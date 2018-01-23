@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -29,6 +29,7 @@
 #include <cstdio>
 #include <cstring>
 #include <algorithm>
+#include <sstream>
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
@@ -65,10 +66,12 @@ template int DistGrid::setArbSeqIndex<ESMC_I8>(InterArray<ESMC_I8> *arbSeqIndex,
   int localDe, int collocation);
 
 template int DistGrid::getSequenceIndexLocalDe<ESMC_I4>(int localDe, 
-    int const *index, vector<ESMC_I4> &seqIndex, bool recursive) const;
+    int const *index, vector<ESMC_I4> &seqIndex, bool recursive, bool canonical)
+    const;
 
 template int DistGrid::getSequenceIndexLocalDe<ESMC_I8>(int localDe, 
-    int const *index, vector<ESMC_I8> &seqIndex, bool recursive) const;
+    int const *index, vector<ESMC_I8> &seqIndex, bool recursive, bool canonical)
+    const;
 
 template int DistGrid::getSequenceIndexTileRelative<ESMC_I4>(int tile,
     int const *index, ESMC_I4 *seqIndex)const;
@@ -3655,7 +3658,9 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
                                     //       relative to exclusive region
                                     //       basis 0
   vector<T> &seqIndex,              // out - sequence index
-  bool recursive                    // in  - recursive mode or not
+  bool recursive,                   // in  - recursive mode or not
+  bool canonical                    // in  - return canonical seqIndex even if
+                                    //       arbitrary seqIndices available
   )const{
 //
 // !DESCRIPTION:
@@ -3689,7 +3694,7 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
   for (int i=0; i<dimCount; i++){
     //TODO: this does _not_ support multiple collocations w/ arb seqIndices 
     //TODO: it assumes that arbSeqIndices may only exist on the first colloc.
-    if (arbSeqIndexListPCollPLocalDe[0][localDe] ||
+    if ((!canonical && arbSeqIndexListPCollPLocalDe[0][localDe]) ||
       !contigFlagPDimPDe[de*dimCount+i]){
       if (index[i] < 0 || index[i] >= indexCountPDimPDe[de*dimCount+i]){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -3734,7 +3739,7 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
   // make the actual call with consistently typed arguments
   localrc = tGetSequenceIndexLocalDe(
     (T ***)arbSeqIndexListPCollPLocalDe, de, localDe, index, seqIndex, 
-    recursive);
+    recursive, canonical);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
     ESMC_CONTEXT, &rc)) return rc;  //  bail out with invalid seqindex
 
@@ -3750,12 +3755,12 @@ template<typename T> int DistGrid::getSequenceIndexLocalDe(
 template<typename T> int DistGrid::tGetSequenceIndexLocalDe(
   T ***tArbSeqIndexListPCollPLocalDe,
   int de, int localDe, const int *index, vector<T> &seqIndex, 
-  bool recursive)const{
+  bool recursive, bool canonical)const{
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   // arb or not arb
-  if (arbSeqIndexListPCollPLocalDe[0][localDe]){
+  if (!canonical && arbSeqIndexListPCollPLocalDe[0][localDe]){
     // determine the seqIndex by arbSeqIndexListPCollPLocalDe look-up
     //TODO: this does _not_ support multiple collocations w/ arb seqIndices 
     //TODO: it assumes that arbSeqIndices may only exist on the first colloc.
@@ -5234,6 +5239,7 @@ template<typename T> int DistGrid::setArbSeqIndex(
     indexTupleBlockEnd.resize(0);
     indexTupleWatchStart.resize(0);
     indexTupleWatchEnd.resize(0);
+    skipBlockedRegionFlag = false; // initialize
   }
   MultiDimIndexLoop::MultiDimIndexLoop(vector<int> const &sizes){
     indexTupleEnd = sizes;
@@ -5252,6 +5258,7 @@ template<typename T> int DistGrid::setArbSeqIndex(
       indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
       indexTupleWatchStart[i] = indexTupleWatchEnd[i] = 0;  // reset
     }
+    skipBlockedRegionFlag = false; // initialize
     adjust();
   }
   MultiDimIndexLoop::MultiDimIndexLoop(vector<int> const &offsets,
@@ -5274,6 +5281,7 @@ template<typename T> int DistGrid::setArbSeqIndex(
       indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
       indexTupleWatchStart[i] = indexTupleWatchEnd[i] = 0;  // reset
     }
+    skipBlockedRegionFlag = false; // initialize
     adjust();
   }
   void MultiDimIndexLoop::setSkipDim(int dim){
@@ -5283,11 +5291,29 @@ template<typename T> int DistGrid::setArbSeqIndex(
   void MultiDimIndexLoop::setBlockStart(vector<int> const &blockStart){
     // todo: check that size of incoming blockStart vector is equal to rank
     indexTupleBlockStart = blockStart;
+    skipBlockedRegionFlag = true; // initialize
+    for (unsigned i=0; i<indexTuple.size(); i++){
+      if ((indexTupleBlockStart[i] > indexTupleStart[i]) ||
+        (indexTupleBlockEnd[i] < indexTupleEnd[i])){
+        // found a dimension that does not have a fully blocked range
+        skipBlockedRegionFlag = false;
+        break;
+      }
+    }
     adjust();
   }
   void MultiDimIndexLoop::setBlockEnd(vector<int> const &blockEnd){
     // todo: check that size of incoming blockStart vector is equal to rank
     indexTupleBlockEnd = blockEnd;
+    skipBlockedRegionFlag = true; // initialize
+    for (unsigned i=0; i<indexTuple.size(); i++){
+      if ((indexTupleBlockStart[i] > indexTupleStart[i]) ||
+        (indexTupleBlockEnd[i] < indexTupleEnd[i])){
+        // found a dimension that does not have a fully blocked range
+        skipBlockedRegionFlag = false;
+        break;
+      }
+    }
     adjust();
   }
   void MultiDimIndexLoop::setWatchStart(vector<int> const &watchStart){
@@ -5332,32 +5358,27 @@ template<typename T> int DistGrid::setArbSeqIndex(
     for (unsigned i=0; i<indexTuple.size(); i++)
       indexTuple[i] = indexTupleEnd[i]-1;  // reset
   }
-  void MultiDimIndexLoop::adjust(){
+  bool MultiDimIndexLoop::adjust(){
     // adjust the indexTuple after an increment to point to the next valid tuple
+    bool adjusted = false;
     // -> consider the blocked out region
     // to improve performance for the fully blocked case check for it first
-    bool skipBlockedRegionFlag = true;
-    for (unsigned i=0; i<indexTuple.size(); i++){
-      if ((indexTupleBlockStart[i] > indexTupleStart[i]) ||
-        (indexTupleBlockEnd[i] < indexTupleEnd[i])){
-        // found a dimension that does not have a fully blocked range
-        skipBlockedRegionFlag = false;
-        break;
-      }
-    }
     if (skipBlockedRegionFlag){
       // fully blocked range in all dimensions -> shift indexTuple to end
       for (unsigned i=0; i<indexTuple.size(); i++)
         indexTuple[i] = indexTupleEnd[i];
+      adjusted = true;
     }else{
       // there are dimensions that do NOT have fully blocked ranges
       // -> must carefully adjust
+      bool skipBlockedFlag;
       do{
         // adjust all tuples, if necessary skip blocked region
-        skipBlockedRegionFlag = true;  // init
+        skipBlockedFlag = true;  // init
         unsigned i;
         for (i=0; i+1<indexTuple.size(); i++){
           if (indexTuple[i] == indexTupleEnd[i]){
+            adjusted = true;
             indexTuple[i] = indexTupleStart[i];  // reset
             if (skipDim[i+1])
               indexTuple[i+1] = indexTupleEnd[i+1]; // skip
@@ -5366,26 +5387,38 @@ template<typename T> int DistGrid::setArbSeqIndex(
           }
           if ((indexTuple[i] < indexTupleBlockStart[i]) ||
             (indexTuple[i] >= indexTupleBlockEnd[i])){
-            skipBlockedRegionFlag = false;  // not within blocked region
+            skipBlockedFlag = false;  // not within blocked region
           }
         }
         if ((indexTuple[i] < indexTupleBlockStart[i]) ||
           (indexTuple[i] >= indexTupleBlockEnd[i])){
-          skipBlockedRegionFlag = false;  // not within blocked region
+          skipBlockedFlag = false;  // not within blocked region
         }
-        if (skipBlockedRegionFlag){
+        if (skipBlockedFlag){
+          adjusted = true;
           indexTuple[0] = indexTupleBlockEnd[0];
 //          printf("gjt skip the blocked region\n");     
         }
-      }while(skipBlockedRegionFlag && (indexTuple[0] >= indexTupleEnd[0]));
+      }while(skipBlockedFlag && (indexTuple[0] >= indexTupleEnd[0]));
     }
+#if 0
+    {
+      std::stringstream msg;
+      msg << "adjust()#" << __LINE__ << "index= ";
+      for (unsigned i=0; i<indexTuple.size(); i++)
+        msg << indexTuple[i] << ", ";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    
+    return adjusted;
   }
-  void MultiDimIndexLoop::next(){
+  bool MultiDimIndexLoop::next(){
     if (skipDim[0])
       indexTuple[0] = indexTupleEnd[0]; // skip
     else
       ++indexTuple[0];                  // increment
-    adjust();
+    return adjust();
   }
   bool MultiDimIndexLoop::isFirst()const{
     for (unsigned i=0; i<indexTuple.size(); i++)

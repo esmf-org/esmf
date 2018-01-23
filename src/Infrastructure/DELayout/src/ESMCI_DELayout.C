@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -17,6 +17,7 @@
 #define XXE_EXEC_MEMLOG_off
 #define XXE_EXEC_BUFFLOG_off
 #define XXE_EXEC_OPSLOG_off
+#define XXE_EXEC_RECURSLOG_off
 //==============================================================================
 //
 // DELayout class implementation (body) file
@@ -46,6 +47,7 @@
 #include "ESMCI_VM.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_RHandle.h"
 
 using namespace std;
 
@@ -54,6 +56,21 @@ using namespace std;
 // into the object file for tracking purposes.
 static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+// prototypes for Fortran interface routines called by C++ code below
+extern "C" {
+  void FTN_X(f_esmf_dynmaskcallbackr8r8r8)(ESMCI::RouteHandle **ptr, 
+    int *count, void **elementVector, int *countVector, int *totalCount,
+    void *factorsVector, void *valuesVector, int *rc);
+  void FTN_X(f_esmf_dynmaskcallbackr4r8r4)(ESMCI::RouteHandle **ptr, 
+    int *count, void **elementVector, int *countVector, int *totalCount,
+    void *factorsVector, void *valuesVector, int *rc);
+  void FTN_X(f_esmf_dynmaskcallbackr4r4r4)(ESMCI::RouteHandle **ptr, 
+    int *count, void **elementVector, int *countVector, int *totalCount,
+    void *factorsVector, void *valuesVector, int *rc);
+}
+//-------------------------------------------------------------------------
 
 namespace ESMCI {
 
@@ -177,7 +194,7 @@ DELayout *DELayout::create(
     deGroupingFlag = 1;   // set
     if (deGroupingCount != deCount){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-        "- Size of deGrouping does not match deCount", ESMC_CONTEXT, rc);
+        "Size of deGrouping does not match deCount", ESMC_CONTEXT, rc);
       return ESMC_NULL_POINTER;
     }
   }
@@ -416,7 +433,7 @@ int DELayout::destroy(
   // return with errors for NULL pointer
   if (delayout == ESMC_NULL_POINTER || *delayout == ESMC_NULL_POINTER){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
-      "- Not a valid pointer to DELayout", ESMC_CONTEXT, &rc);
+      "Not a valid pointer to DELayout", ESMC_CONTEXT, &rc);
     return rc;
   }
 
@@ -432,7 +449,7 @@ int DELayout::destroy(
     return rc;
   }catch(...){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught exception", ESMC_CONTEXT, &rc);
+      "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -536,7 +553,7 @@ int DELayout::construct(
     // the following works because PETs in VM must be contiguous & start at zero
     if (pet < 0 || pet >= petCount){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_VALID,
-        "- DE to PET mapping is invalid", ESMC_CONTEXT, &rc);
+        "DE to PET mapping is invalid", ESMC_CONTEXT, &rc);
       delete [] deInfoList;
       delete [] petFlag;
       return rc;
@@ -1030,7 +1047,7 @@ int DELayout::getDEMatchDE(
   else if (len_deMatchList != -1){
     // deMatchList argument was specified but its size is insufficient
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-      "- deMatchList must be of size 'deMatchCount'", ESMC_CONTEXT, &rc);
+      "deMatchList must be of size 'deMatchCount'", ESMC_CONTEXT, &rc);
     return rc;
   }
     
@@ -1096,7 +1113,7 @@ int DELayout::getDEMatchPET(
   else if (len_petMatchList != -1){
     // petMatchList argument was specified but its size is insufficient
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-      "- petMatchList must be of size 'petMatchCount'", ESMC_CONTEXT, &rc);
+      "petMatchList must be of size 'petMatchCount'", ESMC_CONTEXT, &rc);
     return rc;
   }
     
@@ -1150,7 +1167,7 @@ int DELayout::getDeprecated(
   if (ndim != ESMC_NULL_POINTER){
     if (!oldstyle){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- only OLDSTYLE DELayouts support this query", ESMC_CONTEXT, &rc);
+        "only OLDSTYLE DELayouts support this query", ESMC_CONTEXT, &rc);
       return rc;
     }else
       *ndim = this->ndim;
@@ -1166,7 +1183,7 @@ int DELayout::getDeprecated(
   if (localDe != ESMC_NULL_POINTER){
     if (!oldstyle){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- only OLDSTYLE DELayouts support this query", ESMC_CONTEXT, &rc);
+        "only OLDSTYLE DELayouts support this query", ESMC_CONTEXT, &rc);
       return rc;
     }else{
       if (localDeCount >= 1)  // at least 1 DE on this PET -> return 1st
@@ -1184,7 +1201,7 @@ int DELayout::getDeprecated(
   if (logRectFlag != ESMC_NULL_POINTER){
     if (!oldstyle){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- only OLDSTYLE DELayouts support this query", ESMC_CONTEXT, &rc);
+        "only OLDSTYLE DELayouts support this query", ESMC_CONTEXT, &rc);
       return rc;
     }else
       *logRectFlag = this->logRectFlag;
@@ -1193,7 +1210,7 @@ int DELayout::getDeprecated(
   if (len_deCountPerDim >= this->ndim){
     if (!oldstyle){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-        "- only OLDSTYLE DELayouts support this query", ESMC_CONTEXT, &rc);
+        "only OLDSTYLE DELayouts support this query", ESMC_CONTEXT, &rc);
       return rc;
     }else{
       if (this->logRectFlag == ESMF_TRUE){
@@ -1469,7 +1486,7 @@ int DELayout::serialize(
   if (inquireflag != ESMF_INQUIREONLY){
     if ((*length - *offset) < (int)sizeof(DELayout)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-      "- Buffer too short to add a DELayout object", ESMC_CONTEXT, &rc);
+      "Buffer too short to add a DELayout object", ESMC_CONTEXT, &rc);
       return rc;
     }
   }
@@ -1735,7 +1752,7 @@ ServiceReply DELayout::serviceOffer(
 //TODO: enable LogErr once it is thread-safe
 *rc=ESMC_RC_ARG_WRONG;
 //      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-//        "- Specified DE is not in localDeToDeMap", ESMC_CONTEXT, rc);
+//        "Specified DE is not in localDeToDeMap", ESMC_CONTEXT, rc);
       return reply;
     }
   }
@@ -1747,7 +1764,7 @@ ServiceReply DELayout::serviceOffer(
 //TODO: enable LogErr once it is thread-safe
 *rc=ESMC_RC_ARG_WRONG;
 //    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-//      "- Specified DE is not in vasLocalDeToDeMap", ESMC_CONTEXT, rc);
+//      "Specified DE is not in vasLocalDeToDeMap", ESMC_CONTEXT, rc);
     return reply;
   }
   
@@ -1819,7 +1836,7 @@ int DELayout::serviceComplete(
 //TODO: enable LogErr once it is thread-safe
 rc=ESMC_RC_ARG_WRONG;
 //      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-//        "- Specified DE is not in localDeToDeMap", ESMC_CONTEXT, &rc);
+//        "Specified DE is not in localDeToDeMap", ESMC_CONTEXT, &rc);
       return rc;
     }
   }
@@ -1831,7 +1848,7 @@ rc=ESMC_RC_ARG_WRONG;
 //TODO: enable LogErr once it is thread-safe
 rc=ESMC_RC_ARG_WRONG;
 //    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-//      "- Specified DE is not in vasLocalDeToDeMap", ESMC_CONTEXT, &rc);
+//      "Specified DE is not in vasLocalDeToDeMap", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -1840,7 +1857,7 @@ rc=ESMC_RC_ARG_WRONG;
 //TODO: enable LogErr once it is thread-safe
 rc=ESMC_RC_NOT_VALID;
 //    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_VALID,
-//      "- PET does not hold service mutex for specified", ESMC_CONTEXT, &rc);
+//      "PET does not hold service mutex for specified", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -1894,7 +1911,7 @@ int DELayout::ESMC_DELayoutCopy(
   // ensure this is a 1-to-1 delayout, if not bail out
   if (oneToOneFlag != ESMF_TRUE){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-      "- Can only handle 1-to-1 DELayouts", ESMC_CONTEXT, &rc);
+      "Can only handle 1-to-1 DELayouts", ESMC_CONTEXT, &rc);
     return rc; // bail out
   }
   int mypet = vm->getMypet();
@@ -2483,6 +2500,7 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
   vm = VM::getCurrent(&localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) throw rc;
+  rh = NULL;  // guard
   
   // HEADER
   readin(streami, &count);                // number of elements in op-stream
@@ -2668,6 +2686,7 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
       }
       break;
       // no break on purpose .... need to also shuffle PETs
+      /* FALLTHRU */
     case sendRRA:
     case recvRRA:
       {
@@ -2779,6 +2798,7 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       // no break on purpose .... need to also swap commhandle as below
+      /* FALLTHRU */
     case sendnbRRA:
     case recvnbRRA:
       {
@@ -3368,6 +3388,7 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
         if (newAddr==NULL) cout << "ERROR in old->new translation!!\n";
       }
       // no break on purpose .... need to also swap sub as below
+      /* FALLTHRU */
     case xxeSubMulti:
       {
         MultiSubInfo *multiSubInfo = (MultiSubInfo *)xxeElement;
@@ -3743,12 +3764,12 @@ int XXE::exec(
   // check index range
   if (count > 0 && indexRangeStart > count-1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- indexStart out of range", ESMC_CONTEXT, &rc);
+      "indexStart out of range", ESMC_CONTEXT, &rc);
     return rc;
   }
   if (indexRangeStop > count-1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- indexStop out of range", ESMC_CONTEXT, &rc);
+      "indexStop out of range", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -4889,7 +4910,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           dstSuperVecSize_t,
           dstSuperVecSize_i,
           dstSuperVecSize_j,
-          superVector);
+          superVector, rh);
       }
       break;
     case productSumSuperScalarSrcRRA:
@@ -5599,8 +5620,6 @@ inline void XXE::exec_zeroSuperScalarRRASuper(
 
 //-----------------------------------------------------------------------------
 
-#define XXE_RECURSIVE_DEBUG___disable
-
 template<typename T, typename U, typename V>
 void XXE::psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
   V *valueList, TKId valueTK, int factorCount, int resolved){
@@ -5714,9 +5733,14 @@ void XXE::psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in psv kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in psv kernel with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name()
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   for (int i=0; i<factorCount; i++){
 #ifdef XXE_EXEC_OPSLOG_on
@@ -5835,9 +5859,14 @@ void XXE::pss(T *element, TKId elementTK, U *factor, TKId factorTK,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in pss kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in pss kernel with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 #ifdef XXE_EXEC_OPSLOG_on
     {
@@ -5861,9 +5890,14 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
   bool superVector){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing sssDstRra operation on the data.
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Entering sssDstRra with %s, %s, resolved=%d\n", typeid(T).name(), 
-    typeid(V).name(), resolved);
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Entering sssDstRra with T=" << typeid(T).name() 
+      << " V=" << typeid(V).name()
+      << " resolved=" << resolved;
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if (resolved==0){
     ++resolved;
@@ -5945,9 +5979,13 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in sssDstRra kernel with %s, %s\n", typeid(T).name(), 
-    typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in sssDstRra kernel with T=" << typeid(T).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if(superVector){
 #ifdef XXE_EXEC_OPSLOG_on
@@ -6146,9 +6184,13 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in ssslDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in ssslDstRra kernel with T=" << typeid(T).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if(superVector){
 #ifdef XXE_EXEC_OPSLOG_on
@@ -6263,6 +6305,16 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
   bool superVector){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing psssDstRra operation on the data.
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Entering psssDstRra with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name()
+      << " V=" << typeid(V).name()
+      << " resolved=" << resolved;
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   if (resolved==0){
     ++resolved;
     switch (elementTK){
@@ -6383,9 +6435,14 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in psssDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in psssDstRra kernel with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if(superVector){
 #ifdef XXE_EXEC_OPSLOG_on
@@ -6517,7 +6574,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
   int *valueOffsetList, int *baseListIndexList,
   TKId valueTK, int termCount, int vectorL, int resolved, int localDeIndexOff,
   int size_r, int size_s, int size_t, int *size_i, int *size_j,
-  bool superVector){
+  bool superVector, RouteHandle *rh){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing psssDstRra operation on the data.
   if (resolved==0){
@@ -6529,7 +6586,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           factorList, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case I8:
@@ -6538,7 +6596,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           factorList, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case R4:
@@ -6547,7 +6606,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           factorList, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case R8:
@@ -6556,7 +6616,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
           factorList, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     default:
@@ -6573,7 +6634,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case I8:
@@ -6582,7 +6644,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case R4:
@@ -6591,7 +6654,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case R8:
@@ -6600,7 +6664,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     default:
@@ -6617,7 +6682,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case I8:
@@ -6626,7 +6692,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case R4:
@@ -6635,7 +6702,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     case R8:
@@ -6644,7 +6712,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved, 
-          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
+          localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
+          rh);
       }
       break;
     default:
@@ -6652,9 +6721,27 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in psssDstRra kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in pssslDstRra kernel with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+  int localrc;
+#if 0
+//TODO: strictly check for RH here once it is expected valid from all comms
+  if (rh==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid RouteHandle pointer!", ESMC_CONTEXT, &localrc);
+    throw localrc;  // bail out with exception
+  }
+  bool dynMask = rh->validAsPtr();
+#else
+  bool dynMask = false; // default
+  if (rh) dynMask = rh->validAsPtr();
 #endif
   if(superVector){
 #ifdef XXE_EXEC_OPSLOG_on
@@ -6673,8 +6760,16 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
       "taking vector branch...");
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
-    exec_pssslDstRra(rraBaseList, rraIndexList, rraOffsetList, factorList,
-      valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL);
+    if (dynMask){
+      // consider dynamic masking
+      exec_pssslDstRraDynMask(rraBaseList, rraIndexList, rraOffsetList, 
+        factorList, valueBaseList, valueOffsetList, baseListIndexList,
+        termCount, vectorL, rh);
+    }else{
+      // do not consider dynamic masking
+      exec_pssslDstRra(rraBaseList, rraIndexList, rraOffsetList, factorList,
+        valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL);
+    }
   }
 }
 
@@ -6695,6 +6790,199 @@ void XXE::exec_pssslDstRra(T **rraBaseList, int *rraIndexList,
       factor = factorList[i];
       value = valueBaseList[baseListIndexList[i]] + valueOffsetList[i];
       *element += factor * *value;
+    }
+  }else{
+    // vector elements
+    for (int i=0; i<termCount; i++){  // super scalar loop
+      element = rraBaseList[rraIndexList[baseListIndexList[i]]]
+        + rraOffsetList[i] * vectorL;
+      factor = factorList[i];
+      value = valueBaseList[baseListIndexList[i]]
+        + valueOffsetList[i] * vectorL;
+      for (int k=0; k<vectorL; k++)  // vector loop
+        *(element+k) += factor * *(value+k);
+    }
+  }
+}
+
+//---
+
+template<typename T, typename U, typename V>
+  void XXE::dynMaskHandler(vector<XXE::DynMaskElement<T,U,V> > &dynMaskList,
+  RouteHandle *rh){
+#if 0
+  {
+    std::stringstream logmsg;
+    logmsg << "dynMaskHandler(): with dynMaskList.size()=" 
+      << dynMaskList.size();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+  
+  int localrc;
+  if (rh==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid RouteHandle pointer!", ESMC_CONTEXT, &localrc);
+    throw localrc;  // bail out with exception
+  }
+  // prepare vectors to be passed to the fortran call back
+  int count=dynMaskList.size();
+  vector<void *> elementVector(count);
+  vector<int> countVector(count);
+  int totalCount=0;
+  for (int i=0; i<count; i++){
+    elementVector[i] = dynMaskList[i].element;
+    countVector[i] = dynMaskList[i].factors.size();
+    totalCount += countVector[i];
+#if 0
+  {
+    std::stringstream logmsg;
+    logmsg << "dynMaskHandler(): i=" << i << " element=" << elementVector[i];
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+    
+  }
+  vector<U> factorsVector(totalCount);
+  vector<V> valuesVector(totalCount);
+  int k=0;
+  for (int i=0; i<count; i++){
+    for (int j=0; j<countVector[i]; j++){
+      factorsVector[k] = *(dynMaskList[i].factors[j]);
+      valuesVector[k] = *(dynMaskList[i].values[j]);
+      ++k;
+    }
+  }
+  // hand control back to Fortran layer - but must be type specific
+  if (typeid(T)==typeid(ESMC_R8) && typeid(U)==typeid(ESMC_R8) &&
+    typeid(V)==typeid(ESMC_R8)){
+    FTN_X(f_esmf_dynmaskcallbackr8r8r8)(&rh, &count, &(elementVector[0]), 
+      &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
+      &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+  }else if (typeid(T)==typeid(ESMC_R4) && typeid(U)==typeid(ESMC_R8) &&
+    typeid(V)==typeid(ESMC_R4)){
+    FTN_X(f_esmf_dynmaskcallbackr4r8r4)(&rh, &count, &(elementVector[0]), 
+      &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
+      &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+  }else if (typeid(T)==typeid(ESMC_R4) && typeid(U)==typeid(ESMC_R4) &&
+    typeid(V)==typeid(ESMC_R4)){
+    FTN_X(f_esmf_dynmaskcallbackr4r4r4)(&rh, &count, &(elementVector[0]), 
+      &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
+      &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+  }else{
+    // not a supported type combination
+    char msg[1024];
+    sprintf(msg, "Dynamic masking is not currently available for the "
+      "requested combination of types: %s, %s, %s", typeid(T).name(), 
+      typeid(U).name(), typeid(V).name());
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, msg,
+      ESMC_CONTEXT, &localrc);
+    throw localrc;  // bail out with exception
+  }
+}
+
+//---
+
+template<typename T, typename U, typename V>
+void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList, 
+  int *rraOffsetList, U *factorList, V **valueBaseList,
+  int *valueOffsetList, int *baseListIndexList, int termCount, int vectorL,
+  RouteHandle *rh){
+  T *element;
+  T *prevElement=NULL;
+  T tmpElement;
+  T *dstMaskValue;
+  U factor;
+  V *value;
+  V *srcMaskValue;
+#if 0
+  {
+    std::stringstream logmsg;
+    logmsg << "exec_pssslDstRraDynMask(): termCount=" << termCount;
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+  int localrc;
+  if (rh==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid RouteHandle pointer!", ESMC_CONTEXT, &localrc);
+    throw localrc;  // bail out with exception
+  }
+  rh->getSrcMaskValue(srcMaskValue);
+  rh->getDstMaskValue(dstMaskValue);
+  if (vectorL==1){
+    // scalar elements
+    vector<DynMaskElement<T,U,V> > dynMaskList;
+    bool dstMask = false; 
+    bool srcMask = false;
+    DynMaskElement<T,U,V> dynMaskElement;
+    for (int i=0; i<termCount; i++){  // super scalar loop
+      element = rraBaseList[rraIndexList[baseListIndexList[i]]]
+        + rraOffsetList[i];
+#if 0
+  {
+    std::stringstream logmsg;
+    logmsg << "exec_pssslDstRraDynMask(): i=" << i << " element=" << element;
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+      if (prevElement != element){
+        // this is a new element
+        if (prevElement != NULL && !(dstMask || srcMask)){
+          // finally write the previous sum into the actual element b/c unmasked
+          *prevElement = tmpElement;
+        }else if (dstMask || srcMask){
+          // finally store dynMaskElement in dynMaskList b/c masking detected
+          dynMaskElement.element = prevElement;   // finish the entry
+          dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+        }
+        dynMaskElement.factors.clear(); // reset
+        dynMaskElement.values.clear();  // reset
+        prevElement = element;
+        srcMask = false;  // reset
+        dstMask = false;  // reset
+        if (dstMaskValue && (*element == *dstMaskValue))
+          dstMask = true;
+        else
+          tmpElement = *element;  // load tmpElement with current element
+      }
+      factor = factorList[i];
+      value = valueBaseList[baseListIndexList[i]] + valueOffsetList[i];
+      dynMaskElement.factors.push_back(&(factorList[i])); // dynMaskElement
+      dynMaskElement.values.push_back(value); // dynMaskElement
+      if (srcMaskValue && (*value == *srcMaskValue)) srcMask = true;
+      if (!(dstMask || srcMask)){
+        tmpElement += factor * *value;  // perform calculation
+      }
+#if 0
+  {
+    std::stringstream logmsg;
+    logmsg << "element=" << element
+      << "  factor=" << &(factorList[i])
+      << "  value=" << value;
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+    }
+    // must process the last element of the loop
+    if (prevElement != NULL && !(dstMask || srcMask)){
+      // finally write the previous sum into the actual element
+      *prevElement = tmpElement;
+    }else if (dstMask || srcMask){
+      // finally store dynMaskElement in dynMaskList b/c masking detected
+      dynMaskElement.element = prevElement;   // finish the entry
+      dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+    }
+    // see if any dynamic masking was detected
+    if (dynMaskList.size() > 0){
+      // call into dynMaskHandler to handle the masked elements
+      dynMaskHandler(dynMaskList, rh);
     }
   }else{
     // vector elements
@@ -6775,9 +7063,15 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
   bool superVector){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing psssSrcRra operation on the data.
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Entering psssSrcRra kernel with %s, %s, %s, resolved=%d\n",
-    typeid(T).name(), typeid(U).name(), typeid(V).name(), resolved);
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Entering psssSrcRra with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name()
+      << " V=" << typeid(V).name()
+      << " resolved=" << resolved;
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if (resolved==0){
     ++resolved;
@@ -6911,9 +7205,14 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in psssSrcRra kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in psssSrcRra kernel with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if(superVector){
 #ifdef XXE_EXEC_OPSLOG_on
@@ -7144,9 +7443,14 @@ void XXE::pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
     }
     return;
   }
-#ifdef XXE_RECURSIVE_DEBUG
-  printf("Arrived in pssscRra kernel with %s, %s, %s\n", typeid(T).name(), 
-    typeid(U).name(), typeid(V).name());
+#ifdef XXE_EXEC_RECURSLOG_on
+  {
+    std::stringstream logmsg;
+    logmsg << "Arrived in pssscRra kernel with T=" << typeid(T).name() 
+      << " U=" << typeid(U).name() 
+      << " V=" << typeid(V).name();
+    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
   if (vectorL==1){
     // scalar elements
@@ -7207,12 +7511,12 @@ int XXE::print(
   // check index range
   if (count > 0 && indexRangeStart > count-1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- indexStart out of range", ESMC_CONTEXT, &rc);
+      "indexStart out of range", ESMC_CONTEXT, &rc);
     return rc;
   }
   if (indexRangeStop > count-1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- indexStop out of range", ESMC_CONTEXT, &rc);
+      "indexStop out of range", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -7748,7 +8052,7 @@ int XXE::optimizeElement(
   
   if (index < 0 || index >= count){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- index out of range", ESMC_CONTEXT, &rc);
+      "index out of range", ESMC_CONTEXT, &rc);
     return rc;
   }
     
@@ -7942,7 +8246,7 @@ int XXE::execReady(
           ++sendnbCount;
           if (sendnbCount >= sendnbMax){
             ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              "- sendnbCount out of range", ESMC_CONTEXT, &rc);
+              "sendnbCount out of range", ESMC_CONTEXT, &rc);
             return rc;
           }
         }
@@ -7953,7 +8257,7 @@ int XXE::execReady(
           ++recvnbCount;
           if (recvnbCount >= recvnbMax){
             ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              "- recvnbCount out of range", ESMC_CONTEXT, &rc);
+              "recvnbCount out of range", ESMC_CONTEXT, &rc);
             return rc;
           }
         }
@@ -7964,7 +8268,7 @@ int XXE::execReady(
           ++sendnbCount;
           if (sendnbCount >= sendnbMax){
             ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              "- sendnbCount out of range", ESMC_CONTEXT, &rc);
+              "sendnbCount out of range", ESMC_CONTEXT, &rc);
             return rc;
           }
         }
@@ -7975,7 +8279,7 @@ int XXE::execReady(
           ++recvnbCount;
           if (recvnbCount >= recvnbMax){
             ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-              "- recvnbCount out of range", ESMC_CONTEXT, &rc);
+              "recvnbCount out of range", ESMC_CONTEXT, &rc);
             return rc;
           }
         }
@@ -8135,7 +8439,7 @@ int XXE::execReady(
       }
       if (j==iCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-          "- unable to resolve XXE WTimer Id", ESMC_CONTEXT, &rc);
+          "unable to resolve XXE WTimer Id", ESMC_CONTEXT, &rc);
         return rc;
       }
     }
@@ -8438,7 +8742,7 @@ int XXE::optimize(
               // slip in the associated memcpy()s _before_ the first Sendnb
               if (xxeCount+count > max){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                  "- count out of range", ESMC_CONTEXT, &rc);
+                  "count out of range", ESMC_CONTEXT, &rc);
                 return rc;
               }
               // start a new opstream
@@ -8543,7 +8847,7 @@ int XXE::optimize(
               // slip in the associated memcpy()s _after_ the waitOnAllRecvnb
               if (xxeCount+count > max){
                 ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                  "- count out of range", ESMC_CONTEXT, &rc);
+                  "count out of range", ESMC_CONTEXT, &rc);
                 return rc;
               }
               // start a new opstream
@@ -8638,7 +8942,7 @@ int XXE::growStream(
 
   if (increase < 0){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- increase must be positive", ESMC_CONTEXT, &rc);
+      "increase must be positive", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -8696,7 +9000,7 @@ int XXE::growDataList(
 
   if (increase < 0){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- increase must be positive", ESMC_CONTEXT, &rc);
+      "increase must be positive", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -8756,7 +9060,7 @@ int XXE::growCommhandle(
 
   if (increase < 0){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- increase must be positive", ESMC_CONTEXT, &rc);
+      "increase must be positive", ESMC_CONTEXT, &rc);
     return rc;
   }
   
@@ -8816,7 +9120,7 @@ int XXE::growXxeSub(
 
   if (increase < 0){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "- increase must be positive", ESMC_CONTEXT, &rc);
+      "increase must be positive", ESMC_CONTEXT, &rc);
     return rc;
   }
   

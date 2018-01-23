@@ -214,7 +214,7 @@ static void assign_points_to_procs(PointList *pl,
   std::vector<int> procs(petCount);
 
   // Loop through objects assigning them to procs
-  for (unsigned int i; i < points->size(); ++i) {
+  for (unsigned int i = 0; i < points->size(); ++i) {
 
     point *p = points->at(i);
 

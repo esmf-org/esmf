@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -484,7 +484,7 @@ namespace ESMCI{
                    -tiToConvert.calendar->secondsPerYear){
                   // tiToConvert.getw() >= 1 year =>
                   //  can't determine leap years without startTime or endTime !
-                  char logMsg[ESMF_MAXSTR];
+                  char logMsg[160];
                   sprintf(logMsg, 
                             "yy or yy_i8 because for %s time interval "
                             ">= 1 year, can't determine leap years without "
@@ -519,7 +519,7 @@ namespace ESMCI{
           break;
         default:
           // unknown calendar kind
-          char logMsg[ESMF_MAXSTR];
+          char logMsg[160];
           sprintf(logMsg, "; unknown calendar kind %d.", 
                           tiToConvert.calendar->calkindflag);
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, logMsg, 
@@ -532,7 +532,7 @@ namespace ESMCI{
       if (yy != ESMC_NULL_POINTER) {
         // ensure fit in given int
         if (years < INT_MIN || years > INT_MAX) {
-          char logMsg[ESMF_MAXSTR];
+          char logMsg[160];
           sprintf(logMsg, "; years value %lld won't fit in given yy integer.",
                   years);
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE, logMsg, ESMC_CONTEXT,
@@ -595,7 +595,7 @@ namespace ESMCI{
               // can't determine months without startTime or endTime !
               // TODO:  leave alone and let d,h,m,s be more than a month ?
               //        (unbounded or unnormalized ?) with ESMF_WARNING ?
-              char logMsg[ESMF_MAXSTR];
+              char logMsg[160];
               sprintf(logMsg, 
                         "mm or mm_i8 because for %s time "
                         "interval >= 28 days, can't determine months without "
@@ -628,7 +628,7 @@ namespace ESMCI{
           break;
         default:
           // unknown calendar kind
-          char logMsg[ESMF_MAXSTR];
+          char logMsg[160];
           sprintf(logMsg, "; unknown calendar kind %d.", 
                           tiToConvert.calendar->calkindflag);
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, logMsg, ESMC_CONTEXT,
@@ -641,7 +641,7 @@ namespace ESMCI{
       if (mm != ESMC_NULL_POINTER) {
         // ensure fit in given int
         if (months < INT_MIN || months > INT_MAX) {
-          char logMsg[ESMF_MAXSTR];
+          char logMsg[160];
           sprintf(logMsg, "; months value %lld won't fit in given mm integer.",
                   months);
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE, logMsg, ESMC_CONTEXT,
@@ -675,7 +675,7 @@ namespace ESMCI{
         case ESMC_CALKIND_JULIAN:
           if (tiToConvert.mm != 0) {
             // no startTime or endTime available, can't do
-            char logMsg[ESMF_MAXSTR];
+            char logMsg[160];
             sprintf(logMsg, "need startTime or endTime to convert %lld months "
                             "to days on %s calendar.", tiToConvert.mm,
                             Calendar::calkindflagName[
@@ -699,7 +699,7 @@ namespace ESMCI{
               tiToConvert.mm = 0;
             } else {
               // can't do
-              char logMsg[ESMF_MAXSTR];
+              char logMsg[160];
               sprintf(logMsg, "need startTime or endTime to convert %lld months "
                               "to days on ESMC_CALKIND_NOLEAP calendar, since "
                               "months are not an integral number of years.",
@@ -720,7 +720,7 @@ namespace ESMCI{
           //      months don't apply
           if (tiToConvert.mm != 0) {
             // can't convert months to days without appropriate calendar!
-            char logMsg[ESMF_MAXSTR];
+            char logMsg[160];
             sprintf(logMsg, ", can't convert %lld months to days "
                      "on ESMC_CALKIND_JULIANDAY, ESMC_CALKIND_MODJULIANDAY or "
                      "ESMC_CALKIND_NOCALENDAR calendars.", tiToConvert.mm);
@@ -734,7 +734,7 @@ namespace ESMCI{
           break;
         default:
           // unknown calendar kind
-          char logMsg[ESMF_MAXSTR];
+          char logMsg[160];
           sprintf(logMsg, "; unknown calendar kind %d.", 
                           tiToConvert.calendar->calkindflag);
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, logMsg, ESMC_CONTEXT,
@@ -758,7 +758,7 @@ namespace ESMCI{
       if (d != ESMC_NULL_POINTER) {
         // ensure fit in given int
         if (days < INT_MIN || days > INT_MAX) {
-          char logMsg[ESMF_MAXSTR];
+          char logMsg[160];
           sprintf(logMsg, "; days value %lld won't fit in given d integer.",
                   days);
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE, logMsg, ESMC_CONTEXT,
@@ -772,7 +772,7 @@ namespace ESMCI{
       }
       if (d_r8 != ESMC_NULL_POINTER) {
         if (tiToConvert.calendar->secondsPerDay == 0) {
-          char logMsg[2*ESMF_MAXSTR];
+          char logMsg[320];
           sprintf(logMsg, "; can't get d_r8; must specify a calendar or "
              "calkindflag which defines days (non-zero seconds per day), "
              "e.g. ESMC_CALKIND_GREGORIAN, ESMC_CALKIND_JULIAN, "
@@ -1212,7 +1212,7 @@ namespace ESMCI{
         return(errorResult);
         break;
       default:
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[160];
         sprintf(logMsg, "; unknown calendar kind %d.", 
                         absValue.calendar->calkindflag);
         ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg,
@@ -1440,7 +1440,7 @@ namespace ESMCI{
         return(0.0);
         break;
       default:
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[160];
         sprintf(logMsg, "; unknown calendar kind %d.", 
                         ti1.calendar->calkindflag);
         ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg,
@@ -1850,7 +1850,7 @@ namespace ESMCI{
         return(remainder);
         break;
       default:
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[160];
         sprintf(logMsg, "; unknown calendar kind %d.", 
                         ti1.calendar->calkindflag);
         ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg,
@@ -2721,7 +2721,7 @@ namespace ESMCI{
         return(false);
         break;
       default:
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[160];
         sprintf(logMsg, "; unknown calendar kind %d.", 
                         ti1.calendar->calkindflag);
         ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg,
@@ -2884,7 +2884,7 @@ namespace ESMCI{
     // parse options
     if (options != ESMC_NULL_POINTER) {
       if (strncmp(options, "string", 6) == 0) {
-        char timeString[ESMF_MAXSTR];
+        char timeString[160];
         TimeInterval::getString(timeString, &options[6]);
         printf("%s\n", timeString);
         // see also method TimeInterval::get()
@@ -3298,7 +3298,7 @@ namespace ESMCI{
         break;
       default:
         // unknown calendar kind
-        char logMsg[ESMF_MAXSTR];
+        char logMsg[160];
         sprintf(logMsg, "; unknown calendar kind %d.", 
                         calendar->calkindflag);
         ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD, logMsg,

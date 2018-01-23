@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -138,6 +138,14 @@ program ESMF_GridCreateUTest
   write(name, *) "Testing Grid IsCreated for created object"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isCreated = ESMF_GridIsCreated(grid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Print Grid info"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_GridPrint(grid, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

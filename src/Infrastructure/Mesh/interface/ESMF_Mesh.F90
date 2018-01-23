@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -4176,25 +4176,13 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
   else !localDE=0
     !still have to call ESMF_MeshAddNodes() and ESMF_MeshAddElements() even if there is no DEs
     !First participate in ESMF_VMALlReduce()
-    call ESMF_UtilCreateCSCoords(tileSize, lonEdge=lonEdge, latEdge=latEdge)
 
     totalnodes = (tileSize+1)*(tileSize+1)*6
-    ! convert radius to degrees
-    lonEdge = lonEdge * todeg
-    latEdge = latEdge * todeg
-    !Find unique set of node coordinates
-    allocate(map(totalnodes))
-    TOL=0.0000000001
-    start_lat=-91.0
-    end_lat = 91.0
-    call c_ESMC_ClumpPntsLL(totalNodes, reshape(lonEdge, (/totalnodes/)), reshape(latEdge, (/totalnodes/)), &
-                      TOL, map, uniquenodes, &
-                      maxDuplicate, start_lat, end_lat, rc)
 
-    allocate(firstowners(uniquenodes), recvbuf(uniquenodes))
+    allocate(firstowners(totalnodes), recvbuf(totalnodes))
     firstOwners = PetCnt+1
     ! global minimum of firstOwners to find the owner of the nodes (use the smallest PetNo)
-    call ESMF_VMAllReduce(vm, firstOwners, recvbuf, uniquenodes, &
+    call ESMF_VMAllReduce(vm, firstOwners, recvbuf, totalnodes, &
         ESMF_REDUCE_MIN, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return

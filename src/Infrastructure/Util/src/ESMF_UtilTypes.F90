@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1212,6 +1212,31 @@ end interface
 
 
 !------------------------------------------------------------------------------
+! ! ESMF_DynamicMaskElement
+
+  type ESMF_DynamicMaskElementR8R8R8
+    real(ESMF_KIND_R8), pointer       :: dstElement
+    real(ESMF_KIND_R8), allocatable   :: factor(:)
+    real(ESMF_KIND_R8), allocatable   :: srcElement(:)
+  end type
+
+  type ESMF_DynamicMaskElementR4R8R4
+    real(ESMF_KIND_R4), pointer       :: dstElement
+    real(ESMF_KIND_R8), allocatable   :: factor(:)
+    real(ESMF_KIND_R4), allocatable   :: srcElement(:)
+  end type
+
+  type ESMF_DynamicMaskElementR4R4R4
+    real(ESMF_KIND_R4), pointer       :: dstElement
+    real(ESMF_KIND_R4), allocatable   :: factor(:)
+    real(ESMF_KIND_R4), allocatable   :: srcElement(:)
+  end type
+
+  public ESMF_DynamicMaskElementR8R8R8
+  public ESMF_DynamicMaskElementR4R8R4
+  public ESMF_DynamicMaskElementR4R4R4
+
+!------------------------------------------------------------------------------
 
       contains
 
@@ -2079,7 +2104,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, ""
         print *, "Earth System Modeling Framework"
         print *, ""
-        print *, "Copyright (c) 2002-2017 University Corporation for Atmospheric Research,"
+        print *, "Copyright (c) 2002-2018 University Corporation for Atmospheric Research,"
         print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
         print *, "University of Michigan, National Centers for Environmental Prediction,"
         print *, "Los Alamos National Laboratory, Argonne National Laboratory,"

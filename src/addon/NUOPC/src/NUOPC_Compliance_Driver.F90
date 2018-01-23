@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1574,10 +1574,10 @@ contains
       type(ESMF_GridComp), intent(in) :: comp
       integer, intent(out)  :: rc
       
-      character(len=5)  :: attrConv(4)
-      character(len=8)  :: attrPurp(4)
-      character(len=20) :: attrName(4)
-      character(len=10) :: attrKey(4)
+      character(len=5)  :: attrConv(5)
+      character(len=8)  :: attrPurp(5)
+      character(len=30) :: attrName(5)
+      character(len=10) :: attrKey(5)
       
       rc = ESMF_SUCCESS      
       
@@ -1595,6 +1595,9 @@ contains
 
       attrName(4) = "FinalizePhaseMap"
       attrKey(4) = "FPM"
+
+      attrName(5) = "InternalInitializePhaseMap"
+      attrKey(5) = "IIPM"
       
       call ESMF_TraceComponentInfo(comp, attrConv, &
            attrPurp, attrName, attrKey, rc=rc)

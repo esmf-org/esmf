@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -127,8 +127,7 @@ namespace ESMCI{
     static int smmstore(Field *fieldsrc, Field *fielddst,
                         const char *filename, RouteHandle **routehandle,
                         ESMC_Logical *ignoreUnmatchedIndices,
-                        int *srcTermProcessing, int *pipeLineDepth,
-                        RouteHandle **transposeRoutehandle);
+                        int *srcTermProcessing, int *pipeLineDepth);
     int write(const char *file,
       const char* variableName,
       int overwrite,

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -56,6 +56,10 @@ class VMId {
   public:
   VMId() { vmKey=NULL; localID=0; }
 
+  int create ();      // allocates memory for vmKey member
+  int destroy ();     // frees memory for vmKey member
+  int get(int *localID, char *key, int key_len);
+  int set(int  localID, const char *key, int key_len);
   int serialize(const char *buffer, int *length, int *offset,
                 const ESMC_InquireFlag &inquireflag);
   int deserialize(const char *buffer, int *offset, bool offsetonly);
@@ -73,12 +77,12 @@ class VMId {
 namespace ESMCI {
 
 // ESMCI::VMId methods:
-VMId VMIdCreate(int *rc);      // allocates memory for vmKey member
-void VMIdDestroy(VMId *vmID, int *rc); // frees memory for vmKey memb
+// VMId VMIdCreate(int *rc);      // allocates memory for vmKey member
+// void VMIdDestroy(VMId *vmID, int *rc); // frees memory for vmKey memb
 bool VMIdCompare(VMId *vmID1, VMId *vmID2);
 int VMIdCopy(VMId *vmIDdst, VMId *vmIDsrc);
-void VMIdGet(VMId *vmID, int *localID, char *key, int key_len, int *rc);
-void VMIdSet(VMId *vmID, int  localID, char *key, int key_len, int *rc);
+// void VMIdGet(VMId *vmID, int *localID, char *key, int key_len, int *rc);
+// void VMIdSet(VMId *vmID, int  localID, char *key, int key_len, int *rc);
 } // namespace ESMCI
 
 

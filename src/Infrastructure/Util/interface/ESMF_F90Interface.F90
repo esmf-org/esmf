@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -157,6 +157,12 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! mark this InterArray as invalid
+    call c_ESMC_InterArraySetInvalid(array, localrc)
+    ESMF_InterArrayCreateTrg = array
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
     ! initialize
     nullify(farray1DPtr)
     nullify(farray2DPtr)
@@ -253,6 +259,7 @@ contains
     
     ! mark this InterArray as invalid
     call c_ESMC_InterArraySetInvalid(array, localrc)
+    ESMF_InterArrayCreatePtr = array
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     

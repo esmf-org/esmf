@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -205,7 +205,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     if (ESMC_NOT_PRESENT_FILTER(indexTK) == ESMC_NULL_POINTER) 
-      opt_indexTK = ESMC_TYPEKIND_I4;
+      opt_indexTK = ESMF_NOKIND;
     else opt_indexTK = *indexTK;
     // call into C++
     *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, deBlockList,

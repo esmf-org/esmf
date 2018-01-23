@@ -11,6 +11,31 @@ The ESMF is distributed as a full source code tree.
 Follow the instructions in the following sections
 to build the library and link it with your application.
 
+\subsection{Acquiring Development Snapshots}
+Occasionally, it is helpful to acquire a development snapshot of ESMF
+in order to test emerging capabilities, optimizations, and bug fixes
+before they are available in a formal release.  Development snaphots
+are ``use at your own risk.'' Efforts are made to ensure that most unit
+and system tests are passing on typical platforms, but there are no
+guarantees of the stability of development snapshots. New APIs available
+in development snapshots may change before the next release.
+
+Users aware of these risks may check out development snapshots
+using the appropriate git tag.  The standard naming convention
+for development tags is:
+
+\begin{verbatim}
+ESMF_<VERSION>_beta_snapshot_<NUMBER>
+\end{verbatim}
+
+For example, to check out ESMF version 7.1.0 beta snapshot 31, use the
+following command:
+
+\begin{verbatim}
+  $ git archive --remote=git://git.code.sf.net/p/esmf/esmf --format=tar --prefix=esmf/ ESMF_7_1_0_beta_snapshot_31 | tar xf -
+\end{verbatim}
+
+Once downloaded, development snapshots are built in the same way as releases.
 
 \subsection{System Requirements}
 \label{sec:systemreq}

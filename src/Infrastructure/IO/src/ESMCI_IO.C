@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -320,6 +320,10 @@ int IO::read(
   // Read each item from the object list
   std::vector<IO_ObjectContainer *>::iterator it;
   bool need_redist, has_undist;
+  VM *currentVM = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+    return rc;
+  int petCount = currentVM->getPetCount();
   for (it = objects.begin(); it < objects.end(); ++it) {
     Array *temp_array_p = (*it)->getArray();  // default to caller-provided Array
     Array *temp_array_undist_p;               // temp when Array has undistributed dimensions
@@ -357,7 +361,7 @@ int IO::read(
       if (need_redist) {
         // Create a compatible temp Array with 1 DE per PET
         // std::cout << ESMC_METHOD << ": calling redist_arraycreate1de" << std::endl;
-        redist_arraycreate1de((*it)->getArray(), &temp_array_p, &localrc);
+        redist_arraycreate1de((*it)->getArray(), &temp_array_p, petCount, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
             &rc)) {
         // Close the file but return original error even if close fails.
@@ -581,7 +585,7 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: begin", ESMC_LOGMSG_INFO);
 #if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redist_arraycreate1de()", ESMC_LOGMSG_INFO);
 #endif
-        redist_arraycreate1de((*it)->getArray(), &temp_array_p, &localrc);
+        redist_arraycreate1de((*it)->getArray(), &temp_array_p, petCount, &localrc);
       	if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc)) {
           // Close the file but return original error even if close fails.
@@ -1203,7 +1207,7 @@ bool IO::redist_check(Array *array_p, int *rc) {
 // !IROUTINE:  IO::redist_array
 //
 // !INTERFACE:
-void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc) {
+void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int petCount, int *rc) {
 // !DESCRIPTION:
 //      Create a dest Array with DE count on each PET = 1, based on src Array.
 //      Assumes that incoming Array has tileCount==1.
@@ -1243,10 +1247,21 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
         distgridToArrayMapVec.push_back(distgridToArrayMap[i]);
       }
     }
+    if (minIndexTileVec.size()<1){
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
+        "Not enough distributed dimensions", ESMC_CONTEXT, rc);
+      return; // bail out
+    }
     // now point to the set of reduced lists
     minIndexTile = &(minIndexTileVec[0]);
     maxIndexTile = &(maxIndexTileVec[0]);
     distgridToArrayMap = &(distgridToArrayMapVec[0]);
+  }
+
+  if ((maxIndexTile[0]-minIndexTile[0]+1)<petCount){
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
+      "Index space too small to be distributed across all PETs", ESMC_CONTEXT, rc);
+    return; // bail out
   }
 
   ESMCI::InterArray<int> minIndexInterface((int*)minIndexTile, ndims-replicatedDims);

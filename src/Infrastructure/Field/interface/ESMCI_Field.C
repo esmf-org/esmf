@@ -1,7 +1,7 @@
 //$1.10 2007/04/26 16:13:59 rosalind Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -177,7 +177,6 @@ void FTN_X(f_esmf_smmstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   const char *filename, ESMCI::RouteHandle **routehandlep,
   ESMC_Logical *ignoreUnmatchedIndices,
   int *srcTermProcessing, int *pipeLineDepth,
-  ESMCI::RouteHandle **transposeRoutehandlep,
   int *rc, ESMCI_FortranStrLenArg nlen);
 
 void FTN_X(f_esmf_fieldwrite)(ESMCI::Field *fieldp, const char *file,
@@ -1658,8 +1657,7 @@ namespace ESMCI {
     RouteHandle **routehandlep,
     ESMC_Logical *ignoreUnmatchedIndices,
     int *srcTermProcessing,
-    int *pipeLineDepth,
-    RouteHandle **transposeRoutehandlep) {
+    int *pipeLineDepth) {
 //
 // !DESCRIPTION:
 //
@@ -1686,47 +1684,11 @@ namespace ESMCI {
                               fName, routehandlep,
                               ignoreUnmatchedIndices,
                               srcTermProcessing, pipeLineDepth,
-                              transposeRoutehandlep,
                               &localrc, slen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
       return rc;
     }
-
-#define DEBUG 0
-#if DEBUG
-  // get and fill first coord array and computational bounds
-  int *exLBound = (int *)malloc(2*sizeof(int));
-  int *exUBound = (int *)malloc(2*sizeof(int));
-  ESMCI::InterArray<int> *exLB = new ESMCI::InterArray<int>(exLBound, 2);
-  ESMCI::InterArray<int> *exUB = new ESMCI::InterArray<int>(exUBound, 2);
-
-  int localde = 0;
-  rc = ESMCI::Field::getbounds(fieldpsrc, &localde, exLB, exUB);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  // double * srcfieldptr = (double *)ESMC_FieldGetPtr(fieldpsrc, 0, &rc);
-  if (rc != ESMF_SUCCESS) return 0;
-
-  ESMC_Array array = fieldpsrc->getArray(&localrc);
-  void *ptr = ESMC_ArrayGetPtr(array, 0, &localrc);
-  double *srcfieldptr = static_cast<double *> (ptr);
-
-
-  printf("ESMCI:fieldpsrc mem address = %p\n", fieldpsrc);
-
-  printf("ESMCI:srcfield = [\n");
-  int p = 0;
-  for (int i1=exLBound[1]; i1<=exUBound[1]; ++i1) {
-    for (int i0=exLBound[0]; i0<=exUBound[0]; ++i0) {
-      printf("%f, ", srcfieldptr[p]);
-      p++;
-    }
-  }
-  printf("]\n");
-  printf("ESMCI:srcfield mem address = %p\n", fieldpsrc);
-#endif
-
 
     rc = ESMF_SUCCESS;
     return rc;

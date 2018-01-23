@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -664,6 +664,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value
+    arraybundle%this = ESMF_NULL_POINTER
+    ESMF_ArrayBundleCreate = arraybundle
+
     ! Determine the number of ArrayList elements
     if (present(arrayList)) then
       arrayCount = size(arrayList)
@@ -698,9 +702,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
     
-    ! Mark this ArrayBundle object as invalid
-    arraybundle%this = ESMF_NULL_POINTER
-
     ! Call into the C++ interface, which will sort out optional arguments
     ! Optional name argument requires separate calls into C++
     if (present(name)) then
