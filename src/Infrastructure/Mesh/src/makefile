@@ -75,6 +75,7 @@ SOURCEC	  = \
            ESMCI_SpaceDir.C \
            ESMCI_FindPnts.C \
            ESMCI_Phedra.C \
+           ESMCI_SM.C \
            ESMCI_ConserveInterp.C \
            ESMCI_Conserve2ndInterp.C \
            ESMCI_MeshRedist.C \

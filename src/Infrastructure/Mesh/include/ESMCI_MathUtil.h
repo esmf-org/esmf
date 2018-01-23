@@ -60,8 +60,12 @@ namespace ESMCI {
 
   void count_0len_edges3D(int num_p, double *p, int *_num_0len);
 
+  void write_2D_poly_woid_to_vtk(const char *filename, int num_p, double *p);
+  void write_2D_poly_to_vtk(const char *filename, int id, int num_p, double *p);
+
   void write_3D_poly_to_vtk(const char *filename, int id, int num_p, double *p);
   void write_3D_poly_woid_to_vtk(const char *filename, int num_p, double *p);
+
 
   void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn);
 
@@ -95,6 +99,14 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
                                          double *tmp,
                                          int *num_out, double *out);
 
+  bool line_with_seg2D(double *a1, double *a2, double *sin, double *sout,
+		       double *p);
+
+  void intersect_convex_poly2D(int num_p, double *p,
+			       int num_q, double *q,
+			       double *tmp,
+			       int *num_out, double *out);
+
 //// Handy macros ////
 
 // Do it this way because some compilers don't support isfinite (e.g. pgi)
@@ -105,25 +117,46 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   out[1]=a[1]; \
   out[2]=a[2];
 
+#define MU_ASSIGN_VEC2D(out,a) \
+  out[0]=a[0]; \
+  out[1]=a[1]; 
+
 #define MU_SET_MIN_VEC3D(min,vec)       \
   if (vec[0]<min[0]) min[0]=vec[0];\
   if (vec[1]<min[1]) min[1]=vec[1];\
   if (vec[2]<min[2]) min[2]=vec[2];
+
+#define MU_SET_MIN_VEC2D(min,vec)       \
+  if (vec[0]<min[0]) min[0]=vec[0];\
+  if (vec[1]<min[1]) min[1]=vec[1];
+
 
 #define MU_SET_MAX_VEC3D(max,vec)       \
   if (vec[0]>max[0]) max[0]=vec[0];\
   if (vec[1]>max[1]) max[1]=vec[1];\
   if (vec[2]>max[2]) max[2]=vec[2];
 
+#define MU_SET_MAX_VEC2D(max,vec)       \
+  if (vec[0]>max[0]) max[0]=vec[0];\
+  if (vec[1]>max[1]) max[1]=vec[1];
+
 #define MU_ADD_VEC3D(out,a,b) \
   out[0]=a[0]+b[0]; \
   out[1]=a[1]+b[1]; \
   out[2]=a[2]+b[2];
 
+#define MU_ADD_VEC2D(out,a,b) \
+  out[0]=a[0]+b[0]; \
+  out[1]=a[1]+b[1]; 
+
 #define MU_SUB_VEC3D(out,a,b) \
   out[0]=a[0]-b[0]; \
   out[1]=a[1]-b[1]; \
   out[2]=a[2]-b[2];
+
+#define MU_SUB_VEC2D(out,a,b) \
+  out[0]=a[0]-b[0]; \
+  out[1]=a[1]-b[1]; 
 
 // multiply 3x3 MAT BY 3D VEC
 #define MU_MAT_X_VEC3D(out_v, m, v) \
@@ -136,10 +169,19 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   out[1]=(s);                      \
   out[2]=(s);
 
+#define MU_SET_TO_SCALAR_VEC2D(out,s) \
+  out[0]=(s);                      \
+  out[1]=(s);                      
+
+
 #define MU_MULT_BY_SCALAR_VEC3D(out,a,s) \
   out[0]=a[0]*(s);                      \
   out[1]=a[1]*(s);                      \
   out[2]=a[2]*(s);
+
+#define MU_MULT_BY_SCALAR_VEC2D(out,a,s) \
+  out[0]=a[0]*(s);                      \
+  out[1]=a[1]*(s);                      
 
 #define MU_DIV_BY_SCALAR_VEC3D(out,a,s) \
   out[0]=a[0]/(s);                      \
@@ -147,17 +189,38 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   out[2]=a[2]/(s);
 
 
+#define MU_DIV_BY_SCALAR_VEC2D(out,a,s) \
+  out[0]=a[0]/(s);                      \
+  out[1]=a[1]/(s);                      
+
+
 #define MU_EQUAL_PNT3D(p1,p2,tol) ((std::abs(p1[0]-p2[0]) < tol) && \
                                   (std::abs(p1[1]-p2[1]) < tol) && \
                                   (std::abs(p1[2]-p2[2]) < tol))
 
+#define MU_EQUAL_PNT2D(p1,p2,tol) ((std::abs(p1[0]-p2[0]) < tol) && \
+                                   (std::abs(p1[1]-p2[1]) < tol))
+
 #define MU_CROSS_PRODUCT_VEC3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
+
+// Make a 2D vector (out) orthogonal to 2D vector a
+#define MU_ORTH_VEC2D(out,a) out[0]=a[1]; out[1]=-a[0];
 
 #define MU_LEN_VEC3D(a) std::sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
 
+#define MU_LEN_VEC2D(a) std::sqrt(a[0]*a[0]+a[1]*a[1])
+
 #define MU_LENSQ_VEC3D(a) (a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
 
+#define MU_LENSQ_VEC2D(a) (a[0]*a[0]+a[1]*a[1])
+
 #define MU_DOT_VEC3D(a,b) (a[0]*b[0]+a[1]*b[1]+a[2]*b[2])
+
+#define MU_DOT_VEC2D(a,b) (a[0]*b[0]+a[1]*b[1])
+
+#define MU_LST_VEC3D(a) (a)[0],(a)[1],(a)[2]
+
+#define MU_LST_VEC2D(a) (a)[0],(a)[1]
 
 
   // STUFF FOR TRIANGULATION

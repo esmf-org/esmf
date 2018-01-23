@@ -382,7 +382,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       MEField<> &scoord = *srcmesh->GetCoordField();
 
       int num_snd=0;
-      MEField<> *snd[3],*rcv[3];
+      MEField<> *snd[4],*rcv[4];
 
       // Load coord field
       MEField<> *psc = &scoord;
@@ -403,6 +403,14 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       if (psa != NULL) {
         snd[num_snd]=psa;
         rcv[num_snd]=psa;
+        num_snd++;
+      }
+
+      // Load frac2 field
+      MEField<> *psf = srcmesh->GetField("elem_frac2");
+      if (psf != NULL) {
+        snd[num_snd]=psf;
+        rcv[num_snd]=psf;
         num_snd++;
       }
 

@@ -39,6 +39,7 @@ module ESMF_FieldRegridMod
   use ESMF_XGridGeomBaseMod
   use ESMF_RegridMod
   use ESMF_FieldMod
+  use ESMF_FieldCreateMod
   use ESMF_FieldGetMod
   use ESMF_FieldSMMMod
   use ESMF_XGridMod
@@ -1739,7 +1740,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
       subroutine ESMF_FieldRegridStoreX(xgrid, srcField, dstField, &
-                    keywordEnforcer, routehandle, srcFracField, dstFracField, &
+                    keywordEnforcer, regridmethod, routehandle, &
+                    srcFracField, dstFracField, &
                     srcMergeFracField, dstMergeFracField, rc)
 !      
 ! !ARGUMENTS:
@@ -1747,6 +1749,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Field),       intent(in)              :: srcField
       type(ESMF_Field),       intent(inout)           :: dstField
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
       type(ESMF_RouteHandle), intent(inout), optional :: routehandle
       type(ESMF_Field),       intent(inout), optional :: srcFracField
       type(ESMF_Field),       intent(inout), optional :: dstFracField
@@ -1799,6 +1802,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Source Field.
 !     \item [dstField]
 !           Destination Field. The data in this Field may be overwritten by this call. 
+!     \item [{[regridmethod]}]
+!           The type of interpolation. For this method only 
+!           {\tt ESMF\_REGRIDMETHOD\_CONSERVE} and {\tt ESMF\_REGRIDMETHOD\_CONSERVE\_2ND} are
+!           supported. If not specified, defaults to {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
 !     \item [{[routehandle]}]
 !           The handle that implements the regrid and that can be used in later 
 !           {\tt ESMF\_FieldRegrid}.
@@ -1841,10 +1848,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_STAGGERLOC):: interpFieldStaggerloc, fracFieldStaggerloc
         type(ESMF_MESHLOC)   :: interpFieldMeshloc, fracFieldMeshloc
         integer              :: srcTermProcessingVal
-    
+        type(ESMF_RegridMethod_Flag) :: lregridmethod
+        type(ESMF_Mesh)      :: superMesh
+        type(ESMF_Field)     :: tmpSrcField, tmpDstField
+        type(ESMF_Typekind_Flag) :: fieldTypeKind
+
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! Set optional method argument
+        if (present(regridmethod)) then
+           lregridmethod=regridmethod
+        else     
+           lregridmethod=ESMF_REGRIDMETHOD_CONSERVE
+        endif
+
+        ! Only conservative methods supported for now
+        if ((lregridmethod .ne. ESMF_REGRIDMETHOD_CONSERVE) .and. &
+             (lregridmethod .ne. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                msg="- Only conservative regrid methods supported through XGrid", & 
+                ESMF_CONTEXT, rcToReturn=rc) 
+           return
+        endif
 
         ! look for the correct Grid to use
         ! first Get necessary information from XGrid and Fields
@@ -2296,20 +2323,107 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-        ! retrieve the correct sparseMat structure
-        call ESMF_XGridGet(xgrid, srcSide, srcIdx, &
-            dstSide, dstIdx, sparseMat=sparseMat, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        
-        ! call FieldSMMStore
-        srcTermProcessingVal = 0
-        call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
-            sparseMat%factorList, sparseMat%factorIndexList, &
-            srcTermProcessing=srcTermProcessingVal, &
-            rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Create routehandle based on regrid method
+        if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
+
+           ! retrieve the correct sparseMat structure
+           call ESMF_XGridGet(xgrid, srcSide, srcIdx, &
+                dstSide, dstIdx, sparseMat=sparseMat, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           
+           ! call FieldSMMStore
+           srcTermProcessingVal = 0
+           call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
+                sparseMat%factorList, sparseMat%factorIndexList, &
+                srcTermProcessing=srcTermProcessingVal, &
+                rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+
+           ! Set temporary field for source
+           if (srcSide == ESMF_XGRIDSIDE_BALANCED) then
+
+              ! Get Field typekind
+              call ESMF_FieldGet(srcField, typekind=fieldTypeKind, &
+                   rc=localrc) 
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+              ! Get Super Mesh
+              call ESMF_XGridGet(xgrid, mesh=superMesh, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+              ! Create temporary field
+              tmpSrcField=ESMF_FieldCreate(superMesh, &
+                   typekind=fieldTypeKind, &
+                   meshloc=ESMF_MESHLOC_ELEMENT, &
+                   rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           else 
+              tmpSrcField=srcField
+           endif
+
+           ! Set temporary field for dst
+           if (dstSide == ESMF_XGRIDSIDE_BALANCED) then
+
+              ! Get Field typekind
+              call ESMF_FieldGet(dstField, typekind=fieldTypeKind, &
+                   rc=localrc) 
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+              ! Get Super Mesh
+              call ESMF_XGridGet(xgrid, mesh=superMesh, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+              ! Create temporary field
+              tmpDstField=ESMF_FieldCreate(superMesh, &
+                   typekind=fieldTypeKind, &
+                   meshloc=ESMF_MESHLOC_ELEMENT, &
+                   rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           else 
+              tmpDstField=dstField
+           endif
+
+           ! Generate routehandle other that 1st order conserve
+           call ESMF_FieldRegridStoreNX(&
+                srcField=tmpSrcField, &
+                dstField=tmpDstField, &
+! ??            srcMaskValues, dstMaskValues, &
+                regridmethod=lregridmethod, &
+                srcTermProcessing=srcTermProcessingVal, &
+                routehandle=routehandle, &
+                srcFracField=srcFracField, &
+                dstFracField=dstFracField, &
+                rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+           ! Get rid of temporary source Field if necessary
+           if (srcSide == ESMF_XGRIDSIDE_BALANCED) then
+
+              call ESMF_FieldDestroy(tmpSrcField, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+
+           ! Get rid of temporary destination Field if necessary
+           if (dstSide == ESMF_XGRIDSIDE_BALANCED) then
+
+              call ESMF_FieldDestroy(tmpDstField, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+
+        endif
+
 
         if(present(rc)) rc = ESMF_SUCCESS
 

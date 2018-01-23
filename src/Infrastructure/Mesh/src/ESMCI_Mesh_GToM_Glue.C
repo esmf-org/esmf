@@ -1941,7 +1941,6 @@ void ESMCI_GridToMeshCell(const Grid &grid_,
   int localrc;
   int rc;
 
-
   // Initialize the parallel environment for mesh (if not already done)
   ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
@@ -1962,6 +1961,8 @@ void ESMCI_GridToMeshCell(const Grid &grid_,
        "- currently only ESMC_TYPEKIND_R8 Arrays supported.", ESMC_CONTEXT, &rc);
    throw rc;
  }
+
+
 
  // Get distgrid for the center staggerloc 
  DistGrid *centerDistgrid;
