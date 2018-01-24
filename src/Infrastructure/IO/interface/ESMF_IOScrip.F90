@@ -91,23 +91,23 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     character(len=*), intent(in) :: weightFile
     real(ESMF_KIND_R8), intent(in) :: factorList(:)
     integer(ESMF_KIND_I4), intent(in) :: factorIndexList(:,:)
-    integer, intent(out), optional :: rc
+    integer, intent(inout), optional :: rc
 
     type(ESMF_DistGrid) :: distgridFL
     type(ESMF_Array) :: arrayFL, arrayFIL1, arrayFIL2
 
     type(ESMF_AttPack) :: attpack
     integer :: lens(3), lens2(1), nfactors, ii, localPet, petCount, startIndex, &
-               stopIndex, localrc
+               stopIndex, localrc, memstat, hasFactors, nLivePETs(1), offset
     character(len=22), parameter :: specString = "distgridnetcdfmetadata"
     character(len=23), parameter :: name = "ESMF:gridded_dim_labels"
     character(len=3), parameter :: value = "n_s"
+    character(len=70), parameter :: noFactorsMsg = '"factorList" has size 0 and PET count is 1. There is nothing to write.'
     integer(ESMF_KIND_I4), allocatable, dimension(:) :: col, row
     type(ESMF_VM) :: vm
     integer(ESMF_KIND_I4), dimension(1) :: sendData, recvData
     integer(ESMF_KIND_I4), dimension(2) :: bcstData
     integer(ESMF_KIND_I4), allocatable, dimension(:,:,:) :: deBlockList
-    integer :: memstat
     
     ! ==============================================================================
     
@@ -116,6 +116,13 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     else
       localrc = ESMF_RC_NOT_IMPL
     endif
+    
+#ifndef ESMF_NETCDF
+    ! Writing weights requires netCDF and the subroutine should not continue if
+    ! the netCDF library is not available.
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
     
     call ESMF_VMGetGlobal(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -132,6 +139,23 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     ! Number of local factors.
     nfactors = size(factorList, 1)
     
+    ! Bail out if there are no factors and this is a single process.
+    if ((nfactors .eq. 0) .and. (petCount .eq. 1)) then
+      if (ESMF_LogFoundError(ESMF_RC_NOT_IMPL, msg=noFactorsMsg, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    ! Determine if we need a redistribution. A redistribution is needed if one of
+    ! the PETs does not have any factors.
+    if (nfactors .eq. 0) then
+      hasFactors = 0
+    else
+      hasFactors = 1
+    endif
+    call ESMF_VMAllReduce(vm, (/hasFactors/), nLivePETs, 1, ESMF_REDUCE_SUM, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+    
     ! Chain start and stop index calculation.
     if (localPet .ne. 0) then
       call ESMF_VMRecv(vm, recvData, 1, localPet-1, rc=localrc)
@@ -139,15 +163,42 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     else
       startIndex = 1
     endif
-    stopIndex = startIndex + nfactors - 1
-    if ((localPet .ne. petCount-1) .and. (petCount > 1)) then
-      call ESMF_VMSend(vm, (/stopIndex+1/), 1, localPet+1, rc=localrc)
-      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+    if (nfactors .eq. 0) then
+      stopIndex = startIndex
+    else
+      stopIndex = startIndex + nfactors - 1
     endif
+    if ((localPet .ne. petCount-1) .and. (petCount > 1)) then
+      if (nfactors == 0) then
+        offset = 0
+      else
+        offset = 1
+      endif
+      call ESMF_VMSend(vm, (/stopIndex+offset/), 1, localPet+1, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    ! Some PETs do not have data. We need to gather and scatter to ensure the
+    ! asynchronous write has data for each proc - or - we can use the simple weight
+    ! file write implementation that can handle zero-length factor lists.
     
-    ! Remember ragged factor counts may require a non-regular decomposition. This
-    ! requires a custom block definition per DE.
+    ! TODO (bekozi): Array should be able to handle empty data and the write should
+    !  correspondingly work.
+
+    if (nLivePETs(1) .ne. petCount) then
+      ! This streams everything to a single PET for writing avoiding the need for an
+      ! asynchronous write.
+      call ESMF_OutputSimpleWeightFile(weightFile, factorList, factorIndexList, "", &
+                          largeFileFlag=.false., netcdf4FileFlag=.true., rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+      return
+    endif
+    !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    
+    ! Ragged factor counts may require a non-regular decomposition. This requires a 
+    ! custom block definition per DE.
     allocate(deBlockList(1, 2, petCount), stat=memstat)
     if (ESMF_LogFoundAllocError(memstat,  &
         ESMF_CONTEXT, rcToReturn=rc)) return
