@@ -90,7 +90,10 @@ module ESMF_ArrayMod
   public ESMF_ArrayReduce
   public ESMF_ArrayScatter          ! implemented in ESMF_ArrayScatterMod 
   public ESMF_ArraySet
-  public ESMF_ArraySMM, ESMF_ArraySMMR4R8R4, ESMF_ArraySMMR8R8R8
+  public ESMF_ArraySMM, ESMF_ArraySMMR8R8R8
+#ifndef ESMF_NO_DYNMASKOVERLOAD
+  public ESMF_ArraySMMR4R8R4
+#endif  
   public ESMF_ArraySMMRelease
   public ESMF_ArraySMMStore
   public ESMF_ArrayValidate
@@ -706,7 +709,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
 
-
+#ifndef ESMF_NO_DYNMASKOVERLOAD
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySMMR4R8R4()"
@@ -832,7 +835,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end subroutine ESMF_ArraySMMR4R8R4
 !------------------------------------------------------------------------------
-
+#endif
 
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD

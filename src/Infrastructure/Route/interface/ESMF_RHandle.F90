@@ -68,7 +68,7 @@ module ESMF_RHandleMod
   end type
 
 !------------------------------------------------------------------------------
-! !  ESMF_DynamicMaskRoutine
+! !  ESMF_DynamicMaskRoutine interfaces, typekind overloaded
 !
   interface
     subroutine ESMF_DynamicMaskRoutineR8R8R8(dynMaskList, dynamicSrcMaskValue, &
@@ -97,6 +97,8 @@ module ESMF_RHandleMod
   end type
 
   !----
+
+#ifndef ESMF_NO_DYNMASKOVERLOAD
 
   interface
     subroutine ESMF_DynamicMaskRoutineR4R8R4(dynMaskList, dynamicSrcMaskValue, &
@@ -151,6 +153,8 @@ module ESMF_RHandleMod
   type ESMF_DynamicMaskStateWrapR4R4R4
     type(ESMF_DynamicMaskStateR4R4R4), pointer :: wrap
   end type
+  
+#endif
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -158,11 +162,13 @@ module ESMF_RHandleMod
   public ESMF_UNINITIALIZEDHANDLE, ESMF_ARRAYSPARSEMATMULHANDLE
   public ESMF_DynamicMaskRoutineR8R8R8
   public ESMF_DynamicMaskStateR8R8R8, ESMF_DynamicMaskStateWrapR8R8R8
+#ifndef ESMF_NO_DYNMASKOVERLOAD
   public ESMF_DynamicMaskRoutineR4R8R4
   public ESMF_DynamicMaskStateR4R8R4, ESMF_DynamicMaskStateWrapR4R8R4
   public ESMF_DynamicMaskRoutineR4R4R4
   public ESMF_DynamicMaskStateR4R4R4, ESMF_DynamicMaskStateWrapR4R4R4
-  
+#endif
+
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -1245,6 +1251,7 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
 end subroutine f_esmf_dynmaskcallbackr8r8r8
 !------------------------------------------------------------------------------
 
+#ifndef ESMF_NO_DYNMASKOVERLOAD
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1430,4 +1437,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r4r4(routehandle, count, &
 
 end subroutine f_esmf_dynmaskcallbackr4r4r4
 !------------------------------------------------------------------------------
- 
+
+#endif
+
+!------------------------------------------------------------------------------

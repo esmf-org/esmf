@@ -63,12 +63,14 @@ extern "C" {
   void FTN_X(f_esmf_dynmaskcallbackr8r8r8)(ESMCI::RouteHandle **ptr, 
     int *count, void **elementVector, int *countVector, int *totalCount,
     void *factorsVector, void *valuesVector, int *rc);
+#ifndef ESMF_NO_DYNMASKOVERLOAD
   void FTN_X(f_esmf_dynmaskcallbackr4r8r4)(ESMCI::RouteHandle **ptr, 
     int *count, void **elementVector, int *countVector, int *totalCount,
     void *factorsVector, void *valuesVector, int *rc);
   void FTN_X(f_esmf_dynmaskcallbackr4r4r4)(ESMCI::RouteHandle **ptr, 
     int *count, void **elementVector, int *countVector, int *totalCount,
     void *factorsVector, void *valuesVector, int *rc);
+#endif
 }
 //-------------------------------------------------------------------------
 
@@ -6861,6 +6863,7 @@ template<typename T, typename U, typename V>
       &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+#ifndef ESMF_NO_DYNMASKOVERLOAD
   }else if (typeid(T)==typeid(ESMC_R4) && typeid(U)==typeid(ESMC_R8) &&
     typeid(V)==typeid(ESMC_R4)){
     FTN_X(f_esmf_dynmaskcallbackr4r8r4)(&rh, &count, &(elementVector[0]), 
@@ -6875,6 +6878,7 @@ template<typename T, typename U, typename V>
       &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+#endif
   }else{
     // not a supported type combination
     char msg[1024];

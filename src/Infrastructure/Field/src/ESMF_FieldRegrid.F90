@@ -58,7 +58,9 @@ module ESMF_FieldRegridMod
 ! - ESMF-public methods:
    public ESMF_FieldRegridStore        ! Store a regrid matrix
    public ESMF_FieldRegrid             ! apply a regrid operator
+#ifndef ESMF_NO_DYNMASKOVERLOAD
    public ESMF_FieldRegridR4R8R4       ! apply a regrid operator
+#endif
    public ESMF_FieldRegridRelease      ! apply a regrid operator
    public ESMF_FieldRegridGetIwts      ! get integration weights
    public ESMF_FieldRegridGetArea      ! get area
@@ -312,9 +314,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_FieldRegrid
 !------------------------------------------------------------------------------
+    
+#ifndef ESMF_NO_DYNMASKOVERLOAD
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRegridR4R8R4"
-
 !BOPI
 ! !IROUTINE: ESMF_FieldRegridR4R8R4 - Compute a regridding operation
 !
@@ -521,9 +525,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_FieldRegridR4R8R4
 !------------------------------------------------------------------------------
+#endif
+
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRegridRelease"
-
 !BOP
 ! !IROUTINE: ESMF_FieldRegridRelease - Free resources used by a regridding operation
 !

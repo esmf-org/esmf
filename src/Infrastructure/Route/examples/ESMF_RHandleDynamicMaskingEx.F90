@@ -83,12 +83,14 @@ module ESMF_RHandleDynamicMaskingMod
             if (.not. &
               matchR4(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j))) then
               dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement &
-                + dynamicMaskList(i)%factor(j) &
-                * dynamicMaskList(i)%srcElement(j)
+                + real(dynamicMaskList(i)%factor(j) &
+                     * dynamicMaskList(i)%srcElement(j), &
+                  ESMF_KIND_R4)
               renorm = renorm + dynamicMaskList(i)%factor(j)
             endif
           enddo
-          dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
+          dynamicMaskList(i)%dstElement = &
+            real(dynamicMaskList(i)%dstElement / renorm, ESMF_KIND_R4)
         endif
       enddo
     endif
@@ -594,6 +596,7 @@ program ESMF_RHandleDynamicMaskingEx
 ! {\tt real(ESMF\_KIND\_R4)} source data (third typekind).
 !EOE
 
+#ifndef ESMF_NO_DYNMASKOVERLOAD
 !BOC
   call ESMF_FieldRegridR4R8R4(srcField=srcField, dstField=dstField, &
     routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
@@ -622,6 +625,7 @@ program ESMF_RHandleDynamicMaskingEx
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#endif
 
   call ESMF_FieldDestroy(srcField, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
