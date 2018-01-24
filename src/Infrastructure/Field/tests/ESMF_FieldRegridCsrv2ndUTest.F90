@@ -148,7 +148,7 @@
       call test_SmallNumNbrs(itrp, csrv, rc)
 
       !------------------------------------------------------------------------
-      !EX_OFF_UTest
+      !EX_UTest
       ! Test conservative regridding interpolation
       write(failMsg, *) "Returned an error"
       write(name, *) "Second-order conservative with small number of neighbors."
@@ -158,7 +158,7 @@
                       failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_OFF_UTest
+      !EX_UTest
       ! Test conservative regridding interpolation
       write(failMsg, *) "Interpolation maximum error is greater than 10^-2"
       write(name, *) "Second-order conservative with small number of neighbors", &
@@ -170,7 +170,7 @@
                       failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !EX_OFF_UTest
+      !EX_UTest
       ! Test conservative regridding conservation
       write(failMsg, *) "Conservation relative error is greater than 10^-12"
       write(name, *) "Second-order conservative with small number of neighbors", &
