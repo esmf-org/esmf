@@ -55,7 +55,6 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
  
     !------------------------------------------------------------------------
-#if 0
 
   !------------------------------------------------------------------------
   !NEX_UTest
@@ -184,7 +183,6 @@
     write(failMsg, *) ""
     write(name, *) "Test 2nd order on an XGrid between Meshes"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#endif
 
     !------------------------------------------------------------------------
     !NEX_UTest
