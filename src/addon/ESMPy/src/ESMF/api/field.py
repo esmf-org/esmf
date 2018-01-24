@@ -371,6 +371,9 @@ class Field(object):
         :note: This interface is not supported when ESMF is built with
             ``ESMF_COMM=mpiuni``.
 
+        :note: This interface does not currently support reading ungridded 
+               dimensions.
+
         *REQUIRED:*
 
         :param str filename: The name of the NetCDF file.
