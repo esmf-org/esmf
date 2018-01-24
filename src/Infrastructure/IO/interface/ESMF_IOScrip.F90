@@ -189,8 +189,8 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     if (nLivePETs(1) .ne. petCount) then
       ! This streams everything to a single PET for writing avoiding the need for an
       ! asynchronous write.
-      call ESMF_OutputSimpleWeightFile(weightFile, factorList, factorIndexList, "", &
-                          largeFileFlag=.false., netcdf4FileFlag=.true., rc=localrc)
+      call ESMF_OutputSimpleWeightFile(weightFile, factorList, factorIndexList, &
+                                       rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
         rcToReturn=rc)) return
       return
