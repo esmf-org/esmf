@@ -7262,11 +7262,25 @@ end function ESMF_GridCreateFrmScrip
 end function ESMF_GridCreateFrmGridspec
 
 !------------------------------------------------------------------------------
+! Begin of draft interfaces
+!------------------------------------------------------------------------------
+! Below are three private draft interfaces to help create a 3D Grid with both
+! constant and variable layer heights for each 2D grid location:
+!
+! 1. ESMF_GridCreateFrmGrid      - Adds one undistributed vertical dimension to
+!                                  a 2D Grid.
+!
+! 2. ESMF_GridCreateFrmGridCoord - Adds one undistributed, constant  vertical
+!                                  coordinate (1D Fortran array) to a 2D Grid.
+!
+! 3. ESMF_GridCreateFrmField     - Create a 3D Grid from a Field defined on a
+!                                  2D Grid with an ungridded dimension.
+!                                  (depends on ESMF_GeomBaseMod, ESMF_FieldMod)
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmGrid"
-!BOP
-! !IROUTINE: ESMF_GridCreateFrmGrid - Create a 3D Grid from a 2D Grid by adding
-! an undistributed vertical dimension
+!BOPI
+! !IROUTINE: ESMF_GridCreateFrmGrid - Create a 3D Grid by adding an undistributed vertical dimension to a 2D Grid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate() ?
@@ -7303,7 +7317,7 @@ end function ESMF_GridCreateFrmGridspec
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
     ! local variables
     integer :: localrc
@@ -7542,9 +7556,8 @@ end function ESMF_GridCreateFrmGrid
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmGridCoord"
-!BOP
-! !IROUTINE: ESMF_GridCreateFrmGridCoord - Create a 3D Grid from a 2D Grid and a
-! Fortran array as undistributed vertical coordinate
+!BOPI
+! !IROUTINE: ESMF_GridCreateFrmGridCoord - Create a 3D Grid from a 2D Grid and a 1D Fortran array as undistributed vertical coordinate
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate() ?
@@ -7593,7 +7606,7 @@ end function ESMF_GridCreateFrmGrid
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
     ! local variables
     logical :: isPresent
@@ -7671,9 +7684,8 @@ end function ESMF_GridCreateFrmGridCoord
 #if 0
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmField"
-!BOP
-! !IROUTINE: ESMF_GridCreateFrmField - Create a 3D Grid from a Field defined on
-! a 2D Grid with an ungridded dimension
+!BOPI
+! !IROUTINE: ESMF_GridCreateFrmField - Create a 3D Grid from a Field defined on a 2D Grid with an ungridded dimension
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate() ?
@@ -7720,7 +7732,7 @@ end function ESMF_GridCreateFrmGridCoord
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
     ! local variables
     integer :: localrc
@@ -7829,7 +7841,8 @@ end function ESMF_GridCreateFrmGridCoord
 
 end function ESMF_GridCreateFrmField
 #endif
-
+!------------------------------------------------------------------------------
+! End of draft interfaces
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreate1PeriDimI"
