@@ -200,7 +200,7 @@
     deallocate(petlist_cpl)
     !print *, "Comp Creates finished"
 
-  mapper = ESMF_MapperCreate(vm, rc=localrc)
+  mapper = ESMF_MapperCreate(vm, configFile="./runseq.txt", rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

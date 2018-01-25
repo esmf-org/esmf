@@ -43,6 +43,7 @@ module ESMF_MapperMod
   use ESMF_CplCompMod
   use ESMF_VMMod
   use ESMF_InitMacrosMod
+  use ESMF_MapperRunSeqUtilMod
 
 
   implicit none
@@ -202,7 +203,92 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MapperReadRunSeq
+!BOP
+! !IROUTINE: ESMF_MapperReadRunSeq - Read the run sequence from a config file
+
+! !INTERFACE:
+  subroutine ESMF_MapperReadRunSeq(mapperp, configFile, rc)
+!
+!
+! !ARGUMENTS:
+    type(ESMF_MapperClass), pointer :: mapperp
+    character(len=*), intent(in) :: configFile
+    integer,             intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Collects all info required by the ESMF\_Mapper from a component
+!
+! The arguments are:
+!   \begin{description}
+!   \item[{[mapperp]}]
+!     Pointer to the mapper class;
+!   \item[{[configFile]}]
+!     The config file containing the run sequence.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------    
+
+    integer :: cfunit, localPet
+    logical :: inuse = .false.
+    integer, parameter :: FUNIT_MIN=100, FUNIT_MAX=500
+
+    character(len=ESMF_MAXSTR), dimension(:), allocatable :: runSeqCode
+    character(len=ESMF_MAXSTR) :: line
+    integer :: i, nlines, localrc
+ 
+
+    call ESMF_VMGet(mapperp%vm, localPet=localPet, rc=localrc)
+    !if (ESMF_LogFoundError(localrc, &
+    !  ESMF_ERR_PASSTHRU, &
+    !  ESMF_CONTEXT, rcToReturn=rc)) return
+    if(localPet == 0) then
+      ! Find an available unit number to read sequence config file
+      do cfunit=FUNIT_MIN,FUNIT_MAX
+        inquire(unit=cfunit, opened=inuse)
+        if(.not. inuse) then
+          exit
+        end if
+      end do
+
+      if(inuse) then
+        print *, "Could not find a usable unit number"
+        !call ESMF_LogSetError(ESMF_FAILURE, &
+        !        msg="Unable to find a usable unit number for reading run seq", &
+        !        ESMF_CONTEXT, rcToReturn=rc)
+      end if
+
+      open(unit=cfunit, file=configFile, action='READ')
+      nlines = 0
+      do while(.true.)
+        read(cfunit, '(A)', end=10) line
+        nlines = nlines + 1
+        print *, "Read : ", trim(line)
+      end do
+10    rewind(unit=cfunit)
+      allocate(runSeqCode(nlines))
+      do i=1,nlines
+        read(cfunit, '(A)', end=20) line
+        runSeqCode(i) = trim(line)
+      end do
+20    close(cfunit)
+      do i=1,nlines
+        print *, "Read (mem): ", trim(runSeqCode(i))
+      end do
+    end if
+
+    call ESMF_MapperProcessRunSeq(runSeqCode, rc)
+    !call ESMF_LogSetError(ESMF_FAILURE, &
+    !        msg="Unable to find a usable unit number for reading run seq", &
+    !        ESMF_CONTEXT, rcToReturn=rc)
+
+    if (present(rc)) rc = ESMF_SUCCESS
+  end subroutine
+!------------------------------------------------------------------------------
 
 
 !------------------------------------------------------------------------------
@@ -261,6 +347,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end do
 
     ! FIXME: Read config file, if present, and initialize the mapper
+    if(present(configFile)) then
+      call ESMF_MapperReadRunSeq(mapperp, configFile, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
 
     ESMF_MapperCreate%mapperp => mapperp
 

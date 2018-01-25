@@ -31,5 +31,6 @@ CLOBBERDIRS =
 
 
 RUN_MapperSimpleTwoConcurrentComps:
+	cp -f runseq.txt ${ESMF_TESTDIR}
 	$(MAKE) TNAME=MapperSimpleTwoConcurrentComps NP=8 stest
 
