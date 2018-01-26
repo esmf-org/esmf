@@ -41,6 +41,11 @@
 #define BT_REGION_ENTER 0
 #define BT_REGION_EXIT 1
 
+extern "C" {
+  //used to call into preloader
+  int c_esmf_settraceready(int ready);
+}
+
 namespace ESMCI { 
   void TraceOpen(std::string trace_dir, int *rc);
   void TraceClose(int *rc);

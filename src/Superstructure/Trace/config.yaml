@@ -71,7 +71,7 @@ metadata:
       description: System clock
       $return-ctype: uint64_t
   env:
-    esmf_trace_version: '0.4'
+    esmf_trace_version: '0.5'
   trace:
     byte-order: le
     uuid: auto
@@ -158,3 +158,15 @@ metadata:
                     hour: uint8
                     minute: uint8
                     second: uint8
+        ioread:
+            payload-type:
+                class: struct
+                fields:
+                    totalBytes: uint32
+                    totalTime: uint32
+        iowrite:
+            payload-type:
+                class: struct
+                fields:
+                    totalBytes: uint32
+                    totalTime: uint32
