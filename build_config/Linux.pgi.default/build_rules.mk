@@ -7,17 +7,11 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = pgf90
-# In PGI 15.x, prefer the newer pgc++ front end.  From 16.x onward
-# the pgCC front end is no longer available.
-ifeq ($(shell $(ESMF_DIR)/scripts/available pgCC),pgCC)
-ESMF_CXXMAJORVERSION    = $(shell $(ESMF_DIR)/scripts/version.pgi 1 pgCC -V)
-ifeq ($(ESMF_CXXMAJORVERSION),15)
+# Use pgc++ if available, otherwise fall back to older pgCC front-end
+ifeq ($(shell $(ESMF_DIR)/scripts/available pgc++),pgc++)
 ESMF_CXXDEFAULT         = pgc++
 else
 ESMF_CXXDEFAULT         = pgCC
-endif
-else
-ESMF_CXXDEFAULT         = pgc++
 endif
 
 ############################################################
