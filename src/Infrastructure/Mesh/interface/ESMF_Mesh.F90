@@ -3909,9 +3909,10 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
   integer, parameter    :: f_p = selected_real_kind(15)   ! double precision
   real,  parameter      :: pi = 3.1415926
   real , parameter      :: todeg = 180.0/pi          ! convert to degrees
-  real(ESMF_KIND_R8), allocatable :: lonEdge(:,:), latEdge(:,:)
+  real(ESMF_KIND_R4), allocatable :: lonEdge(:,:), latEdge(:,:)
+  real(ESMF_KIND_R8), allocatable :: lonEdgeR8(:), latEdgeR8(:)
   real(ESMF_KIND_R8), allocatable :: NodeCoords(:), CenterCoords(:)
-  real(ESMF_KIND_R8), allocatable :: lonCenter(:,:), latCenter(:,:)
+  real(ESMF_KIND_R4), allocatable :: lonCenter(:,:), latCenter(:,:)
   integer, allocatable  :: ElemIds(:), NodeIds(:)
   integer, allocatable  :: ElemType(:)
   integer, allocatable  :: ElemConn(:)
@@ -4068,10 +4069,15 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
      TOL=0.0000000001
      start_lat=-91.0
      end_lat = 91.0
-     call c_ESMC_ClumpPntsLL(totalNodes, reshape(lonEdge, (/totalnodes/)), reshape(latEdge, (/totalnodes/)), &
+     allocate(lonEdgeR8(totalnodes), latEdgeR8(totalnodes))
+     lonEdgeR8 = reshape(lonEdge, (/totalnodes/))
+     latEdgeR8 = reshape(latEdge, (/totalnodes/))
+     call c_ESMC_ClumpPntsLL(totalNodes, lonEdgeR8, latEdgeR8, &
                       TOL, map, uniquenodes, &
                       maxDuplicate, start_lat, end_lat, rc)
   
+     deallocate(lonEdgeR8, latEdgeR8)
+
      ! Create a new array to point the new index back to the original index
      allocate(origIds(uniquenodes))
      origIds(:)=0
