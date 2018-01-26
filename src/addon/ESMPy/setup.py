@@ -141,12 +141,12 @@ class TestCommand(AbstractESMFNoseCommand):
 
 class TestParallelCommand(AbstractESMFNoseCommand):
     description = "run parallel tests"
-    _nose_attrs = ['!serial']
+    _nose_attrs = ['!serial,!mpi4py']
     _nose_parallel = True
 
 class TestParallelAllCommand(AbstractESMFNoseCommand):
     description = "run all parallel tests"
-    _nose_attrs = ['!serial,!mpi4py']
+    _nose_attrs = ['!serial']
     _nose_parallel = True
 
 
@@ -169,12 +169,12 @@ class TestRegridCommand(AbstractESMFNoseCommand):
 
 class TestRegridParallelCommand(TestRegridCommand):
     description = "test regrid parallel"
-    _nose_attrs = ['!serial']
+    _nose_attrs = ['!serial,!mpi4py']
     _nose_parallel = True
 
 class TestRegridParallelAllCommand(TestRegridCommand):
     description = "test regrid parallel"
-    _nose_attrs = ['!serial,!mpi4py']
+    _nose_attrs = ['!serial']
     _nose_parallel = True
 
 class TestExamplesCommand(AbstractESMFNoseCommand):
@@ -189,12 +189,12 @@ class TestExamplesCommand(AbstractESMFNoseCommand):
 
 class TestExamplesParallelCommand(TestExamplesCommand):
     description = "run examples in parallel"
-    _nose_attrs = ['!serial']
+    _nose_attrs = ['!serial,!mpi4py']
     _nose_parallel = True
 
 class TestExamplesParallelAllCommand(TestExamplesCommand):
     description = "run all examples in parallel"
-    _nose_attrs = ['!serial,!mpi4py']
+    _nose_attrs = ['!serial']
     _nose_parallel = True
 
 class TestExamplesDryrunCommand(TestExamplesCommand):
