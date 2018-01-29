@@ -702,6 +702,31 @@ namespace ESMCI {
 
   ///////////////////// I/O Tracing //////////////////
 
+  static std::string openFilename;
+  static uint64_t openStartTimestamp = -1;
+
+  void TraceIOOpenStart(const char *path) {
+    if (!traceLocalPet) return;    
+    openStartTimestamp = get_clock(NULL);
+    openFilename = string(path);
+  }
+  
+  void TraceIOOpenEnd() {
+    if (!traceLocalPet) return;
+    uint64_t openEndTimestamp = get_clock(NULL);
+    uint64_t openTime = openEndTimestamp - openStartTimestamp;
+
+    esmftrc_default_trace_ioopen(esmftrc_platform_get_default_ctx(),
+                                 openFilename.c_str(), openTime);
+
+    openStartTimestamp = -1;
+  }
+
+  void TraceIOCloseStart() {
+  }
+  
+  void TraceIOCloseEnd() {
+  }
 
   static vector<size_t> writeTotalBytes;
   static vector<uint64_t> writeTotalTime;
@@ -739,6 +764,8 @@ namespace ESMCI {
   void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
     if (!traceLocalPet) return;
 
+    //openTotalFiles.push_back(0);
+    //openTotalTime.push_back(0);
     readTotalBytes.push_back(0);
     readTotalTime.push_back(0);
     writeTotalBytes.push_back(0);
@@ -749,6 +776,17 @@ namespace ESMCI {
   
   void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
     if (!traceLocalPet) return;
+
+    /*
+    size_t openFiles = openTotalFiles.back();
+    uint64_t openTime = openTotalTime.back();
+    openTotalFiles.pop_back();
+    openTotalTime.pop_back();
+    if (openFiles > 0) {
+      esmftrc_default_trace_ioopen(esmftrc_platform_get_default_ctx(),
+                                    openFiles, openTime);
+    }
+    */
 
     size_t readBytes = readTotalBytes.back();
     uint64_t readTime = readTotalTime.back();

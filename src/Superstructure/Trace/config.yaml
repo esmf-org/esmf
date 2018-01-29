@@ -158,15 +158,22 @@ metadata:
                     hour: uint8
                     minute: uint8
                     second: uint8
+        ioopen:
+            payload-type:
+                class: struct
+                fields:
+                    filename:
+                        class: string
+                    time: uint64
         ioread:
             payload-type:
                 class: struct
                 fields:
-                    totalBytes: uint32
-                    totalTime: uint32
+                    bytes: uint32
+                    time: uint64
         iowrite:
             payload-type:
                 class: struct
                 fields:
-                    totalBytes: uint32
-                    totalTime: uint32
+                    bytes: uint32
+                    time: uint64

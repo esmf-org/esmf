@@ -9,6 +9,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -17,21 +18,22 @@
 
 extern "C" {
 
+static int insideRegion = 0;  /* prevents recursion */
+
+  /**
+   * - in the case of dynamic linking (with LD_PRELOAD), this
+   *    function is defined in preload.c
+   * - in the case of static linking, this function is 
+   *    defined in Trace/src/ESMCI_Trace.C
+   */
   extern int c_esmftrace_isactive();
-  
+
+  /* write */
   extern ssize_t __real_write(int fd, const void *buf, size_t nbytes);
 
-  static int insideRegion = 0;  /* prevents recursion */
-
   ssize_t __wrap_write(int fd, const void *buf, size_t nbytes) {
-    //printf("__wrap_write: %lu\n", nbytes);
     int localrc;
 
-    //TODO:  this should call c_esmftrace_isactive
-    // - in the case of dynamic preload, it is defined
-    //     in preload.c and is set by a callback from TraceOpen
-    // - in the case of static, it calls directly
-    //     into the trace code
     if (c_esmftrace_isactive() == 1 && insideRegion == 0) {
       insideRegion = 1;
       ESMCI::TraceIOWriteStart(nbytes);
@@ -47,25 +49,51 @@ extern "C" {
     return ret;
   }
   
-  /*
-  ssize_t read(int fildes, void *buf, size_t nbyte) {
 
-    if (traceReady == 1) {
+  /* read */
+  extern ssize_t __real_read(int fd, void *buf, size_t nbytes);
+
+  ssize_t __wrap_read(int fd, void *buf, size_t nbyte) {
+
+    if (c_esmftrace_isactive() == 1) {
       ESMCI::TraceIOReadStart(nbyte);
     }
     
-    if (real_read == NULL) {
-      real_read = (ssize_t (*)(int, void *, size_t)) dlsym(RTLD_NEXT, "read");
-    }
-    ssize_t ret = real_read(fildes, buf, nbyte);
+    ssize_t ret = __real_read(fd, buf, nbyte);
 
-    if (traceReady == 1) {
+    if (c_esmftrace_isactive() == 1) {
       ESMCI::TraceIOReadEnd();
     }
     
     return ret;
     
   }
-  */
+
+
+  /* open */
+  extern int __real_open(const char *path, int oflag, ...);
+  
+  int __wrap_open(const char *path, int oflag, ... ) {
+    printf("__wrap_open: %s\n", path);
+
+    va_list args;
+    va_start(args, oflag);
+    mode_t mode = va_arg(args, int);
+    va_end(args);
+    
+    if (c_esmftrace_isactive() == 1) {
+      ESMCI::TraceIOOpenStart(path);
+    }
+
+    int ret =  __real_open(path, oflag, mode);
+
+    if (c_esmftrace_isactive() == 1) {
+      ESMCI::TraceIOOpenEnd();
+    }
+    
+    return ret;
+  }
+
+  
   
 }

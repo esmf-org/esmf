@@ -55,6 +55,11 @@ namespace ESMCI {
   int TraceMapVmId(VMId *vmid, int *rc);
 
   //////////////// IO Tracing //////////
+  void TraceIOOpenStart(const char *path);
+  void TraceIOOpenEnd();
+  void TraceIOCloseStart();
+  void TraceIOCloseEnd();
+  
   void TraceIOWriteStart(size_t nbytes);
   void TraceIOWriteEnd();
   void TraceIOReadStart(size_t nbytes);
