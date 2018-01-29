@@ -3,7 +3,7 @@
  * preload.c
  *
  * Functions that will be preloaded with LD_PRELOAD, thereby
- * overriding the system library so we can call into our
+ * overriding system library functions so we can call into our
  * wrapper function.
  *
  * Since we are using dynamic linking, the __real_<SYMBOL>
@@ -22,6 +22,8 @@
 
 extern "C" {
 
+  static int traceActive = 0;
+  
   extern ssize_t __wrap_write(int fd, const void *buf, size_t nbytes);
   
   static ssize_t (*__real_ptr_write)(int fildes, const void *buf, size_t nbyte) = NULL; 
@@ -31,11 +33,15 @@ extern "C" {
   void c_esmftrace_setactive(int active) {
     if (active == 1) {
       printf("ESMF Tracing enabled with dynamic instrumentation\n"); 
-      __set_esmftrace_active(active);
+      traceActive = 1;
     }
     else {
-      __set_esmftrace_active(0);
+      traceActive = 0;
     }
+  }
+
+  int c_esmftrace_isactive() {
+    return traceActive;
   }
   
   ssize_t __real_write(int fd, const void *buf, size_t nbytes) {   

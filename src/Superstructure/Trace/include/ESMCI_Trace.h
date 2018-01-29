@@ -43,6 +43,7 @@
 
 extern "C" {
   void c_esmftrace_setactive(int ready);
+  int c_esmftrace_isactive();
 }
 
 namespace ESMCI { 

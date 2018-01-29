@@ -905,4 +905,8 @@ void c_esmftrace_setactive(int ready) {
   printf("IGNORNING call to c_esmftrace_setactive: %d\n", ready);
 }
 
-
+/* will be overridden if preloader present */
+int c_esmftrace_isactive() {
+  if (ESMCI::traceActive) return 1;
+  else return 0;
+}
