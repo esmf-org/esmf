@@ -1,3 +1,15 @@
+/**
+ *
+ * preload.c
+ *
+ * Functions that will be preloaded with LD_PRELOAD, thereby
+ * overriding the system library so we can call into our
+ * wrapper function.
+ *
+ * Since we are using dynamic linking, the __real_<SYMBOL>
+ * functions are looked up at runtime using dlsym().
+ */
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dlfcn.h>
@@ -5,84 +17,37 @@
 #include <string.h>
 
 #include "ESMCI_Macros.h"
+#include "ESMCI_Trace.h"
 
-namespace ESMCI {
-  extern void TraceIOWriteStart(size_t nbytes);
-  extern void TraceIOWriteEnd();
-  extern void TraceIOReadStart(size_t nbytes);
-  extern void TraceIOReadEnd();
-}
 
 extern "C" {
 
-  static ssize_t (*real_write)(int fildes, const void *buf, size_t nbyte) = NULL;
-  static ssize_t (*real_read)(int fildes, void *buf, size_t nbyte) = NULL;
-   
-  static int insideRegion = 0;  /* prevents recursion */
-  static int traceReady = 0;
+  extern ssize_t __wrap_write(int fd, const void *buf, size_t nbytes);
+  
+  static ssize_t (*__real_ptr_write)(int fildes, const void *buf, size_t nbyte) = NULL; 
 
+  extern void __set_esmftrace_active(int);
+  
+  void c_esmftrace_setactive(int active) {
+    if (active == 1) {
+      printf("ESMF Tracing enabled with dynamic instrumentation\n"); 
+      __set_esmftrace_active(active);
+    }
+    else {
+      __set_esmftrace_active(0);
+    }
+  }
+  
+  ssize_t __real_write(int fd, const void *buf, size_t nbytes) {   
+    if (__real_ptr_write == NULL) {
+      __real_ptr_write = (ssize_t (*)(int, const void *, size_t)) dlsym(RTLD_NEXT, "write");
+    }
+    return __real_ptr_write(fd, buf, nbytes);
+  }
+  
   ssize_t write(int fd, const void *buf, size_t nbytes) {
-    
-    int localrc;
-    /*
-    struct stat sb;
-    if (fstat(fd, &sb) == -1) {
-      printf("fstat error\n");
-    }
-    else {
-      if (S_ISREG(sb.st_mode)) {
-        regularFile = 1;
-      }
-    }
-    */
-    
-    if (traceReady == 1 && insideRegion == 0) {
-      insideRegion = 1;
-      ESMCI::TraceIOWriteStart(nbytes);
-    }
-
-    if (real_write == NULL) {
-      real_write = (ssize_t (*)(int, const void *, size_t)) dlsym(RTLD_NEXT, "write");
-    }
-    ssize_t ret = real_write(fd, buf, nbytes);
-    
-    if (traceReady == 1 && insideRegion == 1) {
-      ESMCI::TraceIOWriteEnd();
-      insideRegion = 0;
-    }
-    
-    return ret;
+    return __wrap_write(fd, buf, nbytes);
   }
 
   
-  ssize_t read(int fildes, void *buf, size_t nbyte) {
-
-    if (traceReady == 1) {
-      ESMCI::TraceIOReadStart(nbyte);
-    }
-    
-    if (real_read == NULL) {
-      real_read = (ssize_t (*)(int, void *, size_t)) dlsym(RTLD_NEXT, "read");
-    }
-    ssize_t ret = real_read(fildes, buf, nbyte);
-
-    if (traceReady == 1) {
-      ESMCI::TraceIOReadEnd();
-    }
-    
-    return ret;
-    
-  }
-
-  
-  int c_esmf_settraceready(int ready) {
-    if (ready != 0) {
-      printf("***Loading ESMF Tracing Instrumentation***\n");
-      traceReady = 1;
-    }
-    else {
-      traceReady = 0;
-    }
-  }
-
 }

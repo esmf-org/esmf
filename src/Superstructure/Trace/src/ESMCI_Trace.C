@@ -82,7 +82,8 @@ namespace ESMCI {
       return hash % REGION_HASHTABLE_SIZE;
     }
   };
-  
+
+  static bool traceActive = false;
   static bool traceLocalPet = false;
   static int traceClock = 0;
   static int64_t traceClockOffset = 0;
@@ -163,6 +164,10 @@ namespace ESMCI {
     return str.substr(first, (last - first + 1));
   }
 
+  bool TraceActive() {
+    return traceActive;
+  }
+  
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceIsEnabledForPET()"  
   bool TraceIsEnabledForPET(int *rc){
@@ -496,7 +501,6 @@ namespace ESMCI {
                                     ESMC_CONTEXT, rc);
     }
   }
-
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceOpen()"  
@@ -663,7 +667,8 @@ namespace ESMCI {
     //store as global context
     g_esmftrc_platform_filesys_ctx = ctx;
 
-    c_esmf_settraceready(1);
+    traceActive = true;
+    c_esmftrace_setactive(1);
   }
   
     
@@ -679,8 +684,9 @@ namespace ESMCI {
     
     if (ctx != NULL) {
       
-      c_esmf_settraceready(0);
-        
+      traceActive = false;
+      c_esmftrace_setactive(0);
+      
       if (esmftrc_packet_is_open(&ctx->ctx) &&
           !esmftrc_packet_is_empty(&ctx->ctx)) {
         close_packet(ctx);
@@ -895,8 +901,8 @@ namespace ESMCI {
 }
 
 /* will be overridden if preloader present */
-int c_esmf_settraceready(int ready) {
-  //printf("IGNORNING call to c_esmf_settraceready: %d\n", ready);
+void c_esmftrace_setactive(int ready) {
+  printf("IGNORNING call to c_esmftrace_setactive: %d\n", ready);
 }
 
 

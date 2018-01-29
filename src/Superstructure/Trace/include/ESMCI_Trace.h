@@ -42,17 +42,25 @@
 #define BT_REGION_EXIT 1
 
 extern "C" {
-  //used to call into preloader
-  int c_esmf_settraceready(int ready);
+  void c_esmftrace_setactive(int ready);
 }
 
 namespace ESMCI { 
   void TraceOpen(std::string trace_dir, int *rc);
   void TraceClose(int *rc);
-  void TraceSetupTypes(int *rc);  
+  bool TraceActive();
   bool TraceIsEnabledForPET(int *rc);
   std::string TraceGetMetadataString();
   int TraceMapVmId(VMId *vmid, int *rc);
+
+  //////////////// IO Tracing //////////
+  void TraceIOWriteStart(size_t nbytes);
+  void TraceIOWriteEnd();
+  void TraceIOReadStart(size_t nbytes);
+  void TraceIOReadEnd();
+  /////////////////////////////////////
+  
+
   
   ////////////////////////////////
 
