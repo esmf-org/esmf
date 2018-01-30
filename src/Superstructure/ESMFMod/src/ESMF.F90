@@ -47,6 +47,7 @@ module ESMF
     use ESMF_VMMod 
     use ESMF_DELayoutMod
     use ESMF_DistGridMod
+    use ESMF_DynamicMaskMod
     use ESMF_ArrayMod
     use ESMF_ArrayBundleMod
 

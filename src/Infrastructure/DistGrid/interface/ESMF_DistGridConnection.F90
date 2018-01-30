@@ -224,6 +224,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! ensure connection is valid
+ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_DistGridConnectionGetInit, connection, rc)
+
     ! check if connection contains any elements
     localdimCount = (connection % elementCount - 2)/2
 

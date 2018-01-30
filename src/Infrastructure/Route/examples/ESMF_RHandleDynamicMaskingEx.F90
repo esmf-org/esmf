@@ -149,7 +149,8 @@ program ESMF_RHandleDynamicMaskingEx
   real(ESMF_KIND_R4), pointer :: farrayPtrR4(:,:)
   real(ESMF_KIND_R4)          :: srcMaskValueR4=-777.d0
   real(ESMF_KIND_R4)          :: dstMaskValueR4=-888.d0
-
+  type(ESMF_DynamicMask)      :: dynamicMask
+  
   ! result code
   integer :: finalrc, result
   character(ESMF_MAXSTR) :: testname
@@ -282,8 +283,7 @@ program ESMF_RHandleDynamicMaskingEx
 ! unmasked source elements.
 !
 ! The dynamic masking behavior can be achieved in ESMF by setting {\tt srcField}
-! elements to a special value. Then let the {\tt EMSF\_FieldRegrid()} method
-! know about the special value via the {\tt dynamicSrcMaskValue} argument. 
+! elements to a special value.
 !EOE
 
 !BOC
@@ -294,26 +294,56 @@ program ESMF_RHandleDynamicMaskingEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
+  ! setting an arbitrary local source element to special value 'srcMaskValue'
   farrayPtr(lbound(farrayPtr,1)+3,lbound(farrayPtr,2)+3) = srcMaskValue
 !EOC
 
 !BOE
-! Now when the {\tt routehandle} is executed, ESMF will scan the {\tt srcField}
-! for elements that are set to {\tt dynamicSrcMaskValue}. If any are found, they
-! are passed into the routine provided via the {\tt dynamicMaskRoutine}
-! argument.
+! Then set up an {\tt ESMF\_DynamicMask} object that holds information about
+! the special mask value. The dynamic mask object
+! further holds a pointer to the routine that will be called in order to handle
+! dynamically masked elements.
 !EOE
 
 !BOC
-  call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
-    routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
-    dynamicSrcMaskValue=srcMaskValue, dynamicMaskRoutine=simpleDynMaskProc, &
+  call ESMF_DynamicMaskSetR8R8R8(dynamicMask, &
+    dynamicSrcMaskValue=srcMaskValue, &
+    dynamicMaskRoutine=simpleDynMaskProc, &
     rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+!BOE
+! The names of the specific {\tt DynamicMaskSet} methods all carry a 
+! typekind-triplet suffix. Here the suffix was {\tt R8R8R8}. 
+! This typekind-triplet indicates that the {\tt dynamicMaskRoutine} argument
+! provided is expected to deal with {\tt real(ESMF\_KIND\_R8)} destination data
+! (first R8 typekind), {\tt real(ESMF\_KIND\_R8)} factors (second R8 typekind),
+! and {\tt real(ESMF\_KIND\_R8)} source data (third R8 typekind).
+!
+! Now when the {\tt routehandle} is executed, and the {\tt dynamicMask} object
+! is passed into the {\tt ESMF\_FieldRegrid()} call,
+!EOE
+
+!BOC
+  call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
+    routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
+    dynamicMask=dynamicMask, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE 
+! ESMF will scan the {\tt srcField} for elements that have data equal to
+! that set by {\tt dynamicSrcMaskValue}. If any are found, they
+! are passed into the routine provided via the {\tt dynamicMaskRoutine}
+! argument.
+!EOE
 
 #if 0
   call ESMF_FieldWrite(dstField, fileName="dstFieldR8_onlySrcMask.nc", &
@@ -411,21 +441,21 @@ program ESMF_RHandleDynamicMaskingEx
 ! \end{verbatim}
 !
 ! Going back to the example of regridding between the {\tt srcField} and
-! {\tt dstField}, notice that beside providing the {\tt dynamicSrcMaskValue}
-! and {\tt dynamicMaskRoutine} arguments, there was also 
-! {\tt termorderflag = ESMF\_TERMORDER\_SRCSEQ} specified in the
+! {\tt dstField}, notice that beside providing the {\tt dynamicMask} argument,
+! there was also {\tt termorderflag = ESMF\_TERMORDER\_SRCSEQ} specified in the
 ! {\tt ESMF\_FieldRegrid()} call.
 ! The {\tt ESMF\_TERMORDER\_SRCSEQ} option ensures that the destination side
 ! waits for {\em all} of the source elements before summing into the destination
 ! element. This is critical for handling the dynamically masked 
 ! source and destination objects.
 !
-! So far in the example, only the {\tt srcField} had been dynamically masked.
-! However, elements in the {\tt dstField} can be masked following exactly the
-! same manner.
+! So far in the example only the {\tt srcField} had been dynamically masked.
+! However, elements in the {\tt dstField} can be masked as well, following 
+! exactly the same manner.
 !
-! In order to ensure that the {\tt dstField} is in a well defined condition, it
-! is advisable to first reset it, e.g. to zero.
+! First ensure that the {\tt dstField} is in a well defined condition. This can
+! be achived by reseting it, e.g. to zero, using the {\tt ESMF\_FieldFill()}
+! method.
 !EOE
 
 !BOC
@@ -437,7 +467,7 @@ program ESMF_RHandleDynamicMaskingEx
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! Now some of the destination elements can be set to a defined masking value.
+! Now some of the destination elements are set to a defined masking value.
 !EOE
 
 !BOC
@@ -448,22 +478,39 @@ program ESMF_RHandleDynamicMaskingEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
+  ! setting an arbitrary local destination element to special value 'dstMaskValue'
   farrayPtr(lbound(farrayPtr,1)+1,lbound(farrayPtr,2)+1) = dstMaskValue
 !EOC
 
 !BOE
-! The same {\tt routehandle} can now be executed, but with both
-! {\tt dynamicSrcMaskValue}, and {\tt dynamicDstMaskValue} arguments specified.
+! The {\tt dynamicMask} is reset using the same {\tt DynamicMaskSet} method as
+! before, but in addition to the previous arguments, {\tt dynamicDstMaskValue}
+! is also specified.
+!EOE
+
+!BOC
+  call ESMF_DynamicMaskSetR8R8R8(dynamicMask, &
+    dynamicSrcMaskValue=srcMaskValue, &
+    dynamicDstMaskValue=dstMaskValue, &
+    dynamicMaskRoutine=simpleDynMaskProc, &
+    rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! Passing the reset {\tt dynamicMask} object into {\tt ESMF\_FieldRegrid()} 
+! causes ESMF to not only look for source elements that match
+! {\tt dynamicSrcMaskValue}, but also destination elements that
+! match {\tt dynamicDstMaskValue}.
 !EOE
 
 !BOC
   call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
     routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
-    zeroregion=ESMF_REGION_EMPTY, &
-    dynamicSrcMaskValue=srcMaskValue, &
-    dynamicDstMaskValue=dstMaskValue, &
-    dynamicMaskRoutine=simpleDynMaskProc, &
-    rc=rc)
+    zeroregion=ESMF_REGION_EMPTY, dynamicMask=dynamicMask, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -512,9 +559,9 @@ program ESMF_RHandleDynamicMaskingEx
 ! ----------------------------------------------------------------------
 
 !BOE
-! The above code demonstrated dynamic masking for source and destination Fields
-! that contain double precision, i.e. {\tt real(ESMF\_KIND\_R8)} data. Switching
-! to single precision, {\tt real(ESMF\_KIND\_R4)} data is straight forward.
+! Applying dynamic masking to source and destination fields of other typekind
+! than R8 only requires that the correct {\tt DynamicMaskSet} method is chosen.
+! Here we create {\tt real(ESMF\_KIND\_R4)} source and destination fields.
 !EOE
 
   ! create srcField
@@ -542,6 +589,10 @@ program ESMF_RHandleDynamicMaskingEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+!BOE
+! Computing a suitable RouteHandle is unchanged.
+!EOE
+
 !BOC
   srcTermProcessing=0
 
@@ -552,6 +603,11 @@ program ESMF_RHandleDynamicMaskingEx
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! Now setting some source and destination elements to defined special values
+! of the correct typekind.
+!EOE
 
 !BOC
   call ESMF_FieldGet(srcField, farrayPtr=farrayPtrR4, rc=rc)
@@ -584,27 +640,35 @@ program ESMF_RHandleDynamicMaskingEx
 !EOC
 
 !BOE
-! The dynamic mask values, as well as the dynamic mask routine is passed into
-! the Field Regrid method as before. However, because of overload restrictions
-! of most current compilers, we are not currently able to offer dynamic masking
-! of different typekinds through a simple overloaded {\tt ESMF\_FieldRegrid()} 
-! interface. Instead, the current prototype introduces typekind specific calls like
-! {\tt ESMF\_FieldRegridR4R8R4()}. Here the three-part typekind signature at the end of the 
-! method name indicates that the {\tt dynamicMaskRoutine} argument is expected
-! to deal with {\tt real(ESMF\_KIND\_R4)} destination data (first typekind), 
-! {\tt real(ESMF\_KIND\_R8)} factors (second typekind), and 
-! {\tt real(ESMF\_KIND\_R4)} source data (third typekind).
+! Setting up the {\tt ESMF\_DynamicMask} object is practically the same as 
+! before, just that the correct typekind-triplet suffix for the 
+! {\tt DynamicMaskSet} method must be selected, indicating that the 
+! destination data is of typekind R4, the factors are still of typekind R8,
+! and the source data is of typekind R4.
 !EOE
 
-#ifndef ESMF_NO_DYNMASKOVERLOAD
 !BOC
-  call ESMF_FieldRegridR4R8R4(srcField=srcField, dstField=dstField, &
-    routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
-    zeroregion=ESMF_REGION_EMPTY, &
+  call ESMF_DynamicMaskSetR4R8R4(dynamicMask, &
     dynamicSrcMaskValue=srcMaskValueR4, &
     dynamicDstMaskValue=dstMaskValueR4, &
     dynamicMaskRoutine=simpleDynMaskProcR4R8R4, &
     rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOE
+! Finally calling into {\tt ESMF\_FieldRegrid()} with the {\tt dynamicMask}
+! object is unchanged.
+!EOE
+
+#ifndef ESMF_NO_DYNMASKOVERLOAD
+!BOC
+  call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
+    routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
+    zeroregion=ESMF_REGION_EMPTY, dynamicMask=dynamicMask, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
