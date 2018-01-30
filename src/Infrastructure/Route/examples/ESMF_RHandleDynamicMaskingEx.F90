@@ -647,6 +647,8 @@ program ESMF_RHandleDynamicMaskingEx
 ! and the source data is of typekind R4.
 !EOE
 
+#ifndef ESMF_NO_DYNMASKOVERLOAD
+
 !BOC
   call ESMF_DynamicMaskSetR4R8R4(dynamicMask, &
     dynamicSrcMaskValue=srcMaskValueR4, &
@@ -664,7 +666,6 @@ program ESMF_RHandleDynamicMaskingEx
 ! object is unchanged.
 !EOE
 
-#ifndef ESMF_NO_DYNMASKOVERLOAD
 !BOC
   call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
     routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
@@ -689,6 +690,7 @@ program ESMF_RHandleDynamicMaskingEx
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
 #endif
 
   call ESMF_FieldDestroy(srcField, rc=rc)
