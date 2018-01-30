@@ -108,6 +108,7 @@ module ESMF_ArrayMod
   public ESMF_ArraySetThis          ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArraySetThisNull      ! implemented in ESMF_ArrayCreateMod
   public ESMF_ArrayCopyThis         ! implemented in ESMF_ArrayCreateMod
+  public ESMF_ArrayIsProxy          ! implemented in ESMF_ArrayCreateMod
 
 
 !EOPI
