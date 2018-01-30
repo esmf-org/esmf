@@ -398,6 +398,13 @@ info_mk: chkdir_lib
 	-@echo "ESMF_OPENACC_F90LINKOPTS=$(ESMF_OPENACC_F90LINKOPTS)" >> $(MKINFO)
 	-@echo "ESMF_OPENACC_CXXCOMPILEOPTS=$(ESMF_OPENACC_CXXCOMPILEOPTS)" >> $(MKINFO)
 	-@echo "ESMF_OPENACC_CXXLINKOPTS=$(ESMF_OPENACC_CXXLINKOPTS)" >> $(MKINFO)
+	-@echo "" >> $(MKINFO)	
+	-@echo "# ESMF Tracing compile/link options" >> $(MKINFO)
+ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)	
+	-@echo "ESMF_TRACE_LDPRELOAD=$(ESMF_LIBDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)" >> $(MKINFO)
+endif
+	-@echo "ESMF_TRACE_STATICLINKOPTS=-Wl,--wrap=write -Wl,--wrap=read -Wl,--wrap=open" >> $(MKINFO)
+	-@echo "ESMF_TRACE_STATICLINKLIBS=$(ESMF_LIBDIR)/libesmftrace_static.a" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "# Internal ESMF variables, do NOT depend on these!" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)

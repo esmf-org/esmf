@@ -1,6 +1,6 @@
 # $Id$ 
 
-ALL: shared_preload static_wrapper
+ALL: tracelib_preload tracelib_static
 
 SOURCEC	  = preload.c wrappers_io.c
 SOURCEF	  = 
@@ -22,8 +22,8 @@ include $(ESMF_DIR)/makefile
 DIRS	  = 
 
 
-shared_preload: preload.o wrappers_io.o
+tracelib_preload: preload.o wrappers_io.o
 	$(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS)
 
-static_wrapper: wrappers_io.o
+tracelib_static: wrappers_io.o
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_LDIR)/libesmftrace_static.a wrappers_io.o

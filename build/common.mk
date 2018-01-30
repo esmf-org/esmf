@@ -1812,6 +1812,14 @@ ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
 	cd $(ESMF_DIR) ; $(MAKE) shared
 endif
 
+build_tracelibs:
+	cd $(ESMF_DIR)/src/Superstructure/Trace/preload ;\
+	$(MAKE) tracelib_static
+ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
+	cd $(ESMF_DIR)/src/Superstructure/Trace/preload ;\
+	$(MAKE) tracelib_preload
+endif
+
 # Build only stuff in and below the current dir.
 build_here: chkdir_lib chkdir_include chkdir_etc
 	$(MAKE) ACTION="tree_include tree_etc" tree
