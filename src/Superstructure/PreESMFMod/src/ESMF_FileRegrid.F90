@@ -389,6 +389,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            terminateProg = .TRUE.
            goto 1110
       endif
+
     if (dstLocStr .eq. 'node' .and. (localdstFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
           localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE)) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
@@ -999,6 +1000,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       do i=1, ungridrank
          ubnd(i)=srcVarDims(i+srcRank)
       enddo
+
       if (localsrcfiletype == ESMF_FILEFORMAT_GRIDSPEC) then
            srcField = ESMF_FieldCreate(srcGrid, arrayspec, &
 	                  staggerloc=ESMF_STAGGERLOC_CENTER, &
@@ -1465,8 +1467,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           total=count(1)*count(2)*count(3)
           allocate(sendbuf(total))
           ii=1
-          do j=1,count(1)
-            do i=1,count(2)
+          do i=1,count(2)
+            do j=1,count(1)
               do k=1,count(3)
                 sendbuf(ii)=fptr3d(k,j,i)
                 ii=ii+1
@@ -1483,10 +1485,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           total = count(1)*count(2)*count(3)*count(4)
           allocate(sendbuf(total))
           ii=1
-          do j=1,count(1)
-            do i=1,count(2)
-              do k=1,count(3)
-                do l=1,count(4)
+          do i=1,count(2)
+            do j=1,count(1)
+              do l=1,count(4)
+                do k=1,count(3)
                   sendbuf(ii)=fptr4d(k,l,j,i)
                   ii=ii+1
                 enddo
@@ -1882,6 +1884,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           else
                  haveMask = .FALSE.
           endif
+       else
+          haveMask = .TRUE.
        endif
 
        ! get the dimension info for the variable
