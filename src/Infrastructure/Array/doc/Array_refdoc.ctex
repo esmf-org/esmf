@@ -143,6 +143,14 @@
 \input{../Infrastructure/Array/doc/ESMF_Array_fapi}
 #endif
 
+\subsection{Class API: DynamicMask Methods}
+\label{ref:dynamicmask}
+#ifdef STANDALONE
+\input{ESMF_DynamicMask_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DistGrid/doc/ESMF_DynamicMask_fapi}
+#endif
+
 %#ifdef STANDALONE
 %\section{Bibliography}
 %\bibliography{comp} 
