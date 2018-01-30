@@ -501,6 +501,9 @@ namespace ESMCI {
                                     ESMC_CONTEXT, rc);
     }
   }
+
+  static void PushIOStats();
+  static void PopIOStats();
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceOpen()"  
@@ -667,6 +670,7 @@ namespace ESMCI {
     //store as global context
     g_esmftrc_platform_filesys_ctx = ctx;
 
+    PushIOStats();  /* needed in case there are I/O events before first region */
     traceActive = true;
     c_esmftrace_setactive(1);
   }
@@ -686,6 +690,7 @@ namespace ESMCI {
       
       traceActive = false;
       c_esmftrace_setactive(0);
+      PopIOStats();
       
       if (esmftrc_packet_is_open(&ctx->ctx) &&
           !esmftrc_packet_is_empty(&ctx->ctx)) {
@@ -757,36 +762,15 @@ namespace ESMCI {
     readTotalTime.back() = readTotalTime.back() + (readEndTimestamp - readStartTimestamp);
     readStartTimestamp = -1;
   }
-  
-  ////////////////////////////////////////////////////
 
-  
-  void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
-    if (!traceLocalPet) return;
-
-    //openTotalFiles.push_back(0);
-    //openTotalTime.push_back(0);
+  static void PushIOStats() {
     readTotalBytes.push_back(0);
     readTotalTime.push_back(0);
     writeTotalBytes.push_back(0);
     writeTotalTime.push_back(0);
-    esmftrc_default_trace_phase_enter(esmftrc_platform_get_default_ctx(),
-                                      *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
-  
-  void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
-    if (!traceLocalPet) return;
 
-    /*
-    size_t openFiles = openTotalFiles.back();
-    uint64_t openTime = openTotalTime.back();
-    openTotalFiles.pop_back();
-    openTotalTime.pop_back();
-    if (openFiles > 0) {
-      esmftrc_default_trace_ioopen(esmftrc_platform_get_default_ctx(),
-                                    openFiles, openTime);
-    }
-    */
+  static void PopIOStats() {
 
     size_t readBytes = readTotalBytes.back();
     uint64_t readTime = readTotalTime.back();
@@ -805,7 +789,27 @@ namespace ESMCI {
       esmftrc_default_trace_iowrite(esmftrc_platform_get_default_ctx(),
                                     writeBytes, writeTime);
     }
-    
+
+  }
+  
+  ////////////////////////////////////////////////////
+
+  
+  
+  void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    if (!traceLocalPet) return;
+
+    PushIOStats();  /* reset statistics for this region */
+  
+    esmftrc_default_trace_phase_enter(esmftrc_platform_get_default_ctx(),
+                                      *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+  }
+  
+  void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
+    if (!traceLocalPet) return;
+
+    PopIOStats();  /* issue events if there was I/O activity */
+       
     esmftrc_default_trace_phase_exit(esmftrc_platform_get_default_ctx(),
                                      *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
@@ -831,18 +835,17 @@ namespace ESMCI {
       region_id = nextRegionId;
       nextRegionId++;
       regionMap.put(name, region_id);
-      //printf("added new region: %s = %d\n", name.c_str(), region_id);
       //add definition to trace
       esmftrc_default_trace_define_region(esmftrc_platform_get_default_ctx(),
                                           region_id,
                                           name.c_str());
     }
+
+    PushIOStats();
     
     esmftrc_default_trace_regionid_enter(esmftrc_platform_get_default_ctx(),
                                          region_id);
-    
-    //esmftrc_default_trace_region_enter(esmftrc_platform_get_default_ctx(),
-    //                                   name.c_str());
+        
   }
 
   void TraceEventRegionExit(std::string name) {
@@ -862,13 +865,12 @@ namespace ESMCI {
                                           region_id,
                                           name.c_str());
     }
-    
+
+    PopIOStats();
     
     esmftrc_default_trace_regionid_exit(esmftrc_platform_get_default_ctx(),
                                          region_id);
 
-    //esmftrc_default_trace_region_exit(esmftrc_platform_get_default_ctx(),
-    //                                   name);
   }
   
 #undef  ESMC_METHOD
