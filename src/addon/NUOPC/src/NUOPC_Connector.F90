@@ -2220,8 +2220,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            !TODO: make sure that this FieldCreate() sets ungridded bounds and
-            !TODO: total widths correctly
+            !TODO: make sure that this FieldCreate() sets total widths correctly
             if (fieldDimCount - gridDimCount > 0) then
               acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
                 datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
@@ -2383,8 +2382,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            !TODO: make sure that this FieldCreate() sets ungridded bounds and
-            !TODO: total widths correctly
+            !TODO: make sure that this FieldCreate() sets total widths correctly
             if (fieldDimCount - gridDimCount > 0) then
               acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
                 datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
