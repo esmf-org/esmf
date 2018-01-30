@@ -390,6 +390,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            goto 1110
       endif
 
+    if (.not. dstVarExist .or. .not. useDstMask) then
+      if(useSrcMask) then 
+        dstMissingVal = srcMissingVal
+      else
+        dstMissingVal = 0.0
+      endif
+    endif
+ 
     if (dstLocStr .eq. 'node' .and. (localdstFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
           localRegridMethod == ESMF_REGRIDMETHOD_CONSERVE)) then
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
@@ -499,8 +507,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 	if (useDstMask) then 
  	   commandbuf(10) = 1
-	   commandbuf2(2)=dstMissingVal
         endif
+        commandbuf2(2)=dstMissingVal
         if (useSrcCorner) then 
            commandbuf(11)=1
         endif
@@ -1887,6 +1895,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        else
           haveMask = .TRUE.
        endif
+
+       if (.not. haveMask) missingval = 0.0
 
        ! get the dimension info for the variable
        if (present(vartype)) then
