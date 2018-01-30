@@ -2220,13 +2220,22 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            !TODO: make sure that this FieldCreate() sets ungridded bounds and
-            !TODO: total widths correctly
-            acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
-              datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
-              gridToFieldMap=gridToFieldMap, name=fieldName, rc=rc)  
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            !TODO: make sure that this FieldCreate() sets total widths correctly
+            if (fieldDimCount - gridDimCount > 0) then
+              acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
+                datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
+                gridToFieldMap=gridToFieldMap, name=fieldName, &
+                ungriddedLBound=ungriddedLBound, &
+                ungriddedUBound=ungriddedUBound, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            else
+              acceptorField=ESMF_FieldCreate(grid=grid, array=array, &
+                datacopyflag=ESMF_DATACOPY_REFERENCE, staggerloc=staggerloc, &
+                gridToFieldMap=gridToFieldMap, name=fieldName, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            end if
             call NUOPC_Realize(acceptorState, acceptorField, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2373,13 +2382,23 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            !TODO: make sure that this FieldCreate() sets ungridded bounds and
-            !TODO: total widths correctly
-            acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
-              datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
-              gridToFieldMap=gridToFieldMap, name=fieldName, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            !TODO: make sure that this FieldCreate() sets total widths correctly
+            if (fieldDimCount - gridDimCount > 0) then
+              acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
+                datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
+                gridToFieldMap=gridToFieldMap, name=fieldName, &
+                ungriddedLBound=ungriddedLBound, &
+                ungriddedUBound=ungriddedUBound, &
+                rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            else
+              acceptorField=ESMF_FieldCreate(mesh=mesh, array=array, &
+                datacopyflag=ESMF_DATACOPY_REFERENCE, meshloc=meshloc, &
+                gridToFieldMap=gridToFieldMap, name=fieldName, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            end if
             call NUOPC_Realize(acceptorState, acceptorField, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3071,6 +3090,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     logical                         :: matchE, matchI
     integer                         :: count
     integer                         :: sIndex
+    integer                         :: ilde, elde  ! TEST
 
     rc = ESMF_SUCCESS
 
@@ -3310,13 +3330,13 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
         is%wrap%cplSet(sIndex)%srcFieldList(count) = iField
         is%wrap%cplSet(sIndex)%dstFieldList(count) = eField
         ! check if the field pair may share the array, i.e. data allocation
-        call ESMF_FieldGet(iField, array=iArray, rc=rc)
+        call ESMF_FieldGet(iField, array=iArray, localDeCount=ilde, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call ESMF_FieldGet(eField, array=eArray, rc=rc)
+        call ESMF_FieldGet(eField, array=eArray, localDeCount=elde, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        if (iArray/=eArray) then
+        if ((ilde * elde /= 0) .and. (iArray /= eArray)) then
           ! not sharing -> add the import and export Fields to FieldBundles
           call ESMF_FieldBundleAdd(is%wrap%srcFields, (/iField/), &
             multiflag=.true., rc=rc)
@@ -3806,10 +3826,12 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         enddo
       else
-        call ESMF_FieldBundleRegrid(is%wrap%srcFields, is%wrap%dstFields, &
-          routehandle=is%wrap%rh, termorderflag=is%wrap%termOrders, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (ESMF_RouteHandleIsCreated(is%wrap%rh)) then !--- TEST
+          call ESMF_FieldBundleRegrid(is%wrap%srcFields, is%wrap%dstFields, &
+            routehandle=is%wrap%rh, termorderflag=is%wrap%termOrders, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
       endif
       if (btest(verbosity,14)) then
         call ESMF_LogWrite(trim(name)//&
@@ -4026,9 +4048,11 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         enddo
       else
-        call ESMF_FieldBundleRegridRelease(is%wrap%rh, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (ESMF_RouteHandleIsCreated(is%wrap%rh)) then !--- TEST
+          call ESMF_FieldBundleRegridRelease(is%wrap%rh, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
       endif
       if (btest(verbosity,15)) then
         call ESMF_LogWrite(trim(name)//&
@@ -4526,6 +4550,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
+
+    ! if no fields in bundles, bail out
+    if (count < 1) return
     
     ! consistency check the incoming "termOrders" argument
     if (associated(termOrders)) then
