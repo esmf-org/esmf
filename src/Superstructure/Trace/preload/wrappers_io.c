@@ -15,18 +15,11 @@
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_Trace.h"
+#include "preload.h"
 
 extern "C" {
-
-static int insideRegion = 0;  /* prevents recursion */
-
-  /**
-   * - in the case of dynamic linking (with LD_PRELOAD), this
-   *    function is defined in preload.c
-   * - in the case of static linking, this function is 
-   *    defined in Trace/src/ESMCI_Trace.C
-   */
-  extern int c_esmftrace_isactive();
+  
+  static int insideRegion = 0;  /* prevents recursion */
 
   /* write */
   extern ssize_t __real_write(int fd, const void *buf, size_t nbytes);
@@ -74,7 +67,7 @@ static int insideRegion = 0;  /* prevents recursion */
   extern int __real_open(const char *path, int oflag, ...);
   
   int __wrap_open(const char *path, int oflag, ... ) {
-    printf("__wrap_open: %s\n", path);
+    //    printf("__wrap_open: %s\n", path);
 
     va_list args;
     va_start(args, oflag);

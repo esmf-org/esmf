@@ -504,6 +504,8 @@ namespace ESMCI {
 
   static void PushIOStats();
   static void PopIOStats();
+  static void PushMPIStats();
+  static void PopMPIStats();
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceOpen()"  
@@ -671,6 +673,7 @@ namespace ESMCI {
     g_esmftrc_platform_filesys_ctx = ctx;
 
     PushIOStats();  /* needed in case there are I/O events before first region */
+    PushMPIStats();
     traceActive = true;
     c_esmftrace_setactive(1);
   }
@@ -691,6 +694,7 @@ namespace ESMCI {
       traceActive = false;
       c_esmftrace_setactive(0);
       PopIOStats();
+      PopMPIStats();
       
       if (esmftrc_packet_is_open(&ctx->ctx) &&
           !esmftrc_packet_is_empty(&ctx->ctx)) {
@@ -794,13 +798,76 @@ namespace ESMCI {
   
   ////////////////////////////////////////////////////
 
+  /////////////////// MPI /////////////////////
+
+  static vector<size_t> mpiBarrierCount;
+  static vector<uint64_t> mpiBarrierTime;
+  static uint64_t mpiBarrierStartTimestamp = -1;
   
+  void TraceMPIBarrierStart() {
+    mpiBarrierStartTimestamp = get_clock(NULL);
+    mpiBarrierCount.back() = mpiBarrierCount.back() + 1;
+  }
+
+  void TraceMPIBarrierEnd() {
+    uint64_t mpiBarrierEndTimestamp = get_clock(NULL);
+    mpiBarrierTime.back() = mpiBarrierTime.back() + (mpiBarrierEndTimestamp - mpiBarrierStartTimestamp);
+    mpiBarrierStartTimestamp = -1;
+  }
+
+  static vector<size_t> mpiWaitCount;
+  static vector<uint64_t> mpiWaitTime;
+  static uint64_t mpiWaitStartTimestamp = -1;
+  
+  void TraceMPIWaitStart() {
+    mpiWaitStartTimestamp = get_clock(NULL);
+    mpiWaitCount.back() = mpiWaitCount.back() + 1;
+  }
+  
+  void TraceMPIWaitEnd() {
+    uint64_t mpiWaitEndTimestamp = get_clock(NULL);
+    mpiWaitTime.back() = mpiWaitTime.back() + (mpiWaitEndTimestamp - mpiWaitStartTimestamp);
+    mpiWaitStartTimestamp = -1;
+  }  
+
+  static void PushMPIStats() {
+    mpiBarrierCount.push_back(0);
+    mpiBarrierTime.push_back(0);
+    mpiWaitCount.push_back(0);
+    mpiWaitTime.push_back(0);
+  }
+
+  static void PopMPIStats() {
+
+    size_t count = mpiBarrierCount.back();
+    uint64_t time = mpiBarrierTime.back();
+    mpiBarrierCount.pop_back();
+    mpiBarrierTime.pop_back();
+    if (count > 0) {
+      esmftrc_default_trace_mpibarrier(esmftrc_platform_get_default_ctx(),
+                                       count, time);
+    }
+
+    count = mpiWaitCount.back();
+    time = mpiWaitTime.back();
+    mpiWaitCount.pop_back();
+    mpiWaitTime.pop_back();
+    if (count > 0) {
+      esmftrc_default_trace_mpiwait(esmftrc_platform_get_default_ctx(),
+                                    count, time);
+    }
+    
+  }
+
+  
+  /////////////////////////////////////////////
   
   void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
     if (!traceLocalPet) return;
 
     PushIOStats();  /* reset statistics for this region */
-  
+    PushMPIStats();
+    
     esmftrc_default_trace_phase_enter(esmftrc_platform_get_default_ctx(),
                                       *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
@@ -809,7 +876,8 @@ namespace ESMCI {
     if (!traceLocalPet) return;
 
     PopIOStats();  /* issue events if there was I/O activity */
-       
+    PopMPIStats();
+    
     esmftrc_default_trace_phase_exit(esmftrc_platform_get_default_ctx(),
                                      *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
@@ -842,6 +910,7 @@ namespace ESMCI {
     }
 
     PushIOStats();
+    PushMPIStats();
     
     esmftrc_default_trace_regionid_enter(esmftrc_platform_get_default_ctx(),
                                          region_id);
@@ -867,6 +936,7 @@ namespace ESMCI {
     }
 
     PopIOStats();
+    PopMPIStats();
     
     esmftrc_default_trace_regionid_exit(esmftrc_platform_get_default_ctx(),
                                          region_id);

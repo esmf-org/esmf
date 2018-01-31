@@ -66,7 +66,13 @@ namespace ESMCI {
   void TraceIOReadEnd();
   /////////////////////////////////////
   
-
+  ///////////// MPI ////////////
+  void TraceMPIBarrierStart();
+  void TraceMPIBarrierEnd();
+  void TraceMPIWaitStart();
+  void TraceMPIWaitEnd();
+  //////////////////////////////
+    
   
   ////////////////////////////////
 

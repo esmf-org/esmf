@@ -177,3 +177,16 @@ metadata:
                 fields:
                     bytes: uint32
                     time: uint64
+        mpibarrier:
+            payload-type:
+                class: struct
+                fields:
+                    count: uint32
+                    time: uint64
+        mpiwait:
+            payload-type:
+                class: struct
+                fields:
+                    count: uint32
+                    time: uint64
+                    
