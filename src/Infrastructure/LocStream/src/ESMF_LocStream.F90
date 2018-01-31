@@ -2384,59 +2384,61 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     allocate(coordX(localcount), coordY(localcount),imask(localcount))
-    if (localfileformat == ESMF_FILEFORMAT_SCRIP) then 
-       call ESMF_ScripGetVar(filename, grid_center_lon=coordX, grid_center_lat=coordY, &
+    if (localcount > 0) then 
+       if (localfileformat == ESMF_FILEFORMAT_SCRIP) then 
+          call ESMF_ScripGetVar(filename, grid_center_lon=coordX, grid_center_lat=coordY, &
                           grid_imask=imask, start=starti, count=localcount, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
 #if 0
-    elseif (localfileformat == ESMF_FILEFORMAT_GRIDSPEC) then 
-       if (totaldims == 1) then
-          call ESMF_GridspecGetVar1D(filename, varids, coordX, coordY, rc=localrc)
-          !construct 2D arrays and do the distribution
-          xdim=size(coordX)
-          ydim=size(coordY)
+       elseif (localfileformat == ESMF_FILEFORMAT_GRIDSPEC) then 
+          if (totaldims == 1) then
+             call ESMF_GridspecGetVar1D(filename, varids, coordX, coordY, rc=localrc)
+             !construct 2D arrays and do the distribution
+             xdim=size(coordX)
+             ydim=size(coordY)
 #endif
-    elseif (localfileformat == ESMF_FILEFORMAT_ESMFMESH) then
-       allocate(coord2D(totaldims,localcount))
-       call ESMF_EsmfGetCoords(filename, coord2D, imask, &
+       elseif (localfileformat == ESMF_FILEFORMAT_ESMFMESH) then
+          allocate(coord2D(totaldims,localcount))
+          call ESMF_EsmfGetCoords(filename, coord2D, imask, &
                                starti, localcount, localcenterflag, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-       coordX(:) = coord2D(1,:)
-       coordY(:) = coord2D(2,:)
-       if (totaldims == 3) then
-         allocate(coordZ(localcount))
-         coordZ(:) = coord2D(3,:)
-       endif
-       deallocate(coord2D)
-    elseif (localfileformat == ESMF_FILEFORMAT_UGRID) then
-       allocate(coord2D(localcount, totaldims))
-       call ESMF_UGridGetCoords(filename, meshid, coord2D, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+          coordX(:) = coord2D(1,:)
+          coordY(:) = coord2D(2,:)
+          if (totaldims == 3) then
+            allocate(coordZ(localcount))
+            coordZ(:) = coord2D(3,:)
+          endif
+          deallocate(coord2D)
+       elseif (localfileformat == ESMF_FILEFORMAT_UGRID) then
+          allocate(coord2D(localcount, totaldims))
+          call ESMF_UGridGetCoords(filename, meshid, coord2D, &
                                 starti, localcount, localcenterflag, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-       coordX(:) = coord2D(:,1)
-       coordY(:) = coord2D(:,2)
-       if (totaldims == 3) then
-          allocate(coordZ(localcount))
-          coordZ(:) = coord2D(:,3)
-       endif
-       deallocate(coord2D)
-       ! Get mask from varname
-       imask(:)=1
-       if (present(varname)) then
-          allocate(varbuffer(localcount))
-          call ESMF_UGridGetVarByName(filename, varname, varbuffer, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+          coordX(:) = coord2D(:,1)
+          coordY(:) = coord2D(:,2)
+          if (totaldims == 3) then
+             allocate(coordZ(localcount))
+             coordZ(:) = coord2D(:,3)
+          endif
+          deallocate(coord2D)
+          ! Get mask from varname
+          imask(:)=1
+          if (present(varname)) then
+             allocate(varbuffer(localcount))
+             call ESMF_UGridGetVarByName(filename, varname, varbuffer, &
                                       startind=starti, count=localcount, &
                                       location=location, &
                                       missingvalue=missingvalue, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-          do i=1,localcount
-            if (varbuffer(i)==missingvalue) imask(i)=0
-          enddo
-          deallocate(varbuffer)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+             do i=1,localcount
+                if (varbuffer(i)==missingvalue) imask(i)=0
+             enddo
+             deallocate(varbuffer)
+          endif
        endif
     endif
     ! create Location Stream
@@ -2459,6 +2461,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     !If 3D grid, add the height coordinates
     if (totaldims == 3) then
+       if (localcount == 0) allocate(coordZ(localcount))
        call ESMF_LocStreamAddKey(locStream, 'ESMF:Radius',coordZ, keyUnits='radius', &
                                  keyLongName='Height', rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
