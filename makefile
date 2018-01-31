@@ -403,7 +403,7 @@ info_mk: chkdir_lib
 ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)	
 	-@echo "ESMF_TRACE_LDPRELOAD=$(ESMF_LIBDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)" >> $(MKINFO)
 endif
-	-@echo "ESMF_TRACE_STATICLINKOPTS=-Wl,--wrap=write -Wl,--wrap=read -Wl,--wrap=open -Wl,--wrap=mpi_barrier -Wl,--wrap=mpi_wait" >> $(MKINFO)
+	-@echo "ESMF_TRACE_STATICLINKOPTS=-Wl,--wrap=write -Wl,--wrap=read -Wl,--wrap=open -Wl,--wrap=MPI_Barrier -Wl,--wrap=MPI_Wait" >> $(MKINFO)
 	-@echo "ESMF_TRACE_STATICLINKLIBS=$(ESMF_LIBDIR)/libesmftrace_static.a" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "# Internal ESMF variables, do NOT depend on these!" >> $(MKINFO)
