@@ -5170,7 +5170,7 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
       allocate(nodeArbSeqIndexL(nodeLocalDeCount)) 
   
       !! Allocate and fill first list
-      allocate(nodeArbSeqIndexL(1)%ptr(1))
+      allocate(nodeArbSeqIndexL(1)%ptr(4))
       nodeArbSeqIndexL(1)%ptr=(/11,12,15,16/)
 
       ! Fill in elem data
