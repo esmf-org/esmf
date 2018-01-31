@@ -3077,7 +3077,6 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     type(ESMF_Field),       pointer :: exportFieldList(:)
     integer                         :: iMatch, eMatch
     type(ESMF_Field)                :: iField, eField
-    type(ESMF_Array)                :: iArray, eArray
     integer                         :: stat
     type(type_InternalState)        :: is
     logical                         :: foundFlag
@@ -3090,7 +3089,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     logical                         :: matchE, matchI
     integer                         :: count
     integer                         :: sIndex
-    integer                         :: ilde, elde  ! TEST
+    character(ESMF_MAXSTR)          :: iShareStatus, eShareStatus
+    logical                         :: sharedFlag
 
     rc = ESMF_SUCCESS
 
@@ -3329,14 +3329,23 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
         is%wrap%cplSet(sIndex)%count=count
         is%wrap%cplSet(sIndex)%srcFieldList(count) = iField
         is%wrap%cplSet(sIndex)%dstFieldList(count) = eField
-        ! check if the field pair may share the array, i.e. data allocation
-        call ESMF_FieldGet(iField, array=iArray, localDeCount=ilde, rc=rc)
+        ! check if the field pair is doing reference sharing
+        call NUOPC_GetAttribute(iField, name="ShareStatusField", &
+          value=iShareStatus, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call ESMF_FieldGet(eField, array=eArray, localDeCount=elde, rc=rc)
+        call NUOPC_GetAttribute(eField, name="ShareStatusField", &
+          value=eShareStatus, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        if ((ilde * elde /= 0) .and. (iArray /= eArray)) then
+#if 0
+call ESMF_LogWrite("iShareStatus: "//trim(iShareStatus), ESMF_LOGMSG_INFO, rc=rc)
+call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc)
+#endif
+        sharedFlag = .false. ! reset
+        if (trim(iShareStatus)=="shared" .and. trim(eShareStatus)=="shared") &
+          sharedFlag = .true.
+        if (.not.sharedFlag) then
           ! not sharing -> add the import and export Fields to FieldBundles
           call ESMF_FieldBundleAdd(is%wrap%srcFields, (/iField/), &
             multiflag=.true., rc=rc)
