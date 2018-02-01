@@ -547,8 +547,10 @@ LocalArray *LocalArray::create(
   ESMC_TypeKind_Flag typekind = larrayIn->getTypeKind();
   const int *counts = larrayIn->getCounts();
   
-  // check that lbounds and ubounds arguments match counts
+  // check that lbounds and ubounds arguments match counts and find totalcount
+  int totalcount = 1;
   for (int i=0; i<rank; i++){
+    totalcount *= counts[i];
     if (counts[i] != ubounds[i] - lbounds[i] + 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "- Mismatch of lbounds, ubounds and counts", ESMC_CONTEXT, rc);
@@ -581,11 +583,13 @@ LocalArray *LocalArray::create(
       larrayOut->lbound[i] = lbounds[i];
       larrayOut->ubound[i] = ubounds[i];
     }
-    // adjust the Fortran dope vector to reflect the new bounds
-    FTN_X(f_esmf_localarrayadjust)(&larrayOut, &rank, &typekind, counts,
-      larrayOut->lbound, larrayOut->ubound, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) return NULL;
+    if (totalcount > 0){
+      // adjust the Fortran dope vector to reflect the new bounds
+      FTN_X(f_esmf_localarrayadjust)(&larrayOut, &rank, &typekind, counts,
+        larrayOut->lbound, larrayOut->ubound, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
+        ESMC_CONTEXT, rc)) return NULL;
+    }
   }
   
   // Setup info for calculating index tuple location quickly
