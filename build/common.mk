@@ -200,6 +200,10 @@ ifndef ESMF_TESTEXHAUSTIVE
 export ESMF_TESTEXHAUSTIVE = default
 endif
 
+ifndef ESMF_TESTCOMPTUNNEL
+export ESMF_TESTCOMPTUNNEL = default
+endif
+
 ifndef ESMF_TESTWITHTHREADS
 export ESMF_TESTWITHTHREADS = default
 endif
@@ -395,6 +399,10 @@ endif
 
 ifneq ($(ESMF_SHARED_LIB_BUILD),OFF)
 export ESMF_SHARED_LIB_BUILD = ON
+endif
+
+ifneq ($(ESMF_TESTCOMPTUNNEL),OFF)
+export ESMF_TESTCOMPTUNNEL = ON
 endif
 
 ifneq ($(ESMF_TESTWITHTHREADS),ON)
@@ -1509,6 +1517,14 @@ endif
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_TESTEXHAUSTIVE),ON) 
 ESMF_CPPFLAGS       += -DESMF_TESTEXHAUSTIVE 
+endif
+
+#-------------------------------------------------------------------------------
+# ESMF_TESTCOMPTUNNEL is passed (by CPP) into test programs to control the
+# dependency on ESMF-threading.
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_TESTCOMPTUNNEL),ON)
+ESMF_CPPFLAGS       += -DESMF_TESTCOMPTUNNEL
 endif
 
 #-------------------------------------------------------------------------------

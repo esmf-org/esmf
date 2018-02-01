@@ -120,7 +120,7 @@ ESMF_F90MAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_F
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -traceback
+ESMF_F90OPTFLAG_G       += -traceback -check bounds
 ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
 
 ############################################################

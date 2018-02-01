@@ -104,7 +104,7 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -traceback
+ESMF_F90OPTFLAG_G       += -traceback -check bounds
 
 ############################################################
 # Enable TR15581/F2003 Allocatable array resizing

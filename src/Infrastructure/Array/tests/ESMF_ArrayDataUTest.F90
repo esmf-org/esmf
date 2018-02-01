@@ -50,7 +50,7 @@ program ESMF_ArrayDataUTest
   character(ESMF_MAXSTR) :: name
 
   integer :: i, j, petCount
-  logical :: looptest
+  logical :: looptest, isProxy
 
   ! Fortran array pointer of 4-byte integers
   integer (ESMF_KIND_I4),dimension(:), pointer :: fdata
@@ -96,6 +96,21 @@ program ESMF_ArrayDataUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   array = ESMF_ArrayCreate(distgrid, fdata, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Determine Array proxy status"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isProxy = ESMF_ArrayIsProxy(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Checking that Array is marked as not proxy"
+  write(failMsg, *) "Incorrect isProxy status"
+  call ESMF_Test((.not.isProxy), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
@@ -537,6 +552,29 @@ program ESMF_ArrayDataUTest
   deallocate (buffer)
   call ESMF_ArraySetInitCreated(array_new, rc=rc) ! set init code for Fortran
   
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Printing Array created by deserialize"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayPrint(array_new, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Determine Array created by deserialize proxy status"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isProxy = ESMF_ArrayIsProxy(array_new, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Checking that Array created by deserialize is marked as proxy"
+  write(failMsg, *) "Incorrect isProxy status"
+  call ESMF_Test((isProxy), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Destroying Array created by deserialize."
