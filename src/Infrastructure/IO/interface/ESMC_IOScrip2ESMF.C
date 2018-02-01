@@ -293,6 +293,7 @@ void FTN_X(c_convertscrip)(
   size_t len;
   double *nodelons,  *nodelats;
   int totalsize;
+  int localrc;
 
   *rc = 1;
 #ifdef ESMF_NETCDF
@@ -400,8 +401,11 @@ void FTN_X(c_convertscrip)(
   totalsize = gsdim * gcdim;
   cells = (int*)malloc(sizeof(int)*totalsize);
   ESMCI::ClumpPntsLL(totalsize, cornerlons, cornerlats, TOL, cells, &totalnodes,
-		     &nodelons, &nodelats, &maxconnection,-91.0, 91.0, rc);
-  
+		     &nodelons, &nodelats, &maxconnection,-91.0, 91.0, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc,
+            "Internal error", ESMC_CONTEXT, rc)) return;          
+
+
   nodelatlon = (double*)malloc(sizeof(double)*totalnodes*2);
   totalneighbors = (unsigned char*)calloc(totalnodes, sizeof(unsigned char));
   for (i=0; i<totalnodes; i++) {
