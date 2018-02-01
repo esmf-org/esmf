@@ -238,6 +238,7 @@ contains
     integer, parameter :: FUNIT_MIN=100, FUNIT_MAX=500
 
     character(len=ESMF_MAXSTR), dimension(:), allocatable :: runSeqCode
+    type(ESMF_MapperRunSeqDepGraph) :: runSeqDepGraph
     character(len=ESMF_MAXSTR) :: line
     integer :: i, nlines, localrc
  
@@ -281,7 +282,7 @@ contains
       end do
     end if
 
-    call ESMF_MapperProcessRunSeq(runSeqCode, rc)
+    call ESMF_MapperProcessRunSeq(runSeqCode, runSeqDepGraph, rc)
     !call ESMF_LogSetError(ESMF_FAILURE, &
     !        msg="Unable to find a usable unit number for reading run seq", &
     !        ESMF_CONTEXT, rcToReturn=rc)
