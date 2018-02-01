@@ -99,6 +99,7 @@ class Regrid(object):
                  norm_type=None,
                  unmapped_action=None,
                  ignore_degenerate=None,
+                 create_rh=None,
                  src_frac_field=None,
                  dst_frac_field=None):
 
@@ -130,6 +131,7 @@ class Regrid(object):
                                normType=norm_type,
                                unmappedaction=unmapped_action,
                                ignoreDegenerate=ignore_degenerate,
+                               createRH=create_rh,
                                srcFracField=src_frac_field,
                                dstFracField=dst_frac_field)
         else:

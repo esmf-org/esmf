@@ -120,6 +120,7 @@ namespace ESMCI{
                            ESMC_NormType_Flag *normType,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
+                           ESMC_Logical *create_rh,
                            Field *srcFracField, Field *dstFracField);
     static int regrid(Field *fieldsrc, Field *fielddst,
                       RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion);
