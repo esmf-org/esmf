@@ -75,13 +75,14 @@ namespace ESMCI {
     char *asPtr;    // attached state pointer, used to carry Fortran info around
     void *srcMaskValue;
     void *dstMaskValue;
-
+    bool handleAllElements;
    public:
     RouteHandle():ESMC_Base(-1){    // use Base constructor w/o BaseID increment
       // initialize the name for this RouteHandle object in the Base class
       ESMC_BaseSetName(NULL, "RouteHandle");
       srcMaskValue=NULL;
       dstMaskValue=NULL;
+      handleAllElements=false;
     }
     ~RouteHandle(){destruct();}
     static RouteHandle *create(int *rc);
@@ -137,6 +138,10 @@ namespace ESMCI {
       dstMaskValue = dstMaskValue_;
       return ESMF_SUCCESS;
     }
+    int setHandleAllElements(bool handleAllElements_){
+      handleAllElements = handleAllElements_;
+      return ESMF_SUCCESS;
+    }
     template<typename T> bool getSrcMaskValue(T* &value){
       value=(T*)srcMaskValue;
       return (srcMaskValue != NULL);
@@ -145,7 +150,10 @@ namespace ESMCI {
       value=(T*)dstMaskValue;
       return (dstMaskValue != NULL);
     }
-    
+    bool getHandleAllElements(){
+      return handleAllElements;
+    }
+        
     // fingerprinting of src/dst Arrays
     int fingerprint(Array *srcArrayArg, Array *dstArrayArg){
       srcArray = srcArrayArg;

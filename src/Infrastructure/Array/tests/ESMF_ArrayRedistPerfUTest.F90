@@ -181,6 +181,7 @@ program ESMF_ArrayRedistPerfUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "ArrayRedistStore() - Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_VMBarrier(vm, rc=lrc)
   call ESMF_VMWtime(t0_store, rc=lrc)
   call ESMF_ArrayRedistStore(srcArray, dstArray, routehandle=rh, rc=rc)
   call ESMF_VMWtime(t1_store, rc=lrc)
@@ -190,6 +191,7 @@ program ESMF_ArrayRedistPerfUTest
   !EX_UTest_Multi_Proc_Only
   write(name, *) "ArrayRedist() - Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
+  call ESMF_VMBarrier(vm, rc=lrc)
   call ESMF_VMWtime(t0, rc=lrc)
   call ESMF_ArrayRedist(srcArray, dstArray, routehandle=rh, rc=rc)
   call ESMF_VMWtime(t1, rc=lrc)
@@ -240,7 +242,7 @@ program ESMF_ArrayRedistPerfUTest
   dt = t1 - t0
   write(msgString,*) "ArrayRedist() performance: ", dt, " seconds."
   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-  call ESMF_Test((dt<0.01), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((dt<0.1), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
