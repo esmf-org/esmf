@@ -90,6 +90,7 @@ module ESMF_RHandleMod
     real(ESMF_KIND_R8)  :: dynamicSrcMaskValue
     logical             :: dynamicDstMaskIsPresent
     real(ESMF_KIND_R8)  :: dynamicDstMaskValue
+    logical             :: handleAllElements
   end type
   
   type ESMF_DynamicMaskStateWrapR8R8R8
@@ -120,6 +121,7 @@ module ESMF_RHandleMod
     real(ESMF_KIND_R4)  :: dynamicSrcMaskValue
     logical             :: dynamicDstMaskIsPresent
     real(ESMF_KIND_R4)  :: dynamicDstMaskValue
+    logical             :: handleAllElements
   end type
   
   type ESMF_DynamicMaskStateWrapR4R8R4
@@ -148,6 +150,7 @@ module ESMF_RHandleMod
     real(ESMF_KIND_R4)  :: dynamicSrcMaskValue
     logical             :: dynamicDstMaskIsPresent
     real(ESMF_KIND_R4)  :: dynamicDstMaskValue
+    logical             :: handleAllElements
   end type
   
   type ESMF_DynamicMaskStateWrapR4R4R4

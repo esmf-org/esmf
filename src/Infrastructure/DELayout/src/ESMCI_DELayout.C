@@ -6920,15 +6920,45 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
   }
   rh->getSrcMaskValue(srcMaskValue);
   rh->getDstMaskValue(dstMaskValue);
+  bool handleAllElements = rh->getHandleAllElements();
   if (vectorL==1){
     // scalar elements
     vector<DynMaskElement<T,U,V> > dynMaskList;
-    bool dstMask = false; 
-    bool srcMask = false;
     DynMaskElement<T,U,V> dynMaskElement;
-    for (int i=0; i<termCount; i++){  // super scalar loop
-      element = rraBaseList[rraIndexList[baseListIndexList[i]]]
-        + rraOffsetList[i];
+    if (handleAllElements){
+      // dynMaskList to hold all local elements
+      for (int i=0; i<termCount; i++){  // super scalar loop
+        element = rraBaseList[rraIndexList[baseListIndexList[i]]]
+          + rraOffsetList[i];
+        if (prevElement != element){
+          if (prevElement != NULL){
+            // store dynMaskElement in dynMaskList
+            dynMaskElement.element = prevElement;   // finish the entry
+            dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+          }
+          dynMaskElement.factors.clear(); // reset
+          dynMaskElement.values.clear();  // reset
+          prevElement = element;
+        }
+        factor = factorList[i];
+        value = valueBaseList[baseListIndexList[i]] + valueOffsetList[i];
+        dynMaskElement.factors.push_back(&(factorList[i])); // dynMaskElement
+        dynMaskElement.values.push_back(value); // dynMaskElement
+      }
+      // process the last element of the loop
+      if (prevElement != NULL){
+        // store dynMaskElement in dynMaskList
+        dynMaskElement.element = prevElement;   // finish the entry
+        dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+      }
+    }else{
+      // dynMaskList to hold only elements affected by dynamic mask
+      // handle interpolation of all other elements here
+      bool dstMask = false; 
+      bool srcMask = false;
+      for (int i=0; i<termCount; i++){  // super scalar loop
+        element = rraBaseList[rraIndexList[baseListIndexList[i]]]
+          + rraOffsetList[i];
 #if 0
   {
     std::stringstream logmsg;
@@ -6936,34 +6966,34 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
-      if (prevElement != element){
-        // this is a new element
-        if (prevElement != NULL && !(dstMask || srcMask)){
-          // finally write the previous sum into the actual element b/c unmasked
-          *prevElement = tmpElement;
-        }else if (dstMask || srcMask){
-          // finally store dynMaskElement in dynMaskList b/c masking detected
-          dynMaskElement.element = prevElement;   // finish the entry
-          dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+        if (prevElement != element){
+          // this is a new element
+          if (prevElement != NULL && !(dstMask || srcMask)){
+            // finally write the previous sum into the actual element b/c unmasked
+            *prevElement = tmpElement;
+          }else if (dstMask || srcMask){
+            // finally store dynMaskElement in dynMaskList b/c masking detected
+            dynMaskElement.element = prevElement;   // finish the entry
+            dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+          }
+          dynMaskElement.factors.clear(); // reset
+          dynMaskElement.values.clear();  // reset
+          prevElement = element;
+          srcMask = false;  // reset
+          dstMask = false;  // reset
+          if (dstMaskValue && (*element == *dstMaskValue))
+            dstMask = true;
+          else
+            tmpElement = *element;  // load tmpElement with current element
         }
-        dynMaskElement.factors.clear(); // reset
-        dynMaskElement.values.clear();  // reset
-        prevElement = element;
-        srcMask = false;  // reset
-        dstMask = false;  // reset
-        if (dstMaskValue && (*element == *dstMaskValue))
-          dstMask = true;
-        else
-          tmpElement = *element;  // load tmpElement with current element
-      }
-      factor = factorList[i];
-      value = valueBaseList[baseListIndexList[i]] + valueOffsetList[i];
-      dynMaskElement.factors.push_back(&(factorList[i])); // dynMaskElement
-      dynMaskElement.values.push_back(value); // dynMaskElement
-      if (srcMaskValue && (*value == *srcMaskValue)) srcMask = true;
-      if (!(dstMask || srcMask)){
-        tmpElement += factor * *value;  // perform calculation
-      }
+        factor = factorList[i];
+        value = valueBaseList[baseListIndexList[i]] + valueOffsetList[i];
+        dynMaskElement.factors.push_back(&(factorList[i])); // dynMaskElement
+        dynMaskElement.values.push_back(value); // dynMaskElement
+        if (srcMaskValue && (*value == *srcMaskValue)) srcMask = true;
+        if (!(dstMask || srcMask)){
+          tmpElement += factor * *value;  // perform calculation
+        }
 #if 0
   {
     std::stringstream logmsg;
@@ -6973,23 +7003,25 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
+      }
+      // process the last element of the loop
+      if (prevElement != NULL && !(dstMask || srcMask)){
+        // finally write the previous sum into the actual element
+        *prevElement = tmpElement;
+      }else if (dstMask || srcMask){
+        // finally store dynMaskElement in dynMaskList b/c masking detected
+        dynMaskElement.element = prevElement;   // finish the entry
+        dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+      }
     }
-    // must process the last element of the loop
-    if (prevElement != NULL && !(dstMask || srcMask)){
-      // finally write the previous sum into the actual element
-      *prevElement = tmpElement;
-    }else if (dstMask || srcMask){
-      // finally store dynMaskElement in dynMaskList b/c masking detected
-      dynMaskElement.element = prevElement;   // finish the entry
-      dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
-    }
-    // see if any dynamic masking was detected
+    // call into handler method if there are any elements to handle
     if (dynMaskList.size() > 0){
       // call into dynMaskHandler to handle the masked elements
       dynMaskHandler(dynMaskList, rh);
     }
   }else{
     // vector elements
+    //TODO: implement dynamic masking for the vector branch!!
     for (int i=0; i<termCount; i++){  // super scalar loop
       element = rraBaseList[rraIndexList[baseListIndexList[i]]]
         + rraOffsetList[i] * vectorL;

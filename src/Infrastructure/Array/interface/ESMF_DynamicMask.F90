@@ -129,12 +129,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DynamicMaskSetR8R8R8 - Set DynamicMask for R8R8R8
 ! !INTERFACE:
   subroutine ESMF_DynamicMaskSetR8R8R8(dynamicMask, dynamicMaskRoutine, &
-    keywordEnforcer, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
+    keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DynamicMask), intent(out)           :: dynamicMask
     procedure(ESMF_DynamicMaskRoutineR8R8R8)      :: dynamicMaskRoutine
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),  optional :: handleAllElements
     real(ESMF_KIND_R8),     intent(in),  optional :: dynamicSrcMaskValue
     real(ESMF_KIND_R8),     intent(in),  optional :: dynamicDstMaskValue
     integer,                intent(out), optional :: rc
@@ -158,18 +160,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The routine responsible for handling dynamically masked source and 
 !     destination elements. See section \ref{RH:DynMask} for the precise
 !     definition of the {\tt dynamicMaskRoutine} procedure interface.
+!   \item [{[handleAllElements]}]
+!     If set to {\tt .true.}, all local elements, regardless of their dynamic
+!     masking status, are made available to {\tt dynamicMaskRoutine} for
+!     handling. This option can be used to implement fully customized
+!     interpolations based on the information provided by ESMF.
+!     The default is {\tt .false.}, meaning that only elements affected by
+!     dynamic masking will be handed to {\tt dynamicMaskRoutine}.
 !   \item [{[dynamicSrcMaskValue]}]
-!     Any source element with a value equal to {\tt dynamicSrcMaskValue} is
-!     considered dynamically masked. Elements affected will be passed
-!     to the routine specified in {\tt dynamicMaskRoutine} for handling.
-!     The default is to {\em not} assume any source elements as dynamically
+!     The value for which a source element is considered dynamically
 !     masked.
+!     The default is to {\em not} consider any source elements as
+!     dynamically masked.
 !   \item [{[dynamicDstMaskValue]}]
-!     Any destination element with a value equal to {\tt dynamicDstMaskValue} is
-!     considered dynamically masked. Elements affected will be passed
-!     to the routine specified in {\tt dynamicMaskRoutine} for handling.
-!     The default is to {\em not} assume any destination elements as dynamically
+!     The value for which a destination element is considered dynamically
 !     masked.
+!     The default is to {\em not} consider any destination elements as
+!     dynamically masked.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -196,7 +203,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dynamicMask%dmsR8R8R8%dynamicDstMaskIsPresent = present(dynamicDstMaskValue)
     if (present(dynamicDstMaskValue)) &
       dynamicMask%dmsR8R8R8%dynamicDstMaskValue = dynamicDstMaskValue
-
+    if (present(handleAllElements)) then
+      dynamicMask%dmsR8R8R8%handleAllElements = handleAllElements
+    else
+      dynamicMask%dmsR8R8R8%handleAllElements = .false. ! default
+    endif
+    
     ! mark output as successfully initialized
     ESMF_INIT_SET_DEFINED(dynamicMask)
 
@@ -215,12 +227,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DynamicMaskSetR4R8R4 - Set DynamicMask for R4R8R4
 ! !INTERFACE:
   subroutine ESMF_DynamicMaskSetR4R8R4(dynamicMask, dynamicMaskRoutine, &
-    keywordEnforcer, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
+    keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DynamicMask), intent(out)           :: dynamicMask
     procedure(ESMF_DynamicMaskRoutineR4R8R4)      :: dynamicMaskRoutine
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),  optional :: handleAllElements
     real(ESMF_KIND_R4),     intent(in),  optional :: dynamicSrcMaskValue
     real(ESMF_KIND_R4),     intent(in),  optional :: dynamicDstMaskValue
     integer,                intent(out), optional :: rc
@@ -244,18 +258,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The routine responsible for handling dynamically masked source and 
 !     destination elements. See section \ref{RH:DynMask} for the precise
 !     definition of the {\tt dynamicMaskRoutine} procedure interface.
+!   \item [{[handleAllElements]}]
+!     If set to {\tt .true.}, all local elements, regardless of their dynamic
+!     masking status, are made available to {\tt dynamicMaskRoutine} for
+!     handling. This option can be used to implement fully customized
+!     interpolations based on the information provided by ESMF.
+!     The default is {\tt .false.}, meaning that only elements affected by
+!     dynamic masking will be handed to {\tt dynamicMaskRoutine}.
 !   \item [{[dynamicSrcMaskValue]}]
-!     Any source element with a value equal to {\tt dynamicSrcMaskValue} is
-!     considered dynamically masked. Elements affected will be passed
-!     to the routine specified in {\tt dynamicMaskRoutine} for handling.
-!     The default is to {\em not} assume any source elements as dynamically
+!     The value for which a source element is considered dynamically
 !     masked.
+!     The default is to {\em not} consider any source elements as
+!     dynamically masked.
 !   \item [{[dynamicDstMaskValue]}]
-!     Any destination element with a value equal to {\tt dynamicDstMaskValue} is
-!     considered dynamically masked. Elements affected will be passed
-!     to the routine specified in {\tt dynamicMaskRoutine} for handling.
-!     The default is to {\em not} assume any destination elements as dynamically
+!     The value for which a destination element is considered dynamically
 !     masked.
+!     The default is to {\em not} consider any destination elements as
+!     dynamically masked.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -282,6 +301,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dynamicMask%dmsR4R8R4%dynamicDstMaskIsPresent = present(dynamicDstMaskValue)
     if (present(dynamicDstMaskValue)) &
       dynamicMask%dmsR4R8R4%dynamicDstMaskValue = dynamicDstMaskValue
+    if (present(handleAllElements)) then
+      dynamicMask%dmsR4R8R4%handleAllElements = handleAllElements
+    else
+      dynamicMask%dmsR4R8R4%handleAllElements = .false. ! default
+    endif
 
     ! mark output as successfully initialized
     ESMF_INIT_SET_DEFINED(dynamicMask)
@@ -300,12 +324,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DynamicMaskSetR4R4R4 - Set DynamicMask for R4R4R4
 ! !INTERFACE:
   subroutine ESMF_DynamicMaskSetR4R4R4(dynamicMask, dynamicMaskRoutine, &
-    keywordEnforcer, dynamicSrcMaskValue, dynamicDstMaskValue, rc)
+    keywordEnforcer, handleAllElements, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DynamicMask), intent(out)           :: dynamicMask
     procedure(ESMF_DynamicMaskRoutineR4R4R4)      :: dynamicMaskRoutine
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),  optional :: handleAllElements
     real(ESMF_KIND_R4),     intent(in),  optional :: dynamicSrcMaskValue
     real(ESMF_KIND_R4),     intent(in),  optional :: dynamicDstMaskValue
     integer,                intent(out), optional :: rc
@@ -329,18 +355,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The routine responsible for handling dynamically masked source and 
 !     destination elements. See section \ref{RH:DynMask} for the precise
 !     definition of the {\tt dynamicMaskRoutine} procedure interface.
+!   \item [{[handleAllElements]}]
+!     If set to {\tt .true.}, all local elements, regardless of their dynamic
+!     masking status, are made available to {\tt dynamicMaskRoutine} for
+!     handling. This option can be used to implement fully customized
+!     interpolations based on the information provided by ESMF.
+!     The default is {\tt .false.}, meaning that only elements affected by
+!     dynamic masking will be handed to {\tt dynamicMaskRoutine}.
 !   \item [{[dynamicSrcMaskValue]}]
-!     Any source element with a value equal to {\tt dynamicSrcMaskValue} is
-!     considered dynamically masked. Elements affected will be passed
-!     to the routine specified in {\tt dynamicMaskRoutine} for handling.
-!     The default is to {\em not} assume any source elements as dynamically
+!     The value for which a source element is considered dynamically
 !     masked.
+!     The default is to {\em not} consider any source elements as
+!     dynamically masked.
 !   \item [{[dynamicDstMaskValue]}]
-!     Any destination element with a value equal to {\tt dynamicDstMaskValue} is
-!     considered dynamically masked. Elements affected will be passed
-!     to the routine specified in {\tt dynamicMaskRoutine} for handling.
-!     The default is to {\em not} assume any destination elements as dynamically
+!     The value for which a destination element is considered dynamically
 !     masked.
+!     The default is to {\em not} consider any destination elements as
+!     dynamically masked.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -367,6 +398,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dynamicMask%dmsR4R4R4%dynamicDstMaskIsPresent = present(dynamicDstMaskValue)
     if (present(dynamicDstMaskValue)) &
       dynamicMask%dmsR4R4R4%dynamicDstMaskValue = dynamicDstMaskValue
+    if (present(handleAllElements)) then
+      dynamicMask%dmsR4R4R4%handleAllElements = handleAllElements
+    else
+      dynamicMask%dmsR4R4R4%handleAllElements = .false. ! default
+    endif
 
     ! mark output as successfully initialized
     ESMF_INIT_SET_DEFINED(dynamicMask)

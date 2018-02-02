@@ -20,7 +20,7 @@ module ESMF_RHandleDynamicMaskingMod
 
   implicit none
 
-  public simpleDynMaskProc, simpleDynMaskProcR4R8R4
+  public simpleDynMaskProc, simpleHandleAllProc, simpleDynMaskProcR4R8R4
 
  contains !-------------------------------------
  
@@ -52,6 +52,42 @@ module ESMF_RHandleDynamicMaskingMod
             endif
           enddo
           dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
+        endif
+      enddo
+    endif
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine  
+  
+  !-----------
+  
+  subroutine simpleHandleAllProc(dynamicMaskList, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
+    type(ESMF_DynamicMaskElementR8R8R8), pointer        :: dynamicMaskList(:)
+    real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
+    integer,                       intent(out)          :: rc
+    integer :: i, j
+    real(ESMF_KIND_R8)  :: renorm
+    if (associated(dynamicMaskList)) then
+      do i=1, size(dynamicMaskList)
+        ! -> don't use masked srcElements, but renormalize all other factors
+        dynamicMaskList(i)%dstElement = 0.d0 ! set to zero
+        renorm = 0.d0 ! reset
+        do j=1, size(dynamicMaskList(i)%factor)
+          if (.not. &
+            matchR8(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j))) then
+            dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement &
+              + dynamicMaskList(i)%factor(j) &
+              * dynamicMaskList(i)%srcElement(j)
+            renorm = renorm + dynamicMaskList(i)%factor(j)
+          endif
+        enddo
+        dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
+        ! here customize interpolation by setting everything destination point
+        ! that is above 0.5 to the dynamicDstMaskValue 
+        if (dynamicMaskList(i)%dstElement > 0.5d0) then
+          dynamicMaskList(i)%dstElement = dynamicDstMaskValue
         endif
       enddo
     endif
@@ -318,8 +354,8 @@ program ESMF_RHandleDynamicMaskingEx
     
 !BOE
 ! The names of the specific {\tt DynamicMaskSet} methods all carry a 
-! typekind-triplet suffix. Here the suffix was {\tt R8R8R8}. 
-! This typekind-triplet indicates that the {\tt dynamicMaskRoutine} argument
+! typekind-triplet suffix. Here the suffix is {\tt R8R8R8}. 
+! This indicates that the {\tt dynamicMaskRoutine} argument
 ! provided is expected to deal with {\tt real(ESMF\_KIND\_R8)} destination data
 ! (first R8 typekind), {\tt real(ESMF\_KIND\_R8)} factors (second R8 typekind),
 ! and {\tt real(ESMF\_KIND\_R8)} source data (third R8 typekind).
@@ -442,7 +478,7 @@ program ESMF_RHandleDynamicMaskingEx
 !
 ! Going back to the example of regridding between the {\tt srcField} and
 ! {\tt dstField}, notice that beside providing the {\tt dynamicMask} argument,
-! there was also {\tt termorderflag = ESMF\_TERMORDER\_SRCSEQ} specified in the
+! also {\tt termorderflag = ESMF\_TERMORDER\_SRCSEQ} is specified in the
 ! {\tt ESMF\_FieldRegrid()} call.
 ! The {\tt ESMF\_TERMORDER\_SRCSEQ} option ensures that the destination side
 ! waits for {\em all} of the source elements before summing into the destination
@@ -537,6 +573,54 @@ program ESMF_RHandleDynamicMaskingEx
 ! {\tt dstField} remain unchanged until they are checked for
 ! {\tt dynamicDstMaskValue}. 
 !EOE
+
+!BOE
+! The {\tt DynamicMaskSet} methods provide an argument of {\tt logical} type, 
+! called {\tt handleAllElements}. By default it is set to {\tt .false.}, 
+! which means that only elements affected by dynamic masking -- as described
+! above -- are passed to the {\tt dynamicMaskRoutine}. However, when
+! {\tt handleAllElements} is set to {\tt .true.}, {\em all} local
+! elements on each PET are made available to the {\tt dynamicMaskRoutine}.
+! This allows the user supplied procedure to implement fully customized
+! handling of the interpolation from source to destination, using the 
+! information supplied by ESMF.
+!
+! To demonstrate this, a custom routine {\tt simpleHandleAllProc()} is 
+! passed in as {\tt dynamicMaskRoutine}, and {\tt handleAllElements} is
+! set to {\tt .true.}. All other aspects of the user interface remain unchanged.
+!EOE
+
+!BOC
+  call ESMF_DynamicMaskSetR8R8R8(dynamicMask, &
+    dynamicSrcMaskValue=srcMaskValue, &
+    dynamicDstMaskValue=-2.d0, &
+    dynamicMaskRoutine=simpleHandleAllProc, &
+    handleAllElements=.true., &
+    rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOC
+  call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
+    routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
+    zeroregion=ESMF_REGION_EMPTY, dynamicMask=dynamicMask, rc=rc)
+!EOC
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+#if 0
+  call ESMF_FieldWrite(dstField, fileName="dstFieldR8_handleAll.nc", &
+    status=ESMF_FILESTATUS_REPLACE, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#endif
 
   call ESMF_FieldRegridRelease(routehandle, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

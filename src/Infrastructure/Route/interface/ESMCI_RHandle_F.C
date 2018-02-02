@@ -297,6 +297,23 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_routehandlesethandleall)(ESMCI::RouteHandle **ptr, 
+    ESMC_Logical *handleAll, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlesetdyndstmask()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    bool handleAllElements = false; // default
+    if (*handleAll == ESMF_TRUE) handleAllElements = true;
+    localrc = (*ptr)->setHandleAllElements(handleAllElements);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
 };
 
 
