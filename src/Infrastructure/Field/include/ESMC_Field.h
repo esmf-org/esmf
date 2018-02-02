@@ -902,7 +902,7 @@ int ESMC_FieldRegridStoreFile(
 //    Specifies what should happen if there are destination points that can't
 //    be mapped to a source cell. Options are {\tt ESMC\_UNMAPPEDACTION\_ERROR} or
 //    {\tt ESMC\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults to {\tt ESMC\_UNMAPPEDACTION\_ERROR}.
-//  \item[{create_rh}]
+//  \item[{create\_rh}]
 //    Specifies whether or not to create a routehandle, or just write weights to file.
 //    If not specified, defaults to {\tt ESMF\_TRUE}.
 //  \item [{[srcFracField]}]
