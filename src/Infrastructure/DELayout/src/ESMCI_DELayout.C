@@ -6752,6 +6752,13 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
       "taking super-vector branch...");
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
+    if (dynMask){
+      // dynamic masking is undefined for superVector condition -> error out
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
+        "Dynamic masking is not defined for interleaved "
+        "distributed and undistributed dims", ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
     exec_pssslDstRraSuper(rraBaseList, rraIndexList, rraOffsetList, factorList,
       valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL,
       localDeIndexOff, size_r, size_s, size_t, size_i, size_j);
@@ -6763,12 +6770,12 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     if (dynMask){
-      // consider dynamic masking
+      // with dynamic masking
       exec_pssslDstRraDynMask(rraBaseList, rraIndexList, rraOffsetList, 
         factorList, valueBaseList, valueOffsetList, baseListIndexList,
         termCount, vectorL, rh);
     }else{
-      // do not consider dynamic masking
+      // without dynamic masking
       exec_pssslDstRra(rraBaseList, rraIndexList, rraOffsetList, factorList,
         valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL);
     }
@@ -6811,7 +6818,7 @@ void XXE::exec_pssslDstRra(T **rraBaseList, int *rraIndexList,
 
 template<typename T, typename U, typename V>
   void XXE::dynMaskHandler(vector<XXE::DynMaskElement<T,U,V> > &dynMaskList,
-  RouteHandle *rh){
+  RouteHandle *rh, int vectorL){
 #if 0
   {
     std::stringstream logmsg;
@@ -6921,10 +6928,10 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
   rh->getSrcMaskValue(srcMaskValue);
   rh->getDstMaskValue(dstMaskValue);
   bool handleAllElements = rh->getHandleAllElements();
+  vector<DynMaskElement<T,U,V> > dynMaskList;
+  DynMaskElement<T,U,V> dynMaskElement;
   if (vectorL==1){
     // scalar elements
-    vector<DynMaskElement<T,U,V> > dynMaskList;
-    DynMaskElement<T,U,V> dynMaskElement;
     if (handleAllElements){
       // dynMaskList to hold all local elements
       for (int i=0; i<termCount; i++){  // super scalar loop
@@ -6940,7 +6947,6 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
           dynMaskElement.values.clear();  // reset
           prevElement = element;
         }
-        factor = factorList[i];
         value = valueBaseList[baseListIndexList[i]] + valueOffsetList[i];
         dynMaskElement.factors.push_back(&(factorList[i])); // dynMaskElement
         dynMaskElement.values.push_back(value); // dynMaskElement
@@ -7014,23 +7020,50 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
         dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
       }
     }
-    // call into handler method if there are any elements to handle
-    if (dynMaskList.size() > 0){
-      // call into dynMaskHandler to handle the masked elements
-      dynMaskHandler(dynMaskList, rh);
-    }
   }else{
     // vector elements
-    //TODO: implement dynamic masking for the vector branch!!
-    for (int i=0; i<termCount; i++){  // super scalar loop
-      element = rraBaseList[rraIndexList[baseListIndexList[i]]]
-        + rraOffsetList[i] * vectorL;
-      factor = factorList[i];
-      value = valueBaseList[baseListIndexList[i]]
-        + valueOffsetList[i] * vectorL;
-      for (int k=0; k<vectorL; k++)  // vector loop
-        *(element+k) += factor * *(value+k);
+    if (handleAllElements){
+      // dynMaskList to hold all local elements
+      for (int i=0; i<termCount; i++){  // super scalar loop
+        element = rraBaseList[rraIndexList[baseListIndexList[i]]]
+          + rraOffsetList[i] * vectorL;
+        if (prevElement != element){
+          if (prevElement != NULL){
+            // store dynMaskElement in dynMaskList
+            dynMaskElement.element = prevElement;   // finish the entry
+            dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+          }
+          dynMaskElement.factors.clear(); // reset
+          dynMaskElement.values.clear();  // reset
+          prevElement = element;
+        }
+        value = valueBaseList[baseListIndexList[i]]
+          + valueOffsetList[i] * vectorL;
+        dynMaskElement.factors.push_back(&(factorList[i])); // dynMaskElement
+        dynMaskElement.values.push_back(value); // dynMaskElement
+      }
+      // process the last element of the loop
+      if (prevElement != NULL){
+        // store dynMaskElement in dynMaskList
+        dynMaskElement.element = prevElement;   // finish the entry
+        dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+      }
+    }else{
+      // vector handling undefined if not handling all elements -> error out
+      //TODO: Actually it would be possible to loop through the vector dim
+      //TODO: here, and construct non-vectorized dynMaskList!!
+      //TODO: When that gets implemented, make sure to pass a modified 
+      //TODO: vectorL down into dynMaskHandler() from this branch!
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
+        "Dynamic masking is not defined for leading undistributed dimensions",
+        ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
     }
+  }
+  // call into handler method if there are any elements to handle
+  if (dynMaskList.size() > 0){
+    // call into dynMaskHandler to handle the masked elements
+    dynMaskHandler(dynMaskList, rh, vectorL);
   }
 }
 

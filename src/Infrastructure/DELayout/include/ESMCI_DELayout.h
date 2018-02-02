@@ -1140,7 +1140,7 @@ class XXE{
     };
     template<typename T, typename U, typename V>
     static void dynMaskHandler(std::vector<DynMaskElement<T,U,V> > &dynMaskList,
-      RouteHandle *rh);
+      RouteHandle *rh, int vectorL);
 
 };  // class XXE
 
