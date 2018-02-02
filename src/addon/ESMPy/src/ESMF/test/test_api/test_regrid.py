@@ -84,7 +84,56 @@ class TestRegrid(TestBase):
                     line_type=LineType.CART)
         _ = rh(srcfield, dstfield)
 
-    @attr('parallel')
+    def test_field_regrid_2d(self):
+        keywords = dict(
+            # periodic specifies all valid combos of [num_peri_dims, periodic_dim, pole_dim]
+            periodic=[[None, None, None], [None, None, 0], [None, None, 1],
+                      [0, None, None], [0, None, 0], [0, None, 1],
+                      [1, None, None], [1, 0, 1], [1, 1, 0]],
+            staggerloc=[None, StaggerLoc.CENTER, StaggerLoc.EDGE1, StaggerLoc.EDGE2, StaggerLoc.CORNER],
+            coord_sys=[None, CoordSys.CART, CoordSys.SPH_DEG, CoordSys.SPH_RAD],
+            typekind=[None, TypeKind.I4, TypeKind.I8, TypeKind.R4, TypeKind.R8],
+            src_mask_values=[],
+            dst_mask_values=[],
+            regrid_method=[],
+            pole_method=[],
+            regrid_pole_npoints=[],
+            line_type=[],
+            norm_type=[],
+            unmapped_action=[],
+            ignore_degenerate=[],
+            create_rh=[],
+            src_frac_field=[],
+            dst_frac_field=[]
+        )
+
+        testcases = self.iter_product_keywords(keywords)
+        fail = []
+        for a in testcases:
+            try:
+                grid = Grid(np.array([12, 12]),
+                            num_peri_dims=a.periodic[0],
+                            periodic_dim=a.periodic[1],
+                            pole_dim=a.periodic[2],
+                            coord_sys=a.coord_sys,
+                            coord_typekind=a.typekind,
+                            staggerloc=a.staggerloc)
+                grid.add_item(GridItem.MASK)
+                grid.add_item(GridItem.AREA)
+                grid2 = grid[2:10, 4:7]
+                self.examine_grid_attributes(grid)
+                self.examine_grid_attributes(grid2)
+                grid.destroy()
+                grid2.destroy()
+            except:
+                fail += a
+
+        if len(fail) > 0:
+            raise ValueError(
+                "The following combinations of Grid parameters failed to create a proper Grid: " + str(fail))
+
+
+
     def test_field_regrid_file1(self):
         mgr = Manager()
 
@@ -134,13 +183,13 @@ class TestRegrid(TestBase):
             self.assertWeightFileIsRational(filename, 480, 480)
         mgr.barrier()
 
-    @attr('parallel')
     def test_field_regrid_file2(self):
         mgr = Manager()
         filename = 'esmpy_test_field_regrid_file2.nc'
-        path = os.path.join(os.getcwd(), filename)
-        if os.path.isfile(path):
-            os.remove(path)
+        if local_pet() == 0:
+            path = os.path.join(os.getcwd(), filename)
+            if os.path.isfile(path):
+                os.remove(path)
         mgr.barrier()
         
         srcgrid = ESMF.Grid(np.array([20, 20]),
@@ -200,13 +249,14 @@ class TestRegrid(TestBase):
         self.assertWeightFileIsRational(filename, src_size, dst_size)
         mgr.barrier()
 
-    @attr('parallel')
     def test_field_regrid_from_file(self):
         mgr = Manager()
         filename = 'esmpy_test_field_from_file.nc'
         path = os.path.join(os.getcwd(), filename)
-        if os.path.isfile(path):
-            os.remove(path)
+        if local_pet() == 0:
+            path = os.path.join(os.getcwd(), filename)
+            if os.path.isfile(path):
+                os.remove(path)
         mgr.barrier()
 
         srcgrid = ESMF.Grid(np.array([20, 20]),
@@ -265,7 +315,9 @@ class TestRegrid(TestBase):
 
         regridS2D = ESMF.Regrid(srcfield, dstfield, filename=filename,
                         regrid_method=ESMF.RegridMethod.BILINEAR,
-                        unmapped_action=ESMF.UnmappedAction.ERROR)
+                        unmapped_action=ESMF.UnmappedAction.ERROR,
+                        create_rh=True,
+                        ignore_degenerate=False)
         mgr.barrier()
 
         self.assertTrue(os.path.exists(filename))

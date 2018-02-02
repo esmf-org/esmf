@@ -338,7 +338,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     lineType, &
                     normType, &
                     unmappedaction, ignoreDegenerate, &
-                    srcTermProcessing, &
+                    createRoutehandle, srcTermProcessing, &
                     pipeLineDepth, &
                     routehandle, &
                     factorList, factorIndexList, &
@@ -361,6 +361,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_NormType_Flag),       intent(in),    optional :: normType
       type(ESMF_UnmappedAction_Flag), intent(in),    optional :: unmappedaction
       logical,                        intent(in),    optional :: ignoreDegenerate
+      logical,                        intent(in),    optional :: createRoutehandle
       integer,                        intent(inout), optional :: srcTermProcessing
       integer,                        intent(inout), optional :: pipeLineDepth
       type(ESMF_RouteHandle),         intent(inout), optional :: routehandle
@@ -457,6 +458,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the
 !           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error.
 !           If not specified, {\tt ignoreDegenerate} defaults to false.
+!     \item[{createRoutehandle}]
+!           Specifies whether or not to create a routehandle, or just write weights to file.
+!           If not specified, defaults to {\tt ESMF\_TRUE}.
 !     \item [{[srcTermProcessing]}]
 !           The {\tt srcTermProcessing} parameter controls how many source terms,
 !           located on the same PET and summing into the same destination element,
@@ -574,6 +578,54 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       localrc = ESMF_SUCCESS
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    if (present (createRoutehandle)) then
+      if (createRoutehandle .eqv. .false.) then  
+        call ESMF_FieldRegridStore(srcField, dstField, &
+            srcMaskValues=srcMaskValues, &
+            dstMaskValues=dstMaskValues, &
+            regridmethod=regridmethod, &
+            polemethod=polemethod, &
+            regridPoleNPnts=regridPoleNPnts, &
+            lineType=lineType, &
+            normType=normType, &
+            unmappedaction=unmappedaction, &
+            ignoreDegenerate=ignoreDegenerate, &
+            srcTermProcessing=srcTermProcessing, &
+            pipeLineDepth=pipeLineDepth, &
+            factorList=localFactorList, &
+            factorIndexList=localFactorIndexList, &
+            srcFracField=srcFracField, &
+            dstFracField=dstFracField, &
+            dstStatusField=dstStatusField, &
+            unmappedDstList=unmappedDstList, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+      endif  
+        call ESMF_FieldRegridStore(srcField, dstField, &
+            srcMaskValues=srcMaskValues, &
+            dstMaskValues=dstMaskValues, &
+            regridmethod=regridmethod, &
+            polemethod=polemethod, &
+            regridPoleNPnts=regridPoleNPnts, &
+            lineType=lineType, &
+            normType=normType, &
+            unmappedaction=unmappedaction, &
+            ignoreDegenerate=ignoreDegenerate, &
+            srcTermProcessing=srcTermProcessing, &
+            pipeLineDepth=pipeLineDepth, &
+            routehandle=routehandle, &
+            factorList=localFactorList, &
+            factorIndexList=localFactorIndexList, &
+            srcFracField=srcFracField, &
+            dstFracField=dstFracField, &
+            dstStatusField=dstStatusField, &
+            unmappedDstList=unmappedDstList, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    else
       call ESMF_FieldRegridStore(srcField, dstField, &
           srcMaskValues=srcMaskValues, &
           dstMaskValues=dstMaskValues, &
@@ -596,6 +648,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
       ! call OutputWeightsFile
       call ESMF_OutputWeightFile(fileName, localFactorList, &

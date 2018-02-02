@@ -153,6 +153,9 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
   // Create Tree
   OTree *tree= new OTree(num_pnt);
 
+  // Commit empty tree, more points will be add committed later
+  tree->commit();
+
   // Create list of point structures
   PNT_DATA *pd_list=new PNT_DATA[num_pnt];  
 
@@ -183,7 +186,6 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
   std::random_shuffle(pd_list,pd_list+num_pnt);  
 
   // Loop and clump points
-  bool first_time=true;
   for (int i=0; i<num_pnt; i++) {
 
     // Get point structure
@@ -210,15 +212,11 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
 
 
     // See if point should be clumped with any in the tree
-    if (!first_time) {
-      tree->runon(min, max, intersect_func, (void *)(&sd));
-    } else {
-      tree->add_commit(min, max, (void *)pd);    
-      first_time=false;
-    }
+    // (First time through tree will be empty, but then runon() 
+    //  will just return and be a no-op.) 
+    tree->runon(min, max, intersect_func, (void *)(&sd));
 
     // If not clumped, then add to tree
-    // TODO: ADD add_commit to OTree
     if (sd.closest_index==-1) {
       tree->add_commit(min, max, (void *)pd);    
       pd->clump_index=pd->orig_index;
@@ -508,11 +506,13 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
   // Create Tree
   ESMCI::OTree *tree= new ESMCI::OTree(num_pnt);
 
+  // Commit empty tree, more points will be add committed later
+  tree->commit();
+
   // Scramble to reduce chance of degenerate trees
   std::random_shuffle(pd_list,pd_list+num_pnt);  
 
   // Loop and clump points
-  bool first_time=true;
   for (int i=0; i<num_pnt; i++) {
 
     // Get point structure
@@ -553,17 +553,12 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
     sd.closest_index=-1;
     sd.closest_dist2=tol*tol;
 
-
     // See if point should be clumped with any in the tree
-    if (!first_time) {
-      tree->runon(min, max, intersect_func_ll, (void *)(&sd));
-    } else {
-      tree->add_commit(min, max, (void *)pd);    
-      first_time=false;
-    }
+    // (First time through tree will be empty, but then runon() 
+    //  will just return and be a no-op.) 
+    tree->runon(min, max, intersect_func_ll, (void *)(&sd));
 
     // If not clumped, then add to tree
-    // TODO: ADD add_commit to OTree
     if (sd.closest_index==-1) {
       tree->add_commit(min, max, (void *)pd);    
       pd->clump_index=pd->orig_index;
