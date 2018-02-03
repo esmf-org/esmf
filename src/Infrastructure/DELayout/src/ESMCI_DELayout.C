@@ -6965,13 +6965,6 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
       for (int i=0; i<termCount; i++){  // super scalar loop
         element = rraBaseList[rraIndexList[baseListIndexList[i]]]
           + rraOffsetList[i];
-#if 0
-  {
-    std::stringstream logmsg;
-    logmsg << "exec_pssslDstRraDynMask(): i=" << i << " element=" << element;
-    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
         if (prevElement != element){
           // this is a new element
           if (prevElement != NULL && !(dstMask || srcMask)){
@@ -7000,15 +6993,6 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
         if (!(dstMask || srcMask)){
           tmpElement += factor * *value;  // perform calculation
         }
-#if 0
-  {
-    std::stringstream logmsg;
-    logmsg << "element=" << element
-      << "  factor=" << &(factorList[i])
-      << "  value=" << value;
-    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
       }
       // process the last element of the loop
       if (prevElement != NULL && !(dstMask || srcMask)){
@@ -7049,15 +7033,57 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
         dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
       }
     }else{
-      // vector handling undefined if not handling all elements -> error out
-      //TODO: Actually it would be possible to loop through the vector dim
-      //TODO: here, and construct non-vectorized dynMaskList!!
-      //TODO: When that gets implemented, make sure to pass a modified 
-      //TODO: vectorL down into dynMaskHandler() from this branch!
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
-        "Dynamic masking is not defined for leading undistributed dimensions",
-        ESMC_CONTEXT, &localrc);
-      throw localrc;  // bail out with exception
+      // vector handling with dynamic mask -> unroll over vectorL
+      // dynMaskList to hold only elements affected by dynamic mask
+      // handle interpolation of all other elements here
+      bool dstMask = false; 
+      bool srcMask = false;
+      for (int i=0; i<termCount; i++){  // super scalar loop
+        for (int v=0; v<vectorL; v++){
+          element = rraBaseList[rraIndexList[baseListIndexList[i]]]
+            + rraOffsetList[i] * vectorL + v;
+          if (prevElement != element){
+            // this is a new element
+            if (prevElement != NULL && !(dstMask || srcMask)){
+              // finally write the previous sum into the actual element b/c unmasked
+              *prevElement = tmpElement;
+            }else if (dstMask || srcMask){
+              // finally store dynMaskElement in dynMaskList b/c masking detected
+              dynMaskElement.element = prevElement;   // finish the entry
+              dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+            }
+            dynMaskElement.factors.clear(); // reset
+            dynMaskElement.values.clear();  // reset
+            prevElement = element;
+            srcMask = false;  // reset
+            dstMask = false;  // reset
+            if (dstMaskValue && (*element == *dstMaskValue))
+              dstMask = true;
+            else
+              tmpElement = *element;  // load tmpElement with current element
+          }
+          factor = factorList[i];
+          value = valueBaseList[baseListIndexList[i]]
+            + valueOffsetList[i] * vectorL + v;
+          dynMaskElement.factors.push_back(&(factorList[i])); // dynMaskElement
+          dynMaskElement.values.push_back(value); // dynMaskElement
+          if (srcMaskValue && (*value == *srcMaskValue)) srcMask = true;
+          if (!(dstMask || srcMask)){
+            tmpElement += factor * *value;  // perform calculation
+          }
+        }
+      }
+      // process the last element of the loop
+      if (prevElement != NULL && !(dstMask || srcMask)){
+        // finally write the previous sum into the actual element
+        *prevElement = tmpElement;
+      }else if (dstMask || srcMask){
+        // finally store dynMaskElement in dynMaskList b/c masking detected
+        dynMaskElement.element = prevElement;   // finish the entry
+        dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+      }
+      // fully unrolled across vectorL -> set to 1 before passing down
+      vectorL = 1;
     }
   }
   // call into handler method if there are any elements to handle
