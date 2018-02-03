@@ -84,7 +84,7 @@ module ESMF_RHandleMod
 
   type ESMF_DynamicMaskStateR8R8R8
     sequence  ! in order to safely assume first element is typeKey
-    character(len=6)    :: typeKey
+    character(len=7)    :: typeKey
     procedure(ESMF_DynamicMaskRoutineR8R8R8), pointer, nopass :: routine
     logical             :: dynamicSrcMaskIsPresent
     real(ESMF_KIND_R8)  :: dynamicSrcMaskValue
@@ -102,6 +102,35 @@ module ESMF_RHandleMod
 #ifndef ESMF_NO_DYNMASKOVERLOAD
 
   interface
+    subroutine ESMF_DynamicMaskRoutineR8R8R8V(dynMaskList, dynamicSrcMaskValue,&
+      dynamicDstMaskValue, rc)
+      use ESMF_UtilTypesMod
+      implicit none
+      type(ESMF_DynamicMaskElementR8R8R8V), pointer       :: dynMaskList(:)
+      real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
+      real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
+      integer,                       intent(out)  :: rc
+    end subroutine
+  end interface
+
+  type ESMF_DynamicMaskStateR8R8R8V
+    sequence  ! in order to safely assume first element is typeKey
+    character(len=7)    :: typeKey
+    procedure(ESMF_DynamicMaskRoutineR8R8R8V), pointer, nopass :: routine
+    logical             :: dynamicSrcMaskIsPresent
+    real(ESMF_KIND_R8)  :: dynamicSrcMaskValue
+    logical             :: dynamicDstMaskIsPresent
+    real(ESMF_KIND_R8)  :: dynamicDstMaskValue
+    logical             :: handleAllElements
+  end type
+  
+  type ESMF_DynamicMaskStateWrapR8R8R8V
+    type(ESMF_DynamicMaskStateR8R8R8V), pointer :: wrap
+  end type
+
+  !----
+
+  interface
     subroutine ESMF_DynamicMaskRoutineR4R8R4(dynMaskList, dynamicSrcMaskValue, &
       dynamicDstMaskValue, rc)
       use ESMF_UtilTypesMod
@@ -115,7 +144,7 @@ module ESMF_RHandleMod
 
   type ESMF_DynamicMaskStateR4R8R4
     sequence  ! in order to safely assume first element is typeKey
-    character(len=6)    :: typeKey
+    character(len=7)    :: typeKey
     procedure(ESMF_DynamicMaskRoutineR4R8R4), pointer, nopass :: routine
     logical             :: dynamicSrcMaskIsPresent
     real(ESMF_KIND_R4)  :: dynamicSrcMaskValue
@@ -128,6 +157,35 @@ module ESMF_RHandleMod
     type(ESMF_DynamicMaskStateR4R8R4), pointer :: wrap
   end type
   
+  !----
+
+  interface
+    subroutine ESMF_DynamicMaskRoutineR4R8R4V(dynMaskList, dynamicSrcMaskValue,&
+      dynamicDstMaskValue, rc)
+      use ESMF_UtilTypesMod
+      implicit none
+      type(ESMF_DynamicMaskElementR4R8R4V), pointer       :: dynMaskList(:)
+      real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
+      real(ESMF_KIND_R4),            intent(in), optional :: dynamicDstMaskValue
+      integer,                       intent(out)  :: rc
+    end subroutine
+  end interface
+
+  type ESMF_DynamicMaskStateR4R8R4V
+    sequence  ! in order to safely assume first element is typeKey
+    character(len=7)    :: typeKey
+    procedure(ESMF_DynamicMaskRoutineR4R8R4V), pointer, nopass :: routine
+    logical             :: dynamicSrcMaskIsPresent
+    real(ESMF_KIND_R4)  :: dynamicSrcMaskValue
+    logical             :: dynamicDstMaskIsPresent
+    real(ESMF_KIND_R4)  :: dynamicDstMaskValue
+    logical             :: handleAllElements
+  end type
+  
+  type ESMF_DynamicMaskStateWrapR4R8R4V
+    type(ESMF_DynamicMaskStateR4R8R4V), pointer :: wrap
+  end type
+
   !----
 
   interface
@@ -144,7 +202,7 @@ module ESMF_RHandleMod
 
   type ESMF_DynamicMaskStateR4R4R4
     sequence  ! in order to safely assume first element is typeKey
-    character(len=6)    :: typeKey
+    character(len=7)    :: typeKey
     procedure(ESMF_DynamicMaskRoutineR4R4R4), pointer, nopass :: routine
     logical             :: dynamicSrcMaskIsPresent
     real(ESMF_KIND_R4)  :: dynamicSrcMaskValue
@@ -157,6 +215,35 @@ module ESMF_RHandleMod
     type(ESMF_DynamicMaskStateR4R4R4), pointer :: wrap
   end type
   
+  !----
+
+  interface
+    subroutine ESMF_DynamicMaskRoutineR4R4R4V(dynMaskList, dynamicSrcMaskValue,&
+      dynamicDstMaskValue, rc)
+      use ESMF_UtilTypesMod
+      implicit none
+      type(ESMF_DynamicMaskElementR4R4R4V), pointer       :: dynMaskList(:)
+      real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
+      real(ESMF_KIND_R4),            intent(in), optional :: dynamicDstMaskValue
+      integer,                       intent(out)  :: rc
+    end subroutine
+  end interface
+
+  type ESMF_DynamicMaskStateR4R4R4V
+    sequence  ! in order to safely assume first element is typeKey
+    character(len=7)    :: typeKey
+    procedure(ESMF_DynamicMaskRoutineR4R4R4V), pointer, nopass :: routine
+    logical             :: dynamicSrcMaskIsPresent
+    real(ESMF_KIND_R4)  :: dynamicSrcMaskValue
+    logical             :: dynamicDstMaskIsPresent
+    real(ESMF_KIND_R4)  :: dynamicDstMaskValue
+    logical             :: handleAllElements
+  end type
+  
+  type ESMF_DynamicMaskStateWrapR4R4R4V
+    type(ESMF_DynamicMaskStateR4R4R4V), pointer :: wrap
+  end type
+
 #endif
 
 !------------------------------------------------------------------------------
@@ -166,10 +253,16 @@ module ESMF_RHandleMod
   public ESMF_DynamicMaskRoutineR8R8R8
   public ESMF_DynamicMaskStateR8R8R8, ESMF_DynamicMaskStateWrapR8R8R8
 #ifndef ESMF_NO_DYNMASKOVERLOAD
+  public ESMF_DynamicMaskRoutineR8R8R8V
+  public ESMF_DynamicMaskStateR8R8R8V, ESMF_DynamicMaskStateWrapR8R8R8V
   public ESMF_DynamicMaskRoutineR4R8R4
   public ESMF_DynamicMaskStateR4R8R4, ESMF_DynamicMaskStateWrapR4R8R4
+  public ESMF_DynamicMaskRoutineR4R8R4V
+  public ESMF_DynamicMaskStateR4R8R4V, ESMF_DynamicMaskStateWrapR4R8R4V
   public ESMF_DynamicMaskRoutineR4R4R4
   public ESMF_DynamicMaskStateR4R4R4, ESMF_DynamicMaskStateWrapR4R4R4
+  public ESMF_DynamicMaskRoutineR4R4R4V
+  public ESMF_DynamicMaskStateR4R4R4V, ESMF_DynamicMaskStateWrapR4R4R4V
 #endif
 
 !------------------------------------------------------------------------------
@@ -1166,7 +1259,8 @@ end module ESMF_RHandleMod
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_dynmaskcallbackr8r8r8"
 recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
-  elementVector, countVector, totalCount, factorsVector, valuesVector, rc)
+  elementVector, countVector, totalCount, factorsVector, valuesVector, &
+  vectorL, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_LogErrMod
@@ -1177,15 +1271,21 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
   type(ESMF_RouteHandle)        :: routehandle
   integer                       :: count
   type(C_PTR)                   :: elementVector(count)
+  real(ESMF_KIND_R8), pointer   :: elementV(:)
   integer                       :: countVector(count)
   integer                       :: totalCount
   real(ESMF_KIND_R8)            :: factorsVector(totalCount)
-  real(ESMF_KIND_R8)            :: valuesVector(totalCount)
+  type(C_PTR)                   :: valuesVector(totalCount)
+  real(ESMF_KIND_R8), pointer   :: value
+  real(ESMF_KIND_R8), pointer   :: valueV(:)
+  integer                       :: vectorL
   integer                       :: rc
   ! local variables
-  type(ESMF_DynamicMaskStateWrapR8R8R8) :: dynamicMaskState
-  integer                       :: localrc, i, j, k
-  type(ESMF_DynamicMaskElementR8R8R8), pointer :: dynamicMaskList(:)
+  integer                       :: localrc, i, ii, j, k, k_in, v
+  type(ESMF_DynamicMaskStateWrapR8R8R8)   :: dynamicMaskState
+  type(ESMF_DynamicMaskElementR8R8R8), pointer  :: dynamicMaskList(:)
+  type(ESMF_DynamicMaskStateWrapR8R8R8V)  :: dynamicMaskStateV
+  type(ESMF_DynamicMaskElementR8R8R8V), pointer :: dynamicMaskListV(:)
 
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
@@ -1200,53 +1300,132 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
   if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
     ESMF_CONTEXT, rcToReturn=rc)) return
   
-  ! verify that types are consistent with typeKey
-  if (dynamicMaskState%wrap%typeKey /= "R8R8R8") then
+  ! look at typeKey to see what needs to be done
+  if (dynamicMaskState%wrap%typeKey == "R8R8R8") then
+    ! non-vector version
+    ! prepare the dynamicMaskList
+    if (vectorL==1) then
+      ! no vectorization
+      allocate(dynamicMaskList(count))
+      k=1
+      do i=1, count
+        call C_F_POINTER(elementVector(i), dynamicMaskList(i)%dstElement)
+        allocate(dynamicMaskList(i)%factor(countVector(i)))
+        allocate(dynamicMaskList(i)%srcElement(countVector(i)))
+        do j=1, countVector(i)
+          dynamicMaskList(i)%factor(j) = factorsVector(k)
+          call C_F_POINTER(valuesVector(k), value)
+          dynamicMaskList(i)%srcElement(j) = value
+          k = k+1
+        enddo
+      enddo
+    else
+      ! unroll the vector dimension
+      allocate(dynamicMaskList(count*vectorL))
+      k=1
+      ii=1
+      do i=1, count
+        call C_F_POINTER(elementVector(i), elementV, (/vectorL/))
+        k_in=k  ! need to come back to this k value several times
+        do v=1, vectorL ! unrolling
+          dynamicMaskList(ii)%dstElement => elementV(v)
+          allocate(dynamicMaskList(ii)%factor(countVector(i)))
+          allocate(dynamicMaskList(ii)%srcElement(countVector(i)))
+          k=k_in  ! reset to the entrance value
+          do j=1, countVector(i)
+            dynamicMaskList(ii)%factor(j) = factorsVector(k)
+            call C_F_POINTER(valuesVector(k), valueV, (/vectorL/))
+            dynamicMaskList(ii)%srcElement(j) = valueV(v)
+            k = k+1
+          enddo
+          ii = ii+1
+        enddo
+      enddo
+    endif
+    ! call into user provided routine to handle dynamically masked elements
+    if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent &
+      .and. dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
+      call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+        dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, &
+        dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, &
+        rc=localrc)
+    else if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent) then
+      call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+        dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, &
+        rc=localrc)
+    else if (dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
+      call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+        dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, &
+        rc=localrc)
+    else
+      call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+        rc=localrc)
+    endif
+    ! local garbage collection before error handling to prevent memory leaks
+    do i=1, count
+      deallocate(dynamicMaskList(i)%factor)
+      deallocate(dynamicMaskList(i)%srcElement)
+    enddo
+    deallocate(dynamicMaskList)
+    ! error handling of call back into user routine
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (dynamicMaskState%wrap%typeKey == "R8R8R8V") then
+    ! vector version -> use correct variables
+    nullify(dynamicMaskStateV%wrap)
+    call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskStateV, localrc)
+    if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! prepare the dynamicMaskListV
+    allocate(dynamicMaskListV(count))
+    k=1
+    do i=1, count
+      call C_F_POINTER(elementVector(i), dynamicMaskListV(i)%dstElement, &
+        (/vectorL/))
+      allocate(dynamicMaskListV(i)%factor(countVector(i)))
+      allocate(dynamicMaskListV(i)%srcElement(countVector(i)))
+      do j=1, countVector(i)
+        dynamicMaskListV(i)%factor(j) = factorsVector(k)
+        call C_F_POINTER(valuesVector(k), &
+          dynamicMaskListV(i)%srcElement(j)%ptr, (/vectorL/))
+        k = k+1
+      enddo
+    enddo
+    ! call into user provided routine to handle dynamically masked elements
+    if (dynamicMaskStateV%wrap%dynamicSrcMaskIsPresent &
+      .and. dynamicMaskStateV%wrap%dynamicDstMaskIsPresent) then
+      call dynamicMaskStateV%wrap%routine(dynMaskList=dynamicMaskListV, &
+        dynamicSrcMaskValue=dynamicMaskStateV%wrap%dynamicSrcMaskValue, &
+        dynamicDstMaskValue=dynamicMaskStateV%wrap%dynamicDstMaskValue, &
+        rc=localrc)
+    else if (dynamicMaskStateV%wrap%dynamicSrcMaskIsPresent) then
+      call dynamicMaskStateV%wrap%routine(dynMaskList=dynamicMaskListV, &
+        dynamicSrcMaskValue=dynamicMaskStateV%wrap%dynamicSrcMaskValue, &
+        rc=localrc)
+    else if (dynamicMaskStateV%wrap%dynamicDstMaskIsPresent) then
+      call dynamicMaskStateV%wrap%routine(dynMaskList=dynamicMaskListV, &
+        dynamicDstMaskValue=dynamicMaskStateV%wrap%dynamicDstMaskValue, &
+        rc=localrc)
+    else
+      call dynamicMaskStateV%wrap%routine(dynMaskList=dynamicMaskListV, &
+        rc=localrc)
+    endif
+    ! local garbage collection before error handling to prevent memory leaks
+    do i=1, count
+      deallocate(dynamicMaskListV(i)%factor)
+      deallocate(dynamicMaskListV(i)%srcElement)
+    enddo
+    deallocate(dynamicMaskListV)
+    ! error handling of call back into user routine
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+  else    
     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
       msg="Inconsistency between the provided 'dynamicMaskRoutine' and "// &
       "actual data types.", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
   endif
-    
-  ! prepare the dynamicMaskList
-  allocate(dynamicMaskList(count))
-  k=1
-  do i=1, count
-    call C_F_POINTER(elementVector(i), dynamicMaskList(i)%dstElement)
-    allocate(dynamicMaskList(i)%factor(countVector(i)))
-    allocate(dynamicMaskList(i)%srcElement(countVector(i)))
-    do j=1, countVector(i)
-      dynamicMaskList(i)%factor(j) = factorsVector(k)
-      dynamicMaskList(i)%srcElement(j) = valuesVector(k)
-      k = k+1
-    enddo
-  enddo
-
-  ! call back into user provided routine to handle dynamically masked elements
-  if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent &
-    .and. dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
-    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
-      dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, &
-      dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, rc=localrc)
-  else if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent) then
-    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
-      dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, rc=localrc)
-  else if (dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
-    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
-      dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, rc=localrc)
-  else
-    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, rc=localrc)
-  endif
-  ! local garbage collection
-  do i=1, count
-    deallocate(dynamicMaskList(i)%factor)
-    deallocate(dynamicMaskList(i)%srcElement)
-  enddo
-  deallocate(dynamicMaskList)
-  ! error handling of call back into user routine
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! return successfully
   rc = ESMF_SUCCESS
@@ -1260,7 +1439,8 @@ end subroutine f_esmf_dynmaskcallbackr8r8r8
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_dynmaskcallbackr4r8r4"
 recursive subroutine f_esmf_dynmaskcallbackr4r8r4(routehandle, count, &
-  elementVector, countVector, totalCount, factorsVector, valuesVector, rc)
+  elementVector, countVector, totalCount, factorsVector, valuesVector, &
+  vectorL, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_LogErrMod
@@ -1271,15 +1451,21 @@ recursive subroutine f_esmf_dynmaskcallbackr4r8r4(routehandle, count, &
   type(ESMF_RouteHandle)        :: routehandle
   integer                       :: count
   type(C_PTR)                   :: elementVector(count)
+  real(ESMF_KIND_R4), pointer   :: elementV(:)
   integer                       :: countVector(count)
   integer                       :: totalCount
   real(ESMF_KIND_R8)            :: factorsVector(totalCount)
-  real(ESMF_KIND_R4)            :: valuesVector(totalCount)
+  type(C_PTR)                   :: valuesVector(totalCount)
+  real(ESMF_KIND_R4), pointer   :: value
+  real(ESMF_KIND_R4), pointer   :: valueV(:)
+  integer                       :: vectorL
   integer                       :: rc
   ! local variables
-  type(ESMF_DynamicMaskStateWrapR4R8R4) :: dynamicMaskState
-  integer                       :: localrc, i, j, k
-  type(ESMF_DynamicMaskElementR4R8R4), pointer :: dynamicMaskList(:)
+  integer                       :: localrc, i, ii, j, k, k_in, v
+  type(ESMF_DynamicMaskStateWrapR4R8R4)   :: dynamicMaskState
+  type(ESMF_DynamicMaskElementR4R8R4), pointer  :: dynamicMaskList(:)
+  type(ESMF_DynamicMaskStateWrapR4R8R4V)  :: dynamicMaskStateV
+  type(ESMF_DynamicMaskElementR4R8R4V), pointer :: dynamicMaskListV(:)
 
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
@@ -1293,54 +1479,133 @@ recursive subroutine f_esmf_dynmaskcallbackr4r8r4(routehandle, count, &
   call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskState, localrc)
   if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
     ESMF_CONTEXT, rcToReturn=rc)) return
-    
-  ! verify that types are consistent with typeKey
-  if (dynamicMaskState%wrap%typeKey /= "R4R8R4") then
+  
+  ! look at typeKey to see what needs to be done
+  if (dynamicMaskState%wrap%typeKey == "R4R8R4") then
+    ! non-vector version
+    ! prepare the dynamicMaskList
+    if (vectorL==1) then
+      ! no vectorization
+      allocate(dynamicMaskList(count))
+      k=1
+      do i=1, count
+        call C_F_POINTER(elementVector(i), dynamicMaskList(i)%dstElement)
+        allocate(dynamicMaskList(i)%factor(countVector(i)))
+        allocate(dynamicMaskList(i)%srcElement(countVector(i)))
+        do j=1, countVector(i)
+          dynamicMaskList(i)%factor(j) = factorsVector(k)
+          call C_F_POINTER(valuesVector(k), value)
+          dynamicMaskList(i)%srcElement(j) = value
+          k = k+1
+        enddo
+      enddo
+    else
+      ! unroll the vector dimension
+      allocate(dynamicMaskList(count*vectorL))
+      k=1
+      ii=1
+      do i=1, count
+        call C_F_POINTER(elementVector(i), elementV, (/vectorL/))
+        k_in=k  ! need to come back to this k value several times
+        do v=1, vectorL ! unrolling
+          dynamicMaskList(ii)%dstElement => elementV(v)
+          allocate(dynamicMaskList(ii)%factor(countVector(i)))
+          allocate(dynamicMaskList(ii)%srcElement(countVector(i)))
+          k=k_in  ! reset to the entrance value
+          do j=1, countVector(i)
+            dynamicMaskList(ii)%factor(j) = factorsVector(k)
+            call C_F_POINTER(valuesVector(k), valueV, (/vectorL/))
+            dynamicMaskList(ii)%srcElement(j) = valueV(v)
+            k = k+1
+          enddo
+          ii = ii+1
+        enddo
+      enddo
+    endif
+    ! call into user provided routine to handle dynamically masked elements
+    if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent &
+      .and. dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
+      call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+        dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, &
+        dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, &
+        rc=localrc)
+    else if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent) then
+      call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+        dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, &
+        rc=localrc)
+    else if (dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
+      call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+        dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, &
+        rc=localrc)
+    else
+      call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+        rc=localrc)
+    endif
+    ! local garbage collection before error handling to prevent memory leaks
+    do i=1, count
+      deallocate(dynamicMaskList(i)%factor)
+      deallocate(dynamicMaskList(i)%srcElement)
+    enddo
+    deallocate(dynamicMaskList)
+    ! error handling of call back into user routine
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (dynamicMaskState%wrap%typeKey == "R4R8R4V") then
+    ! vector version -> use correct variables
+    nullify(dynamicMaskStateV%wrap)
+    call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskStateV, localrc)
+    if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! prepare the dynamicMaskListV
+    allocate(dynamicMaskListV(count))
+    k=1
+    do i=1, count
+      call C_F_POINTER(elementVector(i), dynamicMaskListV(i)%dstElement, &
+        (/vectorL/))
+      allocate(dynamicMaskListV(i)%factor(countVector(i)))
+      allocate(dynamicMaskListV(i)%srcElement(countVector(i)))
+      do j=1, countVector(i)
+        dynamicMaskListV(i)%factor(j) = factorsVector(k)
+        call C_F_POINTER(valuesVector(k), &
+          dynamicMaskListV(i)%srcElement(j)%ptr, (/vectorL/))
+        k = k+1
+      enddo
+    enddo
+    ! call into user provided routine to handle dynamically masked elements
+    if (dynamicMaskStateV%wrap%dynamicSrcMaskIsPresent &
+      .and. dynamicMaskStateV%wrap%dynamicDstMaskIsPresent) then
+      call dynamicMaskStateV%wrap%routine(dynMaskList=dynamicMaskListV, &
+        dynamicSrcMaskValue=dynamicMaskStateV%wrap%dynamicSrcMaskValue, &
+        dynamicDstMaskValue=dynamicMaskStateV%wrap%dynamicDstMaskValue, &
+        rc=localrc)
+    else if (dynamicMaskStateV%wrap%dynamicSrcMaskIsPresent) then
+      call dynamicMaskStateV%wrap%routine(dynMaskList=dynamicMaskListV, &
+        dynamicSrcMaskValue=dynamicMaskStateV%wrap%dynamicSrcMaskValue, &
+        rc=localrc)
+    else if (dynamicMaskStateV%wrap%dynamicDstMaskIsPresent) then
+      call dynamicMaskStateV%wrap%routine(dynMaskList=dynamicMaskListV, &
+        dynamicDstMaskValue=dynamicMaskStateV%wrap%dynamicDstMaskValue, &
+        rc=localrc)
+    else
+      call dynamicMaskStateV%wrap%routine(dynMaskList=dynamicMaskListV, &
+        rc=localrc)
+    endif
+    ! local garbage collection before error handling to prevent memory leaks
+    do i=1, count
+      deallocate(dynamicMaskListV(i)%factor)
+      deallocate(dynamicMaskListV(i)%srcElement)
+    enddo
+    deallocate(dynamicMaskListV)
+    ! error handling of call back into user routine
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+  else    
     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
       msg="Inconsistency between the provided 'dynamicMaskRoutine' and "// &
       "actual data types.", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
   endif
-    
-  ! prepare the dynamicMaskList
-  allocate(dynamicMaskList(count))
-  k=1
-  do i=1, count
-    call C_F_POINTER(elementVector(i), dynamicMaskList(i)%dstElement)
-    allocate(dynamicMaskList(i)%factor(countVector(i)))
-    allocate(dynamicMaskList(i)%srcElement(countVector(i)))
-    do j=1, countVector(i)
-      dynamicMaskList(i)%factor(j) = factorsVector(k)
-      dynamicMaskList(i)%srcElement(j) = valuesVector(k)
-      k = k+1
-    enddo
-  enddo
-
-  ! call back into user provided routine to handle dynamically masked elements
-  if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent &
-    .and. dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
-    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
-      dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, &
-      dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, rc=localrc)
-  else if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent) then
-    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
-      dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, rc=localrc)
-  else if (dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
-    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
-      dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, rc=localrc)
-  else
-    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, rc=localrc)
-  endif
-  ! local garbage collection
-  do i=1, count
-    deallocate(dynamicMaskList(i)%factor)
-    deallocate(dynamicMaskList(i)%srcElement)
-  enddo
-  deallocate(dynamicMaskList)
-  ! error handling of call back into user routine
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! return successfully
   rc = ESMF_SUCCESS
@@ -1353,7 +1618,8 @@ end subroutine f_esmf_dynmaskcallbackr4r8r4
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_dynmaskcallbackr4r4r4"
 recursive subroutine f_esmf_dynmaskcallbackr4r4r4(routehandle, count, &
-  elementVector, countVector, totalCount, factorsVector, valuesVector, rc)
+  elementVector, countVector, totalCount, factorsVector, valuesVector, &
+  vectorL, rc)
   use ESMF_UtilTypesMod      ! ESMF utility types
   use ESMF_BaseMod           ! ESMF base class
   use ESMF_LogErrMod
@@ -1364,21 +1630,27 @@ recursive subroutine f_esmf_dynmaskcallbackr4r4r4(routehandle, count, &
   type(ESMF_RouteHandle)        :: routehandle
   integer                       :: count
   type(C_PTR)                   :: elementVector(count)
+  real(ESMF_KIND_R4), pointer   :: elementV(:)
   integer                       :: countVector(count)
   integer                       :: totalCount
   real(ESMF_KIND_R4)            :: factorsVector(totalCount)
-  real(ESMF_KIND_R4)            :: valuesVector(totalCount)
+  type(C_PTR)                   :: valuesVector(totalCount)
+  real(ESMF_KIND_R4), pointer   :: value
+  real(ESMF_KIND_R4), pointer   :: valueV(:)
+  integer                       :: vectorL
   integer                       :: rc
   ! local variables
-  type(ESMF_DynamicMaskStateWrapR4R4R4) :: dynamicMaskState
-  integer                       :: localrc, i, j, k
-  type(ESMF_DynamicMaskElementR4R4R4), pointer :: dynamicMaskList(:)
+  integer                       :: localrc, i, ii, j, k, k_in, v
+  type(ESMF_DynamicMaskStateWrapR4R4R4)   :: dynamicMaskState
+  type(ESMF_DynamicMaskElementR4R4R4), pointer  :: dynamicMaskList(:)
+  type(ESMF_DynamicMaskStateWrapR4R4R4V)  :: dynamicMaskStateV
+  type(ESMF_DynamicMaskElementR4R4R4V), pointer :: dynamicMaskListV(:)
 
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
 
 #if 0
-  print *, "*** made it into f_esmf_dynamicmaskcallback(), with count=", count
+  print *, "*** made it into f_esmf_dynmaskcallbackr4r4r4(), with count=", count
 #endif
 
   ! access the dynamicMaskState that is stored inside the Routehandle
@@ -1386,54 +1658,133 @@ recursive subroutine f_esmf_dynmaskcallbackr4r4r4(routehandle, count, &
   call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskState, localrc)
   if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
     ESMF_CONTEXT, rcToReturn=rc)) return
-    
-  ! verify that types are consistent with typeKey
-  if (dynamicMaskState%wrap%typeKey /= "R4R4R4") then
+  
+  ! look at typeKey to see what needs to be done
+  if (dynamicMaskState%wrap%typeKey == "R4R4R4") then
+    ! non-vector version
+    ! prepare the dynamicMaskList
+    if (vectorL==1) then
+      ! no vectorization
+      allocate(dynamicMaskList(count))
+      k=1
+      do i=1, count
+        call C_F_POINTER(elementVector(i), dynamicMaskList(i)%dstElement)
+        allocate(dynamicMaskList(i)%factor(countVector(i)))
+        allocate(dynamicMaskList(i)%srcElement(countVector(i)))
+        do j=1, countVector(i)
+          dynamicMaskList(i)%factor(j) = factorsVector(k)
+          call C_F_POINTER(valuesVector(k), value)
+          dynamicMaskList(i)%srcElement(j) = value
+          k = k+1
+        enddo
+      enddo
+    else
+      ! unroll the vector dimension
+      allocate(dynamicMaskList(count*vectorL))
+      k=1
+      ii=1
+      do i=1, count
+        call C_F_POINTER(elementVector(i), elementV, (/vectorL/))
+        k_in=k  ! need to come back to this k value several times
+        do v=1, vectorL ! unrolling
+          dynamicMaskList(ii)%dstElement => elementV(v)
+          allocate(dynamicMaskList(ii)%factor(countVector(i)))
+          allocate(dynamicMaskList(ii)%srcElement(countVector(i)))
+          k=k_in  ! reset to the entrance value
+          do j=1, countVector(i)
+            dynamicMaskList(ii)%factor(j) = factorsVector(k)
+            call C_F_POINTER(valuesVector(k), valueV, (/vectorL/))
+            dynamicMaskList(ii)%srcElement(j) = valueV(v)
+            k = k+1
+          enddo
+          ii = ii+1
+        enddo
+      enddo
+    endif
+    ! call into user provided routine to handle dynamically masked elements
+    if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent &
+      .and. dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
+      call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+        dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, &
+        dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, &
+        rc=localrc)
+    else if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent) then
+      call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+        dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, &
+        rc=localrc)
+    else if (dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
+      call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+        dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, &
+        rc=localrc)
+    else
+      call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
+        rc=localrc)
+    endif
+    ! local garbage collection before error handling to prevent memory leaks
+    do i=1, count
+      deallocate(dynamicMaskList(i)%factor)
+      deallocate(dynamicMaskList(i)%srcElement)
+    enddo
+    deallocate(dynamicMaskList)
+    ! error handling of call back into user routine
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+  else if (dynamicMaskState%wrap%typeKey == "R4R4R4V") then
+    ! vector version -> use correct variables
+    nullify(dynamicMaskStateV%wrap)
+    call c_ESMC_RouteHandleGetAS(routehandle, dynamicMaskStateV, localrc)
+    if (ESMF_LogFoundError(localrc, msg="Must provide dynamicMaskRoutine!", &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! prepare the dynamicMaskListV
+    allocate(dynamicMaskListV(count))
+    k=1
+    do i=1, count
+      call C_F_POINTER(elementVector(i), dynamicMaskListV(i)%dstElement, &
+        (/vectorL/))
+      allocate(dynamicMaskListV(i)%factor(countVector(i)))
+      allocate(dynamicMaskListV(i)%srcElement(countVector(i)))
+      do j=1, countVector(i)
+        dynamicMaskListV(i)%factor(j) = factorsVector(k)
+        call C_F_POINTER(valuesVector(k), &
+          dynamicMaskListV(i)%srcElement(j)%ptr, (/vectorL/))
+        k = k+1
+      enddo
+    enddo
+    ! call into user provided routine to handle dynamically masked elements
+    if (dynamicMaskStateV%wrap%dynamicSrcMaskIsPresent &
+      .and. dynamicMaskStateV%wrap%dynamicDstMaskIsPresent) then
+      call dynamicMaskStateV%wrap%routine(dynMaskList=dynamicMaskListV, &
+        dynamicSrcMaskValue=dynamicMaskStateV%wrap%dynamicSrcMaskValue, &
+        dynamicDstMaskValue=dynamicMaskStateV%wrap%dynamicDstMaskValue, &
+        rc=localrc)
+    else if (dynamicMaskStateV%wrap%dynamicSrcMaskIsPresent) then
+      call dynamicMaskStateV%wrap%routine(dynMaskList=dynamicMaskListV, &
+        dynamicSrcMaskValue=dynamicMaskStateV%wrap%dynamicSrcMaskValue, &
+        rc=localrc)
+    else if (dynamicMaskStateV%wrap%dynamicDstMaskIsPresent) then
+      call dynamicMaskStateV%wrap%routine(dynMaskList=dynamicMaskListV, &
+        dynamicDstMaskValue=dynamicMaskStateV%wrap%dynamicDstMaskValue, &
+        rc=localrc)
+    else
+      call dynamicMaskStateV%wrap%routine(dynMaskList=dynamicMaskListV, &
+        rc=localrc)
+    endif
+    ! local garbage collection before error handling to prevent memory leaks
+    do i=1, count
+      deallocate(dynamicMaskListV(i)%factor)
+      deallocate(dynamicMaskListV(i)%srcElement)
+    enddo
+    deallocate(dynamicMaskListV)
+    ! error handling of call back into user routine
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+  else    
     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
       msg="Inconsistency between the provided 'dynamicMaskRoutine' and "// &
       "actual data types.", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
   endif
-    
-  ! prepare the dynamicMaskList
-  allocate(dynamicMaskList(count))
-  k=1
-  do i=1, count
-    call C_F_POINTER(elementVector(i), dynamicMaskList(i)%dstElement)
-    allocate(dynamicMaskList(i)%factor(countVector(i)))
-    allocate(dynamicMaskList(i)%srcElement(countVector(i)))
-    do j=1, countVector(i)
-      dynamicMaskList(i)%factor(j) = factorsVector(k)
-      dynamicMaskList(i)%srcElement(j) = valuesVector(k)
-      k = k+1
-    enddo
-  enddo
-
-  ! call back into user provided routine to handle dynamically masked elements
-  if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent &
-    .and. dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
-    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
-      dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, &
-      dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, rc=localrc)
-  else if (dynamicMaskState%wrap%dynamicSrcMaskIsPresent) then
-    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
-      dynamicSrcMaskValue=dynamicMaskState%wrap%dynamicSrcMaskValue, rc=localrc)
-  else if (dynamicMaskState%wrap%dynamicDstMaskIsPresent) then
-    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, &
-      dynamicDstMaskValue=dynamicMaskState%wrap%dynamicDstMaskValue, rc=localrc)
-  else
-    call dynamicMaskState%wrap%routine(dynMaskList=dynamicMaskList, rc=localrc)
-  endif
-  ! local garbage collection
-  do i=1, count
-    deallocate(dynamicMaskList(i)%factor)
-    deallocate(dynamicMaskList(i)%srcElement)
-  enddo
-  deallocate(dynamicMaskList)
-  ! error handling of call back into user routine
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
 
   ! return successfully
   rc = ESMF_SUCCESS

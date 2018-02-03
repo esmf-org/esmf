@@ -61,15 +61,15 @@ static const char *const version = "$Id$";
 // prototypes for Fortran interface routines called by C++ code below
 extern "C" {
   void FTN_X(f_esmf_dynmaskcallbackr8r8r8)(ESMCI::RouteHandle **ptr, 
-    int *count, void **elementVector, int *countVector, int *totalCount,
-    void *factorsVector, void *valuesVector, int *rc);
+    int *count, void *elementVector, int *countVector, int *totalCount,
+    void *factorsVector, void *valuesVector, int *vectorL, int *rc);
 #ifndef ESMF_NO_DYNMASKOVERLOAD
   void FTN_X(f_esmf_dynmaskcallbackr4r8r4)(ESMCI::RouteHandle **ptr, 
-    int *count, void **elementVector, int *countVector, int *totalCount,
-    void *factorsVector, void *valuesVector, int *rc);
+    int *count, void *elementVector, int *countVector, int *totalCount,
+    void *factorsVector, void *valuesVector, int *vectorL, int *rc);
   void FTN_X(f_esmf_dynmaskcallbackr4r4r4)(ESMCI::RouteHandle **ptr, 
-    int *count, void **elementVector, int *countVector, int *totalCount,
-    void *factorsVector, void *valuesVector, int *rc);
+    int *count, void *elementVector, int *countVector, int *totalCount,
+    void *factorsVector, void *valuesVector, int *vectorL, int *rc);
 #endif
 }
 //-------------------------------------------------------------------------
@@ -6836,7 +6836,7 @@ template<typename T, typename U, typename V>
   }
   // prepare vectors to be passed to the fortran call back
   int count=dynMaskList.size();
-  vector<void *> elementVector(count);
+  vector<T *> elementVector(count);
   vector<int> countVector(count);
   int totalCount=0;
   for (int i=0; i<count; i++){
@@ -6853,12 +6853,12 @@ template<typename T, typename U, typename V>
     
   }
   vector<U> factorsVector(totalCount);
-  vector<V> valuesVector(totalCount);
+  vector<V *> valuesVector(totalCount);
   int k=0;
   for (int i=0; i<count; i++){
     for (int j=0; j<countVector[i]; j++){
       factorsVector[k] = *(dynMaskList[i].factors[j]);
-      valuesVector[k] = *(dynMaskList[i].values[j]);
+      valuesVector[k] = dynMaskList[i].values[j];
       ++k;
     }
   }
@@ -6867,7 +6867,7 @@ template<typename T, typename U, typename V>
     typeid(V)==typeid(ESMC_R8)){
     FTN_X(f_esmf_dynmaskcallbackr8r8r8)(&rh, &count, &(elementVector[0]), 
       &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
-      &localrc);
+      &vectorL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 #ifndef ESMF_NO_DYNMASKOVERLOAD
@@ -6875,14 +6875,14 @@ template<typename T, typename U, typename V>
     typeid(V)==typeid(ESMC_R4)){
     FTN_X(f_esmf_dynmaskcallbackr4r8r4)(&rh, &count, &(elementVector[0]), 
       &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
-      &localrc);
+      &vectorL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
   }else if (typeid(T)==typeid(ESMC_R4) && typeid(U)==typeid(ESMC_R4) &&
     typeid(V)==typeid(ESMC_R4)){
     FTN_X(f_esmf_dynmaskcallbackr4r4r4)(&rh, &count, &(elementVector[0]), 
       &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
-      &localrc);
+      &vectorL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 #endif
