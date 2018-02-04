@@ -2156,7 +2156,7 @@ void calc_nearest_mat_serial(PointList *srcpointlist, PointList *dstpointlist, S
 
 
   if (srcpointlist->get_coord_dim() != dstpointlist->get_coord_dim()) {
-    Throw() << "src and dst mesh must have the same spatial dimension for conservative regridding";
+    Throw() << "src and dst mesh must have the same spatial dimension for nearest regridding";
   }
 
 
@@ -2179,6 +2179,137 @@ void calc_nearest_mat_serial(PointList *srcpointlist, PointList *dstpointlist, S
     // Put weights into weight matrix
     // Need merge version in nearest src to dest case where there may be more than 1 src,dst pair with the same dst.
     iw.InsertRowMergeSingle(row, col);  
+    
+  } // for searchresult
+}
+
+
+void calc_nearest_npnts_mat_serial(PointList *srcpointlist, PointList *dstpointlist, SearchResult &sres, IWeights &iw) {
+  Trace __trace("calc_nearest_mat_serial(PointList *srcpointlist, PointList *dstpointlist, SearchResult &sres, IWeights &iw)");
+
+  // Make sure dimensions match
+  if (srcpointlist->get_coord_dim() != dstpointlist->get_coord_dim()) {
+    Throw() << "src and dst must have the same spatial dimension for nearest regridding";
+  }
+
+
+  // Temporary empty col with negatives so unset values
+  // can be detected if they sneak through
+  IWeights::Entry col_empty(-1, 0, -1.0, 0);
+
+  // Put this outside loop, so it doesn't keep allocating memory every time 
+  std::vector<IWeights::Entry> cols;
+
+  // Loop through search results
+  SearchResult::iterator sb = sres.begin(), se = sres.end();
+  for (; sb != se; sb++) {
+    Search_result &sr = **sb;
+
+    // Get dst location in dstpointlist
+    int dst_loc=sr.dst_gid;
+
+    // Get destination id
+    int dst_id=dstpointlist->get_id(dst_loc);
+
+    // Get dst point coords
+    const double *coord=dstpointlist->get_coord_ptr(dst_loc);
+    double dst_pnt[3];
+    dst_pnt[0] = coord[0];
+    dst_pnt[1] = coord[1];
+    dst_pnt[2] = (dstpointlist->get_coord_dim() == 3 ? coord[2] : 0.0);
+
+    // Set row info (i.e. the destination id)
+    IWeights::Entry row(dst_id, 0, 0.0, 0);
+
+    // Clear and then Reserve to potential size
+    cols.clear();
+    cols.reserve(sr.nodes.size());
+
+#if 0
+    if (sr.nodes.size() == 3) {
+
+      double tri[9];
+
+      tri[0]=sr.nodes[0].pcoord[0];
+      tri[1]=sr.nodes[0].pcoord[1];
+      tri[2]=sr.nodes[0].pcoord[2];
+
+      tri[3]=sr.nodes[1].pcoord[0];
+      tri[4]=sr.nodes[1].pcoord[1];
+      tri[5]=sr.nodes[1].pcoord[2];
+
+      tri[6]=sr.nodes[2].pcoord[0];
+      tri[7]=sr.nodes[2].pcoord[1];
+      tri[8]=sr.nodes[2].pcoord[2];
+
+      double center[3]={0.0,0.0,0.0};
+
+      double p[2],t;
+
+      if (!intersect_tri_with_line(tri, dst_pnt, center, p, &t)) {
+        continue;
+      }
+
+      IWeights::Entry col_entry0(sr.nodes[0].dst_gid, 0, 1-p[0]-p[1], 0);
+      cols.push_back(col_entry0);
+
+      IWeights::Entry col_entry1(sr.nodes[1].dst_gid, 0, p[0], 0);
+      cols.push_back(col_entry1);
+
+      IWeights::Entry col_entry2(sr.nodes[2].dst_gid, 0, p[1], 0);
+      cols.push_back(col_entry2);
+    }
+#endif
+
+    // Loop calculating weights
+    double tot=0.0;
+    for (int i=0; i<sr.nodes.size(); i++) {
+
+      // Get coordinates of src point
+      double *coord=sr.nodes[i].pcoord;
+
+      // Calculate distance 
+      double dist=sqrt((dst_pnt[0]-coord[0])*(dst_pnt[0]-coord[0])+
+                       (dst_pnt[1]-coord[1])*(dst_pnt[1]-coord[1])+
+                       (dst_pnt[2]-coord[2])*(dst_pnt[2]-coord[2]));
+      
+      // Skip 0.0 for now. TODO: deal with later      
+      if (dist == 0.0) continue;
+
+      // 1 over dist
+      double inv_dist=1.0/(dist*dist*dist*dist);
+
+      // Sum total weights
+      tot += inv_dist;
+
+      // Set col entry info
+      // NOTE: dst_gid actually contains src_gid 
+      IWeights::Entry col_entry(sr.nodes[i].dst_gid, 0, inv_dist, 0);
+
+      // Push into 
+      cols.push_back(col_entry);
+    }
+
+
+
+    // Loop dividing by tot
+    for (int i=0; i<cols.size(); i++) {
+      cols[i].value=cols[i].value/tot;
+    }
+
+
+    // DEBUG
+    //   if ((dst_id==7050) || (dst_id==6878) || (dst_id==6880)) {
+    if ((dst_id==4581) || (dst_id==4751) || (dst_id==4666)) {
+      printf("wgt calc: dst_id=%d ::",dst_id);
+      for (int i=0; i<cols.size(); i++) {
+        printf(" %d %g, \n",cols[i].id,cols[i].value);
+      }
+      printf("\n");
+    }
+
+    // Put weights into weight matrix
+    iw.InsertRow(row, cols);  
     
   } // for searchresult
 }
@@ -2321,7 +2452,7 @@ static GeomRend::DstConfig get_dst_config(int imethod) {
 Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, Mesh *midmesh, 
                bool freeze_src_, int imethod, 
                bool set_dst_status, WMat &dst_status,
-               MAP_TYPE mtype, int unmappedaction):
+               MAP_TYPE mtype, int unmappedaction, int _num_src_pnts):
                
 sres(),
 grend(src, srcplist, dest, dstplist, get_dst_config(imethod), freeze_src_, (mtype==MAP_TYPE_GREAT_CIRCLE)),
@@ -2333,6 +2464,7 @@ has_patch(false),
 has_cnsrv(false),
 has_nearest_src_to_dst(false),
 has_nearest_dst_to_src(false),
+num_src_pnts(_num_src_pnts), 
 srcmesh(src),
 dstmesh(dest),
 dstpointlist(dstplist),
@@ -2375,7 +2507,12 @@ interp_method(imethod)
       Throw() << "unable to proceed with interpolation method dst_to_src";
 
     } else if (has_nearest_src_to_dst) {
-      ParSearchNearestSrcToDst(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres, set_dst_status, dst_status);
+      if (num_src_pnts == 1) {
+        ParSearchNearestSrcToDst(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres, set_dst_status, dst_status);
+      } else {
+        ParSearchNearestSrcToDstNPnts(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), num_src_pnts, unmappedaction, sres, set_dst_status, dst_status);
+      }
+
       // Redistribute regrid status
       if (set_dst_status) {
         dst_status.Migrate(*dstplist);
@@ -2412,7 +2549,11 @@ interp_method(imethod)
     if (has_nearest_dst_to_src) {
       Throw() << "unable to proceed with interpolation method dst_to_src";
     } else if (has_nearest_src_to_dst) {
-      SearchNearestSrcToDst(*srcpointlist, *dstpointlist, unmappedaction, sres, set_dst_status, dst_status);
+      if (num_src_pnts == 1) {
+        SearchNearestSrcToDst(*srcpointlist, *dstpointlist, unmappedaction, sres, set_dst_status, dst_status);
+      } else {
+        SearchNearestSrcToDstNPnts(*srcpointlist, *dstpointlist, num_src_pnts, unmappedaction, sres, set_dst_status, dst_status);
+      }
     } else {
 
       if (search_obj_type == MeshObj::NODE) {
@@ -2442,7 +2583,7 @@ Interp::~Interp() {
  */
 void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &dst_status) {
   Trace __trace("Interp::operator()(int fpair_num, IWeights &iw)");
-  
+
   IWeights src_frac,dst_frac; // Use IW to get out source and dst frac and to migrate it to the correct procs
                               // eventually make a dedicated class for migrating values associated with mesh
 
@@ -2635,8 +2776,13 @@ void Interp::mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac
   if (interp_method == INTERP_STD) mat_point_serial_transfer(*srcF[fpair_num], sres, iw, dstpointlist);
   else if (interp_method == INTERP_PATCH) mat_patch_serial_transfer(*srcmesh->GetCoordField(), *srcF[fpair_num], sres, srcmesh, iw, dstpointlist);
   else if (interp_method == INTERP_CONSERVE) calc_conserve_mat_serial(*srcmesh, *dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz, set_dst_status, dst_status);
-  else if (interp_method == INTERP_NEAREST_SRC_TO_DST) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
-  else if (interp_method == INTERP_NEAREST_DST_TO_SRC) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
+  else if (interp_method == INTERP_NEAREST_SRC_TO_DST) {
+    if (num_src_pnts == 1) {
+      calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
+    } else {
+      calc_nearest_npnts_mat_serial(srcpointlist, dstpointlist, sres, iw);
+    }
+  } else if (interp_method == INTERP_NEAREST_DST_TO_SRC) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
   else if (interp_method == INTERP_CONSERVE_2ND) calc_2nd_order_conserve_mat_serial(*srcmesh, *dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz, set_dst_status, dst_status);
 
 }
@@ -2654,7 +2800,11 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
     calc_2nd_order_conserve_mat_serial(grend.GetSrcRend(),grend.GetDstRend(),
                              midmesh, sres, iw, src_frac, dst_frac, zz, set_dst_status, dst_status);
   } else if (interp_method == INTERP_NEAREST_SRC_TO_DST) {
-    calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
+    if (num_src_pnts == 1) {
+      calc_nearest_mat_serial(&(grend.GetSrcPlistRend()), &(grend.GetDstPlistRend()), sres, iw);
+    } else {
+      calc_nearest_npnts_mat_serial(&(grend.GetSrcPlistRend()), &(grend.GetDstPlistRend()), sres, iw);
+    }
   } else if (interp_method == INTERP_NEAREST_DST_TO_SRC) {
     calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
   } else {

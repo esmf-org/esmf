@@ -139,7 +139,7 @@ namespace ESMCI {
     // !ARGUMENTS:
     //
 		    int _id,
-		    double *_coord
+		    const double *_coord
 		    ) {
     //
     // !DESCRIPTION:

@@ -879,6 +879,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     polemethod, regridPoleNPnts, & 
                     lineType, &
                     normType, &
+                    extrapMethod, &
+                    extrapNumSrcPnts, &
                     unmappedaction, ignoreDegenerate, &
                     srcTermProcessing, & 
                     pipeLineDepth, &
@@ -895,12 +897,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Field),               intent(inout)           :: dstField
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),          intent(in),    optional :: srcMaskValues(:)
-       integer(ESMF_KIND_I4),         intent(in),    optional :: dstMaskValues(:)
+      integer(ESMF_KIND_I4),         intent(in),    optional :: dstMaskValues(:)
       type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
       type(ESMF_PoleMethod_Flag),     intent(in),    optional :: polemethod
       integer,                        intent(in),    optional :: regridPoleNPnts
       type(ESMF_LineType_Flag),       intent(in),    optional :: lineType
       type(ESMF_NormType_Flag),       intent(in),    optional :: normType
+      type(ESMF_ExtrapMethod_Flag),   intent(in),    optional :: extrapMethod
+      integer,                        intent(in),    optional :: extrapNumSrcPnts
       type(ESMF_UnmappedAction_Flag), intent(in),    optional :: unmappedaction
       logical,                        intent(in),    optional :: ignoreDegenerate
       integer,                        intent(inout), optional :: srcTermProcessing
@@ -1170,6 +1174,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logical :: localIgnoreDegenerate
         type(ESMF_LineType_Flag):: localLineType
         type(ESMF_NormType_Flag):: localNormType
+        type(ESMF_ExtrapMethod_Flag):: localExtrapMethod
         logical :: srcDual, src_pl_used, dst_pl_used
         type(ESMF_PointList) :: dstPointList, srcPointList
         type(ESMF_LocStream) :: dstLocStream, srcLocStream
@@ -1177,6 +1182,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array) :: statusArray
         type(ESMF_TypeKind_Flag) :: typekind
         integer :: tileCount
+        integer :: localExtrapNumSrcPnts
 
 !        real(ESMF_KIND_R8) :: beg_time, end_time
 !        call ESMF_VMWtime(beg_time)
@@ -1268,6 +1274,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            lregridmethod=ESMF_REGRIDMETHOD_BILINEAR
         endif
 
+        ! Handle optional extrap method argument
+        if (present(extrapMethod)) then
+           localExtrapMethod=extrapMethod
+        else     
+           localExtrapMethod=ESMF_EXTRAPMETHOD_NONE
+        endif
+
+
         ! TODO: If lineType is present then do error checking here
 
         ! Handle optional lineType argument
@@ -1306,6 +1320,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            else    
               localpolemethod=ESMF_POLEMETHOD_ALLAVG
            endif
+        endif
+
+        ! Handle default for extrapNumSrcPnts
+        if (present(extrapNumSrcPnts)) then
+           localExtrapNumSrcPnts=extrapNumSrcPnts
+        else 
+           localExtrapNumSrcPnts=1
         endif
         
         if (localpolemethod .eq. ESMF_POLEMETHOD_NPNTAVG) then
@@ -1760,6 +1781,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localpolemethod, localRegridPoleNPnts, &
                                   lregridScheme, &
                                   hasStatusArray, statusArray, &
+                                  localExtrapMethod, &
+                                  localExtrapNumSrcPnts, &
                                   unmappedaction, &
                                   localIgnoreDegenerate, &
                                   srcTermProcessing, &
@@ -1792,6 +1815,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localpolemethod, localRegridPoleNPnts, &
                                   lregridScheme, &
                                   hasStatusArray, statusArray, &
+                                  localExtrapMethod, &
+                                  localExtrapNumSrcPnts, &
                                   unmappedaction, &
                                   localIgnoreDegenerate, &
                                   srcTermProcessing, &

@@ -729,6 +729,19 @@
            ESMF_REGRIDMETHOD_CONSERVE_2ND  = ESMF_RegridMethod_Flag(5)
 
 
+!------------------------------------------------------------------------------
+      type ESMF_ExtrapMethod_Flag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+!  private
+         integer :: extrapmethod
+      end type
+
+
+      type(ESMF_ExtrapMethod_Flag), parameter :: &
+           ESMF_EXTRAPMETHOD_NONE    = ESMF_ExtrapMethod_Flag(0), &
+           ESMF_EXTRAPMETHOD_NEAREST_STOD = ESMF_ExtrapMethod_Flag(1)
 
 !------------------------------------------------------------------------------
       type ESMF_LineType_Flag
@@ -1024,6 +1037,9 @@
                                    ESMF_REGRIDMETHOD_NEAREST_STOD, &
                                    ESMF_REGRIDMETHOD_NEAREST_DTOS, &
                                    ESMF_REGRIDMETHOD_CONSERVE_2ND
+
+       public ESMF_ExtrapMethod_Flag, ESMF_EXTRAPMETHOD_NONE, & 
+                                      ESMF_EXTRAPMETHOD_NEAREST_STOD
 
        public ESMF_LineType_Flag,   ESMF_LINETYPE_CART, &
                                    ESMF_LINETYPE_GREAT_CIRCLE

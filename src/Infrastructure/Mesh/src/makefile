@@ -63,6 +63,7 @@ SOURCEC	  = \
            ESMCI_RefineTopo.C \
            ESMCI_Search.C \
            ESMCI_SearchNearest.C \
+           ESMCI_SearchNearestNPnts.C \
            ESMCI_SearchNearestDToS.C \
            ESMCI_SFuncAdaptor.C \
            ESMCI_ShapeFunc.C \
