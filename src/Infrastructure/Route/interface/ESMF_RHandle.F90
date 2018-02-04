@@ -1284,8 +1284,10 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
   integer                       :: localrc, i, ii, j, k, k_in, v
   type(ESMF_DynamicMaskStateWrapR8R8R8)   :: dynamicMaskState
   type(ESMF_DynamicMaskElementR8R8R8), pointer  :: dynamicMaskList(:)
+#ifndef ESMF_NO_DYNMASKOVERLOAD
   type(ESMF_DynamicMaskStateWrapR8R8R8V)  :: dynamicMaskStateV
   type(ESMF_DynamicMaskElementR8R8R8V), pointer :: dynamicMaskListV(:)
+#endif
 
   ! Initialize return code; assume routine not implemented
   rc = ESMF_RC_NOT_IMPL
@@ -1370,6 +1372,7 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
     ! error handling of call back into user routine
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+#ifndef ESMF_NO_DYNMASKOVERLOAD
   else if (dynamicMaskState%wrap%typeKey == "R8R8R8V") then
     ! vector version -> use correct variables
     nullify(dynamicMaskStateV%wrap)
@@ -1419,6 +1422,7 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
     ! error handling of call back into user routine
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
   else    
     call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
       msg="Inconsistency between the provided 'dynamicMaskRoutine' and "// &

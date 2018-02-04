@@ -20,50 +20,14 @@ module ESMF_RHandleDynamicMaskingMod
 
   implicit none
 
-  public simpleDynMaskProc, simpleHandleAllProc, simpleHandleAllProcV
-  public simpleDynMaskProcVxx, simpleHandleAllProcVx !TODO: remove!!!!!!!1
+  public simpleDynMaskProc, simpleHandleAllProc
+#ifndef ESMF_NO_DYNMASKOVERLOAD
+  public simpleHandleAllProcV
+#endif
   public simpleDynMaskProcR4R8R4
 
  contains !-------------------------------------
  
-  subroutine simpleDynMaskProcVxx(dynamicMaskList, dynamicSrcMaskValue, &
-    dynamicDstMaskValue, rc)
-    type(ESMF_DynamicMaskElementR8R8R8), pointer        :: dynamicMaskList(:)
-    real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
-    real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
-    integer,                       intent(out)          :: rc
-    integer :: i, j
-    real(ESMF_KIND_R8)  :: renorm
-    if (associated(dynamicMaskList)) then
-print *, "Vxx: size(dynamicMaskList)=", size(dynamicMaskList)
-      do i=1, size(dynamicMaskList)
-        if (matchR8(dynamicDstMaskValue,dynamicMaskList(i)%dstElement)) then
-          ! dstElement was masked -> just set to a specific value
-          dynamicMaskList(i)%dstElement = 50.d0
-        else
-          ! there must be srcElements masked 
-          ! -> don't use masked srcElements, but renormalize all other factors
-          dynamicMaskList(i)%dstElement = 0.d0 ! set to zero
-          renorm = 0.d0 ! reset
-          do j=1, size(dynamicMaskList(i)%factor)
-            if (.not. &
-              matchR8(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j))) then
-              dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement &
-                + dynamicMaskList(i)%factor(j) &
-                * dynamicMaskList(i)%srcElement(j)
-              renorm = renorm + dynamicMaskList(i)%factor(j)
-            endif
-          enddo
-          dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
-        endif
-      enddo
-    endif
-    ! return successfully
-    rc = ESMF_SUCCESS
-  end subroutine  
-  
-  !-----------
-  
   subroutine simpleDynMaskProc(dynamicMaskList, dynamicSrcMaskValue, &
     dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR8R8R8), pointer        :: dynamicMaskList(:)
@@ -136,44 +100,7 @@ print *, "Vxx: size(dynamicMaskList)=", size(dynamicMaskList)
   end subroutine  
   
   !-----------
-  
-  subroutine simpleHandleAllProcVx(dynamicMaskList, dynamicSrcMaskValue, &
-    dynamicDstMaskValue, rc)
-    type(ESMF_DynamicMaskElementR8R8R8), pointer        :: dynamicMaskList(:)
-    real(ESMF_KIND_R8),            intent(in), optional :: dynamicSrcMaskValue
-    real(ESMF_KIND_R8),            intent(in), optional :: dynamicDstMaskValue
-    integer,                       intent(out)          :: rc
-    integer :: i, j
-    real(ESMF_KIND_R8)  :: renorm
-    if (associated(dynamicMaskList)) then
-print *, "Vx: size(dynamicMaskList)=", size(dynamicMaskList)
-      do i=1, size(dynamicMaskList)
-        ! -> don't use masked srcElements, but renormalize all other factors
-        dynamicMaskList(i)%dstElement = 0.d0 ! set to zero
-        renorm = 0.d0 ! reset
-        do j=1, size(dynamicMaskList(i)%factor)
-          if (.not. &
-            matchR8(dynamicSrcMaskValue,dynamicMaskList(i)%srcElement(j))) then
-            dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement &
-              + dynamicMaskList(i)%factor(j) &
-              * dynamicMaskList(i)%srcElement(j)
-            renorm = renorm + dynamicMaskList(i)%factor(j)
-          endif
-        enddo
-        dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
-        ! here customize interpolation by setting everything destination point
-        ! that is above 0.5 to the dynamicDstMaskValue 
-        if (dynamicMaskList(i)%dstElement > 0.5d0) then
-          dynamicMaskList(i)%dstElement = dynamicDstMaskValue
-        endif
-      enddo
-    endif
-    ! return successfully
-    rc = ESMF_SUCCESS
-  end subroutine  
-  
-  !-----------
-  
+#ifndef ESMF_NO_DYNMASKOVERLOAD
   subroutine simpleHandleAllProcV(dynamicMaskList, dynamicSrcMaskValue, &
     dynamicDstMaskValue, rc)
     type(ESMF_DynamicMaskElementR8R8R8V), pointer       :: dynamicMaskList(:)
@@ -217,7 +144,7 @@ print *, "V: size(dynamicMaskList)=", size(dynamicMaskList)
     ! return successfully
     rc = ESMF_SUCCESS
   end subroutine  
-  
+#endif
   !-----------
   
   subroutine simpleDynMaskProcR4R8R4(dynamicMaskList, dynamicSrcMaskValue, &
@@ -859,7 +786,7 @@ program ESMF_RHandleDynamicMaskingEx
   call ESMF_DynamicMaskSetR8R8R8(dynamicMask, &
     dynamicSrcMaskValue=srcMaskValue, &
     dynamicDstMaskValue=dstMaskValue, &
-    dynamicMaskRoutine=simpleDynMaskProcVxx, &
+    dynamicMaskRoutine=simpleDynMaskProc, &
     rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -898,7 +825,7 @@ program ESMF_RHandleDynamicMaskingEx
   call ESMF_DynamicMaskSetR8R8R8(dynamicMask, &
     dynamicSrcMaskValue=srcMaskValue, &
     dynamicDstMaskValue=-2.d0, &
-    dynamicMaskRoutine=simpleHandleAllProcVx, &
+    dynamicMaskRoutine=simpleHandleAllProc, &
     handleAllElements=.true., &
     rc=rc)
 !EOC
@@ -967,6 +894,8 @@ program ESMF_RHandleDynamicMaskingEx
 ! element {\tt j} of the interpolation stencile.
 !EOE
 
+#ifndef ESMF_NO_DYNMASKOVERLOAD
+
 !BOC
   call ESMF_DynamicMaskSetR8R8R8V(dynamicMask, &
     dynamicSrcMaskValue=srcMaskValue, &
@@ -1004,7 +933,9 @@ program ESMF_RHandleDynamicMaskingEx
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+    
+#endif
+
   call ESMF_FieldDestroy(srcField, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
