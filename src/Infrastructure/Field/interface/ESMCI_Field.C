@@ -161,6 +161,7 @@ void FTN_X(f_esmf_regridstorefile)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldp
   ESMC_NormType_Flag *normtype,
   ESMC_UnmappedAction_Flag *unmappedaction,
   ESMC_Logical *ignoreDegenerate,
+  ESMC_Logical *create_rh,
   ESMCI::Field *srcfracfieldp,
   ESMCI::Field *dstfracfieldp,
   int *rc,
@@ -1474,6 +1475,7 @@ namespace ESMCI {
     ESMC_NormType_Flag *normType,
     ESMC_UnmappedAction_Flag *unmappedAction,
     ESMC_Logical *ignoreDegenerate,
+    ESMC_Logical *create_rh,
     Field *srcFracField,
     Field *dstFracField) {
 //
@@ -1544,6 +1546,7 @@ namespace ESMCI {
                               normType,
                               unmappedAction,
                               ignoreDegenerate,
+                              create_rh,
                               srcFracField,
                               dstFracField,
                               &localrc,

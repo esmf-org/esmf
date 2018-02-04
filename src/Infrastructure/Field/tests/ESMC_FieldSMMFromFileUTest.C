@@ -189,9 +189,10 @@ int main(void){
   //NEX_UTest
   strcpy(name, "ESMC_FieldRegridStoreFile test");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  ESMC_Logical create_rh = ESMF_TRUE;
   rc = ESMC_FieldRegridStoreFile(srcfield, dstfield, "data/weights_smmsff.nc", NULL, NULL,
                                  &routehandle, NULL, NULL, NULL, NULL, NULL,
-                                 NULL, NULL, NULL, NULL);
+                                 NULL, NULL, &create_rh, NULL, NULL);
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 #else

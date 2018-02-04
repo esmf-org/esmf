@@ -885,9 +885,13 @@ The named constants numerical types are:
 \begin{description}
 
 \item [ESMF\_TYPEKIND\_I1]
-      Indicates 1 byte integer.
+      Indicates 1 byte integer. \newline
+      (Only available if ESMF was built with 
+      {\tt ESMF\_NO\_INTEGER\_1\_BYTE = FALSE}. This is {\em not} the default.)
 \item [ESMF\_TYPEKIND\_I2]
-      Indicates 2 byte integer.
+      Indicates 2 byte integer. \newline
+      (Only available if ESMF was built with 
+      {\tt ESMF\_NO\_INTEGER\_2\_BYTE = FALSE}. This is {\em not} the default.)
 \item [ESMF\_TYPEKIND\_I4]
       Indicates 4 byte integer.
 \item [ESMF\_TYPEKIND\_I8]

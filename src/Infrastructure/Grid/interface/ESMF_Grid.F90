@@ -2067,8 +2067,9 @@ end subroutine ESMF_GridConvertIndex
 !     of predefined stagger locations. If not present, defaults to
 !      ESMF\_STAGGERLOC\_CENTER.
 ! \item[{[typekind]}]
-!     The type/kind of the newly created array data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the newly created array data. For a full list of 
+!     options, please see section~\ref{const:typekind}.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 !\item[{[gridToArrayMap]}]
 !     Indicates where each grid dimension goes in the newly created Array.
 !     {\tt The array gridToArrayMap} should be at least of size equal to the grid's dimCount.
@@ -3690,8 +3691,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -3983,8 +3985,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -4267,8 +4270,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     The size of the array specifies the number of dimensions of the
 !     first coordinate component array. The values specify which
@@ -4485,8 +4489,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDimCount]}]
 !      List that has dimCount elements.
 !      Gives the dimension of each component (e.g. x) array. This is
@@ -4779,8 +4784,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDimCount]}]
 !      List that has dimCount elements.
 !      Gives the dimension of each component (e.g. x) array. This is
@@ -7290,6 +7296,7 @@ end function ESMF_GridCreateFrmGridspec
     type(ESMF_Grid) :: ESMF_GridCreateFrmGrid
 !
 ! !ARGUMENTS:
+
     type(ESMF_Grid), intent(in)            :: grid
     integer,         intent(in),  optional :: minIndex
     integer,         intent(in)            :: maxIndex
@@ -7935,8 +7942,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -8215,8 +8223,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -8484,8 +8493,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     The size of the array specifies the number of dimensions of the
 !     first coordinate component array. The values specify which
@@ -8719,8 +8729,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -8986,8 +8997,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -9238,10 +9250,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[coordSys]}]
 !     The coordinate system of the grid coordinate data.
 !     For a full list of options, please see Section~\ref{const:coordsys}.
- !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
+!     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     The size of the array specifies the number of dimensions of the
 !     first coordinate component array. The values specify which
@@ -9473,8 +9486,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -9730,8 +9744,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -9976,8 +9991,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
- !     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     The size of the array specifies the number of dimensions of the
 !     first coordinate component array. The values specify which
@@ -11008,8 +11024,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[minIndex]}]
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
@@ -12029,8 +12046,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[regDecomp]}]
 !      List that has the same number of elements as {\tt maxIndex}.
 !      Each entry is the number of decounts for that dimension.
@@ -12946,8 +12964,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[minIndex]}]
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
@@ -13512,8 +13531,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridCreateCubedSphere - Create a multi-tile cubed sphere Grid with regular decomposition
 
 ! !INTERFACE:
-  function ESMF_GridCreateCubedSphere(tileSize,keywordEnforcer, regDecompPTile, decompflagPTile, &
-        deLabelList, staggerLocList, delayout, indexflag, name, rc)
+  function ESMF_GridCreateCubedSphere(tileSize,keywordEnforcer, &
+        regDecompPTile, decompflagPTile,                        &
+        coordSys, coordTypeKind,                                &
+        deLabelList, staggerLocList,                            &
+        delayout, indexflag, name, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Grid) :: ESMF_GridCreateCubedSphere
@@ -13523,6 +13545,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                        intent(in),  optional :: regDecompPTile(:,:)
     type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflagPTile(:,:)
+    type(ESMF_CoordSys_Flag),       intent(in),  optional :: coordSys
+    type(ESMF_TypeKind_Flag),       intent(in),  optional :: coordTypeKind
     integer,                        intent(in),  optional :: deLabelList(:)
     type(ESMF_StaggerLoc),          intent(in),  optional :: staggerLocList(:)
     type(ESMF_DELayout),            intent(in),  optional :: delayout
@@ -13567,6 +13591,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The list of stagger locations to fill with coordinates. Only {\tt ESMF\_STAGGERLOC\_CENTER}
 !          and {\tt ESMF\_STAGGERLOC\_CORNER} are supported.  If not present, no coordinates
 !          will be added or filled.
+!     \item[{[coordSys]}]
+!          The coordinate system of the grid coordinate data.
+!          Only ESMF\_COORDSYS\_SPH\_DEG and ESMF\_COORDSYS\_SPH\_RAD are supported. 
+!          If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
+!     \item[{[coordTypeKind]}]
+!          The type/kind of the grid coordinate data. Only ESMF\_TYPEKIND\_R4
+!          and ESMF\_TYPEKIND\_R8 are supported.
+!          If not specified then defaults to ESMF\_TYPEKIND\_R8.
 !     \item[{[delayout]}]
 !          Optional {\tt ESMF\_DELayout} object to be used. By default a new
 !          DELayout object will be created with as many DEs as there are PETs,
@@ -13599,6 +13631,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                                    :: localDeCount, localDe, DeNo, tile
     real(kind=ESMF_KIND_R8),  pointer          :: lonPtr(:,:), latPtr(:,:)
     real(kind=ESMF_KIND_R8),  pointer          :: lonCornerPtr(:,:), latCornerPtr(:,:)
+    real(kind=ESMF_KIND_R4),  pointer          :: lonPtrR4(:,:), latPtrR4(:,:)
+    real(kind=ESMF_KIND_R4),  pointer          :: lonCornerPtrR4(:,:), latCornerPtrR4(:,:)
     integer                                    :: tileCount
     integer                                    :: connectionCount
     integer                                    :: centerCount
@@ -13611,6 +13645,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, allocatable                       :: demap(:)
     integer                                    :: decount
     type(ESMF_Index_Flag)                      :: localIndexFlag
+    type(ESMF_CoordSys_Flag)                   :: coordSysLocal
+    type(ESMF_TypeKind_Flag)                   :: coordTypeKindLocal
     integer                                    :: s
     logical                                    :: docenter, docorner
     !real(ESMF_KIND_R8)                        :: starttime, endtime
@@ -13635,6 +13671,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      localIndexFlag = indexflag
   else
      localIndexFlag = ESMF_INDEX_DELOCAL
+  endif
+
+  ! Set Default coordSys
+  if (present(coordSys)) then
+     if (coordSys .eq. ESMF_COORDSYS_CART) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- only ESMF_TYPEKIND_CART is not supported", &
+           ESMF_CONTEXT, rcToReturn=rc)
+        return
+     endif      
+     coordSysLocal=coordSys
+  else
+     coordSysLocal=ESMF_COORDSYS_SPH_DEG
+  endif
+
+  ! Set Default coordTypeKind
+  if (present(coordTypeKind)) then
+     if (coordTypeKind .ne. ESMF_TYPEKIND_R4 .and. &
+         coordTypeKind .ne. ESMF_TYPEKIND_R8) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- only ESMF_TYPEKIND_R4 and ESMF_TYPEKIND_R8 are allowed", &
+           ESMF_CONTEXT, rcToReturn=rc)
+        return
+     endif      
+     coordTypeKindLocal=coordTypeKind
+  else
+     coordTypeKindLocal=ESMF_TYPEKIND_R8
   endif
 
   ! set defaults
@@ -13884,9 +13947,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! - create Grid
-    ! must create with ESMF_INDEX_DELOCAL because of how tiles get their
-    ! coordinates from the cubedSphereTileCreate() routine
-    grid = ESMF_GridCreate(distgrid, coordSys=ESMF_COORDSYS_SPH_DEG, &
+    grid = ESMF_GridCreate(distgrid, coordSys=coordSysLocal, &
+      coordTypeKind=coordTypeKindLocal, &
       indexflag=localIndexFlag, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -13947,52 +14009,107 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          count(1)=sizei
          count(2)=sizej
 
-         if (docenter) then
-           call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
-              farrayPtr=lonPtr, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-           call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
-              farrayPtr=latPtr, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-         endif
-         if (docorner) then
-           call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
-              staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-           call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
-              staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtr, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-         endif
+         if (coordTypeKindLocal .eq. ESMF_TYPEKIND_R8) then
+           if (docenter) then
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                farrayPtr=lonPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                farrayPtr=latPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+             allocate(lonPtrR4(count(1), count(2)), latPtrR4(count(1), count(2)))
+           endif
+           if (docorner) then
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             allocate(lonCornerPtrR4(count(1)+1, count(2)+1), &
+                latCornerPtrR4(count(1)+1, count(2)+1))
+           endif
+         else ! ESMF_TYPEKIND_R4
+           if (docenter) then
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                farrayPtr=lonPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                farrayPtr=latPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+           if (docorner) then
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+         endif  
          !call ESMF_VMWtime(starttime, rc=localrc)
          ! Generate glocal edge coordinates and local center coordinates
 
          if (docenter .and. docorner) then
-            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtr, &
-               latEdge=latCornerPtr, start=start, count=count, &
-               tile=tile, lonCenter=lonPtr, latCenter=latPtr)
+            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
+               latEdge=latCornerPtrR4, start=start, count=count, &
+               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4)
          elseif (docorner) then
-            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtr, &
-              latEdge=latCornerPtr, start=start, count=count, tile=tile)
+            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
+              latEdge=latCornerPtrR4, start=start, count=count, tile=tile)
          else
             call ESMF_UtilCreateCSCoordsPar(tileSize, &
                start=start, count=count, &
-               tile=tile, lonCenter=lonPtr, latCenter=latPtr)
+               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4)
          endif
 
          !call ESMF_VMWtime(endtime, rc=localrc)
 
-         if (docenter) then
-           lonPtr = lonPtr * todeg
-           latPtr = latPtr * todeg
+         if (coordTypeKindLocal .eq. ESMF_TYPEKIND_R8) then
+           if (docenter) then
+             if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
+               lonPtr = lonPtrR4 * ESMF_COORDSYS_RAD2DEG
+               latPtr = latPtrR4 * ESMF_COORDSYS_RAD2DEG
+             else
+               ! extra copy, can be optimized
+               lonPtr = lonPtrR4
+               latPtr = latPtrR4
+             endif
+             deallocate(lonPtrR4, latPtrR4)
+           endif
+           if (docorner) then
+             if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
+               lonCornerPtr = lonCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
+               latCornerPtr = latCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
+             else
+               lonCornerPtr = lonCornerPtrR4
+               latCornerPtr = latCornerPtrR4
+             endif
+             deallocate(lonCornerPtrR4, latCornerPtrR4)
+           endif  
+         else ! ESMF_TYPE_KIND_R4
+           if (docenter) then
+             if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
+               lonPtrR4 = lonPtrR4 * todeg
+               latPtrR4 = latPtrR4 * todeg
+             endif
+           endif      
+           if (docorner) then
+             if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
+               lonCornerPtrR4 = lonCornerPtrR4 * todeg
+               latCornerPtrR4 = latCornerPtrR4 * todeg
+             endif
+           endif
          endif
-         if (docorner) then
-           lonCornerPtr = lonCornerPtr * todeg
-           latCornerPtr = latCornerPtr * todeg
-         endif
+
       !print *, 'Create CS size ', tileSize, 'in', (endtime-starttime)*1000.0, ' msecs'
       end do
     endif
@@ -14841,8 +14958,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -15146,8 +15264,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -15441,8 +15560,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     The size of the array specifies the number of dimensions of the
 !     first coordinate component array. The values specify which
@@ -15695,7 +15815,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,       target,     intent(out), optional :: coordDimCount(:)
       integer,       target,     intent(out), optional :: coordDimMap(:,:)
       integer,                   intent(out), optional :: arbDim
-        integer,                   intent(out), optional :: rank
+      integer,                   intent(out), optional :: rank
       integer,                   intent(out), optional :: arbDimCount
       integer,       target,     intent(out), optional :: gridEdgeLWidth(:)
       integer,       target,     intent(out), optional :: gridEdgeUWidth(:)
@@ -15718,8 +15838,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !\item[grid]
 !   Grid to get the information from.
 !\item[{[coordTypeKind]}]
-!   The type/kind of the grid coordinate data.
-!   If not specified then the type/kind will be 8 byte reals.
+!   The type/kind of the grid coordinate data. All {\em numerical} types
+!   listed under section~\ref{const:typekind} are supported.
 !\item[{[dimCount]}]
 !   DimCount of the Grid object.
 !\item[{[tileCount]}]
@@ -15917,7 +16037,7 @@ end subroutine ESMF_GridGetDefault
 
 !
 ! !Arguments:
-    type(ESMF_Grid),  intent(in)            :: grid
+        type(ESMF_Grid),  intent(in)            :: grid
         integer,          intent(in),  optional :: tileNo
         integer,target,   intent(out), optional :: minIndex(:)
         integer,target,   intent(out)           :: maxIndex(:)
@@ -22313,29 +22433,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !ARGUMENTS:
-       type(ESMF_Grid),       intent(inout)           :: grid
+       type(ESMF_Grid),          intent(inout)           :: grid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_DistGrid),   intent(in),   optional  :: distgrid
-       integer,               intent(in),   optional  :: distgridToGridMap(:)
-       integer,               intent(in),   optional  :: distDim(:)
-       type(ESMF_CoordSys_Flag),   intent(in),   optional  :: coordSys
-       type(ESMF_TypeKind_Flag),   intent(in),   optional  :: coordTypeKind
-       integer,               intent(in),   optional  :: coordDimCount(:)
-       integer,               intent(in),   optional  :: coordDimMap(:,:)
-       integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in),   optional  :: maxIndex(:)
-       integer,               intent(in),   optional  :: localArbIndexCount
-       integer,               intent(in),   optional  :: localArbIndex(:,:)
-       integer,               intent(in),   optional  :: gridEdgeLWidth(:)
-       integer,               intent(in),   optional  :: gridEdgeUWidth(:)
-       integer,               intent(in),   optional  :: gridAlign(:)
-       integer,               intent(in),   optional  :: gridMemLBound(:)
-       type(ESMF_Index_Flag), intent(in),   optional  :: indexflag
-       logical,               intent(in),   optional  :: destroyDistgrid
-       logical,               intent(in),   optional  :: destroyDELayout
-       character (len=*),     intent(in),   optional  :: name
-       type(ESMF_VM),         intent(in),   optional  :: vm
-       integer,               intent(out),  optional  :: rc
+       type(ESMF_DistGrid),      intent(in),   optional  :: distgrid
+       integer,                  intent(in),   optional  :: distgridToGridMap(:)
+       integer,                  intent(in),   optional  :: distDim(:)
+       type(ESMF_CoordSys_Flag), intent(in),   optional  :: coordSys
+       type(ESMF_TypeKind_Flag), intent(in),   optional  :: coordTypeKind
+       integer,                  intent(in),   optional  :: coordDimCount(:)
+       integer,                  intent(in),   optional  :: coordDimMap(:,:)
+       integer,                  intent(in),   optional  :: minIndex(:)
+       integer,                  intent(in),   optional  :: maxIndex(:)
+       integer,                  intent(in),   optional  :: localArbIndexCount
+       integer,                  intent(in),   optional  :: localArbIndex(:,:)
+       integer,                  intent(in),   optional  :: gridEdgeLWidth(:)
+       integer,                  intent(in),   optional  :: gridEdgeUWidth(:)
+       integer,                  intent(in),   optional  :: gridAlign(:)
+       integer,                  intent(in),   optional  :: gridMemLBound(:)
+       type(ESMF_Index_Flag),    intent(in),   optional  :: indexflag
+       logical,                  intent(in),   optional  :: destroyDistgrid
+       logical,                  intent(in),   optional  :: destroyDELayout
+       character (len=*),        intent(in),   optional  :: name
+       type(ESMF_VM),            intent(in),   optional  :: vm
+       integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !  Set values in a grid in preparation for committing and creating a grid. This method
@@ -22361,8 +22481,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[minIndex]}]
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
@@ -22741,8 +22862,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[minIndex]}]
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
@@ -23757,8 +23879,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{grid}]
 !     {\tt ESMF\_Grid} to set information into and then commit.
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[regDecomp]}]
 !      List that has the same number of elements as {\tt maxIndex}.
 !      Each entry is the number of decounts for that dimension.
@@ -24663,8 +24786,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[minIndex]}]
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.

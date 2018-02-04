@@ -1012,19 +1012,19 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     localrc = ESMF_RC_NOT_IMPL
 
     call ESMF_FieldRegridStore(srcField, dstField, &
-                               srcMaskValues=srcMaskValues, &
-                               dstMaskValues=dstMaskValues, &
-                               routehandle=l_routehandle, &
-                               regridmethod=regridmethod, &
-                               polemethod=polemethod, &
-                               regridPoleNPnts=regridPoleNPnts, &
-                               lineType=linetype, &
-                               normType=normtype, &
-                               unmappedaction=unmappedaction, &
-                               ignoreDegenerate=ignoreDegenerate, &
-                               srcFracField=srcFracField, &
-                               dstFracField=dstFracField, &
-                               rc=localrc)
+                              srcMaskValues=srcMaskValues, &
+                              dstMaskValues=dstMaskValues, &
+                              routehandle=l_routehandle, &
+                              regridmethod=regridmethod, &
+                              polemethod=polemethod, &
+                              regridPoleNPnts=regridPoleNPnts, &
+                              lineType=linetype, &
+                              normType=normtype, &
+                              unmappedaction=unmappedaction, &
+                              ignoreDegenerate=ignoreDegenerate, &
+                              srcFracField=srcFracField, &
+                              dstFracField=dstFracField, &
+                              rc=localrc)
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1054,6 +1054,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                     normtype, &
                                     unmappedaction, &
                                     ignoreDegenerate, &
+                                    createRoutehandle, &
                                     srcFracField, &
                                     dstFracField, &
                                     rc)
@@ -1067,24 +1068,25 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
     implicit none
 
-      type(ESMF_Field)                        :: srcField
-      type(ESMF_Field)                        :: dstField
-      character(*), intent(in)                :: fileName
-      integer                                 :: len1, len2
-      integer,optional                        :: srcMaskValues(len1), &
-                                                 dstMaskValues(len2)
-      type(ESMF_RouteHandle)                  :: routehandle
-      type(ESMF_RegridMethod_Flag)            :: regridmethod
-      type(ESMF_PoleMethod_Flag)              :: polemethod
-      integer                                 :: regridPoleNPnts
+    type(ESMF_Field)                        :: srcField
+    type(ESMF_Field)                        :: dstField
+    character(*), intent(in)                :: fileName
+    integer                                 :: len1, len2
+    integer,optional                        :: srcMaskValues(len1), &
+                                               dstMaskValues(len2)
+    type(ESMF_RouteHandle)                  :: routehandle
+    type(ESMF_RegridMethod_Flag)            :: regridmethod
+    type(ESMF_PoleMethod_Flag)              :: polemethod
+    integer                                 :: regridPoleNPnts
 
-      type(ESMF_LineType_Flag)                :: linetype
-      type(ESMF_NormType_Flag)                :: normtype
-      type(ESMF_UnmappedAction_Flag)          :: unmappedaction
-      logical                                 :: ignoreDegenerate
-      type(ESMF_Field)                        :: srcFracField
-      type(ESMF_Field)                        :: dstFracField
-      integer                                 :: rc
+    type(ESMF_LineType_Flag)                :: linetype
+    type(ESMF_NormType_Flag)                :: normtype
+    type(ESMF_UnmappedAction_Flag)          :: unmappedaction
+    logical                                 :: ignoreDegenerate
+    logical, optional                       :: createRoutehandle
+    type(ESMF_Field)                        :: srcFracField
+    type(ESMF_Field)                        :: dstFracField
+    integer                                 :: rc
 
     integer :: localrc
     type(ESMF_RouteHandle) :: l_routehandle
@@ -1094,19 +1096,20 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     localrc = ESMF_RC_NOT_IMPL
 
     call ESMF_FieldRegridStore(srcField, dstField, fileName, &
-                               srcMaskValues=srcMaskValues, &
-                               dstMaskValues=dstMaskValues, &
-                               routehandle=l_routehandle, &
-                               regridmethod=regridmethod, &
-                               polemethod=polemethod, &
-                               regridPoleNPnts=regridPoleNPnts, &
-                               lineType=linetype, &
-                               normType=normtype, &
-                               unmappedaction=unmappedaction, &
-                               ignoreDegenerate=ignoreDegenerate, &
-                               srcFracField=srcFracField, &
-                               dstFracField=dstFracField, &
-                               rc=localrc)
+                              srcMaskValues=srcMaskValues, &
+                              dstMaskValues=dstMaskValues, &
+                              routehandle=l_routehandle, &
+                              regridmethod=regridmethod, &
+                              polemethod=polemethod, &
+                              regridPoleNPnts=regridPoleNPnts, &
+                              lineType=linetype, &
+                              normType=normtype, &
+                              unmappedaction=unmappedaction, &
+                              ignoreDegenerate=ignoreDegenerate, &
+                              createRoutehandle=createRoutehandle, &
+                              srcFracField=srcFracField, &
+                              dstFracField=dstFracField, &
+                              rc=localrc)
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1115,9 +1118,18 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     ! we use the public interface to do the ptr copy;
     ! the RouteHandle object returned to the C interface must consist only of
     ! the 'this' pointer. It must not contain the isInit member.
-    call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (present (createRoutehandle)) then
+      if (createRoutehandle .eqv. .true.) then
+        call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+      endif
+    else 
+      call ESMF_RoutehandleCopyThis(l_routehandle, routehandle, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     rc = ESMF_SUCCESS
 

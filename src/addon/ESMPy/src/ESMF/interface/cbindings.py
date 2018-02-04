@@ -115,8 +115,12 @@ class OptionalBool(object):
             if param is None:
                 return None
             else:
-                ptr = ct.POINTER(ct.c_bool)
-                paramptr = ptr(ct.c_bool(param))
+                ptr = ct.POINTER(ct.c_int)
+                paramptr = ptr(ct.c_int(1))
+                if param == True:
+                    paramptr = ptr(ct.c_int(1))
+                elif param == False:
+                    paramptr = ptr(ct.c_int(2))
                 return paramptr
 
 class Py3Char(object):
@@ -1821,7 +1825,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
                           regridmethod=None,
                           polemethod=None, regridPoleNPnts=None,
                           lineType=None, normType=None, unmappedaction=None,
-                          ignoreDegenerate=None,
+                          ignoreDegenerate=None, 
                           srcFracField=None, dstFracField=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
@@ -1829,8 +1833,8 @@ def ESMP_FieldRegridStore(srcField, dstField,
                    place.  'srcMaskValues' and 'dstMaskValues' are
                    Numpy arrays which hold the values of a field which
                    represent a masked cell.\n
-    Postconditions: A handle to the regridding operation has been
-                    returned into 'routehandle' and Fields containing
+    Postconditions: A handle to the regridding operation 
+                    has been returned into 'routehandle' and Fields containing
                     the fractions of the source and destination cells
                     participating in the regridding operation are
                     optionally returned into 'srcFracField' and
@@ -1866,11 +1870,11 @@ def ESMP_FieldRegridStore(srcField, dstField,
             Argument values:\n
                 (default) UnmappedAction.ERROR\n
                 UnmappedAction.IGNORE\n
-        boolean (option)                    :: ignoreDegenerate\n
+        boolean (optional)                  :: ignoreDegenerate\n
         ESMP_Field (optional)               :: srcFracField\n
         ESMP_Field (optional)               :: dstFracField\n
     """
-    routehandle = ct.c_void_p(0)
+    routehandle = ct.c_void_p(1)
     if regridPoleNPnts:
         regridPoleNPnts_ct = ct.byref(ct.c_void_p(regridPoleNPnts))
     else:
@@ -1907,6 +1911,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldRegridStore() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
+
     return routehandle
 
 _ESMF.ESMC_FieldRegridStoreFile.restype = ct.c_int
@@ -1922,6 +1927,7 @@ _ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
                                             OptionalNamedConstant,
                                             OptionalNamedConstant,
                                             OptionalBool,
+                                            OptionalBool,
                                             OptionalField,
                                             OptionalField]
 @deprecated
@@ -1930,7 +1936,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                           regridmethod=None,
                           polemethod=None, regridPoleNPnts=None,
                           lineType=None, normType=None, unmappedaction=None,
-                          ignoreDegenerate=None,
+                          ignoreDegenerate=None, createRH=None,
                           srcFracField=None, dstFracField=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
@@ -1938,7 +1944,8 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                    place.  'srcMaskValues' and 'dstMaskValues' are
                    Numpy arrays which hold the values of a field which
                    represent a masked cell.\n
-    Postconditions: A handle to the regridding operation has been
+    Postconditions: If createRH is not False, a handle to the regridding 
+                    operation has been
                     returned into 'routehandle' and Fields containing
                     the fractions of the source and destination cells
                     participating in the regridding operation are
@@ -1976,7 +1983,8 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
             Argument values:\n
                 (default) UnmappedAction.ERROR\n
                 UnmappedAction.IGNORE\n
-        boolean (option)                    :: ignoreDegenerate\n
+        boolean (optional)                  :: ignoreDegenerate\n
+        boolean (optional)                  :: createRH\n
         ESMP_Field (optional)               :: srcFracField\n
         ESMP_Field (optional)               :: dstFracField\n
     """
@@ -2004,6 +2012,18 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
     b_filename = filename.encode('utf-8')
     b_filename = ct.create_string_buffer(b_filename)
 
+    # liD = None
+    # if ignoreDegenerate == True:
+    #     liD = ct.POINTER(ct.c_int(1))
+    # elif ignoreDegenerate == False:
+    #     liD = ct.POINTER(ct.c_int(2))
+    # 
+    # crh = None
+    # if create_rh == True:
+    #     crh = ct.POINTER(ct.c_int(1))
+    # elif create_rh == False:
+    #     crh = ct.POINTER(ct.c_int(2))
+
     rc = _ESMF.ESMC_FieldRegridStoreFile(srcField.struct.ptr,
                                      dstField.struct.ptr,
                                      b_filename,
@@ -2017,6 +2037,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                                      normType,
                                      unmappedaction,
                                      ignoreDegenerate,
+                                     createRH,
                                      srcFracField,
                                      dstFracField)
     if rc != constants._ESMP_SUCCESS:

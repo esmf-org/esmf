@@ -97,6 +97,7 @@ module ESMF_ArrayCreateMod
   public ESMF_ArraySetThisNull
   public ESMF_ArraySetPLocalDeInternal
   public ESMF_ArrayCopyThis
+  public ESMF_ArrayIsProxy
 ! ESMF_ArrayCreateFromGrid - defined in ESMF_Grid.F90 due to circularity issues 
 
 !EOPI
@@ -4323,6 +4324,65 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine ESMF_ArrayCopyThis
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayIsProxy()"
+!BOPI
+! !IROUTINE: ESMF_ArrayIsProxy - Determine whether this Array object is a proxy
+
+! !INTERFACE:
+  function ESMF_ArrayIsProxy(array, rc)
+!
+! !RETURN VALUE:
+    logical :: ESMF_ArrayIsProxy   
+!
+! !ARGUMENTS:
+    type(ESMF_Array), intent(in),  optional :: array
+    integer,          intent(out), optional :: rc  
+!         
+!
+! !DESCRIPTION:
+!     Determine whether this Array object is a proxy object or not. Returns
+!     .true. or .false. accordingly.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[array]}] 
+!          Input {\tt ESMF\_Array} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer             :: localrc      ! local return code
+    type(ESMF_Logical)  :: isProxy
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+    
+    ESMF_ArrayIsProxy = .false. ! initialize
+    
+    if (.not.present(array)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
+        msg="Array object must be present.", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    else
+      call c_ESMC_IsProxy(array, isProxy, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ArrayIsProxy = isProxy
+    endif
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end function ESMF_ArrayIsProxy
 !------------------------------------------------------------------------------
 
 

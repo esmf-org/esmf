@@ -115,27 +115,35 @@ use ESMF_IOScripMod
   ! **^^**^^**^^**^^**^^**^^**^^**^^**^^**^^**^^**^^**^^**^^**^^**^^**^^**^^**^^**^^
   ! Open netCDf weights file.
   ncRc = nf90_open("doodle2.nc", NF90_NOWRITE, ncid)
-  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) return
+  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ! Read netCDF data into actual variables.
   ncRc = nf90_inq_varid(ncid, "S", varid)
-  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) return
+  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   ncRc = nf90_get_var(ncid, varid, actualFactorList)
-  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) return
+  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ncRc = nf90_inq_varid(ncid, "col", varid)
-  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) return
+  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   ncRc = nf90_get_var(ncid, varid, actualSrc)
-  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) return
+  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ncRc = nf90_inq_varid(ncid, "row", varid)
-  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) return
+  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   ncRc = nf90_get_var(ncid, varid, actualDst)
-  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) return
+  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ! Close netCDF weights file.
   ncRc = nf90_close(ncid)
-  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) return
+  if (ESMF_LogFoundNetCDFError(ncRc, file=ESMF_FILENAME, rcToReturn=rc)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   ! --++==--++==--++==--++==--++==--++==--++==--++==--++==--++==--++==--++==--++==--
   ! Test factors are as expected.

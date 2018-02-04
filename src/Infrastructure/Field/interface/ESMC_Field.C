@@ -449,7 +449,8 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                             enum ESMC_LineType_Flag *lineType,
                             enum ESMC_NormType_Flag *normType,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
-                            ESMC_Logical *ignoreDegenerate,
+                            enum ESMC_Logical *ignoreDegenerate,
+                            enum ESMC_Logical *create_rh,
                             ESMC_Field *srcFracField,
                             ESMC_Field *dstFracField){
 
@@ -469,18 +470,23 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     ESMCI::RouteHandle *rhPtr;
     rhPtr=NULL;
 
-
     // Invoke the C++ interface
     localrc = ESMCI::Field::regridstorefile(fieldpsrc, fieldpdst, filename,
       srcMaskValues, dstMaskValues, &rhPtr, regridmethod,
-      polemethod, regridPoleNPnts, lineType, normType, unmappedaction, ignoreDegenerate,
-      srcfracp, dstfracp);
+      polemethod, regridPoleNPnts, lineType, normType, unmappedaction, 
+      ignoreDegenerate, create_rh, srcfracp, dstfracp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
 
     // return rhPtr in routehandle argument
-    routehandle->ptr = NULL;
-    routehandle->ptr = (void *)rhPtr;
+    if (create_rh == NULL) {
+      routehandle->ptr = NULL;
+      routehandle->ptr = (void *)rhPtr;
+    }
+    else if (*create_rh == ESMF_TRUE) {
+      routehandle->ptr = NULL;
+      routehandle->ptr = (void *)rhPtr;
+    }
 
     // return successfully
     rc = ESMF_SUCCESS;

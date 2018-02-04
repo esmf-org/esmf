@@ -842,6 +842,7 @@ int ESMC_FieldRegridStoreFile(
     enum ESMC_NormType_Flag *normType,             // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
+    enum ESMC_Logical *create_rh,                  // in
     ESMC_Field *srcFracField,                      // out
     ESMC_Field *dstFracField);                     // out
 
@@ -862,25 +863,25 @@ int ESMC_FieldRegridStoreFile(
 //    ESMC\_Field with source data.
 //  \item[dstField]
 //    ESMC\_Field with destination data.
-//  \item[filename]
+//  \item[{[filename]}]
 //    The output filename for the factorList and factorIndexList.
-//  \item[srcMaskValues]
+//  \item[{[srcMaskValues]}]
 //    List of values that indicate a source point should be masked out.
 //    If not specified, no masking will occur.
-//  \item[dstMaskValues]
+//  \item[{[dstMaskValues]}]
 //    List of values that indicate a destination point should be masked out.
 //    If not specified, no masking will occur.
-//  \item[routehandle]
+//  \item[{[routehandle]}]
 //    The handle that implements the regrid, to be used in {\tt ESMC\_FieldRegrid()}.
-//  \item[regridmethod]
-//    The type of interpolation. If not specified, defaults to {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
-//  \item [polemethod]
+//  \item[{[regridmethod]}]
+//    The type of interpolation. If not specified, defaults to {\tt ESMC\_REGRIDMETHOD\_BILINEAR}.
+//  \item [{[polemethod]}]
 //    Which type of artificial pole
 //    to construct on the source Grid for regridding.
-//    If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG} for non-conservative regrid methods,
-//    and {\tt ESMF\_POLEMETHOD\_NONE} for conservative methods.
+//    If not specified, defaults to {\tt ESMC\_POLEMETHOD\_ALLAVG} for non-conservative regrid methods,
+//    and {\tt ESMC\_POLEMETHOD\_NONE} for conservative methods.
 //    If not specified, defaults to {\tt ESMC\_POLEMETHOD\_ALLAVG}.
-//  \item [regridPoleNPnts]
+//  \item [{[regridPoleNPnts]}]
 //    If {\tt polemethod} is {\tt ESMC\_POLEMETHOD\_NPNTAVG}.
 //    This parameter indicates how many points should be averaged
 //    over. Must be specified if {\tt polemethod} is
@@ -893,14 +894,17 @@ int ESMC_FieldRegridStoreFile(
 //    built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a
 //    list of valid options for this argument. If not specified, the default depends on the
 //    regrid method. Section~\ref{opt:lineType} has the defaults by line type.
-//  \item[normType]
+//  \item[{[normType]}]
 //    This argument controls the type of normalization used when generating conservative weights.
-//    This option only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}.
-//    If not specified normType defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}.
-//  \item[unmappedaction]
+//    This option only applies to weights generated with {\tt regridmethod=ESMC\_REGRIDMETHOD\_CONSERVE}.
+//    If not specified normType defaults to {\tt ESMC\_NORMTYPE\_DSTAREA}.
+//  \item[{[unmappedaction]}]
 //    Specifies what should happen if there are destination points that can't
-//    be mapped to a source cell. Options are {\tt ESMF\_UNMAPPEDACTION\_ERROR} or
-//    {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}.
+//    be mapped to a source cell. Options are {\tt ESMC\_UNMAPPEDACTION\_ERROR} or
+//    {\tt ESMC\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults to {\tt ESMC\_UNMAPPEDACTION\_ERROR}.
+//  \item[{create\_rh}]
+//    Specifies whether or not to create a routehandle, or just write weights to file.
+//    If not specified, defaults to {\tt ESMF\_TRUE}.
 //  \item [{[srcFracField]}]
 //    The fraction of each source cell participating in the regridding. Only
 //    valid when regridmethod is {\tt ESMC\_REGRIDMETHOD\_CONSERVE}.
@@ -908,7 +912,7 @@ int ESMC_FieldRegridStoreFile(
 //    as the srcField.
 //  \item [{[dstFracField]}]
 //    The fraction of each destination cell participating in the regridding. Only
-//    valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
+//    valid when regridmethod is {\tt ESMC\_REGRIDMETHOD\_CONSERVE}.
 //    This Field needs to be created on the same location (e.g staggerloc)
 //    as the dstField.
 //  \end{description}

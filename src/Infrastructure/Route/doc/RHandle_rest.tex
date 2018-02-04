@@ -9,11 +9,9 @@
 
 \begin{itemize}
 
-\item Only available for {\tt ESMF\_TYPEKIND\_R8} Fields and Arrays.
+\item Only available for {\tt ESMF\_TYPEKIND\_R8} and {\tt ESMF\_TYPEKIND\_R4} Fields and Arrays.
 
 \item Only available through the {\tt ESMF\_FieldRegrid()} and {\tt ESMF\_ArraySMM()} methods.
-
-\item Only available for simple scalar cases. i.e. for Fields/Arrays without undistributed dimension. Also excludes cases where undistributed dims are interleaved with distributed dims.
 
 \item {\tt termorderflag = ESMF\_TERMORDER\_SRCSEQ} must be specified explicitly.
 
