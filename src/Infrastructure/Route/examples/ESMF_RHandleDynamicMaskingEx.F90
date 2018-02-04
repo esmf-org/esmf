@@ -55,7 +55,9 @@ module ESMF_RHandleDynamicMaskingMod
               renorm = renorm + dynamicMaskList(i)%factor(j)
             endif
           enddo
-          dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
+          if (renorm > 0.d0) then
+            dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
+          endif
         endif
       enddo
     endif
@@ -87,7 +89,9 @@ module ESMF_RHandleDynamicMaskingMod
             renorm = renorm + dynamicMaskList(i)%factor(j)
           endif
         enddo
-        dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
+        if (renorm > 0.d0) then
+          dynamicMaskList(i)%dstElement = dynamicMaskList(i)%dstElement / renorm
+        endif
         ! here customize interpolation by setting everything destination point
         ! that is above 0.5 to the dynamicDstMaskValue 
         if (dynamicMaskList(i)%dstElement > 0.5d0) then
@@ -110,7 +114,6 @@ module ESMF_RHandleDynamicMaskingMod
     integer :: i, j, v, vSize
     real(ESMF_KIND_R8)  :: renorm
     if (associated(dynamicMaskList)) then
-print *, "V: size(dynamicMaskList)=", size(dynamicMaskList)
       do i=1, size(dynamicMaskList)
         vSize = size(dynamicMaskList(i)%dstElement) ! vector size
         ! -> don't use masked srcElements, but renormalize all other factors
@@ -131,8 +134,10 @@ print *, "V: size(dynamicMaskList)=", size(dynamicMaskList)
           endif
         enddo
         do v=1, vSize
-          dynamicMaskList(i)%dstElement(v) = &
-            dynamicMaskList(i)%dstElement(v) / renorm
+          if (renorm > 0.d0) then
+            dynamicMaskList(i)%dstElement(v) = &
+              dynamicMaskList(i)%dstElement(v) / renorm
+          endif
           ! here customize interpolation by setting everything destination point
           ! that is above 0.5 to the dynamicDstMaskValue 
           if (dynamicMaskList(i)%dstElement(v) > 0.5d0) then
@@ -175,8 +180,10 @@ print *, "V: size(dynamicMaskList)=", size(dynamicMaskList)
               renorm = renorm + dynamicMaskList(i)%factor(j)
             endif
           enddo
-          dynamicMaskList(i)%dstElement = &
-            real(dynamicMaskList(i)%dstElement / renorm, ESMF_KIND_R4)
+          if (renorm > 0.d0) then
+            dynamicMaskList(i)%dstElement = &
+              real(dynamicMaskList(i)%dstElement / renorm, ESMF_KIND_R4)
+          endif
         endif
       enddo
     endif
