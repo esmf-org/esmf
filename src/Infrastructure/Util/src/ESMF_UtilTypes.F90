@@ -1183,6 +1183,7 @@ interface operator (==)
   module procedure ESMF_LineTypeEqual
   module procedure ESMF_NormTypeEqual
   module procedure ESMF_RWGCheckMethodEqual
+  module procedure ESMF_TermOrderEq
 end interface
 
 interface operator (/=)
@@ -2088,6 +2089,40 @@ end function
 
       end function ESMF_RWGCheckMethodNotEqual
 !-------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TermOrderEq"
+!BOPI
+! !IROUTINE: ESMF_TermOrderEq - Equality of TermOrder Flag
+!
+! !INTERFACE:
+      function ESMF_TermOrderEq(termOrder1, termOrder2)
+
+! !RETURN VALUE:
+      logical :: ESMF_TermOrderEq
+
+! !ARGUMENTS:
+
+      type (ESMF_TermOrder_Flag), intent(in) :: &
+         termOrder1,      &
+         termOrder2
+
+! !DESCRIPTION:
+!     This routine compares two ESMF TermOrder flags to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[termOrder1, termOrder2]
+!          termorder flags
+!     \end{description}
+!
+!EOPI
+
+      ESMF_TermOrderEq = (termOrder1%flag == termOrder2%flag)
+
+      end function ESMF_TermOrderEq
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
