@@ -210,7 +210,7 @@ class TestRegridFromFileCommand(AbstractESMFCommand):
     def run(self):
         original_pp = os.environ.get('PYTHONPATH', '')
         path = os.path.join(os.getcwd(), 'src')
-        os.environ['PYTHONPATH'] = '{}:{}'.format(path, original_pp)
+        os.environ['PYTHONPATH'] = '{0}:{1}'.format(path, original_pp)
         self._validate_()
         target = os.path.join('src', 'ESMF', 'test', 'regrid_from_file', self._filename)
         cmd = [sys.executable, target]
