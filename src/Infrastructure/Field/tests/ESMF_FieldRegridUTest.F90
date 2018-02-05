@@ -63,7 +63,7 @@
 #ifdef ESMF_TESTEXHAUSTIVE
  
 ! This #if surrounds all the tests to enable turning on just one test
-#if 1
+#if 0
      !------------------------------------------------------------------------
         !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -987,6 +987,7 @@
       !------------------------------------------------------------------------
 
 
+#endif
       !------------------------------------------------------------------------
       !EX_UTest
 
@@ -1003,7 +1004,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-
+#if 0
 #endif
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)
@@ -30048,8 +30049,6 @@ end subroutine test_regridSMMArbGrid
     return
   endif
 
-
-
   ! Create Dst Grid
   dstGrid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/dst_nx,dst_ny/), &
        minCornerCoord=(/-50.0_ESMF_KIND_R8,-50.0_ESMF_KIND_R8/), &
@@ -30060,7 +30059,6 @@ end subroutine test_regridSMMArbGrid
     rc=ESMF_FAILURE
     return
   endif
-
 
   ! Create source/destination fields
   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
@@ -30317,7 +30315,7 @@ end subroutine test_regridSMMArbGrid
         endif
 
         ! if working everything should be close to exact answer
-        if (relErr .gt. 1.0) then
+        if (relErr .gt. 0.1) then
             correct=.false.
 !            write(*,*) "relErr=",relErr,farrayPtr(i1,i2),xfarrayPtr(i1,i2)
         endif
@@ -30334,8 +30332,8 @@ end subroutine test_regridSMMArbGrid
   enddo    ! lDE
 
 
-!  write(*,*) "maxRelErr=",maxRelErr
-!  write(*,*) "avgRelErr=",avgRelErr/REAL(numPnts)
+  write(*,*) "maxRelErr=",maxRelErr
+  write(*,*) "avgRelErr=",avgRelErr/REAL(numPnts)
 
 #if 0
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &

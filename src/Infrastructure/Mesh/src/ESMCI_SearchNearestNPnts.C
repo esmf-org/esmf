@@ -335,8 +335,6 @@ struct SearchData {
   void SearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status) {
   Trace __trace("Search(PointList &src_pl, PointList &dst_pl, int unmappedaction, SearchResult &result)");
 
-  printf("In SearchNearestNPnts num_pnts=%d\n",num_pnts);
-
   // Get spatial dim and make sure both have the same
   UInt sdim=src_pl.get_coord_dim();
   if (sdim != dst_pl.get_coord_dim()) {
@@ -408,15 +406,6 @@ struct SearchData {
 
     // If we've found a nearest source point, then add to the search results list...
     if (sd.num_valid_pnts > 0) {
-
-      // DEBUG
-      if (pnt_id == 573) {
-        printf(" dst_id=%d :: ",pnt_id);
-        for (int i=0; i<sd.num_valid_pnts; i++) {
-          printf(" %d ",sd.pnts[i].src_id);
-        }
-        printf("\n");
-      }
 
       // New search result
       Search_result *sr=new Search_result();       
@@ -913,7 +902,7 @@ struct CommDataBack {
       sr->dst_gid=p;  // save the location in the dst point list, so we can pull info out 
       sr->nodes.reserve(sd_list[p].num_valid_pnts);
       for (int i=0; i<sd_list[p].num_valid_pnts; i++) {
-        SearchDataPnt *pnt=sd.pnts+i;
+        SearchDataPnt *pnt=sd_list[p].pnts+i;
         
         // Fill in tmp_snr
         Search_node_result tmp_snr;
@@ -921,7 +910,7 @@ struct CommDataBack {
         tmp_snr.dst_gid=pnt->src_id; // Yeah this is ugly, but it seems a shame to add a new member
         // TODO: rename these members to be more generic
         MU_ASSIGN_VEC3D(tmp_snr.pcoord,pnt->coord);
-        
+       
         // Add it to search results
         sr->nodes.push_back(tmp_snr);
       } 

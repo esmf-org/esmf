@@ -2192,7 +2192,6 @@ void calc_nearest_npnts_mat_serial(PointList *srcpointlist, PointList *dstpointl
     Throw() << "src and dst must have the same spatial dimension for nearest regridding";
   }
 
-
   // Temporary empty col with negatives so unset values
   // can be detected if they sneak through
   IWeights::Entry col_empty(-1, 0, -1.0, 0);
@@ -2225,44 +2224,8 @@ void calc_nearest_npnts_mat_serial(PointList *srcpointlist, PointList *dstpointl
     cols.clear();
     cols.reserve(sr.nodes.size());
 
-#if 0
-    if (sr.nodes.size() == 3) {
-
-      double tri[9];
-
-      tri[0]=sr.nodes[0].pcoord[0];
-      tri[1]=sr.nodes[0].pcoord[1];
-      tri[2]=sr.nodes[0].pcoord[2];
-
-      tri[3]=sr.nodes[1].pcoord[0];
-      tri[4]=sr.nodes[1].pcoord[1];
-      tri[5]=sr.nodes[1].pcoord[2];
-
-      tri[6]=sr.nodes[2].pcoord[0];
-      tri[7]=sr.nodes[2].pcoord[1];
-      tri[8]=sr.nodes[2].pcoord[2];
-
-      double center[3]={0.0,0.0,0.0};
-
-      double p[2],t;
-
-      if (!intersect_tri_with_line(tri, dst_pnt, center, p, &t)) {
-        continue;
-      }
-
-      IWeights::Entry col_entry0(sr.nodes[0].dst_gid, 0, 1-p[0]-p[1], 0);
-      cols.push_back(col_entry0);
-
-      IWeights::Entry col_entry1(sr.nodes[1].dst_gid, 0, p[0], 0);
-      cols.push_back(col_entry1);
-
-      IWeights::Entry col_entry2(sr.nodes[2].dst_gid, 0, p[1], 0);
-      cols.push_back(col_entry2);
-    }
-#endif
-
-    // Loop calculating weights
-    double tot=0.0;
+    // See if there are any 0.0 dist
+    bool no_zero_dist=true;
     for (int i=0; i<sr.nodes.size(); i++) {
 
       // Get coordinates of src point
@@ -2273,40 +2236,88 @@ void calc_nearest_npnts_mat_serial(PointList *srcpointlist, PointList *dstpointl
                        (dst_pnt[1]-coord[1])*(dst_pnt[1]-coord[1])+
                        (dst_pnt[2]-coord[2])*(dst_pnt[2]-coord[2]));
       
-      // Skip 0.0 for now. TODO: deal with later      
-      if (dist == 0.0) continue;
-
-      // 1 over dist
-      double inv_dist=1.0/(dist*dist*dist*dist);
-
-      // Sum total weights
-      tot += inv_dist;
-
-      // Set col entry info
-      // NOTE: dst_gid actually contains src_gid 
-      IWeights::Entry col_entry(sr.nodes[i].dst_gid, 0, inv_dist, 0);
-
-      // Push into 
-      cols.push_back(col_entry);
+      // There is a 0.0 dist, so record that fact and leave
+      if (dist == 0.0) {
+        no_zero_dist=false;
+        break;
+      }
     }
 
-
+    // Loop calculating weights
+    double tot=0.0;
+    if (no_zero_dist) {
+      for (int i=0; i<sr.nodes.size(); i++) {
+        
+        // Get coordinates of src point
+        double *coord=sr.nodes[i].pcoord;
+        
+        // Calculate distance 
+        double dist=sqrt((dst_pnt[0]-coord[0])*(dst_pnt[0]-coord[0])+
+                         (dst_pnt[1]-coord[1])*(dst_pnt[1]-coord[1])+
+                         (dst_pnt[2]-coord[2])*(dst_pnt[2]-coord[2]));
+        
+        // This shouldn't happen, so complain
+        if (dist == 0.0) {
+          Throw() << " zero distance in part of weight calc that's for nonzero.";
+        }
+        
+        // 1 over dist
+        double inv_dist=1.0/(dist*dist*dist*dist);
+        
+        // Sum total weights
+        tot += inv_dist;
+        
+        // Set col entry info
+        // NOTE: dst_gid actually contains src_gid 
+        IWeights::Entry col_entry(sr.nodes[i].dst_gid, 0, inv_dist, 0);
+        
+        // Push into 
+        cols.push_back(col_entry);
+      }
+    } else {
+      // There are 0.0 dist, so just count those
+      for (int i=0; i<sr.nodes.size(); i++) {
+        
+        // Get coordinates of src point
+        double *coord=sr.nodes[i].pcoord;
+        
+        // Calculate distance 
+        double dist=sqrt((dst_pnt[0]-coord[0])*(dst_pnt[0]-coord[0])+
+                         (dst_pnt[1]-coord[1])*(dst_pnt[1]-coord[1])+
+                         (dst_pnt[2]-coord[2])*(dst_pnt[2]-coord[2]));
+        
+        // This is 0.0, so just add that
+        if (dist == 0.0) {
+                 
+          // Set col entry info using 1.0 as weight
+          // NOTE: dst_gid actually contains src_gid 
+          IWeights::Entry col_entry(sr.nodes[i].dst_gid, 0, 1.0, 0);
+        
+          // Sum total weights
+          tot += 1.0;
+          
+          // Push into 
+          cols.push_back(col_entry);
+        }
+      }
+    }
 
     // Loop dividing by tot
     for (int i=0; i<cols.size(); i++) {
       cols[i].value=cols[i].value/tot;
     }
 
-
+#if 0
     // DEBUG
     //   if ((dst_id==7050) || (dst_id==6878) || (dst_id==6880)) {
-    if ((dst_id==4581) || (dst_id==4751) || (dst_id==4666)) {
+    if ((dst_id==3737)) {
       printf("wgt calc: dst_id=%d ::",dst_id);
       for (int i=0; i<cols.size(); i++) {
         printf(" %d %g, \n",cols[i].id,cols[i].value);
       }
       printf("\n");
     }
+#endif
 
     // Put weights into weight matrix
     iw.InsertRow(row, cols);  
