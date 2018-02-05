@@ -281,6 +281,7 @@ program ESMF_RouteHandleUTest
   type(ESMF_GridComp)     :: compA, compB1, compB2
   type(ESMF_Field)        :: fieldA, fieldB1, fieldB2
   type(ESMF_RouteHandle)  :: rh1, rh2
+  logical                 :: isCreated
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
@@ -454,7 +455,31 @@ program ESMF_RouteHandleUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-  ! Create RH from RH
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleIsCreated()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_RouteHandleIsCreated(rh1, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleIsCreated() return value"
+  write(failMsg, *) "Incorrect return value"
+  isCreated = ESMF_RouteHandleIsCreated(rh1, rc=rc)
+  call ESMF_Test((isCreated), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleGet()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_RouteHandleGet(rh1, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  ! Prepare to test create RH from RH
   ! construct originPetList
   allocate(originPetList(size(petListA)+size(petListB1)))
   originPetList(1:size(petListA)) = petListA(:)
