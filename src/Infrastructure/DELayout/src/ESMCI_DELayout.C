@@ -61,15 +61,15 @@ static const char *const version = "$Id$";
 // prototypes for Fortran interface routines called by C++ code below
 extern "C" {
   void FTN_X(f_esmf_dynmaskcallbackr8r8r8)(ESMCI::RouteHandle **ptr, 
-    int *count, void **elementVector, int *countVector, int *totalCount,
-    void *factorsVector, void *valuesVector, int *rc);
+    int *count, void *elementVector, int *countVector, int *totalCount,
+    void *factorsVector, void *valuesVector, int *vectorL, int *rc);
 #ifndef ESMF_NO_DYNMASKOVERLOAD
   void FTN_X(f_esmf_dynmaskcallbackr4r8r4)(ESMCI::RouteHandle **ptr, 
-    int *count, void **elementVector, int *countVector, int *totalCount,
-    void *factorsVector, void *valuesVector, int *rc);
+    int *count, void *elementVector, int *countVector, int *totalCount,
+    void *factorsVector, void *valuesVector, int *vectorL, int *rc);
   void FTN_X(f_esmf_dynmaskcallbackr4r4r4)(ESMCI::RouteHandle **ptr, 
-    int *count, void **elementVector, int *countVector, int *totalCount,
-    void *factorsVector, void *valuesVector, int *rc);
+    int *count, void *elementVector, int *countVector, int *totalCount,
+    void *factorsVector, void *valuesVector, int *vectorL, int *rc);
 #endif
 }
 //-------------------------------------------------------------------------
@@ -6752,6 +6752,13 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
       "taking super-vector branch...");
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
+    if (dynMask){
+      // dynamic masking is undefined for superVector condition -> error out
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
+        "Dynamic masking is not defined for interleaved "
+        "distributed and undistributed dims", ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
+    }
     exec_pssslDstRraSuper(rraBaseList, rraIndexList, rraOffsetList, factorList,
       valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL,
       localDeIndexOff, size_r, size_s, size_t, size_i, size_j);
@@ -6763,12 +6770,12 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     if (dynMask){
-      // consider dynamic masking
+      // with dynamic masking
       exec_pssslDstRraDynMask(rraBaseList, rraIndexList, rraOffsetList, 
         factorList, valueBaseList, valueOffsetList, baseListIndexList,
         termCount, vectorL, rh);
     }else{
-      // do not consider dynamic masking
+      // without dynamic masking
       exec_pssslDstRra(rraBaseList, rraIndexList, rraOffsetList, factorList,
         valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL);
     }
@@ -6811,7 +6818,7 @@ void XXE::exec_pssslDstRra(T **rraBaseList, int *rraIndexList,
 
 template<typename T, typename U, typename V>
   void XXE::dynMaskHandler(vector<XXE::DynMaskElement<T,U,V> > &dynMaskList,
-  RouteHandle *rh){
+  RouteHandle *rh, int vectorL){
 #if 0
   {
     std::stringstream logmsg;
@@ -6829,7 +6836,7 @@ template<typename T, typename U, typename V>
   }
   // prepare vectors to be passed to the fortran call back
   int count=dynMaskList.size();
-  vector<void *> elementVector(count);
+  vector<T *> elementVector(count);
   vector<int> countVector(count);
   int totalCount=0;
   for (int i=0; i<count; i++){
@@ -6846,12 +6853,12 @@ template<typename T, typename U, typename V>
     
   }
   vector<U> factorsVector(totalCount);
-  vector<V> valuesVector(totalCount);
+  vector<V *> valuesVector(totalCount);
   int k=0;
   for (int i=0; i<count; i++){
     for (int j=0; j<countVector[i]; j++){
       factorsVector[k] = *(dynMaskList[i].factors[j]);
-      valuesVector[k] = *(dynMaskList[i].values[j]);
+      valuesVector[k] = dynMaskList[i].values[j];
       ++k;
     }
   }
@@ -6860,7 +6867,7 @@ template<typename T, typename U, typename V>
     typeid(V)==typeid(ESMC_R8)){
     FTN_X(f_esmf_dynmaskcallbackr8r8r8)(&rh, &count, &(elementVector[0]), 
       &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
-      &localrc);
+      &vectorL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 #ifndef ESMF_NO_DYNMASKOVERLOAD
@@ -6868,14 +6875,14 @@ template<typename T, typename U, typename V>
     typeid(V)==typeid(ESMC_R4)){
     FTN_X(f_esmf_dynmaskcallbackr4r8r4)(&rh, &count, &(elementVector[0]), 
       &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
-      &localrc);
+      &vectorL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
   }else if (typeid(T)==typeid(ESMC_R4) && typeid(U)==typeid(ESMC_R4) &&
     typeid(V)==typeid(ESMC_R4)){
     FTN_X(f_esmf_dynmaskcallbackr4r4r4)(&rh, &count, &(elementVector[0]), 
       &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
-      &localrc);
+      &vectorL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 #endif
@@ -6921,10 +6928,10 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
   rh->getSrcMaskValue(srcMaskValue);
   rh->getDstMaskValue(dstMaskValue);
   bool handleAllElements = rh->getHandleAllElements();
+  vector<DynMaskElement<T,U,V> > dynMaskList;
+  DynMaskElement<T,U,V> dynMaskElement;
   if (vectorL==1){
     // scalar elements
-    vector<DynMaskElement<T,U,V> > dynMaskList;
-    DynMaskElement<T,U,V> dynMaskElement;
     if (handleAllElements){
       // dynMaskList to hold all local elements
       for (int i=0; i<termCount; i++){  // super scalar loop
@@ -6940,7 +6947,6 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
           dynMaskElement.values.clear();  // reset
           prevElement = element;
         }
-        factor = factorList[i];
         value = valueBaseList[baseListIndexList[i]] + valueOffsetList[i];
         dynMaskElement.factors.push_back(&(factorList[i])); // dynMaskElement
         dynMaskElement.values.push_back(value); // dynMaskElement
@@ -6959,13 +6965,6 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
       for (int i=0; i<termCount; i++){  // super scalar loop
         element = rraBaseList[rraIndexList[baseListIndexList[i]]]
           + rraOffsetList[i];
-#if 0
-  {
-    std::stringstream logmsg;
-    logmsg << "exec_pssslDstRraDynMask(): i=" << i << " element=" << element;
-    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
         if (prevElement != element){
           // this is a new element
           if (prevElement != NULL && !(dstMask || srcMask)){
@@ -6994,15 +6993,6 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
         if (!(dstMask || srcMask)){
           tmpElement += factor * *value;  // perform calculation
         }
-#if 0
-  {
-    std::stringstream logmsg;
-    logmsg << "element=" << element
-      << "  factor=" << &(factorList[i])
-      << "  value=" << value;
-    ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
       }
       // process the last element of the loop
       if (prevElement != NULL && !(dstMask || srcMask)){
@@ -7014,23 +7004,92 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
         dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
       }
     }
-    // call into handler method if there are any elements to handle
-    if (dynMaskList.size() > 0){
-      // call into dynMaskHandler to handle the masked elements
-      dynMaskHandler(dynMaskList, rh);
-    }
   }else{
     // vector elements
-    //TODO: implement dynamic masking for the vector branch!!
-    for (int i=0; i<termCount; i++){  // super scalar loop
-      element = rraBaseList[rraIndexList[baseListIndexList[i]]]
-        + rraOffsetList[i] * vectorL;
-      factor = factorList[i];
-      value = valueBaseList[baseListIndexList[i]]
-        + valueOffsetList[i] * vectorL;
-      for (int k=0; k<vectorL; k++)  // vector loop
-        *(element+k) += factor * *(value+k);
+    if (handleAllElements){
+      // dynMaskList to hold all local elements
+      for (int i=0; i<termCount; i++){  // super scalar loop
+        element = rraBaseList[rraIndexList[baseListIndexList[i]]]
+          + rraOffsetList[i] * vectorL;
+        if (prevElement != element){
+          if (prevElement != NULL){
+            // store dynMaskElement in dynMaskList
+            dynMaskElement.element = prevElement;   // finish the entry
+            dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+          }
+          dynMaskElement.factors.clear(); // reset
+          dynMaskElement.values.clear();  // reset
+          prevElement = element;
+        }
+        value = valueBaseList[baseListIndexList[i]]
+          + valueOffsetList[i] * vectorL;
+        dynMaskElement.factors.push_back(&(factorList[i])); // dynMaskElement
+        dynMaskElement.values.push_back(value); // dynMaskElement
+      }
+      // process the last element of the loop
+      if (prevElement != NULL){
+        // store dynMaskElement in dynMaskList
+        dynMaskElement.element = prevElement;   // finish the entry
+        dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+      }
+    }else{
+      // vector handling with dynamic mask -> unroll over vectorL
+      // dynMaskList to hold only elements affected by dynamic mask
+      // handle interpolation of all other elements here
+      bool dstMask = false; 
+      bool srcMask = false;
+      for (int i=0; i<termCount; i++){  // super scalar loop
+        for (int v=0; v<vectorL; v++){
+          element = rraBaseList[rraIndexList[baseListIndexList[i]]]
+            + rraOffsetList[i] * vectorL + v;
+          if (prevElement != element){
+            // this is a new element
+            if (prevElement != NULL && !(dstMask || srcMask)){
+              // finally write the previous sum into the actual element b/c unmasked
+              *prevElement = tmpElement;
+            }else if (dstMask || srcMask){
+              // finally store dynMaskElement in dynMaskList b/c masking detected
+              dynMaskElement.element = prevElement;   // finish the entry
+              dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+            }
+            dynMaskElement.factors.clear(); // reset
+            dynMaskElement.values.clear();  // reset
+            prevElement = element;
+            srcMask = false;  // reset
+            dstMask = false;  // reset
+            if (dstMaskValue && (*element == *dstMaskValue))
+              dstMask = true;
+            else
+              tmpElement = *element;  // load tmpElement with current element
+          }
+          factor = factorList[i];
+          value = valueBaseList[baseListIndexList[i]]
+            + valueOffsetList[i] * vectorL + v;
+          dynMaskElement.factors.push_back(&(factorList[i])); // dynMaskElement
+          dynMaskElement.values.push_back(value); // dynMaskElement
+          if (srcMaskValue && (*value == *srcMaskValue)) srcMask = true;
+          if (!(dstMask || srcMask)){
+            tmpElement += factor * *value;  // perform calculation
+          }
+        }
+      }
+      // process the last element of the loop
+      if (prevElement != NULL && !(dstMask || srcMask)){
+        // finally write the previous sum into the actual element
+        *prevElement = tmpElement;
+      }else if (dstMask || srcMask){
+        // finally store dynMaskElement in dynMaskList b/c masking detected
+        dynMaskElement.element = prevElement;   // finish the entry
+        dynMaskList.push_back(dynMaskElement);  // push into dynMaskList
+      }
+      // fully unrolled across vectorL -> set to 1 before passing down
+      vectorL = 1;
     }
+  }
+  // call into handler method if there are any elements to handle
+  if (dynMaskList.size() > 0){
+    // call into dynMaskHandler to handle the masked elements
+    dynMaskHandler(dynMaskList, rh, vectorL);
   }
 }
 

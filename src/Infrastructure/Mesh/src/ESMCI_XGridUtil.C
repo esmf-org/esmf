@@ -1539,11 +1539,16 @@ int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &
   int regridScheme = 0;
   int map_type=0;
   bool tmp_set_dst_status=false;
+  int tmpExtrapMethod=0;
+  int tmpExtrapNumSrcPnts=1;
   IWeights tmp_dst_status;
 //WriteVTKMesh(srcmesh, "srcmesh");
 //WriteVTKMesh(dstmesh, "dstmesh");
   if (!regrid(&srcmesh, NULL, &dstmesh, NULL, midmesh, wts, regridMethod, &regridScheme, 
-              &regridPoleType, &regridPoleNPnts, &map_type, unmappedaction, 
+              &regridPoleType, &regridPoleNPnts, &map_type, 
+              &tmpExtrapMethod,
+              &tmpExtrapNumSrcPnts, 
+              unmappedaction, 
               tmp_set_dst_status, tmp_dst_status))
     Throw() << "Regridding error" << std::endl;
 

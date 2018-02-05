@@ -106,7 +106,9 @@ public:
   void GetColGIDS(std::vector<UInt> &gids);
   
   void Print(std::ostream &);
-  
+
+  void MergeDisjoint(const WMat &wmat2);
+
   /*
    * Migrate the matrix to the row decomposition given by
    * mesh.
@@ -133,6 +135,8 @@ public:
 
  
   void GatherToRowSrc(WMat &rhs);
+
+
 
   /*
    * Removes the columns referencing the constraint row entries.  

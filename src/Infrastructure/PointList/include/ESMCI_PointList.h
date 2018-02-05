@@ -76,7 +76,7 @@ namespace ESMCI {
     ~PointList();
 
     // Add Point to List
-    int add(int _id, double *_coord);
+    int add(int _id, const double *_coord);
 
     // diagnostic print to file
     int WriteVTK(const char *filename);

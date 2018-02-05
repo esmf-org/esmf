@@ -53,6 +53,8 @@ enum {ESMC_REGRID_SCHEME_FULL3D = 0,
 #define ESMC_REGRID_STATUS_OUTSIDE 2
 #define ESMC_REGRID_STATUS_MAPPED 4
 
+#define ESMC_EXTRAPMETHOD_NONE 0
+#define ESMC_EXTRAPMETHOD_NEAREST_STOD 1
 
 
 enum {ESMC_REGRID_METHOD_BILINEAR = 0, ESMC_REGRID_METHOD_PATCH, 
@@ -65,7 +67,10 @@ enum {ESMC_REGRID_POLETYPE_NONE = 0, ESMC_REGRID_POLETYPE_ALL = 1, ESMC_REGRID_P
 	    Mesh *midmesh, IWeights &wts,
 	    int *regridMethod, int *regridScheme, 
 	    int *regridPoleType, int *regridPoleNPnts, 
-	    int *map_type, int *unmappedaction,
+	    int *map_type,
+            int *extrapMethod,
+            int *extrapNumSrcPnts, 
+            int *unmappedaction,
             bool set_dst_status, WMat &dst_status);
 
 int csrv(Mesh &, Mesh &, IWeights &, MEField<> *, MEField<> *, 
@@ -83,7 +88,10 @@ int offline_regrid(Mesh &, Mesh &, Mesh &, int *, int *, int *, int *, char *, c
 		    int *regridConserve, int *regridMethod, 
 		    int *regridPoleType, int *regridPoleNPnts, 
 		    int *regridScheme, 
-		    int *map_type, int *unmappedaction, 
+		    int *map_type, 
+                    int *extrapMethod, 
+                    int *extrapNumSrcPnts, 
+                    int *unmappedaction, 
                     bool set_dst_status, WMat &dst_status);
 
 // get the integration weights for one mesh

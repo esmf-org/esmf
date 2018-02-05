@@ -150,7 +150,7 @@ public:
    */
   Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *destplist, Mesh *midmesh, bool freeze_dst_, int imethod,
          bool set_dst_status, WMat &dst_status,
-         MAP_TYPE mtype=MAP_TYPE_CART_APPROX, int unmappedaction=ESMCI_UNMAPPEDACTION_ERROR);
+         MAP_TYPE mtype=MAP_TYPE_CART_APPROX, int unmappedaction=ESMCI_UNMAPPEDACTION_ERROR, int num_src_pnts=1);
 
   ~Interp();
   
@@ -195,6 +195,7 @@ public:
   bool has_cnsrv; // true if a conserve interp exists
   bool has_nearest_src_to_dst; // true if a nearest interp exists
   bool has_nearest_dst_to_src; // true if a nearest interp exists
+  int num_src_pnts;
   Mesh *srcmesh;
   PointList *srcpointlist;
   Mesh *dstmesh;

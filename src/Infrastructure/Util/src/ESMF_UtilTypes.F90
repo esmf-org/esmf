@@ -175,26 +175,6 @@
  
 !------------------------------------------------------------------------------
 !
-!    ! Character array pointer.  For use when arrays of character pointers
-!    ! are needed, but can not be directly coded due to Fortran semantics.
-
-     type ESMF_CharPtr
-#ifndef ESMF_NO_SEQUENCE
-    sequence
-#endif
-       character(1), pointer :: cptr(:) => null ()
-     end type
-
-!------------------------------------------------------------------------------
-!
-!    ! Types useful to pass arrays of arrays into Fortran API
-
-     type ESMF_PtrInt1D
-       integer, pointer :: ptr(:) => null ()
-     end type
-
-!------------------------------------------------------------------------------
-!
 !    ! Where we can use a derived type, the compiler will help do 
 !    ! typechecking.  For those places where the compiler refuses to allow
 !    ! anything but an Integer data type, use the second set of constants.
@@ -264,6 +244,34 @@
       integer, parameter :: &
                    ESMF_KIND_I = kind(defaultIntegerDummy), &
                    ESMF_KIND_R = kind(defaultRealDummy)
+
+!------------------------------------------------------------------------------
+!
+!    ! Character array pointer.  For use when arrays of character pointers
+!    ! are needed, but can not be directly coded due to Fortran semantics.
+
+     type ESMF_CharPtr
+#ifndef ESMF_NO_SEQUENCE
+    sequence
+#endif
+       character(1), pointer :: cptr(:) => null ()
+     end type
+
+!------------------------------------------------------------------------------
+!
+!    ! Types useful to pass arrays of arrays into Fortran API
+
+     type ESMF_PtrInt1D
+       integer, pointer :: ptr(:) => null ()
+     end type
+
+     type ESMF_PtrR4D1
+       real(ESMF_KIND_R4), pointer :: ptr(:) => null ()
+     end type
+
+     type ESMF_PtrR8D1
+       real(ESMF_KIND_R8), pointer :: ptr(:) => null ()
+     end type
 
 !------------------------------------------------------------------------------
 !    ! Size of default integer, in character storage units.
@@ -729,6 +737,19 @@
            ESMF_REGRIDMETHOD_CONSERVE_2ND  = ESMF_RegridMethod_Flag(5)
 
 
+!------------------------------------------------------------------------------
+      type ESMF_ExtrapMethod_Flag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+!  private
+         integer :: extrapmethod
+      end type
+
+
+      type(ESMF_ExtrapMethod_Flag), parameter :: &
+           ESMF_EXTRAPMETHOD_NONE    = ESMF_ExtrapMethod_Flag(0), &
+           ESMF_EXTRAPMETHOD_NEAREST_STOD = ESMF_ExtrapMethod_Flag(1)
 
 !------------------------------------------------------------------------------
       type ESMF_LineType_Flag
@@ -1025,6 +1046,9 @@
                                    ESMF_REGRIDMETHOD_NEAREST_DTOS, &
                                    ESMF_REGRIDMETHOD_CONSERVE_2ND
 
+       public ESMF_ExtrapMethod_Flag, ESMF_EXTRAPMETHOD_NONE, & 
+                                      ESMF_EXTRAPMETHOD_NEAREST_STOD
+
        public ESMF_LineType_Flag,   ESMF_LINETYPE_CART, &
                                    ESMF_LINETYPE_GREAT_CIRCLE
 
@@ -1080,6 +1104,7 @@
       public ESMF_KeywordEnforcer
 
       public ESMF_Status, ESMF_Pointer, ESMF_CharPtr, ESMF_PtrInt1D
+      public ESMF_PtrR4D1, ESMF_PtrR8D1
       public ESMF_TypeKind_Flag, ESMF_DataValue
 
       public ESMF_MapPtr
@@ -1158,6 +1183,7 @@ interface operator (==)
   module procedure ESMF_LineTypeEqual
   module procedure ESMF_NormTypeEqual
   module procedure ESMF_RWGCheckMethodEqual
+  module procedure ESMF_TermOrderEq
 end interface
 
 interface operator (/=)
@@ -1220,10 +1246,22 @@ end interface
     real(ESMF_KIND_R8), allocatable   :: srcElement(:)
   end type
 
+  type ESMF_DynamicMaskElementR8R8R8V
+    real(ESMF_KIND_R8), pointer       :: dstElement(:)
+    real(ESMF_KIND_R8), allocatable   :: factor(:)
+    type(ESMF_PtrR8D1), allocatable   :: srcElement(:)
+  end type
+
   type ESMF_DynamicMaskElementR4R8R4
     real(ESMF_KIND_R4), pointer       :: dstElement
     real(ESMF_KIND_R8), allocatable   :: factor(:)
     real(ESMF_KIND_R4), allocatable   :: srcElement(:)
+  end type
+
+  type ESMF_DynamicMaskElementR4R8R4V
+    real(ESMF_KIND_R4), pointer       :: dstElement(:)
+    real(ESMF_KIND_R8), allocatable   :: factor(:)
+    type(ESMF_PtrR4D1), allocatable   :: srcElement(:)
   end type
 
   type ESMF_DynamicMaskElementR4R4R4
@@ -1232,9 +1270,15 @@ end interface
     real(ESMF_KIND_R4), allocatable   :: srcElement(:)
   end type
 
-  public ESMF_DynamicMaskElementR8R8R8
-  public ESMF_DynamicMaskElementR4R8R4
-  public ESMF_DynamicMaskElementR4R4R4
+  type ESMF_DynamicMaskElementR4R4R4V
+    real(ESMF_KIND_R4), pointer       :: dstElement(:)
+    real(ESMF_KIND_R4), allocatable   :: factor(:)
+    type(ESMF_PtrR4D1), allocatable   :: srcElement(:)
+  end type
+
+  public ESMF_DynamicMaskElementR8R8R8, ESMF_DynamicMaskElementR8R8R8V
+  public ESMF_DynamicMaskElementR4R8R4, ESMF_DynamicMaskElementR4R8R4V
+  public ESMF_DynamicMaskElementR4R4R4, ESMF_DynamicMaskElementR4R4R4V
 
 !------------------------------------------------------------------------------
 
@@ -2045,6 +2089,40 @@ end function
 
       end function ESMF_RWGCheckMethodNotEqual
 !-------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TermOrderEq"
+!BOPI
+! !IROUTINE: ESMF_TermOrderEq - Equality of TermOrder Flag
+!
+! !INTERFACE:
+      function ESMF_TermOrderEq(termOrder1, termOrder2)
+
+! !RETURN VALUE:
+      logical :: ESMF_TermOrderEq
+
+! !ARGUMENTS:
+
+      type (ESMF_TermOrder_Flag), intent(in) :: &
+         termOrder1,      &
+         termOrder2
+
+! !DESCRIPTION:
+!     This routine compares two ESMF TermOrder flags to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[termOrder1, termOrder2]
+!          termorder flags
+!     \end{description}
+!
+!EOPI
+
+      ESMF_TermOrderEq = (termOrder1%flag == termOrder2%flag)
+
+      end function ESMF_TermOrderEq
 
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
