@@ -689,6 +689,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     normType, &
                     extrapMethod, &
                     extrapNumSrcPnts, &
+                    extrapDistExponent, &
                     unmappedaction, ignoreDegenerate, &
                     srcTermProcessing, & 
                     pipeLineDepth, &
@@ -713,6 +714,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_NormType_Flag),       intent(in),    optional :: normType
       type(ESMF_ExtrapMethod_Flag),   intent(in),    optional :: extrapMethod
       integer,                        intent(in),    optional :: extrapNumSrcPnts
+      real,                           intent(in),    optional :: extrapDistExponent
       type(ESMF_UnmappedAction_Flag), intent(in),    optional :: unmappedaction
       logical,                        intent(in),    optional :: ignoreDegenerate
       integer,                        intent(inout), optional :: srcTermProcessing
@@ -834,6 +836,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE} or  {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE\_2ND}
 !           Please see  Section~\ref{opt:normType} for a 
 !           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!     \item [{[extrapMethod]}]
+!           The type of extrapolation. Please see Section~\ref{opt:regridmethod} 
+!           for a list of valid options. If not specified, defaults to 
+!           {\tt ESMF\_EXTRAPMETHOD\_NONE}.
+!     \item [{[extrapNumSrcPnts]}] 
+!           The number of source points to use for the extrapolation methods that use more than one source point 
+!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}). If not specified, defaults to 8.
+!     \item [{[extrapDistExponent]}] 
+!           The exponent to raise the distance to when calculating weights for 
+!           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}) extrapolation method. A higher value reduces the influence 
+!           of more distant points. If not specified, defaults to 2.0.
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
@@ -991,6 +1004,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_TypeKind_Flag) :: typekind
         integer :: tileCount
         integer :: localExtrapNumSrcPnts
+        real(ESMF_KIND_R8) :: localExtrapDistExponent
 
 !        real(ESMF_KIND_R8) :: beg_time, end_time
 !        call ESMF_VMWtime(beg_time)
@@ -1090,6 +1104,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
 
 
+        ! Handle optional extrapDistExponent
+        if (present(extrapDistExponent)) then
+           localExtrapDistExponent=REAL(extrapDistExponent,ESMF_KIND_R8)
+        else     
+           localExtrapDistExponent=2.0_ESMF_KIND_R8
+        endif
+
         ! TODO: If lineType is present then do error checking here
 
         ! Handle optional lineType argument
@@ -1134,7 +1155,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(extrapNumSrcPnts)) then
            localExtrapNumSrcPnts=extrapNumSrcPnts
         else 
-           localExtrapNumSrcPnts=1
+           localExtrapNumSrcPnts=6
         endif
         
         if (localpolemethod .eq. ESMF_POLEMETHOD_NPNTAVG) then
@@ -1591,6 +1612,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, &
+                                  localExtrapDistExponent, &
                                   unmappedaction, &
                                   localIgnoreDegenerate, &
                                   srcTermProcessing, &
@@ -1625,6 +1647,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   hasStatusArray, statusArray, &
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, &
+                                  localExtrapDistExponent, &
                                   unmappedaction, &
                                   localIgnoreDegenerate, &
                                   srcTermProcessing, &

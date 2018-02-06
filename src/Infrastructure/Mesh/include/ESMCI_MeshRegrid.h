@@ -55,10 +55,12 @@ enum {ESMC_REGRID_SCHEME_FULL3D = 0,
 
 #define ESMC_EXTRAPMETHOD_NONE 0
 #define ESMC_EXTRAPMETHOD_NEAREST_STOD 1
+#define ESMC_EXTRAPMETHOD_NEAREST_IDAVG 2
 
 
 enum {ESMC_REGRID_METHOD_BILINEAR = 0, ESMC_REGRID_METHOD_PATCH, 
-      ESMC_REGRID_METHOD_CONSERVE, ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST, ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC, ESMC_REGRID_METHOD_CONSERVE_2ND};
+      ESMC_REGRID_METHOD_CONSERVE, ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST, ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC, 
+      ESMC_REGRID_METHOD_CONSERVE_2ND, ESMC_REGRID_METHOD_NEAREST_IDAVG};
 enum {ESMC_REGRID_CONSERVE_OFF = 0, ESMC_REGRID_CONSERVE_ON = 1};
 enum {ESMC_REGRID_POLETYPE_NONE = 0, ESMC_REGRID_POLETYPE_ALL = 1, ESMC_REGRID_POLETYPE_NPNT = 2, ESMC_REGRID_POLETYPE_TEETH = 3};
 
@@ -69,7 +71,8 @@ enum {ESMC_REGRID_POLETYPE_NONE = 0, ESMC_REGRID_POLETYPE_ALL = 1, ESMC_REGRID_P
 	    int *regridPoleType, int *regridPoleNPnts, 
 	    int *map_type,
             int *extrapMethod,
-            int *extrapNumSrcPnts, 
+            int *extrapNumSrcPnts,
+            ESMC_R8 *extrapDistExponent,    
             int *unmappedaction,
             bool set_dst_status, WMat &dst_status);
 
@@ -90,7 +93,8 @@ int offline_regrid(Mesh &, Mesh &, Mesh &, int *, int *, int *, int *, char *, c
 		    int *regridScheme, 
 		    int *map_type, 
                     int *extrapMethod, 
-                    int *extrapNumSrcPnts, 
+                    int *extrapNumSrcPnts,
+                    ESMC_R8 *extrapDistExponent,   
                     int *unmappedaction, 
                     bool set_dst_status, WMat &dst_status);
 

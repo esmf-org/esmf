@@ -2184,13 +2184,17 @@ void calc_nearest_mat_serial(PointList *srcpointlist, PointList *dstpointlist, S
 }
 
 
-void calc_nearest_npnts_mat_serial(PointList *srcpointlist, PointList *dstpointlist, SearchResult &sres, IWeights &iw) {
+void calc_nearest_npnts_mat_serial(PointList *srcpointlist, PointList *dstpointlist, ESMC_R8 dist_exponent, SearchResult &sres, IWeights &iw) {
   Trace __trace("calc_nearest_mat_serial(PointList *srcpointlist, PointList *dstpointlist, SearchResult &sres, IWeights &iw)");
 
   // Make sure dimensions match
   if (srcpointlist->get_coord_dim() != dstpointlist->get_coord_dim()) {
     Throw() << "src and dst must have the same spatial dimension for nearest regridding";
   }
+
+  // Convert to double 
+  // (Just in case ESMC_R8 is different)
+  double dist_exponent_dbl = (double)dist_exponent;
 
   // Temporary empty col with negatives so unset values
   // can be detected if they sneak through
@@ -2261,8 +2265,8 @@ void calc_nearest_npnts_mat_serial(PointList *srcpointlist, PointList *dstpointl
           Throw() << " zero distance in part of weight calc that's for nonzero.";
         }
         
-        // 1 over dist
-        double inv_dist=1.0/(dist*dist*dist*dist);
+        // 1 over dist raised to a power
+        double inv_dist=1.0/pow(dist,dist_exponent_dbl);
         
         // Sum total weights
         tot += inv_dist;
@@ -2463,7 +2467,7 @@ static GeomRend::DstConfig get_dst_config(int imethod) {
 Interp::Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *dstplist, Mesh *midmesh, 
                bool freeze_src_, int imethod, 
                bool set_dst_status, WMat &dst_status,
-               MAP_TYPE mtype, int unmappedaction, int _num_src_pnts):
+               MAP_TYPE mtype, int unmappedaction, int _num_src_pnts, ESMC_R8 _dist_exponent):
                
 sres(),
 grend(src, srcplist, dest, dstplist, get_dst_config(imethod), freeze_src_, (mtype==MAP_TYPE_GREAT_CIRCLE)),
@@ -2475,7 +2479,9 @@ has_patch(false),
 has_cnsrv(false),
 has_nearest_src_to_dst(false),
 has_nearest_dst_to_src(false),
+has_nearest_idavg(false),
 num_src_pnts(_num_src_pnts), 
+dist_exponent(_dist_exponent), 
 srcmesh(src),
 dstmesh(dest),
 dstpointlist(dstplist),
@@ -2499,6 +2505,7 @@ interp_method(imethod)
   else if (interp_method == Interp::INTERP_CONSERVE_2ND) has_cnsrv = true;
   else if (interp_method == Interp::INTERP_NEAREST_SRC_TO_DST) has_nearest_src_to_dst = true;
   else if (interp_method == Interp::INTERP_NEAREST_DST_TO_SRC) has_nearest_dst_to_src = true;
+  else if (interp_method == Interp::INTERP_NEAREST_IDAVG) has_nearest_idavg = true;
 
   if (dstmesh != NULL) {
     //must get dst info from mesh
@@ -2518,12 +2525,15 @@ interp_method(imethod)
       Throw() << "unable to proceed with interpolation method dst_to_src";
 
     } else if (has_nearest_src_to_dst) {
-      if (num_src_pnts == 1) {
-        ParSearchNearestSrcToDst(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres, set_dst_status, dst_status);
-      } else {
-        ParSearchNearestSrcToDstNPnts(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), num_src_pnts, unmappedaction, sres, set_dst_status, dst_status);
-      }
+      ParSearchNearestSrcToDst(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres, set_dst_status, dst_status);
 
+      // Redistribute regrid status
+      if (set_dst_status) {
+        dst_status.Migrate(*dstplist);
+      }
+    } else if (has_nearest_idavg) {
+      ParSearchNearestSrcToDstNPnts(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), num_src_pnts, unmappedaction, sres, set_dst_status, dst_status);
+      
       // Redistribute regrid status
       if (set_dst_status) {
         dst_status.Migrate(*dstplist);
@@ -2560,11 +2570,9 @@ interp_method(imethod)
     if (has_nearest_dst_to_src) {
       Throw() << "unable to proceed with interpolation method dst_to_src";
     } else if (has_nearest_src_to_dst) {
-      if (num_src_pnts == 1) {
-        SearchNearestSrcToDst(*srcpointlist, *dstpointlist, unmappedaction, sres, set_dst_status, dst_status);
-      } else {
-        SearchNearestSrcToDstNPnts(*srcpointlist, *dstpointlist, num_src_pnts, unmappedaction, sres, set_dst_status, dst_status);
-      }
+      SearchNearestSrcToDst(*srcpointlist, *dstpointlist, unmappedaction, sres, set_dst_status, dst_status);
+    } else if (has_nearest_idavg) {
+      SearchNearestSrcToDstNPnts(*srcpointlist, *dstpointlist, num_src_pnts, unmappedaction, sres, set_dst_status, dst_status);
     } else {
 
       if (search_obj_type == MeshObj::NODE) {
@@ -2787,13 +2795,9 @@ void Interp::mat_transfer_serial(int fpair_num, IWeights &iw, IWeights &src_frac
   if (interp_method == INTERP_STD) mat_point_serial_transfer(*srcF[fpair_num], sres, iw, dstpointlist);
   else if (interp_method == INTERP_PATCH) mat_patch_serial_transfer(*srcmesh->GetCoordField(), *srcF[fpair_num], sres, srcmesh, iw, dstpointlist);
   else if (interp_method == INTERP_CONSERVE) calc_conserve_mat_serial(*srcmesh, *dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz, set_dst_status, dst_status);
-  else if (interp_method == INTERP_NEAREST_SRC_TO_DST) {
-    if (num_src_pnts == 1) {
-      calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
-    } else {
-      calc_nearest_npnts_mat_serial(srcpointlist, dstpointlist, sres, iw);
-    }
-  } else if (interp_method == INTERP_NEAREST_DST_TO_SRC) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
+  else if (interp_method == INTERP_NEAREST_SRC_TO_DST) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
+  else if (interp_method == INTERP_NEAREST_IDAVG) calc_nearest_npnts_mat_serial(srcpointlist, dstpointlist, dist_exponent,  sres, iw);
+  else if (interp_method == INTERP_NEAREST_DST_TO_SRC) calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
   else if (interp_method == INTERP_CONSERVE_2ND) calc_2nd_order_conserve_mat_serial(*srcmesh, *dstmesh, midmesh, sres, iw, src_frac, dst_frac, zz, set_dst_status, dst_status);
 
 }
@@ -2811,11 +2815,9 @@ void Interp::mat_transfer_parallel(int fpair_num, IWeights &iw, IWeights &src_fr
     calc_2nd_order_conserve_mat_serial(grend.GetSrcRend(),grend.GetDstRend(),
                              midmesh, sres, iw, src_frac, dst_frac, zz, set_dst_status, dst_status);
   } else if (interp_method == INTERP_NEAREST_SRC_TO_DST) {
-    if (num_src_pnts == 1) {
-      calc_nearest_mat_serial(&(grend.GetSrcPlistRend()), &(grend.GetDstPlistRend()), sres, iw);
-    } else {
-      calc_nearest_npnts_mat_serial(&(grend.GetSrcPlistRend()), &(grend.GetDstPlistRend()), sres, iw);
-    }
+    calc_nearest_mat_serial(&(grend.GetSrcPlistRend()), &(grend.GetDstPlistRend()), sres, iw);
+  } else if (interp_method == INTERP_NEAREST_IDAVG) {
+    calc_nearest_npnts_mat_serial(&(grend.GetSrcPlistRend()), &(grend.GetDstPlistRend()), dist_exponent, sres, iw);
   } else if (interp_method == INTERP_NEAREST_DST_TO_SRC) {
     calc_nearest_mat_serial(srcpointlist, dstpointlist, sres, iw);
   } else {

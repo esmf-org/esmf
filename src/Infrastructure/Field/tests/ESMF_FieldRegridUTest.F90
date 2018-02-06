@@ -63,7 +63,7 @@
 #ifdef ESMF_TESTEXHAUSTIVE
  
 ! This #if surrounds all the tests to enable turning on just one test
-#if 0
+#if 1
      !------------------------------------------------------------------------
         !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -987,12 +987,11 @@
       !------------------------------------------------------------------------
 
 
-#endif
       !------------------------------------------------------------------------
       !EX_UTest
 
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test regrid extrap nearest npnts"
+      write(name, *) "Test regrid extrap inverse distance weighted average"
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -1004,7 +1003,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-#if 0
+
 #endif
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)
@@ -29836,7 +29835,6 @@ end subroutine test_regridSMMArbGrid
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           extrapMethod=ESMF_EXTRAPMETHOD_NEAREST_STOD, &
-          extrapNumSrcPnts=1, &
           unmappedAction=ESMF_UNMAPPEDACTION_ERROR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -30253,9 +30251,9 @@ end subroutine test_regridSMMArbGrid
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
-          extrapMethod=ESMF_EXTRAPMETHOD_NEAREST_STOD, &
-!          extrapNumSrcPnts=1, &
+          extrapMethod=ESMF_EXTRAPMETHOD_NEAREST_IDAVG, &
           extrapNumSrcPnts=6, &
+          extrapDistExponent=4.0, &
           unmappedAction=ESMF_UNMAPPEDACTION_ERROR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -30332,8 +30330,8 @@ end subroutine test_regridSMMArbGrid
   enddo    ! lDE
 
 
-  write(*,*) "maxRelErr=",maxRelErr
-  write(*,*) "avgRelErr=",avgRelErr/REAL(numPnts)
+!  write(*,*) "maxRelErr=",maxRelErr
+!  write(*,*) "avgRelErr=",avgRelErr/REAL(numPnts)
 
 #if 0
   call ESMF_GridWriteVTK(srcGrid,staggerloc=ESMF_STAGGERLOC_CENTER, &

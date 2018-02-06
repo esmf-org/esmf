@@ -122,6 +122,7 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
 		    int *map_type, 
                     int *extrapMethod, 
                     int *extrapNumSrcPnts, 
+                    ESMC_R8 *extrapDistExponent,  
                     int *unmappedaction, 
                     bool set_dst_status, WMat &dst_status) {
 
@@ -151,6 +152,7 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
                   regridPoleType, regridPoleNPnts, map_type,
                   extrapMethod, 
                   extrapNumSrcPnts, 
+                  extrapDistExponent,  
                   unmappedaction,
                   set_dst_status, dst_status)) {
         Throw() << "Regridding error" << std::endl;
@@ -263,10 +265,12 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       int tmpExtrapNumSrcPnts=1;
       int map_type=0;
       int tmpExtrapMethod=0;
+      ESMC_R8 tmpDistExponent=2.0;
       if (!regrid(&srcmesh, NULL, &dstmesh, NULL, NULL, wts, regridMethod, &regridScheme,
                   regridPoleType, regridPoleNPnts, &map_type, 
                   &tmpExtrapMethod,
-                  &tmpExtrapNumSrcPnts,  
+                  &tmpExtrapNumSrcPnts,
+                  &tmpDistExponent,
                   &unmappedaction, 
                   tmp_set_dst_status, tmp_dst_status))
 
@@ -434,6 +438,7 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
              MAP_TYPE mtype,
              int extrapMethod, 
              int extrapNumSrcPnts, 
+             ESMC_R8 extrapDistExponent,    
              bool set_dst_status, WMat &dst_status) {
 
    
@@ -453,13 +458,14 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
    } else { 
      Throw() << "No destination geometry object.";
    }      
-   
+
    // DEBUG
    //srcpointlist_extrap->WriteVTK("src_pl");      
    
    // Construct a new point list which just contains destination points not in the weight matrix
    PointList *missing_points=NULL;
    if (dstmesh != NULL) {
+     Throw() << "Conservative methods currently not supported in extrapolation.";
    } else if (dstpointlist != NULL) {
      _create_pointlist_of_points_not_in_wmat(dstpointlist, wts, &missing_points);
    } else { 
@@ -468,7 +474,17 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
    
    // DEBUG
    //missing_points->WriteVTK("missing_pl");      
-   
+
+   // Translate extrap method to regrid method
+   int regridMethod;
+   if (extrapMethod == ESMC_EXTRAPMETHOD_NEAREST_STOD) { 
+     regridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
+   } else if (extrapMethod == ESMC_EXTRAPMETHOD_NEAREST_IDAVG) {
+     regridMethod=ESMC_REGRID_METHOD_NEAREST_IDAVG;
+   } else {
+     Throw() << "unrecognized extrapolation method";
+   }
+
    // Set info for calling into interp
    IWeights extrap_wts;
    bool tmp_set_dst_status=false;
@@ -476,10 +492,10 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
    
    // Build the rendezvous grids
    Interp interp((Mesh *)NULL, srcpointlist_extrap,(Mesh *)NULL, missing_points, 
-                 (Mesh *)NULL, false, ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST, 
+                 (Mesh *)NULL, false, regridMethod, 
                  tmp_set_dst_status, tmp_dst_status,
-                 mtype, ESMCI_UNMAPPEDACTION_IGNORE, extrapNumSrcPnts);
-   
+                 mtype, ESMCI_UNMAPPEDACTION_IGNORE, extrapNumSrcPnts, 
+                 extrapDistExponent);
 
    // Create the weight matrix
    interp(0, extrap_wts, tmp_set_dst_status, tmp_dst_status);
@@ -501,6 +517,7 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
 	    int *map_type, 
             int *extrapMethod, 
             int *extrapNumSrcPnts, 
+            ESMC_R8 *extrapDistExponent,    
             int *unmappedaction,
             bool set_dst_status, WMat &dst_status) {
 
@@ -631,6 +648,8 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
 
     }
 
+
+
     // Convert to map type
     MAP_TYPE mtype;
     if (*map_type==0) mtype=MAP_TYPE_CART_APPROX;
@@ -667,14 +686,13 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
        }
      }
 
-
      // Do extrapolation if the user has requested it
      if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
        extrap(srcmesh, srcpointlist, dstmesh, dstpointlist, 
-              wts, mtype, *extrapMethod, *extrapNumSrcPnts, 
+              wts, mtype, 
+              *extrapMethod, *extrapNumSrcPnts, *extrapDistExponent,    
               set_dst_status, dst_status);
      }
-
 
     return 1;
   }
