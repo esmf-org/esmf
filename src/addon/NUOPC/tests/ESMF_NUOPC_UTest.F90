@@ -983,7 +983,16 @@ program ESMF_NUOPC_UTest
   !NEX_UTest
   write(name, *) "NUOPC_AddNamespace() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_AddNamespace(stateA, namespace="abc", nestedState=stateC, &
+  call NUOPC_AddNamespace(stateA, Namespace="abc", nestedState=stateC, &
+    rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_AddNestedState() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_AddNestedState(stateA, Namespace="def", nestedState=stateC, &
     rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
