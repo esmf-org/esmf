@@ -1768,7 +1768,7 @@ program ESMF_CompTunnelUTest
 !-------------------------------------------------------------------------
 #else
   write(name, *) "Dummy test to satisfy scripts for ESMF_TESTCOMPTUNNEL=OFF"
-  write(failMsg, *) "Did succeed" 
+  write(failMsg, *) "Did not succeed" 
   do i=1,56
     call ESMF_Test((.true.), name, failMsg, result, ESMF_SRCLINE)
   enddo

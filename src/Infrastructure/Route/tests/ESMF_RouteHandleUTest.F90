@@ -233,6 +233,8 @@ end module compBmod
 
 !-------------------------------------------------------------------------------
 
+#ifndef ESMF_NO_DYNMASKOVERLOAD
+
 module dynMaskmod
   use ESMF
   implicit none
@@ -277,6 +279,9 @@ module dynMaskmod
   end subroutine
  
 end module dynMaskmod
+
+#endif
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -304,7 +309,9 @@ program ESMF_RouteHandleUTest
 
   use compAmod, only: ssA => SetServices
   use compBmod, only: ssB => SetServices
+#ifndef ESMF_NO_DYNMASKOVERLOAD  
   use dynMaskmod
+#endif
 
   implicit none
 
@@ -647,6 +654,8 @@ program ESMF_RouteHandleUTest
   deallocate(petListB1)
   deallocate(petListB2)
 
+#ifndef ESMF_NO_DYNMASKOVERLOAD
+
  !-----------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Test ESMF_DynamicMaskSetR4R4R4()"
@@ -673,6 +682,16 @@ program ESMF_RouteHandleUTest
     dynamicMaskRoutine=dynMaskR4R8R4V, rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
+  
+#else
+
+  write(name, *) "Dummy test to satisfy scripts for ESMF_NO_DYNMASKOVERLOAD"
+  write(failMsg, *) "Did not succeed" 
+  do i=1,3
+    call ESMF_Test((.true.), name, failMsg, result, ESMF_SRCLINE)
+  enddo
+
+#endif
 
   !------------------------------------------------------------------------
 10 continue
