@@ -801,6 +801,5 @@ in our regrid weight calculation. The parts of the internal FEM code that are us
 \subsection{Restrictions and Future Work}
 \begin{enumerate}
 
-\item {\bf 32-bit sequence index limitation:} Currently all ESMF interfaces that handle sequence indices for sparse matrix multiplication (SMM) are implemented with default Fortran integer variables, corresponding to a 32-bit signed integer number on all modern architectures. This limits the global data (across PETs) stored in Fields and Arrays, and accessible to SMM, to $2^{31}-1$ elements. This limitation will be removed in future versions of ESMF by allowing 64-bit sequence indices.
-
+\item {\bf 32-bit index limitation:} Currently all index space dimensions in an ESMF object are represented by signed 32-bit integers. This limits the number of elements in one-dimensional objects to the 32-bit limit. This limit can be crossed by higher dimensional objects, where the product space is only limited by the 64-bit sequence index representation.
 \end{enumerate}
