@@ -133,7 +133,8 @@ void IWeights::GatherTangentVectors(const Mesh &mesh, TVECT tv, bool transpose) 
 class Interp {
 public:
 
-  enum {INTERP_STD = 0, INTERP_PATCH, INTERP_CONSERVE, INTERP_NEAREST_SRC_TO_DST, INTERP_NEAREST_DST_TO_SRC, INTERP_CONSERVE_2ND};
+  enum {INTERP_STD = 0, INTERP_PATCH, INTERP_CONSERVE, INTERP_NEAREST_SRC_TO_DST, INTERP_NEAREST_DST_TO_SRC, INTERP_CONSERVE_2ND, 
+        INTERP_NEAREST_IDAVG};
   
   struct FieldPair {
   FieldPair(MEField<> *_sF, MEField<> *_dF, UChar _idata=INTERP_STD, UChar _patch_order=2) :
@@ -150,7 +151,9 @@ public:
    */
   Interp(Mesh *src, PointList *srcplist, Mesh *dest, PointList *destplist, Mesh *midmesh, bool freeze_dst_, int imethod,
          bool set_dst_status, WMat &dst_status,
-         MAP_TYPE mtype=MAP_TYPE_CART_APPROX, int unmappedaction=ESMCI_UNMAPPEDACTION_ERROR, int num_src_pnts=1);
+         MAP_TYPE mtype=MAP_TYPE_CART_APPROX, 
+         int unmappedaction=ESMCI_UNMAPPEDACTION_ERROR, int num_src_pnts=1, 
+         ESMC_R8 dist_exponent=2.0);
 
   ~Interp();
   
@@ -195,7 +198,9 @@ public:
   bool has_cnsrv; // true if a conserve interp exists
   bool has_nearest_src_to_dst; // true if a nearest interp exists
   bool has_nearest_dst_to_src; // true if a nearest interp exists
+  bool has_nearest_idavg; // true if a nearest idavg interp exists
   int num_src_pnts;
+  ESMC_R8 dist_exponent;
   Mesh *srcmesh;
   PointList *srcpointlist;
   Mesh *dstmesh;

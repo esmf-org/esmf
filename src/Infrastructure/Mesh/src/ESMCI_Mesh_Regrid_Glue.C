@@ -95,6 +95,7 @@ void ESMCI_regrid_create(
                      int *regridScheme,
                      int *extrapMethod, 
                      int *extrapNumSrcPnts, 
+                     ESMC_R8 *extrapDistExponent,  
                      int *unmappedaction, int *_ignoreDegenerate,
                      int *srcTermProcessing, int *pipelineDepth, 
                      ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
@@ -208,6 +209,7 @@ void ESMCI_regrid_create(
                         regridScheme, map_type,
                         extrapMethod, 
                         extrapNumSrcPnts, 
+                        extrapDistExponent,  
                         &temp_unmappedaction, 
                         set_dst_status, dst_status)) {
         Throw() << "Online regridding error" << std::endl;
@@ -220,6 +222,7 @@ void ESMCI_regrid_create(
                         regridScheme, map_type, 
                         extrapMethod, 
                         extrapNumSrcPnts, 
+                        extrapDistExponent,  
                         &temp_unmappedaction,
                         set_dst_status, dst_status)) {
         Throw() << "Online regridding error" << std::endl;

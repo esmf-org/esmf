@@ -991,7 +991,7 @@
       !EX_UTest
 
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Test regrid extrap nearest npnts"
+      write(name, *) "Test regrid extrap inverse distance weighted average"
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -29835,7 +29835,6 @@ end subroutine test_regridSMMArbGrid
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
           extrapMethod=ESMF_EXTRAPMETHOD_NEAREST_STOD, &
-          extrapNumSrcPnts=1, &
           unmappedAction=ESMF_UNMAPPEDACTION_ERROR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -30048,8 +30047,6 @@ end subroutine test_regridSMMArbGrid
     return
   endif
 
-
-
   ! Create Dst Grid
   dstGrid=ESMF_GridCreateNoPeriDimUfrm(maxIndex=(/dst_nx,dst_ny/), &
        minCornerCoord=(/-50.0_ESMF_KIND_R8,-50.0_ESMF_KIND_R8/), &
@@ -30060,7 +30057,6 @@ end subroutine test_regridSMMArbGrid
     rc=ESMF_FAILURE
     return
   endif
-
 
   ! Create source/destination fields
   call ESMF_ArraySpecSet(arrayspec, 2, ESMF_TYPEKIND_R8, rc=localrc)
@@ -30255,9 +30251,9 @@ end subroutine test_regridSMMArbGrid
           dstField=dstField, &
           routeHandle=routeHandle, &
           regridmethod=ESMF_REGRIDMETHOD_BILINEAR, &
-          extrapMethod=ESMF_EXTRAPMETHOD_NEAREST_STOD, &
-!          extrapNumSrcPnts=1, &
+          extrapMethod=ESMF_EXTRAPMETHOD_NEAREST_IDAVG, &
           extrapNumSrcPnts=6, &
+          extrapDistExponent=4.0, &
           unmappedAction=ESMF_UNMAPPEDACTION_ERROR, &
           rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -30317,7 +30313,7 @@ end subroutine test_regridSMMArbGrid
         endif
 
         ! if working everything should be close to exact answer
-        if (relErr .gt. 1.0) then
+        if (relErr .gt. 0.1) then
             correct=.false.
 !            write(*,*) "relErr=",relErr,farrayPtr(i1,i2),xfarrayPtr(i1,i2)
         endif
