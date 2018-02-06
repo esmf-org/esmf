@@ -199,6 +199,7 @@ program ESMF_NUOPC_UTest
   character(len=NUOPC_FreeFormatLen)  :: runSequence(5)
   real(ESMF_KIND_R8), allocatable :: factorList(:)
   integer, allocatable            :: factorIndexList(:,:)
+  character(len=40)       :: phaseLabel
 
 
 !-------------------------------------------------------------------------------
@@ -1052,6 +1053,15 @@ program ESMF_NUOPC_UTest
   write(name, *) "NUOPC_MediatorGet() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_MediatorGet(gridComp, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompSearchRevPhaseMap() Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_CompSearchRevPhaseMap(gridComp, ESMF_METHOD_INITIALIZE, &
+    phaseLabel=phaseLabel, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

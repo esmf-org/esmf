@@ -656,8 +656,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     in-depth discussion of {\em all} bit-for-bit reproducibility
 !     aspects related to route-based communication methods.
 !     See \ref{const:termorderflag} for a full list of options.
-!     The default is {\tt ESMF\_TERMORDER\_FREE}, allowing maximum flexibility
-!     in the order of terms for optimum performance.
+!     The default setting depends on whether the {\tt dynamicMask} argument
+!     is present or not. With {\tt dynamicMask} argument present, the default
+!     of {\tt termorderflag} is {\tt ESMF\_TERMORDER\_SRCSEQ}. This ensures
+!     that {\tt all} source terms are present on the destination side, and 
+!     the interpolation can be calculated as a single sum. When 
+!     {\tt dynamicMask} is absent, the default of {\tt termorderflag} is
+!     {\tt ESMF\_TERMORDER\_FREE}, allowing maximum flexibility and partial 
+!     sums for optimum performance.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Array pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
@@ -879,9 +885,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     opt_zeroregion = ESMF_REGION_TOTAL
     if (present(zeroregion)) opt_zeroregion = zeroregion
     opt_termorderflag = ESMF_TERMORDER_FREE
+    if (present(dynamicMask)) opt_termorderflag = ESMF_TERMORDER_SRCSEQ
     if (present(termorderflag)) opt_termorderflag = termorderflag
     opt_checkflag = ESMF_FALSE
     if (present(checkflag)) opt_checkflag = checkflag
+    
+    ! ensure consistent termorder for dynamic masking
+    if (present(dynamicMask) .and. &
+      .not.(opt_termorderflag == ESMF_TERMORDER_SRCSEQ)) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
+          msg="Must use 'ESMF_TERMORDER_SRCSEQ' for dynamic masking", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+    endif
         
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_ArraySMM(opt_srcArray, opt_dstArray, routehandle, &

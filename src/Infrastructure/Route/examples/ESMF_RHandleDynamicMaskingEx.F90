@@ -424,8 +424,7 @@ program ESMF_RHandleDynamicMaskingEx
 
 !BOC
   call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
-    routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
-    dynamicMask=dynamicMask, rc=rc)
+    routehandle=routehandle, dynamicMask=dynamicMask, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -534,15 +533,6 @@ program ESMF_RHandleDynamicMaskingEx
 !  end subroutine
 ! \end{verbatim}
 !
-! Going back to the example of regridding between the {\tt srcField} and
-! {\tt dstField}, notice that beside providing the {\tt dynamicMask} argument,
-! also {\tt termorderflag = ESMF\_TERMORDER\_SRCSEQ} is specified in the
-! {\tt ESMF\_FieldRegrid()} call.
-! The {\tt ESMF\_TERMORDER\_SRCSEQ} option ensures that the destination side
-! waits for {\em all} of the source elements before summing into the destination
-! element. This is critical for handling the dynamically masked 
-! source and destination objects.
-!
 ! So far in the example only the {\tt srcField} had been dynamically masked.
 ! However, elements in the {\tt dstField} can be masked as well, following 
 ! exactly the same manner.
@@ -603,8 +593,8 @@ program ESMF_RHandleDynamicMaskingEx
 
 !BOC
   call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
-    routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
-    zeroregion=ESMF_REGION_EMPTY, dynamicMask=dynamicMask, rc=rc)
+    routehandle=routehandle, zeroregion=ESMF_REGION_EMPTY, &
+    dynamicMask=dynamicMask, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -665,8 +655,8 @@ program ESMF_RHandleDynamicMaskingEx
 
 !BOC
   call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
-    routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
-    zeroregion=ESMF_REGION_EMPTY, dynamicMask=dynamicMask, rc=rc)
+    routehandle=routehandle, zeroregion=ESMF_REGION_EMPTY, &
+    dynamicMask=dynamicMask, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -803,8 +793,8 @@ program ESMF_RHandleDynamicMaskingEx
 
 !BOC
   call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
-    routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
-    zeroregion=ESMF_REGION_EMPTY, dynamicMask=dynamicMask, rc=rc)
+    routehandle=routehandle, zeroregion=ESMF_REGION_EMPTY, &
+    dynamicMask=dynamicMask, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -843,8 +833,8 @@ program ESMF_RHandleDynamicMaskingEx
 
 !BOC
   call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
-    routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
-    zeroregion=ESMF_REGION_EMPTY, dynamicMask=dynamicMask, rc=rc)
+    routehandle=routehandle, zeroregion=ESMF_REGION_EMPTY, &
+    dynamicMask=dynamicMask, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -918,8 +908,8 @@ program ESMF_RHandleDynamicMaskingEx
 
 !BOC
   call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
-    routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
-    zeroregion=ESMF_REGION_EMPTY, dynamicMask=dynamicMask, rc=rc)
+    routehandle=routehandle, zeroregion=ESMF_REGION_EMPTY, &
+    dynamicMask=dynamicMask, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -1067,8 +1057,8 @@ program ESMF_RHandleDynamicMaskingEx
 
 !BOC
   call ESMF_FieldRegrid(srcField=srcField, dstField=dstField, &
-    routehandle=routehandle, termorderflag=ESMF_TERMORDER_SRCSEQ, &
-    zeroregion=ESMF_REGION_EMPTY, dynamicMask=dynamicMask, rc=rc)
+    routehandle=routehandle, zeroregion=ESMF_REGION_EMPTY, &
+    dynamicMask=dynamicMask, rc=rc)
 !EOC
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &

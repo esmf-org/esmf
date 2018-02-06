@@ -200,8 +200,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     in-depth discussion of {\em all} bit-for-bit reproducibility
 !     aspects related to route-based communication methods.
 !     See \ref{const:termorderflag} for a full list of options.
-!     The default is {\tt ESMF\_TERMORDER\_FREE}, allowing maximum flexibility
-!     in the order of terms for optimum performance.
+!     The default setting depends on whether the {\tt dynamicMask} argument
+!     is present or not. With {\tt dynamicMask} argument present, the default
+!     of {\tt termorderflag} is {\tt ESMF\_TERMORDER\_SRCSEQ}. This ensures
+!     that {\tt all} source terms are present on the destination side, and 
+!     the interpolation can be calculated as a single sum. When 
+!     {\tt dynamicMask} is absent, the default of {\tt termorderflag} is
+!     {\tt ESMF\_TERMORDER\_FREE}, allowing maximum flexibility and partial 
+!     sums for optimum performance.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Array pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
