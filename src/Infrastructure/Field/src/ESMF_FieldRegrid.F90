@@ -843,7 +843,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Please see  Section~\ref{opt:normType} for a 
 !           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
 !     \item [{[extrapMethod]}]
-!           The type of extrapolation. Please see Section~\ref{opt:regridmethod} 
+!           The type of extrapolation. Please see Section~\ref{opt:extrapmethod} 
 !           for a list of valid options. If not specified, defaults to 
 !           {\tt ESMF\_EXTRAPMETHOD\_NONE}.
 !     \item [{[extrapNumSrcPnts]}] 
@@ -851,7 +851,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           (e.g. {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}). If not specified, defaults to 8.
 !     \item [{[extrapDistExponent]}] 
 !           The exponent to raise the distance to when calculating weights for 
-!           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}) extrapolation method. A higher value reduces the influence 
+!           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
 !           of more distant points. If not specified, defaults to 2.0.
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
