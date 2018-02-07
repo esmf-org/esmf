@@ -699,6 +699,103 @@ BBox bbox_from_pl(PointList &dst_pl) {
     return BBox(dst_pl.get_coord_dim(), min, max);
 }
 
+  // Loop through search results and clamp them to be within the cell to ensure monotonicity.
+  // Do this after the search so we are not changing which cell a point is mapped to. Also, so we only
+  // do it once per cell.
+  void ClampPCoords(int pdim, SearchResult &result) {
+
+    // Process results depending on parametric dimension
+    SearchResult::iterator sb = result.begin(), se = result.end();
+    if (pdim == 2) {
+      for (; sb != se; sb++) {
+        Search_result *sr = *sb;
+
+        // Get number of nodes in element
+        const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*(sr->elem));
+        int num_nodes=topo->num_nodes;
+
+        // Clamp based on shape indicated by the number of nodes
+        if (num_nodes == 3) { // Tri
+          for (int i= 0; i<sr->nodes.size(); i++) {
+            double *pcoord=sr->nodes[i].pcoord;
+
+            // Clamp into the correct range
+            if (pcoord[0] < 0.0) pcoord[0]=0.0;
+            else if (pcoord[0] > 1.0) pcoord[0]=1.0;
+ 
+            if (pcoord[1] < 0.0) pcoord[1]=0.0;
+            else if (pcoord[1] > 1.0) pcoord[1]=1.0;
+
+            // If over the slanty side, then fix that too
+            if (pcoord[0] + pcoord[1] > 1.0) {
+              // Distance outside
+              double dist=(pcoord[0]+pcoord[1])-1.0;
+
+              // Try taking 1/2 off, otherwise take what we can
+              if (((pcoord[0]-0.5*dist) >= 0.0) && 
+                  ((pcoord[1]-0.5*dist) >= 0.0)) {
+                pcoord[0]=pcoord[0]-0.5*dist;
+                pcoord[1]=pcoord[1]-0.5*dist;
+              } else {
+                if (dist < pcoord[0]) {
+                  pcoord[0]=pcoord[0]-dist;
+                } else {
+                  double extra=dist-pcoord[0];
+                  pcoord[0]=0.0; // take as much from here as we can
+                  pcoord[1]=pcoord[1]-extra; // take the rest from here
+                }
+              }
+            }
+          }
+        } else if (num_nodes == 4) { // Quad
+          for (int i= 0; i<sr->nodes.size(); i++) {
+            double *pcoord=sr->nodes[i].pcoord;
+         
+            if (pcoord[0] < -1.0) pcoord[0]=-1.0;
+            else if (pcoord[0] > 1.0) pcoord[0]=1.0;
+ 
+            if (pcoord[1] < -1.0) pcoord[1]=-1.0;
+            else if (pcoord[1] > 1.0) pcoord[1]=1.0;
+          }
+
+        } else {
+          Throw() << " Element has an unexpected number of nodes for a 2D shape.";
+        }
+      }
+    } else if (pdim == 3) {
+      for (; sb != se; sb++) {
+        Search_result *sr = *sb;
+
+        // Get number of nodes in element
+        const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*(sr->elem));
+        int num_nodes=topo->num_nodes;
+
+        // Clamp based on shape indicated by the number of nodes
+        if (num_nodes == 4) { // Tetra
+
+          // these don't work in bilinear/patch anyways right now, so
+          // don't worry about it until they do. 
+
+        } else if (num_nodes == 8) { // Hex
+          for (int i= 0; i<sr->nodes.size(); i++) {
+            double *pcoord=sr->nodes[i].pcoord;
+         
+            if (pcoord[0] < -1.0) pcoord[0]=-1.0;
+            else if (pcoord[0] > 1.0) pcoord[0]=1.0;
+ 
+            if (pcoord[1] < -1.0) pcoord[1]=-1.0;
+            else if (pcoord[1] > 1.0) pcoord[1]=1.0;
+
+            if (pcoord[2] < -1.0) pcoord[2]=-1.0;
+            else if (pcoord[2] > 1.0) pcoord[2]=1.0;
+          }
+        } else {
+          Throw() << " Element has an unexpected number of nodes for a 3D shape.";
+        }
+      }
+    }
+  }
+
 
 // The main routine
 // dst_pl is assumed to only contain non-masked points
@@ -925,7 +1022,16 @@ BBox bbox_from_pl(PointList &dst_pl) {
      }
   }
 
-  if (!box_in) delete box;
+  // Exiting top of recursion, so do a few things before we leave
+  if (!box_in) {
+    // Clamp pcoords in results to be inside elements to avoid non-montonicity
+    // Doing this after search, so changing pcoords doesn't interfer
+    // with search (e.g. which are considered close)
+    ClampPCoords(src.parametric_dim(), result);
+
+    // Get rid of search structure
+    delete box;
+  }
 }
 
 } // namespace

@@ -7464,11 +7464,11 @@ int setDefaultsLUA(
         // present:       ,       , alignIn        
         for (int i=0; i<dimCount; i++) {
           if (alignIn->array[i] > 0) {
-            lWidthOut[i]= lWidthDefault[i];
+            lWidthOut[i]= 1;
             uWidthOut[i]= 0;
           } else if (alignIn->array[i] < 0) {
             lWidthOut[i]= 0;
-            uWidthOut[i]= uWidthDefault[i];
+            uWidthOut[i]= 1;
           } else {
             lWidthOut[i]= 0;
             uWidthOut[i]= 0;

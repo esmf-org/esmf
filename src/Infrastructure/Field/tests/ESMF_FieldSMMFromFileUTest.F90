@@ -52,6 +52,151 @@ module ESMF_FieldSMMFromFileUTestMod
 
   end subroutine test_smm_from_file
 
+  subroutine test_regrid_store_from_file(rc)
+  integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_VM) :: vm
+  type(ESMF_Grid) :: srcGrid, dstGrid
+  type(ESMF_Field) :: srcField, dstField
+  type(ESMF_RouteHandle) :: routeHandle
+  real(ESMF_KIND_R8), pointer :: src(:,:), dst(:,:)
+  real(ESMF_KIND_R8) :: lon, lat, theta, phi
+  real(ESMF_KIND_R8), pointer :: s_x(:,:), s_y(:,:), d_x(:,:), d_y(:,:)
+  integer(ESMF_KIND_I4) :: lbnd(2), ubnd(2)
+  integer :: localPet, petCount
+  integer :: i, j, m, n
+
+  ! init success flag
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+  m = 8
+  n = 9
+
+  srcGrid = ESMF_GridCreateNoPeriDim(maxIndex=(/n,n/), &
+                                     coordSys=ESMF_COORDSYS_CART, &
+                                     indexflag=ESMF_INDEX_GLOBAL, &
+                                     rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+  dstGrid = ESMF_GridCreateNoPeriDim(maxIndex=(/m,m/), &
+                                     coordSys=ESMF_COORDSYS_CART, &
+                                     indexflag=ESMF_INDEX_GLOBAL,  &
+                                     rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+  call ESMF_GridAddCoord(srcGrid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+  call ESMF_GridAddCoord(dstGrid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+  call ESMF_GridGetCoord(srcGrid, 1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                         computationalLBound=lbnd, computationalUBound=ubnd, &
+                         farrayPtr=s_x, rc=localrc)
+
+  call ESMF_GridGetCoord(srcGrid, 2, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                         computationalLBound=lbnd, computationalUBound=ubnd, &
+                         farrayPtr=s_y, rc=localrc)
+
+  do i = lbnd(1), ubnd(1)
+    do j = lbnd(2), ubnd(2)
+        s_x(i, j) = i - 0.5
+        s_y(i, j) = j - 0.5
+    enddo
+  enddo
+
+
+  call ESMF_GridGetCoord(dstGrid, 1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                         computationalLBound=lbnd, computationalUBound=ubnd, &
+                         farrayPtr=d_x, rc=localrc)
+
+  call ESMF_GridGetCoord(dstGrid, 2, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                         computationalLBound=lbnd, computationalUBound=ubnd, &
+                         farrayPtr=d_y, rc=localrc)
+
+    do i = lbnd(1), ubnd(1)
+      do j = lbnd(2), ubnd(2)
+          d_x(i, j) = i
+          d_y(i, j) = j
+      enddo
+    enddo
+
+  ! Create source/destination fields
+   srcField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
+                               staggerloc=ESMF_STAGGERLOC_CENTER, &
+                               name="source", rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+   dstField = ESMF_FieldCreate(dstGrid, ESMF_TYPEKIND_R8, &
+                               staggerloc=ESMF_STAGGERLOC_CENTER, &
+                               name="dest", rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+
+  ! Get arrays
+  ! dstArray
+  call ESMF_FieldGet(dstField, farrayPtr=dst, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+  dst = 0.
+
+  ! srcArray
+  call ESMF_FieldGet(srcField, farrayPtr=src, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+  src = 42.
+
+  ! Do regrid
+  call ESMF_FieldRegridStore(srcField, dstField, routehandle=routeHandle, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+  ! SMM store
+  call ESMF_FieldSMMStore(srcField, dstField, "weights.nc", routeHandle, &
+                          rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+  do i = lbnd(1), ubnd(1)
+    do j = lbnd(2), ubnd(2)
+        if (dst(i, j) /= 42.) then 
+          correct = .false.
+        endif
+    enddo
+  enddo
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+  ! Free the grids
+  call ESMF_GridDestroy(srcGrid, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+  call ESMF_GridDestroy(dstGrid, rc=localrc)
+  if (localrc /= ESMF_SUCCESS) return ESMF_FAILURE
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+  end subroutine test_regrid_store_from_file
+
 end module
 
 !==============================================================================
@@ -121,6 +266,21 @@ program ESMF_FieldSMMFromFileUTest
   call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   ! Must abort to prevent possible hanging due to communications.
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ESMF_FieldRegridStoreFromFile Unit Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  call test_regrid_store_from_file(rc)
+
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc .eq. ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
   !------------------------------------------------------------------------
 
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
