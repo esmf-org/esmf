@@ -1284,11 +1284,12 @@ static const char *const version = "$Id$";
     // Base object is responsible for vmID deallocation
     rc = vmID->destroy();
     delete vmID;
+  }
 
-    if (vmID_remote) {
-      rc = vmID_remote->destroy();
-      delete vmID_remote;
-    }
+  if (vmID_remote) {
+    // Base object is responsible for vmID_remote deallocation
+    rc = vmID_remote->destroy();
+    delete vmID_remote;
   }
 
   baseStatus  = ESMF_STATUS_INVALID;
