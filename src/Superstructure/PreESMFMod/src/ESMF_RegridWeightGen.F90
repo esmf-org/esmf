@@ -95,6 +95,7 @@ contains
   ! Private name; call using ESMF_RegridWeightGen()
   subroutine ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile, keywordEnforcer, &
     regridmethod, polemethod, regridPoleNPnts, lineType, normType, &
+    extrapMethod, extrapNumSrcPnts, extrapDistExponent, &
     unmappedaction, ignoreDegenerate, srcFileType, dstFileType, &
     srcRegionalFlag, dstRegionalFlag, srcMeshname, dstMeshname,  &
     srcMissingvalueFlag, srcMissingvalueVar, &
@@ -118,6 +119,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer,                      intent(in),  optional :: regridPoleNPnts
   type(ESMF_LineType_Flag),     intent(in),  optional :: lineType
   type(ESMF_NormType_Flag),     intent(in),  optional :: normType
+  type(ESMF_ExtrapMethod_Flag),   intent(in),    optional :: extrapMethod
+  integer,                        intent(in),    optional :: extrapNumSrcPnts
+  real,                           intent(in),    optional :: extrapDistExponent
   type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
   logical,                      intent(in),  optional :: ignoreDegenerate
   type(ESMF_FileFormat_Flag),   intent(in),  optional :: srcFileType
@@ -201,6 +205,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. Please see 
 !           Section~\ref{opt:normType} for a 
 !           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!     \item [{[extrapMethod]}]
+!           The type of extrapolation. Please see Section~\ref{opt:extrapmethod} 
+!           for a list of valid options. If not specified, defaults to 
+!           {\tt ESMF\_EXTRAPMETHOD\_NONE}.
+!     \item [{[extrapNumSrcPnts]}] 
+!           The number of source points to use for the extrapolation methods that use more than one source point 
+!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}). If not specified, defaults to 8.
+!     \item [{[extrapDistExponent]}] 
+!           The exponent to raise the distance to when calculating weights for 
+!           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
+!           of more distant points. If not specified, defaults to 2.0.
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
@@ -1373,6 +1388,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
               lineType=localLineType, &
               normType=localNormType, &
+              extrapMethod=extrapMethod, &
+              extrapNumSrcPnts=extrapNumSrcPnts, &
+              extrapDistExponent=extrapDistExponent, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1388,6 +1406,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
               lineType=localLineType, &
               normType=localNormType, &
+              extrapMethod=extrapMethod, &
+              extrapNumSrcPnts=extrapNumSrcPnts, &
+              extrapDistExponent=extrapDistExponent, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1403,6 +1424,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
               lineType=locallineType, &
               normType=localNormType, &
+              extrapMethod=extrapMethod, &
+              extrapNumSrcPnts=extrapNumSrcPnts, &
+              extrapDistExponent=extrapDistExponent, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1417,6 +1441,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
               lineType=locallineType, &
               normType=localNormType, &
+              extrapMethod=extrapMethod, &
+              extrapNumSrcPnts=extrapNumSrcPnts, &
+              extrapDistExponent=extrapDistExponent, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1720,6 +1747,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
               lineType=locallineType, &
               normType=localNormType, &
+              extrapMethod=extrapMethod, &
+              extrapNumSrcPnts=extrapNumSrcPnts, &
+              extrapDistExponent=extrapDistExponent, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1734,6 +1764,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
               lineType=locallineType, &
               normType=localNormType, &
+              extrapMethod=extrapMethod, &
+              extrapNumSrcPnts=extrapNumSrcPnts, &
+              extrapDistExponent=extrapDistExponent, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1748,6 +1781,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
               lineType=locallineType, &
               normType=localNormType, &
+              extrapMethod=extrapMethod, &
+              extrapNumSrcPnts=extrapNumSrcPnts, &
+              extrapDistExponent=extrapDistExponent, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1761,6 +1797,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               polemethod = localPoleMethod, regridPoleNPnts = localPoleNPnts, &
               lineType=locallineType, &
               normType=localNormType, &
+              extrapMethod=extrapMethod, &
+              extrapNumSrcPnts=extrapNumSrcPnts, &
+              extrapDistExponent=extrapDistExponent, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
@@ -1880,8 +1919,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   subroutine ESMF_RegridWeightGenDG(srcFile, dstFile, regridRouteHandle, &
     keywordEnforcer, srcElementDistgrid, dstElementDistgrid, &
     srcNodalDistgrid, dstNodalDistgrid, &
-    weightFile, regridmethod, lineType, normType, unmappedaction, &
-    ignoreDegenerate, useUserAreaFlag, &
+    weightFile, regridmethod, lineType, normType, &
+    extrapMethod, extrapNumSrcPnts, extrapDistExponent, &
+    unmappedaction, ignoreDegenerate, useUserAreaFlag, &
     largefileFlag, netcdf4fileFlag, &
     weightOnlyFlag, verboseFlag, rc)
 
@@ -1899,6 +1939,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   type(ESMF_RegridMethod_Flag), intent(in),  optional :: regridmethod
   type(ESMF_LineType_Flag),     intent(in),  optional :: lineType
   type(ESMF_NormType_Flag),     intent(in),  optional :: normType
+  type(ESMF_ExtrapMethod_Flag),   intent(in),    optional :: extrapMethod
+  integer,                        intent(in),    optional :: extrapNumSrcPnts
+  real,                           intent(in),    optional :: extrapDistExponent
   type(ESMF_UnmappedAction_Flag),intent(in), optional :: unmappedaction
   logical,                      intent(in),  optional :: ignoreDegenerate
   logical,                      intent(in),  optional :: useUserAreaFlag
@@ -1963,6 +2006,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. Please see 
 !           Section~\ref{opt:normType} for a 
 !           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!     \item [{[extrapMethod]}]
+!           The type of extrapolation. Please see Section~\ref{opt:extrapmethod} 
+!           for a list of valid options. If not specified, defaults to 
+!           {\tt ESMF\_EXTRAPMETHOD\_NONE}.
+!     \item [{[extrapNumSrcPnts]}] 
+!           The number of source points to use for the extrapolation methods that use more than one source point 
+!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}). If not specified, defaults to 8..
+!     \item [{[extrapDistExponent]}] 
+!           The exponent to raise the distance to when calculating weights for 
+!           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
+!           of more distant points. If not specified, defaults to 2.0.
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
@@ -2316,6 +2370,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               polemethod = ESMF_POLEMETHOD_NONE, &
               lineType=locallineType, &
               normType=localNormType, &
+              extrapMethod=extrapMethod, &
+              extrapNumSrcPnts=extrapNumSrcPnts, &
+              extrapDistExponent=extrapDistExponent, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
@@ -2331,6 +2388,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               polemethod = ESMF_POLEMETHOD_NONE, &
               lineType=locallineType, &
               normType=localNormType, &
+              extrapMethod=extrapMethod, &
+              extrapNumSrcPnts=extrapNumSrcPnts, &
+              extrapDistExponent=extrapDistExponent, &
 	      rc=localrc)
       if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &

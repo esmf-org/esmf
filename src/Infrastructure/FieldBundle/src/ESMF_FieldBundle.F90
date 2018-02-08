@@ -3280,9 +3280,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:esmf_fieldbundleregridstore}
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, &
-    srcMaskValues, dstMaskValues, regridmethod, polemethod, regridPoleNPnts, &
-    lineType, normType, unmappedaction,  ignoreDegenerate, srcTermProcessing, &
-    pipelineDepth, routehandle, rc)
+       srcMaskValues, dstMaskValues, regridmethod, polemethod, regridPoleNPnts, &
+       lineType, normType, extrapMethod, extrapNumSrcPnts, extrapDistExponent, &
+       unmappedaction,  ignoreDegenerate, srcTermProcessing, &
+       pipelineDepth, routehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),        intent(in)              :: srcFieldBundle
@@ -3294,6 +3295,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in),    optional :: regridPoleNPnts
     type(ESMF_LineType_Flag),      intent(in),    optional :: lineType
     type(ESMF_NormType_Flag),      intent(in),    optional :: normType
+    type(ESMF_ExtrapMethod_Flag),   intent(in),   optional :: extrapMethod
+    integer,                        intent(in),   optional :: extrapNumSrcPnts
+    real,                           intent(in),   optional :: extrapDistExponent
     type(ESMF_UnmappedAction_Flag),intent(in),    optional :: unmappedaction
     logical,                       intent(in),    optional :: ignoreDegenerate 
     integer,                       intent(inout), optional :: srcTermProcessing
@@ -3389,6 +3393,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. Please see 
 !           Section~\ref{opt:normType} for a 
 !           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!  \item [{[extrapMethod]}]
+!           The type of extrapolation. Please see Section~\ref{opt:extrapmethod} 
+!           for a list of valid options. If not specified, defaults to 
+!           {\tt ESMF\_EXTRAPMETHOD\_NONE}.
+!  \item [{[extrapNumSrcPnts]}] 
+!           The number of source points to use for the extrapolation methods that use more than one source point 
+!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}). If not specified, defaults to 8.
+!  \item [{[extrapDistExponent]}] 
+!           The exponent to raise the distance to when calculating weights for 
+!           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
+!           of more distant points. If not specified, defaults to 2.0.
 !  \item [{[unmappedaction]}]
 !    Specifies what should happen if there are destination points that
 !    can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
@@ -3738,6 +3753,10 @@ call ESMF_LogWrite("must precompute full regridding!", &
             srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
             regridmethod=regridmethod, &
             polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
+            lineType=lineType, normType=normType, &
+            extrapMethod=extrapMethod, &
+            extrapNumSrcPnts=extrapNumSrcPnts, &
+            extrapDistExponent=extrapDistExponent, &
             unmappedaction=unmappedaction, &
             srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
             routehandle=rhh, &

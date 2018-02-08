@@ -1161,7 +1161,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(extrapNumSrcPnts)) then
            localExtrapNumSrcPnts=extrapNumSrcPnts
         else 
-           localExtrapNumSrcPnts=6
+           localExtrapNumSrcPnts=8
         endif
         
         if (localpolemethod .eq. ESMF_POLEMETHOD_NPNTAVG) then
