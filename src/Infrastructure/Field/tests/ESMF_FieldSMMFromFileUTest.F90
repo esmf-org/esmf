@@ -10,7 +10,7 @@
 !
 !==============================================================================
 
-#define FILENAME "src/Infrastructure/Array/tests/ESMF_ArraySMMFromFileUTest.F90"
+#define FILENAME "ESMF_FieldSMMFromFileUTest.F90"
 
 #include "ESMF_Macros.inc"
 #include "ESMF.h"
@@ -29,8 +29,7 @@ module ESMF_FieldSMMFromFileUTestMod
 
   contains !--------------------------------------------------------------------
 
-  subroutine test_smm_from_file(srcFile, dstFile, weightFile, checkMethod, &
-                                rc)
+  subroutine test_smm_from_file(srcFile, dstFile, weightFile, checkMethod, rc)
     character(len=*), intent(in) :: srcFile, dstFile, weightFile
     integer, intent(out) :: rc
     type(ESMF_RWGCheckMethod_Flag), intent(in) :: checkMethod
@@ -40,17 +39,188 @@ module ESMF_FieldSMMFromFileUTestMod
     ! Generate the netCDF weights file.
     call ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return
 
     ! Validate generated weights produce acceptable errors. This subroutine
     ! calls ESMF_ArraySMMStoreFromFile or ESMF_FieldSMMStoreFromFile.
     call ESMF_RegridWeightGenCheck(weightFile, checkMethod=checkMethod, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return
 
     rc = ESMF_SUCCESS
 
   end subroutine test_smm_from_file
+
+  subroutine test_regrid_store_from_file(rc)
+  integer, intent(out)  :: rc
+  logical :: correct
+  integer :: localrc
+  type(ESMF_VM) :: vm
+  type(ESMF_Grid) :: srcGrid, dstGrid
+  type(ESMF_Field) :: srcField, dstField
+  type(ESMF_RouteHandle) :: routeHandle
+  real(ESMF_KIND_R8), pointer :: src(:,:), dst(:,:)
+  real(ESMF_KIND_R8) :: lon, lat, theta, phi
+  real(ESMF_KIND_R8), pointer :: s_x(:,:), s_y(:,:), d_x(:,:), d_y(:,:)
+  integer(ESMF_KIND_I4) :: lbnd(2), ubnd(2)
+  integer :: localPet, petCount
+  integer :: i, j, m, n
+
+  ! init success flag
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! get pet info
+  call ESMF_VMGetGlobal(vm, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localpet, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  m = 8
+  n = 9
+
+  srcGrid = ESMF_GridCreateNoPeriDim(maxIndex=(/n,n/), &
+                                     coordSys=ESMF_COORDSYS_CART, &
+                                     indexflag=ESMF_INDEX_GLOBAL, &
+                                     rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+  dstGrid = ESMF_GridCreateNoPeriDim(maxIndex=(/m,m/), &
+                                     coordSys=ESMF_COORDSYS_CART, &
+                                     indexflag=ESMF_INDEX_GLOBAL,  &
+                                     rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  call ESMF_GridAddCoord(srcGrid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+  call ESMF_GridAddCoord(dstGrid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  call ESMF_GridGetCoord(srcGrid, 1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                         computationalLBound=lbnd, computationalUBound=ubnd, &
+                         farrayPtr=s_x, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  call ESMF_GridGetCoord(srcGrid, 2, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                         computationalLBound=lbnd, computationalUBound=ubnd, &
+                         farrayPtr=s_y, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  do i = lbnd(1), ubnd(1)
+    do j = lbnd(2), ubnd(2)
+        s_x(i, j) = i - 0.5
+        s_y(i, j) = j - 0.5
+    enddo
+  enddo
+
+
+  call ESMF_GridGetCoord(dstGrid, 1, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                         computationalLBound=lbnd, computationalUBound=ubnd, &
+                         farrayPtr=d_x, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  call ESMF_GridGetCoord(dstGrid, 2, staggerloc=ESMF_STAGGERLOC_CENTER, &
+                         computationalLBound=lbnd, computationalUBound=ubnd, &
+                         farrayPtr=d_y, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+    do i = lbnd(1), ubnd(1)
+      do j = lbnd(2), ubnd(2)
+          d_x(i, j) = i
+          d_y(i, j) = j
+      enddo
+    enddo
+
+  ! Create source/destination fields
+   srcField = ESMF_FieldCreate(dstGrid, typekind=ESMF_TYPEKIND_R8, &
+                               staggerloc=ESMF_STAGGERLOC_CENTER, &
+                               name="source", rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+   dstField = ESMF_FieldCreate(dstGrid, ESMF_TYPEKIND_R8, &
+                               staggerloc=ESMF_STAGGERLOC_CENTER, &
+                               name="dest", rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+
+  ! Get arrays
+  ! dstArray
+  call ESMF_FieldGet(dstField, farrayPtr=dst, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+  dst = 0.
+
+  ! srcArray
+  call ESMF_FieldGet(srcField, farrayPtr=src, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+  src = 42.
+
+  ! Do regrid
+  call ESMF_FieldRegridStore(srcField, dstField, routehandle=routeHandle, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  ! SMM store
+  call ESMF_FieldSMMStore(srcField, dstField, "weights.nc", routeHandle, &
+                          rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  do i = lbnd(1), ubnd(1)
+    do j = lbnd(2), ubnd(2)
+        if (dst(i, j) /= 42.) then 
+          correct = .false.
+        endif
+    enddo
+  enddo
+
+  call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  ! Destroy the Fields
+   call ESMF_FieldDestroy(srcField, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+   call ESMF_FieldDestroy(dstField, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  ! Free the grids
+  call ESMF_GridDestroy(srcGrid, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  call ESMF_GridDestroy(dstGrid, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  ! return answer based on correct flag
+  if (correct) then
+    rc=ESMF_SUCCESS
+  else
+    rc=ESMF_FAILURE
+  endif
+
+  end subroutine test_regrid_store_from_file
 
 end module
 
@@ -111,16 +281,30 @@ program ESMF_FieldSMMFromFileUTest
   write(name, *) "ESMF_FieldSMMFromFile Unit Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
-#ifdef ESMF_NETCDF
   call test_smm_from_file(srcFile, dstFile, weightFile, &
                           ESMF_RWGCHECKMETHOD_FIELD, rc)
-#else
-  rc = ESMF_SUCCESS
-#endif
 
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
   call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  ! Must abort to prevent possible hanging due to communications.
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc .eq. ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ESMF_FieldRegridStoreFromFile Unit Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  call test_regrid_store_from_file(rc)
+
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc .eq. ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
   !------------------------------------------------------------------------
 
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally

@@ -43,11 +43,11 @@ int main(void){
 
   // LocStream variables
   ESMC_LocStream srclocstream;
+  ESMC_Array array;
   int ls_size=9;
   const char *keyName="AnyNameHere";
   int cLBound,cUBound;
-  double *farray;
-  double *farray2;
+  double *farray, *farray2, *farray3;
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
@@ -86,6 +86,16 @@ int main(void){
   farray[8]=8.8;
   farray2 = (double *) ESMC_LocStreamGetKeyPtr(srclocstream,keyName,0,&rc);
   ESMC_Test((rc==ESMF_SUCCESS) && farray2[8]==farray[8] && farray2[0]==farray[0], 
+	    name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "LocStreamGetKeyPtr");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  array = ESMC_LocStreamGetKeyArray(srclocstream,keyName,&rc);
+  farray3 = (double *) ESMC_ArrayGetPtr(array, 0, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS) && farray3[8]==farray[8] && farray3[0]==farray[0], 
 	    name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

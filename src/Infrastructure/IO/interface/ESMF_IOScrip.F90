@@ -117,7 +117,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
       localrc = ESMF_RC_NOT_IMPL
     endif
     
-#ifndef ESMF_NETCDF
+#if (!defined ESMF_PIO || (!defined ESMF_NETCDF && !defined ESMF_PNETCDF))
     ! Writing weights requires netCDF and the subroutine should not continue if
     ! the netCDF library is not available.
     if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, ESMF_ERR_PASSTHRU, &
@@ -210,7 +210,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
         bcstData = (/0, 0/)
       endif
       call ESMF_VMBroadcast(vm, bcstData, 2, ii-1, rc=localrc)
-      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       deBlockList(1, :, ii) = bcstData
     enddo

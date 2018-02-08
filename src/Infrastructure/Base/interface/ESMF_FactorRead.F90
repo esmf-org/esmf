@@ -216,10 +216,9 @@ subroutine ESMF_FactorRead(filename, factorList, factorIndexList, rc)
 
     if (present(rc)) rc = ESMF_SUCCESS
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
-      msg="- ESMF_NETCDF not defined when lib was compiled", ESMF_CONTEXT, &
-      rcToReturn=rc)
-    return
+    if (ESMF_LogFoundError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
 #endif
 
   end subroutine ESMF_FactorRead
