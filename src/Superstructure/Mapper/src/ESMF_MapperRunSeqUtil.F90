@@ -82,14 +82,18 @@ module ESMF_MapperRunSeqUtilMod
     integer :: runSeqTimeLoopInfoIdx
   end type
 
+  type ESMF_MapperRunSeqDepGraphNodePtr
+    type(ESMF_MapperRunSeqDepGraphNode), pointer :: ptr => null()
+  end type
+
   type ESMF_MapperRunSeqDepGraphNode
     type(ESMF_RunSeqTokenizedLine) :: line
-    type(ESMF_MapperRunSeqDepGraphNode), dimension(:), pointer :: children
+    type(ESMF_MapperRunSeqDepGraphNodePtr), dimension(:), allocatable :: children
     integer :: nchildren
   end type
 
   type ESMF_MapperRunSeqDepGraph
-    type(ESMF_MapperRunSeqDepGraphNode), dimension(:), pointer :: nodes
+    type(ESMF_MapperRunSeqDepGraphNode), dimension(:), pointer :: nodes => null()
   end type
 
 
@@ -341,6 +345,9 @@ subroutine GetSeqCodeDbgInfo(runSeqCode, tokRunSeq, curLine, dbgStr, rc)
 
 end subroutine
 
+! Get information about the run sequence
+! This function return the number of timeloops and number of lines of 
+! execution (at runtime) for the tokenized run sequence
 subroutine ESMF_GetRunSeqInfo(runSeqCode, tokRunSeq, nTimeLoops, nExecLines, rc)
   character(len=ESMF_MAXSTR), dimension(:), intent(in) :: runSeqCode
   type(ESMF_RunSeqTokenizedCode), intent(in) :: tokRunSeq
@@ -428,6 +435,7 @@ subroutine ESMF_GetRunSeqInfo(runSeqCode, tokRunSeq, nTimeLoops, nExecLines, rc)
 
 end subroutine
 
+! Print the run sequence dependency graph
 subroutine ESMF_MapperPrintDepGraph(runSeqDepGraph, rc)
   type(ESMF_MapperRunSeqDepGraph), intent(inout) :: runSeqDepGraph
   integer, optional, intent(out) :: rc
@@ -446,9 +454,9 @@ subroutine ESMF_MapperPrintDepGraph(runSeqDepGraph, rc)
         " children "
       do j=1,runSeqDepGraph%nodes(i)%nchildren
         print *, "          : ",&
-          trim(runSeqDepGraph%nodes(i)%children(j)%line%tok(ESMF_RUNSEQ_TOK1)),& 
+          trim(runSeqDepGraph%nodes(i)%children(j)%ptr%line%tok(ESMF_RUNSEQ_TOK1)),& 
           " : ",&
-          trim(runSeqDepGraph%nodes(i)%children(j)%line%tok(ESMF_RUNSEQ_TOK2))
+          trim(runSeqDepGraph%nodes(i)%children(j)%ptr%line%tok(ESMF_RUNSEQ_TOK2))
       end do
     else if(runSeqDepGraph%nodes(i)%line%tok_type == ESMF_CONN_TOKEN) then
       print *, "Node :",&
@@ -460,6 +468,9 @@ subroutine ESMF_MapperPrintDepGraph(runSeqDepGraph, rc)
 
 end subroutine
 
+! Create the complete run sequence dependency graph
+! The run sequence dependency graph is already populated with all the nodes.
+! This function adds the parent-child connection between the nodes
 subroutine ESMF_MapperCreateDepGraph(runSeqDepGraph, rc)
   type(ESMF_MapperRunSeqDepGraph), intent(inout) :: runSeqDepGraph
   integer, optional, intent(out) :: rc
@@ -518,6 +529,7 @@ subroutine ESMF_MapperCreateDepGraph(runSeqDepGraph, rc)
   do i=1,nnodes
     distGraphNodeChildrenTop(i) = 1
     allocate(runSeqDepGraph%nodes(i)%children(runSeqDepGraph%nodes(i)%nchildren))
+    print *, "Node : ", i, " has ", runSeqDepGraph%nodes(i)%nchildren, " children"
   end do
 
   do i=1,nnodes
@@ -526,7 +538,7 @@ subroutine ESMF_MapperCreateDepGraph(runSeqDepGraph, rc)
         if(runSeqDepGraph%nodes(j)%line%tok_type == ESMF_COMP_PHASE_TOKEN) then
           if(trim(runSeqDepGraph%nodes(j)%line%tok(ESMF_RUNSEQ_TOK1)) ==&
               trim(runSeqDepGraph%nodes(i)%line%tok(ESMF_RUNSEQ_TOK1))) then
-            runSeqDepGraph%nodes(j)%children(distGraphNodeChildrenTop(j)) =&
+            runSeqDepGraph%nodes(j)%children(distGraphNodeChildrenTop(j))%ptr =>&
               runSeqDepGraph%nodes(i)
             exit
           end if
@@ -555,7 +567,7 @@ subroutine ESMF_MapperCreateDepGraph(runSeqDepGraph, rc)
             do k=j-1,1,-1
               if( trim(runSeqDepGraph%nodes(j)%line%tok(ESMF_RUNSEQ_TOK1)) ==&
                   trim(runSeqDepGraph%nodes(k)%line%tok(ESMF_RUNSEQ_TOK1)) ) then
-                runSeqDepGraph%nodes(k)%children(distGraphNodeChildrenTop(k)) =&
+                runSeqDepGraph%nodes(k)%children(distGraphNodeChildrenTop(k))%ptr =>&
                   runSeqDepGraph%nodes(i)
                 distGraphNodeChildrenTop(k) = distGraphNodeChildrenTop(k) + 1
                 exit
@@ -564,7 +576,7 @@ subroutine ESMF_MapperCreateDepGraph(runSeqDepGraph, rc)
             do k=j-1,1,-1
               if( trim(runSeqDepGraph%nodes(j)%line%tok(ESMF_RUNSEQ_TOK2)) ==&
                   trim(runSeqDepGraph%nodes(k)%line%tok(ESMF_RUNSEQ_TOK1)) ) then
-                runSeqDepGraph%nodes(k)%children(distGraphNodeChildrenTop(k)) =&
+                runSeqDepGraph%nodes(k)%children(distGraphNodeChildrenTop(k))%ptr =>&
                   runSeqDepGraph%nodes(i)
                 distGraphNodeChildrenTop(k) = distGraphNodeChildrenTop(k) + 1
                 exit
