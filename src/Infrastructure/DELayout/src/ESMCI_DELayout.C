@@ -7038,8 +7038,8 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
       // handle interpolation of all other elements here
       bool dstMask = false; 
       bool srcMask = false;
-      for (int i=0; i<termCount; i++){  // super scalar loop
-        for (int v=0; v<vectorL; v++){
+      for (int v=0; v<vectorL; v++){  // vector loop
+        for (int i=0; i<termCount; i++){  // super scalar loop
           element = rraBaseList[rraIndexList[baseListIndexList[i]]]
             + rraOffsetList[i] * vectorL + v;
           if (prevElement != element){
