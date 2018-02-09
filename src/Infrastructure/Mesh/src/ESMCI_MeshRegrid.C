@@ -373,6 +373,103 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 
 }
 
+#if 0
+ // This hasn't been tested yet, but I left it in in case I need it later. 
+static void _create_pointlist_of_mesh_elems_not_in_wmat(Mesh *mesh, WMat &wts, PointList **_missing_points) {
+
+  // Get element coordinate Field
+  MEField<> *cptr = mesh->GetField("elem_coordinates");
+
+  // If there aren't element coordinates we can't make a pointlist
+  if (!cptr) {
+    Throw() << " Can't extrapolate to cell/elem centers there are no coordinates there.";
+  }
+
+  // Get mask Field
+  MEField<> *mptr = mesh->GetField("elem_mask");
+
+  // Get weight iterators
+  WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
+
+  // Get mesh node iterator that goes through in order of id
+  Mesh::MeshObjIDMap::const_iterator ei=mesh->map_begin(MeshObj::ELEMENT), ee=mesh->map_end(MeshObj::ELEMENT);
+
+  // Count all points that don't have weights
+  int num_missing=0;
+  for (; ei != ee; ++ei) {
+    const MeshObj &elem=*ei;
+
+    // Skip non local nodes
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Skip masked elements
+    if (mptr != NULL) {
+      double *m=mptr->data(elem);
+      if (*m > 0.5) continue;
+    }
+
+    // get node id
+    int elem_id=elem.get_id();
+
+    // get weight id
+    int wt_id=wi->first.id;
+
+    // Advance weights until not less than elem id
+    while ((wi != we) && (wi->first.id <elem_id)) {
+      wi++;
+    }
+
+    // If teh current weight is not equal to the node id, then we must have passed it, 
+    // so count it.
+    if (wi->first.id != elem_id) {
+      num_missing++;
+    }
+  }
+
+  // Create Pointlist
+  PointList *missing_points = new ESMCI::PointList(num_missing, mesh->spatial_dim());
+
+  // Get weight iterators
+  wi =wts.begin_row();
+
+  // Get mesh elem iterator that goes through in order of id
+  ei=mesh->map_begin(MeshObj::ELEMENT);
+
+  // Count all points that don't have weights
+  for (; ei != ee; ++ei) {
+    const MeshObj &elem=*ei;
+
+    // Skip non local nodes
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Skip masked elements
+    if (mptr != NULL) {
+      double *m=mptr->data(elem);
+      if (*m > 0.5) continue;
+    }
+
+    // get node id
+    int elem_id=elem.get_id();
+
+    // get weight id
+    int wt_id=wi->first.id;
+
+    // Advance weights until not less than elem id
+    while ((wi != we) && (wi->first.id <elem_id)) {
+      wi++;
+    }
+
+    // If the current weight is not equal to the elem id, then we must have passed it, so add it to the list
+    if (wi->first.id != elem_id) {
+      double *elem_coord=cptr->data(elem);
+      missing_points->add(elem_id, elem_coord);
+    }
+  }
+
+  // Output
+  *_missing_points=missing_points;
+}
+#endif
 
 // Get the list of ids in the mesh, but not in the wts 
 // (i.e. if mesh is the dest. mesh, the unmapped points)
@@ -465,7 +562,7 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
    // Construct a new point list which just contains destination points not in the weight matrix
    PointList *missing_points=NULL;
    if (dstmesh != NULL) {
-     Throw() << "Conservative methods currently not supported in extrapolation.";
+     Throw() << "Conservative methods not supported in extrapolation, because extrapolation would cause the methods to no longer be conservative.";
    } else if (dstpointlist != NULL) {
      _create_pointlist_of_points_not_in_wmat(dstpointlist, wts, &missing_points);
    } else { 

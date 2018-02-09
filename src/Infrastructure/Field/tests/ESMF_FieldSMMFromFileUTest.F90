@@ -169,13 +169,14 @@ module ESMF_FieldSMMFromFileUTestMod
   src = 42.
 
   ! Do regrid
-  call ESMF_FieldRegridStore(srcField, dstField, routehandle=routeHandle, rc=localrc)
+  call ESMF_FieldRegridStore(srcField, dstField, routehandle=routeHandle, &
+                             filename="weights_esmf_smmsff.nc", rc=localrc)
   if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME, rcToReturn=rc)) return
 
   ! SMM store
-  call ESMF_FieldSMMStore(srcField, dstField, "weights.nc", routeHandle, &
-                          rc=localrc)
+  call ESMF_FieldSMMStore(srcField, dstField, "weights_esmf_smmsff.nc", &
+                          routeHandle, rc=localrc)
   if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME, rcToReturn=rc)) return
 
