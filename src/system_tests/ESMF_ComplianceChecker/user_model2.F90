@@ -87,9 +87,9 @@ module user_model2
     call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, userRoutine=user_run, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-!    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, userRoutine=user_final, &
-!      rc=rc)
-!    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, userRoutine=user_final, &
+      rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     
     
 !    call registerIC(comp, rc=rc) !!!!!!!!!!!!!!!!!  I C  !!!!!!!!!!!!!!!!!
@@ -113,7 +113,7 @@ module user_model2
 
     ! Local variables
     integer               :: localPet
-	type(ESMF_AttPack)    :: attpack
+    type(ESMF_AttPack)    :: attpack
     type(ESMF_Field)      :: field
     type(ESMF_FieldBundle):: fieldbundle
     type(ESMF_Clock)      :: clockInternal
@@ -207,14 +207,18 @@ module user_model2
 
     ! Local variables
     integer               :: localPet
+    type(ESMF_Clock)      :: clockInternal
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
 
-    call ESMF_GridCompGet(comp, localPet=localPet, rc=rc)
+    call ESMF_GridCompGet(comp, localPet=localPet, clock=clockInternal, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, localPet, "User Comp2 Final starting"
+
+    call ESMF_ClockDestroy(clockInternal, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, localPet, "User Comp2 Final returning"
 

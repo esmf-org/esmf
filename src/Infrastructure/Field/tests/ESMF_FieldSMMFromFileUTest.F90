@@ -34,17 +34,19 @@ module ESMF_FieldSMMFromFileUTestMod
     integer, intent(out) :: rc
     type(ESMF_RWGCheckMethod_Flag), intent(in) :: checkMethod
 
+    integer :: localrc
+
     rc = ESMF_FAILURE
 
     ! Generate the netCDF weights file.
-    call ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    call ESMF_RegridWeightGenFile(srcFile, dstFile, weightFile, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return
 
     ! Validate generated weights produce acceptable errors. This subroutine
     ! calls ESMF_ArraySMMStoreFromFile or ESMF_FieldSMMStoreFromFile.
-    call ESMF_RegridWeightGenCheck(weightFile, checkMethod=checkMethod, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    call ESMF_RegridWeightGenCheck(weightFile, checkMethod=checkMethod, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return
 
     rc = ESMF_SUCCESS
@@ -68,7 +70,7 @@ module ESMF_FieldSMMFromFileUTestMod
 
   ! init success flag
   correct=.true.
-  rc=ESMF_SUCCESS
+  rc=ESMF_FAILURE
 
   ! get pet info
   call ESMF_VMGetGlobal(vm, rc=localrc)
@@ -169,13 +171,14 @@ module ESMF_FieldSMMFromFileUTestMod
   src = 42.
 
   ! Do regrid
-  call ESMF_FieldRegridStore(srcField, dstField, routehandle=routeHandle, rc=localrc)
+  call ESMF_FieldRegridStore(srcField, dstField, routehandle=routeHandle, &
+                             filename="weights_esmf_smmsff.nc", rc=localrc)
   if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME, rcToReturn=rc)) return
 
   ! SMM store
-  call ESMF_FieldSMMStore(srcField, dstField, "weights.nc", routeHandle, &
-                          rc=localrc)
+  call ESMF_FieldSMMStore(srcField, dstField, "weights_esmf_smmsff.nc", &
+                          routeHandle, rc=localrc)
   if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME, rcToReturn=rc)) return
 
@@ -284,7 +287,7 @@ program ESMF_FieldSMMFromFileUTest
   call test_smm_from_file(srcFile, dstFile, weightFile, &
                           ESMF_RWGCHECKMETHOD_FIELD, rc)
 
-#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+#if defined ESMF_NETCDF
   call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
