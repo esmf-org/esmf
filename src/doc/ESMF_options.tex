@@ -666,6 +666,7 @@ The valid values for all regrid methods are:
 \item [ESMF\_REGRIDSTATUS\_SRCMASKED] The destination location is within a masked part of the source grid, so no regridding has been performed on it. 
 \item [ESMF\_REGRIDSTATUS\_OUTSIDE] The destination location is outside the source grid, so no regridding has been performed on it. 
 \item [ESMF\_REGRIDSTATUS\_MAPPED] The destination location is within the unmasked source grid, and so has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). 
+\item [ESMF\_REGRIDSTATUS\_EXMAPPED] The destination location was not within the unmasked source grid, and so typically it wouldn't be regridded. However, extrapolation was used, and so it has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). 
 \end{description}
 
 In addition to the above, regridding using the conservative method can result in other values. The reason for this is that in that method one destination cell can overlap multiple source cells, so a single destination can have a combination of values.  

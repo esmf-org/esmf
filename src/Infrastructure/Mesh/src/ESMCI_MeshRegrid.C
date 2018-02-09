@@ -528,6 +528,24 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
   *_missing_points=missing_points;
 }
 
+ void _replace_mapped_with_mapped_extrap(WMat &status) {
+
+   WMat::WeightMap::iterator wi = status.begin_row(), we = status.end_row();
+   for (; wi != we; ++wi) {
+    
+     // Get row and column info 
+     const WMat::Entry &row = wi->first;
+     std::vector<WMat::Entry> &col = wi->second;    
+
+     // Loop column
+     for (int i = 0; i < col.size(); ++i) {
+       WMat::Entry &entry = col[i];
+
+       if (entry.id == ESMC_REGRID_STATUS_MAPPED) entry.id=ESMC_REGRID_STATUS_EXTRAP_MAPPED;
+     }
+   }
+ }
+
  // Do extrapolation. The wts structure which comes out will have the new weights for the extrapolation merged in
  // TODO: move to another file
  void extrap(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist, 
@@ -584,23 +602,30 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
 
    // Set info for calling into interp
    IWeights extrap_wts;
-   bool tmp_set_dst_status=false;
-   WMat tmp_dst_status;
+   WMat extrap_dst_status;
    
    // Build the rendezvous grids
    Interp interp((Mesh *)NULL, srcpointlist_extrap,(Mesh *)NULL, missing_points, 
                  (Mesh *)NULL, false, regridMethod, 
-                 tmp_set_dst_status, tmp_dst_status,
+                 set_dst_status, extrap_dst_status,
                  mtype, ESMCI_UNMAPPEDACTION_IGNORE, extrapNumSrcPnts, 
                  extrapDistExponent);
 
    // Create the weight matrix
-   interp(0, extrap_wts, tmp_set_dst_status, tmp_dst_status);
+   interp(0, extrap_wts, set_dst_status, extrap_dst_status);
    
-
    // Merge extrap weights into regridding matrix
    wts.MergeDisjoint(extrap_wts);
    
+   // If status was requested merge that too
+   if (set_dst_status) {
+     // Change from ...MAPPED to ...MAPPED_EXTRAP
+     _replace_mapped_with_mapped_extrap(extrap_dst_status);
+
+     // Replace old status with extrap ones
+     dst_status.MergeReplace(extrap_dst_status);
+   }
+
    // Cleanup
    if (srcpointlist_from_mesh != NULL) delete srcpointlist_from_mesh;
    if (missing_points != NULL) delete missing_points;
