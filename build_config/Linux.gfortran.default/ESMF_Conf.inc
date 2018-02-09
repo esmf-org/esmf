@@ -11,8 +11,8 @@ Licensed under the University of Illinois-NCSA License.
 #endif
 
 #if !defined(__cplusplus)
-#if (__GNUC__ == 4) && (__GNUC_MINOR__ < 3)
-#error "The gfortran compiler must be version 4.3 or newer."
+#if (__GNUC__ == 4) && (__GNUC_MINOR__ < 5)
+#error "The gfortran compiler must be version 4.5 or newer."
 #endif
 
 #if (__GNUC__ == 4) && (__GNUC_MINOR__ < 6)

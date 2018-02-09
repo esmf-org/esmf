@@ -220,6 +220,7 @@ subroutine ESMF_FactorRead(filename, factorList, factorIndexList, rc)
       msg="- ESMF_NETCDF not defined when lib was compiled", ESMF_CONTEXT, &
       rcToReturn=rc)
     return
+
 #endif
 
   end subroutine ESMF_FactorRead
