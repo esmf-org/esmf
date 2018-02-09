@@ -368,8 +368,6 @@ void WMat::MergeDisjoint(const WMat &wmat2) {
 }
 
 
-#if 0
-  
 // Merge wmat2 into exisitng wmat. If the same row exists in both, 
 // replace rows in the existing matrix with ones from wmat2
 void WMat::MergeReplace(const WMat &wmat2) {
@@ -383,50 +381,12 @@ void WMat::MergeReplace(const WMat &wmat2) {
     const Entry &row = w2i->first;
     const std::vector<Entry> &col = w2i->second;    
 
-    // See if the row already exists in the map using find
-    
-
-    // Check to see if destination ids match
-    // Since these two matrices may be coming from different weight
-    // calculation routines they might have different secondary data (e.g. src_id), so
-    // check explicitly if dst ids match
-    //
-    // Lower bound
-    Entry lower(row.id);
-    WeightMap::const_iterator ci = weights.lower_bound(lower);
-    
-    //// Upper Bound
-    Entry upper(row.id+1);
-    WeightMap::const_iterator ce = weights.lower_bound(upper);
-    
-    // If there are no constraints which match continue to next row 
-    if (ci != wmat2.weights.end()) {
-      
-      // Loop over contraints which match
-      // see if any have the same dst id
-      for (; ci != ce; ++ci) {
-        const Entry &crow = ci->first;
-        
-        // Complain if they have the same dst id
-        if (crow.id == row.id) {
-          Throw() << "The same destination id appears in the source and destination when they are expected to be disjoint";
-        }
-      }
-    }
-    
-    
-    //// Add the row and column from wmat2 to the weight matrix
-    std::pair<WeightMap::iterator, bool> wi =
-      weights.insert(std::make_pair(row, col));
-    
-    // Make sure it isn't seeing the same row
-    if (wi.second == false) {
-        Throw() << "Unexpectedly seeing an equivalent row in disjoint weight matrices.";
-    }
+    // Replace entry, or add a new one
+    weights[row]=col;
     
   }
 }
-#endif
+
 
 void WMat::Print(std::ostream &os) {
   

@@ -291,7 +291,7 @@
   integer(ESMF_KIND_I4) , parameter :: ESMF_REGRIDSTATUS_SMSK_MP=5
   integer(ESMF_KIND_I4) , parameter :: ESMF_REGRIDSTATUS_OUT_MP=6
   integer(ESMF_KIND_I4) , parameter :: ESMF_REGRIDSTATUS_SMSK_OUT_MP=7
-
+  integer(ESMF_KIND_I4) , parameter :: ESMF_REGRIDSTATUS_EXMAPPED=8
 
 !------------------------------------------------------------------------------
 !
@@ -990,7 +990,8 @@
              ESMF_REGRIDSTATUS_MAPPED, &
              ESMF_REGRIDSTATUS_SMSK_MP, &
              ESMF_REGRIDSTATUS_OUT_MP, &
-             ESMF_REGRIDSTATUS_SMSK_OUT_MP
+             ESMF_REGRIDSTATUS_SMSK_OUT_MP, &
+             ESMF_REGRIDSTATUS_EXMAPPED
 
 #ifndef ESMF_NO_INTEGER_1_BYTE 
       public ESMF_KIND_I1
