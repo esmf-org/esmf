@@ -125,6 +125,10 @@ enum ESMC_PoleMethod_Flag {ESMC_POLEMETHOD_NONE=0,
 			               ESMC_POLEMETHOD_NPNTAVG,
 			               ESMC_POLEMETHOD_TEETH};
 
+enum ESMC_Reduce_Flag { ESMC_REDUCE_SUM=1,
+                        ESMC_REDUCE_MIN=2,
+                        ESMC_REDUCE_MAX=3};
+
 enum ESMC_Region_Flag { ESMC_REGION_TOTAL=0,
                         ESMC_REGION_SELECT,
                         ESMC_REGION_EMPTY};
