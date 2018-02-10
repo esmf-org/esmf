@@ -850,7 +850,7 @@ program ESMF_RegridWeightGenApp
       extrapMethodStr = 'none'
     else if (commandbuf2(22)==2) then
       extrapMethodStr = 'neareststod'
-    else if (commandbuf2(3)==3) then
+    else if (commandbuf2(22)==3) then
       extrapMethodStr = 'nearestidavg'
     else
       method = 'none'
