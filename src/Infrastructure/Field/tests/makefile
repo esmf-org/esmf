@@ -299,12 +299,14 @@ RUN_ESMC_FieldSMMFromFileUTestUNI:
 
 RUN_ESMF_FieldSMMFromFileUTest:
 	mkdir -p $(ESMF_TESTDIR)/data
+	rm -f $(ESMF_TESTDIR)/data/test_smm_from_file_weights.nc
 	cp -f ../../IO/tests/T42_grid.nc $(ESMF_TESTDIR)/data
 	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=FieldSMMFromFile NP=4 ftest
 
 RUN_ESMF_FieldSMMFromFileUTestUNI:
 	mkdir -p $(ESMF_TESTDIR)/data
+	rm -f $(ESMF_TESTDIR)/data/test_smm_from_file_weights.nc
 	cp -f ../../IO/tests/T42_grid.nc $(ESMF_TESTDIR)/data
 	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=FieldSMMFromFile NP=1 ftest
