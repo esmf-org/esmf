@@ -970,6 +970,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       elseif (localNormType .eq. ESMF_NORMTYPE_FRACAREA) then
 	  print *, "  Norm Type: fracarea"
       endif
+      if (present(extrapMethod)) then
+         if (extrapMethod%extrapmethod .eq. &
+            ESMF_EXTRAPMETHOD_NONE%extrapmethod) then
+	  print *, "  Extrap. Method: none"
+         else if (extrapMethod%extrapmethod .eq. &
+            ESMF_EXTRAPMETHOD_NEAREST_STOD%extrapmethod) then
+	  print *, "  Extrap. Method: neareststod"
+         else if (extrapMethod%extrapmethod .eq. &
+            ESMF_EXTRAPMETHOD_NEAREST_IDAVG%extrapmethod) then
+	  print *, "  Extrap. Method: nearestidavg"
+          if (present(extrapNumSrcPnts)) then
+	  print '(a,i0)', "   Extrap. Number of Source Points: ",extrapNumSrcPnts
+          else 
+	  print '(a,i0)', "   Extrap. Number of Source Points: ",8
+          endif
+          if (present(extrapDistExponent)) then
+	  print *, "  Extrap. Dist. Exponent: ",extrapDistExponent
+          else 
+	  print *, "  Extrap. Dist. Exponent: ",2.0
+         endif
+         else 
+	  print *, "  Extrap. Method: unknown"
+         endif
+      else 
+	  print *, "  Extrap. Method: none"
+      endif
       if (present(tileFilePath)) then
           print *, "  Alternative tile file path: ", trim(tileFilePath)
       endif
@@ -2213,6 +2239,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 	      print *, "  Norm Type: dstarea"
       elseif (localNormType .eq. ESMF_NORMTYPE_FRACAREA) then
 	      print *, "  Norm Type: fracarea"
+      endif
+      if (present(extrapMethod)) then
+         if (extrapMethod%extrapmethod .eq. &
+            ESMF_EXTRAPMETHOD_NONE%extrapmethod) then
+	  print *, "  Extrap. Method: none"
+         else if (extrapMethod%extrapmethod .eq. &
+            ESMF_EXTRAPMETHOD_NEAREST_STOD%extrapmethod) then
+	  print *, "  Extrap. Method: neareststod"
+         else if (extrapMethod%extrapmethod .eq. &
+            ESMF_EXTRAPMETHOD_NEAREST_IDAVG%extrapmethod) then
+	  print *, "  Extrap. Method: nearestidavg"
+          if (present(extrapNumSrcPnts)) then
+	  print '(a,i0)', "   Extrap. Number of Source Points: ",extrapNumSrcPnts
+          else 
+	  print '(a,i0)', "   Extrap. Number of Source Points: ",8
+          endif
+          if (present(extrapDistExponent)) then
+	  print *, "  Extrap. Dist. Exponent: ",extrapDistExponent
+          else 
+	  print *, "  Extrap. Dist. Exponent: ",2.0
+         endif
+         else 
+	  print *, "  Extrap. Method: unknown"
+         endif
+      else 
+	  print *, "  Extrap. Method: none"
       endif
       write(*,*)
     endif 
