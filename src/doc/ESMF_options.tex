@@ -184,6 +184,32 @@ This flag is documented in section \ref{const:distgridmatch}.
 
 This flag is documented in section \ref{const:endflag}.
 
+\subsection{ESMF\_EXTRAPMETHOD}
+\label{opt:extrapmethod}
+
+{\sf DESCRIPTION:\\}  
+Specify which extrapolation method to use on unmapped destination points after regridding. 
+
+The type of this flag is:
+
+{\tt type(ESMF\_ExtrapMethod\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMF\_EXTRAPMETHOD\_NONE]
+     Indicates that no extrapolation should be done. 
+\item [ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG]
+      Inverse distance weighted average. 
+      Here the value of a destination point is the weighted average of the closest N source points. The weight is 
+      the reciprocal of the distance of the source point from the destination point raised to a power P. All the
+      weights contributing to one destination point are normalized so that they sum to 1.0. 
+      The user can choose N and P when using this method, but defaults are also provided.  
+\item [ESMF\_EXTRAPMETHOD\_NEAREST\_STOD]
+      Nearest source to destination. 
+      Here each destination point is mapped to the closest source point. A given source point may go to multiple destination points, but no destination point will receive input from more than one source point. 
+
+\end{description}
+
 \subsection{ESMF\_FIELDSTATUS}
 This flag is documented in section \ref{const:fieldstatus}.
 
@@ -558,7 +584,7 @@ The valid values are:
 \subsection{ESMF\_REDUCE}
 \label{const:reduce}
 {\sf DESCRIPTION:\\}
-Indicates reduce operation
+Indicates reduce operation.
 
 The type of this flag is:
 
@@ -640,6 +666,7 @@ The valid values for all regrid methods are:
 \item [ESMF\_REGRIDSTATUS\_SRCMASKED] The destination location is within a masked part of the source grid, so no regridding has been performed on it. 
 \item [ESMF\_REGRIDSTATUS\_OUTSIDE] The destination location is outside the source grid, so no regridding has been performed on it. 
 \item [ESMF\_REGRIDSTATUS\_MAPPED] The destination location is within the unmasked source grid, and so has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). 
+\item [ESMF\_REGRIDSTATUS\_EXMAPPED] The destination location was not within the unmasked source grid, and so typically it wouldn't be regridded. However, extrapolation was used, and so it has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). 
 \end{description}
 
 In addition to the above, regridding using the conservative method can result in other values. The reason for this is that in that method one destination cell can overlap multiple source cells, so a single destination can have a combination of values.  

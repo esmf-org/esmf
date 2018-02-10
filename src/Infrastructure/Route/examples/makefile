@@ -9,13 +9,16 @@ LOCDIR	  = src/Infrastructure/Route/examples
 .NOTPARALLEL:
 EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_RHandleBitForBitEx \
                     $(ESMF_EXDIR)/ESMF_RHandleFromRHandleEx \
+                    $(ESMF_EXDIR)/ESMF_RHandleReusabilityEx \
                     $(ESMF_EXDIR)/ESMF_RHandleDynamicMaskingEx
                     
 EXAMPLES_RUN      = run_ESMF_RHandleBitForBitEx \
                     run_ESMF_RHandleFromRHandleEx \
+                    run_ESMF_RHandleReusabilityEx \
                     run_ESMF_RHandleDynamicMaskingEx
                     
-EXAMPLES_RUN_UNI  = run_ESMF_RHandleDynamicMaskingEx_uni
+EXAMPLES_RUN_UNI  = run_ESMF_RHandleReusabilityEx_uni \
+                    run_ESMF_RHandleDynamicMaskingEx_uni
 
 
 include $(ESMF_DIR)/makefile
@@ -34,6 +37,12 @@ run_ESMF_RHandleBitForBitEx:
 
 run_ESMF_RHandleFromRHandleEx:
 	$(MAKE) EXNAME=RHandleFromRHandle NP=4 exfrun
+
+run_ESMF_RHandleReusabilityEx:
+	$(MAKE) EXNAME=RHandleReusability NP=4 exfrun
+
+run_ESMF_RHandleReusabilityEx_uni:
+	$(MAKE) EXNAME=RHandleReusability NP=1 exfrun
 
 run_ESMF_RHandleDynamicMaskingEx:
 	$(MAKE) EXNAME=RHandleDynamicMasking NP=4 exfrun

@@ -44,8 +44,8 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V
 
 ############################################################
 # Special debug flags

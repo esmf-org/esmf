@@ -136,7 +136,7 @@ public:
  
   void GatherToRowSrc(WMat &rhs);
 
-
+  void MergeReplace(const WMat &wmat2);
 
   /*
    * Removes the columns referencing the constraint row entries.  

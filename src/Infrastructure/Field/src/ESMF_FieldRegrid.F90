@@ -335,7 +335,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !BOP
 ! !IROUTINE: ESMF_FieldRegridStoreFile - Precompute a Field regridding operation and write a file
 ! !INTERFACE:
-  !   Private name; call using ESMF_FieldRegridStoreFile()
+  !   Private name; call using ESMF_FieldRegridStore()
       subroutine ESMF_FieldRegridStoreFile(srcField, dstField, fileName, &
                     keywordEnforcer, &
                     srcMaskValues, dstMaskValues, &
@@ -383,7 +383,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !       \begin{sloppypar}
-!       Creates a sparse matrix operation (stored in {\tt routehandle}) that
+!       Creates a sparse matrix operation and writes the weights to file. The
+!       operation can also be stored in {\tt routehandle} and it
 !       contains the calculations and communications necessary to interpolate
 !       from {\tt srcField} to {\tt dstField}. The routehandle can then be
 !       used in the call {\tt ESMF\_FieldRegrid()} to interpolate between the
@@ -413,6 +414,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Source Field.
 !     \item [dstField]
 !           Destination Field. The data in this Field may be overwritten by this call.
+!     \item [filename]
+!           The name of the file to create to write the weights. If the file already
+!           exists this call will fail.
 !     \item [{[srcMaskValues]}]
 !           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask})
 !           upon which the {\tt srcField} is built. The {\tt srcMaskValues} argument specifies the values in that
@@ -843,7 +847,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Please see  Section~\ref{opt:normType} for a 
 !           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
 !     \item [{[extrapMethod]}]
-!           The type of extrapolation. Please see Section~\ref{opt:regridmethod} 
+!           The type of extrapolation. Please see Section~\ref{opt:extrapmethod} 
 !           for a list of valid options. If not specified, defaults to 
 !           {\tt ESMF\_EXTRAPMETHOD\_NONE}.
 !     \item [{[extrapNumSrcPnts]}] 
@@ -851,7 +855,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           (e.g. {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}). If not specified, defaults to 8.
 !     \item [{[extrapDistExponent]}] 
 !           The exponent to raise the distance to when calculating weights for 
-!           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}) extrapolation method. A higher value reduces the influence 
+!           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
 !           of more distant points. If not specified, defaults to 2.0.
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
@@ -1161,7 +1165,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(extrapNumSrcPnts)) then
            localExtrapNumSrcPnts=extrapNumSrcPnts
         else 
-           localExtrapNumSrcPnts=6
+           localExtrapNumSrcPnts=8
         endif
         
         if (localpolemethod .eq. ESMF_POLEMETHOD_NPNTAVG) then

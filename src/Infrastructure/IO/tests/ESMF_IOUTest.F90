@@ -72,6 +72,7 @@ use ESMF_IOScripMod
   filename = "doodle.nc"
 
   !NEX_UTest
+  rc = ESMF_FAILURE
   call ESMF_OutputWeightFile(filename, factorList, factorIndexList, rc=rc)
   write(failMsg, *) "did not return ESMF_SUCCESS"
   write(name, *) "call ESMF_OutputWeightFile"
@@ -101,6 +102,7 @@ use ESMF_IOScripMod
   endif
   
   !NEX_UTest
+  rc = ESMF_FAILURE
   call ESMF_OutputWeightFile("doodle2.nc", factorListParallel, factorIndexListParallel, rc=rc)
   write(name, *) "call ESMF_OutputWeightFile with empty factor list on four PETs"
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))

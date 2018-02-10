@@ -373,6 +373,103 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 
 }
 
+#if 0
+ // This hasn't been tested yet, but I left it in in case I need it later. 
+static void _create_pointlist_of_mesh_elems_not_in_wmat(Mesh *mesh, WMat &wts, PointList **_missing_points) {
+
+  // Get element coordinate Field
+  MEField<> *cptr = mesh->GetField("elem_coordinates");
+
+  // If there aren't element coordinates we can't make a pointlist
+  if (!cptr) {
+    Throw() << " Can't extrapolate to cell/elem centers there are no coordinates there.";
+  }
+
+  // Get mask Field
+  MEField<> *mptr = mesh->GetField("elem_mask");
+
+  // Get weight iterators
+  WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
+
+  // Get mesh node iterator that goes through in order of id
+  Mesh::MeshObjIDMap::const_iterator ei=mesh->map_begin(MeshObj::ELEMENT), ee=mesh->map_end(MeshObj::ELEMENT);
+
+  // Count all points that don't have weights
+  int num_missing=0;
+  for (; ei != ee; ++ei) {
+    const MeshObj &elem=*ei;
+
+    // Skip non local nodes
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Skip masked elements
+    if (mptr != NULL) {
+      double *m=mptr->data(elem);
+      if (*m > 0.5) continue;
+    }
+
+    // get node id
+    int elem_id=elem.get_id();
+
+    // get weight id
+    int wt_id=wi->first.id;
+
+    // Advance weights until not less than elem id
+    while ((wi != we) && (wi->first.id <elem_id)) {
+      wi++;
+    }
+
+    // If teh current weight is not equal to the node id, then we must have passed it, 
+    // so count it.
+    if (wi->first.id != elem_id) {
+      num_missing++;
+    }
+  }
+
+  // Create Pointlist
+  PointList *missing_points = new ESMCI::PointList(num_missing, mesh->spatial_dim());
+
+  // Get weight iterators
+  wi =wts.begin_row();
+
+  // Get mesh elem iterator that goes through in order of id
+  ei=mesh->map_begin(MeshObj::ELEMENT);
+
+  // Count all points that don't have weights
+  for (; ei != ee; ++ei) {
+    const MeshObj &elem=*ei;
+
+    // Skip non local nodes
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Skip masked elements
+    if (mptr != NULL) {
+      double *m=mptr->data(elem);
+      if (*m > 0.5) continue;
+    }
+
+    // get node id
+    int elem_id=elem.get_id();
+
+    // get weight id
+    int wt_id=wi->first.id;
+
+    // Advance weights until not less than elem id
+    while ((wi != we) && (wi->first.id <elem_id)) {
+      wi++;
+    }
+
+    // If the current weight is not equal to the elem id, then we must have passed it, so add it to the list
+    if (wi->first.id != elem_id) {
+      double *elem_coord=cptr->data(elem);
+      missing_points->add(elem_id, elem_coord);
+    }
+  }
+
+  // Output
+  *_missing_points=missing_points;
+}
+#endif
 
 // Get the list of ids in the mesh, but not in the wts 
 // (i.e. if mesh is the dest. mesh, the unmapped points)
@@ -431,6 +528,24 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
   *_missing_points=missing_points;
 }
 
+ void _replace_mapped_with_mapped_extrap(WMat &status) {
+
+   WMat::WeightMap::iterator wi = status.begin_row(), we = status.end_row();
+   for (; wi != we; ++wi) {
+    
+     // Get row and column info 
+     const WMat::Entry &row = wi->first;
+     std::vector<WMat::Entry> &col = wi->second;    
+
+     // Loop column
+     for (int i = 0; i < col.size(); ++i) {
+       WMat::Entry &entry = col[i];
+
+       if (entry.id == ESMC_REGRID_STATUS_MAPPED) entry.id=ESMC_REGRID_STATUS_EXTRAP_MAPPED;
+     }
+   }
+ }
+
  // Do extrapolation. The wts structure which comes out will have the new weights for the extrapolation merged in
  // TODO: move to another file
  void extrap(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist, 
@@ -465,7 +580,7 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
    // Construct a new point list which just contains destination points not in the weight matrix
    PointList *missing_points=NULL;
    if (dstmesh != NULL) {
-     Throw() << "Conservative methods currently not supported in extrapolation.";
+     Throw() << "Conservative methods not supported in extrapolation, because extrapolation would cause the methods to no longer be conservative.";
    } else if (dstpointlist != NULL) {
      _create_pointlist_of_points_not_in_wmat(dstpointlist, wts, &missing_points);
    } else { 
@@ -487,23 +602,30 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
 
    // Set info for calling into interp
    IWeights extrap_wts;
-   bool tmp_set_dst_status=false;
-   WMat tmp_dst_status;
+   WMat extrap_dst_status;
    
    // Build the rendezvous grids
    Interp interp((Mesh *)NULL, srcpointlist_extrap,(Mesh *)NULL, missing_points, 
                  (Mesh *)NULL, false, regridMethod, 
-                 tmp_set_dst_status, tmp_dst_status,
+                 set_dst_status, extrap_dst_status,
                  mtype, ESMCI_UNMAPPEDACTION_IGNORE, extrapNumSrcPnts, 
                  extrapDistExponent);
 
    // Create the weight matrix
-   interp(0, extrap_wts, tmp_set_dst_status, tmp_dst_status);
+   interp(0, extrap_wts, set_dst_status, extrap_dst_status);
    
-
    // Merge extrap weights into regridding matrix
    wts.MergeDisjoint(extrap_wts);
    
+   // If status was requested merge that too
+   if (set_dst_status) {
+     // Change from ...MAPPED to ...MAPPED_EXTRAP
+     _replace_mapped_with_mapped_extrap(extrap_dst_status);
+
+     // Replace old status with extrap ones
+     dst_status.MergeReplace(extrap_dst_status);
+   }
+
    // Cleanup
    if (srcpointlist_from_mesh != NULL) delete srcpointlist_from_mesh;
    if (missing_points != NULL) delete missing_points;

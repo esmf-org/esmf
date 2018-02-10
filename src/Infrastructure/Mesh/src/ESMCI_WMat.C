@@ -366,7 +366,27 @@ void WMat::MergeDisjoint(const WMat &wmat2) {
     
   }
 }
+
+
+// Merge wmat2 into exisitng wmat. If the same row exists in both, 
+// replace rows in the existing matrix with ones from wmat2
+void WMat::MergeReplace(const WMat &wmat2) {
+  Trace __trace("WMat::ReplaceRows(const WMat &wmat2)");
   
+  // Loop 2 weight matrix find the entries
+  WeightMap::const_iterator w2i = wmat2.weights.begin(), w2e = wmat2.weights.end();
+  for (; w2i != w2e; ++w2i) {
+    
+    // Get row and column info from 2nd matrix
+    const Entry &row = w2i->first;
+    const std::vector<Entry> &col = w2i->second;    
+
+    // Replace entry, or add a new one
+    weights[row]=col;
+    
+  }
+}
+
 
 void WMat::Print(std::ostream &os) {
   

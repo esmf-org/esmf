@@ -1364,7 +1364,7 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
         rc=localrc)
     endif
     ! local garbage collection before error handling to prevent memory leaks
-    do i=1, count
+    do i=1, size(dynamicMaskList)
       deallocate(dynamicMaskList(i)%factor)
       deallocate(dynamicMaskList(i)%srcElement)
     enddo
@@ -1546,7 +1546,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r8r4(routehandle, count, &
         rc=localrc)
     endif
     ! local garbage collection before error handling to prevent memory leaks
-    do i=1, count
+    do i=1, size(dynamicMaskList)
       deallocate(dynamicMaskList(i)%factor)
       deallocate(dynamicMaskList(i)%srcElement)
     enddo
@@ -1725,7 +1725,7 @@ recursive subroutine f_esmf_dynmaskcallbackr4r4r4(routehandle, count, &
         rc=localrc)
     endif
     ! local garbage collection before error handling to prevent memory leaks
-    do i=1, count
+    do i=1, size(dynamicMaskList)
       deallocate(dynamicMaskList(i)%factor)
       deallocate(dynamicMaskList(i)%srcElement)
     enddo

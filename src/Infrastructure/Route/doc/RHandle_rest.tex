@@ -13,6 +13,8 @@
 
 \item Only available through the {\tt ESMF\_FieldRegrid()} and {\tt ESMF\_ArraySMM()} methods.
 
+\item Destination objects that have undistributed dimensions {\em after} any distributed dimension are not supported.
+
 \item No check is implemented to ensure the provided RouteHandle object is suitable for dynamic masking.
 
 \end{itemize}

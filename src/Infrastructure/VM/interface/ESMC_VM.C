@@ -163,5 +163,48 @@ int ESMC_VMPrint(ESMC_VM vm){
   return rc;
 }  
 
+int ESMC_VMReduce(ESMC_VM vm, void *in, void *out, int len, 
+                  ESMC_TypeKind_Flag typekind, ESMC_Reduce_Flag reduceflag, 
+                  int root){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMReduce()"
+
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // typecast into ESMCI type
+  ESMCI::VM *vmp = (ESMCI::VM *)(vm.ptr);
+
+  vmType vmt;
+  // have to manually reset because the enum values don't line up
+  if (typekind == ESMC_TYPEKIND_I4)
+    vmt = vmI4;
+  else if (typekind == ESMC_TYPEKIND_I8)
+    vmt = vmI8;
+  else if (typekind == ESMC_TYPEKIND_R4)
+    vmt = vmR4;
+  else if (typekind == ESMC_TYPEKIND_R8)
+    vmt = vmR8;
+  else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                  "bad typekind value", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  vmOp vmo = (vmOp) (reduceflag);
+
+  // printf("vmt = %d, vmo = %d\n", vmt, vmo);
+
+  // call into ESMCI method  
+  localrc = vmp->reduce(in, out, len, vmt, vmo, root);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc))
+    return rc;  // bail out
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}  
 
 }; // extern "C"
