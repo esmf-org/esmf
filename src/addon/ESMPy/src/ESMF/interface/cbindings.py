@@ -316,6 +316,45 @@ def ESMP_VMPrint(vm):
         raise ValueError('ESMC_VMPrint() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
 
+_ESMF.ESMC_VMReduce.restype = ct.c_int
+_ESMF.ESMC_VMReduce.argtypes = [ct.c_void_p,
+                                np.ctypeslib.ndpointer(dtype=np.float64),
+                                np.ctypeslib.ndpointer(dtype=np.float64),
+                                ct.c_int,
+                                OptionalNamedConstant,
+                                OptionalNamedConstant,
+                                ct.c_int]
+
+def ESMP_VMReduce(vm, sendBuf, recvBuf, count, reduceflag, rootPet):
+    """
+    Preconditions: An ESMP_VM object has been retrieved.\n
+    Postconditions: The values in sendBuf have been reduced to recvBuf.\n
+    Arguments:\n
+        ESMP_VM :: vm\n
+        Numpy.array(dtype=float64) :: sendBuf\n
+        Numpy.array(dtype=float64) :: recvBuf\n
+        int :: count\n
+        Reduce :: reduceflag\n
+            Argument Values:\n
+                Reduce.SUM\n
+                Reduce.MIN\n
+                Reduce.MAX\n
+        int :: rootPet\n
+    """
+    cc = ct.c_int(count)
+    crp = ct.c_int(rootPet)
+    if (sendBuf.dtype != np.float64):
+        raise TypeError('sendBuf must have dtype=float64')
+
+    if (recvBuf.dtype != np.float64):
+        raise TypeError('sendBuf must have dtype=float64')
+
+    rc = _ESMF.ESMC_VMReduce(vm, sendBuf, recvBuf, cc, constants.TypeKind.R8, 
+                             reduceflag, crp)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_VMReduce() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
 #### LOG ######################################################################
 
 _ESMF.ESMC_LogSet.restype = ct.c_int

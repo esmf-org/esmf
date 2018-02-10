@@ -2275,7 +2275,9 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     integer                   :: localrc, stat
     type(type_InternalState)  :: is
     type(ESMF_Clock)          :: internalClock
-    integer                   :: i, j
+    integer                   :: i, j, itemCount
+    type(ComponentMapEntry)   :: cmEntry
+    type(ConnectorMapEntry)   :: cnEntry
     character(ESMF_MAXSTR)    :: iString, jString
     logical                   :: existflag
     character(ESMF_MAXSTR)    :: name
@@ -2397,11 +2399,44 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     enddo
     deallocate(connectorList)
     
-    ! destroy members in the internal state
+    ! destroy componentMap
+    call ESMF_ContainerGet(is%wrap%componentMap, itemCount=itemCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    do i=1, itemCount
+      call ESMF_ContainerGetUDTByIndex(is%wrap%componentMap, i, cmEntry, &
+        ESMF_ITEMORDER_ADDORDER, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      deallocate(cmEntry%wrap, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of cmEntry failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    enddo
     call ESMF_ContainerDestroy(is%wrap%componentMap, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    ! destroy connectorMap
+    call ESMF_ContainerGet(is%wrap%connectorMap, itemCount=itemCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    do i=1, itemCount
+      call ESMF_ContainerGetUDTByIndex(is%wrap%connectorMap, i, cnEntry, &
+        ESMF_ITEMORDER_ADDORDER, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      deallocate(cnEntry%wrap, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of cnEntry failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    enddo
     call ESMF_ContainerDestroy(is%wrap%connectorMap, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2434,6 +2469,16 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       if (associated(is%wrap%modelPhaseMap(i)%phaseKey)) &
         deallocate(is%wrap%modelPhaseMap(i)%phaseKey)
     enddo
+    deallocate(is%wrap%connectorPhaseMap, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of connectorPhaseMap failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    deallocate(is%wrap%modelPhaseMap, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of modelPhaseMap failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
 
     ! deallocate run sequence data structures
     call NUOPC_RunSequenceDeallocate(is%wrap%runSeq, rc=rc)

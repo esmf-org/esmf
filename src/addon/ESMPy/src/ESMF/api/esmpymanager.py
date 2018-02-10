@@ -164,3 +164,19 @@ class Manager(object):
         '''
         ESMP_VMBarrier(self.vm)
         
+    def _reduce_(self, sendBuf, recvBuf, count, reduceflag=Reduce.SUM, rootPet=0):
+        '''
+        Reduce data from sendBuf into recvBuf across the VM.\n
+            Arguments:\n
+                Numpy.array(dtype=float64) :: sendBuf\n
+                Numpy.array(dtype=float64) :: recvBuf\n
+                int :: count\n
+                Reduce :: reduceflag\n
+                    Argument Values:\n
+                        Reduce.SUM\n
+                        Reduce.MIN\n
+                        Reduce.MAX\n
+                int :: rootPet\n
+
+        '''
+        ESMP_VMReduce(self.vm, sendBuf, recvBuf, count, reduceflag, rootPet)

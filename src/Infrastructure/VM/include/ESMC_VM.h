@@ -251,8 +251,8 @@ int ESMC_VMReduce(ESMC_VM vm,
                   void *sendData,
                   void *recvData,
                   int count,
-                  ESMC_TypeKind_Flag typekind,
-                  ESMC_Reduce_Flag reduceflag,
+                  enum ESMC_TypeKind_Flag *typekind,
+                  enum ESMC_Reduce_Flag *reduceflag,
                   int rootPet);
 // !RETURN VALUE:
 //  Return code; equals ESMF_SUCCESS if there are no errors.
