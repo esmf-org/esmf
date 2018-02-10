@@ -164,7 +164,7 @@ int ESMC_VMPrint(ESMC_VM vm){
 }  
 
 int ESMC_VMReduce(ESMC_VM vm, void *in, void *out, int len, 
-                  ESMC_TypeKind_Flag typekind, ESMC_Reduce_Flag reduceflag, 
+                  enum ESMC_TypeKind_Flag *typekind, enum ESMC_Reduce_Flag *reduceflag, 
                   int root){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMReduce()"
@@ -177,22 +177,27 @@ int ESMC_VMReduce(ESMC_VM vm, void *in, void *out, int len,
   ESMCI::VM *vmp = (ESMCI::VM *)(vm.ptr);
 
   vmType vmt;
+  vmOp vmo;
+
   // have to manually reset because the enum values don't line up
-  if (typekind == ESMC_TYPEKIND_I4)
-    vmt = vmI4;
-  else if (typekind == ESMC_TYPEKIND_I8)
-    vmt = vmI8;
-  else if (typekind == ESMC_TYPEKIND_R4)
-    vmt = vmR4;
-  else if (typekind == ESMC_TYPEKIND_R8)
-    vmt = vmR8;
-  else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-                                  "bad typekind value", ESMC_CONTEXT, &rc);
-    return rc;
+  if (typekind != NULL) {
+    if (*typekind == ESMC_TYPEKIND_I4)
+      vmt = vmI4;
+    else if (*typekind == ESMC_TYPEKIND_I8)
+      vmt = vmI8;
+    else if (*typekind == ESMC_TYPEKIND_R4)
+      vmt = vmR4;
+    else if (*typekind == ESMC_TYPEKIND_R8)
+      vmt = vmR8;
+    else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                                    "bad typekind value", ESMC_CONTEXT, &rc);
+      return rc;
+    }
   }
 
-  vmOp vmo = (vmOp) (reduceflag);
+  if (reduceflag != NULL)
+    vmo = (vmOp) (*reduceflag);
 
   // printf("vmt = %d, vmo = %d\n", vmt, vmo);
 

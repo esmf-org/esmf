@@ -307,6 +307,24 @@ class PoleMethod(IntEnum):
     """
 
 # Region
+class Reduce(IntEnum):
+    """
+    Indicates reduce operation.
+    """
+    SUM = 1
+    """
+    Use arithmetic sum to add all data elements.
+    """
+    MIN = 2
+    """
+    Determine the minimum of all data elements.
+    """
+    MAX = 3
+    """
+    Determine the maximum of all data elements.
+    """
+
+# Region
 class Region(IntEnum):
     """
     Specify various regions in the data layout of a Field object.

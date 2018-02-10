@@ -111,8 +111,9 @@ int main(void){
   int out[4];
   in[0] = 1; in[1] = 1; in[2] = 1; in[3] = 1;
   out[0] = 0; out[1] = 0; out[2] = 0; out[3] = 0;
-  rc = ESMC_VMReduce(vm, in, out, len, ESMC_TYPEKIND_I4,
-                     ESMC_REDUCE_SUM, root);
+  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_I4;
+  ESMC_Reduce_Flag rd = ESMC_REDUCE_SUM;
+  rc = ESMC_VMReduce(vm, in, out, len, &tk, &rd, root);
   bool correct = true;
   if (localPet == 0) {
     for (int i = 0; i < len; ++i) {
@@ -141,8 +142,9 @@ int main(void){
   long long out[4];
   in[0] = 1; in[1] = 1; in[2] = 1; in[3] = 1;
   out[0] = 0; out[1] = 0; out[2] = 0; out[3] = 0;
-  rc = ESMC_VMReduce(vm, in, out, len, ESMC_TYPEKIND_I8,
-                     ESMC_REDUCE_SUM, root);
+  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_I8;
+  ESMC_Reduce_Flag rd = ESMC_REDUCE_SUM;
+  rc = ESMC_VMReduce(vm, in, out, len, &tk, &rd, root);
   bool correct = true;
   if (localPet == 0) {
     for (int i = 0; i < len; ++i) {
@@ -171,8 +173,9 @@ int main(void){
   float out[4];
   in[0] = 1; in[1] = 1; in[2] = 1; in[3] = 1;
   out[0] = 0; out[1] = 0; out[2] = 0; out[3] = 0;
-  rc = ESMC_VMReduce(vm, in, out, len, ESMC_TYPEKIND_R4,
-                     ESMC_REDUCE_SUM, root);
+  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R4;
+  ESMC_Reduce_Flag rd = ESMC_REDUCE_SUM;
+  rc = ESMC_VMReduce(vm, in, out, len, &tk, &rd, root);
   bool correct = true;
   if (localPet == 0) {
     for (int i = 0; i < len; ++i) {
@@ -201,8 +204,9 @@ int main(void){
   double out[4];
   in[0] = 1; in[1] = 1; in[2] = 1; in[3] = 1;
   out[0] = 0; out[1] = 0; out[2] = 0; out[3] = 0;
-  rc = ESMC_VMReduce(vm, in, out, len, ESMC_TYPEKIND_R8,
-                     ESMC_REDUCE_SUM, root);
+  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
+  ESMC_Reduce_Flag rd = ESMC_REDUCE_SUM;
+  rc = ESMC_VMReduce(vm, in, out, len, &tk, &rd, root);
   bool correct = true;
   if (localPet == 0) {
     for (int i = 0; i < len; ++i) {
