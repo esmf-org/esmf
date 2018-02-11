@@ -172,12 +172,12 @@ module ESMF_FieldSMMFromFileUTestMod
 
   ! Do regrid
   call ESMF_FieldRegridStore(srcField, dstField, routehandle=routeHandle, &
-                             filename="weights_esmf_smmsff.nc", rc=localrc)
+                             filename="data/weights_esmf_smmsff.nc", rc=localrc)
   if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME, rcToReturn=rc)) return
 
   ! SMM store
-  call ESMF_FieldSMMStore(srcField, dstField, "weights_esmf_smmsff.nc", &
+  call ESMF_FieldSMMStore(srcField, dstField, "data/weights_esmf_smmsff.nc", &
                           routeHandle, rc=localrc)
   if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME, rcToReturn=rc)) return
@@ -261,7 +261,7 @@ program ESMF_FieldSMMFromFileUTest
   character(ESMF_MAXSTR)      :: name
   character(len=*), parameter :: srcFile = 'data/T42_grid.nc'
   character(len=*), parameter :: dstFile = 'data/T42_grid.nc'
-  character(len=*), parameter :: weightFile = 'test_smm_from_file_weights.nc'
+  character(len=*), parameter :: weightFile = 'data/test_smm_from_file_weights.nc'
   integer                     :: rc
   integer                     :: result = 0
 
