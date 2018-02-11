@@ -243,10 +243,11 @@ namespace ESMCI {
 
   // Compute gradient across the source cell using Green's theorem
   // Assumes nbrs are in counter-clockwise order
-  void _set_grad_info_using_greens_2D_2D_cart(double *src_cntr, double *src_grad, std::vector<NBR_ELEM> *nbrs, int se_id) {
+  // returns true if successful
+  bool _set_grad_info_using_greens_2D_2D_cart(double *src_cntr, double *src_grad, std::vector<NBR_ELEM> *nbrs, int se_id) {
 
     // Compute area of polygon
-#define MAX_NUM_NBRS 40
+#define MAX_NUM_NBRS 100
     double nbr_coords[2*MAX_NUM_NBRS];
     
     // Error check
@@ -266,7 +267,7 @@ namespace ESMCI {
 
     // Compute area
     double nbr_poly_area=area_of_flat_2D_polygon(nbrs->size(), nbr_coords); 
-    if (nbr_poly_area == 0.0) Throw() << "Neighbor poly area 0.0";
+    if (nbr_poly_area == 0.0) return false;
     double div_nbr_poly_area=1.0/nbr_poly_area;
 
     // Set gradients to 0.0
@@ -334,6 +335,8 @@ namespace ESMCI {
     // Divide src_grad by area
     MU_MULT_BY_SCALAR_VEC2D(src_grad,src_grad,div_nbr_poly_area);
 
+    // Return success
+    return true;
   }
 
   // Set gradient info to indicate a 0 gradient across the source cell
@@ -605,7 +608,10 @@ namespace ESMCI {
      _set_grad_info_to_0_2D_2D_cart(src_cntr, src_grad, nbrs);      
    } else { 
      // 3 or more neighbors so use Green's theorem
-     _set_grad_info_using_greens_2D_2D_cart(src_cntr, src_grad, nbrs, src_elem->get_id());
+     if (!_set_grad_info_using_greens_2D_2D_cart(src_cntr, src_grad, nbrs, src_elem->get_id())) {
+       // If the above doesn't suceed just default to constant
+       _set_grad_info_to_0_2D_2D_cart(src_cntr, src_grad, nbrs);      
+     }
    }
 
 #if 0
@@ -891,10 +897,11 @@ namespace ESMCI {
 
   // Compute gradient across the source cell using Green's theorem
   // Assumes nbrs are in counter-clockwise order
-  void _set_grad_info_using_greens(double *src_cntr, double *src_grad, std::vector<NBR_ELEM> *nbrs) {
+  // returns true if successful
+  bool _set_grad_info_using_greens(double *src_cntr, double *src_grad, std::vector<NBR_ELEM> *nbrs) {
 
     // Compute area of polygon
-#define MAX_NUM_NBRS 40
+#define MAX_NUM_NBRS 100
     double nbr_coords[3*MAX_NUM_NBRS];
     
     // Error check
@@ -915,7 +922,7 @@ namespace ESMCI {
 
     // Compute area
     double nbr_poly_area=great_circle_area(nbrs->size(), nbr_coords); 
-    if (nbr_poly_area == 0.0) Throw() << "Neighbor poly area 0.0";
+    if (nbr_poly_area == 0.0) return false;
     double div_nbr_poly_area=1.0/nbr_poly_area;
 
     // Set gradients to 0.0
@@ -997,6 +1004,8 @@ namespace ESMCI {
     // Divide by area
     MU_MULT_BY_SCALAR_VEC3D(src_grad,src_grad,div_nbr_poly_area);
 
+    // Return success
+    return true;
   }
 
 #if 0
@@ -1387,7 +1396,10 @@ namespace ESMCI {
       _set_grad_info_to_0(src_cntr, src_grad, nbrs);      
     } else { 
       // 3 or more neighbors so use Green's theorem
-      _set_grad_info_using_greens(src_cntr, src_grad, nbrs);
+      if (!_set_grad_info_using_greens(src_cntr, src_grad, nbrs)) {
+        // If the above doesn't suceed just default to constant
+        _set_grad_info_to_0(src_cntr, src_grad, nbrs);      
+      }
     }
     
 #if 0
