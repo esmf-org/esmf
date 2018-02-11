@@ -275,6 +275,9 @@ ESMF_RegridWeightGen
         [--pole|-p none|all|teeth|1|2|..]
         [--line_type|-l cartesian|greatcircle]
         [--norm_type dstarea|fracarea]
+        [--extrap_method none|neareststod|nearestidavg]
+        [--extrap_num_src_pnts <N>]
+        [--extrap_dist_exponent <P>]
         [--ignore_unmapped|-i]
         [--ignore_degenerate]
         [-r]
@@ -365,6 +368,38 @@ where:
     --norm_type       - an optional argument indicating the type of normal-
                         ization to do when generating conservative weights. 
                         The default value is dstarea.
+
+    --extrap_method   - an optional argument specifying which extrapolation
+                        method is used to handle unmapped destination locations.
+                        The value can be one of the following:
+
+                        none         - no extrapolation method should be used.
+                                       This is the default. 
+
+                        neareststod  - nearest source to destination. Each
+                                       unmapped destination location is mapped 
+                                       to the closest source location. 
+        
+                        nearestidavg - inverse distance weighted average. 
+                                       The value of each unmapped destination location
+                                       is the weighted average of the closest N 
+                                       source locations. The weight is the reciprocal 
+                                       of the distance of the source from the destination
+                                       raised to a power P. All the weights contributing 
+                                       to one destination point are normalized so that 
+                                       they sum to 1.0. The user can choose N and P by
+                                       using --extrap_num_src_pnts and 
+                                       --extrap_dist_exponent, but defaults are 
+                                       also provided.  
+
+    --extrap_num_src_pnts - an optional argument specifying how many source points
+                            should be used when the extrapolation method is 
+                            nearestidavg. If not specified, the default is 8.
+
+    --extrap_dist_exponent - an optional argument specifying the exponent that 
+                             the distance should be raised to when the 
+                             extrapolation method is nearestidavg. If not specified, 
+                             the default is 2.0.
 
     --ignore_unmapped
            or
