@@ -256,6 +256,33 @@ _ESMF.ESMC_VMGet.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int),
                              ct.c_void_p, ct.POINTER(ct.c_int),
                              ct.POINTER(ct.c_int)]
 
+_ESMF.ESMC_VMBroadcast.restype = ct.c_int
+_ESMF.ESMC_VMBroadcast.argtypes = [ct.c_void_p,
+                                np.ctypeslib.ndpointer(dtype=np.float64),
+                                ct.c_int,
+                                OptionalNamedConstant,
+                                ct.c_int]
+
+def ESMP_VMBroadcast(vm, bcstBuf, count, rootPet):
+    """
+    Preconditions: An ESMP_VM object has been retrieved.\n
+    Postconditions: The values in bcstBuf have been broadcast across the VM.\n
+    Arguments:\n
+        ESMP_VM :: vm\n
+        Numpy.array(dtype=float64) :: bcstBuf\n
+        int :: count\n
+        int :: rootPet\n
+    """
+    cc = ct.c_int(count)
+    crp = ct.c_int(rootPet)
+    if (bcstBuf.dtype != np.float64):
+        raise TypeError('bcstBuf must have dtype=float64')
+
+    rc = _ESMF.ESMC_VMBroadcast(vm, bcstBuf, cc, constants.TypeKind.R8, crp)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_VMBroadcast() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
 def ESMP_VMGet(vm):
     """
     Preconditions: An ESMP_VM object has been retrieved.\n

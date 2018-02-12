@@ -141,12 +141,19 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
 
     # broadcast in parallel case
     if parallel:
-        from mpi4py import MPI
-        comm = MPI.COMM_WORLD
-        itrp_mean, itrp_max, csrv = \
-            MPI.COMM_WORLD.bcast([itrp_mean, itrp_max, csrv],0)
-        total_error_global, csrv_error_global = \
-            MPI.COMM_WORLD.bcast([total_error_global, csrv_error_global], 0)
+        # from mpi4py import MPI
+        # comm = MPI.COMM_WORLD
+        # itrp_mean, itrp_max, csrv = \
+        #     MPI.COMM_WORLD.bcast([itrp_mean, itrp_max, csrv],0)
+        # total_error_global, csrv_error_global = \
+        #     MPI.COMM_WORLD.bcast([total_error_global, csrv_error_global], 0)
+
+        from helpers import broadcast_val
+        itrp_mean = broadcast_val(itrp_mean)
+        itrp_max = broadcast_val(itrp_max)
+        csrv = broadcast_val(csrv)
+        total_error_global = broadcast_val(total_error_global)
+        csrv_error_global = broadcast_val(csrv_error_global)
 
     # print pass or fail
     if (itrp_mean and itrp_max  and csrv):
@@ -156,4 +163,3 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
         print ("PET{0} - FAIL".format(ESMF.local_pet()))
 
     return total_error_global, csrv_error_global, correct
--+-=```   `
