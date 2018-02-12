@@ -60,6 +60,15 @@ Item Label & {\bf Type Restriction}  & {\bf Type Default} & {\bf ESMF Uses} & {\
 \hline
 \end{tabular}
 
+\medskip
+
+ {\bf NOTE:} One important thing to consider when setting areas in the Grid using {\tt ESMF\_GRIDITEM\_AREA},
+  ESMF doesn't currently do unit conversion on areas. If these areas are going to be used
+ in a process that also involves the areas of another Grid or Mesh (e.g. conservative regridding), then
+ it is the user's responsibility to make sure that the area units are consistent between the two sides.
+ If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If 
+ it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared. 
+
 
 \subsubsection{ESMF\_GRIDMATCH}
 \label{const:gridmatch}
