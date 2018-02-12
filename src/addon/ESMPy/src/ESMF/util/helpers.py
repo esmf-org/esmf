@@ -9,3 +9,10 @@ def reduce_val(inval, op=Reduce.SUM):
     mg._reduce_(send_buf, recv_buf, 1, reduceflag=op)
     outval = recv_buf[0]
     return outval
+
+def broadcast_val(inval):
+    mg = Manager()
+    bcst_buf = np.array([inval], dtype=np.float64)
+    mg._broadcast_(bcst_buf, 1)
+    outval = bcst_buf[0]
+    return outval

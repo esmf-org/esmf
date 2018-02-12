@@ -164,6 +164,17 @@ class Manager(object):
         '''
         ESMP_VMBarrier(self.vm)
         
+    def _broadcast_(self, bcstBuf, count, rootPet=0):
+        '''
+        Broadcast data from bcstBuf across the VM.\n
+            Arguments:\n
+                Numpy.array(dtype=float64) :: bcstBuf\n
+                int :: count\n
+                int :: rootPet\n
+
+        '''
+        ESMP_VMBroadcast(self.vm, bcstBuf, count, rootPet)
+
     def _reduce_(self, sendBuf, recvBuf, count, reduceflag=Reduce.SUM, rootPet=0):
         '''
         Reduce data from sendBuf into recvBuf across the VM.\n

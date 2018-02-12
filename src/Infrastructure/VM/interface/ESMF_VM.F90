@@ -3237,8 +3237,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        is to be broadcasted to all other PETs. On all other PETs 
 !        {\tt bcstData} is used to receive the broadcasted data.
 !   \item[count] 
-!        Number of elements in sendData and recvData. Must be the same on all
-!        PETs.
+!        Number of elements in {/bcstData}. Must be the same on all PETs.
 !   \item[rootPet] 
 !        PET that holds data that is being broadcast.
 !   \item[{[syncflag]}]

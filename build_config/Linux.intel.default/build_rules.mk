@@ -120,8 +120,8 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v -c
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v -c
 ESMF_F90MAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_F90COMPILER} -V)
 ESMF_CXXMAJORVERSION      = $(shell $(ESMF_DIR)/scripts/version.intel 1 ${ESMF_CXXCOMPILER} -V)
 
