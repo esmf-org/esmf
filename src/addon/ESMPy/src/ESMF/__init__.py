@@ -59,6 +59,8 @@ from ESMF.api.mesh import *
 from ESMF.api.locstream import *
 from ESMF.api.field import *
 from ESMF.api.regrid import *
+from ESMF.api.constants import *
+from ESMF.util.helpers import *
 from ESMF.api.constants import _ESMF_VERSION
 
 # for testing

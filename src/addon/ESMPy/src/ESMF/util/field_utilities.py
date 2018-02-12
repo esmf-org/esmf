@@ -91,16 +91,6 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
             mass1_global = reduce_val(mass1)
             mass2_global = reduce_val(mass2)
 
-        # use mpi4py to collect values
-        # from mpi4py import MPI
-        # comm = MPI.COMM_WORLD
-        # total_error_global = comm.reduce(totalErr, op=MPI.SUM)
-        # num_nodes_global = comm.reduce(num_nodes, op=MPI.SUM)
-        # max_error_global = comm.reduce(max_error, op=MPI.MAX)
-        # min_error_global = comm.reduce(min_error, op=MPI.MIN)
-        # if (mass1 is not None) and (mass2 is not None):
-        #     mass1_global = comm.reduce(mass1, op=MPI.SUM)
-        #     mass2_global = comm.reduce(mass2, op=MPI.SUM)
     else:
         total_error_global = totalErr
         num_nodes_global = num_nodes
@@ -141,12 +131,6 @@ def compare_fields(field1, field2, itrp_mean_tol, itrp_max_tol, csrv_tol,
 
     # broadcast in parallel case
     if parallel:
-        # from mpi4py import MPI
-        # comm = MPI.COMM_WORLD
-        # itrp_mean, itrp_max, csrv = \
-        #     MPI.COMM_WORLD.bcast([itrp_mean, itrp_max, csrv],0)
-        # total_error_global, csrv_error_global = \
-        #     MPI.COMM_WORLD.bcast([total_error_global, csrv_error_global], 0)
 
         from helpers import broadcast_val
         itrp_mean = broadcast_val(itrp_mean)
