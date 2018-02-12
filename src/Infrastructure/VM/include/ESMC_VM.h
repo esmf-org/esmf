@@ -79,6 +79,49 @@ int ESMC_VMBarrier(
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE: ESMC_VMBroadcast - Broadcast data across the VM
+//
+// !INTERFACE:
+int ESMC_VMBroadcast(ESMC_VM vm,
+                  void *bcstData,
+                  int count,
+                  enum ESMC_TypeKind_Flag *typekind,
+                  int rootPet);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Collective {\tt ESMC\_VM} communication call that broadcasts a contiguous 
+//  data array from {\tt rootPet} to all other PETs of the {\tt ESMC\_VM}
+//  object.
+//
+//  This method is overloaded for:
+//  {\tt ESMC\_TYPEKIND\_I4}, {\tt ESMC\_TYPEKIND\_I8},
+//  {\tt ESMC\_TYPEKIND\_R4}, {\tt ESMC\_TYPEKIND\_R8}, 
+//  {\tt ESMC\_TYPEKIND\_LOGICAL}.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[vm] 
+//    {\tt ESMC\_VM} object.
+//  \item[bcstData]
+//    Contiguous data array. On {\tt rootPet} {\tt bcstData} holds data that
+//    is to be broadcasted to all other PETs. On all other PETs 
+//    {\tt bcstData} is used to receive the broadcasted data.
+//  \item[count] 
+//    Number of elements in {\tt bcstData}. Must be the same on all PETs.
+//  \item[typekind]
+//    The typekind of the data to be reduced. See section 
+//    \ref{const:ctypekind} for a list of valid typekind options.
+//  \item[rootPet] 
+//    PET that holds data that is being broadcast.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE: ESMC_VMGet - Get VM internals
 //
 // !INTERFACE:
@@ -271,26 +314,23 @@ int ESMC_VMReduce(ESMC_VM vm,
 //  The arguments are:
 //  \begin{description}
 //  \item[vm] 
-//       {\tt ESMC\_VM} object.
+//    {\tt ESMC\_VM} object.
 //  \item[sendData]
-//       Contiguous data array holding data to be sent. All PETs must specify a
-//       valid source array.
+//    Contiguous data array holding data to be sent. All PETs must specify a
+//    valid source array.
 //  \item[recvData] 
-//       Contiguous data array for data to be received. Only the {\tt recvData}
-//       array specified by the {\tt rootPet} will be used by this method.
+//    Contiguous data array for data to be received. Only the {\tt recvData}
+//    array specified by the {\tt rootPet} will be used by this method.
 //  \item[count] 
-//       Number of elements in sendData and recvData. Must be the same on all
-//       PETs.
+//    Number of elements in sendData and recvData. Must be the same on all PETs.
 //  \item[typekind]
-//       The typekind of the data to be reduced. See section 
-//       \ref{const:ctypekind} for a list of valid typekind options.
+//    The typekind of the data to be reduced. See section 
+//    \ref{const:ctypekind} for a list of valid typekind options.
 //  \item[reduceflag] 
-//       Reduction operation. See section \ref{const:creduce} for a list of 
-//       valid reduce operations.
+//    Reduction operation. See section \ref{const:creduce} for a list of 
+//    valid reduce operations.
 //  \item[rootPet] 
-//       PET on which reduced data is returned.
-//  \item[{[rc]}] 
-//       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//    PET on which reduced data is returned.
 //  \end{description}
 //
 //EOP

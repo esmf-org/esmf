@@ -224,6 +224,157 @@ int main(void){
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
+  //NEX_UTest
+  //VM Broadcast
+  {
+  strcpy(name, "VMBroadcastI4");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  int root = 0;
+  int len = 4;
+  int bcast[4];
+  if (localPet == 0) {
+    bcast[0] = 4; bcast[1] = 4; bcast[2] = 4; bcast[3] = 4;
+  } else {
+    bcast[0] = 2; bcast[1] = 2; bcast[2] = 2; bcast[3] = 2;
+  }
+  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_I4;
+  rc = ESMC_VMBroadcast(vm, bcast, len, &tk, root);
+  bool correct = true;
+  for (int i = 0; i < len; ++i) {
+    if (bcast[i] != 4) correct = false;
+    printf("PET%d: out[%d] = %d\n", localPet, i, bcast[i]);
+  }
+  ESMC_Test((rc==ESMF_SUCCESS && correct), name, failMsg, &result, __FILE__, __LINE__, 0);
+  }
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //VM Broadcast
+  {
+  strcpy(name, "VMBroadcastI8");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  int root = 0;
+  int len = 4;
+  long long bcast[4];
+  if (localPet == 0) {
+    bcast[0] = 4; bcast[1] = 4; bcast[2] = 4; bcast[3] = 4;
+  } else {
+    bcast[0] = 2; bcast[1] = 2; bcast[2] = 2; bcast[3] = 2;
+  }
+  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_I8;
+  rc = ESMC_VMBroadcast(vm, bcast, len, &tk, root);
+  bool correct = true;
+  for (int i = 0; i < len; ++i) {
+    if (bcast[i] != (long long) 4) correct = false;
+    printf("PET%d: out[%d] = %lld\n", localPet, i, bcast[i]);
+  }
+  ESMC_Test((rc==ESMF_SUCCESS && correct), name, failMsg, &result, __FILE__, __LINE__, 0);
+  }
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //VM Broadcast
+  {
+  strcpy(name, "VMBroadcastR4");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  int root = 0;
+  int len = 4;
+  float bcast[4];
+  if (localPet == 0) {
+    bcast[0] = 4; bcast[1] = 4; bcast[2] = 4; bcast[3] = 4;
+  } else {
+    bcast[0] = 2; bcast[1] = 2; bcast[2] = 2; bcast[3] = 2;
+  }
+  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R4;
+  rc = ESMC_VMBroadcast(vm, bcast, len, &tk, root);
+  bool correct = true;
+  for (int i = 0; i < len; ++i) {
+    if (bcast[i] != (float) 4) correct = false;
+    printf("PET%d: out[%d] = %f\n", localPet, i, bcast[i]);
+  }
+  ESMC_Test((rc==ESMF_SUCCESS && correct), name, failMsg, &result, __FILE__, __LINE__, 0);
+  }
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //VM Broadcast
+  {
+  strcpy(name, "VMBroadcastR8");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  int root = 0;
+  int len = 4;
+  double bcast[4];
+  if (localPet == 0) {
+    bcast[0] = 4; bcast[1] = 4; bcast[2] = 4; bcast[3] = 4;
+  } else {
+    bcast[0] = 2; bcast[1] = 2; bcast[2] = 2; bcast[3] = 2;
+  }
+  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_R8;
+  rc = ESMC_VMBroadcast(vm, bcast, len, &tk, root);
+  bool correct = true;
+  for (int i = 0; i < len; ++i) {
+    if (bcast[i] != (double) 4) correct = false;
+    printf("PET%d: out[%d] = %f\n", localPet, i, bcast[i]);
+  }
+  ESMC_Test((rc==ESMF_SUCCESS && correct), name, failMsg, &result, __FILE__, __LINE__, 0);
+  }
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //VM Broadcast
+  {
+  strcpy(name, "VMBroadcastLogical");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  int root = 0;
+  int len = 4;
+  bool bcast[4];
+  if (localPet == 0) {
+    bcast[0] = true; bcast[1] = true; bcast[2] = true; bcast[3] = true;
+  } else {
+    bcast[0] = false; bcast[1] = false; bcast[2] = false; bcast[3] = false;
+  }
+  ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_LOGICAL;
+  rc = ESMC_VMBroadcast(vm, bcast, len, &tk, root);
+  bool correct = true;
+  for (int i = 0; i < len; ++i) {
+    if (bcast[i] != true) correct = false;
+    printf("PET%d: out[%d] = %d\n", localPet, i, bcast[i]);
+  }
+  ESMC_Test((rc==ESMF_SUCCESS && correct), name, failMsg, &result, __FILE__, __LINE__, 0);
+  }
+  //----------------------------------------------------------------------------
+
+  // //----------------------------------------------------------------------------
+  // //NEX_disable_UTest
+  // //VM Broadcast
+  // {
+  // strcpy(name, "VMBroadcastCharacter");
+  // strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  // int root = 0;
+  // int len = 4;
+  // char bcast[4];
+  // if (localPet == 0) {
+  //   bcast[0] = 'x'; bcast[1] = 'x'; bcast[2] = 'x'; bcast[3] = 'x';
+  // } else {
+  //   bcast[0] = 'y'; bcast[1] = 'y'; bcast[2] = 'y'; bcast[3] = 'y';
+  // }
+  // ESMC_TypeKind_Flag tk = ESMC_TYPEKIND_CHARACTER;
+  // rc = ESMC_VMBroadcast(vm, bcast, len, &tk, root);
+  // bool correct = true;
+  // for (int i = 0; i < len; ++i) {
+  //   if (bcast[i] != 'y') correct = false;
+  //   printf("PET%d: out[%d] = %s\n", localPet, i, bcast[i]);
+  // }
+  // ESMC_Test((rc==ESMF_SUCCESS && correct), name, failMsg, &result, __FILE__, __LINE__, 0);
+  // }
+  // //----------------------------------------------------------------------------
+
+
+  //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
