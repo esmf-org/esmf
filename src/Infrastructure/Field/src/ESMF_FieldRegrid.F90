@@ -2576,6 +2576,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     If created on a 3D Grid, it must be built on the {\tt ESMF\_STAGGERLOC\_CENTER\_VCENTER} stagger 
 !     location. If created on a Mesh, it must be built on the {\tt ESMF\_MESHLOC\_ELEMENT} mesh location. 
 !
+!     If the user has set the area in the Grid or Mesh under {\tt areaField}, then that's the area that's
+!     returned in the units that the user set it in. If the user hasn't set the area, then the area is 
+!     calculated and returned. If the Grid or Mesh is on the surface of a sphere, then the calculated area is in
+!     units of square radians. If the Grid or Mesh is 
+!     Cartesian, then the calculated area is in square units of whatever unit the coordinates are in. 
+!
 !     The arguments are:
 !     \begin{description}
 !     \item [areaField]

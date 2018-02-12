@@ -557,6 +557,11 @@ contains
 !   \item [{[elementArea]}]
 !          An array containing element areas. If not specified, the element areas are internally calculated. 
 !          This input consists of a 1D array the size of the number of elements on this PET.
+!          {\bf NOTE:} ESMF doesn't currently do unit conversion on areas. If these areas are going to be used
+!                in a process that also involves the areas of another Grid or Mesh (e.g. conservative regridding), then
+!                it is the user's responsibility to make sure that the area units are consistent between the two sides.
+!                If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If 
+!                it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared. 
 !   \item[{[elementCoords]}] 
 !          An array containing the physical coordinates of the elements to be created on this
 !          PET. This input consists of a 1D array the size of the number of elements on this PET times the Mesh's 
@@ -1134,6 +1139,11 @@ contains
 !   \item [{[elementArea]}]
 !          An array containing element areas. If not specified, the element areas are internally calculated. 
 !          This input consists of a 1D array the size of the number of elements on this PET.
+!          {\bf NOTE:} ESMF doesn't currently do unit conversion on areas. If these areas are going to be used
+!                in a process that also involves the areas of another Grid or Mesh (e.g. conservative regridding), then
+!                it is the user's responsibility to make sure that the area units are consistent between the two sides.
+!                If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If 
+!                it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared. 
 !   \item[{[elementCoords]}] 
 !          An array containing the physical coordinates of the elements to be created on this
 !          PET. This input consists of a 1D array the size of the number of elements on this PET times the Mesh's 
@@ -3515,6 +3525,11 @@ end function ESMF_MeshCreateDual
 !   \item [{[elementArea]}]
 !          An array containing element areas. If not specified, the element areas are internally calculated. 
 !          This input consists of a 1D array the size of the number of elements on this PET.
+!          {\bf NOTE:} ESMF doesn't currently do unit conversion on areas. If these areas are going to be used
+!                in a process that also involves the areas of another Grid or Mesh (e.g. conservative regridding), then
+!                it is the user's responsibility to make sure that the area units are consistent between the two sides.
+!                If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If 
+!                it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared. 
 !   \item[{[elementCoords]}] 
 !          An array containing the physical coordinates of the elements to be created on this
 !          PET. This input consists of a 2D array with the first dimension that same size as the first dimension of {\tt elementCornerCoords}. 
@@ -3659,6 +3674,11 @@ end function ESMF_MeshCreateDual
 !   \item [{[elementArea]}]
 !          An array containing element areas. If not specified, the element areas are internally calculated. 
 !          This input consists of a 1D array the size of the number of elements on this PET.
+!          {\bf NOTE:} ESMF doesn't currently do unit conversion on areas. If these areas are going to be used
+!                in a process that also involves the areas of another Grid or Mesh (e.g. conservative regridding), then
+!                it is the user's responsibility to make sure that the area units are consistent between the two sides.
+!                If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If 
+!                it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared. 
 !   \item[{[elementCoords]}] 
 !          An array containing the physical coordinates of the elements to be created on this
 !          PET. This input consists of a 2D array with the first dimension that same size as the first dimension of {\tt elementCornerCoords}. 
