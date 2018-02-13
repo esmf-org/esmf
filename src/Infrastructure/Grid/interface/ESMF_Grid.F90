@@ -14617,6 +14617,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_GridCreateMosaic = grid
     deallocate(minIndexPDe, maxIndexPDe)
   endif
+
+  ! Get rid of mosaic info
+  call ESMF_MosaicDestroy(mosaic, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return 
+
   return
 
 end function ESMF_GridCreateMosaic
