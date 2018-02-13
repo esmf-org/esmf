@@ -226,6 +226,13 @@ static const char *const version = "$Id$";
 //EOPI
   int localrc;
   
+  // first deal with old vmID if this is the creator  
+  if (vmIDCreator){
+    // responsible for vmID deallocation
+    localrc = this->vmID->destroy();
+    delete this->vmID;
+  }
+  // now create the new vmID
   this->vmID = new ESMCI::VMId;       // allocate space for this VMId
   localrc = this->vmID->create();     // allocate internal VMId memory
   ESMCI::VMIdCopy(this->vmID, vmID);  // copy content of vmID to this->vmID.
