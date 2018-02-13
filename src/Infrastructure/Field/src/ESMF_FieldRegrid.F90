@@ -2514,6 +2514,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            endif
 
            ! Generate routehandle other that 1st order conserve
+           srcTermProcessingVal = 1 ! multiply on src, but all adding on dst
            call ESMF_FieldRegridStoreNX(&
                 srcField=tmpSrcField, &
                 dstField=tmpDstField, &
