@@ -2450,30 +2450,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !print *, PetNo, starti, localcount, coordX(1), coordY(1)
     ! Add coordinate keys
     call ESMF_LocStreamAddKey(locStream, 'ESMF:Lon',coordX, keyUnits=units, &
-                              keyLongName='Longitude', rc=localrc)
+                              keyLongName='Longitude', &
+                              datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_LocStreamAddKey(locStream, 'ESMF:Lat',coordY, keyUnits=units, &
-                              keyLongName='Latitude', rc=localrc)
+                              keyLongName='Latitude', &
+                              datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     !If 3D grid, add the height coordinates
     if (totaldims == 3) then
        if (localcount == 0) allocate(coordZ(localcount))
-       call ESMF_LocStreamAddKey(locStream, 'ESMF:Radius',coordZ, keyUnits='radius', &
-                                 keyLongName='Height', rc=localrc)
+       call ESMF_LocStreamAddKey(locStream, 'ESMF:Radius',coordZ, &
+                                 keyUnits='radius', &
+                                 keyLongName='Height', &
+                                 datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(coordZ)
     endif
     !Add mask key
     call ESMF_LocStreamAddKey(locStream, 'ESMF:Mask',imask,  &
-                              keyLongName='Mask', rc=localrc)
+                              keyLongName='Mask', &
+                              datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
    
+    ! local garbage collection
+    deallocate(coordX, coordY, imask)
+    
     ESMF_LocStreamCreateFromFile = locStream
+    
     if (present(rc)) rc=ESMF_SUCCESS
     return
 
