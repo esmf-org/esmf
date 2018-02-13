@@ -14,7 +14,7 @@ The following packages are *required* to work with ESMPy:
 
 The following packages are *optional*:
 
-* `mpi4py <http://mpi4py.scipy.org/>`_- python bindings to MPI, needed to run the parallel regridding tests
+* `mpi4py <http://mpi4py.scipy.org/>`_- python bindings to MPI, needed to run some of the parallel regridding examples
 * ESMF installation with NetCDF - required to create grids and meshes from file
     - NetCDF must be built as a shared library for ESMPy installation to succeed
 * `nose <https://nose.readthedocs.org/en/latest/>`_ - for nose testing

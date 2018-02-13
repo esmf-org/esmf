@@ -11468,6 +11468,7 @@ ArrayElement::ArrayElement(
   // flag condition that will prevent optimization of seqIndex lookup
   cannotOptimizeLookup = !firstDimFirstDecomp | arbSeqIndexFlag |
     seqIndexRecursiveFlag;
+  lastSeqIndexInvalid = true;
   
   // early return if not within range
   if (!isWithin()) return;
@@ -11609,6 +11610,7 @@ ArrayElement::ArrayElement(
   // flag condition that will prevent optimization of seqIndex lookup
   cannotOptimizeLookup = !firstDimFirstDecomp | arbSeqIndexFlag |
     seqIndexRecursiveFlag;
+  lastSeqIndexInvalid = true;
   
   // early return if not within range
   if (!isWithin()) return;

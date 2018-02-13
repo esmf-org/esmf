@@ -93,8 +93,8 @@ program ESMF_VMGatherUTest
   ! prepare data array2
   do i=1, nsize
     array2(i)   = 2*localPet + i
-    farray2(i)  = real( 2*localPet + i , ESMF_KIND_R8)
-    f4array2(i) = farray2(i)
+    farray2(i)  = real(2*localPet + i, ESMF_KIND_R8)
+    f4array2(i) = real(farray2(i), ESMF_KIND_R4)
   enddo
 
   !Testing with Integer arguments
@@ -260,8 +260,8 @@ program ESMF_VMGatherUTest
   ! prepare data array2
   do i=1, nsize
     array2(i)   = 2*localPet + i
-    farray2(i)  = real( 2*localPet + i , ESMF_KIND_R8)
-    f4array2(i) = farray2(i)
+    farray2(i)  = real(2*localPet + i, ESMF_KIND_R8)
+    f4array2(i) = real(farray2(i), ESMF_KIND_R4)
   enddo
   
   ! recvCounts and recvOffsets

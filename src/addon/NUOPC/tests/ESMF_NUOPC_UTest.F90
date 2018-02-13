@@ -846,17 +846,6 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_CompSetServices() for GridComp Test"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  ! Not specifying the sharedObj argument results in look-up in the executable
-  ! itself.... and there is a SetServices() routine outside the program below.
-  call NUOPC_CompSetServices(gridComp, rc=rc)
-  rc=ESMF_SUCCESS  ! for now do not really check because some systems have issues.
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
   write(name, *) "NUOPC_Advertise() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_Advertise(stateA, "sea_surface_temperature", rc=rc)
@@ -977,6 +966,7 @@ program ESMF_NUOPC_UTest
     factorIndexList=factorIndexList, fileName="test_scrip.nc", &
     relaxedflag=.true., rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(factorIndexList, factorList)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -1107,6 +1097,24 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_CompSearchPhaseMap(cplComp, ESMF_METHOD_INITIALIZE, &
     phaseIndex=valueInt, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  ! -> Wrapping up the Generic Driver
+  !------------------------------------------------------------------------
+  call ESMF_GridCompFinalize(gridComp, userRc=urc, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  if (urc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_CompSetServices() for GridComp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  ! Not specifying the sharedObj argument results in look-up in the executable
+  ! itself.... and there is a SetServices() routine outside the program below.
+  call NUOPC_CompSetServices(gridComp, rc=rc)
+  rc=ESMF_SUCCESS  ! for now do not really check because some systems have issues.
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

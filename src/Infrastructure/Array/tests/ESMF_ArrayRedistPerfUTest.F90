@@ -218,7 +218,7 @@ program ESMF_ArrayRedistPerfUTest
   mismatch=.false.
   do j=lbound(dstPtr,2), ubound(dstPtr,2)
   do i=lbound(dstPtr,1), ubound(dstPtr,1)
-    if (abs(dstPtr(i,j)-tstPtr(i,j)) > 1.d-15) then
+    if (abs(dstPtr(i,j)-tstPtr(i,j)) > 1.d-13) then
       print *, "mismatch detected: ", dstPtr(i,j), " vs. ", &
         tstPtr(i,j), " diff=", dstPtr(i,j)-tstPtr(i,j)
       mismatch=.true. ! indicate mismatch

@@ -18,7 +18,8 @@
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_VMSendRecvNbUTest - Unit test for non-blocking VM SendRecv Function
+! !PROGRAM: ESMF_VMSendRecvNbUTest - Unit test for non-blocking VM SendRecv
+!  Function
 !
 ! !DESCRIPTION:
 !

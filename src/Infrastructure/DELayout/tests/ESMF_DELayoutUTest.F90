@@ -398,7 +398,7 @@ program ESMF_DELayoutUTest
   write(name, *) "DELayout with deCount and deGrouping Create Test"
   allocate(deGrouping(2*petCount))
   do i=1, 2*petCount
-    deGrouping(i) = real(petCount) * sin(3.1416*real(i)/real(2*petCount))
+    deGrouping(i) = int(petCount * sin(3.1416*real(i)/real(2*petCount)))
   enddo
   print *, "deGrouping: ", deGrouping
   delayout = ESMF_DELayoutCreate(deCount=2*petCount, deGrouping=deGrouping,&

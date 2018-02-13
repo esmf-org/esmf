@@ -119,13 +119,9 @@ if num_nodes is not 0:
 
 # handle the parallel case
 if ESMF.pet_count() > 1:
-    try:
-        from mpi4py import MPI
-    except:
-        raise ImportError
-    comm = MPI.COMM_WORLD
-    relerr = comm.reduce(relerr, op=MPI.SUM)
-    num_nodes = comm.reduce(num_nodes, op=MPI.SUM)
+    from ESMF.util.helpers import reduce_val
+    relerr = reduce_val(relerr, op=MPI.SUM)
+    num_nodes = reduce_val(num_nodes, op=MPI.SUM)
 
 # output the results from one processor only
 if ESMF.local_pet() is 0:

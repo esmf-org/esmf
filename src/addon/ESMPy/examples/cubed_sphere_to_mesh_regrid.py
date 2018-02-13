@@ -12,6 +12,9 @@
 import ESMF
 import numpy
 
+import ESMF.util.helpers as helpers
+import ESMF.api.constants as constants
+
 # This call enables debug logging
 # esmpy = ESMF.Manager(debug=True)
 
@@ -82,14 +85,9 @@ if num_nodes is not 0:
 
 # handle the parallel case
 if ESMF.pet_count() > 1:
-    try:
-        from mpi4py import MPI
-    except:
-        raise ImportError
-    comm = MPI.COMM_WORLD
-    relerr = comm.reduce(relerr, op=MPI.SUM)
-    maxrelerr = comm.reduce(maxrelerr, op=MPI.MAX)
-    num_nodes = comm.reduce(num_nodes, op=MPI.SUM)
+    relerr = helpers.reduce_val(relerr, op=constants.Reduce.SUM)
+    maxrelerr = helpers.reduce_val(maxrelerr, op=constants.Reduce.MAX)
+    num_nodes = helpers.reduce_val(num_nodes, op=constants.Reduce.SUM)
 
 # output the results from one processor only
 if ESMF.local_pet() is 0:
