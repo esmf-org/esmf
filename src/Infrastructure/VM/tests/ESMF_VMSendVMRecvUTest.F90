@@ -18,7 +18,7 @@
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_VMSendVMRecvUTest - Unit test for VM Send Receive Functions
+! !PROGRAM: ESMF_VMSendVMRecvUTest - Unit test for VM Send and Receive Functions
 !
 ! !DESCRIPTION:
 !
@@ -40,7 +40,6 @@
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
-
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
@@ -126,8 +125,8 @@
       !The solution to test against is..
       do  i=1,count
         soln(i)    = src*100+i
-        r8_soln(i) = real( soln(i) , ESMF_KIND_R8 )
-        r4_soln(i) = r8_soln(i)
+        r8_soln(i) = real(soln(i), ESMF_KIND_R8)
+        r4_soln(i) = real(r8_soln(i), ESMF_KIND_R4)
         if ( mod(soln(i)+src,2) .eq. 0 ) then
           logical_soln(i)= ESMF_TRUE
         else

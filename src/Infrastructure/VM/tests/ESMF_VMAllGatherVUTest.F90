@@ -41,7 +41,6 @@
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
-
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
@@ -114,8 +113,8 @@
       do i=1, (localPet + 1)
         array2(i) = i
         i4array2(i) = i
-        farray2(i) = real( 2*localPet + i)
-        f4array2(i) = farray2(i)
+        farray2(i) = real(2*localPet + i, ESMF_KIND_R8)
+        f4array2(i) = real(farray2(i), ESMF_KIND_R4)
       enddo
 
       ! prepare data array3

@@ -349,7 +349,7 @@ program ESMF_ArrayArbHaloEx
 !EOE
 !BOC
   do i=1, 5
-    farrayPtr1d(i) = seqIndexList(i) / 10.
+    farrayPtr1d(i) = real(seqIndexList(i),ESMF_KIND_R8) / 10.d0
   enddo
 !EOC
 !call ESMF_ArrayPrint(array)
@@ -430,7 +430,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   do j=1, 3
     do i=1, 5
-      farrayPtr2d(i,j) = seqIndexList(i) / 10. + 100.*j
+      farrayPtr2d(i,j) = real(seqIndexList(i),ESMF_KIND_R8) / 10.d0 + 100.d0*j
     enddo
   enddo
 !EOC
@@ -531,7 +531,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   do j=1, 3
     do i=1, 5
-      farrayPtr2d(j,i) = seqIndexList(i) / 10. + 100.*j
+      farrayPtr2d(j,i) = real(seqIndexList(i),ESMF_KIND_R8) / 10.d0 + 100.d0*j
     enddo
   enddo
 !EOC
@@ -609,7 +609,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   do j=1, 6
     do i=1, 5
-      farrayPtr2d(j,i) = seqIndexList(i) / 10. + 100.*j
+      farrayPtr2d(j,i) = real(seqIndexList(i),ESMF_KIND_R8) / 10.d0 + 100.d0*j
     enddo
   enddo
 !EOC
