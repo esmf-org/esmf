@@ -437,6 +437,40 @@ subroutine ESMF_GetRunSeqInfo(runSeqCode, tokRunSeq, nTimeLoops, nExecLines, rc)
 
 end subroutine
 
+! Print the run sequence dependency graph node
+subroutine ESMF_MapperPrintDepGraphNode(node, rc)
+  type(ESMF_MapperRunSeqDepGraphNode), intent(inout) :: node
+  integer, optional, intent(out) :: rc
+
+  integer :: j
+
+  if(node%line%tok_type == ESMF_COMP_PHASE_TOKEN) then
+    print *, "Node :",&
+      trim(node%line%tok(ESMF_RUNSEQ_TOK1)),&
+      "(", node%line%lnum, ")",&
+      " : ",&
+      trim(node%line%tok(ESMF_RUNSEQ_TOK2)),&
+      " : Has :", node%nchildren,&
+      " children "
+    do j=1,node%nchildren
+      print *, "          : ",&
+        trim(node%children(j)%ptr%line%tok(ESMF_RUNSEQ_TOK1)),& 
+        " : ",&
+        trim(node%children(j)%ptr%line%tok(ESMF_RUNSEQ_TOK2)), &
+        node%children(j)%ptr%line%lnum
+    end do
+  else if(node%line%tok_type == ESMF_CONN_TOKEN) then
+    print *, "Node :",&
+      trim(node%line%tok(ESMF_RUNSEQ_TOK1)),&
+      " --> ",&
+      trim(node%line%tok(ESMF_RUNSEQ_TOK2))
+  end if
+
+  if(present(rc)) then
+    rc = ESMF_SUCCESS
+  end if
+end subroutine
+
 ! Print the run sequence dependency graph
 subroutine ESMF_MapperPrintDepGraph(runSeqDepGraph, rc)
   type(ESMF_MapperRunSeqDepGraph), intent(inout) :: runSeqDepGraph
@@ -447,27 +481,7 @@ subroutine ESMF_MapperPrintDepGraph(runSeqDepGraph, rc)
 
   nnodes = size(runSeqDepGraph%nodes)
   do i=1,nnodes
-    if(runSeqDepGraph%nodes(i)%line%tok_type == ESMF_COMP_PHASE_TOKEN) then
-      print *, "Node :",&
-        trim(runSeqDepGraph%nodes(i)%line%tok(ESMF_RUNSEQ_TOK1)),&
-        "(", runSeqDepGraph%nodes(i)%line%lnum, ")",&
-        " : ",&
-        trim(runSeqDepGraph%nodes(i)%line%tok(ESMF_RUNSEQ_TOK2)),&
-        " : Has :", runSeqDepGraph%nodes(i)%nchildren,&
-        " children "
-      do j=1,runSeqDepGraph%nodes(i)%nchildren
-        print *, "          : ",&
-          trim(runSeqDepGraph%nodes(i)%children(j)%ptr%line%tok(ESMF_RUNSEQ_TOK1)),& 
-          " : ",&
-          trim(runSeqDepGraph%nodes(i)%children(j)%ptr%line%tok(ESMF_RUNSEQ_TOK2)), &
-          runSeqDepGraph%nodes(i)%children(j)%ptr%line%lnum
-      end do
-    else if(runSeqDepGraph%nodes(i)%line%tok_type == ESMF_CONN_TOKEN) then
-      print *, "Node :",&
-        trim(runSeqDepGraph%nodes(i)%line%tok(ESMF_RUNSEQ_TOK1)),&
-        " --> ",&
-        trim(runSeqDepGraph%nodes(i)%line%tok(ESMF_RUNSEQ_TOK2))
-    end if
+    call ESMF_MapperPrintDepGraphNode(runSeqDepGraph%nodes(i), rc=localrc)
   end do
 
 end subroutine
