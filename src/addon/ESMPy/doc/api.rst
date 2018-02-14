@@ -807,6 +807,37 @@ StaggerLoc.CENTER_VCENTER in 3D) for Grids or the element location
 (StaggerLoc.CORNER in 2D or StaggerLoc.CORNER_VFACE in 3D) must
 contain coordinates describing the outer perimeter of the Grid cells.
 
+~~~~~~~~~~~~~~~~~~~~~~~~~
+Second-order conservative
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Like the first-order conservative method, this method's main purpose is to 
+preserve the integral of the field across the interpolation from source to 
+destination.  
+
+(For a more in-depth description of what this preservation of the integral 
+(i.e. conservation) means please see section~\ref{sec:rwg:conservation}.)  
+
+The 
+difference between the first and second-order conservative methods is that the 
+second-order takes the source gradient into account, so it yields a smoother 
+destination field that typically better matches the source field. This 
+difference between the first and second-order methods is particularly apparent 
+when going from a coarse source grid to a finer destination grid. The 
+implementation of this method is based on the one described in this 
+paper~\cite{ConservativeOrder2}.
+
+The weights for second-order are calculated in a similar manner to 
+first-order with additional weights that take into 
+account the gradient across the source cell. 
+
+To see a description of how the different normalization options affect the 
+values and integrals produced by the conservative methods see 
+section~\ref{sec:rwg:conservative_norm_opts}. For a grid on a sphere this 
+method uses great circle cells, for a description of potential problems with 
+these see~\ref{sec:interpolation:great_circle_cells}.
+
+
 ++++++++++++++++++
 Great Circle Edges
 ++++++++++++++++++

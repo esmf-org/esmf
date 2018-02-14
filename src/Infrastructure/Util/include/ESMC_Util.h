@@ -134,10 +134,11 @@ enum ESMC_Region_Flag { ESMC_REGION_TOTAL=0,
                         ESMC_REGION_EMPTY};
 
 enum ESMC_RegridMethod_Flag {ESMC_REGRIDMETHOD_BILINEAR=0,
-			                 ESMC_REGRIDMETHOD_PATCH,
-			                 ESMC_REGRIDMETHOD_CONSERVE,
+                             ESMC_REGRIDMETHOD_PATCH,
+                             ESMC_REGRIDMETHOD_CONSERVE,
                              ESMC_REGRIDMETHOD_NEAREST_STOD,
-                             ESMC_REGRIDMETHOD_NEAREST_DTOS};
+                             ESMC_REGRIDMETHOD_NEAREST_DTOS,
+                             ESMC_REGRIDMETHOD_CONSERVE_2ND};
 
 enum ESMC_StaggerLoc {ESMC_STAGGERLOC_INVALID=-2,
                       ESMC_STAGGERLOC_UNINIT,
