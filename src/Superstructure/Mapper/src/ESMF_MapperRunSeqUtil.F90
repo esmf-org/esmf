@@ -67,6 +67,7 @@ module ESMF_MapperRunSeqUtilMod
   type ESMF_RunSeqTokenizedLine
     character(len=ESMF_RUNSEQ_MAXTOKENSTR) :: tok(ESMF_RUNSEQ_MAXTOKENS)
     integer :: tok_type
+    integer :: lnum
   end type
   type ESMF_RunSeqTokenizedCode
     type(ESMF_RunSeqTokenizedLine), dimension(:), allocatable :: line
@@ -196,6 +197,7 @@ end function
     do i=1,nlines
       tokRunSeq%line(i)%tok(ESMF_RUNSEQ_TOK1) = ""
       tokRunSeq%line(i)%tok(ESMF_RUNSEQ_TOK2) = ""
+      tokRunSeq%line(i)%lnum = i
       ! A blank line
       if(len(trim(runSeqCode(i))) == 0) then
         tokRunSeq%line(i)%tok_type = ESMF_OTHER_TOKEN
@@ -448,6 +450,7 @@ subroutine ESMF_MapperPrintDepGraph(runSeqDepGraph, rc)
     if(runSeqDepGraph%nodes(i)%line%tok_type == ESMF_COMP_PHASE_TOKEN) then
       print *, "Node :",&
         trim(runSeqDepGraph%nodes(i)%line%tok(ESMF_RUNSEQ_TOK1)),&
+        "(", runSeqDepGraph%nodes(i)%line%lnum, ")",&
         " : ",&
         trim(runSeqDepGraph%nodes(i)%line%tok(ESMF_RUNSEQ_TOK2)),&
         " : Has :", runSeqDepGraph%nodes(i)%nchildren,&
@@ -456,7 +459,8 @@ subroutine ESMF_MapperPrintDepGraph(runSeqDepGraph, rc)
         print *, "          : ",&
           trim(runSeqDepGraph%nodes(i)%children(j)%ptr%line%tok(ESMF_RUNSEQ_TOK1)),& 
           " : ",&
-          trim(runSeqDepGraph%nodes(i)%children(j)%ptr%line%tok(ESMF_RUNSEQ_TOK2))
+          trim(runSeqDepGraph%nodes(i)%children(j)%ptr%line%tok(ESMF_RUNSEQ_TOK2)), &
+          runSeqDepGraph%nodes(i)%children(j)%ptr%line%lnum
       end do
     else if(runSeqDepGraph%nodes(i)%line%tok_type == ESMF_CONN_TOKEN) then
       print *, "Node :",&
@@ -476,9 +480,12 @@ subroutine ESMF_MapperCreateDepGraph(runSeqDepGraph, rc)
   integer, optional, intent(out) :: rc
 
   integer :: localrc
-  integer :: nnodes, i, j, k
+  integer :: nnodes, i, j, k, ichild
+  logical :: ischild
   integer, dimension(:), allocatable :: distGraphNodeChildrenTop
 
+
+  ! FIXME : Add comparison op for graph nodes
   nnodes = size(runSeqDepGraph%nodes)
   do i=1,nnodes
     if(runSeqDepGraph%nodes(i)%line%tok_type == ESMF_COMP_PHASE_TOKEN) then
@@ -538,8 +545,21 @@ subroutine ESMF_MapperCreateDepGraph(runSeqDepGraph, rc)
         if(runSeqDepGraph%nodes(j)%line%tok_type == ESMF_COMP_PHASE_TOKEN) then
           if(trim(runSeqDepGraph%nodes(j)%line%tok(ESMF_RUNSEQ_TOK1)) ==&
               trim(runSeqDepGraph%nodes(i)%line%tok(ESMF_RUNSEQ_TOK1))) then
-            runSeqDepGraph%nodes(j)%children(distGraphNodeChildrenTop(j))%ptr =>&
-              runSeqDepGraph%nodes(i)
+            ischild = .false.
+            do ichild=1,distGraphNodeChildrenTop(j)-1
+              if(runSeqDepGraph%nodes(j)%children(ichild)%ptr%line%tok(ESMF_RUNSEQ_TOK1) ==&
+                  runSeqDepGraph%nodes(i)%line%tok(ESMF_RUNSEQ_TOK1)) then
+                ischild = .true.
+                exit
+              end if
+            end do
+            if(.not. ischild) then
+              runSeqDepGraph%nodes(j)%children(distGraphNodeChildrenTop(j))%ptr =>&
+                runSeqDepGraph%nodes(i)
+              distGraphNodeChildrenTop(j) = distGraphNodeChildrenTop(j) + 1
+            else
+              runSeqDepGraph%nodes(j)%nchildren = runSeqDepGraph%nodes(j)%nchildren - 1
+            end if
             exit
           end if
         else if(runSeqDepGraph%nodes(j)%line%tok_type == ESMF_CONN_TOKEN) then
@@ -567,18 +587,42 @@ subroutine ESMF_MapperCreateDepGraph(runSeqDepGraph, rc)
             do k=j-1,1,-1
               if( trim(runSeqDepGraph%nodes(j)%line%tok(ESMF_RUNSEQ_TOK1)) ==&
                   trim(runSeqDepGraph%nodes(k)%line%tok(ESMF_RUNSEQ_TOK1)) ) then
-                runSeqDepGraph%nodes(k)%children(distGraphNodeChildrenTop(k))%ptr =>&
-                  runSeqDepGraph%nodes(i)
-                distGraphNodeChildrenTop(k) = distGraphNodeChildrenTop(k) + 1
+                ischild = .false.
+                do ichild=1,distGraphNodeChildrenTop(k) - 1
+                  if(runSeqDepGraph%nodes(k)%children(ichild)%ptr%line%tok(ESMF_RUNSEQ_TOK1)&
+                      == runSeqDepGraph%nodes(i)%line%tok(ESMF_RUNSEQ_TOK1)) then
+                    ischild = .true.
+                    exit
+                  end if
+                end do
+                if(.not. ischild) then
+                  runSeqDepGraph%nodes(k)%children(distGraphNodeChildrenTop(k))%ptr =>&
+                    runSeqDepGraph%nodes(i)
+                  distGraphNodeChildrenTop(k) = distGraphNodeChildrenTop(k) + 1
+                else
+                  runSeqDepGraph%nodes(k)%nchildren = runSeqDepGraph%nodes(k)%nchildren-1
+                end if
                 exit
               end if
             end do
             do k=j-1,1,-1
               if( trim(runSeqDepGraph%nodes(j)%line%tok(ESMF_RUNSEQ_TOK2)) ==&
                   trim(runSeqDepGraph%nodes(k)%line%tok(ESMF_RUNSEQ_TOK1)) ) then
-                runSeqDepGraph%nodes(k)%children(distGraphNodeChildrenTop(k))%ptr =>&
-                  runSeqDepGraph%nodes(i)
-                distGraphNodeChildrenTop(k) = distGraphNodeChildrenTop(k) + 1
+                ischild = .false.
+                do ichild=1,distGraphNodeChildrenTop(k) -1
+                  if(runSeqDepGraph%nodes(k)%children(ichild)%ptr%line%tok(ESMF_RUNSEQ_TOK1)&
+                      == runSeqDepGraph%nodes(i)%line%tok(ESMF_RUNSEQ_TOK1)) then
+                    ischild = .true.
+                    exit
+                  end if
+                end do
+                if(.not. ischild) then
+                  runSeqDepGraph%nodes(k)%children(distGraphNodeChildrenTop(k))%ptr =>&
+                    runSeqDepGraph%nodes(i)
+                  distGraphNodeChildrenTop(k) = distGraphNodeChildrenTop(k) + 1
+                else
+                  runSeqDepGraph%nodes(k)%nchildren = runSeqDepGraph%nodes(k)%nchildren-1
+                end if
                 exit
               end if
             end do
