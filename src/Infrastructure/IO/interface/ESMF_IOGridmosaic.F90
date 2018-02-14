@@ -77,6 +77,7 @@
   public ESMF_GridspecReadMosaic
   public ESMF_GridspecQueryTileSize
   public ESMF_GridspecQueryTileGlobal
+  public ESMF_MosaicDestroy
 
 !==============================================================================
 
@@ -1235,6 +1236,33 @@ subroutine parse_contactindex(string, tiletuple)
   enddo
   return
 end subroutine parse_contactindex
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MosaicDestroy"
+
+!BOPI
+! !INTERFACE:
+subroutine ESMF_MosaicDestroy(mosaic, rc)
+
+! !ARGUMENTS:
+ 
+    type(ESMF_Mosaic), intent(inout)       :: mosaic
+    integer, optional, intent(out)         :: rc
+
+   ! Only allocated when there is netcdf
+#ifdef ESMF_NETCDF
+
+    ! Get rid of allocated members
+    deallocate(mosaic%filenames)
+    deallocate(mosaic%contact)
+    deallocate(mosaic%connindex)
+#endif
+
+    ! return success
+    if (present(rc)) rc=ESMF_SUCCESS   
+
+end subroutine ESMF_MosaicDestroy
+
 
 
 !------------------------------------------------------------------------------
