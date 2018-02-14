@@ -125,6 +125,8 @@ script_info:
 	  echo "ESMF_MPIBATCHOPTIONS:   $(ESMF_MPIBATCHOPTIONS)" ; fi
 	-@if [ -n "$(ESMF_MPILAUNCHOPTIONS)" ] ; then \
 	  echo "ESMF_MPILAUNCHOPTIONS:  $(ESMF_MPILAUNCHOPTIONS)" ; fi
+	-@if [ -n "$(ESMF_TOOLRUN)" ] ; then \
+	  echo "ESMF_TOOLRUN:           $(ESMF_TOOLRUN)" ; fi
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF environment variables pointing to 3rd party software *"
