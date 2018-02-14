@@ -2594,8 +2594,13 @@ endif
 !!!!!!!!!!!!!!!!!!!!!!!
 ! Cleanup after Example
 !!!!!!!!!!!!!!!!!!!!!!
-   call ESMF_GridDestroy(grid3D, rc=rc)
+  call ESMF_GridDestroy(grid3D, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+   ! We're done with this array, so get rid of it. 
+   ! (It's allocated way above)
+   deallocate(localArbIndex)
+
 
 
 #ifdef LOCAL_NOT_IMPL
