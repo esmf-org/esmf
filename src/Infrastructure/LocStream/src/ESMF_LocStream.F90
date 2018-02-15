@@ -1157,11 +1157,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-      
 
-      if (present(rc)) rc = ESMF_SUCCESS
+     ! Get rid of mesh created above
+     call ESMF_MeshDestroy(mesh, rc=localrc)
+     if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return      
 
-       end function ESMF_LocStreamCreateByBkgGrid
+     ! return success
+     if (present(rc)) rc = ESMF_SUCCESS
+
+   end function ESMF_LocStreamCreateByBkgGrid
 
 
 !------------------------------------------------------------------------------
