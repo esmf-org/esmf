@@ -112,6 +112,34 @@ class DecompFlag(IntEnum):
     Decompose elements cyclically across DEs.
     """
 
+# ExtrapMethod
+class ExtrapMethod(IntEnum):
+    """
+    Specify which extrapolation method to use on unmapped destination points after 
+    regridding.
+    """
+    NONE = 0
+    """
+    Indicates that no extrapolation should be done.
+    """
+    NEAREST_STOD = 1
+    """
+    Inverse distance weighted average. 
+    Here the value of a destination point is the weighted average of the 
+    closest N source points. The weight is the reciprocal of the distance of 
+    the source point from the destination point raised to a power P. All the
+    weights contributing to one destination point are normalized so that they 
+    sum to 1.0. The user can choose N and P when using this method, but 
+    defaults are also provided.
+    """
+    NEAREST_IDAVG = 2
+    """
+    Nearest source to destination. 
+    Here each destination point is mapped to the closest source point. A given 
+    source point may go to multiple destination points, but no destination 
+    point will receive input from more than one source point.
+    """
+
 # FileFormat
 class FileFormat(IntEnum):
     """

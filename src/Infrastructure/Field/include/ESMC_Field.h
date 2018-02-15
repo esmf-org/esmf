@@ -750,6 +750,9 @@ int ESMC_FieldRegridStore(
     int *regridPoleNPnts,                          // in
     enum ESMC_LineType_Flag *lineType,             // in
     enum ESMC_NormType_Flag *normType,             // in
+    enum ESMC_ExtrapMethod_Flag *extrapMethod,     // in
+    int *extrapNumSrcPnts,                         // in
+    double *extrapDistExponent,                       // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
     ESMC_Field *srcFracField,                      // out
@@ -804,6 +807,17 @@ int ESMC_FieldRegridStore(
 //    This argument controls the type of normalization used when generating conservative weights.
 //    This option only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}.
 //    If not specified normType defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}.
+//  \item [{[extrapMethod]}]
+//    The type of extrapolation. Please see Section~\ref{opt:cextrapmethod} 
+//    for a list of valid options. If not specified, defaults to 
+//    {\tt ESMC\_EXTRAPMETHOD\_NONE}.
+//  \item [{[extrapNumSrcPnts]}] 
+//    The number of source points to use for the extrapolation methods that use more than one source point 
+//    (e.g. {\tt ESMC\_EXTRAPMETHOD\_NEAREST\_IDAVG}). If not specified, defaults to 8.
+//  \item [{[extrapDistExponent]}] 
+//    The exponent to raise the distance to when calculating weights for 
+//    the {\tt ESMC\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
+//    of more distant points. If not specified, defaults to 2.0.
 //  \item[unmappedaction]
 //    Specifies what should happen if there are destination points that can't 
 //    be mapped to a source cell. Options are {\tt ESMF\_UNMAPPEDACTION\_ERROR} or

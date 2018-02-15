@@ -123,6 +123,28 @@ class OptionalBool(object):
                     paramptr = ptr(ct.c_int(2))
                 return paramptr
 
+# this class allows optional arguments to be passed in place of ints
+class OptionalInt(object):
+        @classmethod
+        def from_param(cls, param):
+            if param is None:
+                return None
+            else:
+                ptr = ct.POINTER(ct.c_int)
+                paramptr = ptr(ct.c_int(param))
+                return paramptr
+
+# this class allows optional arguments to be passed in place of float
+class OptionalDouble(object):
+        @classmethod
+        def from_param(cls, param):
+            if param is None:
+                return None
+            else:
+                ptr = ct.POINTER(ct.c_double)
+                paramptr = ptr(ct.c_double(param))
+                return paramptr
+
 class Py3Char(object):
     @classmethod
     def from_param(cls, param):
@@ -1882,6 +1904,9 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
                                         OptionalNamedConstant,
                                         OptionalNamedConstant,
                                         OptionalNamedConstant,
+                                        OptionalInt,
+                                        OptionalDouble,
+                                        OptionalNamedConstant,
                                         OptionalBool,
                                         OptionalField,
                                         OptionalField]
@@ -1890,7 +1915,10 @@ def ESMP_FieldRegridStore(srcField, dstField,
                           srcMaskValues=None, dstMaskValues=None,
                           regridmethod=None,
                           polemethod=None, regridPoleNPnts=None,
-                          lineType=None, normType=None, unmappedaction=None,
+                          lineType=None, normType=None,
+                          extrapMethod=None, 
+                          extrapNumSrcPnts=None, extrapDistExponent=None,
+                          unmappedaction=None,
                           ignoreDegenerate=None, 
                           srcFracField=None, dstFracField=None):
     """
@@ -1932,6 +1960,13 @@ def ESMP_FieldRegridStore(srcField, dstField,
             Argument values:\n
                 (default) NormType.DSTAREA \n
                 NormType.DSTFRAC \n
+        extrapMethod (optional)             :: extrapMethod \n
+            Argument values:\n
+                (default) ExtrapMethod.NONE \n
+                ExtrapMethod.NEAREST_STOD \n
+                ExtrapMethod.NEAREST_IDAVG \n
+        integer (optional)                  :: extrapNumSrcPnts\n
+        float (optional)                    :: extrapDistExponent\n
         unmappedAction (optional)           :: unmappedaction\n
             Argument values:\n
                 (default) UnmappedAction.ERROR\n
@@ -1970,6 +2005,8 @@ def ESMP_FieldRegridStore(srcField, dstField,
                                      regridPoleNPnts_ct,
                                      lineType,
                                      normType,
+                                     extrapMethod, 
+                                     extrapNumSrcPnts, extrapDistExponent,
                                      unmappedaction,
                                      ignoreDegenerate,
                                      srcFracField,

@@ -69,6 +69,17 @@ class Regrid(object):
     :param NormType norm_type: control which type of normalization to do when
         generating conservative regridding weights. If ``None``, defaults to
         :attr:`~ESMF.api.constants.NormType.DSTAREA`.
+    :param ExtrapMethod extrap_method: Specify which extrapolation method to use on 
+        unmapped destination points after regridding.
+    :param int extrap_num_src_pnts: The number of source points to use for the 
+        extrapolation methods that use more than one source point 
+        (e.g. :attr:`~ESMF.api.constants.ExtrapMethod.NEAREST_IDAVG). If not 
+        specified, defaults to 8.
+    :param float extrap_dist_exponent: The exponent to raise the distance to when 
+        calculating weights for the 
+        :attr:`~ESMF.api.constants.ExtrapMethod.NEAREST_IDAVG extrapolation 
+        method. A higher value reduces the influence of more distant points. If 
+        not specified, defaults to 2.0.
     :param UnmappedAction unmapped_action: specifies which action to take if a
         destination point is found which does not map to any source point. If
         ``None``, defaults to :attr:`~ESMF.api.constants.UnmappedAction.ERROR`.
@@ -97,6 +108,9 @@ class Regrid(object):
                  regrid_pole_npoints=None,
                  line_type=None,
                  norm_type=None,
+                 extrap_method=None,
+                 extrap_num_src_pnts=None,
+                 extrap_dist_exponent=None,
                  unmapped_action=None,
                  ignore_degenerate=None,
                  create_rh=None,
@@ -143,6 +157,9 @@ class Regrid(object):
                                regridPoleNPnts=regrid_pole_npoints,
                                lineType=line_type,
                                normType=norm_type,
+                               extrapMethod=extrap_method,
+                               extrapNumSrcPnts=extrap_num_src_pnts,
+                               extrapDistExponent=extrap_dist_exponent,
                                unmappedaction=unmapped_action,
                                ignoreDegenerate=ignore_degenerate,
                                srcFracField=src_frac_field,
@@ -156,6 +173,9 @@ class Regrid(object):
         self._pole_method = pole_method
         self._regrid_pole_npoints = regrid_pole_npoints
         self._norm_type = norm_type
+        self._extrap_method = extrap_method
+        self._extrap_num_src_pnts = extrap_num_src_pnts
+        self._extrap_dist_exponent = extrap_dist_exponent
         self._unmapped_action = unmapped_action
         self._ignore_degenerate = ignore_degenerate
         self._src_frac_field = src_frac_field
@@ -229,6 +249,18 @@ class Regrid(object):
     @property
     def dst_mask_values(self):
         return self._dst_mask_values
+
+    @property
+    def extrap_method(self):
+        return self._extrap_method
+
+    @property
+    def extrap_num_src_pnts(self):
+        return self._extrap_num_src_pnts
+
+    @property
+    def extrap_dist_exponent(self):
+        return self._extrap_dist_exponent
 
     @property
     def finalized(self):
