@@ -321,7 +321,7 @@ int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, d
 
 
   // Create search tree and proc min/max from mesh elements
-  OTree *tree;
+  OTree *tree=NULL;
   double proc_min[3], proc_max[3];
   make_search_info_from_mesh_elems(mesh, normexp, &tree, proc_min, proc_max);
   
@@ -538,6 +538,10 @@ int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, d
     // Put temporary list into long list
     rcv_results.push_back(tmp);
   }
+
+
+  // Now that we're not using it anymore get rid of tree
+  if (tree != NULL) delete tree;
 
   // Calculate size to send back to pnt's home proc
   vector<int> rcv_sizes;       
