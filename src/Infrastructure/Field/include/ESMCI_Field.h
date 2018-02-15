@@ -107,7 +107,7 @@ namespace ESMCI{
                            ESMC_NormType_Flag *normType,
                            ESMC_ExtrapMethod_Flag *extrapMethod,
                            int *extrapNumSrcPnts,
-                           double *extrapDistExponent,
+                           float *extrapDistExponent,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
                            Field *srcFracField, Field *dstFracField);

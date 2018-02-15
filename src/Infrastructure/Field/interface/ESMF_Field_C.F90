@@ -1003,7 +1003,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
       type(ESMF_NormType_Flag),optional       :: normtype
       type(ESMF_ExtrapMethod_Flag), optional  :: extrapMethod
       integer, optional                       :: extrapNumSrcPnts
-      real, optional                          :: extrapDistExponent
+      real(ESMF_KIND_R4), optional            :: extrapDistExponent
       type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
       logical,optional                        :: ignoreDegenerate
       type(ESMF_Field),optional               :: srcFracField

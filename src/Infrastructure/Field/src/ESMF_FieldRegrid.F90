@@ -724,7 +724,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_NormType_Flag),       intent(in),    optional :: normType
       type(ESMF_ExtrapMethod_Flag),   intent(in),    optional :: extrapMethod
       integer,                        intent(in),    optional :: extrapNumSrcPnts
-      real,                           intent(in),    optional :: extrapDistExponent
+      real(ESMF_KIND_R4),             intent(in),    optional :: extrapDistExponent
       type(ESMF_UnmappedAction_Flag), intent(in),    optional :: unmappedaction
       logical,                        intent(in),    optional :: ignoreDegenerate
       integer,                        intent(inout), optional :: srcTermProcessing

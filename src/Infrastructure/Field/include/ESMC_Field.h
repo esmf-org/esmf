@@ -752,7 +752,7 @@ int ESMC_FieldRegridStore(
     enum ESMC_NormType_Flag *normType,             // in
     enum ESMC_ExtrapMethod_Flag *extrapMethod,     // in
     int *extrapNumSrcPnts,                         // in
-    double *extrapDistExponent,                       // in
+    float *extrapDistExponent,                     // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
     ESMC_Field *srcFracField,                      // out

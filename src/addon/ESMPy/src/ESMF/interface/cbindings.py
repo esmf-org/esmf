@@ -135,14 +135,14 @@ class OptionalInt(object):
                 return paramptr
 
 # this class allows optional arguments to be passed in place of float
-class OptionalDouble(object):
+class OptionalFloat(object):
         @classmethod
         def from_param(cls, param):
             if param is None:
                 return None
             else:
-                ptr = ct.POINTER(ct.c_double)
-                paramptr = ptr(ct.c_double(param))
+                ptr = ct.POINTER(ct.c_float)
+                paramptr = ptr(ct.c_float(param))
                 return paramptr
 
 class Py3Char(object):
@@ -1905,7 +1905,7 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
                                         OptionalNamedConstant,
                                         OptionalNamedConstant,
                                         OptionalInt,
-                                        OptionalDouble,
+                                        OptionalFloat,
                                         OptionalNamedConstant,
                                         OptionalBool,
                                         OptionalField,
