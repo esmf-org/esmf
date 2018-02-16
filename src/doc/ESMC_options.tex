@@ -48,7 +48,7 @@ The valid values are:
 \begin{description}
 \item [ESMC\_EXTRAPMETHOD\_NONE]
       Indicates that no extrapolation should be done. 
-\item [ESMC\_EXTRAPMETHOD\_NEAREST_STOD]
+\item [ESMC\_EXTRAPMETHOD\_NEAREST\_STOD]
       Inverse distance weighted average. 
       Here the value of a destination point is the weighted average of the 
       closest N source points. The weight is the reciprocal of the distance of 
@@ -56,7 +56,7 @@ The valid values are:
       weights contributing to one destination point are normalized so that they 
       sum to 1.0. The user can choose N and P when using this method, but 
       defaults are also provided.  
-\item [ESMC\_EXTRAPMETHOD\_NEAREST_IDAVG]
+\item [ESMC\_EXTRAPMETHOD\_NEAREST\_IDAVG]
       Nearest source to destination. 
       Here each destination point is mapped to the closest source point. A given 
       source point may go to multiple destination points, but no destination 
