@@ -971,6 +971,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 regridPoleNPnts, &
                                 linetype, &
                                 normtype, &
+                                extrapMethod, &
+                                extrapNumSrcPnts, &
+                                extrapDistExponent, &
                                 unmappedaction, &
                                 ignoreDegenerate, &
                                 srcFracField, &
@@ -998,6 +1001,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
 
       type(ESMF_LineType_Flag),optional       :: linetype
       type(ESMF_NormType_Flag),optional       :: normtype
+      type(ESMF_ExtrapMethod_Flag), optional  :: extrapMethod
+      integer, optional                       :: extrapNumSrcPnts
+      real(ESMF_KIND_R4), optional            :: extrapDistExponent
       type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
       logical,optional                        :: ignoreDegenerate
       type(ESMF_Field),optional               :: srcFracField
@@ -1020,6 +1026,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                               regridPoleNPnts=regridPoleNPnts, &
                               lineType=linetype, &
                               normType=normtype, &
+                              extrapMethod=extrapMethod, &
+                              extrapNumSrcPnts=extrapNumSrcPnts, &
+                              extrapDistExponent=extrapDistExponent, &
                               unmappedaction=unmappedaction, &
                               ignoreDegenerate=ignoreDegenerate, &
                               srcFracField=srcFracField, &

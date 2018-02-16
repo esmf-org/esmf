@@ -58,6 +58,15 @@ script_info:
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo "ESMF_VERSION_STRING:    $(ESMF_VERSION_STRING)"
+ifeq ($(shell $(ESMF_DIR)/scripts/available git),git)
+	@if [ -d $(ESMF_DIR)/.git ] ; then \
+	git describe --tags ;\
+	echo "--------------------------------------------------------------" ;\
+	git status ;\
+	else \
+	echo "Not a Git repository" ;\
+	fi
+endif
 	-@echo "--------------------------------------------------------------"
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
@@ -125,112 +134,114 @@ script_info:
 	  echo "ESMF_MPIBATCHOPTIONS:   $(ESMF_MPIBATCHOPTIONS)" ; fi
 	-@if [ -n "$(ESMF_MPILAUNCHOPTIONS)" ] ; then \
 	  echo "ESMF_MPILAUNCHOPTIONS:  $(ESMF_MPILAUNCHOPTIONS)" ; fi
+	-@if [ -n "$(ESMF_TOOLRUN)" ] ; then \
+	  echo "ESMF_TOOLRUN:           $(ESMF_TOOLRUN)" ; fi
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF environment variables pointing to 3rd party software *"
 	-@if [ -n "$(ESMF_MOAB)" ] ; then \
-	  echo "ESMF_MOAB:              $(ESMF_MOAB)" ; \
+	  echo "ESMF_MOAB:               $(ESMF_MOAB)" ; \
 	  if [ -n "$(ESMF_MOAB_INCLUDE)" ] ; then \
-	    echo "ESMF_MOAB_INCLUDE:      $(ESMF_MOAB_INCLUDE)" ; \
+	    echo "ESMF_MOAB_INCLUDE:       $(ESMF_MOAB_INCLUDE)" ; \
           fi; \
 	  if [ -n "$(ESMF_MOAB_LIBS)" ] ; then \
-	    echo "ESMF_MOAB_LIBS:         $(ESMF_MOAB_LIBS)" ; \
+	    echo "ESMF_MOAB_LIBS:          $(ESMF_MOAB_LIBS)" ; \
           fi; \
 	  if [ -n "$(ESMF_MOAB_LIBPATH)" ] ; then \
-	    echo "ESMF_MOAB_LIBPATH:      $(ESMF_MOAB_LIBPATH)" ; \
+	    echo "ESMF_MOAB_LIBPATH:       $(ESMF_MOAB_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_LAPACK)" ] ; then \
-	  echo "ESMF_LAPACK:            $(ESMF_LAPACK)" ; \
+	  echo "ESMF_LAPACK:             $(ESMF_LAPACK)" ; \
 	  if [ -n "$(ESMF_LAPACK_LIBS)" ] ; then \
-	    echo "ESMF_LAPACK_LIBS:       $(ESMF_LAPACK_LIBS)" ; \
+	    echo "ESMF_LAPACK_LIBS:        $(ESMF_LAPACK_LIBS)" ; \
           fi; \
 	  if [ -n "$(ESMF_LAPACK_LIBPATH)" ] ; then \
-	    echo "ESMF_LAPACK_LIBPATH:    $(ESMF_LAPACK_LIBPATH)" ; \
+	    echo "ESMF_LAPACK_LIBPATH:     $(ESMF_LAPACK_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_ACC_SOFTWARE_STACK)" ] ; then \
-	  echo "ESMF_ACC_SOFTWARE_STACK:            $(ESMF_ACC_SOFTWARE_STACK)" ; \
+	  echo "ESMF_ACC_SOFTWARE_STACK: $(ESMF_ACC_SOFTWARE_STACK)" ; \
 	  if [ -n "$(ESMF_ACC_SOFTWARE_STACK_INCLUDE)" ] ; then \
-	    echo "ESMF_ACC_SOFTWARE_STACK_INCLUDE:    $(ESMF_ACC_SOFTWARE_STACK_INCLUDE)" ; \
+	    echo "ESMF_ACC_SOFTWARE_STACK_INCLUDE: $(ESMF_ACC_SOFTWARE_STACK_INCLUDE)" ; \
           fi; \
 	  if [ -n "$(ESMF_ACC_SOFTWARE_STACK_LIBS)" ] ; then \
-	    echo "ESMF_ACC_SOFTWARE_STACK_LIBS:       $(ESMF_ACC_SOFTWARE_STACK_LIBS)" ; \
+	    echo "ESMF_ACC_SOFTWARE_STACK_LIBS:    $(ESMF_ACC_SOFTWARE_STACK_LIBS)" ; \
           fi; \
 	  if [ -n "$(ESMF_ACC_SOFTWARE_STACK_LIBPATH)" ] ; then \
-	    echo "ESMF_ACC_SOFTWARE_STACK_LIBPATH:    $(ESMF_ACC_SOFTWARE_STACK_LIBPATH)" ; \
+	    echo "ESMF_ACC_SOFTWARE_STACK_LIBPATH: $(ESMF_ACC_SOFTWARE_STACK_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_NETCDF)" ] ; then \
-	  echo "ESMF_NETCDF:            $(ESMF_NETCDF)" ; \
+	  echo "ESMF_NETCDF:             $(ESMF_NETCDF)" ; \
 	  if [ -n "$(ESMF_NETCDF_INCLUDE)" ] ; then \
-	    echo "ESMF_NETCDF_INCLUDE:    $(ESMF_NETCDF_INCLUDE)" ; \
+	    echo "ESMF_NETCDF_INCLUDE:     $(ESMF_NETCDF_INCLUDE)" ; \
           fi; \
 	  if [ -n "$(ESMF_NETCDF_LIBS)" ] ; then \
-	    echo "ESMF_NETCDF_LIBS:       $(ESMF_NETCDF_LIBS)" ; \
+	    echo "ESMF_NETCDF_LIBS:        $(ESMF_NETCDF_LIBS)" ; \
           fi; \
 	  if [ -n "$(ESMF_NETCDF_LIBPATH)" ] ; then \
-	    echo "ESMF_NETCDF_LIBPATH:    $(ESMF_NETCDF_LIBPATH)" ; \
+	    echo "ESMF_NETCDF_LIBPATH:     $(ESMF_NETCDF_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_PNETCDF)" ] ; then \
-	  echo "ESMF_PNETCDF:           $(ESMF_PNETCDF)" ; \
+	  echo "ESMF_PNETCDF:            $(ESMF_PNETCDF)" ; \
 	  if [ -n "$(ESMF_PNETCDF_INCLUDE)" ] ; then \
-	    echo "ESMF_PNETCDF_INCLUDE:   $(ESMF_PNETCDF_INCLUDE)" ; \
+	    echo "ESMF_PNETCDF_INCLUDE:    $(ESMF_PNETCDF_INCLUDE)" ; \
           fi; \
 	  if [ -n "$(ESMF_PNETCDF_LIBS)" ] ; then \
-	    echo "ESMF_PNETCDF_LIBS:      $(ESMF_PNETCDF_LIBS)" ; \
+	    echo "ESMF_PNETCDF_LIBS:       $(ESMF_PNETCDF_LIBS)" ; \
           fi; \
 	  if [ -n "$(ESMF_PNETCDF_LIBPATH)" ] ; then \
-	    echo "ESMF_PNETCDF_LIBPATH:   $(ESMF_PNETCDF_LIBPATH)" ; \
+	    echo "ESMF_PNETCDF_LIBPATH:    $(ESMF_PNETCDF_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_XERCES)" ] ; then \
-	  echo "ESMF_XERCES:            $(ESMF_XERCES)" ; \
+	  echo "ESMF_XERCES:             $(ESMF_XERCES)" ; \
 	  if [ -n "$(ESMF_XERCES_INCLUDE)" ] ; then \
-	    echo "ESMF_XERCES_INCLUDE:    $(ESMF_XERCES_INCLUDE)" ; \
+	    echo "ESMF_XERCES_INCLUDE:     $(ESMF_XERCES_INCLUDE)" ; \
           fi; \
 	  if [ -n "$(ESMF_XERCES_LIBS)" ] ; then \
-	    echo "ESMF_XERCES_LIBS:       $(ESMF_XERCES_LIBS)" ; \
+	    echo "ESMF_XERCES_LIBS:        $(ESMF_XERCES_LIBS)" ; \
           fi; \
 	  if [ -n "$(ESMF_XERCES_LIBPATH)" ] ; then \
-	    echo "ESMF_XERCES_LIBPATH:    $(ESMF_XERCES_LIBPATH)" ; \
+	    echo "ESMF_XERCES_LIBPATH:     $(ESMF_XERCES_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_PIO)" ] ; then \
-	  echo "ESMF_PIO:               $(ESMF_PIO)" ; \
+	  echo "ESMF_PIO:                $(ESMF_PIO)" ; \
 	  if [ -n "$(ESMF_PIO_INCLUDE)" ] ; then \
-	    echo "ESMF_PIO_INCLUDE:       $(ESMF_PIO_INCLUDE)" ; \
+	    echo "ESMF_PIO_INCLUDE:        $(ESMF_PIO_INCLUDE)" ; \
           fi; \
 	  if [ -n "$(ESMF_PIO_LIBS)" ] ; then \
-	    echo "ESMF_PIO_LIBS:          $(ESMF_PIO_LIBS)" ; \
+	    echo "ESMF_PIO_LIBS:           $(ESMF_PIO_LIBS)" ; \
           fi; \
 	  if [ -n "$(ESMF_PIO_LIBPATH)" ] ; then \
-	    echo "ESMF_PIO_LIBPATH:       $(ESMF_PIO_LIBPATH)" ; \
+	    echo "ESMF_PIO_LIBPATH:        $(ESMF_PIO_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_PROJ4)" ] ; then \
-	  echo "ESMF_PROJ4:               $(ESMF_PROJ4)" ; \
+	  echo "ESMF_PROJ4:                $(ESMF_PROJ4)" ; \
 	  if [ -n "$(ESMF_PROJ4_INCLUDE)" ] ; then \
-	    echo "ESMF_PROJ4_INCLUDE:       $(ESMF_PROJ4_INCLUDE)" ; \
+	    echo "ESMF_PROJ4_INCLUDE:        $(ESMF_PROJ4_INCLUDE)" ; \
           fi; \
 	  if [ -n "$(ESMF_PROJ4_LIBS)" ] ; then \
-	    echo "ESMF_PROJ4_LIBS:          $(ESMF_PROJ4_LIBS)" ; \
+	    echo "ESMF_PROJ4_LIBS:           $(ESMF_PROJ4_LIBS)" ; \
           fi; \
 	  if [ -n "$(ESMF_PROJ4_LIBPATH)" ] ; then \
-	    echo "ESMF_PROJ4_LIBPATH:       $(ESMF_PROJ4_LIBPATH)" ; \
+	    echo "ESMF_PROJ4_LIBPATH:        $(ESMF_PROJ4_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_BABELTRACE)" ] ; then \
-	  echo "ESMF_BABELTRACE:               $(ESMF_BABELTRACE)" ; \
+	  echo "ESMF_BABELTRACE:                $(ESMF_BABELTRACE)" ; \
 	  if [ -n "$(ESMF_BABELTRACE_INCLUDE)" ] ; then \
-	    echo "ESMF_BABELTRACE_INCLUDE:       $(ESMF_BABELTRACE_INCLUDE)" ; \
+	    echo "ESMF_BABELTRACE_INCLUDE:        $(ESMF_BABELTRACE_INCLUDE)" ; \
           fi; \
 	  if [ -n "$(ESMF_BABELTRACE_LIBS)" ] ; then \
-	    echo "ESMF_BABELTRACE_LIBS:          $(ESMF_BABELTRACE_LIBS)" ; \
+	    echo "ESMF_BABELTRACE_LIBS:           $(ESMF_BABELTRACE_LIBS)" ; \
           fi; \
 	  if [ -n "$(ESMF_BABELTRACE_LIBPATH)" ] ; then \
-	    echo "ESMF_BABELTRACE_LIBPATH:       $(ESMF_BABELTRACE_LIBPATH)" ; \
+	    echo "ESMF_BABELTRACE_LIBPATH:        $(ESMF_BABELTRACE_LIBPATH)" ; \
           fi; \
          fi
 	-@echo " "
@@ -243,13 +254,11 @@ script_info:
 	-@echo "ESMF_INSTALL_BINDIR:    $(ESMF_INSTALL_BINDIR)"
 	-@echo "ESMF_INSTALL_DOCDIR:    $(ESMF_INSTALL_DOCDIR)"
 	-@echo " "
-	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * ESMF Benchmark directory and parameters *"
-	-@echo "ESMF_BENCHMARK_PREFIX:    $(ESMF_BENCHMARK_PREFIX)"
-	-@echo "ESMF_BENCHMARK_TOLERANCE: $(ESMF_BENCHMARK_TOLERANCE)"
+	-@echo "ESMF_BENCHMARK_PREFIX:         $(ESMF_BENCHMARK_PREFIX)"
+	-@echo "ESMF_BENCHMARK_TOLERANCE:      $(ESMF_BENCHMARK_TOLERANCE)"
 	-@echo "ESMF_BENCHMARK_THRESHOLD_MSEC: $(ESMF_BENCHMARK_THRESHOLD_MSEC)"
-	-@echo " "
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * Other relevant environment variables *"

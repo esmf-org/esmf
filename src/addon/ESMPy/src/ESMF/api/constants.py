@@ -112,6 +112,34 @@ class DecompFlag(IntEnum):
     Decompose elements cyclically across DEs.
     """
 
+# ExtrapMethod
+class ExtrapMethod(IntEnum):
+    """
+    Specify which extrapolation method to use on unmapped destination points after 
+    regridding.
+    """
+    NONE = 0
+    """
+    Indicates that no extrapolation should be done.
+    """
+    NEAREST_STOD = 1
+    """
+    Inverse distance weighted average. 
+    Here the value of a destination point is the weighted average of the 
+    closest N source points. The weight is the reciprocal of the distance of 
+    the source point from the destination point raised to a power P. All the
+    weights contributing to one destination point are normalized so that they 
+    sum to 1.0. The user can choose N and P when using this method, but 
+    defaults are also provided.
+    """
+    NEAREST_IDAVG = 2
+    """
+    Nearest source to destination. 
+    Here each destination point is mapped to the closest source point. A given 
+    source point may go to multiple destination points, but no destination 
+    point will receive input from more than one source point.
+    """
+
 # FileFormat
 class FileFormat(IntEnum):
     """
@@ -352,45 +380,57 @@ class RegridMethod(IntEnum):
     """
     BILINEAR = 0
     """
-    Bilinear interpolation. Destination value is a linear combination of the
-    source values in the cell which contains the destination point. The weights
-    for the linear combination are based on the distance of the destination
-    point from each source value.
+    Bilinear interpolation. Destination value is a linear combination of the 
+    source values in the cell which contains the destination point. The 
+    weights for the linear combination are based on the distance of destination 
+    point from each source value. 
     """
     PATCH = 1
     """
-    Higher-order patch recovery interpolation. Destination value is a weighted
-    average of 2D polynomial patches constructed from cells surrounding the
-    source cell which contains the destination point. This method typically
-    results in better approximations to values and derivatives than bilinear.
-    However, because of its larger stencil, it also results in a much larger
-    interpolation matrix than the bilinear method.
+    Higher-order patch recovery interpolation. Destination value is a weighted 
+    average of 2D polynomial patches constructed from cells surrounding the 
+    source cell which contains the destination point. This method typically 
+    results in better approximations to values and derivatives than bilinear. 
+    However, because of its larger stencil, it also results in a much larger 
+    interpolation matrix (and thus routeHandle) than the bilinear. 
     """
     CONSERVE = 2
     """
-    First order conservative interpolation. Value of a destination cell is the
-    weighted sum of the values of the source cells that it overlaps. The
-    weights are determined by the amount the source cell overlaps the
-    destination cell. This method will typically give less accurate
-    approximations to values than the other interpolation methods, however, it
-    will do a much better job preserving the integral of the value between the
-    source and destination. This method requires the corner coordinate values
-    to be provided in the Grid, and it currently only works for Fields created
-    on the Grid center stagger (or the Mesh element location).
+    First-order conservative interpolation. The main purpose of this method is 
+    to preserve the integral of the field between the source and destination. 
+    Will typically give a less accurate approximation to the individual field 
+    values than the bilinear or patch methods. The value of a destination cell 
+    is calculated as the weighted sum of the values of the source cells that it 
+    overlaps. The weights are determined by the amount the source cell overlaps 
+    the destination cell. Needs corner coordinate values to be provided in the 
+    Grid. Currently only works for Fields created on the Grid center stagger or 
+    the Mesh element location. 
     """
     NEAREST_STOD = 3
     """
-    In this version of nearest neighbor interpolation each destination point is
-    mapped to the closest source point. A given source point may go to multiple
-    destination points, but no destination point will receive input from more
-    than one source point.
+    In this version of nearest neighbor interpolation each destination point is 
+    mapped to the closest source point. A given source point may go to multiple 
+    destination points, but no destination point will receive input from more 
+    than one source point. 
     """
     NEAREST_DTOS = 4
     """
-    In this version of nearest neighbor interpolation each source point is
-    mapped to the closest destination point. A given destination point may
-    receive input from multiple source points, but no source point will go to
-    more than one destination point.
+    In this version of nearest neighbor interpolation each source point is 
+    mapped to the closest destination point. A given destination point may 
+    receive input from multiple source points, but no source point will go to 
+    more than one destination point. 
+    """
+    CONSERVE_2ND = 5
+    """
+    Second-order conservative interpolation. As with first-order, preserves the 
+    integral of the value between the source and destination. However, typically 
+    produces a smoother more accurate result than first-order. Also like 
+    first-order, the value of a destination cell is calculated as the weighted 
+    sum of the values of the source cells that it overlaps. However, 
+    second-order also includes additional terms to take into account the 
+    gradient of the field across the source cell. Needs corner coordinate 
+    values to be provided in the Grid. Currently only works for Fields created 
+    on the Grid center stagger or the Mesh element location.
     """
 
 # StaggerLoc

@@ -1284,6 +1284,11 @@ namespace ESMCI {
       free(esmftrc_packet_buf(&ctx->ctx));
       free(ctx);
       g_esmftrc_platform_filesys_ctx = NULL;
+
+      for (int i=0; i < nextVmId; i++) {
+        (&vmIdMap[i])->destroy();
+      }
+      
     }
     
   }
