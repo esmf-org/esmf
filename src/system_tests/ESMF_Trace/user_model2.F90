@@ -87,9 +87,9 @@ module user_model2
     call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_RUN, userRoutine=user_run, &
       rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-!    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, userRoutine=user_final, &
-!      rc=rc)
-!    if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_GridCompSetEntryPoint(comp, ESMF_METHOD_FINALIZE, userRoutine=user_final, &
+      rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
     
     
 !    call registerIC(comp, rc=rc) !!!!!!!!!!!!!!!!!  I C  !!!!!!!!!!!!!!!!!
@@ -199,7 +199,7 @@ module user_model2
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
  
-  subroutine user_final(comp, importState, exportState, clock, rc)
+ subroutine user_final(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp)   :: comp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
@@ -207,14 +207,18 @@ module user_model2
 
     ! Local variables
     integer               :: localPet
+    type(ESMF_Clock)      :: clockInternal
     
     ! Initialize user return code
     rc = ESMF_SUCCESS
 
-    call ESMF_GridCompGet(comp, localPet=localPet, rc=rc)
+    call ESMF_GridCompGet(comp, localPet=localPet, clock=clockInternal, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, localPet, "User Comp2 Final starting"
+
+    call ESMF_ClockDestroy(clockInternal, rc=rc)
+    if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, localPet, "User Comp2 Final returning"
 

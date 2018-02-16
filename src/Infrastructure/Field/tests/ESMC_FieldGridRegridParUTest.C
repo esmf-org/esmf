@@ -636,7 +636,8 @@ int main(void){
   ESMC_RegridMethod_Flag regridmethod = ESMC_REGRIDMETHOD_BILINEAR;
   ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_ERROR;
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
-                             &regridmethod, NULL, NULL, NULL, NULL, &unmappedaction,
+                             &regridmethod, NULL, NULL, NULL, NULL, 
+                             NULL, NULL, NULL, &unmappedaction,
                              NULL, NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
