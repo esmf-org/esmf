@@ -58,6 +58,15 @@ script_info:
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo "ESMF_VERSION_STRING:    $(ESMF_VERSION_STRING)"
+ifeq ($(shell $(ESMF_DIR)/scripts/available git),git)
+	@if [ -d $(ESMF_DIR)/.git ] ; then \
+	git describe --tags ;\
+	echo "--------------------------------------------------------------" ;\
+	git status ;\
+	else \
+	echo "Not a Git repository" ;\
+	fi
+endif
 	-@echo "--------------------------------------------------------------"
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
