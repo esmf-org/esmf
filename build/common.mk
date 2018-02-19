@@ -1216,11 +1216,17 @@ endif
 #-------------------------------------------------------------------------------
 # NETCDF
 #-------------------------------------------------------------------------------
+pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_NETCDF))
+ifeq ($(pathtype),abs)
+# use the $(ESMF_NETCDF) contents as nc-config
+ESMF_NETCDF_INCLUDE = $(shell $(ESMF_NETCDF) --includedir)
+ESMF_NETCDF_LIBS    = $(shell $(ESMF_NETCDF) --flibs)
+endif
+
 ifeq ($(ESMF_NETCDF),nc-config)
 ESMF_NETCDF_CPATH = $(shell nc-config --prefix)
 ESMF_NETCDF_INCLUDE = $(ESMF_NETCDF_CPATH)/include
 ESMF_NETCDF_LIBPATH = $(ESMF_NETCDF_CPATH)/lib
-
 # Fortran API library might be in a different directory than the main C library.
 ESMF_NETCDF_FPATH = $(shell nf-config --prefix 2>/dev/null)
 ifeq ($(ESMF_NETCDF_FPATH),"")
