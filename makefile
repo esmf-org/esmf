@@ -54,7 +54,9 @@ all:  lib build_unit_tests build_examples build_system_tests
 #-------------------------------------------------------------------------------
 # Prints information about the system and version of ESMF being compiled.
 #-------------------------------------------------------------------------------
+ifdef ESMF_NETCDF
 pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_NETCDF))
+endif
 script_info:
 	-@echo " "
 	-@echo "--------------------------------------------------------------"

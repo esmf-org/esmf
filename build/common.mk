@@ -1219,7 +1219,10 @@ endif
 
 # Check if ESMF_NETCDF may be pointing to nc-config with absolute path.
 # For situations where PATH is not to be trusted for nc-config location.
+pathtype := ""
+ifdef ESMF_NETCDF
 pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_NETCDF))
+endif
 ifeq ($(pathtype),abs)
 # use the $(ESMF_NETCDF) contents as nc-config
 ESMF_NETCDF_INCLUDE = $(shell $(ESMF_NETCDF) --includedir)
