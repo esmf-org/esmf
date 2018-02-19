@@ -417,6 +417,9 @@ program ESMF_NUOPC_UTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
+  call ESMF_ClockDestroy(clockB, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_AdjustClock() - first create clockB - Test"
@@ -1123,6 +1126,8 @@ program ESMF_NUOPC_UTest
   call ESMF_ClockDestroy(clockA, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_ClockDestroy(clockB, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_ClockDestroy(clockC, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_GridCompDestroy(gridComp, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
