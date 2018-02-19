@@ -1216,6 +1216,9 @@ endif
 #-------------------------------------------------------------------------------
 # NETCDF
 #-------------------------------------------------------------------------------
+
+# Check if ESMF_NETCDF may be pointing to nc-config with absolute path.
+# For situations where PATH is not to be trusted for nc-config location.
 pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_NETCDF))
 ifeq ($(pathtype),abs)
 # use the $(ESMF_NETCDF) contents as nc-config
