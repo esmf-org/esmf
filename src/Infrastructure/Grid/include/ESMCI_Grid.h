@@ -782,7 +782,7 @@ int getComputationalUBound(
     int uBndDE; // end local DE on this PET (the lower bnd is 0)
 
     int numDE; // the number of DE's on this PET
-
+    int tileCount; // the number of DE's on this PET
 
     bool done; // are we done yet?
 
@@ -851,6 +851,7 @@ int getComputationalUBound(
     int uBndDE; // end local DE on this PET (the lower bnd is 0)
 
     int numDE; // the number of DE's on this PET
+    int tileCount; // the number of DE's on this PET
 
     bool done; // are we done yet?
 

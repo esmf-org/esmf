@@ -66,6 +66,7 @@ module ESMF_GridUtilMod
 ! - ESMF-public methods:
   public ESMF_MeshIO
   public ESMF_GridWriteVTK
+  public ESMF_GridCellWriteVTK
   public ESMF_GridToMesh
   public ESMF_GridToMeshCell
 
@@ -295,6 +296,59 @@ module ESMF_GridUtilMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_GridWriteVTK
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCellWriteVTK()"
+!BOPI
+! !IROUTINE: ESMF_GridCellWriteVTK -- Write Grid and associated Arrays
+!
+! !INTERFACE:
+    subroutine ESMF_GridCellWriteVTK(grid, filename, rc)
+!
+!
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(inout)                :: grid
+    character(len = *), intent(in)                :: filename 
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Write the fields out for purview.  This function overcomes certain
+!   difficulties in passing strings with an optional number of arguments.
+!
+!   \begin{description}
+!   \item [grid]
+!         grid to write
+!   \item[{[staggerLoc]}] 
+!         stagger of field
+!   \item[filename]
+!         File (stub) to write results to
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: minidx
+    integer                 :: tmp_staggerloc
+    type(ESMF_Array)        :: arrayEmpty
+
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! Call into write
+    call c_ESMC_GridCellIO(grid, 0, filename, localrc, &
+         arrayEmpty, arrayEmpty, arrayEmpty, arrayEmpty, arrayEmpty, &
+         arrayEmpty)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_GridCellWriteVTK
 !------------------------------------------------------------------------------
 
 
