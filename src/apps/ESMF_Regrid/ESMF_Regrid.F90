@@ -177,7 +177,8 @@ program ESMF_RegridApp
           (trim(method) .ne. 'neareststod')) then
         write(*,*)
         print *, 'ERROR: The interpolation method "', trim(method), '" is not supported'
-        print *, '  The supported methods are "bilinear", "patch", and "conserve"'
+        print *, '  The supported methods are "bilinear", "patch", "conserve", "neareststod"'
+        print *, '  and "nearestdtos"'
         print *, "Use the --help argument to see an explanation of usage."
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif    

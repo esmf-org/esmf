@@ -215,12 +215,11 @@ ESMF_F90COMPILEOPTS += -ffree-line-length-none
 ############################################################
 # Determine where gfortran's libraries are located
 #
-# TODO: The -print-file-name option doesn't seem to work properly yet.
-#ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.dylib)
-#ifeq ($(ESMF_LIBSTDCXX),libgfortran.dylib)
-#ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
-#endif
-#ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
+ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libgfortran.dylib)
+ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
+endif
+ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
 
 ############################################################
 # Blank out variables to prevent rpath encoding

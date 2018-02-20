@@ -54,10 +54,22 @@ all:  lib build_unit_tests build_examples build_system_tests
 #-------------------------------------------------------------------------------
 # Prints information about the system and version of ESMF being compiled.
 #-------------------------------------------------------------------------------
+ifdef ESMF_NETCDF
+pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_NETCDF))
+endif
 script_info:
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo "ESMF_VERSION_STRING:    $(ESMF_VERSION_STRING)"
+ifeq ($(shell $(ESMF_DIR)/scripts/available git),git)
+	@if [ -d $(ESMF_DIR)/.git ] ; then \
+	git describe --tags ;\
+	echo "--------------------------------------------------------------" ;\
+	git status ;\
+	else \
+	echo "Not a Git repository" ;\
+	fi
+endif
 	-@echo "--------------------------------------------------------------"
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
@@ -69,15 +81,21 @@ script_info:
 	-@echo "--------------------------------------------------------------"
 	-@echo "Preprocessor version:"
 	@$(ESMF_CPP) --version $(ESMF_DIR)/scripts/empty.C
-	-@if [ -n "$(ESMF_NETCDF)" ] ; then \
-	  echo "--------------------------------------------------------------" ; \
-	  echo "NetCDF library version: `nc-config --version`" ; \
-	  echo "NetCDF Fortran version: `nf-config --version`" ; \
-	fi
+ifeq ($(pathtype),abs)
+	-@echo "--------------------------------------------------------------"
+	-@echo "NetCDF library version: `$(ESMF_NETCDF) --version`"
+endif
+ifeq ($(ESMF_NETCDF),nc-config)
+	-@echo "--------------------------------------------------------------"
+	-@echo "NetCDF library version: `nc-config --version`"
+	-@echo "NetCDF Fortran version: `nf-config --version`"
+endif
+ifeq ($(shell $(ESMF_DIR)/scripts/available pnetcdf_version),pnetcdf_version)
 	-@if [ -n "$(ESMF_PNETCDF)" ] ; then \
 	  echo "--------------------------------------------------------------" ; \
 	  echo "PNetCDF library version: `pnetcdf_version`" ; \
 	fi
+endif
 	-@echo " "
 	-@echo "--------------------------------------------------------------"
 	-@echo " * User set ESMF environment variables *"

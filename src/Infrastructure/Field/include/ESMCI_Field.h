@@ -105,6 +105,9 @@ namespace ESMCI{
                            int *regridPoleNPnts,
                            ESMC_LineType_Flag *lineType,
                            ESMC_NormType_Flag *normType,
+                           ESMC_ExtrapMethod_Flag *extrapMethod,
+                           int *extrapNumSrcPnts,
+                           float *extrapDistExponent,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
                            Field *srcFracField, Field *dstFracField);

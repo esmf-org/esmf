@@ -91,7 +91,7 @@ program ESMF_LogErrPerfUTest
   !NEX_UTest
   write(name, *) "Threshold check for ESMF_LogFoundError() 1000000x Test"
   write(failMsg, *) "ESMF_LogFoundError() performance problem"
-  dtTest = 5.D-8  ! this is expected to pass even in debug mode
+  dtTest = 1.d-7  ! 100ns is expected to pass even in debug mode
   call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
