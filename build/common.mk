@@ -1225,8 +1225,19 @@ pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_NETCDF))
 endif
 ifeq ($(pathtype),abs)
 # use the $(ESMF_NETCDF) contents as nc-config
-ESMF_NETCDF_INCLUDE = $(shell $(ESMF_NETCDF) --includedir)
-ESMF_NETCDF_LIBS    = $(shell $(ESMF_NETCDF) --flibs)
+# but must check if there is also nf-config available
+ESMF_NCCONFIG = $(ESMF_NETCDF)
+ESMF_NFCONFIG = $(shell $(ESMF_NETCDF) --prefix)/bin/nf-config
+ifneq ($(shell $(ESMF_DIR)/scripts/available $(ESMF_NCCONFIG)),$(ESMF_NCCONFIG))
+ESMF_NCCONFIG := 
+endif
+ESMF_NETCDF_INCLUDE = $(shell $(ESMF_NCCONFIG) --includedir)
+ifdef ESMF_NFCONFIG
+ESMF_NETCDF_LIBS    = $(shell $(ESMF_NFCONFIG) --flibs)
+else
+ESMF_NETCDF_LIBS    = $(shell $(ESMF_NCCONFIG) --flibs)
+endif
+ESMF_NETCDF_LIBS   += $(shell $(ESMF_NCCONFIG) --libs)
 endif
 
 ifeq ($(ESMF_NETCDF),nc-config)
