@@ -1228,8 +1228,8 @@ ifeq ($(pathtype),abs)
 # but must check if there is also nf-config available
 ESMF_NCCONFIG = $(ESMF_NETCDF)
 ESMF_NFCONFIG = $(shell $(ESMF_NETCDF) --prefix)/bin/nf-config
-ifneq ($(shell $(ESMF_DIR)/scripts/available $(ESMF_NCCONFIG)),$(ESMF_NCCONFIG))
-ESMF_NCCONFIG := 
+ifneq ($(shell $(ESMF_DIR)/scripts/exists $(ESMF_NFCONFIG)),$(ESMF_NFCONFIG))
+ESMF_NFCONFIG := 
 endif
 ESMF_NETCDF_INCLUDE = $(shell $(ESMF_NCCONFIG) --includedir)
 ifdef ESMF_NFCONFIG
