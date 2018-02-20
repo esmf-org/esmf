@@ -61,9 +61,9 @@
     integer                                  :: nx, ny      ! the size of the tile, maybe a rectangular grid
     integer                                  :: ncontacts   ! number of contacts
     character(len=ESMF_MAXPATHLEN)           :: tileDirectory  ! the path of the tile files
-    character(len=ESMF_MAXPATHLEN),  pointer :: filenames(:)  ! the tile filename array
-    integer, pointer                         :: contact(:,:)   ! pair of tiles in each contact
-    integer, pointer                         :: connindex(:,:,:)  ! the end points of the contact edges
+    character(len=ESMF_MAXPATHLEN), pointer  :: filenames(:)  ! the tile filename array
+    integer, allocatable                     :: contact(:,:)   ! pair of tiles in each contact
+    integer, allocatable                     :: connindex(:,:,:)  ! the end points of the contact edges
   end type
     
 !------------------------------------------------------------------------------
@@ -985,8 +985,8 @@ subroutine readContacts(ncid, varid, dims, mosaicname, tilenames, &
   integer, intent(in)                       :: dims(2)
   character(len=*), intent(in)              :: mosaicname
   character(len=*), intent(in), target      :: tilenames(:)
-  integer, pointer                          :: contact(:,:)
-  integer, pointer                          :: connindex(:,:,:)
+  integer, intent(inout)                     :: contact(:,:)
+  integer, intent(inout)                    :: connindex(:,:,:)
   integer, intent(out)                      :: rc
 
   ! varid is the id for the "contact_region" variable
@@ -1254,8 +1254,8 @@ subroutine ESMF_MosaicDestroy(mosaic, rc)
 
     ! Get rid of allocated members
     deallocate(mosaic%filenames)
-    deallocate(mosaic%contact)
-    deallocate(mosaic%connindex)
+    if (allocated(mosaic%contact)) deallocate(mosaic%contact)
+    if (allocated(mosaic%connindex)) deallocate(mosaic%connindex)
 #endif
 
     ! return success
