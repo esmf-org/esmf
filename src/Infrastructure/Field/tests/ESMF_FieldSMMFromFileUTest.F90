@@ -67,6 +67,8 @@ module ESMF_FieldSMMFromFileUTestMod
   integer(ESMF_KIND_I4) :: lbnd(2), ubnd(2)
   integer :: localPet, petCount
   integer :: i, j, m, n
+  real(ESMF_KIND_R8), pointer :: factorList(:) 
+  integer(ESMF_KIND_I4), pointer :: factorIndexList(:,:) 
 
   ! init success flag
   correct=.true.
@@ -172,7 +174,12 @@ module ESMF_FieldSMMFromFileUTestMod
 
   ! Do regrid
   call ESMF_FieldRegridStore(srcField, dstField, routehandle=routeHandle, &
-                             filename="data/weights_esmf_smmsff.nc", rc=localrc)
+    factorList=factorList, factorIndexList=factorIndexList, rc=localrc)
+  if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+  call ESMF_SparseMatrixWrite(factorList, factorIndexList, &
+                              "data/weights_esmf_smmsff.nc", rc=localrc)
   if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=FILENAME, rcToReturn=rc)) return
 
@@ -193,6 +200,9 @@ module ESMF_FieldSMMFromFileUTestMod
         endif
     enddo
   enddo
+
+  deallocate(factorList)
+  deallocate(factorIndexList)
 
   call ESMF_FieldRegridRelease(routeHandle, rc=localrc)
   if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
