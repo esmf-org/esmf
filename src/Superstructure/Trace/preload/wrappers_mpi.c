@@ -19,7 +19,7 @@ extern "C" {
   
   int __wrap_MPI_Barrier(MPI_Comm comm) {
 
-    printf("__wrap_MPI_Barrier\n");
+    //printf("__wrap_MPI_Barrier\n");
     
     if (c_esmftrace_isactive() == 1) {
       ESMCI::TraceMPIBarrierStart();
@@ -36,7 +36,7 @@ extern "C" {
   extern void FTN_X(__real_mpi_barrier)(MPI_Fint *comm, MPI_Fint *ierr);
 
   void FTN_X(__wrap_mpi_barrier)(MPI_Fint *comm, MPI_Fint *ierr) {
-    printf("__wrap_mpi_barrier_ (Fortran)\n");
+    //printf("__wrap_mpi_barrier_ (Fortran)\n");
     if (c_esmftrace_isactive() == 1) {
       ESMCI::TraceMPIBarrierStart();
     }
@@ -82,7 +82,7 @@ extern "C" {
   extern void FTN_X(__real_mpi_wait)(MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierr);
   
   void FTN_X(__wrap_mpi_wait)(MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierr) {
-    printf("__wrap_mpi_wait_ (Fortran)\n");
+    //printf("__wrap_mpi_wait_ (Fortran)\n");
     if (c_esmftrace_isactive() == 1) {
       ESMCI::TraceMPIWaitStart();
     }
@@ -91,5 +91,82 @@ extern "C" {
       ESMCI::TraceMPIWaitEnd();
     }
   }
+
+
+  /*
+    MPI_ALLGATHER(SENDBUF, SENDCOUNT, SENDTYPE, RECVBUF, RECVCOUNT,
+       RECVTYPE, COMM, IERROR)
+    <type>    SENDBUF (*), RECVBUF (*)
+    INTEGER    SENDCOUNT, SENDTYPE, RECVCOUNT, RECVTYPE, COMM,
+    INTEGER    IERROR
+  */
+
+  extern void FTN_X(__real_mpi_allgather)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, 
+					  MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, 
+					  MPI_Fint *comm, MPI_Fint *ierr);
+
+  void FTN_X(__wrap_mpi_allgather)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, 
+				   MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, 
+				   MPI_Fint *comm, MPI_Fint *ierr) {
+    if (c_esmftrace_isactive() == 1) {
+      ESMCI::TraceMPIWaitStart();
+    }
+    FTN_X(__real_mpi_allgather)(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
+    if (c_esmftrace_isactive() == 1) {
+      ESMCI::TraceMPIWaitEnd();
+    }  
+  }
+
+
+  /*
+    MPI_ALLGATHERV(SENDBUF, SENDCOUNT, SENDTYPE, RECVBUF,
+    RECVCOUNT, DISPLS, RECVTYPE, COMM, IERROR)
+    <type>    SENDBUF(*), RECVBUF(*)
+    INTEGER    SENDCOUNT, SENDTYPE, RECVCOUNT(*)
+    INTEGER    DISPLS(*), RECVTYPE, COMM, IERROR
+  */
+  
+  extern void FTN_X(__real_mpi_allgatherv)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, 
+					   MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs, 
+					   MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_allgatherv)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, 
+				    MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs, 
+				    MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr) {
+    if (c_esmftrace_isactive() == 1) {
+      ESMCI::TraceMPIWaitStart();
+    }
+    FTN_X(__real_mpi_allgatherv)(sendbuf, sendcount, sendtype, recvbuf, recvcount, displs, recvtype, comm, ierr);
+    if (c_esmftrace_isactive() == 1) {
+      ESMCI::TraceMPIWaitEnd();
+    }  
+  }
+
+
+  /*
+    MPI_ALLREDUCE(SENDBUF, RECVBUF, COUNT, DATATYPE, OP, COMM, IERROR)
+    <type>    SENDBUF(*), RECVBUF(*)
+    INTEGER    COUNT, DATATYPE, OP, COMM, IERROR
+  */
+  
+  extern void FTN_X(__real_mpi_allreduce)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, 
+					  MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_allreduce)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, 
+				   MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
+    //printf("__wrap_mpi_allreduce_ (Fortran)\n");
+    //TODO:  DEAL with different MPI calls in trace
+    if (c_esmftrace_isactive() == 1) {
+      ESMCI::TraceMPIWaitStart();
+    }
+    FTN_X(__real_mpi_allreduce)(sendbuf, recvbuf, count, datatype, op, comm, ierr);
+    if (c_esmftrace_isactive() == 1) {
+      ESMCI::TraceMPIWaitEnd();
+    }  
+  }
+
+
+
+  
     
 }
