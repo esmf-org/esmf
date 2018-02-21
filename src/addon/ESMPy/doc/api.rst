@@ -1,5 +1,5 @@
 ==========
-Python API
+API
 ==========
 
 -------
@@ -199,7 +199,7 @@ section.
 Cell Areas
 ++++++++++
 
-Grid cell areas can be calculated by ESMP. Space must first be allocated for
+Grid cell areas can be calculated by ESMPy. Space must first be allocated for
 this calculation by adding an
 :class:`~ESMF.api.constants.GridItem.AREA` item to the Grid.
 Then a :class:`~ESMF.api.field.Field` must be created, and the
@@ -601,331 +601,26 @@ coordinates.
 Regridding
 ----------
 
-The following sections describe the regridding methods that are available in ESMPy.
-
-~~~~~~~~
-Bilinear
-~~~~~~~~
-
-Bilinear interpolation (RegridMethod.BILINEAR) calculates the value for the destination point as a combination of
-multiple linear
-interpolations, one for each dimension of the Grid. Note that for ease of use, the term bilinear interpolation is used
-for 3D interpolation in ESMF as well, although it should more properly be referred to as trilinear interpolation.
-
-In 2D, ESMPy supports bilinear regridding between any combination of the
-following:
-
-- Structured Grids composed of a single logically rectangular patch
-- Unstructured Meshes composed of polygons with any number of sides
-- A set of disconnected points (LocStream) may be the destination of the regridding
-
-In 3D, ESMPy supports bilinear regridding between any combination of the
-following:
-
-- Structured Grids composed of a single logically rectangular patch
-- Unstructured Meshes composed of hexahedrons (e.g. cubes)
-- A set of disconnected points (LocStream) may be the destination of the regridding
-
-Restrictions:
-
-- Cells which contain enough identical corners to collapse to a line or point are currently ignored
-- Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
-- On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported
-
-To use the bilinear method the user must create their Fields on any stagger
-location for Grids (e.g. StaggerLoc.CENTER) or any Mesh location (e.g. MeshLoc.NODE) for Meshes. For
-either a Grid or a Mesh, the stagger location upon which the Field was built must contain
-coordinates.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Higher order patch recovery
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Patch (or higher-order) interpolation (RegridMethod.PATCH) is the ESMF version of a technique called
-*patch recovery* commonly used in finite element modeling :cite:`PatchInterp1`, :cite:`PatchInterp2`.
-It typically results in better approximations to values and derivatives when
-compared to bilinear interpolation. Patch interpolation works by constructing multiple polynomial patches to represent
-the data in a source cell. For 2D grids, these polynomials are currently 2nd degree 2D polynomials. One patch is
-constructed for each corner of the source cell, and the patch is constructed by doing a least squares fit through the
-data in the cells surrounding the corner. The interpolated value at the destination point is then a weighted average
-of the values of the patches at that point. The patch method has a larger stencil than the bilinear, for this reason
-the patch weight matrix can be correspondingly larger than the bilinear matrix (e.g. for a quadrilateral grid the
-patch matrix is around 4x the size of the bilinear matrix). This can be an issue when performing a regrid operation
-close to the memory limit on a machine.
-
-In 2D, ESMPy supports patch regridding between any combination of the following:
-
-- Structured Grids composed of a single logically rectangular patch
-- Unstructured Meshes composed of polygons with any number of sides
-- A set of disconnected points (LocStream) may be the destination of the regridding
-
-Patch regridding is currently not supported in 3D.
-
-Restrictions:
-
-- Cells which contain enough identical corners to collapse to a line or point are currently ignored
-- Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
-- On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported
-
-To use the patch method the user must create their Fields on any stagger
-location for Grids (e.g. StaggerLoc.CENTER) or any Mesh location (e.g. MeshLoc.NODE) for Meshes. For
-either a Grid or a Mesh, the stagger location upon which the Field was built must contain
-coordinates.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Nearest source to destination
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-In nearest source to destination interpolation (RegridMethod.NEAREST_STOD) each destination point is mapped to the
-closest source point. A given source point may map to multiple destination points, but no destination point will
-receive input from more than one source point. If two points are equally close, then the point with the smallest
-sequence index is arbitrarily used (i.e. the point which would have the smallest index in the weight matrix).
-
-In 2D, ESMPy supports destination to source regridding between any combination of the
-following:
-
-- Structured Grids composed of a single logically rectangular patch
-- Unstructured Meshes composed of polygons with any number of sides
-- A set of disconnected points (LocStream)
-
-In 3D, ESMPy supports nearest destination to source regridding between any combination of the
-following:
-
-- Structured Grids composed of a single logically rectangular patch
-- Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedrons
-- A set of disconnected points (LocStream)
-
-Restrictions:
-
-None
-
-To use the nearest source to destination method the user must create their Fields on any stagger
-location for Grids (e.g. StaggerLoc.CENTER) or any Mesh location (e.g. MeshLoc.NODE) for Meshes. For
-either a Grid or a Mesh, the stagger location upon which the Field was built must contain
-coordinates.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Nearest destination to source
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-In nearest destination to source interpolation (RegridMethod.NEAREST_DTOS) each source point is mapped
-to the closest destination point. A given destination point may receive input from multiple source points, but no
-source point will map to more than one destination point. If two points are equally close, then the point with the
-smallest sequence index is arbitrarily used (i.e. the point which would have the smallest index in the weight matrix).
-Note, that with this method the unmapped destination point detection currently doesn't work, so no error will be
-returned even if there are destination points that don't map to any source point.
-
-In 2D, ESMPy supports nearest source to destination regridding between any combination of the
-following:
-
-- Structured Grids composed of a single logically rectangular patch
-- Unstructured Meshes composed of polygons with any number of sides
-- A set of disconnected points (LocStream)
-
-In 3D, ESMPy supports nearest source to destination regridding between any combination of the
-following:
-
-- Structured Grids composed of a single logically rectangular patch
-- Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedrons
-- A set of disconnected points (LocStream)
-
-Restrictions:
-
-None
-
-To use the nearest destination to source method the user must create their Fields on any stagger
-location for Grids (e.g. StaggerLoc.CENTER) or any Mesh location (e.g. MeshLoc.NODE) for Meshes. For
-either a Grid or a Mesh, the stagger location upon which the Field was built must contain
-coordinates.
-
-~~~~~~~~~~~~~~~~~~~~~~~~
-First-order conservative
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-First-order conservative interpolation (RegridMethod.CONSERVE)
-:cite:`ConservativeOrder1` is also available as a regridding method.
-This method will typically have a larger local interpolation error than the
-other interpoloation methods, but will do a much better job of preserving the
-value of the integral of data between the source and destination grid.
-In this method the value across each source cell is treated as a constant.
-The weights for a particular destination cell are the area of intersection of
-each source cell with the destination cell divided by the area of the
-destination cell.
-For Cartesian grids, the area of a grid cell is the typical Cartesian area.
-For grids on a sphere, cell areas are calculated by connecting the corner
-coordinates of each grid cell with great circles. If the user doesn't specify
-cell areas in the involved Grids or Meshes, then the conservation will
-hold for the areas as calculated by ESMF. This means the following equation
-will hold:
-
-.. math:: \Sigma V^s_iA^s_i = \Sigma V^d_jA'^d_j,
-
-where :math:`V` is the variable being regridded and :math:`A'` is the area of a
-cell as calculated by ESMF. The superscripts :math:`s` and :math:`d` refer to
-the source and destination values, and the subscripts :math:`i` and :math:`j`
-refer to the grid cell indices (flattening the arrays to a single dimension).
-
-If the user does specify the areas in the Grid or Mesh, then the conservation
-will be adjusted to work for the areas provided by the user. This means the
-following equation will hold:
-
-.. math:: \Sigma V^s_iA^s_i = \Sigma V^d_jA^d_j,
-
-where :math:`A` is the area of a cell as provided by the user.
-
-The user should be aware that because of the conservation relationship between
-the source and destination fields, the more the total source area differs from
-the total destination area the more the values of the source field
-will differ from the corresponding values of the destination field, likely
-giving a higher interpolation error. It is best to have the total source and
-destination areas the same (this will automatically be true if no user areas
-are specified). For source and destination grids that only partially overlap,
-the overlapping regions of the source and destination should be the same.
-
-In 2D, ESMPy supports first-order conservative regridding between any
-combination of the following:
-
-- Structured Grids composed of a single logically rectangular patch
-- Unstructured Meshes composed of polygons with any number of sides
-
-In 3D, ESMPy supports first-order conservative regridding between any
-combination of the following:
-
-- Structured Grids composed of a single logically rectangular patch
-- Unstructured Meshes composed of hexahedrons (e.g. cubes) and tetrahedrons.
-
-Restrictions:
-
-- Cells which contain enough identical corners to collapse to a line or point are currently ignored
-- Self-intersecting cells (e.g. a cell twisted into a bow tie) are not supported
-- On a spherical grid, cells which contain an edge which extends more than half way around the sphere are not supported
-
-To use the first-order conservative method the user must create their
-Fields on the center stagger location (StaggerLoc.CENTER in 2D or
-StaggerLoc.CENTER_VCENTER in 3D) for Grids or the element location
-(MeshLoc.ELEMENT) for Meshes. For Grids, the corner stagger location
-(StaggerLoc.CORNER in 2D or StaggerLoc.CORNER_VFACE in 3D) must
-contain coordinates describing the outer perimeter of the Grid cells.
-
-~~~~~~~~~~~~~~~~~~~~~~~~~
-Second-order conservative
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Like the first-order conservative method, this method's main purpose is to 
-preserve the integral of the field across the interpolation from source to 
-destination.  
-
-(For a more in-depth description of what this preservation of the integral 
-(i.e. conservation) means please see section~\ref{sec:rwg:conservation}.)  
-
-The 
-difference between the first and second-order conservative methods is that the 
-second-order takes the source gradient into account, so it yields a smoother 
-destination field that typically better matches the source field. This 
-difference between the first and second-order methods is particularly apparent 
-when going from a coarse source grid to a finer destination grid. The 
-implementation of this method is based on the one described in this 
-paper~\cite{ConservativeOrder2}.
-
-The weights for second-order are calculated in a similar manner to 
-first-order with additional weights that take into 
-account the gradient across the source cell. 
-
-To see a description of how the different normalization options affect the 
-values and integrals produced by the conservative methods see 
-section~\ref{sec:rwg:conservative_norm_opts}. For a grid on a sphere this 
-method uses great circle cells, for a description of potential problems with 
-these see~\ref{sec:interpolation:great_circle_cells}.
-
-
-++++++++++++++++++
-Great Circle Edges
-++++++++++++++++++
-
-Conservative interpolation on spherical grids assumes great
-circle edges to cells. This means that the edges of a cell won't necessarily be
-the same as a straight line in spherical space. For small edges, this difference
-will be small, but for long edges it could be significant. This means if the
-user expects cell edges as straight lines in latitude longitude space, they
-should avoid using one large cell with long edges to compute an average over a
-region (e.g. over an ocean basin). The user should also avoid using cells that
-contain one edge that runs half way or more around the earth, because the regrid
-weight calculation assumes the edge follows the shorter great circle path. Also,
-there isn't a unique great circle edge defined between points on the exact
-opposite side of the earth from one another (antipodal points). However, the
-user can work around both of these problemS by breaking the long edge into two
-smaller edges by inserting an extra node, or by breaking the large target grid
-cells into two or more smaller grid cells. This allows the algorithm to
-resolve the ambiguity in edge direction.
-
-+++++++++++++
-Normalization
-+++++++++++++
-
-It is important to note that conservative regridding does not normalize the
-interpolation weights with the destination fraction by default (i.e. destination
-area normalization). This means that for a destination grid which only partially
-overlaps the source grid the destination field that is output from the regrid
-operation should be divided by the corresponding destination fraction to yield
-the true interpolated values for cells which are only partially covered by the
-source grid. The fraction also needs to be included when computing the total
-source and destination integrals. To include the fraction in the conservative
-weights, the user can specify the fraction area normalization type by specifying
-normType=NormType.FRACAREA when creating the Regrid object.
-
-For weights generated using destination area normalization (either by not
-specifying any normalization type or by specifying normType=NormType.DSTAREA),
-if a destination field extends outside the unmasked source field then the values
-of the cells which extend partway outside the unmasked source field are
-decreased by the fraction they extend outside. To correct these values the
-destination field (dst_field) resulting from the Regrid call can be divided by
-the destination fraction. (dst_frac) The following pseudocode demonstrates how
-to do this::
-
-    for each destination element i
-       if (dst_frac(i) not equal to 0.0) then
-          dst_field(i)=dst_field(i)/dst_frac(i)
-       end if
-    end for
-
-For weights generated using destination area normalization (either by not
-specifying any normalization type or by specifying normType=NormType.DSTAREA),
-the following pseudo-code shows how to compute the total destination integral
-(dst_total) given the destination field values (dst_field), the destination area
-(dst_area), and the destination fraction (dst_frac). As shown in the previous
-paragraph, it also shows how to adjust the destination field (dst_field)
-by the fraction (dst_frac)::
-
-    dst_total=0.0
-    for each destination element i
-       if (dst_frac(i) not equal to 0.0) then
-          dst_total=dst_total+dst_field(i)*dst_area(i)
-          dst_field(i)=dst_field(i)/dst_frac(i)
-          ! If mass computed here after dst_field adjust, would need to be:
-          ! dst_total=dst_total+dst_field(i)*dst_area(i)*dst_frac(i)
-       end if
-    end for
-
-For weights generated using fraction area normalization (by specifying
-normType=NormType.FRACAREA), no adjustment of the destination field is
-necessary. The following pseudo-code shows how to compute the total destination
-integral (dst_total) given the destination field values (dst_field), the
-destination area (dst_area), and the destination fraction (dst_frac)::
-
-    dst_total=0.0
-    for each destination element i
-         dst_total=dst_total+dst_field(i)*dst_area(i)*dst_frac(i)
-    end for
-
-For both normalization types, the following pseudo-code shows how to compute the
-total source integral (src_total) given the source field values (src_field),
-the source area (src_area), and the source fraction (src_frac)::
-
-    src_total=0.0
-    for each source element i
-       src_total=src_total+src_field(i)*src_area(i)*src_frac(i)
-    end for
-
+The following table describe the regridding methods and options that are 
+available in ESMPy, the flag that is required to use it, a short description,
+and a link to the ESMF documentation.
+
+
+=====================================================  ===============================================  ===============================
+Class                                                  Description                                      Link
+=====================================================  ===============================================  ===============================
+:class:`ESMF.api.constants.RegridMethod.BILINEAR`      Linear regridding in two dimensions              `Bilinear <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012100000000000000>`_
+:class:`ESMF.api.constants.RegridMethod.PATCH`         Higher-order least squares method                `Higher-order patch <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012200000000000000>`_
+:class:`ESMF.api.constants.RegridMethod.NEAREST_STOD`  Nearest source point used for each destination   `Nearest source to destination <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012300000000000000>`_
+:class:`ESMF.api.constants.RegridMethod.NEAREST_DTOS`  Nearest destination point used for each source   `Nearest destination to source <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012400000000000000>`_
+:class:`ESMF.api.constants.RegridMethod.CONSERVE`      First-order conservative                         `First-order conservative <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012500000000000000>`_
+:class:`ESMF.api.constants.RegridMethod.CONSERVE_2ND`  Second-order conservative                        `Second-order conservative <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012600000000000000>`_
+N/A                                                    Conservation equations                           `Conservation <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012700000000000000>`_
+:class:`ESMF.api.constants.NormType`                   Normalization options for integral conservation  `Normalization options <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012800000000000000>`_
+:class:`ESMF.api.constants.LineType`                   Line types for spherical and Cartesian space     `Great circle cells <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012900000000000000>`_
+:class:`ESMF.api.constants.UnmappedAction`             Unmapped destination point handling options      `Unmapped destination points <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05013100000000000000>`_
+:class:`ESMF.api.constants.CoordSys`                   Spherical grids and pole handling                `Spherical grids and poles <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05013200000000000000>`_
+=====================================================  ===============================================  ===============================
 
 -------
 Masking
@@ -960,19 +655,6 @@ interpolated to). Similarly, masking a source cell means that the cell won't par
 the masking is set on the location upon which the Fields passed into the regridding call are built.
 For example, if Fields built on StaggerLoc.CENTER are passed into the ESMF_FieldRegridStore()
 call then the masking should also be set on StaggerLoc.CENTER.
-
----------------
-Unmapped points
----------------
-
-If a destination point cannot be mapped to a location in the source grid, the
-user has two options. The user may ignore those destination points that cannot
-be mapped by setting the 'unmapped_action' argument to UnmappedAction.IGNORE.
-The user also has the option to return
-an error if unmapped destination points exist. This is the default behavior,
-so the user can either not set the 'unmapped_action' argument or the user can set
-it to UnmappedAction.ERROR. At this point ESMPy does not support
-extrapolation to destination points outside the unmasked source Field.
 
 --------------------------
 Numpy Slicing and Indexing

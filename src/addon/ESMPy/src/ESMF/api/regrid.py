@@ -73,11 +73,11 @@ class Regrid(object):
         unmapped destination points after regridding.
     :param int extrap_num_src_pnts: The number of source points to use for the 
         extrapolation methods that use more than one source point 
-        (e.g. :attr:`~ESMF.api.constants.ExtrapMethod.NEAREST_IDAVG). If not 
+        (e.g. :attr:`~ESMF.api.constants.ExtrapMethod.NEAREST_IDAVG`). If not 
         specified, defaults to 8.
     :param float extrap_dist_exponent: The exponent to raise the distance to when 
         calculating weights for the 
-        :attr:`~ESMF.api.constants.ExtrapMethod.NEAREST_IDAVG extrapolation 
+        :attr:`~ESMF.api.constants.ExtrapMethod.NEAREST_IDAVG` extrapolation 
         method. A higher value reduces the influence of more distant points. If 
         not specified, defaults to 2.0.
     :param UnmappedAction unmapped_action: specifies which action to take if a
