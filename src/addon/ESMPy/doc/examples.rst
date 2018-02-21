@@ -11,43 +11,6 @@ Hello World
 
     .. literalinclude:: ../examples/hello_world.py
 
--------------------------
-Create and Read from File
--------------------------
-
-    .. literalinclude:: ../examples/create_read_from_file.py
-
-
-----------------------------
-Regridding from Grid to Mesh
-----------------------------
-
-    .. literalinclude:: ../examples/grid_mesh_regrid.py
-
----------------------------------
-Regridding from Grid to LocStream
----------------------------------
-
-    .. literalinclude:: ../examples/grid_locstream_regrid.py
-
----------------------------------
-Regridding from Mesh to LocStream
----------------------------------
-
-    .. literalinclude:: ../examples/mesh_locstream_regrid.py
-
----------------------------------
-Regridding from LocStream to Grid
----------------------------------
-
-    .. literalinclude:: ../examples/locstream_grid_regrid.py
-
--------------------------------------
-Parallel regridding using MPI.Spawn()
--------------------------------------
-
-    .. literalinclude:: ../examples/mpi_spawn_regrid.py
-
 ---------------------------
 Regridding Helper Functions
 ---------------------------
@@ -128,4 +91,40 @@ Compute Field mass
   .. literalinclude:: ../src/ESMF/util/grid_utilities.py
     :pyobject: compute_mass_grid
 
+-------------------------
+Create and Read from File
+-------------------------
+
+    .. literalinclude:: ../examples/create_read_from_file.py
+
+
+----------------------------
+Regridding from Grid to Mesh
+----------------------------
+
+    .. literalinclude:: ../examples/grid_mesh_regrid.py
+
+---------------------------------
+Regridding from Grid to LocStream
+---------------------------------
+
+    .. literalinclude:: ../examples/grid_locstream_regrid.py
+
+---------------------------------
+Regridding from Mesh to LocStream
+---------------------------------
+
+    .. literalinclude:: ../examples/mesh_locstream_regrid.py
+
+---------------------------------
+Regridding from LocStream to Grid
+---------------------------------
+
+    .. literalinclude:: ../examples/locstream_grid_regrid.py
+
+-------------------------------------
+Parallel regridding using MPI.Spawn()
+-------------------------------------
+
+    .. literalinclude:: ../examples/mpi_spawn_regrid.py
 
