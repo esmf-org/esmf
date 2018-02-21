@@ -19,7 +19,7 @@ extern "C" {
   
   int __wrap_MPI_Barrier(MPI_Comm comm) {
 
-    // printf("__wrap_MPI_Barrier\n");
+    printf("__wrap_MPI_Barrier\n");
     
     if (c_esmftrace_isactive() == 1) {
       ESMCI::TraceMPIBarrierStart();
@@ -30,6 +30,20 @@ extern "C" {
     }
 
     return ret;
+  }
+
+
+  extern void FTN_X(__real_mpi_barrier)(MPI_Fint *comm, MPI_Fint *ierr);
+
+  void FTN_X(__wrap_mpi_barrier)(MPI_Fint *comm, MPI_Fint *ierr) {
+    printf("__wrap_mpi_barrier_ (Fortran)\n");
+    if (c_esmftrace_isactive() == 1) {
+      ESMCI::TraceMPIBarrierStart();
+    }
+    FTN_X(__real_mpi_barrier)(comm, ierr);
+    if (c_esmftrace_isactive() == 1) {
+      ESMCI::TraceMPIBarrierEnd();
+    }
   }
 
 
@@ -65,6 +79,17 @@ extern "C" {
     return ret;
   }
 
+  extern void FTN_X(__real_mpi_wait)(MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierr);
   
-  
+  void FTN_X(__wrap_mpi_wait)(MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierr) {
+    printf("__wrap_mpi_wait_ (Fortran)\n");
+    if (c_esmftrace_isactive() == 1) {
+      ESMCI::TraceMPIWaitStart();
+    }
+    FTN_X(__real_mpi_wait)(request, status, ierr);
+    if (c_esmftrace_isactive() == 1) {
+      ESMCI::TraceMPIWaitEnd();
+    }
+  }
+    
 }
