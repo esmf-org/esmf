@@ -7801,6 +7801,9 @@ GridIter::GridIter(
   // set end of local DEs
   uBndDE=numDE-1;
 
+  // Get number of tiles
+  tileCount=grid->getTileCount();
+
   // set to beginning (just in case)
   this->toBeg();
 
@@ -8217,18 +8220,30 @@ bool GridIter::isShared(
   // if not cell then they're no shared nodes
   if (!cellNodes) return false;
 
-   // If we're more than 1 inside the exclusive region then we shouldn't be shared
+  // For single tile grids, if we're more than 1 inside the 
+  //  exclusive region then we shouldn't be shared
   bool interior=true;
-  for (int i=0; i<rank; i++) {
-    if ((curInd[i]<lBndOrig[i]+1) || (curInd[i]>uBndOrig[i]-1)) {
-      interior=false;
-       break;
+  if (tileCount <= 1) {
+    for (int i=0; i<rank; i++) {
+      if ((curInd[i]<lBndOrig[i]+1) || (curInd[i]>uBndOrig[i]-1)) {
+        interior=false;
+        break;
+      }
+    }
+  } else {
+    // multi-tile grids need 1 deeper sharing because of inter-tile connections
+    for (int i=0; i<rank; i++) {
+      if ((curInd[i]<lBndOrig[i]+2) || (curInd[i]>uBndOrig[i]-2)) {
+        interior=false;
+        break;
+      }
     }
   }
+
+  // If we're inside then we're not shared
   if (interior) return false;
 
   // TODO: Could also check if we're next to a non-shared edge
-
 
   // If none of the above are true then return true, because we might be shared
    return true;
@@ -8659,29 +8674,63 @@ void GridCellIter::getDEBnds(
 
   // if cell iterator then expand bounds
   // If center stagger, expand if not bipole
-  if (staggerloc==0) {
-    for (int i=0; i<rank; i++) {
-      bool isLBnd=grid->isStaggerLBnd(staggerloc, curDE, i);
-      bool isUBnd=grid->isStaggerUBnd(staggerloc, curDE, i);
-      
-      if (align[i] <0) {
-        if (isUBnd && (connU[i] != ESMC_GRIDCONN_BIPOLE)) uBnd[i]--;
+    if (staggerloc==0) {
+      for (int i=0; i<rank; i++) {
+        bool isLBnd=grid->isStaggerLBnd(staggerloc, localDE, i);
+        bool isUBnd=grid->isStaggerUBnd(staggerloc, localDE, i);
+        
+        if (align[i] <0) {
+          if (isUBnd && (connU[i] != ESMC_GRIDCONN_BIPOLE)) uBnd[i]--;
+        } else {
+          if (isLBnd && (connL[i] != ESMC_GRIDCONN_BIPOLE)) lBnd[i]++;
+        }    
+      }
+    } else {
+      // Calculations are different for single and multi-tile cases
+      if (tileCount <= 1) {
+        for (int i=0; i<rank; i++) {
+          bool isLBnd=grid->isStaggerLBnd(staggerloc, localDE, i);
+          bool isUBnd=grid->isStaggerUBnd(staggerloc, localDE, i);
+          
+          if (align[i] <0) {
+            if (isUBnd) uBnd[i]--;
+          } else {
+            if (isLBnd) lBnd[i]++;
+          }    
+        }
       } else {
-        if (isLBnd && (connL[i] != ESMC_GRIDCONN_BIPOLE)) lBnd[i]++;
-      }    
+        // Get tile min/max
+        int localrc,rc;
+        const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeToDeMap();
+        const int *DETileList = staggerDistgrid->getTileListPDe();
+        int tile=DETileList[localDEList[localDE]];
+        
+        const int *tileMin=staggerDistgrid->getMinIndexPDimPTile(tile, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          &rc)) throw rc;
+        const int *tileMax=staggerDistgrid->getMaxIndexPDimPTile(tile, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          &rc)) throw rc;        
+
+        // Loop setting bounds based on tile edges
+        for (int i=0; i<rank; i++) {
+          
+          // See if we're on the tile edge
+          bool isLBnd=false;
+          if (lBnd[i] == tileMin[i]) isLBnd=true;
+          
+          bool isUBnd=false;
+          if (uBnd[i] == tileMax[i]) isUBnd=true;
+          
+          // Adjust bounds
+          if (align[i] <0) {
+            if (isUBnd) uBnd[i]--;
+          } else {
+            if (isLBnd) lBnd[i]++;
+          }    
+        }
+      }
     }
-  } else {
-    for (int i=0; i<rank; i++) {
-      bool isLBnd=grid->isStaggerLBnd(staggerloc, curDE, i);
-      bool isUBnd=grid->isStaggerUBnd(staggerloc, curDE, i);
-      
-      if (align[i] <0) {
-        if (isUBnd) uBnd[i]--;
-      } else {
-        if (isLBnd) lBnd[i]++;
-      }    
-    }
-  }
 }
 
 //-----------------------------------------------------------------------------
@@ -8847,6 +8896,7 @@ GridCellIter::GridCellIter(
   rank=grid->getDimCount();
   connL=grid->getConnL();
   connU=grid->getConnU();
+
     
   // Get Alignment for staggerloc
   const int *staggerAlign= grid->getStaggerAlign(staggerloc);
@@ -8880,6 +8930,10 @@ GridCellIter::GridCellIter(
 
    // set end of local DEs
   uBndDE=numDE-1;
+
+  // Get number of tiles
+  tileCount=grid->getTileCount();
+
 
   // set to beginning (just in case)
   this->toBeg();
@@ -9059,6 +9113,8 @@ int GridCellIter::getGlobalID(
   // determine sequence index
   std::vector<int> seqIndex;
   localrc=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,seqIndex);
+
+
 
 #define REPORT_DEGENERACY
 #ifdef REPORT_DEGENERACY

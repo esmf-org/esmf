@@ -180,6 +180,51 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
 
 
 
+  void FTN_X(c_esmc_gridcellio)(ESMCI::Grid **gridpp,
+                                int *num_arrays, char*name, int *rc,
+                                ESMCI::Array **arraypp1,
+                                ESMCI::Array **arraypp2,
+                                ESMCI::Array **arraypp3,
+                                ESMCI::Array **arraypp4,
+                                ESMCI::Array **arraypp5,
+                                ESMCI::Array **arraypp6,
+                                ESMCI_FortranStrLenArg nlen
+                                ) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridcellio()" 
+  ESMCI::Grid &grid = **gridpp;
+  int localrc;
+
+  // How to do this?? Any way I can think of is ugly:
+  ESMCI::Array **ar[] = {
+    arraypp1,
+    arraypp2,
+    arraypp3,
+    arraypp4,
+    arraypp5,
+    arraypp6
+  };
+
+  // Make list of arrays
+  std::vector<ESMCI::Array*> arrays;
+  for (UInt i = 0; i < *num_arrays; ++i)
+    arrays.push_back(*ar[i]);
+
+  // Convert Grid to Mesh
+  MeshCap *meshp=MeshCap::GridToMeshCell(grid, arrays, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+  
+  meshp->meshwrite(name, &localrc, nlen);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+
+  // Get rid of Mesh  
+  delete meshp;
+
+  // Return success
+  if (rc) *rc = ESMF_SUCCESS;
+}
+
+
   void FTN_X(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc,
                                 int *isSphere, int *islatlondeg, MeshCap **meshpp,
                                 ESMCI::InterArray<int> *maskValuesArg, int *regridConserve, int *rc) {
