@@ -639,6 +639,8 @@ void FTN_X(c_convertscrip)(
     nc_close(ncid1);
     nc_close(ncid2);
     free(totalneighbors);
+    delete [] c_infile;
+    delete [] c_outfile;
     *rc = 0;
     return;
   }
