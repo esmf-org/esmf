@@ -15,6 +15,8 @@
       module ESMF_VMSubrs
       use ESMF
       use ESMF_TestMod
+      
+      implicit none
 
       public
 
@@ -39,7 +41,7 @@
       integer::  func_results, myresults
       integer:: nsize, i, j
       integer:: isum, clock_count
-      real :: fsum4
+      real(ESMF_KIND_R4) :: fsum4
       real(ESMF_KIND_R8) :: fsum
       logical:: vmBool
 
@@ -920,7 +922,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      sum=0
+      fsum4=0
       do i=1,nsize
         f4array3_soln(i) = minval( f4array2(i,:) )
         print *, localPet,'f4array3(',i,')=',f4array3(i), &
@@ -1019,11 +1021,11 @@
         f4array3_soln(i) = maxval( f4array2(i,:) )
         print *, localPet,'f4array3(',i,')=',f4array3(i), &
                           'f4array3_soln(',i,')=',f4array3_soln(i)
-        f4sum=f4sum + abs( f4array3(i) - f4array3_soln(i) )
+        fsum4=fsum4 + abs( f4array3(i) - f4array3_soln(i) )
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MAXResults Test: ESMF_KIND_R4"
-      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((fsum4.eq.0.), name, failMsg, result, ESMF_SRCLINE)
 
       end subroutine test_AllReduce_max
 
