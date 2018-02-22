@@ -4700,8 +4700,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
-  subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, petCount, &
-    peCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, rc)
+  recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
+    petCount, peCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag,&
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)            :: vm
@@ -8196,7 +8197,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMWtimeDelay - Delay execution
 
 ! !INTERFACE:
-  subroutine ESMF_VMWtimeDelay(delay, keywordEnforcer, rc)
+  recursive subroutine ESMF_VMWtimeDelay(delay, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     real(ESMF_KIND_R8), intent(in)            :: delay
@@ -8504,7 +8505,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
-      function ESMF_VMGetInit(vm) 
+  recursive function ESMF_VMGetInit(vm) 
 !
 ! !RETURN VALUE:
       ESMF_INIT_TYPE :: ESMF_VMGetInit   
@@ -8530,7 +8531,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_VMGetInit = ESMF_INIT_CREATED
     endif
 
-    end function ESMF_VMGetInit
+  end function ESMF_VMGetInit
 !------------------------------------------------------------------------------
 
 
@@ -8541,7 +8542,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMSetInitCreated - Set VM init code to "CREATED"
 
 ! !INTERFACE:
-  subroutine ESMF_VMSetInitCreated(vm, rc)
+  recursive subroutine ESMF_VMSetInitCreated(vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),  intent(inout)           :: vm
@@ -8582,7 +8583,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMGetThis - Internal access routine for C++ pointer
 
 ! !INTERFACE:
-  subroutine ESMF_VMGetThis(vm, this, rc)
+  recursive subroutine ESMF_VMGetThis(vm, this, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)              :: vm
@@ -8626,7 +8627,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMSetThis - Set C++ pointer in VM
 
 ! !INTERFACE:
-  subroutine ESMF_VMSetThis(vm, this, rc)
+  recursive subroutine ESMF_VMSetThis(vm, this, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(inout)           :: vm

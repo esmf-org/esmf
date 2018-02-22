@@ -106,8 +106,8 @@ contains
 ! !IROUTINE: ESMF_InterArrayCreateTrg - Create InterArray
 
 ! !INTERFACE:
-  function ESMF_InterArrayCreateTrg(farray1D, farray2D, farray3D, &
-    farray1DI8, farray2DI8, farray3DI8, rc)
+  recursive function ESMF_InterArrayCreateTrg(farray1D, farray2D, farray3D, &
+    farray1DI8, farray2DI8, farray3DI8, rc) result (InterArrayCreateTrg)
 !
 ! !ARGUMENTS:
     integer, target,               intent(in),  optional :: farray1D(:)
@@ -119,7 +119,7 @@ contains
     integer,                       intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_InterArray) :: ESMF_InterArrayCreateTrg
+    type(ESMF_InterArray) :: InterArrayCreateTrg
 !
 ! !DESCRIPTION:
 !   Create an {\tt ESMF\_InterArray} from Fortran array.
@@ -159,7 +159,7 @@ contains
     
     ! mark this InterArray as invalid
     call c_ESMC_InterArraySetInvalid(array, localrc)
-    ESMF_InterArrayCreateTrg = array
+    InterArrayCreateTrg = array
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -187,7 +187,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
-    ESMF_InterArrayCreateTrg = array
+    InterArrayCreateTrg = array
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -203,8 +203,9 @@ contains
 ! !IROUTINE: ESMF_InterArrayCreatePtr - Create InterArray
 
 ! !INTERFACE:
-  function ESMF_InterArrayCreatePtr(farray1D, farray2D, farray3D, &
-    farray1DI8, farray2DI8, farray3DI8, transferOwnership, rc)
+  recursive function ESMF_InterArrayCreatePtr(farray1D, farray2D, farray3D, &
+    farray1DI8, farray2DI8, farray3DI8, transferOwnership, rc) &
+    result (InterArrayCreatePtr)
 !
 ! !ARGUMENTS:
     integer, pointer,                   optional :: farray1D(:)
@@ -217,7 +218,7 @@ contains
     integer,               intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_InterArray) :: ESMF_InterArrayCreatePtr
+    type(ESMF_InterArray) :: InterArrayCreatePtr
 !
 ! !DESCRIPTION:
 !   Create an {\tt ESMF\_InterArray} from Fortran array. The 
@@ -259,7 +260,7 @@ contains
     
     ! mark this InterArray as invalid
     call c_ESMC_InterArraySetInvalid(array, localrc)
-    ESMF_InterArrayCreatePtr = array
+    InterArrayCreatePtr = array
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -411,7 +412,7 @@ contains
     endif
     
     ! set return value
-    ESMF_InterArrayCreatePtr = array
+    InterArrayCreatePtr = array
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS

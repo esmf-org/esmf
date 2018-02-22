@@ -386,10 +386,10 @@ contains
 ! !IROUTINE: ESMF_CompClassGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
-  function ESMF_CompClassGetInit(cc) 
+  recursive function ESMF_CompClassGetInit(cc) result (CompClassGetInit)
 !
 ! !RETURN VALUE:
-    ESMF_INIT_TYPE :: ESMF_CompClassGetInit   
+    ESMF_INIT_TYPE :: CompClassGetInit   
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), intent(in), optional :: cc
@@ -406,9 +406,9 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     if(present(cc)) then
-      ESMF_CompClassGetInit = ESMF_INIT_GET(cc)
+      CompClassGetInit = ESMF_INIT_GET(cc)
     else
-      ESMF_CompClassGetInit = ESMF_INIT_CREATED
+      CompClassGetInit = ESMF_INIT_CREATED
     endif
   end function ESMF_CompClassGetInit
 !------------------------------------------------------------------------------
@@ -421,7 +421,7 @@ contains
 ! !IROUTINE: ESMF_CompClassSetInitCreated - Set CompClass init code to "CREATED"
 
 ! !INTERFACE:
-  subroutine ESMF_CompClassSetInitCreated(cc, rc)
+  recursive subroutine ESMF_CompClassSetInitCreated(cc, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CompClass), intent(inout)           :: cc
@@ -2487,7 +2487,7 @@ contains
 ! !IROUTINE: ESMF_CWrapSetInitCreated - Set CWrap init code to "CREATED"
 
 ! !INTERFACE:
-  subroutine ESMF_CWrapSetInitCreated(cw, rc)
+  recursive subroutine ESMF_CWrapSetInitCreated(cw, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CWrap), intent(inout)           :: cw
