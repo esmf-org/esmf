@@ -61,7 +61,7 @@ Grid, Mesh, and LocStream. Grids are used to represent logically rectangular
 grids, Meshes are used for unstructured collections of polygons, and
 LocStreams are used for unstructured collections of individual points. These
 objects are nearly identical counterparts to the objects of the same name in
-ESMF, which some simplifications for ease of use in the Python environment.
+ESMF, with some simplifications for ease of use in the Python environment.
 
 ~~~~
 Grid
@@ -69,7 +69,9 @@ Grid
 
 The Grid is used to represent the geometry and discretization of logically
 rectangular physical grids. The Grid can also hold information that can used in
-calculations involving the Grid, like a mask or the cell areas.
+calculations involving the Grid, like a mask or the cell areas. The ESMF reference
+manual has an in-depth description of the 
+`Grid class <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05080000000000000000>`_.
 
 ESMF Grids are based on the concepts described in A Standard Description of
 Grids Used in Earth System Models [Balaji 2006]. In this document Balaji
@@ -251,21 +253,19 @@ been allocated and retrieved using :class:`~ESMF.api.grid.Grid.get_item()`.
 Mesh
 ~~~~
 
-Mesh is an object for representing unstructured grids. Fields can be created on
-a Mesh to hold data. Fields created on a Mesh can also be used as either the
-source or destination or both of a regridding operation.
+A Mesh is an object for representing unstructured grids. The ESMF reference
+manual has an in-depth description of the 
+`Mesh class <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION050100000000000000000>`_.
 
-A Mesh is constructed of *nodes* and *elements*.
-
-A node, also known as a vertex or corner, is a part of a Mesh which represents a
-single point. Coordinate information is set in a node.
-
-An element, also known as a cell, is a part of a mesh which represents a small
+A Mesh is constructed of *nodes* and *elements*. A node, also known as a vertex 
+or corner, is a part of a Mesh which represents a single point. An element, 
+also known as a cell, is a part of a Mesh which represents a small
 region of space. Elements are described in terms of a connected set of nodes
 which represent locations along their boundaries.
 
-Field data may be located on either the nodes or elements of a Mesh.
-
+Field data may be located on either the nodes or elements of a Mesh. Fields 
+created on a Mesh can also be used as either the source or destination or both 
+of a regridding operation.
 
 The dimension of a Mesh in ESMF is specified with two parameters: the
 *parametric* dimension and the *spatial* dimension.
@@ -298,10 +298,6 @@ of 3, the supported element types are tetrahedrons and hexahedrons. The Mesh
 supports any combination of element types within a particular dimension, but
 types from different dimensions may not be mixed. For example, a Mesh cannot be
 constructed of both quadrilaterals and tetrahedra.
-
-ESMF currently only supports distributions where every node on a PET must be a
-part of an element on that PET. In other words, there must not be nodes without
-a corresponding element on any PET.
 
 +++++++++++++
 Mesh Creation
@@ -371,9 +367,7 @@ element.
 The three step Mesh creation process starts with a call to the Mesh constructor.
 It is then followed by the :class:`~ESMF.api.mesh.Mesh.add_nodes()` call to
 specify nodes, and then the :class:`~ESMF.api.mesh.Mesh.add_elements()` call to
-specify elements. This three step sequence is useful to conserve memory because
-the node arrays can be deallocated before creating the arrays to be used to add
-the elements.
+specify elements.
 
 .. code::
 
@@ -474,7 +468,9 @@ LocStream
 A location stream (LocStream) can be used to represent the locations of a set of
 data points. For example, in the data assimilation world, LocStreams can be used
 to represent a set of observations. The values of the data points are stored
-within a Field created using the LocStream.
+within a Field created using the LocStream. The ESMF reference
+manual has an in-depth description of the 
+`LocStream class <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05090000000000000000>`_.
 
 The locations are generally described using Cartesian (x, y, z), or
 (lat, lon, radius) coordinates. The coordinates are stored using constructs
