@@ -2917,15 +2917,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       if(associated(xgrid%xgtypep%sparseMatA2X)) then
+          do i = 1, size(xgrid%xgtypep%sparseMatA2X)
+            if(associated(xgrid%xgtypep%sparseMatA2X(i)%factorIndexList)) &
+              deallocate(xgrid%xgtypep%sparseMatA2X(i)%factorIndexList)
+            if(associated(xgrid%xgtypep%sparseMatA2X(i)%factorList)) &
+              deallocate(xgrid%xgtypep%sparseMatA2X(i)%factorList)
+          enddo
           deallocate(xgrid%xgtypep%sparseMatA2X)
       endif
       if(associated(xgrid%xgtypep%sparseMatX2A)) then
+          do i = 1, size(xgrid%xgtypep%sparseMatX2A)
+            if(associated(xgrid%xgtypep%sparseMatX2A(i)%factorIndexList)) &
+              deallocate(xgrid%xgtypep%sparseMatX2A(i)%factorIndexList)
+            if(associated(xgrid%xgtypep%sparseMatX2A(i)%factorList)) &
+              deallocate(xgrid%xgtypep%sparseMatX2A(i)%factorList)
+          enddo
           deallocate(xgrid%xgtypep%sparseMatX2A)
       endif
       if(associated(xgrid%xgtypep%sparseMatB2X)) then
+          do i = 1, size(xgrid%xgtypep%sparseMatB2X)
+            if(associated(xgrid%xgtypep%sparseMatB2X(i)%factorIndexList)) &
+              deallocate(xgrid%xgtypep%sparseMatB2X(i)%factorIndexList)
+            if(associated(xgrid%xgtypep%sparseMatB2X(i)%factorList)) &
+              deallocate(xgrid%xgtypep%sparseMatB2X(i)%factorList)
+          enddo
           deallocate(xgrid%xgtypep%sparseMatB2X)
       endif
       if(associated(xgrid%xgtypep%sparseMatX2B)) then
+          do i = 1, size(xgrid%xgtypep%sparseMatX2B)
+            if(associated(xgrid%xgtypep%sparseMatX2B(i)%factorIndexList)) &
+              deallocate(xgrid%xgtypep%sparseMatX2B(i)%factorIndexList)
+            if(associated(xgrid%xgtypep%sparseMatX2B(i)%factorList)) &
+              deallocate(xgrid%xgtypep%sparseMatX2B(i)%factorList)
+          enddo
           deallocate(xgrid%xgtypep%sparseMatX2B)
       endif
 

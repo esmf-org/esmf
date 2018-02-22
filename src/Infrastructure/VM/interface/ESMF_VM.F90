@@ -8456,7 +8456,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMShutdown - Shutdown a VM
 
 ! !INTERFACE:
-  subroutine ESMF_VMShutdown(vm, vmplan, vm_info, rc)
+  recursive subroutine ESMF_VMShutdown(vm, vmplan, vm_info, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)              :: vm
