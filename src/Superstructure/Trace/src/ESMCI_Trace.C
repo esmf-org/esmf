@@ -162,7 +162,7 @@ namespace ESMCI {
       unsigned long hash = 5381;
       int c;
       const char *str = s.c_str();     
-      while (c = *str++)
+      while ((c = *str++))
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
       //printf("hash for %s = %d\n", s.c_str(), hash % REGION_HASHTABLE_SIZE);
       return hash % REGION_HASHTABLE_SIZE;
