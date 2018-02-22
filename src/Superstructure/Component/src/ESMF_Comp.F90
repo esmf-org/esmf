@@ -2526,10 +2526,11 @@ contains
 ! !IROUTINE: ESMF_CompStatusGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
-  function ESMF_CompStatusGetInit(compStatus) 
+  recursive function ESMF_CompStatusGetInit(compStatus) &
+    result (CompStatusGetInit)
 !
 ! !RETURN VALUE:
-    ESMF_INIT_TYPE :: ESMF_CompStatusGetInit   
+    ESMF_INIT_TYPE :: CompStatusGetInit
 !
 ! !ARGUMENTS:
     type(ESMF_CompStatus), intent(in), optional :: compStatus
@@ -2546,9 +2547,9 @@ contains
 !EOPI
 !------------------------------------------------------------------------------
     if (present(compStatus)) then
-      ESMF_CompStatusGetInit = ESMF_INIT_GET(compStatus)
+      CompStatusGetInit = ESMF_INIT_GET(compStatus)
     else
-      ESMF_CompStatusGetInit = ESMF_INIT_DEFINED
+      CompStatusGetInit = ESMF_INIT_DEFINED
     endif
 
   end function ESMF_CompStatusGetInit

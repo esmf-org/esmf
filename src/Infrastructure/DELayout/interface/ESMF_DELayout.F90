@@ -2145,10 +2145,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DELayoutGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
-  function ESMF_DELayoutGetInit(delayout) 
+  recursive function ESMF_DELayoutGetInit(delayout) result (DELayoutGetInit)
 !
 ! !RETURN VALUE:
-    ESMF_INIT_TYPE :: ESMF_DELayoutGetInit   
+    ESMF_INIT_TYPE :: DELayoutGetInit
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout), intent(in), optional :: delayout
@@ -2165,9 +2165,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     if (present(delayout)) then
-      ESMF_DELayoutGetInit = ESMF_INIT_GET(delayout)
+      DELayoutGetInit = ESMF_INIT_GET(delayout)
     else
-      ESMF_DELayoutGetInit = ESMF_INIT_CREATED
+      DELayoutGetInit = ESMF_INIT_CREATED
     endif
 
   end function ESMF_DELayoutGetInit
@@ -2181,7 +2181,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DELayoutSetInitCreated - Set DELayout init code to "CREATED"
 
 ! !INTERFACE:
-  subroutine ESMF_DELayoutSetInitCreated(delayout, rc)
+  recursive subroutine ESMF_DELayoutSetInitCreated(delayout, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(inout)           :: delayout

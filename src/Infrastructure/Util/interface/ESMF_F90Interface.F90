@@ -428,7 +428,7 @@ contains
 ! !IROUTINE: ESMF_InterArrayGet - Get array pointer out of InterArray
 
 ! !INTERFACE:
-  subroutine ESMF_InterArrayGet(array, farray1D, farray2D, farray3D, &
+  recursive subroutine ESMF_InterArrayGet(array, farray1D, farray2D, farray3D, &
     farray1DI8, farray2DI8, farray3DI8, rc)
 !
 ! !ARGUMENTS:
@@ -495,7 +495,7 @@ contains
 ! !IROUTINE: ESMF_InterArrayDestroy - Destroy InterArray
 
 ! !INTERFACE:
-  subroutine ESMF_InterArrayDestroy(array, rc)
+  recursive subroutine ESMF_InterArrayDestroy(array, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InterArray), intent(inout)         :: array
