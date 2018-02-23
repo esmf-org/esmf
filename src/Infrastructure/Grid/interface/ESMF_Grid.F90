@@ -14087,11 +14087,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            endif
            if (docorner) then
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-               lonCornerPtr = lonCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
-               latCornerPtr = latCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
+              lonCornerPtr(:,:) = &
+                lonCornerPtrR4(:ubound(lonCornerPtr,1),:ubound(lonCornerPtr,2))&
+                * ESMF_COORDSYS_RAD2DEG
+              latCornerPtr(:,:) = &
+                latCornerPtrR4(:ubound(latCornerPtr,1),:ubound(latCornerPtr,2))&
+                * ESMF_COORDSYS_RAD2DEG
              else
-               lonCornerPtr = lonCornerPtrR4
-               latCornerPtr = latCornerPtrR4
+              lonCornerPtr(:,:) = &
+                lonCornerPtrR4(:ubound(lonCornerPtr,1),:ubound(lonCornerPtr,2))
+              latCornerPtr(:,:) = &
+                latCornerPtrR4(:ubound(latCornerPtr,1),:ubound(latCornerPtr,2))
              endif
              deallocate(lonCornerPtrR4, latCornerPtrR4)
            endif  
