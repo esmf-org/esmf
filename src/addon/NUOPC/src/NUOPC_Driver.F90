@@ -154,7 +154,7 @@ module NUOPC_Driver
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine SetServices(driver, rc)
+  recursive subroutine SetServices(driver, rc)
     type(ESMF_GridComp)  :: driver
     integer, intent(out) :: rc
     
@@ -273,7 +273,7 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP0(gcomp, importState, exportState, clock, rc)
+  recursive subroutine InitializeP0(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)   :: gcomp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
@@ -287,7 +287,7 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP1(gcomp, importState, exportState, clock, rc)
+  recursive subroutine InitializeP1(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)   :: gcomp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
@@ -2504,13 +2504,13 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
-  subroutine NUOPC_DriverAddGridComp(driver, compLabel, &
+  recursive subroutine NUOPC_DriverAddGridComp(driver, compLabel, &
     compSetServicesRoutine, petList, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: compLabel
     interface
-      subroutine compSetServicesRoutine(gridcomp, rc)
+      recursive subroutine compSetServicesRoutine(gridcomp, rc)
         use ESMF
         implicit none
         type(ESMF_GridComp)        :: gridcomp ! must not be optional
@@ -2657,7 +2657,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
-  subroutine NUOPC_DriverAddGridCompSO(driver, compLabel, &
+  recursive subroutine NUOPC_DriverAddGridCompSO(driver, compLabel, &
     sharedObj, petList, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
@@ -2804,14 +2804,14 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
-  subroutine NUOPC_DriverAddCplComp(driver, srcCompLabel, dstCompLabel, &
-    compSetServicesRoutine, petList, comp, rc)
+  recursive subroutine NUOPC_DriverAddCplComp(driver, srcCompLabel, &
+    dstCompLabel, compSetServicesRoutine, petList, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: srcCompLabel
     character(len=*),    intent(in)            :: dstCompLabel
     interface
-      subroutine compSetServicesRoutine(cplcomp, rc)
+      recursive subroutine compSetServicesRoutine(cplcomp, rc)
         use ESMF
         implicit none
         type(ESMF_CplComp)         :: cplcomp  ! must not be optional
@@ -3092,7 +3092,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddRunElement()
-  subroutine NUOPC_DriverAddRunElementMPL(driver, slot, compLabel, &
+  recursive subroutine NUOPC_DriverAddRunElementMPL(driver, slot, compLabel, &
     keywordEnforcer, phaseLabel, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
@@ -3224,7 +3224,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddRunElement()
-  subroutine NUOPC_DriverAddRunElementCPL(driver, slot, srcCompLabel, &
+  recursive subroutine NUOPC_DriverAddRunElementCPL(driver, slot, srcCompLabel,&
     dstCompLabel, keywordEnforcer, phaseLabel, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
@@ -3377,7 +3377,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddRunElement()
-  subroutine NUOPC_DriverAddRunElementL(driver, slot, linkSlot, rc)
+  recursive subroutine NUOPC_DriverAddRunElementL(driver, slot, linkSlot, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     integer,             intent(in)            :: slot
@@ -3421,7 +3421,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: NUOPC_DriverEgestRunSequence - Egest the run sequence as FreeFormat
 !
 ! !INTERFACE:
-  subroutine NUOPC_DriverEgestRunSequence(driver, freeFormat, rc)
+  recursive subroutine NUOPC_DriverEgestRunSequence(driver, freeFormat, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                           :: driver
     type(NUOPC_FreeFormat), intent(out)           :: freeFormat
@@ -3465,7 +3465,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
-  subroutine NUOPC_DriverGetGridComp(driver, compLabel, comp, petList, &
+  recursive subroutine NUOPC_DriverGetGridComp(driver, compLabel, comp, petList, &
     relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
@@ -3561,8 +3561,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
-  subroutine NUOPC_DriverGetCplComp(driver, srcCompLabel, dstCompLabel, &
-    comp, petList, relaxedflag, rc)
+  recursive subroutine NUOPC_DriverGetCplComp(driver, srcCompLabel, &
+    dstCompLabel, comp, petList, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: srcCompLabel
@@ -3642,7 +3642,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
-  subroutine NUOPC_DriverGetAllGridComp(driver, compList, petLists, rc)
+  recursive subroutine NUOPC_DriverGetAllGridComp(driver, compList, petLists, &
+    rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     type(ESMF_GridComp), pointer, optional     :: compList(:)
@@ -3732,7 +3733,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
-  subroutine NUOPC_DriverGetAllCplComp(driver, compList, rc)
+  recursive subroutine NUOPC_DriverGetAllCplComp(driver, compList, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     type(ESMF_CplComp),  pointer               :: compList(:)
@@ -3806,8 +3807,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: NUOPC_DriverIngestRunSequence - Ingest the run sequence from FreeFormat
 !
 ! !INTERFACE:
-  subroutine NUOPC_DriverIngestRunSequence(driver, freeFormat, autoAddConnectors, &
-   rc)
+  recursive subroutine NUOPC_DriverIngestRunSequence(driver, freeFormat, &
+    autoAddConnectors, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                           :: driver
     type(NUOPC_FreeFormat), intent(in)            :: freeFormat
@@ -4114,7 +4115,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: NUOPC_DriverNewRunSequence - Replace the run sequence in a Driver
 !
 ! !INTERFACE:
-  subroutine NUOPC_DriverNewRunSequence(driver, slotCount, rc)
+  recursive subroutine NUOPC_DriverNewRunSequence(driver, slotCount, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     integer,             intent(in)            :: slotCount
@@ -4161,7 +4162,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: NUOPC_DriverPrint - Print internal Driver information
 !
 ! !INTERFACE:
-  subroutine NUOPC_DriverPrint(driver, orderflag, rc)
+  recursive subroutine NUOPC_DriverPrint(driver, orderflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     logical,             intent(in),  optional :: orderflag
@@ -4273,7 +4274,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverSetRunSequence()
-  subroutine NUOPC_DriverSetRunSequence(driver, slot, clock, rc)
+  recursive subroutine NUOPC_DriverSetRunSequence(driver, slot, clock, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     integer,             intent(in)            :: slot
@@ -4312,7 +4313,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
   !-----------------------------------------------------------------------------
 
-  subroutine IInitAdvertize(driver, importState, exportState, clock, rc)
+  recursive subroutine IInitAdvertize(driver, importState, exportState, clock, &
+    rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -4348,7 +4350,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
   !-----------------------------------------------------------------------------
 
-  subroutine IInitAdvertizeFinish(driver, importState, exportState, clock, rc)
+  recursive subroutine IInitAdvertizeFinish(driver, importState, exportState, &
+    clock, rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -4384,7 +4387,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   !-----------------------------------------------------------------------------
 
-  subroutine IInitModifyCplLists(driver, importState, exportState, clock, rc)
+  recursive subroutine IInitModifyCplLists(driver, importState, exportState, &
+    clock, rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -4446,7 +4450,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
   contains
   
-    subroutine addCplListOption(connector, rc)
+    recursive subroutine addCplListOption(connector, rc)
       type(ESMF_CplComp)              :: connector
       integer, intent(out)            :: rc
       ! local variables
@@ -4483,7 +4487,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   !-----------------------------------------------------------------------------
 
-  subroutine IInitCheck(driver, importState, exportState, clock, rc)
+  recursive subroutine IInitCheck(driver, importState, exportState, clock, rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -4517,7 +4521,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
     !---------------------------------------------------------------------------
 
-    subroutine checkProducerConnection(state, rc)
+    recursive subroutine checkProducerConnection(state, rc)
       type(ESMF_State)     :: state
       integer, intent(out) :: rc
       
@@ -4563,7 +4567,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     !---------------------------------------------------------------------------
 
-    subroutine checkConnections(field, connected, producerConnected, &
+    recursive subroutine checkConnections(field, connected, producerConnected, &
       consumerConnected, rc)
       type(ESMF_Field), intent(in)  :: field
       logical, intent(out)          :: connected
@@ -4598,7 +4602,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
   !-----------------------------------------------------------------------------
 
-  subroutine rmFieldsWoConsumerConnection(state, name, rc)
+  recursive subroutine rmFieldsWoConsumerConnection(state, name, rc)
     type(ESMF_State)     :: state
     character(len=*)     :: name
     integer, intent(out) :: rc
@@ -4646,7 +4650,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   !-----------------------------------------------------------------------------
 
-  subroutine IInitRealize(driver, importState, exportState, clock, rc)
+  recursive subroutine IInitRealize(driver, importState, exportState, clock, rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -4680,7 +4684,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
     !---------------------------------------------------------------------------
 
-    subroutine completeAllFields(state, rc)
+    recursive subroutine completeAllFields(state, rc)
       type(ESMF_State)     :: state
       integer, intent(out) :: rc
       
@@ -4808,8 +4812,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
   !-----------------------------------------------------------------------------
 
-  subroutine InternalInitializeComplete(driver, importState, exportState, &
-    clock, rc)
+  recursive subroutine InternalInitializeComplete(driver, importState, &
+    exportState, clock, rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -4885,7 +4889,8 @@ call ESMF_LogWrite(trim(name)//": Exiting InternalInitializeComplete", &
 
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeIPDv02p5(gcomp, importState, exportState, clock, rc)
+  recursive subroutine InitializeIPDv02p5(gcomp, importState, exportState, &
+    clock, rc)
     ! direct copy of the InitializeP5 routine in NUOPC_Model!!!!
     type(ESMF_GridComp)   :: gcomp
     type(ESMF_State)      :: importState, exportState
