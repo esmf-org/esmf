@@ -4069,12 +4069,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
+        ! Set to destroy proxy objects
+        lstypep%destroyKeys(i)=.true.
       enddo
 
 
      ! Set to destroy proxy objects
      lstypep%destroyDistgrid=.true.
-     lstypep%destroyKeys=.true.
 
      ! Set pointer to locstream
      ESMF_LocStreamDeserialize%lstypep=>lstypep
