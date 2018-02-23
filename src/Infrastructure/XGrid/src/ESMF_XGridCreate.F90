@@ -2622,14 +2622,14 @@ end subroutine checkGrid
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        do i = 0, localDeCount-1
-				 call ESMF_ArrayGet(Array, localDe=i, farrayPtr=frac, rc=localrc)
-				 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-					 ESMF_CONTEXT, rcToReturn=rc)) return
+         call ESMF_ArrayGet(Array, localDe=i, farrayPtr=frac, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
-				 ! Call through to the C++ object that does the work
-				 call ESMF_MeshGetElemFrac(Mesh, frac, rc=localrc)
-				 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-					 ESMF_CONTEXT, rcToReturn=rc)) return 
+         ! Call through to the C++ object that does the work
+         call ESMF_MeshGetElemFrac(Mesh, frac, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return 
        enddo
 
       rc = ESMF_SUCCESS
@@ -2690,14 +2690,14 @@ end subroutine checkGrid
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        do i = 0, localDeCount-1
-				 call ESMF_ArrayGet(Array, localDe=i, farrayPtr=frac, rc=localrc)
-				 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-					 ESMF_CONTEXT, rcToReturn=rc)) return
+         call ESMF_ArrayGet(Array, localDe=i, farrayPtr=frac, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
-				 ! Call through to the C++ object that does the work
-				 call ESMF_MeshGetElemFrac2(Mesh, frac, rc=localrc)
-				 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-					 ESMF_CONTEXT, rcToReturn=rc)) return
+         ! Call through to the C++ object that does the work
+         call ESMF_MeshGetElemFrac2(Mesh, frac, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
 
       rc = ESMF_SUCCESS

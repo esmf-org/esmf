@@ -385,21 +385,21 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-	    !------------------------------------------------------------------------
-	    !NEX_UTest
-	    write(name, *) "XGrid equality before assignment Test"
-	    write(failMsg, *) "Did not return ESMF_SUCCESS"
-	    xgridBool = (xgridAlias.eq.xgrid)
-	    call ESMF_Test(.not.xgridBool, name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !NEX_UTest
+        write(name, *) "XGrid equality before assignment Test"
+        write(failMsg, *) "Did not return ESMF_SUCCESS"
+        xgridBool = (xgridAlias.eq.xgrid)
+        call ESMF_Test(.not.xgridBool, name, failMsg, result, ESMF_SRCLINE)
 
-	    !------------------------------------------------------------------------
-	    !NEX_UTest
-	    ! Testing ESMF_XGridAssignment(=)()
-	    write(name, *) "XGrid assignment and equality Test"
-	    write(failMsg, *) "Did not return ESMF_SUCCESS"
-	    xgridAlias = xgrid
-	    xgridBool = (xgridAlias.eq.xgrid)
-	    call ESMF_Test(xgridBool, name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !NEX_UTest
+        ! Testing ESMF_XGridAssignment(=)()
+        write(name, *) "XGrid assignment and equality Test"
+        write(failMsg, *) "Did not return ESMF_SUCCESS"
+        xgridAlias = xgrid
+        xgridBool = (xgridAlias.eq.xgrid)
+        call ESMF_Test(xgridBool, name, failMsg, result, ESMF_SRCLINE)
 
 
         call ESMF_XGridGet(xgrid, ngridA=ngridA, ngridB=ngridB, &
@@ -475,28 +475,28 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-	    !------------------------------------------------------------------------
-	    !NEX_UTest
-	    write(name, *) "XGridDestroy Test"
-	    write(failMsg, *) "Did not return ESMF_SUCCESS"
-	    call ESMF_XGridDestroy(xgrid, rc=rc)
-	    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !NEX_UTest
+        write(name, *) "XGridDestroy Test"
+        write(failMsg, *) "Did not return ESMF_SUCCESS"
+        call ESMF_XGridDestroy(xgrid, rc=rc)
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-	    !------------------------------------------------------------------------
-	    !NEX_UTest
-	    ! Testing ESMF_XGridOperator(==)()
-	    write(name, *) "XGrid equality after destroy Test"
-	    write(failMsg, *) "Did not return ESMF_SUCCESS"
-	    xgridBool = (xgridAlias==xgrid)
-	    call ESMF_Test(.not.xgridBool, name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !NEX_UTest
+        ! Testing ESMF_XGridOperator(==)()
+        write(name, *) "XGrid equality after destroy Test"
+        write(failMsg, *) "Did not return ESMF_SUCCESS"
+        xgridBool = (xgridAlias==xgrid)
+        call ESMF_Test(.not.xgridBool, name, failMsg, result, ESMF_SRCLINE)
 
-	    !------------------------------------------------------------------------
-	    !NEX_UTest
-	    ! Testing ESMF_XGridOperator(/=)()
-	    write(name, *) "XGrid non-equality after destroy Test"
-	    write(failMsg, *) "Did not return ESMF_SUCCESS"
-	    xgridBool = (xgridAlias/=xgrid)
-	    call ESMF_Test(xgridBool, name, failMsg, result, ESMF_SRCLINE)
+        !------------------------------------------------------------------------
+        !NEX_UTest
+        ! Testing ESMF_XGridOperator(/=)()
+        write(name, *) "XGrid non-equality after destroy Test"
+        write(failMsg, *) "Did not return ESMF_SUCCESS"
+        xgridBool = (xgridAlias/=xgrid)
+        call ESMF_Test(xgridBool, name, failMsg, result, ESMF_SRCLINE)
 
         do i = 1, 2
             call ESMF_GridDestroy(sideA(i), rc = localrc)
