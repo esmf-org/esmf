@@ -445,46 +445,43 @@ int main(void){
       fieldls1ptr[i] = -9999.0;
   }
   
-  // //---------------------------------------------------------------------------- 
-  // //NEX_disable_UTest 
-  // strcpy(name, "Create ESMC_Field object on LocStream using ArraySpec");
-  // strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  // rc = ESMC_ArraySpecSet(&arrayspec2, 1, ESMC_TYPEKIND_R8);
-  // fieldls2 = ESMC_FieldCreateLocStreamArraySpec(locstream, arrayspec2,
-	// 				       NULL, NULL, NULL, "dstfield", &rc);
-  // ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  // //---------------------------------------------------------------------------- 
-  // 
-  // //----------------------------------------------------------------------------
-  // //NEX_disable_UTest
-  // strcpy(name, "Get a void * C pointer to data from ESMC_Field object 2");
-  // strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  // fieldls2ptr = (double *) ESMC_FieldGetPtr(fieldls2, 0, &rc);
-  // ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  // //----------------------------------------------------------------------------
-  // 
-  // // initialize destination field
-  // {
-  //   int i;
-  //   for(i=0;i<ls_size;++i) {
-  //     fieldls2ptr[i] = -9999.0;
-  //     if (fieldls2ptr[i] != fieldls1ptr[i]) correct = false;
-  //   }
-  // }
-  // 
-  // //----------------------------------------------------------------------------
-  // //NEX_disable_UTest
-  // strcpy(name, "Validate C pointers to data from ESMC_Field objects created on LocStream");
-  // strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  // ESMC_Test((correct == true), name, failMsg, &result, __FILE__, __LINE__, 0);
-  // //----------------------------------------------------------------------------
-
+#if 0
+  //---------------------------------------------------------------------------- 
+  //NEX_disable_UTest 
+  strcpy(name, "Create ESMC_Field object on LocStream using ArraySpec");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ArraySpecSet(&arrayspec2, 1, ESMC_TYPEKIND_R8);
+  fieldls2 = ESMC_FieldCreateLocStreamArraySpec(locstream, arrayspec2,
+    NULL, NULL, NULL, "dstfield", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //---------------------------------------------------------------------------- 
+  
+  //----------------------------------------------------------------------------
+  //NEX_disable_UTest
+  strcpy(name, "Get a void * C pointer to data from ESMC_Field object 2");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  fieldls2ptr = (double *) ESMC_FieldGetPtr(fieldls2, 0, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  
+  // initialize destination field
+  {
+    int i;
+    for(i=0;i<ls_size;++i) {
+      fieldls2ptr[i] = -9999.0;
+      if (fieldls2ptr[i] != fieldls1ptr[i]) correct = false;
+    }
+  }
+  
+  //----------------------------------------------------------------------------
+  //NEX_disable_UTest
+  strcpy(name, "Validate C pointers to data from ESMC_Field objects created on LocStream");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  ESMC_Test((correct == true), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+#endif
 
   //----------------------------------------------------------------------------                  
-
-
-
-
   free(nodeId);
   free(nodeCoord);
   free(nodeOwner);

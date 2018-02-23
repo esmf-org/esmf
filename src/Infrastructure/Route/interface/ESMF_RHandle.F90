@@ -93,7 +93,7 @@ module ESMF_RHandleMod
     logical             :: handleAllElements
   end type
   
-  type ESMF_DynamicMaskStateWrapR8R8R8
+  type ESMF_DynamicMaskStateWrpR8R8R8
     type(ESMF_DynamicMaskStateR8R8R8), pointer :: wrap
   end type
 
@@ -124,7 +124,7 @@ module ESMF_RHandleMod
     logical             :: handleAllElements
   end type
   
-  type ESMF_DynamicMaskStateWrapR8R8R8V
+  type ESMF_DynamicMaskStateWrpR8R8R8V
     type(ESMF_DynamicMaskStateR8R8R8V), pointer :: wrap
   end type
 
@@ -153,7 +153,7 @@ module ESMF_RHandleMod
     logical             :: handleAllElements
   end type
   
-  type ESMF_DynamicMaskStateWrapR4R8R4
+  type ESMF_DynamicMaskStateWrpR4R8R4
     type(ESMF_DynamicMaskStateR4R8R4), pointer :: wrap
   end type
   
@@ -182,7 +182,7 @@ module ESMF_RHandleMod
     logical             :: handleAllElements
   end type
   
-  type ESMF_DynamicMaskStateWrapR4R8R4V
+  type ESMF_DynamicMaskStateWrpR4R8R4V
     type(ESMF_DynamicMaskStateR4R8R4V), pointer :: wrap
   end type
 
@@ -211,7 +211,7 @@ module ESMF_RHandleMod
     logical             :: handleAllElements
   end type
   
-  type ESMF_DynamicMaskStateWrapR4R4R4
+  type ESMF_DynamicMaskStateWrpR4R4R4
     type(ESMF_DynamicMaskStateR4R4R4), pointer :: wrap
   end type
   
@@ -240,7 +240,7 @@ module ESMF_RHandleMod
     logical             :: handleAllElements
   end type
   
-  type ESMF_DynamicMaskStateWrapR4R4R4V
+  type ESMF_DynamicMaskStateWrpR4R4R4V
     type(ESMF_DynamicMaskStateR4R4R4V), pointer :: wrap
   end type
 
@@ -251,18 +251,18 @@ module ESMF_RHandleMod
   public ESMF_RouteHandle
   public ESMF_UNINITIALIZEDHANDLE, ESMF_ARRAYSPARSEMATMULHANDLE
   public ESMF_DynamicMaskRoutineR8R8R8
-  public ESMF_DynamicMaskStateR8R8R8, ESMF_DynamicMaskStateWrapR8R8R8
+  public ESMF_DynamicMaskStateR8R8R8, ESMF_DynamicMaskStateWrpR8R8R8
 #ifndef ESMF_NO_DYNMASKOVERLOAD
   public ESMF_DynamicMaskRoutineR8R8R8V
-  public ESMF_DynamicMaskStateR8R8R8V, ESMF_DynamicMaskStateWrapR8R8R8V
+  public ESMF_DynamicMaskStateR8R8R8V, ESMF_DynamicMaskStateWrpR8R8R8V
   public ESMF_DynamicMaskRoutineR4R8R4
-  public ESMF_DynamicMaskStateR4R8R4, ESMF_DynamicMaskStateWrapR4R8R4
+  public ESMF_DynamicMaskStateR4R8R4, ESMF_DynamicMaskStateWrpR4R8R4
   public ESMF_DynamicMaskRoutineR4R8R4V
-  public ESMF_DynamicMaskStateR4R8R4V, ESMF_DynamicMaskStateWrapR4R8R4V
+  public ESMF_DynamicMaskStateR4R8R4V, ESMF_DynamicMaskStateWrpR4R8R4V
   public ESMF_DynamicMaskRoutineR4R4R4
-  public ESMF_DynamicMaskStateR4R4R4, ESMF_DynamicMaskStateWrapR4R4R4
+  public ESMF_DynamicMaskStateR4R4R4, ESMF_DynamicMaskStateWrpR4R4R4
   public ESMF_DynamicMaskRoutineR4R4R4V
-  public ESMF_DynamicMaskStateR4R4R4V, ESMF_DynamicMaskStateWrapR4R4R4V
+  public ESMF_DynamicMaskStateR4R4R4V, ESMF_DynamicMaskStateWrpR4R4R4V
 #endif
 
 !------------------------------------------------------------------------------
@@ -1282,10 +1282,10 @@ recursive subroutine f_esmf_dynmaskcallbackr8r8r8(routehandle, count, &
   integer                       :: rc
   ! local variables
   integer                       :: localrc, i, ii, j, k, k_in, v
-  type(ESMF_DynamicMaskStateWrapR8R8R8)   :: dynamicMaskState
+  type(ESMF_DynamicMaskStateWrpR8R8R8)   :: dynamicMaskState
   type(ESMF_DynamicMaskElementR8R8R8), pointer  :: dynamicMaskList(:)
 #ifndef ESMF_NO_DYNMASKOVERLOAD
-  type(ESMF_DynamicMaskStateWrapR8R8R8V)  :: dynamicMaskStateV
+  type(ESMF_DynamicMaskStateWrpR8R8R8V)  :: dynamicMaskStateV
   type(ESMF_DynamicMaskElementR8R8R8V), pointer :: dynamicMaskListV(:)
 #endif
 
@@ -1466,9 +1466,9 @@ recursive subroutine f_esmf_dynmaskcallbackr4r8r4(routehandle, count, &
   integer                       :: rc
   ! local variables
   integer                       :: localrc, i, ii, j, k, k_in, v
-  type(ESMF_DynamicMaskStateWrapR4R8R4)   :: dynamicMaskState
+  type(ESMF_DynamicMaskStateWrpR4R8R4)   :: dynamicMaskState
   type(ESMF_DynamicMaskElementR4R8R4), pointer  :: dynamicMaskList(:)
-  type(ESMF_DynamicMaskStateWrapR4R8R4V)  :: dynamicMaskStateV
+  type(ESMF_DynamicMaskStateWrpR4R8R4V)  :: dynamicMaskStateV
   type(ESMF_DynamicMaskElementR4R8R4V), pointer :: dynamicMaskListV(:)
 
   ! Initialize return code; assume routine not implemented
@@ -1645,9 +1645,9 @@ recursive subroutine f_esmf_dynmaskcallbackr4r4r4(routehandle, count, &
   integer                       :: rc
   ! local variables
   integer                       :: localrc, i, ii, j, k, k_in, v
-  type(ESMF_DynamicMaskStateWrapR4R4R4)   :: dynamicMaskState
+  type(ESMF_DynamicMaskStateWrpR4R4R4)   :: dynamicMaskState
   type(ESMF_DynamicMaskElementR4R4R4), pointer  :: dynamicMaskList(:)
-  type(ESMF_DynamicMaskStateWrapR4R4R4V)  :: dynamicMaskStateV
+  type(ESMF_DynamicMaskStateWrpR4R4R4V)  :: dynamicMaskStateV
   type(ESMF_DynamicMaskElementR4R4R4V), pointer :: dynamicMaskListV(:)
 
   ! Initialize return code; assume routine not implemented

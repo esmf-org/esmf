@@ -71,6 +71,8 @@ Mesh::Mesh() : MeshDB(), FieldReg(), CommReg(),
 }
 
 Mesh::~Mesh() {
+  // Get rid of ghost communication structure
+  if (sghost != NULL) delete sghost;
 }
 
 #undef  ESMC_METHOD

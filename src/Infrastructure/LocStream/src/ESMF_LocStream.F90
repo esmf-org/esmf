@@ -4019,23 +4019,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-      ! Allocate arrays for names, etc.
-      allocate (lstypep%keyNames(lstypep%keyCount), stat=localrc )
-      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating KeyNames", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-      allocate (lstypep%keyUnits(lstypep%keyCount), stat=localrc )
-      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating units", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-      allocate (lstypep%keyLongNames(lstypep%keyCount), stat=localrc )
-      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating longNames", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-      allocate( lstypep%keys(lstypep%keyCount), stat=localrc )  ! Array of keys
-      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating keys", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-      allocate( lstypep%destroyKeys(lstypep%keyCount), stat=localrc )  ! Array of keys
-      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating keys", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Initialize key member variables
+      nullify(lstypep%keyNames)
+      nullify(lstypep%keyUnits)
+      nullify(lstypep%keyLongNames)
+      nullify(lstypep%keys)
+      nullify(lstypep%destroyKeys)
 
+      ! Allocate arrays for names, etc.
+      if (lstypep%keyCount .gt. 0) then
+         allocate (lstypep%keyNames(lstypep%keyCount), stat=localrc )
+         if (ESMF_LogFoundAllocError(localrc, msg=" Allocating KeyNames", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+         allocate (lstypep%keyUnits(lstypep%keyCount), stat=localrc )
+         if (ESMF_LogFoundAllocError(localrc, msg=" Allocating units", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+         allocate (lstypep%keyLongNames(lstypep%keyCount), stat=localrc )
+         if (ESMF_LogFoundAllocError(localrc, msg=" Allocating longNames", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+         allocate( lstypep%keys(lstypep%keyCount), stat=localrc )  ! Array of keys
+         if (ESMF_LogFoundAllocError(localrc, msg=" Allocating keys", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+         allocate( lstypep%destroyKeys(lstypep%keyCount), stat=localrc )  ! Array of keys
+         if (ESMF_LogFoundAllocError(localrc, msg=" Allocating keys", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      
       ! Serialize locstream key info
       do i=1,lstypep%keyCount
          ! Deserialize key info
@@ -4060,12 +4069,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
+        ! Set to destroy proxy objects
+        lstypep%destroyKeys(i)=.true.
       enddo
 
 
      ! Set to destroy proxy objects
      lstypep%destroyDistgrid=.true.
-     lstypep%destroyKeys=.true.
 
      ! Set pointer to locstream
      ESMF_LocStreamDeserialize%lstypep=>lstypep

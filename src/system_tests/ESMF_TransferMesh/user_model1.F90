@@ -265,6 +265,14 @@ module user_model1
       elementTypes=elemTypes, elementConn=elemConn, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
+    ! Clean up after mesh create
+    deallocate(nodeIds)
+    deallocate(nodeOwners)
+    deallocate(elemIds)
+    deallocate(elemTypes)
+    deallocate(elemConn)
+    deallocate(nodeCoords)
+
     ! Create an empty Field on the Mesh
     field = ESMF_FieldEmptyCreate(name="srcField", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

@@ -1237,12 +1237,12 @@ end function ESMF_LogFoundDeallocError
 ! !IROUTINE: ESMF_LogFoundError - Check ESMF return code for error and write message
 
 ! !INTERFACE:
-      function ESMF_LogFoundError(rcToCheck,  keywordEnforcer,  &
+  recursive function ESMF_LogFoundError(rcToCheck,  keywordEnforcer,  &
                                   msg, line, file, method, &
-                                  rcToReturn, log)
+                                  rcToReturn, log) result (LogFoundError)
 !
 ! !RETURN VALUE:
-      logical :: ESMF_LogFoundError
+      logical :: LogFoundError
 !
 ! !ARGUMENTS:
 !
@@ -1306,7 +1306,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: msglen
 
     ! set default return
-    ESMF_LogFoundError = .FALSE.
+    LogFoundError = .FALSE.
 
     if (.not.present(rcToCheck)) then
       rcToCheckInternal = ESMF_SUCCESS
@@ -1352,13 +1352,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           end if
           call ESMF_LogWrite(errmsg(:msglen), ESMF_LOGMSG_ERROR,  &
               line=line, file=file, method=method, log=log)
-          ESMF_LogFoundError=.TRUE.
+          LogFoundError=.TRUE.
           if (present(rcToReturn)) rcToReturn = rcToCheckInternal
         endif
       endif
     else
       if (rcToCheckInternal /= ESMF_SUCCESS) then
-        ESMF_LogFoundError=.TRUE.
+        LogFoundError=.TRUE.
         if (present(rcToReturn)) rcToReturn = rcToCheckInternal
       end if
     endif

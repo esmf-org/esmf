@@ -148,7 +148,7 @@ class sintd_cell {
       Throw() << "Invalid cell found.\n";
     }
     sintd_node * operator [](int i) const{
-      if(i < 0 || i >= nodes.size()) Throw() << "sintd_cell: access index out of range.\n";
+      if(i < 0 || (unsigned int)i >= nodes.size()) Throw() << "sintd_cell: access index out of range.\n";
       return nodes[i];
     }
     void replace_node(sintd_node * node){

@@ -1074,6 +1074,7 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     use ESMF_RHandleMod
     use ESMF_FieldRegridMod
     use ESMF_FieldMod
+    use ESMF_IOScripMod
 
     implicit none
 
@@ -1100,27 +1101,78 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     integer :: localrc
     type(ESMF_RouteHandle) :: l_routehandle
 
+    real(ESMF_KIND_R8), pointer :: localFactorList(:)
+    integer(ESMF_KIND_I4), pointer :: localFactorIndexList(:,:)
+    
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
-    call ESMF_FieldRegridStore(srcField, dstField, fileName, &
-                              srcMaskValues=srcMaskValues, &
-                              dstMaskValues=dstMaskValues, &
-                              routehandle=l_routehandle, &
-                              regridmethod=regridmethod, &
-                              polemethod=polemethod, &
-                              regridPoleNPnts=regridPoleNPnts, &
-                              lineType=linetype, &
-                              normType=normtype, &
-                              unmappedaction=unmappedaction, &
-                              ignoreDegenerate=ignoreDegenerate, &
-                              createRoutehandle=createRoutehandle, &
-                              srcFracField=srcFracField, &
-                              dstFracField=dstFracField, &
-                              rc=localrc)
+    if (present (createRoutehandle)) then
+      if (createRoutehandle .eqv. .false.) then  
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+                                   polemethod=polemethod, &
+                                   regridPoleNPnts=regridPoleNPnts, &
+                                   lineType=linetype, &
+                                   normType=normtype, &
+                                   unmappedaction=unmappedaction, &
+                                   ignoreDegenerate=ignoreDegenerate, &
+                                   factorList=localFactorList, &
+                                   factorIndexList=localFactorIndexList, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                   srcMaskValues=srcMaskValues, &
+                                   dstMaskValues=dstMaskValues, &
+                                   regridmethod=regridmethod, &
+                                   polemethod=polemethod, &
+                                   regridPoleNPnts=regridPoleNPnts, &
+                                   lineType=linetype, &
+                                   normType=normtype, &
+                                   unmappedaction=unmappedaction, &
+                                   ignoreDegenerate=ignoreDegenerate, &
+                                   routehandle=l_routehandle, &
+                                   factorList=localFactorList, &
+                                   factorIndexList=localFactorIndexList, &
+                                   srcFracField=srcFracField, &
+                                   dstFracField=dstFracField, &
+                                   rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return        
+      endif
+    else
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                 srcMaskValues=srcMaskValues, &
+                                 dstMaskValues=dstMaskValues, &
+                                 regridmethod=regridmethod, &
+                                 polemethod=polemethod, &
+                                 regridPoleNPnts=regridPoleNPnts, &
+                                 lineType=linetype, &
+                                 normType=normtype, &
+                                 unmappedaction=unmappedaction, &
+                                 ignoreDegenerate=ignoreDegenerate, &
+                                 routehandle=l_routehandle, &
+                                 factorList=localFactorList, &
+                                 factorIndexList=localFactorIndexList, &
+                                 srcFracField=srcFracField, &
+                                 dstFracField=dstFracField, &
+                                 rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return        
+    endif
 
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ! write the weights to file
+    call ESMF_SparseMatrixWrite(localFactorList, localFactorIndexList, &
+                                fileName, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! because ESMF_RouteHandle.this is private, it cannot be accessed directly
@@ -1139,6 +1191,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
+
+    deallocate(localFactorList)
+    deallocate(localFactorIndexList)
 
     rc = ESMF_SUCCESS
 

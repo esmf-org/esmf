@@ -69,11 +69,77 @@
   public ESMF_EsmfInqUnits
   public ESMF_EsmfGetCoords
 
+  public ESMF_SparseMatrixWrite     !TODO: move this into SparseMatrix class
+                                    !TODO: once implemented
+
 !==============================================================================
 
       contains
 
 !==============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_SparseMatrixWrite"
+!BOP
+! !IROUTINE: ESMF_SparseMatrixWrite - Write a sparse matrix to file
+! \label{api:SparseMatrixWrite}
+!
+! !INTERFACE:
+  subroutine ESMF_SparseMatrixWrite(factorList, factorIndexList, fileName, &
+    keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    real(ESMF_KIND_R8),    intent(in)            :: factorList(:)
+    integer(ESMF_KIND_I4), intent(in)            :: factorIndexList(:,:)
+    character(*),          intent(in)            :: fileName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,               intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Write the {\tt factorList} and {\tt factorIndexList} into a NetCDF file.
+!   The data is stored in SCRIP format documented under section 
+!   ~(\ref{sec:weightfileformat}).
+!
+!   Limitations:
+!   \begin{itemize}
+!     \item Only {\tt real(ESMF\_KIND\_R8) factorList} and 
+!           {\tt integer(ESMF\_KIND\_I4) factorIndexList} supported.
+!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
+!   \end{itemize}
+!
+!  The arguments are:
+!  \begin{description}
+!   \item[factorList]
+!    The sparse matrix factors to be written.
+!   \item[factorIndexList]
+!    The sparse matrix sequence indices to be written.
+!   \item[fileName]
+!    The name of the output file to be written.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! Local vars
+    integer                    :: localrc           ! local return code
+
+    ! Initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into lower level implementation
+    call ESMF_OutputWeightFile(weightFile=fileName, factorList=factorList, &
+      factorIndexList=factorIndexList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_SparseMatrixWrite
+!------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------
 !------------------------------------------------------------------------------

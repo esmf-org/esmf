@@ -1505,7 +1505,7 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompDerive - Derive a GridComp from a generic component
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompDerive() 
-  subroutine NUOPC_GridCompDerive(comp, genericSetServicesRoutine, rc)
+  recursive subroutine NUOPC_GridCompDerive(comp, genericSetServicesRoutine, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(in)            :: comp
     interface
@@ -1548,7 +1548,7 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompDerive - Derive a CplComp from a generic component
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompDerive() 
-  subroutine NUOPC_CplCompDerive(comp, genericSetServicesRoutine, rc)
+  recursive subroutine NUOPC_CplCompDerive(comp, genericSetServicesRoutine, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(in)            :: comp
     interface
