@@ -2112,7 +2112,9 @@ extern "C" {
   else if (*attcopyflag == ESMF_ATTCOPY_REFERENCE) {
       ESMCI::Attribute *attrdel = (*destination)->ESMC_BaseGetRoot();
       (*destination)->ESMC_BaseSetRoot((*source)->ESMC_BaseGetRoot());
-      delete attrdel;
+      
+      if (attrdel && (attrdel != (*source)->ESMC_BaseGetRoot()))
+        delete attrdel;
       
       status = ESMF_SUCCESS;
       if (rc) *rc = status;
