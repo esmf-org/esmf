@@ -261,6 +261,16 @@
          return
      endif
 
+     ! deallocate node data
+     deallocate(nodeIds)
+     deallocate(nodeCoords)
+     deallocate(nodeOwners)
+
+     ! deallocate elem data
+     deallocate(elemIds)
+     deallocate(elemTypes)
+     deallocate(elemConn)
+
   
     ! Create dest field
     call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
