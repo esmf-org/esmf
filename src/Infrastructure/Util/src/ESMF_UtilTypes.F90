@@ -1398,18 +1398,18 @@ end function ESMF_atreceq
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Status flags to see if they're the same or not
 
-function ESMF_sfeq(sf1, sf2)
- logical ESMF_sfeq
+recursive function ESMF_sfeq(sf1, sf2) result (sfeq)
+ logical sfeq
  type(ESMF_Status), intent(in) :: sf1, sf2
 
- ESMF_sfeq = (sf1%status == sf2%status)
+ sfeq = (sf1%status == sf2%status)
 end function
 
-function ESMF_sfne(sf1, sf2)
- logical ESMF_sfne
+recursive function ESMF_sfne(sf1, sf2) result (sfne)
+ logical sfne
  type(ESMF_Status), intent(in) :: sf1, sf2
 
- ESMF_sfne = (sf1%status /= sf2%status)
+ sfne = (sf1%status /= sf2%status)
 end function
 
 !------------------------------------------------------------------------------
@@ -1544,14 +1544,14 @@ function ESMF_ptne(pt1, pt2)
  ESMF_ptne = (pt1%ptr /= pt2%ptr)
 end function
 
-subroutine ESMF_ptas(ptval, intval)
+recursive subroutine ESMF_ptas(ptval, intval)
  type(ESMF_Pointer), intent(out) :: ptval
  integer, intent(in) :: intval
 
  ptval%ptr = intval
 end subroutine
 
-subroutine ESMF_ptas2(ptval2, ptval)
+recursive subroutine ESMF_ptas2(ptval2, ptval)
  type(ESMF_Pointer), intent(out) :: ptval2
  type(ESMF_Pointer), intent(in) :: ptval
 

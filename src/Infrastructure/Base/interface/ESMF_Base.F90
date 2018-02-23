@@ -710,7 +710,7 @@ module ESMF_BaseMod
 ! !IROUTINE:  ESMF_BaseGetStatus - get the status
 !
 ! !INTERFACE:
-  subroutine ESMF_BaseGetStatus(base, status, rc)
+  recursive subroutine ESMF_BaseGetStatus(base, status, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base),    intent(in)            :: base

@@ -398,18 +398,18 @@ contains
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_ServiceReply_Flag args to see if they're the same
 
-  function ESMF_sreq(sr1, sr2)
-    logical ESMF_sreq
+  recursive function ESMF_sreq(sr1, sr2) result (sreq)
+    logical sreq
     type(ESMF_ServiceReply_Flag), intent(in) :: sr1, sr2
 
-    ESMF_sreq = (sr1%value == sr2%value)    
+    sreq = (sr1%value == sr2%value)    
   end function
 
-  function ESMF_srne(sr1, sr2)
-    logical ESMF_srne
+  recursive function ESMF_srne(sr1, sr2) result (srne)
+    logical srne
     type(ESMF_ServiceReply_Flag), intent(in) :: sr1, sr2
 
-    ESMF_srne = (sr1%value /= sr2%value)
+    srne = (sr1%value /= sr2%value)
   end function
 !------------------------------------------------------------------------------
 
@@ -1037,8 +1037,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DELayoutGet - Get object-wide DELayout information
 
 ! !INTERFACE:
-  subroutine ESMF_DELayoutGet(delayout, keywordEnforcer, vm, deCount, petMap, &
-    vasMap, oneToOneFlag, pinflag, localDeCount, localDeToDeMap, &
+  recursive subroutine ESMF_DELayoutGet(delayout, keywordEnforcer, vm, deCount,&
+    petMap, vasMap, oneToOneFlag, pinflag, localDeCount, localDeToDeMap, &
     localDeList, &      ! DEPRECATED ARGUMENT
     vasLocalDeCount, vasLocalDeToDeMap, &
     vasLocalDeList, &   ! DEPRECATED ARGUMENT
@@ -2145,10 +2145,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DELayoutGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
-  function ESMF_DELayoutGetInit(delayout) 
+  recursive function ESMF_DELayoutGetInit(delayout) result (DELayoutGetInit)
 !
 ! !RETURN VALUE:
-    ESMF_INIT_TYPE :: ESMF_DELayoutGetInit   
+    ESMF_INIT_TYPE :: DELayoutGetInit
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout), intent(in), optional :: delayout
@@ -2165,9 +2165,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     if (present(delayout)) then
-      ESMF_DELayoutGetInit = ESMF_INIT_GET(delayout)
+      DELayoutGetInit = ESMF_INIT_GET(delayout)
     else
-      ESMF_DELayoutGetInit = ESMF_INIT_CREATED
+      DELayoutGetInit = ESMF_INIT_CREATED
     endif
 
   end function ESMF_DELayoutGetInit
@@ -2181,7 +2181,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DELayoutSetInitCreated - Set DELayout init code to "CREATED"
 
 ! !INTERFACE:
-  subroutine ESMF_DELayoutSetInitCreated(delayout, rc)
+  recursive subroutine ESMF_DELayoutSetInitCreated(delayout, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(inout)           :: delayout

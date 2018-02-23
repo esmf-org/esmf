@@ -688,13 +688,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Region_Flag)      :: opt_zeroregion     ! helper variable
     type(ESMF_TermOrder_Flag)   :: opt_termorderflag  ! helper variable
     type(ESMF_Logical)          :: opt_checkflag      ! helper variable
-    type(ESMF_DynamicMaskStateWrapR8R8R8) :: dynMaskStateR8R8R8
+    type(ESMF_DynamicMaskStateWrpR8R8R8) :: dynMaskStateR8R8R8
 #ifndef ESMF_NO_DYNMASKOVERLOAD
-    type(ESMF_DynamicMaskStateWrapR8R8R8V):: dynMaskStateR8R8R8V
-    type(ESMF_DynamicMaskStateWrapR4R8R4) :: dynMaskStateR4R8R4
-    type(ESMF_DynamicMaskStateWrapR4R8R4V):: dynMaskStateR4R8R4V
-    type(ESMF_DynamicMaskStateWrapR4R4R4) :: dynMaskStateR4R4R4
-    type(ESMF_DynamicMaskStateWrapR4R4R4V):: dynMaskStateR4R4R4V
+    type(ESMF_DynamicMaskStateWrpR8R8R8V):: dynMaskStateR8R8R8V
+    type(ESMF_DynamicMaskStateWrpR4R8R4) :: dynMaskStateR4R8R4
+    type(ESMF_DynamicMaskStateWrpR4R8R4V):: dynMaskStateR4R8R4V
+    type(ESMF_DynamicMaskStateWrpR4R4R4) :: dynMaskStateR4R4R4
+    type(ESMF_DynamicMaskStateWrpR4R4R4V):: dynMaskStateR4R4R4V
 #endif
     type(ESMF_Logical)          :: handleAllElements
 

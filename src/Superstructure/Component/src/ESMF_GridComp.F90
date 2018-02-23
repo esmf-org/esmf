@@ -892,13 +892,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_GridCompGet - Get GridComp information
 !
 ! !INTERFACE:
-  subroutine ESMF_GridCompGet(gridcomp, keywordEnforcer, gridIsPresent, grid, &
-    gridList, meshIsPresent, mesh, meshList, locstreamIsPresent, locstream, &
-    locstreamList, xgridIsPresent, xgrid, xgridList, &
-    importStateIsPresent, importState, exportStateIsPresent, exportState, &
-    configIsPresent, config, configFileIsPresent, configFile, &
-    clockIsPresent, clock, localPet, petCount, contextflag, &
-    currentMethod, currentPhase, comptype, vmIsPresent, vm, name, rc)
+  recursive subroutine ESMF_GridCompGet(gridcomp, keywordEnforcer, &
+    gridIsPresent, grid, gridList, meshIsPresent, mesh, meshList, &
+    locstreamIsPresent, locstream, locstreamList, xgridIsPresent, &
+    xgrid, xgridList, importStateIsPresent, importState, &
+    exportStateIsPresent, exportState, configIsPresent, config, &
+    configFileIsPresent, configFile, clockIsPresent, clock, localPet, &
+    petCount, contextflag, currentMethod, currentPhase, comptype, &
+    vmIsPresent, vm, name, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp),           intent(in)            :: gridcomp
@@ -3527,10 +3528,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE:  ESMF_GridCompGetInit - Get initialization status.
 
 ! !INTERFACE:
-  function ESMF_GridCompGetInit(d)
+  recursive function ESMF_GridCompGetInit(d) result (GridCompGetInit)
 !
 ! !RETURN VALUE:
-    ESMF_INIT_TYPE :: ESMF_GridCompGetInit
+    ESMF_INIT_TYPE :: GridCompGetInit
 !
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(in), optional :: d
@@ -3547,9 +3548,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     if (present(d)) then
-      ESMF_GridCompGetInit = ESMF_INIT_GET(d)
+      GridCompGetInit = ESMF_INIT_GET(d)
     else
-      ESMF_GridCompGetInit = ESMF_INIT_CREATED
+      GridCompGetInit = ESMF_INIT_CREATED
     endif
   end function ESMF_GridCompGetInit
 !------------------------------------------------------------------------------
