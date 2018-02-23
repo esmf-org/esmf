@@ -2141,7 +2141,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           allocate(gridToFieldMap(gridDimCount),stat=stat)
           if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-            msg="Allocation of internal ungriddedLBound failed.", &
+            msg="Allocation of internal gridToFieldMap failed.", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
           call ESMF_FieldGet(providerField, gridToFieldMap=gridToFieldMap, &
