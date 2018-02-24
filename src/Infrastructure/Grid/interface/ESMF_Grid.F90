@@ -14031,8 +14031,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtr, rc=localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-             allocate(lonCornerPtrR4(count(1)+1, count(2)+1), &
-                latCornerPtrR4(count(1)+1, count(2)+1))
+             shapLon=shape(lonCornerPtr)  ! make sure lhs and rhs is same shape
+             shapLat=shape(latCornerPtr)  ! make sure lhs and rhs is same shape
+             allocate(lonCornerPtrR4(shapLon(1), shapLon(2)), &
+                latCornerPtrR4(shapLat(1),shapLat(2)))
            endif
          else ! ESMF_TYPEKIND_R4
            if (docenter) then
@@ -14087,16 +14089,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              deallocate(lonPtrR4, latPtrR4)
            endif
            if (docorner) then
-             shapLon=shape(lonCornerPtr)  ! make sure lhs and rhs is same shape
-             shapLat=shape(latCornerPtr)! make sure lhs and rhs is same shape
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-              lonCornerPtr = lonCornerPtrR4(1:shapLon(1),1:shapLon(2)) &
-                * ESMF_COORDSYS_RAD2DEG
-              latCornerPtr = latCornerPtrR4(1:shapLat(1),1:shapLat(2)) &
-                * ESMF_COORDSYS_RAD2DEG
+              lonCornerPtr = lonCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
+              latCornerPtr = latCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
              else
-              lonCornerPtr = lonCornerPtrR4(1:shapLon(1),1:shapLon(2))
-              latCornerPtr = latCornerPtrR4(1:shapLat(1),1:shapLat(2))
+              lonCornerPtr = lonCornerPtrR4
+              latCornerPtr = latCornerPtrR4
              endif
              deallocate(lonCornerPtrR4, latCornerPtrR4)
            endif  
