@@ -1997,10 +1997,12 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
         return  ! bail out
 #endif
       
-      if (loopFlag) then
-        ! increment the loop counter
-        runLoopCounter=runLoopCounter+1
-        runElementCounter = 0
+      if (btest(profiling,0)) then
+        if (loopFlag) then
+          ! increment the loop counter
+          runLoopCounter=runLoopCounter+1
+          runElementCounter = 0
+        endif
       endif
       
       i = runElement%i

@@ -283,6 +283,7 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
   integer                       :: rc
   real, allocatable             :: tile_local(:,:,:)
   real, allocatable, save       :: global_tile1(:,:,:)
+  integer                       :: shapLon(2), shapLat(2)
 
     allocate(global_tile1(npts+1,npts+1,ndims))
     call gnomonic_grids(grid_type, npts, global_tile1(:,:,1), global_tile1(:,:,2))
@@ -307,9 +308,11 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
        enddo
     enddo
 
+    shapLon=shape(LonEdge)
+    shapLat=shape(LatEdge)
     if (present(LonEdge) .and. present(LatEdge)) then
-       LonEdge=tile_local(:,:,1)
-       LatEdge=tile_local(:,:,2)
+       LonEdge=tile_local(1:shapLon(1),1:shapLon(2),1)
+       LatEdge=tile_local(1:shapLat(1),1:shapLat(2),2)
     endif
 
     if (present(LonCenter) .and. present(LatCenter)) then
