@@ -2126,10 +2126,11 @@ void ESMCI_meshserialize(Mesh **meshpp,
     if (*inquireflag != ESMF_INQUIREONLY) {
 
       // Save set sizes and values
-      if (nvalSetSizes != NULL)
+      if (nvalSetSizes != NULL) {
         for (int i=0; i<numSets; i++) {
 	  *uip++=nvalSetSizes[i];
         }
+      }
 
       if (nvalSetVals != 0) {
         int k=0;
@@ -2142,10 +2143,11 @@ void ESMCI_meshserialize(Mesh **meshpp,
       }
 
       // Save set obj sizes and values
-      if (nvalSetObjSizes != NULL)
+      if (nvalSetObjSizes != NULL) {
         for (int i=0; i<numSets; i++) {
 	  *uip++=nvalSetObjSizes[i];
         }
+      }
 
       if (nvalSetObjVals != NULL) {
         int k=0;
@@ -2249,14 +2251,18 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
       // Retrieve sizes and values
       nvalSetSizes.resize(numSets,0);
       for (int i=0; i<numSets; i++) {
-	nvalSetSizes[i]=*uip++;
+	//	nvalSetSizes[i]=*uip++; THIS SEEMS TO CONFUSE PGI OPTIMIZER ?
+	nvalSetSizes[i]=*uip;
+	uip++;
       }
 
       int k=0;
       for (int i=0; i<numSets; i++) {
 	nvalSetVals.resize(k+nvalSetSizes[i],0);
 	for (int j=0; j<nvalSetSizes[i]; j++) {
-	  nvalSetVals[k]=*uip++;
+	  //	  nvalSetVals[k]=*uip++; THIS SEEMS TO CONFUSE PGI OPTIMIZER ?
+	  nvalSetVals[k]=*uip;
+	  uip++;
 	  k++;
 	}
       }
@@ -2264,14 +2270,18 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
       // Save set obj sizes and value
       nvalSetObjSizes.resize(numSets,0);
       for (int i=0; i<numSets; i++) {
-	nvalSetObjSizes[i]=*uip++;
+	//	nvalSetObjSizes[i]=*uip++; THIS SEEMS TO CONFUSE PGI OPTIMIZER ?
+	nvalSetObjSizes[i]=*uip;
+	uip++;
       }
 
       k=0;
       for (int i=0; i<numSets; i++) {
 	nvalSetObjVals.resize(k+nvalSetObjSizes[i],0);
 	for (int j=0; j<nvalSetObjSizes[i]; j++) {
-	  nvalSetObjVals[k]=*uip++;
+	  // nvalSetObjVals[k]=*uip++; THIS SEEMS TO CONFUSE PGI OPTIMIZER ?
+	  nvalSetObjVals[k]=*uip;
+	  uip++;
 	  k++;
 	}
       }
