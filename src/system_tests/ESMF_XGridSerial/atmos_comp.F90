@@ -148,7 +148,6 @@ module atmos_comp
     integer, intent(out) :: rc
 
     ! Local variables
-    real(ESMF_KIND_R8)    :: pi
     type(ESMF_Field)      :: field
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     integer               :: i, j
@@ -157,8 +156,6 @@ module atmos_comp
     rc = ESMF_SUCCESS
 
     print *, "Atmosphere Run starting"
-
-    pi = 3.14159d0
 
     ! Get the source Field from the export State
     call ESMF_StateGet(importState, "F_atm", field, rc=rc)
