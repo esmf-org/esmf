@@ -13639,6 +13639,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                                    :: starti, startj, sizei, sizej
     integer                                    :: ind, rem, rem1, rem2
     integer                                    :: start(2), count(2)
+    integer                                    :: shapLon(2), shapLat(2)
     integer, allocatable                       :: minIndexPTile(:,:)
     integer, allocatable                       :: maxIndexPTile(:,:)
     integer, allocatable                       :: regDecomp(:,:)
@@ -14086,12 +14087,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              deallocate(lonPtrR4, latPtrR4)
            endif
            if (docorner) then
+             shapLon=shape(lonCornerPtr)  ! make sure lhs and rhs is same shape
+             shapLat=shape(latCornerPtr)! make sure lhs and rhs is same shape
              if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
-               lonCornerPtr = lonCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
-               latCornerPtr = latCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
+              lonCornerPtr = lonCornerPtrR4(1:shapLon(1),1:shapLon(2)) &
+                * ESMF_COORDSYS_RAD2DEG
+              latCornerPtr = latCornerPtrR4(1:shapLat(1),1:shapLat(2)) &
+                * ESMF_COORDSYS_RAD2DEG
              else
-               lonCornerPtr = lonCornerPtrR4
-               latCornerPtr = latCornerPtrR4
+              lonCornerPtr = lonCornerPtrR4(1:shapLon(1),1:shapLon(2))
+              latCornerPtr = latCornerPtrR4(1:shapLat(1),1:shapLat(2))
              endif
              deallocate(lonCornerPtrR4, latCornerPtrR4)
            endif  
