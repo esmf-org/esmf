@@ -158,8 +158,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{itemize}
 ! \item The SCRIP format~(\ref{sec:fileformat:scrip})
 ! \item The native ESMF format for an unstructured grid~(\ref{sec:fileformat:esmf})
-! \item The GRIDSPEC Tile grid file following the CF metadata convention~(\ref{sec:fileformat:gridspec})
-! \item The proposed CF Unstructured grid (UGRID) format~(\ref{sec:fileformat:ugrid}).  
+! \item The CF Convention Single Tile File format~(\ref{sec:fileformat:gridspec})
+! \item The proposed CF Unstructured grid (UGRID) format~(\ref{sec:fileformat:ugrid})
+! \item The GRIDSPEC Mosaic File format~(\ref{sec:fileformat:mosaic})
 ! \end{itemize}
 ! \smallskip
 ! The weight file is created in SCRIP format~(\ref{sec:weightfileformat}).
@@ -225,11 +226,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error. 
 !           If not specified, {\tt ignoreDegenerate} defaults to false.
 !   \item [{[srcFileType]}]
-!     The file format of the source grid. Please see Section~\ref{const:grid:fileformat} and
-!     Section~\ref{const:mesh:fileformat} for a list of valid options.
+!     The file format of the source grid. Please see Section~\ref{const:fileformatflag} for a list of valid options.
 !   \item [{[dstFileType]}]
-!     The file format of the destination grid.  Please see Section~\ref{const:grid:fileformat} and
-!     Section~\ref{const:mesh:fileformat} for a list of valid options.
+!     The file format of the destination grid.  Please see Section~\ref{const:fileformatflag} for a list of valid options.
 !   \item [{[srcRegionalFlag]}]
 !     If .TRUE., the source grid is a regional grid, otherwise,
 !     it is a global grid.  The default value is .FALSE.

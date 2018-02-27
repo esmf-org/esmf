@@ -5725,8 +5725,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[filename]
 !     The NetCDF Grid filename.
 ! \item[fileformat]
-!     The Grid file format, please see section~\ref{const:grid:fileformat}
-!         for a list of valid options.
+!     The Grid file format.  The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP} and {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
+!     If it is the SCRIP format, the dimension {\tt grid\_rank} in the file has to be equal to 2.
+!     please see section~\ref{const:fileformatflag} for a detailed description of the options.
 ! \item[distGrid]
 !      A distGrid defines how the grid is distributed
 ! \item[{[isSphere]}]

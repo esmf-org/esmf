@@ -214,7 +214,32 @@ The valid values are:
 This flag is documented in section \ref{const:fieldstatus}.
 
 \subsection{ESMF\_FILEFORMAT}
-This flag is documented in section \ref{const:grid:fileformat}.
+\label{const:fileformatflag}
+{\sf DESCRIPTION:\\}
+This flag is used in {\tt ESMF\_GridCreate} and {\tt ESMF\_MeshCreate} functions. 
+
+The type of this flag is:
+
+{\tt type(ESMF\_FileFormat\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMF\_FILEFORMAT\_SCRIP] SCRIP format grid file. The SCRIP format is
+  the format accepted by the SCRIP regridding tool~\cite{ref:SCRIP}.  See section\ref{sec:fileformat:scrip} for more detailed description.
+
+\item [ESMF\_FILEFORMAT\_GRIDSPEC]  a single tile logically rectangular
+  grid file that follows the NetCDF CF convention. See section~\ref{sec:fileformat:gridspec} for more detailed description.
+
+\item [ESMF\_FILEFORMAT\_ESMFMESH] ESMF unstructured grid file format. This format was developed by the ESMF team to match the capabilities of the Mesh class and to be efficient to convert to that class. See section~\ref{sec:fileformat:esmf} for more detailed description.
+
+\item [ESMF\_FILEFORMAT\_UGRID] CF-convention unstructured grid file format. This format is a proposed extension to the 
+CF-conventions for unstructured grid data model. See section~\ref{sec:fileformat:ugrid} for more detailed description.
+
+\item [ESMF\_FILEFORMAT\_MOSAIC] This format is a proposed extension to the 
+CF-conventions for grid mosaics consisting of multiple logically rectangular grid
+tiles. See section~\ref{sec:fileformat:mosaic} for more detailed description.
+
+\end{description}
 
 \subsection{ESMF\_FILESTATUS}
 \label{const:filestatusflag}
