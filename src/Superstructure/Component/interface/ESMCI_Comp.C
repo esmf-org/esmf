@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -45,10 +45,10 @@ static const char *const version = "$Id$";
 extern "C" {
   void FTN_X(f_esmf_compexecute)(const ESMCI::Comp *comp,
     enum ESMCI::method *method,
-    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::State *importState, ESMCI::State *exportState,
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *timeout, int *userRc, int *rc);
-  
+
   void FTN_X(f_esmf_compgetcurrentphase)(const ESMCI::Comp *compp,
     int *currentPhase, int *rc);
   void FTN_X(f_esmf_compgettimeout)(const ESMCI::Comp *compp,
@@ -65,46 +65,46 @@ extern "C" {
     ESMCI::FTable **ftable, int *rc);
   void FTN_X(f_esmf_compgetbase)(const ESMCI::Comp *compp,
     ESMC_Base **base, int *rc);
-  void FTN_X(f_esmf_compgettunnel)(const ESMCI::Comp *comp, 
+  void FTN_X(f_esmf_compgettunnel)(const ESMCI::Comp *comp,
     ESMCI::CompTunnel **tunnel, int *rc);
 
-  void FTN_X(f_esmf_gridcompcreate)(ESMCI::GridComp *comp, char const *name, 
-    char const *configFile, ESMCI::Clock **clock, 
+  void FTN_X(f_esmf_gridcompcreate)(ESMCI::GridComp *comp, char const *name,
+    char const *configFile, ESMCI::Clock **clock,
     int *rc, ESMCI_FortranStrLenArg nlen, ESMCI_FortranStrLenArg clen);
   void FTN_X(f_esmf_gridcompdestroy)(ESMCI::GridComp *comp, int *rc);
   void FTN_X(f_esmf_gridcompinitialize)(const ESMCI::GridComp *gcomp,
-    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::State *importState, ESMCI::State *exportState,
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
   void FTN_X(f_esmf_gridcomprun)(const ESMCI::GridComp *gcomp,
-    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::State *importState, ESMCI::State *exportState,
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
   void FTN_X(f_esmf_gridcompfinalize)(const ESMCI::GridComp *gcomp,
-    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::State *importState, ESMCI::State *exportState,
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
   void FTN_X(f_esmf_gridcompprint)(const ESMCI::GridComp *gcomp, int *rc);
-  
-  void FTN_X(f_esmf_cplcompcreate)(ESMCI::CplComp *comp, char const *name, 
-    char const *configFile, ESMCI::Clock **clock, 
+
+  void FTN_X(f_esmf_cplcompcreate)(ESMCI::CplComp *comp, char const *name,
+    char const *configFile, ESMCI::Clock **clock,
     int *rc, ESMCI_FortranStrLenArg nlen, ESMCI_FortranStrLenArg clen);
   void FTN_X(f_esmf_cplcompdestroy)(ESMCI::CplComp *comp, int *rc);
   void FTN_X(f_esmf_cplcompinitialize)(const ESMCI::CplComp *gcomp,
-    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::State *importState, ESMCI::State *exportState,
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
   void FTN_X(f_esmf_cplcomprun)(const ESMCI::CplComp *gcomp,
-    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::State *importState, ESMCI::State *exportState,
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
   void FTN_X(f_esmf_cplcompfinalize)(const ESMCI::CplComp *gcomp,
-    ESMCI::State *importState, ESMCI::State *exportState, 
+    ESMCI::State *importState, ESMCI::State *exportState,
     ESMCI::Clock **clock, ESMC_BlockingFlag *blockingFlag, int *phase,
     int *userRc, int *rc);
   void FTN_X(f_esmf_cplcompprint)(const ESMCI::CplComp *gcomp, int *rc);
 
-  void FTN_X(f_esmf_scicompcreate)(ESMCI::SciComp *comp, char const *name, 
+  void FTN_X(f_esmf_scicompcreate)(ESMCI::SciComp *comp, char const *name,
     int *rc, ESMCI_FortranStrLenArg nlen);
   void FTN_X(f_esmf_scicompdestroy)(ESMCI::SciComp *comp, int *rc);
   void FTN_X(f_esmf_scicompprint)(const ESMCI::SciComp *comp, int *rc);
@@ -186,7 +186,7 @@ int Comp::setServices(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -197,14 +197,14 @@ int Comp::setServices(
   FTable::setServices(this, (void(*)())func, userRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
 }
 //-----------------------------------------------------------------------------
 
-  
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Comp::setEntryPoint()"
@@ -220,7 +220,7 @@ int Comp::setEntryPoint(
 // !ARGUMENTS:
 //
     enum method method,                           // in: method type
-    void (*functionPtr)(Comp *, State *, State *, Clock **, int *), // in: 
+    void (*functionPtr)(Comp *, State *, State *, Clock **, int *), // in:
     int phase                                           // in: phase
   ){
 //
@@ -231,7 +231,7 @@ int Comp::setEntryPoint(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -247,17 +247,17 @@ int Comp::setEntryPoint(
   }
 
   char const *methodString = FTable::methodString(method);
-  
+
   int slen = strlen(methodString);
   char *fname;
   FTable::newtrim(methodString, slen, &phase, NULL, &fname);
-  
+
   localrc = ftable->setFuncPtr(fname, (void *)functionPtr, FT_VOIDP4INTP);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
   delete[] fname;  // delete memory that "newtrim" allocated above
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -289,36 +289,36 @@ void *Comp::getInternalState(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, rc);
     return NULL;
   }
-  
+
   FTable *ftable = **(FTable***)this;
   if (ftable==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid FTable pointer", ESMC_CONTEXT, rc);
     return NULL;
   }
-  
+
   char const *name = "localdata";
   enum dtype dtype;
   void *data;
-  
+
   localrc = ftable->getDataPtr(name, &data, &dtype);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return NULL;
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return data;
 }
 //-----------------------------------------------------------------------------
 
-  
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Comp::setInternalState()"
@@ -343,35 +343,35 @@ int Comp::setInternalState(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTable *ftable = **(FTable***)this;
   if (ftable==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid FTable pointer", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   char const *name = "localdata";
   enum dtype dtype = DT_VOIDP;
-  
+
   localrc = ftable->setDataPtr(name, &data, dtype);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
 }
 //-----------------------------------------------------------------------------
 
-  
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Comp::execute()"
@@ -403,22 +403,22 @@ int Comp::execute(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   int localUserRc;
   if (userRc) localUserRc = *userRc;
-  
+
   FTN_X(f_esmf_compexecute)(this, &method, importState, exportState, &clock,
     &blockingFlag, &phase, &timeout, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   if (userRc) *userRc = localUserRc;
 
   // return successfully
@@ -452,18 +452,18 @@ int Comp::getCurrentPhase(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_compgetcurrentphase)(this, currentPhase, &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -495,18 +495,18 @@ int Comp::getTimeout(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_compgettimeout)(this, timeout, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -538,18 +538,18 @@ int Comp::getVmInfo(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_compgetvminfo)(this, vm_info, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -581,18 +581,18 @@ int Comp::getVm(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_compgetvm)(this, vm, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -624,18 +624,18 @@ int Comp::getVmParent(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_compgetvmparent)(this, vmparent, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -667,18 +667,18 @@ int Comp::getVmPlan(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_compgetvmplan)(this, vmplan, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -710,18 +710,18 @@ int Comp::getFTable(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_compgetftable)(this, ftable, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -753,18 +753,18 @@ int Comp::getBase(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_compgetbase)(this, base, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -796,18 +796,18 @@ int Comp::getTunnel(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_compgettunnel)(this, tunnel, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -839,7 +839,7 @@ int Comp::getComplianceCheckerDepth(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
   if (envVar != NULL && depth != NULL){
@@ -857,7 +857,7 @@ int Comp::getComplianceCheckerDepth(
     }
     //printf("depth = %d\n", *depth);
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -990,19 +990,19 @@ int Comp::getComplianceCheckerText(
     else {
       std::string value(envVar);
       if (value.length() == 0) {
-	*textIsOn = 0;
+        *textIsOn = 0;
       }
       else {
-	*textIsOn = 1;  //default to on if env variable present
+        *textIsOn = 1;  //default to on if env variable present
       }
-      
+
       // see if TEXT is specified in ESMF_RUNTIME_COMPLIANCECHECK
       int index;
       index = value.find("text=off");
       if (index == std::string::npos)
-	index = value.find("TEXT=OFF");
+        index = value.find("TEXT=OFF");
       if (index != std::string::npos){
-	*textIsOn=0;
+        *textIsOn=0;
       }
     }
   }
@@ -1028,7 +1028,7 @@ GridComp *GridComp::create(
 //
 // !ARGUMENTS:
 //
-    char const *name, 
+    char const *name,
     char const *configFile,
     Clock *clock,
     int *rc
@@ -1041,9 +1041,9 @@ GridComp *GridComp::create(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   GridComp *comp = new GridComp;
-  
+
   FTN_X(f_esmf_gridcompcreate)(comp, name,
     configFile, &clock, &localrc, strlen(name), strlen(configFile));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1080,20 +1080,20 @@ int GridComp::destroy(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (comp==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_gridcompdestroy)(comp, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   delete comp;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1129,24 +1129,24 @@ int GridComp::initialize(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
-  
+
   int localUserRc;
   if (userRc) localUserRc = *userRc;
-  
+
   FTN_X(f_esmf_gridcompinitialize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   if (userRc) *userRc = localUserRc;
 
   // return successfully
@@ -1184,16 +1184,16 @@ int GridComp::run(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
-  
+
   int localUserRc;
   if (userRc) localUserRc = *userRc;
 
@@ -1201,7 +1201,7 @@ int GridComp::run(
     &blockingFlag, &phase, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   if (userRc) *userRc = localUserRc;
 
   // return successfully
@@ -1239,26 +1239,26 @@ int GridComp::finalize(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
-  
+
   int localUserRc;
   if (userRc) localUserRc = *userRc;
-  
+
   FTN_X(f_esmf_gridcompfinalize)(this, importState, exportState, &clock,
     &blockingFlag, &phase, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   if (userRc) *userRc = localUserRc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1289,18 +1289,18 @@ int GridComp::print(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_gridcompprint)(this, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1322,7 +1322,7 @@ CplComp *CplComp::create(
 //
 // !ARGUMENTS:
 //
-    char const *name, 
+    char const *name,
     char const *configFile,
     Clock *clock,
     int *rc
@@ -1335,9 +1335,9 @@ CplComp *CplComp::create(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   CplComp *comp = new CplComp;
-  
+
   FTN_X(f_esmf_cplcompcreate)(comp, name, configFile, &clock, &localrc,
     strlen(name), strlen(configFile));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1374,20 +1374,20 @@ int CplComp::destroy(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (comp==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_cplcompdestroy)(comp, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   delete comp;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1423,16 +1423,16 @@ int CplComp::initialize(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
-  
+
   int localUserRc;
   if (userRc) localUserRc = *userRc;
 
@@ -1440,9 +1440,9 @@ int CplComp::initialize(
     &blockingFlag, &phase, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   if (userRc) *userRc = localUserRc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1478,16 +1478,16 @@ int CplComp::run(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
-  
+
   int localUserRc;
   if (userRc) localUserRc = *userRc;
 
@@ -1495,9 +1495,9 @@ int CplComp::run(
     &blockingFlag, &phase, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   if (userRc) *userRc = localUserRc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1533,16 +1533,16 @@ int CplComp::finalize(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   ESMC_BlockingFlag blockingFlag = ESMF_VASBLOCKING;
-  
+
   int localUserRc;
   if (userRc) localUserRc = *userRc;
 
@@ -1550,9 +1550,9 @@ int CplComp::finalize(
     &blockingFlag, &phase, &localUserRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   if (userRc) *userRc = localUserRc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1583,18 +1583,18 @@ int CplComp::print(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_cplcompprint)(this, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1616,7 +1616,7 @@ SciComp *SciComp::create(
 //
 // !ARGUMENTS:
 //
-    char const *name, 
+    char const *name,
     int *rc
   )
 //
@@ -1627,17 +1627,17 @@ SciComp *SciComp::create(
 {
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  if (rc != NULL) 
+  if (rc != NULL)
     *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   SciComp *comp = new SciComp;
-  
+
   FTN_X(f_esmf_scicompcreate)(comp, name, &localrc, strlen(name));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return comp;
 
   // return successfully
-  if (rc != NULL) 
+  if (rc != NULL)
     *rc = ESMF_SUCCESS;
 
   return comp;
@@ -1670,20 +1670,20 @@ int SciComp::destroy(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (comp == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_scicompdestroy)(comp, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   delete comp;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1715,18 +1715,18 @@ int SciComp::print(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input
   if (this==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "- Not a valid comp argument", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   FTN_X(f_esmf_scicompprint)(this, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;

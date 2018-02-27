@@ -69,7 +69,7 @@ ESMCI_WebServProcCtrl::ESMCI_WebServProcCtrl(
 //
 // !ARGUMENTS:
 //
-  int              procCtrlPort,       // (in) the port number on which to 
+  int              procCtrlPort,       // (in) the port number on which to
                                        //   setup the socket service to listen
                                        //   for requests
   string           registrarHost,      // (in) the host name on which the
@@ -78,11 +78,11 @@ ESMCI_WebServProcCtrl::ESMCI_WebServProcCtrl(
   string           compSvrHost,        // (in) the host name of the component
                                        //   svc to which we'll be connecting
   int              compSvrStartPort,   // (in) the starting port number of pool
-                                       //   of ports on which the component 
+                                       //   of ports on which the component
                                        //   services will be listening
   int              portPoolSize,       // (in) the size of the pool of ports
-  string           compSvrScriptDir,   // (in) the directory that contains the 
-                                       //   script that is used to startup the 
+  string           compSvrScriptDir,   // (in) the directory that contains the
+                                       //   script that is used to startup the
                                        //   component svc
   string           compSvrScriptName,  // (in) the name of the script that is
                                        //   used to startup the component svc
@@ -91,39 +91,39 @@ ESMCI_WebServProcCtrl::ESMCI_WebServProcCtrl(
   )
 //
 // !DESCRIPTION:
-//    Initialize the ESMF Process Controller service with the default values 
+//    Initialize the ESMF Process Controller service with the default values
 //    as well as the specified port number and output file directory.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theNextClientId = 101;
+        theNextClientId = 101;
 
-	theProcCtrlPort      = procCtrlPort;
+        theProcCtrlPort      = procCtrlPort;
    theRegistrarHost     = registrarHost;
    theRegistrarPort     = registrarPort;
    theCompSvrHost       = compSvrHost;
    theCompSvrStartPort  = compSvrStartPort;
    thePortPoolSize      = portPoolSize;
-	theCompSvrScriptDir  = compSvrScriptDir;
-	theCompSvrScriptName = compSvrScriptName;
-	theJobMgrType        = jobMgrType;
+        theCompSvrScriptDir  = compSvrScriptDir;
+        theCompSvrScriptName = compSvrScriptName;
+        theJobMgrType        = jobMgrType;
 
-	//***
-	// Startup a new component server for each client.
-	//***
-	if (theJobMgrType == ESMC_JOBMGRTYPE_GLOBUS)
-	{
-		theCompSvrMgr = new ESMCI_WebServGRAMClient(theCompSvrHost,
+        //***
+        // Startup a new component server for each client.
+        //***
+        if (theJobMgrType == ESMC_JOBMGRTYPE_GLOBUS)
+        {
+                theCompSvrMgr = new ESMCI_WebServGRAMClient(theCompSvrHost,
                                                   theCompSvrScriptDir,
                                                   theCompSvrScriptName);
-	}
-	else 
-	{
-		theCompSvrMgr = new ESMCI_WebServForkClient(theCompSvrHost,
+        }
+        else
+        {
+                theCompSvrMgr = new ESMCI_WebServForkClient(theCompSvrHost,
                                                   theCompSvrScriptDir,
                                                   theCompSvrScriptName);
-	}
+        }
 }
 
 
@@ -142,13 +142,13 @@ ESMCI_WebServProcCtrl::~ESMCI_WebServProcCtrl(
   )
 //
 // !DESCRIPTION:
-//    Cleanup the process controller service.  For now, all this involves is 
+//    Cleanup the process controller service.  For now, all this involves is
 //    making sure the socket is disconnected.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theSocket.disconnect();
+        theSocket.disconnect();
 }
 
 
@@ -169,38 +169,38 @@ int  ESMCI_WebServProcCtrl::requestLoop(
   )
 //
 // !DESCRIPTION:
-//    Sets up a socket service for a process controller server to handle 
-//    client requests.  
+//    Sets up a socket service for a process controller server to handle
+//    client requests.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("ESMCI_WebServProcCtrl::requestLoop()\n");
-	int	localrc = 0;
-	
+        //printf("ESMCI_WebServProcCtrl::requestLoop()\n");
+        int     localrc = 0;
+        
    //***
    // Setup the server socket
    //***
-	if (theSocket.connect(theProcCtrlPort) < 0)
-	{
+        if (theSocket.connect(theProcCtrlPort) < 0)
+        {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Connection error for the server socket.",
          ESMC_CONTEXT, &localrc);
 
       return localrc;
-	}
+        }
 
    //***
    // Enter into a loop that waits for a client request and processes the
    // requests as they come in.  This loop continues until the client sends
    // an exit request (this isn't currently used).
    //***
-	int	request;
+        int     request;
 
-	do
-	{
-		request = getNextRequest();
+        do
+        {
+                request = getNextRequest();
 
       if (request == ESMF_FAILURE)
       {
@@ -212,11 +212,11 @@ int  ESMCI_WebServProcCtrl::requestLoop(
          return ESMF_FAILURE;
       }
 
-		serviceRequest(request);
+                serviceRequest(request);
 
-	} while (request != NET_ESMF_EXIT);
+        } while (request != NET_ESMF_EXIT);
 
-	return ESMF_SUCCESS;
+        return ESMF_SUCCESS;
 }
 
 
@@ -244,13 +244,13 @@ int  ESMCI_WebServProcCtrl::getNextRequest(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("ESMCI_WebServProcCtrl::getNextRequest()\n");
-	int	localrc = 0;
+        //printf("ESMCI_WebServProcCtrl::getNextRequest()\n");
+        int     localrc = 0;
 
    //***
    // Wait for client requests
    //***
-	if (theSocket.accept() == ESMF_FAILURE)
+        if (theSocket.accept() == ESMF_FAILURE)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_OPEN,
@@ -263,10 +263,10 @@ int  ESMCI_WebServProcCtrl::getNextRequest(
    //***
    // Read the request id string from the socket
    //***
-	int	n;
-	char	requestStr[50];
+        int     n;
+        char    requestStr[50];
 
-	if (theSocket.read(n, requestStr) <= 0)
+        if (theSocket.read(n, requestStr) <= 0)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
@@ -276,12 +276,12 @@ int  ESMCI_WebServProcCtrl::getNextRequest(
       return localrc;
    }
 
-	//printf("ProcCtrl: request: %s\n", requestStr);
+        //printf("ProcCtrl: request: %s\n", requestStr);
 
    //***
    // Convert the string to a valid request id
    //***
-	return ESMCI_WebServGetRequestId(requestStr);
+        return ESMCI_WebServGetRequestId(requestStr);
 }
 
 
@@ -308,62 +308,62 @@ int  ESMCI_WebServProcCtrl::serviceRequest(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("ESMCI_WebServProcCtrl::serviceRequest()\n");
-	//printf("Request ID: %d\n", request);
+        //printf("ESMCI_WebServProcCtrl::serviceRequest()\n");
+        //printf("Request ID: %d\n", request);
 
-	switch (request)
-	{
-	case NET_ESMF_NEW: 
-		processNew();
-		break;
+        switch (request)
+        {
+        case NET_ESMF_NEW:
+                processNew();
+                break;
 
-	case NET_ESMF_INIT: 
-		processInit();
-		break;
+        case NET_ESMF_INIT:
+                processInit();
+                break;
 
-	case NET_ESMF_STATE: 
-		processState();
-		break;
+        case NET_ESMF_STATE:
+                processState();
+                break;
 
-	case NET_ESMF_RUN: 
-		processRun();
-		break;
+        case NET_ESMF_RUN:
+                processRun();
+                break;
 
-	case NET_ESMF_TIMESTEP: 
-		processTimestep();
-		break;
+        case NET_ESMF_TIMESTEP:
+                processTimestep();
+                break;
 
-	case NET_ESMF_FINAL: 
-		processFinal();
-		break;
+        case NET_ESMF_FINAL:
+                processFinal();
+                break;
 
-	case NET_ESMF_DATA_DESC: 
-		processGetDataDesc();
-		break;
+        case NET_ESMF_DATA_DESC:
+                processGetDataDesc();
+                break;
 
-	case NET_ESMF_DATA: 
-		processGetData();
-		break;
+        case NET_ESMF_DATA:
+                processGetData();
+                break;
 
-	case NET_ESMF_END: 
-		processEnd();
-		break;
+        case NET_ESMF_END:
+                processEnd();
+                break;
 
-	case NET_ESMF_PING: 
-		processPing();
-		break;
+        case NET_ESMF_PING:
+                processPing();
+                break;
 
-	case NET_ESMF_EXIT: 
-		processExit();
-		break;
+        case NET_ESMF_EXIT:
+                processExit();
+                break;
 
-	default:
-		break;
-	}
+        default:
+                break;
+        }
 
-	theSocket.close();
+        theSocket.close();
 
-	return request;
+        return request;
 }
 
 
@@ -392,17 +392,17 @@ int  ESMCI_WebServProcCtrl::processNew(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	printf("\n\nProcCtrl: processing New\n");
-	int	localrc = 0;
+        printf("\n\nProcCtrl: processing New\n");
+        int     localrc = 0;
 
-	//***
-	// Read the client name and password from the socket
-	//***
-	int	bytesRead = 0;
-	char	userName[1024];
-	char	password[1024];
+        //***
+        // Read the client name and password from the socket
+        //***
+        int     bytesRead = 0;
+        char    userName[1024];
+        char    password[1024];
 
-	if (theSocket.read(bytesRead, userName) <= 0)
+        if (theSocket.read(bytesRead, userName) <= 0)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
@@ -412,7 +412,7 @@ int  ESMCI_WebServProcCtrl::processNew(
       return ESMF_FAILURE;
    }
 
-	if (theSocket.read(bytesRead, password) <= 0)
+        if (theSocket.read(bytesRead, password) <= 0)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
@@ -422,92 +422,92 @@ int  ESMCI_WebServProcCtrl::processNew(
       return ESMF_FAILURE;
    }
 
-	printf("User Name: %s\n", userName);
-	printf("Password: %s\n", password);
+        printf("User Name: %s\n", userName);
+        printf("Password: %s\n", password);
 
-	//***
-	// Generate a new client id and add the new client to the collection 
-	// of clients
-	//***
-	int								clientId = getNextClientId();
-	ESMCI_WebServClientInfo*	newClient = new ESMCI_WebServClientInfo(clientId);
-	theClients[clientId] = newClient;
+        //***
+        // Generate a new client id and add the new client to the collection
+        // of clients
+        //***
+        int                                                             clientId = getNextClientId();
+        ESMCI_WebServClientInfo*        newClient = new ESMCI_WebServClientInfo(clientId);
+        theClients[clientId] = newClient;
 
-	newClient->setUserName(userName);
-	newClient->setPassword(password);
-	newClient->setServerHost(theCompSvrHost);
-	newClient->setServerPort(theCompSvrStartPort);
+        newClient->setUserName(userName);
+        newClient->setPassword(password);
+        newClient->setServerHost(theCompSvrHost);
+        newClient->setServerPort(theCompSvrStartPort);
 printf("*** Client ID: %d\n", clientId);
 printf("*** Port Num: %d\n", theCompSvrStartPort);
 
 // KDS: TODO - Add method to get next port number
 
-	//***
-	// Register submitted job with Registrar
-	// Issue here is that if using fork, server will register itself before
-	// the process controller... so process controller needs to register
-	// before it gets submitted, then change the status to error if there's
-	// an error in the submission
-	//***
-	ESMCI_WebServRegistrarClient	registrar(theRegistrarHost.c_str(), 
+        //***
+        // Register submitted job with Registrar
+        // Issue here is that if using fork, server will register itself before
+        // the process controller... so process controller needs to register
+        // before it gets submitted, then change the status to error if there's
+        // an error in the submission
+        //***
+        ESMCI_WebServRegistrarClient    registrar(theRegistrarHost.c_str(),
                                            theRegistrarPort);
 
-	char	clientIdStr[64];
-	sprintf(clientIdStr, "%d", clientId);
+        char    clientIdStr[64];
+        sprintf(clientIdStr, "%d", clientId);
 
-	char	portNumStr[64];
-	sprintf(portNumStr, "%d", theCompSvrStartPort);
+        char    portNumStr[64];
+        sprintf(portNumStr, "%d", theCompSvrStartPort);
 
-	if ((localrc = registrar.registerComp(clientIdStr, 
-                                         theCompSvrHost.c_str(), 
+        if ((localrc = registrar.registerComp(clientIdStr,
+                                         theCompSvrHost.c_str(),
                                          portNumStr)) != NET_ESMF_STAT_IDLE)
-	{
+        {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_NOT_VALID,
          "Error while registering component service with Registrar.",
          ESMC_CONTEXT, &localrc);
 
       return ESMF_FAILURE;
-	}
+        }
 
-	//***
-	// Startup a new component server for the new client.
-	//***
+        //***
+        // Startup a new component server for the new client.
+        //***
 printf("Client ID: %d\n", clientId);
 printf("Port Num: %d\n", theCompSvrStartPort);
-	string	jobId = theCompSvrMgr->submitJob(clientId, 
-                                             theRegistrarHost, 
+        string  jobId = theCompSvrMgr->submitJob(clientId,
+                                             theRegistrarHost,
                                              theCompSvrStartPort);
-	newClient->setJobId(jobId);
+        newClient->setJobId(jobId);
 printf("Job ID: %s\n", jobId.c_str());
 
-	if (jobId.empty())
-	{
-		newClient->setStatus(NET_ESMF_STAT_ERROR);
-	}
-	else
-	{
-		int	currentStatus = registrar.compSubmitted(clientIdStr, jobId.c_str()); 
-		if (currentStatus == ESMF_FAILURE)
-		{
-      	ESMC_LogDefault.MsgFoundError(
-         	ESMC_RC_NOT_VALID,
-         	"Error while updating Registrar.",
-         	ESMC_CONTEXT, &localrc);
+        if (jobId.empty())
+        {
+                newClient->setStatus(NET_ESMF_STAT_ERROR);
+        }
+        else
+        {
+                int     currentStatus = registrar.compSubmitted(clientIdStr, jobId.c_str());
+                if (currentStatus == ESMF_FAILURE)
+                {
+        ESMC_LogDefault.MsgFoundError(
+                ESMC_RC_NOT_VALID,
+                "Error while updating Registrar.",
+                ESMC_CONTEXT, &localrc);
 
-      	return ESMF_FAILURE;
-		}
+        return ESMF_FAILURE;
+                }
 
-		newClient->setStatus(currentStatus);
-	}
+                newClient->setStatus(currentStatus);
+        }
 
-	//***
-	// Send back the new client id
-	//***
-	printf("Client id: %d\n", clientId);
-	int	netClientId = htonl(clientId);
+        //***
+        // Send back the new client id
+        //***
+        printf("Client id: %d\n", clientId);
+        int     netClientId = htonl(clientId);
 
-	if (theSocket.write(4, &netClientId) != 4)
+        if (theSocket.write(4, &netClientId) != 4)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
@@ -517,7 +517,7 @@ printf("Job ID: %s\n", jobId.c_str());
       return ESMF_FAILURE;
    }
 
-	return ESMF_SUCCESS;
+        return ESMF_SUCCESS;
 }
 
 
@@ -541,24 +541,24 @@ int  ESMCI_WebServProcCtrl::processState(
 //    Processes the request to retrieve the component state.  This method
 //    reads the client id from the socket and uses it to lookup the client
 //    information.  The Registrar is then used to fetch the current status
-//    of the component server, and finally, the component status is written 
+//    of the component server, and finally, the component status is written
 //    to the socket to complete the transaction.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing State\n");
+        printf("\n\nSERVER: processing State\n");
 
-	int	localrc = 0;
-	int	status = NET_ESMF_STAT_IDLE;
+        int     localrc = 0;
+        int     status = NET_ESMF_STAT_IDLE;
 
-	//***
-	// Get the client id 
-	//***
-	int	bytesRead = 0;
-	char	buf[1024];
+        //***
+        // Get the client id
+        //***
+        int     bytesRead = 0;
+        char    buf[1024];
 
-	if (theSocket.read(bytesRead, buf) <= 0)
+        if (theSocket.read(bytesRead, buf) <= 0)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
@@ -568,26 +568,26 @@ int  ESMCI_WebServProcCtrl::processState(
       return ESMF_FAILURE;
    }
 
-   int	clientId = ntohl(*((unsigned int*)buf));
-	printf("Client ID: %d\n", clientId);
+   int  clientId = ntohl(*((unsigned int*)buf));
+        printf("Client ID: %d\n", clientId);
 
-	//***
-	// Now that everything's been read off the socket, lookup the client info
-	// based on the client id.  If the client can't be found, then send back
-	// an error
-	//***
-	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
-	ESMCI_WebServClientInfo*								clientInfo = NULL;
+        //***
+        // Now that everything's been read off the socket, lookup the client info
+        // based on the client id.  If the client can't be found, then send back
+        // an error
+        //***
+        map<int, ESMCI_WebServClientInfo*>::iterator            iter;
+        ESMCI_WebServClientInfo*                                                                clientInfo = NULL;
 
-	if ((iter = theClients.find(clientId)) == theClients.end())
-	{
-		//***
-		// Client ID not found... send back error
-		//***
-		status = NET_ESMF_STAT_ERROR;
-		unsigned int	netStatus = htonl(status);
+        if ((iter = theClients.find(clientId)) == theClients.end())
+        {
+                //***
+                // Client ID not found... send back error
+                //***
+                status = NET_ESMF_STAT_ERROR;
+                unsigned int    netStatus = htonl(status);
 
-		if (theSocket.write(4, &netStatus) != 4)
+                if (theSocket.write(4, &netStatus) != 4)
       {
          ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
@@ -603,45 +603,45 @@ int  ESMCI_WebServProcCtrl::processState(
          ESMC_CONTEXT, &localrc);
 
       return ESMF_FAILURE;
-	}
+        }
 
-	//***
-	// Pass on the state request to the Registrar and get the current status
-	//***
-	clientInfo = iter->second;
-	clientInfo->print();
+        //***
+        // Pass on the state request to the Registrar and get the current status
+        //***
+        clientInfo = iter->second;
+        clientInfo->print();
 
-	//***
-	// Get the component server state from the Registrar.  If there's an 
-	// error getting the status from the Registrar, log the error but continue.
-	// Just use the existing status in the local store.
-	//***
-	ESMCI_WebServRegistrarClient	registrar(theRegistrarHost.c_str(), 
+        //***
+        // Get the component server state from the Registrar.  If there's an
+        // error getting the status from the Registrar, log the error but continue.
+        // Just use the existing status in the local store.
+        //***
+        ESMCI_WebServRegistrarClient    registrar(theRegistrarHost.c_str(),
                                            theRegistrarPort);
 
-	char	clientIdStr[64];
-	sprintf(clientIdStr, "%d", clientId);
+        char    clientIdStr[64];
+        sprintf(clientIdStr, "%d", clientId);
 
-	status = registrar.getStatus(clientIdStr);
-	if (status == ESMF_FAILURE)
-	{
+        status = registrar.getStatus(clientIdStr);
+        if (status == ESMF_FAILURE)
+        {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_NOT_VALID,
          "Error while while getting component service status from Registrar.",
          ESMC_CONTEXT, &localrc);
-	}
-	else
-	{
-		clientInfo->setStatus(status);
-	}
+        }
+        else
+        {
+                clientInfo->setStatus(status);
+        }
 
-	//***
-	// Send the current state back to the client 
-	//***
+        //***
+        // Send the current state back to the client
+        //***
 printf("Component Server Status: %s\n", registrar.getStateStr(status));
-	unsigned int	netStatus = htonl(status);
+        unsigned int    netStatus = htonl(status);
 
-	if (theSocket.write(4, &netStatus) != 4)
+        if (theSocket.write(4, &netStatus) != 4)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
@@ -651,7 +651,7 @@ printf("Component Server Status: %s\n", registrar.getStateStr(status));
       return ESMF_FAILURE;
    }
 
-	return ESMF_SUCCESS;
+        return ESMF_SUCCESS;
 }
 
 
@@ -676,24 +676,24 @@ int  ESMCI_WebServProcCtrl::processInit(
 //    client id from the socket and uses it to lookup the client information.
 //    It then reads the names of input files (if any) from the socket.  The
 //    request and its parameters are then passed on to the component server,
-//    and finally, the component status is written to the socket to complete 
+//    and finally, the component status is written to the socket to complete
 //    the transaction.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("\n\nSERVER: processing Init\n");
+        //printf("\n\nSERVER: processing Init\n");
 
-	int	localrc = 0;
-	int	status = NET_ESMF_STAT_IDLE;
+        int     localrc = 0;
+        int     status = NET_ESMF_STAT_IDLE;
 
-	//***
-	// Get the client id 
-	//***
-	int	bytesRead = 0;
-	char	buf[1024];
+        //***
+        // Get the client id
+        //***
+        int     bytesRead = 0;
+        char    buf[1024];
 
-	if (theSocket.read(bytesRead, buf) <= 0)
+        if (theSocket.read(bytesRead, buf) <= 0)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
@@ -703,26 +703,26 @@ int  ESMCI_WebServProcCtrl::processInit(
       return localrc;
    }
 
-   int	clientId = ntohl(*((unsigned int*)buf));
-	//printf("Client ID: %d\n", clientId);
+   int  clientId = ntohl(*((unsigned int*)buf));
+        //printf("Client ID: %d\n", clientId);
 
-	//***
-	// Now that everything's been read off the socket, lookup the client info
-	// based on the client id.  If the client can't be found, then send back
-	// an error
-	//***
-	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
-	ESMCI_WebServClientInfo*								clientInfo = NULL;
+        //***
+        // Now that everything's been read off the socket, lookup the client info
+        // based on the client id.  If the client can't be found, then send back
+        // an error
+        //***
+        map<int, ESMCI_WebServClientInfo*>::iterator            iter;
+        ESMCI_WebServClientInfo*                                                                clientInfo = NULL;
 
-	if ((iter = theClients.find(clientId)) == theClients.end())
-	{
-		//***
-		// Client ID not found... send back error
-		//***
-		status = NET_ESMF_STAT_ERROR;
-		unsigned int	netStatus = htonl(status);
+        if ((iter = theClients.find(clientId)) == theClients.end())
+        {
+                //***
+                // Client ID not found... send back error
+                //***
+                status = NET_ESMF_STAT_ERROR;
+                unsigned int    netStatus = htonl(status);
 
-		if (theSocket.write(4, &netStatus) != 4)
+                if (theSocket.write(4, &netStatus) != 4)
       {
          ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
@@ -738,31 +738,31 @@ int  ESMCI_WebServProcCtrl::processInit(
          ESMC_CONTEXT, &localrc);
 
       return localrc;
-	}
+        }
 
-	clientInfo = iter->second;
-	clientInfo->print();
+        clientInfo = iter->second;
+        clientInfo->print();
 
-	//***
-	// Get the component server information from the Registrar.  
-	//***
-	char	clientIdStr[64];
-	sprintf(clientIdStr, "%d", clientInfo->clientId());
+        //***
+        // Get the component server information from the Registrar.
+        //***
+        char    clientIdStr[64];
+        sprintf(clientIdStr, "%d", clientInfo->clientId());
 
-	ESMCI_WebServRegistrarClient	registrar(theRegistrarHost.c_str(), 
+        ESMCI_WebServRegistrarClient    registrar(theRegistrarHost.c_str(),
                                            theRegistrarPort);
-	ESMCI_WebServCompSvrInfo		compSvrInfo;
+        ESMCI_WebServCompSvrInfo                compSvrInfo;
 
-	if ((status = registrar.getComponent(clientIdStr, &compSvrInfo)) == 
-			ESMF_FAILURE)
-	{
-		//***
-		// Error communicating with Registrar... send back error
-		//***
-		status = NET_ESMF_STAT_ERROR;
-		unsigned int	netStatus = htonl(status);
+        if ((status = registrar.getComponent(clientIdStr, &compSvrInfo)) ==
+                        ESMF_FAILURE)
+        {
+                //***
+                // Error communicating with Registrar... send back error
+                //***
+                status = NET_ESMF_STAT_ERROR;
+                unsigned int    netStatus = htonl(status);
 
-		if (theSocket.write(4, &netStatus) != 4)
+                if (theSocket.write(4, &netStatus) != 4)
       {
          ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
@@ -772,53 +772,53 @@ int  ESMCI_WebServProcCtrl::processInit(
          return localrc;
       }
 
-		//***
-		// Then log and return
-		//***
-     	ESMC_LogDefault.MsgFoundError(
-        	ESMC_RC_NOT_VALID,
-        	"Error while while getting component svc info from Registrar.",
-        	ESMC_CONTEXT, &localrc);
+                //***
+                // Then log and return
+                //***
+        ESMC_LogDefault.MsgFoundError(
+                ESMC_RC_NOT_VALID,
+                "Error while while getting component svc info from Registrar.",
+                ESMC_CONTEXT, &localrc);
 
-     	return ESMF_FAILURE;
-	}
+        return ESMF_FAILURE;
+        }
 
-	compSvrInfo.print();
-	status = compSvrInfo.status();
+        compSvrInfo.print();
+        status = compSvrInfo.status();
 
-	clientInfo->setStatus(status);
+        clientInfo->setStatus(status);
 
-	//***
-	// Call the component initialize.  Must be in the READY state before the
-	// initialize can be called.
-	//***
-	if (status == NET_ESMF_STAT_READY)
-	{
-		ESMCI_WebServCompSvrClient		client(compSvrInfo.physHostName().c_str(), 
-                                           compSvrInfo.portNum(), 
+        //***
+        // Call the component initialize.  Must be in the READY state before the
+        // initialize can be called.
+        //***
+        if (status == NET_ESMF_STAT_READY)
+        {
+                ESMCI_WebServCompSvrClient              client(compSvrInfo.physHostName().c_str(),
+                                           compSvrInfo.portNum(),
                                            compSvrInfo.clientId());
 
-		status = client.init();
+                status = client.init();
 
-		clientInfo->setStatus(status);
-	}
-	else
-	{
-		// Handle error... probably just log because the next step will
-		// return the error to the client... don't really care about the
-		// calling function getting an error message... nothing will happen
-		// because of it.
-	}
+                clientInfo->setStatus(status);
+        }
+        else
+        {
+                // Handle error... probably just log because the next step will
+                // return the error to the client... don't really care about the
+                // calling function getting an error message... nothing will happen
+                // because of it.
+        }
 
-	//***
-	// Send the current state back to the client (use the return code from
-	// the component initialize call to determine the state)
-	//***
-	status = clientInfo->status();
+        //***
+        // Send the current state back to the client (use the return code from
+        // the component initialize call to determine the state)
+        //***
+        status = clientInfo->status();
 printf("PROC CTRL: Returning Status: %d\n", status);
-	unsigned int	netStatus = htonl(status);
+        unsigned int    netStatus = htonl(status);
 
-	if (theSocket.write(4, &netStatus) != 4)
+        if (theSocket.write(4, &netStatus) != 4)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
@@ -827,9 +827,9 @@ printf("PROC CTRL: Returning Status: %d\n", status);
 
       return localrc;
    }
-	//clientInfo->print();
+        //clientInfo->print();
 
-	return ESMF_SUCCESS;
+        return ESMF_SUCCESS;
 }
 
 
@@ -852,25 +852,25 @@ int  ESMCI_WebServProcCtrl::processRun(
 // !DESCRIPTION:
 //    Processes the request to run the component.  This method reads the
 //    client id from the socket and uses it to lookup the client information.
-//    The request and its parameters are then passed on to the component 
-//    server, and finally, the component status is written to the socket 
+//    The request and its parameters are then passed on to the component
+//    server, and finally, the component status is written to the socket
 //    to complete the transaction.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("\n\nSERVER: processing Run\n");
+        //printf("\n\nSERVER: processing Run\n");
 
-	int	localrc = 0;
-	int	status = NET_ESMF_STAT_IDLE;
+        int     localrc = 0;
+        int     status = NET_ESMF_STAT_IDLE;
 
-	//***
-	// Get the client id 
-	//***
-	int	bytesRead = 0;
-	char	buf[1024];
+        //***
+        // Get the client id
+        //***
+        int     bytesRead = 0;
+        char    buf[1024];
 
-	if (theSocket.read(bytesRead, buf) <= 0)
+        if (theSocket.read(bytesRead, buf) <= 0)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
@@ -880,23 +880,23 @@ int  ESMCI_WebServProcCtrl::processRun(
       return localrc;
    }
 
-   int	clientId = ntohl(*((unsigned int*)buf));
-	//printf("Client ID: %d\n", clientId);
+   int  clientId = ntohl(*((unsigned int*)buf));
+        //printf("Client ID: %d\n", clientId);
 
-	//***
-	// Now that everything's been read off the socket, lookup the client info
-	// based on the client id.  If the client can't be found, then send back
-	// an error
-	//***
-	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
-	ESMCI_WebServClientInfo*								clientInfo = NULL;
+        //***
+        // Now that everything's been read off the socket, lookup the client info
+        // based on the client id.  If the client can't be found, then send back
+        // an error
+        //***
+        map<int, ESMCI_WebServClientInfo*>::iterator            iter;
+        ESMCI_WebServClientInfo*                                                                clientInfo = NULL;
 
-	if ((iter = theClients.find(clientId)) == theClients.end())
-	{
-		status = NET_ESMF_STAT_ERROR;
-		unsigned int	netStatus = htonl(status);
+        if ((iter = theClients.find(clientId)) == theClients.end())
+        {
+                status = NET_ESMF_STAT_ERROR;
+                unsigned int    netStatus = htonl(status);
 
-		if (theSocket.write(4, &netStatus) != 4)
+                if (theSocket.write(4, &netStatus) != 4)
       {
          ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
@@ -912,10 +912,10 @@ int  ESMCI_WebServProcCtrl::processRun(
          ESMC_CONTEXT, &localrc);
 
       return localrc;
-	}
+        }
 
-	clientInfo = iter->second;
-	//clientInfo->print();
+        clientInfo = iter->second;
+        //clientInfo->print();
 
    //***
    // Get the component server information from the Registrar.
@@ -960,35 +960,35 @@ int  ESMCI_WebServProcCtrl::processRun(
    compSvrInfo.print();
    status = compSvrInfo.status();
 
-	clientInfo->setStatus(status);
+        clientInfo->setStatus(status);
 
-	//***
-	// Call the component run (must have completed the initialize phase before
-	// the run could be called)
-	//***
-	if (status == NET_ESMF_STAT_INIT_DONE)
-	{
-	   ESMCI_WebServCompSvrClient	client(compSvrInfo.physHostName().c_str(), 
-                                        compSvrInfo.portNum(), 
+        //***
+        // Call the component run (must have completed the initialize phase before
+        // the run could be called)
+        //***
+        if (status == NET_ESMF_STAT_INIT_DONE)
+        {
+           ESMCI_WebServCompSvrClient   client(compSvrInfo.physHostName().c_str(),
+                                        compSvrInfo.portNum(),
                                         compSvrInfo.clientId());
 
-		status = client.run();
-		//clientInfo->setStatus(NET_ESMF_STAT_RUNNING);
-		clientInfo->setStatus(status);
-	}
-	else
-	{
-		// Should return an error message
-	}
+                status = client.run();
+                //clientInfo->setStatus(NET_ESMF_STAT_RUNNING);
+                clientInfo->setStatus(status);
+        }
+        else
+        {
+                // Should return an error message
+        }
 
-	//***
-	// Send the current state back to the client (use the return code from
-	// the component run call to determine the state)
-	//***
-	status = clientInfo->status();
-	unsigned int	netStatus = htonl(status);
+        //***
+        // Send the current state back to the client (use the return code from
+        // the component run call to determine the state)
+        //***
+        status = clientInfo->status();
+        unsigned int    netStatus = htonl(status);
 
-	if (theSocket.write(4, &netStatus) != 4)
+        if (theSocket.write(4, &netStatus) != 4)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
@@ -998,7 +998,7 @@ int  ESMCI_WebServProcCtrl::processRun(
       return localrc;
    }
 
-	return ESMF_SUCCESS;
+        return ESMF_SUCCESS;
 }
 
 
@@ -1022,25 +1022,25 @@ int  ESMCI_WebServProcCtrl::processTimestep(
 //    Processes the request to timestep the component.  This method reads the
 //    client id from the socket and uses it to lookup the client information.
 //    It then reads the number of timesteps parameter from the socket.
-//    The request and its parameters are then passed on to the component 
-//    server, and finally, the component status is written to the socket 
+//    The request and its parameters are then passed on to the component
+//    server, and finally, the component status is written to the socket
 //    to complete the transaction.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing Timestep\n");
+        printf("\n\nSERVER: processing Timestep\n");
 
-	int	localrc = 0;
-	int	status = NET_ESMF_STAT_IDLE;
+        int     localrc = 0;
+        int     status = NET_ESMF_STAT_IDLE;
 
-	//***
-	// Get the client id 
-	//***
-	int	bytesRead = 0;
-	char	buf[1024];
+        //***
+        // Get the client id
+        //***
+        int     bytesRead = 0;
+        char    buf[1024];
 
-	if (theSocket.read(bytesRead, buf) <= 0)
+        if (theSocket.read(bytesRead, buf) <= 0)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
@@ -1050,15 +1050,15 @@ int  ESMCI_WebServProcCtrl::processTimestep(
       return localrc;
    }
 
-   int	clientId = ntohl(*((unsigned int*)buf));
-	printf("Client ID: %d\n", clientId);
+   int  clientId = ntohl(*((unsigned int*)buf));
+        printf("Client ID: %d\n", clientId);
 
-	//***
-	// Get the number of timesteps
-	//***
-	bytesRead = 0;
+        //***
+        // Get the number of timesteps
+        //***
+        bytesRead = 0;
 
-	if (theSocket.read(bytesRead, buf) <= 0)
+        if (theSocket.read(bytesRead, buf) <= 0)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
@@ -1068,23 +1068,23 @@ int  ESMCI_WebServProcCtrl::processTimestep(
       return localrc;
    }
 
-   int	numTimesteps = ntohl(*((unsigned int*)buf));
-	printf("Num Timesteps: %d\n", numTimesteps);
+   int  numTimesteps = ntohl(*((unsigned int*)buf));
+        printf("Num Timesteps: %d\n", numTimesteps);
 
-	//***
-	// Now that everything's been read off the socket, lookup the client info
-	// based on the client id.  If the client can't be found, then send back
-	// an error
-	//***
-	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
-	ESMCI_WebServClientInfo*								clientInfo = NULL;
+        //***
+        // Now that everything's been read off the socket, lookup the client info
+        // based on the client id.  If the client can't be found, then send back
+        // an error
+        //***
+        map<int, ESMCI_WebServClientInfo*>::iterator            iter;
+        ESMCI_WebServClientInfo*                                                                clientInfo = NULL;
 
-	if ((iter = theClients.find(clientId)) == theClients.end())
-	{
-		status = NET_ESMF_STAT_ERROR;
-		unsigned int	netStatus = htonl(status);
+        if ((iter = theClients.find(clientId)) == theClients.end())
+        {
+                status = NET_ESMF_STAT_ERROR;
+                unsigned int    netStatus = htonl(status);
 
-		if (theSocket.write(4, &netStatus) != 4)
+                if (theSocket.write(4, &netStatus) != 4)
       {
          ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
@@ -1100,10 +1100,10 @@ int  ESMCI_WebServProcCtrl::processTimestep(
          ESMC_CONTEXT, &localrc);
 
       return localrc;
-	}
+        }
 
-	clientInfo = iter->second;
-	//clientInfo->print();
+        clientInfo = iter->second;
+        //clientInfo->print();
 
    //***
    // Get the component server information from the Registrar.
@@ -1150,33 +1150,33 @@ int  ESMCI_WebServProcCtrl::processTimestep(
 
    clientInfo->setStatus(status);
 
-	//***
-	// Call the component run (must have completed the initialize phase before
-	// the run could be called)
-	//***
-	if ((status == NET_ESMF_STAT_INIT_DONE)  ||
-	    (status == NET_ESMF_STAT_TIMESTEP_DONE))
-	{
-	   ESMCI_WebServCompSvrClient	client(compSvrInfo.physHostName().c_str(), 
-                                        compSvrInfo.portNum(), 
+        //***
+        // Call the component run (must have completed the initialize phase before
+        // the run could be called)
+        //***
+        if ((status == NET_ESMF_STAT_INIT_DONE)  ||
+            (status == NET_ESMF_STAT_TIMESTEP_DONE))
+        {
+           ESMCI_WebServCompSvrClient   client(compSvrInfo.physHostName().c_str(),
+                                        compSvrInfo.portNum(),
                                         compSvrInfo.clientId());
 
-		status = client.timestep(numTimesteps);
-		clientInfo->setStatus(status);
-	}
-	else
-	{
-		// Should return an error message
-	}
+                status = client.timestep(numTimesteps);
+                clientInfo->setStatus(status);
+        }
+        else
+        {
+                // Should return an error message
+        }
 
-	//***
-	// Send the current state back to the client (use the return code from
-	// the component run call to determine the state)
-	//***
-	status = clientInfo->status();
-	unsigned int	netStatus = htonl(status);
+        //***
+        // Send the current state back to the client (use the return code from
+        // the component run call to determine the state)
+        //***
+        status = clientInfo->status();
+        unsigned int    netStatus = htonl(status);
 
-	if (theSocket.write(4, &netStatus) != 4)
+        if (theSocket.write(4, &netStatus) != 4)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
@@ -1186,7 +1186,7 @@ int  ESMCI_WebServProcCtrl::processTimestep(
       return localrc;
    }
 
-	return ESMF_SUCCESS;
+        return ESMF_SUCCESS;
 }
 
 
@@ -1209,25 +1209,25 @@ int  ESMCI_WebServProcCtrl::processFinal(
 // !DESCRIPTION:
 //    Processes the request to finalize the component.  This method reads the
 //    client id from the socket and uses it to lookup the client information.
-//    The request and its parameters are then passed on to the component 
-//    server, and finally, the component status is written to the socket 
+//    The request and its parameters are then passed on to the component
+//    server, and finally, the component status is written to the socket
 //    to complete the transaction.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing Final\n");
+        printf("\n\nSERVER: processing Final\n");
 
-	int	localrc = 0;
-	int	status = NET_ESMF_STAT_IDLE;
+        int     localrc = 0;
+        int     status = NET_ESMF_STAT_IDLE;
 
-	//***
-	// Get the client id 
-	//***
-	int	bytesRead = 0;
-	char	buf[1024];
+        //***
+        // Get the client id
+        //***
+        int     bytesRead = 0;
+        char    buf[1024];
 
-	if (theSocket.read(bytesRead, buf) <= 0)
+        if (theSocket.read(bytesRead, buf) <= 0)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
@@ -1237,23 +1237,23 @@ int  ESMCI_WebServProcCtrl::processFinal(
       return localrc;
    }
 
-   int	clientId = ntohl(*((unsigned int*)buf));
-	printf("Client ID: %d\n", clientId);
+   int  clientId = ntohl(*((unsigned int*)buf));
+        printf("Client ID: %d\n", clientId);
 
-	//***
-	// Now that everything's been read off the socket, lookup the client info
-	// based on the client id.  If the client can't be found, then send back
-	// an error
-	//***
-	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
-	ESMCI_WebServClientInfo*								clientInfo = NULL;
+        //***
+        // Now that everything's been read off the socket, lookup the client info
+        // based on the client id.  If the client can't be found, then send back
+        // an error
+        //***
+        map<int, ESMCI_WebServClientInfo*>::iterator            iter;
+        ESMCI_WebServClientInfo*                                                                clientInfo = NULL;
 
-	if ((iter = theClients.find(clientId)) == theClients.end())
-	{
-		status = NET_ESMF_STAT_ERROR;
-		unsigned int	netStatus = htonl(status);
+        if ((iter = theClients.find(clientId)) == theClients.end())
+        {
+                status = NET_ESMF_STAT_ERROR;
+                unsigned int    netStatus = htonl(status);
 
-		if (theSocket.write(4, &netStatus) != 4)
+                if (theSocket.write(4, &netStatus) != 4)
       {
          ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
@@ -1269,10 +1269,10 @@ int  ESMCI_WebServProcCtrl::processFinal(
          ESMC_CONTEXT, &localrc);
 
       return localrc;
-	}
+        }
 
-	clientInfo = iter->second;
-	//clientInfo->print();
+        clientInfo = iter->second;
+        //clientInfo->print();
 
    //***
    // Get the component server information from the Registrar.
@@ -1319,36 +1319,36 @@ int  ESMCI_WebServProcCtrl::processFinal(
 
    clientInfo->setStatus(status);
 
-	//***
-	// Call the component finalize (must have completed at least the initalize
-   // phase, and possibly the run phase before the finalize can be called 
+        //***
+        // Call the component finalize (must have completed at least the initalize
+   // phase, and possibly the run phase before the finalize can be called
    // (KDS: assuming you can call finalize after calling just initialize, but
    //       not sure if that is true.)
-	//***
-	if ((status == NET_ESMF_STAT_RUN_DONE)  ||
-	    (status == NET_ESMF_STAT_TIMESTEP_DONE)  ||
-	    (status == NET_ESMF_STAT_INIT_DONE))
-	{
-	   ESMCI_WebServCompSvrClient	client(compSvrInfo.physHostName().c_str(), 
-                                        compSvrInfo.portNum(), 
+        //***
+        if ((status == NET_ESMF_STAT_RUN_DONE)  ||
+            (status == NET_ESMF_STAT_TIMESTEP_DONE)  ||
+            (status == NET_ESMF_STAT_INIT_DONE))
+        {
+           ESMCI_WebServCompSvrClient   client(compSvrInfo.physHostName().c_str(),
+                                        compSvrInfo.portNum(),
                                         compSvrInfo.clientId());
 
-		status = client.final();
-		clientInfo->setStatus(status);
-	}
-	else
-	{
-		// Should return an error message
-	}
+                status = client.final();
+                clientInfo->setStatus(status);
+        }
+        else
+        {
+                // Should return an error message
+        }
 
-	//***
-	// Send the current state back to the client (use the return code from
-	// the component finalize call to determine the state)
-	//***
-	status = clientInfo->status();
-	unsigned int	netStatus = htonl(status);
+        //***
+        // Send the current state back to the client (use the return code from
+        // the component finalize call to determine the state)
+        //***
+        status = clientInfo->status();
+        unsigned int    netStatus = htonl(status);
 
-	if (theSocket.write(4, &netStatus) != 4)
+        if (theSocket.write(4, &netStatus) != 4)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
@@ -1358,7 +1358,7 @@ int  ESMCI_WebServProcCtrl::processFinal(
       return localrc;
    }
 
-	return ESMF_SUCCESS;
+        return ESMF_SUCCESS;
 }
 
 
@@ -1379,29 +1379,29 @@ int  ESMCI_WebServProcCtrl::processGetDataDesc(
   )
 //
 // !DESCRIPTION:
-//    Processes the request to retrieve the description of the output data.  
-//    This method reads the client id from the socket and uses it to lookup 
+//    Processes the request to retrieve the description of the output data.
+//    This method reads the client id from the socket and uses it to lookup
 //    the client information.  It then gets the data description from the
-//    component server and writes that information back to the client.  
-//    Finally, the component status is written back to the socket to complete 
+//    component server and writes that information back to the client.
+//    Finally, the component status is written back to the socket to complete
 //    the transaction.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	printf("\n\nPROCCTRL: processing GetDataDesc\n");
+        printf("\n\nPROCCTRL: processing GetDataDesc\n");
 
-	int	localrc = 0;
-	int	status = NET_ESMF_STAT_IDLE;
-	int	numFiles = 0;
+        int     localrc = 0;
+        int     status = NET_ESMF_STAT_IDLE;
+        int     numFiles = 0;
 
-	//***
-	// Get the client id 
-	//***
-	int	bytesRead = 0;
-	char	buf[1024];
+        //***
+        // Get the client id
+        //***
+        int     bytesRead = 0;
+        char    buf[1024];
 
-	if (theSocket.read(bytesRead, buf) <= 0)
+        if (theSocket.read(bytesRead, buf) <= 0)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
@@ -1411,22 +1411,22 @@ int  ESMCI_WebServProcCtrl::processGetDataDesc(
       return localrc;
    }
 
-   int	clientId = ntohl(*((unsigned int*)buf));
-	printf("Client ID: %d\n", clientId);
+   int  clientId = ntohl(*((unsigned int*)buf));
+        printf("Client ID: %d\n", clientId);
 
-	//***
-	// Now that everything's been read off the socket, lookup the client info
-	// based on the client id.  If the client can't be found, then send back
-	// an error
-	//***
-	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
-	ESMCI_WebServClientInfo*								clientInfo = NULL;
+        //***
+        // Now that everything's been read off the socket, lookup the client info
+        // based on the client id.  If the client can't be found, then send back
+        // an error
+        //***
+        map<int, ESMCI_WebServClientInfo*>::iterator            iter;
+        ESMCI_WebServClientInfo*                                                                clientInfo = NULL;
 
-	if ((iter = theClients.find(clientId)) == theClients.end())
-	{
-		status = NET_ESMF_STAT_ERROR;
-		unsigned int	netStatus = htonl(status);
-		if (theSocket.write(4, &netStatus) != 4)
+        if ((iter = theClients.find(clientId)) == theClients.end())
+        {
+                status = NET_ESMF_STAT_ERROR;
+                unsigned int    netStatus = htonl(status);
+                if (theSocket.write(4, &netStatus) != 4)
       {
          ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
@@ -1442,10 +1442,10 @@ int  ESMCI_WebServProcCtrl::processGetDataDesc(
          ESMC_CONTEXT, &localrc);
 
       return localrc;
-	}
+        }
 
-	clientInfo = iter->second;
-	//clientInfo->print();
+        clientInfo = iter->second;
+        //clientInfo->print();
 
    //***
    // Get the component server information from the Registrar.
@@ -1493,26 +1493,26 @@ int  ESMCI_WebServProcCtrl::processGetDataDesc(
    clientInfo->setStatus(status);
 
 
-	//***
-	// Get the data description from the server
-	//***
-	ESMCI_WebServCompSvrClient	client(compSvrInfo.physHostName().c_str(), 
-                                     compSvrInfo.portNum(), 
+        //***
+        // Get the data description from the server
+        //***
+        ESMCI_WebServCompSvrClient      client(compSvrInfo.physHostName().c_str(),
+                                     compSvrInfo.portNum(),
                                      compSvrInfo.clientId());
 
-	ESMCI_WebServDataDesc*	dataDesc = client.dataDesc();
+        ESMCI_WebServDataDesc*  dataDesc = client.dataDesc();
 
-	//***
+        //***
    // Return the description of the variables and the grid information
    // (i.e., the variable names and the lat/lon values)
    //***
-	if (dataDesc != NULL)
-	{
-		//dataDesc->print();
+        if (dataDesc != NULL)
+        {
+                //dataDesc->print();
 
-		//***
-		// Write out the number of variables
-		//***
+                //***
+                // Write out the number of variables
+                //***
       int   numVars = dataDesc->getNumVars();
       unsigned int  netNumVars = htonl(numVars);
       if (theSocket.write(4, &netNumVars) != 4)
@@ -1525,15 +1525,15 @@ int  ESMCI_WebServProcCtrl::processGetDataDesc(
          return localrc;
       }
 
-		//***
-		// Write out the variable names
-		//***
+                //***
+                // Write out the variable names
+                //***
       string*  varNames = dataDesc->getVarNames();
 
       for (int i = 0; i < numVars; ++i)
       {
          int      valueLen = varNames[i].length() + 1;
-  
+
          if (theSocket.write(valueLen,
                              (void*)(varNames[i].c_str())) != valueLen)
          {
@@ -1546,9 +1546,9 @@ int  ESMCI_WebServProcCtrl::processGetDataDesc(
          }
       }
 
-		//***
-		// Write out the number of latitude values
-		//***
+                //***
+                // Write out the number of latitude values
+                //***
       int   numLats = dataDesc->getNumLatValues();
       unsigned int  netNumLats = htonl(numLats);
       if (theSocket.write(4, &netNumLats) != 4)
@@ -1561,13 +1561,13 @@ int  ESMCI_WebServProcCtrl::processGetDataDesc(
          return localrc;
       }
 
-		//***
-		// Write out the latitude values
-		//***
+                //***
+                // Write out the latitude values
+                //***
       double*  latValues = dataDesc->getLatValues();
       double*  netLatValues = new double[numLats];
       int      latDataSize = sizeof(double) * numLats;
-  
+
       for (int i = 0; i < numLats; ++i)
       {
          netLatValues[i] = latValues[i];
@@ -1584,9 +1584,9 @@ int  ESMCI_WebServProcCtrl::processGetDataDesc(
             return localrc;
       }
 
-		//***
-		// Write out the number of longitude values
-		//***
+                //***
+                // Write out the number of longitude values
+                //***
       int   numLons = dataDesc->getNumLonValues();
       unsigned int  netNumLons = htonl(numLons);
 
@@ -1600,9 +1600,9 @@ int  ESMCI_WebServProcCtrl::processGetDataDesc(
          return localrc;
       }
 
-		//***
-		// Write out the longitude values
-		//***
+                //***
+                // Write out the longitude values
+                //***
       double*  lonValues = dataDesc->getLonValues();
       double*  netLonValues = new double[numLons];
       int      lonDataSize = sizeof(double) * numLons;
@@ -1623,16 +1623,16 @@ int  ESMCI_WebServProcCtrl::processGetDataDesc(
 
             return localrc;
       }
-	}
+        }
 
-	//***
-	// Send the current state back to the client (use the return code from
-	// the component initialize call to determine the state)
-	//***
-	status = clientInfo->status();
-	unsigned int	netStatus = htonl(status);
+        //***
+        // Send the current state back to the client (use the return code from
+        // the component initialize call to determine the state)
+        //***
+        status = clientInfo->status();
+        unsigned int    netStatus = htonl(status);
 
-	if (theSocket.write(4, &netStatus) != 4)
+        if (theSocket.write(4, &netStatus) != 4)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
@@ -1642,7 +1642,7 @@ int  ESMCI_WebServProcCtrl::processGetDataDesc(
       return localrc;
    }
 
-	return ESMF_SUCCESS;
+        return ESMF_SUCCESS;
 }
 
 
@@ -1665,9 +1665,9 @@ int  ESMCI_WebServProcCtrl::processGetData(
 // !DESCRIPTION:
 //    Processes the request to retrieve the export data.  This method
 //    reads the client id from the socket and uses it to lookup the client
-//    information.  It then reads the data parameters (variable name, time, 
-//    lat and lon) from the socket and uses that information to read the 
-//    data from the socket.  The data and the component status are then 
+//    information.  It then reads the data parameters (variable name, time,
+//    lat and lon) from the socket and uses that information to read the
+//    data from the socket.  The data and the component status are then
 //    written back to the socket to complete the transaction.
 //
 //    (KDS: This design is very specific to CCSM/CAM and is hardcoded for
@@ -1679,19 +1679,19 @@ int  ESMCI_WebServProcCtrl::processGetData(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing GetData\n");
+        printf("\n\nSERVER: processing GetData\n");
 
-	int	localrc = 0;
-	int	status = NET_ESMF_STAT_IDLE;
-	int	numFiles = 0;
+        int     localrc = 0;
+        int     status = NET_ESMF_STAT_IDLE;
+        int     numFiles = 0;
 
-	//***
-	// Get the client id 
-	//***
-	int	bytesRead = 0;
-	char	buf[1024];
+        //***
+        // Get the client id
+        //***
+        int     bytesRead = 0;
+        char    buf[1024];
 
-	if (theSocket.read(bytesRead, buf) <= 0)
+        if (theSocket.read(bytesRead, buf) <= 0)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
@@ -1701,8 +1701,8 @@ int  ESMCI_WebServProcCtrl::processGetData(
       return localrc;
    }
 
-   int	clientId = ntohl(*((unsigned int*)buf));
-	//printf("Client ID: %d\n", clientId);
+   int  clientId = ntohl(*((unsigned int*)buf));
+        //printf("Client ID: %d\n", clientId);
 
    //***
    // Read the timestamp for the requested data
@@ -1723,19 +1723,19 @@ int  ESMCI_WebServProcCtrl::processGetData(
    ntohll((uint64_t)(*timeValue));
 printf("After: %g\n", *timeValue);
 
-	//***
-	// Now that everything's been read off the socket, lookup the client info
-	// based on the client id.  If the client can't be found, then send back
-	// an error
-	//***
-	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
-	ESMCI_WebServClientInfo*								clientInfo = NULL;
+        //***
+        // Now that everything's been read off the socket, lookup the client info
+        // based on the client id.  If the client can't be found, then send back
+        // an error
+        //***
+        map<int, ESMCI_WebServClientInfo*>::iterator            iter;
+        ESMCI_WebServClientInfo*                                                                clientInfo = NULL;
 
-	if ((iter = theClients.find(clientId)) == theClients.end())
-	{
-		status = NET_ESMF_STAT_ERROR;
-		unsigned int	netStatus = htonl(status);
-		if (theSocket.write(4, &netStatus) != 4)
+        if ((iter = theClients.find(clientId)) == theClients.end())
+        {
+                status = NET_ESMF_STAT_ERROR;
+                unsigned int    netStatus = htonl(status);
+                if (theSocket.write(4, &netStatus) != 4)
       {
          ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
@@ -1751,10 +1751,10 @@ printf("After: %g\n", *timeValue);
          ESMC_CONTEXT, &localrc);
 
       return localrc;
-	}
+        }
 
-	clientInfo = iter->second;
-	//clientInfo->print();
+        clientInfo = iter->second;
+        //clientInfo->print();
 
    //***
    // Get the component server information from the Registrar.
@@ -1801,11 +1801,11 @@ printf("After: %g\n", *timeValue);
 
    clientInfo->setStatus(status);
 
-	//***
-	// Get the data from the server
-	//***
-	ESMCI_WebServCompSvrClient	client(compSvrInfo.physHostName().c_str(), 
-                                     compSvrInfo.portNum(), 
+        //***
+        // Get the data from the server
+        //***
+        ESMCI_WebServCompSvrClient      client(compSvrInfo.physHostName().c_str(),
+                                     compSvrInfo.portNum(),
                                      compSvrInfo.clientId());
 
    int      numVars = 0;
@@ -1813,16 +1813,16 @@ printf("After: %g\n", *timeValue);
    int      numLons = 0;
    string*  varNames = NULL;
 
-	ESMCI_WebServDataContent*	outputData = client.outputData(*timeValue,
+        ESMCI_WebServDataContent*       outputData = client.outputData(*timeValue,
                                                              &numVars,
                                                              &varNames,
                                                              &numLats,
                                                              &numLons);
 
-	if (outputData != NULL)
-	{
-		//outputData->print();
-	}
+        if (outputData != NULL)
+        {
+                //outputData->print();
+        }
 
    printf("Num Vars: %d\n", numVars);
    for (int i = 0; i < numVars; ++i)
@@ -1832,7 +1832,7 @@ printf("After: %g\n", *timeValue);
    printf("Num Lats: %d\n", numLats);
    printf("Num Lons: %d\n", numLons);
 
-	//***
+        //***
    // Return the description of the variables and the grid information
    // (i.e., the variable names and the number of lat/lon values)
    //***
@@ -1925,14 +1925,14 @@ printf("Num Values: %d\n", numValues);
       }
    }
 
-	//***
-	// Send the current state back to the client (use the return code from
-	// the component initialize call to determine the state)
-	//***
-	status = clientInfo->status();
-	unsigned int	netStatus = htonl(status);
+        //***
+        // Send the current state back to the client (use the return code from
+        // the component initialize call to determine the state)
+        //***
+        status = clientInfo->status();
+        unsigned int    netStatus = htonl(status);
 
-	if (theSocket.write(4, &netStatus) != 4)
+        if (theSocket.write(4, &netStatus) != 4)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
@@ -1942,7 +1942,7 @@ printf("Num Values: %d\n", numValues);
       return localrc;
    }
 
-	return ESMF_SUCCESS;
+        return ESMF_SUCCESS;
 }
 
 
@@ -1972,18 +1972,18 @@ int  ESMCI_WebServProcCtrl::processEnd(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("\n\nSERVER: processing End\n");
+        //printf("\n\nSERVER: processing End\n");
 
-	int	localrc = 0;
-	int	status = NET_ESMF_STAT_IDLE;
+        int     localrc = 0;
+        int     status = NET_ESMF_STAT_IDLE;
 
-	//***
-	// Get the client id 
-	//***
-	int	bytesRead = 0;
-	char	buf[1024];
+        //***
+        // Get the client id
+        //***
+        int     bytesRead = 0;
+        char    buf[1024];
 
-	if (theSocket.read(bytesRead, buf) <= 0)
+        if (theSocket.read(bytesRead, buf) <= 0)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_READ,
@@ -1993,23 +1993,23 @@ int  ESMCI_WebServProcCtrl::processEnd(
       return localrc;
    }
 
-   int	clientId = ntohl(*((unsigned int*)buf));
-	//printf("Client ID: %d\n", clientId);
+   int  clientId = ntohl(*((unsigned int*)buf));
+        //printf("Client ID: %d\n", clientId);
 
-	//***
-	// Now that everything's been read off the socket, lookup the client info
-	// based on the client id.  If the client can't be found, then send back
-	// an error
-	//***
-	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
-	ESMCI_WebServClientInfo*								clientInfo = NULL;
+        //***
+        // Now that everything's been read off the socket, lookup the client info
+        // based on the client id.  If the client can't be found, then send back
+        // an error
+        //***
+        map<int, ESMCI_WebServClientInfo*>::iterator            iter;
+        ESMCI_WebServClientInfo*                                                                clientInfo = NULL;
 
-	if ((iter = theClients.find(clientId)) == theClients.end())
-	{
-		status = NET_ESMF_STAT_ERROR;
-		unsigned int	netStatus = htonl(status);
+        if ((iter = theClients.find(clientId)) == theClients.end())
+        {
+                status = NET_ESMF_STAT_ERROR;
+                unsigned int    netStatus = htonl(status);
 
-		if (theSocket.write(4, &netStatus) != 4)
+                if (theSocket.write(4, &netStatus) != 4)
       {
          ESMC_LogDefault.MsgFoundError(
             ESMC_RC_FILE_WRITE,
@@ -2025,11 +2025,11 @@ int  ESMCI_WebServProcCtrl::processEnd(
          ESMC_CONTEXT, &localrc);
 
       return localrc;
-	}
+        }
 
-	clientInfo = iter->second;
-	//clientInfo->print();
-	status = clientInfo->status();
+        clientInfo = iter->second;
+        //clientInfo->print();
+        status = clientInfo->status();
 
    //***
    // Get the component server information from the Registrar.
@@ -2076,32 +2076,32 @@ int  ESMCI_WebServProcCtrl::processEnd(
 
    clientInfo->setStatus(status);
 
-	ESMCI_WebServCompSvrClient	client(compSvrInfo.physHostName().c_str(), 
-                                     compSvrInfo.portNum(), 
+        ESMCI_WebServCompSvrClient      client(compSvrInfo.physHostName().c_str(),
+                                     compSvrInfo.portNum(),
                                      compSvrInfo.clientId());
 
-	status = client.end();
-	clientInfo->setStatus(status);
+        status = client.end();
+        clientInfo->setStatus(status);
 
    //***
    // Remove the client from the collection of clients
-	//***
-	theClients.erase(clientId);
-	delete clientInfo;
+        //***
+        theClients.erase(clientId);
+        delete clientInfo;
 
    //***
    // Kill the server
    //**
    client.killServer();
 
-	//***
-	// Send the current state back to the client (use the return code from
-	// the component initialize call to determine the state)
-	//***
-	status = NET_ESMF_STAT_DONE;
-	unsigned int	netStatus = htonl(status);
+        //***
+        // Send the current state back to the client (use the return code from
+        // the component initialize call to determine the state)
+        //***
+        status = NET_ESMF_STAT_DONE;
+        unsigned int    netStatus = htonl(status);
 
-	if (theSocket.write(4, &netStatus) != 4)
+        if (theSocket.write(4, &netStatus) != 4)
    {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
@@ -2111,7 +2111,7 @@ int  ESMCI_WebServProcCtrl::processEnd(
       return localrc;
    }
 
-	return ESMF_SUCCESS;
+        return ESMF_SUCCESS;
 }
 
 
@@ -2132,7 +2132,7 @@ int  ESMCI_WebServProcCtrl::processExit(
   )
 //
 // !DESCRIPTION:
-//    Processes the request to exit the Process Controller.  Exiting the 
+//    Processes the request to exit the Process Controller.  Exiting the
 //    Process Controller means exiting all of the Component Services associate
 //    with the process controller.  This is a very powerful operation, and
 //    I should probably do some security checking before allowing it... later.
@@ -2140,85 +2140,85 @@ int  ESMCI_WebServProcCtrl::processExit(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	printf("\n\nProcCtrl: processing EXIT\n");
+        printf("\n\nProcCtrl: processing EXIT\n");
 
-	int	localrc = 0;
-	int	status = NET_ESMF_STAT_IDLE;
+        int     localrc = 0;
+        int     status = NET_ESMF_STAT_IDLE;
 
 
-	//***
-	// Go through the list of clients and for each client, connect to
-	// it's component service and execute the killServer command.
-	// KDS: TODO - check the server status, and if it's still "SUBMITTED", then
-	//      we'll have to use the job scheduler to CANCEL the job request
-	//      (since the job has not yet started to run).
-	//***
-	ESMCI_WebServRegistrarClient	registrar(theRegistrarHost.c_str(), 
+        //***
+        // Go through the list of clients and for each client, connect to
+        // it's component service and execute the killServer command.
+        // KDS: TODO - check the server status, and if it's still "SUBMITTED", then
+        //      we'll have to use the job scheduler to CANCEL the job request
+        //      (since the job has not yet started to run).
+        //***
+        ESMCI_WebServRegistrarClient    registrar(theRegistrarHost.c_str(),
                                            theRegistrarPort);
 
-	map<int, ESMCI_WebServClientInfo*>::iterator		iter;
-	ESMCI_WebServClientInfo*								clientInfo = NULL;
+        map<int, ESMCI_WebServClientInfo*>::iterator            iter;
+        ESMCI_WebServClientInfo*                                                                clientInfo = NULL;
 
-	for (iter = theClients.begin(); iter != theClients.end(); ++iter)
-	{
-		clientInfo = iter->second;
-		//clientInfo->print();
+        for (iter = theClients.begin(); iter != theClients.end(); ++iter)
+        {
+                clientInfo = iter->second;
+                //clientInfo->print();
 
-		//***
-		// First, get the server info from the registrar
-		//***
-		char	clientIdStr[64];
-		sprintf(clientIdStr, "%d", clientInfo->clientId());
+                //***
+                // First, get the server info from the registrar
+                //***
+                char    clientIdStr[64];
+                sprintf(clientIdStr, "%d", clientInfo->clientId());
 
-		ESMCI_WebServCompSvrInfo	compSvrInfo;
+                ESMCI_WebServCompSvrInfo        compSvrInfo;
 
-		if ((status = registrar.getComponent(clientIdStr, &compSvrInfo)) == 
-			ESMF_FAILURE)
-		{
-      	ESMC_LogDefault.MsgFoundError(
-         	ESMC_RC_NOT_VALID,
-         	"Error while while getting component svc info from Registrar.",
-         	ESMC_CONTEXT, &localrc);
+                if ((status = registrar.getComponent(clientIdStr, &compSvrInfo)) ==
+                        ESMF_FAILURE)
+                {
+        ESMC_LogDefault.MsgFoundError(
+                ESMC_RC_NOT_VALID,
+                "Error while while getting component svc info from Registrar.",
+                ESMC_CONTEXT, &localrc);
 
-      	return ESMF_FAILURE;
-		}
+        return ESMF_FAILURE;
+                }
 
-		compSvrInfo.print();
-		status = compSvrInfo.status();
+                compSvrInfo.print();
+                status = compSvrInfo.status();
 
-		switch (status)
-		{
-		case NET_ESMF_STAT_READY:
-		case NET_ESMF_STAT_INITIALIZING:
-		case NET_ESMF_STAT_INIT_DONE:
-		case NET_ESMF_STAT_RUNNING:
-		case NET_ESMF_STAT_RUN_DONE:
-		case NET_ESMF_STAT_FINALIZING:
-		case NET_ESMF_STAT_FINAL_DONE:
-			{
-				ESMCI_WebServCompSvrClient	
-					client(compSvrInfo.physHostName().c_str(), 
-                      compSvrInfo.portNum(), 
+                switch (status)
+                {
+                case NET_ESMF_STAT_READY:
+                case NET_ESMF_STAT_INITIALIZING:
+                case NET_ESMF_STAT_INIT_DONE:
+                case NET_ESMF_STAT_RUNNING:
+                case NET_ESMF_STAT_RUN_DONE:
+                case NET_ESMF_STAT_FINALIZING:
+                case NET_ESMF_STAT_FINAL_DONE:
+                        {
+                                ESMCI_WebServCompSvrClient      
+                                        client(compSvrInfo.physHostName().c_str(),
+                      compSvrInfo.portNum(),
                       compSvrInfo.clientId());
 
-				client.killServer();
-			}
-			break;
+                                client.killServer();
+                        }
+                        break;
 
-		case NET_ESMF_STAT_SUBMITTED:
-			{
-				// Cancel using job scheduler
-			}
-			break;
+                case NET_ESMF_STAT_SUBMITTED:
+                        {
+                                // Cancel using job scheduler
+                        }
+                        break;
 
-		default:
-			break;
+                default:
+                        break;
 
-		} // end switch
+                } // end switch
 
-	} // end for
+        } // end for
 
-	return ESMF_SUCCESS;
+        return ESMF_SUCCESS;
 }
 
 
@@ -2244,9 +2244,9 @@ int  ESMCI_WebServProcCtrl::processPing(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	printf("\n\nSERVER: processing Ping\n");
+        printf("\n\nSERVER: processing Ping\n");
 
-	return ESMF_SUCCESS;
+        return ESMF_SUCCESS;
 }
 
 
@@ -2273,11 +2273,11 @@ int  ESMCI_WebServProcCtrl::getNextClientId(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int	nextClientId = theNextClientId;
+        int     nextClientId = theNextClientId;
 
-	++theNextClientId;
+        ++theNextClientId;
 
-	return nextClientId;
+        return nextClientId;
 }
 
 } // end namespace

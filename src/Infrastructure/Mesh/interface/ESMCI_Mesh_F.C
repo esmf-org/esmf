@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -85,19 +85,19 @@ extern "C" void FTN_X(c_esmc_meshinit)(char *logfile, int *use_log,
 }
 #endif
 
-extern "C" void FTN_X(c_esmc_clumppntsll)(int *num_pnt, double *pnt_lon, double *pnt_lat, 
-                                        double *tol, int *pnt_cl_ind,int *num_cl, 
-                                        int *max_size_cl, 
-                                        double *start_lat, double *end_lat, int *rc) 
+extern "C" void FTN_X(c_esmc_clumppntsll)(int *num_pnt, double *pnt_lon, double *pnt_lat,
+                                        double *tol, int *pnt_cl_ind,int *num_cl,
+                                        int *max_size_cl,
+                                        double *start_lat, double *end_lat, int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_clumppntsll()"
 
   double *cl_lon, *cl_lat;
 
-  ESMCI::ClumpPntsLL(*num_pnt, pnt_lon, pnt_lat, 
-                     *tol, pnt_cl_ind, num_cl, 
-                     &cl_lon, &cl_lat, max_size_cl, 
+  ESMCI::ClumpPntsLL(*num_pnt, pnt_lon, pnt_lat,
+                     *tol, pnt_cl_ind, num_cl,
+                     &cl_lon, &cl_lat, max_size_cl,
                      *start_lat, *end_lat, rc) ;
 
   delete [] cl_lon;
@@ -106,7 +106,7 @@ extern "C" void FTN_X(c_esmc_clumppntsll)(int *num_pnt, double *pnt_lon, double 
 }
 
 extern "C" void FTN_X(c_esmc_meshcreate)(MeshCap **meshpp,
-                                         int *pdim, int *sdim, 
+                                         int *pdim, int *sdim,
                                          ESMC_CoordSys_Flag *coordSys, int *rc)
 {
 #undef  ESMC_METHOD
@@ -118,22 +118,22 @@ extern "C" void FTN_X(c_esmc_meshcreate)(MeshCap **meshpp,
   } else {
     *meshpp=MeshCap::meshcreate(pdim,sdim,coordSys,true,rc);
   }
-  
+
 } // meshcreate
 
 
-extern "C" void FTN_X(c_esmc_meshaddnodes)(MeshCap **meshpp, int *num_nodes, int *nodeId, 
+extern "C" void FTN_X(c_esmc_meshaddnodes)(MeshCap **meshpp, int *num_nodes, int *nodeId,
                                            double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
-                                           int *rc) 
+                                           int *rc)
 {
   // Call into implementation
-  (*meshpp)->meshaddnodes(num_nodes, nodeId, 
+  (*meshpp)->meshaddnodes(num_nodes, nodeId,
                           nodeCoord, nodeOwner, nodeMaskII,
                           _coordSys, _orig_sdim,
                           rc);
 
-} 
+}
 
 extern "C" void FTN_X(c_esmc_meshwrite)(MeshCap **meshpp, char *fname, int *rc,
     ESMCI_FortranStrLenArg nlen) {
@@ -142,22 +142,22 @@ extern "C" void FTN_X(c_esmc_meshwrite)(MeshCap **meshpp, char *fname, int *rc,
   (*meshpp)->meshwrite(fname, rc, nlen);
 }
 
-extern "C" void FTN_X(c_esmc_meshaddelements)(MeshCap **meshpp, 
+extern "C" void FTN_X(c_esmc_meshaddelements)(MeshCap **meshpp,
                                               int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
-                                              int *_areaPresent, double *elemArea, 
-                                              int *_coordsPresent, double *elemCoords, 
-                                              int *_num_elemConn, int *elemConn, int *regridConserve, 
+                                              int *_areaPresent, double *elemArea,
+                                              int *_coordsPresent, double *elemCoords,
+                                              int *_num_elemConn, int *elemConn, int *regridConserve,
                                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
-                                              int *rc) 
+                                              int *rc)
 {
   // Call into implementation
   (*meshpp)->meshaddelements(_num_elems, elemId, elemType, _elemMaskII ,
-                         _areaPresent, elemArea, 
-                         _coordsPresent, elemCoords, 
-                         _num_elemConn, elemConn, regridConserve, 
+                         _areaPresent, elemArea,
+                         _coordsPresent, elemCoords,
+                         _num_elemConn, elemConn, regridConserve,
                          _coordSys, _orig_sdim,
                          rc);
-} 
+}
 
 
 /**
@@ -196,7 +196,7 @@ extern "C" void FTN_X(c_esmc_meshget)(MeshCap **meshpp, int *num_nodes, int *num
 
   (*meshpp)->meshget(num_nodes, num_elements, rc);
 }
-    
+
 
 
 extern "C" void FTN_X(c_esmc_meshcreatenodedistgrid)(MeshCap **meshpp, int *ngrid, int *num_lnodes, int *rc) {
@@ -213,34 +213,34 @@ extern "C" void FTN_X(c_esmc_meshcreateelemdistgrid)(MeshCap **meshpp, int *egri
 
 
 extern "C" void FTN_X(c_esmc_meshinfoserialize)(int *intMeshFreed,
-                int *spatialDim, int *parametricDim, 
-	        char *buffer, int *length, int *offset,
+                int *spatialDim, int *parametricDim,
+                char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *localrc,
                 ESMCI_FortranStrLenArg buffer_l){
 
   MeshCap::meshinfoserialize(intMeshFreed,
-                             spatialDim, parametricDim, 
+                             spatialDim, parametricDim,
                              buffer, length, offset,
                              inquireflag, localrc,
                              buffer_l);
 
-} 
+}
 
 
-extern "C" void FTN_X(c_esmc_meshinfodeserialize)(int *intMeshFreed, 
-                                 int *spatialDim, int *parametricDim, 
+extern "C" void FTN_X(c_esmc_meshinfodeserialize)(int *intMeshFreed,
+                                 int *spatialDim, int *parametricDim,
                                  char *buffer, int *offset, int *localrc,
                                  ESMCI_FortranStrLenArg buffer_l){
 
-  MeshCap::meshinfodeserialize(intMeshFreed, 
-                               spatialDim, parametricDim, 
+  MeshCap::meshinfodeserialize(intMeshFreed,
+                               spatialDim, parametricDim,
                                buffer, offset, localrc,
                                buffer_l);
-} 
+}
 
 
 extern "C" void FTN_X(c_esmc_meshserialize)(MeshCap **meshpp,
-	        char *buffer, int *length, int *offset,
+                char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *rc,
                 ESMCI_FortranStrLenArg buffer_l){
 
@@ -248,35 +248,35 @@ extern "C" void FTN_X(c_esmc_meshserialize)(MeshCap **meshpp,
                            inquireflag, rc,
                            buffer_l);
 
-} 
+}
 
 
-extern "C" void FTN_X(c_esmc_meshdeserialize)(MeshCap **meshpp, 
+extern "C" void FTN_X(c_esmc_meshdeserialize)(MeshCap **meshpp,
                                  char *buffer, int *offset, int *rc,
                                  ESMCI_FortranStrLenArg buffer_l){
 
   *meshpp=MeshCap::meshdeserialize(buffer, offset, rc,
                              buffer_l);
-} 
+}
 
 
-extern "C" void FTN_X(c_esmc_meshfindpnt)(MeshCap **meshpp, int *unmappedaction, int *dimPnts, int *numPnts, 
-					double *pnts, int *pets, int *rc){
-  (*meshpp)->meshfindpnt(unmappedaction, dimPnts, numPnts, 
+extern "C" void FTN_X(c_esmc_meshfindpnt)(MeshCap **meshpp, int *unmappedaction, int *dimPnts, int *numPnts,
+                                        double *pnts, int *pets, int *rc){
+  (*meshpp)->meshfindpnt(unmappedaction, dimPnts, numPnts,
                                   pnts, pets, rc);
 }
 
-extern "C" void FTN_X(c_esmc_getlocalcoords)(MeshCap **meshpp, double *nodeCoord, int *_orig_sdim, int *rc) 
+extern "C" void FTN_X(c_esmc_getlocalcoords)(MeshCap **meshpp, double *nodeCoord, int *_orig_sdim, int *rc)
 {
 
-  (*meshpp)->getlocalcoords(nodeCoord, _orig_sdim, rc); 
-} 
+  (*meshpp)->getlocalcoords(nodeCoord, _orig_sdim, rc);
+}
 
-extern "C" void FTN_X(c_esmc_getlocalelemcoords)(MeshCap **meshpp, double *elemCoord, int *_orig_sdim, int *rc) 
+extern "C" void FTN_X(c_esmc_getlocalelemcoords)(MeshCap **meshpp, double *elemCoord, int *_orig_sdim, int *rc)
 {
 
-  (*meshpp)->getlocalelemcoords(elemCoord, _orig_sdim, rc); 
-} 
+  (*meshpp)->getlocalelemcoords(elemCoord, _orig_sdim, rc);
+}
 
 
 extern "C" void FTN_X(c_esmc_meshgetarea)(MeshCap **meshpp, int *num_elem, double *elem_areas, int *rc) {
@@ -308,13 +308,13 @@ extern "C" void FTN_X(c_esmc_meshgetfrac2)(MeshCap **meshpp, int *num_elem, doub
 // Input is: pnts (the polygon of size numPnts*sdim
 //           td a temporary buffer of the same size as pnts
 //           ti a temporary buffer of size numPnts
-// Output is: tri_ind, which are the 0-based indices of the triangles 
+// Output is: tri_ind, which are the 0-based indices of the triangles
 //             making up the triangulization. tri_ind should be of size 3*(numPnts-2).
-// 
-extern "C" void FTN_X(c_esmc_triangulate)(int *pdim, int *sdim, int *numPnts, 
-					double *pnts, double *td, int *ti, int *triInd, int *rc){
-  MeshCap::triangulate(pdim, sdim, numPnts, 
-                                    pnts, td, ti, triInd, rc); 
+//
+extern "C" void FTN_X(c_esmc_triangulate)(int *pdim, int *sdim, int *numPnts,
+                                        double *pnts, double *td, int *ti, int *triInd, int *rc){
+  MeshCap::triangulate(pdim, sdim, numPnts,
+                                    pnts, td, ti, triInd, rc);
 }
 
 
@@ -341,84 +341,84 @@ extern "C" void FTN_X(c_esmc_meshturnoffnodemask)(MeshCap **meshpp, int *rc) {
     (*meshpp)->meshturnoffnodemask(rc);
 }
 
-//////////// 
+////////////
 
-extern "C" void FTN_X(c_esmc_get_polygon_area)(int *spatialdim, int *nedges, 
-						 double *points, double *area, int *rc) {
-  MeshCap::get_polygon_area(spatialdim, nedges, 
+extern "C" void FTN_X(c_esmc_get_polygon_area)(int *spatialdim, int *nedges,
+                                                 double *points, double *area, int *rc) {
+  MeshCap::get_polygon_area(spatialdim, nedges,
                                 points, area, rc);
 }
 
 ////////////////
 
-extern "C" void FTN_X(c_esmc_meshcreatefrommeshes)(MeshCap **meshapp, MeshCap **meshbpp, MeshCap **meshpp, 
+extern "C" void FTN_X(c_esmc_meshcreatefrommeshes)(MeshCap **meshapp, MeshCap **meshbpp, MeshCap **meshpp,
 ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
 
-  *meshpp=MeshCap::meshcreatefrommeshes(meshapp, meshbpp, 
+  *meshpp=MeshCap::meshcreatefrommeshes(meshapp, meshbpp,
                                meshop, threshold, rc);
 }
 
 
-extern "C" void FTN_X(c_esmc_meshcreateredistelems)(MeshCap **src_meshpp, int *num_elem_gids, int *elem_gids, 
+extern "C" void FTN_X(c_esmc_meshcreateredistelems)(MeshCap **src_meshpp, int *num_elem_gids, int *elem_gids,
                                                     MeshCap **output_meshpp, int *rc) {
 
-  *output_meshpp=MeshCap::meshcreateredistelems(src_meshpp, num_elem_gids, elem_gids, 
+  *output_meshpp=MeshCap::meshcreateredistelems(src_meshpp, num_elem_gids, elem_gids,
                                        rc);
 }
 
 
 
-extern "C" void FTN_X(c_esmc_meshcreateredistnodes)(MeshCap **src_meshpp, int *num_node_gids, int *node_gids, 
+extern "C" void FTN_X(c_esmc_meshcreateredistnodes)(MeshCap **src_meshpp, int *num_node_gids, int *node_gids,
                                                     MeshCap **output_meshpp, int *rc) {
 
-  *output_meshpp=MeshCap::meshcreateredistnodes(src_meshpp, num_node_gids, node_gids, 
+  *output_meshpp=MeshCap::meshcreateredistnodes(src_meshpp, num_node_gids, node_gids,
                                           rc);
 }
 
 
 
-extern "C" void FTN_X(c_esmc_meshcreateredist)(MeshCap **src_meshpp, int *num_node_gids, int *node_gids, 
+extern "C" void FTN_X(c_esmc_meshcreateredist)(MeshCap **src_meshpp, int *num_node_gids, int *node_gids,
                                                int *num_elem_gids, int *elem_gids,  MeshCap **output_meshpp, int *rc) {
 
-  *output_meshpp=MeshCap::meshcreateredist(src_meshpp, num_node_gids, node_gids, 
+  *output_meshpp=MeshCap::meshcreateredist(src_meshpp, num_node_gids, node_gids,
                                   num_elem_gids, elem_gids, rc);
 }
 
 
 
 // This method verifies that nodes in node_gids array are the same as the local nodes in meshpp, otherwise
-// it returns an error (used to test MeshRedist()). 
+// it returns an error (used to test MeshRedist()).
 // To do this check make sure the number of nodes in both cases are the same and that every
 // entry in node_gids is contained in meshpp
-extern "C" void FTN_X(c_esmc_meshchecknodelist)(MeshCap **meshpp, int *_num_node_gids, int *node_gids, 
+extern "C" void FTN_X(c_esmc_meshchecknodelist)(MeshCap **meshpp, int *_num_node_gids, int *node_gids,
                                              int *rc) {
-  (*meshpp)->meshchecknodelist(_num_node_gids, node_gids, 
+  (*meshpp)->meshchecknodelist(_num_node_gids, node_gids,
                                rc);
 
 }
 
 
 // This method verifies that elems in elem_gids array are the same as the local elems in meshpp, otherwise
-// it returns an error (used to test MeshRedist()). 
+// it returns an error (used to test MeshRedist()).
 // To do this check make sure the number of elems in both cases are the same and that every
 // entry in elem_gids is contained in meshpp
-extern "C" void FTN_X(c_esmc_meshcheckelemlist)(MeshCap **meshpp, int *_num_elem_gids, int *elem_gids, 
+extern "C" void FTN_X(c_esmc_meshcheckelemlist)(MeshCap **meshpp, int *_num_elem_gids, int *elem_gids,
                                              int *rc) {
-  (*meshpp)->meshcheckelemlist(_num_elem_gids, elem_gids, 
+  (*meshpp)->meshcheckelemlist(_num_elem_gids, elem_gids,
                                         rc);
 }
 
 // Interface to internal code to convert coords from spherical in degrees to Cartesian
 // Input is: lon, lat - spherical coordinates in degrees
 // Output is: x,y,z - Cartesian coordinates
-// 
+//
 extern "C" void FTN_X(c_esmc_sphdeg_to_cart)(double *lon, double *lat,
                                              double *x, double *y, double *z, int *rc){
   MeshCap::sphdeg_to_cart(lon, lat, x, y, z, rc);
 }
 
 
-// This method sets the pole values so a 2D Mesh from a SCRIP grid can still be used in regrid with poles 
+// This method sets the pole values so a 2D Mesh from a SCRIP grid can still be used in regrid with poles
 extern "C" void FTN_X(c_esmc_meshsetpoles)(MeshCap **meshpp, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
                                              int *rc) {
 
@@ -440,7 +440,7 @@ extern "C" void FTN_X(c_esmc_meshgetinternalptr)(MeshCap **meshpp,
 #define ESMC_METHOD "c_esmc_meshgetinternalptr"
 
   *internal_ptr=(*meshpp)->get_internal_mesh_ptr();
-  
+
   // return success
   if (rc) *rc=ESMF_SUCCESS;
 
@@ -464,18 +464,18 @@ extern "C" void FTN_X(c_esmc_meshfitonvm)(MeshCap **meshpp, VM **vm, int *rc) {
 }
 
 extern "C" void FTN_X(c_esmc_meshcreateeasyelems)(MeshCap **meshpp,
-                                                  int *pdim, 
-                                                  int *sdim, 
-                                                  int *num_elems, 
+                                                  int *pdim,
+                                                  int *sdim,
+                                                  int *num_elems,
                                                   InterArray<int> *elemIdsII,
-                                                  int *elemTypes, 
+                                                  int *elemTypes,
                                                   InterArray<int> *elemMaskII,
-                                                  int *num_elemCorners, 
-                                                  double *elemCornerCoords, 
-                                                  int *has_elemArea, 
-                                                  double *elemArea, 
-                                                  int *has_elemCoords, 
-                                                  double *elemCoords, 
+                                                  int *num_elemCorners,
+                                                  double *elemCornerCoords,
+                                                  int *has_elemArea,
+                                                  double *elemArea,
+                                                  int *has_elemCoords,
+                                                  double *elemCoords,
                                                   ESMC_CoordSys_Flag *coordSys, int *rc)
 {
 #undef  ESMC_METHOD
@@ -484,37 +484,37 @@ extern "C" void FTN_X(c_esmc_meshcreateeasyelems)(MeshCap **meshpp,
   // Create Mesh depending on whether MOAB or not
   if (Moab_on) {
     *meshpp=MeshCap::meshcreate_easy_elems(pdim, sdim,
-                                num_elems, elemIdsII, elemTypes, elemMaskII, 
-                                num_elemCorners, elemCornerCoords, 
-                                has_elemArea, elemArea, 
-                                has_elemCoords, elemCoords, 
+                                num_elems, elemIdsII, elemTypes, elemMaskII,
+                                num_elemCorners, elemCornerCoords,
+                                has_elemArea, elemArea,
+                                has_elemCoords, elemCoords,
                                 coordSys,false,rc);
   } else {
     *meshpp=MeshCap::meshcreate_easy_elems(pdim, sdim,
-                                num_elems, elemIdsII, elemTypes, elemMaskII, 
-                                num_elemCorners, elemCornerCoords, 
-                                has_elemArea, elemArea, 
-                                has_elemCoords, elemCoords, 
+                                num_elems, elemIdsII, elemTypes, elemMaskII,
+                                num_elemCorners, elemCornerCoords,
+                                has_elemArea, elemArea,
+                                has_elemCoords, elemCoords,
                                 coordSys,true,rc);
   }
-  
+
 } // meshcreate
 
 #if 0
-extern "C" void FTN_X(c_esmc_meshaddelements)(MeshCap **meshpp, 
+extern "C" void FTN_X(c_esmc_meshaddelements)(MeshCap **meshpp,
                                               int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
-                                              int *_areaPresent, double *elemArea, 
-                                              int *_coordsPresent, double *elemCoords, 
-                                              int *_num_elemConn, int *elemConn, int *regridConserve, 
+                                              int *_areaPresent, double *elemArea,
+                                              int *_coordsPresent, double *elemCoords,
+                                              int *_num_elemConn, int *elemConn, int *regridConserve,
                                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
-                                              int *rc) 
+                                              int *rc)
 {
   // Call into implementation
   (*meshpp)->meshaddelements(_num_elems, elemId, elemType, _elemMaskII ,
-                         _areaPresent, elemArea, 
-                         _coordsPresent, elemCoords, 
-                         _num_elemConn, elemConn, regridConserve, 
+                         _areaPresent, elemArea,
+                         _coordsPresent, elemCoords,
+                         _num_elemConn, elemConn, regridConserve,
                          _coordSys, _orig_sdim,
                          rc);
-} 
+}
 #endif

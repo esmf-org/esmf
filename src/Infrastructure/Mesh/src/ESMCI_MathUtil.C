@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -32,21 +32,21 @@
 // into the object file for tracking purposes.
 static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
- 
+
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
-          
+
 namespace ESMCI {
 
   bool mathutil_debug=false;
 
   ///////// File for random math routines that I didn't know where to put ///////////
 
- 
-//// These should eventually be moved elsewhere (perhaps into ESMCI_ShapeFunc.C??) 
+
+//// These should eventually be moved elsewhere (perhaps into ESMCI_ShapeFunc.C??)
 // INSTEAD OF THIS USE MACRO!
 void mult(double m[], double v[], double out_v[]) {
 
@@ -62,11 +62,11 @@ bool invert_matrix_3x3(double m[], double m_inv[]) {
   const double det =  m[0] * (m[4]*m[8] - m[5]*m[7])
                      -m[1] * (m[3]*m[8] - m[5]*m[6])
                      +m[2] * (m[3]*m[7] - m[4]*m[6]);
-  
+
   // If det == 0.0 we can't invert
   if (!MU_IS_FINITE(det)) return false;
   if (det == 0.0) return false;
- 
+
   const double deti = 1.0/det;
 
   m_inv[0] = (m[4]*m[8] - m[5]*m[7]) * deti;
@@ -85,14 +85,14 @@ bool invert_matrix_3x3(double m[], double m_inv[]) {
 }
 
 
-// Intersects between the quad q (entries in counterclockwise order)                                       
-// and the line determined by the endpoints l1 and l2                       
-// returns true if the two intersect and the output variables are valid                                
-// outputs p containing the coordinates in the quad and t the coordinate in the line   
-// of the intersection.                                                           
-// NOTE: the intersection doesn't have to be inside the quad or line for this to return true    
+// Intersects between the quad q (entries in counterclockwise order)
+// and the line determined by the endpoints l1 and l2
+// returns true if the two intersect and the output variables are valid
+// outputs p containing the coordinates in the quad and t the coordinate in the line
+// of the intersection.
+// NOTE: the intersection doesn't have to be inside the quad or line for this to return true
 bool intersect_quad_with_line(const double *q, const double *l1, const double *l2, double *p,
- 			      double *t) {
+                              double *t) {
 
   double A[3], B[3], C[3], D[3], E[3], F[3];
   double J[3*3], inv_J[3*3];
@@ -107,7 +107,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   int rotate_cntr_clk = 0;
 
   // If q0 and q1 are the same then it causes a problem, so if they are then rotate
-  if (MU_EQUAL_PNT3D(q0,q1,1.0E-20)) { 
+  if (MU_EQUAL_PNT3D(q0,q1,1.0E-20)) {
     const double *tmp=q3;
     q3=q2;
     q2=q1;
@@ -117,7 +117,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   }
 
   // If q0 and q3 are the same then it causes a problem, so if they are then rotate
-  if (MU_EQUAL_PNT3D(q0,q3,1.0E-20)) { 
+  if (MU_EQUAL_PNT3D(q0,q3,1.0E-20)) {
     const double *tmp;
     tmp=q3;
     q3=q1;
@@ -145,7 +145,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   D[0]=l1[0]-l2[0];
   D[1]=l1[1]-l2[1];
   D[2]=l1[2]-l2[2];
- 
+
   E[0]=q0[0]-l1[0];
   E[1]=q0[1]-l1[1];
   E[2]=q0[2]-l1[2];
@@ -163,7 +163,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
     F[1]=X[0]*X[1]*A[1]+X[0]*B[1]+X[1]*C[1]+X[2]*D[1]+E[1];
     F[2]=X[0]*X[1]*A[2]+X[0]*B[2]+X[1]*C[2]+X[2]*D[2]+E[2];
 
-    // If we're close enough to 0.0 then exit           
+    // If we're close enough to 0.0 then exit
      if (F[0]*F[0]+F[1]*F[1]+F[2]*F[2] < 1.0E-20) break;
 
     // Construct Jacobian
@@ -174,11 +174,11 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
     // Invert Jacobian
     if (!invert_matrix_3x3(J,inv_J)) {
       return false;
-    }    
+    }
 
     // Calculate change in X
     mult(inv_J, F, delta_X);
-    
+
     // Move to next approximation of X
     X[0] = X[0] - delta_X[0];
     X[1] = X[1] - delta_X[1];
@@ -186,8 +186,8 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   }
 
  // If not finite then return as not mapped
- if (!MU_IS_FINITE(X[0]) ||  
-     !MU_IS_FINITE(X[1]) ||  
+ if (!MU_IS_FINITE(X[0]) ||
+     !MU_IS_FINITE(X[1]) ||
      !MU_IS_FINITE(X[2])) {
 
    return false;
@@ -214,7 +214,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
   return true;
 }
 
-//// Intersect a line and a tri 
+//// Intersect a line and a tri
 // Intersects between the tri t (entries in counterclockwise order)
 // and the line determined by the endpoints l1 and l2 (t=0.0 at l1 and t=1.0 at l2)
 // returns true if the two intersect and the output variables are valid
@@ -222,7 +222,7 @@ bool intersect_quad_with_line(const double *q, const double *l1, const double *l
 // of the intersection.
 // NOTE: the intersection doesn't have to be inside the tri or line for this to return true
 bool intersect_tri_with_line(const double *tri, const double *l1, const double *l2, double *p,
-			     double *t) {
+                             double *t) {
 
   double M[3*3], inv_M[3*3];
    double V[3];
@@ -241,7 +241,7 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
 
   // Invert M
   if (!invert_matrix_3x3(M,inv_M)) return false;
- 
+
   // Set variable holding vector
   V[0]=l1[0]-tri0[0];
   V[1]=l1[1]-tri0[1];
@@ -251,8 +251,8 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
   mult(inv_M, V, X);
 
  // If not finite then return as not mapped
- if (!MU_IS_FINITE(X[0]) ||  
-     !MU_IS_FINITE(X[1]) ||  
+ if (!MU_IS_FINITE(X[0]) ||
+     !MU_IS_FINITE(X[1]) ||
      !MU_IS_FINITE(X[2])) return false;
 
   // Get answer out
@@ -274,7 +274,7 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
 
       area += (coords[2*i]*coords[2*ip1+1]-coords[2*ip1]*coords[2*i+1]);
     }
-    
+
     return 0.5*area;
 
   }
@@ -293,9 +293,9 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
 //    u------v
 //    ^
 //    | --- angle being calculated
-//      
+//
   double angle(double *u, double *v, double *w) {
-  
+
   double cosa=u[0]*v[0]+u[1]*v[1]+u[2]*v[2];
 
   double cosb=u[0]*w[0]+u[1]*w[1]+u[2]*w[2];
@@ -363,7 +363,7 @@ double great_circle_area(int n, double *pnts) {
 
   double s=0.5*(a+b+c);
 
-  double t = tan ( s / 2.0 ) * tan ( ( s - a ) / 2.0 ) * 
+  double t = tan ( s / 2.0 ) * tan ( ( s - a ) / 2.0 ) *
              tan ( ( s - b ) / 2.0 ) * tan ( ( s - c ) / 2.0 );
 
   //  if (mathutil_debug) {
@@ -411,18 +411,18 @@ double great_circle_area(int n, double *pnts) {
 
       // make sure that we're not bigger than max size
       if (topo->num_nodes > max_num_nodes) {
-	Throw() << "Element exceeds maximum poly size";
+        Throw() << "Element exceeds maximum poly size";
       }
 
       // Get coords of element
       int k=0;
       for (ESMCI::UInt s = 0; s < topo->num_nodes; ++s){
-	const MeshObj &node = *(elem->Relations[s].obj);
-	double *c = cfield->data(node);
+        const MeshObj &node = *(elem->Relations[s].obj);
+        double *c = cfield->data(node);
         for (int i=0; i<sdim; i++) {
-	  coords[k]=c[i];
+          coords[k]=c[i];
           k++;
-	}
+        }
       }
 
       // Get number of nodes
@@ -434,7 +434,7 @@ double great_circle_area(int n, double *pnts) {
   // Get coords, but flip so always counter clockwise
   // Also gets rid of degenerate edges
   // This version only works for elements of parametric_dimension = 2 and spatial_dim=2
-  void get_elem_coords_2D_ccw(const MeshObj *elem, MEField<>  *cfield, int max_num_nodes,double *tmp_coords, 
+  void get_elem_coords_2D_ccw(const MeshObj *elem, MEField<>  *cfield, int max_num_nodes,double *tmp_coords,
                               int *num_nodes, double *coords) {
     int num_tmp_nodes;
 
@@ -458,7 +458,7 @@ double great_circle_area(int n, double *pnts) {
       *num_nodes=num_tmp_nodes;
       return;
     }
-    
+
     // Get elem rotation
     bool left_turn;
     bool right_turn;
@@ -476,7 +476,7 @@ double great_circle_area(int n, double *pnts) {
       }
     } else {
       // Swap
-      int j=0; int k=2*(num_tmp_nodes-1); 
+      int j=0; int k=2*(num_tmp_nodes-1);
       for (int i=0; i<num_tmp_nodes; i++) {
         coords[j]=tmp_coords[k];
         coords[j+1]=tmp_coords[k+1];
@@ -484,7 +484,7 @@ double great_circle_area(int n, double *pnts) {
       }
     }
 
-   
+
   // Output num nodes
   *num_nodes=num_tmp_nodes;
 }
@@ -494,7 +494,7 @@ double great_circle_area(int n, double *pnts) {
   // Get coords, but flip so always counter clockwise
   // Also gets rid of degenerate edges
   // This version only works for elements of parametric_dimension = 2 and spatial_dim=2
-  void get_elem_coords_3D_ccw(const MeshObj *elem, MEField<>  *cfield, int max_num_nodes,double *tmp_coords, 
+  void get_elem_coords_3D_ccw(const MeshObj *elem, MEField<>  *cfield, int max_num_nodes,double *tmp_coords,
                               int *num_nodes, double *coords) {
     int num_tmp_nodes;
 
@@ -520,7 +520,7 @@ double great_circle_area(int n, double *pnts) {
 
       return;
     }
-    
+
     // Get elem rotation
     bool left_turn;
     bool right_turn;
@@ -540,7 +540,7 @@ double great_circle_area(int n, double *pnts) {
       }
     } else {
       // Swap
-      int j=0; int k=3*(num_tmp_nodes-1); 
+      int j=0; int k=3*(num_tmp_nodes-1);
       for (int i=0; i<num_tmp_nodes; i++) {
         coords[j]=tmp_coords[k];
         coords[j+1]=tmp_coords[k+1];
@@ -549,7 +549,7 @@ double great_circle_area(int n, double *pnts) {
       }
     }
 
-   
+
   // Output num nodes
   *num_nodes=num_tmp_nodes;
 }
@@ -566,18 +566,18 @@ double great_circle_area(int n, double *pnts) {
 
       // make sure that we're not bigger than max size
       if (topo->num_nodes > max_num_nodes) {
-	Throw() << "Element exceeds maximum poly size";
+        Throw() << "Element exceeds maximum poly size";
       }
 
       // Get coords of element
       int k=0;
       for (ESMCI::UInt s = 0; s < topo->num_nodes; ++s){
-	const MeshObj &node = *(elem->Relations[s].obj);
-	double *c = cfield->data(node);
+        const MeshObj &node = *(elem->Relations[s].obj);
+        double *c = cfield->data(node);
         for (int i=0; i<sdim; i++) {
-	  coords[k]=c[i];
+          coords[k]=c[i];
           k++;
-	}
+        }
         ids[s]=node.get_id();
       }
 
@@ -593,13 +593,13 @@ double great_circle_area(int n, double *pnts) {
   void remove_0len_edges3D(int *num_p, double *p, int *_first_remove_ind) {
 
 #define EQUAL_TOL 1E-15
-#define PNTS_EQUAL(p1,p2) ((std::abs(p1[0]-p2[0]) < EQUAL_TOL) &&	\
-                           (std::abs(p1[1]-p2[1]) < EQUAL_TOL) &&	\
+#define PNTS_EQUAL(p1,p2) ((std::abs(p1[0]-p2[0]) < EQUAL_TOL) &&       \
+                           (std::abs(p1[1]-p2[1]) < EQUAL_TOL) &&       \
                            (std::abs(p1[2]-p2[2]) < EQUAL_TOL))
 
-  // Init first remove ind    
+  // Init first remove ind
   int first_remove_ind=-1;
-    
+
   // Get old value of num_p
   int old_num_p=*num_p;
 
@@ -608,7 +608,7 @@ double great_circle_area(int n, double *pnts) {
   double *last_pnt=p+3*(old_num_p-1);
   for (int i=0; i<old_num_p; i++) {
     double *pnti=p+3*i;
-    
+
     if (PNTS_EQUAL(pnti,last_pnt)) {
       j=i;
       break;
@@ -616,7 +616,7 @@ double great_circle_area(int n, double *pnts) {
 
     // advance last point
     last_pnt=pnti;
-  } 
+  }
 
   // We found an equal point so start trimming them out
   if (j>-1) {
@@ -626,18 +626,18 @@ double great_circle_area(int n, double *pnts) {
     for (int i=j; i<old_num_p; i++) {
       double *pnti=p+3*i;
       if (!PNTS_EQUAL(pnti,last_pnt)) {
-	double *pntj=p+3*j;
+        double *pntj=p+3*j;
 
-	// copy the non-equal point to j
-	pntj[0]=pnti[0];
-	pntj[1]=pnti[1];
-	pntj[2]=pnti[2];
+        // copy the non-equal point to j
+        pntj[0]=pnti[0];
+        pntj[1]=pnti[1];
+        pntj[2]=pnti[2];
 
-	// move j
-	j++;
+        // move j
+        j++;
 
-	// reset the last pointer to the last non-repeating value
-	last_pnt=pntj;
+        // reset the last pointer to the last non-repeating value
+        last_pnt=pntj;
       }
     }
 
@@ -658,9 +658,9 @@ double great_circle_area(int n, double *pnts) {
 void remove_0len_edges2D(int *num_p, double *p) {
 
 #define EQUAL_TOL 1E-15
-#define PNTS_EQUAL(p1,p2) ((std::abs(p1[0]-p2[0]) < EQUAL_TOL) &&	\
+#define PNTS_EQUAL(p1,p2) ((std::abs(p1[0]-p2[0]) < EQUAL_TOL) &&       \
                            (std::abs(p1[1]-p2[1]) < EQUAL_TOL))
-    
+
   // Get old value of num_p
   int old_num_p=*num_p;
 
@@ -669,7 +669,7 @@ void remove_0len_edges2D(int *num_p, double *p) {
   double *last_pnt=p+2*(old_num_p-1);
   for (int i=0; i<old_num_p; i++) {
     double *pnti=p+2*i;
-    
+
     if (PNTS_EQUAL(pnti,last_pnt)) {
       j=i;
       break;
@@ -677,24 +677,24 @@ void remove_0len_edges2D(int *num_p, double *p) {
 
     // advance last point
     last_pnt=pnti;
-  } 
+  }
 
   // We found an equal point so start trimming them out
   if (j>-1) {
     for (int i=j; i<old_num_p; i++) {
       double *pnti=p+2*i;
       if (!PNTS_EQUAL(pnti,last_pnt)) {
-	double *pntj=p+2*j;
+        double *pntj=p+2*j;
 
-	// copy the non-equal point to j
-	pntj[0]=pnti[0];
-	pntj[1]=pnti[1];
+        // copy the non-equal point to j
+        pntj[0]=pnti[0];
+        pntj[1]=pnti[1];
 
-	// move j
-	j++;
+        // move j
+        j++;
 
-	// reset the last pointer to the last non-repeating value
-	last_pnt=pntj;
+        // reset the last pointer to the last non-repeating value
+        last_pnt=pntj;
       }
     }
 
@@ -715,9 +715,9 @@ void remove_0len_edges2D(int *num_p, double *p) {
 bool is_smashed_quad2D(int num_p, double *p) {
 
 #define EQUAL_TOL 1E-15
-#define PNTS_EQUAL(p1,p2) ((std::abs((p1)[0]-(p2)[0]) < EQUAL_TOL) &&	\
+#define PNTS_EQUAL(p1,p2) ((std::abs((p1)[0]-(p2)[0]) < EQUAL_TOL) &&   \
                            (std::abs((p1)[1]-(p2)[1]) < EQUAL_TOL))
-      
+
 
   // If not a quad, then leave
   if (num_p != 4) return false;
@@ -741,10 +741,10 @@ bool is_smashed_quad2D(int num_p, double *p) {
 bool is_smashed_quad3D(int num_p, double *p) {
 
 #define EQUAL_TOL 1E-15
-#define PNTS_EQUAL(p1,p2) ((std::abs((p1)[0]-(p2)[0]) < EQUAL_TOL) &&	\
-                           (std::abs((p1)[1]-(p2)[1]) < EQUAL_TOL) &&	\
+#define PNTS_EQUAL(p1,p2) ((std::abs((p1)[0]-(p2)[0]) < EQUAL_TOL) &&   \
+                           (std::abs((p1)[1]-(p2)[1]) < EQUAL_TOL) &&   \
                            (std::abs((p1)[2]-(p2)[2]) < EQUAL_TOL))
-      
+
 
   // If not a quad, then leave
   if (num_p != 4) return false;
@@ -766,7 +766,7 @@ bool is_smashed_quad3D(int num_p, double *p) {
     std::ofstream myfile;
 #define MAX_W3PTV_STR_LEN 1000
     char new_filename[MAX_W3PTV_STR_LEN];
-    
+
     if (strlen(filename)+4 > MAX_W3PTV_STR_LEN) {
        printf("ERROR: filename too long!!!\n");
        return;
@@ -800,14 +800,14 @@ bool is_smashed_quad3D(int num_p, double *p) {
     }
     myfile << "\n";
     myfile.close();
-#undef MAX_W3PTV_STR_LEN 
+#undef MAX_W3PTV_STR_LEN
   }
 
 
   void write_2D_poly_to_vtk(const char *filename, int id, int num_p, double *p) {
 #define MAX_W3PTVID_STR_LEN 1000
     char new_filename[MAX_W3PTVID_STR_LEN];
-    
+
     if (((double)strlen(filename))+log10((double)id)+1.0 > ((double)MAX_W3PTVID_STR_LEN)) {
        printf("ERROR: filename too long!!!\n");
        return;
@@ -817,7 +817,7 @@ bool is_smashed_quad3D(int num_p, double *p) {
 
     write_2D_poly_woid_to_vtk(new_filename,num_p,p);
 
-#undef MAX_W3PTVID_STR_LEN 
+#undef MAX_W3PTVID_STR_LEN
   }
 
 
@@ -825,7 +825,7 @@ bool is_smashed_quad3D(int num_p, double *p) {
     std::ofstream myfile;
 #define MAX_W3PTV_STR_LEN 1000
     char new_filename[MAX_W3PTV_STR_LEN];
-    
+
     if (strlen(filename)+4 > MAX_W3PTV_STR_LEN) {
        printf("ERROR: filename too long!!!\n");
        return;
@@ -859,13 +859,13 @@ bool is_smashed_quad3D(int num_p, double *p) {
     }
     myfile << "\n";
     myfile.close();
-#undef MAX_W3PTV_STR_LEN 
+#undef MAX_W3PTV_STR_LEN
   }
 
   void write_3D_poly_to_vtk(const char *filename, int id, int num_p, double *p) {
 #define MAX_W3PTVID_STR_LEN 1000
     char new_filename[MAX_W3PTVID_STR_LEN];
-    
+
     if (((double)strlen(filename))+log10((double)id)+1.0 > ((double)MAX_W3PTVID_STR_LEN)) {
        printf("ERROR: filename too long!!!\n");
        return;
@@ -875,39 +875,39 @@ bool is_smashed_quad3D(int num_p, double *p) {
 
     write_3D_poly_woid_to_vtk(new_filename,num_p,p);
 
-#undef MAX_W3PTVID_STR_LEN 
+#undef MAX_W3PTVID_STR_LEN
   }
 
 
 
 void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn) {
 
-  // Define Cross product                                                                                                                    
+  // Define Cross product
 #define CROSS_PRODUCT2D(out,a,b) out=a[0]*b[1]-a[1]*b[0];
 #define TOL 1.0E-17
 
-  // init flags                                                            
+  // init flags
   *left_turn=false;
   *right_turn=false;
 
-  // Loop through polygon                    
+  // Loop through polygon
   for (int i=0; i<num_p; i++) {
     double *pntip0=p+2*i;
     double *pntip1=p+2*((i+1)%num_p);
     double *pntip2=p+2*((i+2)%num_p);
 
-    // vector from pntip1 to pnti0                                                                                             
+    // vector from pntip1 to pnti0
     double v10[2];
     v10[0]=pntip0[0]-pntip1[0];
     v10[1]=pntip0[1]-pntip1[1];
 
 
-    // vector from pntip1 to pnti2                                                                            
+    // vector from pntip1 to pnti2
     double v12[2];
     v12[0]=pntip2[0]-pntip1[0];
     v12[1]=pntip2[1]-pntip1[1];
 
-    // Calc cross product                                                             
+    // Calc cross product
     double cross;
     CROSS_PRODUCT2D(cross,v12,v10);
 
@@ -933,35 +933,35 @@ void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn) {
 
 void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
 
-  // Define Cross product                                                                                                                   
+  // Define Cross product
 #define CROSS_PRODUCT3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
 #define DOT_PRODUCT3D(a,b) a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
 #define TOL 1.0E-17
 
-  // init flags                                                            
+  // init flags
   *left_turn=false;
   *right_turn=false;
 
-  // Loop through polygon                    
+  // Loop through polygon
   for (int i=0; i<num_p; i++) {
     double *pntip0=p+3*i;
     double *pntip1=p+3*((i+1)%num_p);
     double *pntip2=p+3*((i+2)%num_p);
 
-    // vector from pntip1 to pnti0                                                                                             
+    // vector from pntip1 to pnti0
     double v10[3];
     v10[0]=pntip0[0]-pntip1[0];
     v10[1]=pntip0[1]-pntip1[1];
     v10[2]=pntip0[2]-pntip1[2];
 
 
-    // vector from pntip1 to pnti2                                                                            
+    // vector from pntip1 to pnti2
     double v12[3];
     v12[0]=pntip2[0]-pntip1[0];
     v12[1]=pntip2[1]-pntip1[1];
     v12[2]=pntip2[2]-pntip1[2];
 
-    // Calc cross product                                                             
+    // Calc cross product
     double cross[3];
     CROSS_PRODUCT3D(cross,v12,v10);
 
@@ -992,21 +992,21 @@ void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
   // false otherwise
 template <class GEOM>
   bool is_pnt_in_poly(int num_p, double *p, double *pnt) {
-  
-  // Loop through polygon                    
+
+  // Loop through polygon
   for (int i=0; i<num_p; i++) {
     double *pntip0=GEOM::getPntAt(p,i);
     double *pntip1=GEOM::getPntAt(p,(i+1)%num_p);
 
-    // vector from pntip0 to pnti1              
+    // vector from pntip0 to pnti1
     double v01[GEOM::pnt_size];
     GEOM::sub(v01,pntip1,pntip0);
 
-    // vector from pntip0 to pnt              
+    // vector from pntip0 to pnt
     double v0p[GEOM::pnt_size];
     GEOM::sub(v0p,pnt,pntip0);
 
-    // Calc cross product                                                             
+    // Calc cross product
     double cross;
     cross=GEOM::turn(v01,v0p,pntip0);
 
@@ -1056,7 +1056,7 @@ template bool is_ear<GEOM_SPH2D3D>(int num_p, double *p, int *ind);
 // Triangulate a 2D polygon using the ear clip method.
 // This method works on both concave and convex polygons.
 // As usual in ESMF Mesh this assumes the polygon is counter-clockwise.
-// Output is in tri_ind, which are the 0-based indices of the triangles 
+// Output is in tri_ind, which are the 0-based indices of the triangles
 // making up the triangulization. tri_ind should be of size 3*(num_p-2)
 // td should be the same size as p, ti should be of size num_p.
 template <class GEOM>
@@ -1078,7 +1078,7 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
   // Copy polygon to temporary array
   memcpy((double *)td, (double *)p, GEOM::pnt_size*num_p*sizeof(double));
   int num_t=num_p;
-  
+
   // Fill index array
   for(int i=0; i<num_p; i++) {
     ti[i]=i;
@@ -1097,7 +1097,7 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
       return ESMCI_TP_SUCCESS;
     }
 
-    // Loop through polygon                    
+    // Loop through polygon
     int max_clip_ind[3];
     double max_clip_dot=-std::numeric_limits<double>::max();
     bool found_clip=false;
@@ -1113,7 +1113,7 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
       double *pntip1=GEOM::getPntAt(td,clip_ind[1]);
       double *pntip2=GEOM::getPntAt(td,clip_ind[2]);
 
-      // vector from pntip1 to pnti0                 
+      // vector from pntip1 to pnti0
       double v10[GEOM::pnt_size];
       GEOM::sub(v10,pntip0,pntip1);
 
@@ -1121,7 +1121,7 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
       double v12[GEOM::pnt_size];
       GEOM::sub(v12,pntip2,pntip1);
 
-      // Calc cross product                                                             
+      // Calc cross product
       double cross;
       cross=GEOM::turn(v12,v10,pntip1);
 
@@ -1145,7 +1145,7 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
         }
       }
     }
-    
+
     // Clip
     if (found_clip) {
       // Add clipped triangle to list
@@ -1153,7 +1153,7 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
       tri_ind[pos_tri_ind+1]=ti[max_clip_ind[1]];
       tri_ind[pos_tri_ind+2]=ti[max_clip_ind[2]];
       pos_tri_ind +=3;
-      
+
       // remove triangle from polygon and collapse arrays
       for (int j=max_clip_ind[1]+1; j<num_t; j++) {
         GEOM::copy(GEOM::getPntAt(td,j-1),GEOM::getPntAt(td,j));
@@ -1167,7 +1167,7 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
       continue;
     } else {
       return ESMCI_TP_CLOCKWISE_POLY;
-    }        
+    }
   } // Loop back to top before triangle detection
 
 }
@@ -1184,7 +1184,7 @@ template int triangulate_poly<GEOM_SPH2D3D>(int num_p, double *p, double *td, in
 void convert_cart_to_sph(double x, double y, double z,
                          double *lon, double *lat, double *r) {
 
-  // calc radius of sphere 
+  // calc radius of sphere
   *r=sqrt(x*x+y*y+z*z);
 
   // calc lon
@@ -1232,10 +1232,10 @@ void calc_plane_equation(double *pnt1, double *pnt2, double *pnt3, double *a, do
   // Calc outward (from sphere) normal to plane
   double normal[3];
   CROSS_PRODUCT3D(normal,vec23,vec21);
-  
+
   // check if 0.0
-  if ((normal[0] == 0.0) && 
-      (normal[1] == 0.0) && 
+  if ((normal[0] == 0.0) &&
+      (normal[1] == 0.0) &&
       (normal[2] == 0.0)) {
     Throw() << " Points are collinear, so can't compute normal";
   }
@@ -1255,12 +1255,12 @@ void calc_sph_mmbox(double *pnt1, double *pnt2, double *pnt3, double *min, doubl
   double a,b,c,d;
 
   // Get plane equation
-  calc_plane_equation(pnt1, pnt2, pnt3, &a, &b, &c, &d); 
+  calc_plane_equation(pnt1, pnt2, pnt3, &a, &b, &c, &d);
 
   // Calc. distance from plane to sphere
   double dist_p_to_sph;
   dist_p_to_sph=1.0-(std::abs(d)/std::sqrt(a*a+b*b+c*c));
- 
+
   // Calculate normal to plane with length dist_p_to_sph
   double p_norm_len=std::sqrt(a*a+b*b+c*c);
   double p_normal[3];
@@ -1277,7 +1277,7 @@ void calc_sph_mmbox(double *pnt1, double *pnt2, double *pnt3, double *min, doubl
   MU_ADD_VEC3D(pnt1_pls_vec,pnt1,p_normal);
   MU_ADD_VEC3D(pnt2_pls_vec,pnt2,p_normal);
   MU_ADD_VEC3D(pnt3_pls_vec,pnt3,p_normal);
- 
+
   // Compute min-max box
   //// set to pnt1
   min[0]=pnt1[0]; min[1]=pnt1[1]; min[2]=pnt1[2];
@@ -1306,7 +1306,7 @@ void calc_sph_mmbox(double *pnt1, double *pnt2, double *pnt3, double *min, doubl
 }
 
 #if 0
-  // Compute the angle (in radians) around normal between two 3D vectors a and b 
+  // Compute the angle (in radians) around normal between two 3D vectors a and b
   // CURRENTLY ONLY WORKS FOR -pi/2 to pi/2
   // Returns 0 if successful, 1 otherwise
   int angle_between_VEC3D(double *a, double *b, double*normal, double *_angle) {
@@ -1319,33 +1319,33 @@ void calc_sph_mmbox(double *pnt1, double *pnt2, double *pnt3, double *min, doubl
     double cross_ab_len=MU_LEN_VEC3D(cross_ab);
     double a_len=MU_LEN_VEC3D(a);
     double b_len=MU_LEN_VEC3D(b);
-    
+
     // adjust to be negative if going in other direction
     if (MU_DOT_VEC3D(cross_ab,normal)<0.0) cross_ab_len=-cross_ab_len;
-    
+
     // Error Check bottom
     if ((a_len==0.0) || (b_len==0.0)) return 1;
-   
+
     // Compute sin value
   double sin_ab=cross_ab_len/(a_len*b_len);
-    
+
    // Clamp if out of range
    if (sin_ab<-1.0) sin_ab=-1.0;
    else if (sin_ab>1.0) sin_ab=1.0;
 
-   // Compute angle 
+   // Compute angle
    *_angle_=std::asin(sin_ab);
-   
+
    // Return success
    return 0;
   }
 #endif
 
-// Inputs: q1, q2, q3, q4 are 3D cartesian points located on 
+// Inputs: q1, q2, q3, q4 are 3D cartesian points located on
 // a sphere (in counter-clockwise order) making up two planes (with the sphere center (0,0,0)).
 // Each of these should be of size 3 doubles.
 // Outputs: p - position between plane formed by q1 and q2 and  plane formed by q3 to q4
-int calc_gc_parameter_2planes(const double *pnt, double *q1, double *q2, double *q3, double *q4, 
+int calc_gc_parameter_2planes(const double *pnt, double *q1, double *q2, double *q3, double *q4,
                               double *p) {
 
   // Compute normal to plane through q1 q2 and center (origin)
@@ -1378,13 +1378,13 @@ int calc_gc_parameter_2planes(const double *pnt, double *q1, double *q2, double 
 
   // Compute the angle between the planes
   double angle_1234=std::asin(sin_1234);
-  
+
   // parallelx(pntxparallel)  = a pnt projected to the plane perp. to parallel
   double tmp[3];
   MU_CROSS_PRODUCT_VEC3D(tmp,pnt,parallel);
   double pnt_in_plane[3];
   MU_CROSS_PRODUCT_VEC3D(pnt_in_plane,parallel,tmp);
-    
+
 
   // parallelx(pntxparallel)  = a pnt projected to the plane perp. to parallel
   MU_CROSS_PRODUCT_VEC3D(tmp,q1,parallel);
@@ -1416,14 +1416,14 @@ int calc_gc_parameter_2planes(const double *pnt, double *q1, double *q2, double 
 
    // Compute cosine
    double dot_12pnt=MU_DOT_VEC3D(pnt_in_plane,q1_in_plane);
-   
+
    double cos_12pnt=dot_12pnt/(q1_in_plane_len*pnt_in_plane_len);
 
    // Clamp if out of range
    if (cos_12pnt<-1.0) cos_12pnt=-1.0;
    else if (cos_12pnt>1.0) cos_12pnt=1.0;
-   
-   
+
+
    // Compute angle
    double angle_12pnt=std::atan2(sin_12pnt,cos_12pnt);
 
@@ -1450,18 +1450,18 @@ int calc_gc_parameter_2planes(const double *pnt, double *q1, double *q2, double 
 
   // return success
   return 0;
-} 
+}
 
 
 // Inputs: pnt - is the point to determine the location of
-// q1, q2, q3, q4 are 3D cartesian points located on 
+// q1, q2, q3, q4 are 3D cartesian points located on
 // a sphere (in counter-clockwise order) making up the quad. Each of these should be of size 3 doubles.
 // Outputs: p1 - position in q1 to q2 / q3 to q4 direction
 //          p2 - position in q1 to q4 / q2 to q3 direction
-int calc_gc_parameters_quad(const double *pnt, double *q1, double *q2, double *q3, double *q4, 
+int calc_gc_parameters_quad(const double *pnt, double *q1, double *q2, double *q3, double *q4,
                             double *p1, double *p2) {
 
- 
+
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
   if (mathutil_debug) {
     double lon,lat,r;
@@ -1506,12 +1506,12 @@ int calc_gc_parameters_quad(const double *pnt, double *q1, double *q2, double *q
 
   // return success
   return 0;
-} 
+}
 
 
 #if 0
 
-// Inputs: t1, t2 are 3D cartesian points located on 
+// Inputs: t1, t2 are 3D cartesian points located on
 // a sphere making up a plane (with the sphere center(0,0,0)). Each of these should be of size 3 doubles.
 // Outputs: p - position parallel to the plane formed by t1 and t2 (and the sphere center).
 int calc_gc_parameter_1plane(const double *pnt, double *t1, double *t2, double *p) {
@@ -1527,7 +1527,7 @@ int calc_gc_parameter_1plane(const double *pnt, double *t1, double *t2, double *
 
   // Error Check
   if ((t1_len==0.0) || (t2_len==0.0)) return 1;
- 
+
   // Compute angle between t1 and t2
   double angle_12=std::asin(normal_len/(t1_len*t2_len));
 
@@ -1557,17 +1557,17 @@ int calc_gc_parameter_1plane(const double *pnt, double *t1, double *t2, double *
 
   // Error check output
   if (angle_12==0.0) return 1;
-  
+
   // Calc. output
   *p=angle_1pnt/angle_12;
- 
+
   // return success
   return 0;
-} 
+}
 
 
 // Inputs: pnt - is the point to determine the location of
-// t1, t2, t3 are 3D cartesian points located on 
+// t1, t2, t3 are 3D cartesian points located on
 // a sphere (in counter-clockwise order) making up the tri. Each of these should be of size 3 doubles.
 // Outputs: p1 - position in t1 to t2 direction
 //          p2 - position in t2 to t3 direction
@@ -1583,7 +1583,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
   // return success
   return 0;
-} 
+}
 #endif
 
 
@@ -1591,7 +1591,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
 
 
-// Inputs: t1, t2 are 3D cartesian points located on 
+// Inputs: t1, t2 are 3D cartesian points located on
 // a sphere making up a plane (with the sphere center(0,0,0)). t3 is a point in front of this plane.
 //  Each of these should be of size 3 doubles.
 // Outputs: p - position between plane formed by t1 and t2 (and the sphere center) and point t3
@@ -1612,9 +1612,9 @@ int calc_gc_parameter_1plane(const double *pnt, double *t1, double *t2, double *
   MU_CROSS_PRODUCT_VEC3D(tmp,t1,pl_normal);
   double t1_in_plane[3];
   MU_CROSS_PRODUCT_VEC3D(t1_in_plane,pl_normal,tmp);
-  
+
   // t3 is already within plane defined by pl_normal
-  
+
   // Compute angle between t1-t2 plane and t3
   double cross_123[3];
   MU_CROSS_PRODUCT_VEC3D(cross_123,t1_in_plane,t3);
@@ -1644,7 +1644,7 @@ int calc_gc_parameter_1plane(const double *pnt, double *t1, double *t2, double *
   double pnt_in_plane[3];
   MU_CROSS_PRODUCT_VEC3D(pnt_in_plane,pl_normal,tmp);
 
-  // Compute angle between projected pnt and t1-t2 plane 
+  // Compute angle between projected pnt and t1-t2 plane
   double cross_1pnt[3];
   MU_CROSS_PRODUCT_VEC3D(cross_1pnt,t1_in_plane,pnt_in_plane);
 
@@ -1673,17 +1673,17 @@ int calc_gc_parameter_1plane(const double *pnt, double *t1, double *t2, double *
 
   // Error check output
   if (angle_123==0.0) return 1;
-  
+
   // Calc. output
   *p=angle_1pnt/angle_123;
 
   // return success
   return 0;
-} 
+}
 
 
 // Inputs: pnt - is the point to determine the location of
-// t1, t2, t3 are 3D cartesian points located on 
+// t1, t2, t3 are 3D cartesian points located on
 // a sphere (in counter-clockwise order) making up the tri. Each of these should be of size 3 doubles.
 // Outputs: p1 - position in t1 to t2 direction
 //          p2 - position in t2 to t3 direction
@@ -1749,7 +1749,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
   // return success
   return 0;
-} 
+}
 
   //////// NEW STUFF /////
  /* XMRKX */
@@ -1763,9 +1763,9 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   void sph_comb_pnts(const double *pnt0, const double *pnt1, double p,
        double *out_pnt, double *out_angle01) {
 
-  // Thought about doing a case here if the points are the same, but I think that 
-  // the below will just work in that case, and this way I don't have to come up 
-  // with an arbitrary tol for sameness. 
+  // Thought about doing a case here if the points are the same, but I think that
+  // the below will just work in that case, and this way I don't have to come up
+  // with an arbitrary tol for sameness.
 
   // lengths
   double len0=MU_LEN_VEC3D(pnt0);
@@ -1805,7 +1805,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   if (radp < 0.0) radp=0.0;
 
   // printf("cosp=%f sinp=%f radp=%f\n",cosp,sinp,radp);
- 
+
   // Compute vec. perp to u_pnt0
   double tmp[3];
   MU_CROSS_PRODUCT_VEC3D(tmp,u_pnt1,u_pnt0);
@@ -1816,7 +1816,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   // If lenp is 0.0, then the vectors are parallel or 180 degrees
   // TODO: handle 180 case
   // SHOULD I DO THIS ABOVE IF ANGLE01==0.0??
-  // A: MAYBE NOT SINCE NO HAVING lenp == 0.0 IS MORE IMPORTANT FOR AVOIDING NAN 
+  // A: MAYBE NOT SINCE NO HAVING lenp == 0.0 IS MORE IMPORTANT FOR AVOIDING NAN
   if (lenp == 0.0) {
     out_pnt[0]=radp*u_pnt0[0];
     out_pnt[1]=radp*u_pnt0[1];
@@ -1830,8 +1830,8 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   u_pntp[0]=pntp[0]/lenp;
   u_pntp[1]=pntp[1]/lenp;
   u_pntp[2]=pntp[2]/lenp;
- 
- 
+
+
   // compute point and output
   out_pnt[0]=radp*(cosp*u_pnt0[0]+sinp*u_pntp[0]);
   out_pnt[1]=radp*(cosp*u_pnt0[1]+sinp*u_pntp[1]);
@@ -1842,15 +1842,15 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
 
 // QUESTION: SHOULD quad be a set of different input points (e.g. q1,...q4)?
-//        A: MAYBE NOT SINCE HAVING 8 entries for a HEX would be inconvienient. 
-// Take in a spherical quad represented in Cartesian 3D and 
-// 2 parameter (p) values. Calculate a new point that is at the 
+//        A: MAYBE NOT SINCE HAVING 8 entries for a HEX would be inconvienient.
+// Take in a spherical quad represented in Cartesian 3D and
+// 2 parameter (p) values. Calculate a new point that is at the
 // position described by the parameters in the quad.
 // quad_xyz    - should be of size 12 (4 Cartesian 3D points)
 // p           - should be of size 2  (2 parameters)
 // o_pnt       - should be of size 3  (1 Cartesian 3D point)
 // o_max_angle - the maximum angle for the cooresponding p values (2 values)
-  void calc_pnt_quad_sph3D_xyz(const double *quad_xyz, double *p, 
+  void calc_pnt_quad_sph3D_xyz(const double *quad_xyz, double *p,
                                double *o_pnt, double *o_max_angle) {
   const double *q0, *q1, *q2, *q3;
   double pnt01[3];
@@ -1878,8 +1878,8 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 }
 
 
-// Take in a spherical hex represented in Cartesian 3D and 
-// 2 parameter (p) values. Calculate a new point that is at the 
+// Take in a spherical hex represented in Cartesian 3D and
+// 2 parameter (p) values. Calculate a new point that is at the
 // position described by the parameters in the quad.
 // hex_xyz - should be of size 24 (8 Cartesian 3D points)
 // p        - should be of size 3  (3 parameters)
@@ -1906,15 +1906,15 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
 
 
-// Take in a spherical quad represented in Cartesian 3D and 
-// 2 parameter (p) values. Calculate the pnt and the jacobian for the 
+// Take in a spherical quad represented in Cartesian 3D and
+// 2 parameter (p) values. Calculate the pnt and the jacobian for the
 // position described by the parameters in the quad.
 // Do both at the same time to avoid having to recalc. o_pnt
-  void calc_pnt_and_jac_hex_sph3D_xyz(const double *hex_xyz, double *p, 
+  void calc_pnt_and_jac_hex_sph3D_xyz(const double *hex_xyz, double *p,
                               double *o_pnt, double *o_jac, double *o_max_angle) {
     //  double delta=1.0E-14; // Small distance to use to estimate derivative
   double delta=1.0E-10; // Small distance to use to estimate derivative
-  double tmp_max_angle[3];   
+  double tmp_max_angle[3];
 
   // Calculate Function with given p's
   double f[3];
@@ -1930,7 +1930,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   double tmp_f[3];
 
   // Compute partial by p[0]
-  tmp_p[0]=p[0]+delta; 
+  tmp_p[0]=p[0]+delta;
   tmp_p[1]=p[1];
   tmp_p[2]=p[2];
 
@@ -1941,7 +1941,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   o_jac[6]=(tmp_f[2]-f[2])/delta;
 
   // Compute partial by p[1]
-  tmp_p[0]=p[0]; 
+  tmp_p[0]=p[0];
   tmp_p[1]=p[1]+delta;
   tmp_p[2]=p[2];
 
@@ -1952,7 +1952,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
   o_jac[7]=(tmp_f[2]-f[2])/delta;
 
   // Compute partial by p[2]
-  tmp_p[0]=p[0]; 
+  tmp_p[0]=p[0];
   tmp_p[1]=p[1];
   tmp_p[2]=p[2]+delta;
 
@@ -1965,8 +1965,8 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 }
 
 
-// Take in a spherical hex represented in xyz and 
-// a point value. Calculate the parameters for where the 
+// Take in a spherical hex represented in xyz and
+// a point value. Calculate the parameters for where the
 // point is in the hex
 // hex_xyz - should be of size 24 (8 llr points)
 // pnt_xyz  - should be of size 3  (1 llr point)
@@ -1975,7 +1975,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 // Returns: true - if converged and p is valid, false otherwise
 bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *p) {
 
-  // List of optional guesses, and which we're using 
+  // List of optional guesses, and which we're using
   int guess=0;
   double p_guess[8][3]={{0.0,0.0,0.0},
                         {0.0,0.0,1.0},
@@ -2011,9 +2011,9 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     double tmp_pnt[3];
     double jac[3*3];
     double max_angle[3];
-    calc_pnt_and_jac_hex_sph3D_xyz(hex_xyz, p, 
+    calc_pnt_and_jac_hex_sph3D_xyz(hex_xyz, p,
                                    tmp_pnt, jac, max_angle);
-   
+
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
     if (mathutil_debug) {
@@ -2027,10 +2027,10 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     // Calculate function we're trying to 0
     // (point at p-pnt_xyz)
     double f[3];
-    MU_SUB_VEC3D(f,tmp_pnt,pnt_xyz);    
+    MU_SUB_VEC3D(f,tmp_pnt,pnt_xyz);
 
     // Calculate Cart. dist. between point at p and actual point
-    double cart_dist_at_p=MU_LEN_VEC3D(f); 
+    double cart_dist_at_p=MU_LEN_VEC3D(f);
 
     // Invert Jacobian
     double inv_jac[3*3];
@@ -2070,9 +2070,9 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #endif
 
     // The length of the change in p gives an approximation for
-    // the distance in p-space from the point. 
+    // the distance in p-space from the point.
     // If we're close enough in p-space dist. to be significantly
-    // within 1.0E-10 mapping tol and reasonably close in actual Cart. dist. 
+    // within 1.0E-10 mapping tol and reasonably close in actual Cart. dist.
     // then exit.
     if ((len_delta_p < 1.0E-11) && (cart_dist_at_p < 1.0E-11)) {
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
@@ -2092,7 +2092,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     }
 
     // Move to next approximation of p
-    MU_SUB_VEC3D(p,p,delta_p);    
+    MU_SUB_VEC3D(p,p,delta_p);
 
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
@@ -2132,7 +2132,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #endif
       // Add on all the complete turns
        p[0]=p[0]+turns*two_pi/max_angle[0];
- 
+
        // If still inside cell on neg. side add one more turn to push to pos
       if (p[0]*max_angle[0] < -pi+half_max_angle[0]) {
         p[0]=p[0]+two_pi/max_angle[0];
@@ -2140,7 +2140,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
       if (mathutil_debug) printf(" AFTER P[0] small p=%f angle=%f \n",p[0],p[0]*max_angle[0]);
 #endif
-    }                             
+    }
 
     if (p[1]*max_angle[1] > pi+half_max_angle[1]) {
       // how many turns
@@ -2166,7 +2166,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #endif
        // Add on all the complete turns
       p[1]=p[1]+turns*two_pi/max_angle[1];
-  
+
        // If still inside cell on neg. side add one more turn to push to pos
       if (p[1]*max_angle[1] < -pi+half_max_angle[1]) {
         p[1]=p[1]+two_pi/max_angle[1];
@@ -2174,7 +2174,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
       if (mathutil_debug) printf(" AFTER P[1] small p=%f angle=%f \n",p[1],p[1]*max_angle[1]);
 #endif
-    } 
+    }
 
     if (p[2]*max_angle[2] > pi+half_max_angle[2]) {
        // how many turns
@@ -2184,7 +2184,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #endif
       // subtract off all the complete turns
       p[2]=p[2]-turns*two_pi/max_angle[2];
- 
+
        // If still too big one more turn to push to pos
       if (p[2]*max_angle[2] > pi+half_max_angle[2]) {
         p[2]=p[2]-two_pi/max_angle[2];
@@ -2200,7 +2200,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
  #endif
        // Add on all the complete turns
       p[2]=p[2]+turns*two_pi/max_angle[2];
- 
+
        // If still inside cell on neg. side add one more turn to push to pos
       if (p[2]*max_angle[2] < -pi+half_max_angle[2]) {
         p[2]=p[2]+two_pi/max_angle[2];
@@ -2208,7 +2208,7 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
       if (mathutil_debug) printf(" AFTER P[2] small p=%f angle=%f \n",p[2],p[2]*max_angle[2]);
 #endif
-    }                             
+    }
 
    }
 
@@ -2219,11 +2219,11 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
   return false;
 }
 
-  // Do some quick checks to see if the point is 
-  // definitely outside the hex. 
-  // 
-  // Take in a spherical hex represented in xyz and 
-  // a point value. 
+  // Do some quick checks to see if the point is
+  // definitely outside the hex.
+  //
+  // Take in a spherical hex represented in xyz and
+  // a point value.
   // hex_xyz - should be of size 24 (8 llr points)
   // pnt_xyz  - should be of size 3  (1 llr point)
   //
@@ -2240,10 +2240,10 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     for (int i=0; i<8; i++) {
       // Get hex pnt
       const double *hex_pnt=hex_xyz+3*i;
-    
+
       // Calculate radius of hex point
       double hex_radsq=MU_LENSQ_VEC3D(hex_pnt);
-  
+
       // Calulate min and max
       if (hex_radsq < min_hex_radsq) min_hex_radsq=hex_radsq;
       if (hex_radsq > max_hex_radsq) max_hex_radsq=hex_radsq;
@@ -2258,11 +2258,11 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #undef TOL
   }
 
-  // Calculate the counter-clockwise angle from a to b 
+  // Calculate the counter-clockwise angle from a to b
   // a, b, un should be arrays of the correct size for the geometry
-  // un is a unit normal pointing out of the surface 
+  // un is a unit normal pointing out of the surface
   //      (e.g. away from the center of the sphere)
-  // un isn't used in all cases (e.g. with GEOM_CART2D) 
+  // un isn't used in all cases (e.g. with GEOM_CART2D)
   template <>
   double calc_angle<GEOM_CART2D>(double *a, double *b, double *un) {
     double dot = a[0]*b[0] + a[1]*b[1];
@@ -2281,25 +2281,25 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
   void count_0len_edges3D(int num_p, double *p, int *_num_0len) {
 
 #define EQUAL_TOL 1E-15
-#define PNTS_EQUAL(p1,p2) ((std::abs(p1[0]-p2[0]) < EQUAL_TOL) &&	\
-                           (std::abs(p1[1]-p2[1]) < EQUAL_TOL) &&	\
+#define PNTS_EQUAL(p1,p2) ((std::abs(p1[0]-p2[0]) < EQUAL_TOL) &&       \
+                           (std::abs(p1[1]-p2[1]) < EQUAL_TOL) &&       \
                            (std::abs(p1[2]-p2[2]) < EQUAL_TOL))
 
     // Init to 0
     int num_0len=0;
-    
+
     // See if there are any equal points
     double *last_pnt=p+3*(num_p-1);
     for (int i=0; i<num_p; i++) {
       double *pnti=p+3*i;
-    
+
       if (PNTS_EQUAL(pnti,last_pnt)) {
         num_0len++;
       }
 
       // advance last point
       last_pnt=pnti;
-    } 
+    }
 
     // Do output
     *_num_0len=num_0len;
@@ -2315,11 +2315,11 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
   // Subroutine eturns true if we should add point p.
   // sin is the end of the segment inside the polygon
   // sout is the end of the segment outside the polygon
-  // This subroutine is set up to be used with the poly intersect 
+  // This subroutine is set up to be used with the poly intersect
   // code below, and has a number of tweaks for special cases
   // which might make it odd to be used as a general intesect code.
   bool line_with_gc_seg3D(double *a1, double *a2, double *sin, double *sout,
-		       double *p) {
+                       double *p) {
 
     //// If we're too close to parallel to be accurate then just treat like parallel ////
 #define PARALLEL_TOL 1.0E-10
@@ -2337,25 +2337,25 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     double len_sio_vec=MU_LEN_VEC3D(sio_vec);
 
     // calculate dot product
-    double cos_plane_sio=MU_DOT_VEC3D(plane_norm,sio_vec); 
+    double cos_plane_sio=MU_DOT_VEC3D(plane_norm,sio_vec);
 
     // divide by lengths to get cos
     if (len_plane_norm != 0.0)  cos_plane_sio=cos_plane_sio/len_plane_norm;
     if (len_sio_vec != 0.0) cos_plane_sio=cos_plane_sio/len_sio_vec;
-  
+
     if(std::abs(cos_plane_sio) < PARALLEL_TOL) {
       p[0]=sout[0];
       p[1]=sout[1];
       p[2]=sout[2];
-      
+
       return true;
     }
 #undef PARALLEL_TOL
 
 
     // Do this intersection by reprsenting the line a1 to a2 as a plane through the
-    // two line points and the origin of the sphere (0,0,0). This is the 
-    // definition of a great circle arc. 
+    // two line points and the origin of the sphere (0,0,0). This is the
+    // definition of a great circle arc.
     double plane[9];
     double plane_p[2];
     double t;
@@ -2370,8 +2370,8 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
     plane[6]=0.0;
     plane[7]=0.0;
     plane[8]=0.0;
-    
-    
+
+
     // Intersect the segment with the plane
     if(!intersect_tri_with_line(plane, sin, sout, plane_p, &t)) {
       // If can't intesect then the lines and plane are parallel, this
@@ -2382,14 +2382,14 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       p[2]=sout[2];
        return true;
     }
-    
+
     // We shouldn't be off the ends, but
     // if we are because of rounding then
     // do what makes sense
-    
+
     // if we're off the in end, then don't add
     if (t<0.0) return false;
-    
+
     // if we're off the out end, then just add the
     // out point
     if (t>=1.0) {
@@ -2398,18 +2398,18 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       p[2]=sout[2];
       return true;
     }
-    
+
     // Otherwise calculate point of intersection
     // and add that
     p[0]=sin[0] + t*(sout[0]-sin[0]);
     p[1]=sin[1] + t*(sout[1]-sin[1]);
     p[2]=sin[2] + t*(sout[2]-sin[2]);
-    return true;    
+    return true;
   }
 
 
 
- 
+
   // intersects convex polygons whose vertices are stored in counter clockwise
   // order and which lie on a sphere. Note that the polygons have 3D coordinates
   // but are only 2D in the parameter space of the sphere. This subroutine
@@ -2418,9 +2418,9 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
   // q should be of size 3*num_q
   // tmp and out should both be allocated to be at least of size 3*(num_p+num_q)
   void intersect_convex_2D_3D_sph_gc_poly(int num_p, double *p,
-			       int num_q, double *q,
-			       double *tmp,
-			       int *num_out, double *out) 
+                               int num_q, double *q,
+                               double *tmp,
+                               int *num_out, double *out)
   {
 
 #define CROSS_PRODUCT3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
@@ -2428,30 +2428,30 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #define NORM(a) sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
 #define CLIP_EQUAL_TOL 1.0e-20
 #define CLOSE_TO_ZERO(vec) ((std::abs(vec[0])<CLIP_EQUAL_TOL) && (std::abs(vec[1])<CLIP_EQUAL_TOL) && (std::abs(vec[2])<CLIP_EQUAL_TOL))
-    
+
     // If p is empty then leave
     if (num_p==0) {
       *num_out=0;
     }
-    
+
     // If q is empty then leave
     if (num_q==0) {
       *num_out=0;
     }
-    
+
     // INSTEAD OF TMP USE T???
-    
+
     // Copy q into tmp
     double *end_q=q+3*num_q;
     for (double *q_i=q, *tmp_i=tmp; q_i<end_q; q_i++, tmp_i++) {
       *tmp_i=*q_i;
     }
     int num_tmp=num_q;
-    
+
     // Setup alias for output array
     int num_o=0;
     double *o=out;
-    
+
     // Loop through p
    for (int ip=0; ip<num_p; ip++) {
 
@@ -2461,17 +2461,17 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 
 
       //      if (debug) printf("ip=%d p1=[%f %f %f] p2=[%f %f %f] -------------------- \n ",ip,p1[0],p1[1],p1[2],p2[0],p2[1],p2[2]);
-      
+
       // calc p_vec (vector along the current edge of p)
       double p_vec[3];
       p_vec[0]=p2[0]-p1[0]; p_vec[1]=p2[1]-p1[1]; p_vec[2]=p2[2]-p1[2];
 
       double p_norm=NORM(p_vec);
-      
+
       // Set initial t1 (last point in tmp polygon)
       double *t1=tmp+3*(num_tmp-1);
 
-      // Vector from p to t1     
+      // Vector from p to t1
       double pt1_vec[3];
       pt1_vec[0]=t1[0]-p1[0]; pt1_vec[1]=t1[1]-p1[1]; pt1_vec[2]=t1[2]-p1[2];
 
@@ -2480,142 +2480,142 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       bool inout1_same=false;
       double inout1;
       if (CLOSE_TO_ZERO(pt1_vec)) {
-         inout1_same=true;     
+         inout1_same=true;
          inout1=1000.0; // Set to a value so we know where to catch in point processing ifs
       } else {
-	// Normal vector which is the length of |p_vec||pt_vec|*the sin between them
-	double n_vec[3];
-	CROSS_PRODUCT3D(n_vec,p_vec,pt1_vec);
-	
-	// Get magnitude which is distance out * |p_vec| without sign to indicate direction
-	inout1=NORM(n_vec)/p_norm;
-	
-	// Dot normal with normal to sphere at point (i.e. just p1 since origin of sphere is (0,0,0)) 
-	// This gives angle with respect to surface of the sphere and hence allows us to assign
-	// a direction (i.e. a sign) to inout1
-	if (DOT_PRODUCT3D(n_vec,p1)<0.0) inout1=-inout1; 
+        // Normal vector which is the length of |p_vec||pt_vec|*the sin between them
+        double n_vec[3];
+        CROSS_PRODUCT3D(n_vec,p_vec,pt1_vec);
+        
+        // Get magnitude which is distance out * |p_vec| without sign to indicate direction
+        inout1=NORM(n_vec)/p_norm;
+        
+        // Dot normal with normal to sphere at point (i.e. just p1 since origin of sphere is (0,0,0))
+        // This gives angle with respect to surface of the sphere and hence allows us to assign
+        // a direction (i.e. a sign) to inout1
+        if (DOT_PRODUCT3D(n_vec,p1)<0.0) inout1=-inout1;
 
       }
-      
+
       // Make sure we don't have a degenerate polygon after clipping
       bool in_but_not_on_p_vec=false;
-      
+
       // Init output poly
       num_o=0;
-      
+
       // Loop through other polygon
       for (int it=0; it<num_tmp; it++) {
-	double *t2=tmp+3*it;
-	
-	// calculate variable which says if t2 is in or out of polygon p
-	// (the cross product of p_vec with the vector from p1 to t2
-	//// Vector from p to t2    
-	double pt2_vec[3];
-	pt2_vec[0]=t2[0]-p1[0]; pt2_vec[1]=t2[1]-p1[1]; pt2_vec[2]=t2[2]-p1[2];
-	
-	// Make sure that we're not dealing with a zero length vector
-	bool inout2_same=false;
-	double inout2;
-	if (CLOSE_TO_ZERO(pt2_vec)) {
-	  inout2_same=true;     
+        double *t2=tmp+3*it;
+        
+        // calculate variable which says if t2 is in or out of polygon p
+        // (the cross product of p_vec with the vector from p1 to t2
+        //// Vector from p to t2
+        double pt2_vec[3];
+        pt2_vec[0]=t2[0]-p1[0]; pt2_vec[1]=t2[1]-p1[1]; pt2_vec[2]=t2[2]-p1[2];
+        
+        // Make sure that we're not dealing with a zero length vector
+        bool inout2_same=false;
+        double inout2;
+        if (CLOSE_TO_ZERO(pt2_vec)) {
+          inout2_same=true;
           inout2=1000.0; // Set to a value so we know where to catch in point processing ifs
-	}
+        }
         else {
-	  //// Normal vector which is the length of |p_vec||pt2_vec|*the sin between them
-	  double n2_vec[3];
-	  CROSS_PRODUCT3D(n2_vec,p_vec,pt2_vec);
-	  
-	  //// Get magnitude which is distance out * |p_vec| without sign to indicate direction
-	  inout2=NORM(n2_vec)/p_norm;      
-	  	  
-	  //// Dot normal with normal to sphere at point (i.e. just p1 since origin of sphere is (0,0,0)) 
-	  //// This gives angle with respect to surface of the sphere and hence allows us to assign
-	  //// a direction (i.e. a sign) to inout1
-	  if (DOT_PRODUCT3D(n2_vec,p1)<0.0) inout2=-inout2; 
-	}
+          //// Normal vector which is the length of |p_vec||pt2_vec|*the sin between them
+          double n2_vec[3];
+          CROSS_PRODUCT3D(n2_vec,p_vec,pt2_vec);
+        
+          //// Get magnitude which is distance out * |p_vec| without sign to indicate direction
+          inout2=NORM(n2_vec)/p_norm;
+                
+          //// Dot normal with normal to sphere at point (i.e. just p1 since origin of sphere is (0,0,0))
+          //// This gives angle with respect to surface of the sphere and hence allows us to assign
+          //// a direction (i.e. a sign) to inout1
+          if (DOT_PRODUCT3D(n2_vec,p1)<0.0) inout2=-inout2;
+        }
 
-	//	if (debug) printf("   it=%d t1=[%f %f %f] t2=[%f %f %f] inout1=%20.17f inout2=%20.17f \n ",it,t1[0],t1[1],t1[2],t2[0],t2[1],t2[2],inout1,inout2);
-	
-      
-	// process point
-	if (inout2 > CLIP_EQUAL_TOL) { // t2 inside  
-	  if ((inout1 < 0.0) && !inout2_same && !inout1_same) { //  t1 outside
-	    double intersect_pnt[3];        
-	    
-	    // Do intersection and add that point
-	    if (line_with_gc_seg3D(p1, p2, t2, t1, intersect_pnt)) {
-              double ipnorm=NORM(intersect_pnt);
-	      o[3*num_o]=intersect_pnt[0]/ipnorm;
-	      o[3*num_o+1]=intersect_pnt[1]/ipnorm;
-	      o[3*num_o+2]=intersect_pnt[2]/ipnorm;
-	      //  	      if (debug) printf("    it=%d t1-out t2-in inter=[%f %f %f] \n ",it,o[3*num_o],o[3*num_o+1],o[3*num_o+2]);
-	      num_o++;
-	    }
-	  }
-	  
-	  // Add t2 point because it's inside
-	  o[3*num_o]=t2[0];
-	  o[3*num_o+1]=t2[1];
-	  o[3*num_o+2]=t2[2];
-	  num_o++;
-	  
-	  // record the fact that a point isn't on p_vec, but is in
-	  in_but_not_on_p_vec=true;
-	  
-	} else if (inout2 < 0.0) { // t2 outside
-	  
-	  if (!inout1_same && (inout1 > CLIP_EQUAL_TOL)) {  //  t1 inside (this excludes the EQUAL region, because 
-	    double intersect_pnt[3];      //             if a point was added in there we don't
-  	                                 //              want to add another one right next to it)
-	    
-	    // Do intersection and add that point
-	    if (line_with_gc_seg3D(p1, p2, t1, t2, intersect_pnt)) {
-              double ipnorm=NORM(intersect_pnt);
-	      o[3*num_o]=intersect_pnt[0]/ipnorm;
-	      o[3*num_o+1]=intersect_pnt[1]/ipnorm;
-	      o[3*num_o+2]=intersect_pnt[2]/ipnorm;
+        //      if (debug) printf("   it=%d t1=[%f %f %f] t2=[%f %f %f] inout1=%20.17f inout2=%20.17f \n ",it,t1[0],t1[1],t1[2],t2[0],t2[1],t2[2],inout1,inout2);
+        
 
-	      // if (debug) printf("    it=%d t1-in t2-out inter=[%f %f %f] \n ",it,o[3*num_o],o[3*num_o+1],o[3*num_o+2]);
-	      num_o++;
-	    }
-	  }
-	  
-	} else {  // t2 on edge
-	  // Just add point because it's on the edge
-	  o[3*num_o]=t2[0];
-	  o[3*num_o+1]=t2[1];
-	  o[3*num_o+2]=t2[2];
-	  num_o++;
-	}
-	
-	// old t2 becomes the new t1
-	t1=t2;
-	inout1=inout2;  
-	inout1_same=inout2_same;  
+        // process point
+        if (inout2 > CLIP_EQUAL_TOL) { // t2 inside
+          if ((inout1 < 0.0) && !inout2_same && !inout1_same) { //  t1 outside
+            double intersect_pnt[3];
+        
+            // Do intersection and add that point
+            if (line_with_gc_seg3D(p1, p2, t2, t1, intersect_pnt)) {
+              double ipnorm=NORM(intersect_pnt);
+              o[3*num_o]=intersect_pnt[0]/ipnorm;
+              o[3*num_o+1]=intersect_pnt[1]/ipnorm;
+              o[3*num_o+2]=intersect_pnt[2]/ipnorm;
+              //              if (debug) printf("    it=%d t1-out t2-in inter=[%f %f %f] \n ",it,o[3*num_o],o[3*num_o+1],o[3*num_o+2]);
+              num_o++;
+            }
+          }
+        
+          // Add t2 point because it's inside
+          o[3*num_o]=t2[0];
+          o[3*num_o+1]=t2[1];
+          o[3*num_o+2]=t2[2];
+          num_o++;
+        
+          // record the fact that a point isn't on p_vec, but is in
+          in_but_not_on_p_vec=true;
+        
+        } else if (inout2 < 0.0) { // t2 outside
+        
+          if (!inout1_same && (inout1 > CLIP_EQUAL_TOL)) {  //  t1 inside (this excludes the EQUAL region, because
+            double intersect_pnt[3];      //             if a point was added in there we don't
+                                         //              want to add another one right next to it)
+        
+            // Do intersection and add that point
+            if (line_with_gc_seg3D(p1, p2, t1, t2, intersect_pnt)) {
+              double ipnorm=NORM(intersect_pnt);
+              o[3*num_o]=intersect_pnt[0]/ipnorm;
+              o[3*num_o+1]=intersect_pnt[1]/ipnorm;
+              o[3*num_o+2]=intersect_pnt[2]/ipnorm;
+
+              // if (debug) printf("    it=%d t1-in t2-out inter=[%f %f %f] \n ",it,o[3*num_o],o[3*num_o+1],o[3*num_o+2]);
+              num_o++;
+            }
+          }
+        
+        } else {  // t2 on edge
+          // Just add point because it's on the edge
+          o[3*num_o]=t2[0];
+          o[3*num_o+1]=t2[1];
+          o[3*num_o+2]=t2[2];
+          num_o++;
+        }
+        
+        // old t2 becomes the new t1
+        t1=t2;
+        inout1=inout2;
+        inout1_same=inout2_same;
       }
-      
+
       // if only on p_vec then degenerate and get rid of output poly
       if (!in_but_not_on_p_vec) num_o=0;
-      
+
       // if poly is empty then leave
       if (num_o==0) break;
 
-	remove_0len_edges3D(&num_o, o);
+        remove_0len_edges3D(&num_o, o);
 
       // if poly is empty then leave
       if (num_o==0) break;
 
       // if not on the last cycle then copy out poly back to tmp
       if (ip != num_p-1) {
-	double *end_o=o+3*num_o;
-	for (double *o_i=o, *tmp_i=tmp; o_i<end_o; o_i++, tmp_i++) {
-	  *tmp_i=*o_i;
-	}
-	num_tmp=num_o;
+        double *end_o=o+3*num_o;
+        for (double *o_i=o, *tmp_i=tmp; o_i<end_o; o_i++, tmp_i++) {
+          *tmp_i=*o_i;
+        }
+        num_tmp=num_o;
 
       }
     }
-    
+
   // Do output
     *num_out=num_o;
     // o is an alias for out so don't need to copy
@@ -2626,25 +2626,25 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
 #undef CLIP_EQUAL_TOL
   }
 
-  
+
   // Intersects between the line a and the seqment s
   // returns true if we should add point p.
   // sin is the end of the segment inside the polygon
   // sout is the end of the segment outside the polygon
-  // This subroutine is set up to be used with the poly intersect 
+  // This subroutine is set up to be used with the poly intersect
   // code below, and has a number of tweaks for special cases
   // which might make it odd to be used as a general intesect code.
   bool line_with_seg2D(double *a1, double *a2, double *sin, double *sout,
-		       double *p) {
-    
+                       double *p) {
+
     // Calculate thing to divide both line equations by
-    double ttdb= 
+    double ttdb=
       a1[0]*(sout[1] - sin[1]) +
       a2[0]*(sin[1] - sout[1]) +
-      sin[0]*(a1[1] - a2[1]) + 
+      sin[0]*(a1[1] - a2[1]) +
       sout[0]*(a2[1] - a1[1]);
-    
-    
+
+
     // if ttdb is 0.0 then the lines are parallel, this
     // shouldn't happen, but if it does it makes the
     // most sense to add the out point
@@ -2653,20 +2653,20 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       p[1]=sout[1];
       return true;
     }
-    
+
     // Calculate t
     double t=
       -(a1[0]*(sin[1]-a2[1]) +
-	a2[0]*(a1[1]-sin[1]) +
-	sin[0]*(a2[1]-a1[1]))/ttdb;
-    
+        a2[0]*(a1[1]-sin[1]) +
+        sin[0]*(a2[1]-a1[1]))/ttdb;
+
     // We shouldn't be off the ends, but
     // if we are because of rounding then
     // do what makes sense
-    
+
     // if we're off the in end, then don't add
     if (t<0.0) return false;
-    
+
     // if we're off the out end, then just add the
     // out point
     if (t>=1.0) {
@@ -2674,147 +2674,147 @@ bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *
       p[1]=sout[1];
       return true;
     }
-    
+
     // Otherwise calculate point of intersection
     // and add that
     p[0]=sin[0] + t*(sout[0]-sin[0]);
     p[1]=sin[1] + t*(sout[1]-sin[1]);
     return true;
-    
+
   }
-  
+
   // intersects 2D convex polygons whose vertices are stored in counter clockwise
   // order.
   // p should be of size 2*num_p
   // q should be of size 2*num_q
   // tmp and out should both be allocated to be at least of size 2*(num_p+num_q)
   void intersect_convex_poly2D(int num_p, double *p,
-			       int num_q, double *q,
-			       double *tmp,
-			       int *num_out, double *out) 
+                               int num_q, double *q,
+                               double *tmp,
+                               int *num_out, double *out)
   {
-    
+
 #define CLIP_EQUAL_TOL 1.0e-20
-    
+
     // If p is empty then leave
     if (num_p==0) {
       *num_out=0;
     }
-    
+
     // If q is empty then leave
     if (num_q==0) {
       *num_out=0;
     }
-    
+
     // INSTEAD OF TMP USE T???
-    
+
     // Copy q into tmp
     double *end_q=q+2*num_q;
     for (double *q_i=q, *tmp_i=tmp; q_i<end_q; q_i++, tmp_i++) {
       *tmp_i=*q_i;
     }
     int num_tmp=num_q;
-    
+
     // Setup alias for output array
     int num_o=0;
     double *o=out;
-    
+
     // Loop through p
     for (int ip=0; ip<num_p; ip++) {
       // Get points of current edge of p
       double *p1=p+2*ip;
       double *p2=p+2*((ip+1)%num_p);
-      
+
     // calc p_vec (vector along the current edge of p)
       double p_vec[2];
       p_vec[0]=p2[0]-p1[0];
       p_vec[1]=p2[1]-p1[1];
-      
+
       // Set initial t1
       double *t1=tmp+2*(num_tmp-1);
       double inout1=p_vec[0]*(t1[1]-p1[1]) - p_vec[1]*(t1[0]-p1[0]);
-      
+
       // Make sure we don't have a degenerate polygon after clipping
       bool in_but_not_on_p_vec=false;
-      
+
       // Init output poly
       num_o=0;
-      
+
       // Loop through other polygon
       for (int it=0; it<num_tmp; it++) {
-	double *t2=tmp+2*it;
-	
-	// calculate variable which says if t2 is in or out of polygon p
-	// (the cross product of p_vec with the vector from p1 to t2
-	double inout2=p_vec[0]*(t2[1]-p1[1]) - p_vec[1]*(t2[0]-p1[0]);
-	
-	// process point
-	if (inout2 > CLIP_EQUAL_TOL) { // t2 inside 
-	  if (inout1 < 0.0) { //  t1 outside
-	    double intersect_pnt[2];        
-	    
-	    // Do intersection and add that point
-	    if (line_with_seg2D(p1, p2, t2, t1, intersect_pnt)) {
-	      o[2*num_o]=intersect_pnt[0];
-	      o[2*num_o+1]=intersect_pnt[1];
-	      num_o++;
-	    }
-	  }
-	  
-	  // Add t2 point because it's inside
-	  o[2*num_o]=t2[0];
-	  o[2*num_o+1]=t2[1];
-	  num_o++;
-	  
-	  // record the fact that a point isn't on p_vec, but is in
-	  in_but_not_on_p_vec=true;
-	  
-	} else if (inout2 < 0.0) { // t2 outside
-	  
-	  if (inout1 > CLIP_EQUAL_TOL) {  //  t1 inside (this excludes the EQUAL region, because 
-	    double intersect_pnt[2];      //             if a point was added in there we don't
-	    //             want to add another one right next to it)
-	    
-	    // Do intersection and add that point
-	    if (line_with_seg2D(p1, p2, t1, t2, intersect_pnt)) {
-	      o[2*num_o]=intersect_pnt[0];
-	      o[2*num_o+1]=intersect_pnt[1];
-	      num_o++;
-	    }
-	  }
-	  
-	} else {  // t2 on edge
-	  // Just add point because it's on the edge
-	  o[2*num_o]=t2[0];
-	  o[2*num_o+1]=t2[1];
-	  num_o++;
-	}
-	
-	// old t2 becomes the new t1
-	t1=t2;
-	inout1=inout2;  
+        double *t2=tmp+2*it;
+        
+        // calculate variable which says if t2 is in or out of polygon p
+        // (the cross product of p_vec with the vector from p1 to t2
+        double inout2=p_vec[0]*(t2[1]-p1[1]) - p_vec[1]*(t2[0]-p1[0]);
+        
+        // process point
+        if (inout2 > CLIP_EQUAL_TOL) { // t2 inside
+          if (inout1 < 0.0) { //  t1 outside
+            double intersect_pnt[2];
+        
+            // Do intersection and add that point
+            if (line_with_seg2D(p1, p2, t2, t1, intersect_pnt)) {
+              o[2*num_o]=intersect_pnt[0];
+              o[2*num_o+1]=intersect_pnt[1];
+              num_o++;
+            }
+          }
+        
+          // Add t2 point because it's inside
+          o[2*num_o]=t2[0];
+          o[2*num_o+1]=t2[1];
+          num_o++;
+        
+          // record the fact that a point isn't on p_vec, but is in
+          in_but_not_on_p_vec=true;
+        
+        } else if (inout2 < 0.0) { // t2 outside
+        
+          if (inout1 > CLIP_EQUAL_TOL) {  //  t1 inside (this excludes the EQUAL region, because
+            double intersect_pnt[2];      //             if a point was added in there we don't
+            //             want to add another one right next to it)
+        
+            // Do intersection and add that point
+            if (line_with_seg2D(p1, p2, t1, t2, intersect_pnt)) {
+              o[2*num_o]=intersect_pnt[0];
+              o[2*num_o+1]=intersect_pnt[1];
+              num_o++;
+            }
+          }
+        
+        } else {  // t2 on edge
+          // Just add point because it's on the edge
+          o[2*num_o]=t2[0];
+          o[2*num_o+1]=t2[1];
+          num_o++;
+        }
+        
+        // old t2 becomes the new t1
+        t1=t2;
+        inout1=inout2;
       }
-      
+
       // if only on p_vec then degenerate and get rid of output poly
       if (!in_but_not_on_p_vec) num_o=0;
-      
+
       // if poly is empty then leave
       if (num_o==0) break;
 
       // if not on the last cycle then copy out poly back to tmp
       if (ip != num_p-1) {
-	double *end_o=o+2*num_o;
-	for (double *o_i=o, *tmp_i=tmp; o_i<end_o; o_i++, tmp_i++) {
-	  *tmp_i=*o_i;
-	}
-	num_tmp=num_o;
+        double *end_o=o+2*num_o;
+        for (double *o_i=o, *tmp_i=tmp; o_i<end_o; o_i++, tmp_i++) {
+          *tmp_i=*o_i;
+        }
+        num_tmp=num_o;
       }
     }
-    
+
   // Do output
     *num_out=num_o;
     // o is an alias for out so don't need to copy
-    
+
 #undef CLIP_EQUAL_TOL
   }
 

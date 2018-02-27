@@ -40,7 +40,7 @@
 //-------------------------------------------------------------------------
 
 // The default port number for the Registrar
-#define REGISTRAR_PORT	45002
+#define REGISTRAR_PORT  45002
 
 namespace ESMCI
 {
@@ -50,32 +50,32 @@ namespace ESMCI
   public:
 
      // constructor and destructor
-	  ESMCI_WebServRegistrarClient(const char*  host,
+          ESMCI_WebServRegistrarClient(const char*  host,
                                   int          port);
-	  ~ESMCI_WebServRegistrarClient();
+          ~ESMCI_WebServRegistrarClient();
 
      // methods to send client requests to the server
-	  int  registerComp(const char*  clientId,
+          int  registerComp(const char*  clientId,
                        const char*  hostName,
                        const char*  portNum);
 
-	  int  compSubmitted(const char*  clientId,
+          int  compSubmitted(const char*  clientId,
                         const char*  jobId);
 
-	  int  compStarted(const char*  clientId,
+          int  compStarted(const char*  clientId,
                       const char*  compName,
                       const char*  compDesc,
                       const char*  physHostName);
 
-	  int  getComponent(const char*                clientId,
+          int  getComponent(const char*                clientId,
                        ESMCI_WebServCompSvrInfo*  compSvrInfo);
 
-	  int  getStatus(const char*  clientId);
+          int  getStatus(const char*  clientId);
 
-	  int  setStatus(const char*  clientId,
+          int  setStatus(const char*  clientId,
                     const char*  status);
 
-	  int  unregisterComp(const char*  clientId);
+          int  unregisterComp(const char*  clientId);
 
   private:
 
@@ -83,4 +83,4 @@ namespace ESMCI
 
 } // end namespace
 
-#endif 	// ESMCI_WebServRegistrarClient_H
+#endif          // ESMCI_WebServRegistrarClient_H

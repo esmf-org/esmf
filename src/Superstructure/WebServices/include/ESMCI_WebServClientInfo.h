@@ -48,46 +48,46 @@ namespace ESMCI
   public:
 
      // constructor and destructor
-	  ESMCI_WebServClientInfo(int  clientId);
-	  ~ESMCI_WebServClientInfo();
+          ESMCI_WebServClientInfo(int  clientId);
+          ~ESMCI_WebServClientInfo();
 
      // get methods
-	  int    				clientId()		{ return theClientId; }
-	  string    			userName()		{ return theUserName; }
-	  string    			password()		{ return thePassword; }
-	  int    				status()			{ return theCurrentStatus; }
-	  string    			serverHost()	{ return theServerHost; }
-	  int    				serverPort()	{ return theServerPort; }
-	  string    			jobId()	   	{ return theJobId; }
-	  vector<string>  	outputFiles()	{ return theOutputFiles; }
+          int                                   clientId()              { return theClientId; }
+          string                        userName()              { return theUserName; }
+          string                        password()              { return thePassword; }
+          int                                   status()                        { return theCurrentStatus; }
+          string                        serverHost()    { return theServerHost; }
+          int                                   serverPort()    { return theServerPort; }
+          string                        jobId()                 { return theJobId; }
+          vector<string>        outputFiles()   { return theOutputFiles; }
 
      // set methods
-	  void  setUserName(string  userName);
-	  void  setPassword(string  password);
+          void  setUserName(string  userName);
+          void  setPassword(string  password);
      void  setStatus(int  status);
-	  void  setServerHost(string  serverHost);
-	  void  setServerPort(int  serverPort);
-	  void  setJobId(string  jobId);
-	  void  addOutputFile(string  outputFile);
+          void  setServerHost(string  serverHost);
+          void  setServerPort(int  serverPort);
+          void  setJobId(string  jobId);
+          void  addOutputFile(string  outputFile);
 
      void  print();
 
   private:
 
-	  int					theClientId;			// the unique id for the client
+          int                                   theClientId;                    // the unique id for the client
      string          theUserName;         // the client's login name on the svr
                                           //   server
      string          thePassword;         // the client's password on the svr
-	  int					theCurrentStatus;		// the current status of the client
-	  string				theServerHost;			// the name of the host to which the
+          int                                   theCurrentStatus;               // the current status of the client
+          string                                theServerHost;                  // the name of the host to which the
                                           //   client is connected
-	  int					theServerPort;       // the port number of the socket to
+          int                                   theServerPort;       // the port number of the socket to
                                           //   which the client is connected
-     string				theJobId;			   // the unique id for the component
+     string                             theJobId;                          // the unique id for the component
                                           //   service for this client
-	  vector<string>	theOutputFiles;		// the list of output files
+          vector<string>        theOutputFiles;                 // the list of output files
   };
 
 } // end namespace
 
-#endif 	// ESMCI_WebServClientInfo_H
+#endif          // ESMCI_WebServClientInfo_H

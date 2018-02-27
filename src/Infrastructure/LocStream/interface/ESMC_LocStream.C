@@ -49,7 +49,7 @@ extern "C" {
                                              indexflag, coordSys, &localrc));
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc)){
       locstream.ptr = NULL;
-      return locstream; 
+      return locstream;
     }
 
     // return successfully
@@ -61,11 +61,11 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_LocStreamGetBounds()"
   int ESMC_LocStreamGetBounds(ESMC_LocStream locstream,
-			int localDe,
-			int *cLBound,
-			int *cUBound){
+                        int localDe,
+                        int *cLBound,
+                        int *cUBound){
 
-    // initialize return code; assume routine not implemented 
+    // initialize return code; assume routine not implemented
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;   // final return code
 
@@ -75,7 +75,7 @@ extern "C" {
     // Invoke the C++ interface
     localrc = ESMCI::LocStream::getbounds(locstreamp, localDe, cLBound, cUBound);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-				      &rc)) return rc;  // bail out 
+                                      &rc)) return rc;  // bail out
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -87,10 +87,10 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_LocStreamAddKeyAlloc()"
   int ESMC_LocStreamAddKeyAlloc(ESMC_LocStream locstream,
-				const char *keyName,
-				enum ESMC_TypeKind_Flag *keyTypeKind){
+                                const char *keyName,
+                                enum ESMC_TypeKind_Flag *keyTypeKind){
 
-    // initialize return code; assume routine not implemented 
+    // initialize return code; assume routine not implemented
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;   // final return code
 
@@ -100,7 +100,7 @@ extern "C" {
     // Invoke the C++ interface
     localrc = ESMCI::LocStream::addKeyAlloc(locstreamp, keyName, keyTypeKind);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-				      &rc)) return rc;  // bail out 
+                                      &rc)) return rc;  // bail out
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -112,19 +112,19 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_LocStreamGetKeyPtr()"
   void *ESMC_LocStreamGetKeyPtr(ESMC_LocStream locstream, const char *keyName,
-			       int localDe, int *rc){
+                               int localDe, int *rc){
 
-    // initialize return code; assume routine not implemented 
+    // initialize return code; assume routine not implemented
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
     ESMC_Array array = ESMC_LocStreamGetKeyArray(locstream, keyName, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-				      rc)) return NULL;  // bail out
+                                      rc)) return NULL;  // bail out
 
     void *ptr = ESMC_ArrayGetPtr(array, localDe, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-				      rc)) return NULL;  // bail out
+                                      rc)) return NULL;  // bail out
 
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -132,7 +132,7 @@ extern "C" {
   }
 
 
-//--------------------------------------------------------------------------                   
+//--------------------------------------------------------------------------
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_LocStreamGetKeyArray()"
@@ -147,7 +147,7 @@ extern "C" {
     // Invoke the C++ interface
     ESMC_Array array = locstreamp->getKeyArray(keyName, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-				      rc)) return array;
+                                      rc)) return array;
 
     // return successfully
     if(rc) *rc = ESMF_SUCCESS;
@@ -155,30 +155,30 @@ extern "C" {
   }
 
 
-//-----------------------------------------------------------------------------                                                                                                     
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_LocStreamDestroy()"
   int ESMC_LocStreamDestroy(ESMC_LocStream *locstream){
-    // Initialize return code; assume routine not implemented                                                                                                                       
+    // Initialize return code; assume routine not implemented
     int rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
 
-    // typecase into ESMCI type                                                                                                                                                     
+    // typecase into ESMCI type
     ESMCI::LocStream *locstreamp = reinterpret_cast<ESMCI::LocStream *>(locstream->ptr);
 
-    // Invoke the C++ interface                                                                                                                                                     
+    // Invoke the C++ interface
     localrc = ESMCI::LocStream::destroy(locstreamp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-				      &rc)) return rc;
+                                      &rc)) return rc;
 
-    // invalidate pointer                                                                                                                                                           
+    // invalidate pointer
     locstream->ptr = NULL;
 
-    // return successfully                                                                                                                                                          
+    // return successfully
     rc = ESMF_SUCCESS;
     return rc;
   }
-  //--------------------------------------------------------------------------                                                                                                        
+  //--------------------------------------------------------------------------
 
 
 }

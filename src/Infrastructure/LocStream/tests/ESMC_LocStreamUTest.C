@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -37,7 +37,7 @@ int main(void){
   char failMsg[80];
   int result = 0;
   int rc;
-  
+
   // Field variables
   ESMC_Field srcfield;
 
@@ -85,8 +85,8 @@ int main(void){
   farray[7]=7.7;
   farray[8]=8.8;
   farray2 = (double *) ESMC_LocStreamGetKeyPtr(srclocstream,keyName,0,&rc);
-  ESMC_Test((rc==ESMF_SUCCESS) && farray2[8]==farray[8] && farray2[0]==farray[0], 
-	    name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((rc==ESMF_SUCCESS) && farray2[8]==farray[8] && farray2[0]==farray[0],
+            name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -95,8 +95,8 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   array = ESMC_LocStreamGetKeyArray(srclocstream,keyName,&rc);
   farray3 = (double *) ESMC_ArrayGetPtr(array, 0, &rc);
-  ESMC_Test((rc==ESMF_SUCCESS) && farray3[8]==farray[8] && farray3[0]==farray[0], 
-	    name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((rc==ESMF_SUCCESS) && farray3[8]==farray[8] && farray3[0]==farray[0],
+            name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -135,6 +135,6 @@ int main(void){
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  
+
   return 0;
 }

@@ -48,7 +48,7 @@ extern char pghpf_0_[];
 extern char pghpf_0c_;
 #define ESMC_PRESENT(arg) ( ! ( ( (char*)(arg) >=  pghpf_0_ && \
                                   (char*)(arg) <= &pghpf_0_[12] ) || \
-		                  (char*)(arg) == &pghpf_0c_ ) )
+                                  (char*)(arg) == &pghpf_0c_ ) )
 #endif
 
 #ifdef S32

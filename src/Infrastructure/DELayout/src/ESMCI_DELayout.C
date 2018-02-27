@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -60,14 +60,14 @@ static const char *const version = "$Id$";
 //-------------------------------------------------------------------------
 // prototypes for Fortran interface routines called by C++ code below
 extern "C" {
-  void FTN_X(f_esmf_dynmaskcallbackr8r8r8)(ESMCI::RouteHandle **ptr, 
+  void FTN_X(f_esmf_dynmaskcallbackr8r8r8)(ESMCI::RouteHandle **ptr,
     int *count, void *elementVector, int *countVector, int *totalCount,
     void *factorsVector, void *valuesVector, int *vectorL, int *rc);
 #ifndef ESMF_NO_DYNMASKOVERLOAD
-  void FTN_X(f_esmf_dynmaskcallbackr4r8r4)(ESMCI::RouteHandle **ptr, 
+  void FTN_X(f_esmf_dynmaskcallbackr4r8r4)(ESMCI::RouteHandle **ptr,
     int *count, void *elementVector, int *countVector, int *totalCount,
     void *factorsVector, void *valuesVector, int *vectorL, int *rc);
-  void FTN_X(f_esmf_dynmaskcallbackr4r4r4)(ESMCI::RouteHandle **ptr, 
+  void FTN_X(f_esmf_dynmaskcallbackr4r4r4)(ESMCI::RouteHandle **ptr,
     int *count, void *elementVector, int *countVector, int *totalCount,
     void *factorsVector, void *valuesVector, int *vectorL, int *rc);
 #endif
@@ -109,7 +109,7 @@ DELayout *DELayout::create(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   // allocate the new DELayout object and construct the inside
   DELayout *delayout;
   try{
@@ -122,10 +122,10 @@ DELayout *DELayout::create(
     }
   }catch(...){
      // allocation error
-     ESMC_LogDefault.MsgAllocError("for new DELayout.", ESMC_CONTEXT, rc);  
+     ESMC_LogDefault.MsgAllocError("for new DELayout.", ESMC_CONTEXT, rc);
      return ESMC_NULL_POINTER;
   }
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return delayout;
@@ -160,15 +160,15 @@ DELayout *DELayout::create(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   // There is only one DELayoutConstruct() method - it requires a petMap
-  // in order to construct the inside of a DELayout object. The task of 
+  // in order to construct the inside of a DELayout object. The task of
   // this DELayoutCreate() function is to build a petMap according to the
   // provided input and then call DELayoutConstruct() with this petMap.
   int *petMap;
   int petMapCount;
   bool petMapDeleteFlag = false; // reset
-  
+
   // by default use the currentVM for vm
   if (vm == ESMC_NULL_POINTER){
     vm = VM::getCurrent(&localrc);
@@ -178,8 +178,8 @@ DELayout *DELayout::create(
 
   // query the VM for localPet and petCount
   int localPet = vm->getMypet();
-  int petCount = vm->getNpets();    
-  
+  int petCount = vm->getNpets();
+
   // check deCount input
   int deCount = petCount; // number of DEs, default
   int deCountFlag = 0;    // reset
@@ -187,7 +187,7 @@ DELayout *DELayout::create(
     deCountFlag = 1;      // set
     deCount = *deCountArg;
   }
-  
+
   // check deGrouping input
   int deGroupingFlag = 0; // reset
   int deGroupingCount = 0;
@@ -200,7 +200,7 @@ DELayout *DELayout::create(
       return ESMC_NULL_POINTER;
     }
   }
-  
+
   // check petList input
   int petListDeleteFlag = 0;  // reset
   int petListFlag = 0;        // reset
@@ -217,7 +217,7 @@ DELayout *DELayout::create(
     for (int i=0; i<petListCount; i++)
       petList[i] = i;
   }
-  
+
   // construct petMap according to input
   if (!(deCountFlag | deGroupingFlag | petListFlag)){
     // the trivial case: default DELayout
@@ -255,9 +255,9 @@ DELayout *DELayout::create(
         }
       }
     }
-  
+
     // start cleanup
-#if 0  
+#if 0
     if (deStrideBlockDeleteFlag){
       for (int i=0; i<deStrideBlockCount; i++)
         delete [] deStrideBlock[i];
@@ -265,7 +265,7 @@ DELayout *DELayout::create(
     }
 #endif
   }
-  
+
   // allocate the new DELayout object and construct the inside
   DELayout *delayout;
   try{
@@ -284,11 +284,11 @@ DELayout *DELayout::create(
     delayout->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  
+
   // final cleanup
   if (petMapDeleteFlag) delete [] petMap;
   if (petListDeleteFlag) delete [] petList;
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return delayout;
@@ -330,7 +330,7 @@ DELayout *DELayout::create(
   ESMC_Logical cyclic = ESMF_FALSE;
   if (cyclic_opt != ESMC_NULL_POINTER)
     cyclic = *cyclic_opt;
-  
+
   // CAUTION: todo: THIS IS A _NASTY_ HACK to make things happy on higher levels
   // that rely on DELayout to be _always 2D! Here I promote a 1D layout request
   // to 2D: N x 1. I write a message to LogErr to make people aware of this!!!
@@ -352,7 +352,7 @@ DELayout *DELayout::create(
     deCountArg[0] = firstDEdim;
     deCountArg[1] = 1;
   }
-  
+
 
   // decide whether this is a 1D or an ND layout
   if (ndim==0){
@@ -368,7 +368,7 @@ DELayout *DELayout::create(
     }
     catch (...) {
       // LogErr catches the allocation error
-      ESMC_LogDefault.MsgAllocError("for new DELayout.", ESMC_CONTEXT, rc);  
+      ESMC_LogDefault.MsgAllocError("for new DELayout.", ESMC_CONTEXT, rc);
       return ESMC_NULL_POINTER;
     }
   }else if(ndim==1){
@@ -383,7 +383,7 @@ DELayout *DELayout::create(
     }
     catch (...) {
       // LogErr catches the allocation error
-      ESMC_LogDefault.MsgAllocError("for new DELayout.", ESMC_CONTEXT, rc);  
+      ESMC_LogDefault.MsgAllocError("for new DELayout.", ESMC_CONTEXT, rc);
       return ESMC_NULL_POINTER;
     }
   }else{
@@ -398,7 +398,7 @@ DELayout *DELayout::create(
     }
     catch (...) {
       // LogErr catches the allocation error
-      ESMC_LogDefault.MsgAllocError("for new DELayout.", ESMC_CONTEXT, rc);  
+      ESMC_LogDefault.MsgAllocError("for new DELayout.", ESMC_CONTEXT, rc);
       return ESMC_NULL_POINTER;
     }
   }
@@ -454,13 +454,13 @@ int DELayout::destroy(
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // optionally delete the complete object and remove from garbage collection
   if (noGarbage){
     VM::rmObject(*delayout); // remove object from garbage collection
     delete (*delayout);      // completely delete the object, free heap
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -492,7 +492,7 @@ int DELayout::construct(
   ESMC_Pin_Flag *pinFlagArg,    // (in) type of resources DEs are pinned to
   int *petMap,                  // (in) pointer to petMap list
   int petMapCount               // (in) number of element in petMap
-  ){             
+  ){
 //
 // !DESCRIPTION:
 //    Construct the internal information structure of an ESMC\_DELayout object.
@@ -502,13 +502,13 @@ int DELayout::construct(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // by default pin DEs to PETs
   if (pinFlagArg == ESMC_NULL_POINTER)
     pinFlag = ESMF_PIN_DE_TO_PET;
   else
     pinFlag = *pinFlagArg;
-  
+
   // by default use the currentVM for vm
   if (vmArg == ESMC_NULL_POINTER){
     vmArg = VM::getCurrent(&localrc);
@@ -520,7 +520,7 @@ int DELayout::construct(
   int petCount = vmArg->getPetCount();
   int localPet = vmArg->getLocalPet();
   int localVas = vmArg->getVas(localPet);
-  
+
   // by default use a sequential 1-to-1 petMap
   bool petMapDeleteFlag = false; // reset
   if (petMap == ESMC_NULL_POINTER || petMapCount == 0){
@@ -542,7 +542,7 @@ int DELayout::construct(
     deInfoList[i].pet = petMap[i];
     deInfoList[i].vas = vmArg->getVas(petMap[i]);
   }
-  
+
   // clean up petMap if necessary
   if (petMapDeleteFlag) delete [] petMap;
 
@@ -566,7 +566,7 @@ int DELayout::construct(
   for (int i=0; i<petCount; i++)
     if (petFlag[i]!=1) oneToOneFlag = ESMF_FALSE; // reset
   delete [] petFlag;
-  
+
   // fill PET-local part of layout object
   deList = new int[deCount];
   localDeCount = 0;               // reset local de count
@@ -584,7 +584,7 @@ int DELayout::construct(
       localDeToDeMap[j]=i;
       ++j;
     }
-    
+
   // fill VAS-local part of layout object
   vasLocalDeCount = 0;               // reset vas-local de count
   for (int i=0; i<deCount; i++)
@@ -596,7 +596,7 @@ int DELayout::construct(
       vasLocalDeToDeMap[j]=i;
       ++j;
     }
-    
+
   // setup work queue
   localServiceOfferCount = new int[vasLocalDeCount];
   serviceMutexFlag = new int[vasLocalDeCount];
@@ -620,7 +620,7 @@ int DELayout::construct(
     serviceMutex[i] = vm->ipmutexallocate();  // obtain shared mutex
   if (vasLocalDeCount)  // don't use mutex if it's not there
     vm->ipmutexunlock(serviceOfferMutex[0]); // unlock mutex
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -650,7 +650,7 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   oldstyle = 1;           // while the old style delayout is still supported
   vm = &vmArg;                       // set the pointer onto this VM instance
   int npets =  vm->getNpets(); // get number of PETs
@@ -662,7 +662,7 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
     deCount = deCountArg;
   }
   deInfoList = new de_type[deCount];   // allocate as many DEs as there are PETs
-  // uniquely label the DEs in the layout 
+  // uniquely label the DEs in the layout
   for (int i=0; i<deCount; i++){
     deInfoList[i].de = i;                // default is to use basis zero
   }
@@ -709,7 +709,7 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
         deInfoList[i].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
         deInfoList[i].connect_de[1] = i+1;
         deInfoList[i].connect_w[1] = DELAYOUT_CWGHT_NORMAL;
-      }        
+      }
     }
   } else  {
      deInfoList[0].nconnect = 1;
@@ -718,7 +718,7 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
      deInfoList[0].connect_de[0] = 0;
      deInfoList[0].connect_w[0] = DELAYOUT_CWGHT_NORMAL;
   }
-	
+        
   // Setup the dimensionality and coordinates of this layout. This information
   // is only kept for external use!
   ndim = 1; // this is a 1D logical rectangular routine
@@ -744,14 +744,14 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
   // of multiple DEs per PET.
   if (oneToOneFlag == ESMF_FALSE){
     ESMC_LogDefault.Write("A layout without 1:1 DE:PET mapping was"
-      " created! This may cause problems in higher layers of ESMF!", 
+      " created! This may cause problems in higher layers of ESMF!",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
   // Issue warning if this is not logically rectangular
   // TODO: remove this warning when non logRect layouts o.k.
   if (logRectFlag == ESMF_FALSE){
     ESMC_LogDefault.Write("A non logRect layout was"
-      " created! This may cause problems in higher layers of ESMF!", 
+      " created! This may cause problems in higher layers of ESMF!",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
   // Fill local part of layout object
@@ -761,7 +761,7 @@ int DELayout::construct1D(VM &vmArg, int deCountArg,
   // more to set the correct VAS.
   for (int i=0; i<deCount; i++)
     deInfoList[i].vas = vm->getVas(deInfoList[i].pet);
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -784,7 +784,7 @@ int DELayout::constructND(VM &vmArg, int *deCountArg, int nndim,
 //
 //
 // !DESCRIPTION:
-//    Construct the internal information structure in a new DELayout 
+//    Construct the internal information structure in a new DELayout
 //     - deprecated
 //
 //EOPI
@@ -806,7 +806,7 @@ int DELayout::constructND(VM &vmArg, int *deCountArg, int nndim,
   for (int i=0; i<nndim; i++)
     deCount *= deCountArg[i];
   deInfoList = new de_type[deCount]; // allocate as many DEs as there are PETs
-  // uniquely label the DEs in the layout 
+  // uniquely label the DEs in the layout
   for (int i=0; i<deCount; i++){
     deInfoList[i].de = i;                // default is to use basis zero
   }
@@ -845,7 +845,7 @@ int DELayout::constructND(VM &vmArg, int *deCountArg, int nndim,
       deInfoList[i].pet = DEtoPET[i];   // copy the mapping
     // nsc - if deCount is = npets, go ahead and set the 1:1 flag
     // even if the user supplied the mapping.   6dec04
-    // TODO: gjt - this needs a bit more consideration than this, just 
+    // TODO: gjt - this needs a bit more consideration than this, just
     // deCount == npets alone does not indicate 1:1!
       if (deCount==npets) // 1:1 layout
         oneToOneFlag = ESMF_TRUE;
@@ -861,14 +861,14 @@ int DELayout::constructND(VM &vmArg, int *deCountArg, int nndim,
   // of multiple DEs per PET.
   if (oneToOneFlag == ESMF_FALSE){
     ESMC_LogDefault.Write("A layout without 1:1 DE:PET mapping was"
-      " created! This may cause problems in higher layers of ESMF!", 
+      " created! This may cause problems in higher layers of ESMF!",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
   // Issue warning if this is not logically rectangular
   // TODO: remove this warning when non logRect layouts o.k.
   if (logRectFlag == ESMF_FALSE){
     ESMC_LogDefault.Write("A non logRect layout was"
-      " created! This may cause problems in higher layers of ESMF!", 
+      " created! This may cause problems in higher layers of ESMF!",
       ESMC_LOGMSG_WARN, ESMC_CONTEXT);
   }
   // Fill local part of layout object
@@ -906,7 +906,7 @@ int DELayout::destruct(){
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
 //fprintf(stderr, "DELayout::destruct\n");
 
   if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
@@ -920,7 +920,7 @@ int DELayout::destruct(){
       if (logRectFlag == ESMF_TRUE)
         delete [] dims;
     }
-      
+
     // oldstyle and newstyle DELayout alike must delete the following members
     delete [] deInfoList;
     delete [] localDeToDeMap;
@@ -1020,7 +1020,7 @@ int DELayout::getDEMatchDE(
   int *deMatchCount,            // out - number of matching DEs in layoutMatch
   int *deMatchList,             // out - list of matching DEs in layoutMatch
   int len_deMatchList           // in  - size of deMatchList
-  )const{ 
+  )const{
 //
 // !DESCRIPTION:
 //    Get information about a DELayout object
@@ -1039,7 +1039,7 @@ int DELayout::getDEMatchDE(
       tempMatchList[j] = i;
       ++j;
     }
-  // now j is equal to the number of DEs in layoutMatch which operate in the 
+  // now j is equal to the number of DEs in layoutMatch which operate in the
   // same virtual memory space as "de" does in this layout.
   if (deMatchCount != ESMC_NULL_POINTER)
     *deMatchCount = j;
@@ -1052,10 +1052,10 @@ int DELayout::getDEMatchDE(
       "deMatchList must be of size 'deMatchCount'", ESMC_CONTEXT, &rc);
     return rc;
   }
-    
+
   // garbage collection
   delete [] tempMatchList;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1082,10 +1082,10 @@ int DELayout::getDEMatchPET(
   int *petMatchCount,           // out - number of matching PETs in vmMatch
   int *petMatchList,            // out - list of matching PETs in vmMatch
   int len_petMatchList          // in  - size of petMatchList
-  )const{ 
+  )const{
 //
 // !DESCRIPTION:
-//    Match de in the current DELayout object against the PETs in the 
+//    Match de in the current DELayout object against the PETs in the
 //    provided vmMatch VM. Return number of matched PETs and a list of the
 //    matching pet id's that operate in the same virtual address space in which
 //    de lies.
@@ -1105,7 +1105,7 @@ int DELayout::getDEMatchPET(
       tempMatchList[j] = i;
       ++j;
     }
-  // now j is equal to the number of PETs in vmMatch which operate in the 
+  // now j is equal to the number of PETs in vmMatch which operate in the
   // same virtual address space as "de" does in this layout.
   if (petMatchCount != ESMC_NULL_POINTER)
     *petMatchCount = j;
@@ -1118,7 +1118,7 @@ int DELayout::getDEMatchPET(
       "petMatchList must be of size 'petMatchCount'", ESMC_CONTEXT, &rc);
     return rc;
   }
-    
+
   // garbage collection
   delete [] tempMatchList;
 
@@ -1153,7 +1153,7 @@ int DELayout::getDeprecated(
   ESMC_Logical *logRectFlag,  // out - logical rectangular layout flag
   int  *deCountPerDim,        // out - list of dimension sizes
   int  len_deCountPerDim      // in  - number of elements in deCountPerDim list
-  )const{ 
+  )const{
 //
 // !DESCRIPTION:
 //    Get information about a DELayout object
@@ -1165,7 +1165,7 @@ int DELayout::getDeprecated(
 
   if (deCountArg != ESMC_NULL_POINTER)
     *deCountArg = deCount;
-  
+
   if (ndim != ESMC_NULL_POINTER){
     if (!oldstyle){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -1174,14 +1174,14 @@ int DELayout::getDeprecated(
     }else
       *ndim = this->ndim;
   }
-  
+
   if (localDeCountArg != ESMC_NULL_POINTER)
     *localDeCountArg = localDeCount;
-  
+
   if (len_localDeToDeMap >= localDeCount)
     for (int i=0; i<localDeCount; i++)
       localDeToDeMapArg[i] = localDeToDeMap[i];
-  
+
   if (localDe != ESMC_NULL_POINTER){
     if (!oldstyle){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -1196,10 +1196,10 @@ int DELayout::getDeprecated(
       }
     }
   }
-  
+
   if (oneToOneFlag != ESMC_NULL_POINTER)
     *oneToOneFlag = this->oneToOneFlag;
-  
+
   if (logRectFlag != ESMC_NULL_POINTER){
     if (!oldstyle){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -1208,7 +1208,7 @@ int DELayout::getDeprecated(
     }else
       *logRectFlag = this->logRectFlag;
   }
-  
+
   if (len_deCountPerDim >= this->ndim){
     if (!oldstyle){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -1223,7 +1223,7 @@ int DELayout::getDeprecated(
       }else{
         for (int i=0; i<len_deCountPerDim; i++)
           deCountPerDim[i] = -1;    // mark invalid
-        return ESMC_RC_CANNOT_GET; 
+        return ESMC_RC_CANNOT_GET;
       }
     }
   }
@@ -1258,7 +1258,7 @@ int DELayout::getDELocalInfo(
   int  len_cw,            // in  - dimensions in DEcw
   int  *nDEc,             // out - DE's number of connections
   int  *vas               // out - vas for this DE
-  )const{ 
+  )const{
 //
 // !DESCRIPTION:
 //    Get information about a DELayout object
@@ -1323,7 +1323,7 @@ int DELayout::print()const{
 //
 //
 // !DESCRIPTION:
-//    Print details of DELayout object 
+//    Print details of DELayout object
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1349,7 +1349,7 @@ int DELayout::print()const{
       printf("ESMF_FALSE\n");
     printf("deCount = %d\n", deCount);
     for (int i=0; i<deCount; i++){
-      printf("  deInfoList[%d]: de=%d, pet=%d, vas=%d, nconnect=%d\n", i, 
+      printf("  deInfoList[%d]: de=%d, pet=%d, vas=%d, nconnect=%d\n", i,
         deInfoList[i].de, deInfoList[i].pet, deInfoList[i].vas,
         deInfoList[i].nconnect);
       for (int j=0; j<deInfoList[i].nconnect; j++)
@@ -1386,7 +1386,7 @@ int DELayout::print()const{
       printf(" ...unknown... \n");
     printf("deCount = %d\n", deCount);
     for (int i=0; i<deCount; i++){
-      printf("  deInfoList[%d]: de=%d, pet=%d, vas=%d\n", i, 
+      printf("  deInfoList[%d]: de=%d, pet=%d, vas=%d\n", i,
         deInfoList[i].de, deInfoList[i].pet, deInfoList[i].vas);
     }
     printf("--- PET-local DELayout section ---\n");
@@ -1421,7 +1421,7 @@ int DELayout::validate()const{
 //
 //
 // !DESCRIPTION:
-//    Validate details of DELayout object 
+//    Validate details of DELayout object
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1434,7 +1434,7 @@ int DELayout::validate()const{
       " - 'this' pointer is NULL.", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1463,7 +1463,7 @@ int DELayout::serialize(
 // !ARGUMENTS:
   char *buffer,          // inout - byte stream to fill
   int *length,           // inout - buf length; realloc'd here if needed
-  int *offset,           // inout - original offset, updated to point 
+  int *offset,           // inout - original offset, updated to point
                          //         to first free byte after current obj info
   ESMC_InquireFlag inquireflag) const { // in - inquiry flag
 //
@@ -1487,7 +1487,7 @@ int DELayout::serialize(
   // Check if buffer has enough free memory to hold object
   if (inquireflag != ESMF_INQUIREONLY){
     if ((*length - *offset) < (int)sizeof(DELayout)){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "Buffer too short to add a DELayout object", ESMC_CONTEXT, &rc);
       return rc;
     }
@@ -1539,7 +1539,7 @@ int DELayout::serialize(
           *ip++ = dep->connect_de[j];
           *ip++ = dep->connect_w[j];
         }
-        for (j=0; j<ndim; j++) 
+        for (j=0; j<ndim; j++)
           *ip++ = dep->coord[j];
       }
     }
@@ -1551,7 +1551,7 @@ int DELayout::serialize(
       }
     }
   }
-  
+
   // this has to come before dims, since they are not allocated unless
   // logRectFlag is true.
   lp = (ESMC_Logical *)ip;
@@ -1562,12 +1562,12 @@ int DELayout::serialize(
   }else{
     lp += oldstyle ? 1 : 2;
   }
-  
+
   ip = (int *)lp;
   if (oldstyle){
     if (logRectFlag == ESMF_TRUE){
       if (inquireflag != ESMF_INQUIREONLY){
-        for (i=0; i<ndim; i++) 
+        for (i=0; i<ndim; i++)
           *ip++ = dims[i];
       }else{
         ip += ndim;
@@ -1578,12 +1578,12 @@ int DELayout::serialize(
   cp = (char *)ip;
 
   *offset = (cp - buffer);
- 
+
   if (inquireflag == ESMF_INQUIREONLY){
     if (*offset < (int)sizeof(DELayout))
       *offset = sizeof(DELayout);
   }
- 
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1605,7 +1605,7 @@ DELayout *DELayout::deserialize(
 //
 // !ARGUMENTS:
   char *buffer,          // in - byte stream to read
-  int *offset) {         // inout - original offset, updated to point 
+  int *offset) {         // inout - original offset, updated to point
                          //  to first free byte after current obj info
 //
 // !DESCRIPTION:
@@ -1652,7 +1652,7 @@ DELayout *DELayout::deserialize(
     a->pinFlag = *dp++;
     ip = (int *)dp;
   }
-  
+
   a->deInfoList = new de_type[a->deCount];
   for (i=0, dep=a->deInfoList; i<a->deCount; i++, dep++) {
     dep->de = *ip++;
@@ -1668,7 +1668,7 @@ DELayout *DELayout::deserialize(
         dep->connect_de[j] = *ip++;
         dep->connect_w[j] = *ip++;
       }
-      for (j=0; j<a->ndim; j++) 
+      for (j=0; j<a->ndim; j++)
         dep->coord[j] = *ip++;
     }
   }
@@ -1684,7 +1684,7 @@ DELayout *DELayout::deserialize(
   a->serviceMutexFlag = new int[a->vasLocalDeCount];
   a->serviceMutex = new VMK::ipmutex*[a->vasLocalDeCount];
   a->serviceOfferMutex = new VMK::ipmutex*[a->vasLocalDeCount];
-  
+
   // decode flags first, because dims is not sent unless logRectFlag is true.
   lp = (ESMC_Logical *)ip;
   a->oneToOneFlag = *lp++;
@@ -1695,7 +1695,7 @@ DELayout *DELayout::deserialize(
   if (a->oldstyle){
     if (a->logRectFlag == ESMF_TRUE) {
       a->dims = new int[a->ndim];
-      for (i=0; i<a->ndim; i++) 
+      for (i=0; i<a->ndim; i++)
           a->dims[i] = *ip++;
     }else
       a->dims = NULL;
@@ -1704,7 +1704,7 @@ DELayout *DELayout::deserialize(
   cp = (char *)ip;
 
   *offset = (cp - buffer);
- 
+
   // return successfully
   rc = ESMF_SUCCESS;
   return a;
@@ -1730,20 +1730,20 @@ ServiceReply DELayout::serviceOffer(
   int *rc){                 // out - optional return code
 //
 // !DESCRIPTION:
-//    Calling PET offers service for {\tt de} in DELayout. The 
+//    Calling PET offers service for {\tt de} in DELayout. The
 //    offer is either accepted or denied.
 //
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   // initialize the reply
   ServiceReply reply = SERVICEREPLY_DENY; // reset
 
   int localPet = vm->getMypet();
   int localVas = vm->getVas(localPet);
-  
+
   // DE to PET pinning is more restrictive -> check first
   if (pinFlag == ESMF_PIN_DE_TO_PET){
     // search for de in localDeToDeMap
@@ -1769,7 +1769,7 @@ ServiceReply DELayout::serviceOffer(
 //      "Specified DE is not in vasLocalDeToDeMap", ESMC_CONTEXT, rc);
     return reply;
   }
-  
+
   // ...de was found in local list
   ++localServiceOfferCount[ii];
   vm->ipmutexlock(serviceOfferMutex[ii]);   // lock mutex
@@ -1778,20 +1778,20 @@ ServiceReply DELayout::serviceOffer(
     ++maxServiceOfferCount[4*ii];
   }
   vm->ipmutexunlock(serviceOfferMutex[ii]); // unlock mutex
-  
+
   if (reply==SERVICEREPLY_ACCEPT){
     vm->ipmutexlock(serviceMutex[ii]);  // lock service mutex
     serviceMutexFlag[ii] = 1;               // set
   }
-    
+
 //  if (reply==SERVICEREPLY_ACCEPT)
-//    printf("PET %d localServiceOfferCount for DE %d is %d: ACCEPT\n", 
+//    printf("PET %d localServiceOfferCount for DE %d is %d: ACCEPT\n",
 //      localPet, de, localServiceOfferCount[ii]);
 //  else
-//    printf("PET %d localServiceOfferCount for DE %d is %d: DENY\n", 
+//    printf("PET %d localServiceOfferCount for DE %d is %d: DENY\n",
 //      localPet, de, localServiceOfferCount[ii]);
-  
-    
+
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return reply;
@@ -1827,7 +1827,7 @@ int DELayout::serviceComplete(
 
   int localPet = vm->getMypet();
   int localVas = vm->getVas(localPet);
-  
+
   // DE to PET pinning is more restrictive -> check first
   if (pinFlag == ESMF_PIN_DE_TO_PET){
     // search for de in localDeToDeMap
@@ -1853,7 +1853,7 @@ rc=ESMC_RC_ARG_WRONG;
 //      "Specified DE is not in vasLocalDeToDeMap", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // ...de was found in local list
   if (!serviceMutexFlag[ii]){
 //TODO: enable LogErr once it is thread-safe
@@ -1862,11 +1862,11 @@ rc=ESMC_RC_NOT_VALID;
 //      "PET does not hold service mutex for specified", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
-  // ...pet holds service mutex for de   
+
+  // ...pet holds service mutex for de
   vm->ipmutexunlock(serviceMutex[ii]);  // unlock service mutex
   serviceMutexFlag[ii] = 0;                 // reset
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -2081,7 +2081,7 @@ int DELayout::ESMC_DELayoutBcast(
 //
 // !ARGUMENTS:
 //
-  void *data,     // data 
+  void *data,     // data
   int blen,       // message size in bytes
   int rootDE      // root DE
   ){
@@ -2118,7 +2118,7 @@ int DELayout::ESMC_DELayoutBcast(
 //
 // !ARGUMENTS:
 //
-  void *data,    // data 
+  void *data,    // data
   int len,       // message size in elements
   ESMC_TypeKind_Flag dtk,// data type kind
   int rootDE      // root DE
@@ -2498,12 +2498,12 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
   map<void *, void *> *dataOldNewMap){
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   vm = VM::getCurrent(&localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) throw rc;
   rh = NULL;  // guard
-  
+
   // HEADER
   readin(streami, &count);                // number of elements in op-stream
   map<void *, unsigned long>::size_type dataMapSize;    // aux. variable
@@ -2514,12 +2514,12 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
   readin(streami, &xxeSubCount);          // number of subs
   for (int i=0; i<10; i++)
     readin(streami, &typekind[i]);        // typekinds
-  readin(streami, &lastFilterBitField);   // 
-  readin(streami, &superVectorOkay);      // 
-  readin(streami, &max);                  // 
-  readin(streami, &dataMaxCount);         // 
-  readin(streami, &commhandleMaxCount);   // 
-  readin(streami, &xxeSubMaxCount);       // 
+  readin(streami, &lastFilterBitField);   //
+  readin(streami, &superVectorOkay);      //
+  readin(streami, &max);                  //
+  readin(streami, &dataMaxCount);         //
+  readin(streami, &commhandleMaxCount);   //
+  readin(streami, &xxeSubMaxCount);       //
 
   streampos positionOpstream;
   readin(streami, &positionOpstream);
@@ -2535,18 +2535,18 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
   dataCount = 0;              // reset, because building up here
   dataMaxCount = dataMapSize; // appropriate size from incoming streami
   dataList = new char*[dataMapSize];
-  
+
   // need a map object in order to track association between old->new data
   bool dataOldNewMapCreatorFlag = false;
   if (dataOldNewMap==NULL){
-    // incoming dataOldNewMap is not created, created it here, 
+    // incoming dataOldNewMap is not created, created it here,
     // i.e. top level of recursion
     dataOldNewMapCreatorFlag = true;
     dataOldNewMap = new map<void *, void *>;
   }
 
   // associate new data allocation address with position of data in streami
-  map<void *, streampos> dataPos; 
+  map<void *, streampos> dataPos;
   // position to read in dataMap
   streami.seekg(positionDataMap);
   // replicate the dataMap, allocating own local data
@@ -2570,7 +2570,7 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
     (*dataOldNewMap)[oldAddr] = data;
   }
   // now read the actual data from streami and fill into new allocations
-  map<void *, streampos>::iterator it;  
+  map<void *, streampos>::iterator it;
   for (it=dataPos.begin(); it!=dataPos.end(); ++it){
     void *data = it->first;
     streampos pos = it->second;
@@ -2582,12 +2582,12 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
   // need a map object in order to track association between old->new buffer
   bool bufferOldNewMapCreatorFlag = false;
   if (bufferOldNewMap==NULL){
-    // incoming bufferOldNewMap is not created, created it here, 
+    // incoming bufferOldNewMap is not created, created it here,
     // i.e. top level of recursion
     bufferOldNewMapCreatorFlag = true;
     bufferOldNewMap = new map<void *, void *>;
   }
-  
+
   // position to read in bufferMap
   streami.seekg(positionBufferMap);
   // replicate the bufferInfoList, allocating own local buffers
@@ -2655,18 +2655,18 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
     // reposition streami for next iteration
     streami.seekg(currPos);
   }
-  
+
   // position to read in opstream
   streami.seekg(positionOpstream);
   max = count;        // know exactly how many elements there are
   opstream = new StreamElement[count];
   // read the full opstream
   streami.read((char*)opstream, count*sizeof(StreamElement));
-  
+
   // translate old->new addresses in the entire opstream
   for (int index=0; index<count; index++){
     StreamElement *xxeElement = &(opstream[index]);
-    
+
     switch(opstream[index].opId){
     case send:
     case recv:
@@ -3467,9 +3467,9 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
     default:
       break;
     }
-    
+
   } // index
-  
+
   // local garbage collection
   if (dataOldNewMapCreatorFlag){
     delete dataOldNewMap;
@@ -3477,7 +3477,7 @@ XXE::XXE(stringstream &streami, vector<int> *originToTargetMap,
   if (bufferOldNewMapCreatorFlag){
     delete bufferOldNewMap;
   }
-  
+
 }
 //-----------------------------------------------------------------------------
 
@@ -3545,7 +3545,7 @@ template<typename T> void append(stringstream &streami, T value){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::streamify()"
 void XXE::streamify(stringstream &streami){
-  
+
   // HEADER
   append(streami, count);                 // number of elements in op-stream
   append(streami, dataMap.size());        // number of data elements
@@ -3554,21 +3554,21 @@ void XXE::streamify(stringstream &streami){
   append(streami, xxeSubCount);           // number of subs
   for (int i=0; i<10; i++)
     append(streami, typekind[i]);         // typekinds
-  append(streami, lastFilterBitField);    // 
-  append(streami, superVectorOkay);       // 
-  append(streami, max);                   // 
-  append(streami, dataMaxCount);          // 
-  append(streami, commhandleMaxCount);    // 
-  append(streami, xxeSubMaxCount);        // 
-  
+  append(streami, lastFilterBitField);    //
+  append(streami, superVectorOkay);       //
+  append(streami, max);                   //
+  append(streami, dataMaxCount);          //
+  append(streami, commhandleMaxCount);    //
+  append(streami, xxeSubMaxCount);        //
+
   streampos posZero = 0;  // dummy position variable
-  
+
   streampos posPositionOpstream = streami.tellp(); // store this position
   append(streami, posZero);               // placeholder for actual position
 
   streampos posPositionDataMap = streami.tellp(); // store this position
   append(streami, posZero);               // placeholder for actual position
-  
+
   streampos posPositionBufferMap = streami.tellp(); // store this position
   append(streami, posZero);               // placeholder for actual position
 
@@ -3577,7 +3577,7 @@ void XXE::streamify(stringstream &streami){
 
   streampos posPositionSubsMap = streami.tellp(); // store this position
   append(streami, posZero);               // placeholder for actual position
-    
+
   // SUBS
   vector<streampos> subPos;
   for (int i=0; i<xxeSubCount; ++i){
@@ -3585,7 +3585,7 @@ void XXE::streamify(stringstream &streami){
     xxeSubList[i]->streamify(streami); // recursively streamify
   }
 
-  // needed below for iterations  
+  // needed below for iterations
   map<void *, unsigned long>::iterator it;
   int ii;
 
@@ -3595,7 +3595,7 @@ void XXE::streamify(stringstream &streami){
     dataPos.push_back(streami.tellp()); // hang on to position in stream
     streami.write((char*)it->first, it->second);  // data block
   }
-  
+
   // MAPS
   // dataMap
   streampos positionDataMap = streami.tellp();
@@ -3622,7 +3622,7 @@ void XXE::streamify(stringstream &streami){
     append(streami, (void *)(xxeSubList[i]));   // old address
     append(streami, subPos[i]);                 // position in stream
   }
-  
+
   // OPSTREAM
   streampos positionOpstream = streami.tellp();
   streami.write((char*)opstream, count*sizeof(StreamElement));// write opstream
@@ -3634,7 +3634,7 @@ void XXE::streamify(stringstream &streami){
   append(streami, positionBufferMap);
   append(streami, positionCommhMap);
   append(streami, positionSubsMap);
-  
+
   // reset to end of stream again -> very important for recusion!
   streami.seekp(0, ios::end);
 }
@@ -3719,7 +3719,7 @@ int XXE::exec(
   int *vectorLength,  // in  - run-time vectorLength
   int filterBitField, // in  - filter operations according to predicateBitField
   bool *finished,     // out - TEST ops executed as per filterBitField are
-                      //       finished, or need additional FINISH calls 
+                      //       finished, or need additional FINISH calls
   bool *cancelled,    // out - indicates whether there are any cancelled ops
   double *dTime,      // out - execution time, NULL to disable
   int indexStart,     // in  - start index, < 0 for default (full stream)
@@ -3752,7 +3752,7 @@ int XXE::exec(
     "finished=%p, cancelled=%p", filterBitField, finished, cancelled);
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
-  
+
 #ifdef XXE_EXEC_MEMLOG_on
   VM::logMemInfo(std::string("XXE::exec():1.0"));
 #endif
@@ -3762,7 +3762,7 @@ int XXE::exec(
   if (indexStart > 0) indexRangeStart = indexStart;
   int indexRangeStop = count-1;   // default
   if (indexStop > 0) indexRangeStop = indexStop;
-  
+
   // check index range
   if (count > 0 && indexRangeStart > count-1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -3774,13 +3774,13 @@ int XXE::exec(
       "indexStop out of range", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // store filterBitField in XXE
   lastFilterBitField = filterBitField;
-  
+
   // initialize finished and cancelled flags
   if (finished) *finished = true; // assume all ops finished unless find otherw.
-  if (cancelled) *cancelled = false; // assume no ops cancelled unless find ow.  
+  if (cancelled) *cancelled = false; // assume no ops cancelled unless find ow.
   // XXE element variables used below
   StreamElement *xxeElement, *xxeIndexElement;
   SendInfo *xxeSendInfo;
@@ -3821,21 +3821,21 @@ int XXE::exec(
   XxeSubMultiInfo *xxeSubMultiInfo;
   WtimerInfo *xxeWtimerInfo, *xxeWtimerInfoActual, *xxeWtimerInfoRelative;
   MessageInfo *xxeMessageInfo;
-  
+
   double t0, t1;
-  
+
   if (dTime != NULL)
     VMK::wtime(&t0);
-  
+
 #ifdef XXE_EXEC_MEMLOG_on
   VM::logMemInfo(std::string("XXE::exec():2.0"));
 #endif
 
 #ifdef XXE_EXEC_LOG_on
-  sprintf(msg, "ESMCI::XXE::exec(): bufferInfoList.size()=%d", 
+  sprintf(msg, "ESMCI::XXE::exec(): bufferInfoList.size()=%d",
     bufferInfoList.size());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-#endif    
+#endif
   for (unsigned i=0; i<bufferInfoList.size(); i++){
     unsigned long currentSize = bufferInfoList[i]->vectorLengthMultiplier
       * *vectorLength;
@@ -3864,22 +3864,22 @@ int XXE::exec(
     memset(bufferInfoList[i]->buffer, 0xff, bufferInfoList[i]->size);
 #endif
   }
-  
+
 #ifdef XXE_EXEC_MEMLOG_on
   VM::logMemInfo(std::string("XXE::exec():3.0"));
 #endif
 
   for (int i=indexRangeStart; i<=indexRangeStop; i++){
     xxeElement = &(opstream[i]);
-    
+
     if (xxeElement->predicateBitField & filterBitField)
       continue; // filter out this operation
-    
+
 #ifdef XXE_EXEC_LOG_on
     sprintf(msg, "ESMCI::XXE::exec(): %d, opId=%d", i, opstream[i].opId);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-#endif    
-    
+#endif
+
     switch(opstream[i].opId){
     case send:
       {
@@ -3979,7 +3979,7 @@ int XXE::exec(
           dstSize *= *vectorLength;
         }
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::sendrecv: dst=%d, sendSize=%d, src=%d, recvSize=%d", 
+        sprintf(msg, "XXE::sendrecv: dst=%d, sendSize=%d, src=%d, recvSize=%d",
           xxeSendRecvInfo->dstPet, srcSize, xxeSendRecvInfo->srcPet, dstSize);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4005,7 +4005,7 @@ int XXE::exec(
           rraOffset *= *vectorLength;
         }
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::sendRRArecv: dst=%d, src=%d", 
+        sprintf(msg, "XXE::sendRRArecv: dst=%d, src=%d",
           xxeSendRRARecvInfo->dstPet, xxeSendRRARecvInfo->srcPet);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4030,7 +4030,7 @@ int XXE::exec(
         if (xxeSendnbInfo->vectorFlag)
           size *= *vectorLength;
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::sendnb: dst=%d, size=%d", 
+        sprintf(msg, "XXE::sendnb: dst=%d, size=%d",
           xxeSendnbInfo->dstPet, size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4056,7 +4056,7 @@ int XXE::exec(
         if (xxeRecvnbInfo->vectorFlag)
           size *= *vectorLength;
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::recvnb: src=%d, size=%d", 
+        sprintf(msg, "XXE::recvnb: src=%d, size=%d",
           xxeRecvnbInfo->srcPet, size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4076,7 +4076,7 @@ int XXE::exec(
           rraOffset *= *vectorLength;
         }
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::sendnbRRA: dst=%d, size=%d", 
+        sprintf(msg, "XXE::sendnbRRA: dst=%d, size=%d",
           xxeSendnbRRAInfo->dstPet, size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4097,7 +4097,7 @@ int XXE::exec(
           rraOffset *= *vectorLength;
         }
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::recvnbRRA: src=%d, size=%d", 
+        sprintf(msg, "XXE::recvnbRRA: src=%d, size=%d",
           xxeRecvnbRRAInfo->srcPet, size);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4114,7 +4114,7 @@ int XXE::exec(
         xxeIndexElement = &(opstream[xxeWaitOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::waitOnIndex: index=%d, activeFlag=%d", 
+        sprintf(msg, "XXE::waitOnIndex: index=%d, activeFlag=%d",
           xxeWaitOnIndexInfo->index, xxeCommhandleInfo->activeFlag);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
         if (xxeCommhandleInfo->activeFlag){
@@ -4124,7 +4124,7 @@ int XXE::exec(
             int size = xxeSendnbInfo->size;
             if (xxeSendnbInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::waitOnIndex:sendnb: dst=%d, size=%d", 
+            sprintf(msg, "XXE::waitOnIndex:sendnb: dst=%d, size=%d",
               xxeSendnbInfo->dstPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }else if (xxeIndexElement->opId == recvnb){
@@ -4132,7 +4132,7 @@ int XXE::exec(
             int size = xxeRecvnbInfo->size;
             if (xxeRecvnbInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::waitOnIndex:recvnb: src=%d, size=%d", 
+            sprintf(msg, "XXE::waitOnIndex:recvnb: src=%d, size=%d",
               xxeRecvnbInfo->srcPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }else if (xxeIndexElement->opId == sendnbRRA){
@@ -4140,7 +4140,7 @@ int XXE::exec(
             int size = xxeSendnbRRAInfo->size;
             if (xxeSendnbRRAInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::waitOnIndex:sendnbRRA: dst=%d, size=%d", 
+            sprintf(msg, "XXE::waitOnIndex:sendnbRRA: dst=%d, size=%d",
               xxeSendnbRRAInfo->dstPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }else if (xxeIndexElement->opId == recvnbRRA){
@@ -4148,7 +4148,7 @@ int XXE::exec(
             int size = xxeRecvnbRRAInfo->size;
             if (xxeRecvnbRRAInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::waitOnIndex:recvnbRRA: src=%d, size=%d", 
+            sprintf(msg, "XXE::waitOnIndex:recvnbRRA: src=%d, size=%d",
               xxeRecvnbRRAInfo->srcPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }
@@ -4170,7 +4170,7 @@ int XXE::exec(
         xxeIndexElement = &(opstream[xxeTestOnIndexInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::testOnIndex: index=%d, activeFlag=%d", 
+        sprintf(msg, "XXE::testOnIndex: index=%d, activeFlag=%d",
           xxeTestOnIndexInfo->index, xxeCommhandleInfo->activeFlag);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
         if (xxeCommhandleInfo->activeFlag){
@@ -4180,7 +4180,7 @@ int XXE::exec(
             int size = xxeSendnbInfo->size;
             if (xxeSendnbInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::testOnIndex:sendnb: dst=%d, size=%d", 
+            sprintf(msg, "XXE::testOnIndex:sendnb: dst=%d, size=%d",
               xxeSendnbInfo->dstPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }else if (xxeIndexElement->opId == recvnb){
@@ -4188,7 +4188,7 @@ int XXE::exec(
             int size = xxeRecvnbInfo->size;
             if (xxeRecvnbInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::testOnIndex:recvnb: src=%d, size=%d", 
+            sprintf(msg, "XXE::testOnIndex:recvnb: src=%d, size=%d",
               xxeRecvnbInfo->srcPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }else if (xxeIndexElement->opId == sendnbRRA){
@@ -4196,7 +4196,7 @@ int XXE::exec(
             int size = xxeSendnbRRAInfo->size;
             if (xxeSendnbRRAInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::testOnIndex:sendnbRRA: dst=%d, size=%d", 
+            sprintf(msg, "XXE::testOnIndex:sendnbRRA: dst=%d, size=%d",
               xxeSendnbRRAInfo->dstPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }else if (xxeIndexElement->opId == recvnbRRA){
@@ -4204,7 +4204,7 @@ int XXE::exec(
             int size = xxeRecvnbRRAInfo->size;
             if (xxeRecvnbRRAInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::testOnIndex:recvnbRRA: src=%d, size=%d", 
+            sprintf(msg, "XXE::testOnIndex:recvnbRRA: src=%d, size=%d",
               xxeRecvnbRRAInfo->srcPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }
@@ -4217,7 +4217,7 @@ int XXE::exec(
           vm->commtest(xxeCommhandleInfo->commhandle, &completeFlag, &status);
           xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
 #ifdef XXE_EXEC_LOG_on
-          sprintf(msg, "XXE::testOnIndex: completeFlag=%d, cancelledFlag=%d", 
+          sprintf(msg, "XXE::testOnIndex: completeFlag=%d, cancelledFlag=%d",
             completeFlag, xxeCommhandleInfo->cancelledFlag);
           ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4228,7 +4228,7 @@ int XXE::exec(
             if (finished) *finished = false;  // comm not finished
           }
 #ifdef XXE_EXEC_LOG_on
-          sprintf(msg, "XXE::testOnIndex: returning with finished=%d", 
+          sprintf(msg, "XXE::testOnIndex: returning with finished=%d",
             *finished);
           ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4243,7 +4243,7 @@ int XXE::exec(
         int count = xxeWaitOnAnyIndexSubInfo->count;
         int completeTotal = 0;  // reset
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::waitOnAnyIndexSub: count=%d", 
+        sprintf(msg, "XXE::waitOnAnyIndexSub: count=%d",
           xxeWaitOnAnyIndexSubInfo->count);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4267,7 +4267,7 @@ int XXE::exec(
                   bool localCancelled;
                   xxeWaitOnAnyIndexSubInfo->xxe[k]->
                     exec(rraCount, rraList, vectorLength, filterBitField,
-                    &localFinished, &localCancelled, NULL, -1, -1, 
+                    &localFinished, &localCancelled, NULL, -1, -1,
                     srcLocalDeCount, superVectP);
                   if (!localFinished)
                     if (finished) *finished = false;  // unfinished ops in sub
@@ -4317,7 +4317,7 @@ int XXE::exec(
         xxeIndexElement = &(opstream[waitOnIndexSubInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::waitOnIndexSub: index=%d, activeFlag=%d", 
+        sprintf(msg, "XXE::waitOnIndexSub: index=%d, activeFlag=%d",
           waitOnIndexSubInfo->index, xxeCommhandleInfo->activeFlag);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
         if (xxeCommhandleInfo->activeFlag){
@@ -4327,7 +4327,7 @@ int XXE::exec(
             int size = xxeSendnbInfo->size;
             if (xxeSendnbInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::waitOnIndexSub:sendnb: dst=%d, size=%d", 
+            sprintf(msg, "XXE::waitOnIndexSub:sendnb: dst=%d, size=%d",
               xxeSendnbInfo->dstPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }else if (xxeIndexElement->opId == recvnb){
@@ -4335,7 +4335,7 @@ int XXE::exec(
             int size = xxeRecvnbInfo->size;
             if (xxeRecvnbInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::waitOnIndexSub:recvnb: src=%d, size=%d", 
+            sprintf(msg, "XXE::waitOnIndexSub:recvnb: src=%d, size=%d",
               xxeRecvnbInfo->srcPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }else if (xxeIndexElement->opId == sendnbRRA){
@@ -4343,7 +4343,7 @@ int XXE::exec(
             int size = xxeSendnbRRAInfo->size;
             if (xxeSendnbRRAInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::waitOnIndexSub:sendnbRRA: dst=%d, size=%d", 
+            sprintf(msg, "XXE::waitOnIndexSub:sendnbRRA: dst=%d, size=%d",
               xxeSendnbRRAInfo->dstPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }else if (xxeIndexElement->opId == recvnbRRA){
@@ -4351,7 +4351,7 @@ int XXE::exec(
             int size = xxeRecvnbRRAInfo->size;
             if (xxeRecvnbRRAInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::waitOnIndexSub:recvnbRRA: src=%d, size=%d", 
+            sprintf(msg, "XXE::waitOnIndexSub:recvnbRRA: src=%d, size=%d",
               xxeRecvnbRRAInfo->srcPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }
@@ -4371,7 +4371,7 @@ int XXE::exec(
               rraList + waitOnIndexSubInfo->rraShift,
               vectorLength + waitOnIndexSubInfo->vectorLengthShift,
               filterBitField, &localFinished, &localCancelled, NULL, -1, -1,
-              srcLocalDeCount + waitOnIndexSubInfo->vectorLengthShift, 
+              srcLocalDeCount + waitOnIndexSubInfo->vectorLengthShift,
               superVectP + waitOnIndexSubInfo->vectorLengthShift);
             if (!localFinished)
               if (finished) *finished = false;  // unfinished ops in sub
@@ -4388,7 +4388,7 @@ int XXE::exec(
         xxeIndexElement = &(opstream[testOnIndexSubInfo->index]);
         xxeCommhandleInfo = (CommhandleInfo *)xxeIndexElement;
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::testOnIndexSub: index=%d, activeFlag=%d", 
+        sprintf(msg, "XXE::testOnIndexSub: index=%d, activeFlag=%d",
           testOnIndexSubInfo->index, xxeCommhandleInfo->activeFlag);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
         if (xxeCommhandleInfo->activeFlag){
@@ -4398,7 +4398,7 @@ int XXE::exec(
             int size = xxeSendnbInfo->size;
             if (xxeSendnbInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::testOnIndexSub:sendnb: dst=%d, size=%d", 
+            sprintf(msg, "XXE::testOnIndexSub:sendnb: dst=%d, size=%d",
               xxeSendnbInfo->dstPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }else if (xxeIndexElement->opId == recvnb){
@@ -4406,7 +4406,7 @@ int XXE::exec(
             int size = xxeRecvnbInfo->size;
             if (xxeRecvnbInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::testOnIndexSub:recvnb: src=%d, size=%d", 
+            sprintf(msg, "XXE::testOnIndexSub:recvnb: src=%d, size=%d",
               xxeRecvnbInfo->srcPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }else if (xxeIndexElement->opId == sendnbRRA){
@@ -4414,7 +4414,7 @@ int XXE::exec(
             int size = xxeSendnbRRAInfo->size;
             if (xxeSendnbRRAInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::testOnIndexSub:sendnbRRA: dst=%d, size=%d", 
+            sprintf(msg, "XXE::testOnIndexSub:sendnbRRA: dst=%d, size=%d",
               xxeSendnbRRAInfo->dstPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }else if (xxeIndexElement->opId == recvnbRRA){
@@ -4422,7 +4422,7 @@ int XXE::exec(
             int size = xxeRecvnbRRAInfo->size;
             if (xxeRecvnbRRAInfo->vectorFlag)
               size *= *vectorLength;
-            sprintf(msg, "XXE::testOnIndexSub:recvnbRRA: src=%d, size=%d", 
+            sprintf(msg, "XXE::testOnIndexSub:recvnbRRA: src=%d, size=%d",
               xxeRecvnbRRAInfo->srcPet, size);
             ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           }
@@ -4435,7 +4435,7 @@ int XXE::exec(
           vm->commtest(xxeCommhandleInfo->commhandle, &completeFlag, &status);
           xxeCommhandleInfo->cancelledFlag = vm->cancelled(&status);
 #ifdef XXE_EXEC_LOG_on
-          sprintf(msg, "XXE::testOnIndexSub: completeFlag=%d, cancelledFlag=%d", 
+          sprintf(msg, "XXE::testOnIndexSub: completeFlag=%d, cancelledFlag=%d",
             completeFlag, xxeCommhandleInfo->cancelledFlag);
           ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4470,7 +4470,7 @@ int XXE::exec(
             if (finished) *finished = false;  // comm not finished
           }
 #ifdef XXE_EXEC_LOG_on
-          sprintf(msg, "XXE::testOnIndexSub: returning with finished=%d", 
+          sprintf(msg, "XXE::testOnIndexSub: returning with finished=%d",
             *finished);
           ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4496,13 +4496,13 @@ int XXE::exec(
             xxeCommhandleInfo->activeFlag = false;  // reset
           }else
             if (finished) *finished = false;  // comm not finished
-          
+
 
 if (xxeCommhandleInfo->cancelledFlag)
 printf("gjt - CANCELLED commhandle\n");
 else
 printf("gjt - DID NOT CANCEL commhandle\n");
-          
+
         }
         if (cancelled && xxeCommhandleInfo->cancelledFlag) *cancelled = true;
       }
@@ -4522,7 +4522,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int *valueList = (int *)xxeProductSumVectorInfo->valueList;
 #endif
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::productSumVector: factorCount=%d", 
+        sprintf(msg, "XXE::productSumVector: factorCount=%d",
           xxeProductSumVectorInfo->factorCount);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -4608,13 +4608,13 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           valueBase = *(int **)xxeSumSuperScalarDstRRAInfo->valueBase;
 #endif
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::sumSuperScalarDstRRA: termCount=%d, vectorL=%d", 
+        sprintf(msg, "XXE::sumSuperScalarDstRRA: termCount=%d, vectorL=%d",
           termCount, vectorL);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         // recursively resolve the TKs of the arguments and execute operation
-        bool superVector = (xxeSumSuperScalarDstRRAInfo->vectorFlag 
-          && (superVectP && superVectP->dstSuperVecSize_r>=1) 
+        bool superVector = (xxeSumSuperScalarDstRRAInfo->vectorFlag
+          && (superVectP && superVectP->dstSuperVecSize_r>=1)
           && superVectorOkay);
         // initialize
         int dstSuperVecSize_r =-1;
@@ -4632,7 +4632,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int srcLocalDeC = 0;  // init
         if (srcLocalDeCount) srcLocalDeC = *srcLocalDeCount;
         sssDstRra(rraBase, xxeSumSuperScalarDstRRAInfo->elementTK,
-          rraOffsetList, valueBase, valueOffsetList, 
+          rraOffsetList, valueBase, valueOffsetList,
           xxeSumSuperScalarDstRRAInfo->valueTK, termCount, vectorL, 0,
           xxeSumSuperScalarDstRRAInfo->rraIndex - srcLocalDeC,
           dstSuperVecSize_r,
@@ -4703,13 +4703,13 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         }
 #endif
 #ifdef XXE_EXEC_LOG_on
-        sprintf(msg, "XXE::sumSuperScalarListDstRRA: termCount=%d, vectorL=%d", 
+        sprintf(msg, "XXE::sumSuperScalarListDstRRA: termCount=%d, vectorL=%d",
           termCount, vectorL);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         // recursively resolve the TKs of the arguments and execute operation
-        bool superVector = (xxeSumSuperScalarListDstRRAInfo->vectorFlag 
-          && (superVectP && superVectP->dstSuperVecSize_r>=1) 
+        bool superVector = (xxeSumSuperScalarListDstRRAInfo->vectorFlag
+          && (superVectP && superVectP->dstSuperVecSize_r>=1)
           && superVectorOkay);
         // initialize
         int dstSuperVecSize_r =-1;
@@ -4773,8 +4773,8 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           valueBase = *(int **)xxeProductSumSuperScalarDstRRAInfo->valueBase;
 #endif
         // recursively resolve the TKs of the arguments and execute operation
-        bool superVector = (xxeProductSumSuperScalarDstRRAInfo->vectorFlag 
-          && (superVectP && superVectP->dstSuperVecSize_r>=1) 
+        bool superVector = (xxeProductSumSuperScalarDstRRAInfo->vectorFlag
+          && (superVectP && superVectP->dstSuperVecSize_r>=1)
           && superVectorOkay);
         // initialize
         int dstSuperVecSize_r =-1;
@@ -4793,18 +4793,18 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         sprintf(msg, "XXE::productSumSuperScalarDstRRA: "
           "termCount=%d, vectorL=%d, vectorFlag=%d, dstSuperVecSize_r=%d, "
           "superVectorOkay=%d", termCount, vectorL,
-          xxeProductSumSuperScalarDstRRAInfo->vectorFlag, 
+          xxeProductSumSuperScalarDstRRAInfo->vectorFlag,
           dstSuperVecSize_r, superVectorOkay);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         int srcLocalDeC = 0;  // init
         if (srcLocalDeCount) srcLocalDeC = *srcLocalDeCount;
         psssDstRra(rraBase, xxeProductSumSuperScalarDstRRAInfo->elementTK,
-          rraOffsetList, factorList, 
+          rraOffsetList, factorList,
           xxeProductSumSuperScalarDstRRAInfo->factorTK,
           valueBase, valueOffsetList,
           xxeProductSumSuperScalarDstRRAInfo->valueTK, termCount, vectorL, 0,
-          xxeProductSumSuperScalarDstRRAInfo->rraIndex - srcLocalDeC, 
+          xxeProductSumSuperScalarDstRRAInfo->rraIndex - srcLocalDeC,
           dstSuperVecSize_r,
           dstSuperVecSize_s,
           dstSuperVecSize_t,
@@ -4882,8 +4882,8 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         // recursively resolve the TKs of the arguments and execute operation
-        bool superVector = (xxeProductSumSuperScalarListDstRRAInfo->vectorFlag 
-          && (superVectP && superVectP->dstSuperVecSize_r>=1) 
+        bool superVector = (xxeProductSumSuperScalarListDstRRAInfo->vectorFlag
+          && (superVectP && superVectP->dstSuperVecSize_r>=1)
           && superVectorOkay);
         // initialize
         int dstSuperVecSize_r =-1;
@@ -4902,10 +4902,10 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         if (srcLocalDeCount) srcLocalDeC = *srcLocalDeCount;
         pssslDstRra(rraBaseList, rraIndexList,
           xxeProductSumSuperScalarListDstRRAInfo->elementTK,
-          rraOffsetList, factorList, 
+          rraOffsetList, factorList,
           xxeProductSumSuperScalarListDstRRAInfo->factorTK,
           valueBaseListResolve, valueOffsetList, baseListIndexList,
-          xxeProductSumSuperScalarListDstRRAInfo->valueTK, termCount, vectorL,0, 
+          xxeProductSumSuperScalarListDstRRAInfo->valueTK, termCount, vectorL,0,
           srcLocalDeC,
           dstSuperVecSize_r,
           dstSuperVecSize_s,
@@ -4955,8 +4955,8 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
         // recursively resolve the TKs of the arguments and execute operation
-        bool superVector = (xxeProductSumSuperScalarSrcRRAInfo->vectorFlag 
-          && (superVectP && superVectP->srcSuperVecSize_r>=1) 
+        bool superVector = (xxeProductSumSuperScalarSrcRRAInfo->vectorFlag
+          && (superVectP && superVectP->srcSuperVecSize_r>=1)
           && superVectorOkay);
         // initialize
         int srcSuperVecSize_r =-1;
@@ -4976,12 +4976,12 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           xxeProductSumSuperScalarSrcRRAInfo->factorTK,
           elementBase, elementOffsetList,
           xxeProductSumSuperScalarSrcRRAInfo->elementTK, termCount, vectorL, 0,
-          xxeProductSumSuperScalarSrcRRAInfo->rraIndex, 
+          xxeProductSumSuperScalarSrcRRAInfo->rraIndex,
           srcSuperVecSize_r,
           srcSuperVecSize_s,
           srcSuperVecSize_t,
           srcSuperVecSize_i,
-          srcSuperVecSize_j, 
+          srcSuperVecSize_j,
           superVector);
       }
       break;
@@ -5079,12 +5079,12 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           vectorL = *vectorLength;
 #ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::zeroSuperScalarRRA: elementTK=%d, "
-          "vectorFlag=%d, vectorL=%d", xxeZeroSuperScalarRRAInfo->elementTK, 
+          "vectorFlag=%d, vectorL=%d", xxeZeroSuperScalarRRAInfo->elementTK,
           xxeZeroSuperScalarRRAInfo->vectorFlag, vectorL);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
-        bool superVector = (xxeZeroSuperScalarRRAInfo->vectorFlag 
-          && (superVectP && superVectP->dstSuperVecSize_r>=1) 
+        bool superVector = (xxeZeroSuperScalarRRAInfo->vectorFlag
+          && (superVectP && superVectP->dstSuperVecSize_r>=1)
           && superVectorOkay);
         // initialize
         int dstSuperVecSize_r =-1;
@@ -5110,7 +5110,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           switch (xxeZeroSuperScalarRRAInfo->elementTK){
           case I4:
             exec_zeroSuperScalarRRASuper<ESMC_I4>(xxeZeroSuperScalarRRAInfo,
-              vectorL, rraList, 
+              vectorL, rraList,
               xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeC,
               dstSuperVecSize_r,
               dstSuperVecSize_s,
@@ -5120,7 +5120,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
             break;
           case I8:
             exec_zeroSuperScalarRRASuper<ESMC_I8>(xxeZeroSuperScalarRRAInfo,
-              vectorL, rraList, 
+              vectorL, rraList,
               xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeC,
               dstSuperVecSize_r,
               dstSuperVecSize_s,
@@ -5130,7 +5130,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
             break;
           case R4:
             exec_zeroSuperScalarRRASuper<ESMC_R4>(xxeZeroSuperScalarRRAInfo,
-              vectorL, rraList, 
+              vectorL, rraList,
               xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeC,
               dstSuperVecSize_r,
               dstSuperVecSize_s,
@@ -5140,7 +5140,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
             break;
           case R8:
             exec_zeroSuperScalarRRASuper<ESMC_R8>(xxeZeroSuperScalarRRAInfo,
-              vectorL, rraList, 
+              vectorL, rraList,
               xxeZeroSuperScalarRRAInfo->rraIndex - srcLocalDeC,
               dstSuperVecSize_r,
               dstSuperVecSize_s,
@@ -5194,7 +5194,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           byteCount *= *vectorLength;
 #ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::zeroMemset: indirectionFlag=%d, buffer=%p, "
-          "vectorFlag=%d, byteCount=%d", xxeZeroMemsetInfo->indirectionFlag, 
+          "vectorFlag=%d, byteCount=%d", xxeZeroMemsetInfo->indirectionFlag,
           buffer, xxeZeroMemsetInfo->vectorFlag, byteCount);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -5211,7 +5211,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           byteCount *= *vectorLength;
 #ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::zeroMemsetRRA: rraBase=%p, "
-          "vectorFlag=%d, byteCount=%d", rraBase, 
+          "vectorFlag=%d, byteCount=%d", rraBase,
           xxeZeroMemsetRRAInfo->vectorFlag, byteCount);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
@@ -5246,8 +5246,8 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         int vectorL = 1; // initialize
         if (xxeMemGatherSrcRRAInfo->vectorFlag)
           vectorL = *vectorLength;
-        bool superVector = (xxeMemGatherSrcRRAInfo->vectorFlag 
-          && (superVectP && superVectP->srcSuperVecSize_r>=1) 
+        bool superVector = (xxeMemGatherSrcRRAInfo->vectorFlag
+          && (superVectP && superVectP->srcSuperVecSize_r>=1)
           && superVectorOkay);
         // initialize
         int srcSuperVecSize_r =-1;
@@ -5264,8 +5264,8 @@ printf("gjt - DID NOT CANCEL commhandle\n");
         }
 #ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::memGatherSrcRRA: dstBaseTK=%d, vectorFlag=%d, "
-          "vectorL=%d, srcSuperVecSize_r=%d, superVectorOkay=%d", 
-          xxeMemGatherSrcRRAInfo->dstBaseTK, 
+          "vectorL=%d, srcSuperVecSize_r=%d, superVectorOkay=%d",
+          xxeMemGatherSrcRRAInfo->dstBaseTK,
           xxeMemGatherSrcRRAInfo->vectorFlag, vectorL,
           srcSuperVecSize_r,
           superVectorOkay);
@@ -5361,7 +5361,7 @@ printf("gjt - DID NOT CANCEL commhandle\n");
           bool localCancelled;
 #ifdef XXE_EXEC_LOG_on
         sprintf(msg, "XXE::xxeSub: rraCount=%d, rraList=%p, "
-          "rraShift=%d, vectorLength=%p, vectorLengthShift=%d", 
+          "rraShift=%d, vectorLength=%p, vectorLengthShift=%d",
           rraCount, rraList, xxeSubInfo->rraShift, vectorLength,
           xxeSubInfo->vectorLengthShift);
         ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -5437,12 +5437,12 @@ printf("gjt - DID NOT CANCEL commhandle\n");
     VM::logMemInfo(std::string("XXE::exec(): op-loop"));
 #endif
   }
-  
+
   if (dTime != NULL){
     VMK::wtime(&t1);
     *dTime = t1 - t0;
   }
-  
+
 #ifdef XXE_EXEC_MEMLOG_on
   VM::logMemInfo(std::string("XXE::exec():4.0"));
 #endif
@@ -5532,7 +5532,7 @@ inline void XXE::exec_memGatherSrcRRASuper(
 #ifdef XXE_EXEC_OPSLOG_on
       {
         std::stringstream logmsg;
-        logmsg << "srcPointer=" << &(srcPointer[kkkk]) << " *=" << 
+        logmsg << "srcPointer=" << &(srcPointer[kkkk]) << " *=" <<
           srcPointer[kkkk]
           << " (" << k << "," << kk << "," << kkk << "," << kkkk << ")";
         ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
@@ -5540,7 +5540,7 @@ inline void XXE::exec_memGatherSrcRRASuper(
 #endif
         }
         dstPointer += size_r; // dst step in contiguous buffer
-        // determine next src step 
+        // determine next src step
         ++s;
         if (s<size_s){
           srcPointer += sz_i*size_r;
@@ -5558,7 +5558,7 @@ inline void XXE::exec_memGatherSrcRRASuper(
 
 template<typename T>
 inline void XXE::exec_zeroSuperScalarRRA(
-  ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo, int vectorL, 
+  ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo, int vectorL,
   char **rraList){
   int *rraOffsetList = xxeZeroSuperScalarRRAInfo->rraOffsetList;
   int rraIndex = xxeZeroSuperScalarRRAInfo->rraIndex;
@@ -5578,7 +5578,7 @@ inline void XXE::exec_zeroSuperScalarRRA(
 
 template<typename T>
 inline void XXE::exec_zeroSuperScalarRRASuper(
-  ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo, int vectorL, 
+  ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo, int vectorL,
   char **rraList, int localDeIndexOff,
   int size_r, int size_s, int size_t, int *size_i, int *size_j){
   int *rraOffsetList = xxeZeroSuperScalarRRAInfo->rraOffsetList;
@@ -5600,14 +5600,14 @@ inline void XXE::exec_zeroSuperScalarRRASuper(
 #ifdef XXE_EXEC_OPSLOG_on
       {
         std::stringstream logmsg;
-        logmsg << "dstPointer=" <<  &(dstPointer[kkkk]) << " *=" << 
+        logmsg << "dstPointer=" <<  &(dstPointer[kkkk]) << " *=" <<
           dstPointer[kkkk]
           << " (" << k << "," << kkk << "," << kkkk << ")";
         ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
       }
 #endif
       }
-      // determine next dst step 
+      // determine next dst step
       ++s;
       if (s<size_s){
         dstPointer += sz_i*size_r;
@@ -5738,7 +5738,7 @@ void XXE::psv(T *element, TKId elementTK, U *factorList, TKId factorTK,
 #ifdef XXE_EXEC_RECURSLOG_on
   {
     std::stringstream logmsg;
-    logmsg << "Arrived in psv kernel with T=" << typeid(T).name() 
+    logmsg << "Arrived in psv kernel with T=" << typeid(T).name()
       << " U=" << typeid(U).name()
       << " V=" << typeid(V).name();
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
@@ -5864,8 +5864,8 @@ void XXE::pss(T *element, TKId elementTK, U *factor, TKId factorTK,
 #ifdef XXE_EXEC_RECURSLOG_on
   {
     std::stringstream logmsg;
-    logmsg << "Arrived in pss kernel with T=" << typeid(T).name() 
-      << " U=" << typeid(U).name() 
+    logmsg << "Arrived in pss kernel with T=" << typeid(T).name()
+      << " U=" << typeid(U).name()
       << " V=" << typeid(V).name();
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
@@ -5895,7 +5895,7 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
 #ifdef XXE_EXEC_RECURSLOG_on
   {
     std::stringstream logmsg;
-    logmsg << "Entering sssDstRra with T=" << typeid(T).name() 
+    logmsg << "Entering sssDstRra with T=" << typeid(T).name()
       << " V=" << typeid(V).name()
       << " resolved=" << resolved;
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
@@ -5984,7 +5984,7 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
 #ifdef XXE_EXEC_RECURSLOG_on
   {
     std::stringstream logmsg;
-    logmsg << "Arrived in sssDstRra kernel with T=" << typeid(T).name() 
+    logmsg << "Arrived in sssDstRra kernel with T=" << typeid(T).name()
       << " V=" << typeid(V).name();
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
@@ -6014,7 +6014,7 @@ void XXE::sssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
 //---
 
 template<typename T, typename V>
-void XXE::exec_sssDstRra(T *rraBase, int *rraOffsetList, V *valueBase, 
+void XXE::exec_sssDstRra(T *rraBase, int *rraOffsetList, V *valueBase,
   int *valueOffsetList, int termCount, int vectorL){
   T *element;
   V *value;
@@ -6032,15 +6032,15 @@ void XXE::exec_sssDstRra(T *rraBase, int *rraOffsetList, V *valueBase,
       value = valueBase + valueOffsetList[i] * vectorL;
       for (int k=0; k<vectorL; k++)  // vector loop
         *(element+k) += *(value+k);
-    }    
+    }
   }
 }
 
 //---
 
 template<typename T, typename V>
-void XXE::exec_sssDstRraSuper(T *rraBase, int *rraOffsetList, V *valueBase, 
-  int *valueOffsetList, int termCount, int vectorL, int localDeIndexOff, 
+void XXE::exec_sssDstRraSuper(T *rraBase, int *rraOffsetList, V *valueBase,
+  int *valueOffsetList, int termCount, int vectorL, int localDeIndexOff,
   int size_r, int size_s, int size_t, int *size_i, int *size_j){
   T *element;
   V *value;
@@ -6092,7 +6092,7 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
   int *rraOffsetList, V **valueBaseList,
   int *valueOffsetList, int *baseListIndexList,
   TKId valueTK, int termCount, int vectorL, int resolved, int localDeIndexOff,
-  int size_r, int size_s, int size_t, int *size_i, int *size_j, 
+  int size_r, int size_s, int size_t, int *size_i, int *size_j,
   bool superVector){
   // Recursively resolve the TKs and typecast the arguments appropriately
   // before executing ssslDstRra operation on the data.
@@ -6104,7 +6104,7 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     case I4:
       {
         ESMC_I4 **rraBaseTList = (ESMC_I4 **)rraBaseList;
-        ssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
+        ssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList,
           valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
@@ -6113,7 +6113,7 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     case I8:
       {
         ESMC_I8 **rraBaseTList = (ESMC_I8 **)rraBaseList;
-        ssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
+        ssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList,
           valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
@@ -6122,7 +6122,7 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     case R4:
       {
         ESMC_R4 **rraBaseTList = (ESMC_R4 **)rraBaseList;
-        ssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
+        ssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList,
           valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
@@ -6131,7 +6131,7 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     case R8:
       {
         ESMC_R8 **rraBaseTList = (ESMC_R8 **)rraBaseList;
-        ssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
+        ssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList,
           valueBaseList, valueOffsetList,
           baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
@@ -6189,7 +6189,7 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
 #ifdef XXE_EXEC_RECURSLOG_on
   {
     std::stringstream logmsg;
-    logmsg << "Arrived in ssslDstRra kernel with T=" << typeid(T).name() 
+    logmsg << "Arrived in ssslDstRra kernel with T=" << typeid(T).name()
       << " V=" << typeid(V).name();
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
@@ -6201,7 +6201,7 @@ void XXE::ssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
       "taking super-vector branch...");
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
-    exec_ssslDstRraSuper(rraBaseList, rraIndexList, rraOffsetList, 
+    exec_ssslDstRraSuper(rraBaseList, rraIndexList, rraOffsetList,
       valueBaseList, valueOffsetList, baseListIndexList, termCount, vectorL,
       localDeIndexOff, size_r, size_s, size_t, size_i, size_j);
   }else{
@@ -6310,7 +6310,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
 #ifdef XXE_EXEC_RECURSLOG_on
   {
     std::stringstream logmsg;
-    logmsg << "Entering psssDstRra with T=" << typeid(T).name() 
+    logmsg << "Entering psssDstRra with T=" << typeid(T).name()
       << " U=" << typeid(U).name()
       << " V=" << typeid(V).name()
       << " resolved=" << resolved;
@@ -6324,7 +6324,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_I4 *rraBaseT = (ESMC_I4 *)rraBase;
         psssDstRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
-          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved, 
+          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
@@ -6332,7 +6332,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_I8 *rraBaseT = (ESMC_I8 *)rraBase;
         psssDstRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
-          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved, 
+          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
@@ -6340,7 +6340,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_R4 *rraBaseT = (ESMC_R4 *)rraBase;
         psssDstRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
-          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved, 
+          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
@@ -6348,7 +6348,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_R8 *rraBaseT = (ESMC_R8 *)rraBase;
         psssDstRra(rraBaseT, elementTK, rraOffsetList, factorList, factorTK,
-          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved, 
+          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
@@ -6364,7 +6364,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
-          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved, 
+          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
@@ -6372,7 +6372,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
-          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved, 
+          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
@@ -6380,7 +6380,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
-          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved, 
+          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
@@ -6388,7 +6388,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorListT, factorTK,
-          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved, 
+          valueBase, valueOffsetList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
@@ -6404,7 +6404,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_I4 *valueBaseT = (ESMC_I4 *)valueBase;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
-          valueBaseT, valueOffsetList, valueTK, termCount, vectorL, resolved, 
+          valueBaseT, valueOffsetList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
@@ -6412,7 +6412,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_I8 *valueBaseT = (ESMC_I8 *)valueBase;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
-          valueBaseT, valueOffsetList, valueTK, termCount, vectorL, resolved, 
+          valueBaseT, valueOffsetList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
@@ -6420,7 +6420,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_R4 *valueBaseT = (ESMC_R4 *)valueBase;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
-          valueBaseT, valueOffsetList, valueTK, termCount, vectorL, resolved, 
+          valueBaseT, valueOffsetList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
@@ -6428,7 +6428,7 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
       {
         ESMC_R8 *valueBaseT = (ESMC_R8 *)valueBase;
         psssDstRra(rraBase, elementTK, rraOffsetList, factorList, factorTK,
-          valueBaseT, valueOffsetList, valueTK, termCount, vectorL, resolved, 
+          valueBaseT, valueOffsetList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
       }
       break;
@@ -6440,8 +6440,8 @@ void XXE::psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
 #ifdef XXE_EXEC_RECURSLOG_on
   {
     std::stringstream logmsg;
-    logmsg << "Arrived in psssDstRra kernel with T=" << typeid(T).name() 
-      << " U=" << typeid(U).name() 
+    logmsg << "Arrived in psssDstRra kernel with T=" << typeid(T).name()
+      << " U=" << typeid(U).name()
       << " V=" << typeid(V).name();
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
@@ -6503,7 +6503,7 @@ void XXE::exec_psssDstRra(T *rraBase, int *rraOffsetList, U *factorList,
 #ifdef XXE_EXEC_OPSLOG_on
     {
       std::stringstream logmsg;
-      logmsg << "exec_psssDstRra: element+kk=" << element+kk << ":" 
+      logmsg << "exec_psssDstRra: element+kk=" << element+kk << ":"
         << *(element+kk)
         << " factor=" << factor
         << " value+kk=" << value+kk << ":" << *(value+kk);
@@ -6585,9 +6585,9 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     case I4:
       {
         ESMC_I4 **rraBaseTList = (ESMC_I4 **)rraBaseList;
-        pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
+        pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorL, resolved, 
+          baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
           rh);
       }
@@ -6595,9 +6595,9 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     case I8:
       {
         ESMC_I8 **rraBaseTList = (ESMC_I8 **)rraBaseList;
-        pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
+        pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorL, resolved, 
+          baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
           rh);
       }
@@ -6605,9 +6605,9 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     case R4:
       {
         ESMC_R4 **rraBaseTList = (ESMC_R4 **)rraBaseList;
-        pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
+        pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorL, resolved, 
+          baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
           rh);
       }
@@ -6615,9 +6615,9 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
     case R8:
       {
         ESMC_R8 **rraBaseTList = (ESMC_R8 **)rraBaseList;
-        pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList, 
+        pssslDstRra(rraBaseTList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorL, resolved, 
+          baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
           rh);
       }
@@ -6635,7 +6635,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorL, resolved, 
+          baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
           rh);
       }
@@ -6645,7 +6645,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorL, resolved, 
+          baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
           rh);
       }
@@ -6655,7 +6655,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorL, resolved, 
+          baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
           rh);
       }
@@ -6665,7 +6665,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorListT, factorTK, valueBaseList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorL, resolved, 
+          baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
           rh);
       }
@@ -6683,7 +6683,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I4 **valueBaseTList = (ESMC_I4 **)valueBaseList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorL, resolved, 
+          baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
           rh);
       }
@@ -6693,7 +6693,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_I8 **valueBaseTList = (ESMC_I8 **)valueBaseList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorL, resolved, 
+          baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
           rh);
       }
@@ -6703,7 +6703,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R4 **valueBaseTList = (ESMC_R4 **)valueBaseList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorL, resolved, 
+          baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
           rh);
       }
@@ -6713,7 +6713,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
         ESMC_R8 **valueBaseTList = (ESMC_R8 **)valueBaseList;
         pssslDstRra(rraBaseList, rraIndexList, elementTK, rraOffsetList,
           factorList, factorTK, valueBaseTList, valueOffsetList,
-          baseListIndexList, valueTK, termCount, vectorL, resolved, 
+          baseListIndexList, valueTK, termCount, vectorL, resolved,
           localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector,
           rh);
       }
@@ -6726,8 +6726,8 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
 #ifdef XXE_EXEC_RECURSLOG_on
   {
     std::stringstream logmsg;
-    logmsg << "Arrived in pssslDstRra kernel with T=" << typeid(T).name() 
-      << " U=" << typeid(U).name() 
+    logmsg << "Arrived in pssslDstRra kernel with T=" << typeid(T).name()
+      << " U=" << typeid(U).name()
       << " V=" << typeid(V).name();
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
@@ -6771,7 +6771,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
 #endif
     if (dynMask){
       // with dynamic masking
-      exec_pssslDstRraDynMask(rraBaseList, rraIndexList, rraOffsetList, 
+      exec_pssslDstRraDynMask(rraBaseList, rraIndexList, rraOffsetList,
         factorList, valueBaseList, valueOffsetList, baseListIndexList,
         termCount, vectorL, rh);
     }else{
@@ -6785,7 +6785,7 @@ void XXE::pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
 //---
 
 template<typename T, typename U, typename V>
-void XXE::exec_pssslDstRra(T **rraBaseList, int *rraIndexList, 
+void XXE::exec_pssslDstRra(T **rraBaseList, int *rraIndexList,
   int *rraOffsetList, U *factorList, V **valueBaseList,
   int *valueOffsetList, int *baseListIndexList, int termCount, int vectorL){
   T *element;
@@ -6822,12 +6822,12 @@ template<typename T, typename U, typename V>
 #if 0
   {
     std::stringstream logmsg;
-    logmsg << "dynMaskHandler(): with dynMaskList.size()=" 
+    logmsg << "dynMaskHandler(): with dynMaskList.size()="
       << dynMaskList.size();
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
-  
+
   int localrc;
   if (rh==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -6850,7 +6850,7 @@ template<typename T, typename U, typename V>
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
-    
+
   }
   vector<U> factorsVector(totalCount);
   vector<V *> valuesVector(totalCount);
@@ -6865,7 +6865,7 @@ template<typename T, typename U, typename V>
   // hand control back to Fortran layer - but must be type specific
   if (typeid(T)==typeid(ESMC_R8) && typeid(U)==typeid(ESMC_R8) &&
     typeid(V)==typeid(ESMC_R8)){
-    FTN_X(f_esmf_dynmaskcallbackr8r8r8)(&rh, &count, &(elementVector[0]), 
+    FTN_X(f_esmf_dynmaskcallbackr8r8r8)(&rh, &count, &(elementVector[0]),
       &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
       &vectorL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -6873,14 +6873,14 @@ template<typename T, typename U, typename V>
 #ifndef ESMF_NO_DYNMASKOVERLOAD
   }else if (typeid(T)==typeid(ESMC_R4) && typeid(U)==typeid(ESMC_R8) &&
     typeid(V)==typeid(ESMC_R4)){
-    FTN_X(f_esmf_dynmaskcallbackr4r8r4)(&rh, &count, &(elementVector[0]), 
+    FTN_X(f_esmf_dynmaskcallbackr4r8r4)(&rh, &count, &(elementVector[0]),
       &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
       &vectorL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
   }else if (typeid(T)==typeid(ESMC_R4) && typeid(U)==typeid(ESMC_R4) &&
     typeid(V)==typeid(ESMC_R4)){
-    FTN_X(f_esmf_dynmaskcallbackr4r4r4)(&rh, &count, &(elementVector[0]), 
+    FTN_X(f_esmf_dynmaskcallbackr4r4r4)(&rh, &count, &(elementVector[0]),
       &(countVector[0]), &totalCount, &(factorsVector[0]), &(valuesVector[0]),
       &vectorL, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -6890,7 +6890,7 @@ template<typename T, typename U, typename V>
     // not a supported type combination
     char msg[1024];
     sprintf(msg, "Dynamic masking is not currently available for the "
-      "requested combination of types: %s, %s, %s", typeid(T).name(), 
+      "requested combination of types: %s, %s, %s", typeid(T).name(),
       typeid(U).name(), typeid(V).name());
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, msg,
       ESMC_CONTEXT, &localrc);
@@ -6901,7 +6901,7 @@ template<typename T, typename U, typename V>
 //---
 
 template<typename T, typename U, typename V>
-void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList, 
+void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
   int *rraOffsetList, U *factorList, V **valueBaseList,
   int *valueOffsetList, int *baseListIndexList, int termCount, int vectorL,
   RouteHandle *rh){
@@ -6960,7 +6960,7 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
     }else{
       // dynMaskList to hold only elements affected by dynamic mask
       // handle interpolation of all other elements here
-      bool dstMask = false; 
+      bool dstMask = false;
       bool srcMask = false;
       for (int i=0; i<termCount; i++){  // super scalar loop
         element = rraBaseList[rraIndexList[baseListIndexList[i]]]
@@ -7036,7 +7036,7 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
       // vector handling with dynamic mask -> unroll over vectorL
       // dynMaskList to hold only elements affected by dynamic mask
       // handle interpolation of all other elements here
-      bool dstMask = false; 
+      bool dstMask = false;
       bool srcMask = false;
       for (int v=0; v<vectorL; v++){  // vector loop
         for (int i=0; i<termCount; i++){  // super scalar loop
@@ -7096,7 +7096,7 @@ void XXE::exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList,
 //---
 
 template<typename T, typename U, typename V>
-void XXE::exec_pssslDstRraSuper(T **rraBaseList, int *rraIndexList, 
+void XXE::exec_pssslDstRraSuper(T **rraBaseList, int *rraIndexList,
   int *rraOffsetList, U *factorList, V **valueBaseList,
   int *valueOffsetList, int *baseListIndexList, int termCount, int vectorL,
   int localDeIndexOff,
@@ -7161,7 +7161,7 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
 #ifdef XXE_EXEC_RECURSLOG_on
   {
     std::stringstream logmsg;
-    logmsg << "Entering psssSrcRra with T=" << typeid(T).name() 
+    logmsg << "Entering psssSrcRra with T=" << typeid(T).name()
       << " U=" << typeid(U).name()
       << " V=" << typeid(V).name()
       << " resolved=" << resolved;
@@ -7303,8 +7303,8 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
 #ifdef XXE_EXEC_RECURSLOG_on
   {
     std::stringstream logmsg;
-    logmsg << "Arrived in psssSrcRra kernel with T=" << typeid(T).name() 
-      << " U=" << typeid(U).name() 
+    logmsg << "Arrived in psssSrcRra kernel with T=" << typeid(T).name()
+      << " U=" << typeid(U).name()
       << " V=" << typeid(V).name();
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
@@ -7317,7 +7317,7 @@ void XXE::psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     exec_psssSrcRraSuper(rraBase, rraOffsetList, factorList,
-      elementBase, elementOffsetList, termCount, vectorL, 
+      elementBase, elementOffsetList, termCount, vectorL,
       localDeIndexOff, size_r, size_s, size_t, size_i, size_j, superVector);
   }else{
 #ifdef XXE_EXEC_OPSLOG_on
@@ -7363,7 +7363,7 @@ void XXE::exec_psssSrcRra(T *rraBase, int *rraOffsetList, U *factorList,
 
 template<typename T, typename U, typename V>
 void XXE::exec_psssSrcRraSuper(T *rraBase, int *rraOffsetList, U *factorList,
-  V *elementBase, int *elementOffsetList, int termCount, int vectorL, 
+  V *elementBase, int *elementOffsetList, int termCount, int vectorL,
   int localDeIndexOff, int size_r, int size_s, int size_t,
   int *size_i, int *size_j, bool superVector){
   T *value;
@@ -7541,8 +7541,8 @@ void XXE::pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
 #ifdef XXE_EXEC_RECURSLOG_on
   {
     std::stringstream logmsg;
-    logmsg << "Arrived in pssscRra kernel with T=" << typeid(T).name() 
-      << " U=" << typeid(U).name() 
+    logmsg << "Arrived in pssscRra kernel with T=" << typeid(T).name()
+      << " U=" << typeid(U).name()
       << " V=" << typeid(V).name();
     ESMC_LogDefault.Write(logmsg.str(), ESMC_LOGMSG_INFO);
   }
@@ -7596,13 +7596,13 @@ int XXE::print(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // set index range
   int indexRangeStart = 0;        // default
   if (indexStart > 0) indexRangeStart = indexStart;
   int indexRangeStop = count-1;   // default
   if (indexStop > 0) indexRangeStop = indexStop;
-  
+
   // check index range
   if (count > 0 && indexRangeStart > count-1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -7614,7 +7614,7 @@ int XXE::print(
       "indexStop out of range", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   StreamElement *xxeElement, *xxeIndexElement;
   SendInfo *xxeSendInfo;
   RecvInfo *xxeRecvInfo;
@@ -7651,15 +7651,15 @@ int XXE::print(
   WtimerInfo *xxeWtimerInfo, *xxeWtimerInfoActual, *xxeWtimerInfoRelative;
   MessageInfo *xxeMessageInfo;
   ProfileMessageInfo *xxeProfileMessageInfo;
-  
+
   for (int i=indexRangeStart; i<=indexRangeStop; i++){
     xxeElement = &(opstream[i]);
-    
+
     if (xxeElement->predicateBitField & filterBitField)
       continue; // filter out this operation
-    
+
     fprintf(fp, "XXE::print(): <xxe=%p> <localPet=%d> i=%d, xxeElement=%p, "
-      "opId=%d, predicateBitField=0x%08x\n", this, 
+      "opId=%d, predicateBitField=0x%08x\n", this,
       vm->getLocalPet(), i, xxeElement, opstream[i].opId,
       opstream[i].predicateBitField);
     switch(opstream[i].opId){
@@ -7794,7 +7794,7 @@ int XXE::print(
           " commhandle=%p\n", waitOnIndexSubInfo->index,
           xxeCommhandleInfo->commhandle);
         if (waitOnIndexSubInfo->xxe)
-          waitOnIndexSubInfo->xxe->print(fp, rraCount, 
+          waitOnIndexSubInfo->xxe->print(fp, rraCount,
             rraList+waitOnIndexSubInfo->rraShift);        // recursive call
       }
       break;
@@ -7807,7 +7807,7 @@ int XXE::print(
           " commhandle=%p\n", testOnIndexSubInfo->index,
           xxeCommhandleInfo->commhandle);
         if (testOnIndexSubInfo->xxe)
-          testOnIndexSubInfo->xxe->print(fp, rraCount, 
+          testOnIndexSubInfo->xxe->print(fp, rraCount,
             rraList+testOnIndexSubInfo->rraShift);        // recursive call
       }
       break;
@@ -7909,7 +7909,7 @@ int XXE::print(
       {
         xxeZeroMemsetInfo = (ZeroMemsetInfo *)xxeElement;
         fprintf(fp, "  XXE::zeroMemset buffer=%p, byteCount=%d, "
-          "vectorFlag=%d, indirectionFlag=%d\n", 
+          "vectorFlag=%d, indirectionFlag=%d\n",
             xxeZeroMemsetInfo->buffer,
             xxeZeroMemsetInfo->byteCount, xxeZeroMemsetInfo->vectorFlag,
             xxeZeroMemsetInfo->indirectionFlag);
@@ -7918,8 +7918,8 @@ int XXE::print(
     case zeroMemsetRRA:
       {
         xxeZeroMemsetRRAInfo = (ZeroMemsetRRAInfo *)xxeElement;
-        fprintf(fp, "  XXE::zeroMemsetRRA byteCount=%d, "   
-          "rraIndex=%d, vectorFlag=%d\n", 
+        fprintf(fp, "  XXE::zeroMemsetRRA byteCount=%d, "
+          "rraIndex=%d, vectorFlag=%d\n",
           xxeZeroMemsetRRAInfo->byteCount,
           xxeZeroMemsetRRAInfo->rraIndex, xxeZeroMemsetRRAInfo->vectorFlag);
       }
@@ -7941,9 +7941,9 @@ int XXE::print(
         xxeMemGatherSrcRRAInfo = (MemGatherSrcRRAInfo *)xxeElement;
         fprintf(fp, "  XXE::memGatherSrcRRA: dstBase=%p, dstBaseTK=%d, "
           "chunkCount=%d, vectorFlag=%d, indirectionFlag=%d\n",
-          xxeMemGatherSrcRRAInfo->dstBase, 
+          xxeMemGatherSrcRRAInfo->dstBase,
           xxeMemGatherSrcRRAInfo->dstBaseTK,
-          xxeMemGatherSrcRRAInfo->chunkCount, 
+          xxeMemGatherSrcRRAInfo->chunkCount,
           xxeMemGatherSrcRRAInfo->vectorFlag,
           xxeMemGatherSrcRRAInfo->indirectionFlag);
       }
@@ -7989,7 +7989,7 @@ int XXE::print(
     case profileMessage:
       {
         xxeProfileMessageInfo = (ProfileMessageInfo *)xxeElement;
-        fprintf(fp, "  XXE::profileMessage string=%s\n", 
+        fprintf(fp, "  XXE::profileMessage string=%s\n",
           xxeProfileMessageInfo->messageString);
       }
       break;
@@ -8002,7 +8002,7 @@ int XXE::print(
       break;
     }
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -8033,14 +8033,14 @@ int XXE::printProfile(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
 #if 0
   printf("gjt in ESMCI::XXE::printProfile(), opstream=%p, %d, %d\n", opstream,
     count, sizeof(StreamElement));
 #endif
-  
+
   int localPet = vm->getLocalPet();
-  
+
   StreamElement *xxeElement;
   WtimerInfo *xxeWtimerInfo;
   XxeSubInfo *xxeSubInfo;
@@ -8049,13 +8049,13 @@ int XXE::printProfile(
   WaitOnIndexSubInfo *waitOnIndexSubInfo;
   TestOnIndexSubInfo *testOnIndexSubInfo;
   ProfileMessageInfo *xxeProfileMessageInfo;
-  
+
   for (int i=0; i<count; i++){
     xxeElement = &(opstream[i]);
-    
+
     if (xxeElement->predicateBitField & lastFilterBitField)
       continue; // filter out this operation
-    
+
 //    printf("gjt: %d, opId=%d\n", i, opstream[i].opId);
     switch(opstream[i].opId){
     case xxeSub:
@@ -8091,7 +8091,7 @@ int XXE::printProfile(
           // this is an actual wtimer element -> print
           fprintf(fp, "localPet %d - XXE profile wtimer - id: %04d  "
             "element: %04d\t%s\t wtime = %gs\t wtimeSum = %gs\t"
-            "sumTermCount: %d\n", 
+            "sumTermCount: %d\n",
             localPet, xxeWtimerInfo->timerId, i, xxeWtimerInfo->timerString,
             xxeWtimerInfo->wtime, xxeWtimerInfo->wtimeSum,
             xxeWtimerInfo->sumTermCount);
@@ -8115,7 +8115,7 @@ int XXE::printProfile(
   return rc;
 }
 //-----------------------------------------------------------------------------
-      
+
       //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::optimizeElement()"
@@ -8139,18 +8139,18 @@ int XXE::optimizeElement(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
 #if 0
   printf("gjt in ESMCI::XXE::optimizeElement(), opstream=%p, %d, %d\n", opstream,
     count, sizeof(StreamElement));
 #endif
-  
+
   if (index < 0 || index >= count){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "index out of range", ESMC_CONTEXT, &rc);
     return rc;
   }
-    
+
   StreamElement *xxeElement = &(opstream[index]);
   switch(opstream[index].opId){
   case productSumSuperScalarDstRRA:
@@ -8179,10 +8179,10 @@ int XXE::optimizeElement(
       // I introduced this code in hopes of optimizing the
       // productSumSuperScalarDstRRA execution time. On columbia I see
       // performance
-      // variations on the order of one magnitude between different 
+      // variations on the order of one magnitude between different
       // productSumSuperScalarDstRRA's (all of the same length 69490 elements),
       // so I thought that the difference might be the order in which the
-      // elements are being processed. Interestingly the following 
+      // elements are being processed. Interestingly the following
       // rearrangement did not change performance on any of the
       // productSumSuperScalarDstRRA's! The slow ones stayed slow and the fast
       // ones stayed fast. This finding leads me to believe that the differnce
@@ -8226,7 +8226,7 @@ int XXE::optimizeElement(
   return rc;
 }
 //-----------------------------------------------------------------------------
-      
+
       //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::XXE::execReady()"
@@ -8255,17 +8255,17 @@ int XXE::execReady(
   printf("gjt in ESMCI::XXE::execReady(), opstream=%p, %d, %d\n", opstream,
     count, sizeof(StreamElement));
 #endif
-  
+
   const int sendnbMax = 20000;
   int *sendnbIndexList = new int[sendnbMax];
   int sendnbCount = 0;
   int sendnbLowerIndex = -1;  // prime lower index indicator blow 0
-  
+
   const int recvnbMax = 20000;
   int *recvnbIndexList = new int[recvnbMax];
   int recvnbCount = 0;
   int recvnbLowerIndex = -1;  // prime lower index indicator blow 0
-  
+
   StreamElement *xxeElement, *xxeIndexElement, *xxeElement2;
   WaitOnIndexInfo *xxeWaitOnIndexInfo;
   WaitOnAnyIndexSubInfo *xxeWaitOnAnyIndexSubInfo;
@@ -8277,7 +8277,7 @@ int XXE::execReady(
   WtimerInfo *xxeWtimerInfo, *xxeWtimerInfo2;
   XxeSubInfo *xxeSubInfo;
   XxeSubMultiInfo *xxeSubMultiInfo;
-  
+
   int i = 0;  // prime index counter
   while(i!=count){
     // repeat going through the entire opstream until no more StreamElements
@@ -8285,7 +8285,7 @@ int XXE::execReady(
     // through.
     sendnbCount = 0;
     recvnbCount = 0;
-    
+
     for (i=0; i<count; i++){
       xxeElement = &(opstream[i]);
 //    printf("gjt: %d, opId=%d\n", i, opstream[i].opId);
@@ -8406,7 +8406,7 @@ int XXE::execReady(
             ++count;
             if (count >= max){
               localrc = growStream(1000);
-              if (ESMC_LogDefault.MsgFoundError(localrc, 
+              if (ESMC_LogDefault.MsgFoundError(localrc,
                 ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
             }
           }
@@ -8414,7 +8414,7 @@ int XXE::execReady(
           // (excluding this StreamElement)
           if (sendnbCount+oldCount-1 >= max){
             localrc = growStream(sendnbCount+oldCount-max);
-            if (ESMC_LogDefault.MsgFoundError(localrc, 
+            if (ESMC_LogDefault.MsgFoundError(localrc,
               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           }
           memcpy(opstream+count, oldStream+i+1, (oldCount-i-1)
@@ -8450,7 +8450,7 @@ int XXE::execReady(
             ++count;
             if (count >= max){
               localrc = growStream(1000);
-              if (ESMC_LogDefault.MsgFoundError(localrc, 
+              if (ESMC_LogDefault.MsgFoundError(localrc,
                 ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
             }
           }
@@ -8458,7 +8458,7 @@ int XXE::execReady(
           // (excluding this StreamElement)
           if (recvnbCount+count-1 >= max){
             localrc = growStream(recvnbCount+oldCount-max);
-            if (ESMC_LogDefault.MsgFoundError(localrc, 
+            if (ESMC_LogDefault.MsgFoundError(localrc,
               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
           }
           memcpy(opstream+count, oldStream+i+1, (oldCount-i-1)
@@ -8474,7 +8474,7 @@ int XXE::execReady(
       if (breakFlag) break;
     } // for i
   } // while
-  
+
   // garbage collection
   delete [] sendnbIndexList;
   delete [] recvnbIndexList;
@@ -8539,11 +8539,11 @@ int XXE::execReady(
       }
     }
   }
-  
+
   // garbage collection
   delete [] idList;
   delete [] indexList;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -8574,7 +8574,7 @@ int XXE::optimize(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
 #if 0
   printf("gjt in ESMCI::XXE::optimize(), opstream=%p, %d, %d\n", opstream,
     count, sizeof(StreamElement));
@@ -8588,7 +8588,7 @@ int XXE::optimize(
   CommhandleInfo *xxeCommhandleInfo;
   ProductSumVectorInfo *xxeProductSumVectorInfo;
   MemCpyInfo *xxeMemCpyInfo;
-  
+
   class AnalyzeElement{
     public:
       OpId opId;
@@ -8627,7 +8627,7 @@ int XXE::optimize(
         }else
           printf("ae: END\n");
       }
-      void add(int index, OpId opIdArg, int predicateBitFieldArg, 
+      void add(int index, OpId opIdArg, int predicateBitFieldArg,
         int petArg, void *buffer, int size){
         if (opIdArg!=opId || predicateBitFieldArg!=predicateBitField
           || petArg!=partnerPet)
@@ -8635,7 +8635,7 @@ int XXE::optimize(
             next->add(index, opIdArg, predicateBitFieldArg, petArg, buffer,
             size);
           else
-            next = new 
+            next = new
               AnalyzeElement(index, opIdArg, predicateBitFieldArg, petArg,
               buffer, size);
         else{
@@ -8650,7 +8650,7 @@ int XXE::optimize(
               next->add(index, opIdArg, predicateBitFieldArg, petArg, buffer,
               size);
             else
-              next = new 
+              next = new
                 AnalyzeElement(index, opIdArg, predicateBitFieldArg, petArg,
                 buffer, size);
         }
@@ -8716,7 +8716,7 @@ int XXE::optimize(
         return aeListCount;
       }
   };
-    
+
   // prime the analyzeQueue
   AnalyzeElement *aq = NULL;
 
@@ -8728,7 +8728,7 @@ int XXE::optimize(
 
     if (aq != NULL) delete aq;  // delete from previous analysis loop
     aq = NULL;  // indicate empty queue
-    
+
     int breakFlag = 0;  // reset
     for (i=0; i<count; i++){
       xxeElement = &(opstream[i]);
@@ -8741,7 +8741,7 @@ int XXE::optimize(
       case sendnb:
         {
           xxeSendnbInfo = (SendnbInfo *)xxeElement;
-          if (aq) aq->add(i, xxeSendnbInfo->opId, 
+          if (aq) aq->add(i, xxeSendnbInfo->opId,
             xxeSendnbInfo->predicateBitField, xxeSendnbInfo->dstPet,
             xxeSendnbInfo->buffer, xxeSendnbInfo->size);
           else
@@ -8842,11 +8842,11 @@ int XXE::optimize(
               }
               // start a new opstream
               StreamElement *newstream = new StreamElement[max]; // prep. opstream
-              // fill in StreamElements from before firstIndex 
+              // fill in StreamElements from before firstIndex
               // (excluding firstIndex)
               memcpy(newstream, opstream, firstIndex*sizeof(StreamElement));
               // insert extrastream
-              memcpy(newstream+firstIndex, extrastream, xxeCount 
+              memcpy(newstream+firstIndex, extrastream, xxeCount
                 * sizeof(StreamElement));
               delete [] extrastream;  // done using
               // fill in StreamElements from after firstIndex
@@ -8992,10 +8992,10 @@ int XXE::optimize(
   opstream = newstream; // replace by new opstream
   count = xxeCount;
   // done replacing the nop StreamElements from opstream
-  
+
   // garbage collection
   if (aq != NULL) delete aq;  // delete from previous analysis loop
-  
+
   // return successfully
   //rc = ESMF_SUCCESS       todo: activate once done implementing
   return rc;
@@ -9028,7 +9028,7 @@ int XXE::growStream(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   if (increase == 0){
     // nothing to do -> return successfully
     rc = ESMF_SUCCESS;
@@ -9040,7 +9040,7 @@ int XXE::growStream(
       "increase must be positive", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   int maxNew = max + increase;
   StreamElement *streamNew;
   try{
@@ -9086,7 +9086,7 @@ int XXE::growDataList(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   if (increase == 0){
     // nothing to do -> return successfully
     rc = ESMF_SUCCESS;
@@ -9098,7 +9098,7 @@ int XXE::growDataList(
       "increase must be positive", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   int dataMaxCountNew = dataMaxCount + increase;
   char **dataListNew;
   try{
@@ -9137,7 +9137,7 @@ int XXE::growCommhandle(
 //
 // !DESCRIPTION:
 //  Increase the length of the XXE commhandle manager.
-//  CAUTION: This method changes the location (in memory) of the entire 
+//  CAUTION: This method changes the location (in memory) of the entire
 //           commhandle manager!
 //    Previously written commhandle manager elements will be moved to a new
 //    location.
@@ -9146,7 +9146,7 @@ int XXE::growCommhandle(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   if (increase == 0){
     // nothing to do -> return successfully
     rc = ESMF_SUCCESS;
@@ -9158,7 +9158,7 @@ int XXE::growCommhandle(
       "increase must be positive", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   int commhandleMaxCountNew = commhandleMaxCount + increase;
   VMK::commhandle ***commhandleNew;
   try{
@@ -9197,7 +9197,7 @@ int XXE::growXxeSub(
 //
 // !DESCRIPTION:
 //  Increase the length of the XXE Sub manager.
-//  CAUTION: This method changes the location (in memory) of the entire 
+//  CAUTION: This method changes the location (in memory) of the entire
 //           XXE Sub manager!
 //    Previously written XXE Sub manager elements will be moved to a new
 //    location.
@@ -9206,7 +9206,7 @@ int XXE::growXxeSub(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   if (increase == 0){
     // nothing to do -> return successfully
     rc = ESMF_SUCCESS;
@@ -9218,7 +9218,7 @@ int XXE::growXxeSub(
       "increase must be positive", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   int xxeSubMaxCountNew = xxeSubMaxCount + increase;
   XXE **xxeSubListNew;
   try{
@@ -9263,12 +9263,12 @@ int XXE::incCount(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   ++count;
   if (count >= max)
-    if (ESMC_LogDefault.MsgFoundError(growStream(1000), 
+    if (ESMC_LogDefault.MsgFoundError(growStream(1000),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -9300,12 +9300,12 @@ int XXE::incDataCount(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   ++dataCount;
   if (dataCount >= dataMaxCount)
-    if (ESMC_LogDefault.MsgFoundError(growDataList(10000), 
+    if (ESMC_LogDefault.MsgFoundError(growDataList(10000),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -9337,12 +9337,12 @@ int XXE::incCommhandleCount(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   ++commhandleCount;
   if (commhandleCount >= commhandleMaxCount)
-    if (ESMC_LogDefault.MsgFoundError(growCommhandle(1000), 
+    if (ESMC_LogDefault.MsgFoundError(growCommhandle(1000),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -9374,12 +9374,12 @@ int XXE::incXxeSubCount(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   ++xxeSubCount;
   if (xxeSubCount >= xxeSubMaxCount)
-    if (ESMC_LogDefault.MsgFoundError(growXxeSub(1000), 
+    if (ESMC_LogDefault.MsgFoundError(growXxeSub(1000),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -9414,14 +9414,14 @@ int XXE::storeData(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   dataMap[dataArg] = size;  // store the size of the allocation
-  
+
   dataList[dataCount] = dataArg;
   localrc = incDataCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -9455,12 +9455,12 @@ int XXE::storeCommhandle(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   commhandle[commhandleCount] = commhandleArg;
   localrc = incCommhandleCount();
-  if (ESMC_LogDefault.MsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -9494,12 +9494,12 @@ int XXE::storeXxeSub(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   xxeSubList[xxeSubCount] = xxe;
   localrc = incXxeSubCount();
-  if (ESMC_LogDefault.MsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -9520,8 +9520,8 @@ int XXE::storeBufferInfo(
 //
 // !ARGUMENTS:
 //
-  char *buffer, 
-  unsigned long size, 
+  char *buffer,
+  unsigned long size,
   int vectorLengthMultiplier
   ){
 //
@@ -9532,19 +9532,19 @@ int XXE::storeBufferInfo(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   BufferInfo *bufferInfo = new BufferInfo(buffer, size, vectorLengthMultiplier);
-  
+
   unsigned capacity = bufferInfoList.capacity();  // old capacity
-  
+
   bufferInfoList.push_back(bufferInfo);
-  
+
   if (bufferInfoList.capacity() != capacity){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
       "bufferInfoList overflow!!!", ESMC_CONTEXT, &rc);
     return rc;  // bail out
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -9579,19 +9579,19 @@ int XXE::appendXxeSub(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = xxeSub;
   opstream[count].predicateBitField = predicateBitField;
   XxeSubInfo *xxeSubInfo = (XxeSubInfo *)&(opstream[count]);
   xxeSubInfo->xxe = xxe;
   xxeSubInfo->rraShift = rraShift;
   xxeSubInfo->vectorLengthShift = vectorLengthShift;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -9628,7 +9628,7 @@ int XXE::appendWtimer(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = wtimer;
   opstream[count].predicateBitField = predicateBitField;
   WtimerInfo *xxeWtimerInfo = (WtimerInfo *)&(opstream[count]);
@@ -9644,7 +9644,7 @@ int XXE::appendWtimer(
   localrc = storeData(xxeWtimerInfo->timerString, stringLen+1);
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -9687,7 +9687,7 @@ int XXE::appendRecv(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = recv;
   opstream[count].predicateBitField = predicateBitField;
   RecvInfo *xxeRecvInfo = (RecvInfo *)&(opstream[count]);
@@ -9699,7 +9699,7 @@ int XXE::appendRecv(
   xxeRecvInfo->indirectionFlag = indirectionFlag;
   xxeRecvInfo->activeFlag = false;
   xxeRecvInfo->cancelledFlag = false;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -9742,7 +9742,7 @@ int XXE::appendSend(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = send;
   opstream[count].predicateBitField = predicateBitField;
   SendInfo *xxeSendInfo = (SendInfo *)&(opstream[count]);
@@ -9754,7 +9754,7 @@ int XXE::appendSend(
   xxeSendInfo->indirectionFlag = indirectionFlag;
   xxeSendInfo->activeFlag = false;
   xxeSendInfo->cancelledFlag = false;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -9809,7 +9809,7 @@ int XXE::appendSendRRA(
   xxeSendRRAInfo->vectorFlag = vectorFlag;
   xxeSendRRAInfo->activeFlag = false;
   xxeSendRRAInfo->cancelledFlag = false;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -9857,7 +9857,7 @@ int XXE::appendSendRecv(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = sendrecv;
   opstream[count].predicateBitField = predicateBitField;
   SendRecvInfo *xxeSendRecvInfo = (SendRecvInfo *)&(opstream[count]);
@@ -9874,7 +9874,7 @@ int XXE::appendSendRecv(
   xxeSendRecvInfo->dstIndirectionFlag = dstIndirectionFlag;
   xxeSendRecvInfo->activeFlag = false;
   xxeSendRecvInfo->cancelledFlag = false;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -9939,7 +9939,7 @@ int XXE::appendSendRRARecv(
   xxeSendRRARecvInfo->dstIndirectionFlag = dstIndirectionFlag;
   xxeSendRRARecvInfo->activeFlag = false;
   xxeSendRRARecvInfo->cancelledFlag = false;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -9982,7 +9982,7 @@ int XXE::appendRecvnb(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = recvnb;
   opstream[count].predicateBitField = predicateBitField;
   RecvnbInfo *xxeRecvnbInfo = (RecvnbInfo *)&(opstream[count]);
@@ -9996,12 +9996,12 @@ int XXE::appendRecvnb(
   xxeRecvnbInfo->cancelledFlag = false;
   xxeRecvnbInfo->commhandle = new VMK::commhandle*;
   *(xxeRecvnbInfo->commhandle) = new VMK::commhandle;
-  
+
   // keep track of commhandles for xxe garbage collection
   localrc = storeCommhandle(xxeRecvnbInfo->commhandle);
-  if (ESMC_LogDefault.MsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10044,7 +10044,7 @@ int XXE::appendSendnb(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = sendnb;
   opstream[count].predicateBitField = predicateBitField;
   SendnbInfo *xxeSendnbInfo = (SendnbInfo *)&(opstream[count]);
@@ -10061,9 +10061,9 @@ int XXE::appendSendnb(
 
   // keep track of commhandles for xxe garbage collection
   localrc = storeCommhandle(xxeSendnbInfo->commhandle);
-  if (ESMC_LogDefault.MsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10123,9 +10123,9 @@ int XXE::appendSendnbRRA(
 
   // keep track of commhandles for xxe garbage collection
   localrc = storeCommhandle(xxeSendnbRRAInfo->commhandle);
-  if (ESMC_LogDefault.MsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10174,7 +10174,7 @@ int XXE::appendMemCpySrcRRA(
   xxeMemCpySrcRRAInfo->size = size;
   xxeMemCpySrcRRAInfo->dstMem = dstMem;
   xxeMemCpySrcRRAInfo->rraIndex = rraIndex;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10217,7 +10217,7 @@ int XXE::appendMemGatherSrcRRA(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = memGatherSrcRRA;
   opstream[count].predicateBitField = predicateBitField;
   MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo =
@@ -10240,7 +10240,7 @@ int XXE::appendMemGatherSrcRRA(
   localrc = storeData(countListChar, chunkCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10288,7 +10288,7 @@ int XXE::appendZeroScalarRRA(
   xxeZeroScalarRRAInfo->elementTK = elementTK;
   xxeZeroScalarRRAInfo->rraOffset = rraOffset;
   xxeZeroScalarRRAInfo->rraIndex = rraIndex;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10345,7 +10345,7 @@ int XXE::appendZeroSuperScalarRRA(
   localrc = storeData(rraOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10395,7 +10395,7 @@ int XXE::appendZeroMemset(
   xxeZeroMemsetInfo->byteCount = byteCount;
   xxeZeroMemsetInfo->vectorFlag = vectorFlag;
   xxeZeroMemsetInfo->indirectionFlag = indirectionFlag;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10443,7 +10443,7 @@ int XXE::appendZeroMemsetRRA(
   xxeZeroMemsetRRAInfo->byteCount = byteCount;
   xxeZeroMemsetRRAInfo->rraIndex = rraIndex;
   xxeZeroMemsetRRAInfo->vectorFlag = vectorFlag;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10487,7 +10487,7 @@ int XXE::appendProductSumScalarRRA(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = productSumScalarRRA;
   opstream[count].predicateBitField = predicateBitField;
   ProductSumScalarRRAInfo *xxeProductSumScalarRRAInfo =
@@ -10502,9 +10502,9 @@ int XXE::appendProductSumScalarRRA(
 
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
-  if (ESMC_LogDefault.MsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -10543,7 +10543,7 @@ int XXE::appendSumSuperScalarDstRRA(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = sumSuperScalarDstRRA;
   opstream[count].predicateBitField = predicateBitField;
   SumSuperScalarDstRRAInfo *xxeSumSuperScalarDstRRAInfo =
@@ -10559,7 +10559,7 @@ int XXE::appendSumSuperScalarDstRRA(
   xxeSumSuperScalarDstRRAInfo->rraOffsetList = (int *)rraOffsetListChar;
   char *valueOffsetListChar = new char[termCount*sizeof(int)];
   xxeSumSuperScalarDstRRAInfo->valueOffsetList = (int *)valueOffsetListChar;
-  
+
   // keep track of allocations for xxe garbage collection
   localrc = storeData(rraOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10567,7 +10567,7 @@ int XXE::appendSumSuperScalarDstRRA(
   localrc = storeData(valueOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10611,7 +10611,7 @@ int XXE::appendSumSuperScalarListDstRRA(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = sumSuperScalarListDstRRA;
   opstream[count].predicateBitField = predicateBitField;
   SumSuperScalarListDstRRAInfo *xxeSumSuperScalarListDstRRAInfo =
@@ -10671,7 +10671,7 @@ int XXE::appendSumSuperScalarListDstRRA(
   localrc = storeData(baseListIndexListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10716,7 +10716,7 @@ int XXE::appendProductSumSuperScalarDstRRA(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = productSumSuperScalarDstRRA;
   opstream[count].predicateBitField = predicateBitField;
   ProductSumSuperScalarDstRRAInfo *xxeProductSumSuperScalarDstRRAInfo =
@@ -10756,7 +10756,7 @@ int XXE::appendProductSumSuperScalarDstRRA(
   localrc = storeData(valueOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10801,7 +10801,7 @@ int XXE::appendProductSumSuperScalarListDstRRA(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = productSumSuperScalarListDstRRA;
   opstream[count].predicateBitField = predicateBitField;
   ProductSumSuperScalarListDstRRAInfo *xxeProductSumSuperScalarListDstRRAInfo =
@@ -10876,7 +10876,7 @@ int XXE::appendProductSumSuperScalarListDstRRA(
   localrc = storeData(baseListIndexListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10921,7 +10921,7 @@ int XXE::appendProductSumSuperScalarSrcRRA(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = productSumSuperScalarSrcRRA;
   opstream[count].predicateBitField = predicateBitField;
   ProductSumSuperScalarSrcRRAInfo *xxeProductSumSuperScalarSrcRRAInfo =
@@ -10952,7 +10952,7 @@ int XXE::appendProductSumSuperScalarSrcRRA(
   localrc = storeData(elementOffsetListChar, termCount*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -10999,9 +10999,9 @@ int XXE::appendWaitOnIndex(
 
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
-  if (ESMC_LogDefault.MsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -11040,12 +11040,12 @@ int XXE::appendTestOnIndex(
   TestOnIndexInfo *xxeTestOnIndexInfo =
     (TestOnIndexInfo *)&(opstream[count]);
   xxeTestOnIndexInfo->index = index;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
-  if (ESMC_LogDefault.MsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -11101,7 +11101,7 @@ int XXE::appendWaitOnAnyIndexSub(
   localrc = storeData(completeFlagChar, countArg*sizeof(int));
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -11141,12 +11141,12 @@ int XXE::appendWaitOnAllSendnb(
 
   opstream[count].opId = waitOnAllSendnb;
   opstream[count].predicateBitField = predicateBitField;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
-  if (ESMC_LogDefault.MsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -11183,7 +11183,7 @@ int XXE::appendWaitOnIndexSub(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = waitOnIndexSub;
   opstream[count].predicateBitField = predicateBitField;
   WaitOnIndexSubInfo *waitOnIndexSubInfo =
@@ -11192,12 +11192,12 @@ int XXE::appendWaitOnIndexSub(
   waitOnIndexSubInfo->rraShift = rraShift;
   waitOnIndexSubInfo->vectorLengthShift = vectorLengthShift;
   waitOnIndexSubInfo->index = index;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -11234,7 +11234,7 @@ int XXE::appendTestOnIndexSub(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   opstream[count].opId = testOnIndexSub;
   opstream[count].predicateBitField = predicateBitField;
   TestOnIndexSubInfo *testOnIndexSubInfo =
@@ -11243,12 +11243,12 @@ int XXE::appendTestOnIndexSub(
   testOnIndexSubInfo->rraShift = rraShift;
   testOnIndexSubInfo->vectorLengthShift = vectorLengthShift;
   testOnIndexSubInfo->index = index;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -11287,12 +11287,12 @@ int XXE::appendCancelIndex(
   CancelIndexInfo *xxeCancelIndexInfo =
     (CancelIndexInfo *)&(opstream[count]);
   xxeCancelIndexInfo->index = index;
-  
-  // bump up element count, this may move entire opstream to new memory location 
+
+  // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
-  if (ESMC_LogDefault.MsgFoundError(localrc, 
+  if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -11333,12 +11333,12 @@ int XXE::appendProfileMessage(
   int stringLen = strlen(messageString);
   xxeProfileMessageInfo->messageString = new char[stringLen+1];
   strcpy(xxeProfileMessageInfo->messageString, messageString);
-  
+
   // keep track of strings for xxe garbage collection
   localrc = storeData(xxeProfileMessageInfo->messageString, stringLen+1);
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -11389,7 +11389,7 @@ int XXE::appendMessage(
   localrc = storeData(xxeMessageInfo->messageString, stringLen+1);
   if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-  
+
   // bump up element count, this may move entire opstream to new memory location
   localrc = incCount();
   if (ESMC_LogDefault.MsgFoundError(localrc,

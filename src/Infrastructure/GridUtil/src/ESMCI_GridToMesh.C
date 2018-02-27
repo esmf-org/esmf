@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -77,20 +77,20 @@ namespace ESMCI {
 //   |     :      |      :      |
 //   |     :      |      :      |
 //   o------------o-------------o
-//   
+//
 //   E.G. mesh o---o, dual mesh x....x
 //
-// I think there is work here.  
+// I think there is work here.
 // For the moment, we should at least be able to represent the grid itself,
 // and, maybe, for simple single tile grids with a periodic component,
 // the dual, which is not so bad.  This will put us equivalent with
-// SCRIP.  
+// SCRIP.
 
-void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh, 
+void GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh,
   const std::vector<ESMCI::Array*> &arrays, ESMCI::InterArray<int> *maskValuesArg,
   int *regridConserve) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "GridToMesh()" 
+#define ESMC_METHOD "GridToMesh()"
   Trace __trace("GridToMesh(const Grid &grid_, int staggerLoc, ESMCI::Mesh &mesh)");
 
  int localrc;
@@ -111,17 +111,17 @@ printf("HERE IN GTOM\n");
  // *** Grid error checking here ***
  if (!grid.hasCoordStaggerLoc(staggerLoc)) {
    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-	    "- Grid being used in Regrid call does not contain coordinates at appropriate staggerloc ", ESMC_CONTEXT, &localrc);
+            "- Grid being used in Regrid call does not contain coordinates at appropriate staggerloc ", ESMC_CONTEXT, &localrc);
     throw localrc;
  }
 
 
-     
+
  // *** Set some meta-data ***
  // We set the topological dimension of the mesh (quad = 2, hex = 3, etc...)
  UInt pdim = grid.getDimCount();
  mesh.set_parametric_dimension(pdim);
- 
+
  // In what dimension is the grid embedded?? (sphere = 3, simple rectangle = 2, etc...)
  UInt sdim = grid.getCartCoordDimCount();
  // if ((sdim<3)&&is_sphere) Throw()<<"Sphere's not supported with less than 3 dimesnions";
@@ -156,7 +156,7 @@ printf("HERE IN GTOM\n");
      hasMask=false;
    }
  }
- 
+
  // Get Mask values if necessary
  int numMaskValues=0;
  int *ptrMaskValues;
@@ -166,14 +166,14 @@ printf("HERE IN GTOM\n");
      if (maskValuesArg->dimCount != 1) {
        Throw() << " Mask values must be of rank 1.";
      }
-     
+
      // Get mask values
      numMaskValues=maskValuesArg->extent[0];
      ptrMaskValues=&(maskValuesArg->array[0]);
     }
  }
 
- 
+
  // See if grid has area field
  // (Area only useful for conservative)
  bool hasArea=false;
@@ -191,10 +191,10 @@ printf("HERE IN GTOM\n");
  // for cell creation.
  std::map<UInt,MeshObj*> nodemap;
  std::map<UInt,UInt> ngid2lid;
- 
+
  UInt local_node_num = 0, local_elem_num = 0;
- 
- 
+
+
  // Set the id of this processor here (me)
  int me = VM::getCurrent(&localrc)->getLocalPet();
  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
@@ -208,21 +208,21 @@ printf("HERE IN GTOM\n");
      // Loop nodes of the grid.  Here we loop all nodes, both owned and not.
    ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
 
-   // Put Local in first, so we don't have to search for duplicates for every interation, 
+   // Put Local in first, so we don't have to search for duplicates for every interation,
    // after locals are in put in non-local
 
    // loop through all LOCAL nodes in the Grid owned by cells
-   for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
+   for(gni->toBeg(); !gni->isDone(); gni->adv()) {
 
      // Only operate on Local Nodes
      if (gni->isLocal()) {
        MeshObj *node;
-       
+
        // get the global id of this Grid node
-       int gid=gni->getGlobalID(); 
-       
+       int gid=gni->getGlobalID();
+
        // get the local id of this Grid node
-       int lid=gni->getLocalID(); 
+       int lid=gni->getLocalID();
 
 
 
@@ -230,7 +230,7 @@ printf("HERE IN GTOM\n");
 Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
 #endif
 
-       // Create new node in mesh object       
+       // Create new node in mesh object
        node = new MeshObj(MeshObj::NODE,     // node...
                                    gid,               // unique global id
                                    local_node_num
@@ -238,48 +238,48 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
 
        ngid2lid[gid] = lid;
        local_node_num++;
-       
-       
+
+
        node->set_owner(me);  // Set owner to this proc
-       
+
        //       UInt nodeset = is_sphere ? gni->getPoleID() : 0;   // Do we need to partition the nodes in any sets?
        UInt nodeset = gni->getPoleID();   // Do we need to partition the nodes in any sets?
        mesh.add_node(node, nodeset);
 
-       
+
        // If Shared add to list to use DistDir on
        if (gni->isShared()) {
-         
+
          // Put gid in list
          std::vector<UInt>::iterator lb =
-           std::lower_bound(owned_shared.begin(), owned_shared.end(), gid);    
-         
+           std::lower_bound(owned_shared.begin(), owned_shared.end(), gid);
+
          if (lb == owned_shared.end() || *lb != gid)
            owned_shared.insert(lb, gid);
        }
 
        // Put node into map
-       nodemap[lid]=node;    
+       nodemap[lid]=node;
      }
-     
+
    } // gni
 
 
    // loop through all NON-LOCAL nodes in the Grid owned by cells
-   for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
+   for(gni->toBeg(); !gni->isDone(); gni->adv()) {
 
      // Only operate on non-local nodes
      if (!gni->isLocal()) {
        MeshObj *node;
-       
-       // get the global id of this Grid node
-       int gid=gni->getGlobalID(); 
-       
-       // get the local id of this Grid node
-       int lid=gni->getLocalID(); 
-       
 
-       // If Grid node is not already in the mesh then add 
+       // get the global id of this Grid node
+       int gid=gni->getGlobalID();
+
+       // get the local id of this Grid node
+       int lid=gni->getLocalID();
+
+
+       // If Grid node is not already in the mesh then add
        Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::NODE, gid);
        if (mi == mesh.map_end(MeshObj::NODE)) {
          node = new MeshObj(MeshObj::NODE,    // node...
@@ -289,46 +289,46 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
 
          ngid2lid[gid] = lid;
          local_node_num++;
-         
+
          node->set_owner(std::numeric_limits<UInt>::max());  // Set owner to unknown (will have to ghost later)
 
-         //         UInt nodeset = is_sphere ? gni->getPoleID() : 0;   // Do we need to partition the nodes in any sets? 
+         //         UInt nodeset = is_sphere ? gni->getPoleID() : 0;   // Do we need to partition the nodes in any sets?
          UInt nodeset = gni->getPoleID();   // Do we need to partition the nodes in any sets?
          mesh.add_node(node, nodeset);
-         
+
          // Node must be shared
          std::vector<UInt>::iterator lb =
-           std::lower_bound(notowned_shared.begin(), notowned_shared.end(), gid);    
-         
+           std::lower_bound(notowned_shared.begin(), notowned_shared.end(), gid);
+
          if (lb == notowned_shared.end() || *lb != gid)
            notowned_shared.insert(lb, gid);
-         
+
        } else {
-         node=&*mi; 
+         node=&*mi;
        }
-       
+
        // Put node into map
-       nodemap[lid]=node;    
+       nodemap[lid]=node;
      }
    } // gni
-  
 
 
-   // Use DistDir to fill node owners for non-local nodes 
+
+   // Use DistDir to fill node owners for non-local nodes
    // TODO: Use nodes which are gni->isLocal() && gni->isShared() to get owners of
    //       non-local nodes ->David
 
 
-   // *** Create the Cells ***  
+   // *** Create the Cells ***
 
    // Presumably, for a structured grid there is only the
    // 'hypercube' topology, i.e. a quadrilateral for 2d
    // and a hexahedron for 3d
    const MeshObjTopo *ctopo = 0;
    if (pdim == 2) {
-   
+
      ctopo = sdim == 2 ? GetTopo("QUAD") : GetTopo("QUAD_3D");
-                                         
+
    } else if (pdim == 3) {
 
      ThrowRequire(sdim == 3);
@@ -345,23 +345,23 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
    // Allocate vector to hold nodes for translation
    std::vector<int> uniq_node_ids(ctopo->num_nodes);
 
-   // Loop Cells of the grid. 
+   // Loop Cells of the grid.
    ESMCI::GridCellIter *gci=new ESMCI::GridCellIter(&grid,staggerLoc);
 
-   for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
-     
+   for(gci->toBeg(); !gci->isDone(); gci->adv()) {
+
      // Get Local Ids of Corners
      int cnrCount;
      int cnrList[16]; // ONLY WORKS FOR UP TO 4D
      gci->getCornersCellNodeLocalID(&cnrCount, cnrList);
      ThrowRequire(cnrCount == ctopo->num_nodes);
-     
+
      // Get Nodes via Local IDs
      for (UInt n = 0; n < ctopo->num_nodes; ++n) {
        nodes[n] = nodemap[cnrList[n]];
      } // n
 
-     // If cell is degenerate then don't create. 
+     // If cell is degenerate then don't create.
      // If there are less than 3 unique nodes
      // then it's just a line
      int num_uniq_node_ids=0;
@@ -380,11 +380,11 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
      } // n
 
      // TODO: Make the number depend on the parametric dimension
-     // TOD0: If the number of nodes is smaller than ctopo->num_nodes make a different topo? 
+     // TOD0: If the number of nodes is smaller than ctopo->num_nodes make a different topo?
      if (num_uniq_node_ids<3) {
        continue;
      }
-     
+
      // Create Cell
      MeshObj *cell = new MeshObj(MeshObj::ELEMENT,     // Mesh equivalent of Cell
                                  gci->getGlobalID(),   // unique global id
@@ -394,14 +394,14 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
 #ifdef G2M_DBG
      Par::Out() << "Cell:" << cell->get_id() << " uses nodes:";
 #endif
-     
+
      // Set Owner
      cell->set_owner(me);
-     
+
      UInt block_id = 1;  // Any reason to use different sets for cells?
-     
+
      mesh.add_element(cell, nodes, block_id, ctopo);
-     
+
    } // ci
 
     // Remove any superfluous nodes
@@ -451,7 +451,7 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
 //Par::Out() << "node:" << ni->get_id() << ", lid=" << lid;
 
      // Move to corresponding grid node
-    gni->moveToLocalID(lid);      
+    gni->moveToLocalID(lid);
 
     // If local fill in cartesian coords
     if (gni->isLocal()) {
@@ -505,7 +505,7 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
 
      } else {
        IOField<NodalField> *node_mask;
-       node_mask = mesh.RegisterNodalField(mesh, "mask", 1);       
+       node_mask = mesh.RegisterNodalField(mesh, "mask", 1);
      }
    }
 
@@ -523,20 +523,20 @@ Par::Out() << "GID=" << gid << ", LID=" << lid << std::endl;
    // from the owned, shared nodes, then look up the shared, not owned.
    {
      DDir<> dir;
-   
+
      std::vector<UInt> lids(owned_shared.size(), 0);
      if (owned_shared.size ())
        dir.Create(owned_shared.size(), &owned_shared[0], &lids[0]);
      else
        dir.Create(0, (UInt*) NULL, 0);
-  
+
      std::vector<DDir<>::dentry> lookups;
      if (notowned_shared.size ())
        dir.RemoteGID(notowned_shared.size(), &notowned_shared[0], lookups);
      else
        dir.RemoteGID(0, (UInt *) NULL, lookups);
 
-     // Loop through the results.  Do a map lookup to find nodes--since the shared 
+     // Loop through the results.  Do a map lookup to find nodes--since the shared
      // porition of the mesh is a hypersurface, this should be cheap enough to do.
      std::vector<DDir<>::dentry>::iterator ri = lookups.begin(), re = lookups.end();
      for (; ri != re; ++ri) {
@@ -549,14 +549,14 @@ Par::Out() << "Finding owner for gid" << dent.gid << " = " << dent.origin_proc <
 
        Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::NODE, dent.gid);
      //  ThrowRequire(mi != mesh.map_end(MeshObj::NODE));
-       // May have been deleted as an unused node.  
+       // May have been deleted as an unused node.
        if (mi == mesh.map_end(MeshObj::NODE)) {
 #ifdef G2M_DBG
 Par::Out() << "\tnot in mesh!!" << std::endl;
 #endif
          continue;
        }
- 
+
        mi->set_owner(dent.origin_proc);
 
      } // ri
@@ -585,11 +585,11 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
       MEField<> *elem_mask=mesh.GetField("elem_mask");
 
        // Loop elemets of the grid.  Here we loop all elements, both owned and not.
-       for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
-         
+       for(gci->toBeg(); !gci->isDone(); gci->adv()) {
+
          // get the global id of this Grid node
-         int gid=gci->getGlobalID(); 
-      
+         int gid=gci->getGlobalID();
+
          //  Find the corresponding Mesh element
          Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, gid);
          if (mi == mesh.map_end(MeshObj::ELEMENT)) {
@@ -597,7 +597,7 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
          }
 
          // Get the element
-         const MeshObj &elem = *mi; 
+         const MeshObj &elem = *mi;
 
          // Get mask data
          double *m=elem_mask->data(elem);
@@ -607,10 +607,10 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 
          // Only put it in if it's locally owned
          if (!GetAttr(elem).is_locally_owned()) continue;
-         
+
          // Get mask from the Item Array
          ESMC_I4 gm;
-         
+
          // Get Mask value from grid
          gci->getItem(ESMC_GRIDITEM_MASK, &gm);
 
@@ -623,7 +623,7 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
              break;
            }
          }
-           
+
          // Set Mask based on grid mask value
          if (mask) {
            *m=1.0;
@@ -637,19 +637,19 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 
        for (ni = mesh.node_begin(); ni != ne; ++ni) {
          double *m = node_mask->data(*ni);
-         
+
          UInt lid = ngid2lid[ni->get_id()]; // we set this above when creating the node
-         
+
          // Move to corresponding grid node
-         gni->moveToLocalID(lid);      
-         
+         gni->moveToLocalID(lid);
+
          // If local fill in coords
          if (gni->isLocal()) {
            ESMC_I4 gm;
-           
+
            // Get Mask value from grid
            gni->getItem(ESMC_GRIDITEM_MASK, &gm);
-           
+
            // See if gm matches any mask values
            bool mask=false;
            for (int i=0; i<numMaskValues; i++) {
@@ -659,14 +659,14 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
                break;
              }
            }
-           
+
            // Set Mask based on grid mask value
            if (mask) {
              *m=1.0;
            } else {
              *m=0.0;
            }
-           
+
          } else { // set to Null value to be ghosted later
            *m=0.0;
          }
@@ -684,39 +684,39 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
        MEField<> *elem_area=mesh.GetField("elem_area");
 
        // Loop elemets of the grid.  Here we loop all elements, both owned and not.
-       for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
-         
+       for(gci->toBeg(); !gci->isDone(); gci->adv()) {
+
          // get the global id of this Grid node
-         int gid=gci->getGlobalID(); 
-      
+         int gid=gci->getGlobalID();
+
          //  Find the corresponding Mesh element
          Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, gid);
          if (mi == mesh.map_end(MeshObj::ELEMENT)) {
            Throw() << "Grid entry not in mesh";
          }
-      
+
          // Get the element
-         const MeshObj &elem = *mi; 
+         const MeshObj &elem = *mi;
 
          // Get mask data
          double *a=elem_area->data(elem);
-         
+
          // Init in case is not locally owned
          *a=0.0;
-         
+
          // Only put it in if it's locally owned
          if (!GetAttr(elem).is_locally_owned()) continue;
-         
+
          // Get mask from the Item Array
          ESMC_R8 ga;
-         
+
          // Get Mask value from grid
          gci->getItem(ESMC_GRIDITEM_AREA, &ga);
 
          // Set value
          *a=ga;
        }
-     } 
+     }
    }
 
   if(isConserve) { // set up frac2 field
@@ -766,10 +766,10 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
 #undef  ESMC_METHOD
 
 
-  // Only works for scalar data right now, but would be pretty easy to add more dimensions 
+  // Only works for scalar data right now, but would be pretty easy to add more dimensions
 void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "CpMeshDataToArray()" 
+#define ESMC_METHOD "CpMeshDataToArray()"
   Trace __trace("CpMeshDataToArray()");
 
  int localrc;
@@ -786,23 +786,23 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
    ESMCI::GridIter *gni=new ESMCI::GridIter(&grid,staggerLoc,true);
 
    // loop through all nodes in the Grid
-   for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
+   for(gni->toBeg(); !gni->isDone(); gni->adv()) {
      if(!gni->isLocal()) continue;
 
        // get the global id of this Grid node
-       int gid=gni->getGlobalID(); 
+       int gid=gni->getGlobalID();
 
        //  Find the corresponding Mesh node
        Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::NODE, gid);
        if (mi == mesh.map_end(MeshObj::NODE)) {
-	 Throw() << "Grid entry not in mesh";
+         Throw() << "Grid entry not in mesh";
        }
 
        // Get the node
-	const MeshObj &node = *mi; 
+        const MeshObj &node = *mi;
 
-       // Get the data 
-	double *data = dataToArray->data(node);
+       // Get the data
+        double *data = dataToArray->data(node);
 
        // Put it into the Array
       gni->setArrayData(&array, *data);
@@ -819,7 +819,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
   // Assumes array is on center staggerloc of grid
   void CpMeshElemDataToArray(Grid &grid, int staggerloc, ESMCI::Mesh &mesh, ESMCI::Array &array, MEField<> *dataToArray) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "CpMeshElemDataToArray()" 
+#define ESMC_METHOD "CpMeshElemDataToArray()"
   Trace __trace("CpMeshElemDataToArray()");
 
  int localrc;
@@ -834,28 +834,28 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
     // Loop elemets of the grid.  Here we loop all elements, both owned and not.
     ESMCI::GridCellIter *gci=new ESMCI::GridCellIter(&grid,staggerloc);
-    
+
     // loop through all nodes in the Grid
-    for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
-      
+    for(gci->toBeg(); !gci->isDone(); gci->adv()) {
+
       // get the global id of this Grid node
-      int gid=gci->getGlobalID(); 
-      
+      int gid=gci->getGlobalID();
+
       //  Find the corresponding Mesh element
       Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, gid);
       if (mi == mesh.map_end(MeshObj::ELEMENT)) {
-	Throw() << "Grid entry not in mesh";
+        Throw() << "Grid entry not in mesh";
       }
-      
+
       // Get the element
-      const MeshObj &elem = *mi; 
-      
+      const MeshObj &elem = *mi;
+
       // Only put it in if it's locally owned
       if (!GetAttr(elem).is_locally_owned()) continue;
 
 
-       // Get the data 
-	double *data = dataToArray->data(elem);
+       // Get the data
+        double *data = dataToArray->data(elem);
 
         // DEBUG:  printf("G2M %d %f \n",gid,*data);
 
@@ -873,16 +873,16 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
 
   void PutElemAreaIntoArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Array &array) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "PutElemAreaIntoArray()" 
+#define ESMC_METHOD "PutElemAreaIntoArray()"
     Trace __trace("PutElemAreaIntoArray()");
-    
+
     int localrc;
     int rc;
 
 #define  MAX_NUM_POLY_COORDS  60
 #define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
 #define  MAX_NUM_POLY_NODES_3D  20  // MAX_NUM_POLY_COORDS/3
-    
+
     int num_poly_nodes;
     double poly_coords[MAX_NUM_POLY_COORDS];
     double tmp_coords[MAX_NUM_POLY_COORDS];
@@ -902,28 +902,28 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
     // TODO: replace this with something that doesn't require building a mesh first
     MEField<> *area_field = mesh.GetField("elem_area");
     if (area_field) {
-    
+
       // loop through all nodes in the Grid
-      for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
-      
+      for(gci->toBeg(); !gci->isDone(); gci->adv()) {
+
         // get the global id of this Grid node
-        int gid=gci->getGlobalID(); 
-      
+        int gid=gci->getGlobalID();
+
         //  Find the corresponding Mesh element
         Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, gid);
         if (mi == mesh.map_end(MeshObj::ELEMENT)) {
           Throw() << "Grid entry not in mesh";
         }
-      
+
         // Get the element
-        const MeshObj &elem = *mi; 
-        
+        const MeshObj &elem = *mi;
+
         // Only put it in if it's locally owned
         if (!GetAttr(elem).is_locally_owned()) continue;
-        
+
         // Get area from field
         double *area=area_field->data(elem);
-      
+
         // Put it into the Array
         gci->setArrayData(&array, *area);
       }
@@ -932,58 +932,58 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
     }
 
 
-    ////// Otherwise calculate areas..... 
-    
+    ////// Otherwise calculate areas.....
+
     // Get coord field
     MEField<> *cfield = mesh.GetCoordField();
 
     // Get dimensions
     int sdim=mesh.spatial_dim();
     int pdim=mesh.parametric_dim();
-    
+
     // loop through all nodes in the Grid
-    for(gci->toBeg(); !gci->isDone(); gci->adv()) {   
-      
+    for(gci->toBeg(); !gci->isDone(); gci->adv()) {
+
       // get the global id of this Grid node
-      int gid=gci->getGlobalID(); 
-      
+      int gid=gci->getGlobalID();
+
       //  Find the corresponding Mesh element
       Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, gid);
       if (mi == mesh.map_end(MeshObj::ELEMENT)) {
-	Throw() << "Grid entry not in mesh";
+        Throw() << "Grid entry not in mesh";
       }
-      
+
       // Get the element
-      const MeshObj &elem = *mi; 
-      
+      const MeshObj &elem = *mi;
+
       // Only put it in if it's locally owned
       if (!GetAttr(elem).is_locally_owned()) continue;
 
       // Get area depending on dimensions
       double area;
-      
+
       if (pdim==2) {
-	if (sdim==2) {
+        if (sdim==2) {
           get_elem_coords_2D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_2D, tmp_coords, &num_poly_nodes, poly_coords);
-	  remove_0len_edges2D(&num_poly_nodes, poly_coords);
+          remove_0len_edges2D(&num_poly_nodes, poly_coords);
           area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
-	} else if (sdim==3) {
+        } else if (sdim==3) {
           get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
-	  remove_0len_edges3D(&num_poly_nodes, poly_coords);
-	  area=great_circle_area(num_poly_nodes, poly_coords);
-	}
+          remove_0len_edges3D(&num_poly_nodes, poly_coords);
+          area=great_circle_area(num_poly_nodes, poly_coords);
+        }
       } else if (pdim==3) {
-	if (sdim==3) {
+        if (sdim==3) {
           Phedra tmp_phedra=create_phedra_from_elem(&elem, cfield);
-          area=tmp_phedra.calc_volume(); 
+          area=tmp_phedra.calc_volume();
         } else {
           Throw() << "Meshes with parametric dimension == 3, but spatial dim != 3 not supported for computing areas";
         }
       } else {
-	Throw() << "Meshes with parametric dimension != 2 or 3 not supported for computing areas";
+        Throw() << "Meshes with parametric dimension != 2 or 3 not supported for computing areas";
       }
 
-      
+
        // Put it into the Array
       gci->setArrayData(&array, area);
    }
@@ -1003,7 +1003,7 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
   // Convert Grid To PointList
   void GridToPointList(Grid &grid, ESMC_StaggerLoc staggerLoc, ESMCI::InterArray<int> *maskValuesArg, ESMCI::PointList **_pl, int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "GridToPointList()" 
+#define ESMC_METHOD "GridToPointList()"
     Trace __trace("GridToPointList()");
 
     int localrc;
@@ -1021,67 +1021,67 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
       int *ptrMaskValues;
 
       if (present(maskValuesArg)) {
-	numMaskValues=maskValuesArg->extent[0];
-	ptrMaskValues=&(maskValuesArg->array[0]);
+        numMaskValues=maskValuesArg->extent[0];
+        ptrMaskValues=&(maskValuesArg->array[0]);
       } else {
-	numMaskValues=0;
-	ptrMaskValues = NULL;
+        numMaskValues=0;
+        ptrMaskValues = NULL;
       }
 
 
       // Count all local pnts in the Grid
       int num_local_pts=0;
-      for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
-	if(!gni->isLocal()) continue;
+      for(gni->toBeg(); !gni->isDone(); gni->adv()) {
+        if(!gni->isLocal()) continue;
 
-	// skip if masked
-	ESMC_I4 gm;
-	gni->getItem(ESMC_GRIDITEM_MASK,&gm);
+        // skip if masked
+        ESMC_I4 gm;
+        gni->getItem(ESMC_GRIDITEM_MASK,&gm);
 
-	bool mask=false;
-	for (int i=0; i<numMaskValues; i++) {
-	  int mvi=ptrMaskValues[i];
-	  if (gm == mvi) {
-	    mask=true;
-	    break;
-	  }
-	}
-	if (!mask) 
-	  num_local_pts++;
-	  
+        bool mask=false;
+        for (int i=0; i<numMaskValues; i++) {
+          int mvi=ptrMaskValues[i];
+          if (gm == mvi) {
+            mask=true;
+            break;
+          }
+        }
+        if (!mask)
+          num_local_pts++;
+        
       }
 
       // Create PointList
-      // (Put Cartesian coordinates in list) 
+      // (Put Cartesian coordinates in list)
       ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount());
 
       // loop through all nodes in the Grid
-      for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
-	if(!gni->isLocal()) continue;
+      for(gni->toBeg(); !gni->isDone(); gni->adv()) {
+        if(!gni->isLocal()) continue;
 
-	// skip if masked
-	ESMC_I4 gm;
-	gni->getItem(ESMC_GRIDITEM_MASK,&gm);
+        // skip if masked
+        ESMC_I4 gm;
+        gni->getItem(ESMC_GRIDITEM_MASK,&gm);
 
-	bool mask=false;
-	for (int i=0; i<numMaskValues; i++) {
-	  int mvi=ptrMaskValues[i];
-	  if (gm == mvi) {
-	    mask=true;
-	    break;
-	  }
-	}
-	if (!mask) {
-	  // get the global id of this Grid node
-	  int gid=gni->getGlobalID(); 
+        bool mask=false;
+        for (int i=0; i<numMaskValues; i++) {
+          int mvi=ptrMaskValues[i];
+          if (gm == mvi) {
+            mask=true;
+            break;
+          }
+        }
+        if (!mask) {
+          // get the global id of this Grid node
+          int gid=gni->getGlobalID();
 
-	  // get cartesian coordinates
-	  double cart_coord[ESMF_MAXDIM];
-	  gni->getCartCoord(cart_coord);
+          // get cartesian coordinates
+          double cart_coord[ESMF_MAXDIM];
+          gni->getCartCoord(cart_coord);
 
-	  // Add Point
-	  pl->add(gid,cart_coord);
-	}
+          // Add Point
+          pl->add(gid,cart_coord);
+        }
       }
 
       // Output point list
@@ -1090,29 +1090,29 @@ void CpMeshDataToArray(Grid &grid, int staggerLoc, ESMCI::Mesh &mesh, ESMCI::Arr
     } else {                                   //no masking
       // Count all local pnts in the Grid
       int num_local_pts=0;
-      for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
-	if(!gni->isLocal()) continue;
+      for(gni->toBeg(); !gni->isDone(); gni->adv()) {
+        if(!gni->isLocal()) continue;
 
-	num_local_pts++;
+        num_local_pts++;
       }
 
       // Create PointList
-      // (Put Cartesian coordinates in list) 
+      // (Put Cartesian coordinates in list)
       ESMCI::PointList *pl=new PointList(num_local_pts, grid.getCartCoordDimCount());
 
       // loop through all nodes in the Grid
-      for(gni->toBeg(); !gni->isDone(); gni->adv()) {   
-	if(!gni->isLocal()) continue;
+      for(gni->toBeg(); !gni->isDone(); gni->adv()) {
+        if(!gni->isLocal()) continue;
 
-	// get the global id of this Grid node
-	int gid=gni->getGlobalID(); 
+        // get the global id of this Grid node
+        int gid=gni->getGlobalID();
 
-	// get cartesian coordinates
-	double cart_coord[ESMF_MAXDIM];
-	gni->getCartCoord(cart_coord);
+        // get cartesian coordinates
+        double cart_coord[ESMF_MAXDIM];
+        gni->getCartCoord(cart_coord);
 
-	// Add Point
-	pl->add(gid,cart_coord);
+        // Add Point
+        pl->add(gid,cart_coord);
       }
       // Output point list
       *_pl=pl;

@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
@@ -15,7 +15,7 @@
 // !DESCRIPTION:
 //
 // The LogErr class (defined in ESMC\_Log.C and declared in
-// the companion file ESMC\_LogErr.h) provides the user a way to write 
+// the companion file ESMC\_LogErr.h) provides the user a way to write
 // {\tt ESMC\_Log} data.
 //
 
@@ -23,7 +23,7 @@
 #include "ESMCI_LogErr.h"
 
 // higher level, 3rd party or system headers
-#include <stdio.h>        
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string>
@@ -86,7 +86,7 @@ void LogErr::AllocError(
     int LINE,
     const std::string &FILE,
     const std::string &method,
-    int *rcToReturn      
+    int *rcToReturn
     )
 // !DESCRIPTION:
 //    Allocation error without message.
@@ -117,7 +117,7 @@ void LogErr::MsgAllocError(
     int LINE,
     const std::string &FILE,
     const std::string &method,
-    int *rcToReturn      
+    int *rcToReturn
     )
 // !DESCRIPTION:
 //    Allocation error with message.
@@ -150,7 +150,7 @@ void LogErr::DeallocError(
     int LINE,
     const std::string &FILE,
     const std::string &method,
-    int *rcToReturn      
+    int *rcToReturn
     )
 // !DESCRIPTION:
 //    Deallocation error without message.
@@ -181,7 +181,7 @@ void LogErr::MsgDeallocError(
     int LINE,
     const std::string &FILE,
     const std::string &method,
-    int *rcToReturn      
+    int *rcToReturn
     )
 // !DESCRIPTION:
 //    Deallocation error with message.
@@ -220,10 +220,10 @@ void LogErr::Open(
 // {\tt ESMC\_LogOpen} opens a new log file and sets the default filename
 //
 //EOP
-// 
+//
 {
     nameLogErrFile = filename;
-}   
+}
 
 } // namespace ESMCI
 
@@ -251,7 +251,7 @@ int ESMC_LogSetFilename(
 // {\tt ESMC\_LogSetFilename} sets the filename to the opened log.
 //
 //EOP
-// 
+//
 {
     int rc;
 
@@ -261,7 +261,7 @@ int ESMC_LogSetFilename(
     ESMC_LogDefault.nameLogErrFile = filename;
     rc = ESMF_SUCCESS;
     return rc;
-}   
+}
 
 //----------------------------------------------------------------------------
 #undef ESMC_METHOD
@@ -284,10 +284,10 @@ int ESMC_LogFinalize(
 // !DESCRIPTION:
 // {\tt ESMC\_LogFinalize} finalizes an open log.
 //EOP
-// 
+//
 {
     return ESMF_SUCCESS;
-} 
+}
 
 namespace ESMCI{
 
@@ -295,7 +295,7 @@ namespace ESMCI{
 #undef ESMC_METHOD
 #define ESMC_METHOD "LogErr::Close"
 //BOP
-// !IROUTINE: Close - closes log file. 
+// !IROUTINE: Close - closes log file.
 //
 // !INTERFACE:
 
@@ -310,12 +310,12 @@ void LogErr::Close(
    )
 //
 // ! DESCRIPTION:
-// This routine simply closes the log file(s).  
+// This routine simply closes the log file(s).
 //
 //EOP
 
 {
-  
+
 }
 
 //----------------------------------------------------------------------------
@@ -365,8 +365,8 @@ int LogErr::Write(
 //  bool
 //
 // !ARGUMENTS:
-    const std::string &msg,	// Log Entry
-    int msgtype,        // Msg Type   
+    const std::string &msg,     // Log Entry
+    int msgtype,        // Msg Type
     int LINE,
     const std::string &FILE,
     const std::string &method
@@ -377,7 +377,7 @@ int LogErr::Write(
 //EOP
 {
     int rc;
-    
+
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
@@ -409,10 +409,10 @@ int LogErr::Set(
 //EOP
 {
     int rc;
-    
+
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
-    
+
     // cast flush to bool
     ESMC_Logical lflush = (flush != 0)?ESMF_TRUE:ESMF_FALSE;
 
@@ -443,10 +443,10 @@ int LogErr::SetTrace(
 //EOP
 {
     int rc;
-    
+
     // Initialize return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
-    
+
     trace = traceflag;
 
     rc = ESMF_SUCCESS;
@@ -595,7 +595,7 @@ bool LogErr::MsgFoundError(
       if (i==errorMaskCount){
         // this means that rcToCheck was _not_ in the errorMask -> flag error
         result=true;   // TODO: if this line moved to after Write()
-                       // below, will crash ESMF_TimeIntervalUTest.F90 on 
+                       // below, will crash ESMF_TimeIntervalUTest.F90 on
                        // Linux longs 2.4.20-31.9, Lahey lf95 6.0 optimized
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
 
@@ -648,7 +648,7 @@ bool LogErr::MsgFoundError(
       if (i==errorMaskCount){
         // this means that rcToCheck was _not_ in the errorMask -> flag error
         result=true;   // TODO: if this line moved to after Write()
-                       // below, will crash ESMF_TimeIntervalUTest.F90 on 
+                       // below, will crash ESMF_TimeIntervalUTest.F90 on
                        // Linux longs 2.4.20-31.9, Lahey lf95 6.0 optimized
         if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=rcToCheck;
 
@@ -682,7 +682,7 @@ void ESMC_TimeStamp(
     int *m,
     int *s,
     int *ms
-      
+
     )
 // !DESCRIPTION:
 // Returns time stamp values so that microsecond precision can be used.
@@ -691,7 +691,7 @@ void ESMC_TimeStamp(
     time_t tm;
     struct tm ti;
 #if !defined (ESMF_OS_MinGW)
-    struct timeval tv;	
+    struct timeval tv;  
     gettimeofday(&tv,NULL);
     ti=*localtime((const time_t*)&tv.tv_sec);
 #else

@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -20,8 +20,8 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the methods of two C++ classes 
-// {\tt ESMCI::VM} and {\tt ESMCI::VMPlan} which are defined in the companion 
+// The code in this file implements the methods of two C++ classes
+// {\tt ESMCI::VM} and {\tt ESMCI::VMPlan} which are defined in the companion
 // file {\tt ESMCI::VM.h}.
 //
 // Class {\tt ESMCI::VM} is derived from base class {\tt ESMCI::VMK}
@@ -50,7 +50,7 @@
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
-#include "ESMCI_Base.h" 
+#include "ESMCI_Base.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_Util.h"
 #include "ESMCI_LogErr.h"
@@ -86,8 +86,8 @@ namespace ESMCI {
 //-----------------------------------------------------------------------------
 // Module variable pointing to the global default VM
 // The global VM will be initialized in call ESMC_VMInitialize() and wrapped up
-// calling ESMC_VMFinalize(). 
-static VM *GlobalVM = NULL;  
+// calling ESMC_VMFinalize().
+static VM *GlobalVM = NULL;
 //-----------------------------------------------------------------------------
 
 
@@ -137,7 +137,7 @@ static bool VMKeyCompare(char *vmKey1, char *vmKey2){
   for (i=0; i<vmKeyWidth; i++)
     if (vmKey1[i] != vmKey2[i]){
 #if 0
-      std::cout << ESMC_METHOD << "loop broke with i = " << i 
+      std::cout << ESMC_METHOD << "loop broke with i = " << i
         << ", vmKeyWidth = " << vmKeyWidth << std::endl;
 #endif
       break;
@@ -548,11 +548,11 @@ VMId VMIdCreate(
 void VMIdDestroy(
 //
 // !RETURN VALUE:
-//    
+//
 //
 // !ARGUMENTS:
 //
-  VMId *vmID, 
+  VMId *vmID,
   int *rc
   ){
 //
@@ -596,11 +596,11 @@ void VMIdDestroy(
 bool VMIdCompare(
 //
 // !RETURN VALUE:
-//    bool indicating result of comparison. 
+//    bool indicating result of comparison.
 //
 // !ARGUMENTS:
 //
-  VMId *vmID1, 
+  VMId *vmID1,
   VMId *vmID2
   ){
 //
@@ -642,11 +642,11 @@ bool VMIdCompare(
 int VMIdCopy(
 //
 // !RETURN VALUE:
-//    int return code 
+//    int return code
 //
 // !ARGUMENTS:
 //
-  VMId *vmIDdst, 
+  VMId *vmIDdst,
   VMId *vmIDsrc
   ){
 //
@@ -684,7 +684,7 @@ int VMIdCopy(
 void VMIdGet(
 //
 // !RETURN VALUE:
-//    
+//
 //
 // !ARGUMENTS:
 //
@@ -728,7 +728,7 @@ void VMIdGet(
 void VMIdSet(
 //
 // !RETURN VALUE:
-//    
+//
 //
 // !ARGUMENTS:
 //
@@ -796,10 +796,10 @@ void *VM::startup(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   // Startup the VM
   void *info = VMK::startup(static_cast<VMKPlan *>(vmp), fctp, cargo, &localrc);
-  // The return code set by startup() indicates failure in pthread_create() 
+  // The return code set by startup() indicates failure in pthread_create()
   // [if pthread_create() is used -- which depends on the VMKPlan].
   // Translate startup() error code into ESMF error code.
   if (localrc){
@@ -857,11 +857,11 @@ void *VM::startup(
       }
     }
     ++(vmID.localID); // Make this localID unique to all other entries
-    
+
     // Enter information for each spawned PET of this new VM into the matchTable
     for (int j=0; j<vmp->nspawn; j++){
       // Each thread spawned by this PET gets its own entry because it will
-      // have a unique tid which will be used to associate the thread with 
+      // have a unique tid which will be used to associate the thread with
       // this entry in the matchTable.
       int index;
       if (emptyListBound){
@@ -898,7 +898,7 @@ void *VM::startup(
       rc))
       return NULL;  // bail out on error
   }
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return info;  // Return pointer to info structure
@@ -936,7 +936,7 @@ void VM::shutdown(
   // For each locally spawned PET mark the matchTable entry invalid
   if (!(vmp->parentVMflag)){
     // This is really a separate VM context (not the parent's)
-    
+
     //TODO: Make this section thread-safe for when we allow creation of child
     //TODO: components out of ESMF-multithreading parent components!
     //TODO: The issue is that multiple threads within the same VAS may access
@@ -944,7 +944,7 @@ void VM::shutdown(
     //TODO: There is no problem with the current implementation creating
     //TODO: a multi-threaded child component out of a single-threaded
     //TODO: parent component.
-    
+
     for (int j=0; j<vmp->nspawn; j++){
       int i;
       for (i=0; i<matchTableBound; i++)
@@ -1073,7 +1073,7 @@ void VM::shutdown(
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
-  
+
   //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::VM::enter()"
@@ -1153,15 +1153,15 @@ int VM::getPETMatchPET(
   int *petMatchCount,           // out - number of matching PETs in vmMatch
   int *petMatchList,            // out - list of matching PETs in vmMatch
   int len_petMatchList          // in  - size of petMatchList
-  ){              
+  ){
 //
 // !DESCRIPTION:
-//    Match PET in the current VM object against the PETs in the 
+//    Match PET in the current VM object against the PETs in the
 //    provided vmMatch VM. Return number of matched PETs and a list of the
 //    matching PET id's that operate in the same virtual address space as
 //    the specified PET.
-//    Returns ESMC_RC_ARG_SIZE if {\tt petMatchList} was provided 
-//    (i.e. not equal to {\tt ESMC\_NULL\_POINTER) but 
+//    Returns ESMC_RC_ARG_SIZE if {\tt petMatchList} was provided
+//    (i.e. not equal to {\tt ESMC\_NULL\_POINTER) but
 //    {\tt len_petMatchList} < number of matching PETs found.
 //    Otherwise returns ESMF_SUCCESS (even if no matching PETs were found!).
 //
@@ -1179,7 +1179,7 @@ int VM::getPETMatchPET(
       tempMatchList[j] = i;
       ++j;
     }
-  // now j is equal to the number of PETs in vmMatch which operate in the 
+  // now j is equal to the number of PETs in vmMatch which operate in the
   // same virtual address space as pet in the current VM
   if (petMatchCount != ESMC_NULL_POINTER)
     *petMatchCount = j;
@@ -1235,7 +1235,7 @@ VMId *VM::getVMId(
     return NULL;
   }
   // found a match
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return &matchTable_vmID[i];
@@ -1420,7 +1420,7 @@ int VM::alltoallvVMId(
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
-  
+
 }
 //-----------------------------------------------------------------------------
 
@@ -1461,7 +1461,7 @@ int VM::allgathervVMId(
   for (int i=0; i<sendcount; i++) {
     if (sendvmid[i]==ESMC_NULL_POINTER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-	"- Invalid VMId", ESMC_CONTEXT, &rc);
+        "- Invalid VMId", ESMC_CONTEXT, &rc);
       return rc;
     }
   }
@@ -1473,14 +1473,14 @@ int VM::allgathervVMId(
     return rc;
   }
 
-  // TODO: Convert this to a real AllGatherV 
+  // TODO: Convert this to a real AllGatherV
 
   // Each PET copies its send data into its receive area, then broadcast
   for (int i=0; i<recvcounts[mypet]; i++) {
     int localrc = VMIdCopy (recvvmid[recvoffsets[mypet]+i], sendvmid[i]);
     if (localrc != ESMF_SUCCESS){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-	"- Bad VMIdCopy", ESMC_CONTEXT, &rc);
+        "- Bad VMIdCopy", ESMC_CONTEXT, &rc);
       return rc;
     }
   }
@@ -1523,7 +1523,7 @@ int VM::bcastVMId(
   for (int i=0; i<count; i++) {
     if (vmID[i]==ESMC_NULL_POINTER){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-	"- Invalid VMId", ESMC_CONTEXT, &rc);
+        "- Invalid VMId", ESMC_CONTEXT, &rc);
       return rc;
     }
   }
@@ -1575,7 +1575,7 @@ int VM::print() const{
 //
 //
 // !DESCRIPTION:
-//    Print details of VM object 
+//    Print details of VM object
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1617,7 +1617,7 @@ int VM::validate()const{
 //
 //
 // !DESCRIPTION:
-//    Validate details of VM object 
+//    Validate details of VM object
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -1716,7 +1716,7 @@ VM *VM::getGlobal(
       "- Invalid GlobalVM", ESMC_CONTEXT, rc);
     return NULL;
   }
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return GlobalVM;
@@ -1765,7 +1765,7 @@ VM *VM::getCurrent(
     }
   }
   // found a match
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return matchTable_vm[i];
@@ -1803,7 +1803,7 @@ VMId *VM::getCurrentID(
 #else
   mytid = 0;
 #endif
-  
+
   int i = matchTableIndex;
   if (matchTable_tid[i] != mytid){
     for (i=0; i<matchTableBound; i++)
@@ -1862,10 +1862,10 @@ void VM::getCurrentGarbageInfo(
     }
   }
   // found a match
-  
+
   *fobjCount = matchTable_FObjects[i].size();
   *objCount = matchTable_Objects[i].size();
- 
+
   // return successfully
 }
 //-----------------------------------------------------------------------------
@@ -1910,9 +1910,9 @@ void VM::logCurrentGarbageInfo(
     }
   }
   // found a match
-  
+
   char msg[512];
-  sprintf(msg, "%s - CurrGarbInfo: Fortran objs=%lu", prefix.c_str(), 
+  sprintf(msg, "%s - CurrGarbInfo: Fortran objs=%lu", prefix.c_str(),
     matchTable_FObjects[i].size());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   for (unsigned j=0; j<matchTable_FObjects[i].size(); j++){
@@ -1920,7 +1920,7 @@ void VM::logCurrentGarbageInfo(
       matchTable_FObjects[i][j].objectID);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   }
-  sprintf(msg, "%s - CurrGarbInfo: Base objs=%lu", prefix.c_str(), 
+  sprintf(msg, "%s - CurrGarbInfo: Base objs=%lu", prefix.c_str(),
     matchTable_Objects[i].size());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   for (unsigned j=0; j<matchTable_Objects[i].size(); j++){
@@ -1928,8 +1928,8 @@ void VM::logCurrentGarbageInfo(
     proxyString="actual object";
     if (matchTable_Objects[i][j]->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
       proxyString="proxy object";
-    sprintf(msg, "%s - CurrGarbInfo: base objs[%d]: %p : %s : %s : %d ; %s", 
-      prefix.c_str(), j, matchTable_Objects[i][j], 
+    sprintf(msg, "%s - CurrGarbInfo: base objs[%d]: %p : %s : %s : %d ; %s",
+      prefix.c_str(), j, matchTable_Objects[i][j],
       matchTable_Objects[i][j]->ESMC_BaseGetClassName(),
       matchTable_Objects[i][j]->ESMC_BaseGetName(),
       matchTable_Objects[i][j]->ESMC_BaseGetID(), proxyString);
@@ -1965,7 +1965,7 @@ void VM::getMemInfo(
   int rc = ESMC_RC_NOT_IMPL;   // final return code
 
   *virtMemPet = *physMemPet = -1; // initialize
-  
+
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
   // must lock/unlock for thread-safety
   VM *vm = getCurrent();
@@ -1985,7 +1985,7 @@ void VM::getMemInfo(
   fclose(file);
   vm->unlock();
 #endif
-  
+
   // return successfully
 }
 //-----------------------------------------------------------------------------
@@ -2079,7 +2079,7 @@ void VM::logMemInfo(
   // unlock again
   vm->unlock();
 #endif
-  
+
   // return successfully
 }
 //-----------------------------------------------------------------------------
@@ -2110,7 +2110,7 @@ int VM::getBaseIDAndInc(
     if (VMIdCompare(vmID, &(matchTable_vmID[i]))) break;
   if (i == matchTableBound)
     return -1;  // no match found -> return invalid count
-  
+
   // match found
   int count = matchTable_BaseIDCount[i];
   matchTable_BaseIDCount[i] = count + 1;  // increment
@@ -2154,7 +2154,7 @@ void VM::addObject(
       "- Could not find table entry for current VM", ESMC_CONTEXT, &rc);
     throw rc;
   }
-  
+
   // match found, proceed
 
   // must lock/unlock for thread-safe access to std::vector
@@ -2207,14 +2207,14 @@ void VM::rmObject(
       throw rc;
     }
   }
-  
+
   // found a match
   // proceed to remove object from this VM's garbage collection table
 
   // must lock/unlock for thread-safe access to std::vector
   VM *vm = getCurrent();
   vm->lock();
-  for (vector<ESMC_Base *>::iterator 
+  for (vector<ESMC_Base *>::iterator
     it = matchTable_Objects[i].begin();
     it != matchTable_Objects[i].end(); ++it){
     if (*it == object){
@@ -2263,7 +2263,7 @@ void VM::addFObject(
       "- Could not find table entry for current VM", ESMC_CONTEXT, &rc);
     throw rc;
   }
-  
+
   // match found
 
   // must lock/unlock for thread-safe access to std::vector
@@ -2272,7 +2272,7 @@ void VM::addFObject(
   int size = matchTable_FObjects[i].size();
   matchTable_FObjects[i].resize(size+1);  // add element to FObjects list
   void *fobjectElement = (void *)&(matchTable_FObjects[i][size].fobject);
-  
+
   FTN_X(f_esmf_fortranudtpointercopy)(fobjectElement, (void *)fobject);
 
   matchTable_FObjects[i][size].objectID = objectID;
@@ -2413,15 +2413,15 @@ void VM::rmFObject(
   // must lock/unlock for thread-safe access to std::vector
   VM *vm = getCurrent();
   vm->lock();
-  for (vector<FortranObject>::iterator 
+  for (vector<FortranObject>::iterator
     it = matchTable_FObjects[i].begin();
     it != matchTable_FObjects[i].end(); ++it){
-  
+
     void *fobjectElement = (void *)&(it->fobject);
-    
+
     int flag;
     FTN_X(f_esmf_fortranudtpointercompare)(fobjectElement, (void *)fobject, &flag);
-    
+
     if (flag){
       matchTable_FObjects[i].erase(it);  // erase the object entry
       break;
@@ -2490,7 +2490,7 @@ char const *VM::getenv(
     if (!esmfRuntimeEnv[i].compare(name)) break;
   if (i == count)
     return NULL;  // no match found, bail out
-  
+
   // match found
   return esmfRuntimeEnvValue[i].c_str();
 }
@@ -2515,7 +2515,7 @@ VM *VM::initialize(
   int *rc){   // return code
 //
 // !DESCRIPTION:
-//    Initialize the global virtual machine as an all MPI VM and return a 
+//    Initialize the global virtual machine as an all MPI VM and return a
 //    handle to the local instance of the GlobalVM.
 //
 //EOPI
@@ -2530,7 +2530,7 @@ VM *VM::initialize(
     return NULL;
   }
   GlobalVM->VMK::init(mpiCommunicator);  // set up default VMK (all MPI)
-  
+
   // allocate the VM association table
 //gjtNotYet  matchTable_tid = new esmf_pthread_t[ESMC_VM_MATCHTABLEMAX];
 //gjtNotYet  matchTable_vm = new ESMCI::VM*[ESMC_VM_MATCHTABLEMAX];
@@ -2546,7 +2546,7 @@ VM *VM::initialize(
   matchTable_BaseIDCount[matchTableBound] = 0;        // reset
   matchTable_Objects[matchTableBound].reserve(1000);  // start w/ 1000 obj
   matchTable_FObjects[matchTableBound].reserve(1000); // start w/ 1000 obj
-  
+
   // obtain ESMF runtime environment
   if (GlobalVM->getLocalPet() == 0){
     char const *esmfRuntimeVarName = "ESMF_RUNTIME_COMPLIANCECHECK";
@@ -2597,7 +2597,7 @@ VM *VM::initialize(
       esmfRuntimeEnv.push_back(esmfRuntimeVarName);
       esmfRuntimeEnvValue.push_back(esmfRuntimeVarValue);
     }
-      
+
     int count = esmfRuntimeEnv.size();
     GlobalVM->broadcast(&count, sizeof(int), 0);
     int *length = new int[2];
@@ -2652,10 +2652,10 @@ VM *VM::initialize(
                         // totalview cannot handle events during the init
                         // call - it freezes or crashes or ignores input.
   GlobalVM->barrier();  // so for now, wait for everyone to init.
-  
+
   // set the global initialized state
   esmfInitialized = true;
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return GlobalVM;
@@ -2811,7 +2811,7 @@ void VM::finalize(
       ESMC_CONTEXT, rc);
     return;
   }
-  
+
   // clean-up matchTable
   matchTableBound = 0;
 
@@ -2829,7 +2829,7 @@ void VM::finalize(
 
   // set the global finalized state
   esmfFinalized = true;
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
@@ -2953,7 +2953,7 @@ void VM::timerLog(
 //-----------------------------------------------------------------------------
   std::stringstream timerMsg;
   std::map<std::string, VMTimer>::iterator t = timers.find(timer);
-  timerMsg << "Timer '" << timer << "' accumulated time: " 
+  timerMsg << "Timer '" << timer << "' accumulated time: "
     << t->second.taccu << " seconds in " << t->second.iters << " iterations.";
   ESMC_LogDefault.Write(timerMsg.str(), ESMC_LOGMSG_INFO);
 }

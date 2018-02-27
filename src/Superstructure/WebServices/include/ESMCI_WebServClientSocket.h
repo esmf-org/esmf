@@ -45,15 +45,15 @@ namespace ESMCI
   public:
 
      // constructor and destructor
-	  ESMCI_WebServClientSocket();
-	  ~ESMCI_WebServClientSocket();
+          ESMCI_WebServClientSocket();
+          ~ESMCI_WebServClientSocket();
 
      // setting up a client
-	  int  connect(const char*  host,
+          int  connect(const char*  host,
                   int          port);
   };
 
 } // end namespace
 
 
-#endif 	// ESMCI_WebServClientSocket_H
+#endif          // ESMCI_WebServClientSocket_H

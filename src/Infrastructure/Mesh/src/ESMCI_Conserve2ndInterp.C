@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -44,7 +44,7 @@ static const char *const version = "$Id$";
 #define M_PI 3.14159265358979323846
 #endif
 
-          
+
 namespace ESMCI {
 
 
@@ -52,7 +52,7 @@ namespace ESMCI {
   /* XMRKX */
 
   void _calc_elem_centroid_2D_2D_cart(const MeshObj *elem, const MEField<>  *cfield, int sdim, double *cntr) {
-   
+
       // Get number of nodes in element
       const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
 
@@ -63,28 +63,28 @@ namespace ESMCI {
 
       // Get coords of element
       for (ESMCI::UInt s = 0; s < topo->num_nodes; ++s){
-	const MeshObj &node = *(elem->Relations[s].obj);
-	double *c = cfield->data(node);
+        const MeshObj &node = *(elem->Relations[s].obj);
+        double *c = cfield->data(node);
         for (int i=0; i<sdim; i++) {
-	  cntr[i] += c[i];
-	}
+          cntr[i] += c[i];
+        }
       }
 
       // Compute average
       for (int i=0; i<sdim; i++) {
         cntr[i]=cntr[i]/((double)topo->num_nodes);
-      }      
+      }
   }
 
   // This is used in set creation so that things are sorted by id vs. pointer
-  // sorting by pointer can result in different orders which can 
-  // result in different values on different runs (not bfb). 
+  // sorting by pointer can result in different orders which can
+  // result in different values on different runs (not bfb).
   static bool _are_gids_less_2D_2D_cart(const NBR_ELEM lhs, const NBR_ELEM rhs) {
     return (lhs.elem->get_id() < rhs.elem->get_id());
   }
 
-  // Get the neighboring elements of a given element 
-  void _get_neighbor_elems_2D_2D_cart(const MeshObj *elem, const MEField<>  *cfield, const MEField<>  *mask_field, 
+  // Get the neighboring elements of a given element
+  void _get_neighbor_elems_2D_2D_cart(const MeshObj *elem, const MEField<>  *cfield, const MEField<>  *mask_field,
                            std::vector<NBR_ELEM> *nbrs) {
 
     // Get neighboring elements
@@ -117,7 +117,7 @@ namespace ESMCI {
         _calc_elem_centroid_2D_2D_cart(nbr_elem,cfield,2,tmp_ne.cntr);
 
         // See if it's in the list, if not add it
-        std::vector<NBR_ELEM>::iterator lb = 
+        std::vector<NBR_ELEM>::iterator lb =
           std::lower_bound(nbrs->begin(), nbrs->end(), tmp_ne, _are_gids_less_2D_2D_cart);
 
         // If it's already in the list then continue
@@ -158,7 +158,7 @@ namespace ESMCI {
 
     // Get cntr from nbr with max id to make things consistent
     // on different processors
-    // Loop the rest of the elements 
+    // Loop the rest of the elements
     UInt max_nbr_id=0; // Init to 0 to watch for nothing ever being selected
     double max_nbr_cntr[2];
     for (int n=0; n<nbrs->size(); n++) {
@@ -166,16 +166,16 @@ namespace ESMCI {
 
       // Get id
       int elem_id=nbr->elem->get_id();
- 
-      // Check if max id if so switch max id and coordinates 
+
+      // Check if max id if so switch max id and coordinates
       if (elem_id > max_nbr_id) {
         double tmp_cntr[3];
         MU_ASSIGN_VEC2D(tmp_cntr,nbr->cntr);
-  
+
         // If at the center, so would be a zero vector skip...
         if ((tmp_cntr[0]==src_cntr[0]) &&
             (tmp_cntr[1]==src_cntr[1])) continue;
-   
+
         // Otherwise make this the new point
         max_nbr_id=elem_id;
         MU_ASSIGN_VEC2D(max_nbr_cntr,tmp_cntr);
@@ -183,7 +183,7 @@ namespace ESMCI {
     }
 
      // If this is a  cell with everything at the center, then just use the center
-    // this'll result in a degenerate cell which'll be handled later in the regridding with the flag. 
+    // this'll result in a degenerate cell which'll be handled later in the regridding with the flag.
     if (max_nbr_id==0) {
       MU_ASSIGN_VEC2D(max_nbr_cntr,src_cntr);
     }
@@ -207,7 +207,7 @@ namespace ESMCI {
       double vcurr[2];
       MU_SUB_VEC2D(vcurr,nbr->cntr,src_cntr);
 
-      // Calculate angle 
+      // Calculate angle
       double angle;
       nbr->angle=calc_angle<GEOM_CART2D>(v1, vcurr, u_src_cntr);
     }
@@ -219,10 +219,10 @@ namespace ESMCI {
 
   void _calc_centroid_from_sm_cells_2D_2D_cart(std::vector<SM_CELL> *sm_cells, double *cntr) {
 
-    // Init   
+    // Init
     cntr[0]=0.0;
     cntr[1]=0.0;
-    
+
     // Loop summing coords and area
     double tot_area=0.0;
     for (int i=0; i<sm_cells->size(); i++) {
@@ -249,7 +249,7 @@ namespace ESMCI {
     // Compute area of polygon
 #define MAX_NUM_NBRS 100
     double nbr_coords[2*MAX_NUM_NBRS];
-    
+
     // Error check
     if (nbrs->size()>MAX_NUM_NBRS) {
       Throw() << " A source cell contains more neighbors ("<<nbrs->size()<<") than is currently supported in 2nd order conservative weight calculation.";
@@ -266,7 +266,7 @@ namespace ESMCI {
     }
 
     // Compute area
-    double nbr_poly_area=area_of_flat_2D_polygon(nbrs->size(), nbr_coords); 
+    double nbr_poly_area=area_of_flat_2D_polygon(nbrs->size(), nbr_coords);
     if (nbr_poly_area == 0.0) return false;
     double div_nbr_poly_area=1.0/nbr_poly_area;
 
@@ -293,7 +293,7 @@ namespace ESMCI {
       MU_SUB_VEC2D(edge_vec,nbr->cntr,prev_nbr->cntr);
 
       // Compute outward normal
-      double outward_norm[2];  
+      double outward_norm[2];
       MU_ORTH_VEC2D(outward_norm,edge_vec);
 
       // Make a unit vector
@@ -324,7 +324,7 @@ namespace ESMCI {
     for (int i=0; i<nbrs->size(); i++) {
       NBR_ELEM *nbr=&((*nbrs)[i]);
 
-      // Divide by area 
+      // Divide by area
       MU_MULT_BY_SCALAR_VEC2D(nbr->grad,nbr->grad,div_nbr_poly_area);
 
       // Divide by 2.0
@@ -358,7 +358,7 @@ namespace ESMCI {
 #ifdef USE_NONCNCV_SM
   void _calc_centroid2D(int num_p, double *p, double *cntr) {
 
-    // Init   
+    // Init
     cntr[0]=0.0;
     cntr[1]=0.0;
 
@@ -375,10 +375,10 @@ namespace ESMCI {
   }
 
 
-  void create_sm_cells_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
-                                 std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, 
+  void create_sm_cells_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield,
+                                 std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field,
                                  double *src_elem_area,
-                                 std::vector<int> *valid, 
+                                 std::vector<int> *valid,
                                  std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
                                  std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
                                  std::vector<SM_CELL> *sm_cells
@@ -386,12 +386,12 @@ namespace ESMCI {
 
 
 // Maximum size for a supported polygon
-// Since the elements are of a small 
-// limited size. Fixed sized buffers seem 
+// Since the elements are of a small
+// limited size. Fixed sized buffers seem
 // the best way to handle them
 
 #define  MAX_NUM_POLY_NODES 40
-#define  MAX_NUM_POLY_COORDS_2D (2*MAX_NUM_POLY_NODES) 
+#define  MAX_NUM_POLY_COORDS_2D (2*MAX_NUM_POLY_NODES)
 
     // Declaration for src polygon
     int num_src_nodes;
@@ -402,7 +402,7 @@ namespace ESMCI {
     get_elem_coords_2D_ccw(src_elem, src_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
 
     // Init output to invalid in case we return early
-    *src_elem_area=0.0;    
+    *src_elem_area=0.0;
     for (int i=0; i<dst_elems.size(); i++) {
       (*valid)[i]=0;
       (*sintd_areas_out)[i]=0.0;
@@ -424,14 +424,14 @@ namespace ESMCI {
     if (is_smashed_quad2D(num_src_nodes, src_coords)) return;
 
     // calculate dst area
-    double src_area=area_of_flat_2D_polygon(num_src_nodes, src_coords); 
+    double src_area=area_of_flat_2D_polygon(num_src_nodes, src_coords);
 
     // If src area is 0.0 invalidate everything and leave because it won't results in weights
     // Decision about returning error for degeneracy is made above this subroutine
     if (src_area == 0.0) return;
 
     // Output src_elem_area
-    *src_elem_area=src_area;    
+    *src_elem_area=src_area;
 
     // Declaration for dst polygon
     int num_dst_nodes;
@@ -452,7 +452,7 @@ namespace ESMCI {
           continue;
         }
       }
-      
+
       // Get dst coords
       get_elem_coords_2D_ccw(dst_elem, dst_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_dst_nodes, dst_coords);
 
@@ -461,30 +461,30 @@ namespace ESMCI {
 
       // Get rid of degenerate edges
       remove_0len_edges2D(&num_dst_nodes, dst_coords);
-      
+
       // if less than a triangle skip
       if (num_dst_nodes < 3) continue;
 
       // if a smashed quad skip
       if (is_smashed_quad2D(num_dst_nodes, dst_coords)) continue;
-      
+
       // calculate dst area
-      double dst_area=area_of_flat_2D_polygon(num_dst_nodes, dst_coords); 
+      double dst_area=area_of_flat_2D_polygon(num_dst_nodes, dst_coords);
 
       // if destination area is 0.0, invalidate and go to next
       if (dst_area == 0.0) continue;
-      
+
       // Make sure that we aren't going to go over size of tmp buffers
       if ((num_src_nodes + num_dst_nodes) > MAX_NUM_POLY_NODES) {
         Throw() << " src and dst poly size too big for temp buffer";
       }
-     
+
       // Intersect src with dst element
       intersect_convex_poly2D(num_dst_nodes, dst_coords,
                               num_src_nodes, src_coords,
                               tmp_coords,
-                              &num_sintd_nodes, sintd_coords); 
-      
+                              &num_sintd_nodes, sintd_coords);
+
 
       // Get rid of degenerate edges
       remove_0len_edges2D(&num_sintd_nodes, sintd_coords);
@@ -493,7 +493,7 @@ namespace ESMCI {
       if (num_sintd_nodes < 3) continue;
 
       // calculate intersection area
-      double sintd_area=area_of_flat_2D_polygon(num_sintd_nodes, sintd_coords); 
+      double sintd_area=area_of_flat_2D_polygon(num_sintd_nodes, sintd_coords);
 
       // Valid, so set output variables
       (*valid)[i]=1;
@@ -506,10 +506,10 @@ namespace ESMCI {
       // Add destination cell index
       tmp_smc.dst_index=i;
 
-      // Add area to supermesh cell info 
+      // Add area to supermesh cell info
       tmp_smc.area=sintd_area;
-      
-      // Add centroid to supermesh cell info 
+
+      // Add centroid to supermesh cell info
       _calc_centroid2D(num_sintd_nodes, sintd_coords, tmp_smc.cntr);
 
       // Add to list
@@ -517,7 +517,7 @@ namespace ESMCI {
     }
 
 #undef  MAX_NUM_POLY_NODES
-#undef  MAX_NUM_POLY_COORDS_2D    
+#undef  MAX_NUM_POLY_COORDS_2D
    }
 #endif
 
@@ -542,7 +542,7 @@ namespace ESMCI {
 
       // Calc nbr value
       double src_nbr_val=f(nbr->cntr);
-      
+
       // Add nbr term to gradient
       grad[0]=grad[0]+src_nbr_val*nbr->grad[0];
       grad[1]=grad[1]+src_nbr_val*nbr->grad[1];
@@ -559,29 +559,29 @@ namespace ESMCI {
  /* XMRKX */
 
   // Main Call
-  void calc_2nd_order_weights_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, MEField<> *src_mask_field, 
+  void calc_2nd_order_weights_2D_2D_cart(const MeshObj *src_elem, MEField<> *src_cfield, MEField<> *src_mask_field,
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
                                            double *src_elem_area,
-                                           std::vector<int> *valid, 
-                                           std::vector<HC_WGHT> *wgts, 
+                                           std::vector<int> *valid,
+                                           std::vector<HC_WGHT> *wgts,
                                            std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
                                            std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
-                                           std::vector<SM_CELL> *sm_cells, 
+                                           std::vector<SM_CELL> *sm_cells,
                                            std::vector<NBR_ELEM> *nbrs
                                            ) {
 
 
     // Create super mesh cells by intersecting src_elem and list of dst_elems
 #ifndef USE_NONCNCV_SM
-    create_SM_cells_2D_2D_cart(src_elem, src_cfield, 
+    create_SM_cells_2D_2D_cart(src_elem, src_cfield,
                               dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
                               src_elem_area,
                               valid, sintd_areas_out, dst_areas_out,
                               tmp_valid, tmp_sintd_areas_out, tmp_dst_areas_out,
                               sm_cells);
 #else
-    create_sm_cells_2D_2D_cart(src_elem, src_cfield, 
-                              dst_elems, dst_cfield, dst_mask_field, 
+    create_sm_cells_2D_2D_cart(src_elem, src_cfield,
+                              dst_elems, dst_cfield, dst_mask_field,
                               src_elem_area,
                               valid, sintd_areas_out, dst_areas_out,
                               tmp_valid, tmp_sintd_areas_out, tmp_dst_areas_out,
@@ -603,14 +603,14 @@ namespace ESMCI {
 
     // Set gradient info based on number of neighbors
    double src_grad[2];
-   if (nbrs->size() < 3) { 
-     // Too few neighbors to use Green's, so assume constant grad 
-     _set_grad_info_to_0_2D_2D_cart(src_cntr, src_grad, nbrs);      
-   } else { 
+   if (nbrs->size() < 3) {
+     // Too few neighbors to use Green's, so assume constant grad
+     _set_grad_info_to_0_2D_2D_cart(src_cntr, src_grad, nbrs);
+   } else {
      // 3 or more neighbors so use Green's theorem
      if (!_set_grad_info_using_greens_2D_2D_cart(src_cntr, src_grad, nbrs, src_elem->get_id())) {
        // If the above doesn't suceed just default to constant
-       _set_grad_info_to_0_2D_2D_cart(src_cntr, src_grad, nbrs);      
+       _set_grad_info_to_0_2D_2D_cart(src_cntr, src_grad, nbrs);
      }
    }
 
@@ -633,11 +633,11 @@ namespace ESMCI {
 
       // calc first part of weight
       double weight=sm_cell->area/(*dst_areas_out)[sm_cell->dst_index];
-        
+
       // If weight is slightly bigger than one because of round off then push it back
-      // if it's way over let it go, so we see it. 
+      // if it's way over let it go, so we see it.
       if ((weight > 1.0) && (weight < 1.0+1.0E-10)) weight = 1.0;
-        
+
       // Subtract src centroid from subpart centroid
       double diff_cntr[2];
       MU_SUB_VEC2D(diff_cntr,sm_cell->cntr,src_cntr);
@@ -656,9 +656,9 @@ namespace ESMCI {
       tmp_hcw.src_id=src_elem->get_id();
       tmp_hcw.dst_id=dst_elems[sm_cell->dst_index]->get_id();
       tmp_hcw.dst_index=sm_cell->dst_index;
-      tmp_hcw.wgt=weight;      
+      tmp_hcw.wgt=weight;
       wgts->push_back(tmp_hcw);
- 
+
       // add parts due to neighbors
       for (int n=0; n<nbrs->size(); n++) {
         NBR_ELEM *nbr=&((*nbrs)[n]);
@@ -668,7 +668,7 @@ namespace ESMCI {
         tmp_hcw.src_id=nbr->elem->get_id();
         tmp_hcw.dst_id=dst_elems[sm_cell->dst_index]->get_id();
         tmp_hcw.dst_index=sm_cell->dst_index;
-        tmp_hcw.wgt=sintd_wgt;      
+        tmp_hcw.wgt=sintd_wgt;
         wgts->push_back(tmp_hcw);
       }
     }
@@ -690,7 +690,7 @@ namespace ESMCI {
   /* XMRKX */
 
   void _calc_elem_centroid_2D_3D_sph(const MeshObj *elem, const MEField<>  *cfield, int sdim, double *cntr) {
-   
+
       // Get number of nodes in element
       const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(*elem);
 
@@ -701,37 +701,37 @@ namespace ESMCI {
 
       // Get coords of element
       for (ESMCI::UInt s = 0; s < topo->num_nodes; ++s){
-	const MeshObj &node = *(elem->Relations[s].obj);
-	double *c = cfield->data(node);
+        const MeshObj &node = *(elem->Relations[s].obj);
+        double *c = cfield->data(node);
         for (int i=0; i<sdim; i++) {
-	  cntr[i] += c[i];
-	}
+          cntr[i] += c[i];
+        }
       }
 
       // Compute average
       for (int i=0; i<sdim; i++) {
         cntr[i]=cntr[i]/((double)topo->num_nodes);
-      }      
+      }
 
       // Project to sphere surface
       double len=MU_LEN_VEC3D(cntr);
       if (len == 0.0) Throw() << "Distance from center to point on sphere unexpectedly 0.0";
       for (int i=0; i<sdim; i++) {
         cntr[i]=cntr[i]/len;
-      }      
+      }
   }
 
 
 
   // This is used in set creation so that things are sorted by id vs. pointer
-  // sorting by pointer can result in different orders which can 
-  // result in different values on different runs (not bfb). 
+  // sorting by pointer can result in different orders which can
+  // result in different values on different runs (not bfb).
   static bool _are_gids_less_2D_3D_sph(const NBR_ELEM lhs, const NBR_ELEM rhs) {
     return (lhs.elem->get_id() < rhs.elem->get_id());
   }
 
-  // Get the neighboring elements of a given element 
-  void _get_neighbor_elems_2D_3D_sph(const MeshObj *elem, const MEField<>  *cfield, const MEField<>  *mask_field, 
+  // Get the neighboring elements of a given element
+  void _get_neighbor_elems_2D_3D_sph(const MeshObj *elem, const MEField<>  *cfield, const MEField<>  *mask_field,
                            std::vector<NBR_ELEM> *nbrs) {
 
     // Get neighboring elements
@@ -765,7 +765,7 @@ namespace ESMCI {
 
 
         // See if it's in the list, if not add it
-        std::vector<NBR_ELEM>::iterator lb = 
+        std::vector<NBR_ELEM>::iterator lb =
           std::lower_bound(nbrs->begin(), nbrs->end(), tmp_ne, _are_gids_less_2D_3D_sph);
 
         // If it's already in the list then continue
@@ -807,7 +807,7 @@ namespace ESMCI {
 
     // Get cntr from nbr with max id to make things consistent
     // on different processors
-    // Loop the rest of the elements 
+    // Loop the rest of the elements
     UInt max_nbr_id=0; // Init to 0 to watch for nothing ever being selected
     double max_nbr_cntr[3];
     for (int n=0; n<nbrs->size(); n++) {
@@ -815,17 +815,17 @@ namespace ESMCI {
 
       // Get id
       int elem_id=nbr->elem->get_id();
- 
-      // Check if max id if so switch max id and coordinates 
+
+      // Check if max id if so switch max id and coordinates
       if (elem_id > max_nbr_id) {
         double tmp_cntr[3];
         MU_ASSIGN_VEC3D(tmp_cntr,nbr->cntr);
-  
+
         // If at the center, so would be a zero vector skip...
         if ((tmp_cntr[0]==src_cntr[0]) &&
             (tmp_cntr[1]==src_cntr[1]) &&
             (tmp_cntr[2]==src_cntr[2])) continue;
-   
+
         // Otherwise make this the new point
         max_nbr_id=elem_id;
         max_nbr_cntr[0]=tmp_cntr[0];
@@ -835,7 +835,7 @@ namespace ESMCI {
     }
 
      // If this is a  cell with everything at the center, then just use the center
-    // this'll result in a degenerate cell which'll be handled later in the regridding with the flag. 
+    // this'll result in a degenerate cell which'll be handled later in the regridding with the flag.
     if (max_nbr_id==0) {
       max_nbr_cntr[0]=src_cntr[0];
       max_nbr_cntr[1]=src_cntr[1];
@@ -861,7 +861,7 @@ namespace ESMCI {
       double vcurr[3];
       MU_SUB_VEC3D(vcurr,nbr->cntr,src_cntr);
 
-      // Calculate angle 
+      // Calculate angle
       double angle;
       nbr->angle=calc_angle<GEOM_SPH2D3D>(v1, vcurr, u_src_cntr);
     }
@@ -873,12 +873,12 @@ namespace ESMCI {
 
   void _calc_centroid_from_sm_cells(std::vector<SM_CELL> *sm_cells, double *cntr) {
 
-    // Init   
+    // Init
     cntr[0]=0.0;
     cntr[1]=0.0;
     cntr[2]=0.0;
 
-    // Loop summing 
+    // Loop summing
     for (int i=0; i<sm_cells->size(); i++) {
       SM_CELL *sm_cell=&((*sm_cells)[i]);
 
@@ -903,7 +903,7 @@ namespace ESMCI {
     // Compute area of polygon
 #define MAX_NUM_NBRS 100
     double nbr_coords[3*MAX_NUM_NBRS];
-    
+
     // Error check
     if (nbrs->size()>MAX_NUM_NBRS) {
       Throw() << " A source cell contains more neighbors ("<<nbrs->size()<<") than is currently supported in 2nd order conservative weight calculation.";
@@ -921,7 +921,7 @@ namespace ESMCI {
     }
 
     // Compute area
-    double nbr_poly_area=great_circle_area(nbrs->size(), nbr_coords); 
+    double nbr_poly_area=great_circle_area(nbrs->size(), nbr_coords);
     if (nbr_poly_area == 0.0) return false;
     double div_nbr_poly_area=1.0/nbr_poly_area;
 
@@ -977,7 +977,7 @@ namespace ESMCI {
     if (len == 0.0) Throw() << "Length of vector to point on sphere unexpectedly 0.0";
     double div_len=1.0/len;
     MU_MULT_BY_SCALAR_VEC3D(u_src_cntr,src_cntr,div_len);
-    
+
     // Make sure gradient is orthogonal to src_cntr
     // (because src_cntr is a constant we can use the distributive property to do each part of the sum
     //  separately)
@@ -989,14 +989,14 @@ namespace ESMCI {
       MU_CROSS_PRODUCT_VEC3D(tmp,u_src_cntr,nbr->grad);
       MU_CROSS_PRODUCT_VEC3D(nbr->grad,tmp,u_src_cntr);
 
-      // Divide by area 
+      // Divide by area
       MU_MULT_BY_SCALAR_VEC3D(nbr->grad,nbr->grad,div_nbr_poly_area);
 
       // Divide by 2.0
       MU_MULT_BY_SCALAR_VEC3D(nbr->grad,nbr->grad,0.5);
     }
 
-    // Make sure src_grad is orthogonal 
+    // Make sure src_grad is orthogonal
     double tmp[3];
     MU_CROSS_PRODUCT_VEC3D(tmp,u_src_cntr,src_grad);
     MU_CROSS_PRODUCT_VEC3D(src_grad,tmp,u_src_cntr);
@@ -1010,9 +1010,9 @@ namespace ESMCI {
 
 #if 0
   // This doesn't seem to be a very good approximation. It's possible that
-  // there's a bug, but I think that it's correct. It may just be that this way doesn't work 
-  // very well. In particular it fails if there isn't a change in one of the coordinates. 
-  // Go with constant grad for 1 and 2 for now. When time think if there's a better way to 
+  // there's a bug, but I think that it's correct. It may just be that this way doesn't work
+  // very well. In particular it fails if there isn't a change in one of the coordinates.
+  // Go with constant grad for 1 and 2 for now. When time think if there's a better way to
   // approximate a gradient for a small number of neighbors
 
   // Only have 1 or 2 neighbors so approximate gradient by just taking differences and dividing by length
@@ -1055,7 +1055,7 @@ namespace ESMCI {
         num_nonzero++;
       } else nbr->grad[2]=0.0;
 
-      // Divide by the number of nonzero components, so they are each only contributing 
+      // Divide by the number of nonzero components, so they are each only contributing
       // their part to the total
       if (num_nonzero > 0) {
         double div_num_nz=1.0/(double)(num_nonzero);
@@ -1073,7 +1073,7 @@ namespace ESMCI {
     if (len == 0.0) Throw() << "Length of vector to point on sphere unexpectedly 0.0";
     double div_len=1.0/len;
     MU_MULT_BY_SCALAR_VEC3D(u_src_cntr,src_cntr,div_len);
-    
+
     // Make sure gradient is orthogonal to src_cntr
     // (because src_cntr is a constant we can use the distributive property to do each part of the sum
     //  separately)
@@ -1089,7 +1089,7 @@ namespace ESMCI {
       MU_MULT_BY_SCALAR_VEC3D(nbr->grad,nbr->grad,div_num);
     }
 
-    // Make sure src_grad is orthogonal 
+    // Make sure src_grad is orthogonal
     double tmp[3];
     MU_CROSS_PRODUCT_VEC3D(tmp,u_src_cntr,src_grad);
     MU_CROSS_PRODUCT_VEC3D(src_grad,tmp,u_src_cntr);
@@ -1115,10 +1115,10 @@ namespace ESMCI {
   }
 
  /* XMRKX */
-#ifdef USE_NONCNCV_SM 
+#ifdef USE_NONCNCV_SM
   void _calc_centroid3D(int num_p, double *p, double *cntr) {
 
-    // Init   
+    // Init
     cntr[0]=0.0;
     cntr[1]=0.0;
     cntr[2]=0.0;
@@ -1134,7 +1134,7 @@ namespace ESMCI {
 
     // Compute average
     MU_DIV_BY_SCALAR_VEC3D(cntr,cntr,((double)num_p));
-    
+
     // Project to sphere surface
     double len=MU_LEN_VEC3D(cntr);
     if (len == 0.0) Throw() << "Distance from center to point on sphere unexpectedly 0.0";
@@ -1143,21 +1143,21 @@ namespace ESMCI {
   }
 
 
-  void create_sm_cells_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, 
-                                 std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, 
+  void create_sm_cells_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield,
+                                 std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field,
                                  double *src_elem_area,
-                                 std::vector<int> *valid, 
+                                 std::vector<int> *valid,
                                  std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
                                  std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
                                  std::vector<SM_CELL> *sm_cells
                                  ) {
 
 // Maximum size for a supported polygon
-// Since the elements are of a small 
-// limited size. Fixed sized buffers seem 
+// Since the elements are of a small
+// limited size. Fixed sized buffers seem
 // the best way to handle them
 #define  MAX_NUM_POLY_NODES 40
-#define  MAX_NUM_POLY_COORDS_3D (3*MAX_NUM_POLY_NODES) 
+#define  MAX_NUM_POLY_COORDS_3D (3*MAX_NUM_POLY_NODES)
 
     // Declaration for src polygon
     int num_src_nodes;
@@ -1168,7 +1168,7 @@ namespace ESMCI {
     get_elem_coords_3D_ccw(src_elem, src_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_src_nodes, src_coords);
 
     // Init output to invalid in case we return early
-    *src_elem_area=0.0;    
+    *src_elem_area=0.0;
     for (int i=0; i<dst_elems.size(); i++) {
       (*valid)[i]=0;
       (*sintd_areas_out)[i]=0.0;
@@ -1180,7 +1180,7 @@ namespace ESMCI {
 
     // Get rid of degenerate edges
     remove_0len_edges3D(&num_src_nodes, src_coords);
- 
+
     // If less than a triangle leave because it won't results in weights
      // Decision about returning error for degeneracy is made above this subroutine
     if (num_src_nodes<3) return;
@@ -1190,7 +1190,7 @@ namespace ESMCI {
     if (is_smashed_quad3D(num_src_nodes, src_coords)) return;
 
     // calculate src area
-    double src_area=great_circle_area(num_src_nodes, src_coords); 
+    double src_area=great_circle_area(num_src_nodes, src_coords);
 
 
     // If src area is 0.0 leave because it won't results in weights
@@ -1198,7 +1198,7 @@ namespace ESMCI {
     if (src_area == 0.0) return;
 
     // Output src_elem_area
-    *src_elem_area=src_area;    
+    *src_elem_area=src_area;
 
     /// Loop over destination elements
     // Declaration for dst polygon
@@ -1212,7 +1212,7 @@ namespace ESMCI {
     // Loop intersecting and computing areas of intersection
     for (int i=0; i<dst_elems.size(); i++) {
        const MeshObj *dst_elem = dst_elems[i];
-      
+
        // Skip masked dst elem
        if (dst_mask_field) {
          double *msk=dst_mask_field->data(*dst_elem);
@@ -1223,22 +1223,22 @@ namespace ESMCI {
 
        // Get dst coords
        get_elem_coords_3D_ccw(dst_elem, dst_cfield, MAX_NUM_POLY_NODES, tmp_coords, &num_dst_nodes, dst_coords);
-   
-  
+
+
       // if no nodes then go to next
       if (num_dst_nodes<1) continue;
 
       // Get rid of degenerate edges
       remove_0len_edges3D(&num_dst_nodes, dst_coords);
-      
+
       // if less than a triangle skip
       if (num_dst_nodes<3) continue;
- 
+
       // if a smashed quad skip
       if (is_smashed_quad3D(num_dst_nodes, dst_coords)) continue;
-       
+
       // calculate dst area
-     double dst_area=great_circle_area(num_dst_nodes, dst_coords); 
+     double dst_area=great_circle_area(num_dst_nodes, dst_coords);
 
      // if destination area is 0.0, skip
      if (dst_area==0.0)  continue;
@@ -1247,12 +1247,12 @@ namespace ESMCI {
      if ((num_src_nodes + num_dst_nodes) > MAX_NUM_POLY_NODES) {
        Throw() << " src and dst poly size too big for temp buffer";
      }
-          
+
      // Intersect src with dst element
      intersect_convex_2D_3D_sph_gc_poly(num_dst_nodes, dst_coords,
                                         num_src_nodes, src_coords,
                                         tmp_coords,
-                                        &num_sintd_nodes, sintd_coords);      
+                                        &num_sintd_nodes, sintd_coords);
 
       // Get rid of degenerate edges
       remove_0len_edges3D(&num_sintd_nodes, sintd_coords);
@@ -1261,7 +1261,7 @@ namespace ESMCI {
       if (num_sintd_nodes < 3) continue;
 
       // calculate intersection area
-      double sintd_area=great_circle_area(num_sintd_nodes, sintd_coords); 
+      double sintd_area=great_circle_area(num_sintd_nodes, sintd_coords);
 
       // Valid, so set output variables
       (*valid)[i]=1;
@@ -1274,10 +1274,10 @@ namespace ESMCI {
       // Add destination cell index
       tmp_smc.dst_index=i;
 
-      // Add area to supermesh cell info 
+      // Add area to supermesh cell info
       tmp_smc.area=sintd_area;
-      
-      // Add centroid to supermesh cell info 
+
+      // Add centroid to supermesh cell info
       _calc_centroid3D(num_sintd_nodes, sintd_coords, tmp_smc.cntr);
 
       // Add to list
@@ -1285,7 +1285,7 @@ namespace ESMCI {
     }
 
 #undef  MAX_NUM_POLY_NODES
-#undef  MAX_NUM_POLY_COORDS_3D    
+#undef  MAX_NUM_POLY_COORDS_3D
    }
 #endif
 
@@ -1311,7 +1311,7 @@ namespace ESMCI {
 
       // Calc nbr value
       double src_nbr_val=f(nbr->cntr);
-      
+
       // Add nbr term to gradient
       grad[0]=grad[0]+src_nbr_val*nbr->grad[0];
       grad[1]=grad[1]+src_nbr_val*nbr->grad[1];
@@ -1331,28 +1331,28 @@ namespace ESMCI {
  /* XMRKX */
 
   // Main Call
-  void calc_2nd_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, MEField<> *src_mask_field, 
+  void calc_2nd_order_weights_2D_3D_sph(const MeshObj *src_elem, MEField<> *src_cfield, MEField<> *src_mask_field,
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,
                                            double *src_elem_area,
-                                           std::vector<int> *valid, 
-                                           std::vector<HC_WGHT> *wgts, 
+                                           std::vector<int> *valid,
+                                           std::vector<HC_WGHT> *wgts,
                                            std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out,
                                            std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
-                                           std::vector<SM_CELL> *sm_cells, 
+                                           std::vector<SM_CELL> *sm_cells,
                                            std::vector<NBR_ELEM> *nbrs
                                         ) {
 
     // Create super mesh cells by intersecting src_elem and list of dst_elems
 #ifndef USE_NONCNCV_SM
-    create_SM_cells_2D_3D_sph(src_elem, src_cfield, 
+    create_SM_cells_2D_3D_sph(src_elem, src_cfield,
                               dst_elems, dst_cfield, dst_mask_field, dst_frac2_field,
                               src_elem_area,
                               valid, sintd_areas_out, dst_areas_out,
                               tmp_valid, tmp_sintd_areas_out, tmp_dst_areas_out,
                               sm_cells);
 #else
-    create_sm_cells_2D_3D_sph(src_elem, src_cfield, 
-                              dst_elems, dst_cfield, dst_mask_field, 
+    create_sm_cells_2D_3D_sph(src_elem, src_cfield,
+                              dst_elems, dst_cfield, dst_mask_field,
                               src_elem_area,
                               valid, sintd_areas_out, dst_areas_out,
                               tmp_valid, tmp_sintd_areas_out, tmp_dst_areas_out,
@@ -1362,70 +1362,70 @@ namespace ESMCI {
 
     // If there are no sm cells then leave
     if (sm_cells->empty()) return;
-    
+
     // Get list of source elements surrounding this one
     _get_neighbor_elems_2D_3D_sph(src_elem, src_cfield, src_mask_field, nbrs);
-    
+
     // Compute src centroid
     double src_cntr[3];
     _calc_centroid_from_sm_cells(sm_cells, src_cntr);
-    
+
     // Put the nbrs into counter clockwise order
     _make_nbr_elems_cntrclk(src_cntr, nbrs);
-    
+
 #if 0
     if (src_elem->get_id() == 137) {
       // Check output
       printf("%d# src_elem=%d is_local=%d active=%d nbrs= ",Par::Rank(),src_elem->get_id(),GetAttr(*src_elem).is_locally_owned(),GetAttr(*src_elem).GetContext().is_set(Attr::ACTIVE_ID));
       for (int i=0; i<nbrs->size(); i++) {
         NBR_ELEM *nbr=&((*nbrs)[i]);
-        
+
         printf(" %d %g",nbr->elem->get_id(),nbr->angle);
       }
       printf("\n");
-      
+
       printf("src_elem=%d sm_cells->size()=%d\n",src_elem->get_id(),sm_cells->size());
-      
+
     }
 #endif
-    
+
     // Set gradient info based on number of neighbors
     double src_grad[3];
-    if (nbrs->size() < 3) { 
-      // Too few neighbors to use Green's, so assume constant grad 
-      _set_grad_info_to_0(src_cntr, src_grad, nbrs);      
-    } else { 
+    if (nbrs->size() < 3) {
+      // Too few neighbors to use Green's, so assume constant grad
+      _set_grad_info_to_0(src_cntr, src_grad, nbrs);
+    } else {
       // 3 or more neighbors so use Green's theorem
       if (!_set_grad_info_using_greens(src_cntr, src_grad, nbrs)) {
         // If the above doesn't suceed just default to constant
-        _set_grad_info_to_0(src_cntr, src_grad, nbrs);      
+        _set_grad_info_to_0(src_cntr, src_grad, nbrs);
       }
     }
-    
+
 #if 0
     // Check output
     printf("src_elem=%d nbrs= \n",src_elem->get_id());
     for (int i=0; i<nbrs.size(); i++) {
       NBR_ELEM *nbr=&((*nbrs)[i]);
-      
+
       printf("    %d [%g %g %g] len=%g\n",nbr->elem->get_id(),nbr->grad[0],nbr->grad[1],nbr->grad[2],MU_LEN_VEC3D(nbr->.grad));
     }
     printf("\n");
 #endif
-    
+
     // Loop over supermesh cells calculating weights
     for (int i=0; i<sm_cells->size(); i++) {
-      
+
       // get info for one supermesh cell
       SM_CELL *sm_cell=&((*sm_cells)[i]);
-      
+
       // calc first part of weight
       double weight=sm_cell->area/(*dst_areas_out)[sm_cell->dst_index];
-      
+
       // If weight is slightly bigger than one because of round off then push it back
-      // if it's way over let it go, so we see it. 
+      // if it's way over let it go, so we see it.
       if ((weight > 1.0) && (weight < 1.0+1.0E-10)) weight = 1.0;
-        
+
       // Subtract src centroid from subpart centroid
       double diff_cntr[3];
       MU_SUB_VEC3D(diff_cntr,sm_cell->cntr,src_cntr);
@@ -1444,9 +1444,9 @@ namespace ESMCI {
       tmp_hcw.src_id=src_elem->get_id();
       tmp_hcw.dst_id=dst_elems[sm_cell->dst_index]->get_id();
       tmp_hcw.dst_index=sm_cell->dst_index;
-      tmp_hcw.wgt=weight;      
+      tmp_hcw.wgt=weight;
       wgts->push_back(tmp_hcw);
- 
+
       // add parts due to neighbors
       for (int n=0; n<nbrs->size(); n++) {
         NBR_ELEM *nbr=&((*nbrs)[n]);
@@ -1456,7 +1456,7 @@ namespace ESMCI {
         tmp_hcw.src_id=nbr->elem->get_id();
         tmp_hcw.dst_id=dst_elems[sm_cell->dst_index]->get_id();
         tmp_hcw.dst_index=sm_cell->dst_index;
-        tmp_hcw.wgt=sintd_wgt;      
+        tmp_hcw.wgt=sintd_wgt;
         wgts->push_back(tmp_hcw);
       }
     }
