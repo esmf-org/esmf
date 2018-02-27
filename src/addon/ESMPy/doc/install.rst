@@ -140,8 +140,7 @@ time management, etc.  The limitations listed here are relative
 to ESMF offline and integrated regridding capabilities.
 
 - There is no FieldBundle class, only single Fields.
-- There is no support for multi-tile Grids, nor Grids defined across multiple
-  files.
+- Multi-tile Grid support is limited to cubed-sphere grids on 6 processors.
 - ESMPy cannot use an ESMF installation that is built with external LAPACK
   support.
 - Conservative regridding with a source Mesh created from file is not supported,
