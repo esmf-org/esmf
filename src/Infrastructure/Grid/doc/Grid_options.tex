@@ -198,21 +198,3 @@ The 3D predefined stagger locations (illustrated in figure~\ref{fig:gridstaggerl
 \item [ESMF\_STAGGERLOC\_CENTER\_VFACE:] The center of the top and bottom face. The face bounded by the 1st and 2nd dimensions. 
 \end{description}
 
-\subsubsection{ESMF\_FILEFORMAT}
-\label{const:grid:fileformat}
-
-{\sf DESCRIPTION:\\}
-This option is used by {\tt ESMF\_GridCreate} to specify the type of the input grid file.  See 
-sections~\ref{sec:fileformat:scrip} and \ref{sec:fileformat:gridspec} for more detailed description of the supported file formats.
-
-The type of this flag is:
-
-{\tt type(ESMF\_FileFormat\_Flag)}
-
-The valid values are:
-\begin{description}
-\item [ESMF\_FILEFORMAT\_SCRIP] SCRIP format grid file. The SCRIP format is the format accepted by the SCRIP regridding tool~\cite{ref:SCRIP}.   For Grid creation, files of this type only work when the {\tt grid\_rank} in the file is equal to 2.
-
-\item [ESMF\_FILEFORMAT\_GRIDSPEC] a single tile grid file comforming with the proposed CF-GRIDSPEC conventions.
-\end{description}
-

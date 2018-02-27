@@ -2180,9 +2180,6 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! store element counter high water mark nad reset
-    runElementCounterMax = runElementCounter
-
     ! conditionally output diagnostic to Log file
     if (btest(verbosity,0)) then
       call ESMF_ClockPrint(internalClock, options="currTime", &
@@ -2196,6 +2193,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
         return  ! bail out
     endif
     if (btest(profiling,0)) then
+      ! store element counter high water mark and reset
+      runElementCounterMax = runElementCounter
       ! profile output
       write (msgString, *) "RunSequence Profile:"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)

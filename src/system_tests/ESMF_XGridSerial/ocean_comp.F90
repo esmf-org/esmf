@@ -152,6 +152,8 @@ module ocean_comp
 
     print *, "Ocean Run starting"
 
+    pi = 3.14159d0
+
     ! Get the source Field from the export State
     call ESMF_StateGet(exportState, "F_ocn", field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out

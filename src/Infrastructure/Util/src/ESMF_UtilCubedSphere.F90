@@ -307,10 +307,10 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
            if (ABS(tile_local(i,j,2)) < 1.e-10) tile_local(i,j,2) = 0.0
        enddo
     enddo
-
-    shapLon=shape(LonEdge)
-    shapLat=shape(LatEdge)
+    
     if (present(LonEdge) .and. present(LatEdge)) then
+       shapLon=shape(LonEdge)
+       shapLat=shape(LatEdge)
        LonEdge=tile_local(1:shapLon(1),1:shapLon(2),1)
        LatEdge=tile_local(1:shapLat(1),1:shapLat(2),2)
     endif
