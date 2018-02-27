@@ -611,7 +611,10 @@ Non-Conserv Regrid on Corners & NO  & YES & NO  & YES &YES\\
 \subsubsection{SCRIP Grid File Format}\label{sec:fileformat:scrip}
 
 A SCRIP format grid file is a NetCDF file for describing grids. This format is the same as is used by the SCRIP~\cite{ref:SCRIP}
-package, and so grid files which work with that package should also work here.  SCRIP format files are capable of storing either 2D logically rectangular
+package, and so grid files which work with that package should also work here.  
+When using the ESMF API, the file format flag {\tt ESMF\_FILEFORMAT\_SCRIP} can be used to indicate a file in this format.
+
+SCRIP format files are capable of storing either 2D logically rectangular
 grids or 2D unstructured grids. The basic format for both of these grids is the same and they are distinguished by the
 value of the {\tt grid\_rank} variable. Logically rectangular grids have {\tt grid\_rank} set to 2,
 whereas unstructured grids have this variable set to 1.
@@ -695,8 +698,7 @@ Both the SCRIP grid file format and the SCRIP weight file format work with the S
 
 \subsubsection{ESMF Unstructured Grid File Format}\label{sec:fileformat:esmf}
 
-ESMF supports a custom unstructured grid file format for describing meshes. This format is more compatible than the SCRIP format with the methods used to create an ESMF Mesh object, so less conversion needs to be done to create a Mesh.
-The ESMF format is thus more efficient than SCRIP when used with ESMF codes (e.g. the ESMF\_RegridWeightGen application). 
+ESMF supports a custom unstructured grid file format for describing meshes. This format is more compatible than the SCRIP format with the methods used to create an ESMF Mesh object, so less conversion needs to be done to create a Mesh. The ESMF format is thus more efficient than SCRIP when used with ESMF codes (e.g. the ESMF\_RegridWeightGen application). When using the ESMF API, the file format flag {\tt ESMF\_FILEFORMAT\_ESMFMESH} can be used to indicate a file in this format.
 
 The following is a sample header in the ESMF format followed by a description:
 
@@ -858,7 +860,9 @@ data:
 \subsubsection{CF Convention Single Tile File Format}\label{sec:fileformat:gridspec}
 
 ESMF\_RegridWeightGen supports single tile logically rectangular lat/lon grid files that follow the NETCDF CF convention based on
-\htmladdnormallink{CF Metadata Conventions V1.6} {http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html}.   An example grid file is shown below.
+\htmladdnormallink{CF Metadata Conventions V1.6} {http://cfconventions.org/cf-conventions/v1.6.0/cf-conventions.html}. When using the ESMF API, the file format flag {\tt ESMF\_FILEFORMAT\_CFGRID} (or its equivalent {\tt ESMF\_FILEFORMAT\_GRIDSPEC}) can be used to indicate a file in this format.  
+
+ An example grid file is shown below.
 The cell center coordinate variables are determined by the value of its attribute {\tt units}.  The longitude
 variable has the attribute value set to either {\tt degrees\_east}, {\tt degree\_east}, {\tt degrees\_E}, {\tt degree\_E},
 {\tt degreesE} or {\tt degreeE}.  The latitude variable has the attribute value set to {\tt degrees\_north}, {\tt degree\_north}, {\tt degrees\_N},
@@ -915,7 +919,7 @@ variables:
 
 ESMF\_RegridWeightGen supports NetCDF files that follow the UGRID conventions for unstructured grids.
 
-The UGRID file format is a proposed extension to the CF metadata conventions for the unstructured grid data model. The latest proposal can be found at \htmladdnormallink{https://github.com/ugrid-conventions/ugrid-conventions}{https://github.com/ugrid-conventions/ugrid-conventions}.  The proposal is still evolving, the Mesh creation API and ESMF\_RegridWeightGen in the current ESMF release is based on UGRID Version 0.9.0 published on October 29, 2013.
+The UGRID file format is a proposed extension to the CF metadata conventions for the unstructured grid data model. The latest proposal can be found at \htmladdnormallink{https://github.com/ugrid-conventions/ugrid-conventions}{https://github.com/ugrid-conventions/ugrid-conventions}.  The proposal is still evolving, the Mesh creation API and ESMF\_RegridWeightGen in the current ESMF release is based on UGRID Version 0.9.0 published on October 29, 2013. When using the ESMF API, the file format flag {\tt ESMF\_FILEFORMAT\_UGRID} can be used to indicate a file in this format.
 
 In the UGRID proposal, a 1D, 2D, or 3D mesh topology can be defined for an unstructured grid.  Currently, ESMF
 supports two types of meshes: (1) the 2D flexible mesh topology where each cell (a.k.a. "face" as defined in the UGRID document) in the mesh is either a triangle or a quadrilateral, and (2) the fully 3D unstructured mesh topology where each cell (a.k.a. "volume" as defined in the UGRID document) in the mesh
@@ -1048,9 +1052,8 @@ variables:
 GRIDSPEC is a draft proposal to extend the Climate and Forecast (CF) metadata conventions for the representation of gridded data for Earth System Models.  The original GRIDSPEC standard was proposed by V. Balaji and Z. Liang of GFDL (see \htmladdnormallink{ref} {http://www.gfdl.noaa.gov/~vb/gridstd/gridstd.html}). GRIDSPEC extends the current CF convention to support grid  mosaics, i.e., a grid consisting of multiple logically
 rectangular grid tiles. It also provides a mechanism for storing a grid dataset in multiple files.  Therefore,
 it introduces different types of files, such as a mosaic file that defines the multiple tiles and their
-connectivity, and a tile file for a single tile grid definition on a so-called ``Supergrid'' format.
+connectivity, and a tile file for a single tile grid definition on a so-called ``Supergrid'' format. When using the ESMF API, the file format flag {\tt ESMF\_FILEFORMAT\_MOSAIC} can be used to indicate a file in this format.
 
-In the lastest ESMF release, we added support for the multi-tile GRIDSPEC Mosaic file to the ESMF\_RegridWeightGen application.  
 Following is an example of a mosaic file that defines a 6 tile Cubed Sphere grid:
 
 \begin{verbatim}
