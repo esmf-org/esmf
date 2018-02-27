@@ -16,7 +16,7 @@
 !
 !===============================================================================
 !
-! This file contains parameters, global data types, and parser 
+! This file contains parameters, global data types, and parser
 ! functions/subroutines for the Testing Harness.
 ! These methods are used by the test harness driver ESMF_TestHarnessUTest.F90.
 !
@@ -30,7 +30,7 @@
 ! !DESCRIPTION:
 !
 ! The code in this file contains data types and basic functions for the
-! {\tt ESMF\_TestHarnessParse}.  
+! {\tt ESMF\_TestHarnessParse}.
 !  Expand on the type of routines included here
 !
 !-------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ logical                       :: checkpoint = .FALSE.
 ! minimum error neighborhood for regrid interpolation
 !real(ESMF_KIND_R8), parameter :: RegridMinNeighborhood = 1.0D-14
 
-  contains 
+  contains
 
 !===============================================================================
 ! !IROUTINE: Read_TestHarness_Config
@@ -80,7 +80,7 @@ logical                       :: checkpoint = .FALSE.
 
 !
 ! !DESCRIPTION:
-! Routine opens the top level config file "test_harness.rc", which specifies the 
+! Routine opens the top level config file "test_harness.rc", which specifies the
 ! test class, the reporting style, and depending on how the ESMF_TESTEXHAUSTIVE
 ! flag is set, extracts the list of files containing the problem descriptor
 ! strings.
@@ -110,7 +110,7 @@ logical                       :: checkpoint = .FALSE.
   ! local integer variables
   integer :: kfile, ncolumns
   integer :: localrc
-  integer :: allocRcToTest 
+  integer :: allocRcToTest
 
   ! local  logical
   logical :: flag = .true.
@@ -139,11 +139,11 @@ logical                       :: checkpoint = .FALSE.
   call ESMF_ConfigLoadFile (localcf, trim(filename), rc=localrc)
   if( ESMF_LogFoundError(localrc, msg="cannot load config file " //             &
       trim(configFname), rcToReturn=returnrc) ) return
-  
+
   !-----------------------------------------------------------------------------
-  ! find and read the test class 
+  ! find and read the test class
   !-----------------------------------------------------------------------------
-  call ESMF_ConfigFindLabel(localcf, trim(adjustL(test_class_name)), rc=localrc) 
+  call ESMF_ConfigFindLabel(localcf, trim(adjustL(test_class_name)), rc=localrc)
   if( ESMF_LogFoundError(localrc, msg="cannot find config label " //            &
       trim(adjustL(test_class_name)),rcToReturn=returnrc) ) return
 
@@ -186,7 +186,7 @@ logical                       :: checkpoint = .FALSE.
   endif
 
   !-----------------------------------------------------------------------------
-  ! read test report flag 
+  ! read test report flag
   ! test_report: FULL  - full report presenting both success and failure configs
   ! test_report: FAILURE - report only failure configurations
   ! test_report: SUCCESS - report only successful configurations
@@ -204,12 +204,12 @@ logical                       :: checkpoint = .FALSE.
   if ( har%reportType /= "FULL" .and. har%reportType /= "FAILURE" .and.        &
        har%reportType /= "SUCCESS" .and. har%reportType /= "NONE" ) then
      call ESMF_LogSetError( ESMF_FAILURE, msg="report flag improperly set" //   &
-          trim(har%reportType), rcToReturn=returnrc) 
+          trim(har%reportType), rcToReturn=returnrc)
      return
   endif
 
   !-----------------------------------------------------------------------------
-  ! based on whether exhaustive or nonexhaustive tests are to be run,  find 
+  ! based on whether exhaustive or nonexhaustive tests are to be run,  find
   ! and load the problem descriptor file names
   !-----------------------------------------------------------------------------
 !#ifdef ESMF_TESTEXHAUSTIVE
@@ -258,8 +258,8 @@ logical                       :: checkpoint = .FALSE.
      call ESMF_ConfigNextLine(localcf, tableEnd=flag, rc=localrc)
      if( ESMF_LogFoundError(localrc, msg="cannot advance to next line of " //   &
          "table " // trim(adjustL(ltag)), rcToReturn=returnrc) ) return
- 
-     ! retrieve the problem descriptor filenames 
+
+     ! retrieve the problem descriptor filenames
      call ESMF_ConfigGetAttribute(localcf, ltmp, rc=localrc)
      if( ESMF_LogFoundError(localrc, msg="cannot get descriptor filename in "// &
          trim(adjustL(ltag)), rcToReturn=returnrc) ) return
@@ -283,7 +283,7 @@ logical                       :: checkpoint = .FALSE.
 !===============================================================================
 
 !-------------------------------------------------------------------------------
- 
+
 !===============================================================================
 ! !IROUTINE: Read_TestHarness_Specifier
 
@@ -301,7 +301,7 @@ logical                       :: checkpoint = .FALSE.
 ! 1. Reads the problem descriptor files, storing each problem descriptor string
 ! and the names of the accompaning support files in the harness descriptor record.
 !
-! 2. Parse the descriptor strings and store the information in the harness 
+! 2. Parse the descriptor strings and store the information in the harness
 ! descriptor record.
 !
 ! 3. Read the grid and distribution specifier files and store the configurations
@@ -328,7 +328,7 @@ logical                       :: checkpoint = .FALSE.
   localrc = ESMF_RC_NOT_IMPL
 
   !-----------------------------------------------------------------------------
-  ! read each of the problem descriptor files obtained from read_testharness_config 
+  ! read each of the problem descriptor files obtained from read_testharness_config
   ! and extract the problem descriptor strings and the accompanying specifier
   ! filenames.
   !-----------------------------------------------------------------------------
@@ -351,7 +351,7 @@ logical                       :: checkpoint = .FALSE.
                   har%rcrd(kfile)%str(kstr), localrc)
         if (ESMF_LogFoundError(localrc,msg=" error in problem descriptor file " &
            // trim(adjustL(har%rcrd(kfile)%filename)),                         &
-           rcToReturn=returnrc)) return  
+           rcToReturn=returnrc)) return
 
         ! read distribution specifier files
         do k=1,har%rcrd(kfile)%str(kstr)%nDfiles
@@ -359,7 +359,7 @@ logical                       :: checkpoint = .FALSE.
            call read_dist_specification(nPEs,                                  &
                     har%rcrd(kfile)%str(kstr)%Dfiles(k),                       &
                     har%rcrd(kfile)%str(kstr)%DstMem,                          &
-                    har%rcrd(kfile)%str(kstr)%SrcMem, localrc)       
+                    har%rcrd(kfile)%str(kstr)%SrcMem, localrc)
            if (ESMF_LogFoundError(localrc,msg=" error reading dist specifier"   &
               // " file "  //                                                  &
               trim(adjustL(har%rcrd(kfile)%str(kstr)%Dfiles(k)%filename)),     &
@@ -407,7 +407,7 @@ logical                       :: checkpoint = .FALSE.
            do iD=1, nDspec
            do iG=1, nGspec
              har%rcrd(kfile)%str(kstr)%test_record(iDfile,iGfile)%             &
-                 test_status(iD,iG) = HarnessTest_UNDEFINED 
+                 test_status(iD,iG) = HarnessTest_UNDEFINED
            enddo   ! iG
            enddo   ! iD
 
@@ -424,7 +424,7 @@ logical                       :: checkpoint = .FALSE.
   if( trim(har%setupReportType) == "TRUE" )  nstatus= 1
   do kfile=1,har%numrecords
      do kstr=1,har%rcrd(kfile)%numStrings
-        call construct_descriptor_string(har%rcrd(kfile)%str(kstr),nstatus, &  
+        call construct_descriptor_string(har%rcrd(kfile)%str(kstr),nstatus, &
                                          localPet, localrc)
      enddo  ! kstr
   enddo    ! kfile
@@ -452,16 +452,16 @@ logical                       :: checkpoint = .FALSE.
 ! !ARGUMENTS:
   character(len=*),                 intent(in)  :: srcPath
   integer,                          intent(in)  :: numRecords
-  type(problem_descriptor_records), pointer     :: rcrd(:) 
+  type(problem_descriptor_records), pointer     :: rcrd(:)
   integer,                          intent(out) :: rc
 
 !
 ! !DESCRIPTION:
-! This routine takes the problem descriptor file names specified in the top 
+! This routine takes the problem descriptor file names specified in the top
 ! level config file "test_harness.rc" and extracts from a config table the
 ! "problem descriptor string" and all the "problem specifier files." These
 ! helper files are divided into groups by flags preceeded by a dash. The
-! "-c" flag (currently not implemented) indicates file(s) containing the CLASS 
+! "-c" flag (currently not implemented) indicates file(s) containing the CLASS
 ! specific settings. The "-d" flag indicates the file(s) containing an ensemble
 ! of distribution configurations to be run with the specific "problem descriptor
 ! string." Likewise the "-g" flag indicates the file(s) containing an ensemble
@@ -471,7 +471,7 @@ logical                       :: checkpoint = .FALSE.
 !
 ! Upon completion, the routine returns the values to a public record
 
-!   har%rcrd(n)%numStrings      number of problem descriptor strings in 
+!   har%rcrd(n)%numStrings      number of problem descriptor strings in
 !                               the n'th problem descriptor file.
 
 !   har%rcrd(n)%str(k)%pds   k'th problem descriptor from the n'th
@@ -480,10 +480,10 @@ logical                       :: checkpoint = .FALSE.
 !   har%rcrd(n)%str(k)%nDfiles   number of distribution specifier files
 
 !   har%rcrd(n)%str(k)%Dfiles(l)%filename   filename string for
-!                                        the l'th distribution specifier file 
+!                                        the l'th distribution specifier file
 !                                        associated with the k'th problem descriptor
-!                                        string, located in the n'th problem 
-!                                        descriptor file.                  
+!                                        string, located in the n'th problem
+!                                        descriptor file.
 !
 !   har%rcrd(n)%str(k)%nGfiles        number of grid specifier files
 !
@@ -491,7 +491,7 @@ logical                       :: checkpoint = .FALSE.
 !                                        the l'th grid specifier file associated
 !                                        with the k'th problem descriptor string
 !                                        located in the n'th problem descriptor
-!                                        file.                  
+!                                        file.
 !===============================================================================
 
   ! local ESMF types
@@ -508,7 +508,7 @@ logical                       :: checkpoint = .FALSE.
   character(THARN_MAXSTR) :: lfilename
   character(THARN_MAXSTR) :: ltmp
   character(THARN_MAXSTR) :: lchar, lchar1, lchar2
-  
+
   logical :: flag
 
 ! local integer variables
@@ -663,11 +663,11 @@ logical                       :: checkpoint = .FALSE.
 
     do kstr=1,nstrings(kfile)
        if( trim(adjustL(ltmpstring(kstr)%tag(1)%string)) /= "&") then
-         pds_flag(kstr) = 1         
+         pds_flag(kstr) = 1
          npds = npds + 1
        else
          ncount = ncount + 1
-         pds_flag(kstr) = 0         
+         pds_flag(kstr) = 0
        endif
     enddo     ! end string
     ! sanity check
@@ -679,7 +679,7 @@ logical                       :: checkpoint = .FALSE.
              trim(adjustl(lchar)) // " in the table"  //                       &
              " does not match the sum of strings " // trim(adjustl(lchar1))    &
              // " and continuation lines " //  trim(adjustl(lchar2)) //        &
-             " of file " // trim(adjustL(lfilename)), rcToReturn=rc) 
+             " of file " // trim(adjustL(lfilename)), rcToReturn=rc)
       return
     endif
 
@@ -697,11 +697,11 @@ logical                       :: checkpoint = .FALSE.
     do kstr=1,nstrings(kfile)
        if( pds_flag(kstr) == 1 ) then
          k = k + 1
-         pds_loc(k) =  kstr        
+         pds_loc(k) =  kstr
        endif
     enddo     ! end string
     ! sanity check
-    if( npds .ne. k ) then 
+    if( npds .ne. k ) then
       write(lchar,"(i5)")  nstrings(kfile)
       write(lchar1,"(i5)")  npds
       write(lchar2,"(i5)")  ncount
@@ -714,10 +714,10 @@ logical                       :: checkpoint = .FALSE.
     endif
 
     !---------------------------------------------------------------------------
-    ! to simplify the later search algorithm, reshape the input table from a 
+    ! to simplify the later search algorithm, reshape the input table from a
     ! series of lines with a PDS plus optional continuations lines, to a single
-    ! line with everything on it. Count the total number of elements on both 
-    ! type of lines to that we can allocate enough memory to store the whole 
+    ! line with everything on it. Count the total number of elements on both
+    ! type of lines to that we can allocate enough memory to store the whole
     ! specification.
     !---------------------------------------------------------------------------
     allocate( kcount(npds), stat=allocRcToTest )
@@ -738,7 +738,7 @@ logical                       :: checkpoint = .FALSE.
         pstring =  pds_loc(k)
  21     continue
         !-----------------------------------------------------------------------
-        ! if not end of table, look for additional continuation lines 
+        ! if not end of table, look for additional continuation lines
         !-----------------------------------------------------------------------
         if(pstring < nstrings(kfile)) then
           pstring =  pstring + 1
@@ -746,7 +746,7 @@ logical                       :: checkpoint = .FALSE.
           ! if find a continuation line add additional elements (minus the
           ! continuation symbol "&")
           !---------------------------------------------------------------------
-          if( trim( ltmpstring(pstring)%tag(1)%string ) == "&" ) then 
+          if( trim( ltmpstring(pstring)%tag(1)%string ) == "&" ) then
             kcount(k) = kcount(k) + ncolumns(pstring) -1
             goto 21
           endif
@@ -757,13 +757,13 @@ logical                       :: checkpoint = .FALSE.
     !---------------------------------------------------------------------------
     ! create reshaped workspace to hold the problem descriptor table contents
     !---------------------------------------------------------------------------
-    allocate ( lstring(npds), stat=allocRcToTest )    
+    allocate ( lstring(npds), stat=allocRcToTest )
     if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//                    &
        " lstring in read_descriptor_files", rcToReturn=rc)) then
     endif
 
     do k=1, npds
-      allocate ( lstring(k)%tag(kcount(k)), stat=allocRcToTest )    
+      allocate ( lstring(k)%tag(kcount(k)), stat=allocRcToTest )
       if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//                  &
          " lstring tag in read_descriptor_files", rcToReturn=rc)) then
       endif
@@ -771,7 +771,7 @@ logical                       :: checkpoint = .FALSE.
       do n=1,ncolumns(pds_loc(k))
         lstring(k)%tag(n)%string = trim( ltmpstring(pds_loc(k))%tag(n)%string )
       enddo     ! n
-        
+
       pstring =  pds_loc(k)
       nn = ncolumns(pds_loc(k))+1
  22   continue
@@ -783,7 +783,7 @@ logical                       :: checkpoint = .FALSE.
         pstring =  pstring + 1
 
         !-----------------------------------------------------------------------
-        ! if find a continuation line, and add to the line length (minus the 
+        ! if find a continuation line, and add to the line length (minus the
         ! continuation symbol)
         !-----------------------------------------------------------------------
         if( trim( ltmpstring(pstring)%tag(1)%string ) == "&" ) then
@@ -891,10 +891,10 @@ logical                       :: checkpoint = .FALSE.
            ! if not a flag, repeat until a flag
            if( ltmp(1:1) /= '-' ) goto 12
            dsize = pos-1-dpos
-           endflag =.true. 
+           endflag =.true.
          else  ! at end of row
            dsize = pos-dpos
-           endflag =.false. 
+           endflag =.false.
          endif
 
          allocate( rcrd(kfile)%str(k)%Dfiles(dsize), stat=allocRcToTest )
@@ -940,7 +940,7 @@ logical                       :: checkpoint = .FALSE.
          else  ! at end of row
            gsize = pos-gpos
            endflag = .false.
-         endif  
+         endif
 
          allocate( rcrd(kfile)%str(k)%Gfiles(gsize), stat=allocRcToTest )
          if (ESMF_LogFoundAllocError(allocRcToTest, msg="type "//               &
@@ -981,7 +981,7 @@ logical                       :: checkpoint = .FALSE.
     enddo
     do kstr=1,nstrings(kfile)
       deallocate ( ltmpstring(kstr)%tag )
-    enddo  
+    enddo
     deallocate( ncolumns, kcount )
     deallocate( ltmpstring, lstring )
     deallocate( pds_loc, pds_flag )
@@ -1014,21 +1014,21 @@ logical                       :: checkpoint = .FALSE.
   subroutine parse_descriptor_string(nstrings, pds, rc)
   !-----------------------------------------------------------------------------
   ! Routine parses a problem descriptor string and extracts:
-  !	operation - redistribution or regrid plus method
-  !	rank of memory
-  !	rank of distribution
-  !	rank of grid association
+  !     operation - redistribution or regrid plus method
+  !     rank of memory
+  !     rank of distribution
+  !     rank of grid association
   !     order of dist and grid
   !     type of dist or grid
   !
   ! Upon completion, the routine returns the values to the harness record
-  ! Harness%Record(*)%string(*)%   for 
+  ! Harness%Record(*)%string(*)%   for
   !
   !     process%string          character string of process
   !     process%tag             numerical tag for process
   !
   !     SrcMem%memRank          rank of source memory block
-  !     SrcMem%GridRank         rank of source grid 
+  !     SrcMem%GridRank         rank of source grid
   !     SrcMem%DistRank         rank of source distribution
   !     SrcMem%GridType         type of grid
   !     SrcMem%DistType         type of distribution
@@ -1088,7 +1088,7 @@ logical                       :: checkpoint = .FALSE.
   !    source and destination parts
   !-----------------------------------------------------------------------------
   lstring = trim(adjustL( pds%pds ) )
-  call process_query(lstring, lname, tag, location, localrc)  
+  call process_query(lstring, lname, tag, location, localrc)
   if( CheckError(checkpoint, __LINE__, __FILE__, localrc,"syntax error in problem descriptor" //    &
           " string " // trim(adjustL(lstring)),                                &
           rcToReturn=rc) ) return
@@ -1110,7 +1110,7 @@ logical                       :: checkpoint = .FALSE.
           rcToReturn=rc) ) return
 
   ! a multiple block memory structure contains (), these are counted in
-  ! srcMulti and dstMulti 
+  ! srcMulti and dstMulti
   if( (srcMulti >= 1).or.(dstMulti >= 1) ) then
      ! TODO break into multiple single block strings
      ! and parse each string separately
@@ -1164,7 +1164,7 @@ logical                       :: checkpoint = .FALSE.
         if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " grid_order in parse_descriptor_string", rcToReturn=rc)) then
         endif
-        allocate( grid_type(src_mem_rank), stat=allocRcToTest )      
+        allocate( grid_type(src_mem_rank), stat=allocRcToTest )
         if (ESMF_LogFoundAllocError(allocRcToTest, msg="char variable "//       &
            " grid_type in parse_descriptor_string", rcToReturn=rc)) then
         endif
@@ -1176,15 +1176,15 @@ logical                       :: checkpoint = .FALSE.
         if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " grid_HaloR in parse_descriptor_string", rcToReturn=rc)) then
         endif
-        allocate( grid_StagLoc(src_mem_rank), stat=allocRcToTest )    
+        allocate( grid_StagLoc(src_mem_rank), stat=allocRcToTest )
         if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " grid_StagLoc in parse_descriptor_string", rcToReturn=rc)) then
         endif
-        allocate( dist_order(src_mem_rank), stat=allocRcToTest )      
+        allocate( dist_order(src_mem_rank), stat=allocRcToTest )
         if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " dist_order in parse_descriptor_string", rcToReturn=rc)) then
         endif
-        allocate( dist_type(src_mem_rank), stat=allocRcToTest )      
+        allocate( dist_type(src_mem_rank), stat=allocRcToTest )
         if (ESMF_LogFoundAllocError(allocRcToTest, msg="char variable "//       &
            " dist_type in parse_descriptor_string", rcToReturn=rc)) then
         endif
@@ -1220,14 +1220,14 @@ logical                       :: checkpoint = .FALSE.
 
         !-----------------------------------------------------------------------
         ! partition the source descriptor string into separate parts which
-        ! correspond to memory locations and parse the substrings for 
+        ! correspond to memory locations and parse the substrings for
         ! grid and distribution descriptions.
         !-----------------------------------------------------------------------
-        call memory_separate( src_string, src_mem_rank, lsrc, localrc) 
+        call memory_separate( src_string, src_mem_rank, lsrc, localrc)
         if( CheckError(checkpoint, __LINE__, __FILE__, localrc,"syntax error in SRC portion " //    &
                 "of problem descriptor string - memory separate " //           &
                  trim(adjustL(lstring)), rcToReturn=rc) ) return
-        call interpret_descriptor_string( lsrc, src_mem_rank,                  & 
+        call interpret_descriptor_string( lsrc, src_mem_rank,                  &
                  grid_rank, grid_order, grid_type, grid_HaloL, grid_HaloR,     &
                  grid_StagLoc, dist_rank, dist_order, dist_type, localrc)
 
@@ -1238,12 +1238,12 @@ logical                       :: checkpoint = .FALSE.
         pds%SrcMem%GridRank = grid_rank
         pds%SrcMem%DistRank = dist_rank
 
-        do k=1,pds%SrcMem%memRank 
+        do k=1,pds%SrcMem%memRank
            pds%SrcMem%GridType(k)%string = grid_type(k)%string
            pds%SrcMem%DistType(k)%string = dist_type(k)%string
 
            pds%SrcMem%GridOrder(k) = grid_order(k)
-       ! These are getting corrupted when tensor dimensions are specified 
+       ! These are getting corrupted when tensor dimensions are specified
            pds%SrcMem%DistOrder(k) = dist_order(k)
            pds%SrcMem%HaloL(k)     = grid_HaloL(k)
            pds%SrcMem%HaloR(k)     = grid_HaloR(k)
@@ -1252,8 +1252,8 @@ logical                       :: checkpoint = .FALSE.
 
         deallocate( lsrc )
         deallocate( grid_order, grid_type, grid_HaloL, grid_HaloR )
-        deallocate( grid_StagLoc )    
-        deallocate( dist_order, dist_type )      
+        deallocate( grid_StagLoc )
+        deallocate( dist_order, dist_type )
 
         !-----------------------------------------------------------------------
         ! create work space for parsing the destination descriptor string
@@ -1278,7 +1278,7 @@ logical                       :: checkpoint = .FALSE.
         if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " grid_HaloR in parse_descriptor_string", rcToReturn=rc)) then
         endif
-        allocate( grid_StagLoc(dst_mem_rank), stat=allocRcToTest )    
+        allocate( grid_StagLoc(dst_mem_rank), stat=allocRcToTest )
         if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " grid_StagLoc in parse_descriptor_string", rcToReturn=rc)) then
         endif
@@ -1286,7 +1286,7 @@ logical                       :: checkpoint = .FALSE.
         if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//    &
            " dist_order in parse_descriptor_string", rcToReturn=rc)) then
         endif
-        allocate( dist_type(dst_mem_rank), stat=allocRcToTest )      
+        allocate( dist_type(dst_mem_rank), stat=allocRcToTest )
         if (ESMF_LogFoundAllocError(allocRcToTest, msg="char variable "//       &
            " dist_type in parse_descriptor_string", rcToReturn=rc)) then
         endif
@@ -1322,14 +1322,14 @@ logical                       :: checkpoint = .FALSE.
 
         !-----------------------------------------------------------------------
         ! partition the destination descriptor string into separate parts
-        ! which correspond to memory locations and parse the substrings 
+        ! which correspond to memory locations and parse the substrings
         ! for grid and distribution descriptions.
         !-----------------------------------------------------------------------
-        call memory_separate( dst_string, dst_mem_rank, ldst, localrc) 
+        call memory_separate( dst_string, dst_mem_rank, ldst, localrc)
         if( CheckError(checkpoint, __LINE__, __FILE__, localrc,"syntax error in SRC portion " //    &
                 "of problem descriptor string - memory separate " //           &
                 trim(adjustL(lstring)), rcToReturn=rc) ) return
-        call interpret_descriptor_string( ldst, dst_mem_rank,                  & 
+        call interpret_descriptor_string( ldst, dst_mem_rank,                  &
                 grid_rank, grid_order, grid_type, grid_HaloL, grid_HaloR,      &
                 grid_StagLoc, dist_rank, dist_order, dist_type, localrc)
         if( CheckError(checkpoint, __LINE__, __FILE__, localrc,"syntax error in SRC portion " //    &
@@ -1339,7 +1339,7 @@ logical                       :: checkpoint = .FALSE.
         pds%DstMem%GridRank = grid_rank
         pds%DstMem%DistRank = dist_rank
 
-        do k=1,pds%DstMem%memRank 
+        do k=1,pds%DstMem%memRank
            pds%DstMem%GridType(k)%string  = grid_type(k)%string
            pds%DstMem%DistType(k)%string  = dist_type(k)%string
 
@@ -1353,8 +1353,8 @@ logical                       :: checkpoint = .FALSE.
 
         deallocate( ldst )
         deallocate( grid_order, grid_type, grid_HaloL, grid_HaloR )
-        deallocate( grid_StagLoc )    
-        deallocate( dist_order, dist_type )      
+        deallocate( grid_StagLoc )
+        deallocate( dist_order, dist_type )
      else  ! error does not conform to either single block or multiblock
         localrc = ESMF_FAILURE
         call ESMF_LogSetError(ESMF_FAILURE,msg="syntax error - problem "        &
@@ -1398,7 +1398,7 @@ logical                       :: checkpoint = .FALSE.
 
   ! arguments
   type(character_array), intent(in   ) :: lstring(:)
-  integer,               intent(in   ) :: nstring 
+  integer,               intent(in   ) :: nstring
   integer,               intent(  out) :: grid_rank, grid_order(:)
   integer,               intent(  out) :: dist_rank, dist_order(:)
   type(character_array), intent(  out) :: grid_type(:), dist_type(:)
@@ -1421,7 +1421,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   ! initialize return variable
   !-----------------------------------------------------------------------------
-  localrc = ESMF_RC_NOT_IMPL 
+  localrc = ESMF_RC_NOT_IMPL
 
   !-----------------------------------------------------------------------------
   ! work array
@@ -1435,9 +1435,9 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   ! Determine grid layout (rank and order)
   !-----------------------------------------------------------------------------
-  grid_rank = 0 
+  grid_rank = 0
   do kstring=1, nstring
-     rank = set_query(lstring(kstring)%string, 'GU') 
+     rank = set_query(lstring(kstring)%string, 'GU')
      if( rank == 0 ) then
      ! no associated grid
         grid_type(kstring)%string = ' '
@@ -1451,15 +1451,15 @@ logical                       :: checkpoint = .FALSE.
         !  keep track of associated dimensions
         assoc_grid( grid_order(kstring) ) =  -1
 
-        halo = set_query(lstring(kstring)%string, 'H') 
+        halo = set_query(lstring(kstring)%string, 'H')
         if( halo == 1 ) then
         !-----------------------------------------------------------------------
         ! halo is specified, now check that the syntax is correct
         !-----------------------------------------------------------------------
-           halo = set_query(lstring(kstring)%string, '{:}') 
+           halo = set_query(lstring(kstring)%string, '{:}')
            if( halo == 3 ) then
               itmp = 1
-              call pattern_locate(lstring(kstring)%string, 'H{', itmp, iloc)    
+              call pattern_locate(lstring(kstring)%string, 'H{', itmp, iloc)
               hbeg = iloc(1)
               if( itmp /= 1) then
                  !syntax error in halo specification
@@ -1469,7 +1469,7 @@ logical                       :: checkpoint = .FALSE.
                  return
               endif
 
-              call set_locate(lstring(kstring)%string, ':', itmp, iloc)    
+              call set_locate(lstring(kstring)%string, ':', itmp, iloc)
               hmid = iloc(1)
               if( itmp /= 1) then
                  !syntax error in halo specification
@@ -1479,7 +1479,7 @@ logical                       :: checkpoint = .FALSE.
                  return
               endif
 
-              call set_locate(lstring(kstring)%string, '}', itmp, iloc)    
+              call set_locate(lstring(kstring)%string, '}', itmp, iloc)
               hend = iloc(1)
               if( itmp /= 1) then
                  !syntax error in halo specification
@@ -1489,7 +1489,7 @@ logical                       :: checkpoint = .FALSE.
                  return
               endif
               !-----------------------------------------------------------------
-              ! halo syntax is correct, now read in the halo values as characters 
+              ! halo syntax is correct, now read in the halo values as characters
               ! and convert then to integer values.
               !-----------------------------------------------------------------
               intstr = adjustL( lstring(kstring)%string(hmid-1:hbeg+2) )
@@ -1513,8 +1513,8 @@ logical                       :: checkpoint = .FALSE.
               return
            endif   ! halo
 
-        elseif( halo == 0 ) then 
-        ! no halo 
+        elseif( halo == 0 ) then
+        ! no halo
            HaloL(kstring) = 0
            HaloR(kstring) = 0
         else
@@ -1527,7 +1527,7 @@ logical                       :: checkpoint = .FALSE.
            return
         endif    ! halo
 
-     else 
+     else
      ! error multiple grid specifications for single memory location
         call ESMF_LogSetError( ESMF_FAILURE,                                &
                 msg="multiple grid specifications for single memory location " //  &
@@ -1546,7 +1546,7 @@ logical                       :: checkpoint = .FALSE.
         do while( assoc_grid(n) == -1 )
            n = n-1
         enddo   ! while
-        grid_order(k) = n 
+        grid_order(k) = n
      enddo
   endif
 
@@ -1559,8 +1559,8 @@ logical                       :: checkpoint = .FALSE.
 
   !-----------------------------------------------------------------------------
   ! determine if the stagger location is specified by the problem descriptor
-  ! string. Look for trailing tag of the form "@{#,#,#}" following the 
-  ! closing "]". If it exists it will be placed in the memory_rank+1 element 
+  ! string. Look for trailing tag of the form "@{#,#,#}" following the
+  ! closing "]". If it exists it will be placed in the memory_rank+1 element
   ! of the character array.
   !-----------------------------------------------------------------------------
 
@@ -1582,7 +1582,7 @@ logical                       :: checkpoint = .FALSE.
         ! determine the number of entries
         ndelim = pattern_query( lstagger, ',')
 
-        if( ndelim >= 1 .and. ndelim <= grid_rank-1 ) then   
+        if( ndelim >= 1 .and. ndelim <= grid_rank-1 ) then
            ! identify the separate entries, check that they are not empty,
            ! and read the values
            allocate( sdelim(ndelim), stat=allocRcToTest )
@@ -1594,7 +1594,7 @@ logical                       :: checkpoint = .FALSE.
            call pattern_locate( lstagger, ',', ndelim, sdelim)
 
            if(  sdelim(1)-1 >= 1) then
-              intstr = adjustL( lstagger( 1:sdelim(1)-1 ) ) 
+              intstr = adjustL( lstagger( 1:sdelim(1)-1 ) )
               read(intstr, *) staggerloc(1)
            else
               ! specification empty
@@ -1603,10 +1603,10 @@ logical                       :: checkpoint = .FALSE.
                        rcToReturn=localrc)
               return
            endif
-        
+
            do k=2,ndelim
               if(  sdelim(k)-1 > sdelim(k-1) ) then
-                 intstr = adjustL( lstagger( sdelim(k-1)+1:sdelim(k)-1) ) 
+                 intstr = adjustL( lstagger( sdelim(k-1)+1:sdelim(k)-1) )
                  read(intstr, *) staggerloc(k)
               else
                  ! specification empty
@@ -1619,7 +1619,7 @@ logical                       :: checkpoint = .FALSE.
 
            send = len( trim( adjustL( lstagger ) ) )
            if(  send-1 >= sdelim(ndelim) ) then
-              intstr = adjustL( lstagger( send-1:sdelim(ndelim)+1 ) ) 
+              intstr = adjustL( lstagger( send-1:sdelim(ndelim)+1 ) )
               read(intstr, *) staggerloc(ndelim+1)
            else
            ! specification empty
@@ -1631,7 +1631,7 @@ logical                       :: checkpoint = .FALSE.
            ! clean up workspace
            deallocate( sdelim )
 
-        else    
+        else
         ! wrong number of delimiters for grid rank
            call ESMF_LogSetError( ESMF_FAILURE,                             &
                    msg="wrong number of delimiters for grid rank",                 &
@@ -1676,7 +1676,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   dist_rank = 0
   do kstring=1, nstring
-     rank = set_query(lstring(kstring)%string, 'BCA') 
+     rank = set_query(lstring(kstring)%string, 'BCA')
      if( rank == 0 ) then
      ! no associated distribution
         dist_type(kstring)%string = ' '
@@ -1687,7 +1687,7 @@ logical                       :: checkpoint = .FALSE.
         call set_locate(lstring(kstring)%string, 'BCA', rank , mloc)
         dist_type(kstring)%string = lstring(kstring)%string(mloc(1):mloc(1))
         read( lstring(kstring)%string(mloc(1)+1:mloc(1)+1), *) dist_order(kstring)
-     else 
+     else
         ! error multiple distribution specifications for single memory location
         call ESMF_LogSetError( ESMF_FAILURE,                                &
                 msg="multiple distribution specifications in single memory" //     &
@@ -1698,7 +1698,7 @@ logical                       :: checkpoint = .FALSE.
   enddo    !  kstring
 
   !-----------------------------------------------------------------------------
-  ! clean up 
+  ! clean up
   !-----------------------------------------------------------------------------
   deallocate( assoc_grid )
 

@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
@@ -17,7 +17,7 @@ module ESMF_GridCompMod
 !
 !==============================================================================
 !
-! This file contains the Gridded Component class definition and all 
+! This file contains the Gridded Component class definition and all
 !  Gridded Component class methods.
 !
 !------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ module ESMF_GridCompMod
 ! !DESCRIPTION:
 !
 ! The code in this file implements the Fortran interfaces to the
-! {\tt ESMF\_GridComp} class and associated functions and subroutines.  
+! {\tt ESMF\_GridComp} class and associated functions and subroutines.
 !
 !
 ! !USES:
@@ -90,7 +90,7 @@ module ESMF_GridCompMod
   public ESMF_GridCompValidate
   public ESMF_GridCompWait
   public ESMF_GridCompWriteRestart
-  
+
 ! - ESMF-internal methods:
   public ESMF_GridCompGetInit
 
@@ -274,7 +274,7 @@ contains
 !
 ! !INTERFACE:
   function ESMF_GridCompEQ(gridcomp1, gridcomp2)
-! 
+!
 ! !RETURN VALUE:
     logical :: ESMF_GridCompEQ
 
@@ -284,7 +284,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!   Test if both {\tt gridcomp1} and {\tt gridcomp2} alias the same ESMF GridComp 
+!   Test if both {\tt gridcomp1} and {\tt gridcomp2} alias the same ESMF GridComp
 !   object.
 !
 !EOPI
@@ -294,7 +294,7 @@ contains
     integer :: localrc1, localrc2
     logical :: lval1, lval2
 
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
     ! deleted).
@@ -326,7 +326,7 @@ contains
 !
 ! !INTERFACE:
   function ESMF_GridCompNE(gridcomp1, gridcomp2)
-! 
+!
 ! !RETURN VALUE:
     logical :: ESMF_GridCompNE
 
@@ -336,7 +336,7 @@ contains
 
 !
 ! !DESCRIPTION:
-!   Test if both {\tt gridcomp1} and {\tt gridcomp2} alias the same ESMF GridComp 
+!   Test if both {\tt gridcomp1} and {\tt gridcomp2} alias the same ESMF GridComp
 !   object.
 !
 !EOPI
@@ -346,11 +346,11 @@ contains
     integer :: localrc1, localrc2
     logical :: lval1, lval2
 
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
     ! deleted).
-    
+
     ESMF_GridCompNE = .not.ESMF_GridCompEQ(gridcomp1, gridcomp2)
 
   end function ESMF_GridCompNE
@@ -394,10 +394,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \begin{sloppypar}
-! \item[7.1.0] Added arguments {\tt gridList}, {\tt mesh}, {\tt meshList}, 
+! \item[7.1.0] Added arguments {\tt gridList}, {\tt mesh}, {\tt meshList},
 !   {\tt locstream}, {\tt locstreamList}, {\tt xgrid}, and {\tt xgridList}.
 !   These arguments add support for holding references to multiple geom objects,
-!   either of the same type, or different type, in the same 
+!   either of the same type, or different type, in the same
 !   {\tt ESMF\_GridComp} object.
 ! \end{sloppypar}
 ! \end{description}
@@ -415,14 +415,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! {\tt contextflag} to ESMF\_CONTEXT\_PARENT\_VM.
 !
 ! The return value is the new {\tt ESMF\_GridComp}.
-!   
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[{[grid]}]
 !   Associate an {\tt ESMF\_Grid} object with the newly created component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt grid} object.
-!   The {\tt grid} argument is mutually exclusive with the {\tt gridList} 
+!   The {\tt grid} argument is mutually exclusive with the {\tt gridList}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
 !   By default, i.e. if neither {\tt grid} nor {\tt gridList} are provided,
@@ -432,7 +432,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt gridList} object.
-!   The {\tt gridList} argument is mutually exclusive with the {\tt grid} 
+!   The {\tt gridList} argument is mutually exclusive with the {\tt grid}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
 !   By default, i.e. if neither {\tt grid} nor {\tt gridList} are provided,
@@ -441,7 +441,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Associate an {\tt ESMF\_Mesh} object with the newly created component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt mesh} object.
-!   The {\tt mesh} argument is mutually exclusive with the {\tt meshList} 
+!   The {\tt mesh} argument is mutually exclusive with the {\tt meshList}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
 !   By default, i.e. if neither {\tt mesh} nor {\tt meshList} are provided,
@@ -451,7 +451,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt meshList} object.
-!   The {\tt meshList} argument is mutually exclusive with the {\tt mesh} 
+!   The {\tt meshList} argument is mutually exclusive with the {\tt mesh}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
 !   By default, i.e. if neither {\tt mesh} nor {\tt meshList} are provided,
@@ -460,11 +460,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Associate an {\tt ESMF\_LocStream} object with the newly created component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt locstream} object.
-!   The {\tt locstream} argument is mutually exclusive with the 
-!   {\tt locstreamList} 
+!   The {\tt locstream} argument is mutually exclusive with the
+!   {\tt locstreamList}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
-!   By default, i.e. if neither {\tt locstream} nor {\tt locstreamList} are 
+!   By default, i.e. if neither {\tt locstream} nor {\tt locstreamList} are
 !   provided, no {\tt ESMF\_LocStream} objects are associated with the
 !   component.
 ! \item[{[locstreamList]}]
@@ -472,18 +472,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt locstreamList} object.
-!   The {\tt locstreamList} argument is mutually exclusive with the 
-!   {\tt locstream} 
+!   The {\tt locstreamList} argument is mutually exclusive with the
+!   {\tt locstream}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
-!   By default, i.e. if neither {\tt locstream} nor {\tt locstreamList} are 
+!   By default, i.e. if neither {\tt locstream} nor {\tt locstreamList} are
 !   provided, no {\tt ESMF\_LocStream} objects are associated with the
 !   component.
 ! \item[{[xgrid]}]
 !   Associate an {\tt ESMF\_XGrid} object with the newly created component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt xgrid} object.
-!   The {\tt xgrid} argument is mutually exclusive with the {\tt xgridList} 
+!   The {\tt xgrid} argument is mutually exclusive with the {\tt xgridList}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
 !   By default, i.e. if neither {\tt xgrid} nor {\tt xgridList} are provided,
@@ -493,7 +493,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt xgridList} object.
-!   The {\tt xgridList} argument is mutually exclusive with the {\tt xgrid} 
+!   The {\tt xgridList} argument is mutually exclusive with the {\tt xgrid}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
 !   By default, i.e. if neither {\tt xgrid} nor {\tt xgridList} are provided,
@@ -501,14 +501,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[config]}]
 !   An already-created {\tt ESMF\_Config} object to be attached to the newly
 !   created component.
-!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   If both {\tt config} and {\tt configFile} arguments are specified,
 !   {\tt config} takes priority.
 ! \item[{[configFile]}]
-!   The filename of an {\tt ESMF\_Config} format file.  
+!   The filename of an {\tt ESMF\_Config} format file.
 !   If specified, a new {\tt ESMF\_Config} object is created and attached to the
 !   newly created component. The {\tt configFile} file is opened and associated
 !   with the new config object.
-!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   If both {\tt config} and {\tt configFile} arguments are specified,
 !   {\tt config} takes priority.
 ! \item[{[clock]}]
 !   \begin{sloppypar}
@@ -558,7 +558,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     allocate(compclass, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="compclass", &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
       configFile=configFile, config=config, clock=clock, petList=petList, &
@@ -573,10 +573,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     gcomp%compp => compclass
     ! Add reference to this object into ESMF garbage collection table
     call c_ESMC_VMAddFObject(gcomp, ESMF_ID_COMPONENT%objectID)
-      
+
     ! Set return values
     ESMF_GridCompCreate%compp => compclass
-    
+
     ESMF_INIT_SET_CREATED(ESMF_GridCompCreate)
 
     ! deal with geom object arguments
@@ -635,8 +635,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   object into any other routines after being destroyed.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
-!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   with the actual component, before returning with a timeout condition.
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
 !   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
@@ -734,34 +734,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Call the associated user-supplied finalization routine for 
+! Call the associated user-supplied finalization routine for
 ! an {\tt ESMF\_GridComp}.
-!   
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   The {\tt ESMF\_GridComp} to call finalize routine for.
-! \item[{[importState]}]  
+! \item[{[importState]}]
 !   {\tt ESMF\_State} containing import data. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   importState argument in the user code cannot be optional. 
-! \item[{[exportState]}]  
+!   argument will be passed to the user-supplied routine.  The
+!   importState argument in the user code cannot be optional.
+! \item[{[exportState]}]
 !   {\tt ESMF\_State} containing export data. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   exportState argument in the user code cannot be optional. 
-! \item[{[clock]}]  
-!   External {\tt ESMF\_Clock} for passing in time information.  
+!   argument will be passed to the user-supplied routine.  The
+!   exportState argument in the user code cannot be optional.
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   clock argument in the user code cannot be optional. 
-! \item[{[syncflag]}]  
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   argument will be passed to the user-supplied routine.  The
+!   clock argument in the user code cannot be optional.
+! \item[{[syncflag]}]
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
-! \item[{[phase]}]  
+! \item[{[phase]}]
 !   Component providers must document whether each of their
 !   routines are {\em single-phase} or {\em multi-phase}.
 !   Single-phase routines require only one invocation to complete
@@ -776,8 +776,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   is 1.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
-!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   with the actual component, before returning with a timeout condition.
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
 !   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
@@ -801,7 +801,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
-    
+
     ! check consistency between timeout argument and component argument
     if (present(timeout).and. &
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
@@ -919,7 +919,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                       intent(out), optional :: importStateIsPresent
     type(ESMF_State),              intent(out), optional :: importState
     logical,                       intent(out), optional :: exportStateIsPresent
-    type(ESMF_State),              intent(out), optional :: exportState    
+    type(ESMF_State),              intent(out), optional :: exportState
     logical,                       intent(out), optional :: configIsPresent
     type(ESMF_Config),             intent(out), optional :: config
     logical,                       intent(out), optional :: configFileIsPresent
@@ -944,10 +944,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \begin{sloppypar}
 ! \item[7.1.0] Added arguments {\tt gridList}, {\tt meshIsPresent}, {\tt mesh},
-!   {\tt meshList}, {\tt locstreamIsPresent}, {\tt locstream}, 
+!   {\tt meshList}, {\tt locstreamIsPresent}, {\tt locstream},
 !   {\tt locstreamList}, {\tt xgridIsPresent}, {\tt xgrid}, and {\tt xgridList}.
 !   These arguments add support for accessing references to multiple geom objects,
-!   either of the same type, or different type, associated with the same 
+!   either of the same type, or different type, associated with the same
 !   {\tt ESMF\_GridComp} object.
 ! \end{sloppypar}
 ! \end{description}
@@ -955,7 +955,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Get information about an {\tt ESMF\_GridComp} object.
-!  
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
@@ -967,15 +967,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[grid]}]
 !   Return the {\tt ESMF\_Grid} object associated with the {\tt gridcomp}
 !   component. If multiple {\tt ESMF\_Grid} objects are associated, return the
-!   first in the list. 
+!   first in the list.
 !   It is an error to query for {\tt grid} if no {\tt ESMF\_Grid} object is
 !   associated with the {\tt gridcomp} component.
 !   If unsure, query for {\tt gridIsPresent} first, or use the {\tt gridList}
 !   variant.
 ! \item[{[gridList]}]
 !   Return a list of all {\tt ESMF\_Grid} objects associated with the
-!   {\tt gridcomp} component. The size of the returned {\tt gridList} 
-!   corresponds to the number of {\tt ESMF\_Grid} objects associated. 
+!   {\tt gridcomp} component. The size of the returned {\tt gridList}
+!   corresponds to the number of {\tt ESMF\_Grid} objects associated.
 !   If no {\tt ESMF\_Grid} object is associated with the {\tt gridcomp}
 !   component, the size of the returned {\tt gridList} is zero.
 ! \item[{[meshIsPresent]}]
@@ -985,35 +985,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[mesh]}]
 !   Return the {\tt ESMF\_Mesh} object associated with the {\tt gridcomp}
 !   component. If multiple {\tt ESMF\_Mesh} objects are associated, return the
-!   first in the list. 
+!   first in the list.
 !   It is an error to query for {\tt mesh} if no {\tt ESMF\_Mesh} object is
 !   associated with the {\tt gridcomp} component.
 !   If unsure, query for {\tt meshIsPresent} first, or use the {\tt meshList}
 !   variant.
 ! \item[{[meshList]}]
 !   Return a list of all {\tt ESMF\_Mesh} objects associated with the
-!   {\tt gridcomp} component. The size of the returned {\tt meshList} 
-!   corresponds to the number of {\tt ESMF\_Mesh} objects associated. 
+!   {\tt gridcomp} component. The size of the returned {\tt meshList}
+!   corresponds to the number of {\tt ESMF\_Mesh} objects associated.
 !   If no {\tt ESMF\_Mesh} object is associated with the {\tt gridcomp}
 !   component, the size of the returned {\tt meshList} is zero.
 ! \item[{[locstreamIsPresent]}]
 !   Set to {\tt .true.} if at least one {\tt ESMF\_LocStream} object is
-!   associated with the {\tt gridcomp} component. 
+!   associated with the {\tt gridcomp} component.
 !   Set to {\tt .false.} otherwise.
 ! \item[{[locstream]}]
 ! \begin{sloppypar}
 !   Return the {\tt ESMF\_LocStream} object associated with the {\tt gridcomp}
 !   component. If multiple {\tt ESMF\_LocStream} objects are associated, return
-!   the first in the list. 
+!   the first in the list.
 !   It is an error to query for {\tt locstream} if no {\tt ESMF\_Grid} object is
 !   associated with the {\tt gridcomp} component.
-!   If unsure, query for {\tt locstreamIsPresent} first, or use the 
+!   If unsure, query for {\tt locstreamIsPresent} first, or use the
 !   {\tt locstreamList} variant.
 ! \end{sloppypar}
 ! \item[{[locstreamList]}]
 !   Return a list of all {\tt ESMF\_LocStream} objects associated with the
-!   {\tt gridcomp} component. The size of the returned {\tt locstreamList} 
-!   corresponds to the number of {\tt ESMF\_LocStream} objects associated. 
+!   {\tt gridcomp} component. The size of the returned {\tt locstreamList}
+!   corresponds to the number of {\tt ESMF\_LocStream} objects associated.
 !   If no {\tt ESMF\_LocStream} object is associated with the {\tt gridcomp}
 !   component, the size of the returned {\tt locstreamList} is zero.
 ! \item[{[xgridIsPresent]}]
@@ -1023,15 +1023,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[xgrid]}]
 !   Return the {\tt ESMF\_XGrid} object associated with the {\tt gridcomp}
 !   component. If multiple {\tt ESMF\_XGrid} objects are associated, return the
-!   first in the list. 
+!   first in the list.
 !   It is an error to query for {\tt xgrid} if no {\tt ESMF\_XGrid} object is
 !   associated with the {\tt gridcomp} component.
 !   If unsure, query for {\tt xgridIsPresent} first, or use the {\tt xgridList}
 !   variant.
 ! \item[{[xgridList]}]
 !   Return a list of all {\tt ESMF\_XGrid} objects associated with the
-!   {\tt gridcomp} component. The size of the returned {\tt xgridList} 
-!   corresponds to the number of {\tt ESMF\_XGrid} objects associated. 
+!   {\tt gridcomp} component. The size of the returned {\tt xgridList}
+!   corresponds to the number of {\tt ESMF\_XGrid} objects associated.
 !   If no {\tt ESMF\_XGrid} object is associated with the {\tt gridcomp}
 !   component, the size of the returned {\tt xgridList} is zero.
 ! \item[{[importStateIsPresent]}]
@@ -1166,11 +1166,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Method_Flag), intent(in)            :: methodflag
     integer,                intent(out)           :: phaseCount
     logical,                intent(out), optional :: phaseZeroFlag
-    integer,                intent(out), optional :: rc 
+    integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Get phaseCount
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
@@ -1178,8 +1178,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[methodflag]
 !   \begin{sloppypar}
 !   One of a set of predefined Component methods - e.g.
-!   {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN}, 
-!   {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{const:method} 
+!   {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN},
+!   {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{const:method}
 !   for a complete list of valid method options.
 !   \end{sloppypar}
 ! \item[phaseCount]
@@ -1187,7 +1187,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[phaseZeroFlag]
 !   Return .true. if a "zero" phase was registered for {\tt methodflag}. Otherwise
 !   return .false..
-! \item[{[rc]}] 
+! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -1201,13 +1201,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
-  
+
     call c_ESMC_GetEntryPointPhaseCount(gridcomp, methodflag, phaseCount, &
       phaseZeroFlagHelp, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     ! translate ESMF_Logical -> logical
     if (present(phaseZeroFlag)) then
       phaseZeroFlag = phaseZeroFlagHelp
@@ -1237,17 +1237,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Available to be called by an {\tt ESMF\_GridComp} at any time after 
+! Available to be called by an {\tt ESMF\_GridComp} at any time after
 ! {\tt ESMF\_GridCompSetInternalState} has been called.
 ! Since init, run, and finalize must be separate subroutines, data that
 ! they need to share in common can either be module global data, or can
 ! be allocated in a private data block and the address of that block
 ! can be registered with the framework and retrieved by this call.
-! When running multiple instantiations of an {\tt ESMF\_GridComp}, 
-! for example during ensemble runs, 
-! it may be simpler to maintain private data specific to 
-! each run with private data blocks.  A corresponding 
-! {\tt ESMF\_GridCompSetInternalState} call sets the data pointer to 
+! When running multiple instantiations of an {\tt ESMF\_GridComp},
+! for example during ensemble runs,
+! it may be simpler to maintain private data specific to
+! each run with private data blocks.  A corresponding
+! {\tt ESMF\_GridCompSetInternalState} call sets the data pointer to
 ! this block, and this call retrieves the data pointer.
 ! Note that the {\tt wrappedDataPointer} argument needs to be a derived type
 ! which contains only a pointer of the type of the data block defined
@@ -1259,22 +1259,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Only the {\em last} data block set via
 ! {\tt ESMF\_GridCompSetInternalState} will be accessible.
 !
-! CAUTION: This method does not have an explicit Fortran interface. Do not 
+! CAUTION: This method does not have an explicit Fortran interface. Do not
 ! specify argument keywords when calling this method!
-!   
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   An {\tt ESMF\_GridComp} object.
 ! \item[wrappedDataPointer]
-!   A derived type (wrapper), containing only an unassociated pointer 
+!   A derived type (wrapper), containing only an unassociated pointer
 !   to the private data block.
 !   The framework will fill in the pointer. When this call returns, the
 !   pointer is set to the same address set during the last
 !   {\tt ESMF\_GridCompSetInternalState} call.
-!   This level of indirection is needed to reliably set and retrieve 
-!   the data block no matter which architecture or compiler is used.  
-! \item[rc] 
+!   This level of indirection is needed to reliably set and retrieve
+!   the data block no matter which architecture or compiler is used.
+! \item[rc]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   Note: unlike most other ESMF routines, this argument is not optional
 !   because of implementation considerations.
@@ -1321,32 +1321,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Call the associated user initialization routine for 
+! Call the associated user initialization routine for
 ! an {\tt ESMF\_GridComp}.
-!   
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   {\tt ESMF\_GridComp} to call initialize routine for.
-! \item[{[importState]}]  
+! \item[{[importState]}]
 !   {\tt ESMF\_State} containing import data for coupling. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   importState argument in the user code cannot be optional. 
-! \item[{[exportState]}]  
+!   argument will be passed to the user-supplied routine.  The
+!   importState argument in the user code cannot be optional.
+! \item[{[exportState]}]
 !   {\tt ESMF\_State} containing export data for coupling. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   exportState argument in the user code cannot be optional. 
-! \item[{[clock]}]  
-!   External {\tt ESMF\_Clock} for passing in time information.  
+!   argument will be passed to the user-supplied routine.  The
+!   exportState argument in the user code cannot be optional.
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   clock argument in the user code cannot be optional. 
+!   argument will be passed to the user-supplied routine.  The
+!   clock argument in the user code cannot be optional.
 ! \item[{[syncflag]}]
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[phase]}]
 !   Component providers must document whether each of their
@@ -1363,8 +1363,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   1.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
-!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   with the actual component, before returning with a timeout condition.
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
 !   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
@@ -1388,7 +1388,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
-    
+
     ! check consistency between timeout argument and component argument
     if (present(timeout).and. &
       .not.ESMF_CompIsDualConnected(gridcomp%compp, rc=localrc)) then
@@ -1447,7 +1447,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 ! Same as {\tt ESMF\_GridCompInitialize} but no redirection through the
 ! Interface Component method, instead directly call into the actual method.
-!   
+!
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
@@ -1492,10 +1492,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Return {\tt .true.} if the {\tt gridcomp} has been created. Otherwise return
 !   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
 !   returned, the return value of the function will also be {\tt .false.}.
-!    
+!
 ! The arguments are:
 !   \begin{description}
-!   \item[gridcomp] 
+!   \item[gridcomp]
 !     {\tt ESMF\_GridComp} queried.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1536,12 +1536,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 ! Inquire if this {\tt ESMF\_GridComp} object is to execute on the calling PET.
 !
-! The return value is {\tt .true.} if the component is to execute on the 
+! The return value is {\tt .true.} if the component is to execute on the
 ! calling PET, {\tt .false.} otherwise.
-!    
+!
 ! The arguments are:
 ! \begin{description}
-! \item[gridcomp] 
+! \item[gridcomp]
 !   {\tt ESMF\_GridComp} queried.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1574,7 +1574,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   end function ESMF_GridCompIsPetLocal
 !------------------------------------------------------------------------------
 
-    
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompPrint"
@@ -1665,50 +1665,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Call the associated user read restart routine for 
+! Call the associated user read restart routine for
 ! an {\tt ESMF\_GridComp}.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   {\tt ESMF\_GridComp} to call run routine for.
-! \item[{[importState]}]  
+! \item[{[importState]}]
 !   {\tt ESMF\_State} containing import data. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   importState argument in the user code cannot be optional. 
-! \item[{[exportState]}]  
+!   argument will be passed to the user-supplied routine.  The
+!   importState argument in the user code cannot be optional.
+! \item[{[exportState]}]
 !   {\tt ESMF\_State} containing export data. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   exportState argument in the user code cannot be optional. 
-! \item[{[clock]}]  
-!   External {\tt ESMF\_Clock} for passing in time information.  
+!   argument will be passed to the user-supplied routine.  The
+!   exportState argument in the user code cannot be optional.
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   clock argument in the user code cannot be optional. 
-! \item[{[syncflag]}]  
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   argument will be passed to the user-supplied routine.  The
+!   clock argument in the user code cannot be optional.
+! \item[{[syncflag]}]
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
-! \item[{[phase]}]   
+! \item[{[phase]}]
 !   Component providers must document whether each of their
-!   routines are {\em single-phase} or {\em multi-phase}.    
+!   routines are {\em single-phase} or {\em multi-phase}.
 !   Single-phase routines require only one invocation to complete
-!   their work.    
+!   their work.
 !   Multi-phase routines provide multiple subroutines to accomplish
 !   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For multiple-phase child components, this is the integer phase  
+!   For multiple-phase child components, this is the integer phase
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
-!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   with the actual component, before returning with a timeout condition.
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
 !   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
@@ -1805,50 +1805,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Call the associated user run routine for 
+! Call the associated user run routine for
 ! an {\tt ESMF\_GridComp}.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   {\tt ESMF\_GridComp} to call run routine for.
-! \item[{[importState]}]  
+! \item[{[importState]}]
 !   {\tt ESMF\_State} containing import data. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   importState argument in the user code cannot be optional. 
-! \item[{[exportState]}]  
+!   argument will be passed to the user-supplied routine.  The
+!   importState argument in the user code cannot be optional.
+! \item[{[exportState]}]
 !   {\tt ESMF\_State} containing export data. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   exportState argument in the user code cannot be optional. 
-! \item[{[clock]}]  
-!   External {\tt ESMF\_Clock} for passing in time information.  
+!   argument will be passed to the user-supplied routine.  The
+!   exportState argument in the user code cannot be optional.
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   clock argument in the user code cannot be optional. 
-! \item[{[syncflag]}]  
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   argument will be passed to the user-supplied routine.  The
+!   clock argument in the user code cannot be optional.
+! \item[{[syncflag]}]
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
-! \item[{[phase]}]   
+! \item[{[phase]}]
 !   Component providers must document whether each of their
-!   routines are {\em single-phase} or {\em multi-phase}.    
+!   routines are {\em single-phase} or {\em multi-phase}.
 !   Single-phase routines require only one invocation to complete
-!   their work.    
+!   their work.
 !   Multi-phase routines provide multiple subroutines to accomplish
 !   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For multiple-phase child components, this is the integer phase  
+!   For multiple-phase child components, this is the integer phase
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
-!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   with the actual component, before returning with a timeout condition.
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
 !   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
@@ -1983,33 +1983,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! This tries to establish a "component tunnel" between the {\em actual}
 ! Component (calling this routine) and a {\tt dual} Component connecting to it
 ! through a matching SetServices call.
-!   
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   {\tt ESMF\_GridComp} to call service loop routine for.
-! \item[{[importState]}]  
+! \item[{[importState]}]
 !   {\tt ESMF\_State} containing import data for coupling. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   importState argument in the user code cannot be optional. 
-! \item[{[exportState]}]  
+!   argument will be passed to the user-supplied routine.  The
+!   importState argument in the user code cannot be optional.
+! \item[{[exportState]}]
 !   {\tt ESMF\_State} containing export data for coupling. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   exportState argument in the user code cannot be optional. 
-! \item[{[clock]}]  
-!   External {\tt ESMF\_Clock} for passing in time information.  
+!   argument will be passed to the user-supplied routine.  The
+!   exportState argument in the user code cannot be optional.
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   clock argument in the user code cannot be optional. 
+!   argument will be passed to the user-supplied routine.  The
+!   clock argument in the user code cannot be optional.
 ! \item[{[syncflag]}]
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[port]}]
-!   In case a port number is provided, the "component tunnel" is established 
+!   In case a port number is provided, the "component tunnel" is established
 !   using sockets. The actual component side, i.e. the side that calls into
 !   {\tt ESMF\_GridCompServiceLoop()}, starts to listen on the specified port
 !   as the server. The valid port range is [1024, 65535].
@@ -2018,7 +2018,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   methods (e.g. MPI).
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait for communications
-!   with the dual component, before returning with a timeout condition. 
+!   with the dual component, before returning with a timeout condition.
 !   The default is 3600, i.e. 1 hour.
 !   (NOTE: Currently this option is only available for socket based component
 !   tunnels.)
@@ -2043,17 +2043,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit,gridcomp,rc)
-    
+
     if (.not.present(port).and.(present(timeout))) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="Currently the 'timeout' argument requires the 'port' argument", &
         ESMF_CONTEXT, rcToReturn=rc)
       return  ! bail out
     endif
-    
+
     timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
-    
+
     ! call Comp method
     call ESMF_CompExecute(gridcomp%compp, method=ESMF_METHOD_SERVICELOOP, &
       importState=importState, exportState=exportState, clock=clock, &
@@ -2091,7 +2091,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_GridCompSet(gridcomp, keywordEnforcer, grid, gridList, &
-    mesh, meshList, locstream, locstreamList, xgrid, xgridList, &  
+    mesh, meshList, locstream, locstreamList, xgrid, xgridList, &
     config, configFile, clock, name, rc)
 !
 ! !ARGUMENTS:
@@ -2117,10 +2117,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \begin{sloppypar}
-! \item[7.1.0] Added arguments {\tt gridList}, {\tt mesh}, {\tt meshList}, 
+! \item[7.1.0] Added arguments {\tt gridList}, {\tt mesh}, {\tt meshList},
 !   {\tt locstream}, {\tt locstreamList}, {\tt xgrid}, and {\tt xgridList}.
 !   These arguments add support for holding references to multiple geom objects,
-!   either of the same type, or different type, in the same 
+!   either of the same type, or different type, in the same
 !   {\tt ESMF\_GridComp} object.
 ! \end{sloppypar}
 ! \end{description}
@@ -2137,99 +2137,99 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   Associate an {\tt ESMF\_Grid} object with the {\tt gridcomp} component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt grid} object.
-!   The {\tt grid} argument is mutually exclusive with the {\tt gridList} 
+!   The {\tt grid} argument is mutually exclusive with the {\tt gridList}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
 !   By default, i.e. if neither {\tt grid} nor {\tt gridList} are provided,
-!   the {\tt ESMF\_Grid} association of the incoming {\tt gridcomp} 
+!   the {\tt ESMF\_Grid} association of the incoming {\tt gridcomp}
 !   component remains unchanged.
 ! \item[{[gridList]}]
 !   Associate a list of {\tt ESMF\_Grid} objects with the {\tt gridcomp}
 !   component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt gridList} object.
-!   The {\tt gridList} argument is mutually exclusive with the {\tt grid} 
+!   The {\tt gridList} argument is mutually exclusive with the {\tt grid}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
 !   By default, i.e. if neither {\tt grid} nor {\tt gridList} are provided,
-!   the {\tt ESMF\_Grid} association of the incoming {\tt gridcomp} 
+!   the {\tt ESMF\_Grid} association of the incoming {\tt gridcomp}
 !   component remains unchanged.
 ! \item[{[mesh]}]
 !   Associate an {\tt ESMF\_Mesh} object with the {\tt gridcomp} component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt mesh} object.
-!   The {\tt mesh} argument is mutually exclusive with the {\tt meshList} 
+!   The {\tt mesh} argument is mutually exclusive with the {\tt meshList}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
 !   By default, i.e. if neither {\tt mesh} nor {\tt meshList} are provided,
-!   the {\tt ESMF\_Mesh} association of the incoming {\tt gridcomp} 
+!   the {\tt ESMF\_Mesh} association of the incoming {\tt gridcomp}
 !   component remains unchanged.
 ! \item[{[meshList]}]
 !   Associate a list of {\tt ESMF\_Mesh} objects with the {\tt gridcomp}
 !   component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt meshList} object.
-!   The {\tt meshList} argument is mutually exclusive with the {\tt mesh} 
+!   The {\tt meshList} argument is mutually exclusive with the {\tt mesh}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
 !   By default, i.e. if neither {\tt mesh} nor {\tt meshList} are provided,
-!   the {\tt ESMF\_Mesh} association of the incoming {\tt gridcomp} 
+!   the {\tt ESMF\_Mesh} association of the incoming {\tt gridcomp}
 !   component remains unchanged.
 ! \item[{[locstream]}]
 !   Associate an {\tt ESMF\_LocStream} object with the {\tt gridcomp} component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt locstream} object.
-!   The {\tt locstream} argument is mutually exclusive with the 
-!   {\tt locstreamList} 
+!   The {\tt locstream} argument is mutually exclusive with the
+!   {\tt locstreamList}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
-!   By default, i.e. if neither {\tt locstream} nor {\tt locstreamList} are 
-!   provided, the {\tt ESMF\_LocStream} association of the incoming 
+!   By default, i.e. if neither {\tt locstream} nor {\tt locstreamList} are
+!   provided, the {\tt ESMF\_LocStream} association of the incoming
 !   {\tt gridcomp} component remains unchanged.
 ! \item[{[locstreamList]}]
 !   Associate a list of {\tt ESMF\_LocStream} objects with the {\tt gridcomp}
 !   component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt locstreamList} object.
-!   The {\tt locstreamList} argument is mutually exclusive with the 
-!   {\tt locstream} 
+!   The {\tt locstreamList} argument is mutually exclusive with the
+!   {\tt locstream}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
-!   By default, i.e. if neither {\tt locstream} nor {\tt locstreamList} are 
-!   provided, the {\tt ESMF\_LocStream} association of the incoming 
+!   By default, i.e. if neither {\tt locstream} nor {\tt locstreamList} are
+!   provided, the {\tt ESMF\_LocStream} association of the incoming
 !   {\tt gridcomp} component remains unchanged.
 ! \item[{[xgrid]}]
 !   Associate an {\tt ESMF\_XGrid} object with the {\tt gridcomp} component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt xgrid} object.
-!   The {\tt xgrid} argument is mutually exclusive with the {\tt xgridList} 
+!   The {\tt xgrid} argument is mutually exclusive with the {\tt xgridList}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
 !   By default, i.e. if neither {\tt xgrid} nor {\tt xgridList} are provided,
-!   the {\tt ESMF\_XGrid} association of the incoming {\tt gridcomp} 
+!   the {\tt ESMF\_XGrid} association of the incoming {\tt gridcomp}
 !   component remains unchanged.
 ! \item[{[xgridList]}]
 !   Associate a list of {\tt ESMF\_XGrid} objects with the {\tt gridcomp}
 !   component.
 !   This is simply a convenience feature for the user. The ESMF library code
 !   does not access the {\tt xgridList} object.
-!   The {\tt xgridList} argument is mutually exclusive with the {\tt xgrid} 
+!   The {\tt xgridList} argument is mutually exclusive with the {\tt xgrid}
 !   argument. If both arguments are provided, the routine will fail, and an
 !   error is returned in {\tt rc}.
 !   By default, i.e. if neither {\tt xgrid} nor {\tt xgridList} are provided,
-!   the {\tt ESMF\_XGrid} association of the incoming {\tt gridcomp} 
+!   the {\tt ESMF\_XGrid} association of the incoming {\tt gridcomp}
 !   component remains unchanged.
 ! \item[{[config]}]
 !   An already-created {\tt ESMF\_Config} object to be attached to the
 !   component.
-!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   If both {\tt config} and {\tt configFile} arguments are specified,
 !   {\tt config} takes priority.
 ! \item[{[configFile]}]
-!   The filename of an {\tt ESMF\_Config} format file.  
+!   The filename of an {\tt ESMF\_Config} format file.
 !   If specified, a new {\tt ESMF\_Config} object is created and attached to the
 !   component. The {\tt configFile} file is opened and associated
 !   with the new config object.
-!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   If both {\tt config} and {\tt configFile} arguments are specified,
 !   {\tt config} takes priority.
 ! \item[{[clock]}]
 !   Set the private clock for this {\tt ESMF\_GridComp}.
@@ -2251,7 +2251,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_GridGetInit,grid,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ConfigGetInit,config,rc)
     ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
-    
+
     ! call Comp method
     call ESMF_CompSet(gridcomp%compp, name=name, &
       grid=grid, gridList=gridList, mesh=mesh, meshList=meshList, &
@@ -2296,7 +2296,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end interface
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: phase
-    integer,                intent(out), optional :: rc 
+    integer,                intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -2307,7 +2307,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Registers a user-supplied {\tt userRoutine} as the entry point for one of the
 ! predefined Component {\tt methodflag}s. After this call the {\tt userRoutine}
 ! becomes accessible via the standard Component method API.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
@@ -2315,12 +2315,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[methodflag]
 !   \begin{sloppypar}
 !   One of a set of predefined Component methods - e.g.
-!   {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN}, 
-!   {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{const:method} 
+!   {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN},
+!   {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{const:method}
 !   for a complete list of valid method options.
 !   \end{sloppypar}
 ! \item[userRoutine]
-!   The user-supplied subroutine to be associated for this Component 
+!   The user-supplied subroutine to be associated for this Component
 !   {\tt method}.  Argument types, intent and order must match
 !   the interface signature, and must not have the {\tt optional} attribute.
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
@@ -2329,11 +2329,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   From Fortran-2008 onwards, an internal procedure contained within either a main program
 !   or a module procedure may be used.  If the internal procedure is contained within a
 !   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
-! \item[{[phase]}] 
-!   The {\tt phase} number for multi-phase methods. For single phase 
+! \item[{[phase]}]
+!   The {\tt phase} number for multi-phase methods. For single phase
 !   methods the {\tt phase} argument can be omitted. The default setting
 !   is 1.
-! \item[{[rc]}] 
+! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -2347,10 +2347,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
-  
+
     phaseArg = 1   ! default
     if (present(phase)) phaseArg = phase
-  
+
     call c_ESMC_SetEntryPoint(gridcomp, methodflag, userRoutine, phaseArg, &
       localrc)
 !TODO: back in once thread-safe    if (ESMF_LogFoundError(localrc, &
@@ -2381,25 +2381,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Available to be called by an {\tt ESMF\_GridComp} at any time, but 
+! Available to be called by an {\tt ESMF\_GridComp} at any time, but
 ! expected to be
 ! most useful when called during the registration process, or initialization.
 ! Since init, run, and finalize must be separate subroutines, data that
 ! they need to share in common can either be module global data, or can
 ! be allocated in a private data block and the address of that block
 ! can be registered with the framework and retrieved by subsequent calls.
-! When running multiple instantiations of an {\tt ESMF\_GridComp}, 
+! When running multiple instantiations of an {\tt ESMF\_GridComp},
 ! for example during
-! ensemble runs, it may be simpler to maintain private data specific to 
-! each run with private data blocks.  A corresponding 
+! ensemble runs, it may be simpler to maintain private data specific to
+! each run with private data blocks.  A corresponding
 ! {\tt ESMF\_GridCompGetInternalState} call retrieves the data pointer.
-!   
+!
 ! Only the {\em last} data block set via
 ! {\tt ESMF\_GridCompSetInternalState} will be accessible.
 !
-! CAUTION: This method does not have an explicit Fortran interface. Do not 
+! CAUTION: This method does not have an explicit Fortran interface. Do not
 ! specify argument keywords when calling this method!
-!   
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
@@ -2408,8 +2408,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   A pointer to the private data block, wrapped in a derived type which
 !   contains only a pointer to the block.  This level of indirection is
 !   needed to reliably set and retrieve the data block no matter which
-!   architecture or compiler is used.  
-! \item[rc] 
+!   architecture or compiler is used.
+! \item[rc]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   Note: unlike most other ESMF routines, this argument is not optional
 !   because of implementation considerations.
@@ -2452,13 +2452,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{GridComp:SetServices}
 ! Call into user provided {\tt userRoutine} which is responsible for
 ! setting Component's Initialize(), Run(), and Finalize() services.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   Gridded Component.
 ! \item[userRoutine]
-!   The Component writer must supply a subroutine with the exact interface 
+!   The Component writer must supply a subroutine with the exact interface
 !   shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !   must not be declared as optional, and the types, intent and order must match.
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
@@ -2490,7 +2490,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
-  
+
     call c_ESMC_SetServices(gridcomp, userRoutine, localUserRc, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -2498,7 +2498,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! now indicate that this Component has a VM associated
     gridcomp%compp%compStatus%vmIsPresent = .true.
-    
+
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
@@ -2546,14 +2546,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! {\tt userRoutine} must exist in the executable, or in the shared object
 ! specified by {\tt sharedObj}. In the latter case all of the platform
 ! specific details about dynamic linking and loading apply.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   Gridded Component.
 ! \item[userRoutine]
 !   Name of routine to be called, specified as a character string.
-!   The Component writer must supply a subroutine with the exact interface 
+!   The Component writer must supply a subroutine with the exact interface
 !   shown for {\tt userRoutine} below. Arguments must not be declared
 !   as optional, and the types, intent and order must match.
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
@@ -2565,10 +2565,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   !INTERFACE:
 !     interface
-!   	subroutine userRoutine(gridcomp, rc)
-!   	  type(ESMF_GridComp)  :: gridcomp   ! must not be optional
-!   	  integer, intent(out) :: rc	     ! must not be optional
-!   	end subroutine
+!       subroutine userRoutine(gridcomp, rc)
+!         type(ESMF_GridComp)  :: gridcomp   ! must not be optional
+!         integer, intent(out) :: rc         ! must not be optional
+!       end subroutine
 !     end interface
 !
 !   !DESCRIPTION:
@@ -2583,7 +2583,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   searched for {\tt userRoutine}.
 ! \item[{[userRoutineFound]}]
 !   Report back whether the specified {\tt userRoutine} was found and executed,
-!   or was not available. If this argument is present, not finding the 
+!   or was not available. If this argument is present, not finding the
 !   {\tt userRoutine} will not result in returning an error in {\tt rc}.
 !   The default is to return an error if the {\tt userRoutine} cannot be found.
 ! \item[{[userRc]}]
@@ -2605,7 +2605,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
-  
+
     if (present(sharedObj)) then
       call c_ESMC_SetServicesShObj(gridcomp, userRoutine, sharedObj, &
         userRoutineFoundHelp, localUserRc, localrc)
@@ -2616,13 +2616,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! translate ESMF_Logical -> logical
     userRoutineFoundHelpHelp = userRoutineFoundHelp
-    
+
     ! report back
     if (present(userRoutineFound)) userRoutineFound = userRoutineFoundHelpHelp
-    
+
     if (userRoutineFoundHelpHelp) then
       ! routine found and executed -> indicate this Component has VM associated
       gridcomp%compp%compStatus%vmIsPresent = .true.
@@ -2636,7 +2636,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
       endif
     endif
-    
+
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
@@ -2666,7 +2666,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 ! Set the services of a Gridded Component to serve a "dual" Component for an
 ! "actual" Component. The component tunnel is VM based.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
@@ -2689,7 +2689,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, actualGridcomp, rc)
-    
+
     ! access the petList of the actualGridcomp and find the lowest PET
     ! -> this is going to be the rendezvous PET for the component tunnel setup
     nullify(actualCompPetList)
@@ -2705,7 +2705,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         actualCompRootPet = actualCompPetList(i)
     enddo
     deallocate(actualCompPetList)
-    
+
     call c_ESMC_SetServicesComp(gridcomp, gridcomp%compp%compTunnel, &
       actualGridcomp, actualCompRootPet, localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -2714,7 +2714,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! now indicate that this Component has a VM associated
     gridcomp%compp%compStatus%vmIsPresent = .true.
-    
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_GridCompSetServicesComp
@@ -2744,7 +2744,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 ! Set the services of a Gridded Component to serve a "dual" Component for an
 ! "actual" Component. The component tunnel is socket based.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
@@ -2757,7 +2757,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   if the {\tt server} argument was not provided, is {\tt localhost}.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
+!   with the actual component, before returning with a timeout condition.
 !   The default is 3600, i.e. 1 hour.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
@@ -2779,7 +2779,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
-    
+
     timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
 
@@ -2804,7 +2804,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! now indicate that this Component has a VM associated
     gridcomp%compp%compStatus%vmIsPresent = .true.
-    
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_GridCompSetServicesSock
@@ -2848,7 +2848,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[gridcomp]
 !   Gridded Component.
 ! \item[userRoutine]
-!   The Component writer must supply a subroutine with the exact interface 
+!   The Component writer must supply a subroutine with the exact interface
 !   shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !   must not be declared as optional, and the types, intent and order must match.
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
@@ -2877,12 +2877,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
-  
+
     call c_ESMC_SetVM(gridcomp, userRoutine, localUserRc, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
@@ -2922,14 +2922,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! {\tt userRoutine} must exist in the executable, or in the shared object
 ! specified by {\tt sharedObj}. In the latter case all of the platform
 ! specific details about dynamic linking and loading apply.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   Gridded Component.
 ! \item[userRoutine]
 !   Routine to be called, specified as a character string.
-!   The Component writer must supply a subroutine with the exact interface 
+!   The Component writer must supply a subroutine with the exact interface
 !   shown for {\tt userRoutine} below. Arguments must not be declared
 !   as optional, and the types, intent and order must match.
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
@@ -2941,10 +2941,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   !INTERFACE:
 !     interface
-!   	subroutine userRoutine(gridcomp, rc)
-!   	  type(ESMF_GridComp)  :: gridcomp    ! must not be optional
-!   	  integer, intent(out) :: rc	      ! must not be optional
-!   	end subroutine
+!       subroutine userRoutine(gridcomp, rc)
+!         type(ESMF_GridComp)  :: gridcomp    ! must not be optional
+!         integer, intent(out) :: rc          ! must not be optional
+!       end subroutine
 !     end interface
 !
 !   !DESCRIPTION:
@@ -2966,13 +2966,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc                       ! local error status
     integer :: localUserRc
     character(len=0) :: emptyString
-    
+
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_GridCompGetInit, gridcomp, rc)
-  
+
     if (present(sharedObj)) then
       call c_ESMC_SetVMShObj(gridcomp, userRoutine, sharedObj, localUserRc, &
         localrc)
@@ -3021,7 +3021,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The other constraint to this call is that the number of PEs is preserved.
 !   This means that the child Component in the end is associated with as many
-!   PEs as the parent Component provided to the child. The number of child PETs 
+!   PEs as the parent Component provided to the child. The number of child PETs
 !   however is adjusted according to the above rule.
 !
 !   The typical use of {\tt ESMF\_GridCompSetVMMaxPEs()} is to allocate
@@ -3029,21 +3029,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
-! \item[gridcomp] 
+! \item[gridcomp]
 !   {\tt ESMF\_GridComp} to set the {\tt ESMF\_VM} for.
-! \item[{[maxPeCountPerPet]}] 
+! \item[{[maxPeCountPerPet]}]
 !   Maximum number of PEs on each PET.
 !   Default for each SSI is the local number of PEs.
-! \item[{[prefIntraProcess]}] 
+! \item[{[prefIntraProcess]}]
 !   Communication preference within a single process.
 !   {\em Currently options not documented. Use default.}
-! \item[{[prefIntraSsi]}] 
+! \item[{[prefIntraSsi]}]
 !   Communication preference within a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
-! \item[{[prefInterSsi]}] 
+! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
-! \item[{[rc]}] 
+! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -3091,10 +3091,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
-!   Attempts to provide {\tt maxPetCountPerVas} threaded PETs in each 
+!   Attempts to provide {\tt maxPetCountPerVas} threaded PETs in each
 !   virtual address space (VAS). Only as many threaded PETs as there are PEs
-!   located on the single system image (SSI) can be associated with the VAS. 
-!   Within this constraint the call tries to get as close as possible to the 
+!   located on the single system image (SSI) can be associated with the VAS.
+!   Within this constraint the call tries to get as close as possible to the
 !   number specified by {\tt maxPetCountPerVas}.
 !
 !   The other constraint to this call is that the number of PETs is preserved.
@@ -3102,27 +3102,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   PETs as the parent Component provided to the child. The threading level of
 !   the child PETs however is adjusted according to the above rule.
 !
-!   The typical use of {\tt ESMF\_GridCompSetVMMaxThreads()} is to run a 
+!   The typical use of {\tt ESMF\_GridCompSetVMMaxThreads()} is to run a
 !   Component multi-threaded with groups of PETs executing within a common
 !   virtual address space.
 !
 ! The arguments are:
 ! \begin{description}
-! \item[gridcomp] 
+! \item[gridcomp]
 !   {\tt ESMF\_GridComp} to set the {\tt ESMF\_VM} for.
-! \item[{[maxPetCountPerVas]}] 
-!   Maximum number of threaded PETs in each virtual address space (VAS). 
+! \item[{[maxPetCountPerVas]}]
+!   Maximum number of threaded PETs in each virtual address space (VAS).
 !   Default for each SSI is the local number of PEs.
-! \item[{[prefIntraProcess]}] 
+! \item[{[prefIntraProcess]}]
 !   Communication preference within a single process.
 !   {\em Currently options not documented. Use default.}
-! \item[{[prefIntraSsi]}] 
+! \item[{[prefIntraSsi]}]
 !   Communication preference within a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
-! \item[{[prefInterSsi]}] 
+! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
-! \item[{[rc]}] 
+! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -3171,7 +3171,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_GridComp}.
 !   Reduces the number of threaded PETs in each VAS. The {\tt max} argument
-!   may be specified to limit the maximum number of PEs that a single PET 
+!   may be specified to limit the maximum number of PEs that a single PET
 !   can be associated with.
 !
 !   Several constraints apply: 1) the number of PEs cannot change, 2) PEs
@@ -3179,26 +3179,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   cannot increase, only decrease, 4) PETs cannot migrate between virtual
 !   address spaces (VASs), nor can VASs migrate between SSIs.
 !
-!   The typical use of {\tt ESMF\_GridCompSetVMMinThreads()} is to run a 
+!   The typical use of {\tt ESMF\_GridCompSetVMMinThreads()} is to run a
 !   Component across a set of single-threaded PETs.
 !
 ! The arguments are:
 ! \begin{description}
-! \item[gridcomp] 
+! \item[gridcomp]
 !   {\tt ESMF\_GridComp} to set the {\tt ESMF\_VM} for.
-! \item[{[maxPeCountPerPet]}] 
+! \item[{[maxPeCountPerPet]}]
 !   Maximum number of PEs on each PET.
 !   Default for each SSI is the local number of PEs.
-! \item[{[prefIntraProcess]}] 
+! \item[{[prefIntraProcess]}]
 !   Communication preference within a single process.
 !   {\em Currently options not documented. Use default.}
-! \item[{[prefIntraSsi]}] 
+! \item[{[prefIntraSsi]}]
 !   Communication preference within a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
-! \item[{[prefInterSsi]}] 
+! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
-! \item[{[rc]}] 
+! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -3314,12 +3314,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
-! \item[gridcomp] 
+! \item[gridcomp]
 !   {\tt ESMF\_GridComp} to wait for.
 ! \item[{[syncflag]}]
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[timeout]}]
 !   The maximum period in seconds the actual component is allowed to execute
@@ -3336,7 +3336,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   condition.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
-! \item[{[rc]}] 
+! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -3417,50 +3417,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Call the associated user write restart routine for 
+! Call the associated user write restart routine for
 ! an {\tt ESMF\_GridComp}.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[gridcomp]
 !   {\tt ESMF\_GridComp} to call run routine for.
-! \item[{[importState]}]  
+! \item[{[importState]}]
 !   {\tt ESMF\_State} containing import data. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   importState argument in the user code cannot be optional. 
-! \item[{[exportState]}]  
+!   argument will be passed to the user-supplied routine.  The
+!   importState argument in the user code cannot be optional.
+! \item[{[exportState]}]
 !   {\tt ESMF\_State} containing export data. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   exportState argument in the user code cannot be optional. 
-! \item[{[clock]}]  
-!   External {\tt ESMF\_Clock} for passing in time information.  
+!   argument will be passed to the user-supplied routine.  The
+!   exportState argument in the user code cannot be optional.
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   clock argument in the user code cannot be optional. 
-! \item[{[syncflag]}]  
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   argument will be passed to the user-supplied routine.  The
+!   clock argument in the user code cannot be optional.
+! \item[{[syncflag]}]
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
-! \item[{[phase]}]   
+! \item[{[phase]}]
 !   Component providers must document whether each of their
-!   routines are {\em single-phase} or {\em multi-phase}.    
+!   routines are {\em single-phase} or {\em multi-phase}.
 !   Single-phase routines require only one invocation to complete
-!   their work.    
+!   their work.
 !   Multi-phase routines provide multiple subroutines to accomplish
 !   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For multiple-phase child components, this is the integer phase  
+!   For multiple-phase child components, this is the integer phase
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
-!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   with the actual component, before returning with a timeout condition.
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
 !   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.

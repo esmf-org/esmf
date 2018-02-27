@@ -21,7 +21,7 @@ module user_modelB
   use ESMF_TestMod
 
   implicit none
-    
+
   public usermB_register
 
   private
@@ -35,7 +35,7 @@ module user_modelB
   sequence
     type(dblock), pointer :: p
   end type
-        
+
   contains
 
   subroutine usermB_register(comp, rc)
@@ -58,14 +58,14 @@ module user_modelB
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "User CompB Register returning"
-    
+
   end subroutine
 
 !-------------------------------------------------------------------------
 !   !  User Comp Component created by higher level calls, here is the
 !   !   Initialization routine.
- 
-    
+
+
   subroutine user_init(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -93,7 +93,7 @@ module user_modelB
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_AttributeGet(comp, "perturbation", perturbation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    
+
     ! Create the source Array and add it to the export State
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -120,19 +120,19 @@ module user_modelB
                   farrayPtr(i,j) = 6+perturbation
        enddo
     enddo
-    
+
     allocate(intStatePtr%p)
 
-    ! Set the export state 
+    ! Set the export state
     call ESMF_StateAdd(exportState, (/array/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Set the internal state
     call ESMF_GridCompGet(comp, name=compName, rc=rc)
     if (trim(compName) .eq. "user model B-1") then
-	intStatePtr%p%offset = 3.0
+        intStatePtr%p%offset = 3.0
     else
-	intStatePtr%p%offset = 6.0
+        intStatePtr%p%offset = 6.0
     endif
     call ESMF_GridCompSetInternalState(comp, intStatePtr, rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -145,7 +145,7 @@ module user_modelB
 !-------------------------------------------------------------------------
 !   !  The Run routine where data is computed.
 !   !
- 
+
   subroutine user_run(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -165,7 +165,7 @@ module user_modelB
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     offset = intStatePtr%p%offset
-  
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
@@ -180,8 +180,8 @@ module user_modelB
     ! increment each element by the offset set in the init routine and passed over using
     ! internal state
     do j = lbound(farrayPtr, 2), ubound(farrayPtr, 2)
-   	do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
-       		farrayPtr(i,j) = farrayPtr(i,j) + offset
+        do i = lbound(farrayPtr, 1), ubound(farrayPtr, 1)
+                        farrayPtr(i,j) = farrayPtr(i,j) + offset
       enddo
    enddo
 
@@ -199,7 +199,7 @@ module user_modelB
 !-------------------------------------------------------------------------
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
- 
+
   subroutine user_final(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -210,7 +210,7 @@ module user_modelB
     ! Local variables
     type(ESMF_DistGrid) :: distgrid
     type(ESMF_Array) :: array
-    
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
@@ -233,5 +233,5 @@ module user_modelB
 
 
 end module user_modelB
-    
+
 !\end{verbatim}
