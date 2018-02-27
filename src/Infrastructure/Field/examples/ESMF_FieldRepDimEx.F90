@@ -26,7 +26,7 @@
     use ESMF
     use ESMF_TestMod
     implicit none
-    
+
     ! Local variables
     type(ESMF_VM)       :: vm
     type(ESMF_Field)    :: field
@@ -41,8 +41,8 @@
     integer                 :: dimCount, gridrank_repdim
     type(ESMF_StaggerLoc)   :: lstaggerloc
     integer, dimension(4) :: lgridToFieldMap
-    integer, dimension(1) :: lungriddedLBound 
-    integer, dimension(1) :: lungriddedUBound 
+    integer, dimension(1) :: lungriddedLBound
+    integer, dimension(1) :: lungriddedUBound
     integer, dimension(2,1) :: ltotalLWidth
     integer, dimension(2,1) :: ltotalUWidth
 
@@ -68,7 +68,7 @@
     write(failMsg, *) "Example failure"
     write(testname, *) "Example ESMF_FieldRepDimEx"
 
- 
+
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
 
@@ -91,7 +91,7 @@
 !\label{sec:field:usage:create_repdim}
 !
 !  \begin{sloppypar}
-!  In this example an {\tt ESMF\_Field} with replicated dimension is created from an {\tt ESMF\_Grid} and 
+!  In this example an {\tt ESMF\_Field} with replicated dimension is created from an {\tt ESMF\_Grid} and
 !  an {\tt ESMF\_Arrayspec}. A user can also use other {\tt ESMF\_FieldCreate()} methods to create replicated
 !  dimension Field, this example illustrates the key concepts and use of a replicated dimension Field.
 !  \end{sloppypar}
@@ -101,7 +101,7 @@
 !  indicates the corresponding Grid dimension is replicated in the Field. In such a Field,
 !  the rank of the Field is no longer necessarily greater than its Grid rank.
 !  An example will make this clear. We will start by creating Distgrid and Grid.
-!  
+!
 !EOE
 
 !BOC
@@ -120,7 +120,7 @@
 !EOC
 !BOE
 ! In this example, a user creates a 3D Field with replicated dimension
-! replicated along the 2nd and 4th dimension of its underlying 4D Grid. 
+! replicated along the 2nd and 4th dimension of its underlying 4D Grid.
 ! In addition, the 2nd dimension of the Field is ungridded (why?). The 1st and
 ! 3rd dimensions of the Field have halos.
 !EOE
@@ -165,20 +165,20 @@
 !BOE
 ! Number of undistributed dimension of the array {\it X} is computed from
 ! total rank of the array {\it A}, the dimension count of its underlying distgrid
-! {\it B} and number of replicated dimension in the distgrid {\it C}. 
+! {\it B} and number of replicated dimension in the distgrid {\it C}.
 ! We have the following formula: X = A - (B - C)
 !EOE
 !BOC
     allocate(audlb(arank-adimCount+gridrank_repdim), &
-	audub(arank-adimCount+gridrank_repdim))
+        audub(arank-adimCount+gridrank_repdim))
     call ESMF_ArrayGet(array, exclusiveLBound=aelb, exclusiveUBound=aeub, &
         computationalLBound=aclb, computationalUBound=acub, &
         totalLBound=atlb, totalUBound=atub, &
         undistLBound=audlb, undistUBound=audub, &
         rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
-    ! verify the ungridded bounds from field match 
+
+    ! verify the ungridded bounds from field match
     ! undistributed bounds from its underlying array
     do i = 1, arank-adimCount
         if(lungriddedLBound(i) .ne. audlb(i) ) &

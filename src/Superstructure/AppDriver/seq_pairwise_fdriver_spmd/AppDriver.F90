@@ -2,11 +2,11 @@
 ! MODULE AppDriver.F90 - generic main program for an ESMF Application
 !
 ! !DESCRIPTION:
-!  ESMF Application Driver for any Gridded Component.  Creates the top 
+!  ESMF Application Driver for any Gridded Component.  Creates the top
 !  Gridded Component and calls the Initialize, Run, and Finalize routines
-!  for it.  
+!  for it.
 !  This Gridded Component will most likely create and manage subcomponents
-!  internally, so that this generic file becomes the "cap" or root 
+!  internally, so that this generic file becomes the "cap" or root
 !  of a tree of components.
 !
 !  In the text below, {\tt USER\_APP} should be replaced by the specific
@@ -21,10 +21,10 @@
 !---------------------------------------------------------------------------
 !---------------------------------------------------------------------------
 !
-!  The ChangeMe.F90 file that's included below contains a number of 
-!  definitions that are used by the AppDriver, such as the name of the 
-!  application's main configuration file and the name of the application's 
-!  SetServices routine.  This file is in the same directory as the 
+!  The ChangeMe.F90 file that's included below contains a number of
+!  definitions that are used by the AppDriver, such as the name of the
+!  application's main configuration file and the name of the application's
+!  SetServices routine.  This file is in the same directory as the
 !  AppDriver.F90 file.
 !---------------------------------------------------------------------------
 
@@ -37,12 +37,12 @@
 
     ! ESMF module, defines all ESMF data types and procedures
     use ESMF
-    
+
     ! Gridded Component registration routines.  Defined in "ChangeMe.F90"
     use USER_APP_Mod, only : SetServices => USER_APP_SetServices
 
     implicit none
-    
+
 !---------------------------------------------------------------------------
 !  Define local variables
 !---------------------------------------------------------------------------
@@ -68,7 +68,7 @@
 
     ! Return codes for error checks
     integer :: rc, localrc
-        
+
 !---------------------------------------------------------------------------
 !  Initialize ESMF.  Note that an output Log is created by default.
 !---------------------------------------------------------------------------
@@ -83,10 +83,10 @@
 !---------------------------------------------------------------------------
 !  Create and load a configuration file.
 !  The USER_CONFIG_FILE is set to sample.rc in the ChangeMe.F90 file.
-!  The sample.rc file is also included in the directory with the 
+!  The sample.rc file is also included in the directory with the
 !  AppDriver.F90 file.
 !---------------------------------------------------------------------------
-    
+
     config = ESMF_ConfigCreate(rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
@@ -122,7 +122,7 @@
 !---------------------------------------------------------------------------
 
     compGridded = ESMF_GridCompCreate(name="ESMF Gridded Component", &
-	rc=localrc)
+        rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
@@ -195,7 +195,7 @@
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) &
             call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-     
+
 !----------------------------------------------------------------------------
 !  Call the initialize, run, and finalize methods of the top component.
 !  When the initialize method of the top component is called, it will in
@@ -203,12 +203,12 @@
 !  will initialize their children, and so on.  The same is true of the
 !  run and finalize methods.
 !----------------------------------------------------------------------------
- 
+
       call ESMF_GridCompInitialize(compGridded, importState=defaultstate, &
         exportState=defaultstate, clock=clock, rc=localrc)
       if (ESMF_LogFoundError(rc, msg="Initialize failed", rcToReturn=rc)) &
           call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
- 
+
       call ESMF_GridCompRun(compGridded, importState=defaultstate, &
         exportState=defaultstate, clock=clock, rc=localrc)
       if (ESMF_LogFoundError(rc, msg="Run failed", rcToReturn=rc)) &
@@ -218,8 +218,8 @@
         exportState=defaultstate, clock=clock, rc=localrc)
       if (ESMF_LogFoundError(rc, msg="Finalize failed", rcToReturn=rc)) &
           call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
- 
- 
+
+
 !----------------------------------------------------------------------------
 !  Destroy objects.
 !----------------------------------------------------------------------------
@@ -247,6 +247,6 @@
 
     end program ESMF_AppDriver
 
-!\end{verbatim}    
+!\end{verbatim}
 !EOP
 

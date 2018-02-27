@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !==============================================================================
@@ -33,12 +33,12 @@ module ESMF_StateReconcile2Mod
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the Fortran function and subroutine 
+! The code in this file implements the Fortran function and subroutine
 !  interfaces to ensure that {\tt ESMF\_State} data is consistent across
-!  all PETs.  The intended use is by components that have subcomponents 
+!  all PETs.  The intended use is by components that have subcomponents
 !  which run on subsets of the couplers PET list.
 !  Objects that have been created on only a subset of the PETs cannot be
-!  identified to methods like Regrid or Redistribution since they have no 
+!  identified to methods like Regrid or Redistribution since they have no
 !  valid handles to identify them.  The code here communicates the missing
 !  object information to other PETs in the current VM.
 !
@@ -104,7 +104,7 @@ module ESMF_StateReconcile2Mod
   end type
 
 !==============================================================================
-! 
+!
 ! INTERFACE BLOCKS
 !
 !==============================================================================
@@ -137,13 +137,13 @@ contains
     type(ESMF_State),            intent(inout)         :: state
     type(ESMF_VM),               intent(in),  optional :: vm
     type(ESMF_AttReconcileFlag), intent(in),  optional :: attreconflag
-    integer,                     intent(out), optional :: rc                   
+    integer,                     intent(out), optional :: rc
 !
 !
 ! !DESCRIPTION:
 !     Must be called for any {\tt ESMF\_State} which contains ESMF objects
 !     that have not been created on all the {\tt PET}s of the currently
-!     running {\tt ESMF\_Component}.  
+!     running {\tt ESMF\_Component}.
 !     For example, if a coupler is operating on data
 !     which was created by another component that ran on only a subset
 !     of the couplers {\tt PET}s, the coupler must make this call first
@@ -199,7 +199,7 @@ contains
     ! we might want to hash the ID lists so we can send a single number
     ! (or short list of numbers) instead of having to build and send the
     ! list each time.
-     
+
     ! Set the optional ESMF_AttReconcileFlag
     lattreconflag = ESMF_ATTRECONCILE_OFF
     if(present(attreconflag)) then
@@ -314,7 +314,7 @@ contains
     end if
     itemtypes_send => null ()
     ids_send   => null ()
-    vmids_send => null ()      
+    vmids_send => null ()
     call ESMF_ReconcileGetStateIDInfo (state, siwrap,  &
         itemtype=itemtypes_send,  &
           id=  ids_send,  &
@@ -605,8 +605,8 @@ contains
 !  offered by multiple PETs, a heuristic is used to determine which PET will
 !  provide it in order to try to avoid 'hot spotting' the offering PET.
 !
-!   The arguments are:                                                     
-!   \begin{description}                                                    
+!   The arguments are:
+!   \begin{description}
 !   \item[vm]
 !     The current {\tt ESMF\_VM} (virtual machine).
 !   \item[id]
@@ -778,7 +778,7 @@ contains
       end if
 
       rc_1 = ESMF_SUCCESS
-        
+
     end subroutine needs_list_deallocate
 
     subroutine needs_list_insert (needs_list_1, pet_1,  &
@@ -823,7 +823,7 @@ contains
         needs_list_1%position(pet_1) = position
         return
       end if
-         
+
       needslist_p => needs_list_1
       do
         if (id_1 == needslist_p%id .and.  &
@@ -957,11 +957,11 @@ contains
         needslist_p => needslist_p%next
       end do
 #endif
-      
+
     end subroutine needs_list_select
 
   end subroutine ESMF_ReconcileCompareNeeds
-  
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ReconcileDeserialize"
@@ -973,18 +973,18 @@ contains
       attreconflag, rc)
 !
 ! !ARGUMENTS:
-    type (ESMF_State), intent(inout):: state                                   
-    type (ESMF_VM),    intent(in)   :: vm                                   
-    character,         pointer      :: obj_buffer(:) ! intent(in)          
-    type(ESMF_VMId),   pointer      :: vm_ids(:)     ! intent(in)          
+    type (ESMF_State), intent(inout):: state
+    type (ESMF_VM),    intent(in)   :: vm
+    character,         pointer      :: obj_buffer(:) ! intent(in)
+    type(ESMF_VMId),   pointer      :: vm_ids(:)     ! intent(in)
     type(ESMF_AttReconcileFlag),intent(in)   :: attreconflag
     integer,           intent(out)  :: rc
 !
 ! !DESCRIPTION:
 !   Builds proxy items for each of the items in the buffer.
 !
-!   The arguments are:                                                     
-!   \begin{description}                                                    
+!   The arguments are:
+!   \begin{description}
 !   \item[state]
 !     {\tt ESMF\_State} to add proxy objects to.
 !   \item[obj_buffer]
@@ -1286,8 +1286,8 @@ contains
 !
 !  Exchange attributes on the base of the State itself.
 !
-!   The arguments are:                                                     
-!   \begin{description}                                                    
+!   The arguments are:
+!   \begin{description}
 !   \item[state]
 !     {\tt ESMF\_State} to add proxy objects to.
 !   \item[vm]
@@ -1467,8 +1467,8 @@ contains
 !
 !  Dense AlltoAll of all Ids and VMIds from every PET to every PET.
 !
-!   The arguments are:                                                     
-!   \begin{description}                                                    
+!   The arguments are:
+!   \begin{description}
 !   \item[vm]
 !     The current {\tt ESMF\_VM} (virtual machine).
 !   \item[nitems_buf]
@@ -1610,13 +1610,13 @@ contains
 
 !    if (debug) then
 !      do, j=0, npets-1
-!	if (j == myPet) then
-!	  do, i=0, ubound (id_info, 1)
-!	    write (6,*) 'pet', j, ': id_info%id     =', id_info(i)%id
-!	    call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
-!	  end do
-!	end if
-!	call ESMF_VMBarrier (vm)
+!       if (j == myPet) then
+!         do, i=0, ubound (id_info, 1)
+!           write (6,*) 'pet', j, ': id_info%id     =', id_info(i)%id
+!           call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
+!         end do
+!       end if
+!       call ESMF_VMBarrier (vm)
 !      end do
 !    end if
 
@@ -1694,7 +1694,7 @@ contains
     rc = localrc
 
   end subroutine ESMF_ReconcileExchgIDInfo
-    
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ReconcileExchgItems"
@@ -1716,8 +1716,8 @@ contains
 !  Performs alltoallv communications of serialized data from offering PETs
 !  to PETs requesting items.
 !
-!   The arguments are:                                                     
-!   \begin{description}                                                    
+!   The arguments are:
+!   \begin{description}
 !   \item[vm]
 !     The current {\tt ESMF\_VM} (virtual machine).
 !   \item[id_info]
@@ -1914,8 +1914,8 @@ contains
 !  Performs alltoallv communications from needy PETs to PETs which offer
 !  items they need.
 !
-!   The arguments are:                                                     
-!   \begin{description}                                                    
+!   The arguments are:
+!   \begin{description}
 !   \item[vm]
 !     The current {\tt ESMF\_VM} (virtual machine).
 !   \item[id_info]
@@ -2070,8 +2070,8 @@ contains
 !
 ! !DESCRIPTION:
 !
-!   The arguments are:                                                     
-!   \begin{description}                                                    
+!   The arguments are:
+!   \begin{description}
 !   \item[state]
 !     {\tt ESMF\_State} to collect information from.
 !   \item[siwrap]
@@ -2248,7 +2248,7 @@ contains
     rc = ESMF_SUCCESS
 
   end subroutine ESMF_ReconcileGetStateIDInfo
-  
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ReconcileInitialize"
@@ -2268,8 +2268,8 @@ contains
 !
 ! !DESCRIPTION:
 !
-!   The arguments are:                                                     
-!   \begin{description}                                                    
+!   The arguments are:
+!   \begin{description}
 !   \item[state]
 !     {\tt ESMF\_State} to collect information from.
 !   \item[rc]
@@ -2359,8 +2359,8 @@ contains
 !
 ! !DESCRIPTION:
 !
-!   The arguments are:                                                     
-!   \begin{description}                                                    
+!   The arguments are:
+!   \begin{description}
 !   \item[state]
 !     {\tt ESMF\_State} to collect information from.
 !   \item[siwrap]
@@ -2834,7 +2834,7 @@ contains
 
     stypep => state%statep
     zapList => stypep%zapList
-    
+
     itemList => null ()
     call ESMF_ContainerGet(container=stypep%stateContainer, itemList=itemList, &
       rc=localrc)
@@ -2852,7 +2852,7 @@ contains
           if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-          
+
           do k=1, size(zapList)
             if (associated (zapList(k)%si)) then
               if (zapList(k)%si%otype==ESMF_STATEITEM_FIELD) then
@@ -2866,7 +2866,7 @@ contains
 !print *, "ESMF_ReconcileZappedProxies() found: ", trim(name)
                 ! Bend pointers and copy contents to result in the desired
                 ! behavior for re-reconcile. From a user perspective of
-                ! Reconcile() proxies should persist when a State is 
+                ! Reconcile() proxies should persist when a State is
                 ! re-reconciled, and the same proxies are needed. Basically
                 ! a user should be able to hang on to a proxy.
                   tempField%ftypep => itemList(i)%si%datap%fp%ftypep

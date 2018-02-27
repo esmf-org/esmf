@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright 2002-2014, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
@@ -46,7 +46,7 @@ module ESMF_PointListMod
   use ESMF_F90InterfaceMod
   use ESMF_StaggerLocMod
   use ESMF_LocStreamMod
-  
+
   implicit none
 
 !------------------------------------------------------------------------------
@@ -79,14 +79,14 @@ module ESMF_PointListMod
 
   public ESMF_PointListCreate
   public ESMF_PointListDestroy
-  
+
   public ESMF_PointListGet
   public ESMF_PointListGetForLoc
   public ESMF_PointListAdd
- 
+
   public ESMF_PointListPrint
   public ESMF_PointListWriteVTK
-  
+
 !EOPI
 !------------------------------------------------------------------------------
 
@@ -111,10 +111,10 @@ interface ESMF_PointListCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-	module procedure ESMF_PointListCreateFrmGrid
-	module procedure ESMF_PointListCreateFrmMesh
-	module procedure ESMF_PointListCreateFrmLocStream
-	module procedure ESMF_PointListCreateFrmInput
+        module procedure ESMF_PointListCreateFrmGrid
+        module procedure ESMF_PointListCreateFrmMesh
+        module procedure ESMF_PointListCreateFrmLocStream
+        module procedure ESMF_PointListCreateFrmInput
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -138,7 +138,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PointListGetInit"
 !BOPI
-! !IROUTINE: ESMF_PointListGetInit - Get the Init status 
+! !IROUTINE: ESMF_PointListGetInit - Get the Init status
 
 ! !INTERFACE:
   function ESMF_PointListGetInit(d)
@@ -154,8 +154,8 @@ contains
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[d] 
-!     The class to be queried 
+!   \item[d]
+!     The class to be queried
 !   \end{description}
 !
 !EOPI
@@ -164,7 +164,7 @@ contains
       ESMF_PointListGetInit=ESMF_INIT_GET(d)
     else
       ESMF_PointListGetInit=ESMF_INIT_CREATED
-    endif 
+    endif
   end function ESMF_PointListGetInit
 !------------------------------------------------------------------------------
 
@@ -180,17 +180,17 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_PointList), intent(inout)           :: pointlist
-    integer,                intent(out),  optional  :: rc  
-!         
+    integer,                intent(out),  optional  :: rc
+!
 !
 ! !DESCRIPTION:
 !   Set init code in PointList object to "CREATED".
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[pointlist] 
+!   \item[pointlist]
 !     Specified {\tt ESMF\_PointList} object.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -198,13 +198,13 @@ contains
 !------------------------------------------------------------------------------
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Set init code
     ESMF_INIT_SET_CREATED(pointlist)
 
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_PointListSetInitCreated
 !------------------------------------------------------------------------------
 
@@ -224,10 +224,10 @@ contains
     type(ESMF_Grid), intent(in)       :: grid
     type(ESMF_StaggerLoc), intent(in) :: staggerLoc
     integer(ESMF_KIND_I4), optional   :: maskValues(:)
-    integer, intent(out), optional    :: rc               
+    integer, intent(out), optional    :: rc
 !
 ! !DESCRIPTION:
-!   Allocates memory for a new {\tt ESMF\_PointList} object and 
+!   Allocates memory for a new {\tt ESMF\_PointList} object and
 !   constructs its internals from input Grid.
 !
 !   The arguments are:
@@ -238,7 +238,7 @@ contains
 !     stagger location
 !   \item[{maskValues}]
 !     Values to set as masked
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -300,10 +300,10 @@ contains
     type(ESMF_Mesh), intent(in)     :: mesh
     type(ESMF_MeshLoc), intent(in)  :: meshLoc
     integer(ESMF_KIND_I4), optional :: maskValues(:)
-    integer, intent(out), optional  :: rc               
+    integer, intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
-!   Allocates memory for a new {\tt ESMF\_PointList} object and 
+!   Allocates memory for a new {\tt ESMF\_PointList} object and
 !   constructs its internals from input Mesh.
 !
 !   The arguments are:
@@ -314,7 +314,7 @@ contains
 !     mesh location
 !   \item[{maskValues}]
 !     Values to set as masked
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -371,10 +371,10 @@ contains
 ! !ARGUMENTS:
     type(ESMF_LocStream), intent(in)  :: locstream
     integer(ESMF_KIND_I4), intent(in), optional   :: maskValues(:)
-    integer, intent(out), optional    :: rc               
+    integer, intent(out), optional    :: rc
 !
 ! !DESCRIPTION:
-!   Allocates memory for a new {\tt ESMF\_PointList} object and 
+!   Allocates memory for a new {\tt ESMF\_PointList} object and
 !   constructs its internals from input LocStream.
 !
 !   The arguments are:
@@ -383,7 +383,7 @@ contains
 !     The Location Stream to get the information from to create the PointList.
 !   \item[{maskValues}]
 !     Values to set as masked
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -523,7 +523,7 @@ contains
       do j=cl,cu
         masked_value=.false.
 
-        !redundant if statement here is needed to avoid bug in Intel optimizer, which 
+        !redundant if statement here is needed to avoid bug in Intel optimizer, which
         !occurs with versions 15.0.3, 16.0.0 and possibly others
         if (num_maskValues .gt. 0) then
         do k=1,num_maskValues
@@ -533,7 +533,7 @@ contains
           endif
         enddo
         endif
-        if (.not. masked_value) num_local_pts = num_local_pts + 1  
+        if (.not. masked_value) num_local_pts = num_local_pts + 1
       enddo
     enddo
 
@@ -558,7 +558,7 @@ contains
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
 
-      !Allocate space for seqInd 
+      !Allocate space for seqInd
       allocate(seqInd(size(farrayPtrX)), stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -607,7 +607,7 @@ contains
       do j=cl,cu
         masked_value=.false.
 
-        !redundant if statement here is needed to avoid bug in Intel optimizer, which 
+        !redundant if statement here is needed to avoid bug in Intel optimizer, which
         !occurs with versions 15.0.3, 16.0.0 and possibly others
         if (num_maskValues .gt. 0) then
         do k=1,num_maskValues
@@ -670,10 +670,10 @@ contains
 !
 ! !ARGUMENTS:
     integer, intent(in)                             :: maxpts, numdims
-    integer, intent(out), optional                  :: rc               
+    integer, intent(out), optional                  :: rc
 !
 ! !DESCRIPTION:
-!   Allocates memory for a new {\tt ESMF\_PointList} object and 
+!   Allocates memory for a new {\tt ESMF\_PointList} object and
 !   constructs its internals from test input
 !
 !   The arguments are:
@@ -682,7 +682,7 @@ contains
 !     The maximum number of points to hold in the PointList.
 !   \item[{numdims}]
 !     The number of dimensions for points in the PointList.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -728,7 +728,7 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_PointList), intent(inout) :: pointlist
-    integer, intent(out), optional :: rc        
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Destroys an {\tt ESMF\_PointList}, releaseing the resources associated
@@ -736,9 +736,9 @@ contains
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[pointlist] 
+!   \item[pointlist]
 !     The {\tt ESMF\_PointList} to be destroyed.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -757,7 +757,7 @@ contains
     if (pointlist%this .eq. ESMF_NULL_POINTER) then
       if (present(rc)) rc = ESMF_SUCCESS
       return
-    endif 
+    endif
 
     ! Call C++ destroy code
 
@@ -769,7 +769,7 @@ contains
     ! nullify pointer
     pointlist%this = ESMF_NULL_POINTER
     ESMF_INIT_SET_DELETED(pointlist)
-    
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -799,15 +799,15 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[pointlist] 
+!     \item[pointlist]
 !          {\tt ESMF\_PointList} to be queried.
-!     \item[{[numpts]}] 
+!     \item[{[numpts]}]
 !          Returns current number of points.
-!     \item[{[maxpts]}] 
+!     \item[{[maxpts]}]
 !          Returns maximum number of points allowed.
-!     \item[{[dims]}] 
+!     \item[{[dims]}]
 !          Returns number of dimensions for coordinates.
-!     \item[{[rc]}] 
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -842,7 +842,7 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -870,15 +870,15 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[pointlist] 
+!     \item[pointlist]
 !          {\tt ESMF\_PointList} to be queried.
-!     \item[loc] 
+!     \item[loc]
 !          Location within Pointlist to be queried. Locations values begin with zero.
-!     \item[{[id]}] 
+!     \item[{[id]}]
 !          Returns the id associated with location.
-!     \item[{[loc_coords]}] 
+!     \item[{[loc_coords]}]
 !          Returns array of coordinates associated with location.
-!     \item[{[rc]}] 
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -934,13 +934,13 @@ contains
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[pointlist] 
+!     \item[pointlist]
 !          {\tt ESMF\_PointList} to be queried.
-!     \item[{[id]}] 
+!     \item[{[id]}]
 !          The id associated with point to add.
-!     \item[{[loc_coords]}] 
+!     \item[{[loc_coords]}]
 !          The array of coordinates associated with point to add.
-!     \item[{[rc]}] 
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -953,7 +953,7 @@ contains
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_PointListGetInit,pointlist,rc)
-    
+
     call c_ESMC_PointListAdd(pointlist, id, loc_coords, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -978,16 +978,16 @@ contains
 !
 ! !ARGUMENTS:
     type(ESMF_PointList),     intent(in)            :: pointlist
-    integer,                intent(out), optional :: rc           
+    integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Print information about an {\tt ESMF\_PointList}.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[pointlist] 
+!   \item[pointlist]
 !     {\tt ESMF\_PointList} to print contents of.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -1012,7 +1012,7 @@ contains
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_PointListPrint
 
 
@@ -1028,16 +1028,16 @@ contains
 ! !ARGUMENTS:
     type(ESMF_PointList), intent(in)            :: pointlist
     character(*),         intent(in)            :: filename
-    integer,              intent(out), optional :: rc           
+    integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Print information about an {\tt ESMF\_PointList} into a VTK file.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[pointlist] 
+!   \item[pointlist]
 !     {\tt ESMF\_PointList} to print contents of.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -1062,7 +1062,7 @@ contains
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_PointListWriteVTK
 !------------------------------------------------------------------------------
 

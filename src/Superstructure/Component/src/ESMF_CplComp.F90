@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
@@ -17,7 +17,7 @@ module ESMF_CplCompMod
 !
 !==============================================================================
 !
-! This file contains the Coupler Cplcomp class definition and all 
+! This file contains the Coupler Cplcomp class definition and all
 !   Coupler Cplcomp class methods.
 !
 !------------------------------------------------------------------------------
@@ -31,7 +31,7 @@ module ESMF_CplCompMod
 ! !DESCRIPTION:
 !
 ! The code in this file implements the Fortran interfaces to the
-! {\tt ESMF\_CplComp} class and associated functions and subroutines.  
+! {\tt ESMF\_CplComp} class and associated functions and subroutines.
 !
 !
 ! !USES:
@@ -270,7 +270,7 @@ contains
 !
 ! !INTERFACE:
   function ESMF_CplCompEQ(cplcomp1, cplcomp2)
-! 
+!
 ! !RETURN VALUE:
     logical :: ESMF_CplCompEQ
 
@@ -279,7 +279,7 @@ contains
     type(ESMF_CplComp), intent(in) :: cplcomp2
 
 ! !DESCRIPTION:
-!   Test if both {\tt cplcomp1} and {\tt cplcomp2} alias the same ESMF CplComp 
+!   Test if both {\tt cplcomp1} and {\tt cplcomp2} alias the same ESMF CplComp
 !   object.
 !
 !EOPI
@@ -289,7 +289,7 @@ contains
     integer :: localrc1, localrc2
     logical :: lval1, lval2
 
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
     ! deleted).
@@ -321,7 +321,7 @@ contains
 !
 ! !INTERFACE:
   function ESMF_CplCompNE(cplcomp1, cplcomp2)
-! 
+!
 ! !RETURN VALUE:
     logical :: ESMF_CplCompNE
 
@@ -330,7 +330,7 @@ contains
     type(ESMF_CplComp), intent(in) :: cplcomp2
 
 ! !DESCRIPTION:
-!   Test if both {\tt cplcomp1} and {\tt cplcomp2} alias the same ESMF CplComp 
+!   Test if both {\tt cplcomp1} and {\tt cplcomp2} alias the same ESMF CplComp
 !   object.
 !
 !EOPI
@@ -340,11 +340,11 @@ contains
     integer :: localrc1, localrc2
     logical :: lval1, lval2
 
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
     ! deleted).
-    
+
     ESMF_CplCompNE = .not.ESMF_CplCompEQ(cplcomp1, cplcomp2)
 
   end function ESMF_CplCompNE
@@ -390,25 +390,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! {\tt contextflag} to ESMF\_CONTEXT\_PARENT\_VM.
 !
 ! The return value is the new {\tt ESMF\_CplComp}.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[{[config]}]
 !   An already-created {\tt ESMF\_Config} object to be attached to the newly
 !   created component.
-!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   If both {\tt config} and {\tt configFile} arguments are specified,
 !   {\tt config} takes priority.
 ! \item[{[configFile]}]
-!   The filename of an {\tt ESMF\_Config} format file.  
+!   The filename of an {\tt ESMF\_Config} format file.
 !   If specified, a new {\tt ESMF\_Config} object is created and attached to the
 !   newly created component. The {\tt configFile} file is opened and associated
 !   with the new config object.
-!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   If both {\tt config} and {\tt configFile} arguments are specified,
 !   {\tt config} takes priority.
 ! \item[{[clock]}]
 !   \begin{sloppypar}
 !   Component-specific {\tt ESMF\_Clock}.  This clock is available to be
-!   queried and updated by the new {\tt ESMF\_CplComp} as it chooses.  
+!   queried and updated by the new {\tt ESMF\_CplComp} as it chooses.
 !   This should
 !   not be the parent component clock, which should be maintained and passed
 !   down to the initialize/run/finalize routines separately.
@@ -424,7 +424,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_CONTEXT\_OWN\_VM}. See section \ref{const:contextflag} for a
 !   complete list of valid flags.
 ! \item[{[name]}]
-!   Name of the newly-created {\tt ESMF\_CplComp}.  This name can be altered 
+!   Name of the newly-created {\tt ESMF\_CplComp}.  This name can be altered
 !   from within the {\tt ESMF\_CplComp} code once the initialization routine
 !   is called.
 ! \item[{[rc]}]
@@ -452,7 +452,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     allocate(compclass, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Component class", &
       ESMF_CONTEXT, rcToReturn=rc)) return
-   
+
     ! call Comp method
     call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
       configFile=configFile, config=config, clock=clock, petList=petList, &
@@ -467,10 +467,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     cplcomp%compp => compclass
     ! Add reference to this object into ESMF garbage collection table
     call c_ESMC_VMAddFObject(cplcomp, ESMF_ID_COMPONENT%objectID)
-      
+
     ! Set return values
     ESMF_CplCompCreate%compp => compclass
-    
+
     ESMF_INIT_SET_CREATED(ESMF_CplCompCreate)
 
     ! return successfully
@@ -521,8 +521,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   object into any other routines after being destroyed.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
-!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   with the actual component, before returning with a timeout condition.
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
 !   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
@@ -545,7 +545,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
 
     ! Check to see if already destroyed
-    if (.not.associated(cplcomp%compp)) then  
+    if (.not.associated(cplcomp%compp)) then
       if (ESMF_LogFoundError(ESMF_RC_OBJ_BAD, &
         msg="CplComp not initialized or already destroyed", &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -575,7 +575,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_INIT_SET_DELETED(cplcomp)
-    
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -621,50 +621,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Call the associated user-supplied finalization routine for 
+! Call the associated user-supplied finalization routine for
 ! an {\tt ESMF\_CplComp}.
-!   
-! The arguments are: 
-! \begin{description} 
+!
+! The arguments are:
+! \begin{description}
 ! \item[cplcomp]
 !   The {\tt ESMF\_CplComp} to call finalize routine for.
-! \item[{[importState]}]  
+! \item[{[importState]}]
 !   {\tt ESMF\_State} containing import data for coupling. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   importState argument in the user code cannot be optional. 
-! \item[{[exportState]}]  
+!   argument will be passed to the user-supplied routine.  The
+!   importState argument in the user code cannot be optional.
+! \item[{[exportState]}]
 !   {\tt ESMF\_State} containing export data for coupling. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   exportState argument in the user code cannot be optional. 
-! \item[{[clock]}]  
-!   External {\tt ESMF\_Clock} for passing in time information.  
+!   argument will be passed to the user-supplied routine.  The
+!   exportState argument in the user code cannot be optional.
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   clock argument in the user code cannot be optional. 
+!   argument will be passed to the user-supplied routine.  The
+!   clock argument in the user code cannot be optional.
 ! \item[{[syncflag]}]
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
-! \item[{[phase]}]  
+! \item[{[phase]}]
 !   Component providers must document whether each of their
-!   routines are {\em single-phase} or {\em multi-phase}.  
+!   routines are {\em single-phase} or {\em multi-phase}.
 !   Single-phase routines require only one invocation to complete
-!   their work.  
+!   their work.
 !   Multi-phase routines provide multiple subroutines to accomplish
 !   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For multiple-phase child components, this is the integer phase 
+!   For multiple-phase child components, this is the integer phase
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
-!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   with the actual component, before returning with a timeout condition.
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
 !   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
@@ -918,11 +918,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Method_Flag), intent(in)            :: methodflag
     integer,                intent(out)           :: phaseCount
     logical,                intent(out), optional :: phaseZeroFlag
-    integer,                intent(out), optional :: rc 
+    integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Get phaseCount
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
@@ -930,8 +930,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[methodflag]
 !   \begin{sloppypar}
 !   One of a set of predefined Component methods - e.g.
-!   {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN}, 
-!   {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{const:method} 
+!   {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN},
+!   {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{const:method}
 !   for a complete list of valid method options.
 !   \end{sloppypar}
 ! \item[phaseCount]
@@ -939,7 +939,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[phaseZeroFlag]
 !   Return .true. if a "zero" phase was registered for {\tt methodflag}. Otherwise
 !   return .false..
-! \item[{[rc]}] 
+! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -953,13 +953,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
-  
+
     call c_ESMC_GetEntryPointPhaseCount(cplcomp, methodflag, phaseCount, &
       phaseZeroFlagHelp, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     ! translate ESMF_Logical -> logical
     if (present(phaseZeroFlag)) then
       phaseZeroFlag = phaseZeroFlagHelp
@@ -989,29 +989,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Available to be called by an {\tt ESMF\_CplComp} at any time after 
+! Available to be called by an {\tt ESMF\_CplComp} at any time after
 ! {\tt ESMF\_CplCompSetInternalState} has been called.
 ! Since init, run, and finalize must be separate subroutines, data that
 ! they need to share in common can either be module global data, or can
 ! be allocated in a private data block and the address of that block
 ! can be registered with the framework and retrieved by this call.
-! When running multiple instantiations of an {\tt ESMF\_CplComp}, 
-! for example during ensemble runs, 
-! it may be simpler to maintain private data specific to 
-! each run with private data blocks.  A corresponding 
-! {\tt ESMF\_CplCompSetInternalState} call sets the data pointer to 
-! this block, and this call retrieves the data pointer.   
+! When running multiple instantiations of an {\tt ESMF\_CplComp},
+! for example during ensemble runs,
+! it may be simpler to maintain private data specific to
+! each run with private data blocks.  A corresponding
+! {\tt ESMF\_CplCompSetInternalState} call sets the data pointer to
+! this block, and this call retrieves the data pointer.
 ! Note that the {\tt wrappedDataPointer} argument needs to be a derived type
 ! which contains only a pointer of the type of the data block defined
 ! by the user.  When making this call the pointer needs to be unassociated.
 ! When the call returns, the pointer will now reference the original
 ! data block which was set during the previous call to
 ! {\tt ESMF\_CplCompSetInternalState}.
-!   
+!
 ! Only the {\em last} data block set via
 ! {\tt ESMF\_CplCompSetInternalState} will be accessible.
 !
-! CAUTION: This method does not have an explicit Fortran interface. Do not 
+! CAUTION: This method does not have an explicit Fortran interface. Do not
 ! specify argument keywords when calling this method!
 !
 ! The arguments are:
@@ -1019,14 +1019,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[cplcomp]
 !   An {\tt ESMF\_CplComp} object.
 ! \item[wrappedDataPointer]
-!   A derived type (wrapper), containing only an unassociated pointer 
+!   A derived type (wrapper), containing only an unassociated pointer
 !   to the private data block.
 !   The framework will fill in the pointer. When this call returns, the
 !   pointer is set to the same address set during the last
 !   {\tt ESMF\_CplCompSetInternalState} call.
-!   This level of indirection is needed to reliably set and retrieve 
-!   the data block no matter which architecture or compiler is used.  
-! \item[rc] 
+!   This level of indirection is needed to reliably set and retrieve
+!   the data block no matter which architecture or compiler is used.
+! \item[rc]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   Note: unlike most other ESMF routines, this argument is not optional
 !   because of implementation considerations.
@@ -1074,50 +1074,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Call the associated user initialization routine for 
+! Call the associated user initialization routine for
 ! an {\tt ESMF\_CplComp}.
-!    
-! The arguments are: 
-! \begin{description} 
+!
+! The arguments are:
+! \begin{description}
 ! \item[cplcomp]
 !   {\tt ESMF\_CplComp} to call initialize routine for.
-! \item[{[importState]}]  
+! \item[{[importState]}]
 !   {\tt ESMF\_State} containing import data for coupling. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   importState argument in the user code cannot be optional. 
-! \item[{[exportState]}]  
+!   argument will be passed to the user-supplied routine.  The
+!   importState argument in the user code cannot be optional.
+! \item[{[exportState]}]
 !   {\tt ESMF\_State} containing export data for coupling. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   exportState argument in the user code cannot be optional. 
-! \item[{[clock]}]  
-!   External {\tt ESMF\_Clock} for passing in time information.  
+!   argument will be passed to the user-supplied routine.  The
+!   exportState argument in the user code cannot be optional.
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   clock argument in the user code cannot be optional. 
+!   argument will be passed to the user-supplied routine.  The
+!   clock argument in the user code cannot be optional.
 ! \item[{[syncflag]}]
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
-! \item[{[phase]}] 
+! \item[{[phase]}]
 !   Component providers must document whether each of their
-!   routines are {\em single-phase} or {\em multi-phase}.  
+!   routines are {\em single-phase} or {\em multi-phase}.
 !   Single-phase routines require only one invocation to complete
-!   their work.  
+!   their work.
 !   Multi-phase routines provide multiple subroutines to accomplish
 !   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For multiple-phase child components, this is the integer phase 
+!   For multiple-phase child components, this is the integer phase
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
-!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   with the actual component, before returning with a timeout condition.
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
 !   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
@@ -1288,12 +1288,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 ! Inquire if this {\tt ESMF\_CplComp} object is to execute on the calling PET.
 !
-! The return value is {\tt .true.} if the component is to execute on the 
+! The return value is {\tt .true.} if the component is to execute on the
 ! calling PET, {\tt .false.} otherwise.
-!    
+!
 ! The arguments are:
 ! \begin{description}
-! \item[cplcomp] 
+! \item[cplcomp]
 !   {\tt ESMF\_CplComp} queried.
 ! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1417,50 +1417,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Call the associated user read restart routine for 
+! Call the associated user read restart routine for
 ! an {\tt ESMF\_CplComp}.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
 !   {\tt ESMF\_CplComp} to call run routine for.
-! \item[{[importState]}]  
+! \item[{[importState]}]
 !   {\tt ESMF\_State} containing import data. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   importState argument in the user code cannot be optional. 
-! \item[{[exportState]}]  
+!   argument will be passed to the user-supplied routine.  The
+!   importState argument in the user code cannot be optional.
+! \item[{[exportState]}]
 !   {\tt ESMF\_State} containing export data. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   exportState argument in the user code cannot be optional. 
-! \item[{[clock]}]  
-!   External {\tt ESMF\_Clock} for passing in time information.  
+!   argument will be passed to the user-supplied routine.  The
+!   exportState argument in the user code cannot be optional.
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   clock argument in the user code cannot be optional. 
-! \item[{[syncflag]}]  
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   argument will be passed to the user-supplied routine.  The
+!   clock argument in the user code cannot be optional.
+! \item[{[syncflag]}]
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
-! \item[{[phase]}]   
+! \item[{[phase]}]
 !   Component providers must document whether each of their
-!   routines are {\em single-phase} or {\em multi-phase}.    
+!   routines are {\em single-phase} or {\em multi-phase}.
 !   Single-phase routines require only one invocation to complete
-!   their work.    
+!   their work.
 !   Multi-phase routines provide multiple subroutines to accomplish
 !   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For multiple-phase child components, this is the integer phase  
+!   For multiple-phase child components, this is the integer phase
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
-!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   with the actual component, before returning with a timeout condition.
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
 !   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
@@ -1557,50 +1557,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Call the associated user run routine for 
+! Call the associated user run routine for
 ! an {\tt ESMF\_CplComp}.
-!    
-! The arguments are: 
-! \begin{description} 
+!
+! The arguments are:
+! \begin{description}
 ! \item[cplcomp]
 !   {\tt ESMF\_CplComp} to call run routine for.
-! \item[{[importState]}]  
+! \item[{[importState]}]
 !   {\tt ESMF\_State} containing import data for coupling. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   importState argument in the user code cannot be optional. 
-! \item[{[exportState]}]  
+!   argument will be passed to the user-supplied routine.  The
+!   importState argument in the user code cannot be optional.
+! \item[{[exportState]}]
 !   {\tt ESMF\_State} containing export data for coupling. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   exportState argument in the user code cannot be optional. 
-! \item[{[clock]}]  
-!   External {\tt ESMF\_Clock} for passing in time information.  
+!   argument will be passed to the user-supplied routine.  The
+!   exportState argument in the user code cannot be optional.
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   clock argument in the user code cannot be optional. 
+!   argument will be passed to the user-supplied routine.  The
+!   clock argument in the user code cannot be optional.
 ! \item[{[syncflag]}]
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
-! \item[{[phase]}]  
+! \item[{[phase]}]
 !   Component providers must document whether each of their
-!   routines are {\em single-phase} or {\em multi-phase}.  
+!   routines are {\em single-phase} or {\em multi-phase}.
 !   Single-phase routines require only one invocation to complete
-!   their work.  
+!   their work.
 !   Multi-phase routines provide multiple subroutines to accomplish
 !   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For multiple-phase child components, this is the integer phase 
+!   For multiple-phase child components, this is the integer phase
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
-!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   with the actual component, before returning with a timeout condition.
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
 !   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
@@ -1735,33 +1735,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! This tries to establish a "component tunnel" between the {\em actual}
 ! Component (calling this routine) and a {\tt dual} Component connecting to it
 ! through a matching SetServices call.
-!   
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
 !   {\tt ESMF\_CplComp} to call service loop routine for.
-! \item[{[importState]}]  
+! \item[{[importState]}]
 !   {\tt ESMF\_State} containing import data for coupling. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   importState argument in the user code cannot be optional. 
-! \item[{[exportState]}]  
+!   argument will be passed to the user-supplied routine.  The
+!   importState argument in the user code cannot be optional.
+! \item[{[exportState]}]
 !   {\tt ESMF\_State} containing export data for coupling. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   exportState argument in the user code cannot be optional. 
-! \item[{[clock]}]  
-!   External {\tt ESMF\_Clock} for passing in time information.  
+!   argument will be passed to the user-supplied routine.  The
+!   exportState argument in the user code cannot be optional.
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   clock argument in the user code cannot be optional. 
+!   argument will be passed to the user-supplied routine.  The
+!   clock argument in the user code cannot be optional.
 ! \item[{[syncflag]}]
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[port]}]
-!   In case a port number is provided, the "component tunnel" is established 
+!   In case a port number is provided, the "component tunnel" is established
 !   using sockets. The actual component side, i.e. the side that calls into
 !   {\tt ESMF\_CplCompServiceLoop()}, starts to listen on the specified port
 !   as the server. The valid port range is [1024, 65535].
@@ -1770,7 +1770,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   methods (e.g. MPI).
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait for communications
-!   with the dual component, before returning with a timeout condition. 
+!   with the dual component, before returning with a timeout condition.
 !   The default is 3600, i.e. 1 hour.
 !   (NOTE: Currently this option is only available for socket based component
 !   tunnels.)
@@ -1795,17 +1795,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit,cplcomp,rc)
-    
+
     if (.not.present(port).and.(present(timeout))) then
       call ESMF_LogSetError(ESMF_RC_ARG_INCOMP, &
         msg="Currently the 'timeout' argument requires the 'port' argument", &
         ESMF_CONTEXT, rcToReturn=rc)
       return  ! bail out
     endif
-    
+
     timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
-    
+
     ! call Comp method
     call ESMF_CompExecute(cplcomp%compp, method=ESMF_METHOD_SERVICELOOP, &
       importState=importState, exportState=exportState, clock=clock, &
@@ -1871,14 +1871,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[config]}]
 !   An already-created {\tt ESMF\_Config} object to be attached to the
 !   component.
-!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   If both {\tt config} and {\tt configFile} arguments are specified,
 !   {\tt config} takes priority.
 ! \item[{[configFile]}]
-!   The filename of an {\tt ESMF\_Config} format file.  
+!   The filename of an {\tt ESMF\_Config} format file.
 !   If specified, a new {\tt ESMF\_Config} object is created and attached to the
 !   component. The {\tt configFile} file is opened and associated
 !   with the new config object.
-!   If both {\tt config} and {\tt configFile} arguments are specified, 
+!   If both {\tt config} and {\tt configFile} arguments are specified,
 !   {\tt config} takes priority.
 ! \item[{[clock]}]
 !   Set the private clock for this {\tt ESMF\_CplComp}.
@@ -1939,7 +1939,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end interface
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional :: phase
-    integer,                intent(out), optional :: rc 
+    integer,                intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1950,7 +1950,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Registers a user-supplied {\tt userRoutine} as the entry point for one of the
 ! predefined Component {\tt methodflag}s. After this call the {\tt userRoutine}
 ! becomes accessible via the standard Component method API.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
@@ -1958,13 +1958,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[methodflag]
 !   \begin{sloppypar}
 !   One of a set of predefined Component methods - e.g.
-!   {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN}, 
-!   {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{const:method} 
+!   {\tt ESMF\_METHOD\_INITIALIZE}, {\tt ESMF\_METHOD\_RUN},
+!   {\tt ESMF\_METHOD\_FINALIZE}. See section \ref{const:method}
 !   for a complete list of valid method options.
 !   \end{sloppypar}
 ! \item[userRoutine]
 !   The user-supplied subroutine to be associated for this {\tt methodflag}.
-!   The Component writer must supply a subroutine with the exact interface 
+!   The Component writer must supply a subroutine with the exact interface
 !   shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !   must not be declared as optional, and the types, intent and order must match.
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
@@ -1973,11 +1973,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   From Fortran-2008 onwards, an internal procedure contained within either a main program
 !   or a module procedure may be used.  If the internal procedure is contained within a
 !   module procedure, it is subject to initialization requirements.  See: \ref{sec:AppDriverIntProc}
-! \item[{[phase]}] 
-!   The {\tt phase} number for multi-phase methods. For single phase 
+! \item[{[phase]}]
+!   The {\tt phase} number for multi-phase methods. For single phase
 !   methods the {\tt phase} argument can be omitted. The default setting
 !   is 1.
-! \item[{[rc]}] 
+! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -1991,10 +1991,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
-  
+
     phaseArg = 1   ! default
     if (present(phase)) phaseArg = phase
-  
+
     call c_ESMC_SetEntryPoint(cplcomp, methodflag, userRoutine, phaseArg, &
       localrc)
 !TODO: back in once thread-safe    if (ESMF_LogFoundError(localrc, &
@@ -2025,35 +2025,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Available to be called by an {\tt ESMF\_CplComp} at any time, but 
+! Available to be called by an {\tt ESMF\_CplComp} at any time, but
 ! expected to be
 ! most useful when called during the registration process, or initialization.
 ! Since init, run, and finalize must be separate subroutines data that
 ! they need to share in common can either be module global data, or can
 ! be allocated in a private data block and the address of that block
 ! can be registered with the framework and retrieved by subsequent calls.
-! When running multiple instantiations of an {\tt ESMF\_CplComp}, 
+! When running multiple instantiations of an {\tt ESMF\_CplComp},
 ! for example during
-! ensemble runs, it may be simpler to maintain private data specific to 
-! each run with private data blocks.  A corresponding 
+! ensemble runs, it may be simpler to maintain private data specific to
+! each run with private data blocks.  A corresponding
 ! {\tt ESMF\_CplCompGetInternalState} call retrieves the data pointer.
-!   
+!
 ! Only the {\em last} data block set via
 ! {\tt ESMF\_CplCompSetInternalState} will be accessible.
 !
-! CAUTION: This method does not have an explicit Fortran interface. Do not 
+! CAUTION: This method does not have an explicit Fortran interface. Do not
 ! specify argument keywords when calling this method!
 !
 ! The arguments are:
 ! \begin{description}
-! \item[cplcomp] 
+! \item[cplcomp]
 !   An {\tt ESMF\_CplComp} object.
 ! \item[wrappedDataPointer]
 !   A pointer to the private data block, wrapped in a derived type which
 !   contains only a pointer to the block.  This level of indirection is
 !   needed to reliably set and retrieve the data block no matter which
-!   architecture or compiler is used.  
-! \item[rc] 
+!   architecture or compiler is used.
+! \item[rc]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   Note: unlike most other ESMF routines, this argument is not optional
 !   because of implementation considerations.
@@ -2096,13 +2096,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{CplComp:SetServices}
 ! Call into user provided {\tt userRoutine} which is responsible
 ! for setting Component's Initialize(), Run(), and Finalize() services.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
 !   Coupler Component.
 ! \item[userRoutine]
-!  The Component writer must supply a subroutine with the exact interface 
+!  The Component writer must supply a subroutine with the exact interface
 !  shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !  must not be declared as optional, and the types, intent and order must match.
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
@@ -2133,7 +2133,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
-  
+
     call c_ESMC_SetServices(cplcomp, userRoutine, localUserRc, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -2141,7 +2141,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! now indicate that this Component has a VM associated
     cplcomp%compp%compStatus%vmIsPresent = .true.
-    
+
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
@@ -2189,14 +2189,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! {\tt userRoutine} must exist in the executable, or in the shared object
 ! specified by {\tt sharedObj}. In the latter case all of the platform
 ! specific details about dynamic linking and loading apply.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
 !   Coupler Component.
 ! \item[userRoutine]
 !   Name of routine to be called, specified as a character string.
-!   The Component writer must supply a subroutine with the exact interface 
+!   The Component writer must supply a subroutine with the exact interface
 !   shown for {\tt userRoutine} below. Arguments must not be declared
 !   as optional, and the types, intent and order must match.
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
@@ -2208,10 +2208,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   !INTERFACE:
 !     interface
-!   	subroutine userRoutine(cplcomp, rc)
-!   	  type(ESMF_CplComp)   :: cplcomp    ! must not be optional
-!   	  integer, intent(out) :: rc	     ! must not be optional
-!   	end subroutine
+!       subroutine userRoutine(cplcomp, rc)
+!         type(ESMF_CplComp)   :: cplcomp    ! must not be optional
+!         integer, intent(out) :: rc         ! must not be optional
+!       end subroutine
 !     end interface
 !
 !   !DESCRIPTION:
@@ -2226,7 +2226,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   searched for {\tt userRoutine}.
 ! \item[{[userRoutineFound]}]
 !   Report back whether the specified {\tt userRoutine} was found and executed,
-!   or was not available. If this argument is present, not finding the 
+!   or was not available. If this argument is present, not finding the
 !   {\tt userRoutine} will not result in returning an error in {\tt rc}.
 !   The default is to return an error if the {\tt userRoutine} cannot be found.
 ! \item[{[userRc]}]
@@ -2248,7 +2248,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
-  
+
     if (present(sharedObj)) then
       call c_ESMC_SetServicesShObj(cplcomp, userRoutine, sharedObj, &
         userRoutineFoundHelp, localUserRc, localrc)
@@ -2262,10 +2262,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! translate ESMF_Logical -> logical
     userRoutineFoundHelpHelp = userRoutineFoundHelp
-    
+
     ! report back
     if (present(userRoutineFound)) userRoutineFound = userRoutineFoundHelpHelp
-    
+
     if (userRoutineFoundHelpHelp) then
       ! routine found and executed -> indicate this Component has VM associated
       cplcomp%compp%compStatus%vmIsPresent = .true.
@@ -2279,7 +2279,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
       endif
     endif
-    
+
     ! pass back userRc
     if (present(userRc)) userRc = localUserRc
 
@@ -2309,7 +2309,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 ! Set the services of a Coupler Component to serve a "dual" Component for an
 ! "actual" Component. The component tunnel is VM based.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
@@ -2332,7 +2332,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, actualCplcomp, rc)
-    
+
     ! access the petList of the actualCplcomp and find the lowest PET
     ! -> this is going to be the rendezvous PET for the component tunnel setup
     nullify(actualCompPetList)
@@ -2348,7 +2348,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         actualCompRootPet = actualCompPetList(i)
     enddo
     deallocate(actualCompPetList)
-    
+
     call c_ESMC_SetServicesComp(cplcomp, cplcomp%compp%compTunnel, &
       actualCplcomp, actualCompRootPet, localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -2357,7 +2357,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! now indicate that this Component has a VM associated
     cplcomp%compp%compStatus%vmIsPresent = .true.
-    
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_CplCompSetServicesComp
@@ -2387,7 +2387,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 ! Set the services of a Coupler Component to serve a "dual" Component for an
 ! "actual" Component. The component tunnel is socket based.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
@@ -2400,7 +2400,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   if the {\tt server} argument was not provided, is {\tt localhost}.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
+!   with the actual component, before returning with a timeout condition.
 !   The default is 3600, i.e. 1 hour.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.
@@ -2422,7 +2422,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
-    
+
     timeoutArg = ESMF_DEFAULT_TIMEOUT ! default 1h
     if (present(timeout)) timeoutArg = timeout
 
@@ -2447,7 +2447,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! now indicate that this Component has a VM associated
     cplcomp%compp%compStatus%vmIsPresent = .true.
-    
+
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine ESMF_CplCompSetServicesSock
@@ -2484,14 +2484,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Optionally call into user provided {\tt userRoutine} which is responsible
-! for setting Component's VM properties. 
+! for setting Component's VM properties.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
 !   Coupler Component.
 ! \item[userRoutine]
-!   The Component writer must supply a subroutine with the exact interface 
+!   The Component writer must supply a subroutine with the exact interface
 !   shown above for the {\tt userRoutine} argument. Arguments in {\tt userRoutine}
 !   must not be declared as optional, and the types, intent and order must match.
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
@@ -2520,7 +2520,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
-  
+
     call c_ESMC_SetVM(cplcomp, userRoutine, localUserRc, localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -2564,14 +2564,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! {\tt userRoutine} must exist in the executable, or in the shared object
 ! specified by {\tt sharedObj}. In the latter case all of the platform
 ! specific details about dynamic linking and loading apply.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
 !   Coupler Component.
 ! \item[userRoutine]
 !   Routine to be called, specified as a character string.
-!   The Component writer must supply a subroutine with the exact interface 
+!   The Component writer must supply a subroutine with the exact interface
 !   shown for {\tt userRoutine} below. Arguments must not be declared
 !   as optional, and the types, intent and order must match.
 !   Prior to Fortran-2008, the subroutine must be either a module scope procedure,
@@ -2583,10 +2583,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   !INTERFACE:
 !     interface
-!   	subroutine userRoutine(cplcomp, rc)
-!   	  type(ESMF_CplComp)   :: cplcomp     ! must not be optional
-!   	  integer, intent(out) :: rc	      ! must not be optional
-!   	end subroutine
+!       subroutine userRoutine(cplcomp, rc)
+!         type(ESMF_CplComp)   :: cplcomp     ! must not be optional
+!         integer, intent(out) :: rc          ! must not be optional
+!       end subroutine
 !     end interface
 !
 !   !DESCRIPTION:
@@ -2594,7 +2594,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   {\tt ESMF\_CplCompSetVMxxx()} methods to set the properties of the VM
 !   associated with the Coupler Component.
 ! \item[{[sharedObj]}]
-!   Name of shared object that contains {\tt userRoutine}. If the 
+!   Name of shared object that contains {\tt userRoutine}. If the
 !   {\tt sharedObj} argument is not provided the executable itself will be
 !   searched for {\tt userRoutine}.
 ! \item[{[userRc]}]
@@ -2614,7 +2614,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_CplCompGetInit, cplcomp, rc)
-  
+
     if (present(sharedObj)) then
       call c_ESMC_SetVMShObj(cplcomp, userRoutine, sharedObj, localUserRc, &
         localrc)
@@ -2663,7 +2663,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The other constraint to this call is that the number of PEs is preserved.
 !   This means that the child Component in the end is associated with as many
-!   PEs as the parent Component provided to the child. The number of child PETs 
+!   PEs as the parent Component provided to the child. The number of child PETs
 !   however is adjusted according to the above rule.
 !
 !   The typical use of {\tt ESMF\_CplCompSetVMMaxPEs()} is to allocate
@@ -2671,21 +2671,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
-! \item[cplcomp] 
+! \item[cplcomp]
 !   {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
-! \item[{[maxPeCountPerPet]}] 
+! \item[{[maxPeCountPerPet]}]
 !   Maximum number of PEs on each PET.
 !   Default for each SSI is the local number of PEs.
-! \item[{[prefIntraProcess]}] 
+! \item[{[prefIntraProcess]}]
 !   Communication preference within a single process.
 !   {\em Currently options not documented. Use default.}
-! \item[{[prefIntraSsi]}] 
+! \item[{[prefIntraSsi]}]
 !   Communication preference within a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
-! \item[{[prefInterSsi]}] 
+! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
-! \item[{[rc]}] 
+! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -2733,10 +2733,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
-!   Attempts to provide {\tt maxPetCountPerVas} threaded PETs in each 
+!   Attempts to provide {\tt maxPetCountPerVas} threaded PETs in each
 !   virtual address space (VAS). Only as many threaded PETs as there are PEs
-!   located on the single system image (SSI) can be associated with the VAS. 
-!   Within this constraint the call tries to get as close as possible to the 
+!   located on the single system image (SSI) can be associated with the VAS.
+!   Within this constraint the call tries to get as close as possible to the
 !   number specified by {\tt maxPetCountPerVas}.
 !
 !   The other constraint to this call is that the number of PETs is preserved.
@@ -2744,27 +2744,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   PETs as the parent Component provided to the child. The threading level of
 !   the child PETs however is adjusted according to the above rule.
 !
-!   The typical use of {\tt ESMF\_CplCompSetVMMaxThreads()} is to run a 
+!   The typical use of {\tt ESMF\_CplCompSetVMMaxThreads()} is to run a
 !   Component multi-threaded with groups of PETs executing within a common
 !   virtual address space.
 !
 ! The arguments are:
 ! \begin{description}
-! \item[cplcomp] 
+! \item[cplcomp]
 !   {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
-! \item[{[maxPetCountPerVas]}] 
-!   Maximum number of threaded PETs in each virtual address space (VAS). 
+! \item[{[maxPetCountPerVas]}]
+!   Maximum number of threaded PETs in each virtual address space (VAS).
 !   Default for each SSI is the local number of PEs.
-! \item[{[prefIntraProcess]}] 
+! \item[{[prefIntraProcess]}]
 !   Communication preference within a single process.
 !   {\em Currently options not documented. Use default.}
-! \item[{[prefIntraSsi]}] 
+! \item[{[prefIntraSsi]}]
 !   Communication preference within a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
-! \item[{[prefInterSsi]}] 
+! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
-! \item[{[rc]}] 
+! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -2813,7 +2813,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   Set characteristics of the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
 !   Reduces the number of threaded PETs in each VAS. The {\tt max} argument
-!   may be specified to limit the maximum number of PEs that a single PET 
+!   may be specified to limit the maximum number of PEs that a single PET
 !   can be associated with.
 !
 !   Several constraints apply: 1) the number of PEs cannot change, 2) PEs
@@ -2821,26 +2821,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   cannot increase, only decrease, 4) PETs cannot migrate between virtual
 !   address spaces (VASs), nor can VASs migrate between SSIs.
 !
-!   The typical use of {\tt ESMF\_CplCompSetVMMinThreads()} is to run a 
+!   The typical use of {\tt ESMF\_CplCompSetVMMinThreads()} is to run a
 !   Component across a set of single-threaded PETs.
 !
 ! The arguments are:
 ! \begin{description}
-! \item[cplcomp] 
+! \item[cplcomp]
 !   {\tt ESMF\_CplComp} to set the {\tt ESMF\_VM} for.
-! \item[{[maxPeCountPerPet]}] 
+! \item[{[maxPeCountPerPet]}]
 !   Maximum number of PEs on each PET.
 !   Default for each SSI is the local number of PEs.
-! \item[{[prefIntraProcess]}] 
+! \item[{[prefIntraProcess]}]
 !   Communication preference within a single process.
 !   {\em Currently options not documented. Use default.}
-! \item[{[prefIntraSsi]}] 
+! \item[{[prefIntraSsi]}]
 !   Communication preference within a single system image (SSI).
 !   {\em Currently options not documented. Use default.}
-! \item[{[prefInterSsi]}] 
+! \item[{[prefInterSsi]}]
 !   Communication preference between different single system images (SSIs).
 !   {\em Currently options not documented. Use default.}
-! \item[{[rc]}] 
+! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -2956,12 +2956,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! The arguments are:
 ! \begin{description}
-! \item[cplcomp] 
+! \item[cplcomp]
 !   {\tt ESMF\_CplComp} to wait for.
 ! \item[{[syncflag]}]
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
 ! \item[{[timeout]}]
 !   The maximum period in seconds the actual component is allowed to execute
@@ -2978,7 +2978,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   condition.
 ! \item[{[userRc]}]
 !   Return code set by {\tt userRoutine} before returning.
-! \item[{[rc]}] 
+! \item[{[rc]}]
 !   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -3059,50 +3059,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Call the associated user write restart routine for 
+! Call the associated user write restart routine for
 ! an {\tt ESMF\_CplComp}.
-!    
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[cplcomp]
 !   {\tt ESMF\_CplComp} to call run routine for.
-! \item[{[importState]}]  
+! \item[{[importState]}]
 !   {\tt ESMF\_State} containing import data. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   importState argument in the user code cannot be optional. 
-! \item[{[exportState]}]  
+!   argument will be passed to the user-supplied routine.  The
+!   importState argument in the user code cannot be optional.
+! \item[{[exportState]}]
 !   {\tt ESMF\_State} containing export data. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   exportState argument in the user code cannot be optional. 
-! \item[{[clock]}]  
-!   External {\tt ESMF\_Clock} for passing in time information.  
+!   argument will be passed to the user-supplied routine.  The
+!   exportState argument in the user code cannot be optional.
+! \item[{[clock]}]
+!   External {\tt ESMF\_Clock} for passing in time information.
 !   This is generally the parent component's clock, and will be treated
 !   as read-only by the child component.  The child component can maintain
 !   a private clock for its own internal time computations. If not present, a dummy
-!   argument will be passed to the user-supplied routine.  The 
-!   clock argument in the user code cannot be optional. 
-! \item[{[syncflag]}]  
-!   Blocking behavior of this method call. See section \ref{const:sync} 
+!   argument will be passed to the user-supplied routine.  The
+!   clock argument in the user code cannot be optional.
+! \item[{[syncflag]}]
+!   Blocking behavior of this method call. See section \ref{const:sync}
 !   for a list of valid blocking options. Default option is
-!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads 
+!   {\tt ESMF\_SYNC\_VASBLOCKING} which blocks PETs and their spawned off threads
 !   across each VAS but does not synchronize PETs that run in different VASs.
-! \item[{[phase]}]   
+! \item[{[phase]}]
 !   Component providers must document whether each of their
-!   routines are {\em single-phase} or {\em multi-phase}.    
+!   routines are {\em single-phase} or {\em multi-phase}.
 !   Single-phase routines require only one invocation to complete
-!   their work.    
+!   their work.
 !   Multi-phase routines provide multiple subroutines to accomplish
 !   the work, accommodating components which must complete part of their
 !   work, return to the caller and allow other processing to occur,
 !   and then continue the original operation.
-!   For multiple-phase child components, this is the integer phase  
+!   For multiple-phase child components, this is the integer phase
 !   number to be invoked.
 !   For single-phase child components this argument is optional. The default is
 !   1.
 ! \item[{[timeout]}]
 !   The maximum period in seconds that this call will wait in communications
-!   with the actual component, before returning with a timeout condition. 
-!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only 
+!   with the actual component, before returning with a timeout condition.
+!   The default is 3600, i.e. 1 hour. The {\tt timeout} argument is only
 !   supported for connected dual components.
 ! \item[{[timeoutFlag]}]
 !   Returns {\tt .true.} if the timeout was reached, {\tt .false.} otherwise.

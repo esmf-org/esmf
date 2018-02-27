@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
@@ -87,7 +87,7 @@ contains
 !
 !
 ! !ARGUMENTS:
-    type(ESMF_Field), intent(in)            :: field 
+    type(ESMF_Field), intent(in)            :: field
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,          intent(out), optional :: rc
 !
@@ -112,13 +112,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 
     character(len=ESMF_MAXSTR)      :: name, str
-    type(ESMF_FieldType), pointer   :: fp 
+    type(ESMF_FieldType), pointer   :: fp
     integer                         :: i, localrc
     integer                         :: gridrank, arrayrank
     character(len=6)                :: defaultopts
     type(ESMF_Status)               :: fieldstatus
 
-!	Initialize
+!       Initialize
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -174,7 +174,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     write(ESMF_UtilIOStdout,*)  "Field status = ", fp%status
     if (fp%status .eq. ESMF_FIELDSTATUS_GRIDSET .or. &
-         fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then 
+         fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
 !      call ESMF_GeomBasePrint(fp%geombase, "", localrc)
 !      if (ESMF_LogFoundError(localrc, &
 !          ESMF_ERR_PASSTHRU, &
@@ -186,7 +186,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       write(ESMF_UtilIOStdout,*) "gridrank = ", gridrank
     endif
 
-    if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then 
+    if (fp%status .eq. ESMF_FIELDSTATUS_COMPLETE) then
       call ESMF_ArrayPrint(fp%array, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
@@ -225,12 +225,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !ARGUMENTS:
-    type(ESMF_Field),      intent(inout)          :: field 
+    type(ESMF_Field),      intent(inout)          :: field
     character(*),          intent(in)             :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*),          intent(in),  optional  :: variableName
     integer,               intent(in),  optional  :: timeslice
-    type(ESMF_IOFmt_Flag), intent(in),  optional  :: iofmt 
+    type(ESMF_IOFmt_Flag), intent(in),  optional  :: iofmt
     integer,               intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
@@ -272,8 +272,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
     character(len=ESMF_MAXSTR)      :: name
-    type(ESMF_FieldType), pointer   :: fp 
-    type(ESMF_Array)                :: array 
+    type(ESMF_FieldType), pointer   :: fp
+    type(ESMF_Array)                :: array
     integer                         :: localrc
     type(ESMF_FieldStatus_Flag)     :: fieldstatus  ! Field's status
     type(ESMF_IOFmt_Flag)           :: opt_iofmt

@@ -14,11 +14,11 @@
 !
 !     ESMF Clock Module
       module ESMF_ClockMod
-!     
+!
 !==============================================================================
-!     
+!
 ! This file contains the Clock class definition and all Clock class methods.
-!     
+!
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF_TimeMgr.inc"
@@ -26,13 +26,13 @@
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_ClockMod
-!     
+!
 ! !DESCRIPTION:
 ! Part of Time Manager Fortran API wrapper of C++ implementation.
 !
 ! Defines Fortran wrapper entry points for corresponding
 ! C++ class {\tt ESMC\_Time} implementation.
-!     
+!
 ! See {\tt ../include/ESMC\_Clock.h} for complete description.
 !
 !------------------------------------------------------------------------------
@@ -77,8 +77,8 @@
       public operator(/=)
       public ESMF_ClockAdvance
       public ESMF_ClockCreate
-      public ESMF_ClockDestroy 
-      public ESMF_ClockGet     
+      public ESMF_ClockDestroy
+      public ESMF_ClockGet
       public ESMF_ClockGetAlarm
       public ESMF_ClockGetAlarmList
       public ESMF_ClockGetNextTime
@@ -90,12 +90,12 @@
       public ESMF_ClockPrint
       public ESMF_ClockReadRestart
       public ESMF_ClockSet
-      public ESMF_ClockStopTimeDisable     
-      public ESMF_ClockStopTimeEnable     
+      public ESMF_ClockStopTimeDisable
+      public ESMF_ClockStopTimeEnable
       public ESMF_ClockSyncToRealTime
       public ESMF_ClockValidate
       public ESMF_ClockWriteRestart
-      
+
 ! - ESMF-internal methods:
       public ESMF_ClockGetInit
       public ESMF_ClockSetInitCreated
@@ -131,7 +131,7 @@
 ! !ARGUMENTS:
 !     type(ESMF_Clock) :: clock1
 !     type(ESMF_Clock) :: clock2
-! 
+!
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -139,30 +139,30 @@
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!     Assign {\tt clock1} as an alias to the same {\tt ESMF\_Clock} object in 
-!     memory as {\tt clock2}. If {\tt clock2} is invalid, then {\tt clock1} 
+!     Assign {\tt clock1} as an alias to the same {\tt ESMF\_Clock} object in
+!     memory as {\tt clock2}. If {\tt clock2} is invalid, then {\tt clock1}
 !     will be equally invalid after the assignment.
 !
 !     The arguments are:
-!     \begin{description} 
-!     \item[clock1] 
-!          The {\tt ESMF\_Clock} object on the left hand side of the 
+!     \begin{description}
+!     \item[clock1]
+!          The {\tt ESMF\_Clock} object on the left hand side of the
 !          assignment.
-!     \item[clock2] 
-!          The {\tt ESMF\_Clock} object on the right hand side of the 
+!     \item[clock2]
+!          The {\tt ESMF\_Clock} object on the right hand side of the
 !          assignment.
 !     \end{description}
 !
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
-!     None, documentation only, to describe the behavior of the default 
+!     None, documentation only, to describe the behavior of the default
 !     Fortran assignment(=).
 !
 ! !REQUIREMENTS:
 !     API review 11/2010.
-! 
+!
 !     end interface
-! 
+!
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_ClockOperator(==) - Test if Clock 1 is equal to Clock 2
@@ -238,15 +238,15 @@
 !     If either side of the equality test is not in the
 !     {\tt ESMF\_INIT\_CREATED} status an error will be logged. However, this
 !     does not affect the return value, which is {\tt .true.} when both sides
-!     are {\em not} in the {\em same} status, and {\tt .false.} otherwise. 
+!     are {\em not} in the {\em same} status, and {\tt .false.} otherwise.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[clock1]
-!          The {\tt ESMF\_Clock} object on the left hand side of the 
+!          The {\tt ESMF\_Clock} object on the left hand side of the
 !          non-equality operation.
 !     \item[clock2]
-!          The {\tt ESMF\_Clock} object on the right hand side of the 
+!          The {\tt ESMF\_Clock} object on the right hand side of the
 !          non-equality operation.
 !     \end{description}
 !
@@ -272,7 +272,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for {\tt ESMF\_Clock} Create
-!     methods. 
+!     methods.
 !
 !EOPI
       end interface
@@ -298,7 +298,7 @@
       type(ESMF_Alarm),        intent(out), optional :: ringingAlarmList(:)
       integer,                 intent(out), optional :: ringingAlarmCount
       integer,                 intent(out), optional :: rc
-!   
+!
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -317,14 +317,14 @@
 !     {\tt ESMF\_ClockAdvance()} optionally returns a list and number of ringing
 !     {\tt ESMF\_Alarm}s.  See also method {\tt ESMF\_ClockGetRingingAlarms()}.
 !     \end{sloppypar}
-!  
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
 !          The object instance to advance.
 !     \item[{[timeStep]}]
 !          Time step is performed with given timeStep, instead of
-!          the {\tt ESMF\_Clock}'s.  Does not replace the {\tt ESMF\_Clock}'s 
+!          the {\tt ESMF\_Clock}'s.  Does not replace the {\tt ESMF\_Clock}'s
 !          timeStep; use {\tt ESMF\_ClockSet(clock, timeStep, ...)} for
 !          this purpose.  Supports applications with variable time steps.
 !          timeStep can be positive or negative.
@@ -336,7 +336,7 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!  
+!
 !EOP
 ! !REQUIREMENTS:
 !     TMG3.4.1
@@ -344,7 +344,7 @@
 
       ! initialize list size to zero for not-present list
       integer :: sizeofRingingAlarmList,i
-      type(ESMF_Pointer), allocatable :: ringingAlarmPtrList(:)      
+      type(ESMF_Pointer), allocatable :: ringingAlarmPtrList(:)
       integer :: localrc                        ! local return code
 
       ! Assume failure until success
@@ -360,7 +360,7 @@
       ! get size of given ringing alarm list for C++ validation
       if (present(ringingAlarmList)) then
         sizeofRingingAlarmList = size(ringingAlarmList)
- 
+
         ! for Init Macros
         allocate(ringingAlarmPtrList(sizeofRingingAlarmList))
       end if
@@ -386,7 +386,7 @@
           ESMF_CONTEXT, rcToReturn=rc)) then
           ! Not bail out until deallocation
           write(*,*)"c_ESMC_ClockAdvance1 fails"
-        endif 
+        endif
       else
         ! array is not present
         call c_ESMC_ClockAdvance0(clock, timeStep, &
@@ -412,7 +412,7 @@
 
      ! Return success
      if (present(rc)) rc = localrc
-    
+
      end subroutine ESMF_ClockAdvance
 
 !------------------------------------------------------------------------------
@@ -439,7 +439,7 @@
       type(ESMF_Time),         intent(in),  optional :: refTime
       character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
-    
+
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -447,7 +447,7 @@
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!     Creates and sets the initial values in a new {\tt ESMF\_Clock}.    
+!     Creates and sets the initial values in a new {\tt ESMF\_Clock}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -480,14 +480,14 @@
 !     \item[{[refTime]}]
 !          The {\tt ESMF\_Clock}'s reference time.  Provides reference point
 !          for simulation time (see currSimTime in ESMF\_ClockGet() below).
-!     \item[{[name]}]     
+!     \item[{[name]}]
 !          The name for the newly created clock.  If not specified, a
 !          default unique name will be generated: "ClockNNN" where NNN
 !          is a unique sequence number from 001 to 999.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!     
+!
 !EOP
 ! !REQUIREMENTS:
 !     TMG3.1, TMG3.4.4
@@ -544,7 +544,7 @@
       type(ESMF_Clock), intent(in)            :: clock
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
-    
+
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -558,7 +558,7 @@
 !     {\tt ESMF\_Clock} copy has no associated {\tt ESMF\_Alarm}s, the same as
 !     with a newly created {\tt ESMF\_Clock}.  If desired, new
 !     {\tt ESMF\_Alarm}s must be created and associated with this copied
-!     {\tt ESMF\_Clock} via {\tt ESMF\_AlarmCreate()}, or existing 
+!     {\tt ESMF\_Clock} via {\tt ESMF\_AlarmCreate()}, or existing
 !     {\tt ESMF\_Alarm}s must be re-associated with this copied
 !     {\tt ESMF\_Clock} via {\tt ESMF\_AlarmSet(...clock=...)}.
 !
@@ -569,7 +569,7 @@
 !     \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!     
+!
 !EOP
 ! !REQUIREMENTS:
       integer :: localrc                        ! local return code
@@ -606,7 +606,7 @@
       type(ESMF_Clock), intent(inout)          :: clock
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out),  optional :: rc
-!     
+!
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -617,15 +617,15 @@
 !     \begin{sloppypar}
 !     Releases resources associated with this {\tt ESMF\_Clock}.  This releases
 !     the list of associated {\tt ESMF\_Alarm}s (pointers), but not the
-!     {\tt ESMF\_Alarm}s themselves; the user must explicitly call 
+!     {\tt ESMF\_Alarm}s themselves; the user must explicitly call
 !     {\tt ESMF\_AlarmDestroy()} on each {\tt ESMF\_Alarm} to release its
-!     resources.  {\tt ESMF\_ClockDestroy()} and corresponding 
+!     resources.  {\tt ESMF\_ClockDestroy()} and corresponding
 !     {\tt ESMF\_AlarmDestroy()}s can be called in either order.
 !     \end{sloppypar}
 !
 !     \begin{sloppypar}
 !     If {\tt ESMF\_ClockDestroy()} is called before {\tt ESMF\_AlarmDestroy()},
-!     any {\tt ESMF\_Alarm}s that were in the {\tt ESMF\_Clock}'s list will  
+!     any {\tt ESMF\_Alarm}s that were in the {\tt ESMF\_Clock}'s list will
 !     no longer be associated with any {\tt ESMF\_Clock}.  If desired,
 !     these "orphaned" {\tt ESMF\_Alarm}s can be associated with a different
 !     {\tt ESMF\_Clock} via a call to {\tt ESMF\_AlarmSet(...clock=...)}.
@@ -655,7 +655,7 @@
       ! invoke C to C++ entry point
       call c_ESMC_ClockDestroy(clock, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) then 
+        ESMF_CONTEXT, rcToReturn=rc)) then
         ! Don't bail out until Delete
         write(*,*)" c_ESMC_ClockDestroy fails"
       endif
@@ -701,7 +701,7 @@
       type(ESMF_Direction_Flag),    intent(out), optional :: direction
       character (len=*),       intent(out), optional :: name
       integer,                 intent(out), optional :: rc
-    
+
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -710,7 +710,7 @@
 !
 ! !DESCRIPTION:
 !     Gets one or more of the properties of an {\tt ESMF\_Clock}.
-!     
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
@@ -747,12 +747,12 @@
 !     \item[{[timeZone]}]
 !          The timezone within which all the {\tt Clock}'s times are defined.
 !     \item[{[advanceCount]}]
-!	   \begin{sloppypar}
+!          \begin{sloppypar}
 !          The number of times the {\tt ESMF\_Clock} has been advanced.
 !          Increments in {\tt ESMF\_DIRECTION\_FORWARD} and decrements in
-!          {\tt ESMF\_DIRECTION\_REVERSE}; see "direction" argument below and 
+!          {\tt ESMF\_DIRECTION\_REVERSE}; see "direction" argument below and
 !          in {\tt ESMF\_ClockSet()}.
-!	   \end{sloppypar}
+!          \end{sloppypar}
 !     \item[{[alarmCount]}]
 !          The number of {\tt ESMF\_Alarm}s in the {\tt ESMF\_Clock}'s
 !          {\tt ESMF\_Alarm} list.
@@ -765,7 +765,7 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!     
+!
 !EOP
 ! !REQUIREMENTS:
 !     TMG3.5.1 - TMG3.5.5
@@ -807,7 +807,7 @@
       if (present(name)) then
         name = tempName(1:tempNameLen)
       endif
-    
+
       ! mark outputs as successfully initialized
       call ESMF_TimeIntervalInit(timeStep)
       call ESMF_TimeInit(startTime)
@@ -848,9 +848,9 @@
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!     Gets the {\tt alarm} whose name is the value of alarmname in the 
+!     Gets the {\tt alarm} whose name is the value of alarmname in the
 !     {\tt clock}'s {\tt ESMF\_Alarm} list.
-!   
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
@@ -862,7 +862,7 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!   
+!
 !EOP
 ! !REQUIREMENTS:
 !     TMGx.x
@@ -886,7 +886,7 @@
 
       ! mark output as successfully initialized
       call ESMF_AlarmSetInitCreated(alarm)
-   
+
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockGetAlarm
@@ -909,7 +909,7 @@
       type(ESMF_Alarm),          intent(out), optional :: alarmList(:)
       integer,                   intent(out), optional :: alarmCount
       integer,                   intent(out), optional :: rc
-!   
+!
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -918,11 +918,11 @@
 !
 ! !DESCRIPTION:
 !     Gets the {\tt clock}'s list of alarms and/or number of alarms.
-!  
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
-!          The object instance from which to get an {\tt ESMF\_Alarm} list 
+!          The object instance from which to get an {\tt ESMF\_Alarm} list
 !          and/or count of {\tt ESMF\_Alarm}s.
 !     \item[alarmlistflag]
 !          The kind of list to get:
@@ -951,29 +951,29 @@
 !                See also method {\tt ESMF\_AlarmIsRinging()} for checking a
 !                single alarm.
 !     \item[{[timeStep]}]
-!	   \begin{sloppypar}
+!          \begin{sloppypar}
 !          Optional time step to be used instead of the {\tt clock}'s.
 !          Only used with {\tt ESMF\_ALARMLIST\_NEXTRINGING alarmlistflag}
 !          (see above); ignored if specified with other {\tt alarmlistflags}.
-!	   \end{sloppypar}
+!          \end{sloppypar}
 !     \item[{[alarmList]}]
 !          The array of returned alarms.  If given, the array must be large
-!          enough to hold the number of alarms of the specified 
+!          enough to hold the number of alarms of the specified
 !          {\tt alarmlistflag} in the specified {\tt clock}.
 !     \item[{[alarmCount]}]
-!          If specified, returns the number of {\tt ESMF\_Alarm}s of the 
-!          specified {\tt alarmlistflag} in the specified {\tt clock}.  
+!          If specified, returns the number of {\tt ESMF\_Alarm}s of the
+!          specified {\tt alarmlistflag} in the specified {\tt clock}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!  
+!
 !EOP
 ! !REQUIREMENTS:
 !     TMG4.3, 4.8
 
       ! get size of given alarm list for C++ validation
       integer :: sizeofAlarmList,i
-      type(ESMF_Pointer), allocatable :: alarmPtrList(:)      
+      type(ESMF_Pointer), allocatable :: alarmPtrList(:)
       integer :: localrc                        ! local return code
 
       ! Assume failure until success
@@ -996,7 +996,7 @@
         ! get alarmList and alarmCount if specified
 
         sizeofAlarmList = size(alarmList)
-      
+
         ! for init macros
         allocate(alarmPtrList(sizeofAlarmList))
 
@@ -1022,7 +1022,7 @@
             write(*,*)"c_ESMC_ClockGetAlarmList1 fails"
           endif
         endif
-    
+
         ! post-process alarm list
         do i=1,sizeofAlarmList
            call ESMF_AlarmSetThis(alarmList(i),alarmPtrList(i))
@@ -1055,7 +1055,7 @@
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TimeInterval), intent(in),  optional :: timeStep
       integer,                 intent(out), optional :: rc
-    
+
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1066,7 +1066,7 @@
 !     Calculates what the next time of the {\tt clock} will be, based on
 !     the {\tt clock}'s current time step or an optionally passed-in
 !     {\tt timeStep}.
-!     
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
@@ -1078,7 +1078,7 @@
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!     
+!
 !EOP
 ! !REQUIREMENTS:
 !     TMGx.x, CCSM
@@ -1122,8 +1122,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt clock} has been created. Otherwise return 
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   Return {\tt .true.} if the {\tt clock} has been created. Otherwise return
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
 !   returned, the return value of the function will also be {\tt .false.}.
 !
 ! The arguments are:
@@ -1135,7 +1135,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !EOP
-  !-----------------------------------------------------------------------------    
+  !-----------------------------------------------------------------------------
     ESMF_ClockIsCreated = .false.   ! initialize
     if (present(rc)) rc = ESMF_SUCCESS
     if (ESMF_ClockGetInit(clock)==ESMF_INIT_CREATED) &
@@ -1168,8 +1168,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Returns true if currentTime is greater than or equal to stopTime
-!     in {\tt ESMF\_DIRECTION\_FORWARD}, or if currentTime is less than or 
-!     equal to startTime in {\tt ESMF\_DIRECTION\_REVERSE}.  It returns false 
+!     in {\tt ESMF\_DIRECTION\_FORWARD}, or if currentTime is less than or
+!     equal to startTime in {\tt ESMF\_DIRECTION\_REVERSE}.  It returns false
 !     otherwise.
 !
 !     The arguments are:
@@ -1227,9 +1227,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!     Returns true if clock is in {\tt ESMF\_DIRECTION\_REVERSE}, and false if 
-!     in {\tt ESMF\_DIRECTION\_FORWARD}.  Allows convenient use in "if" and 
-!     "do while" constructs.  Alternative to 
+!     Returns true if clock is in {\tt ESMF\_DIRECTION\_REVERSE}, and false if
+!     in {\tt ESMF\_DIRECTION\_FORWARD}.  Allows convenient use in "if" and
+!     "do while" constructs.  Alternative to
 !     {\tt ESMF\_ClockGet(...direction=...)}.
 !
 !     The arguments are:
@@ -1439,13 +1439,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
-      
+
       ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
       if (present(unit).or.present(preString)) then
         ! simple, single line print format
-      
+
         if (present(options)) then
           optionsOpt=trim(options)
         else
@@ -1478,7 +1478,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             msg="Unknown selection requested.", &
             ESMF_CONTEXT, rcToReturn=rc)
           return
-        endif    
+        endif
 
       else
         ! print to STDOUT
@@ -1488,7 +1488,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call c_ESMC_ClockPrint(clock, options, localrc)   
+        call c_ESMC_ClockPrint(clock, options, localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       endif
@@ -1524,7 +1524,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The name of the object instance to restore.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}  
+!     \end{description}
 !
 !EOPI
 ! !REQUIREMENTS:
@@ -1577,7 +1577,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Direction_Flag),    intent(in),  optional :: direction
       character (len=*),       intent(in),  optional :: name
       integer,                 intent(out), optional :: rc
-    
+
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1589,7 +1589,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Sets/resets one or more of the properties of an {\tt ESMF\_Clock} that
 !     was previously initialized via {\tt ESMF\_ClockCreate()}.
 !     \end{sloppypar}
-!     
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
@@ -1641,14 +1641,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          startTime to stopTime.  This holds true for negative timestep
 !          clocks as well, which are initialized (created) with
 !          stopTime < startTime.  The default mode is
-!          {\tt ESMF\_DIRECTION\_FORWARD}, established at 
-!          {\tt ESMF\_ClockCreate()}.  timeStep can also be specified as an 
-!          argument at the same time, which allows for a change in magnitude 
-!          and/or sign of the clock's timeStep.  If not specified with 
-!          {\tt ESMF\_DIRECTION\_REVERSE}, the clock's current timeStep is 
-!          effectively negated.  If timeStep is specified, its sign is used as 
-!          specified; it is not negated internally.  E.g., if the specified 
-!          timeStep is negative and the clock is placed in 
+!          {\tt ESMF\_DIRECTION\_FORWARD}, established at
+!          {\tt ESMF\_ClockCreate()}.  timeStep can also be specified as an
+!          argument at the same time, which allows for a change in magnitude
+!          and/or sign of the clock's timeStep.  If not specified with
+!          {\tt ESMF\_DIRECTION\_REVERSE}, the clock's current timeStep is
+!          effectively negated.  If timeStep is specified, its sign is used as
+!          specified; it is not negated internally.  E.g., if the specified
+!          timeStep is negative and the clock is placed in
 !          {\tt ESMF\_DIRECTION\_REVERSE}, subsequent calls to
 !          {\tt ESMF\_ClockAdvance()} will cause the clock's current time to
 !          be decremented by the new timeStep's magnitude.
@@ -1657,7 +1657,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!     
+!
 !EOP
 ! !REQUIREMENTS:
 !     TMG3.1, TMG3.4.4
@@ -1734,7 +1734,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
-      localrc = ESMF_RC_NOT_IMPL 
+      localrc = ESMF_RC_NOT_IMPL
 
       ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
@@ -1817,7 +1817,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Clock), intent(inout)         :: clock
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
-    
+
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1827,7 +1827,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !     Sets a {\tt clock}'s current time to the wall clock time.  It is
 !     accurate to the nearest second.
-!   
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
@@ -1835,7 +1835,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!   
+!
 !EOP
 ! !REQUIREMENTS:
 !     TMG3.4.5
@@ -1854,7 +1854,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
-      if (present(rc)) rc = ESMF_SUCCESS 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockSyncToRealTime
 
 !------------------------------------------------------------------------------
@@ -1878,18 +1878,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!     Checks whether a {\tt clock} is valid.  
+!     Checks whether a {\tt clock} is valid.
 !     Must have a valid startTime and timeStep.  If {\tt clock} has a
 !     stopTime, its currTime must be within startTime to stopTime, inclusive;
 !     also startTime's and stopTime's calendars must be the same.
 !
-!     The arguments are:  
+!     The arguments are:
 !     \begin{description}
 !     \item[clock]
 !          {\tt ESMF\_Clock} to be validated.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description} 
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -1900,7 +1900,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
- 
+
       ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_ClockGetInit,clock,rc)
 
@@ -1910,7 +1910,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Return success
-      if (present(rc)) rc = ESMF_SUCCESS 
+      if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_ClockValidate
 
 !------------------------------------------------------------------------------
@@ -1984,7 +1984,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc1, localrc2
       logical :: lval1, lval2
 
-      ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+      ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
       ! init checks on both args, and in the case where both are uninitialized,
       ! to distinguish equality based on uninitialized type (uncreated,
       ! deleted).
@@ -2034,7 +2034,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc1, localrc2
       logical :: lval1, lval2
 
-      ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+      ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
       ! init checks on both args, and in the case where both are uninitialized,
       ! to distinguish equality based on uninitialized type (uncreated,
       ! deleted).

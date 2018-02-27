@@ -17,10 +17,10 @@
 !==============================================================================
 !
 ! !PROGRAM: ESMF_FieldSMMEx - Field SMMribution
-!     
+!
 ! !DESCRIPTION:
-!     
-! This program shows examples of Field interfaces for 
+!
+! This program shows examples of Field interfaces for
 ! sparse matrix multiplication of data.
 !-----------------------------------------------------------------------------
 #include "ESMF.h"
@@ -55,7 +55,7 @@
     integer, pointer                            :: fptr(:)
     real(ESMF_KIND_R4), pointer                 :: fptr2d(:,:)
     real(ESMF_KIND_R4), pointer                 :: src_farray2(:)
-        
+
     real(ESMF_KIND_R4), allocatable          :: factorList(:)
     integer, allocatable                        :: factorIndexList(:,:)
 
@@ -89,31 +89,31 @@
 ! \label{sec:field:usage:smm_1dptr}
 !
 ! The {\tt ESMF\_FieldSMM()} interface can be used to perform sparse matrix multiplication
-! from 
+! from
 ! source Field to destination Field. This interface is overloaded by type and kind;
-! 
+!
 ! In this example, we first create two 1D Fields, a source Field and a destination
 ! Field. Then we use {\tt ESMF\_FieldSMM} to
 ! perform sparse matrix multiplication from source Field to destination Field.
 !
 ! The source and destination Field data are arranged such that each of the 4 PETs has 4
 ! data elements. Moreover, the source Field has all its data elements initialized to a linear
-! function based on local PET number. 
+! function based on local PET number.
 ! Then collectively on each PET, a SMM according to the following formula
 ! is preformed: \newline
 ! $dstField(i) = i * srcField(i), i = 1 ... 4$ \newline
 ! \newline
 !
-! Because source Field data are initialized to a linear function based on local PET number, 
+! Because source Field data are initialized to a linear function based on local PET number,
 ! the formula predicts that
 ! the result destination Field data on each PET is {1,2,3,4}. This is verified in the
 ! example.
 !
-! Section \ref{Array:SparseMatMul} provides a detailed discussion of the 
+! Section \ref{Array:SparseMatMul} provides a detailed discussion of the
 ! sparse matrix multiplication operation implemented in ESMF.
-! 
+!
 !EOE
-!BOC 
+!BOC
 
     ! Get current VM and pet number
     call ESMF_VMGetCurrent(vm, rc=rc)
@@ -142,7 +142,7 @@
     allocate(src_farray(fa_shape(1)) )
     src_farray = lpe+1
     srcArray = ESMF_ArrayCreate(distgrid, src_farray, &
-		indexflag=ESMF_INDEX_DELOCAL, rc=rc)
+                indexflag=ESMF_INDEX_DELOCAL, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     srcField = ESMF_FieldCreate(grid, srcArray, rc=rc)
@@ -155,7 +155,7 @@
     allocate(dst_farray(fa_shape(1)) )
     dst_farray = 0
     dstArray = ESMF_ArrayCreate(distgrid, dst_farray, &
-		indexflag=ESMF_INDEX_DELOCAL, rc=rc)
+                indexflag=ESMF_INDEX_DELOCAL, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     dstField = ESMF_FieldCreate(grid, dstArray, rc=rc)
@@ -183,7 +183,7 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     ! Verify that the result data in dstField is correct.
-    ! Before the SMM op, the dst Field contains all 0. 
+    ! Before the SMM op, the dst Field contains all 0.
     ! The SMM op reset the values to the index value, verify this is the case.
     ! +--------+--------+--------+--------+
     !  1 2 3 4  2 4 6 8  3 6 9 12  4 8 12 16       ! value
@@ -197,7 +197,7 @@
 !BOE
 ! Field sparse matrix multiplication can also be performed between weakly congruent Fields.
 ! In this case, source and destination Fields can have ungridded dimensions
-! with size different from the Field pair used to compute the routehandle. 
+! with size different from the Field pair used to compute the routehandle.
 !EOE
 !BOC
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=2, rc=rc)
@@ -258,7 +258,7 @@
 ! and the size of those gridded dimensions. The source Field has a 1D decomposition
 ! with 16 total elements; the destination Field has a 2D decomposition with
 ! 12 total elements. For ease of understanding of the actual matrix calculation,
-! a global indexing scheme is used. 
+! a global indexing scheme is used.
 !EOE
 !BOC
     distgrid = ESMF_DistGridCreate(minIndex=(/1/), maxIndex=(/16/), &
@@ -289,7 +289,7 @@
     allocate(src_farray2(tlb(1):tub(1)) )
     src_farray2 = lpe+1
     srcArray = ESMF_ArrayCreate(distgrid, src_farray2, &
-		  indexflag=ESMF_INDEX_GLOBAL, &
+                  indexflag=ESMF_INDEX_GLOBAL, &
       rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     !print *, lpe, '+', tlb, tub, '+', src_farray2
@@ -299,7 +299,7 @@
 
 !EOC
 !BOE
-! Create 2D dstField on the following distribution 
+! Create 2D dstField on the following distribution
 ! (numbers are the sequence indices):
 !\begin{verbatim}
 ! +  PET0  +  PET1  +  PET2  +  PET3  +
@@ -352,7 +352,7 @@
 ! dstField equals to 0.25*srcField(2) + 0.5*srcField(16) = 0.25*1+0.5*4=2.25
 ! For simplicity, we will load the factorList and factorIndexList on
 ! PET 0 and 1, the SMMStore engine will load balance the parameters on all 4
-! PETs internally for optimal performance. 
+! PETs internally for optimal performance.
 !EOE
 !BOC
     if(lpe == 0) then

@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
@@ -43,9 +43,9 @@ module ESMF_FieldGetMod
   use ESMF_GeomBaseMod
   use ESMF_StaggerLocMod
   use ESMF_InitMacrosMod
-  
+
   use ESMF_FieldMod
-      
+
   implicit none
 
 !------------------------------------------------------------------------------
@@ -57,14 +57,14 @@ module ESMF_FieldGetMod
 
   public ESMF_FieldGet
   public ESMF_FieldGetBounds
- 
+
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
   character(*), parameter, private :: version = &
     '$Id$'
 
 !==============================================================================
-! 
+!
 ! INTERFACE BLOCKS
 !
 !==============================================================================
@@ -83,11 +83,11 @@ module ESMF_FieldGetMod
     !module procedure ESMF_FieldGetLocalArray !TODO: FIELDINTEGRATION
     TypeKindRankInterfaceMacro(FieldGetDataPtr)
 
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_FieldGet} subroutines.   
+! !DESCRIPTION:
+! This interface provides a single entry point for the various
+!  types of {\tt ESMF\_FieldGet} subroutines.
   end interface
-!EOPI 
+!EOPI
 !------------------------------------------------------------------------------
 
 
@@ -112,27 +112,27 @@ contains
     status, geomtype, grid, mesh, locstream, xgrid, array, &
     typekind, dimCount, rank, staggerloc, meshloc, xgridside, &
     gridindex, gridToFieldMap, ungriddedLBound, ungriddedUBound, &
-    totalLWidth, totalUWidth, localDeCount, name, vm, rc) 
+    totalLWidth, totalUWidth, localDeCount, name, vm, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Field),           intent(in)            :: field    
+    type(ESMF_Field),           intent(in)            :: field
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_ArraySpec),       intent(out), optional :: arrayspec
     type(ESMF_FieldStatus_Flag),intent(out), optional :: status
-    type(ESMF_GeomType_Flag),   intent(out), optional :: geomtype     
-    type(ESMF_Grid),            intent(out), optional :: grid     
-    type(ESMF_Mesh),            intent(out), optional :: mesh     
-    type(ESMF_LocStream),       intent(out), optional :: locstream     
-    type(ESMF_XGrid),           intent(out), optional :: xgrid     
-    type(ESMF_Array),           intent(out), optional :: array     
+    type(ESMF_GeomType_Flag),   intent(out), optional :: geomtype
+    type(ESMF_Grid),            intent(out), optional :: grid
+    type(ESMF_Mesh),            intent(out), optional :: mesh
+    type(ESMF_LocStream),       intent(out), optional :: locstream
+    type(ESMF_XGrid),           intent(out), optional :: xgrid
+    type(ESMF_Array),           intent(out), optional :: array
     type(ESMF_TypeKind_Flag),   intent(out), optional :: typekind
     integer,                    intent(out), optional :: dimCount
     integer,                    intent(out), optional :: rank
-    type(ESMF_StaggerLoc),      intent(out), optional :: staggerloc 
-    type(ESMF_MeshLoc),         intent(out), optional :: meshloc 
-    type(ESMF_XGridSide_Flag),  intent(out), optional :: xgridside 
+    type(ESMF_StaggerLoc),      intent(out), optional :: staggerloc
+    type(ESMF_MeshLoc),         intent(out), optional :: meshloc
+    type(ESMF_XGridSide_Flag),  intent(out), optional :: xgridside
     integer,                    intent(out), optional :: gridindex
-    integer,                    intent(out), optional :: gridToFieldMap(:)    
+    integer,                    intent(out), optional :: gridToFieldMap(:)
     integer,                    intent(out), optional :: ungriddedLBound(:)
     integer,                    intent(out), optional :: ungriddedUBound(:)
     integer,                    intent(out), optional :: totalLWidth(:,:)
@@ -156,7 +156,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Query an {\tt ESMF\_Field} for various things.  All arguments after
 ! the {\tt field} are optional.  To select individual items use the
 ! named\_argument=value syntax. For an example and
-! associated documentation using this method see section 
+! associated documentation using this method see section
 ! \ref{sec:field:usage:field_get_default}.
 !
 ! The arguments are:
@@ -192,16 +192,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       complete list of values.
 ! \item [{[dimCount]}]
 !       Number of geometrical dimensions in {\tt field}.
-!       For an detailed discussion of this parameter, please see 
+!       For an detailed discussion of this parameter, please see
 !       section \ref{sec:field:usage:createArbGrid} and
-!       section \ref{sec:field:usage:createArbGridRep}. 
+!       section \ref{sec:field:usage:createArbGridRep}.
 ! \item [{[rank]}]
-!       Number of dimensions in the physical memory of the {\tt field} data. It is 
+!       Number of dimensions in the physical memory of the {\tt field} data. It is
 !       identical to dimCount when the corresponding grid is a non-arbitrary grid.
 !       It is less than dimCount when the grid is arbitrarily distributed.
-!       For an detailed discussion of this parameter, please see 
+!       For an detailed discussion of this parameter, please see
 !       section \ref{sec:field:usage:createArbGrid} and
-!       section \ref{sec:field:usage:createArbGridRep}. 
+!       section \ref{sec:field:usage:createArbGridRep}.
 ! \item [{[staggerloc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values and interpretation of results see
@@ -210,20 +210,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       \begin{sloppypar}
 !       \apiStatusCompatibleException
 !       The part of the mesh to build the Field on. Can be either
-!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set, 
+!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set,
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}.
 !       \end{sloppypar}
 ! \item [{[xgridside]}]
 !       \begin{sloppypar}
 !       \apiStatusCompatibleException
-!       The side of the XGrid that the Field was created on. See section 
+!       The side of the XGrid that the Field was created on. See section
 !       \ref{const:xgridside} for a complete list of values.
 !       \end{sloppypar}
 ! \item [{[gridIndex]}]
 !       \apiStatusCompatibleException
 !       If xgridside is {\tt ESMF\_XGRIDSIDE\_A} or {\tt ESMF\_XGRIDSIDE\_B}
 !       then this index tells which Grid/Mesh on that side the Field was
-!       created on. 
+!       created on.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -235,7 +235,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
-!       stored in the {\t field}.  
+!       stored in the {\t field}.
 ! \item [{[ungriddedLBound]}]
 !       Lower bounds of the ungridded dimensions of the {\tt field}.
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
@@ -299,7 +299,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Get Field pointer
     ftype => field%ftypep
-    
+
    call ESMF_BaseGetStatus(ftype%base, fieldstatus, rc=localrc)
    if (ESMF_LogFoundError(localrc, &
      ESMF_ERR_PASSTHRU, &
@@ -482,7 +482,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(totalLWidth)) then
         !totalLWidth = ftype%totalLWidth(1:size(totalLWidth))
-        call ESMF_ArrayGet(ftype%array, totalLWidth=totalLWidth, rc=localrc) 
+        call ESMF_ArrayGet(ftype%array, totalLWidth=totalLWidth, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -490,7 +490,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (present(totalUWidth)) then
         !totalUWidth = ftype%totalUWidth(1:size(totalUWidth))
-        call ESMF_ArrayGet(ftype%array, totalUWidth=totalUWidth, rc=localrc) 
+        call ESMF_ArrayGet(ftype%array, totalUWidth=totalUWidth, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -596,7 +596,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{description}
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: localrc 
+    integer :: localrc
     !character(len=ESMF_MAXSTR) :: str
     type(ESMF_Array) :: array
 
@@ -617,7 +617,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, &
                               ESMF_ERR_PASSTHRU, &
                               ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! Set return values.
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -756,7 +756,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Field), intent(in)            :: field @\
     integer,          intent(in), optional  :: localDe @\
     mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr @\
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     integer,          intent(out), optional :: exclusiveLBound(:) @\
     integer,          intent(out), optional :: exclusiveUBound(:) @\
     integer,          intent(out), optional :: exclusiveCount(:) @\
@@ -871,35 +871,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Upon return this holds the lower bounds of the exclusive region.
 !     {\tt exclusiveLBound} must be allocated to be of size equal to the field rank.
 !     Please see section~\ref{sec:grid:usage:bounds} for a description
-!     of the regions and their associated bounds and counts. 
+!     of the regions and their associated bounds and counts.
 ! \item[{[exclusiveUBound]}]
 !     Upon return this holds the upper bounds of the exclusive region.
 !     {\tt exclusiveUBound} must be allocated to be of size equal to the field rank.
 !     Please see section~\ref{sec:grid:usage:bounds} for a description
-!     of the regions and their associated bounds and counts. 
+!     of the regions and their associated bounds and counts.
 ! \item[{[exclusiveCount]}]
-!     Upon return this holds the number of items, {\tt exclusiveUBound-exclusiveLBound+1}, 
+!     Upon return this holds the number of items, {\tt exclusiveUBound-exclusiveLBound+1},
 !     in the exclusive region per dimension.
 !     {\tt exclusiveCount} must
 !     be allocated to be of size equal to the field rank.
 !     Please see section~\ref{sec:grid:usage:bounds} for a description
-!     of the regions and their associated bounds and counts. 
+!     of the regions and their associated bounds and counts.
 ! \item[{[computationalLBound]}]
 !     Upon return this holds the lower bounds of the stagger region.
 !     {\tt computationalLBound} must be allocated to be of size equal to the field rank.
 !     Please see section~\ref{sec:grid:usage:bounds} for a description
-!     of the regions and their associated bounds and counts. 
+!     of the regions and their associated bounds and counts.
 ! \item[{[computationalUBound]}]
 !     Upon return this holds the upper bounds of the stagger region.
 !     {\tt computationalUBound} must be allocated to be of size equal to the field rank.
 !     Please see section~\ref{sec:grid:usage:bounds} for a description
-!     of the regions and their associated bounds and counts. 
+!     of the regions and their associated bounds and counts.
 ! \item[{[computationalCount]}]
 !     Upon return this holds the number of items in the computational region per dimension
 !     (i.e. {\tt computationalUBound-computationalLBound+1}). {\tt computationalCount}
 !      must be allocated to be of size equal to the field rank.
 !     Please see section~\ref{sec:grid:usage:bounds} for a description
-!     of the regions and their associated bounds and counts. 
+!     of the regions and their associated bounds and counts.
 ! \item[{[totalLBound]}]
 !     Upon return this holds the lower bounds of the total region.
 !     {\tt totalLBound} must be allocated to be of size equal to the field rank.
@@ -931,7 +931,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, dimension(:), allocatable :: l_ec, l_cc, l_tc
 
 
-    if (present(rc)) rc = ESMF_RC_NOT_IMPL 
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
     ! check variables
@@ -943,7 +943,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           msg="Cannot retrieve gridrank from ftypep%grid", &
            ESMF_CONTEXT, rcToReturn=rc)
        return
-    endif 
+    endif
     call ESMF_ArrayGet(field%ftypep%array, rank=fieldrank, &
         localDeCount=localDeCount, &
         rc=localrc)
@@ -952,17 +952,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           msg="Cannot retrieve fieldrank from ftypep%array", &
            ESMF_CONTEXT, rcToReturn=rc)
        return
-    endif 
+    endif
 
     if(localDeCount .gt. 1 .and. (.not. present(localDe))) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
           msg="localDe must be present when localDeCount is greater than 1", &
            ESMF_CONTEXT, rcToReturn=rc)
        return
-    endif 
+    endif
     if(present(localDe)) then
         l_localDe = localDe
-    else 
+    else
         l_localDe = 0
     endif
 
@@ -972,7 +972,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="the size of exclusiveLBound must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
-        endif 
+        endif
     endif
     if(present(exclusiveUBound)) then
         if(size(exclusiveUBound) .ne. fieldrank) then
@@ -980,7 +980,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="the size of exclusiveUBound must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
-        endif 
+        endif
     endif
     if(present(exclusiveCount)) then
         if(size(exclusiveCount) .ne. fieldrank) then
@@ -988,7 +988,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="the size of exclusiveCount must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
-        endif 
+        endif
     endif
     if(present(computationalLBound)) then
         if(size(computationalLBound) .ne. fieldrank) then
@@ -996,7 +996,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="the size of computationalLBound must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
-        endif 
+        endif
     endif
     if(present(computationalUBound)) then
         if(size(computationalUBound) .ne. fieldrank) then
@@ -1004,7 +1004,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="the size of computationalUBound must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
-        endif 
+        endif
     endif
     if(present(computationalCount)) then
         if(size(computationalCount) .ne. fieldrank) then
@@ -1012,7 +1012,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="the size of computationalCount must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
-        endif 
+        endif
     endif
     if(present(totalLBound)) then
         if(size(totalLBound) .ne. fieldrank) then
@@ -1020,7 +1020,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="the size of totalLBound must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
-        endif 
+        endif
     endif
     if(present(totalUBound)) then
         if(size(totalUBound) .ne. fieldrank) then
@@ -1028,7 +1028,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="the size of totalUBound must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
-        endif 
+        endif
     endif
     if(present(totalCount)) then
         if(size(totalCount) .ne. fieldrank) then
@@ -1036,7 +1036,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               msg="the size of totalCount must equal to the field rank", &
                ESMF_CONTEXT, rcToReturn=rc)
            return
-        endif 
+        endif
     endif
 
     ! local temporaries to store return values
@@ -1053,7 +1053,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(totalLBound) .or. present(totalUBound) .or. &
         present(computationalLBound) .or. present(computationalUBound) .or. &
         present(exclusiveLBound) .or. present(exclusiveUBound)) then
-    
+
         ! Get Size of Array info
         call ESMF_ArrayGet(field%ftypep%array, dimCount=dimCount, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -1069,25 +1069,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         allocate(undistBnd(fieldRank-dimCount+dimCount_repdim))
         allocate(distgridToPackedArrayMap(dimCount))
         allocate(distgridToArrayMap(dimCount))
-              
+
         ! get distributed dimension map
-        call ESMF_ArrayGet(field%ftypep%array, & 
+        call ESMF_ArrayGet(field%ftypep%array, &
             distgridToPackedArrayMap=distgridToPackedArrayMap, &
             distgridToArrayMap=distgridToArrayMap, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
         ! fill lower Bounds
         if (present(totalLBound) .or. present(computationalLBound) &
             .or. present(exclusiveLBound)) then
-            call ESMF_ArrayGet(field%ftypep%array, totalLBound=arrayBnd, & 
+            call ESMF_ArrayGet(field%ftypep%array, totalLBound=arrayBnd, &
                 computationalLBound=arrayCompBnd, exclusiveLBound=arrayExclBnd, &
                 undistLBound=undistBnd, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
             ! set distributed dimensions
             filled=.false.
             do i=1, dimCount
@@ -1101,7 +1101,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                    filled(distgridToArrayMap(i))=.true.
                 endif
             enddo
-    
+
             ! set undistributed dimensions
             j=1
             do i=1, fieldRank
@@ -1113,17 +1113,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                endif
             enddo
         endif
-    
+
         ! fill upper bounds
         if (present(totalUBound) .or. present(computationalUBound) &
             .or. present(exclusiveUBound)) then
-            call ESMF_ArrayGet(field%ftypep%array, totalUBound=arrayBnd, & 
+            call ESMF_ArrayGet(field%ftypep%array, totalUBound=arrayBnd, &
                 computationalUBound=arrayCompBnd, exclusiveUBound=arrayExclBnd, &
                 undistUBound=undistBnd, rc=localrc)
             if (ESMF_LogFoundError(localrc, &
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
             ! set distributed dimensions
             filled=.false.
             do i=1, dimCount
@@ -1137,7 +1137,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     filled(distgridToArrayMap(i))=.true.
                 endif
             enddo
-    
+
             ! set undistributed dimensions
             j=1
             do i=1, fieldRank
@@ -1158,7 +1158,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         deallocate(distgridToArrayMap)
     endif
 
-    do i = 1, fieldrank 
+    do i = 1, fieldrank
         l_cc(i) = l_cub(i) - l_clb(i) + 1
         l_ec(i) = l_eub(i) - l_elb(i) + 1
         l_tc(i) = l_tub(i) - l_tlb(i) + 1

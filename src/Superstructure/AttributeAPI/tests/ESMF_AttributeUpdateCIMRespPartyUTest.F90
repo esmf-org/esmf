@@ -25,8 +25,8 @@ module ESMF_AttributeUpdateCIMRespPartyUTestMod
 
   !-------------------------------------------------------------------------
 !   !  The SetVM Register routines for Gridcomp1
- 
-  subroutine userm1_setvm(comp, rc) 
+
+  subroutine userm1_setvm(comp, rc)
     type(ESMF_GridComp)  :: comp
     integer, intent(out) :: rc
 
@@ -40,11 +40,11 @@ module ESMF_AttributeUpdateCIMRespPartyUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    
+
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
@@ -90,9 +90,9 @@ module ESMF_AttributeUpdateCIMRespPartyUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -140,9 +140,9 @@ module ESMF_AttributeUpdateCIMRespPartyUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -184,14 +184,14 @@ module ESMF_AttributeUpdateCIMRespPartyUTestMod
     integer, intent(out) :: rc
 
     ! Local variables
-	  type(ESMF_AttPack) :: attpack, attpack1, attpack2
+          type(ESMF_AttPack) :: attpack, attpack1, attpack2
     integer                     :: nameCount
     character(ESMF_MAXSTR)      :: convCIM, purpComp
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
     character(ESMF_MAXSTR), dimension(2) :: nestConv, nestPurp
     character(ESMF_MAXSTR), dimension(5) :: nestAttPackName
 
-    
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
@@ -315,7 +315,7 @@ module ESMF_AttributeUpdateCIMRespPartyUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-	  type(ESMF_AttPack) :: attpack1, attpack2, attpack_nested
+          type(ESMF_AttPack) :: attpack1, attpack2, attpack_nested
     character(ESMF_MAXSTR) :: convCIM, purpComp, convISO, purpRP, purpExt
     character(ESMF_MAXSTR),dimension(2) :: attrList, valueList, attPackInstNames
     integer attPackInstCount
@@ -441,7 +441,7 @@ module ESMF_AttributeUpdateCIMRespPartyUTestMod
     rc = ESMF_SUCCESS
 
   end subroutine usercpl_final
- 
+
 end module
 
 program ESMF_AttributeUpdateCIMRespPartyUTest
@@ -508,7 +508,7 @@ program ESMF_AttributeUpdateCIMRespPartyUTest
     !-----------------------------------------------------------------------------
 
 #ifdef ESMF_TESTEXHAUSTIVE
-    call ESMF_VMGetCurrent(vm, rc=rc) 
+    call ESMF_VMGetCurrent(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)

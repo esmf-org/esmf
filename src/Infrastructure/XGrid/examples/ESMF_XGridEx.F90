@@ -28,7 +28,7 @@
     use ESMF_XGridMod
     use ESMF_XGridCreateMod
     implicit none
-    
+
     ! Local variables
     integer                             :: localrc, i, j
     type(ESMF_XGrid)                    :: xgrid
@@ -76,17 +76,17 @@
 ! of the exchange grid. Internally the
 ! weight matrices and index mapping are computed and stored in the XGrid, along
 ! with other necessary information for flux exchange calculation between
-! any pair of model components used for the XGrid creation. 
-! 
+! any pair of model components used for the XGrid creation.
+!
 ! In this example, we create an XGrid from overlapping Grids on
 ! either side of the XGrid. Then we perform a flux exchange from one side
-! to the other side of the XGrid. 
+! to the other side of the XGrid.
 !
 ! We start by creating the Grids on both sides and associate coordinates with
-! the Grids on the corner stagger. The Grids use global indexing and padding 
+! the Grids on the corner stagger. The Grids use global indexing and padding
 ! for coordinates on the corner stagger.
 !
-! For details of Grid creation and coordinate use, 
+! For details of Grid creation and coordinate use,
 ! please refer to Grid class documentation: \ref{example:2DRegUniGrid}.
 !EOE
 !BOC
@@ -147,7 +147,7 @@
 !EOC
 
 !BOC
-    ! SideA second grid spans (14.3-24.3, 14.2-24.2) with 0.5x1.0 degree 
+    ! SideA second grid spans (14.3-24.3, 14.2-24.2) with 0.5x1.0 degree
     ! resolution X corner
     call ESMF_GridGetCoord(sideA(2), localDE=0, &
         staggerLoc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
@@ -181,7 +181,7 @@
       name='source Grid 1 on side B', rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
     do i = 1, 1
       call ESMF_GridAddCoord(sideB(i), staggerloc=ESMF_STAGGERLOC_CORNER, &
@@ -227,7 +227,7 @@
     xgrid = ESMF_XGridCreate(sideAGrid=sideA, sideBGrid=sideB, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 
 !BOE
 ! Create an {\tt ESMF\_Field} on the XGrid:
@@ -237,7 +237,7 @@
                 rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOE
 ! Query the Field for its Fortran data pointer and its exclusive bounds:
 !EOE
@@ -246,7 +246,7 @@
         exclusiveLBound=xlb, exclusiveUBound=xub, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 
 !BOE
 ! Create src and dst Fields on side A and side B Grids.
@@ -284,14 +284,14 @@
 ! The current implementation requires that Grids used to generate the XGrid
 ! must not match, i.e. they are different either topologically or geometrically or both.
 ! In this example, the first source Grid is topologically identical to the destination
-! Grid but their geometric coordinates are different. 
+! Grid but their geometric coordinates are different.
 !
 ! First we compute the regrid routehandles, these routehandles can be used repeatedly
 ! afterwards. Then we initialize the values in the Fields. Finally we execute the Regrid.
-! 
+!
 !EOE
 !BOC
-    ! Compute regrid routehandles. The routehandles can be used 
+    ! Compute regrid routehandles. The routehandles can be used
     ! repeatedly afterwards.
     ! From A -> X
     do i = 1, 2
@@ -354,7 +354,7 @@
     ! To get the surface integral of flux on XGrid, adjust by dst area
 
     !do i = xlb(1), xub(1)
-    !    xfarrayPtr(i) = xfarrayPtr(i) * xgrid_area(i) 
+    !    xfarrayPtr(i) = xfarrayPtr(i) * xgrid_area(i)
     !enddo
 
     !print *, '- after SMM from A -> X'
@@ -415,27 +415,27 @@
 !\subsubsection{Using XGrid in Earth System modeling}
 !\label{sec:xgrid:usage:xgrid_create_masking}
 !
-! A typical application in Earth System Modeling is to calculate flux exchange 
-! through the planetary boundary layer that can be represented by {\tt ESMF\_XGrid}. 
+! A typical application in Earth System Modeling is to calculate flux exchange
+! through the planetary boundary layer that can be represented by {\tt ESMF\_XGrid}.
 ! Atmosphere is above the planetary boundary layer while land and ocean are below the boundary layer.
-! To create an XGrid, the land and ocean Grids that are usually different in resolution 
+! To create an XGrid, the land and ocean Grids that are usually different in resolution
 ! need to be merged first to create a super Mesh. This merging process is enabled through the support
-! of masking. 
+! of masking.
 !
 ! The global land and ocean Grids need to be created with masking enabled.
 ! In practice, each Grid cell has an integer masking value attached to it. For examples using masking in
 ! {\tt ESMF\_Grid} please refer to section \ref{sec:usage:items}.
 !
-! When calling the {\tt ESMF\_XGridCreate()} method, user can supply the optional arguments 
-! sideAMaskValues and sideBMaskValues. 
+! When calling the {\tt ESMF\_XGridCreate()} method, user can supply the optional arguments
+! sideAMaskValues and sideBMaskValues.
 ! These arguments are one dimensional Fortran integer arrays. If any of the sideAMaskValues entry
 ! matches the masking value used in sideA Grid, the sideA Grid cell is masked out, vice versa for sideB.
 ! Thus by specifying different regions of a land and ocean Grids to be masked out, the two global Grids
 ! can be merged into a new global Mesh covering the entire Earth.
 !
-! The following call shows how to use the {\tt ESMF\_XGridCreate()} method with the optional 
+! The following call shows how to use the {\tt ESMF\_XGridCreate()} method with the optional
 ! arguments sideAMaskValues and sideBMaskValues.
-! 
+!
 !EOE
 
 !BOC
@@ -483,7 +483,7 @@
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
       endflag=ESMF_END_ABORT)
 
-    ! After the regridding is successful. 
+    ! After the regridding is successful.
     ! Clean up all the allocated resources:
     call ESMF_FieldDestroy(field, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
