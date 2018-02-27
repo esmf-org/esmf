@@ -2200,10 +2200,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[filename]
 !          Name of grid file to be used to create the location stream.  
 !     \item[{[fileformat]}]
-!          Flag that indicates the file format of the grid file.  Please see
-!          Section~\ref{const:grid:fileformat} and Section~\ref{const:mesh:fileformat} for a 
-!          list of valid options (note that the {\tt ESMF\_FILEFORMAT\_GRIDSPEC} format is not
-!          supported).  If not specified, the default is {\tt ESMF\_FILEFORMAT\_SCRIP}.
+!     The file format.  The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP},
+!     {\tt ESMF\_FILEFORMAT\_ESMFMESH}, and {\tt ESMF\_FILEFORMAT\_UGRID}.
+!      Please see section~\ref{const:fileformatflag} for a detailed description of the options.
+!     If not specified, the default is {\tt ESMF\_FILEFORMAT\_SCRIP}.
 !     \item[{[varname]}]
 !         An optional variable name stored in the UGRID file to be used to
 !         generate the mask using the missing value of the data value of
