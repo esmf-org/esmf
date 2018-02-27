@@ -563,7 +563,7 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
  void extrap(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist, 
              IWeights &wts,
              MAP_TYPE mtype,
-	     UInt pole_constraint_id,
+	     UInt pole_constraint_id, // Only valid when srcmesh exists
              int extrapMethod, 
              int extrapNumSrcPnts, 
              ESMC_R8 extrapDistExponent,    
@@ -671,8 +671,13 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
     // No pole is added to dst mesh
 #endif
 
-    // Pole constraints
-    UInt pole_constraint_id = srcmesh->DefineContext("pole_constraints");
+    // If a srcMesh exists add Pole constraints to it
+    UInt pole_constraint_id;
+    if (srcmesh != NULL) {
+      pole_constraint_id = srcmesh->DefineContext("pole_constraints");
+    }
+
+    // Add Pole
     IWeights pole_constraints, stw;
      if (maybe_pole) {
       if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
