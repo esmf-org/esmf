@@ -316,7 +316,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 
 
 // This method converts unmasked Mesh nodes to a PointList
- static void _create_pointlist_from_mesh_nodes(Mesh *mesh, PointList **_pointlist) {
+ static void _create_pointlist_from_mesh_nodes(Mesh *mesh, UInt pole_constraint_id,PointList **_pointlist) {
 
    // Coord Pointer
    MEField<> *coord_ptr = mesh->GetCoordField();
@@ -333,6 +333,12 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
      // If not local, then go on to next node
      if (!GetAttr(node).is_locally_owned()) continue;
      
+     // If this node is a newly added pole, then skip, because
+     // it's not a point in the original grid
+     if (GetMeshObjContext(node).is_set(pole_constraint_id)) {
+       continue;
+     }  
+
      // If masked, then go on to next
      if (mask_ptr) {
        double *msk=mask_ptr->data(node);
@@ -354,6 +360,12 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
      // If not local, then go on to next node
      if (!GetAttr(node).is_locally_owned()) continue;
      
+     // If this node is a newly added pole, then skip, because
+     // it's not a point in the original grid
+     if (GetMeshObjContext(node).is_set(pole_constraint_id)) {
+       continue;
+     }  
+
      // If masked, then go on to next
      if (mask_ptr) {
        double *msk=mask_ptr->data(node);
@@ -551,6 +563,7 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
  void extrap(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist, 
              IWeights &wts,
              MAP_TYPE mtype,
+	     UInt pole_constraint_id,
              int extrapMethod, 
              int extrapNumSrcPnts, 
              ESMC_R8 extrapDistExponent,    
@@ -566,7 +579,7 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
    PointList *srcpointlist_extrap=NULL;
    PointList *srcpointlist_from_mesh=NULL;
    if (srcmesh != NULL) {
-     _create_pointlist_from_mesh_nodes(srcmesh, &srcpointlist_from_mesh);
+     _create_pointlist_from_mesh_nodes(srcmesh, pole_constraint_id, &srcpointlist_from_mesh);
      srcpointlist_extrap=srcpointlist_from_mesh;
    } else if (srcpointlist != NULL) {
      srcpointlist_extrap=srcpointlist;
@@ -658,20 +671,19 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
     // No pole is added to dst mesh
 #endif
 
-
+    // Pole constraints
+    UInt pole_constraint_id = srcmesh->DefineContext("pole_constraints");
     IWeights pole_constraints, stw;
      if (maybe_pole) {
-      // Pole constraints
-      UInt constraint_id = srcmesh->DefineContext("pole_constraints");
       if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
         for (UInt i = 1; i <= 7; ++i)
-          MeshAddPole(*srcmesh, i, constraint_id, pole_constraints);
+          MeshAddPole(*srcmesh, i, pole_constraint_id, pole_constraints);
       } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
         for (UInt i = 1; i <= 7; ++i)
-          MeshAddPoleNPnts(*srcmesh, *regridPoleNPnts, i, constraint_id, pole_constraints);
+          MeshAddPoleNPnts(*srcmesh, *regridPoleNPnts, i, pole_constraint_id, pole_constraints);
       } else if (*regridPoleType == ESMC_REGRID_POLETYPE_TEETH) {
         for (UInt i = 1; i <= 7; ++i)
-          MeshAddPoleTeeth(*srcmesh, i, constraint_id, pole_constraints);
+          MeshAddPoleTeeth(*srcmesh, i, pole_constraint_id, pole_constraints);
       }
     }
 
@@ -811,7 +823,7 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
      // Do extrapolation if the user has requested it
      if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
        extrap(srcmesh, srcpointlist, dstmesh, dstpointlist, 
-              wts, mtype, 
+              wts, mtype, pole_constraint_id, 
               *extrapMethod, *extrapNumSrcPnts, *extrapDistExponent,    
               set_dst_status, dst_status);
      }
