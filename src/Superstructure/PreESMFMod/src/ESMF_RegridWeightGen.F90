@@ -226,9 +226,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error.
 !           If not specified, {\tt ignoreDegenerate} defaults to false.
 !   \item [{[srcFileType]}]
-!     The file format of the source grid. Please see Section~\ref{const:fileformatflag} for a list of valid options.
+!     The file format of the source grid. Please see
+!     Section~\ref{const:fileformatflag} for a list of valid options. 
+!      If not specifed, the program will determine the file format automatically.
 !   \item [{[dstFileType]}]
 !     The file format of the destination grid.  Please see Section~\ref{const:fileformatflag} for a list of valid options.
+!      If not specifed, the program will determine the file format automatically.
 !   \item [{[srcRegionalFlag]}]
 !     If .TRUE., the source grid is a regional grid, otherwise,
 !     it is a global grid.  The default value is .FALSE.
