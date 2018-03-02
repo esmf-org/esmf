@@ -619,7 +619,7 @@ contains
                attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) then
-             print *, "incorrect tk = ", attrName(i)
+             !print *, "incorrect tk = ", attrName(i)
              return
           endif
           !attributeKeys = trim(attributeKeys)//trim(delim)// &
