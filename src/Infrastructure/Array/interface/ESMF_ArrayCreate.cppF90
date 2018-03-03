@@ -677,7 +677,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFrmPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayCreate() @\
 ! function ESMF_ArrayCreateFrmPtrArb<indexkind><rank><type><kind>(distgrid, & @\
-!   farrayPtr, haloSeqIndexList, keywordEnforcer datacopyflag, & @\
+!   farrayPtr, haloSeqIndexList, keywordEnforcer, datacopyflag, & @\
 !   distgridToArrayMap, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\

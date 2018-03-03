@@ -2506,7 +2506,7 @@ end function ESMF_LocStreamCreateFromFile
 ! !IROUTINE: ESMF_LocStreamDestroy - Release resources associated with a LocStream 
 
 ! !INTERFACE:
-      subroutine ESMF_LocStreamDestroy(locstream, keywordenforcer, rc)
+      subroutine ESMF_LocStreamDestroy(locstream, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(inout)          :: locstream 
@@ -3001,7 +3001,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-  subroutine ESMF_LocStreamGetKeyInfo(locstream, keyName, keywordEnforcer,&
+  subroutine ESMF_LocStreamGetKeyInfo(locstream, keyName, keywordEnforcer, &
        keyUnits, keyLongName, typekind, isPresent, rc)
 !
 ! !ARGUMENTS:
@@ -3466,7 +3466,7 @@ end subroutine ESMF_LocStreamGetKeyR4
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-      subroutine ESMF_LocStreamGetKeyR8(locstream, keyName, keywordEnforcer,&
+      subroutine ESMF_LocStreamGetKeyR8(locstream, keyName, keywordEnforcer, &
           localDE, exclusiveLBound, exclusiveUBound, exclusiveCount,     &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,     &

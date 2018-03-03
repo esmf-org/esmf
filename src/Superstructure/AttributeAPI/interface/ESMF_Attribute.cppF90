@@ -2466,7 +2466,7 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGetAttPack()
-!     subroutine ESMF_AttGetAttPackSL(<object>, specList, keywordEnforcer,
+!     subroutine ESMF_AttGetAttPackSL(<object>, specList, keywordEnforcer, &
 !       attpack, attnestflag, isPresent, rc)
 !
 ! !ARGUMENTS:
@@ -2526,7 +2526,7 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGetAttPack()
-!     subroutine ESMF_AttGetAttPack(<object>, convention, purpose, keywordEnforcer
+!     subroutine ESMF_AttGetAttPack(<object>, convention, purpose, keywordEnforcer, &
 !       attPackInstanceName, attpack, attnestflag, isPresent, rc)
 !
 ! !ARGUMENTS:

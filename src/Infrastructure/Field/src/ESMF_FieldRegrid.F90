@@ -108,7 +108,7 @@ contains
 ! !IROUTINE: ESMF_FieldRegrid - Compute a regridding operation
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldRegrid(srcField, dstField, routehandle, keywordEnforcer,&
+  subroutine ESMF_FieldRegrid(srcField, dstField, routehandle, keywordEnforcer, &
     zeroregion, termorderflag, checkflag, dynamicMask, rc)
 !
 ! !ARGUMENTS:

@@ -4248,7 +4248,7 @@ end function ESMF_MeshCreateCubedSphere
 ! !IROUTINE: ESMF_MeshDestroy - Release resources associated with a Mesh
 !
 ! !INTERFACE:
-      subroutine ESMF_MeshDestroy(mesh, keywordenforcer, rc)
+      subroutine ESMF_MeshDestroy(mesh, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
 !
