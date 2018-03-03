@@ -571,7 +571,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt termorderflag}.
 !              The new argument gives the user control over the order in which
 !              the src terms are summed up.
-! \item[7.1.0] Added argument {\tt dynamicMask}.
+! \item[7.1.0r] Added argument {\tt dynamicMask}.
 !              The new argument supports the dynamic masking feature.
 ! \end{description}
 ! \end{itemize}
@@ -1012,7 +1012,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
 !              matrices that contain elements with indices that do not have a
 !              match within the source or destination Array.
-! \item[7.1.0] Removed argument {\tt transposeRoutehandle} and provide it
+! \item[7.1.0r] Removed argument {\tt transposeRoutehandle} and provide it
 !              via interface overloading instead. This allows argument 
 !              {\tt srcArray} to stay strictly intent(in) for this entry point.
 ! \end{description}
@@ -2971,7 +2971,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
 !              matrices that contain elements with indices that do not have a
 !              match within the source or destination Array.
-! \item[7.1.0] Removed argument {\tt transposeRoutehandle} and provide it
+! \item[7.1.0r] Removed argument {\tt transposeRoutehandle} and provide it
 !              via interface overloading instead. This allows argument 
 !              {\tt srcArray} to stay strictly intent(in) for this entry point.
 ! \end{description}

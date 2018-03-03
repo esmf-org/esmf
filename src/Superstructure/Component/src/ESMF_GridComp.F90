@@ -394,7 +394,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \begin{sloppypar}
-! \item[7.1.0] Added arguments {\tt gridList}, {\tt mesh}, {\tt meshList},
+! \item[7.1.0r] Added arguments {\tt gridList}, {\tt mesh}, {\tt meshList},
 !   {\tt locstream}, {\tt locstreamList}, {\tt xgrid}, and {\tt xgridList}.
 !   These arguments add support for holding references to multiple geom objects,
 !   either of the same type, or different type, in the same
@@ -943,7 +943,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \begin{sloppypar}
-! \item[7.1.0] Added arguments {\tt gridList}, {\tt meshIsPresent}, {\tt mesh},
+! \item[7.1.0r] Added arguments {\tt gridList}, {\tt meshIsPresent}, {\tt mesh},
 !   {\tt meshList}, {\tt locstreamIsPresent}, {\tt locstream},
 !   {\tt locstreamList}, {\tt xgridIsPresent}, {\tt xgrid}, and {\tt xgridList}.
 !   These arguments add support for accessing references to multiple geom objects,
@@ -2117,7 +2117,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
 ! \begin{sloppypar}
-! \item[7.1.0] Added arguments {\tt gridList}, {\tt mesh}, {\tt meshList},
+! \item[7.1.0r] Added arguments {\tt gridList}, {\tt mesh}, {\tt meshList},
 !   {\tt locstream}, {\tt locstreamList}, {\tt xgrid}, and {\tt xgridList}.
 !   These arguments add support for holding references to multiple geom objects,
 !   either of the same type, or different type, in the same

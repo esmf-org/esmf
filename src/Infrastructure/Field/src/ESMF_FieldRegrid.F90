@@ -130,7 +130,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt termorderflag}.
 !              The new argument gives the user control over the order in which
 !              the src terms are summed up.
-! \item[7.1.0] Added argument {\tt dynamicMask}.
+! \item[7.1.0r] Added argument {\tt dynamicMask}.
 !              The new argument supports the dynamic masking feature.
 ! \end{description}
 ! \end{itemize}
@@ -412,7 +412,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !               a sphere.
 ! \item[6.3.0rp1] Added argument {\tt normType}. This argument allows the user to
 !               control the type of normalization done during conservative weight generation.
-! \item[7.1.0] Added argument {\tt dstStatusField}. This argument allows the user to
+! \item[7.1.0r] Added argument {\tt dstStatusField}. This argument allows the user to
 !              receive information about what happened to each location in the destination
 !              Field during regridding.
 ! \end{description}

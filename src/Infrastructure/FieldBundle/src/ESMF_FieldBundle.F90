@@ -3319,7 +3319,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              of distances and the shape of cells during regrid weight calculation on 
 !              a sphere. The argument {\tt normType} allows the user to 
 !              control the type of normalization done during conservative weight generation. 
-! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
 !              Added argument {\tt pipelineDepth}.
 !              The new arguments provide access to the tuning parameters
 !              affecting the performance and bit-for-bit behavior when applying
@@ -4664,7 +4664,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise
 !              reproducibility.
@@ -5125,7 +5125,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise
 !              reproducibility.

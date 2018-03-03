@@ -2713,7 +2713,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise 
 !              reproducibility.
@@ -3148,7 +3148,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise 
 !              reproducibility.
