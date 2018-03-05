@@ -16174,6 +16174,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item[7.1.0r] Added argument {\tt tile}. This new argument allows the user to 
+!               query the tile within which the localDE is contained. 
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -16504,6 +16506,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item[7.1.0r] Added arguments {\tt staggerEdgeLWidth}, {\tt staggerEdgeUWidth},
+!               {\tt staggerAlign}, and {\tt staggerLBound}. These new arguments 
+!                allow the user to get width, alignment, and bound information for
+!                the given stagger location. 
 ! \end{itemize}
 !
 ! !DESCRIPTION:
