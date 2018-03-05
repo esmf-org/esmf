@@ -297,19 +297,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item [{[useUserAreaFlag]}]
 !     If .TRUE., the element area values defined in the grid files are used.
 !     Only the SCRIP and ESMF format grid files have user specified areas. This flag
-!     is only used for conservative regridding. The default is .FALSE.
+!     is only used for conservative regridding. The default is .FALSE..
 !   \item [{[largefileFlag]}]
 !     If .TRUE., the output weight file is in NetCDF 64bit offset format.
-!     The default is .FALSE.
+!     The default is .FALSE..
 !   \item [{[netcdf4fileFlag]}]
 !     If .TRUE., the output weight file is in NetCDF4 file format.
-!     The default is .FALSE.
+!     The default is .FALSE..
 !   \item [{[weightOnlyFlag]}]
 !     If .TRUE., the output weight file only contains factorList and factorIndexList.
-!     The default is .FALSE.
+!     The default is .FALSE..
 !   \item [{[verboseFlag]}]
 !     If .TRUE., it will print summary information about the regrid parameters,
-!     default to .FALSE.
+!     default to .FALSE..
+!   \item[{[tileFilePath]}]
+!     Optional argument to define the path where the tile files reside. If it
+!     is given, it overwrites the path defined in {\tt gridlocation} variable
+!     in the mosaic file.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
