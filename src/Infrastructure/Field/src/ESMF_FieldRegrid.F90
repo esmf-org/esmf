@@ -415,6 +415,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[7.1.0r] Added argument {\tt dstStatusField}. This argument allows the user to
 !              receive information about what happened to each location in the destination
 !              Field during regridding.
+!
+!              Added arguments {\tt extrapMethod}, {\tt extrapNumSrcPnts}, and
+!              {\tt extrapDistExponent}. These three new extrapolation arguments allow the 
+!              user to extrapolate destination points not mapped by the regrid method. 
+!              {\tt extrapMethod} allows the user to choose the extrapolation method.
+!              {\tt extrapNumSrcPnts} and {\tt extrapDistExponent} are parameters that
+!              allow the user to tune the behavior of the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} 
+!              method.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1532,6 +1540,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[5.3.0] Added arguments {\tt srcFracField}, {\tt dstFracField}, {\tt srcMergeFracField}, and {\tt dstMergeFracField}.
 ! These fraction Fields allow a user to calculate correct flux regridded through {\tt ESMF\_XGrid}.
+! \item[7.1.0r] Added argument {\tt regridmethod}. This new argument allows the user to choose the regrid method
+!               to apply when computing the routehandle. 
 ! \end{description}
 ! \end{itemize}
 !
