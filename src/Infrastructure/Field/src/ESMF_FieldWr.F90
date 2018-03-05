@@ -115,7 +115,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   Limitations:
 !   \begin{itemize}
-!     \item Only single tile Arrays are supported.
+!     \item Only single tile Fields are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -131,12 +131,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    supports variable name. If the I/O format does not support this
 !    (such as binary format), ESMF will return an error code.
 !   \item[{[convention]}]
-!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     Specifies an Attribute package associated with the Field, used to create NetCDF
 !     dimension labels and attributes for the variable in the file.  When this argument is present,
 !     the {\tt purpose} argument must also be present.  Use this argument only with a NetCDF
 !     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[purpose]}]
-!     Specifies an Attribute package associated with the Array, used to create NetCDF
+!     Specifies an Attribute package associated with the Field, used to create NetCDF
 !     dimension labels and attributes for the variable in the file.  When this argument is present,
 !     the {\tt convention} argument must also be present.  Use this argument only with a NetCDF
 !     I/O format. If binary format is used, ESMF will return an error code.
