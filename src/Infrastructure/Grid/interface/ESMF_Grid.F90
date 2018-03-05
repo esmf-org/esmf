@@ -2723,6 +2723,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added argument {\tt copyAttributes} to support attribute
+!               propagation from the existing to the newly created grid object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2741,8 +2746,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for the Grid.
 ! \item[{[copyAttributes]}]
 !      A flag to indicate whether to copy the attributes of the existing grid
-!      to the new grid.  The default value is FALSE
-!      for the Grid.
+!      to the new grid.  The default value is .false..
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3299,6 +3303,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added argument {\tt copyAttributes} to support attribute
+!               propagation from the existing to the newly created grid object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3330,8 +3339,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      created for the Grid.
 ! \item[{[copyAttributes]}]
 !      A flag to indicate whether to copy the attributes of the existing grid
-!      to the new grid.  The default value is FALSE
-!      for the Grid.
+!      to the new grid.  The default value is .false..
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -15754,6 +15762,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added argument {\tt vm} to support object creation on a
+!               different VM than that of the current context.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
