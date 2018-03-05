@@ -54,9 +54,9 @@ class Manager(object):
     Explicit creation of a Manager object allows for setting a flag which 
     results in the output of debug information from the ESMF logging capability 
     during the application runtime.  The output log files are named 
-    PET<processor number>.ESMF_LogFile.
+    PET<PET number>.ESMF_LogFile.
 
-    The processor rank (local_pet) and total number of processers (pet_count) 
+    The PET rank (local_pet) and total number of PETs (pet_count) 
     can also be retrieved from the Manager using the following calls::
 
         ESMF.local_pet()
@@ -159,8 +159,8 @@ class Manager(object):
 
     def barrier(self):
         '''
-        Collective VM communication call that blocks calling processor until 
-        all processors of the VM have issued the call.
+        Collective VM communication call that blocks calling PET until 
+        all PETs of the VM have issued the call.
         '''
         ESMP_VMBarrier(self.vm)
         
