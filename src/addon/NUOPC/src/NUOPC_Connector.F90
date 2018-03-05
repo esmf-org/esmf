@@ -5019,7 +5019,7 @@ call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
       endif
 
       if (.not.rhListMatch) then
-#if 1
+#if 0
 call ESMF_LogWrite(trim(name)//&
   ": no rhListMatch -> pre-compute new remapping: "// &
   trim(cplList(i)), ESMF_LOGMSG_INFO)
@@ -5081,7 +5081,7 @@ call ESMF_LogWrite(trim(name)//&
           rhListE%unmappedaction=unmappedaction
         endif
       else
-#if 1
+#if 0
 call ESMF_LogWrite(trim(name)//&
   ": found rhListMatch -> reuse routehandle: "// &
   trim(cplList(i)), ESMF_LOGMSG_INFO)
