@@ -60,9 +60,9 @@ ESMCI_WebServCompSvrMgr::ESMCI_WebServCompSvrMgr(
 //
 // !ARGUMENTS:
 //
-  string		hostName,
-  string		scriptDir,
-  string		scriptName
+  string                hostName,
+  string                scriptDir,
+  string                scriptName
   )
 //
 // !DESCRIPTION:
@@ -71,9 +71,9 @@ ESMCI_WebServCompSvrMgr::ESMCI_WebServCompSvrMgr(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theHostName = hostName;
-	theScriptDir = scriptDir;
-	theScriptName = scriptName;
+        theHostName = hostName;
+        theScriptDir = scriptDir;
+        theScriptName = scriptName;
 }
 
 
@@ -97,7 +97,7 @@ ESMCI_WebServCompSvrMgr::~ESMCI_WebServCompSvrMgr(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	// need to free up memory here
+        // need to free up memory here
 }
 
 

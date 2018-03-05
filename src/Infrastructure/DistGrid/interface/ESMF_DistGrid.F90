@@ -1799,6 +1799,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added argument {\tt indexTK} to support selecting between
+!               32-bit and 64-bit sequence indices.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:

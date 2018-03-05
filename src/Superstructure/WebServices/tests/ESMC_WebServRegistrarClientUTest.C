@@ -58,7 +58,7 @@ const char*  getDateAndTime(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-   static char 	datestr[1024];
+   static char          datestr[1024];
    time_t         ttime;
    struct tm*     tm;
 
@@ -85,18 +85,18 @@ const char*  getDateAndTime(
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int main(int    argc, 
+int main(int    argc,
          char*  argv[])
 {
-  	printf("hello from ESMCI_WebServCompSvrClientUTest\n");
+        printf("hello from ESMCI_WebServCompSvrClientUTest\n");
 
-   int	rc;
-	int	result = 0;
+   int  rc;
+        int     result = 0;
    char  name[80];
    char  failMsg[80];
-	int	portNum = 45002;
-	int	clientId = 1001;
-	char	host[512] = { "localhost" };
+        int     portNum = 45002;
+        int     clientId = 1001;
+        char    host[512] = { "localhost" };
 
 
   //----------------------------------------------------------------------------
@@ -108,7 +108,7 @@ int main(int    argc,
    strcpy(name, "Instantiate Registrar Client");
    strcpy(failMsg, "Instantiation Failed");
 
-	ESMCI::ESMCI_WebServRegistrarClient		client(host, portNum);
+        ESMCI::ESMCI_WebServRegistrarClient             client(host, portNum);
 
    ESMC_Test(1, name, failMsg, &result, __FILE__, __LINE__, 0);
    //---------------------------------------------------------------------------
@@ -130,8 +130,8 @@ int main(int    argc,
 
    rc = client.registerComp("110", "bluefire", "27001");
 
-   ESMC_Test((rc == NET_ESMF_STAT_IDLE), 
-		name, failMsg, &result, __FILE__, __LINE__, 0);
+   ESMC_Test((rc == NET_ESMF_STAT_IDLE),
+                name, failMsg, &result, __FILE__, __LINE__, 0);
    printf("\n");
    //---------------------------------------------------------------------------
 
@@ -142,8 +142,8 @@ int main(int    argc,
 
    rc = client.compSubmitted("110", "job_bluefire_1001");
 
-   ESMC_Test((rc == NET_ESMF_STAT_SUBMITTED), 
-		name, failMsg, &result, __FILE__, __LINE__, 0);
+   ESMC_Test((rc == NET_ESMF_STAT_SUBMITTED),
+                name, failMsg, &result, __FILE__, __LINE__, 0);
    printf("\n");
    //---------------------------------------------------------------------------
 
@@ -153,13 +153,13 @@ int main(int    argc,
    strcpy(name, "Call Component Started");
    strcpy(failMsg, "Returned ESMF_FAILURE");
 
-   rc = client.compStarted("110", 
-                           "CAM", 
-                           "Community Atmospheric Model", 
+   rc = client.compStarted("110",
+                           "CAM",
+                           "Community Atmospheric Model",
                            "ben0001");
 
-   ESMC_Test((rc == NET_ESMF_STAT_READY), 
-		name, failMsg, &result, __FILE__, __LINE__, 0);
+   ESMC_Test((rc == NET_ESMF_STAT_READY),
+                name, failMsg, &result, __FILE__, __LINE__, 0);
    printf("\n");
    //---------------------------------------------------------------------------
 
@@ -170,8 +170,8 @@ int main(int    argc,
 
    rc = client.compSubmitted("110", "job_bluefire_1001");
 
-   ESMC_Test((rc == NET_ESMF_STAT_READY), 
-		name, failMsg, &result, __FILE__, __LINE__, 0);
+   ESMC_Test((rc == NET_ESMF_STAT_READY),
+                name, failMsg, &result, __FILE__, __LINE__, 0);
    printf("\n");
    //---------------------------------------------------------------------------
 
@@ -180,13 +180,13 @@ int main(int    argc,
    //NEX_disable_UTest
    strcpy(name, "Call Get Component");
    strcpy(failMsg, "Returned ESMF_FAILURE");
-	ESMCI::ESMCI_WebServCompSvrInfo	goodClient;
+        ESMCI::ESMCI_WebServCompSvrInfo         goodClient;
 
    rc = client.getComponent("110", &goodClient);
-	goodClient.print();
+        goodClient.print();
 
-   ESMC_Test((rc != ESMF_FAILURE), 
-		name, failMsg, &result, __FILE__, __LINE__, 0);
+   ESMC_Test((rc != ESMF_FAILURE),
+                name, failMsg, &result, __FILE__, __LINE__, 0);
    printf("\n");
    //---------------------------------------------------------------------------
 
@@ -195,12 +195,12 @@ int main(int    argc,
    //NEX_disable_UTest
    strcpy(name, "Call Get Component with unknown client ID");
    strcpy(failMsg, "Did not return ESMF_FAILURE");
-	ESMCI::ESMCI_WebServCompSvrInfo	dummyClient;
+        ESMCI::ESMCI_WebServCompSvrInfo         dummyClient;
 
    rc = client.getComponent("666", &dummyClient);
 
-   ESMC_Test((rc == ESMF_FAILURE), 
-		name, failMsg, &result, __FILE__, __LINE__, 0);
+   ESMC_Test((rc == ESMF_FAILURE),
+                name, failMsg, &result, __FILE__, __LINE__, 0);
    printf("\n");
    //---------------------------------------------------------------------------
 
@@ -212,8 +212,8 @@ int main(int    argc,
 
    rc = client.getStatus("110");
 
-   ESMC_Test((rc != ESMF_FAILURE), 
-		name, failMsg, &result, __FILE__, __LINE__, 0);
+   ESMC_Test((rc != ESMF_FAILURE),
+                name, failMsg, &result, __FILE__, __LINE__, 0);
    printf("\n");
    //---------------------------------------------------------------------------
 
@@ -225,8 +225,8 @@ int main(int    argc,
 
    rc = client.setStatus("110", "DONE");
 
-   ESMC_Test((rc == NET_ESMF_STAT_DONE), 
-		name, failMsg, &result, __FILE__, __LINE__, 0);
+   ESMC_Test((rc == NET_ESMF_STAT_DONE),
+                name, failMsg, &result, __FILE__, __LINE__, 0);
    printf("\n");
    //---------------------------------------------------------------------------
 
@@ -238,8 +238,8 @@ int main(int    argc,
 
    rc = client.setStatus("110", "EXITED");
 
-   ESMC_Test((rc == ESMF_FAILURE), 
-		name, failMsg, &result, __FILE__, __LINE__, 0);
+   ESMC_Test((rc == ESMF_FAILURE),
+                name, failMsg, &result, __FILE__, __LINE__, 0);
    printf("\n");
    //---------------------------------------------------------------------------
 
@@ -251,8 +251,8 @@ int main(int    argc,
 
    rc = client.unregisterComp("110");
 
-   ESMC_Test((rc != ESMF_FAILURE), 
-		name, failMsg, &result, __FILE__, __LINE__, 0);
+   ESMC_Test((rc != ESMF_FAILURE),
+                name, failMsg, &result, __FILE__, __LINE__, 0);
    printf("\n");
    //---------------------------------------------------------------------------
 
@@ -264,5 +264,5 @@ int main(int    argc,
    printf("\n-----------------------------------------------------\n");
    fflush(stdout);
 
-  	return 0;
+        return 0;
 }

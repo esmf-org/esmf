@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
@@ -58,7 +58,7 @@ module ESMF_MeshMod
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
-        
+
 !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
 !
@@ -81,13 +81,13 @@ module ESMF_MeshMod
       integer :: spatialDim
     integer :: parametricDim
 
-    type(ESMF_CoordSys_Flag) :: coordSys ! Put this here for now. 
+    type(ESMF_CoordSys_Flag) :: coordSys ! Put this here for now.
                                          ! Eventually may need to also put lower in C++ Mesh???
                                          ! If connect this via MeshCXX then move this there.
 
 
     ! Info about Split elements if created from a file
-    ! Eventually may allow this even if not created 
+    ! Eventually may allow this even if not created
     ! from a file
     logical :: hasSplitElem
     integer :: splitElemStart
@@ -115,7 +115,7 @@ module ESMF_MeshMod
 !!        ESMF_MESHELEMTYPE_HEX = ESMF_MeshElement(2), &
 !!        ESMF_MESHELEMTYPE_TET = ESMF_MeshElement(3)
 !!!!
-  
+
   integer, parameter :: &
         ESMF_MESHELEMTYPE_TRI    = 3,  &  ! Triangle
         ESMF_MESHELEMTYPE_QUAD   = 4,  &  ! Quadralateral
@@ -135,7 +135,7 @@ module ESMF_MeshMod
   type(ESMF_MeshLoc), parameter :: &
         ESMF_MESHLOC_NODE = ESMF_MeshLoc(0), &
         ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(1), &
- 	    ESMF_MESHLOC_NONE = ESMF_MeshLoc(2)
+            ESMF_MESHLOC_NONE = ESMF_MeshLoc(2)
 
  !------------------------------------------------------------------------------
 !     ! ESMF_Mesh
@@ -144,7 +144,7 @@ module ESMF_MeshMod
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-  public ESMF_Mesh               
+  public ESMF_Mesh
   public ESMF_MESHELEMTYPE_QUAD, ESMF_MESHELEMTYPE_TRI, &
           ESMF_MESHELEMTYPE_HEX, ESMF_MESHELEMTYPE_TETRA
   public ESMF_MeshLoc
@@ -161,7 +161,7 @@ module ESMF_MeshMod
   public operator(==)
   public operator(/=)
 
-  public ESMF_MeshCreate           
+  public ESMF_MeshCreate
   public ESMF_MeshWrite
   public ESMF_MeshAddNodes
   public ESMF_MeshAddElements
@@ -202,7 +202,7 @@ module ESMF_MeshMod
     '$Id$'
 
 !==============================================================================
-! 
+!
 ! INTERFACE BLOCKS
 !
 !==============================================================================
@@ -229,7 +229,7 @@ module ESMF_MeshMod
 
 ! !DESCRIPTION:
 !     This interface overloads the equality operator for the specific
-!     ESMF MeshLoc.  It is provided for easy comparisons of 
+!     ESMF MeshLoc.  It is provided for easy comparisons of
 !     these types with defined values.
 !
 !EOPI
@@ -245,7 +245,7 @@ module ESMF_MeshMod
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
-!     ESMF MeshLoc.  It is provided for easy comparisons of 
+!     ESMF MeshLoc.  It is provided for easy comparisons of
 !     these types with defined values.
 !
  !EOPI
@@ -399,7 +399,7 @@ contains
 !
 ! !INTERFACE:
   function ESMF_MeshEQ(mesh1, mesh2)
-! 
+!
 ! !RETURN VALUE:
     logical :: ESMF_MeshEQ
 
@@ -408,7 +408,7 @@ contains
     type(ESMF_Mesh), intent(in) :: mesh2
 
 ! !DESCRIPTION:
-!   Test if both {\tt mesh1} and {\tt mesh2} alias the same ESMF Mesh 
+!   Test if both {\tt mesh1} and {\tt mesh2} alias the same ESMF Mesh
 !   object.
 !
 !EOPI
@@ -418,7 +418,7 @@ contains
     integer :: localrc1, localrc2
     logical :: lval1, lval2
 
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
     ! deleted).
@@ -450,7 +450,7 @@ contains
 !
 ! !INTERFACE:
   function ESMF_MeshNE(mesh1, mesh2)
-! 
+!
 ! !RETURN VALUE:
     logical :: ESMF_MeshNE
 
@@ -459,7 +459,7 @@ contains
     type(ESMF_Mesh), intent(in) :: mesh2
 
 ! !DESCRIPTION:
-!   Test if both {\tt mesh1} and {\tt mesh2} alias the same ESMF Mesh 
+!   Test if both {\tt mesh1} and {\tt mesh2} alias the same ESMF Mesh
 !   object.
 !
 
@@ -467,11 +467,11 @@ contains
     integer :: localrc1, localrc2
     logical :: lval1, lval2
 
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
     ! deleted).
-    
+
     ESMF_MeshNE = .not.ESMF_MeshEQ(mesh1, mesh2)
 
   end function ESMF_MeshNE
@@ -501,19 +501,19 @@ contains
 !
 ! !DESCRIPTION:
 !   This call is the third and last part of the three part mesh create
-!   sequence and should be called after the mesh is created with {\tt ESMF\_MeshCreate()} 
+!   sequence and should be called after the mesh is created with {\tt ESMF\_MeshCreate()}
 !   (\ref{sec:mesh:api:meshcreate})
 !   and after the nodes are added with {\tt ESMF\_MeshAddNodes()} (\ref{sec:mesh:api:meshaddnodes}).
-!   This call adds the elements to the 
+!   This call adds the elements to the
 !   mesh and finalizes the create. After this call the Mesh is usable, for
-!   example a Field may be built on the created Mesh object and 
+!   example a Field may be built on the created Mesh object and
 !   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
 !
 !   The parameters to this call {\tt elementIds}, {\tt elementTypes}, and
-!   {\tt elementConn} describe the elements to be created. The description 
-!   for a particular element lies at the same index location in {\tt elementIds} 
+!   {\tt elementConn} describe the elements to be created. The description
+!   for a particular element lies at the same index location in {\tt elementIds}
 !   and {\tt elementTypes}. Each entry in {\tt elementConn} consists of the list of
-!   nodes used to create that element, so the connections for element $e$ in the 
+!   nodes used to create that element, so the connections for element $e$ in the
 !   {\tt elementIds} array will start at $number\_of\_nodes\_in\_element(1) + number\_of\_nodes\_in\_element(2) +
 !   \cdots + number\_of\_nodes\_in\_element(e-1) + 1$ in {\tt elementConn}.
 !
@@ -521,21 +521,21 @@ contains
 !
 !   \begin{description}
 !   \item [elementIds]
-!          An array containing the global ids of the elements to be created on this PET. 
+!          An array containing the global ids of the elements to be created on this PET.
 !          This input consists of a 1D array the size of the number of elements on this PET.
 !          Each element id must be a number equal to or greater than 1. An id should be
 !          unique in the sense that different elements must have different ids (the same element
 !          that appears on different processors must have the same id). There may be gaps in the sequence
-!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to 
-!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).  
-!   \item[elementTypes] 
+!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to
+!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).
+!   \item[elementTypes]
 !          An array containing the types of the elements to be created on this PET. The types used
 !          must be appropriate for the parametric dimension of the Mesh. Please see
-!          Section~\ref{const:meshelemtype} for the list of options. This input consists of 
-!          a 1D array the size of the number of elements on this PET.  
-!   \item[elementConn] 
+!          Section~\ref{const:meshelemtype} for the list of options. This input consists of
+!          a 1D array the size of the number of elements on this PET.
+!   \item[elementConn]
 !         An array containing the indexes of the sets of nodes to be connected together to form the
-!         elements to be created on this PET. The entries in this list are NOT node global ids, 
+!         elements to be created on this PET. The entries in this list are NOT node global ids,
 !         but rather each entry is a local index (1 based) into the list of nodes which were
 !         created on this PET by the previous {\tt ESMF\_MeshAddNodes()} call.
 !         In other words, an entry of 1 indicates that this element contains the node
@@ -543,39 +543,39 @@ contains
 !         {\tt ESMF\_MeshAddNodes()} call on this PET. It is also
 !         important to note that the order of the nodes in an element connectivity list
 !         matters. Please see Section~\ref{const:meshelemtype} for diagrams illustrating
-!         the correct order of nodes in a element. This input consists of a 1D array with 
+!         the correct order of nodes in a element. This input consists of a 1D array with
 !         a total size equal to the sum of the number of nodes in each element on
-!         this PET. The number of nodes in each element is implied by its element type in 
-!         {\tt elementTypes}. The nodes for each element 
+!         this PET. The number of nodes in each element is implied by its element type in
+!         {\tt elementTypes}. The nodes for each element
 !         are in sequence in this array (e.g. the nodes for element 1 are elementConn(1),
-!         elementConn(2), etc.). 
+!         elementConn(2), etc.).
 !   \item [{[elementMask]}]
 !          An array containing values which can be used for element masking. Which values indicate
-!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
+!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to
 !          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
 !          size of the number of elements on this PET.
 !   \item [{[elementArea]}]
-!          An array containing element areas. If not specified, the element areas are internally calculated. 
+!          An array containing element areas. If not specified, the element areas are internally calculated.
 !          This input consists of a 1D array the size of the number of elements on this PET.
 !          {\bf NOTE:} ESMF doesn't currently do unit conversion on areas. If these areas are going to be used
 !                in a process that also involves the areas of another Grid or Mesh (e.g. conservative regridding), then
 !                it is the user's responsibility to make sure that the area units are consistent between the two sides.
-!                If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If 
-!                it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared. 
-!   \item[{[elementCoords]}] 
+!                If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If
+!                it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared.
+!   \item[{[elementCoords]}]
 !          An array containing the physical coordinates of the elements to be created on this
-!          PET. This input consists of a 1D array the size of the number of elements on this PET times the Mesh's 
+!          PET. This input consists of a 1D array the size of the number of elements on this PET times the Mesh's
 !          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
-!          so that the coordinates for an element lie in sequence in memory. (e.g. for a 
+!          so that the coordinates for an element lie in sequence in memory. (e.g. for a
 !          Mesh with spatial dimension 2, the coordinates for element 1 are in elementCoords(1) and
-!          elementCoords(2), the coordinates for element 2 are in elementCoords(3) and elementCoords(4), 
-!          etc.). 
+!          elementCoords(2), the coordinates for element 2 are in elementCoords(3) and elementCoords(4),
+!          etc.).
 !   \item [{[elementDistgrid]}]
-!          If present, use this as the element Distgrid for the Mesh. 
-!          The passed in Distgrid 
-!          needs to contain a local set of sequence indices matching the set of local element ids (i.e. those in {\tt elementIds}). 
-!          However, specifying an externally created Distgrid gives the user more control over aspects of 
-!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs). 
+!          If present, use this as the element Distgrid for the Mesh.
+!          The passed in Distgrid
+!          needs to contain a local set of sequence indices matching the set of local element ids (i.e. those in {\tt elementIds}).
+!          However, specifying an externally created Distgrid gives the user more control over aspects of
+!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs).
 !          If not present, a 1D Distgrid will be created internally consisting of one DE per PET.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -603,11 +603,11 @@ contains
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh internals have been freed", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh internals have been freed", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! Handle optional conserve argument
 ! Passing the regridConserve flag into add elements is a fix for source masking
@@ -627,11 +627,11 @@ contains
 
     ! If we're at the wrong stage then complain
     if (mesh%createStage .ne. 2) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- MeshAddNodes() should be called before this", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- MeshAddNodes() should be called before this", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! get sizes of lists
     num_elems = size(elementIds)
@@ -646,7 +646,7 @@ contains
                ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
-    endif    
+    endif
 
    ! Create interface int to wrap optional element mask
    elementMaskII = ESMF_InterArrayCreate(elementMask, rc=localrc)
@@ -714,7 +714,7 @@ contains
        call C_ESMC_MeshCreateNodeDistGrid(mesh%this, mesh%nodal_distgrid, &
             mesh%numOwnedNodes, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return    
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! Set Element Distgrid
@@ -724,11 +724,11 @@ contains
             mesh%numOwnedElements, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-    else 
+    else
        call C_ESMC_MeshCreateElemDistGrid(mesh%this, mesh%element_distgrid, &
             mesh%numOwnedElements, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return    
+            ESMF_CONTEXT, rcToReturn=rc)) return
    endif
 
 
@@ -741,17 +741,17 @@ contains
          ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-    ! Go to next stage 
+    ! Go to next stage
     mesh%createStage=3
 
-    ! Set as fully created 
+    ! Set as fully created
     mesh%hasSplitElem=.false.
 
-    ! Set as fully created 
+    ! Set as fully created
     mesh%isFullyCreated=.true.
 
     if (present (rc)) rc = localrc
-    
+
   end subroutine ESMF_MeshAddElements
 !------------------------------------------------------------------------------
 
@@ -780,51 +780,51 @@ contains
 !   This call is the second part of the three part mesh create
 !   sequence and should be called after the mesh's dimensions are set
 !   using {\tt ESMF\_MeshCreate()} (\ref{sec:mesh:api:meshcreate}).
-!   This call adds the nodes to the 
+!   This call adds the nodes to the
 !   mesh. The next step is to call {\tt ESMF\_MeshAddElements()} (\ref{sec:mesh:api:meshaddelements}).
 !
-!   The parameters to this call {\tt nodeIds}, {\tt nodeCoords}, and 
-!   {\tt nodeOwners} describe the nodes to be created on this PET. 
-!   The description for a particular node lies at the same index location in 
+!   The parameters to this call {\tt nodeIds}, {\tt nodeCoords}, and
+!   {\tt nodeOwners} describe the nodes to be created on this PET.
+!   The description for a particular node lies at the same index location in
 !   {\tt nodeIds} and {\tt nodeOwners}. Each entry
 !   in {\tt nodeCoords} consists of spatial dimension coordinates, so the coordinates
-!   for node $n$ in the {\tt nodeIds} array will start at $(n-1)*spatialDim+1$. 
+!   for node $n$ in the {\tt nodeIds} array will start at $(n-1)*spatialDim+1$.
 !
 !   \begin{description}
 !   \item [nodeIds]
-!         An array containing the global ids of the nodes to be created on this PET. 
+!         An array containing the global ids of the nodes to be created on this PET.
 !         This input consists of a 1D array the size of the number of nodes on this PET.
 !          Each node id must be a number equal to or greater than 1. An id should be
 !          unique in the sense that different nodes must have different ids (the same node
 !          that appears on different processors must have the same id). There may be gaps in the sequence
-!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to 
-!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).  
-!   \item[nodeCoords] 
+!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to
+!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).
+!   \item[nodeCoords]
 !          An array containing the physical coordinates of the nodes to be created on this
-!          PET. This input consists of a 1D array the size of the number of nodes on this PET times the Mesh's 
+!          PET. This input consists of a 1D array the size of the number of nodes on this PET times the Mesh's
 !          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
-!          so that the coordinates for a node lie in sequence in memory. (e.g. for a 
+!          so that the coordinates for a node lie in sequence in memory. (e.g. for a
 !          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(1) and
-!          nodeCoords(2), the coordinates for node 2 are in nodeCoords(3) and nodeCoords(4), 
-!          etc.). 
-!   \item[nodeOwners] 
-!         An array containing the PETs that own the nodes to be created on this PET. 
+!          nodeCoords(2), the coordinates for node 2 are in nodeCoords(3) and nodeCoords(4),
+!          etc.).
+!   \item[nodeOwners]
+!         An array containing the PETs that own the nodes to be created on this PET.
 !         If the node is shared with another PET, the value
 !         may be a PET other than the current one. Only nodes owned by this PET
-!         will have PET local entries in a Field created on the Mesh. This input consists of 
+!         will have PET local entries in a Field created on the Mesh. This input consists of
 !         a 1D array the size of the number of nodes on this PET.
 !   \item [{[nodeMask]}]
 !          An array containing values which can be used for node masking. Which values indicate
-!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
+!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to
 !          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
 !          size of the number of nodes on this PET.
 !   \item [{[nodalDistgrid]}]
-!          If present, use this as the node Distgrid for the Mesh. 
-!          The passed in Distgrid 
-!          needs to contain a local set of sequence indices matching the set of local node ids (i.e. the ids in 
-!          {\tt nodeIds} with {\tt nodeOwners} equal to the current PET). 
-!          However, specifying an externally created Distgrid gives the user more control over aspects of 
-!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs). 
+!          If present, use this as the node Distgrid for the Mesh.
+!          The passed in Distgrid
+!          needs to contain a local set of sequence indices matching the set of local node ids (i.e. the ids in
+!          {\tt nodeIds} with {\tt nodeOwners} equal to the current PET).
+!          However, specifying an externally created Distgrid gives the user more control over aspects of
+!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs).
 !          If not present, a 1D Distgrid will be created internally consisting of one DE per PET.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -846,19 +846,19 @@ contains
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh internals have been freed", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh internals have been freed", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If we're at the wrong stage then complain
     if (mesh%createStage .ne. 1) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- MeshAddNodes() should be called before this", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- MeshAddNodes() should be called before this", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
 
    ! Create interface int to wrap optional element mask
@@ -881,7 +881,7 @@ contains
 
 
     ! Set distgrid if was passed in
-    if (present(nodalDistgrid)) then 
+    if (present(nodalDistgrid)) then
        mesh%nodal_distgrid=nodalDistgrid
        mesh%nodal_distgrid_set=.true.
        call ESMF_DistGridGetNumIds(nodalDistgrid, &
@@ -890,11 +890,11 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    ! Go to next stage 
+    ! Go to next stage
     mesh%createStage=2
 
     if (present (rc)) rc = localrc
-    
+
   end subroutine ESMF_MeshAddNodes
 !------------------------------------------------------------------------------
 
@@ -922,8 +922,8 @@ contains
 !   This call is the first part of the three part mesh create
 !   sequence. This call sets the dimension of the elements in the mesh
 !   ({\tt parametricDim}) and the number of coordinate dimensions in the mesh
-!   ({\tt spatialDim}). The next step is to call {\tt ESMF\_MeshAddNodes()} (\ref{sec:mesh:api:meshaddnodes}) 
-!   to add the nodes and then {\tt ESMF\_MeshAddElements()} (\ref{sec:mesh:api:meshaddelements}) to add 
+!   ({\tt spatialDim}). The next step is to call {\tt ESMF\_MeshAddNodes()} (\ref{sec:mesh:api:meshaddnodes})
+!   to add the nodes and then {\tt ESMF\_MeshAddElements()} (\ref{sec:mesh:api:meshaddelements}) to add
 !   the elements and finalize the mesh.
 !
 !   This call is {\em collective} across the current VM.
@@ -933,14 +933,14 @@ contains
 !         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
 !         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
 !         of 3.)
-!   \item[spatialDim] 
-!         The number of coordinate dimensions needed to describe the locations of the nodes 
-!         making up the Mesh. For a manifold, the spatial dimension can be larger than the 
-!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
-! \item[{[coordSys]}] 
-!         The coordinate system of the grid coordinate data. 
-!         For a full list of options, please see Section~\ref{const:coordsys}. 
-!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
+!   \item[spatialDim]
+!         The number of coordinate dimensions needed to describe the locations of the nodes
+!         making up the Mesh. For a manifold, the spatial dimension can be larger than the
+!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller.
+! \item[{[coordSys]}]
+!         The coordinate system of the grid coordinate data.
+!         For a full list of options, please see Section~\ref{const:coordsys}.
+!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -957,7 +957,7 @@ contains
     ! Set Default coordSys
     if (present(coordSys)) then
        coordSysLocal=coordSys
-    else 
+    else
        coordSysLocal=ESMF_COORDSYS_SPH_DEG
     endif
 
@@ -972,7 +972,7 @@ contains
     ! The C side has been created
     ESMF_MeshCreate3Part%isCMeshFreed=.false.
 
-    ! Go to next stage 
+    ! Go to next stage
     ESMF_MeshCreate3Part%createStage=1
 
     ! Set as not yet created
@@ -993,7 +993,7 @@ contains
 
 
     if (present (rc)) rc = localrc
-    
+
   end function ESMF_MeshCreate3Part
 !------------------------------------------------------------------------------
 
@@ -1026,7 +1026,7 @@ contains
     integer,            intent(in)            :: elementTypes(:)
     integer,            intent(in)            :: elementConn(:)
     integer,            intent(in),  optional :: elementMask(:)
-    real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)  
+    real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)
     real(ESMF_KIND_R8), intent(in),  optional :: elementCoords(:)
     type(ESMF_DistGrid), intent(in),  optional :: elementDistgrid
     type(ESMF_CoordSys_Flag), intent(in),  optional :: coordSys
@@ -1034,26 +1034,26 @@ contains
 !
 ! !DESCRIPTION:
 !   Create a Mesh object in one step. After this call the Mesh is usable, for
-!   example, a Field may be built on the created Mesh object and 
+!   example, a Field may be built on the created Mesh object and
 !   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
 !
 !   This call sets the dimension of the elements in the mesh
 !   ({\tt parametricDim}) and the number of coordinate dimensions in the mesh
-!   ({\tt spatialDim}). It then creates the nodes, and 
+!   ({\tt spatialDim}). It then creates the nodes, and
 !   then creates the elements by connecting together the nodes.
 !
-!   The parameters to this call {\tt nodeIds}, {\tt nodeCoords}, and 
-!   {\tt nodeOwners} describe the nodes to be created on this PET. 
-!   The description for a particular node lies at the same index location in 
+!   The parameters to this call {\tt nodeIds}, {\tt nodeCoords}, and
+!   {\tt nodeOwners} describe the nodes to be created on this PET.
+!   The description for a particular node lies at the same index location in
 !   {\tt nodeIds} and {\tt nodeOwners}. Each entry
 !   in {\tt nodeCoords} consists of spatial dimension coordinates, so the coordinates
-!   for node $n$ in the {\tt nodeIds} array will start at $(n-1)*spatialDim+1$. 
+!   for node $n$ in the {\tt nodeIds} array will start at $(n-1)*spatialDim+1$.
 !
 !   The parameters to this call {\tt elementIds}, {\tt elementTypes}, and
-!   {\tt elementConn} describe the elements to be created. The description 
-!   for a particular element lies at the same index location in {\tt elementIds} 
+!   {\tt elementConn} describe the elements to be created. The description
+!   for a particular element lies at the same index location in {\tt elementIds}
 !   and {\tt elementTypes}. Each entry in {\tt elementConn} consists of the list of
-!   nodes used to create that element, so the connections for element $e$ in the 
+!   nodes used to create that element, so the connections for element $e$ in the
 !   {\tt elementIds} array will start at $number\_of\_nodes\_in\_element(1) + number\_of\_nodes\_in\_element(2) +
 !   \cdots + number\_of\_nodes\_in\_element(e-1) + 1$ in {\tt elementConn}.
 !
@@ -1064,105 +1064,105 @@ contains
 !         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
 !         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
 !         of 3.)
-!   \item[spatialDim] 
-!         The number of coordinate dimensions needed to describe the locations of the nodes 
-!         making up the Mesh. For a manifold, the spatial dimension can be larger than the 
-!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
+!   \item[spatialDim]
+!         The number of coordinate dimensions needed to describe the locations of the nodes
+!         making up the Mesh. For a manifold, the spatial dimension can be larger than the
+!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller.
 !   \item [nodeIds]
-!         An array containing the global ids of the nodes to be created on this PET. 
+!         An array containing the global ids of the nodes to be created on this PET.
 !         This input consists of a 1D array the size of the number of nodes on this PET.
 !          Each node id must be a number equal to or greater than 1. An id should be
 !          unique in the sense that different nodes must have different ids (the same node
 !          that appears on different processors must have the same id). There may be gaps in the sequence
-!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to 
-!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).  
-!   \item[nodeCoords] 
+!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to
+!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).
+!   \item[nodeCoords]
 !          An array containing the physical coordinates of the nodes to be created on this
-!          PET. This input consists of a 1D array the size of the number of nodes on this PET times the Mesh's 
+!          PET. This input consists of a 1D array the size of the number of nodes on this PET times the Mesh's
 !          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
-!          so that the coordinates for a node lie in sequence in memory. (e.g. for a 
+!          so that the coordinates for a node lie in sequence in memory. (e.g. for a
 !          Mesh with spatial dimension 2, the coordinates for node 1 are in nodeCoords(1) and
-!          nodeCoords(2), the coordinates for node 2 are in nodeCoords(3) and nodeCoords(4), 
-!          etc.). 
-!   \item[nodeOwners] 
-!         An array containing the PETs that own the nodes to be created on this PET. 
+!          nodeCoords(2), the coordinates for node 2 are in nodeCoords(3) and nodeCoords(4),
+!          etc.).
+!   \item[nodeOwners]
+!         An array containing the PETs that own the nodes to be created on this PET.
 !         If the node is shared with another PET, the value
 !         may be a PET other than the current one. Only nodes owned by this PET
-!         will have PET local entries in a Field created on the Mesh. This input consists of 
+!         will have PET local entries in a Field created on the Mesh. This input consists of
 !         a 1D array the size of the number of nodes on this PET.
 !   \item [{[nodeMask]}]
 !          An array containing values which can be used for node masking. Which values indicate
-!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
+!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to
 !          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
 !          size of the number of nodes on this PET.
 !   \item [{[nodalDistgrid]}]
-!          If present, use this as the node Distgrid for the Mesh. 
-!          The passed in Distgrid 
-!          needs to contain a local set of sequence indices matching the set of local node ids (i.e. the ids in 
-!          {\tt nodeIds} with {\tt nodeOwners} equal to the current PET). 
-!          However, specifying an externally created Distgrid gives the user more control over aspects of 
-!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs). 
+!          If present, use this as the node Distgrid for the Mesh.
+!          The passed in Distgrid
+!          needs to contain a local set of sequence indices matching the set of local node ids (i.e. the ids in
+!          {\tt nodeIds} with {\tt nodeOwners} equal to the current PET).
+!          However, specifying an externally created Distgrid gives the user more control over aspects of
+!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs).
 !          If not present, a 1D Distgrid will be created internally consisting of one DE per PET.
 !   \item [elementIds]
-!          An array containing the global ids of the elements to be created on this PET. 
+!          An array containing the global ids of the elements to be created on this PET.
 !          This input consists of a 1D array the size of the number of elements on this PET.
 !          Each element id must be a number equal to or greater than 1. An id should be
 !          unique in the sense that different elements must have different ids (the same element
 !          that appears on different processors must have the same id). There may be gaps in the sequence
-!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to 
-!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).  
-!   \item[elementTypes] 
+!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to
+!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).
+!   \item[elementTypes]
 !          An array containing the types of the elements to be created on this PET. The types used
 !          must be appropriate for the parametric dimension of the Mesh. Please see
-!          Section~\ref{const:meshelemtype} for the list of options. This input consists of 
-!          a 1D array the size of the number of elements on this PET.  
-!   \item[elementConn] 
+!          Section~\ref{const:meshelemtype} for the list of options. This input consists of
+!          a 1D array the size of the number of elements on this PET.
+!   \item[elementConn]
 !         An array containing the indexes of the sets of nodes to be connected together to form the
-!         elements to be created on this PET. The entries in this list are NOT node global ids, 
-!         but rather each entry is a local index (1 based) into the list of nodes to be 
+!         elements to be created on this PET. The entries in this list are NOT node global ids,
+!         but rather each entry is a local index (1 based) into the list of nodes to be
 !         created on this PET by this call.
 !         In other words, an entry of 1 indicates that this element contains the node
 !         described by {\tt nodeIds(1)}, {\tt nodeCoords(1)}, etc. on this PET. It is also
 !         important to note that the order of the nodes in an element connectivity list
 !         matters. Please see Section~\ref{const:meshelemtype} for diagrams illustrating
-!         the correct order of nodes in a element. This input consists of a 1D array with 
+!         the correct order of nodes in a element. This input consists of a 1D array with
 !         a total size equal to the sum of the number of nodes contained in each element on
-!         this PET. The number of nodes in each element is implied by its element type in 
-!         {\tt elementTypes}. The nodes for each element 
+!         this PET. The number of nodes in each element is implied by its element type in
+!         {\tt elementTypes}. The nodes for each element
 !         are in sequence in this array (e.g. the nodes for element 1 are elementConn(1),
-!         elementConn(2), etc.). 
+!         elementConn(2), etc.).
 !   \item [{[elementMask]}]
 !          An array containing values which can be used for element masking. Which values indicate
-!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
+!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to
 !          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
 !          size of the number of elements on this PET.
 !   \item [{[elementArea]}]
-!          An array containing element areas. If not specified, the element areas are internally calculated. 
+!          An array containing element areas. If not specified, the element areas are internally calculated.
 !          This input consists of a 1D array the size of the number of elements on this PET.
 !          {\bf NOTE:} ESMF doesn't currently do unit conversion on areas. If these areas are going to be used
 !                in a process that also involves the areas of another Grid or Mesh (e.g. conservative regridding), then
 !                it is the user's responsibility to make sure that the area units are consistent between the two sides.
-!                If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If 
-!                it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared. 
-!   \item[{[elementCoords]}] 
+!                If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If
+!                it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared.
+!   \item[{[elementCoords]}]
 !          An array containing the physical coordinates of the elements to be created on this
-!          PET. This input consists of a 1D array the size of the number of elements on this PET times the Mesh's 
+!          PET. This input consists of a 1D array the size of the number of elements on this PET times the Mesh's
 !          spatial dimension ({\tt spatialDim}). The coordinates in this array are ordered
-!          so that the coordinates for an element lie in sequence in memory. (e.g. for a 
+!          so that the coordinates for an element lie in sequence in memory. (e.g. for a
 !          Mesh with spatial dimension 2, the coordinates for element 1 are in elementCoords(1) and
-!          elementCoords(2), the coordinates for element 2 are in elementCoords(3) and elementCoords(4), 
-!          etc.). 
+!          elementCoords(2), the coordinates for element 2 are in elementCoords(3) and elementCoords(4),
+!          etc.).
 !   \item [{[elementDistgrid]}]
-!          If present, use this as the element Distgrid for the Mesh. 
-!          The passed in Distgrid 
-!          needs to contain a local set of sequence indices matching the set of local element ids (i.e. those in {\tt elementIds}). 
-!          However, specifying an externally created Distgrid gives the user more control over aspects of 
-!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs). 
+!          If present, use this as the element Distgrid for the Mesh.
+!          The passed in Distgrid
+!          needs to contain a local set of sequence indices matching the set of local element ids (i.e. those in {\tt elementIds}).
+!          However, specifying an externally created Distgrid gives the user more control over aspects of
+!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs).
 !          If not present, a 1D Distgrid will be created internally consisting of one DE per PET.
-!   \item[{[coordSys]}] 
-!         The coordinate system of the grid coordinate data. 
-!         For a full list of options, please see Section~\ref{const:coordsys}. 
-!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
+!   \item[{[coordSys]}]
+!         The coordinate system of the grid coordinate data.
+!         For a full list of options, please see Section~\ref{const:coordsys}.
+!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1208,11 +1208,11 @@ contains
        lregridConserve=ESMF_REGRID_CONSERVE_ON
 !    endif
 
-   
+
    ! Set Default coordSys
    if (present(coordSys)) then
       coordSysLocal=coordSys
-   else 
+   else
       coordSysLocal=ESMF_COORDSYS_SPH_DEG
    endif
 
@@ -1267,11 +1267,11 @@ contains
                ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
-    endif    
-    
+    endif
+
 
 #if 0
-    call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this, 
+    call C_ESMC_MeshAddElements(ESMF_MeshCreate1Part%this,
 num_elems, &
                              elementIds, elementTypes, elementMaskII, &
                              num_elementConn, elementConn, &
@@ -1341,37 +1341,37 @@ num_elems, &
     endif
 
     ! Create two distgrids, one for nodes and one for elements
-    if (present(nodalDistgrid)) then 
+    if (present(nodalDistgrid)) then
        ESMF_MeshCreate1Part%nodal_distgrid=nodalDistgrid
        ESMF_MeshCreate1Part%nodal_distgrid_set=.true.
       call ESMF_DistGridGetNumIds(nodalDistgrid, &
             ESMF_MeshCreate1Part%numOwnedNodes, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-    else 
+    else
        call C_ESMC_MeshCreateNodeDistGrid( &
             ESMF_MeshCreate1Part%this, &
             ESMF_MeshCreate1Part%nodal_distgrid, &
             ESMF_MeshCreate1Part%numOwnedNodes, &
             localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return    
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    if (present(elementDistgrid)) then 
+    if (present(elementDistgrid)) then
        ESMF_MeshCreate1Part%element_distgrid=elementDistgrid
        call ESMF_DistGridGetNumIds(elementDistgrid, &
             ESMF_MeshCreate1Part%numOwnedElements, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-    else 
+    else
        call C_ESMC_MeshCreateElemDistGrid( &
             ESMF_MeshCreate1Part%this, &
             ESMF_MeshCreate1Part%element_distgrid, &
             ESMF_MeshCreate1Part%numOwnedElements, &
             localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return    
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! Get rid of interface Int wrapper
@@ -1385,7 +1385,7 @@ num_elems, &
     ! Can't happen here
     ESMF_MeshCreate1Part%hasSplitElem=.false.
 
-    ! Set as fully created 
+    ! Set as fully created
     ESMF_MeshCreate1Part%isFullyCreated=.true.
 
     ! Set dimension information
@@ -1399,7 +1399,7 @@ num_elems, &
     !ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, ESMF_MeshCreate1Part%nodal_distgrid, rc)
 
     if (present (rc)) rc = localrc
-    
+
   end function ESMF_MeshCreate1Part
 !------------------------------------------------------------------------------
 
@@ -1425,7 +1425,7 @@ num_elems, &
     type(ESMF_CoordSys_Flag),   intent(in), optional  :: coordSys
     integer,                    intent(out), optional :: rc
 
-! 
+!
 ! !DESCRIPTION:
 !   Create a Mesh from an elemental distgrid. Such a mesh will have no coordinate or
 !   connectivity information stored.
@@ -1440,13 +1440,13 @@ num_elems, &
 !         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
 !         of 3.)
 !   \item [{[spatialDim]}]
-!         The number of coordinate dimensions needed to describe the locations of the nodes 
-!         making up the Mesh. For a manifold, the spatial dimension can be larger than the 
-!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
-!   \item[{[coordSys]}] 
-!         The coordinate system of the grid coordinate data. 
-!         For a full list of options, please see Section~\ref{const:coordsys}. 
-!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
+!         The number of coordinate dimensions needed to describe the locations of the nodes
+!         making up the Mesh. For a manifold, the spatial dimension can be larger than the
+!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller.
+!   \item[{[coordSys]}]
+!         The coordinate system of the grid coordinate data.
+!         For a full list of options, please see Section~\ref{const:coordsys}.
+!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1464,7 +1464,7 @@ num_elems, &
     ! Set Default coordSys
     if (present(coordSys)) then
        coordSysLocal=coordSys
-    else 
+    else
        coordSysLocal=ESMF_COORDSYS_SPH_DEG
     endif
 
@@ -1477,7 +1477,7 @@ num_elems, &
     ESMF_MeshCreateFromDG%element_distgrid = distgrid
     if (present(nodalDistgrid)) then
       ESMF_MeshCreateFromDG%nodal_distgrid = nodalDistgrid
-    else 
+    else
       ESMF_MeshCreateFromDG%nodal_distgrid = distgrid
     endif
 
@@ -1509,11 +1509,11 @@ end function ESMF_MeshCreateFromDG
 !    type(ESMF_MeshOp_Flag),     intent(in)            :: MeshOp
 !    real(ESMF_KIND_R4),         intent(in),  optional :: areaThreshold
 !    integer,                    intent(out), optional :: rc
-!! 
+!!
 !! !DESCRIPTION:
 !!   Create a Mesh from two source Meshes with spatial operations. These spatial operations
 !!   treat the points in the two Meshes as point sets. The returned Mesh is either intersection,
-!!   union, or difference of the point sets of two source Meshes. 
+!!   union, or difference of the point sets of two source Meshes.
 !!
 !!   \begin{description}
 !!   \item [MeshA]
@@ -1548,7 +1548,7 @@ end function ESMF_MeshCreateFromDG
 !    ! The C side has been created
 !    ESMF_MeshCreateFromMeshesR4%isCMeshFreed=.false.
 !
-!    ! Set as fully created 
+!    ! Set as fully created
 !    ESMF_MeshCreateFromMeshesR4%hasSplitElem=.false.
 !
 !    ESMF_MeshCreateFromMeshesR4%isFullyCreated=.true.
@@ -1580,11 +1580,11 @@ end function ESMF_MeshCreateFromDG
 !    type(ESMF_MeshOp_Flag),     intent(in)            :: MeshOp
 !    real(ESMF_KIND_R8),         intent(in),  optional :: areaThreshold
 !    integer,                    intent(out), optional :: rc
-!! 
+!!
 !! !DESCRIPTION:
 !!   Create a Mesh from two source Meshes with spatial operations. These spatial operations
 !!   treat the points in the two Meshes as point sets. The returned Mesh is either intersection,
-!!   union, or difference of the point sets of two source Meshes. 
+!!   union, or difference of the point sets of two source Meshes.
 !!
 !!   \begin{description}
 !!   \item [MeshA]
@@ -1619,7 +1619,7 @@ end function ESMF_MeshCreateFromDG
 !    ! The C side has been created
 !    ESMF_MeshCreateFromMeshesR8%isCMeshFreed=.false.
 !
-!    ! Set as fully created 
+!    ! Set as fully created
 !    ESMF_MeshCreateFromMeshesR8%hasSplitElem=.false.
 !
 !    ESMF_MeshCreateFromMeshesR8%isFullyCreated=.true.
@@ -1651,11 +1651,11 @@ end function ESMF_MeshCreateFromDG
     type(ESMF_MeshOp_Flag),     intent(in)            :: MeshOp
     real(ESMF_KIND_R8),         intent(in),  optional :: areaThreshold
     integer,                    intent(out), optional :: rc
-! 
+!
 ! !DESCRIPTION:
 !   Create a Mesh from two source Meshes with spatial operations. These spatial operations
 !   treat the points in the two Meshes as point sets. The returned Mesh is either intersection,
-!   union, or difference of the point sets of two source Meshes. 
+!   union, or difference of the point sets of two source Meshes.
 !
 !   \begin{description}
 !   \item [MeshA]
@@ -1695,15 +1695,15 @@ end function ESMF_MeshCreateFromDG
          ESMF_MeshCreateFromMeshes%nodal_distgrid, &
          ESMF_MeshCreateFromMeshes%numOwnedNodes, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return    
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromMeshes%this, &
          ESMF_MeshCreateFromMeshes%element_distgrid, &
          ESMF_MeshCreateFromMeshes%numOwnedElements, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return    
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Set as fully created 
+    ! Set as fully created
     ESMF_MeshCreateFromMeshes%hasSplitElem=.false.
 
     ESMF_MeshCreateFromMeshes%isFullyCreated=.true.
@@ -1727,7 +1727,7 @@ end function ESMF_MeshCreateFromMeshes
   ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromFile(filename, fileformat, keywordEnforcer, &
                  convertToDual, addUserArea, maskFlag, varname, &
-		 nodalDistgrid, elementDistgrid, rc)
+                 nodalDistgrid, elementDistgrid, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1743,34 +1743,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid),        intent(in),  optional :: nodalDistgrid
     type(ESMF_DistGrid),        intent(in),  optional :: elementDistgrid
     integer,                    intent(out), optional :: rc
-! 
+!
 ! !DESCRIPTION:
 !   Create a Mesh from a file. Provides options to convert to 3D and in the case of SCRIP
-!   format files, allows the dual of the mesh to be created. 
+!   format files, allows the dual of the mesh to be created.
 !
 !   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
 !   \item [filename]
 !         The name of the grid file
-!   \item[fileformat] 
-!         The Grid file format. The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP}, {\tt ESMF\_FILEFORMAT\_ESMFMESH} and
-!         {\tt ESMF\_FILEFORMAT\_UGRID}. If the file is a SCRIP file, the dimension {\tt grid\_rank} in the file has to 
+!   \item[fileformat]
+!         The file format. The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP}, {\tt ESMF\_FILEFORMAT\_ESMFMESH} and
+!         {\tt ESMF\_FILEFORMAT\_UGRID}. If the file is a SCRIP file, the dimension {\tt grid\_rank} in the file has to
 !         be equal to 1.  Please see Section~\ref{const:fileformatflag} for a detailed description of the options.
-!   \item[{[convertToDual]}] 
+!   \item[{[convertToDual]}]
 !         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
-!         defaults to {\tt .false.}. 
-!   \item[{[addUserArea]}] 
+!         defaults to {\tt .false.}.
+!   \item[{[addUserArea]}]
 !         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
-!         only supported when the grid file is in the SCRIP or ESMF format. If not specified, 
+!         only supported when the grid file is in the SCRIP or ESMF format. If not specified,
 !         defaults to {\tt .false.}.
 !   \item[{[maskFlag]}]
 !         If maskFlag is present, generate the mask using the missing\_value attribute defined in 'varname'
 !         This flag is only supported when the grid file is in the UGRID format.
 !         The value could be either {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}.  If the value is
-!         {\tt ESMF\_MESHLOC\_NODE}, the node mask will be generated and the variable has to be 
-!         defined on the "node" (specified by its {\tt location} attribute).  If the value is 
-!         {\tt ESMF\_MESHLOC\_ELEMENT}, the element mask will be generated and the variable has to be 
+!         {\tt ESMF\_MESHLOC\_NODE}, the node mask will be generated and the variable has to be
+!         defined on the "node" (specified by its {\tt location} attribute).  If the value is
+!         {\tt ESMF\_MESHLOC\_ELEMENT}, the element mask will be generated and the variable has to be
 !         defined on the "face" of the mesh.  If the variable is not defined on the right location,
 !         no mask will be generated.  If not specified, no mask will be generated.
 !   \item[{[varname]}]
@@ -1778,14 +1778,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         the mask will be generated using the missing value of the data value of
 !         this variable.  The first two dimensions of the variable has to be the
 !         the longitude and the latitude dimension and the mask is derived from the
-!         first 2D values of this variable even if this data is 3D, or 4D array. If not 
+!         first 2D values of this variable even if this data is 3D, or 4D array. If not
 !         specified, defaults to empty string.
 !   \item [{[nodalDistgrid]}]
-!         A Distgrid describing the user-specified distribution of 
-!         the nodes across the PETs. 
+!         A Distgrid describing the user-specified distribution of
+!         the nodes across the PETs.
 !   \item [{[elementDistgrid]}]
-!         A Distgrid describing the user-specified distribution of 
-!         the elements across the PETs. 
+!         A Distgrid describing the user-specified distribution of
+!         the elements across the PETs.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1793,40 +1793,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     logical::  localConvertToDual      ! local flag
-    logical::  localAddUserArea  
+    logical::  localAddUserArea
     type(ESMF_Mesh) :: myMesh
     integer::  localrc
 
     ! Set Defaults
     if (present(convertToDual)) then
-	localConvertToDual = convertToDual
+        localConvertToDual = convertToDual
     else
-	localConvertToDual = .false.
+        localConvertToDual = .false.
     endif
 
     if (present(addUserArea)) then
-	localAddUserArea = addUserArea
+        localAddUserArea = addUserArea
     else
-	localAddUserArea = .false.
+        localAddUserArea = .false.
     endif
 
     if (present(maskFlag) .and. .not. present(varname)) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-	  msg="- need varname argument to create mask", &
-	  ESMF_CONTEXT, rcToReturn=rc)
+          msg="- need varname argument to create mask", &
+          ESMF_CONTEXT, rcToReturn=rc)
           return
     endif
 
     if (fileformat == ESMF_FILEFORMAT_SCRIP) then
-	myMesh = ESMF_MeshCreateFromScrip(filename, localConvertToDual, &
+        myMesh = ESMF_MeshCreateFromScrip(filename, localConvertToDual, &
           addUserArea=localAddUserArea, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (fileformat == ESMF_FILEFORMAT_ESMFMESH) then
-	myMesh = ESMF_MeshCreateFromUnstruct(filename, &
-	   addUserArea=localAddUserArea, &
+        myMesh = ESMF_MeshCreateFromUnstruct(filename, &
+           addUserArea=localAddUserArea, &
            convertToDual=localConvertToDual, &
-	   fileformat=fileformat, rc=localrc)
+           fileformat=fileformat, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (fileformat == ESMF_FILEFORMAT_UGRID) then
@@ -1840,52 +1840,52 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-	if (present(maskFlag)) then
+        if (present(maskFlag)) then
            myMesh = ESMF_MeshCreateFromUnstruct(filename, &
-	     fileformat=fileformat, &
+             fileformat=fileformat, &
              convertToDual=localConvertToDual, &
-	     maskFlag=maskFlag, varname=varname, &
-	     rc=localrc)
-	else
+             maskFlag=maskFlag, varname=varname, &
+             rc=localrc)
+        else
            myMesh = ESMF_MeshCreateFromUnstruct(filename, &
-	     fileformat=fileformat, &
+             fileformat=fileformat, &
              convertToDual=localConvertToDual, &
-	     rc=localrc)
-	endif 
+             rc=localrc)
+        endif
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
     else
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-                 msg="- unrecognized fileformat", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                 msg="- unrecognized fileformat", &
+                 ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
     if (present(elementDistgrid) .and. present(nodalDistgrid)) then
         ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
-       			       nodalDistgrid=nodalDistgrid, &
-       			       elementDistgrid=elementDistgrid, rc=localrc)
+                                       nodalDistgrid=nodalDistgrid, &
+                                       elementDistgrid=elementDistgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-	call ESMF_MeshDestroy(myMesh)
+        call ESMF_MeshDestroy(myMesh)
     elseif (present(elementDistgrid)) then
         ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
-       			       elementDistgrid=elementDistgrid, rc=localrc)
+                                       elementDistgrid=elementDistgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-	call ESMF_MeshDestroy(myMesh)
+        call ESMF_MeshDestroy(myMesh)
     elseif (present(nodalDistgrid)) then
         ESMF_MeshCreateFromFile = ESMF_MeshCreateRedist(myMesh, &
-       			       nodalDistgrid=nodalDistgrid, rc=localrc)
+                                       nodalDistgrid=nodalDistgrid, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
-	call ESMF_MeshDestroy(myMesh)
+        call ESMF_MeshDestroy(myMesh)
     else
-       ESMF_MeshCreateFromFile = myMesh			       
+       ESMF_MeshCreateFromFile = myMesh                         
     endif
 
     if (present(rc)) rc=ESMF_SUCCESS
@@ -1905,16 +1905,16 @@ end function ESMF_MeshCreateFromFile
 !  arguments:  VertexCoords(3, NodeCnt), where NodeCnt is the total node count for the
 !  global mesh, the first dimension stores the x,y,z coordinates of the node
 !              CellConnect(4, ElemCnt), where ElemCnt is the total number of elements
-!                The first dimension contains the global node IDs at the four corner of the element 
+!                The first dimension contains the global node IDs at the four corner of the element
 !              StartCell, the first Element ID in this PET
 !  in this local PET.  Note the CellConnect is local and VertexCoords is global.
-!  In this routine, we have to figure out which nodes are used by the local Elements 
+!  In this routine, we have to figure out which nodes are used by the local Elements
 !  and who are the owners of the local nodes, then add the local nodes and elements into
 !  the mesh
 ! !INTERFACE:
 ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromUnstruct(filename, convertToDual, fileformat, meshname, &
-			addUserArea, maskFlag, varname, rc)
+                        addUserArea, maskFlag, varname, rc)
 !
 !
 ! !RETURN VALUE:
@@ -1924,7 +1924,7 @@ end function ESMF_MeshCreateFromFile
     logical, intent(in), optional               :: convertToDual
     type(ESMF_FileFormat_Flag), optional, intent(in) :: fileformat
     character(len=*), optional, intent(in)    :: meshname
-    logical, intent(in), optional	      :: addUserArea
+    logical, intent(in), optional             :: addUserArea
     type(ESMF_MeshLoc), intent(in), optional  :: maskFlag
      character(len=*), optional, intent(in)    :: varname
    integer, intent(out), optional            :: rc
@@ -1935,12 +1935,12 @@ end function ESMF_MeshCreateFromFile
 !   \begin{description}
 !   \item [filename]
 !         The name of the grid file
-!   \item[{[convertToDual]}] 
+!   \item[{[convertToDual]}]
 !         if {\tt .true.}, the mesh will be converted to its dual. If not specified,
-!         defaults to {\tt .false.}. 
-!   \item[{[addUserArea]}] 
+!         defaults to {\tt .false.}.
+!   \item[{[addUserArea]}]
 !         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
-!         only supported when the grid file is in the SCRIP or ESMF format. 
+!         only supported when the grid file is in the SCRIP or ESMF format.
 !   \item [{[fileformat]}]
 !         The type of grid file
 !   \item[{[meshname]}]
@@ -1948,7 +1948,7 @@ end function ESMF_MeshCreateFromFile
 !         is {\tt ESMF\_FILEFORMAT\_UGRID}
 !   \item[{[maskFlag]}]
 !      If present, generate the mask using the missing\_value attribute defined in 'varname' on
-!      the location defined by the flag, the accepted values are {\tt ESMF\_MESHLOC\_NODE} or 
+!      the location defined by the flag, the accepted values are {\tt ESMF\_MESHLOC\_NODE} or
 !      {\tt ESMF\_MESHLOC\_ELEMENT}
 !   \item[{[varname]}]
 !      If maskFlag is present, provide a variable name stored in the grid file and
@@ -1963,7 +1963,7 @@ end function ESMF_MeshCreateFromFile
 !EOPI
 !------------------------------------------------------------------------------
     integer                             :: localrc      ! local return code
-    integer			        :: PetNo, PetCnt 
+    integer                             :: PetNo, PetCnt
     real(ESMF_KIND_R8),pointer          :: nodeCoords(:,:), faceCoords(:,:)
     integer(ESMF_KIND_I4),pointer       :: elementConn(:)
     integer(ESMF_KIND_I4),pointer       :: elmtNum(:)
@@ -1981,7 +1981,7 @@ end function ESMF_MeshCreateFromFile
 
     integer                             :: ElemNo, TotalElements, startElemNo
     integer                             :: ElemCnt,i,j,k,dim, nedges
-    integer				:: localNodes, myStartElmt
+    integer                             :: localNodes, myStartElmt
     integer                             :: ConnNo, TotalConnects
     integer, allocatable                :: ElemId(:)
     integer, allocatable                :: ElemType(:)
@@ -2000,7 +2000,7 @@ end function ESMF_MeshCreateFromFile
     real(ESMF_KIND_R8)                  :: area(maxNumPoly)
     integer                             :: polyIntBuf(maxNumPoly)
     integer                             :: triInd(3*(maxNumPoly-2))
-#else 
+#else
     integer                             :: maxNumPoly
     real(ESMF_KIND_R8),allocatable      :: polyCoords(:)
     real(ESMF_KIND_R8),allocatable      :: polyDblBuf(:)
@@ -2017,9 +2017,9 @@ end function ESMF_MeshCreateFromFile
     logical                             :: convertToDeg
     logical                             :: haveNodeMask, haveElmtMask
     logical                             :: haveMask
-    logical 				:: localAddUserArea
-    logical 				:: localConvertToDual
-    type(ESMF_MeshLoc)			:: localAddMask
+    logical                             :: localAddUserArea
+    logical                             :: localConvertToDual
+    type(ESMF_MeshLoc)                  :: localAddMask
     real(ESMF_KIND_R8), pointer         :: varbuffer(:)
     real(ESMF_KIND_R8)                  :: missingvalue
     type(ESMF_CoordSys_Flag)            :: coordSys
@@ -2035,36 +2035,36 @@ end function ESMF_MeshCreateFromFile
     hasFaceCoords = .false.
 
     if (present(addUserArea)) then
-	localAddUserArea = addUserArea
+        localAddUserArea = addUserArea
     else
-	localAddUserArea = .false.
+        localAddUserArea = .false.
     endif
 
     if (present(convertToDual)) then
-	localConvertToDual = convertToDual
+        localConvertToDual = convertToDual
     else
-	localConvertToDual = .false.
+        localConvertToDual = .false.
     endif
 
     if (present(maskFlag)) then
-	localAddMask = maskFlag
+        localAddMask = maskFlag
      else
-	localAddMask = ESMF_MESHLOC_NONE
+        localAddMask = ESMF_MESHLOC_NONE
     endif
 
     ! Read the mesh definition from the file
     if (present(fileformat)) then
-	fileformatlocal = fileformat
+        fileformatlocal = fileformat
     else
-	fileformatlocal = ESMF_FILEFORMAT_ESMFMESH
+        fileformatlocal = ESMF_FILEFORMAT_ESMFMESH
     endif
 
 #if 0
     if (fileformatlocal == ESMF_FILEFORMAT_UGRID) then
-	if (.not. present(meshname)) then
-           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                             msg="- meshname argument is missing", & 
-                             ESMF_CONTEXT, rcToReturn=rc) 
+        if (.not. present(meshname)) then
+           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+                             msg="- meshname argument is missing", &
+                             ESMF_CONTEXT, rcToReturn=rc)
         endif
     endif
 #endif
@@ -2082,50 +2082,50 @@ end function ESMF_MeshCreateFromFile
 
     ! define default coordinate system
     coordSys = ESMF_COORDSYS_SPH_DEG
- 
+
     if (fileformatlocal == ESMF_FILEFORMAT_ESMFMESH) then
        ! Get coordDim
        call ESMF_EsmfInq(filename,coordDim=coordDim, haveNodeMask=haveNodeMask, &
-       	    haveElmtMask=haveElmtMask, maxNodePElement=maxEdges, rc=localrc)
+                    haveElmtMask=haveElmtMask, maxNodePElement=maxEdges, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Don't convert if not 2D because that'll be cartesian right now
        if (coordDim .eq. 2) then
           convertToDeg = .true.
-       else 
+       else
           convertToDeg = .false.
        endif
 
-       ! Get information from file     
-       ! Need to return the coordinate system for the nodeCoords 
+       ! Get information from file
+       ! Need to return the coordinate system for the nodeCoords
        if (haveNodeMask) then
            call ESMF_EsmfGetNode(filename, nodeCoords, nodeMask=glbNodeMask,&
-	   		        convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
+                                convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
        else
            call ESMF_EsmfGetNode(filename, nodeCoords, &
-	   		        convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
-       endif			      			       
+                                convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
+       endif                                            
 
-       if (haveElmtMask .and. localAddUserArea) then 
+       if (haveElmtMask .and. localAddUserArea) then
             call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, elementArea=elementArea, &
-	 			 centerCoords=faceCoords, &
- 				 convertToDeg=convertToDeg, rc=localrc)
+                                 centerCoords=faceCoords, &
+                                 convertToDeg=convertToDeg, rc=localrc)
        elseif (haveElmtMask) then
             call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, &
-	 			 centerCoords=faceCoords, &
-				 convertToDeg=convertToDeg, rc=localrc)
+                                 centerCoords=faceCoords, &
+                                 convertToDeg=convertToDeg, rc=localrc)
        elseif (localAddUserArea) then
             call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementArea=elementArea, &
-	 			 centerCoords=faceCoords, &
-				 convertToDeg=convertToDeg, rc=localrc)
+                                 centerCoords=faceCoords, &
+                                 convertToDeg=convertToDeg, rc=localrc)
        else
             call ESMF_EsmfGetElement(filename, elementConn, elmtNum, startElmt, &
                                  centerCoords=faceCoords, &
-				 convertToDeg=convertToDeg, rc=localrc)
+                                 convertToDeg=convertToDeg, rc=localrc)
        endif
 
        ElemCnt = ubound (elmtNum, 1)
@@ -2146,7 +2146,7 @@ end function ESMF_MeshCreateFromFile
        ! Get information from file
        call ESMF_GetMeshFromUGridFile(filename, nodeCoords, elementConn, &
                            elmtNum, startElmt, convertToDeg=.true., &
-			   faceCoords=faceCoords, rc=localrc)
+                           faceCoords=faceCoords, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
        ! Chenk if the grid is 3D or 2D
@@ -2156,52 +2156,52 @@ end function ESMF_MeshCreateFromFile
        totalConnects = ubound(elementConn, 1)
 
        if ( associated(faceCoords)) then
-       	  hasFaceCoords = .true.
+                  hasFaceCoords = .true.
        endif
 
        if (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_ELEMENT) then
-	  !Get the variable and the missing value attribute from file
-	  ! Total number of local elements
+          !Get the variable and the missing value attribute from file
+          ! Total number of local elements
           allocate(varbuffer(ElemCnt))
-	  call ESMF_UGridGetVarByName(filename, varname, varbuffer, startind=startElmt, &
-		count=ElemCnt, location="face", &
-		missingvalue=missingvalue, rc=localrc)
+          call ESMF_UGridGetVarByName(filename, varname, varbuffer, startind=startElmt, &
+                count=ElemCnt, location="face", &
+                missingvalue=missingvalue, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
-	  ! Create local mask 
-	  allocate(elementMask(ElemCnt))
-	  elementMask(:)=1
-	  do i=1,ElemCnt
-	    if (varbuffer(i) == missingvalue) elementMask(i)=0
+          ! Create local mask
+          allocate(elementMask(ElemCnt))
+          elementMask(:)=1
+          do i=1,ElemCnt
+            if (varbuffer(i) == missingvalue) elementMask(i)=0
           enddo
-	  deallocate(varbuffer)
+          deallocate(varbuffer)
        elseif (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_NODE) then
-	  !Get the variable and the missing value attribute from file
-	  ! Total number of total nodes
+          !Get the variable and the missing value attribute from file
+          ! Total number of total nodes
           allocate(varbuffer(nodeCnt))
-	  call ESMF_UGridGetVarByName(filename, varname, varbuffer, &
-		location="node", &
-		missingvalue=missingvalue, rc=localrc)
+          call ESMF_UGridGetVarByName(filename, varname, varbuffer, &
+                location="node", &
+                missingvalue=missingvalue, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
-	  ! Create local mask 
-	  allocate(glbNodeMask(nodeCnt))
-	  glbNodeMask(:)=1
-	  do i=1,nodeCnt
-	    if (varbuffer(i) == missingvalue) glbNodeMask(i)=0
+          ! Create local mask
+          allocate(glbNodeMask(nodeCnt))
+          glbNodeMask(:)=1
+          do i=1,nodeCnt
+            if (varbuffer(i) == missingvalue) glbNodeMask(i)=0
           enddo
-	  deallocate(varbuffer)
-       endif 
+          deallocate(varbuffer)
+       endif
     else
-       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                             msg="- unrecognized fileformat", & 
-                             ESMF_CONTEXT, rcToReturn=rc) 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+                             msg="- unrecognized fileformat", &
+                             ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
     nodeCnt = ubound(nodeCoords,2)
 
-   ! Figure out dimensions 
+   ! Figure out dimensions
     if (coordDim .eq. 2) then
        parametricDim = 2
        spatialDim = 2
@@ -2209,15 +2209,15 @@ end function ESMF_MeshCreateFromFile
        parametricDim = 3
        spatialDim = 3
     else
-       call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
-            msg="- only coordDim 2 or 3 is supported right now", & 
-            ESMF_CONTEXT, rcToReturn=rc) 
+       call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, &
+            msg="- only coordDim 2 or 3 is supported right now", &
+            ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
     ! create the mesh
     Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
-	       coordSys=coordSys, rc=localrc)
+               coordSys=coordSys, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2234,14 +2234,14 @@ end function ESMF_MeshCreateFromFile
     ! the local elements and we will do a global reduce to find the minimal values
     NodeUsed(:)=PetCnt+100
 
-    ! Set the coorsponding NodeUsed(:) value to my PetNo if it is used by the local element 
+    ! Set the coorsponding NodeUsed(:) value to my PetNo if it is used by the local element
     ! Also calculate the total number of mesh elements based on elmtNum
     totalElements = ElemCnt
     maxNumPoly=0
     if (parametricDim .eq. 2) then
        j=1
        do ElemNo = 1, ElemCnt
-          do i=1,elmtNum(ElemNo)	
+          do i=1,elmtNum(ElemNo)        
             if (elementConn(j) /= ESMF_MESH_POLYBREAK) then
                 NodeUsed(elementConn(j))=PetNo
              endif
@@ -2260,7 +2260,7 @@ end function ESMF_MeshCreateFromFile
              endif
              j=j+1
           enddo
-       end do       
+       end do
     endif
 
     if (totalConnects /= (j-1)) then
@@ -2269,33 +2269,33 @@ end function ESMF_MeshCreateFromFile
    ! write(*,*) "maxNumPoly=",maxNumPoly
 
     ! Do a global reduce to find out the lowest PET No that owns each node, the result is in
-    ! NodeOwners1(:) 
+    ! NodeOwners1(:)
     call ESMF_VMAllReduce(vm, NodeUsed, NodeOwners1, NodeCnt, ESMF_REDUCE_MIN, rc=localrc)
    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
 
     ! count number of nodes used and convert NodeUsed values into local index
     localNodes = 0
     do NodeNo = 1, NodeCnt
        if (NodeUsed(NodeNo) == PetNo) then
          localNodes = localNodes+1
-	 NodeUsed(NodeNo) = localNodes
+         NodeUsed(NodeNo) = localNodes
        else
-	 NodeUsed(NodeNo) = 0
+         NodeUsed(NodeNo) = 0
        endif
     enddo
 
     ! allocate nodes arrays for ESMF_MeshAddNodes()
     allocate (NodeId(localNodes))
     allocate (NodeOwners(localNodes))
-    
+
     if (parametricDim .eq. 2) then
        allocate (NodeCoords1D(localNodes*coordDim))
     else ! If not parametricDim==2, assuming parmetricDim==3
        allocate(NodeCoords1D(localNodes*3))
     endif
-    
+
     ! copy vertex information into nodes, NodeUsed(:) now contains either 0 (not for me) or
     ! the local node index.  The owner of the node is stored in NodeOwners1(:)
     ! Also calculate how many nodes are "owned" by me -- total
@@ -2304,7 +2304,7 @@ end function ESMF_MeshCreateFromFile
     if (parametricDim .eq. 2) then
        do NodeNo = 1, NodeCnt
           if (NodeUsed(NodeNo) > 0) then
-             NodeId(i) = NodeNo     
+             NodeId(i) = NodeNo
              do dim = 1, coordDim
                 NodeCoords1D ((i-1)*coordDim+dim) = nodeCoords (dim, NodeNo)
              end do
@@ -2316,10 +2316,10 @@ end function ESMF_MeshCreateFromFile
     else ! If not parametricDim==2, assuming parmetricDim==3
        do NodeNo = 1, NodeCnt
           if (NodeUsed(NodeNo) > 0) then
-             NodeId(i) = NodeNo     
+             NodeId(i) = NodeNo
              do dim = 1, 3
                 NodeCoords1D ((i-1)*3+dim) = nodeCoords(dim, NodeNo)
-	     end do
+             end do
              NodeOwners (i) = NodeOwners1(NodeNo)
              if (NodeOwners1(NodeNo) == PetNo) total = total+1
              i = i+1
@@ -2343,12 +2343,12 @@ end function ESMF_MeshCreateFromFile
        call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
                             NodeCoords=NodeCoords1D, &
                             NodeOwners=NodeOwners, &
-			    NodeMask = NodeMask, &
+                            NodeMask = NodeMask, &
                             rc=localrc)
        deallocate(NodeMask)
-       deallocate(glbNodeMask)		    
-    endif 
-    
+       deallocate(glbNodeMask)          
+    endif
+
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -2360,7 +2360,7 @@ end function ESMF_MeshCreateFromFile
     call ESMF_VMAllGather(vm, sndBuf, localElmTable, 1, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! Find out the start element ID
     myStartElmt=0
     do i=1,PetNo
@@ -2378,7 +2378,7 @@ end function ESMF_MeshCreateFromFile
 
     ! Allocate mask if the user wants one
     haveMask=.false.
-    if (haveElmtMask) then 
+    if (haveElmtMask) then
        allocate (ElemMask(TotalElements))
        haveMask=.true.
     endif
@@ -2395,7 +2395,7 @@ end function ESMF_MeshCreateFromFile
        ! Loop through creating Mesh appropriate elements
        k=1
        do j = 1, ElemCnt
-          if (elmtNum(j)==3) then        
+          if (elmtNum(j)==3) then
              ElemId(ElemNo) = myStartElmt+ElemNo
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
              do i=1,3
@@ -2406,8 +2406,8 @@ end function ESMF_MeshCreateFromFile
                 endif
                 k=k+1
              end do
-	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
-	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
+             if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
+             if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
              ElemNo=ElemNo+1
              ConnNo=ConnNo+3
           elseif (elmtNum(j)==4) then
@@ -2421,8 +2421,8 @@ end function ESMF_MeshCreateFromFile
                 endif
                 k=k+1
              end do
-	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
-	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
+             if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
+             if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
              ElemNo=ElemNo+1
              ConnNo=ConnNo+4
           else
@@ -2436,8 +2436,8 @@ end function ESMF_MeshCreateFromFile
                 endif
                 k=k+1
              end do
-	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
-	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
+             if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
+             if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
              ElemNo=ElemNo+1
              ConnNo=ConnNo+elmtNum(j)
           endif
@@ -2445,14 +2445,14 @@ end function ESMF_MeshCreateFromFile
     else ! If not parametricDim==2, assuming parmetricDim==3
        k=1
        do j = 1, ElemCnt
-          if (elmtNum(j)==4) then        
+          if (elmtNum(j)==4) then
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_TETRA
           elseif (elmtNum(j)==8) then
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_HEX
           else
-             call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
-                  msg="- in 3D currently only support Tetra. (4 nodes) or Hexa. (8 nodes)", & 
-                  ESMF_CONTEXT, rcToReturn=rc) 
+             call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, &
+                  msg="- in 3D currently only support Tetra. (4 nodes) or Hexa. (8 nodes)", &
+                  ESMF_CONTEXT, rcToReturn=rc)
              return
           endif
 
@@ -2473,55 +2473,55 @@ end function ESMF_MeshCreateFromFile
     endif
 
     if ((ElemNo /= TotalElements+1) .or. (ConnNo /= TotalConnects)) then
-	write (ESMF_UtilIOStdout,*)  &
+        write (ESMF_UtilIOStdout,*)  &
             PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements, ConnNo, TotalConnects
     end if
     ! Add elements
-    
+
     if (hasFaceCoords) then
        if (haveMask .and. localAddUserArea) then
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
-			elementMask=ElemMask, elementArea=ElemArea, &
-			elementCoords=reshape(faceCoords,(/totalElements*coordDim/)), rc=localrc)
+            call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+                        elementMask=ElemMask, elementArea=ElemArea, &
+                        elementCoords=reshape(faceCoords,(/totalElements*coordDim/)), rc=localrc)
        elseif (haveMask) then
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
-			elementMask=ElemMask, &
-			elementCoords=reshape(faceCoords,(/totalElements*coordDim/)), rc=localrc)
+            call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+                        elementMask=ElemMask, &
+                        elementCoords=reshape(faceCoords,(/totalElements*coordDim/)), rc=localrc)
        elseif (localAddUserArea) then
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
-			elementArea=ElemArea, &
-			elementCoords=reshape(faceCoords,(/totalElements*coordDim/)), rc=localrc)
+            call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+                        elementArea=ElemArea, &
+                        elementCoords=reshape(faceCoords,(/totalElements*coordDim/)), rc=localrc)
        else
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
-			elementCoords=reshape(faceCoords,(/totalElements*coordDim/)), rc=localrc)
+            call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+                        elementCoords=reshape(faceCoords,(/totalElements*coordDim/)), rc=localrc)
        end if
-    else 
+    else
        if (haveMask .and. localAddUserArea) then
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
-			elementMask=ElemMask, elementArea=ElemArea, rc=localrc)
+            call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+                        elementMask=ElemMask, elementArea=ElemArea, rc=localrc)
        elseif (haveMask) then
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
-			elementMask=ElemMask, rc=localrc)
+            call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+                        elementMask=ElemMask, rc=localrc)
        elseif (localAddUserArea) then
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
-			elementArea=ElemArea, rc=localrc)
+            call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+                        elementArea=ElemArea, rc=localrc)
        else
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, rc=localrc)
+            call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, rc=localrc)
        end if
-    endif 
+    endif
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners, NodeOwners1)
     deallocate(ElemId, ElemType, ElemConn, elementConn, elmtNum)
-    if (haveElmtMask) deallocate(elementMask) 
-    if (haveMask) deallocate(ElemMask) 
+    if (haveElmtMask) deallocate(elementMask)
+    if (haveMask) deallocate(ElemMask)
     if (associated(faceCoords)) deallocate(faceCoords)
     if (localAddUserArea) deallocate(elementArea, ElemArea)
 
     if (localConvertToDual) then
-       	ESMF_MeshCreateFromUnstruct = ESMF_MeshCreateDual(Mesh, rc=localrc)
+                ESMF_MeshCreateFromUnstruct = ESMF_MeshCreateDual(Mesh, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
     else
@@ -2558,12 +2558,12 @@ end function ESMF_MeshCreateFromUnstruct
 !   \begin{description}
 !   \item [filename]
 !         The name of the grid file
-!   \item[convertToDual] 
+!   \item[convertToDual]
 !         if {\tt .true.}, the mesh will be converted to it's dual. If not specified,
-!         defaults to .false. 
-!   \item[addUserArea] 
+!         defaults to .false.
+!   \item[addUserArea]
 !         if {\tt .true.}, the grid_area defined in the grid file will be added into the mesh.
-!         If not specified, defaults to .false. 
+!         If not specified, defaults to .false.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2572,7 +2572,7 @@ end function ESMF_MeshCreateFromUnstruct
 !------------------------------------------------------------------------------
     integer                 :: localrc           ! local return code
     character(len=128)      :: cmd, esmffilename
-    integer   	            :: PetNo, PetCnt 
+    integer                 :: PetNo, PetCnt
     integer                 :: scrip_file_len, esmf_file_len
     type(ESMF_VM)           :: vm
     integer                 :: dualflag
@@ -2620,7 +2620,7 @@ end function ESMF_MeshCreateFromUnstruct
             ESMF_CONTEXT, rcToReturn=rc)) return
 
     esmffilename = ".esmf.nc"
-    
+
     if (PetNo == 0) then
         ! this is a serial call into C code for now
         call c_ConvertSCRIP(filename, esmffilename,  &
@@ -2630,7 +2630,7 @@ end function ESMF_MeshCreateFromUnstruct
     endif
     call ESMF_VMBarrier(vm)
     ESMF_MeshCreateFromScrip=ESMF_MeshCreateFromUnstruct(esmffilename,&
-	addUserArea=addUserArea, rc=localrc)
+        addUserArea=addUserArea, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
     if (PetNo == 0) then
@@ -2642,11 +2642,11 @@ end function ESMF_MeshCreateFromUnstruct
 
        call ESMF_UtilIOUnitGet(unit, rc=rc)
        if (rc==ESMF_SUCCESS) then
-  	  open(unit, FILE=esmffilename,status='unknown')
+          open(unit, FILE=esmffilename,status='unknown')
           close(unit, STATUS='delete')
        endif
-    endif    
-   
+    endif
+
    ! Add pole information, if created from a 2D grid file
     allocate(gridDims(2))
     call ESMF_ScripInq(filename, grid_rank=gridRank, grid_dims=gridDims, rc=localrc)
@@ -2705,10 +2705,10 @@ end function ESMF_MeshCreateFromScrip
 !         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
 !         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
 !         of 3.)
-!   \item[spatialDim] 
-!         The number of coordinate dimensions needed to describe the locations of the nodes 
-!         making up the Mesh. For a manifold, the spatial dimension can be larger than the 
-!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
+!   \item[spatialDim]
+!         The number of coordinate dimensions needed to describe the locations of the nodes
+!         making up the Mesh. For a manifold, the spatial dimension can be larger than the
+!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2732,22 +2732,22 @@ end function ESMF_MeshCreateFromScrip
                                        ESMF_MeshCreateFromPointer%numOwnedNodes, &
                                        localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return    
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromPointer%this, &
                                        ESMF_MeshCreateFromPointer%element_distgrid, &
                                        ESMF_MeshCreateFromPointer%numOwnedElements, &
                                        localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return    
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! The C side has been created
     ESMF_MeshCreateFromPointer%isCMeshFreed=.false.
 
-    ! Set as fully created 
+    ! Set as fully created
     ESMF_MeshCreateFromPointer%hasSplitElem=.false.
 
-    ! Set as fully created 
+    ! Set as fully created
     ESMF_MeshCreateFromPointer%isFullyCreated=.true.
 
     ! Set default coordsys
@@ -2783,10 +2783,10 @@ end function ESMF_MeshCreateFromScrip
 !         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
 !         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
 !         of 3.)
-!   \item[spatialDim] 
-!         The number of coordinate dimensions needed to describe the locations of the nodes 
-!         making up the Mesh. For a manifold, the spatial dimension can be larger than the 
-!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
+!   \item[spatialDim]
+!         The number of coordinate dimensions needed to describe the locations of the nodes
+!         making up the Mesh. For a manifold, the spatial dimension can be larger than the
+!         parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2802,7 +2802,7 @@ end function ESMF_MeshCreateFromScrip
     call C_ESMC_MeshCreateFromIntPtr(ESMF_MeshCreateFromIntPtr%this,  &
                                   mesh_pointer, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return    
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Check init status of arguments
     ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromIntPtr)
@@ -2813,22 +2813,22 @@ end function ESMF_MeshCreateFromScrip
                                        ESMF_MeshCreateFromIntPtr%numOwnedNodes, &
                                        localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return    
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateFromIntPtr%this, &
                                        ESMF_MeshCreateFromIntPtr%element_distgrid, &
                                        ESMF_MeshCreateFromIntPtr%numOwnedElements, &
                                        localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return    
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! The C side has been created
     ESMF_MeshCreateFromIntPtr%isCMeshFreed=.false.
 
-    ! Set as fully created 
+    ! Set as fully created
     ESMF_MeshCreateFromIntPtr%hasSplitElem=.false.
 
-    ! Set as fully created 
+    ! Set as fully created
     ESMF_MeshCreateFromIntPtr%isFullyCreated=.true.
 
     ! Set default coordsys
@@ -2840,7 +2840,7 @@ end function ESMF_MeshCreateFromScrip
 !------------------------------------------------------------------------------
 
 
-    
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshGetIntPtr()"
@@ -2856,7 +2856,7 @@ end function ESMF_MeshCreateFromScrip
     integer, intent(out) , optional            :: rc
 !
 ! !DESCRIPTION:
-!   Get the internal pointer. 
+!   Get the internal pointer.
 !
 !   \begin{description}
 !   \item [mesh]
@@ -2869,18 +2869,18 @@ end function ESMF_MeshCreateFromScrip
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: localrc 
-    integer :: intMoabOn    
+    integer :: localrc
+    integer :: intMoabOn
 
     ! Init localrc
     localrc = ESMF_SUCCESS
-    
+
     call c_esmc_meshgetinternalptr(mesh, internalPtr, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     end subroutine ESMF_MeshGetIntPtr
 
 !!!!!!!!  private Mesh subroutines !!!!!!!!!!
@@ -2898,12 +2898,12 @@ subroutine ESMF_DistGridGetNumIds(distgrid, numIds, rc)
     ! Get delayout from distgrid
     call ESMF_DistGridGet(distgrid, delayout=delayout, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return    
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Get local number of DEs
     call ESMF_DELayoutGet(delayout, localDECount=localDECount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return    
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Iterate summing number of DEs
     numIds=0
@@ -2933,12 +2933,12 @@ subroutine ESMF_DistGridGetIds(distgrid, Ids, rc)
     ! Get delayout from distgrid
     call ESMF_DistGridGet(distgrid, delayout=delayout, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return    
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Get local number of DEs
     call ESMF_DELayoutGet(delayout, localDECount=localDECount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return    
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Iterate summing number of DEs
     startPos=1
@@ -2982,30 +2982,30 @@ end subroutine ESMF_DistGridGetIds
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGrid), intent(in),  optional :: nodalDistgrid
     type(ESMF_DistGrid), intent(in),  optional :: elementDistgrid
-    type(ESMF_VM),       intent(in),  optional :: vm 
+    type(ESMF_VM),       intent(in),  optional :: vm
     integer,             intent(out), optional :: rc
-! 
+!
 ! !DESCRIPTION:
 !  Create a copy of an existing Mesh with a new distribution. Information
-! in the Mesh such as connections, coordinates, areas, masks, etc. are 
-! automatically redistributed to the new Mesh. To redistribute 
+! in the Mesh such as connections, coordinates, areas, masks, etc. are
+! automatically redistributed to the new Mesh. To redistribute
 ! data in Fields built on the original Mesh create a Field on the new Mesh
-!  and then use the Field redistribution functionality 
+!  and then use the Field redistribution functionality
 ! ({\tt ESMF\_FieldRedistStore()}, etc.). The equivalent methods
-! can also be used for data in FieldBundles.  
+! can also be used for data in FieldBundles.
 !
 ! \begin{description}
 !  \item [mesh]
-!       The source Mesh to be redistributed. 
+!       The source Mesh to be redistributed.
 !  \item [{[nodalDistgrid]}]
-!       A Distgrid describing the new distribution of 
-!       the nodes across the PETs. 
+!       A Distgrid describing the new distribution of
+!       the nodes across the PETs.
 !  \item [{[elementDistgrid]}]
-!       A Distgrid describing the new distribution of 
-!       the elements across the PETs. 
+!       A Distgrid describing the new distribution of
+!       the elements across the PETs.
 !  \item[{[vm]}]
-!      If present, the Mesh object is created on the specified 
-!      {\tt ESMF\_VM} object. The default is to create on the VM of the 
+!      If present, the Mesh object is created on the specified
+!      {\tt ESMF\_VM} object. The default is to create on the VM of the
 !      current context.
 !  \item [{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3029,22 +3029,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
 
-    ! We don't handle a mesh containing split elements right now, 
-    ! so complain and exit. 
+    ! We don't handle a mesh containing split elements right now,
+    ! so complain and exit.
     ! TODO: Will need to do this before CESM uses with HOMME grid
     if (mesh%hasSplitElem) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-               msg="- meshes with split elements can not be redisted right now", & 
-               ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg="- meshes with split elements can not be redisted right now", &
+               ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     !! Fill in information available in input mesh
     ! Same dimensions as input mesh
@@ -3121,7 +3121,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! Call into C
           call C_ESMC_MeshCreateRedist(mesh,                  &
                numNodeIds, nodeIds,   &
-               numElemIds, elemIds,   & 
+               numElemIds, elemIds,   &
                ESMF_MeshCreateRedist, &
                localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3140,13 +3140,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_MeshCreateRedist%numOwnedNodes=numNodeIds
 
 
-          ! If the C side doesn't exist, then return an error 
-          ! because I don't know how to distribute nodes without elem info 
+          ! If the C side doesn't exist, then return an error
+          ! because I don't know how to distribute nodes without elem info
           if (mesh%isCMeshFreed) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
    msg="- method does not work if the input Mesh has no " // &
-       "C Mesh attached and just the nodeDistgrid is specified", & 
-                  ESMF_CONTEXT, rcToReturn=rc) 
+       "C Mesh attached and just the nodeDistgrid is specified", &
+                  ESMF_CONTEXT, rcToReturn=rc)
              return
           endif
 
@@ -3162,7 +3162,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! Call into C
           call C_ESMC_MeshCreateRedistNodes(mesh,                  &
-               numNodeIds, nodeIds,   & 
+               numNodeIds, nodeIds,   &
                ESMF_MeshCreateRedist, &
                localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3177,7 +3177,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                       ESMF_MeshCreateRedist%element_distgrid, &
                       ESMF_MeshCreateRedist%numOwnedElements, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return    
+               ESMF_CONTEXT, rcToReturn=rc)) return
      endif
     else
        !! JUST ELEMENT DISTGRID PRESENT !!
@@ -3192,13 +3192,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_MeshCreateRedist%numOwnedElements=numElemIds
 
 
-          ! If the C side doesn't exist, then return an error 
-          ! because I don't know how to distribute nodes without elem info 
+          ! If the C side doesn't exist, then return an error
+          ! because I don't know how to distribute nodes without elem info
           if (mesh%isCMeshFreed) then
-             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
    msg="- method does not work if the input Mesh has no " // &
-       "C Mesh attached and just the elemDistgrid is specified", & 
-                  ESMF_CONTEXT, rcToReturn=rc) 
+       "C Mesh attached and just the elemDistgrid is specified", &
+                  ESMF_CONTEXT, rcToReturn=rc)
              return
           endif
 
@@ -3214,7 +3214,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! Call into C
           call C_ESMC_MeshCreateRedistElems(mesh,                  &
-               numElemIds, elemIds,   & 
+               numElemIds, elemIds,   &
                ESMF_MeshCreateRedist, &
                localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3229,10 +3229,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                       ESMF_MeshCreateRedist%nodal_distgrid, &
                       ESMF_MeshCreateRedist%numOwnedNodes, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return    
+               ESMF_CONTEXT, rcToReturn=rc)) return
 
        else !! NO DISTGRIDs PRESENT -> make new mesh a copy of the old w/ new distgrids !!
-             
+
           ! Get number of node Ids
           call ESMF_DistGridGetNumIds(mesh%nodal_distgrid, &
                numNodeIds, rc=localrc)
@@ -3281,7 +3281,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ! Call into C
           call C_ESMC_MeshCreateRedist(mesh,                  &
                numNodeIds, nodeIds,   &
-               numElemIds, elemIds,   & 
+               numElemIds, elemIds,   &
                ESMF_MeshCreateRedist, &
                localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3297,7 +3297,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                       ESMF_MeshCreateRedist%nodal_distgrid, &
                       ESMF_MeshCreateRedist%numOwnedNodes, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return    
+               ESMF_CONTEXT, rcToReturn=rc)) return
 
            ! Create elem distgrid and get number of elems
           call C_ESMC_MeshCreateElemDistGrid( &
@@ -3305,7 +3305,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                       ESMF_MeshCreateRedist%element_distgrid, &
                       ESMF_MeshCreateRedist%numOwnedElements, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return    
+               ESMF_CONTEXT, rcToReturn=rc)) return
        endif
     endif
 
@@ -3344,13 +3344,13 @@ end function ESMF_MeshCreateRedist
 ! !ARGUMENTS:
     type(ESMF_Mesh),     intent(in)            :: mesh
     integer,             intent(out), optional :: rc
-! 
+!
 ! !DESCRIPTION:
 !  Create the dual of an existing mesh.
 !
 !   \begin{description}
 !   \item [mesh]
-!         The source Mesh. 
+!         The source Mesh.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -3368,22 +3368,22 @@ end function ESMF_MeshCreateRedist
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
 
-    ! We don't handle a mesh containing split elements right now, 
-    ! so complain and exit. 
+    ! We don't handle a mesh containing split elements right now,
+    ! so complain and exit.
     ! TODO: Will need to do this before CESM uses with HOMME grid
     if (mesh%hasSplitElem) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-               msg="- meshes with split elements can not be redisted right now", & 
-               ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg="- meshes with split elements can not be redisted right now", &
+               ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     !! Fill in information available in input mesh
     ! Same dimensions as input mesh
@@ -3417,14 +3417,14 @@ end function ESMF_MeshCreateRedist
                       ESMF_MeshCreateDual%nodal_distgrid, &
                       ESMF_MeshCreateDual%numOwnedNodes, localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return    
+               ESMF_CONTEXT, rcToReturn=rc)) return
 
     call C_ESMC_MeshCreateElemDistGrid(ESMF_MeshCreateDual%this, &
                                        ESMF_MeshCreateDual%element_distgrid, &
                                        ESMF_MeshCreateDual%numOwnedElements, &
                                        localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return    
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Set as created
@@ -3439,8 +3439,8 @@ end function ESMF_MeshCreateDual
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateEasyElems1Type()"
-!BOP                 
-! !IROUTINE: ESMF_MeshCreate - Create a Mesh of just one element type using corner coordinates 
+!BOP
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh of just one element type using corner coordinates
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
@@ -3459,32 +3459,32 @@ end function ESMF_MeshCreateDual
     integer,            intent(in)            :: elementType
     real(ESMF_KIND_R8), intent(in)            :: elementCornerCoords(:,:,:)
     integer,            intent(in),  optional :: elementMask(:)
-    real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)  
+    real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)
     real(ESMF_KIND_R8), intent(in),  optional :: elementCoords(:,:)
     type(ESMF_DistGrid), intent(in),  optional :: elementDistgrid
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Create a Mesh object in one step by just specifying the corner coordinates of each element. 
+!   Create a Mesh object in one step by just specifying the corner coordinates of each element.
 !   Internally these corners are turned into nodes forming the outside edges of the elements.
 !   This call assumes that each element is the same type to make the specification of the elements
-!   a bit easier.  
+!   a bit easier.
 !   After this call the Mesh is usable, for
-!   example, a Field may be built on the created Mesh object and 
+!   example, a Field may be built on the created Mesh object and
 !   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
 !
 !   This call sets the dimension of the elements in the Mesh
 !   via {\tt parametricDim} and the number of coordinate dimensions in the mesh
-!   is determined from the first dimension of {\tt elementCornerCoords}. 
+!   is determined from the first dimension of {\tt elementCornerCoords}.
 !
 !   The parameters to this call {\tt elementIds}, {\tt elementTypes}, and
-!   {\tt elementCornerCoords} describe the elements to be created. The description 
-!   for a particular element lies at the same index location in {\tt elementIds} 
-!   and {\tt elementTypes}. The argument {\tt elementCornerCoords} contains the coordinates of the 
-!   corners used to create each element. The first dimension of this argument are across the coordinate dimensions. 
-!   The second dimension of this argument is across the corners of a 
+!   {\tt elementCornerCoords} describe the elements to be created. The description
+!   for a particular element lies at the same index location in {\tt elementIds}
+!   and {\tt elementTypes}. The argument {\tt elementCornerCoords} contains the coordinates of the
+!   corners used to create each element. The first dimension of this argument are across the coordinate dimensions.
+!   The second dimension of this argument is across the corners of a
 !   particular element. The last dimension of this argument is across the list
-!   of elements on this PET, so the coordinates of corner c in element e on this PET 
+!   of elements on this PET, so the coordinates of corner c in element e on this PET
 !   would be in {\tt elementCornerCoords(:,c,e)}.
 !
 !   This call is {\em collective} across the current VM.
@@ -3494,53 +3494,53 @@ end function ESMF_MeshCreateDual
 !         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
 !         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
 !         of 3.)
-!   \item[{[coordSys]}] 
-!         The coordinate system of the grid coordinate data. 
-!         For a full list of options, please see Section~\ref{const:coordsys}. 
-!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
+!   \item[{[coordSys]}]
+!         The coordinate system of the grid coordinate data.
+!         For a full list of options, please see Section~\ref{const:coordsys}.
+!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 !   \item [{[elementIds]}]
-!          An array containing the global ids of the elements to be created on this PET. 
+!          An array containing the global ids of the elements to be created on this PET.
 !          This input consists of a 1D array the size of the number of elements on this PET.
 !          Each element id must be a number equal to or greater than 1. An id should be
 !          unique in the sense that different elements must have different ids (the same element
 !          that appears on different processors must have the same id). There may be gaps in the sequence
-!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to 
-!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).  
+!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to
+!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).
 !          If not specified, then elements are numbered in sequence starting with the first element
-!          on PET 0. 
-!   \item[elementType] 
+!          on PET 0.
+!   \item[elementType]
 !          An variable containing the type of the elements to be created in this Mesh. The type used
 !          must be appropriate for the parametric dimension of the Mesh. Please see
-!          Section~\ref{const:meshelemtype} for the list of options. 
-!   \item[elementCornerCoords] 
+!          Section~\ref{const:meshelemtype} for the list of options.
+!   \item[elementCornerCoords]
 !         A 3D array containing the coordinates of the corners of the elements
-!         to be created on this PET. The first dimension of this array is for the 
-!         coordinates and should be of size 2 or 3. The size of this dimension will be 
+!         to be created on this PET. The first dimension of this array is for the
+!         coordinates and should be of size 2 or 3. The size of this dimension will be
 !         used to determine the spatialDim of the Mesh. The second dimension is the number
 !         of corners for an element. The 3rd dimension is a list of all the elements on this PET.
 !   \item [{[elementMask]}]
 !          An array containing values which can be used for element masking. Which values indicate
-!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
+!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to
 !          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
 !          size of the number of elements on this PET.
 !   \item [{[elementArea]}]
-!          An array containing element areas. If not specified, the element areas are internally calculated. 
+!          An array containing element areas. If not specified, the element areas are internally calculated.
 !          This input consists of a 1D array the size of the number of elements on this PET.
 !          {\bf NOTE:} ESMF doesn't currently do unit conversion on areas. If these areas are going to be used
 !                in a process that also involves the areas of another Grid or Mesh (e.g. conservative regridding), then
 !                it is the user's responsibility to make sure that the area units are consistent between the two sides.
-!                If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If 
-!                it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared. 
-!   \item[{[elementCoords]}] 
+!                If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If
+!                it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared.
+!   \item[{[elementCoords]}]
 !          An array containing the physical coordinates of the elements to be created on this
-!          PET. This input consists of a 2D array with the first dimension that same size as the first dimension of {\tt elementCornerCoords}. 
-!          The second dimension should be the same size as the {\tt elementTypes} argument. 
+!          PET. This input consists of a 2D array with the first dimension that same size as the first dimension of {\tt elementCornerCoords}.
+!          The second dimension should be the same size as the {\tt elementTypes} argument.
 !   \item [{[elementDistgrid]}]
-!          If present, use this as the element Distgrid for the Mesh. 
-!          The passed in Distgrid 
-!          needs to contain a local set of sequence indices matching the set of local element ids (i.e. those in {\tt elementIds}). 
-!          However, specifying an externally created Distgrid gives the user more control over aspects of 
-!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs). 
+!          If present, use this as the element Distgrid for the Mesh.
+!          The passed in Distgrid
+!          needs to contain a local set of sequence indices matching the set of local element ids (i.e. those in {\tt elementIds}).
+!          However, specifying an externally created Distgrid gives the user more control over aspects of
+!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs).
 !          If not present, a 1D Distgrid will be created internally consisting of one DE per PET.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3556,7 +3556,7 @@ end function ESMF_MeshCreateDual
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ! This is just a simple wrapper function, so most error 
+    ! This is just a simple wrapper function, so most error
     ! checking happens inside ESMF_MeshCreateEasyElems()
 
     ! Get number of spatial dimensions
@@ -3567,7 +3567,7 @@ end function ESMF_MeshCreateDual
     ! Create elem type array
     allocate(elementTypes(num_elems))
     elementTypes=elementType
-    
+
     ! Call into more general function
     ESMF_MeshCreateEasyElems1Type= &
          ESMF_MeshCreateEasyElemsGen(parametricDim, coordSys, &
@@ -3575,7 +3575,7 @@ end function ESMF_MeshCreateDual
                    reshape(elementCornerCoords,(/spatialDim,num_elemCorners*num_elems/)), &
                    elementMask, elementArea, elementCoords, &
                    elementDistgrid, rc)
-    
+
     ! deallocate array
     deallocate(elementTypes)
 
@@ -3585,7 +3585,7 @@ end function ESMF_MeshCreateDual
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateEasyElemsGen()"
 !BOP
-! !IROUTINE: ESMF_MeshCreate - Create a Mesh using element corner coordinates 
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh using element corner coordinates
 !
 ! !INTERFACE:
   ! Private name; call using ESMF_MeshCreate()
@@ -3604,28 +3604,28 @@ end function ESMF_MeshCreateDual
     integer,            intent(in)            :: elementTypes(:)
     real(ESMF_KIND_R8), intent(in)            :: elementCornerCoords(:,:)
     integer,            intent(in),  optional :: elementMask(:)
-    real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)  
+    real(ESMF_KIND_R8), intent(in),  optional :: elementArea(:)
     real(ESMF_KIND_R8), intent(in),  optional :: elementCoords(:,:)
     type(ESMF_DistGrid), intent(in),  optional :: elementDistgrid
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Create a Mesh object in one step by just specifying the corner coordinates of each element. 
+!   Create a Mesh object in one step by just specifying the corner coordinates of each element.
 !   Internally these corners are turned into nodes forming the outside edges of the elements.
 !   After this call the Mesh is usable, for
-!   example, a Field may be built on the created Mesh object and 
+!   example, a Field may be built on the created Mesh object and
 !   this Field may be used in a {\tt ESMF\_FieldRegridStore()} call.
 !
 !   This call sets the dimension of the elements in the Mesh
 !   via {\tt parametricDim} and the number of coordinate dimensions in the mesh
-!   is determined from the first dimension of {\tt elementCornerCoords}. 
+!   is determined from the first dimension of {\tt elementCornerCoords}.
 !
 !   The parameters to this call {\tt elementIds}, {\tt elementTypes}, and
-!   {\tt elementCornerCoords} describe the elements to be created. The description 
-!   for a particular element lies at the same index location in {\tt elementIds} 
+!   {\tt elementCornerCoords} describe the elements to be created. The description
+!   for a particular element lies at the same index location in {\tt elementIds}
 !   and {\tt elementTypes}. The argument {\tt elementCornerCoords} consists of a list of
-!   all the corners used to create all the elements, so the corners for element $e$ in the 
-!   {\tt elementTypes} array will start at $number\_of\_corners\_in\_element(1) 
+!   all the corners used to create all the elements, so the corners for element $e$ in the
+!   {\tt elementTypes} array will start at $number\_of\_corners\_in\_element(1)
 !    + number\_of\_corners\_in\_element(2) +
 !   \cdots + number\_of\_corners\_in\_element(e-1) + 1$ in {\tt elementCornerCoords}.
 !
@@ -3636,60 +3636,60 @@ end function ESMF_MeshCreateDual
 !         Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
 !         have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
 !         of 3.)
-!   \item[{[coordSys]}] 
-!         The coordinate system of the grid coordinate data. 
-!         For a full list of options, please see Section~\ref{const:coordsys}. 
-!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.  
+!   \item[{[coordSys]}]
+!         The coordinate system of the grid coordinate data.
+!         For a full list of options, please see Section~\ref{const:coordsys}.
+!         If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 !   \item [{[elementIds]}]
-!          An array containing the global ids of the elements to be created on this PET. 
+!          An array containing the global ids of the elements to be created on this PET.
 !          This input consists of a 1D array the size of the number of elements on this PET.
 !          Each element id must be a number equal to or greater than 1. An id should be
 !          unique in the sense that different elements must have different ids (the same element
 !          that appears on different processors must have the same id). There may be gaps in the sequence
-!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to 
-!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).  
+!          of ids, but if these gaps are the same scale as the length of the sequence it can lead to
+!          inefficiencies when the Mesh is used (e.g. in {\tt ESMF\_FieldRegridStore()}).
 !          If not specified, then elements are numbered in sequence starting with the first element
-!          on PET 0. 
-!   \item[elementTypes] 
+!          on PET 0.
+!   \item[elementTypes]
 !          An array containing the types of the elements to be created on this PET. The types used
 !          must be appropriate for the parametric dimension of the Mesh. Please see
-!          Section~\ref{const:meshelemtype} for the list of options. This input consists of 
-!          a 1D array the size of the number of elements on this PET.  
-!   \item[elementCornerCoords] 
+!          Section~\ref{const:meshelemtype} for the list of options. This input consists of
+!          a 1D array the size of the number of elements on this PET.
+!   \item[elementCornerCoords]
 !         A 2D array containing the coordinates of the corners of the elements
-!         to be created on this PET. The first dimension of this array is for the 
-!         coordinates and should be of size 2 or 3. The size of this dimension will be 
+!         to be created on this PET. The first dimension of this array is for the
+!         coordinates and should be of size 2 or 3. The size of this dimension will be
 !         used to determine the spatialDim of the Mesh. The second dimension is a collapsed
 !         list of all the corners in all the elements. The list of corners has been collapsed
-!         to 1D to enable elements with different number of corners to be supported in the 
-!         same list without wasting space. 
-!         The number of corners in each element is implied by its element type in 
-!         {\tt elementTypes}. The corners for each element 
+!         to 1D to enable elements with different number of corners to be supported in the
+!         same list without wasting space.
+!         The number of corners in each element is implied by its element type in
+!         {\tt elementTypes}. The corners for each element
 !         are in sequence in this array (e.g. If element 1 has 3 corners then they are in elementCornerCoords(:,1),
-!         elementCornerCoords(:,2), elementCornerCoords(:,3) and the corners for the next element start in elementCornerCoords(:,4)). 
+!         elementCornerCoords(:,2), elementCornerCoords(:,3) and the corners for the next element start in elementCornerCoords(:,4)).
 !   \item [{[elementMask]}]
 !          An array containing values which can be used for element masking. Which values indicate
-!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to 
+!          masking are chosen via the {\tt srcMaskValues} or {\tt dstMaskValues} arguments to
 !          {\tt ESMF\_FieldRegridStore()} call. This input consists of a 1D array the
 !          size of the number of elements on this PET.
 !   \item [{[elementArea]}]
-!          An array containing element areas. If not specified, the element areas are internally calculated. 
+!          An array containing element areas. If not specified, the element areas are internally calculated.
 !          This input consists of a 1D array the size of the number of elements on this PET.
 !          {\bf NOTE:} ESMF doesn't currently do unit conversion on areas. If these areas are going to be used
 !                in a process that also involves the areas of another Grid or Mesh (e.g. conservative regridding), then
 !                it is the user's responsibility to make sure that the area units are consistent between the two sides.
-!                If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If 
-!                it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared. 
-!   \item[{[elementCoords]}] 
+!                If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If
+!                it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared.
+!   \item[{[elementCoords]}]
 !          An array containing the physical coordinates of the elements to be created on this
-!          PET. This input consists of a 2D array with the first dimension that same size as the first dimension of {\tt elementCornerCoords}. 
-!          The second dimension should be the same size as the {\tt elementTypes} argument. 
+!          PET. This input consists of a 2D array with the first dimension that same size as the first dimension of {\tt elementCornerCoords}.
+!          The second dimension should be the same size as the {\tt elementTypes} argument.
 !   \item [{[elementDistgrid]}]
-!          If present, use this as the element Distgrid for the Mesh. 
-!          The passed in Distgrid 
-!          needs to contain a local set of sequence indices matching the set of local element ids (i.e. those in {\tt elementIds}). 
-!          However, specifying an externally created Distgrid gives the user more control over aspects of 
-!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs). 
+!          If present, use this as the element Distgrid for the Mesh.
+!          The passed in Distgrid
+!          needs to contain a local set of sequence indices matching the set of local element ids (i.e. those in {\tt elementIds}).
+!          However, specifying an externally created Distgrid gives the user more control over aspects of
+!          the Distgrid containing those sequence indices (e.g. how they are broken into DEs).
 !          If not present, a 1D Distgrid will be created internally consisting of one DE per PET.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3722,7 +3722,7 @@ end function ESMF_MeshCreateDual
    ! Set Default coordSys
    if (present(coordSys)) then
       coordSysLocal=coordSys
-   else 
+   else
       coordSysLocal=ESMF_COORDSYS_SPH_DEG
    endif
 
@@ -3742,7 +3742,7 @@ end function ESMF_MeshCreateDual
                ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
-    endif    
+    endif
 
    ! Other array sizes are checked within C_ESMC_MeshCreateEasyElems()
 
@@ -3755,7 +3755,7 @@ end function ESMF_MeshCreateDual
    elementIdsII = ESMF_InterArrayCreate(elementIds, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! set element area if it's present.
     if (present(elementCoords)) then
        if (present(elementArea)) then
@@ -3822,24 +3822,24 @@ end function ESMF_MeshCreateDual
          ESMF_MeshCreateEasyElemsGen%numOwnedNodes, &
          localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return    
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Create a distgrid if it isn't passed in
-    if (present(elementDistgrid)) then 
+    if (present(elementDistgrid)) then
        ESMF_MeshCreateEasyElemsGen%element_distgrid=elementDistgrid
        call ESMF_DistGridGetNumIds(elementDistgrid, &
             ESMF_MeshCreateEasyElemsGen%numOwnedElements, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-    else 
+    else
        call C_ESMC_MeshCreateElemDistGrid( &
             ESMF_MeshCreateEasyElemsGen%this, &
             ESMF_MeshCreateEasyElemsGen%element_distgrid, &
             ESMF_MeshCreateEasyElemsGen%numOwnedElements, &
             localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return    
+            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
     ! Get rid of interface Int wrappers
@@ -3857,7 +3857,7 @@ end function ESMF_MeshCreateDual
     ! Can't happen here
     ESMF_MeshCreateEasyElemsGen%hasSplitElem=.false.
 
-    ! Set as fully created 
+    ! Set as fully created
     ESMF_MeshCreateEasyElemsGen%isFullyCreated=.true.
 
     ! Set dimension information
@@ -3872,7 +3872,7 @@ end function ESMF_MeshCreateDual
 
     ! Set return code
     if (present (rc)) rc = localrc
-    
+
   end function ESMF_MeshCreateEasyElemsGen
 !------------------------------------------------------------------------------
 
@@ -3884,7 +3884,7 @@ end function ESMF_MeshCreateDual
 
 ! !IROUTINE: ESMF_MeshCreateCubedSphere - Create a Mesh representation of a cubed sphere grid
 !
-! !INTERFACE:  
+! !INTERFACE:
 function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
 
 ! !RETURN VALUE:
@@ -3892,22 +3892,22 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
 
 ! !ARGUMENTS:
     integer,                  intent(in)            :: tileSize
-    integer,                  intent(in)            :: nx 
+    integer,                  intent(in)            :: nx
     integer,                  intent(in)            :: ny
     integer,                  intent(out),optional  :: rc
 
 !
 ! !DESCRIPTION:
 !   Create a {\tt ESMF\_Mesh} object for a cubed sphere grid using identical regular decomposition for every tile.
-!   The grid coordinates are generated based on the algorithm used by GEOS-5, The tile resolution is defined by 
+!   The grid coordinates are generated based on the algorithm used by GEOS-5, The tile resolution is defined by
 !   {\tt tileSize}.  Each tile is decomposed into nx x ny blocks and the total number of DEs used
 !   is nx x ny x 6.  If the total PET is not equal to the number of DEs, the DEs are distributed
 !   into PETs in the default cyclic distribution.  Internally, the nodes and the elements from multiple DEs are
 !   collapsed into a 1D array.  Therefore, the nodal distgrid or the element distgrid attached to the Mesh object
-!   is always a one DE arbitrarily distributed distgrid.  The sequential indices of the nodes and the elements 
+!   is always a one DE arbitrarily distributed distgrid.  The sequential indices of the nodes and the elements
 !   are derived based on the location of the point in the Cubed Sphere grid.  If an element is located at {\tt (x, y)} of
 !   tile {\tt n}.  Its sequential index would be {\tt (n-1)*tileSize*tileSize+(y-1)*tileSize+x}.  If it is a node, its
-!   sequential index would be {\tt (n-1)*(tileSize+1)*(tileSize+1)+(y-1)*(tileSize+1)+x}.  
+!   sequential index would be {\tt (n-1)*(tileSize+1)*(tileSize+1)+(y-1)*(tileSize+1)+x}.
 
 !
 !     The arguments are:
@@ -3966,18 +3966,18 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-#if 0  
+#if 0
   if (nx * ny * 6 /= PetCnt) then
-       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                             msg="nx * ny does not equal to the total number of PETs", & 
-                             ESMF_CONTEXT, rcToReturn=rc) 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+                             msg="nx * ny does not equal to the total number of PETs", &
+                             ESMF_CONTEXT, rcToReturn=rc)
        return
-  endif    
+  endif
 #endif
 
   allocate(lonEdge(tileSize+1, (tileSize+1)*6),latEdge(tileSize+1, (tileSize+1)*6))
 
-  ! Create a mesh 
+  ! Create a mesh
   mesh = ESMF_MeshCreate(2, 2, coordSys=ESMF_COORDSYS_SPH_DEG, rc=localrc)
 
   ! Distribute center coordinates according to the nx/ny decomposition
@@ -3993,7 +3993,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
     localNodes = 0
     localElems = 0
     if (PetCnt >= totalDE) then
-      if (PetNo < totalDE) then 
+      if (PetNo < totalDE) then
          localDE=1
       else
          localDE=0
@@ -4010,7 +4010,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
      ! deNo is zero-based
      do i=1,localDE
         DElist(i)=PetNo+PetCnt*(i-1)
-     enddo 
+     enddo
      do i=1,localDE
         tileno(i) = DElist(i)/(nx*ny)+1
         rem = mod(DElist(i),nx*ny)
@@ -4054,12 +4054,12 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
      allocate(ElemIds(localElems), ElemConn(localElems*4), ElemType(localElems))
      allocate(centerCoords(localElems*2))
      ElemType = ESMF_MESHELEMTYPE_QUAD
-     k=1      
+     k=1
      do i=1,localDE
         !call ESMF_VMWtime(starttime, rc=rc)
         ! Generate glocal edge coordinates and local center coordinates
         allocate(lonCenter(count(1,i), count(2,i)), latCenter(count(1,i), count(2,i)))
-        if (i==1) then 
+        if (i==1) then
            call ESMF_UtilCreateCSCoords(tileSize, lonEdge=lonEdge, latEdge=latEdge, &
                 start=start(:,i), count=count(:,i), &
                 tile=tileno(i), lonCenter=lonCenter, latCenter=latCenter)
@@ -4096,7 +4096,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
      call c_ESMC_ClumpPntsLL(totalNodes, lonEdgeR8, latEdgeR8, &
                       TOL, map, uniquenodes, &
                       maxDuplicate, start_lat, end_lat, rc)
-  
+
      deallocate(lonEdgeR8, latEdgeR8)
 
      ! Create a new array to point the new index back to the original index
@@ -4105,7 +4105,7 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
 
      do i=1,totalnodes
        k=map(i)+1
-       if (origIds(k)==0) origIds(k)=i      
+       if (origIds(k)==0) origIds(k)=i
      enddo
 
      ! Find total unique local nodes in each PET
@@ -4114,8 +4114,8 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
      ! Global ID for the elements and the nodes using its 2D index: (y-1)*tileSize+x
      ! for nodes shared by multiple PETs, the PET with smaller rank will own the
      ! nodes.
-  
-     k=1 
+
+     k=1
      firstOwners = PetCnt+1
      !nodeOwners = PetNo
      allocate(GlobalIds(localNodes), localIds(localNodes))
@@ -4248,7 +4248,7 @@ end function ESMF_MeshCreateCubedSphere
 ! !IROUTINE: ESMF_MeshDestroy - Release resources associated with a Mesh
 !
 ! !INTERFACE:
-      subroutine ESMF_MeshDestroy(mesh, keywordenforcer, rc)
+      subroutine ESMF_MeshDestroy(mesh, keywordEnforcer, rc)
 !
 ! !RETURN VALUE:
 !
@@ -4263,7 +4263,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!  This call removes internal memory associated with {\tt mesh}. 
+!  This call removes internal memory associated with {\tt mesh}.
 !  After this call {\tt mesh} will no longer be usable.
  !
  ! The arguments are:
@@ -4292,12 +4292,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! TODO: destroy distgrids here
       if (mesh%isFullyCreated) then
-         ! destroy node distgrid          
+         ! destroy node distgrid
          call ESMF_DistgridDestroy(mesh%nodal_distgrid, rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
 
-         ! destroy element distgrid          
+         ! destroy element distgrid
          call ESMF_DistgridDestroy(mesh%element_distgrid, rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4337,15 +4337,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !    This call removes the portions of {\tt mesh} which contain connection and coordinate
 !    information. After this call, Fields build on {\tt mesh} will no longer be usable
-!    as part of an {\tt ESMF\_FieldRegridStore()} operation. However, after this call 
-!    Fields built on {\tt mesh} can still be used in an {\tt ESMF\_FieldRegrid()} 
+!    as part of an {\tt ESMF\_FieldRegridStore()} operation. However, after this call
+!    Fields built on {\tt mesh} can still be used in an {\tt ESMF\_FieldRegrid()}
 !    operation if the routehandle was generated beforehand. New Fields may also
 !    be built on {\tt mesh} after this call.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item [mesh]
-! Mesh object whose memory is to be freed. 
+! Mesh object whose memory is to be freed.
 ! \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -4361,7 +4361,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return
       endif
 
-      ! Free internal C++ mesh   
+      ! Free internal C++ mesh
       call C_ESMC_MeshFreeMemory(mesh,localrc)
 
       ! Set Freed status
@@ -4412,10 +4412,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Dimension of the topology of the Mesh. (E.g. a mesh constructed of squares would
 ! have a parametric dimension of 2, whereas a Mesh constructed of cubes would have one
 ! of 3.)
-! \item[{[spatialDim]}] 
-! The number of coordinate dimensions needed to describe the locations of the nodes 
-! making up the Mesh. For a manifold, the spatial dimension can be larger than the 
-! parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller. 
+! \item[{[spatialDim]}]
+! The number of coordinate dimensions needed to describe the locations of the nodes
+! making up the Mesh. For a manifold, the spatial dimension can be larger than the
+! parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller.
 ! \item [{[nodalDistgrid]}]
 ! A Distgrid describing the distribution of the nodes across the PETs. Note that
 ! on each PET the distgrid will only contain entries for nodes owned by that PET.
@@ -4429,13 +4429,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! the nodalDistgrid.
 ! \item [{[ownedNodeCoords]}]
 ! The coordinates for the local nodes. These coordinates will be in the proper order to correspond
-! with the nodes in the {\tt nodalDistgrid} returned by this call, and hence with a Field built on 
-! {\tt mesh}. The size of the input array should be the spatial dim of {\tt mesh} times 
+! with the nodes in the {\tt nodalDistgrid} returned by this call, and hence with a Field built on
+! {\tt mesh}. The size of the input array should be the spatial dim of {\tt mesh} times
 ! {\tt numOwnedNodes}.
 ! \item [{[numOwnedElements]}]
-! The number of local elements which are owned by this PET. Note that every element is owned by 
+! The number of local elements which are owned by this PET. Note that every element is owned by
 ! the PET it resides on, so unlike for nodes, {\tt numOwnedElements} is identical to the number of elements on
-! the PET. It is also the number of PET local entries in the elementDistgrid. 
+! the PET. It is also the number of PET local entries in the elementDistgrid.
 ! \item [{[ownedElemCoords]}]
 ! The center coordinates for the local elements. These coordinates will be in the proper order to correspond
 ! with the elements in the {\tt elementDistgrid} returned by this call, and hence with a Field built on the
@@ -4444,8 +4444,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [{[isMemFreed]}]
 ! Indicates if the coordinate and connection memory been freed from {\tt mesh}. If so, it
 ! can no longer be used as part of an {\tt ESMF\_FieldRegridStore()} call.
-! \item[{[coordSys]}] 
-!  The coordinate system of the grid coordinate data. 
+! \item[{[coordSys]}]
+!  The coordinate system of the grid coordinate data.
 ! \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -4459,32 +4459,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     if (present(ownedNodeCoords)) then
        ! If mesh has been freed then exit
        if (mesh%isCMeshFreed) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                msg="- the mesh internals have been freed", & 
-                ESMF_CONTEXT, rcToReturn=rc) 
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                msg="- the mesh internals have been freed", &
+                ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
 
        ! Check array size
        if (size(ownedNodeCoords)<mesh%numOwnedNodes*mesh%spatialDim) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-                msg="- owndedNodeCoords too small to hold coordinates", & 
-                ESMF_CONTEXT, rcToReturn=rc) 
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                msg="- owndedNodeCoords too small to hold coordinates", &
+                ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
 
        ! Get coords from C
        call C_ESMC_GetLocalCoords(mesh, ownedNodeCoords, &
-                                  mesh%spatialDim,localrc) 
+                                  mesh%spatialDim,localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -4492,23 +4492,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(ownedElemCoords)) then
        ! If mesh has been freed then exit
        if (mesh%isCMeshFreed) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                msg="- the mesh internals have been freed", & 
-                ESMF_CONTEXT, rcToReturn=rc) 
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                msg="- the mesh internals have been freed", &
+                ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
 
        ! Check array size
        if (size(ownedElemCoords)<mesh%numOwnedElements*mesh%spatialDim) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-                msg="- owndedElemCoords too small to hold coordinates", & 
-                ESMF_CONTEXT, rcToReturn=rc) 
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                msg="- owndedElemCoords too small to hold coordinates", &
+                ESMF_CONTEXT, rcToReturn=rc)
           return
        endif
 
        ! Get coords from C
        call C_ESMC_GetLocalElemCoords(mesh, ownedElemCoords, &
-                                  mesh%spatialDim,localrc) 
+                                  mesh%spatialDim,localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
@@ -4518,11 +4518,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(nodalDistgrid)) nodalDistgrid = mesh%nodal_distgrid
       if (present(elementDistgrid)) elementDistgrid = mesh%element_distgrid
       if (present(numOwnedNodes)) numOwnedNodes =mesh%numOwnedNodes
-      if (present(numOwnedElements)) numOwnedElements =mesh%numOwnedElements 
+      if (present(numOwnedElements)) numOwnedElements =mesh%numOwnedElements
       if (present(isMemFreed)) then
             isMemFreed=mesh%isCMeshFreed
       endif
-      if (present(coordSys)) coordSys =mesh%coordSys 
+      if (present(coordSys)) coordSys =mesh%coordSys
 
       if (present(rc)) rc = localrc
 
@@ -4547,8 +4547,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt mesh} has been created. Otherwise return 
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   Return {\tt .true.} if the {\tt mesh} has been created. Otherwise return
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
 !   returned, the return value of the function will also be {\tt .false.}.
 !
 ! The arguments are:
@@ -4560,7 +4560,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !EOP
-  !-----------------------------------------------------------------------------    
+  !-----------------------------------------------------------------------------
     ESMF_MeshIsCreated = .false.   ! initialize
     if (present(rc)) rc = ESMF_SUCCESS
     if (ESMF_MeshGetInit(mesh)==ESMF_INIT_CREATED) &
@@ -4580,12 +4580,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !RETURN VALUE:
     logical :: ESMF_MeshMatch
-      
+
 ! !ARGUMENTS:
     type(ESMF_Mesh),  intent(in)             :: mesh1
     type(ESMF_Mesh),  intent(in)             :: mesh2
-    integer,          intent(out),  optional :: rc  
-!         
+    integer,          intent(out),  optional :: rc
+!
 !
 ! !DESCRIPTION:
 !      Check if {\tt mesh1} and {\tt mesh2} match. Returns
@@ -4595,11 +4595,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[mesh1] 
+!     \item[mesh1]
 !          {\tt ESMF\_Mesh} object.
-!     \item[mesh2] 
+!     \item[mesh2]
 !          {\tt ESMF\_Mesh} object.
-!     \item[{[rc]}] 
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -4619,25 +4619,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! init to one setting in case of error
     ESMF_MeshMatch = .false.
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh1, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh2, rc)
-    
+
     ! If meshes have not been fully created
     if (.not. mesh1%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif        
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     if (.not. mesh2%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif        
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! For now just make match to mean that the Mesh's have the same distgrids because that's
     ! all the fields care about
@@ -4669,7 +4669,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_MeshGetOrigElemArea(mesh2, area2, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     do i = 1, mesh1%numOwnedElements
       if(area1(i) /= area2(i)) then
         ESMF_MeshMatch = .false.
@@ -4741,7 +4741,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    do i = 1, mesh1%numOwnedElements 
+    do i = 1, mesh1%numOwnedElements
       if(coord1(i) /= coord2(i)) then
         ESMF_MeshMatch = .false.
         deallocate(coord1, coord2)
@@ -4752,7 +4752,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #endif
 
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
   end function ESMF_MeshMatch
 !------------------------------------------------------------------------------
 
@@ -4766,7 +4766,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_MeshSerialize - Serialize mesh info into a byte stream
 !
 ! !INTERFACE:
-      subroutine ESMF_MeshSerialize(mesh, buffer, length, offset, inquireflag, rc) 
+      subroutine ESMF_MeshSerialize(mesh, buffer, length, offset, inquireflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Mesh), intent(inout) :: mesh
@@ -4774,11 +4774,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
       type(ESMF_InquireFlag), intent(in), optional :: inquireflag
-       integer, intent(out), optional :: rc 
+       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Takes an {\tt ESMF\_Mesh} object and adds all the information needed
-!      to  recreate the object based on this information.  
+!      to  recreate the object based on this information.
 !      Expected to be used by {\tt ESMF\_StateReconcile()}.
 !
 !     The arguments are:
@@ -4816,11 +4816,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
 
       if (present (inquireflag)) then
@@ -4879,15 +4879,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_MeshDeserialize - Deserialize a byte stream into a Mesh
 !
 ! !INTERFACE:
-      function ESMF_MeshDeserialize(buffer, offset, rc) 
+      function ESMF_MeshDeserialize(buffer, offset, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Mesh) :: ESMF_MeshDeserialize   
+      type(ESMF_Mesh) :: ESMF_MeshDeserialize
 !
 ! !ARGUMENTS:
       character, pointer, dimension(:) :: buffer
        integer, intent(inout) :: offset
-      integer, intent(out), optional :: rc 
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Takes a byte-stream buffer and reads the information needed to
@@ -4913,7 +4913,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: i
       type(ESMF_AttReconcileFlag) :: attreconflag
       integer :: intMeshFreed, spatialDim, parametricDim
-  
+
        ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if  (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -4956,7 +4956,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          ESMF_MeshDeserialize%isCMeshFreed=.false.
       endif
 
-      ! Set values who's values are implied by the fact 
+      ! Set values who's values are implied by the fact
       ! that this is a proxy mesh
       ESMF_MeshDeserialize%hasSplitElem=.false.
       ESMF_MeshDeserialize%isFullyCreated=.true.
@@ -4973,7 +4973,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
       endif
-   
+
      ! Set init status
      ESMF_INIT_SET_CREATED(ESMF_MeshDeserialize)
 
@@ -4985,7 +4985,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshSetMOAB()"
 !BOP
-! !IROUTINE: ESMF_MeshSetMOAB -- Toggle using the MOAB library internally. 
+! !IROUTINE: ESMF_MeshSetMOAB -- Toggle using the MOAB library internally.
 !
 ! !INTERFACE:
    subroutine ESMF_MeshSetMOAB(moabOn, rc)
@@ -4995,12 +4995,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) , optional            :: rc
 !
 ! !DESCRIPTION:
-!   This method can be employed to turn on or off using the MOAB library 
+!   This method can be employed to turn on or off using the MOAB library
 !   to hold the internal structure of the Mesh. When set to .true. the following
 !   Mesh create calls create a Mesh using MOAB internally. When set to .false. the following
-!   Mesh create calls use the ESMF native internal mesh respresentation. Note that ESMF Meshes 
+!   Mesh create calls use the ESMF native internal mesh respresentation. Note that ESMF Meshes
 !   created on MOAB are only supported in a limited set of operations and should be used
-!   with caution as they haven't yet been tested as thoroughly as the native version.  
+!   with caution as they haven't yet been tested as thoroughly as the native version.
 !
 !   \begin{description}
 !   \item [moabOn]
@@ -5011,12 +5011,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer :: localrc 
-    integer :: intMoabOn    
+    integer :: localrc
+    integer :: intMoabOn
 
     ! Init localrc
     localrc = ESMF_SUCCESS
-    
+
    ! Translate to integer
    intMoabOn=0
    if (moabOn) then
@@ -5026,16 +5026,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call c_esmc_meshsetMOAB(intMoabOn, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     end subroutine ESMF_MeshSetMOAB
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshSetIsCMeshFreed()"
 !BOPI
-! !IROUTINE: ESMF_MeshSetIsCMeshFreed 
+! !IROUTINE: ESMF_MeshSetIsCMeshFreed
 !
 ! !INTERFACE:
    subroutine ESMF_MeshSetIsCMeshFreed(mesh, rc)
@@ -5056,11 +5056,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOPI
 !------------------------------------------------------------------------------
-    
+
     mesh%isCMeshFreed=.true.
-        
+
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_MeshSetIsCMeshFreed
 !------------------------------------------------------------------------------
 
@@ -5084,7 +5084,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item [mesh]
 !         The mesh.
-!   \item[filename] 
+!   \item[filename]
 !         The name of the output file.
 !   \item [{[rc]}]
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -5103,26 +5103,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh internals have been freed", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh internals have been freed", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     call C_ESMC_MeshWrite(mesh%this, filename, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = localrc
-    
+
   end subroutine ESMF_MeshWrite
 !------------------------------------------------------------------------------
 
@@ -5159,10 +5159,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !         The mesh.
 !   \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
-!           can't be mapped to a source cell. Options are 
-!           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or 
-!           {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults 
-!           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. 
+!           can't be mapped to a source cell. Options are
+!           {\tt ESMF\_UNMAPPEDACTION\_ERROR} or
+!           {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults
+!           to {\tt ESMF\_UNMAPPEDACTION\_ERROR}.
 !   \item [pntDim]
 !         The dimension of the points in pntList.
 !   \item [pntNum]
@@ -5187,19 +5187,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh internals have been freed", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh internals have been freed", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
    ! Set default vale for unmappedaction
    if (present(unmappedaction)) then
@@ -5211,14 +5211,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
    ! Call into mesh find point subroutine
    ! TODO: ADD GIDS TO THIS INTERFACE AS THEY'RE AVAILABLE FROM C++ METHOD
     call C_ESMC_MeshFindPnt(mesh%this, localunmappedaction, pntDim, pntCount, &
-			    pntList, petList, localrc)
+                            pntList, petList, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! return success
      if  (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_MeshFindPnt
 !------------------------------------------------------------------------------
 
@@ -5264,19 +5264,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh internals have been freed", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh internals have been freed", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
    ! Call into mesh get areas
     call C_ESMC_MeshGetArea(mesh%this, size(areaList), areaList, localrc);
@@ -5286,7 +5286,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! return success
      if  (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_MeshGetElemArea
 !------------------------------------------------------------------------------
 
@@ -5307,9 +5307,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional                  :: rc
 !
 ! !DESCRIPTION:
-!   For a Mesh with split elements, get the area of the original 
+!   For a Mesh with split elements, get the area of the original
 !   unsplit element. If not split elements then just get Mesh areas.
-!  
+!
 !
 !   \begin{description}
 !   \item [mesh]
@@ -5335,44 +5335,44 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh internals have been freed", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh internals have been freed", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If mesh doesn't have split elements then just get
     ! current areas
     if (.not. mesh%hasSplitElem) then
-       call ESMF_MeshGetElemArea(mesh, areaList, rc=localrc)    
+       call ESMF_MeshGetElemArea(mesh, areaList, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
        if  (present(rc)) rc = ESMF_SUCCESS
-       return 
-    endif    
+       return
+    endif
 
 
     ! check size of areaList
     if (size(areaList) .lt. mesh%origElemCount) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- area list too small to hold element areas", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- area list too small to hold element areas", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! Allocate array to hold split areas
     allocate(splitAreaList(mesh%splitElemCount))
 
     ! Get split areas
-    call ESMF_MeshGetElemArea(mesh, splitAreaList, rc=localrc)    
+    call ESMF_MeshGetElemArea(mesh, splitAreaList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -5383,14 +5383,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        areaList(m)=areaList(m)+splitAreaList(i)
     enddo
 
-    
-    
+
+
     ! Allocate array to hold split areas
     deallocate(splitAreaList)
 
     ! return success
      if  (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_MeshGetOrigElemArea
 !------------------------------------------------------------------------------
 
@@ -5435,19 +5435,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh internals have been freed", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh internals have been freed", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
    ! Call into mesh get areas
     call C_ESMC_MeshGetFrac(mesh%this, size(fracList), fracList, localrc);
@@ -5457,7 +5457,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! return success
      if  (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_MeshGetElemFrac
 !------------------------------------------------------------------------------
 
@@ -5501,19 +5501,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh internals have been freed", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh internals have been freed", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
    ! Call into mesh get areas
     call C_ESMC_MeshGetFrac2(mesh%this, size(fracList), fracList, localrc);
@@ -5523,7 +5523,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! return success
      if  (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_MeshGetElemFrac2
 !------------------------------------------------------------------------------
 
@@ -5545,9 +5545,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional                  :: rc
 !
 ! !DESCRIPTION:
-!   For a Mesh with split elements, get the area of the original 
+!   For a Mesh with split elements, get the area of the original
 !   unsplit element. If not split elements then just get Mesh areas.
-!  
+!
 !
 !   \begin{description}
 !   \item [mesh]
@@ -5574,49 +5574,49 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh internals have been freed", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh internals have been freed", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
 
     ! check size of fracList
     if (size(origfracList) .lt. mesh%origElemCount) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
-                 msg="- frac list too small to hold element fracs", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+                 msg="- frac list too small to hold element fracs", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! check size of fracList
     if (size(splitfracList) .lt. mesh%splitElemCount) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
-                 msg="- frac list too small to hold element fracs", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+                 msg="- frac list too small to hold element fracs", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If mesh doesn't have split elements then just copy
     ! split fractions
     if (.not. mesh%hasSplitElem) then
        if (size(splitFracList) .ne. size(origFracList)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, & 
-               msg="- no solit elements so frac list sizes should be the same", & 
-               ESMF_CONTEXT, rcToReturn=rc) 
-          return 
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+               msg="- no solit elements so frac list sizes should be the same", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
        endif
        origFracList(:)=splitFracList(:)
-       return 
-    endif    
+       return
+    endif
 
 
     ! Allocate array to hold split areas
@@ -5624,13 +5624,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     allocate(origAreaList(mesh%origElemCount))
 
     ! Get split areas
-    call ESMF_MeshGetElemArea(mesh, splitAreaList, rc=localrc)    
+    call ESMF_MeshGetElemArea(mesh, splitAreaList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Put the Fracs back together
-    ! TODO: MIGHT MAKE SENSE TO HAVE ONE INTERFACE 
+    ! TODO: MIGHT MAKE SENSE TO HAVE ONE INTERFACE
     ! THAT DOES AREA AND FRAC, SO WE DON'T REPEAT THE AREA CALC.
     origFracList=0.0_ESMF_KIND_R8
     origAreaList=0.0_ESMF_KIND_R8
@@ -5651,7 +5651,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! return success
      if  (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_MeshGetOrigElemFrac
 !------------------------------------------------------------------------------
 
@@ -5698,40 +5698,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has not been fully created
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
 
     if (present(hasSplitElem))   hasSplitElem=mesh%hasSplitElem
 
-    if (mesh%hasSplitElem) then 
+    if (mesh%hasSplitElem) then
       if (present(splitElemStart)) splitElemStart=mesh%splitElemStart
       if (present(splitElemCount)) splitElemCount=mesh%splitElemCount
       if (present(origElemStart))  origElemStart=mesh%origElemStart
-      if (present(origElemCount))  origElemCount=mesh%origElemCount    
+      if (present(origElemCount))  origElemCount=mesh%origElemCount
 
       ! copy split Element Map
       if (present(splitElemMap)) then
          if (size(splitElemMap) .lt. size(mesh%splitElemMap)) then
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- splitElemMap input parameter wrong size ", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-            return 
-         endif            	
-  
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- splitElemMap input parameter wrong size ", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+            return
+         endif                  
+
         splitElemMap(:)=mesh%splitElemMap(:)
       endif
     else
       if (present(splitElemStart) .or. present(splitElemCount) .or. &
           present(origElemStart)  .or. present(origElemCount) .or. &
           present(splitElemMap)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has no split elements", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-      endif 
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has no split elements", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+      endif
     endif
 
     if (present(rc)) rc = localrc
@@ -5789,25 +5789,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh internals have been freed", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh internals have been freed", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If mesh doesn't have split elements then just leave
     if (.not. mesh%hasSplitElem) then
         if  (present(rc)) rc = ESMF_SUCCESS
        return
-    endif    
+    endif
 
     ! Get size of list
     indCount=size(factorIndexList,2)
@@ -5847,7 +5847,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     do i=1,petCount
        totalCount=totalCount+globalCount(i)
     enddo
-  
+
     ! Allocate final area list
     allocate(globalSplitElemMap(totalCount))
 
@@ -5868,10 +5868,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Get rid of global Map
     deallocate(globalSplitElemMap)
-    
+
     ! return success
      if  (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_MeshMergeSplitSrcInd
 !------------------------------------------------------------------------------
 
@@ -5887,7 +5887,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(in)                     :: mesh
-    real(ESMF_KIND_R8), intent(inout)               :: factorList(:) 
+    real(ESMF_KIND_R8), intent(inout)               :: factorList(:)
     integer(ESMF_KIND_I4),intent(inout)             :: factorIndexList(:,:)
     integer, intent(out), optional                  :: rc
 !
@@ -5924,25 +5924,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! If mesh has been freed then exit
     if (mesh%isCMeshFreed) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh internals have been freed", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh internals have been freed", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If mesh has been freed then exit
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, & 
-                 msg="- the mesh has not been fully created", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
-       return 
-    endif    
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
 
     ! If mesh doesn't have split elements then just leave
     if (.not. mesh%hasSplitElem) then
         if  (present(rc)) rc = ESMF_SUCCESS
        return
-    endif    
+    endif
 
     ! Get size of list
     indCount=size(factorIndexList,2)
@@ -5952,17 +5952,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     allocate(splitAreaList(mesh%numOwnedElements))
 
     ! Get split areas
-    call ESMF_MeshGetElemArea(mesh, splitAreaList, rc=localrc)    
+    call ESMF_MeshGetElemArea(mesh, splitAreaList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return   
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Allocate array to hold orig areas (before split)
     allocate(origAreaList(mesh%origElemCount))
 
     ! Get split areas
-    call ESMF_MeshGetOrigElemArea(mesh, origAreaList, rc=localrc)    
+    call ESMF_MeshGetOrigElemArea(mesh, origAreaList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return   
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
 
     ! Loop changing factorIndexList and weights
@@ -5973,14 +5973,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        orig_dst_pos=orig_dst_id-mesh%origElemStart+1
 
 !       write(*,*) i,"b:",factorIndexList(2,i),"a:",orig_dst_id,"  ", &
-!                  (splitAreaList(split_dst_pos))/origAreaList(orig_dst_pos)                                       
+!                  (splitAreaList(split_dst_pos))/origAreaList(orig_dst_pos)
 
        ! Set new index
        factorIndexList(2,i)=orig_dst_id
 
        ! Set new weight
        factorList(i)=(factorList(i)*splitAreaList(split_dst_pos))/ &
-                      origAreaList(orig_dst_pos)                                       
+                      origAreaList(orig_dst_pos)
     enddo
 
 
@@ -6023,7 +6023,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: localrc 
+    integer :: localrc
     type(ESMF_InterArray) :: maskValuesArg
 
     ! Init localrc
@@ -6035,18 +6035,18 @@ end subroutine ESMF_MeshMergeSplitDstInd
        return
     endif
 
-    ! convert mask values 
+    ! convert mask values
     maskValuesArg = ESMF_InterArrayCreate(maskValues, rc=localrc)
-    	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      	  ESMF_CONTEXT, rcToReturn=rc)) return
- 
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
     call c_esmc_meshturnoncellmask(mesh, maskValuesArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      	    ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_InterArrayDestroy(maskValuesArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      	    ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -6078,17 +6078,17 @@ end subroutine ESMF_MeshMergeSplitDstInd
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: localrc 
-    
+    integer :: localrc
+
     ! Init localrc
     localrc = ESMF_SUCCESS
-    
+
     call c_esmc_meshturnoffcellmask(mesh, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     end subroutine ESMF_MeshTurnOffCellMask
 
 
@@ -6122,7 +6122,7 @@ end subroutine ESMF_MeshMergeSplitDstInd
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: localrc 
+    integer :: localrc
     type(ESMF_InterArray) :: maskValuesArg
 
     ! Init localrc
@@ -6134,18 +6134,18 @@ end subroutine ESMF_MeshMergeSplitDstInd
        return
     endif
 
-    ! convert mask values 
+    ! convert mask values
     maskValuesArg = ESMF_InterArrayCreate(maskValues, rc=localrc)
-    	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      	  ESMF_CONTEXT, rcToReturn=rc)) return
- 
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
     call c_esmc_meshturnonnodemask(mesh, maskValuesArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      	    ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_InterArrayDestroy(maskValuesArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      	    ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -6177,17 +6177,17 @@ end subroutine ESMF_MeshMergeSplitDstInd
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: localrc 
-    
+    integer :: localrc
+
     ! Init localrc
     localrc = ESMF_SUCCESS
-    
+
     call c_esmc_meshturnoffnodemask(mesh, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     end subroutine ESMF_MeshTurnOffNodeMask
 
 
@@ -6297,145 +6297,145 @@ end subroutine ESMF_MeshMergeSplitDstInd
 
 !------------------------------------------------------------------------------
 
- subroutine sort_int(origlist, newind, unique) 
-! 
-! !ARGUMENTS: 
- integer(ESMF_KIND_I4), intent(in) :: origlist(:) 
- integer(ESMF_KIND_I4), intent(inout) :: newind(:) 
+ subroutine sort_int(origlist, newind, unique)
+!
+! !ARGUMENTS:
+ integer(ESMF_KIND_I4), intent(in) :: origlist(:)
+ integer(ESMF_KIND_I4), intent(inout) :: newind(:)
  integer(ESMF_KIND_I4), intent(out) :: unique
 
- INTEGER, PARAMETER :: SELECT = 20 
-! .. 
-! .. Local Scalars .. 
- INTEGER :: ENDD, I, J, START, STKPNT 
+ INTEGER, PARAMETER :: SELECT = 20
+! ..
+! .. Local Scalars ..
+ INTEGER :: ENDD, I, J, START, STKPNT
  integer :: n , first, k
- integer(ESMF_KIND_I4) :: arrayel1, arrayel2, arrayel3, arrayel_minmax, arrayel_temp 
+ integer(ESMF_KIND_I4) :: arrayel1, arrayel2, arrayel3, arrayel_minmax, arrayel_temp
  integer(ESMF_KIND_I4) :: indtemp, minind
  integer(ESMF_KIND_I4), allocatable :: list(:), origind(:), offset(:)
 
-! .. 
-! .. Local Arrays .. 
- INTEGER :: STACK( 2, 32 ) 
-! .. 
-! .. Executable Statements .. 
- 
-! 
-! Test the input paramters. 
- 
- n = size (origlist) 
+! ..
+! .. Local Arrays ..
+ INTEGER :: STACK( 2, 32 )
+! ..
+! .. Executable Statements ..
+
+!
+! Test the input paramters.
+
+ n = size (origlist)
  allocate(list(n), origind(n), offset(n))
  list = origlist
  do i=1,n
   origind(i)=i
   newind(i)=i
  enddo
- STKPNT = 1 
- STACK( 1, 1 ) = 1 
- STACK( 2, 1 ) = N 
- 
- 10 CONTINUE 
- START = STACK( 1, STKPNT ) 
- ENDD = STACK( 2, STKPNT ) 
- STKPNT = STKPNT - 1 
- IF( ENDD-START.LE.SELECT .AND. ENDD-START > 0 ) THEN 
-! 
-! Do Insertion sort on D( START:ENDD ) 
-! 
-! Sort into increasing order 
-! 
- DO 50 I = START + 1, ENDD 
- DO, J = I, START + 1, -1 
- IF( list( J ) < list( J-1 ) ) THEN 
- arrayel_minmax = list( J ) 
- list( J ) = list( J-1 ) 
- list( J-1 ) = arrayel_minmax 
+ STKPNT = 1
+ STACK( 1, 1 ) = 1
+ STACK( 2, 1 ) = N
+
+ 10 CONTINUE
+ START = STACK( 1, STKPNT )
+ ENDD = STACK( 2, STKPNT )
+ STKPNT = STKPNT - 1
+ IF( ENDD-START.LE.SELECT .AND. ENDD-START > 0 ) THEN
+!
+! Do Insertion sort on D( START:ENDD )
+!
+! Sort into increasing order
+!
+ DO 50 I = START + 1, ENDD
+ DO, J = I, START + 1, -1
+ IF( list( J ) < list( J-1 ) ) THEN
+ arrayel_minmax = list( J )
+ list( J ) = list( J-1 )
+ list( J-1 ) = arrayel_minmax
  indtemp = origind(j)
  origind(j)=origind(j-1)
  origind(j-1)=indtemp
- ELSE 
- GO TO 50 
- END IF 
- end do 
- 50 end do 
-! 
- ELSE IF( ENDD-START > SELECT ) THEN 
-! 
-! Partition list( START:ENDD ) and stack parts, largest one first 
-! 
-! Choose partition entry as median of 3 
-! 
- arrayel1 = list( START ) 
- arrayel2 = list( ENDD ) 
- I = ( START+ENDD ) / 2 
- arrayel3 = list( I ) 
- IF( arrayel1 < arrayel2 ) THEN 
- IF( arrayel3 < arrayel1 ) THEN 
- arrayel_minmax = arrayel1 
- ELSE IF( arrayel3 < arrayel2 ) THEN 
- arrayel_minmax = arrayel3 
- ELSE 
- arrayel_minmax = arrayel2 
- END IF 
- ELSE 
- IF( arrayel3 < arrayel2 ) THEN 
- arrayel_minmax = arrayel2 
- ELSE IF( arrayel3 < arrayel1 ) THEN 
- arrayel_minmax = arrayel3 
- ELSE 
- arrayel_minmax = arrayel1 
- END IF 
- END IF 
-! 
- I = START - 1 
- J = ENDD + 1 
- 
- 90 CONTINUE 
- do 
- J = J - 1 
- IF( list( J ) <= arrayel_minmax )& 
- & exit 
- end do 
- 
- do 
- I = I + 1 
- IF( list( I ) >= arrayel_minmax )& 
- & exit 
- end do 
- 
- IF( I < J ) THEN 
- arrayel_temp = list( I ) 
- list( I ) = list( J ) 
- list( J ) = arrayel_temp 
+ ELSE
+ GO TO 50
+ END IF
+ end do
+ 50 end do
+!
+ ELSE IF( ENDD-START > SELECT ) THEN
+!
+! Partition list( START:ENDD ) and stack parts, largest one first
+!
+! Choose partition entry as median of 3
+!
+ arrayel1 = list( START )
+ arrayel2 = list( ENDD )
+ I = ( START+ENDD ) / 2
+ arrayel3 = list( I )
+ IF( arrayel1 < arrayel2 ) THEN
+ IF( arrayel3 < arrayel1 ) THEN
+ arrayel_minmax = arrayel1
+ ELSE IF( arrayel3 < arrayel2 ) THEN
+ arrayel_minmax = arrayel3
+ ELSE
+ arrayel_minmax = arrayel2
+ END IF
+ ELSE
+ IF( arrayel3 < arrayel2 ) THEN
+ arrayel_minmax = arrayel2
+ ELSE IF( arrayel3 < arrayel1 ) THEN
+ arrayel_minmax = arrayel3
+ ELSE
+ arrayel_minmax = arrayel1
+ END IF
+ END IF
+!
+ I = START - 1
+ J = ENDD + 1
+
+ 90 CONTINUE
+ do
+ J = J - 1
+ IF( list( J ) <= arrayel_minmax )&
+ & exit
+ end do
+
+ do
+ I = I + 1
+ IF( list( I ) >= arrayel_minmax )&
+ & exit
+ end do
+
+ IF( I < J ) THEN
+ arrayel_temp = list( I )
+ list( I ) = list( J )
+ list( J ) = arrayel_temp
  indtemp = origind(i)
  origind(i)=origind(j)
  origind(j)=indtemp
- GO TO 90 
- END IF 
- IF( J-START > ENDD-J-1 ) THEN 
- STKPNT = STKPNT + 1 
- STACK( 1, STKPNT ) = START 
- STACK( 2, STKPNT ) = J 
- STKPNT = STKPNT + 1 
- STACK( 1, STKPNT ) = J + 1 
- STACK( 2, STKPNT ) = ENDD 
- ELSE 
- STKPNT = STKPNT + 1 
- STACK( 1, STKPNT ) = J + 1 
- STACK( 2, STKPNT ) = ENDD 
- STKPNT = STKPNT + 1 
- STACK( 1, STKPNT ) = START 
- STACK( 2, STKPNT ) = J 
- END IF 
- END IF 
- IF( STKPNT > 0 ) & 
- & GO TO 10 
+ GO TO 90
+ END IF
+ IF( J-START > ENDD-J-1 ) THEN
+ STKPNT = STKPNT + 1
+ STACK( 1, STKPNT ) = START
+ STACK( 2, STKPNT ) = J
+ STKPNT = STKPNT + 1
+ STACK( 1, STKPNT ) = J + 1
+ STACK( 2, STKPNT ) = ENDD
+ ELSE
+ STKPNT = STKPNT + 1
+ STACK( 1, STKPNT ) = J + 1
+ STACK( 2, STKPNT ) = ENDD
+ STKPNT = STKPNT + 1
+ STACK( 1, STKPNT ) = START
+ STACK( 2, STKPNT ) = J
+ END IF
+ END IF
+ IF( STKPNT > 0 ) &
+ & GO TO 10
 
  ! find unique elements in list
 offset = 0
  unique=1
  first=-1
  do i=2,n
-  if (list(i) > list(i-1)) then 
+  if (list(i) > list(i-1)) then
     unique=unique+1
     if (first>0) then
       !found duplicate, set the newIds to the smallest of the list
@@ -6457,18 +6457,18 @@ offset = 0
     if (first<0) first=i-1
   endif
  enddo
- 
+
  do i=1,n
    newind(i)=newind(i)-offset(newind(i))
  enddo
 
- RETURN 
- 
- end subroutine sort_int 
+ RETURN
+
+ end subroutine sort_int
 
 #if 0
 !------------------------------------------------------------------------------
-!---  In this function, the node coordinates of the mesh are read in to multiple PETs in 
+!---  In this function, the node coordinates of the mesh are read in to multiple PETs in
 !---  parallel and redistributed to its resident nodes based on the cell partition.
 !---  The other version of the same function reads the entire node coordinates into every
 !---  PET and only store the ones the local cells use.  This version may same some memory
@@ -6479,23 +6479,23 @@ offset = 0
 #define ESMF_METHOD "ESMF_MeshCreateFromUnstruct()"
 !BOPI
 ! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a grid file defined in the ESMF Unstructured
-!  Grid format -- this is the parallel version and it only works for UGRID.  
+!  Grid format -- this is the parallel version and it only works for UGRID.
 !  Keep the code here but commented it out for 6.3.0 release
 !  Create a triangle and quad mesh using a global node coordinate table and a distributed
 ! element connection array
 !  arguments:  VertexCoords(3, NodeCnt), where NodeCnt is the total node count for the
 !  global mesh, the first dimension stores the x,y,z coordinates of the node
 !              CellConnect(4, ElemCnt), where ElemCnt is the total number of elements
-!                The first dimension contains the global node IDs at the four corner of the element 
+!                The first dimension contains the global node IDs at the four corner of the element
 !              StartCell, the first Element ID in this PET
 !  in this local PET.  Note the CellConnect is local and VertexCoords is global.
-!  In this routine, we have to figure out which nodes are used by the local Elements 
+!  In this routine, we have to figure out which nodes are used by the local Elements
 !  and who are the owners of the local nodes, then add the local nodes and elements into
 !  the mesh
 ! !INTERFACE:
 ! Private name; call using ESMF_MeshCreate()
     function ESMF_MeshCreateFromUnstruct(filename, fileformat, &
-			addUserArea, maskFlag, varname, rc)
+                        addUserArea, maskFlag, varname, rc)
 !
 !
 ! !RETURN VALUE:
@@ -6503,7 +6503,7 @@ offset = 0
 ! !ARGUMENTS:
     character(len=*), intent(in)              :: filename
     type(ESMF_FileFormat_Flag), optional, intent(in) :: fileformat
-    logical, intent(in), optional	      :: addUserArea
+    logical, intent(in), optional             :: addUserArea
     type(ESMF_MeshLoc), intent(in), optional  :: maskFlag
     character(len=*), optional, intent(in)    :: varname
     integer, intent(out), optional            :: rc
@@ -6514,9 +6514,9 @@ offset = 0
 !   \begin{description}
 !   \item [filename]
 !         The name of the grid file
-!   \item[{[addUserArea]}] 
+!   \item[{[addUserArea]}]
 !         if {\tt .true.}, the cell area will be read in from the GRID file.  This feature is
-!         only supported when the grid file is in the SCRIP or ESMF format. 
+!         only supported when the grid file is in the SCRIP or ESMF format.
 !   \item [{[fileformat]}]
 !         The type of grid file
 !   \item[{[meshname]}]
@@ -6524,7 +6524,7 @@ offset = 0
 !         is {\tt ESMF\_FILEFORMAT\_UGRID}
 !   \item[{[maskFlag]}]
 !      If present, generate the mask using the missing\_value attribute defined in 'varname' on
-!      the location defined by the flag, the accepted values are {\tt ESMF\_MESHLOC\_NODE} or 
+!      the location defined by the flag, the accepted values are {\tt ESMF\_MESHLOC\_NODE} or
 !      {\tt ESMF\_MESHLOC\_ELEMENT}
 !   \item[{[varname]}]
 !      If maskFlag is present, provide a variable name stored in the grid file and
@@ -6539,7 +6539,7 @@ offset = 0
 !EOPI
 !------------------------------------------------------------------------------
     integer                             :: localrc      ! local return code
-    integer			        :: PetNo, PetCnt 
+    integer                             :: PetNo, PetCnt
     real(ESMF_KIND_R8),pointer          :: nodeCoords(:,:)
     integer(ESMF_KIND_I4),pointer       :: elementConn(:,:)
     integer(ESMF_KIND_I4),pointer       :: elmtNum(:)
@@ -6557,7 +6557,7 @@ offset = 0
 
     integer                             :: ElemNo, TotalElements, startElemNo
     integer                             :: ElemCnt,i,j,k,n,dim, nedges
-    integer				:: localNodes, myStartElmt
+    integer                             :: localNodes, myStartElmt
     integer                             :: ConnNo, TotalConnects
     integer, allocatable                :: ElemId(:)
     integer, allocatable                :: ElemType(:)
@@ -6579,7 +6579,7 @@ offset = 0
     real(ESMF_KIND_R8)                  :: area(maxNumPoly)
     integer                             :: polyIntBuf(maxNumPoly)
     integer                             :: triInd(3*(maxNumPoly-2))
-#else 
+#else
     integer                             :: maxNumPoly
     real(ESMF_KIND_R8),allocatable      :: polyCoords(:)
     real(ESMF_KIND_R8),allocatable      :: polyDblBuf(:)
@@ -6596,20 +6596,20 @@ offset = 0
     logical                             :: convertToDeg
     logical                             :: haveNodeMask, haveElmtMask
     logical                             :: haveMask
-    logical 				:: localAddUserArea
-    type(ESMF_MeshLoc)			:: localAddMask
+    logical                             :: localAddUserArea
+    type(ESMF_MeshLoc)                  :: localAddMask
     real(ESMF_KIND_R8), pointer         :: varbuffer(:)
     real(ESMF_KIND_R8)                  :: missingvalue
-    integer                             :: cartSpatialDim    ! sp. dim of grid when converted to 
+    integer                             :: cartSpatialDim    ! sp. dim of grid when converted to
     type(ESMF_CoordSys_Flag)            :: coordSys
 
-    ! additional variables used to parallelize node IO 
+    ! additional variables used to parallelize node IO
     integer, pointer                    :: segmentTbl(:), pairoffsets(:)
     integer, pointer                    :: nodepairs(:), newpairs(:), mypair(:), allpairs(:)
     integer, pointer                    :: seqIndexList(:)
     integer, pointer                    :: haloIndexList(:)
     integer                             :: totalpairs, startind, endind
-    integer                             :: localnodecnt, totalnodecnt, halonodecnt    
+    integer                             :: localnodecnt, totalnodecnt, halonodecnt
     integer                             :: haloNodes, startNode
     type(ESMF_DistGrid)                 :: regDistGrid, nodeDistGrid
     type(ESMF_Array)                    :: regCoordArray, nodeCoordArray
@@ -6621,29 +6621,29 @@ offset = 0
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     if (present(addUserArea)) then
-	localAddUserArea = addUserArea
+        localAddUserArea = addUserArea
     else
-	localAddUserArea = .false.
+        localAddUserArea = .false.
     endif
 
     if (present(maskFlag)) then
-	localAddMask = maskFlag
+        localAddMask = maskFlag
     else
-	localAddMask = ESMF_MESHLOC_NONE
+        localAddMask = ESMF_MESHLOC_NONE
     endif
 
     ! Read the mesh definition from the file
     if (present(fileformat)) then
-	fileformatlocal = fileformat
+        fileformatlocal = fileformat
     else
-	fileformatlocal = ESMF_FILEFORMAT_ESMFMESH
+        fileformatlocal = ESMF_FILEFORMAT_ESMFMESH
     endif
 
     if (fileformatlocal == ESMF_FILEFORMAT_UGRID) then
-	if (.not. present(meshname)) then
-           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                             msg="- meshname argument is missing", & 
-                             ESMF_CONTEXT, rcToReturn=rc) 
+        if (.not. present(meshname)) then
+           call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+                             msg="- meshname argument is missing", &
+                             ESMF_CONTEXT, rcToReturn=rc)
         endif
     endif
 
@@ -6660,48 +6660,48 @@ offset = 0
 
     ! Default coordinate system
     coordSys = ESMF_COORDSYS_SPH_DEG
- 
+
     if (fileformatlocal == ESMF_FILEFORMAT_ESMFMESH) then
        ! Get coordDim
        call ESMF_EsmfInq(filename,coordDim=coordDim, haveNodeMask=haveNodeMask, &
-       	    haveElmtMask=haveElmtMask, rc=localrc)
+                    haveElmtMask=haveElmtMask, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! Don't convert if not 2D because that'll be cartesian right now
        if (coordDim .eq. 2) then
           convertToDeg = .true.
-       else 
+       else
           convertToDeg = .false.
        endif
 
-       ! Get information from file     
+       ! Get information from file
        if (haveNodeMask) then
            call ESMF_EsmfGetNode(filename, nodeCoords, nodeMask=glbNodeMask,&
-	   		      convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
+                              convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
        else
            call ESMF_EsmfGetNode(filename, nodeCoords, &
-	   		      convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
-       endif			      			       
+                              convertToDeg=convertToDeg, coordSys=coordSys, rc=localrc)
+       endif                                            
        if (haveElmtMask) then
-	if (localAddUserArea) then
+        if (localAddUserArea) then
            call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, elementArea=elementArea, &
-	 			 rc=localrc)
-	else
+                                 rc=localrc)
+        else
            call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementMask=elementMask, &
-	 			 rc=localrc)
-	endif
+                                 rc=localrc)
+        endif
        else
-	if (localAddUserArea) then
+        if (localAddUserArea) then
            call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, elementArea=elementArea, &
-				 rc=localrc)
-	else
+                                 rc=localrc)
+        else
            call ESMF_EsmfGetElement(filename, elementConn, elmtNum, &
                                  startElmt, rc=localrc)
-	endif
+        endif
        endif
 
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6722,50 +6722,50 @@ offset = 0
 
        ! Chenk if the grid is 3D or 2D
        call ESMF_UGridInq(filename, meshname, nodeCount=nodeCnt, &
-       	    			    nodeCoordDim=coordDim, rc=localrc)
+                                            nodeCoordDim=coordDim, rc=localrc)
 
        if (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_ELEMENT) then
-	  !Get the variable and the missing value attribute from file
-	  ! Total number of local elements
+          !Get the variable and the missing value attribute from file
+          ! Total number of local elements
           ElemCnt = ubound (elementConn, 2)
           allocate(varbuffer(ElemCnt))
-	  call ESMF_UGridGetVarByName(filename, varname, varbuffer, startind=startElmt, &
-		count=ElemCnt, location="face", &
-		missingvalue=missingvalue, rc=localrc)
+          call ESMF_UGridGetVarByName(filename, varname, varbuffer, startind=startElmt, &
+                count=ElemCnt, location="face", &
+                missingvalue=missingvalue, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
-	  ! Create local mask 
-	  allocate(elementMask(ElemCnt))
-	  elementMask(:)=1
-	  do i=1,ElemCnt
-	    if (varbuffer(i) == missingvalue) elementMask(i)=0
+          ! Create local mask
+          allocate(elementMask(ElemCnt))
+          elementMask(:)=1
+          do i=1,ElemCnt
+            if (varbuffer(i) == missingvalue) elementMask(i)=0
           enddo
-	  deallocate(varbuffer)
+          deallocate(varbuffer)
        elseif (coordDim == 2 .and. localAddMask == ESMF_MESHLOC_NODE) then
-	  !Get the variable and the missing value attribute from file
-	  ! Total number of total nodes
+          !Get the variable and the missing value attribute from file
+          ! Total number of total nodes
           allocate(varbuffer(nodeCnt))
-	  call ESMF_UGridGetVarByName(filename, varname, varbuffer, &
-		location="node", &
-		missingvalue=missingvalue, rc=localrc)
+          call ESMF_UGridGetVarByName(filename, varname, varbuffer, &
+                location="node", &
+                missingvalue=missingvalue, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
-	  ! Create local mask 
-	  allocate(glbNodeMask(nodeCnt))
-	  glbNodeMask(:)=1
-	  do i=1,nodeCnt
-	    if (varbuffer(i) == missingvalue) glbNodeMask(i)=0
+          ! Create local mask
+          allocate(glbNodeMask(nodeCnt))
+          glbNodeMask(:)=1
+          do i=1,nodeCnt
+            if (varbuffer(i) == missingvalue) glbNodeMask(i)=0
           enddo
-	  deallocate(varbuffer)
-       endif 
+          deallocate(varbuffer)
+       endif
     else
-       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, & 
-                             msg="- unrecognized fileformat", & 
-                             ESMF_CONTEXT, rcToReturn=rc) 
+       call ESMF_LogSetError(ESMF_RC_ARG_WRONG, &
+                             msg="- unrecognized fileformat", &
+                             ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
-   ! Figure out dimensions 
+   ! Figure out dimensions
     if (coordDim .eq. 2) then
        parametricDim=2
        spatialDim = 2
@@ -6777,22 +6777,22 @@ offset = 0
     else if (coordDim .eq. 3) then
        parametricDim=3
        spatialDim=3
-       cartSpatialDim=3 
-       coordSys = ESMF_COORDSYS_CART 
+       cartSpatialDim=3
+       coordSys = ESMF_COORDSYS_CART
     else
-       call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
-            msg="- only coordDim 2 or 3 is supported right now", & 
-            ESMF_CONTEXT, rcToReturn=rc) 
+       call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, &
+            msg="- only coordDim 2 or 3 is supported right now", &
+            ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
 
     if (parametricDim == 2) then
         Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
-	       coordSys=coordSys,rc=localrc)
+               coordSys=coordSys,rc=localrc)
     else
         Mesh = ESMF_MeshCreate3part (parametricDim, spatialDim, &
-	       coordSys=coordSys,rc=localrc)
-    endif    
+               coordSys=coordSys,rc=localrc)
+    endif
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6808,7 +6808,7 @@ offset = 0
     ! Total number of local elements
     ElemCnt = ubound (elementConn, 2)
 
-    ! Set the coorsponding NodeUsed(:) value to my PetNo if it is used by the local element 
+    ! Set the coorsponding NodeUsed(:) value to my PetNo if it is used by the local element
     ! Also calculate the total number of mesh elements based on elmtNum
     ! if elmtNum == 3 or 4, no change, if elmtNum > 4, break it into elmtNum-2 triangles
     totalElements = ElemCnt
@@ -6816,7 +6816,7 @@ offset = 0
     maxNumPoly=0
     if (parametricDim .eq. 2) then
        do ElemNo =1, ElemCnt
-          do i=1,elmtNum(ElemNo)	
+          do i=1,elmtNum(ElemNo)        
              NodeUsed(elementConn(i,ElemNo))=PetNo
           enddo
           if (elmtNum(ElemNo) > 4) TotalElements = TotalElements + (elmtNum(ElemNo)-3)
@@ -6831,11 +6831,11 @@ offset = 0
        end do
     else ! If not parametricDim==2, assuming parmetricDim==3
        do ElemNo =1, ElemCnt
-          do i=1,elmtNum(ElemNo)	
+          do i=1,elmtNum(ElemNo)        
              NodeUsed(elementConn(i,ElemNo))=PetNo
           enddo
           TotalConnects = TotalConnects+elmtNum(ElemNo)
-       end do       
+       end do
     endif
 
    ! write(*,*) "maxNumPoly=",maxNumPoly
@@ -6863,19 +6863,19 @@ offset = 0
       if (j>totalpairs) then
          !print *, 'reallocate nodepairs'
          allocate(newpairs(totalpairs*2))
-	 newpairs(1:totalpairs)=nodepairs
+         newpairs(1:totalpairs)=nodepairs
          deallocate(nodepairs)
          nodepairs => newpairs
          totalpairs=totalpairs*2
       endif
     enddo
 
-    ! collect the node segment pairs in all the PETs  
+    ! collect the node segment pairs in all the PETs
     allocate(allpairs(PetCnt))
-    call ESMF_VMAllGather(vm, mypair, allpairs, 1, rc=localrc) 
+    call ESMF_VMAllGather(vm, mypair, allpairs, 1, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     allocate(pairoffsets(PetCnt))
     pairoffsets(1)=0
     allpairs = allpairs*2
@@ -6884,7 +6884,7 @@ offset = 0
       pairoffsets(i)=pairoffsets(i-1)+allpairs(i-1)
       totalpairs = totalpairs+allpairs(i)
     enddo
-   
+
     !print *, PetNo, " Total node pairs and total nodes: ",  mypair(1), totalpairs, totalnodecnt
 
     allocate(segmentTbl(totalpairs))
@@ -6898,7 +6898,7 @@ offset = 0
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Need to decide who owns the local nodes
-    ! Assign the node to the first PET that uses it, so only need to 
+    ! Assign the node to the first PET that uses it, so only need to
     ! search the pairs from PET=0:PetNo-1
     halonodecnt = 0
     do j=1, mypair(1)
@@ -6911,8 +6911,8 @@ offset = 0
             if (k < segmentTbl(n)) EXIT
             if (k > segmentTbl(n+1)) CYCLE
             NodeUsed(k)= i-1
-	    halonodecnt = halonodecnt+1
-	    !print *, PetNo, k, 'fall within ', segmentTbl(n), segmentTbl(n+1)
+            halonodecnt = halonodecnt+1
+            !print *, PetNo, k, 'fall within ', segmentTbl(n), segmentTbl(n+1)
             goto 100
            enddo
         enddo
@@ -6940,9 +6940,9 @@ offset = 0
     enddo
     nodeDistGrid = ESMF_DistGridCreate(arbSeqIndexList=seqIndexList, rc=localrc)
     nodeCoordArray= ESMF_ArrayCreate(nodeDistGrid, ESMF_TYPEKIND_R8, &
-    		                distgridToArrayMap=(/2/), &
- 		    		haloSeqIndexList=haloIndexList, undistLBound=(/1/), & 
-				undistUBound=(/coordDim/),rc=localrc)
+                                distgridToArrayMap=(/2/), &
+                                haloSeqIndexList=haloIndexList, undistLBound=(/1/), &
+                                undistUBound=(/coordDim/),rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6954,22 +6954,22 @@ offset = 0
     endif
     call ESMF_GetNodeFromUGridFile(filename, meshname, nodeCoords, &
          nodeCount=localnodecnt, startNode=startNode, &
-         convertToDeg = .true., rc=localrc) 
+         convertToDeg = .true., rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create a distgrid with regular distribution for the NodeCoords
     regDistGrid = ESMF_DistGridCreate((/1/), (/NodeCnt/), &
-    		  	   regDecomp=(/PetCnt/), &
-    		           decompflag=(/ESMF_DECOMP_RESTLAST/), &
-			   indexflag=ESMF_INDEX_GLOBAL,  rc=localrc) 
+                           regDecomp=(/PetCnt/), &
+                           decompflag=(/ESMF_DECOMP_RESTLAST/), &
+                           indexflag=ESMF_INDEX_GLOBAL,  rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Create an array with one undistributed dimension for the coordinates
     regCoordArray= ESMF_ArrayCreate(regDistGrid, ESMF_TYPEKIND_R8, &
-    		            distgridToArrayMap=(/2/), &
-   		    	    undistLBound=(/1/), undistUBound=(/coordDim/),rc=localrc)
+                            distgridToArrayMap=(/2/), &
+                            undistLBound=(/1/), undistUBound=(/coordDim/),rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -6987,11 +6987,11 @@ offset = 0
 
     ! call array redist to redist to the new distribution
     call ESMF_ArrayRedistStore(regCoordArray, nodeCoordArray, routehandle=redistHdl, &
-    	 				      rc=localrc)
+                                              rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
     call ESMF_ArrayRedist(regCoordArray, nodeCoordArray, routehandle=redistHdl, &
-    	 				 rc=localrc)               
+                                         rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -7010,7 +7010,7 @@ offset = 0
     call ESMF_DistGridDestroy(regDistGrid)
 
     ! Now, get the node coordinates fortran pointer, this fptr includes both the
-    ! exclusive region and the halo region 
+    ! exclusive region and the halo region
     call ESMF_ArrayGet(nodeCoordArray, farrayPtr=nodeCoords, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7024,7 +7024,7 @@ offset = 0
     NodeId(1:localnodecnt)=seqIndexList
     NodeId(localnodecnt+1:totalnodecnt)=haloIndexList
     NodeOwners(1:localnodecnt)=PetNo
-    ! Now change NodeUsed content to store the local node index to be used by elemConn    
+    ! Now change NodeUsed content to store the local node index to be used by elemConn
     do i = 1, localnodecnt
        NodeUsed(seqIndexList(i))=i
     enddo
@@ -7052,7 +7052,7 @@ offset = 0
        do NodeNo = 1, totalnodecnt
           do dim = 1, 3
              NodeCoords1D ((i-1)*3+dim) = nodeCoords(dim, NodeNo)
-	  end do
+          end do
        end do
     endif
 
@@ -7071,11 +7071,11 @@ offset = 0
        call ESMF_MeshAddNodes (Mesh, NodeIds=NodeId, &
                             NodeCoords=NodeCoords1D, &
                             NodeOwners=NodeOwners, &
-			    NodeMask = NodeMask, &
+                            NodeMask = NodeMask, &
                             rc=localrc)
        deallocate(NodeMask)
-       deallocate(glbNodeMask)		    
-    endif 
+       deallocate(glbNodeMask)          
+    endif
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7092,7 +7092,7 @@ offset = 0
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-    
+
     ! Find out the start element ID
     myStartElmt=0
     do i=1,PetNo
@@ -7108,7 +7108,7 @@ offset = 0
 
     ! Allocate mask if the user wants one
     haveMask=.false.
-    if (haveElmtMask) then 
+    if (haveElmtMask) then
        allocate (ElemMask(TotalElements))
        haveMask=.true.
     endif
@@ -7117,21 +7117,21 @@ offset = 0
     !! Fake logical allreduce .or. with MAX
     if (totalElements .gt. ElemCnt) then
        localSplitElems(1)=1
-    else 
+    else
        localSplitElems(1)=0
     endif
     call ESMF_VMAllReduce(vm, localSplitElems, globalSplitElems, 1, ESMF_REDUCE_MAX, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return    
+            ESMF_CONTEXT, rcToReturn=rc)) return
     if (globalSplitElems(1) .eq. 1) then
        existSplitElems=.true.
-    else 
+    else
        existSplitElems=.false.
     endif
 
 
     ! Set split element info
-    if (existSplitElems) then    
+    if (existSplitElems) then
        Mesh%hasSplitElem=.true.
        allocate(mesh%splitElemMap(TotalElements))
        Mesh%splitElemStart=myStartElmt+1  ! position of first element
@@ -7140,12 +7140,12 @@ offset = 0
        Mesh%origElemCount=ElemCnt
     endif
 
-    ! Allocate a mask even if the user doesn't want one, if we have split elements 
+    ! Allocate a mask even if the user doesn't want one, if we have split elements
     if (existSplitElems .and. .not. haveElmtMask) then
        allocate (ElemMask(TotalElements))
        haveMask=.true.
        ElemMask(:)=1  ! default to nothing masked out
-    endif    
+    endif
 
 
     ! The ElemId is the global ID.  The myStartElmt is the starting Element ID(-1), and the
@@ -7162,7 +7162,7 @@ offset = 0
        allocate(polyIntBuf(maxNumPoly))
        allocate(triInd(3*(maxNumPoly-2)))
 
-       ! Parametric dim=2 and cartSpatialDim=3 
+       ! Parametric dim=2 and cartSpatialDim=3
        ! Means spherical, so calc. cart. coordinates
        if (cartSpatialDim .eq. 3) then
           allocate(NodeCoordsCart(cartSpatialDim*localNodes))
@@ -7177,7 +7177,7 @@ offset = 0
                                         NodeCoordsCart(tk+3),  &
                                         localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return    
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 
              ti=ti+2
              tk=tk+3
@@ -7186,15 +7186,15 @@ offset = 0
 
        ! Loop through creating Mesh appropriate elements
        do j = 1, ElemCnt
-          if (elmtNum(j)==3) then        
+          if (elmtNum(j)==3) then
              ElemId(ElemNo) = myStartElmt+ElemNo
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
              do i=1,3
                 ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
              end do
              if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
-	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
-	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
+             if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
+             if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
              ElemNo=ElemNo+1
              ConnNo=ConnNo+3
           elseif (elmtNum(j)==4) then
@@ -7204,8 +7204,8 @@ offset = 0
                 ElemConn (ConnNo+i) = NodeUsed(elementConn(i,j))
              end do
              if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
-	     if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
-	     if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
+             if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
+             if (localAddUserArea) ElemArea(ElemNo) = elementArea(j)
              ElemNo=ElemNo+1
              ConnNo=ConnNo+4
           else
@@ -7243,13 +7243,13 @@ offset = 0
              ! call triangulation routine
              call c_ESMC_triangulate(parametricDim, cartSpatialDim, &
                   numPoly, polyCoords, polyDblBuf, polyIntBuf, &
-                  triInd, localrc)   
+                  triInd, localrc)
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
 
              ! translate triangulation out of output list
              ti=0
-	     startElemNo = ElemNo
+             startElemNo = ElemNo
              do k=1,numPoly-2
                 ElemId(ElemNo)=myStartElmt+ElemNo
                 ElemType (ElemNo) = ESMF_MESHELEMTYPE_TRI
@@ -7257,19 +7257,19 @@ offset = 0
                 ElemConn (ConnNo+2) = NodeUsed(elementConn(triInd(ti+2)+1,j))
                 ElemConn (ConnNo+3) = NodeUsed(elementConn(triInd(ti+3)+1,j))
                 if (existSplitElems) Mesh%splitElemMap(ElemNo)=j+startElmt-1
- 	        if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
-                
+                if (haveElmtMask) ElemMask(ElemNo) = elementMask(j)
+
                 ! Calculate area of sub-triangle
-  	        !if (localAddUserArea) then 
+                !if (localAddUserArea) then
                    if (cartSpatialDim==2) then
-		     tk=0
-		     do i=1,3
+                     tk=0
+                     do i=1,3
                        lni=2*(ElemConn(ConnNo+i)-1) ! get the index of the node coords in the local list
-      	               polyCoords(tk+1)=NodeCoords1D(lni+1)
+                       polyCoords(tk+1)=NodeCoords1D(lni+1)
                        polyCoords(tk+2)=NodeCoords1D(lni+2)
                        tk=tk+2
                      enddo
-	           else if (cartSpatialDim==3) then
+                   else if (cartSpatialDim==3) then
                      tk=0
                      do i=1,3
                        lni=3*(ElemConn(ConnNo+i)-1) ! get the index of the node coords in the local list
@@ -7280,9 +7280,9 @@ offset = 0
                      enddo
                    endif
                    nEdges = 3
-                   call c_ESMC_get_polygon_area(cartSpatialDim, nEdges, polyCoords, area(k), localrc) 
-	           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        	          ESMF_CONTEXT, rcToReturn=rc)) return
+                   call c_ESMC_get_polygon_area(cartSpatialDim, nEdges, polyCoords, area(k), localrc)
+                   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                          ESMF_CONTEXT, rcToReturn=rc)) return
                 ! endif
 
                 ! If the area of the subtriangle is 0.0 mask it out
@@ -7295,10 +7295,10 @@ offset = 0
                 ti=ti+3
              enddo
              !!! set the area for each splitted triangle
-	     if (localAddUserArea) then
-	        totalarea = 0
-		do k=1,numPoly-2
-	          totalarea = totalarea + area(k)
+             if (localAddUserArea) then
+                totalarea = 0
+                do k=1,numPoly-2
+                  totalarea = totalarea + area(k)
                 enddo
                 do k=1, numPoly-2
                   elemArea(startElemNo+k) = elementArea(j)*(area(k)/totalarea)
@@ -7320,14 +7320,14 @@ offset = 0
        deallocate(triInd)
     else ! If not parametricDim==2, assuming parmetricDim==3
        do j = 1, ElemCnt
-          if (elmtNum(j)==4) then        
+          if (elmtNum(j)==4) then
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_TETRA
           elseif (elmtNum(j)==8) then
              ElemType (ElemNo) = ESMF_MESHELEMTYPE_HEX
           else
-             call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, & 
-                  msg="- in 3D currently only support Tetra. (4 nodes) or Hexa. (8 nodes)", & 
-                  ESMF_CONTEXT, rcToReturn=rc) 
+             call ESMF_LogSetError(ESMF_RC_VAL_OUTOFRANGE, &
+                  msg="- in 3D currently only support Tetra. (4 nodes) or Hexa. (8 nodes)", &
+                  ESMF_CONTEXT, rcToReturn=rc)
              return
           endif
 
@@ -7344,22 +7344,22 @@ offset = 0
 
 
     if (ElemNo /= TotalElements+1) then
-	write (ESMF_UtilIOStdout,*)  &
+        write (ESMF_UtilIOStdout,*)  &
             PetNo, ' TotalElements does not match ',ElemNo-1, TotalElements
     end if
 
     ! Add elements
     if (haveMask .and. localAddUserArea) then
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
-			elementMask=ElemMask, elementArea=ElemArea, rc=localrc)
+            call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+                        elementMask=ElemMask, elementArea=ElemArea, rc=localrc)
     elseif (haveMask) then
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
-			elementMask=ElemMask, rc=localrc)
+            call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+                        elementMask=ElemMask, rc=localrc)
     elseif (localAddUserArea) then
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
-			elementArea=ElemArea, rc=localrc)
+            call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, &
+                        elementArea=ElemArea, rc=localrc)
     else
-	    call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, rc=localrc)
+            call ESMF_MeshAddElements (Mesh, ElemId, ElemType, ElemConn, rc=localrc)
     end if
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7374,9 +7374,9 @@ offset = 0
     deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners)
     deallocate(ElemId, ElemType, ElemConn)
     deallocate(elementConn, elmtNum)
-    if (haveElmtMask) deallocate(elementMask) 
-    if (haveMask) deallocate(ElemMask) 
-     
+    if (haveElmtMask) deallocate(elementMask)
+    if (haveMask) deallocate(ElemMask)
+
     if (localAddUserArea) deallocate(elementArea, ElemArea)
     ESMF_MeshCreateFromUnstruct = Mesh
 

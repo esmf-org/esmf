@@ -93,7 +93,7 @@ ESMCI_WebServClientSocket::~ESMCI_WebServClientSocket(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	disconnect();
+        disconnect();
 }
 
 
@@ -118,14 +118,14 @@ int  ESMCI_WebServClientSocket::connect(
   )
 //
 // !DESCRIPTION:
-//    Creates a client socket and connects to a socket service on the 
+//    Creates a client socket and connects to a socket service on the
 //    specified host listening on the specified port.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("ClientSocket::connect()\n");
-	return clientConnect(host, port);
+        //printf("ClientSocket::connect()\n");
+        return clientConnect(host, port);
 }
 
 

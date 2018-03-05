@@ -55,17 +55,17 @@ enum ESMC_CoordSys_Flag {ESMC_COORDSYS_INVALID=-2,
                     ESMC_COORDSYS_SPH_RAD};
 
 enum ESMC_Decomp_Flag {ESMC_DECOMP_INVALID=0,
-		       ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,
-		       ESMC_DECOMP_RESTLAST, ESMC_DECOMP_CYCLIC};
+                       ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,
+                       ESMC_DECOMP_RESTLAST, ESMC_DECOMP_CYCLIC};
 
 enum ESMC_ExtrapMethod_Flag {ESMC_EXTRAPMETHOD_NONE=0,
-		                         ESMC_EXTRAPMETHOD_NEAREST_STOD,
+                                         ESMC_EXTRAPMETHOD_NEAREST_STOD,
                              ESMC_EXTRAPMETHOD_NEAREST_IDAVG};
 
 enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED, ESMC_FILEFORMAT_VTK,
-			   ESMC_FILEFORMAT_SCRIP, ESMC_FILEFORMAT_ESMFMESH,
-			   ESMC_FILEFORMAT_ESMCGRID, ESMC_FILEFORMAT_UGRID,
-			   ESMC_FILEFORMAT_GRIDSPEC};
+                           ESMC_FILEFORMAT_SCRIP, ESMC_FILEFORMAT_ESMFMESH,
+                           ESMC_FILEFORMAT_ESMCGRID, ESMC_FILEFORMAT_UGRID,
+                           ESMC_FILEFORMAT_GRIDSPEC};
 
 // File status flag (for IO write functions)
 typedef enum ESMC_FileStatus_Flag { ESMC_FILESTATUS_UNKNOWN=0,
@@ -108,10 +108,10 @@ enum ESMC_LogKind_Flag{
                 ESMC_LOGKIND_NONE  =3 };
 
 enum ESMC_LogMsgType_Flag{
-		ESMC_LOGMSG_INFO =1,
-		ESMC_LOGMSG_WARN =2,
-		ESMC_LOGMSG_ERROR=3,
-		ESMC_LOGMSG_TRACE=4,
+                ESMC_LOGMSG_INFO =1,
+                ESMC_LOGMSG_WARN =2,
+                ESMC_LOGMSG_ERROR=3,
+                ESMC_LOGMSG_TRACE=4,
                 ESMC_LOGMSG_JSON =5 };
 
 enum ESMC_MeshLoc_Flag {ESMC_MESHLOC_NODE=0,
@@ -125,9 +125,9 @@ enum ESMC_PoleKind_Flag {ESMC_POLEKIND_NONE=0,
                          ESMC_POLEKIND_BIPOLE=2};
 
 enum ESMC_PoleMethod_Flag {ESMC_POLEMETHOD_NONE=0,
-			               ESMC_POLEMETHOD_ALLAVG,
-			               ESMC_POLEMETHOD_NPNTAVG,
-			               ESMC_POLEMETHOD_TEETH};
+                                       ESMC_POLEMETHOD_ALLAVG,
+                                       ESMC_POLEMETHOD_NPNTAVG,
+                                       ESMC_POLEMETHOD_TEETH};
 
 enum ESMC_Reduce_Flag { ESMC_REDUCE_SUM=1,
                         ESMC_REDUCE_MIN=2,
@@ -173,7 +173,7 @@ enum ESMC_TypeKind_Flag {ESMC_TYPEKIND_I1=1,
                     ESMF_NOKIND=99};
 
 enum ESMC_UnmappedAction_Flag {ESMC_UNMAPPEDACTION_ERROR=0,
-			       ESMC_UNMAPPEDACTION_IGNORE};
+                               ESMC_UNMAPPEDACTION_IGNORE};
 
 
 #endif  // ESMC_UTIL_H

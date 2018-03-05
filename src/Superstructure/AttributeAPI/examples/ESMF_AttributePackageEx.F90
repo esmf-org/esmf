@@ -20,12 +20,12 @@ program ESMF_AttributePackageEx
 !BOE
 ! \subsubsection{Attribute packages} \label{ex:AttributePackageEx}
 !
-! This example is slightly more complex than the example presented in section 
+! This example is slightly more complex than the example presented in section
 ! \ref{ex:AttributeEx} and illustrates the use of the Attribute class to
 ! create Attribute hierarchies using Attribute packages.  A gridded Component
 ! is used in conjunction with two States, a FieldBundle, and various realistic
-! Fields to create an Attribute hierarchy and copy it from one State to another.  
-! Attribute packages are created on the Component and Fields, and the 
+! Fields to create an Attribute hierarchy and copy it from one State to another.
+! Attribute packages are created on the Component and Fields, and the
 ! standard Attributes in each package are used in the Attribute hierarchy.
 ! The Attribute package nesting capability is demonstrated by nesting the standard
 ! ESMF supplied packages for the Fields inside a user specified Attribute package
@@ -35,7 +35,7 @@ program ESMF_AttributePackageEx
 
 !  !PROGRAM: ESMF\_AttributePackageEx - Examples of Attribute Package usage.
 !
-!  !DESCRIPTION: 
+!  !DESCRIPTION:
 !
 ! This program shows examples of Attribute usage
 
@@ -45,9 +45,9 @@ program ESMF_AttributePackageEx
       use ESMF_TestMod
       implicit none
 
-      ! Local variables  
+      ! Local variables
       integer                 :: rc, finalrc, petCount, localPet, result
-	    type(ESMF_AttPack)      :: attpack
+            type(ESMF_AttPack)      :: attpack
       type(ESMF_VM)           :: vm
       type(ESMF_Field)        :: DPEDT,DTDT,DUDT,DVDT,PHIS,QTR,CNV,CONVCPT,&
                                  CONVKE,CONVPHI
@@ -57,8 +57,8 @@ program ESMF_AttributePackageEx
       character(ESMF_MAXSTR)  :: name1,name2,name3,name4, &
                                  value1,value2,value3, value4, &
                                  convESMF,convCC,purpGen
-      
-      character(ESMF_MAXSTR),dimension(2)   :: attrList         
+
+      character(ESMF_MAXSTR),dimension(2)   :: attrList
       character(ESMF_MAXSTR) :: testname
       character(ESMF_MAXSTR) :: failMsg
 
@@ -79,11 +79,11 @@ program ESMF_AttributePackageEx
                     defaultlogfilename="AttributePackageEx.Log", &
                     logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      
+
       ! get the vm
       call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      
+
       if (localPet==0) then
         print *, "--------------------------------------- "
         print *, "Start of ESMF_AttributePackage Example"
@@ -92,15 +92,15 @@ program ESMF_AttributePackageEx
 
 !BOE
 !    We must construct the ESMF objects that will be responsible for the
-!    Attributes we will be manipulating.  These objects include the 
-!    gridded Component, two States, a FieldBundle, and 10 Fields.  In this trivial 
+!    Attributes we will be manipulating.  These objects include the
+!    gridded Component, two States, a FieldBundle, and 10 Fields.  In this trivial
 !    example we are constructing empty Fields with no underlying Grid.
 !EOE
 !BOC
       if (petCount<4) then
         gridcomp = ESMF_GridCompCreate(name="gridded_comp_ex2", &
           petList=(/0/), rc=rc)
-      else 
+      else
         gridcomp = ESMF_GridCompCreate(name="gridded_comp_ex2", &
           petList=(/0,1,2,3/), rc=rc)
       endif
@@ -117,7 +117,7 @@ program ESMF_AttributePackageEx
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-        
+
       DPEDT = ESMF_FieldEmptyCreate(name='DPEDT', rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -158,22 +158,22 @@ program ESMF_AttributePackageEx
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-      
+
       fbundle = ESMF_FieldBundleCreate(name="fbundle", rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
 !    Now we can add Attribute packages to all of the appropriate objects.
-!    We will use the ESMF supplied Attribute packages for the Fields and 
-!    the Component.  On the Fields, we will first use 
+!    We will use the ESMF supplied Attribute packages for the Fields and
+!    the Component.  On the Fields, we will first use
 !    {\tt ESMF\_AttributeAdd()} to create standard Attribute packages, then
 !    we will nest customized Attribute packages around the ESMF standard
 !    Attribute packages.  In this simple example the purpose for the Attribute packages will
 !    be specified as "General" in all cases.
 !EOE
 
-!BOC 
+!BOC
       convESMF = 'ESMF'
       convCC = 'CustomConvention'
       purpGen = 'General'
@@ -273,7 +273,7 @@ program ESMF_AttributePackageEx
         attrList=attrList, nestConvention=convESMF, nestPurpose=purpGen,    &
         rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      
+
       call ESMF_AttributeAdd(gridcomp, convention=convESMF, &
         purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -281,8 +281,8 @@ program ESMF_AttributePackageEx
 !BOE
 !     ... and so on for the other 9 Fields.
 !
-!     The standard Attribute package currently supplied by ESMF for 
-!     Field contains 6 Attributes, 2 of which are set automatically.  
+!     The standard Attribute package currently supplied by ESMF for
+!     Field contains 6 Attributes, 2 of which are set automatically.
 !     The remaining 4 Attributes in the standard Field Attribute
 !     package must be set manually by the user.   We must also
 !     set the Attributes of our own custom Attribute package, which
@@ -294,7 +294,7 @@ program ESMF_AttributePackageEx
       name2 = 'StandardName'
       name3 = 'LongName'
       name4 = 'Units'
-      
+
       ! DPEDT
       value1 = 'DPEDT'
       value2 = 'tendency_of_air_pressure'
@@ -346,7 +346,7 @@ program ESMF_AttributePackageEx
 
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
+
       ! DTDT
       value1 = 'DTDT'
       value2 = 'tendency_of_air_temperature'
@@ -366,7 +366,7 @@ program ESMF_AttributePackageEx
       ! ESMF Attributes
       ! retrieve Attribute package
       call ESMF_AttributeGetAttPack(DTDT, convESMF, purpGen, &
-	attpack=attpack, rc=rc)
+        attpack=attpack, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
       call ESMF_AttributeSet(DTDT, name2, value2, &
         convention=convESMF, purpose=purpGen, rc=rc)
@@ -377,7 +377,7 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(DTDT, name4, value4, &
         convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
+
       ! DUDT
       value1 = 'DUDT'
       value2 = 'tendency_of_eastward_wind'
@@ -406,7 +406,7 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(DUDT, name4, value4, &
         convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
+
       ! DVDT
       value1 = 'DVDT'
       value2 = 'tendency_of_northward_wind'
@@ -435,7 +435,7 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(DVDT, name4, value4, &
         convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
+
       ! PHIS
       value1 = 'PHIS'
       value2 = 'surface_geopotential'
@@ -467,7 +467,7 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(PHIS, name4, value4, &
         convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
+
       ! QTR
       value1 = 'QTR'
       value2 = ''
@@ -499,7 +499,7 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(QTR, name4, value4, &
         convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
+
       ! CNV
       value1 = 'CNV'
       value2 = 'atmosphere_kinetic_energy_content'
@@ -531,7 +531,7 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(CNV, name4, value4, &
         convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
+
       ! CONVCPT
       value1 = 'CONVCPT'
       value2 = ''
@@ -563,7 +563,7 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(CONVCPT, name4, value4, &
         convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
+
       ! CONVKE
       value1 = 'CONVKE'
       value2 = ''
@@ -595,7 +595,7 @@ program ESMF_AttributePackageEx
       call ESMF_AttributeSet(CONVKE, name4, value4, &
         convention=convESMF, purpose=purpGen, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
+
       ! CONVPHI
       value1 = 'CONVPHI'
       value2 = ''
@@ -630,7 +630,7 @@ program ESMF_AttributePackageEx
 !BOE
 !     ... and so on for the other 9 Fields.
 !
-!     The standard Attribute package currently supplied by ESMF for 
+!     The standard Attribute package currently supplied by ESMF for
 !     Component contains 10 Attributes.  These Attributes conform to both
 !     the ESG and CF conventions, and must be set manually.
 !EOE
@@ -690,7 +690,7 @@ program ESMF_AttributePackageEx
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-!     Adding the Fields to the FieldBundle will automatically ``link" the 
+!     Adding the Fields to the FieldBundle will automatically ``link" the
 !     Attribute hierarchies.  The same type of link will be generated
 !     when adding a FieldBundle to a State.
 !EOE
@@ -736,7 +736,7 @@ program ESMF_AttributePackageEx
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-      
+
       call ESMF_StateAdd(exportState, fieldbundleList=(/fbundle/), rc=rc)
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -757,13 +757,13 @@ program ESMF_AttributePackageEx
 !     There is an XML formatted write, which generates an .xml file in the
 !     execution directory with the contents of the write.  There is also
 !     a tab-delimited write which writes to standard out, a file generated
-!     in the execution directory with the extension .stdout.  Either of 
+!     in the execution directory with the extension .stdout.  Either of
 !     the {\tt ESMF\_AttributeWrite()} formats can be called on any of the objects which
-!     are capable of manipulating Attributes, but only from objects in an 
-!     Attribute hierarchy which contain ESMF standard Attribute packages can it be confirmed that any 
+!     are capable of manipulating Attributes, but only from objects in an
+!     Attribute hierarchy which contain ESMF standard Attribute packages can it be confirmed that any
 !     relevant information be written.  The {\tt ESMF\_AttributeWrite()}
 !     capability is only functional for single-item Attributes at this point, it
-!     will be more robust in future releases.  A flag is used to 
+!     will be more robust in future releases.  A flag is used to
 !     specify which format to write, the default is tab-delimited.
 !EOE
 
@@ -821,12 +821,12 @@ program ESMF_AttributePackageEx
 
 
   call ESMF_Finalize(rc=rc)
-  
+
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   if (finalrc==ESMF_SUCCESS) then
     print *, "PASS: ESMF_AttributePackageEx.F90"
   else
     print *, "FAIL: ESMF_AttributePackageEx.F90"
   endif
-  
+
 end program

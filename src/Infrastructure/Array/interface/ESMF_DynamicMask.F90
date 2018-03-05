@@ -166,6 +166,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The routine responsible for handling dynamically masked source and 
 !     destination elements. See section \ref{RH:DynMask} for the precise
 !     definition of the {\tt dynamicMaskRoutine} procedure interface.
+!     The routine is only called on PETs where {\em at least one} interpolation 
+!     element is identified for special handling.
 !   \item [{[handleAllElements]}]
 !     If set to {\tt .true.}, all local elements, regardless of their dynamic
 !     masking status, are made available to {\tt dynamicMaskRoutine} for
@@ -264,6 +266,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The routine responsible for handling dynamically masked source and 
 !     destination elements. See section \ref{RH:DynMask} for the precise
 !     definition of the {\tt dynamicMaskRoutine} procedure interface.
+!     The routine is only called on PETs where {\em at least one} interpolation 
+!     element is identified for special handling.
 !   \item [{[handleAllElements]}]
 !     If set to {\tt .true.}, all local elements, regardless of their dynamic
 !     masking status, are made available to {\tt dynamicMaskRoutine} for
@@ -361,6 +365,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The routine responsible for handling dynamically masked source and 
 !     destination elements. See section \ref{RH:DynMask} for the precise
 !     definition of the {\tt dynamicMaskRoutine} procedure interface.
+!     The routine is only called on PETs where {\em at least one} interpolation 
+!     element is identified for special handling.
 !   \item [{[handleAllElements]}]
 !     If set to {\tt .true.}, all local elements, regardless of their dynamic
 !     masking status, are made available to {\tt dynamicMaskRoutine} for
@@ -458,6 +464,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The routine responsible for handling dynamically masked source and 
 !     destination elements. See section \ref{RH:DynMask} for the precise
 !     definition of the {\tt dynamicMaskRoutine} procedure interface.
+!     The routine is only called on PETs where {\em at least one} interpolation 
+!     element is identified for special handling.
 !   \item [{[handleAllElements]}]
 !     If set to {\tt .true.}, all local elements, regardless of their dynamic
 !     masking status, are made available to {\tt dynamicMaskRoutine} for
@@ -555,6 +563,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The routine responsible for handling dynamically masked source and 
 !     destination elements. See section \ref{RH:DynMask} for the precise
 !     definition of the {\tt dynamicMaskRoutine} procedure interface.
+!     The routine is only called on PETs where {\em at least one} interpolation 
+!     element is identified for special handling.
 !   \item [{[handleAllElements]}]
 !     If set to {\tt .true.}, all local elements, regardless of their dynamic
 !     masking status, are made available to {\tt dynamicMaskRoutine} for
@@ -652,6 +662,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The routine responsible for handling dynamically masked source and 
 !     destination elements. See section \ref{RH:DynMask} for the precise
 !     definition of the {\tt dynamicMaskRoutine} procedure interface.
+!     The routine is only called on PETs where {\em at least one} interpolation 
+!     element is identified for special handling.
 !   \item [{[handleAllElements]}]
 !     If set to {\tt .true.}, all local elements, regardless of their dynamic
 !     masking status, are made available to {\tt dynamicMaskRoutine} for

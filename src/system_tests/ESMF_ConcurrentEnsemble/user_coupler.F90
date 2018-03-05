@@ -16,11 +16,11 @@ module user_coupler
 
   ! ESMF Framework module
   use ESMF
-    
+
   implicit none
-   
+
   public usercpl_register
-        
+
   ! global data
   type(ESMF_RouteHandle), save :: rhandle(4)
 
@@ -54,7 +54,7 @@ module user_coupler
 !-------------------------------------------------------------------------
 !   !User Comp Component created by higher level calls, here is the
 !   ! Initialization routine.
-    
+
   subroutine user_init(comp, importState, exportState, clock, rc)
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -96,7 +96,7 @@ module user_coupler
         call ESMF_StateGet(state, "array data", srcArray, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 
-        ! Create the destination Array 
+        ! Create the destination Array
         call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_R8, rank=2, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -113,23 +113,23 @@ module user_coupler
         if (rc/=ESMF_SUCCESS) return ! bail out
 
         ! Precompute and store an ArrayRedist routehandle for each import array
-  	call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
-      		routehandle=rhandle(i), rc=rc)
-    	if (rc/=ESMF_SUCCESS) return ! bail out
-    
+        call ESMF_ArrayRedistStore(srcArray=srcArray, dstArray=dstArray, &
+                routehandle=rhandle(i), rc=rc)
+        if (rc/=ESMF_SUCCESS) return ! bail out
+
         ! Add the dstArray into the exportState using the component export state name
         call ESMF_StateAdd(exportState, (/dstArray/), rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 
-    end do    
-    
+    end do
+
   end subroutine user_init
 
 
 !-------------------------------------------------------------------------
 !   !  The Run routine where data is coupled.
 !   !
- 
+
   subroutine user_run(comp, importState, exportState, clock, rc)
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -164,15 +164,15 @@ module user_coupler
         ! Get source Array out of import state
         call ESMF_StateGet(state, "array data", srcArray, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
-       
+
         ! Get destination Array out of export state
         call ESMF_StateGet(exportState, stateItemNames(i), dstArray, rc=rc)
         if (rc/=ESMF_SUCCESS) return ! bail out
 
         ! Use ArrayRedist() to take data from srcArray to dstArray according to import state name
         call ESMF_ArrayRedist(srcArray=srcArray, dstArray=dstArray, &
-      			routehandle=rhandle(i), rc=rc)
-    	if (rc/=ESMF_SUCCESS) return ! bail out
+                        routehandle=rhandle(i), rc=rc)
+        if (rc/=ESMF_SUCCESS) return ! bail out
     end do
 
   end subroutine user_run
@@ -181,7 +181,7 @@ module user_coupler
 !-------------------------------------------------------------------------
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
- 
+
   subroutine user_final(comp, importState, exportState, clock, rc)
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -215,11 +215,11 @@ module user_coupler
        call ESMF_DistGridDestroy(distgrid, rc=rc)
        if (rc/=ESMF_SUCCESS) return ! bail out
     end do
-  
+
   end subroutine user_final
 
 
 end module user_coupler
-    
+
 !\end{verbatim}
 

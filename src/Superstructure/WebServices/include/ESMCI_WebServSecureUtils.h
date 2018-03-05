@@ -27,7 +27,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the C++ SecureUtils function 
+// The code in this file defines the C++ SecureUtils function
 // signatures (prototypes).  The companion file ESMCI\_WebServSecureUtils.C
 // contains the full code (bodies) for the SecureUtils functions.
 //
@@ -62,4 +62,4 @@ namespace ESMCI
 
 } // end namespace
 
-#endif 	// ESMCI_WebServSecureUtils_H
+#endif          // ESMCI_WebServSecureUtils_H

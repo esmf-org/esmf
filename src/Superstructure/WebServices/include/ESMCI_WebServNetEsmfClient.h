@@ -39,7 +39,7 @@ using namespace std;
 // contains the full code (bodies) for the NetEsmfClient methods.
 //
 // This class provides the capability to connect and communicate with a
-// ESMF Component (Grid or Coupler) service.  
+// ESMF Component (Grid or Coupler) service.
 //
 //EOPI
 //-------------------------------------------------------------------------
@@ -47,14 +47,14 @@ using namespace std;
 namespace ESMCI
 {
 
-  class ESMCI_WebServNetEsmfClient 
+  class ESMCI_WebServNetEsmfClient
   {
   public:
 
-	  // constructor and destructor
-	  ESMCI_WebServNetEsmfClient(const char*  host,
+          // constructor and destructor
+          ESMCI_WebServNetEsmfClient(const char*  host,
                                 int          port);
-	  ~ESMCI_WebServNetEsmfClient();
+          ~ESMCI_WebServNetEsmfClient();
 
      int    getStateValue(const char*  stateStr);
      char*  getStateStr(int  id);
@@ -62,38 +62,38 @@ namespace ESMCI
   protected:
 
      // methods to setup the connection parameters
-	  void setHost(const char*  host);
-	  void setPort(int  port);
+          void setHost(const char*  host);
+          void setPort(int  port);
 
      // low-level communications methods
-	  int  sendRequest(int    request,
+          int  sendRequest(int    request,
                       int    length = 0,
                       void*  data = NULL);
 
-	  int  sendData(int    length,
+          int  sendData(int    length,
                    void*  data);
 
-	  int  sendString(const char*  data);
+          int  sendString(const char*  data);
 
-	  int  getResponse(int    request,
+          int  getResponse(int    request,
                       int&   length,
                       void*  data);
 
-	  int  connect();
-	  void disconnect();
+          int  connect();
+          void disconnect();
 
 
   private:
 
-	  char*			theHost;			// the name of the machine that hosts the svc
-	  int				thePort;			// the port number for the service
-	  char			theMsg[8192];	// the message buffer
+          char*                         theHost;                        // the name of the machine that hosts the svc
+          int                           thePort;                        // the port number for the service
+          char                  theMsg[8192];   // the message buffer
 
-	  ESMCI_WebServClientSocket	
-						theSocket;		// the socket connection to the service
+          ESMCI_WebServClientSocket     
+                                                theSocket;              // the socket connection to the service
   };
 
 }  // end namespace
 
 
-#endif 	// ESMCI_WebServNetEsmfClient_H
+#endif          // ESMCI_WebServNetEsmfClient_H

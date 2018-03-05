@@ -316,7 +316,7 @@ module ESMF_AttributeMod
         module procedure ESMF_ArrayBundleAttGetInfoByNum
         module procedure ESMF_ArrayBundleAttGetInfoByNumAP
         module procedure ESMF_ArrayBundleAttGetCount
-        module procedure ESMF_ArrayBundleAttGetCountAttPack                       
+        module procedure ESMF_ArrayBundleAttGetCountAttPack
 
         TypeKindInterfaceMacro(ESMF_CplCompAttGet)
         TypeKindInterfaceMacro(ESMF_CplCompAttGet1D)
@@ -335,7 +335,7 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttGetInfoByNum
         module procedure ESMF_CplCompAttGetInfoByNumAP
         module procedure ESMF_CplCompAttGetCount
-        module procedure ESMF_CplCompAttGetCountAttPack  
+        module procedure ESMF_CplCompAttGetCountAttPack
         module procedure ESMF_CplCompAttGetAPinstNames
         module procedure ESMF_CplCompAttGetAPinstNamesAP
 
@@ -356,7 +356,7 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttGetInfoByNum
         module procedure ESMF_GridCompAttGetInfoByNumAP
         module procedure ESMF_GridCompAttGetCount
-        module procedure ESMF_GridCompAttGetCountAttPack  
+        module procedure ESMF_GridCompAttGetCountAttPack
         module procedure ESMF_GridCompAttGetAPinstNames
         module procedure ESMF_GridCompAttGetAPinstNamesAP
 
@@ -377,7 +377,7 @@ module ESMF_AttributeMod
         module procedure ESMF_SciCompAttGetInfoByNum
         module procedure ESMF_SciCompAttGetInfoByNumAP
         module procedure ESMF_SciCompAttGetCount
-        module procedure ESMF_SciCompAttGetCountAttPack  
+        module procedure ESMF_SciCompAttGetCountAttPack
         module procedure ESMF_SciCompAttGetAPinstNames
         module procedure ESMF_SciCompAttGetAPinstNamesAP
 
@@ -398,7 +398,7 @@ module ESMF_AttributeMod
         module procedure ESMF_DistGridAttGetInfoByNum
         module procedure ESMF_DistGridAttGetInfoByNumAP
         module procedure ESMF_DistGridAttGetCount
-        module procedure ESMF_DistGridAttGetCountAttPack  
+        module procedure ESMF_DistGridAttGetCountAttPack
 
         TypeKindInterfaceMacro(ESMF_FieldAttGet)
         TypeKindInterfaceMacro(ESMF_FieldAttGet1D)
@@ -1383,7 +1383,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet  - Get an Attribute from an ESMF_AttPack 
+! !IROUTINE: ESMF_AttributeGet  - Get an Attribute from an ESMF_AttPack
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, attpack, <value> &
@@ -1473,7 +1473,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information from an ESMF_AttPack 
+! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information from an ESMF_AttPack
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, attpack, <value>, &
@@ -1549,7 +1549,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet  - Get an Attribute from an ESMF_AttPack 
+! !IROUTINE: ESMF_AttributeGet  - Get an Attribute from an ESMF_AttPack
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, attpack, <valueList>, &
@@ -1642,7 +1642,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information from an ESMF_AttPack 
+! !IROUTINE: ESMF_AttributeGet - Get an Attribute pointing to internal class information from an ESMF_AttPack
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeGet(<object>, name, attpack, <valueList>, &
@@ -1743,7 +1743,7 @@ contains
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the <object>, or from an Attribute
-!     package on the <object>, specified by {\tt convention}, 
+!     package on the <object>, specified by {\tt convention},
 !     {\tt purpose}, and {\tt attPackInstanceName}.  Internal information can also
 !     be retrieved from Grid objects by prepending 'ESMF:' to the name of the
 !     piece of information that is requested.  See
@@ -1844,7 +1844,7 @@ contains
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt value} from the <object>, or from an Attribute
-!     package on the <object>, specified by {\tt convention}, 
+!     package on the <object>, specified by {\tt convention},
 !     {\tt purpose}, and {\tt attPackInstanceName}.  Internal class information can
 !     be retrieved by prepending 'ESMF:' to the name of the
 !     piece of information that is requested.  See
@@ -1930,7 +1930,7 @@ contains
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the <object>, or from an
-!     Attribute package on the <object>, specified by {\tt convention}, 
+!     Attribute package on the <object>, specified by {\tt convention},
 !     {\tt purpose}, and {\tt attPackInstanceName}.  Internal
 !     information can also be retrieved from Grid objects by prepending 'ESMF:'
 !     to the name of the piece of information that is requested.  See
@@ -2033,7 +2033,7 @@ contains
 !
 ! !DESCRIPTION:
 !     Return an Attribute {\tt valueList} from the <object>, or from an
-!     Attribute package on the <object>, specified by {\tt convention}, 
+!     Attribute package on the <object>, specified by {\tt convention},
 !     {\tt purpose}, and {\tt attPackInstanceName}.  Internal class
 !     information can be retrieved by prepending 'ESMF:'
 !     to the name of the piece of information that is requested.  See
@@ -2154,7 +2154,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeGet - Get Attribute info by name from an ESMF_AttPack 
+! !IROUTINE: ESMF_AttributeGet - Get Attribute info by name from an ESMF_AttPack
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGet()
@@ -2225,7 +2225,7 @@ contains
 !     subroutine ESMF_AttributeGetInfoByNam(<object>, name, keywordEnforcer, &
 !       convention, purpose, attPackInstanceName, &
 !       attnestflag, typekind, itemCount, isPresent, rc)
-!       
+!
 !
 ! !ARGUMENTS:
 !     <object>, see below for supported values
@@ -2372,7 +2372,7 @@ contains
 !     integer,                 intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Get the Attribute package instance names of the ESMF\_AttPack.  
+!     Get the Attribute package instance names of the ESMF\_AttPack.
 !     Also get the number of such names.
 !     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
@@ -2466,7 +2466,7 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGetAttPack()
-!     subroutine ESMF_AttGetAttPackSL(<object>, specList, keywordEnforcer,
+!     subroutine ESMF_AttGetAttPackSL(<object>, specList, keywordEnforcer, &
 !       attpack, attnestflag, isPresent, rc)
 !
 ! !ARGUMENTS:
@@ -2503,7 +2503,7 @@ contains
 !     \item [<object>]
 !           An {\tt ESMF} object.
 !     \item [specList]
-!           A character list of values which identify the Attribute package, 
+!           A character list of values which identify the Attribute package,
 !           such as convention, purpose, and instancename.
 !     \item [{[attpack]}]
 !           A handle to the Attribute package.
@@ -2526,7 +2526,7 @@ contains
 !
 ! !INTERFACE:
 !     ! Private name; call using ESMF_AttributeGetAttPack()
-!     subroutine ESMF_AttGetAttPack(<object>, convention, purpose, keywordEnforcer
+!     subroutine ESMF_AttGetAttPack(<object>, convention, purpose, keywordEnforcer, &
 !       attPackInstanceName, attpack, attnestflag, isPresent, rc)
 !
 ! !ARGUMENTS:
@@ -2995,7 +2995,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute or Attribute package using an ESMF_AttPack 
+! !IROUTINE: ESMF_AttributeRemove - Remove an Attribute or Attribute package using an ESMF_AttPack
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeRemove(<object>, keywordEnforcer, name, &
@@ -3106,14 +3106,14 @@ contains
 !            {\tt convention}, {\tt purpose}, and {\tt attPackInstanceName}
 !            only, without {\tt name}. An
 !            Attribute can be removed directly from <object> by specifying
-!            {\tt name}, without {\tt convention}, {\tt purpose}, and 
+!            {\tt name}, without {\tt convention}, {\tt purpose}, and
 !            {\tt attPackInstanceName}.
 !
 !
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Set an Attribute in an ESMF_AttPack 
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute in an ESMF_AttPack
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(<object>, name, <value>, attpack, &
@@ -3175,7 +3175,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Set an Attribute to point to internal class information in an ESMF_AttPack 
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute to point to internal class information in an ESMF_AttPack
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(<object>, name, <value>,  attpack, &
@@ -3194,7 +3194,7 @@ contains
 !     Attach an Attribute to <object>, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and {\tt value},
 !     and, if in an Attribute package, a {\tt attpack}.
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.  
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !     The Attribute can
 !     also be set to be a pointer to internal class information.  See Section
 !     \ref{sec:InternalInfo} for a description of this capability.
@@ -3229,7 +3229,7 @@ contains
 !EOP
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AttributeSet - Set an Attribute in an ESMF_AttPack 
+! !IROUTINE: ESMF_AttributeSet - Set an Attribute in an ESMF_AttPack
 !
 ! !INTERFACE:
 !     subroutine ESMF_AttributeSet(<object>, name, <valueList>, attpack, &
@@ -3313,8 +3313,8 @@ contains
 ! !DESCRIPTION:
 !     Attach an Attribute to <object>, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and {\tt value},
-!     and, if in an Attribute package, {\tt convention}, {\tt purpose}, and 
-!     {\tt attPackInstanceName}.  
+!     and, if in an Attribute package, {\tt convention}, {\tt purpose}, and
+!     {\tt attPackInstanceName}.
 !     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !
 !     Supported values for <object> are:
@@ -3369,7 +3369,7 @@ contains
 ! !IROUTINE: ESMF_AttributeSet - Set an Attribute to point to internal class information
 !
 ! !INTERFACE:
-!     subroutine ESMF_AttributeSet(<object>, name, <value>, inputList, 
+!     subroutine ESMF_AttributeSet(<object>, name, <value>, inputList,
 !       convention, purpose, attPackInstanceName, rc)
 !
 ! !ARGUMENTS:
@@ -3385,9 +3385,9 @@ contains
 ! !DESCRIPTION:
 !     Attach an Attribute to <object>, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and {\tt value},
-!     and, if in an Attribute package, {\tt convention}, {\tt purpose}, and 
-!     {\tt attPackInstanceName}.  
-!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.  
+!     and, if in an Attribute package, {\tt convention}, {\tt purpose}, and
+!     {\tt attPackInstanceName}.
+!     See Section~\ref{sec:AttPacks} for a description of Attribute packages.
 !     The Attribute can
 !     also be set to be a pointer to internal class information.  See Section
 !     \ref{sec:InternalInfo} for a description of this capability.
@@ -3449,7 +3449,7 @@ contains
 !     Attach an Attribute to <object>, or set an Attribute in an
 !     Attribute package.  The Attribute has a {\tt name} and a
 !     {\tt valueList}, with an {\tt itemCount}, and, if in an Attribute
-!     package, {\tt convention}, {\tt purpose}, and {\tt attPackInstanceName}.  
+!     package, {\tt convention}, {\tt purpose}, and {\tt attPackInstanceName}.
 !     See Section~\ref{sec:AttPacks} for a
 !     description of Attribute packages.
 !
@@ -3655,7 +3655,7 @@ contains
 !
 ! !INTERFACE:
       subroutine ESMF_AttPackStreamJSON(attpack, flattenPackList, includeUnset, &
-      	includeLinks, output, rc)
+        includeLinks, output, rc)
 
       type(ESMF_AttPack), intent(in)   :: attpack
       logical,            intent(in)   :: flattenPackList
@@ -3673,12 +3673,12 @@ contains
 !     \item [attpack]
 !           The Attribute package to stream.
 !     \item [flattenPackList]
-!			Whether to flatten nested attribute packages into a single list
+!                       Whether to flatten nested attribute packages into a single list
 !     \item [includeUnset]
 !           Whether to include unset attributes
 !     \item [output]
 !           The character string output variable.
-!     \item [{[rc]}] 
+!     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -3687,24 +3687,24 @@ contains
 
       integer :: localrc, errflag, jsonstrlen
       integer :: localFlattenPackList, localIncludeUnset, localIncludeLinks
-      
+
       if (flattenPackList) then
-      	localFlattenPackList = 1
+        localFlattenPackList = 1
       else
         localFlattenPackList = 0
       endif
-      
+
       if (includeUnset) then
-      	localIncludeUnset = 1
+        localIncludeUnset = 1
       else
         localIncludeUnset = 0
-      endif  
-      
+      endif
+
       if (includeLinks) then
-      	localIncludeLinks = 1
+        localIncludeLinks = 1
       else
         localIncludeLinks = 0
-      endif   
+      endif
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -3713,7 +3713,7 @@ contains
       ! for the JSON string.  This will be used to allocate the Fortran string,
       ! the user will be responsible for deallocating it.
       call C_ESMC_AttPackStreamJSONstrlen(attpack, localFlattenPackList, localIncludeUnset, &
-      	localIncludeLinks, jsonstrlen, localrc)
+        localIncludeLinks, jsonstrlen, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3723,7 +3723,7 @@ contains
 
       ! call the C++ function to stream JSON to the output string
       call C_ESMC_AttPackStreamJSON(attpack, localFlattenPackList, localIncludeUnset, &
-      	localIncludeLinks, output, localrc)
+        localIncludeLinks, output, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 

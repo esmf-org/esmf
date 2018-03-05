@@ -1,8 +1,8 @@
 #include "ESMFPIO.h"
 !>
-!! @file 
+!! @file
 !! @brief User interface Module for PIO, this is the only file a user program should 'use'
-!! 
+!!
 !! $Revision: 751 $
 !! $LastChangedDate: 2013-04-02 09:01:13 -0700 (Tue, 02 Apr 2013) $
 !<
@@ -21,19 +21,19 @@ module pio
        pio_setnum_OST, pio_getnum_OST
 
   use pio_types, only : io_desc_t, file_desc_t, var_desc_t, iosystem_desc_t, &
-	pio_int, pio_real, pio_double, pio_noerr, iotype_netcdf, &
-	iotype_pnetcdf, iotype_binary, iotype_direct_pbinary, iotype_pbinary, &
+        pio_int, pio_real, pio_double, pio_noerr, iotype_netcdf, &
+        iotype_pnetcdf, iotype_binary, iotype_direct_pbinary, iotype_pbinary, &
         PIO_iotype_binary, PIO_iotype_direct_pbinary, PIO_iotype_pbinary, &
         pio_iotype_netcdf4p, pio_iotype_netcdf4c, pio_iotype_pnetcdf,pio_iotype_netcdf, &
-	pio_global, pio_char, pio_write, pio_nowrite, pio_clobber, pio_noclobber, &
-	pio_max_name, pio_max_var_dims, pio_rearr_none, &
+        pio_global, pio_char, pio_write, pio_nowrite, pio_clobber, pio_noclobber, &
+        pio_max_name, pio_max_var_dims, pio_rearr_none, &
 #if defined(_NETCDF) || defined(_PNETCDF)
-	pio_nofill, pio_unlimited, pio_64bit_offset, &
+        pio_nofill, pio_unlimited, pio_64bit_offset, &
 #endif
-	pio_iotype_vdc2, &
+        pio_iotype_vdc2, &
         pio_rearr_box, pio_internal_error, pio_bcast_error, pio_return_error
 
-  use piodarray, only : pio_read_darray, pio_write_darray, pio_set_buffer_size_limit  
+  use piodarray, only : pio_read_darray, pio_write_darray, pio_set_buffer_size_limit
 
   use nf_mod, only:        &
        PIO_enddef,            &
@@ -55,7 +55,7 @@ module pio
        PIO_redef     ,          &
        PIO_copy_att  ,       &
        PIO_inquire_variable , &
-       PIO_inquire_dimension 
+       PIO_inquire_dimension
 
   use pionfatt_mod, only : PIO_put_att   => put_att,        &
        PIO_get_att   => get_att
@@ -63,7 +63,7 @@ module pio
   use pionfget_mod, only : PIO_get_var   => get_var
 
   use calcdecomp, only : pio_set_blocksize
-   
+
 
 
   implicit none

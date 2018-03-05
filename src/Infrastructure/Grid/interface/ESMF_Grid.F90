@@ -2723,6 +2723,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added argument {\tt copyAttributes} to support attribute
+!               propagation from the existing to the newly created grid object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2741,8 +2746,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for the Grid.
 ! \item[{[copyAttributes]}]
 !      A flag to indicate whether to copy the attributes of the existing grid
-!      to the new grid.  The default value is FALSE
-!      for the Grid.
+!      to the new grid.  The default value is .false..
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3299,6 +3303,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added argument {\tt copyAttributes} to support attribute
+!               propagation from the existing to the newly created grid object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3330,8 +3339,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      created for the Grid.
 ! \item[{[copyAttributes]}]
 !      A flag to indicate whether to copy the attributes of the existing grid
-!      to the new grid.  The default value is FALSE
-!      for the Grid.
+!      to the new grid.  The default value is .false..
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -5725,9 +5733,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[filename]
 !     The NetCDF Grid filename.
 ! \item[fileformat]
-!     The Grid file format.  The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP} and {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
+!     The file format.  The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP} and {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
 !     If it is the SCRIP format, the dimension {\tt grid\_rank} in the file has to be equal to 2.
-!     please see section~\ref{const:fileformatflag} for a detailed description of the options.
+!      Please see section~\ref{const:fileformatflag} for a detailed description of the options.
 ! \item[distGrid]
 !      A distGrid defines how the grid is distributed
 ! \item[{[isSphere]}]
@@ -5968,8 +5976,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[filename]
 !     The NetCDF Grid filename.
 ! \item[fileformat]
-!     The Grid file format, please see section~\ref{const:grid:fileformat}
-!         for a list of valid options.
+!     The file format.  The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP} and {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
+!     If it is the SCRIP format, the dimension {\tt grid\_rank} in the file has to be equal to 2.
+!      Please see section~\ref{const:fileformatflag} for a detailed description of the options.
 ! \item[{[regDecomp]}]
 !      A 2 element array specifying how the grid is decomposed.
 !      Each entry is the number of decounts for that dimension.
@@ -15753,6 +15762,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added argument {\tt vm} to support object creation on a
+!               different VM than that of the current context.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -16160,6 +16174,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item[7.1.0r] Added argument {\tt tile}. This new argument allows the user to 
+!               query the tile within which the localDE is contained. 
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -16490,6 +16506,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item[7.1.0r] Added arguments {\tt staggerEdgeLWidth}, {\tt staggerEdgeUWidth},
+!               {\tt staggerAlign}, and {\tt staggerLBound}. These new arguments 
+!                allow the user to get width, alignment, and bound information for
+!                the given stagger location. 
 ! \end{itemize}
 !
 ! !DESCRIPTION:

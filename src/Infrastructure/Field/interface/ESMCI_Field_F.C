@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
@@ -34,7 +34,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = 
+ static const char *const version =
              "$Id$";
 //-----------------------------------------------------------------------------
 
@@ -149,7 +149,7 @@ extern "C" {
 
 // non-method functions
 void FTN_X(c_esmc_fieldserialize)(
-                ESMC_Status *status, 
+                ESMC_Status *status,
                 ESMC_Status *iostatus,
                 int * dimCount,
                 int * gridToFieldMap,
@@ -165,7 +165,7 @@ void FTN_X(c_esmc_fieldserialize)(
 #define ESMC_METHOD "c_esmc_fieldserialize()"
     ESMC_InquireFlag linquireflag = *inquireflag;
     int i;
- 
+
     // Initialize return code; assume routine not implemented
     if (localrc) *localrc = ESMC_RC_NOT_IMPL;
     // either put the code here, or call into a real C++ function
@@ -174,11 +174,11 @@ void FTN_X(c_esmc_fieldserialize)(
     // TODO: verify length > 4 status vars, and if not, make room.
     int fixedpart = 4 * sizeof(int *) + sizeof(int) + 5 * ESMF_MAXDIM * sizeof(int);
     if ((*inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < fixedpart) {
-         
+
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "Buffer too short to add a Field object", ESMC_CONTEXT, localrc);
          return;
- 
+
         //buffer = (char *)realloc((void *)buffer,
         //                         *length + 2*fixedpart + byte_count);
         //*length += 2 * fixedpart;
@@ -187,8 +187,8 @@ void FTN_X(c_esmc_fieldserialize)(
 
     sp = (ESMC_Status *)(buffer + *offset);
     if (linquireflag != ESMF_INQUIREONLY) {
-      *sp++ = *status; 
-      *sp++ = *iostatus; 
+      *sp++ = *status;
+      *sp++ = *iostatus;
     } else
       sp += 2;
 
@@ -222,19 +222,19 @@ void FTN_X(c_esmc_fieldserialize)(
     if (localrc) *localrc = ESMF_SUCCESS;
 
     return;
-} 
+}
 
 
 void FTN_X(c_esmc_fielddeserialize)(
-                ESMC_Status *status, 
-                ESMC_Status *iostatus, 
+                ESMC_Status *status,
+                ESMC_Status *iostatus,
                 int * dimCount,
                 int * gridToFieldMap,
                 int * ungriddedLBound,
                 int * ungriddedUBound,
                 int * totalLWidth,
                 int * totalUWidth,
-		char *buffer, int *offset, int *localrc,
+                char *buffer, int *offset, int *localrc,
                 ESMCI_FortranStrLenArg buffer_l){
 
 #undef  ESMC_METHOD
@@ -269,7 +269,7 @@ void FTN_X(c_esmc_fielddeserialize)(
     if (localrc) *localrc = ESMF_SUCCESS;
 
     return;
-} 
+}
 
 
 }

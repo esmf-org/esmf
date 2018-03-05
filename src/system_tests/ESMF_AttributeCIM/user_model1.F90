@@ -19,18 +19,18 @@ module user_model1
   use ESMF
 
   implicit none
-  
+
   private
-    
+
   public userm1_setvm, userm1_register
-        
+
   contains
 
 !-------------------------------------------------------------------------
 !   !  The Register routine sets the subroutines to be called
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
- 
+
   subroutine userm1_setvm(comp, rc)
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
@@ -86,8 +86,8 @@ module user_model1
 !-------------------------------------------------------------------------
 !   !  User Comp Component created by higher level calls, here is the
 !   !   Initialization routine.
- 
-    
+
+
   subroutine user_init(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -95,13 +95,13 @@ module user_model1
     integer, intent(out) :: rc
 
     ! Local variables
-	  type(ESMF_AttPack)        :: attpack
+          type(ESMF_AttPack)        :: attpack
     character(ESMF_MAXSTR)      :: convCIM, purpComp, purpSci, purpField
     character(ESMF_MAXSTR)      :: convISO, purpRP, purpCitation
     character(ESMF_MAXSTR)      :: sciPropAtt(3)
     type(ESMF_Field)            :: OH, Orog
     type(ESMF_FieldBundle)      :: fieldbundle
-    
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
@@ -125,9 +125,9 @@ module user_model1
     call ESMF_AttributeSet(comp, 'ShortName', 'EarthSys_Atmos', &
       convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  1) Name of component in navigator bar on the left; 
+    ! ESG Display:  1) Name of component in navigator bar on the left;
     !                  attribute 'Version' appended, if set.
-    !               2) Also "Simulation Metadata:", for top-level component, 
+    !               2) Also "Simulation Metadata:", for top-level component,
     !                  first part of display, at top, 1st line, prepended to
     !                  top-level component's attributes 'Version' (if set) and
     !                  'SimulationShortName'.
@@ -136,7 +136,7 @@ module user_model1
                            'Atmosphere component of the EarthSys model', &
       convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Full Name:"  first part of display, at top, 2nd line 
+    ! ESG Display:  "Full Name:"  first part of display, at top, 2nd line
     !               under title, prepended to attribute 'SimulationLongName'.
 
     call ESMF_AttributeSet(comp, 'Description', &
@@ -156,7 +156,7 @@ module user_model1
     call ESMF_AttributeSet(comp, 'ModelType', &
       'Atmosphere', convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  Maps to "Realm:", expanded under component name, in 
+    ! ESG Display:  Maps to "Realm:", expanded under component name, in
     !               navigator bar on the left.
 
 
@@ -196,13 +196,13 @@ module user_model1
     purpCitation = 'Citation'
     call ESMF_AttributeGetAttPack(comp, convISO, purpCitation, attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    
+
     call ESMF_AttributeSet(comp, 'ShortTitle', &
      'Doe_2008', &
       convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  Not ingested, as of ESG 1.3.1.
-  
+
     call ESMF_AttributeSet(comp, 'LongTitle', &
      'Doe, J.A.; Doe, S.B.; ' // &
      'Doe, J.C.; 2008 EarthSys: ' // &
@@ -211,7 +211,7 @@ module user_model1
      '1361-1396.', &
       convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Reference", concatenated with attribute 'DOI', under 
+    ! ESG Display:  "Reference", concatenated with attribute 'DOI', under
     !               tab "References".
 
     call ESMF_AttributeSet(comp, 'Date', &
@@ -230,14 +230,14 @@ module user_model1
      'doi:16.1034/2008JCLI4507.1', &
       convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  Concatenated to attribute 'LongTitle' and displayed as 
+    ! ESG Display:  Concatenated to attribute 'LongTitle' and displayed as
     !               "Reference" under tab "References".
 
     call ESMF_AttributeSet(comp, 'URL', &
      'http://www.earthsys.org/publications', &
       convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  Not output to CIM, as of v1.5/1.7 (no definition for it). 
+    ! ESG Display:  Not output to CIM, as of v1.5/1.7 (no definition for it).
 
 
     !
@@ -258,7 +258,7 @@ module user_model1
         'effect of snow', &
       convention=convCIM, purpose=purpSci, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  ESG-name mapped from Metafor-name, under tabs 
+    ! ESG Display:  ESG-name mapped from Metafor-name, under tabs
     !               "Properties->Scientific"
 
     call ESMF_AttributeSet(comp, &
@@ -266,7 +266,7 @@ module user_model1
         'yes', &
       convention=convCIM, purpose=purpSci, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  ESG-name mapped from Metafor-name, under tabs 
+    ! ESG Display:  ESG-name mapped from Metafor-name, under tabs
     !               "Properties->Scientific"
 
     call ESMF_AttributeSet(comp, &
@@ -274,12 +274,12 @@ module user_model1
         'spaceborne', &
       convention=convCIM, purpose=purpSci, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  ESG-name mapped from Metafor-name, under tabs 
+    ! ESG Display:  ESG-name mapped from Metafor-name, under tabs
     !               "Properties->Scientific"
 
 
     ! Create two Fields, and add CIM Attribute packages.
-    ! The standard Attribute package currently supplied by ESMF for 
+    ! The standard Attribute package currently supplied by ESMF for
     ! CIM Fields contains a standard CF-Extended package nested within it.
     convCIM = 'CIM 1.7.1'
     purpField = 'Inputs'
@@ -320,21 +320,21 @@ module user_model1
     call ESMF_AttributeSet(OH, 'CouplingPurpose', 'Boundary', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  Title of expandable bar under tab "Inputs", 
+    ! ESG Display:  Title of expandable bar under tab "Inputs",
     !               "Boundary Conditions".
 
     call ESMF_AttributeSet(OH, 'CouplingSource', &
                                'EarthSys_Atmos', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Input Source Component" under tab "Inputs", 
-    !               under field name. 
+    ! ESG Display:  "Input Source Component" under tab "Inputs",
+    !               under field name.
 
     call ESMF_AttributeSet(OH, 'CouplingTarget', &
                                'EarthSys_AtmosDynCore', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Input Target Component" under tab "Inputs", 
+    ! ESG Display:  "Input Target Component" under tab "Inputs",
     !               under field name.
 
     call ESMF_AttributeSet(OH, 'Description', &
@@ -349,7 +349,7 @@ module user_model1
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Spatial Regridding Method" under tab "Inputs",
-    !               under field name. 
+    !               under field name.
 
     call ESMF_AttributeSet(OH, 'SpatialRegriddingDimension', &
                                '2D', &
@@ -366,10 +366,10 @@ module user_model1
                                'TimeInterpolation', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Input Time Transformation Type" under tab "Inputs", 
-    !               under field name. 
+    ! ESG Display:  "Input Time Transformation Type" under tab "Inputs",
+    !               under field name.
 
-    
+
     ! Orog Field
     Orog = ESMF_FieldEmptyCreate(name='Orog', rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -403,21 +403,21 @@ module user_model1
     call ESMF_AttributeSet(Orog, 'CouplingPurpose', 'Initial', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  Title of expandable bar under tab "Inputs", 
+    ! ESG Display:  Title of expandable bar under tab "Inputs",
     !               "Boundary Conditions".
 
     call ESMF_AttributeSet(Orog, 'CouplingSource', &
                                  'EarthSys_Atmos', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Input Source Component" under tab "Inputs", 
-    !               under field name. 
+    ! ESG Display:  "Input Source Component" under tab "Inputs",
+    !               under field name.
 
     call ESMF_AttributeSet(Orog, 'CouplingTarget', &
                                  'EarthSys_AtmosDynCore', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Input Target Component" under tab "Inputs", 
+    ! ESG Display:  "Input Target Component" under tab "Inputs",
     !               under field name.
 
     call ESMF_AttributeSet(Orog, 'Description', &
@@ -432,7 +432,7 @@ module user_model1
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     ! ESG Display:  "Input Spatial Regridding Method" under tab "Inputs",
-    !               under field name. 
+    !               under field name.
 
     call ESMF_AttributeSet(Orog, 'SpatialRegriddingDimension', &
                                  '2D', &
@@ -443,14 +443,14 @@ module user_model1
     call ESMF_AttributeSet(Orog, 'TimeTransformationType', 'Exact', &
          convention=convCIM, purpose=purpField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Input Time Transformation Type" under tab "Inputs", 
-    !               under field name. 
+    ! ESG Display:  "Input Time Transformation Type" under tab "Inputs",
+    !               under field name.
 
 
     ! Create a FieldBundle for the two Fields
     fieldbundle = ESMF_FieldBundleCreate(name="fieldbundle1", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-      
+
     ! Add the Fields to the FieldBundle (this will link the Attribute
     ! hierarchies of the FieldBundle and Fields)
     call ESMF_FieldBundleAdd(fieldbundle, (/OH/), rc=rc)
@@ -461,13 +461,13 @@ module user_model1
     ! Link the Attributes from the FieldBundle to the export State
     call ESMF_StateAdd(exportState, fieldbundleList=(/fieldbundle/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    
+
   end subroutine user_init
 
 !-------------------------------------------------------------------------
 !   !  The Run routine where data is computed.
 !   !
- 
+
   subroutine user_run(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -493,13 +493,13 @@ module user_model1
       convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 #endif
-                                                             
+
   end subroutine user_run
 
 !-------------------------------------------------------------------------
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
- 
+
   subroutine user_final(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -512,7 +512,7 @@ module user_model1
 
     ! Initialize return code
     rc = ESMF_SUCCESS
-    
+
     call ESMF_StateGet(exportState, "fieldbundle1", fieldbundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
@@ -530,5 +530,5 @@ module user_model1
   end subroutine user_final
 
 end module user_model1
-    
+
 !\end{verbatim}

@@ -2806,8 +2806,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_XGridDestroy - Release resources associated with an XGrid
 ! !INTERFACE:
 
-  subroutine ESMF_XGridDestroy(xgrid, keywordenforcer, &
-    rc)
+  subroutine ESMF_XGridDestroy(xgrid, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_XGrid), intent(inout)          :: xgrid       

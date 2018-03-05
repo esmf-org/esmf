@@ -108,7 +108,7 @@ contains
 ! !IROUTINE: ESMF_FieldRegrid - Compute a regridding operation
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldRegrid(srcField, dstField, routehandle, keywordEnforcer,&
+  subroutine ESMF_FieldRegrid(srcField, dstField, routehandle, keywordEnforcer, &
     zeroregion, termorderflag, checkflag, dynamicMask, rc)
 !
 ! !ARGUMENTS:
@@ -130,7 +130,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt termorderflag}.
 !              The new argument gives the user control over the order in which
 !              the src terms are summed up.
-! \item[7.1.0] Added argument {\tt dynamicMask}.
+! \item[7.1.0r] Added argument {\tt dynamicMask}.
 !              The new argument supports the dynamic masking feature.
 ! \end{description}
 ! \end{itemize}
@@ -412,9 +412,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !               a sphere.
 ! \item[6.3.0rp1] Added argument {\tt normType}. This argument allows the user to
 !               control the type of normalization done during conservative weight generation.
-! \item[7.1.0] Added argument {\tt dstStatusField}. This argument allows the user to
+! \item[7.1.0r] Added argument {\tt dstStatusField}. This argument allows the user to
 !              receive information about what happened to each location in the destination
 !              Field during regridding.
+!
+!              Added arguments {\tt extrapMethod}, {\tt extrapNumSrcPnts}, and
+!              {\tt extrapDistExponent}. These three new extrapolation arguments allow the 
+!              user to extrapolate destination points not mapped by the regrid method. 
+!              {\tt extrapMethod} allows the user to choose the extrapolation method.
+!              {\tt extrapNumSrcPnts} and {\tt extrapDistExponent} are parameters that
+!              allow the user to tune the behavior of the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} 
+!              method.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1514,7 +1522,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      
 ! !ARGUMENTS:
       type(ESMF_XGrid),       intent(in)              :: xgrid
-      type(ESMF_Field),       intent(inout)           :: srcField
+      type(ESMF_Field),       intent(in)              :: srcField
       type(ESMF_Field),       intent(inout)           :: dstField
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
@@ -1532,6 +1540,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[5.3.0] Added arguments {\tt srcFracField}, {\tt dstFracField}, {\tt srcMergeFracField}, and {\tt dstMergeFracField}.
 ! These fraction Fields allow a user to calculate correct flux regridded through {\tt ESMF\_XGrid}.
+! \item[7.1.0r] Added argument {\tt regridmethod}. This new argument allows the user to choose the regrid method
+!               to apply when computing the routehandle. 
 ! \end{description}
 ! \end{itemize}
 !

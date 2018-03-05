@@ -327,7 +327,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
 !              matrices that contain elements with indices that do not have a
 !              match within the source or destination Array.
-! \item[7.1.0] Removed argument {\tt transposeRoutehandle} and provide it
+! \item[7.1.0r] Removed argument {\tt transposeRoutehandle} and provide it
 !              via interface overloading instead. This allows argument 
 !              {\tt srcField} to stay strictly intent(in) for this entry point.
 ! \end{description}
@@ -1293,7 +1293,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
 !              matrices that contain elements with indices that do not have a
 !              match within the source or destination Array.
-! \item[7.1.0] Removed argument {\tt transposeRoutehandle} and provide it
+! \item[7.1.0r] Removed argument {\tt transposeRoutehandle} and provide it
 !              via interface overloading instead. This allows argument 
 !              {\tt srcField} to stay strictly intent(in) for this entry point.
 ! \end{description}

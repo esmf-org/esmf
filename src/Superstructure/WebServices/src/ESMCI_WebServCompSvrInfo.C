@@ -72,14 +72,14 @@ ESMCI_WebServCompSvrInfo::ESMCI_WebServCompSvrInfo(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theClientId = 0;
-	theJobId = "";
-	theHostName = "";
-	thePortNum = 0;
-	theName = "";
-	theDesc = "";
-	thePhysHostName = "";
-	theCurrentStatus = NET_ESMF_STAT_IDLE;
+        theClientId = 0;
+        theJobId = "";
+        theHostName = "";
+        thePortNum = 0;
+        theName = "";
+        theDesc = "";
+        thePhysHostName = "";
+        theCurrentStatus = NET_ESMF_STAT_IDLE;
 }
 
 
@@ -120,7 +120,7 @@ void  ESMCI_WebServCompSvrInfo::setClientId(
 //
 // !ARGUMENTS:
 //
-  int  clientId		// the identifier of the client who started the server
+  int  clientId                 // the identifier of the client who started the server
   )
 //
 // !DESCRIPTION:
@@ -129,7 +129,7 @@ void  ESMCI_WebServCompSvrInfo::setClientId(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theClientId = clientId;
+        theClientId = clientId;
 }
 
 
@@ -146,7 +146,7 @@ void  ESMCI_WebServCompSvrInfo::setJobId(
 //
 // !ARGUMENTS:
 //
-  string  jobId		// the unique id of the component server for this client
+  string  jobId                 // the unique id of the component server for this client
   )
 //
 // !DESCRIPTION:
@@ -155,7 +155,7 @@ void  ESMCI_WebServCompSvrInfo::setJobId(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theJobId = jobId;
+        theJobId = jobId;
 }
 
 
@@ -172,9 +172,9 @@ void  ESMCI_WebServCompSvrInfo::setHostName(
 //
 // !ARGUMENTS:
 //
-  string  hostName		// the name of the host machine on which the server
-  								// was initiated (may not be running on this machine
-  								// if this is a cluster)
+  string  hostName              // the name of the host machine on which the server
+                                                                // was initiated (may not be running on this machine
+                                                                // if this is a cluster)
   )
 //
 // !DESCRIPTION:
@@ -183,7 +183,7 @@ void  ESMCI_WebServCompSvrInfo::setHostName(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theHostName = hostName;
+        theHostName = hostName;
 }
 
 
@@ -200,7 +200,7 @@ void  ESMCI_WebServCompSvrInfo::setPortNum(
 //
 // !ARGUMENTS:
 //
-  int  portNum		// the port number to which the client session is connected
+  int  portNum          // the port number to which the client session is connected
   )
 //
 // !DESCRIPTION:
@@ -209,7 +209,7 @@ void  ESMCI_WebServCompSvrInfo::setPortNum(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	thePortNum = portNum;
+        thePortNum = portNum;
 }
 
 
@@ -226,7 +226,7 @@ void  ESMCI_WebServCompSvrInfo::setName(
 //
 // !ARGUMENTS:
 //
-  string  name		// the name of the component
+  string  name          // the name of the component
   )
 //
 // !DESCRIPTION:
@@ -235,7 +235,7 @@ void  ESMCI_WebServCompSvrInfo::setName(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theName = name;
+        theName = name;
 }
 
 
@@ -252,7 +252,7 @@ void  ESMCI_WebServCompSvrInfo::setDesc(
 //
 // !ARGUMENTS:
 //
-  string  desc		// the description of the component
+  string  desc          // the description of the component
   )
 //
 // !DESCRIPTION:
@@ -261,7 +261,7 @@ void  ESMCI_WebServCompSvrInfo::setDesc(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theDesc = desc;
+        theDesc = desc;
 }
 
 
@@ -278,9 +278,9 @@ void  ESMCI_WebServCompSvrInfo::setPhysHostName(
 //
 // !ARGUMENTS:
 //
-  string  physHostName	// the name of the host machine on which the server
-  								// is listening (may be different from host name if
-  								// this is a cluster)
+  string  physHostName  // the name of the host machine on which the server
+                                                                // is listening (may be different from host name if
+                                                                // this is a cluster)
   )
 //
 // !DESCRIPTION:
@@ -289,7 +289,7 @@ void  ESMCI_WebServCompSvrInfo::setPhysHostName(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	thePhysHostName = physHostName;
+        thePhysHostName = physHostName;
 }
 
 
@@ -306,7 +306,7 @@ void  ESMCI_WebServCompSvrInfo::setStatus(
 //
 // !ARGUMENTS:
 //
-  int  status		// the status value 
+  int  status           // the status value
   )
 //
 // !DESCRIPTION:
@@ -315,7 +315,7 @@ void  ESMCI_WebServCompSvrInfo::setStatus(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theCurrentStatus = status;
+        theCurrentStatus = status;
 }
 
 
@@ -340,16 +340,16 @@ void  ESMCI_WebServCompSvrInfo::print(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	cout << "***** BEGIN ESMCI_WebServCompSvrInfo *****" << endl;
-	cout << "Client ID      : " << theClientId << endl;
-	cout << "Job ID         : " << theJobId << endl;
-	cout << "Host Name      : " << theHostName << endl;
-	cout << "Port Num       : " << thePortNum << endl;
-	cout << "Name           : " << theName << endl;
-	cout << "Desc           : " << theDesc << endl;
-	cout << "Phys Host Name : " << thePhysHostName << endl;
-	cout << "Status         : " << theCurrentStatus << endl;
-	cout << "*****  END ESMCI_WebServCompSvrInfo  *****" << endl;
+        cout << "***** BEGIN ESMCI_WebServCompSvrInfo *****" << endl;
+        cout << "Client ID      : " << theClientId << endl;
+        cout << "Job ID         : " << theJobId << endl;
+        cout << "Host Name      : " << theHostName << endl;
+        cout << "Port Num       : " << thePortNum << endl;
+        cout << "Name           : " << theName << endl;
+        cout << "Desc           : " << theDesc << endl;
+        cout << "Phys Host Name : " << thePhysHostName << endl;
+        cout << "Status         : " << theCurrentStatus << endl;
+        cout << "*****  END ESMCI_WebServCompSvrInfo  *****" << endl;
 }
 
 

@@ -19,16 +19,16 @@
     use ESMF
 
     implicit none
-    
+
     public userm2_register
-        
+
     contains
 
 !--------------------------------------------------------------------------------
 !   !  The Register routine sets the subroutines to be called
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
- 
+
     subroutine userm2_register(comp, rc)
         type(ESMF_GridComp) :: comp
         integer, intent(out) :: rc
@@ -52,7 +52,7 @@
 !--------------------------------------------------------------------------------
 !   !  User Comp Component created by higher level calls, here is the
 !   !   Initialization routine.
- 
+
     subroutine user_init(comp, importState, exportState, clock, rc)
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importState, exportState
@@ -95,7 +95,7 @@
       ! Establish the coordinates of the grids
       dst_minx = 0.1
       dst_miny = 0.1
-  
+
       dst_maxx = 1.9
       dst_maxy = 1.9
 
@@ -133,7 +133,7 @@
 
       ! Get memory and set coords for dst
       do lDE=0,localDECount-1
- 
+
          !! get coords
          call ESMF_GridGetCoord(dstGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, coordDim=1, &
                            computationalLBound=clbnd, computationalUBound=cubnd, farrayPtr=farrayPtrXC, rc=localrc)
@@ -181,7 +181,7 @@
 !--------------------------------------------------------------------------------
 !   !  The Run routine where data is computed.
 !   !
- 
+
     subroutine user_run(comp, importState, exportState, clock, rc)
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importState, exportState
@@ -247,15 +247,15 @@
          do i1=clbnd(1),cubnd(1)
           do i2=clbnd(2),cubnd(2)
 
-    	     !! if error is too big report an error
-	     if (abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))) > 0.0001) then
+             !! if error is too big report an error
+             if (abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))) > 0.0001) then
 !                 write(*,*) farrayPtr(i1,i2),".ne.",(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))
                  rc=ESMF_FAILURE
                  return
-    	     endif	
+             endif      
          enddo
        enddo
-   
+
        ! RESET DESTINATION BACK TO 0
        farrayPtr=0.0
 
@@ -268,7 +268,7 @@
 !--------------------------------------------------------------------------------
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
- 
+
     subroutine user_final(comp, importState, exportState, clock, rc)
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importState, exportState
@@ -280,7 +280,7 @@
       type(ESMF_Grid) :: dstGrid
 
       rc = ESMF_SUCCESS
-      print *, "User Comp Final starting"  
+      print *, "User Comp Final starting"
 
       ! check validity of results
       ! Get Fields from import state
@@ -298,11 +298,11 @@
       if (rc .ne. ESMF_SUCCESS) return
 
       print *, "User Comp Final returning"
-   
+
     end subroutine user_final
 
 
     end module user_model2
-    
+
 !\end{verbatim}
-    
+

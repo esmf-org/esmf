@@ -1,9 +1,9 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
@@ -28,14 +28,14 @@ namespace ESMCI {
   bool is_outside_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz);
 
   bool calc_p_hex_sph3D_xyz(const double *hex_xyz, const double *pnt_xyz, double *p);
- 
+
   bool invert_matrix_3x3(double m[], double m_inv[]);
 
   bool intersect_quad_with_line(const double *q, const double *l1, const double *l2, double *p,
-				double *t);
+                                double *t);
 
   bool intersect_tri_with_line(const double *tri, const double *l1, const double *l2, double *p,
-			       double *t);
+                               double *t);
 
   double area_of_flat_2D_polygon(int num, double *coords);
 
@@ -45,10 +45,10 @@ namespace ESMCI {
 
   void get_elem_coords(const MeshObj *elem, const MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords);
 
-  void get_elem_coords_2D_ccw(const MeshObj *elem, MEField<>  *cfield, int max_num_nodes,double *tmp_coords, 
+  void get_elem_coords_2D_ccw(const MeshObj *elem, MEField<>  *cfield, int max_num_nodes,double *tmp_coords,
                               int *num_nodes, double *coords);
 
-  void get_elem_coords_3D_ccw(const MeshObj *elem, MEField<>  *cfield, int max_num_nodes,double *tmp_coords, 
+  void get_elem_coords_3D_ccw(const MeshObj *elem, MEField<>  *cfield, int max_num_nodes,double *tmp_coords,
                               int *num_nodes, double *coords);
 
   void get_elem_coords_and_ids(const MeshObj *elem, MEField<>  *cfield, int sdim, int max_num_nodes, int *num_nodes, double *coords, int *ids);
@@ -85,7 +85,7 @@ namespace ESMCI {
   void calc_sph_mmbox(double *pnt1, double *pnt2, double *pnt3, double *min, double *max);
 
 
-int calc_gc_parameters_quad(const double *pnt, double *pnt1, double *pnt2, double *pnt3, double *pnt4, 
+int calc_gc_parameters_quad(const double *pnt, double *pnt1, double *pnt2, double *pnt3, double *pnt4,
                             double *p1, double *p2);
 
 int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3,
@@ -100,18 +100,18 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
                                          int *num_out, double *out);
 
   bool line_with_seg2D(double *a1, double *a2, double *sin, double *sout,
-		       double *p);
+                       double *p);
 
   void intersect_convex_poly2D(int num_p, double *p,
-			       int num_q, double *q,
-			       double *tmp,
-			       int *num_out, double *out);
+                               int num_q, double *q,
+                               double *tmp,
+                               int *num_out, double *out);
 
 //// Handy macros ////
 
 // Do it this way because some compilers don't support isfinite (e.g. pgi)
 #define MU_IS_FINITE(n) ((n) <= std::numeric_limits<double>::max() && (n) >= -std::numeric_limits<double>::max())
-  
+
 #define MU_ASSIGN_VEC3D(out,a) \
   out[0]=a[0]; \
   out[1]=a[1]; \
@@ -119,7 +119,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
 #define MU_ASSIGN_VEC2D(out,a) \
   out[0]=a[0]; \
-  out[1]=a[1]; 
+  out[1]=a[1];
 
 #define MU_SET_MIN_VEC3D(min,vec)       \
   if (vec[0]<min[0]) min[0]=vec[0];\
@@ -147,7 +147,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
 #define MU_ADD_VEC2D(out,a,b) \
   out[0]=a[0]+b[0]; \
-  out[1]=a[1]+b[1]; 
+  out[1]=a[1]+b[1];
 
 #define MU_SUB_VEC3D(out,a,b) \
   out[0]=a[0]-b[0]; \
@@ -156,7 +156,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
 #define MU_SUB_VEC2D(out,a,b) \
   out[0]=a[0]-b[0]; \
-  out[1]=a[1]-b[1]; 
+  out[1]=a[1]-b[1];
 
 // multiply 3x3 MAT BY 3D VEC
 #define MU_MAT_X_VEC3D(out_v, m, v) \
@@ -171,7 +171,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
 #define MU_SET_TO_SCALAR_VEC2D(out,s) \
   out[0]=(s);                      \
-  out[1]=(s);                      
+  out[1]=(s);
 
 
 #define MU_MULT_BY_SCALAR_VEC3D(out,a,s) \
@@ -181,7 +181,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
 #define MU_MULT_BY_SCALAR_VEC2D(out,a,s) \
   out[0]=a[0]*(s);                      \
-  out[1]=a[1]*(s);                      
+  out[1]=a[1]*(s);
 
 #define MU_DIV_BY_SCALAR_VEC3D(out,a,s) \
   out[0]=a[0]/(s);                      \
@@ -191,7 +191,7 @@ int calc_gc_parameters_tri(const double *pnt, double *t1, double *t2, double *t3
 
 #define MU_DIV_BY_SCALAR_VEC2D(out,a,s) \
   out[0]=a[0]/(s);                      \
-  out[1]=a[1]/(s);                      
+  out[1]=a[1]/(s);
 
 
 #define MU_EQUAL_PNT3D(p1,p2,tol) ((std::abs(p1[0]-p2[0]) < tol) && \
@@ -265,9 +265,9 @@ struct GEOM_SPH2D3D {
 };
 
 
-#define ESMCI_TP_SUCCESS 0 
-#define ESMCI_TP_DEGENERATE_POLY 1 
-#define ESMCI_TP_CLOCKWISE_POLY 2 
+#define ESMCI_TP_SUCCESS 0
+#define ESMCI_TP_DEGENERATE_POLY 1
+#define ESMCI_TP_CLOCKWISE_POLY 2
 template <class TYPE>
 int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind);
 

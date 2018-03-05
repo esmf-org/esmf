@@ -40,10 +40,10 @@ program ESMF_F95PTRUTest
     '$Id$'
 !------------------------------------------------------------------------------
 
-  integer, parameter :: int8_k = selected_int_kind (12)		! 8-byte integer
-  
+  integer, parameter :: int8_k = selected_int_kind (12)                 ! 8-byte integer
+
   ! cumulative result: count failures; no failures equals "all pass"
-  
+
   integer :: result = 0
 
   ! individual test result code
@@ -52,11 +52,11 @@ program ESMF_F95PTRUTest
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name
- 
+
   ! Make sure the BLOCK DATA gets linked in
 
   external :: ESMF_F95PtrBData
- 
+
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -130,7 +130,7 @@ contains
   !-----------------------------------------------------------------------------
   ! NEX_disable_UTest
   ! First obtain a simple F95 pointer for comparison purposes
-  
+
     write (name,*) 'pointer to scalar REAL'
     write (failMsg,*) 'Pointer length is not a positive, non-zero, integer!'
     realptr_l = ichar (real_endchar)
@@ -142,7 +142,7 @@ contains
   !-----------------------------------------------------------------------------
   !NEX_notest_UTest
     write(name, *) "Pointer to CHARACTER string"
-    write(failMsg, *) "Pointer size changed!"    
+    write(failMsg, *) "Pointer size changed!"
     charptr_l = ichar (char_endchar)
     print *, '  F95 pointer-to-characterString length =', charptr_l
     !call ESMF_Test((charptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
@@ -189,7 +189,7 @@ contains
     call ESMF_Test((baseptr_l == realptr_l), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 #endif
-  
+
   end subroutine
-  
+
 end program

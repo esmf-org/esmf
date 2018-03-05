@@ -716,7 +716,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.1.0] Added argument {\tt zeroregion} to allow user to control
+! \item[7.1.0r] Added argument {\tt zeroregion} to allow user to control
 !              how the destination array is zero'ed out. This is especially
 !              useful in cases where the source and destination arrays do not
 !              cover the identical index space.
@@ -956,7 +956,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              Added argument {\tt ignoreUnmatchedIndices} to support situations 
 !              where not all elements between source and destination Arrays 
 !              match.
-! \item[7.1.0] Removed argument {\tt transposeRoutehandle} and provide it
+! \item[7.1.0r] Removed argument {\tt transposeRoutehandle} and provide it
 !              via interface overloading instead. This allows argument 
 !              {\tt srcArray} to stay strictly intent(in) for this entry point.
 ! \end{description}
@@ -1982,7 +1982,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              Added argument {\tt ignoreUnmatchedIndices} to support situations 
 !              where not all elements between source and destination Arrays 
 !              match.
-! \item[7.1.0] Removed argument {\tt transposeRoutehandle} and provide it
+! \item[7.1.0r] Removed argument {\tt transposeRoutehandle} and provide it
 !              via interface overloading instead. This allows argument 
 !              {\tt srcArray} to stay strictly intent(in) for this entry point.
 ! \end{description}

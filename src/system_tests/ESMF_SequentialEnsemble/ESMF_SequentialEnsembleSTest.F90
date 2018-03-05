@@ -124,7 +124,7 @@ program ESMF_SequentialEnsembleSTest
 !
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm, defaultlogfilename="SequentialEnsembleSTest.Log", &
-	logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
+        logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -163,20 +163,20 @@ program ESMF_SequentialEnsembleSTest
 
   compA1 = ESMF_GridCompCreate(name=cnameA1, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-	ESMF_CONTEXT, rcToReturn=rc)) &
-	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   compA2 = ESMF_GridCompCreate(name=cnameA2, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-	ESMF_CONTEXT, rcToReturn=rc)) &
-	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   compB1 = ESMF_GridCompCreate(name=cnameB1, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-	ESMF_CONTEXT, rcToReturn=rc)) &
-	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   compB2 = ESMF_GridCompCreate(name=cnameB2, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-	ESMF_CONTEXT, rcToReturn=rc)) &
-	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! create the composite composite and the coupler on all PETs
   compC = ESMF_GridCompCreate(name=cnameC, rc=localrc)
@@ -445,66 +445,66 @@ call ESMF_AttributeSet(compB2, name="perturbation", value=perturb, rc=rc);
   do while (.not. ESMF_ClockIsStopTime(clock, rc=rc))
 
         ! Sequence:  A1, A2, B1, B2 Coupler, C
-  	call ESMF_GridCompRun(compA1, exportState=cA1exp, clock=clock, &
+        call ESMF_GridCompRun(compA1, exportState=cA1exp, clock=clock, &
            userRc=userrc, rc=localrc)
-  	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    	ESMF_CONTEXT, rcToReturn=rc)) &
-    	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  	if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    	ESMF_CONTEXT, rcToReturn=rc)) &
-    	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  	call ESMF_GridCompRun(compA2, exportState=cA2exp, clock=clock, &
+        call ESMF_GridCompRun(compA2, exportState=cA2exp, clock=clock, &
            userRc=userrc, rc=localrc)
-  	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    	ESMF_CONTEXT, rcToReturn=rc)) &
-    	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  	if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    	ESMF_CONTEXT, rcToReturn=rc)) &
-    	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  	call ESMF_GridCompRun(compB1, exportState=cB1exp, clock=clock, &
+        call ESMF_GridCompRun(compB1, exportState=cB1exp, clock=clock, &
            userRc=userrc, rc=localrc)
-  	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    	ESMF_CONTEXT, rcToReturn=rc)) &
-    	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  	if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    	ESMF_CONTEXT, rcToReturn=rc)) &
-    	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  	call ESMF_GridCompRun(compB2, exportState=cB2exp, clock=clock, &
+        call ESMF_GridCompRun(compB2, exportState=cB2exp, clock=clock, &
            userRc=userrc, rc=localrc)
-  	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    	ESMF_CONTEXT, rcToReturn=rc)) &
-    	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  	if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    	ESMF_CONTEXT, rcToReturn=rc)) &
-    	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  	call ESMF_CplCompRun(cpl, importState=cplimp, &
+        call ESMF_CplCompRun(cpl, importState=cplimp, &
       exportState=cplexp, clock=clock, userRc=userrc, rc=localrc)
-  	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    	ESMF_CONTEXT, rcToReturn=rc)) &
-    	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  	if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    	ESMF_CONTEXT, rcToReturn=rc)) &
-    	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  	call ESMF_GridCompRun(compC, importState=cplexp, &
+        call ESMF_GridCompRun(compC, importState=cplexp, &
       exportState=compCexp, clock=clock, userRc=userrc, rc=localrc)
-  	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    	ESMF_CONTEXT, rcToReturn=rc)) &
-    	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  	if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    	ESMF_CONTEXT, rcToReturn=rc)) &
-    	call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
         ! Advance the time
         call ESMF_ClockAdvance(clock, rc=rc)
         if (rc .ne. ESMF_SUCCESS) goto 10
         !call ESMF_ClockPrint(clock, "currtime string", rc)
 
-  	print *, "Comp Run finished one step returned, rc =", localrc
+        print *, "Comp Run finished one step returned, rc =", localrc
 
   enddo
   if (localPet==0) print *, "Run Loop End time"

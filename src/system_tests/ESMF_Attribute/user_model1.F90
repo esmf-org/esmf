@@ -19,18 +19,18 @@ module user_model1
   use ESMF
 
   implicit none
-  
+
   private
-    
+
   public userm1_setvm, userm1_register
-        
+
   contains
 
 !-------------------------------------------------------------------------
 !   !  The Register routine sets the subroutines to be called
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
- 
+
   subroutine userm1_setvm(comp, rc)
     type(ESMF_GridComp) :: comp
     integer, intent(out) :: rc
@@ -86,8 +86,8 @@ module user_model1
 !-------------------------------------------------------------------------
 !   !  User Comp Component created by higher level calls, here is the
 !   !   Initialization routine.
- 
-    
+
+
   subroutine user_init(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -95,7 +95,7 @@ module user_model1
     integer, intent(out) :: rc
 
     ! Local variables
-	type(ESMF_AttPack)          :: attpack
+        type(ESMF_AttPack)          :: attpack
     type(ESMF_VM)               :: vm
     integer                     :: petCount, localPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,name5, &
@@ -107,8 +107,8 @@ module user_model1
     type(ESMF_Grid)             :: grid
     type(ESMF_Field)            :: DPEDT,DTDT,DUDT,DVDT,PHIS,QTR,CNV,CONVCPT,CONVKE,CONVPHI
     type(ESMF_FieldBundle)      :: fieldbundle
-    character(ESMF_MAXSTR),dimension(2)   :: attrList         
-    
+    character(ESMF_MAXSTR),dimension(2)   :: attrList
+
     ! Initialize return code
     rc = ESMF_SUCCESS
 
@@ -126,7 +126,7 @@ module user_model1
       gridEdgeLWidth=(/0,0/), gridEdgeUWidth=(/0,0/), & ! no stagger padding
       indexflag=ESMF_INDEX_GLOBAL, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    
+
     ! Initialize variables
     conv = 'ESMF'
     purp = 'General'
@@ -134,13 +134,13 @@ module user_model1
     name2 = 'StandardName'
     name3 = 'LongName'
     name4 = 'Units'
- 
+
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'DPEDT'
     value2 = 'tendency_of_air_pressure'
     value3 = 'Edge pressure tendency'
     value4 = 'Pa s-1'
-      
+
     DPEDT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
     call ESMF_AttributeAdd(DPEDT, convention=conv, purpose=purp, rc=rc)
@@ -178,7 +178,7 @@ module user_model1
     value2 = 'tendency_of_eastward_wind'
     value3 = 'Eastward wind tendency'
     value4 = 'm s-2'
-      
+
     DUDT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
     call ESMF_AttributeAdd(DUDT, convention=conv, purpose=purp, rc=rc)
@@ -191,13 +191,13 @@ module user_model1
     call ESMF_AttributeSet(DUDT, name4, value4, &
                            convention=conv, purpose=purp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
-    
+
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'DVDT'
     value2 = 'tendency_of_northward_wind'
     value3 = 'Northward wind tendency'
     value4 = 'm s-2'
-      
+
     DVDT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
     call ESMF_AttributeAdd(DVDT, convention=conv, purpose=purp, rc=rc)
@@ -210,13 +210,13 @@ module user_model1
     call ESMF_AttributeSet(DVDT, name4, value4, &
                            convention=conv, purpose=purp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
- 
+
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'PHIS'
     value2 = 'surface_geopotential'
     value3 = 'Surface geopotential height'
     value4 = 'm2 s-2'
-      
+
     PHIS = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
     call ESMF_AttributeAdd(PHIS, convention=conv, purpose=purp, rc=rc)
@@ -229,13 +229,13 @@ module user_model1
     call ESMF_AttributeSet(PHIS, name4, value4, &
                            convention=conv, purpose=purp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
- 
+
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'QTR'
     value2 = ''
     value3 = 'Advected quantities'
     value4 = 'unknown'
-      
+
     QTR = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
     call ESMF_AttributeAdd(QTR, convention=conv, purpose=purp, rc=rc)
@@ -248,13 +248,13 @@ module user_model1
     call ESMF_AttributeSet(QTR, name4, value4, &
                            convention=conv, purpose=purp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
- 
+
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'CNV'
     value2 = 'atmosphere_kinetic_energy_content'
     value3 = 'Generation of atmosphere kinetic energy content'
     value4 = 'W m-2'
-      
+
     CNV = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
     call ESMF_AttributeAdd(CNV, convention=conv, purpose=purp, rc=rc)
@@ -267,13 +267,13 @@ module user_model1
     call ESMF_AttributeSet(CNV, name4, value4, &
                            convention=conv, purpose=purp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
- 
+
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'CONVCPT'
     value2 = ''
     value3 = 'Vertically integrated enthalpy convergence'
     value4 = 'W m-2'
-      
+
     CONVCPT = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
     call ESMF_AttributeAdd(CONVCPT, convention=conv, purpose=purp, rc=rc)
@@ -286,13 +286,13 @@ module user_model1
     call ESMF_AttributeSet(CONVCPT, name4, value4, &
                            convention=conv, purpose=purp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
- 
+
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'CONVKE'
     value2 = ''
     value3 = 'Vertically integrated kinetic energy convergence'
     value4 = 'W m-2'
-      
+
     CONVKE = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
     call ESMF_AttributeAdd(CONVKE, convention=conv, purpose=purp, rc=rc)
@@ -305,13 +305,13 @@ module user_model1
     call ESMF_AttributeSet(CONVKE, name4, value4, &
                            convention=conv, purpose=purp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
- 
+
     ! Create a Field, add an Attribute package, and set Attributes in the package
     value1 = 'CONVPHI'
     value2 = ''
     value3 = 'Vertically integrated geopotential convergence'
     value4 = 'W m-2'
-      
+
     CONVPHI = ESMF_FieldCreate(grid, arrayspec=arrayspec, &
               staggerloc=ESMF_STAGGERLOC_CENTER, rc=rc)
     call ESMF_AttributeAdd(CONVPHI, convention=conv, purpose=purp, rc=rc)
@@ -340,7 +340,7 @@ module user_model1
 
     call ESMF_FieldBundleSet(fieldbundle, grid=grid, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
-      
+
     ! Add the Fields to the FieldBundle (this will connect the Attribute hierarchies)
     call ESMF_FieldBundleAdd(fieldbundle, (/DPEDT/), rc=rc)
     call ESMF_FieldBundleAdd(fieldbundle, (/DTDT/), rc=rc)
@@ -357,7 +357,7 @@ module user_model1
     ! Connect the Attributes from the FieldBundle to the export State
     call ESMF_StateAdd(exportState, fieldbundleList=(/fieldbundle/), rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
-    
+
     ! Add the Attribute package to comp
     call ESMF_AttributeAdd(comp, convention=conv, purpose=purp, rc=rc)
     call ESMF_AttributeSet(comp, 'Agency', 'NASA', &
@@ -381,7 +381,7 @@ module user_model1
     call ESMF_AttributeSet(comp, 'Version', 'GEOSagcm-EROS-beta7p12', &
                            convention=conv, purpose=purp, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
-    
+
     ! link the component to the state
     call ESMF_AttributeLink(comp, exportState, rc=rc)
 
@@ -398,7 +398,7 @@ module user_model1
 !-------------------------------------------------------------------------
 !   !  The Run routine where data is computed.
 !   !
- 
+
   subroutine user_run(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -406,7 +406,7 @@ module user_model1
     integer, intent(out) :: rc
 
     ! Local variables
-	type(ESMF_AttPack)          :: attpack, attpack2
+        type(ESMF_AttPack)          :: attpack, attpack2
     type(ESMF_VM)               :: vm
     integer                     :: petCount, myPet, k
     character(ESMF_MAXSTR)      :: name2,value2,conv,purp,purp2,name3
@@ -423,11 +423,11 @@ module user_model1
     name2 = 'StandardName'
     value2 = 'DefaultStandardName'
     name3 = 'LongName'
-    
+
     purp2 = 'Extended'
     attrList(1) = 'Coordinates'
     attrList(2) = 'Mask'
-    
+
     ! Determine petCount
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) return
@@ -437,16 +437,16 @@ module user_model1
     ! Get the FieldBundle
     call ESMF_StateGet(exportState, "fieldbundle", fieldbundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    
+
     ! Write the Attribute package from the FieldBundle
 !    call ESMF_AttributeWrite(fieldbundle,conv,purp,rc=rc)
 !    call ESMF_AttributeWrite(fieldbundle,conv,purp, &
 !                               attwriteflag=ESMF_ATTWRITE_XML, rc=rc)
-    
+
     ! Get the Grid
     !call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
     !if (rc/=ESMF_SUCCESS) return ! bail out
-    
+
     ! Process the Fields
     do k = 1, 10
         call ESMF_FieldBundleGet(fieldbundle, fieldIndex=k, field=field, rc=rc)
@@ -476,13 +476,13 @@ module user_model1
     !print *, 'myPet = ', myPet
 
     ! Nothing happens in this run cycle for this simple example
-                                                             
+
   end subroutine user_run
 
 !-------------------------------------------------------------------------
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
- 
+
   subroutine user_final(comp, importState, exportState, clock, rc)
     type(ESMF_GridComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -496,7 +496,7 @@ module user_model1
 
     ! Initialize return code
     rc = ESMF_SUCCESS
-    
+
     call ESMF_StateGet(exportState, "fieldbundle", fieldbundle, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     !call ESMF_FieldBundleGet(fieldbundle, grid=grid, rc=rc)
@@ -517,5 +517,5 @@ module user_model1
 
 
 end module user_model1
-    
+
 !\end{verbatim}

@@ -47,7 +47,7 @@ using namespace std;
 namespace ESMCI
 {
 
-  class ESMCI_WebServProcCtrl 
+  class ESMCI_WebServProcCtrl
   {
   public:
 
@@ -58,7 +58,7 @@ namespace ESMCI
      } ESMC_JobMgrType;
 
      // constructor and destructor
-	  ESMCI_WebServProcCtrl(int              procCtrlPort, 
+          ESMCI_WebServProcCtrl(int              procCtrlPort,
                            string           registrarHost,
                            int              registrarPort,
                            string           compSvrHost,
@@ -67,68 +67,68 @@ namespace ESMCI
                            string           compSvrScriptDir,
                            string           compSvrScriptName,
                            ESMC_JobMgrType  jobMgrType);
-	  ~ESMCI_WebServProcCtrl();
+          ~ESMCI_WebServProcCtrl();
 
      // data member access methods
-	  int              getProcCtrlPort()	   { return theProcCtrlPort; }
-	  string           getRegistrarHost()	   { return theRegistrarHost; }
-	  int              getRegistrarPort()		{ return theRegistrarPort; }
-	  string           getCompSvrHost()		   { return theCompSvrHost; }
-	  int              getCompSvrStartPort()	{ return theCompSvrStartPort; }
-	  int              getPortPoolSize()	   { return thePortPoolSize; }
+          int              getProcCtrlPort()       { return theProcCtrlPort; }
+          string           getRegistrarHost()      { return theRegistrarHost; }
+          int              getRegistrarPort()           { return theRegistrarPort; }
+          string           getCompSvrHost()                { return theCompSvrHost; }
+          int              getCompSvrStartPort()        { return theCompSvrStartPort; }
+          int              getPortPoolSize()       { return thePortPoolSize; }
      string           getCompSvrScriptDir()  { return theCompSvrScriptDir; }
      string           getCompSvrScriptName() { return theCompSvrScriptName; }
      ESMC_JobMgrType  getJobMgrType()        { return theJobMgrType; }
 
      // method to setup socket service loop
-	  int  requestLoop();
+          int  requestLoop();
 
 
   private:
 
      // methods to handle incoming requests
-	  int  getNextRequest();
-	  int  serviceRequest(int  request);
+          int  getNextRequest();
+          int  serviceRequest(int  request);
 
-	  int   getRequestId(const char  request[]);
-	  char* getRequestFromId(int  id);
+          int   getRequestId(const char  request[]);
+          char* getRequestFromId(int  id);
 
      // process request methods
-	  int   processNew();
-	  int   processState();
-	  int   processInit();
-	  int   processRun();
-	  int   processTimestep();
-	  int   processFinal();
-	  int   processGetDataDesc();
-	  int   processGetData();
-	  int   processEnd();
-	  int   processExit();
-	  int   processPing();
+          int   processNew();
+          int   processState();
+          int   processInit();
+          int   processRun();
+          int   processTimestep();
+          int   processFinal();
+          int   processGetDataDesc();
+          int   processGetData();
+          int   processEnd();
+          int   processExit();
+          int   processPing();
 
      // internal data access methods
-	  int  getNextClientId();
+          int  getNextClientId();
 
-	  int				    theProcCtrlPort;	     // listening port number 
+          int                               theProcCtrlPort;         // listening port number
      string           theRegistrarHost;     // host name of registrar
-	  int				    theRegistrarPort;     // port num of registrar
+          int                               theRegistrarPort;     // port num of registrar
      string           theCompSvrHost;       // host name of component svc
-	  int				    theCompSvrStartPort;  // starting port num of comp svc
-	  int				    thePortPoolSize;      // num of ports in pool of ports
-     string           theCompSvrScriptDir;  // dir for comp svc startup script 
-     string           theCompSvrScriptName; // name of comp svc startup script 
+          int                               theCompSvrStartPort;  // starting port num of comp svc
+          int                               thePortPoolSize;      // num of ports in pool of ports
+     string           theCompSvrScriptDir;  // dir for comp svc startup script
+     string           theCompSvrScriptName; // name of comp svc startup script
      ESMC_JobMgrType  theJobMgrType;        // the type of job manager
 
-     ESMCI_WebServCompSvrMgr*		theCompSvrMgr;	// the component svr manager
-	  ESMCI_WebServServerSocket	theSocket;     // the server socket
+     ESMCI_WebServCompSvrMgr*           theCompSvrMgr;  // the component svr manager
+          ESMCI_WebServServerSocket     theSocket;     // the server socket
 
      // list of client sessions and counter to keep track of the next
      // available client session id
-	  map<int, ESMCI_WebServClientInfo*>	theClients;
-	  int												theNextClientId;
+          map<int, ESMCI_WebServClientInfo*>    theClients;
+          int                                                                                           theNextClientId;
   };
 
 } // end namespace
 
 
-#endif 	// ESMCI_WebServProcCtrl_H
+#endif          // ESMCI_WebServProcCtrl_H

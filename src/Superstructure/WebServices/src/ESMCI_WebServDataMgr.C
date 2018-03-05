@@ -60,12 +60,12 @@ ESMCI_WebServDataMgr::ESMCI_WebServDataMgr(
 //
 // !ARGUMENTS:
 //
-  int    	numVars,			// the number of variables in the set of data
-  string*	varNames,   	// the names of the variables contained in the set
-  int    	numLatValues,	// the number of latitudes for the data
-  double*	latValues,   	// the latitude values for the data
-  int    	numLonValues,	// the number of longitudes for the data
-  double*	lonValues   	// the longitude values for the data
+  int           numVars,                        // the number of variables in the set of data
+  string*       varNames,       // the names of the variables contained in the set
+  int           numLatValues,   // the number of latitudes for the data
+  double*       latValues,      // the latitude values for the data
+  int           numLonValues,   // the number of longitudes for the data
+  double*       lonValues       // the longitude values for the data
   )
 //
 // !DESCRIPTION:
@@ -74,11 +74,11 @@ ESMCI_WebServDataMgr::ESMCI_WebServDataMgr(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theDataDesc = new ESMCI_WebServDataDesc(numVars, 
-                                           varNames, 
-                                           numLatValues, 
-                                           latValues, 
-                                           numLonValues, 
+        theDataDesc = new ESMCI_WebServDataDesc(numVars,
+                                           varNames,
+                                           numLatValues,
+                                           latValues,
+                                           numLonValues,
                                            lonValues);
 }
 
@@ -95,7 +95,7 @@ ESMCI_WebServDataMgr::ESMCI_WebServDataMgr(
 //
 // !ARGUMENTS:
 //
-  ESMCI_WebServDataDesc*   desc	// the data description
+  ESMCI_WebServDataDesc*   desc         // the data description
   )
 //
 // !DESCRIPTION:
@@ -104,11 +104,11 @@ ESMCI_WebServDataMgr::ESMCI_WebServDataMgr(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theDataDesc = new ESMCI_WebServDataDesc(desc->getNumVars(), 
-                                           desc->getVarNames(), 
-                                           desc->getNumLatValues(), 
-                                           desc->getLatValues(), 
-                                           desc->getNumLonValues(), 
+        theDataDesc = new ESMCI_WebServDataDesc(desc->getNumVars(),
+                                           desc->getVarNames(),
+                                           desc->getNumLatValues(),
+                                           desc->getLatValues(),
+                                           desc->getNumLonValues(),
                                            desc->getLonValues());
 }
 
@@ -133,11 +133,11 @@ ESMCI_WebServDataMgr::~ESMCI_WebServDataMgr(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	// need to free up memory here
-	if (theDataDesc)
-	{
-		delete theDataDesc;
-	}
+        // need to free up memory here
+        if (theDataDesc)
+        {
+                delete theDataDesc;
+        }
 }
 
 
@@ -163,14 +163,14 @@ int  ESMCI_WebServDataMgr::getNumVars(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int	numVars = 0;
+        int     numVars = 0;
 
-	if (theDataDesc)
-	{
-		numVars = theDataDesc->getNumVars();
-	}
+        if (theDataDesc)
+        {
+                numVars = theDataDesc->getNumVars();
+        }
 
-	return numVars;
+        return numVars;
 }
 
 
@@ -196,14 +196,14 @@ string*  ESMCI_WebServDataMgr::getVarNames(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	string*	varNames = 0;
+        string*         varNames = 0;
 
-	if (theDataDesc)
-	{
-		varNames = theDataDesc->getVarNames();
-	}
+        if (theDataDesc)
+        {
+                varNames = theDataDesc->getVarNames();
+        }
 
-	return varNames;
+        return varNames;
 }
 
 
@@ -229,14 +229,14 @@ int  ESMCI_WebServDataMgr::getNumLatValues(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int	numLats = 0;
+        int     numLats = 0;
 
-	if (theDataDesc)
-	{
-		numLats = theDataDesc->getNumLatValues();
-	}
+        if (theDataDesc)
+        {
+                numLats = theDataDesc->getNumLatValues();
+        }
 
-	return numLats;
+        return numLats;
 }
 
 
@@ -262,14 +262,14 @@ double*  ESMCI_WebServDataMgr::getLatValues(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	double*	latValues = 0;
+        double*         latValues = 0;
 
-	if (theDataDesc)
-	{
-		latValues = theDataDesc->getLatValues();
-	}
+        if (theDataDesc)
+        {
+                latValues = theDataDesc->getLatValues();
+        }
 
-	return latValues;
+        return latValues;
 }
 
 
@@ -295,14 +295,14 @@ int  ESMCI_WebServDataMgr::getNumLonValues(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int	numLons = 0;
+        int     numLons = 0;
 
-	if (theDataDesc)
-	{
-		numLons = theDataDesc->getNumLonValues();
-	}
+        if (theDataDesc)
+        {
+                numLons = theDataDesc->getNumLonValues();
+        }
 
-	return numLons;
+        return numLons;
 }
 
 
@@ -328,14 +328,14 @@ double*  ESMCI_WebServDataMgr::getLonValues(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	double*	lonValues = 0;
+        double*         lonValues = 0;
 
-	if (theDataDesc)
-	{
-		lonValues = theDataDesc->getLonValues();
-	}
+        if (theDataDesc)
+        {
+                lonValues = theDataDesc->getLonValues();
+        }
 
-	return lonValues;
+        return lonValues;
 }
 
 
@@ -353,24 +353,24 @@ int  ESMCI_WebServDataMgr::getVarIndex(
 //
 // !ARGUMENTS:
 //
-  string  varName	// the variable name to lookup in the array of names
+  string  varName       // the variable name to lookup in the array of names
   )
 //
 // !DESCRIPTION:
-//    Looks up the index of the specified variable name in the array of 
+//    Looks up the index of the specified variable name in the array of
 //    variable names.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int	varIndex = -1;
+        int     varIndex = -1;
 
-	if (theDataDesc)
-	{
-		varIndex = theDataDesc->getVarIndex(varName);
-	}
+        if (theDataDesc)
+        {
+                varIndex = theDataDesc->getVarIndex(varName);
+        }
 
-	return varIndex;
+        return varIndex;
 }
 
 
@@ -389,7 +389,7 @@ int  ESMCI_WebServDataMgr::getLatIndex(
 //
 // !ARGUMENTS:
 //
-  double  latValue	// the lat value to lookup in the array of lat values
+  double  latValue      // the lat value to lookup in the array of lat values
   )
 //
 // !DESCRIPTION:
@@ -399,14 +399,14 @@ int  ESMCI_WebServDataMgr::getLatIndex(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int	latIndex = -1;
+        int     latIndex = -1;
 
-	if (theDataDesc)
-	{
-		latIndex = theDataDesc->getLatIndex(latValue);
-	}
+        if (theDataDesc)
+        {
+                latIndex = theDataDesc->getLatIndex(latValue);
+        }
 
-	return latIndex;
+        return latIndex;
 }
 
 
@@ -425,7 +425,7 @@ int  ESMCI_WebServDataMgr::getLonIndex(
 //
 // !ARGUMENTS:
 //
-  double  lonValue	// the lon value to lookup in the array of lon values
+  double  lonValue      // the lon value to lookup in the array of lon values
   )
 //
 // !DESCRIPTION:
@@ -435,14 +435,14 @@ int  ESMCI_WebServDataMgr::getLonIndex(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int	lonIndex = -1;
+        int     lonIndex = -1;
 
-	if (theDataDesc)
-	{
-		lonIndex = theDataDesc->getLonIndex(lonValue);
-	}
+        if (theDataDesc)
+        {
+                lonIndex = theDataDesc->getLonIndex(lonValue);
+        }
 
-	return lonIndex;
+        return lonIndex;
 }
 
 
@@ -460,7 +460,7 @@ ESMCI_WebServDataContent*  ESMCI_WebServDataMgr::getDataValues(
 //
 // !ARGUMENTS:
 //
-  double  timeStamp		// longitude value name of data value to lookup
+  double  timeStamp             // longitude value name of data value to lookup
   )
 //
 // !DESCRIPTION:
@@ -469,35 +469,35 @@ ESMCI_WebServDataContent*  ESMCI_WebServDataMgr::getDataValues(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	ESMCI_WebServDataContent*	retValue = NULL;
+        ESMCI_WebServDataContent*       retValue = NULL;
 
-	if (theDataDesc)
-	{
-		int	numLatValues = theDataDesc->getNumLatValues();
-		int	numLonValues = theDataDesc->getNumLonValues();
+        if (theDataDesc)
+        {
+                int     numLatValues = theDataDesc->getNumLatValues();
+                int     numLonValues = theDataDesc->getNumLonValues();
 
-		retValue = new ESMCI_WebServDataContent(numLatValues, numLonValues);
+                retValue = new ESMCI_WebServDataContent(numLatValues, numLonValues);
 
-		retValue->setTimeStamp(1.1);
+                retValue->setTimeStamp(1.1);
 
-		double*	dataValues = new double[numLatValues * numLonValues];
-		for (int i = 0; i < numLatValues; ++i)
-		{
-			for (int j = 0; j < numLonValues; ++j)
-			{
-				dataValues[(j * numLatValues) + i] = 
-					(double)(i + (double)(j / 100.0));
-			}
-		}
+                double*         dataValues = new double[numLatValues * numLonValues];
+                for (int i = 0; i < numLatValues; ++i)
+                {
+                        for (int j = 0; j < numLonValues; ++j)
+                        {
+                                dataValues[(j * numLatValues) + i] =
+                                        (double)(i + (double)(j / 100.0));
+                        }
+                }
 
-		retValue->addDataValues("temp", dataValues);
-		retValue->addDataValues("wind", dataValues);
-		retValue->addDataValues("precip", dataValues);
-		retValue->addDataValues("solarrad", dataValues);
-		retValue->addDataValues("relhumid", dataValues);
-	}
+                retValue->addDataValues("temp", dataValues);
+                retValue->addDataValues("wind", dataValues);
+                retValue->addDataValues("precip", dataValues);
+                retValue->addDataValues("solarrad", dataValues);
+                retValue->addDataValues("relhumid", dataValues);
+        }
 
-	return retValue;
+        return retValue;
 }
 
 
@@ -523,19 +523,19 @@ void  ESMCI_WebServDataMgr::printSourceValues(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	if (theDataDesc)
-	{
-		theDataDesc->print();
+        if (theDataDesc)
+        {
+                theDataDesc->print();
 
-		list<ESMCI_WebServDataContent*>::iterator	iter = theDataValues.begin();
-		ESMCI_WebServDataContent*						thisDataPtr;
+                list<ESMCI_WebServDataContent*>::iterator       iter = theDataValues.begin();
+                ESMCI_WebServDataContent*                                               thisDataPtr;
 
-		while (iter != theDataValues.end())
-		{
-			thisDataPtr = *iter;
-			thisDataPtr->print();
-		}
-	}
+                while (iter != theDataValues.end())
+                {
+                        thisDataPtr = *iter;
+                        thisDataPtr->print();
+                }
+        }
 }
 
 } // end namespace

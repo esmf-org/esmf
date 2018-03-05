@@ -5387,7 +5387,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                     intent(in)            :: vm
-!    integer(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)  
+!    <type>(ESMF_KIND_<kind>), target,  intent(in)            :: recvData(:)  
 !    integer,                           intent(in)            :: count
 !    integer,                           intent(in)            :: srcPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below

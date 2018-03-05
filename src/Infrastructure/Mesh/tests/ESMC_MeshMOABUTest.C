@@ -34,7 +34,7 @@ using namespace moab;
 //
 // !DESCRIPTION: This set of unit tests is based on the MOAB
 // structuredmesh example at:
-//    
+//
 //  http://ftp.mcs.anl.gov/pub/fathom/moab-docs/structuredmesh_8cpp_source.html
 //
 //EOP
@@ -83,7 +83,7 @@ int main(void){
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  
+
 
   //----------------------------------------------------------------------------
   // Create the mesh
@@ -180,7 +180,7 @@ int main(void){
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  
+
 
   //----------------------------------------------------------------------------
   // Loop over elements in 3 nested loops over i, j, k; for each (i,j,k)
@@ -199,21 +199,21 @@ int main(void){
   for (int k = 0; k < K-1; k++) {
     for (int j = 0; j < J-1; j++) {
       for (int i = 0; i < I-1; i++) {
-	  // 3a. Get the element corresponding to (i,j,k)
-	EntityHandle ehandle = box->get_element(i, j, k);
-	if (0 == ehandle) {
+          // 3a. Get the element corresponding to (i,j,k)
+        EntityHandle ehandle = box->get_element(i, j, k);
+        if (0 == ehandle) {
           rc = ESMF_FAILURE;
           break;
         }
-	  // 3b. Get the connectivity of the element
-	rval = mb->get_connectivity(&ehandle, 1, connect); // get the connectivity, in canonical order
-	if (MB_SUCCESS != rval) {
+          // 3b. Get the connectivity of the element
+        rval = mb->get_connectivity(&ehandle, 1, connect); // get the connectivity, in canonical order
+        if (MB_SUCCESS != rval) {
           rc = ESMF_FAILURE;
           break;
         }
-	  // 3c. Get the coordinates of the vertices comprising that element
-	rval = mb->get_coords(&connect[0], connect.size(), &coords[0]); // get the coordinates of those vertices
-	if (MB_SUCCESS != rval) {
+          // 3c. Get the coordinates of the vertices comprising that element
+        rval = mb->get_coords(&connect[0], connect.size(), &coords[0]); // get the coordinates of those vertices
+        if (MB_SUCCESS != rval) {
           rc = ESMF_FAILURE;
           break;
         }
@@ -222,7 +222,7 @@ int main(void){
   }
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  
+
 
   //----------------------------------------------------------------------------
   // Release resources tests

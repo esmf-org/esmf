@@ -571,7 +571,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt termorderflag}.
 !              The new argument gives the user control over the order in which
 !              the src terms are summed up.
-! \item[7.1.0] Added argument {\tt dynamicMask}.
+! \item[7.1.0r] Added argument {\tt dynamicMask}.
 !              The new argument supports the dynamic masking feature.
 ! \end{description}
 ! \end{itemize}
@@ -1012,7 +1012,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
 !              matrices that contain elements with indices that do not have a
 !              match within the source or destination Array.
-! \item[7.1.0] Removed argument {\tt transposeRoutehandle} and provide it
+! \item[7.1.0r] Removed argument {\tt transposeRoutehandle} and provide it
 !              via interface overloading instead. This allows argument 
 !              {\tt srcArray} to stay strictly intent(in) for this entry point.
 ! \end{description}
@@ -2971,7 +2971,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              Added argument {\tt ignoreUnmatchedIndices} to support sparse 
 !              matrices that contain elements with indices that do not have a
 !              match within the source or destination Array.
-! \item[7.1.0] Removed argument {\tt transposeRoutehandle} and provide it
+! \item[7.1.0r] Removed argument {\tt transposeRoutehandle} and provide it
 !              via interface overloading instead. This allows argument 
 !              {\tt srcArray} to stay strictly intent(in) for this entry point.
 ! \end{description}
@@ -3748,6 +3748,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the ESMF library is built.  Please see the section on 
 !   Data I/O,~\ref{io:dataio}. 
 !
+!   When {\tt convention} and {\tt purpose} arguments are specified,
+!   a NetCDF variable can be created with user-specified dimension labels and
+!   attributes.  Dimension labels may be defined for both gridded and
+!   ungridded dimensions.  Dimension labels for gridded dimensions are specified
+!   at the DistGrid level by attaching an ESMF Attribute package to it.  The Attribute
+!   package must contain an attribute named by the pre-defined ESMF parameter
+!   {\tt ESMF\_ATT\_GRIDDED\_DIM\_LABELS}.  The corresponding value is an array of
+!   character strings specifying the desired names of the dimensions.  Likewise,
+!   for ungridded dimensions, an Attribute package is attached at the Array level.
+!   The name of the name must be {\tt ESMF\_ATT\_UNGRIDDED\_DIM\_LABELS}.
+!
+!   NetCDF attributes for the variable can also be specified.  As with dimension labels,
+!   an Attribute package is added to the Array with the desired names and values.
+!   A value may be either a scalar character string, or a scalar or array of type
+!   integer, real, or double precision.  Dimension label attributes can co-exist with
+!   variable attributes within a common Attribute package.
+!
 !   Limitations:
 !   \begin{itemize}
 !     \item Only single tile Arrays are supported.
@@ -3767,13 +3784,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    (such as binary format), ESMF will return an error code.
 !   \item[{[convention]}]
 !     Specifies an Attribute package associated with the Array, used to create NetCDF
-!     attributes for the variable in the file.  When this argument is present,
-!     the [{[purpose]}] argument must also be present.  Use this argument only with a NetCDF
+!     dimension labels and attributes for the variable in the file.  When this argument is present,
+!     the {\tt purpose} argument must also be present.  Use this argument only with a NetCDF
 !     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[purpose]}]
 !     Specifies an Attribute package associated with the Array, used to create NetCDF
-!     attributes for the variable in the file.  When this argument is present,
-!     the [{[convention]}] argument must also be present.  Use this argument only with a NetCDF
+!     dimension labels and attributes for the variable in the file.  When this argument is present,
+!     the {\tt convention} argument must also be present.  Use this argument only with a NetCDF
 !     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[overwrite]}]
 !    \begin{sloppypar}
