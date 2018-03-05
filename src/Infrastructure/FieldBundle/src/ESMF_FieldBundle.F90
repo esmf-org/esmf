@@ -5448,6 +5448,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   when the ESMF library is built. Please see the section on 
 !   Data I/O,~\ref{io:dataio}.
 !
+!   When {\tt convention} and {\tt purpose} arguments are specified, NetCDF dimension
+!   labels and variable attributes are written from each Field with corresponding Attributes
+!   in the bundle.  Additionally, Attribute package names and values may be set at the
+!   FieldBundle level.  This allows the specification of global attributes within the file.
+!   As with individual Fields, the value associated with each name may be either a scalar
+!   character string, or a scalar or array of type integer, real, or double precision.
+!
 !   Limitations:
 !   \begin{itemize}
 !     \item Only single tile Arrays within Fields are supported.
@@ -5463,12 +5470,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   \item[{[convention]}]
 !     Specifies an Attribute package associated with the Array, used to create NetCDF
 !     attributes for the variable in the file.  When this argument is present,
-!     the [{[purpose]}] argument must also be present.  Use this argument only with a NetCDF
+!     the {\tt purpose} argument must also be present.  Use this argument only with a NetCDF
 !     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[purpose]}]
 !     Specifies an Attribute package associated with the Array, used to create NetCDF
 !     attributes for the variable in the file.  When this argument is present,
-!     the [{[convention]}] argument must also be present.  Use this argument only with a NetCDF
+!     the {\tt convention} argument must also be present.  Use this argument only with a NetCDF
 !     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[singleFile]}]
 !     A logical flag, the default is .true., i.e., all fields in the bundle 
