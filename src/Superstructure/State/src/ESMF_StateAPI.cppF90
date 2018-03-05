@@ -1869,7 +1869,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       When set to {\tt .true.}, additionally prints information from
 !       nested States
 !     \item[{[filename]}]
-!       The filename to which to write the Attribute info.
+!       The filename to which to write the Attribute info. This debugging option
+!       should not have been made public and will be removed in the future.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
