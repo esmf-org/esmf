@@ -31,7 +31,7 @@ class Field(object):
     replicate it multiple times.
 
     For more information about the ESMF Field class, please see the `ESMF Field documentation
-    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
+    <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
 
     The following parameters are used to create a :class:`~ESMF.api.field.Field`
     from a :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh` or

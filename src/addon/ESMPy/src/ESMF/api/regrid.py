@@ -27,7 +27,7 @@ class Regrid(object):
 
     For more information about the ESMF Regridding functionality, please see
     the `ESMF Regrid documentation
-    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
+    <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
 
     The following arguments are used to create a handle to a Regridding
     operation between two :class:`Fields <ESMF.api.field.Field>`.
@@ -367,7 +367,7 @@ class RegridFromFile(object):
 
     For more information about the ESMF Regridding functionality, please see
     the `ESMF Regrid documentation
-    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
+    <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05012000000000000000>`_.
 
     The following arguments are used to create a handle to a regridding
     operation between two :class:`Fields <ESMF.api.field.Field>`.
