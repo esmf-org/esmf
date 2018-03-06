@@ -25,7 +25,7 @@ Class                                    Description
 
 
 ---------------
-Named constants
+Named Constants
 ---------------
 
 ESMPy follows the ESMF convention of using "named constants" to represent the
@@ -52,9 +52,72 @@ Named constants                                             Description
 :class:`UnmappedAction<ESMF.api.constants.UnmappedAction>`  Specify which action to take with respect to unmapped destination points
 =========================================================== ==============================
 
------------------------------
-Grids, Meshes, and LocStreams
------------------------------
+-------
+Manager
+-------
+
+The :class:`~ESMF.api.esmpymanager.Manager` is used by ESMPy to simplify a 
+number of low-level calls used by the underlying ESMF framework to allocate
+resources, enable logging, and control garbage collection. 
+
+~~~~~~~~~~~~~~~~~~~
+Resource Allocation
+~~~~~~~~~~~~~~~~~~~
+
+The ESMF Virtual Machine (VM) `ESMF Virtual Machine (VM) <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node6.html#SECTION060120000000000000000>`_
+is created at the beginning of each ESMPy execution, and contains information 
+about the topology and characteristics of the underlying computer. The VM 
+allocates computational resources in the form of 
+**Persistent Execution Threads**, or **PETs**. These are equivalent to operating
+system threads with a lifetime of at least that of the ESMPy execution. In the 
+simplest, and most common case, a PET is equivalent to an MPI process. The 
+number of PETs and the current PET can be queried from the 
+:class:`~ESMF.api.esmpymanager.Manager`:
+
+.. code::
+
+    mg = ESMF.Manager()
+    pet_count = mg.pet_count()
+    local_pet = mg.local_pet()
+
+~~~~~~~
+Logging
+~~~~~~~
+
+The :class:`~ESMF.api.esmpymanager.Manager` is also used to enable logging:
+
+.. code::
+
+    mg = ESMF.Manager(debug=True)
+    local_pet = mg.local_pet()
+
+The output will be logged in files named PET<local_pet>.ESMF_LogFile.
+
+~~~~~~~~~~~~~~~~~~
+Garbage Collection
+~~~~~~~~~~~~~~~~~~
+
+The underlying ESMF framework needs to be initialized and finalized once and 
+only once per execution. This is handled internally by the 
+:class:`~ESMF.api.esmpymanager.Manager` and **does not** require any explicit
+user intervention. However, the ESMF garbage collection feature is not triggered
+until the finalization routine is invoked. So if memory deallocation of ESMPy
+objects is required *prior* to the end of the program, the class level 
+**destroy** routines should be invoked:
+
+.. code::
+
+    mg = ESMF.Manager()
+    
+    mg.destroy()
+
+This is commonly required when reusing a :class:`~ESMF.api.regrid.Regrid` object 
+to interpolate data between many :class:`~ESMF.api.field.Field` pairs to 
+conserve memory to complete all interpolations in a single execution.
+
+------------------------------
+Spatial Discretization Objects
+------------------------------
 
 There are three different objects used for spatial coordinate representation:
 :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh`, and :class:`~ESMF.api.locstream.LocStream`. :class:`Grids <ESMF.api.grid.Grid>` are used to represent logically rectangular
@@ -115,7 +178,7 @@ to a :class:`~ESMF.api.grid.Grid`.
     grid = ESMF.Grid(np.array([3,4]), staggerloc=ESMF.StaggerLoc.CENTER)
 
 +++++++++++++++++++++
-Spherical coordinates
+Spherical Coordinates
 +++++++++++++++++++++
 
 In the case that the :class:`~ESMF.api.grid.Grid` is on a sphere (coord_sys = :class:`ESMF.api.constants.CoordSys.SPH_DEG` or
@@ -310,32 +373,34 @@ making up the :class:`~ESMF.api.mesh.Mesh`.
 
 The structure of the per node and element information used to create a :class:`~ESMF.api.mesh.Mesh` is
 influenced by the :class:`~ESMF.api.mesh.Mesh` distribution strategy. The :class:`~ESMF.api.mesh.Mesh` class is distributed by
-elements. This means that a node must be present on any processor that contains
-an element associated with that node, but not on any other processor (a node
-can't be on a processor without an element "home"). Since a node may be used by
-two or more elements located on different processors, a node may be duplicated
-on multiple processors. When a node is duplicated in this manner, one and only
-one of the processors that contain the node must "own" the node. The user sets
-this ownership when they define the nodes during :class:`~ESMF.api.mesh.Mesh` creation. When a :class:`~ESMF.api.field.Field` is
-created on a :class:`~ESMF.api.mesh.Mesh` (i.e. on the :class:`~ESMF.api.mesh.Mesh` nodes), on each processor the :class:`~ESMF.api.field.Field` is only
-created on the nodes which are owned by that processor. This means that the size
-of the :class:`~ESMF.api.field.Field` memory on the processor can be smaller than the number of nodes
-used to create the :class:`~ESMF.api.mesh.Mesh` on that processor.
+elements. This means that a node must be present on any PET that contains
+an element associated with that node, but not on any other PET (a node
+can't be on a PET without an element "home"). Since a node may be used by
+two or more elements located on different PETs, a node may be duplicated
+on multiple PETs. When a node is duplicated in this manner, one and only
+one of the PETs that contain the node must "own" the node. The user sets
+this ownership when they define the nodes during :class:`~ESMF.api.mesh.Mesh` 
+creation. When a :class:`~ESMF.api.field.Field` is created on a 
+:class:`~ESMF.api.mesh.Mesh` (i.e. on the :class:`~ESMF.api.mesh.Mesh` nodes), 
+on each PET the :class:`~ESMF.api.field.Field` is only
+created on the nodes which are owned by that PET. This means that the size
+of the :class:`~ESMF.api.field.Field` memory on the PET can be smaller than the 
+number of nodes used to create the :class:`~ESMF.api.mesh.Mesh` on that PET.
 
 Three properties need to be defined for each :class:`~ESMF.api.mesh.Mesh` node: the global id of the node
-(*node_ids*), node coordinates (node_coords), and which processor owns the node
-(*node_owners*). The node id is a unique (across all processors) integer attached
+(*node_ids*), node coordinates (node_coords), and which PET owns the node
+(*node_owners*). The node id is a unique (across all PETs) integer attached
 to the particular node. It is used to indicate which nodes are the same when
-connecting together pieces of the :class:`~ESMF.api.mesh.Mesh` on different processors. The node
+connecting together pieces of the :class:`~ESMF.api.mesh.Mesh` on different PETs. The node
 coordinates indicate the location of a node in space and are used in the :class:`~ESMF.api.regrid.Regrid`
-functionality when interpolating. The node owner indicates which processor is in
+functionality when interpolating. The node owner indicates which PET is in
 charge of the node. This is used when creating a :class:`~ESMF.api.field.Field` on the :class:`~ESMF.api.mesh.Mesh` to indicate
-which processor should contain a :class:`~ESMF.api.field.Field` location for the data.
+which PET should contain a :class:`~ESMF.api.field.Field` location for the data.
 
 Three properties need to be defined for each :class:`~ESMF.api.mesh.Mesh` element: the global id of the
 element (*element_ids*), the topology type of the element (*element_types*), and
 which nodes are connected together to form the element (*element_conn*). The
-element id is a unique (across all processors) integer attached to the
+element id is a unique (across all PETs) integer attached to the
 particular element. The element type describes the topology of the element
 (e.g. a triangle vs. a quadrilateral). The range of choices for the topology of
 the elements in a :class:`~ESMF.api.mesh.Mesh` are restricted by the :class:`Mesh's <ESMF.api.mesh.Mesh>` parametric dimension (e.g. a
@@ -350,7 +415,7 @@ polygon (e.g. element type=6 for a hexagon). The element connectivity indicates
 which nodes are to be connected together to form the element. The number of
 nodes connected together for each element is implied by the elements topology
 type (element_types). It is IMPORTANT to note, that the entries in this list are
-NOT the global ids of the nodes, but are indices into the processor local lists
+NOT the global ids of the nodes, but are indices into the PET local lists
 of node info used in the :class:`~ESMF.api.mesh.Mesh` creation. In other words, the element connectivity
 isn't specified in terms of the global list of nodes, but instead is specified
 in terms of the locally described node info. One other important point about
@@ -502,11 +567,11 @@ relationship at all.
 
 
 -------------------------------
-Create a Grid or Mesh From File
+Create a Grid or Mesh from File
 -------------------------------
 
 ~~~~~~~~~~~~
-File formats
+File Formats
 ~~~~~~~~~~~~
 
 ESMPy can create :class:`~ESMF.api.grid.Grid` or :class:`~ESMF.api.mesh.Mesh` objects from NetCDF files in a variety
@@ -556,7 +621,7 @@ More information can be found in the ESMF reference manual section on
 the `CF Convention UGRID File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03027000000000000000>`_.
 
 ~~~~~~~~~~~~~~~~
-Meshes From File
+Meshes from File
 ~~~~~~~~~~~~~~~~
 
 When creating a :class:`~ESMF.api.mesh.Mesh` from a :class:`~ESMF.api.constants.FileFormat.SCRIP` format file, there are a number of
@@ -574,7 +639,7 @@ The mask generated for a :class:`~ESMF.api.mesh.Mesh` created from file will
 have 0 for the masked values and 1 for the unmasked values.
 
 ~~~~~~~~~~~~~~~
-Grids From File
+Grids from File
 ~~~~~~~~~~~~~~~
 
 A number of optional boolean arguments are also supported to create a
@@ -732,7 +797,7 @@ Dimension Ordering
 
 
 ------------------
-Parallel execution
+Parallel Execution
 ------------------
 
 ESMPy is a thin wrapper on top of ESMF, which was designed for high performance
@@ -750,7 +815,7 @@ the interpolation weights using all available computing resources with no need
 for user intervention.
 
 However, it is useful to remember that resulting :class:`~ESMF.api.field.Field` values will only be
-accessible on certain processors. The mpi4py package may be necessary for post
+accessible on certain PETs. The mpi4py package may be necessary for post
 processing tasks that require access to global :class:`~ESMF.api.field.Field` values.
 
 ~~~~~~~~~~~~~~~~~~~~
@@ -811,7 +876,7 @@ MPI.Spawn
             raise ValueError('Could not connect to parent - ' + usage)
 
         # worker code goes here, regridding etc..
-        print "Hello World from processor #"+str(rank)
+        print "Hello World from PET #"+str(rank)
 
         # Shutdown
         comm.Disconnect()
