@@ -27,41 +27,51 @@ masking options.  ESMF also has capabilities to read grid information
 from NetCDF files in a variety of formats, including the evolving Climate and 
 Forecast (CF) GridSpec and UGRID conventions.
 
-ESMPy supports a single-tile logically rectangular discretization type called
-Grid and an unstructured discretization type called Mesh (ESMF also
-supports observational data streams).
-ESMPy supports bilinear, finite element patch recovery and first-order
-conservative regridding.  There is also an option to ignore unmapped
-destination points and mask out points on either the source or destination.
-Regridding on the sphere takes place in 3D Cartesian space, so the pole
+ESMPy provides a Grid to represent single-tile logically rectangular coordinate
+data, a Mesh for unstructured coordinates, and a LocStream for collections of
+unconnected points like observational data streams.
+ESMPy supports bilinear, nearest neighbor, higher order patch recovery, 
+first-order conservative and second-order conservative regridding. There is 
+also an option to ignore unmapped destination points, mask out points on either
+the source or destination, choose straight line or great circle paths when using
+spherical coordinates and extrapolate data to points outside of the destination
+domain. Regridding on the sphere takes place in 3D Cartesian space, so the pole
 problem is not an issue as it commonly is with many Earth system grid remapping
-softwares.  Grid and Mesh objects can be created in 2D or 3D space, and 3D
-first-order conservative regridding is fully supported.  Future plans for ESMPy
-involve the incorporation of observational data streams.
+softwares. Grid and Mesh objects can be created in 2D or 3D space, and 3D 
+conservative regridding is fully supported.
 
 Regridding, also called remapping or interpolation, is the process of changing
 the grid underneath field data values while preserving the qualities of the
-original data.  Different kinds of transformations are appropriate for
+original data. Different kinds of transformations are appropriate for
 different problems. Regridding may be needed when communicating data between
-Earth system model components such as land and atmosphere, or between
+Earth system modeling components such as land and atmosphere, or between
 different data sets to support analysis or visualization.
 
 Regridding can be broken into two stages. The first stage is generation of an
 interpolation weight matrix that describes how points in the source grid
 contribute to points in the destination grid. The second stage is the
 multiplication of values on the source grid by the interpolation weight matrix
-to produce the appropriate values on the destination grid.  ESMPy provides
+to produce the appropriate values on the destination grid. ESMPy provides
 access to both stages through two separate interfaces.
 
-There are many different interpolation methods, suitable for different
-problems.  In ESMPy, the basic bilinear option is a two dimensional variant of
-linear interpolation.  The higher order patch recovery is a second degree
-polynomial regridding method, which uses a least squares algorithm to
-calculate the polynomial.  The first-order conservative regridding is a
-variant of a constant method which compares the proportions of overlapping
-source and destination cells to determine appropriate weights.  All of these
-methods can be broken down to a simple sparse matrix multiplication operation
-between interpolation weights and data values.
+There are many different interpolation methods, suitable for different problems.
+In ESMPy, the basic bilinear option is a two dimensional variant of linear 
+interpolation. The higher order patch recovery is a second degree polynomial 
+regridding method, which uses a least squares algorithm to calculate the 
+polynomial. This method gives better derivatives in the resulting destination 
+field than the bilinear. There are two nearest-neighbor methods which map the 
+points from one grid to the nearest corresponding point on the other grid, from
+either source to destination or vice versa. These are useful for extrapolation 
+or categorical fields. 
+
+The first-order conservative regridding is a method designed to preserve the 
+integral of the field across the interpolation from source to destination.  It 
+uses the proportion of the area of the overlapping source and destination cells
+to determine appropriate weights. The second-order conservative method also 
+preserves the integral, but uses the source gradient to give a smoother result 
+than the first-order conservative. All of these methods can be broken down to a
+simple sparse matrix multiplication operation between interpolation weights and
+data values.
 
 ================================================================================
 
@@ -90,85 +100,6 @@ Please contact <esmf_support@list.woc.noaa.gov> with any questions or problems.
 
 ================================================================================
 
-The ESMPy package should include the following files:
-
--- LICENSE - University of Illinois-NCSA License
-
--- README - this file
-
--- setup.py - standard Python build file
-
--- doc directory - contains all Sphinx documentation files
-
--- examples directory - iPython script examples
-  -- __init__.py - package init file
-  -- hello_world.py - simple hello world example
-  -- grid_create_from_file.py - grid creation from file
-  -- mesh_create_from_file.py - mesh creation from file
-  -- grid_mesh_regrid.py - grid to mesh bilinear regridding
-  -- tripole_regrid.py - conservative regridding between a GRIDSPEC and a tripole grid using masking
-  -- ungridded_dimension_regrid.py - conservative regridding with extra field dimesions for time and vertical levels
-  -- exampletest.py - examples test class
-  -- run_examples.py - script to run all examples
-  -- run_examples_dryrun.py - script to download files required for examples
-
-
--- src directory
-  -- ESMF directory
-    -- __init__.py - package init file
-    -- api directory
-      -- __init__.py - package init file
-      -- array.py - MaskedArray base class for Field
-      -- constants.py - global constants
-      -- esmpymanager.py - Manager class
-      -- field.py - Field class
-      -- grid.py - Grid class
-      -- mesh.py - Mesh class
-      -- regrid.py - Regrid class
-
-    -- fragments directory
-      -- extras.py - ESMPy routines that are not currently part of the ESMPy package
-      -- remap.py - interface to ESMF_RegridWeightGen application
-
-    -- interface directory
-      -- cbindings.py - ctypes bindings to ESMF C interface
-      -- loadESMF.py - script to load the ESMF shared library
-
-
-    -- test directory
-      -- __init__.py - package init file
-      -- base.py - base class to hold utility test functions
-      -- base_test.py - testing of the base class
-      -- run_alltest.py - unit test run utility
-      -- test_cbindings.py - tests of the "glue" layer to the ESMF c interface
-
-        -- regrid_from_file directory
-          -- __init__.py - package init file
-          -- read_test_cases_from_control_file.py - utility to read test cases from file
-          -- regrid_check.py - Regrid testing program
-          -- regrid_check_driver.py - Driver program for regrid testing
-          -- regrid_from_file_consts.py - utility constants
-          -- regrid_test_data.txt - text file contains regridding test configurations
-          -- run_regrid_from_file.py - regrid test run utility
-          -- run_regrid_from_file_dryrun.py - regrid test dryrun utility
-
-        -- test_api
-          -- __init__.py - package init file
-          -- grid_utilities.py - utility functions for grids
-          -- mesh_utilities.py - utility functions for meshes
-          -- test_array.py - array tests
-          -- test_field.py - field tests
-          -- test_grid.py - grid tests
-          -- test_mesh.py - mesh tests
-          -- test_regrid.py - regrid tests
-
-    -- util directory
-      -- __init__.py - package init file
-      -- decorators.py - decorators for special functions
-      -- exceptions.py - warning and exception classes
-
-================================================================================
-
 REQUIREMENTS:
 -------------
 
@@ -186,8 +117,10 @@ The following packages are *optional*:
     - NetCDF must be built as a shared library for ESMPy installation to succeed
 -- nose - for nose testing
 
+================================================================================
+
 INSTALLATION:
---------
+-------------
 
 Installation of ESMPy requires a pointer to a file named esmf.mk inside of an
 ESMF installation.  This file resides in a directory which looks like:
@@ -231,6 +164,20 @@ with the following command issued from the top level ESMPy directory:
 Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
 
 
+Anaconda Packages:
+------------------
+
+ESMPy conda packages are available through the NESII channel:
+
+    conda install -c nesii esmpy
+
+There are Python3 compatible development versions available through the
+conda-forge channel:
+
+    conda install -c nesii/label/dev-esmf -c conda-forge esmpy
+
+================================================================================
+
 USE:
 ----
 
@@ -238,6 +185,7 @@ To use this package in an external program, import it with:
 
     import ESMF
 
+================================================================================
 
 VALIDATION:
 -----------
@@ -283,12 +231,16 @@ ESMPy doesn't include many aspects of ESMF, including components, array
 interfaces, time management, etc.  The limitations listed here are relative
 to ESMF offline and integrated regridding capabilities.
 
-- There is no FieldBundle class, only single Fields.
-- There is no support for multi-tile Grids.
-- ESMPy cannot use an ESMF installation that is built with external LAPACK 
+- ESMPy cannot use an ESMF installation that is built with external LAPACK
   support.
-- Conservative regridding with a source Mesh created from file is not supported,
-  because the Mesh cannot retrieve coordinates from the elements.
+- Coordinates cannot be retrieved from the elements of a Mesh. This can affect 
+  the ability to set Field values on a source Mesh created from file when using
+  conservative regridding.
+- Multi-tile Grid support is limited to cubed-sphere grids created on 6 
+  processors. A cubed-sphere grid can be created on any number of processors, 
+  but only when it is created on 6 processors will the coordinates be 
+  retrievable for the entire object.
+- There is no FieldBundle class, only single Fields.
 
 Testing related:
 - Nightly regression testing is limited to a small subset of the ESMF test
