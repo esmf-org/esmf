@@ -25,7 +25,7 @@ Class                                    Description
 
 
 ---------------
-Named constants
+Named Constants
 ---------------
 
 ESMPy follows the ESMF convention of using "named constants" to represent the
@@ -52,9 +52,9 @@ Named constants                                             Description
 :class:`UnmappedAction<ESMF.api.constants.UnmappedAction>`  Specify which action to take with respect to unmapped destination points
 =========================================================== ==============================
 
----------------------------------------------------
-Resource Allocation, Logging and Garbage Collection
----------------------------------------------------
+-------
+Manager
+-------
 
 The :class:`~ESMF.api.esmpymanager.Manager` is used by ESMPy to simplify a 
 number of low-level calls used by the underlying ESMF framework to allocate
@@ -64,22 +64,21 @@ resources, enable logging, and control garbage collection.
 Resource Allocation
 ~~~~~~~~~~~~~~~~~~~
 
-The ESMF **Virtual Machine (VM)**
+The ESMF Virtual Machine (VM) `ESMF Virtual Machine (VM) <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node6.html#SECTION060120000000000000000>`_
 is created at the beginning of each ESMPy execution, and contains information 
 about the topology and characteristics of the underlying computer. The VM 
 allocates computational resources in the form of 
 **Persistent Execution Threads**, or **PETs**. These are equivalent to operating
 system threads with a lifetime of at least that of the ESMPy execution. In the 
-simplest, and most common case, a PET is equivalent to an MPI process. However, 
-ESMPy also supports multi-threading, where multiple PETs run as Pthreads inside
-the same virtual address space (VAS). The number of PETs and the current PET
-can be queried from the :class:`~ESMF.api.esmpymanager.Manager`:
+simplest, and most common case, a PET is equivalent to an MPI process. The 
+number of PETs and the current PET can be queried from the 
+:class:`~ESMF.api.esmpymanager.Manager`:
 
 .. code::
 
     mg = ESMF.Manager()
-    mg.local_pet()
-    mg.pet_count()
+    pet_count = mg.pet_count()
+    local_pet = mg.local_pet()
 
 ~~~~~~~
 Logging
@@ -90,8 +89,9 @@ The :class:`~ESMF.api.esmpymanager.Manager` is also used to enable logging:
 .. code::
 
     mg = ESMF.Manager(debug=True)
+    local_pet = mg.local_pet()
 
-The output will be logged in files named PET<local_PET>.ESMF_LogFile.
+The output will be logged in files named PET<local_pet>.ESMF_LogFile.
 
 ~~~~~~~~~~~~~~~~~~
 Garbage Collection
@@ -115,9 +115,9 @@ This is commonly required when reusing a :class:`~ESMF.api.regrid.Regrid` object
 to interpolate data between many :class:`~ESMF.api.field.Field` pairs to 
 conserve memory to complete all interpolations in a single execution.
 
------------------------------
-Grids, Meshes, and LocStreams
------------------------------
+------------------------------
+Spatial Discretization Objects
+------------------------------
 
 There are three different objects used for spatial coordinate representation:
 :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh`, and :class:`~ESMF.api.locstream.LocStream`. :class:`Grids <ESMF.api.grid.Grid>` are used to represent logically rectangular
@@ -178,7 +178,7 @@ to a :class:`~ESMF.api.grid.Grid`.
     grid = ESMF.Grid(np.array([3,4]), staggerloc=ESMF.StaggerLoc.CENTER)
 
 +++++++++++++++++++++
-Spherical coordinates
+Spherical Coordinates
 +++++++++++++++++++++
 
 In the case that the :class:`~ESMF.api.grid.Grid` is on a sphere (coord_sys = :class:`ESMF.api.constants.CoordSys.SPH_DEG` or
@@ -567,11 +567,11 @@ relationship at all.
 
 
 -------------------------------
-Create a Grid or Mesh From File
+Create a Grid or Mesh from File
 -------------------------------
 
 ~~~~~~~~~~~~
-File formats
+File Formats
 ~~~~~~~~~~~~
 
 ESMPy can create :class:`~ESMF.api.grid.Grid` or :class:`~ESMF.api.mesh.Mesh` objects from NetCDF files in a variety
@@ -621,7 +621,7 @@ More information can be found in the ESMF reference manual section on
 the `CF Convention UGRID File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03027000000000000000>`_.
 
 ~~~~~~~~~~~~~~~~
-Meshes From File
+Meshes from File
 ~~~~~~~~~~~~~~~~
 
 When creating a :class:`~ESMF.api.mesh.Mesh` from a :class:`~ESMF.api.constants.FileFormat.SCRIP` format file, there are a number of
@@ -639,7 +639,7 @@ The mask generated for a :class:`~ESMF.api.mesh.Mesh` created from file will
 have 0 for the masked values and 1 for the unmasked values.
 
 ~~~~~~~~~~~~~~~
-Grids From File
+Grids from File
 ~~~~~~~~~~~~~~~
 
 A number of optional boolean arguments are also supported to create a
@@ -797,7 +797,7 @@ Dimension Ordering
 
 
 ------------------
-Parallel execution
+Parallel Execution
 ------------------
 
 ESMPy is a thin wrapper on top of ESMF, which was designed for high performance
