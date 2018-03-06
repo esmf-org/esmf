@@ -19,7 +19,7 @@ from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_o
 
 class Grid(object):
     """
-    The Grid class is a Python wrapper object for the ESMF Grid.  The individual 
+    The :class:`~ESMF.api.grid.Grid` class is a Python wrapper object for the ESMF Grid.  The individual 
     values of all coordinate and mask arrays are referenced to those of the
     underlying Fortran ESMF object.
 
@@ -36,7 +36,7 @@ class Grid(object):
     <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05080000000000000000>`_.
  
     A :class:`~ESMF.api.grid.Grid` can be created in two different ways, as a
-    Grid in memory, or from SCRIP formatted or CF compliant GRIDSPEC file. The
+    :class:`~ESMF.api.grid.Grid` in memory, or from SCRIP formatted or CF compliant GRIDSPEC file. The
     arguments for each type of :class:`~ESMF.api.grid.Grid` creation are
     outlined below.
 

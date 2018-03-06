@@ -16,7 +16,9 @@ Regridding Helper Functions
 ---------------------------
 
 The following code snippets demonstrate how to build all of the pieces
-necessary to regrid data between Fields built on Grids, Meshes and LocStreams.
+necessary to regrid data between :class:`Fields <ESMF.api.field.Field>` built on 
+:class:`Grids <ESMF.api.grid.Grid>`, :class:`Meshes <ESMF.api.mesh.Mesh>` 
+and :class:`LocStreams <ESMF.api.locstream.LocStream>`.
 
 ~~~~~~~~~~~~~~~~
 LocStream Create

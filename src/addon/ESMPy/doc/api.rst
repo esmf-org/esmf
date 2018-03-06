@@ -6,11 +6,13 @@ API
 Classes
 -------
 
-ESMPy uses a Field object to represent data variables built on an
-underlying spatial discretization, which is represented by a :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh` or :class:`~ESMF.api.locstream.LocStream`.
-Regridding between Fields is accomplished with the Regrid class.  All of these
-classes are explained in more detail in the sections provided by the links in
-the following table.
+ESMPy uses a :class:`~ESMF.api.field.Field` object to represent data variables 
+built on an underlying spatial discretization, which is represented by a 
+:class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh` or 
+:class:`~ESMF.api.locstream.LocStream`.
+Regridding between :class:`Fields <ESMF.api.field.Field>` is accomplished with the 
+:class:`~ESMF.api.regrid.Regrid` class.  All of these classes are explained in 
+more detail in the sections provided by the links in the following table.
 
 =======================================  ==============================================================================
 Class                                    Description
@@ -18,7 +20,7 @@ Class                                    Description
 :class:`~ESMF.api.esmpymanager.Manager`  A manager class to initialize and finalize ESMF
 :class:`~ESMF.api.field.Field`           A data field built on a :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh`, or :class:`~ESMF.api.locstream.LocStream`
 :class:`~ESMF.api.grid.Grid`             A class to represent a logically rectangular grid
-:class:`~ESMF.api.mesh.Mesh`             A calss to represent an unstructured grid
+:class:`~ESMF.api.mesh.Mesh`             A class to represent an unstructured grid
 :class:`~ESMF.api.locstream.LocStream`   A class to represent observational data as a collection of disconnected points
 :class:`~ESMF.api.regrid.Regrid`         The regridding utility
 =======================================  ==============================================================================
@@ -103,7 +105,7 @@ only once per execution. This is handled internally by the
 user intervention. However, the ESMF garbage collection feature is not triggered
 until the finalization routine is invoked. So if memory deallocation of ESMPy
 objects is required *prior* to the end of the program, the class level 
-**destroy** routines should be invoked:
+``destroy`` routines should be invoked:
 
 .. code::
 
@@ -135,17 +137,6 @@ rectangular physical grids. The :class:`~ESMF.api.grid.Grid` can also hold infor
 calculations involving the :class:`~ESMF.api.grid.Grid`, like a mask or the cell areas. The ESMF reference
 manual has an in-depth description of the 
 `Grid class <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05080000000000000000>`_.
-
-ESMF :class:`Grids <ESMF.api.grid.Grid>` are based on the concepts described in A Standard Description of
-Grids Used in Earth System Models [Balaji 2006]. In this document Balaji
-introduces the mosaic concept as a means of describing a wide variety of Earth
-system model grids. A mosaic is composed of grid tiles connected at their edges.
-Mosaic grids includes simple, single tile grids as a special case.
-
-The ESMF :class:`~ESMF.api.grid.Grid` class is a representation of a mosaic grid. Each ESMF :class:`~ESMF.api.grid.Grid` is
-constructed of one or more logically rectangular Tiles. A Tile will usually have
-some physical significance (e.g. the region of the world covered by one face of
-a cubed sphere grid).
 
 ++++++++++
 Staggering
@@ -184,7 +175,7 @@ Spherical Coordinates
 In the case that the :class:`~ESMF.api.grid.Grid` is on a sphere (coord_sys = :class:`ESMF.api.constants.CoordSys.SPH_DEG` or
 :class:`ESMF.api.constants.CoordSys.SPH_RAD`) then the coordinates given in the :class:`~ESMF.api.grid.Grid` are interpreted
 as latitude and longitude values. The coordinates can either be in degrees or
-radians as indicated by the *coord_sys* flag set during :class:`~ESMF.api.grid.Grid` creation. As is
+radians as indicated by the ``coord_sys`` flag set during :class:`~ESMF.api.grid.Grid` creation. As is
 true with many global models, this application currently assumes the latitude
 and longitude refer to positions on a perfect sphere.
 
@@ -201,8 +192,8 @@ Periodicity
 +++++++++++
 
 A periodic connection can be specified when building :class:`Grids <ESMF.api.grid.Grid>` in spherical
-coordinates. The *num_peri_dims* parameter indicates the total number of
-periodic dimensions and *periodic_dim* is used to identify which dimensions
+coordinates. The ``num_peri_dims`` parameter indicates the total number of
+periodic dimensions and ``periodic_dim`` is used to identify which dimensions
 should be considered periodic. There must always be at least one non-periodic
 dimension. For example, to create a global latitude-longitude :class:`~ESMF.api.grid.Grid` there would
 be one periodic dimension, dimension 0 (longitude).
@@ -217,7 +208,7 @@ be one periodic dimension, dimension 0 (longitude).
 Pole Generation
 +++++++++++++++
 
-The :class:`~ESMF.api.grid.Grid` can generate an artifical pole by using the *pole_dim* parameter. This
+The :class:`~ESMF.api.grid.Grid` can generate an artificial pole by using the ``pole_dim`` parameter. This
 can be helpful for regridding operations to smooth out the interpolated values
 in the polar region. For the example of creating a global latitude-longitude
 :class:`~ESMF.api.grid.Grid`, the pole dimension would be 1 (latitude).
@@ -270,7 +261,8 @@ Then a :class:`~ESMF.api.field.Field` must be created, and the
 
 .. Note:: The :class:`~ESMF.api.grid.Grid` area calculation assumes the :class:`~ESMF.api.grid.Grid` is a unit sphere.
 
-:class:`~ESMF.api.grid.Grid` cell areas may also be set to user-defined values after the AREA item has
+:class:`~ESMF.api.grid.Grid` cell areas may also be set to user-defined values 
+after the :class:`~ESMF.api.constants.GridItem.AREA` item has
 been allocated and retrieved using :class:`~ESMF.api.grid.Grid.get_item()`.
 
 .. code::
@@ -388,8 +380,8 @@ of the :class:`~ESMF.api.field.Field` memory on the PET can be smaller than the
 number of nodes used to create the :class:`~ESMF.api.mesh.Mesh` on that PET.
 
 Three properties need to be defined for each :class:`~ESMF.api.mesh.Mesh` node: the global id of the node
-(*node_ids*), node coordinates (node_coords), and which PET owns the node
-(*node_owners*). The node id is a unique (across all PETs) integer attached
+(``node_ids``), node coordinates (``node_coords``), and which PET owns the node
+(``node_owners``). The node id is a unique (across all PETs) integer attached
 to the particular node. It is used to indicate which nodes are the same when
 connecting together pieces of the :class:`~ESMF.api.mesh.Mesh` on different PETs. The node
 coordinates indicate the location of a node in space and are used in the :class:`~ESMF.api.regrid.Regrid`
@@ -398,8 +390,8 @@ charge of the node. This is used when creating a :class:`~ESMF.api.field.Field` 
 which PET should contain a :class:`~ESMF.api.field.Field` location for the data.
 
 Three properties need to be defined for each :class:`~ESMF.api.mesh.Mesh` element: the global id of the
-element (*element_ids*), the topology type of the element (*element_types*), and
-which nodes are connected together to form the element (*element_conn*). The
+element (``element_ids``), the topology type of the element (``element_types``), and
+which nodes are connected together to form the element (``element_conn``). The
 element id is a unique (across all PETs) integer attached to the
 particular element. The element type describes the topology of the element
 (e.g. a triangle vs. a quadrilateral). The range of choices for the topology of
@@ -414,7 +406,7 @@ four sides, the element type should be set to the number of corners of the
 polygon (e.g. element type=6 for a hexagon). The element connectivity indicates
 which nodes are to be connected together to form the element. The number of
 nodes connected together for each element is implied by the elements topology
-type (element_types). It is IMPORTANT to note, that the entries in this list are
+type (``element_types``). It is IMPORTANT to note, that the entries in this list are
 NOT the global ids of the nodes, but are indices into the PET local lists
 of node info used in the :class:`~ESMF.api.mesh.Mesh` creation. In other words, the element connectivity
 isn't specified in terms of the global list of nodes, but instead is specified
@@ -493,28 +485,28 @@ There are two types of masking available in :class:`~ESMF.api.mesh.Mesh`: node m
 masking. These both work in a similar manner, but vary slightly in the details
 of setting the mask information during :class:`~ESMF.api.mesh.Mesh` creation.
 
-For node masking, the mask information is set using the *node_mask* parameter.
-When a :class:`~ESMF.api.regrid.Regrid` object is created the mask values arguments *src_mask_values* and
-*dst_mask_values* can then be used to indicate which particular values set in
-the *node_mask* array indicate that the node should be masked. For example, if
-*dst_mask_values* has been set to 1, then any node in the destination :class:`~ESMF.api.mesh.Mesh` whose
-corresponding *node_mask* value is 1 will be masked out (a node with any other
+For node masking, the mask information is set using the ``node_mask`` parameter.
+When a :class:`~ESMF.api.regrid.Regrid` object is created the mask values arguments ``src_mask_values`` and
+``dst_mask_values`` can then be used to indicate which particular values set in
+the ``node_mask`` array indicate that the node should be masked. For example, if
+``dst_mask_values`` has been set to 1, then any node in the destination :class:`~ESMF.api.mesh.Mesh` whose
+corresponding ``node_mask`` value is 1 will be masked out (a node with any other
 value than 1 will not be masked).
 
-For element masking, the mask information is set using the *element_mask*
+For element masking, the mask information is set using the ``element_mask``
 parameter when adding elements to the :class:`~ESMF.api.mesh.Mesh`. In a similar manner to node masking,
-the mask values parameters to :class:`~ESMF.api.regrid.Regrid.__init__()`, *src_mask_values* and *dst_mask_values*
-can then be used to indicate which particular values set in the *element_mask*
+the mask values parameters to :class:`~ESMF.api.regrid.Regrid`, ``src_mask_values`` and ``dst_mask_values``
+can then be used to indicate which particular values set in the ``element_mask``
 array indicate that the element should be masked. For example, if
-*dst_mask_values* has been set to 1, then any element in the destination :class:`~ESMF.api.mesh.Mesh`
-whose corresponding *element_mask* value is 1 will be masked out (an element
+``dst_mask_values`` has been set to 1, then any element in the destination :class:`~ESMF.api.mesh.Mesh`
+whose corresponding ``element_mask`` value is 1 will be masked out (an element
 with any other value than 1 will not be masked).
 
 +++++
 Areas
 +++++
 
-:class:`~ESMF.api.mesh.Mesh` cell areas can be specified using the *element_areas* parameter to
+:class:`~ESMF.api.mesh.Mesh` cell areas can be specified using the ``element_areas`` parameter to
 :class:`~ESMF.api.mesh.Mesh.add_elements()`.
 
 If cell areas are not specified by the user they can be calculated by ESMPy
@@ -534,7 +526,7 @@ manual has an in-depth description of the
 
 The locations are generally described using Cartesian (x, y, z), or
 (lat, lon, radius) coordinates. The coordinates are stored using constructs
-called keys. A key is essentially a list of point descriptors, one for each data
+called *keys*. A key is essentially a list of point descriptors, one for each data
 point. They may hold other information besides the coordinates - a mask, for
 example. They may also hold a second set of coordinates. Keys are referenced by
 name. Each key must contain the same number of elements as there are data points
@@ -581,6 +573,7 @@ formats.  :class:`~ESMF.api.grid.Grid` files can be in :class:`~ESMF.api.constan
 +++++
 SCRIP
 +++++
+.. _scrip:
 
 This file format is used by the :class:`~ESMF.api.constants.FileFormat.SCRIP` :cite:`ref:SCRIP`, package, grid files that
 work with that package should also work here.  :class:`~ESMF.api.constants.FileFormat.SCRIP` format files are
@@ -588,9 +581,10 @@ capable of storing either 2D logically rectangular grids or 2D
 unstructured grids.  More information can be found in the ESMF reference
 manual section on the `SCRIP Grid File Format <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node3.html#SECTION03024000000000000000>`_.
 
-++++
-ESMF
-++++
+++++++++
+ESMFMESH
+++++++++
+.. _esmfmesh:
 
 ESMF has a custom unstructured grid file format for describing :class:`Meshes <ESMF.api.mesh.Mesh>`.
 This format is more compatible than the :class:`~ESMF.api.constants.FileFormat.SCRIP` format with the methods
@@ -602,6 +596,7 @@ manual section on the `ESMF Unstructured Grid File Format <http://www.earthsyste
 ++++++++
 GRIDSPEC
 ++++++++
+.. _gridspec:
 
 :class:`~ESMF.api.constants.FileFormat.GRIDSPEC` is an extension to the Climate and Forecast (CF) metadata
 conventions for the representation of gridded data for Earth System
@@ -613,6 +608,7 @@ information can be found in the ESMF reference manual section on the
 +++++
 UGRID
 +++++
+.. _ugrid:
 
 :class:`~ESMF.api.constants.FileFormat.UGRID` is an extension to the CF metadata
 conventions for the unstructured grid data model.  ESMPy support
@@ -627,14 +623,14 @@ Meshes from File
 When creating a :class:`~ESMF.api.mesh.Mesh` from a :class:`~ESMF.api.constants.FileFormat.SCRIP` format file, there are a number of
 options to control the output :class:`~ESMF.api.mesh.Mesh`. The data is located at the center
 of the grid cell in a :class:`~ESMF.api.constants.FileFormat.SCRIP` grid. Therefore, when the :class:`~ESMF.api.mesh.Mesh` will be
-part of a conservative regridding operation, the 'convert_to_dual'
+part of a conservative regridding operation, the ``convert_to_dual``
 flag must be set to True to properly generate coordinates at the the
 cell corners.
 
 A :class:`~ESMF.api.mesh.Mesh` may also be created with boolean flags to specify whether or not to
-add an area property to the :class:`~ESMF.api.mesh.Mesh` 'add_user_area', or to add a mask
-'add_mask' held by the NetCDF variable indicated in the optional argument,
-'varname'.  These argument are only valid for :class:`~ESMF.api.constants.FileFormat.UGRID` formatted files.
+add an area property to the :class:`~ESMF.api.mesh.Mesh` ``add_user_area``, or to add a mask
+``add_mask`` held by the NetCDF variable indicated in the optional argument,
+``varname``.  These argument are only valid for :class:`~ESMF.api.constants.FileFormat.UGRID` formatted files.
 The mask generated for a :class:`~ESMF.api.mesh.Mesh` created from file will 
 have 0 for the masked values and 1 for the unmasked values.
 
@@ -643,14 +639,14 @@ Grids from File
 ~~~~~~~~~~~~~~~
 
 A number of optional boolean arguments are also supported to create a
-structured :class:`~ESMF.api.grid.Grid` from a file.  These include 'is_sphere' to indicate whether
-the grid is spherical or regional, 'add_corner_stagger' to add the corner
+structured :class:`~ESMF.api.grid.Grid` from a file.  These include ``is_sphere`` to indicate whether
+the grid is spherical or regional, ``add_corner_stagger`` to add the corner
 stagger information to the :class:`~ESMF.api.grid.Grid` for conservative regridding, and
-'add_user_area' to specify whether to read in the cell area from the
+``add_user_area`` to specify whether to read in the cell area from the
 NetCDF file or to calculate them.  Also, for :class:`~ESMF.api.constants.FileFormat.GRIDSPEC` formated files
-there is the 'add_mask' optional argument
+there is the ``add_mask`` optional argument
 to add a mask held by the NetCDF variable indicated in optional
-argument, 'varname', and the 'coord_names' argument to specify the longitude
+argument, ``varname``, and the ``coord_names`` argument to specify the longitude
 and latitude variable names in :class:`~ESMF.api.constants.FileFormat.GRIDSPEC` file containing multiple sets of
 coordinates. The mask generated for a :class:`~ESMF.api.grid.Grid` created from 
 file will have 0 for the masked values and 1 for the unmasked values.
@@ -674,7 +670,7 @@ Class                                                   Description             
 :class:`~ESMF.api.constants.RegridMethod.NEAREST_DTOS`  Nearest destination point used for each source   `Nearest destination to source <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012400000000000000>`_
 :class:`~ESMF.api.constants.RegridMethod.CONSERVE`      First-order conservative                         `First-order conservative <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012500000000000000>`_
 :class:`~ESMF.api.constants.RegridMethod.CONSERVE_2ND`  Second-order conservative                        `Second-order conservative <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012600000000000000>`_
-N/A                                                     Conservation equations                           `Conservation <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012700000000000000>`_
+See conservative options above.                         Conservation equations                           `Conservation <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012700000000000000>`_
 :class:`~ESMF.api.constants.NormType`                   Normalization options for integral conservation  `Normalization options <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012800000000000000>`_
 :class:`~ESMF.api.constants.LineType`                   Line types for spherical and Cartesian space     `Great circle cells <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05012900000000000000>`_
 :class:`~ESMF.api.constants.UnmappedAction`             Unmapped destination point handling options      `Unmapped destination points <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05013100000000000000>`_
@@ -696,27 +692,31 @@ isn't being used (e.g. the land portion of an ocean grid).
 
 The user may mask out points in the source :class:`~ESMF.api.field.Field` or destination :class:`~ESMF.api.field.Field` or both. To do masking the user
 sets mask information in the :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh`, or :class:`~ESMF.api.locstream.LocStream` upon
-which the :class:`Fields <ESMF.api.field.Field>` passed into the :class:`~ESMF.api.regrid.Regrid` call are built. The src_mask_values and
-dst_mask_values arguments to that call can then be used to specify which values in that mask information
-indicate that a location should be masked out. For example, if dstMaskValues is set to (/1,2/), then any
+which the :class:`Fields <ESMF.api.field.Field>` passed into the :class:`~ESMF.api.regrid.Regrid` call are built. The ``src_mask_values`` and
+``dst_mask_values`` arguments to that call can then be used to specify which values in that mask information
+indicate that a location should be masked out. For example, if ``dst_mask_values`` is set to [1,2], then any
 location that has a value of 1 or 2 in the mask information of the :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh` or :class:`~ESMF.api.locstream.LocStream` upon which
 the destination :class:`~ESMF.api.field.Field` is built will be masked out.
 
 Masking behavior differs slightly between regridding methods. For non-conservative regridding methods
 (e.g. bilinear or high-order patch), masking is done on points. For these methods, masking a destination
-point means that that point won't participate in regridding (e.g. won't be interpolated to). For these
+point means that the point will not participate in regridding. For these
 methods, masking a source point means that the entire source cell using that point is masked out.
 In other words, if any corner point making up a source cell is masked then the cell is masked.
-For conservative regridding methods (e.g. first-order conservative) masking is done on cells.
-Masking a destination cell means that the cell won't participate in regridding (e.g. won't be
-interpolated to). Similarly, masking a source cell means that the cell won't participate in regridding
-(e.g. won't be interpolated from). For any type of interpolation method (conservative or non-conservative)
-the masking is set on the location upon which the :class:`Fields <ESMF.api.field.Field>` passed into the regridding call are built.
-For example, if :class:`Fields <ESMF.api.field.Field>` built on StaggerLoc.CENTER are passed into the ESMF_FieldRegridStore()
-call then the masking should also be set on StaggerLoc.CENTER.
+For conservative regridding methods masking is done on cells.
+Masking a destination cell means that the cell won't participate in regridding.
+Similarly, masking a source cell means that the cell won't participate in regridding. 
+For any type of interpolation method (conservative or non-conservative)
+the masking is set on the location upon which the 
+:class:`Fields <ESMF.api.field.Field>` passed into the regridding call are built.
+For example, if :class:`Fields <ESMF.api.field.Field>` built on 
+:class:`StaggerLoc.CENTER <ESMF.api.constants.StaggerLoc.CENTER>` are passed into 
+:class:`~ESMF.api.regrid.Regrid`
+then the masking should also be set on :class:`StaggerLoc.CENTER <ESMF.api.constants.StaggerLoc.CENTER>`.
 
-The mask generated for a :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh` or :class:`~ESMF.api.locstream.LocStream` created from file will 
-have 0 for the masked values and 1 for the unmasked values.
+The mask generated for a :class:`~ESMF.api.grid.Grid`, 
+:class:`~ESMF.api.mesh.Mesh` or :class:`~ESMF.api.locstream.LocStream` created 
+from file will have 0 for the masked values and 1 for the unmasked values.
 
 --------------------------
 Numpy Slicing and Indexing
@@ -730,7 +730,7 @@ been put into raising exceptions where inappropriate indexing or slicing
 operations are attempted.
 
 It is very important to remember that all indexing
-and slicing operations apply ONLY to the ESMPy level objects, and these operations
+and slicing operations apply **ONLY** to the ESMPy level objects, and these operations
 do not propagate down to the lower-level Fortran- and C-based representations
 of the ESMF objects.  One example of where this could come up is when passing
 a :class:`~ESMF.api.field.Field` slice into regridding.  The entire original :class:`~ESMF.api.field.Field` will still be run
@@ -741,7 +741,7 @@ the :class:`~ESMF.api.field.Field` slice will be updated with the regridded valu
 Dimension Ordering
 ~~~~~~~~~~~~~~~~~~
 
-.. Warning:: The underlying ESMF library is built with a mix of Fortran and C++
+.. Warning:: The underlying ESMF library is built with a mix of Fortran and C/C++
     and follows Fortran conventions with respect to array indexing and
     dimension ordering. Some effort has been made to make ESMPy feel more
     natural to the Python user where possible. This means that ESMPy uses

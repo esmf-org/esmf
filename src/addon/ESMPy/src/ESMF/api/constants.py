@@ -54,33 +54,33 @@ _ESMF_MPIRUN_NP = 4
 # CoordSys
 class CoordSys(IntEnum):
     """
-    This flag indicates the coordinate system of a Grid. This value is
+    This flag indicates the coordinate system of a :class:`~ESMF.api.grid.Grid`. This value is
     useful both to indicate to other users the type of the coordinates,
     but also to control how the coordinates are interpreted in
-    regridding methods (e.g. Regrid()).
+    regridding methods (e.g. :class:`~ESMF.api.regrid.Regrid`).
     """
     INVALID = -2
     UNINIT = -1
     CART = 0
     """
     Cartesian coordinate system. In this system, the Cartesian
-    coordinates are mapped to the Grid coordinate dimensions in the
+    coordinates are mapped to the :class:`~ESMF.api.grid.Grid` coordinate dimensions in the
     following order: x, y, z. (e.g. using coord_dim=1 in
-    Grid.get_coords() references the y dimension)
+    :class:`~ESMF.api.grid.Grid.get_coords()` references the y dimension)
     """
     SPH_DEG = 1
     """
     Spherical coordinates in degrees. In this system, the spherical
-    coordinates are mapped to the Grid coordinate dimensions in the
+    coordinates are mapped to the :class:`~ESMF.api.grid.Grid` coordinate dimensions in the
     following order: longitude, latitude, radius. (E.g. using
-    coord_dim=1 in Grid.get_coords() references the latitude dimension).
+    coord_dim=1 in :class:`~ESMF.api.grid.:class:`~ESMF.api.grid.Grid.get_coords()`` references the latitude dimension).
     """
     SPH_RAD = 2
     """
     Spherical coordinates in radians. In this system, the spherical
-    coordinates are mapped to the Grid coordinate dimensions in the
+    coordinates are mapped to the :class:`~ESMF.api.grid.Grid` coordinate dimensions in the
     following order: longitude, latitude, radius. (E.g. using
-    coord_dim=1 in Grid.get_coords() references the latitude dimension).
+    coord_dim=1 in :class:`~ESMF.api.grid.Grid.get_coords()` references the latitude dimension).
     """
 
 # DecompFlag
@@ -143,42 +143,42 @@ class ExtrapMethod(IntEnum):
 # FileFormat
 class FileFormat(IntEnum):
     """
-    The Grid and Mesh objects may be created from specifications in a NetCDF
-    data file.  This flag indicates the format of the data file.
+    The :class:`~ESMF.api.grid.Grid` and :class:`~ESMF.api.mesh.Mesh` objects 
+    may be created from specifications in a NetCDF data file.  This flag 
+    indicates the format of the data file.
     """
     UNDEFINED = 0
     VTK = 1
     """
-    Use VTK file format.
+    Use the VTK file format.
     """
     SCRIP = 2
     """
-    Use SCRIP file format.
+    Use the :ref:`SCRIP <scrip>` file format.
     """
     ESMFMESH = 3
     """
-    Use ESMF unstructured grid file format.
+    Use the :ref:`ESMFMESH <esmfmesh>` unstructured grid file format.
     """
     ESMFGRID = 4
     """
-    Use ESMF structured grid file format.
+    Use the ESMF structured grid file format.
     """
     UGRID = 5
     """
-    Use CF UGRID unstructured grid file format.
+    Use the :ref:`UGRID <ugrid>` unstructured grid file format.
     """
     GRIDSPEC = 6
     """
-    Use a single tile grid file conforming with the proposed
-    CF GRIDSPEC conventions.
+    Use the :ref:`UGRID single tile grid file format based on CF V1.6 conventions (a.k.a GRIDSPEC) <gridspec>`.
     """
 
 # GridItem
 class GridItem(IntEnum):
     """
-    The Grid can contain other kinds of data besides coordinates. This
-    data is referred to as Grid "items". Some items may be used
-    for calculations involving the Grid.
+    The :class:`~ESMF.api.grid.Grid` can contain other kinds of data besides coordinates. This
+    data is referred to as :class:`~ESMF.api.grid.Grid` "items". Some items may be used
+    for calculations involving the :class:`~ESMF.api.grid.Grid`.
     """
     INVALID = -2
     UNINIT = -1
@@ -236,11 +236,11 @@ class LogKind(IntEnum):
 # MeshElemType
 class MeshElemType(IntEnum):
     """
-    A Mesh can be constructed from a combination of different elements.
-    The type of elements that can be used in a Mesh depends on the
-    parametric dimension of the Mesh, which is set during Mesh
-    creation. The following are the valid Mesh element types for each
-    valid Mesh parametric dimension (2D or 3D).
+    A :class:`~ESMF.api.mesh.Mesh` can be constructed from a combination of different elements.
+    The type of elements that can be used in a :class:`~ESMF.api.mesh.Mesh` depends on the
+    parametric dimension of the :class:`~ESMF.api.mesh.Mesh`, which is set during :class:`~ESMF.api.mesh.Mesh`
+    creation. The following are the valid :class:`~ESMF.api.mesh.Mesh` element types for each
+    valid :class:`~ESMF.api.mesh.Mesh` parametric dimension (2D or 3D).
     """
     TRI = 3
     """
@@ -262,15 +262,15 @@ class MeshElemType(IntEnum):
 # MeshLoc
 class MeshLoc(IntEnum):
     """
-    The Mesh location used to hold Field data.
+    The :class:`~ESMF.api.mesh.Mesh` location used to hold :class:`~ESMF.api.field.Field` data.
     """
     NODE = 0
     """
-    The nodes of the Mesh.
+    The nodes of the :class:`~ESMF.api.mesh.Mesh`.
     """
     ELEMENT = 1
     """
-    The elements of the Mesh.
+    The elements of the :class:`~ESMF.api.mesh.Mesh`.
     """
 
 # NormType
@@ -299,12 +299,12 @@ class NormType(IntEnum):
 class PoleMethod(IntEnum):
     """
     Indicates which type of artificial pole to construct on the source
-    Grid for regridding.
+    :class:`~ESMF.api.grid.Grid` for regridding.
     """
     NONE = 0
     """
     No pole. Destination points which lie above the top or below the bottom row
-    of the source Grid won't be mapped.
+    of the source :class:`~ESMF.api.grid.Grid` won't be mapped.
     """
     ALLAVG = 1
     """
@@ -327,11 +327,11 @@ class PoleMethod(IntEnum):
     TEETH = 3
     """
     No new pole point is constructed, instead the holes at the poles are filled
-    by constructing triangles across the top and bottom row of the source Grid.
+    by constructing triangles across the top and bottom row of the source :class:`~ESMF.api.grid.Grid`.
     This can be useful because no averaging occurs, however, because the top and
     bottom of the sphere are now flat, for a big enough mismatch between the
     size of the destination and source pole holes, some destination points may
-    still not be able to be mapped to the source Grid.
+    still not be able to be mapped to the source :class:`~ESMF.api.grid.Grid`.
     """
 
 # Region
@@ -355,7 +355,7 @@ class Reduce(IntEnum):
 # Region
 class Region(IntEnum):
     """
-    Specify various regions in the data layout of a Field object.
+    Specify various regions in the data layout of a :class:`~ESMF.api.field.Field` object.
     """
     TOTAL = 0
     """
@@ -364,7 +364,7 @@ class Region(IntEnum):
     SELECT = 1
     """
     An operation applies to a select portion of the domain. One use of this is
-    to specify that the portions of a Field that are not mapped in a regridding
+    to specify that the portions of a :class:`~ESMF.api.field.Field` that are not mapped in a regridding
     operation should retain their original value (as opposed to being
     initialized to 0).
     """
@@ -403,8 +403,10 @@ class RegridMethod(IntEnum):
     is calculated as the weighted sum of the values of the source cells that it 
     overlaps. The weights are determined by the amount the source cell overlaps 
     the destination cell. Needs corner coordinate values to be provided in the 
-    Grid. Currently only works for Fields created on the Grid center stagger or 
-    the Mesh element location. 
+    :class:`~ESMF.api.grid.Grid`. Currently only works for 
+    :class:`Fields <ESMF.api.field.Field>` created on the 
+    :class:`~ESMF.api.grid.Grid` center stagger or 
+    the :class:`~ESMF.api.mesh.Mesh` element location. 
     """
     NEAREST_STOD = 3
     """
@@ -429,16 +431,18 @@ class RegridMethod(IntEnum):
     sum of the values of the source cells that it overlaps. However, 
     second-order also includes additional terms to take into account the 
     gradient of the field across the source cell. Needs corner coordinate 
-    values to be provided in the Grid. Currently only works for Fields created 
-    on the Grid center stagger or the Mesh element location.
+    values to be provided in the :class:`~ESMF.api.grid.Grid`. Currently only 
+    works for :class:`Fields <ESMF.api.field.Field>` created 
+    on the :class:`~ESMF.api.grid.Grid` center stagger or the 
+    :class:`~ESMF.api.mesh.Mesh` element location.
     """
 
 # StaggerLoc
 class StaggerLoc(IntEnum):
     """
-    In the Grid class, data can be located at different positions in a
-    Grid cell. When setting or retrieving coordinate data the stagger
-    location is specified to tell the Grid method from where in the
+    In the :class:`~ESMF.api.grid.Grid` class, data can be located at different positions in a
+    :class:`~ESMF.api.grid.Grid` cell. When setting or retrieving coordinate data the stagger
+    location is specified to tell the :class:`~ESMF.api.grid.Grid` method from where in the
     cell to get the data.
     """
     INVALID = -2
