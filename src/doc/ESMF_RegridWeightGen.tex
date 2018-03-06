@@ -378,7 +378,9 @@ where:
 
                         neareststod  - nearest source to destination. Each
                                        unmapped destination location is mapped 
-                                       to the closest source location. 
+                                       to the closest source location. This 
+                                       extrapolation method not supported with 
+                                       conservative regrid methods (e.g. conserve).
         
                         nearestidavg - inverse distance weighted average. 
                                        The value of each unmapped destination location
@@ -390,7 +392,9 @@ where:
                                        they sum to 1.0. The user can choose N and P by
                                        using --extrap_num_src_pnts and 
                                        --extrap_dist_exponent, but defaults are 
-                                       also provided.  
+                                       also provided. This extrapolation method not 
+                                       supported with conservative regrid methods
+                                       (e.g. conserve).
 
     --extrap_num_src_pnts - an optional argument specifying how many source points
                             should be used when the extrapolation method is 
