@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-program ESMF_IOUTest
+program ESMF_IOCompUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -18,7 +18,7 @@ program ESMF_IOUTest
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_IOUTest - I/O Unit Tests
+! !PROGRAM: ESMF_IOCompUTest - I/O Unit Tests
 !
 ! !DESCRIPTION:
 !
@@ -167,4 +167,4 @@ program ESMF_IOUTest
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
   
-end program ESMF_IOUTest
+end program ESMF_IOCompUTest
