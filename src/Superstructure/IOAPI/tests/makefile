@@ -6,9 +6,9 @@ run_uni: run_unit_tests_uni
 
 LOCDIR	  = src/Superstructure/IOAPI/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_IOGridCompUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_IOGridCompUTest $(ESMF_TESTDIR)/ESMFIOUTest
 
-TESTS_RUN     = RUN_ESMF_IOGridCompUTest
+TESTS_RUN     = RUN_ESMF_IOGridCompUTest RUN_ESMFIOUTest
 
 TESTS_RUN_UNI = RUN_ESMF_IOGridCompUTestUNI
 
@@ -32,3 +32,4 @@ RUN_ESMF_IOGridCompUTestUNI:
 	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
 	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
 	$(MAKE) TNAME=IOGridComp NP=1 ftest
+
