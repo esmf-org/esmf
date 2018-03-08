@@ -17,7 +17,7 @@
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{\Large {\bf NUOPC Layer Reference}}
 \newcommand{\myauthors}{\large {\it Content Standards Committee (CSC) Members}}
-\newcommand{\myversion}{ESMF v7.1.0r}
+\newcommand{\myversion}{ESMF v8.0.0 beta snapshot}
 % set a standard paragraph style
 \setlength{\parskip}{0pt}
 \setlength{\parindent}{0pt}
