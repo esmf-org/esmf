@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-program ESMFIOUTest
+program ESMF_IOUTest
 
 !------------------------------------------------------------------------------
 ! INCLUDES
@@ -18,11 +18,11 @@ program ESMFIOUTest
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_IOGridCompUTest - I/O GridComp Unit Tests
+! !PROGRAM: ESMF_IOUTest - I/O Unit Tests
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives F90 I/O GridComp unit tests.
+! The code in this file drives F90 I/O unit tests.
 ! The companion file ESMF\_IO.F90 contains the definitions for the
 ! I/O methods.
 !
@@ -57,12 +57,6 @@ program ESMFIOUTest
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
-
-#ifdef ESMF_TESTEXHAUSTIVE
-      character(ESMF_MAXSTR) :: attrname, attrvalue, outChar
-      character(ESMF_MAXSTR) :: conv, purp
-
-#endif
 
 !-------------------------------------------------------------------------------
 !  The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -115,27 +109,43 @@ program ESMFIOUTest
     end do
   end do
 
-  ! -- initialize ESMFIO
-  ioComp = ESMFIO_Create(grid, rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=__FILE__)) call ESMF_Finalize()
-
-  call ESMFIO_Write(IOComp, 'restart.nc', (/field/), filePath='./', rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=__FILE__)) call ESMF_Finalize()
-
   fieldIn = ESMF_FieldCreate(grid, ESMF_TYPEKIND_R8, name="test", rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=__FILE__)) call ESMF_Finalize()
 
+  ! -- actual ESMFIO testing...
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Create ESMFIO Component Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  ioComp = ESMFIO_Create(grid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Write through ESMFIO Component Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMFIO_Write(IOComp, 'restart.nc', (/field/), filePath='./', rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Read through ESMFIO Component Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMFIO_Read(IOComp, 'restart.nc', (/fieldIn/), filePath='./', rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=__FILE__)) call ESMF_Finalize()
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Destroy ESMFIO Component Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMFIO_Destroy(ioComp, rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=__FILE__)) call ESMF_Finalize()
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+
+  ! post test validation ....  !TODO: should somehow use ESMF_Test().
 
   do localDe = 0, localDeCount-1
     call ESMF_FieldGet(field, localDE=localDe, farrayPtr=fp, rc=rc)
@@ -149,12 +159,12 @@ program ESMFIOUTest
     print *,'|read-write|, min/max: ', minval(abs(fp-fpIn)), maxval(abs(fp-fpIn))
   end do
 
-      !------------------------------------------------------------------------
-      ! clean up      
-      !------------------------------------------------------------------------
+  !------------------------------------------------------------------------
+  ! clean up      
+  !------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
   
-end program ESMF_IOGridCompUTest
+end program ESMF_IOUTest

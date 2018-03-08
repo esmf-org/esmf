@@ -38,6 +38,12 @@ module ESMFIOMod
   use ESMF_LogErrMod
   use ESMF_UtilTypesMod
   use ESMF_VMMod
+  use ESMF_ArrayMod
+  use ESMF_GeomBaseMod
+  use ESMF_StateMod
+  use ESMF_ClockMod
+  use ESMF_GridCompMod
+  use ESMF_FieldGetMod
 #ifdef ESMF_NETCDF
   use netcdf
 #endif
@@ -84,7 +90,7 @@ contains
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMFIO_Create()"
 
-  function ESMFIO_Create(grid, rc)
+  function ESMFIO_Create(grid, keywordEnforcer, rc)
     type(ESMF_Grid), intent(in)            :: grid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,         intent(out), optional :: rc
@@ -108,15 +114,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     nullify(IO)
 
     call ESMF_GridGet(grid, localDeCount=localDeCount, tileCount=tileCount, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     call ESMF_VMGetCurrent(vm, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     call ESMF_VMGet(vm, localPet=localpe, petCount=peCount, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     allocate(recvpes(peCount), pes(peCount), stat=localrc)
@@ -128,7 +134,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     pes(localpe+1) = -localDeCount
 
     call ESMF_VMAllReduce(vm, pes, recvpes, peCount, ESMF_REDUCE_SUM, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     pes = -1
@@ -142,15 +148,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! -- create IO component on this PET
     IOComp = ESMF_GridCompCreate(name="io_comp", petList=pes(1:npe), rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     deallocate(recvpes, pes, stat=localrc)
-    if (ESMF_LogFoundDeallocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundDeallocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     call ESMF_GridCompSetServices(IOComp, IOCompSetServices, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     if (ESMF_GridCompIsPetLocal(IOComp)) then
@@ -175,12 +181,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! -- set internal state for IO component
     call ESMF_GridCompSetInternalState(IOComp, is, localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     ! -- save grid object in IO component
     call ESMF_GridCompSet(IOComp, grid=grid, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     allocate(localTile(tileCount), tileToPet(tileCount*peCount), stat=localrc)
@@ -192,7 +198,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localTile = -1
     do localDe = 0, localDeCount-1
       call ESMF_GridGet(grid, localDE=localDe, tile=tile, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       localTile(tile) = localpe
       is % IO % IOLayout(localDe) % tile = tile
@@ -201,11 +207,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     tileToPet = -1
     call ESMF_VMAllGather(vm, localTile, tileToPet, tileCount, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     deallocate(localTile, stat=localrc)
-    if (ESMF_LogFoundDeallocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundDeallocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     ! -- extract the list of PETs assigned to each tile and create MPI groups
@@ -226,16 +232,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end do
 
       taskComp = ESMF_GridCompCreate(petList=pes(1:npe), rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
       call ESMF_GridCompSetServices(taskComp, IOCompSetServices, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
       do localDe = 0, localDeCount-1
         call ESMF_GridGet(grid, localDE=localDe, tile=i, rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
         if (tile == i) then
           ! -- create new VM for tile
@@ -245,16 +251,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end do
 
     deallocate(pes, tileToPet, stat=localrc)
-    if (ESMF_LogFoundDeallocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundDeallocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     ! -- flag PET if local I/O must be performed
     do localDe = 0, localDeCount - 1
       call ESMF_GridCompGet(is % IO % IOLayout(localDe) % taskComp, vm=vm, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       call ESMF_VMGet(vm, localPet=localpe, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       is % IO % IOLayout(localDe) % localIOflag = (localpe == 0)
     end do
@@ -267,7 +273,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMFIO_Destroy()"
 
-  subroutine ESMFIO_Destroy(IOComp, rc)
+  subroutine ESMFIO_Destroy(IOComp, keywordEnforcer, rc)
     type(ESMF_GridComp)            :: IOComp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out), optional :: rc
@@ -282,25 +288,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (ESMF_GridCompIsCreated(IOComp)) then
       call ESMF_GridCompGetInternalState(IOComp, is, localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       if (associated(is % IO)) then
         if (associated(is % IO % IOLayout)) then
           do localDe = 0, size(is % IO % IOLayout) - 1
             if (ESMF_GridCompIsCreated(is % IO % IOLayout(localDe) % taskComp)) then
               call ESMF_GridCompDestroy(is % IO % IOLayout(localDe) % taskComp, rc=localrc)
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+              if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
             end if
           end do
 
           deallocate(is % IO % IOLayout, stat=localrc)
-          if (ESMF_LogFoundDeallocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundDeallocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
           nullify(is % IO % IOLayout)
 
           call ESMF_GridCompDestroy(IOComp, rc=localrc)
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
         end if
         nullify(is % IO)
@@ -313,7 +319,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMFIO_Write()"
 
-  subroutine ESMFIO_Write(IOComp, fileName, fieldList, filePath, iofmt, rc)
+  subroutine ESMFIO_Write(IOComp, fileName, fieldList, keywordEnforcer, &
+    filePath, iofmt, rc)
     type(ESMF_GridComp),   intent(inout)         :: IOComp
     character(len=*),      intent(in)            :: fileName
     type(ESMF_Field),      intent(in)            :: fieldList(:)
@@ -337,7 +344,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(iofmt)) liofmt = iofmt
 
     call ESMF_GridCompGetInternalState(IOComp, is, localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     if (.not.associated(is % IO)) return
@@ -349,7 +356,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       do localDe = 0, localDeCount - 1
         call IONCCreate(IOComp, fileName, filePath=filePath, fieldList=fieldList, &
           localDe=localDe, rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       end do
       do item = 1, size(fieldList)
@@ -357,7 +364,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end do
       do localDe = 0, localDeCount - 1
         call IONCClose(IOComp, localDe=localDe, rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
         call IONCClose(IOComp, localDe=localDe, rc=localrc)
       end do
@@ -374,7 +381,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMFIO_Read()"
 
-  subroutine ESMFIO_Read(IOComp, fileName, fieldList, filePath, iofmt, rc)
+  subroutine ESMFIO_Read(IOComp, fileName, fieldList, keywordEnforcer, &
+    filePath, iofmt, rc)
     type(ESMF_GridComp),   intent(inout)         :: IOComp
     character(len=*),      intent(in)            :: fileName
     type(ESMF_Field),      intent(in)            :: fieldList(:)
@@ -395,7 +403,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (.not.ESMF_GridCompIsPetLocal(IOComp)) return
 
     call ESMF_GridCompGetInternalState(IOComp, is, localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     if (.not.associated(is % IO)) return
@@ -409,7 +417,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (liofmt == ESMF_IOFMT_NETCDF) then
       do localDe = 0, localDeCount - 1
         call IONCOpen(IOComp, fileName, filePath=filePath, localDe=localDe, rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       end do
       do item = 1, size(fieldList)
@@ -417,7 +425,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       end do
       do localDe = 0, localDeCount - 1
         call IONCClose(IOComp, localDe=localDe, rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
         call IONCClose(IOComp, localDe=localDe, rc=localrc)
       end do
@@ -436,7 +444,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMFIO_FieldAccess()"
 
-  subroutine ESMFIO_FieldAccess(IOComp, field, action, iofmt, rc)
+  subroutine ESMFIO_FieldAccess(IOComp, field, action, keywordEnforcer, &
+    iofmt, rc)
     type(ESMF_GridComp),   intent(in)            :: IOComp
     type(ESMF_Field),      intent(in)            :: field
     character(len=*),      intent(in)            :: action
@@ -467,17 +476,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (.not.ESMF_GridCompIsPetLocal(IOComp)) return
 
     call ESMF_GridCompGet(IOComp, grid=iogrid, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     call ESMF_FieldGet(field, geomtype=geomtype, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     if (geomtype == ESMF_GEOMTYPE_GRID) then
       call ESMF_FieldGet(field, grid=grid, name=fieldName, &
         localDeCount=localDeCount, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       if (grid /= iogrid) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
@@ -488,38 +497,38 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! -- get domain decomposition
       call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
       call ESMF_DistGridGet(distgrid, deCount=deCount, dimCount=dimCount, &
         tileCount=tileCount, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
       allocate(minIndexPDe(dimCount, deCount), maxIndexPDe(dimCount, deCount),  &
         minIndexPTile(dimCount, tileCount), maxIndexPTile(dimCount, tileCount), &
         deToTileMap(deCount), localDeToDeMap(localDeCount), stat=localrc)
-      if (ESMF_LogFoundAllocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundAllocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
       call ESMF_DistGridGet(distgrid, &
         minIndexPDe=minIndexPDe, maxIndexPDe=maxIndexPDe, &
         minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
         rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
       call ESMF_FieldGet(field, array=array, rank=rank, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
       call ESMF_ArrayGet(array, deToTileMap=deToTileMap, &
         localDeToDeMap=localDeToDeMap, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
       call ESMF_GridCompGetInternalState(IOComp, is, localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
       do localDe = 0, localDeCount-1
@@ -527,11 +536,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         tile = deToTileMap(de)
 
         call ESMF_FieldGet(field, localDe=localDe, farrayPtr=fp, rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
         call ESMF_GridCompGet(is % IO % IOLayout(localDe) % taskComp, vm=vm, rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
         if (rank == 2) then
@@ -542,7 +551,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 minIndexPTile(:,tile), maxIndexPTile(:,tile), &
                 iofmt=iofmt, ncid=is % IO % IOLayout(localDe) % ncid, &
                 rc=localrc)
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+              if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
             case('w','write')
               call IOWrite2D(vm, fp, fieldName, &
@@ -550,7 +559,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 minIndexPTile(:,tile), maxIndexPTile(:,tile), &
                 iofmt=iofmt, ncid=is % IO % IOLayout(localDe) % ncid, &
                 rc=localrc)
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+              if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
             case default
               ! -- do nothing
@@ -565,7 +574,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       deallocate(minIndexPDe, maxIndexPDe, minIndexPTile, maxIndexPTile, &
         deToTileMap, localDeToDeMap, stat=localrc)
-      if (ESMF_LogFoundDeallocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundDeallocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     else
@@ -582,7 +591,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "IOWrite2D()"
 
   subroutine IOWrite2D(vm, farray, fieldName, &
-    minIndexPDe, maxIndexPDe, minIndexPTile, maxIndexPTile, &
+    minIndexPDe, maxIndexPDe, minIndexPTile, maxIndexPTile, keywordEnforcer, &
     fileName, iofmt, ncid, rc)
     type(ESMF_VM),         intent(in)            :: vm
     real(ESMF_KIND_R8),    intent(in)            :: farray(:,:)
@@ -609,7 +618,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     allocate(buf(minIndexPTile(1):maxIndexPTile(1), &
                  minIndexPTile(2):maxIndexPTile(2)), stat=localrc)
-    if (ESMF_LogFoundAllocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundAllocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     buf = 0._ESMF_KIND_R8
@@ -622,15 +631,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     lbuf = ilen * jlen
 
     allocate(recvbuf(lbuf), stat=localrc)
-    if (ESMF_LogFoundAllocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundAllocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     call ESMF_VMReduce(vm, reshape(buf, (/lbuf/)), recvbuf, lbuf, ESMF_REDUCE_SUM, 0, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     call ESMF_VMGet(vm, localPet=localpe, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     if (localpe == 0) then
@@ -668,7 +677,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     deallocate(buf, recvbuf, stat=localrc)
-    if (ESMF_LogFoundDeallocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundDeallocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
   end subroutine IOWrite2D
@@ -678,7 +687,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define ESMF_METHOD "IORead2D()"
 
   subroutine IORead2D(vm, farray, fieldName, &
-    minIndexPDe, maxIndexPDe, minIndexPTile, maxIndexPTile, &
+    minIndexPDe, maxIndexPDe, minIndexPTile, maxIndexPTile, keywordEnforcer, &
     fileName, iofmt, ncid, rc)
     type(ESMF_VM),         intent(in)            :: vm
     real(ESMF_KIND_R8),    intent(out)           :: farray(:,:)
@@ -705,7 +714,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     allocate(buf(minIndexPTile(1):maxIndexPTile(1), &
                  minIndexPTile(2):maxIndexPTile(2)), stat=localrc)
-    if (ESMF_LogFoundAllocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundAllocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     buf = 0._ESMF_KIND_R8
@@ -715,7 +724,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     lbuf = ilen * jlen
 
     call ESMF_VMGet(vm, localPet=localpe, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     if (localpe == 0) then
@@ -752,13 +761,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end if
 
     allocate(bcstbuf(lbuf), stat=localrc)
-    if (ESMF_LogFoundAllocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundAllocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     bcstbuf = reshape(buf, (/lbuf/))
 
     call ESMF_VMBroadcast(vm, bcstbuf, lbuf, 0, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     buf = reshape(bcstbuf, (/ilen,jlen/))
@@ -766,7 +775,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     farray = buf(minIndexPDe(1):maxIndexPDe(1),minIndexPDe(2):maxIndexPDe(2))
 
     deallocate(buf, bcstbuf, stat=localrc)
-    if (ESMF_LogFoundDeallocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundDeallocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
   end subroutine IORead2D
@@ -775,7 +784,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "IOFilenameGet()"
 
-  subroutine IOFilenameGet(fullName, fileName, tile, filePath)
+  subroutine IOFilenameGet(fullName, fileName, keywordEnforcer, tile, filePath)
     character(len=*), intent(out)          :: fullName
     character(len=*), intent(in)           :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -819,7 +828,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "IONCCreate()"
 
-  subroutine IONCCreate(IOComp, fileName, filePath, fieldList, localDe, rc)
+  subroutine IONCCreate(IOComp, fileName, keywordEnforcer, filePath, &
+    fieldList, localDe, rc)
     type(ESMF_GridComp), intent(inout)         :: IOComp
     character(len=*),    intent(in)            :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -851,18 +861,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(localDe)) de = localDe
 
     call ESMF_GridCompGetInternalState(IOComp, is, localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     if (.not.is % IO % IOLayout(de) % localIOflag) return
 
     call ESMF_GridCompGet(IOComp, grid=grid, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     call ESMF_GridGet(grid, distgrid=distgrid, dimCount=dimCount, &
       tileCount=tileCount, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     if (tileCount > 1) then
@@ -878,12 +888,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     allocate(minIndexPTile(dimCount, tileCount), &
       maxIndexPTile(dimCount, tileCount), stat=localrc)
-    if (ESMF_LogFoundAllocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundAllocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     call ESMF_DistGridGet(distgrid, minIndexPTile=minIndexPTile, &
       maxIndexPTile=maxIndexPTile, rc=localrc)
-    if (ESMF_LogFoundAllocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundAllocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     allocate(dimIds(dimCount), stat=localrc)
@@ -904,13 +914,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     end do
 
     deallocate(minIndexPTile, maxIndexPTile, stat=localrc)
-    if (ESMF_LogFoundDeallocError(statusToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundDeallocError(statusToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     if (present(fieldList)) then
       do item = 1, size(fieldList)
         call ESMF_FieldGet(fieldList(item), name=fieldName, rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
         ncStatus = nf90_def_var(ncid, trim(fieldName), NF90_DOUBLE, dimIds, varId)
         if (ESMF_LogFoundNetCDFError(ncerrToCheck=ncStatus, &
@@ -942,7 +952,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "IONCOpen()"
 
-  subroutine IONCOpen(IOComp, fileName, filePath, localDe, rc)
+  subroutine IONCOpen(IOComp, fileName, keywordEnforcer, filePath, localDe, rc)
     type(ESMF_GridComp), intent(inout)         :: IOComp
     character(len=*),    intent(in)            :: fileName
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -968,15 +978,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(localDe)) de = localDe
 
     call ESMF_GridCompGetInternalState(IOComp, is, localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     call ESMF_GridCompGet(IOComp, grid=grid, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     call ESMF_GridGet(grid, tileCount=tileCount, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     if (is % IO % IOLayout(de) % localIOflag) then
@@ -1005,7 +1015,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "IONCClose()"
 
-  subroutine IONCClose(IOComp, localDe, rc)
+  subroutine IONCClose(IOComp, keywordEnforcer, localDe, rc)
     type(ESMF_GridComp), intent(inout)         :: IOComp
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(in),  optional :: localDe
@@ -1026,7 +1036,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(localDe)) de = localDe
 
     call ESMF_GridCompGetInternalState(IOComp, is, localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
     if (.not.associated(is % IO)) return
@@ -1065,16 +1075,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     rc = ESMF_SUCCESS
 
-    call ESMF_GridCompSetEntryPoint(IOComp, ESMF_METHOD_INITIALIZE, IOCompNoOp, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_ERR_PASSTHRU, &
+    call ESMF_GridCompSetEntryPoint(IOComp, ESMF_METHOD_INITIALIZE, IOCompNoOp, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT)) return  ! bail out
 
     call ESMF_GridCompSetEntryPoint(IOComp, ESMF_METHOD_RUN, IOCompNoOp, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT)) return  ! bail out
 
     call ESMF_GridCompSetEntryPoint(IOComp, ESMF_METHOD_FINALIZE, IOCompNoOp, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_ERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT)) return  ! bail out
   
   end subroutine IOCompSetServices
