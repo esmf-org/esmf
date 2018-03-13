@@ -60,10 +60,10 @@ namespace ESMCI {
   void TraceIOCloseStart();
   void TraceIOCloseEnd();
   
-  void TraceIOWriteStart(size_t nbytes);
-  void TraceIOWriteEnd();
-  void TraceIOReadStart(size_t nbytes);
-  void TraceIOReadEnd();
+  void TraceIOWriteStart();
+  void TraceIOWriteEnd(size_t nbytes);
+  void TraceIOReadStart();
+  void TraceIOReadEnd(size_t nbytes);
   /////////////////////////////////////
   
   ///////////// MPI ////////////

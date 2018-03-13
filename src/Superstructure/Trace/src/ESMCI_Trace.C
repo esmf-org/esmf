@@ -741,14 +741,14 @@ namespace ESMCI {
   static vector<uint64_t> writeTotalTime;
   static uint64_t writeStartTimestamp = -1;
     
-  void TraceIOWriteStart(size_t nbytes) {
+  void TraceIOWriteStart() {
     writeStartTimestamp = get_clock(NULL);
-    writeTotalBytes.back() = writeTotalBytes.back() + nbytes;
   }
 
-  void TraceIOWriteEnd() {
+  void TraceIOWriteEnd(size_t nbytes) {
     uint64_t writeEndTimestamp = get_clock(NULL);
     writeTotalTime.back() = writeTotalTime.back() + (writeEndTimestamp - writeStartTimestamp);
+    writeTotalBytes.back() = writeTotalBytes.back() + nbytes;
     writeStartTimestamp = -1;
   }
 
@@ -756,14 +756,14 @@ namespace ESMCI {
   static vector<uint64_t> readTotalTime;
   static uint64_t readStartTimestamp = -1;
   
-  void TraceIOReadStart(size_t nbytes) {
+  void TraceIOReadStart() {
     readStartTimestamp = get_clock(NULL);
-    readTotalBytes.back() = readTotalBytes.back() + nbytes;
   }
 
-  void TraceIOReadEnd() {
+  void TraceIOReadEnd(size_t nbytes) {
     uint64_t readEndTimestamp = get_clock(NULL);
     readTotalTime.back() = readTotalTime.back() + (readEndTimestamp - readStartTimestamp);
+    readTotalBytes.back() = readTotalBytes.back() + nbytes;
     readStartTimestamp = -1;
   }
 

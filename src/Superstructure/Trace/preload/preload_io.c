@@ -12,6 +12,8 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/uio.h>
+#include <unistd.h>
 #include <dlfcn.h>
 #include <stdio.h>
 #include <string.h>
@@ -36,6 +38,31 @@ extern "C" {
     return __wrap_write(fd, buf, nbytes);
   }
 
+  /* writev */
+  static ssize_t (*__real_ptr_writev)(int fd, const struct iovec *iov, int iovcnt) = NULL;
+  ssize_t __real_writev(int fd, const struct iovec *iov, int iovcnt) {
+    if (__real_ptr_writev == NULL) {
+      __real_ptr_writev = (ssize_t (*)(int, const struct iovec *, int)) dlsym(RTLD_NEXT, "writev");
+    }
+    return __real_ptr_writev(fd, iov, iovcnt);
+  }
+
+  ssize_t writev(int fd, const struct iovec *iov, int iovcnt) {
+    return __wrap_writev(fd, iov, iovcnt);
+  }
+
+  /* pwrite */
+  static ssize_t (*__real_ptr_pwrite)(int fd, const void *buf, size_t nbytes, off_t offset) = NULL;
+  ssize_t __real_pwrite(int fd, const void *buf, size_t nbytes, off_t offset) {
+    if (__real_ptr_pwrite == NULL) {
+      __real_ptr_pwrite = (ssize_t (*)(int, const void *, size_t, off_t)) dlsym(RTLD_NEXT, "pwrite");
+    }
+    return __real_ptr_pwrite(fd, buf, nbytes, offset);
+  }
+
+  ssize_t pwrite(int fd, const void *buf, size_t nbytes, off_t offset) {
+    return __wrap_pwrite(fd, buf, nbytes, offset);
+  }
   
   /* read */
   static ssize_t (*__real_ptr_read)(int fd, void *buf, size_t nbytes) = NULL;

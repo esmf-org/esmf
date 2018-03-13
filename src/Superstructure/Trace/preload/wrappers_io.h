@@ -15,6 +15,8 @@
 
 extern "C" {  
   ssize_t __wrap_write(int fd, const void *buf, size_t nbytes);
+  ssize_t __wrap_writev(int fd, const struct iovec *iov, int iovcnt);
+  ssize_t __wrap_pwrite(int fd, const void *buf, size_t nbyte, off_t offset);
   ssize_t __wrap_read(int fd, void *buf, size_t nbyte);
   int __wrap_open(const char *path, int oflag, ...);
 }

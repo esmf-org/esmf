@@ -9,6 +9,8 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/uio.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
@@ -19,43 +21,75 @@
 
 extern "C" {
   
-  static int insideRegion = 0;  /* prevents recursion */
+  static int insideWrite = 0;  /* prevents recursion */
 
   /* write */
   extern ssize_t __real_write(int fd, const void *buf, size_t nbytes);
 
   ssize_t __wrap_write(int fd, const void *buf, size_t nbytes) {
-    int localrc;
-
-    if (c_esmftrace_isactive() == 1 && insideRegion == 0) {
-      insideRegion = 1;
-      ESMCI::TraceIOWriteStart(nbytes);
+    if (c_esmftrace_isactive() == 1 && insideWrite == 0) {
+      insideWrite = 1;
+      ESMCI::TraceIOWriteStart();
+      ssize_t ret = __real_write(fd, buf, nbytes);
+      ESMCI::TraceIOWriteEnd(ret > 0 ? ret : 0);
+      insideWrite = 0;
+      return ret;
     }    
-    
-    ssize_t ret = __real_write(fd, buf, nbytes);
-    
-    if (c_esmftrace_isactive() == 1 && insideRegion == 1) {
-      ESMCI::TraceIOWriteEnd();
-      insideRegion = 0;
+    else {
+      return __real_write(fd, buf, nbytes);
     }
-    
-    return ret;
   }
   
 
+  /* writev */
+  extern ssize_t __real_writev(int fd, const struct iovec *iov, int iovcnt);
+
+  ssize_t __wrap_writev(int fd, const struct iovec *iov, int iovcnt) {    
+    if (c_esmftrace_isactive() == 1 && insideWrite == 0) {
+      insideWrite = 1;
+      ESMCI::TraceIOWriteStart();
+      ssize_t ret = __real_writev(fd, iov, iovcnt);
+      ESMCI::TraceIOWriteEnd(ret > 0 ? ret : 0);
+      insideWrite = 0;
+      return ret;
+    }    
+    else {
+      return __real_writev(fd, iov, iovcnt);
+    }    
+  }
+
+  /* pwrite */
+  extern ssize_t __real_pwrite(int fd, const void *buf, size_t nbyte, off_t offset);
+
+  ssize_t __wrap_pwrite(int fd, const void *buf, size_t nbytes, off_t offset) {
+    if (c_esmftrace_isactive() == 1 && insideWrite == 0) {
+      insideWrite = 1;
+      ESMCI::TraceIOWriteStart();
+      ssize_t ret = __real_pwrite(fd, buf, nbytes, offset);
+      ESMCI::TraceIOWriteEnd(ret > 0 ? ret : 0);
+      insideWrite = 0;
+      return ret;
+    }    
+    else {
+      return __real_pwrite(fd, buf, nbytes, offset);
+    }
+  }
+
+  
+  
   /* read */
   extern ssize_t __real_read(int fd, void *buf, size_t nbytes);
 
   ssize_t __wrap_read(int fd, void *buf, size_t nbyte) {
 
     if (c_esmftrace_isactive() == 1) {
-      ESMCI::TraceIOReadStart(nbyte);
+      ESMCI::TraceIOReadStart();
     }
     
     ssize_t ret = __real_read(fd, buf, nbyte);
 
     if (c_esmftrace_isactive() == 1) {
-      ESMCI::TraceIOReadEnd();
+      ESMCI::TraceIOReadEnd(ret > 0 ? ret : 0);
     }
     
     return ret;
