@@ -4334,7 +4334,6 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
       if (ESMF_LogFoundDeallocError(memstat,  &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-      print *, PetNo, ' read block ', startConn, totalConn
       ncStatus = nf90_get_var(ncid, VarNo, elementConn, start=(/startConn/), &
                               count=(/totalConn/))
       if (CDFCheckError (ncStatus, &
