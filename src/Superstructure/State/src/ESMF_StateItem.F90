@@ -473,7 +473,7 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_StateItemPrint (stateItem, header, prefixstr,  &
-      longflag, debugflag, filename, unit, rc)
+      longflag, debugflag, unit, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_StateItem), intent(in), target    :: stateItem
@@ -481,7 +481,6 @@ contains
     character(*),         intent(in)            :: prefixstr
     logical,              intent(in)            :: longflag
     logical,              intent(in)            :: debugflag
-    character(*),         intent(in),  optional :: filename
     integer,              intent(in),  optional :: unit
     integer,              intent(out), optional :: rc
 !         
@@ -579,11 +578,7 @@ contains
         fieldp => stateItem%datap%fp%ftypep
 
         call ESMF_BaseGetVMId (fieldp%base, vmid, rc=localrc)
-        if (present(filename)) then
-          call c_ESMC_BasePrint(fieldp, 1, "debug", ESMF_TRUE, filename, ESMF_TRUE, localrc)
-        else
-          call c_ESMC_BasePrint(fieldp, 1, "debug", ESMF_FALSE, "", ESMF_FALSE, localrc)
-        endif
+        call c_ESMC_BasePrint(fieldp, 1, "debug", ESMF_FALSE, "", ESMF_FALSE, localrc)
 
       case (ESMF_STATEITEM_ARRAY%ot)
         arrayp => stateItem%datap%ap
