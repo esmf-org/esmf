@@ -321,6 +321,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_VM) :: vm
       integer :: localPet
 
+      character(ESMF_MAXPATHLEN) :: build_detail
+      integer :: detail_loc
+
       ! Initialize return code
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -411,9 +414,63 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
       endif
       
-      ! Write our version number out into the log
+      ! Write our version number, build location, and other details to the log
       call ESMF_LogWrite(&
-           "Running with ESMF Version " // ESMF_VERSION_STRING, &
+           "Running with ESMF Version   : " // ESMF_VERSION_STRING, &
+           ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+         return
+      endif
+
+      call ESMF_LogWrite(&
+           "ESMF library build date/time: " // __DATE__ // ' ' // __TIME__,  &
+           ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+         return
+      endif
+
+      build_detail = __FILE__
+      detail_loc = index (build_detail, '/src/Superstructure/ESMFMod/src') - 1
+      if (detail_loc < 0) detail_loc = len_trim (build_detail)
+      call ESMF_LogWrite(&
+           "ESMF library build location : " // build_detail(:detail_loc),  &
+           ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+         return
+      endif
+
+      call c_esmc_initget_esmf_comm (build_detail)
+      call ESMF_LogWrite(&
+           "ESMF_MPI                    : " // build_detail,  &
+           ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+         return
+      endif
+
+#if defined (ESMF_NETCDF)
+      build_detail = 'enabled'
+#else
+      build_detail = 'disabled'
+#endif
+      call ESMF_LogWrite(&
+           "ESMF_NETCDF                 : " // build_detail,  &
+           ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+         return
+      endif
+
+#if defined (ESMF_PNETCDF)
+      build_detail = 'enabled'
+#else
+      build_detail = 'disabled'
+#endif
+      call ESMF_LogWrite(&
+           "ESMF_PNETCDF                : " // build_detail,  &
            ESMF_LOGMSG_INFO, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
