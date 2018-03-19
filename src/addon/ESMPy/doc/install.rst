@@ -71,13 +71,13 @@ with the following command issued from the top level ESMPy directory:
 
 .. code::
 
-    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk> install
+    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk>/esmf.mk install
 
 - custom install location:
 
 .. code::
 
-    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk>
+    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk>/esmf.mk
 
     python setup.py install --prefix=<custom_install_location>
 
@@ -94,14 +94,7 @@ ESMPy conda packages are available through the NESII channel:
 
 .. code::
 
-    conda install -c nesii esmpy
-
-There are Python3 compatible development versions available through the
-conda-forge channel:
-
-.. code::
-
-    conda install -c nesii/label/dev-esmf -c conda-forge esmpy
+    conda install -n esmpy -c nesii -c conda-forge esmpy
 
 ---------------
 Importing ESMPy
@@ -170,7 +163,9 @@ to ESMF offline and integrated regridding capabilities.
 - Multi-tile :class:`~ESMF.api.grid.Grid` support is limited to cubed-sphere 
   grids created on 6 processors. A cubed-sphere grid can be created on any
   number of processors, but only when it is created on 6 processors will the
-  coordinates be retrievable for the entire object.
+  coordinates be retrievable for the entire object. A 
+  :class:`~ESMF.api.field.Field` created from a cubed-sphere 
+  :class:`~ESMF.api.grid.Grid` cannot be written to file in parallel.
 - There is no ``FieldBundle`` class, only single :class:`Fields <ESMF.api.field.Field>`.
 
 Testing related:
