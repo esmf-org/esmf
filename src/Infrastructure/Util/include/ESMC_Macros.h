@@ -50,14 +50,14 @@
 #define ESMF_MAXGRIDDIM 3
 
 
-#define ESMF_VERSION_MAJOR        7
-#define ESMF_VERSION_MINOR        1
+#define ESMF_VERSION_MAJOR        8
+#define ESMF_VERSION_MINOR        0
 #define ESMF_VERSION_REVISION     0
 #define ESMF_VERSION_PATCHLEVEL   0
-#define ESMF_VERSION_PUBLIC       'T'
-#define ESMF_VERSION_BETASNAPSHOT 'F'
+#define ESMF_VERSION_PUBLIC       'F'
+#define ESMF_VERSION_BETASNAPSHOT 'T'
 
-#define ESMF_VERSION_STRING "7.1.0r"
+#define ESMF_VERSION_STRING "8.0.0 beta snapshot"
 
 #endif   // ESMC_MACROS_H
 

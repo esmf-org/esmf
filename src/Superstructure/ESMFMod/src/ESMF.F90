@@ -107,4 +107,6 @@ module ESMF
     
     use ESMF_InitMod
 
+    use ESMFIOMod
+
 end module ESMF
