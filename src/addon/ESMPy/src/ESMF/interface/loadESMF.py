@@ -105,7 +105,7 @@ except:
     if constants._ESMF_OS == constants._ESMF_OS_UNICOS:
         constants._ESMF_MPIRUN = "aprun"
     else:
-        constants._ESMF_MPIRUN = "mpirun"
+        constants._ESMF_MPIRUN = "mpiexec"
 
 #### SHARED LIBRARY ###########################################################
 

@@ -62,7 +62,7 @@ class AbstractESMFNoseCommand(AbstractESMFCommand):
             sys.path.append('src')
 
             from ESMF.api import constants
-            mpirun_prefix = [constants._ESMF_MPIRUN, '-np', str(constants._ESMF_MPIRUN_NP)]
+            mpirun_prefix = [constants._ESMF_MPIRUN, '-n', str(constants._ESMF_MPIRUN_NP)]
             ret = mpirun_prefix + ret
 
         if cls._nose_flags is not None:
