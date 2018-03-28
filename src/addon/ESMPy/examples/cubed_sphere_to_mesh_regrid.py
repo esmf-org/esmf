@@ -25,7 +25,7 @@ mg = ESMF.Manager(debug=False)
 
 grid1 = "examples/data/ll1deg_grid.nc"
 
-# Create a cubed sphere grid with 45 elements per tile
+# Create a cubed sphere grid with 20 elements per tile
 srcgrid = ESMF.Grid(tilesize=20, name="cubed_sphere")
 
 # create an regular lat lon grid from file
@@ -73,15 +73,11 @@ if ESMF.local_pet() == 0:
         os.path.join(os.getcwd(), filename)):
         os.remove(os.path.join(os.getcwd(), filename))
 
-    regrid = ESMF.Regrid(srcfield, dstfield, filename=filename,
-                        regrid_method=ESMF.RegridMethod.BILINEAR,
-                        unmapped_action=ESMF.UnmappedAction.ERROR)
-else:
-    mg.barrier()
+mg.barrier()
 
-    regrid = ESMF.Regrid(srcfield, dstfield, filename=filename,
-                        regrid_method=ESMF.RegridMethod.BILINEAR,
-                        unmapped_action=ESMF.UnmappedAction.ERROR)
+regrid = ESMF.Regrid(srcfield, dstfield, filename=filename,
+                     regrid_method=ESMF.RegridMethod.BILINEAR,
+                     unmapped_action=ESMF.UnmappedAction.ERROR)
 
 mg.barrier()
 regrid = ESMF.RegridFromFile(srcfield, dstfield, filename=filename)
