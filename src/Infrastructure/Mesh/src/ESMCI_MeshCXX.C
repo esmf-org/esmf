@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -11,7 +11,7 @@
 #define ESMC_FILENAME "./src/Infrastructure/Mesh/src/ESMCI_MeshCXX.C"
 //==============================================================================
 //------------------------------------------------------------------------------
-// INCLUDES    
+// INCLUDES
 //------------------------------------------------------------------------------
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
@@ -36,7 +36,7 @@ static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 
 namespace ESMCI {
- 
+
 MeshCXX::MeshCXX() {
   meshFreed = 1;
   level=MeshCXXLevel_Empty;
@@ -51,8 +51,8 @@ MeshCXX::~MeshCXX(){
 }
 
 
-  
-  MeshCXX* MeshCXX::create( int pdim, int sdim, 
+
+  MeshCXX* MeshCXX::create( int pdim, int sdim,
                             ESMC_CoordSys_Flag coordSys, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MeshCXX::create()"
@@ -78,13 +78,13 @@ MeshCXX::~MeshCXX(){
 
     if ((pdim < 2) || (pdim >3)) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-	 "- Parametric dimension can't be greater than 3D or less than 2D",
+         "- Parametric dimension can't be greater than 3D or less than 2D",
          ESMC_CONTEXT, rc)) return (MeshCXX *)NULL;
      }
 
     if ((sdim < 2) || (sdim >3)) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-	 "- Spatial dimension can't be greater than 3D or less than 2D",
+         "- Spatial dimension can't be greater than 3D or less than 2D",
          ESMC_CONTEXT, rc)) return (MeshCXX *)NULL;
     }
 
@@ -93,11 +93,11 @@ MeshCXX::~MeshCXX(){
 
      // Set dimensions
     meshCXXp->spatialDim=sdim;
-    meshCXXp->parametricDim=pdim; 
+    meshCXXp->parametricDim=pdim;
 
     // Set CoordSys
-    meshCXXp->coordSys=coordSys; 
-    
+    meshCXXp->coordSys=coordSys;
+
     // Create internal mesh
     meshp = new Mesh();
 
@@ -110,7 +110,7 @@ MeshCXX::~MeshCXX(){
     int localrc;
     localrc=ESMCI_CoordSys_CalcCartDim(coordSys, sdim, &cart_sdim);
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception    
+      throw localrc;  // bail out with exception
 
     // set internal mesh dimensions
     (meshp)->set_parametric_dimension(pdim);
@@ -135,13 +135,13 @@ MeshCXX::~MeshCXX(){
     meshCXXp->level=MeshCXXLevel_Created;
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
      } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return (MeshCXX *)NULL;
@@ -156,7 +156,7 @@ MeshCXX::~MeshCXX(){
     return (MeshCXX *)NULL;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
    return meshCXXp;
@@ -171,12 +171,12 @@ MeshCXX::~MeshCXX(){
       num=0;
       Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
       for (; ei != ee; ++ei) {
-        
+
         MeshObj &elem = *ei;
-        
+
         // Don't do split elements
-        if (elem.get_id() > mesh.max_non_split_id) continue; 
-        
+        if (elem.get_id() > mesh.max_non_split_id) continue;
+
         num++;
        }
     } else {
@@ -190,22 +190,22 @@ MeshCXX::~MeshCXX(){
 
   // Calculate the number of owned elements disregarding split elements
   int calc_num_owned_elems(Mesh &mesh) {
-    
+
     int num=0;
     Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
-       
+
       MeshObj &elem = *ei;
-      
-      // Only do owned elements      
+
+      // Only do owned elements
       if (!GetAttr(elem).is_locally_owned()) continue;
-      
+
       // Don't do split elements
-      if (mesh.is_split && elem.get_id() > mesh.max_non_split_id) continue;   
-      
+      if (mesh.is_split && elem.get_id() > mesh.max_non_split_id) continue;
+
       num++;
     }
-    
+
     return num;
   }
 
@@ -213,13 +213,13 @@ MeshCXX::~MeshCXX(){
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MeshCXX::createFromFile()"
-MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag, 
-				 int *convertToDual,
-				 int *addUserArea,
-				 const char *meshname,
-				 int *maskFlag,
-				 const char *varname,
-				 int *rc) {
+MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
+                                 int *convertToDual,
+                                 int *addUserArea,
+                                 const char *meshname,
+                                 int *maskFlag,
+                                 const char *varname,
+                                 int *rc) {
    MeshCXX* meshCXXp;
    Mesh* meshp;
    int parametricDim;
@@ -235,12 +235,12 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
      }
- 
+
     int localrc;
     meshp = ESMCI::Mesh::createfromfile(filename, fileTypeFlag,
-					convertToDual, addUserArea, meshname, 
-					maskFlag, varname, 
-                                        &parametricDim, &spatialDim, 
+                                        convertToDual, addUserArea, meshname,
+                                        maskFlag, varname,
+                                        &parametricDim, &spatialDim,
                                         &coordSys,
                                         &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -248,13 +248,13 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
 
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return (MeshCXX *)NULL;
@@ -270,14 +270,14 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
   }
    meshCXXp = new MeshCXX();
    (meshCXXp)->meshPointer = meshp;
-   
+
    // Set dimensions
    meshCXXp->spatialDim=spatialDim;
    meshCXXp->parametricDim=parametricDim;
-   
+
    // Set CoordSys
-   meshCXXp->coordSys=coordSys; 
-   
+   meshCXXp->coordSys=coordSys;
+
    // Set the number of nodes and elements
    meshCXXp->numLElements = calc_num_local_elems(*meshp);
 
@@ -308,19 +308,19 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
      if (!GetAttr(elem).is_locally_owned()) continue;
 
      // Don't do split elements
-     if (meshp->is_split && (elem.get_id() > meshp->max_non_split_id)) continue;  
+     if (meshp->is_split && (elem.get_id() > meshp->max_non_split_id)) continue;
 
      num_owned_elems++;
-   }   
+   }
    meshCXXp->numOwnedElements=num_owned_elems;
 
 
-   // Set return code 
+   // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
    return meshCXXp;
 } // MeshCXX::createFromFile
-  
+
 
   int MeshCXX::destroy(MeshCXX **meshpp) {
      int localrc;
@@ -332,7 +332,7 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
     }
 
     // call MeshCXX destructor
-    delete *meshpp; 
+    delete *meshpp;
 
     // Set to NULL
     *meshpp=(MeshCXX*)NULL;
@@ -340,22 +340,22 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
     try{
       // Initialize the parallel environment for mesh (if not already done)
       {
-	ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
-	if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
       }
-      
-      
+
+
     } catch(std::exception &x) {
-      // catch Mesh exception return code 
+      // catch Mesh exception return code
       if (x.what()) {
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				      x.what(), ESMC_CONTEXT, &localrc);
-	return localrc;
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                      x.what(), ESMC_CONTEXT, &localrc);
+        return localrc;
       } else {
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				      "UNKNOWN", ESMC_CONTEXT, &localrc);
-	return localrc;
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                      "UNKNOWN", ESMC_CONTEXT, &localrc);
+        return localrc;
       }
     }catch(int localrc){
       // catch standard ESMF return code
@@ -367,7 +367,7 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
         "- Caught unknown exception", ESMC_CONTEXT, &localrc);
       return localrc;
     }
-    
+
     // Return SUCCESS
     return ESMF_SUCCESS;
   }
@@ -379,7 +379,7 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
     int localrc;
     try {
       ESMCI_getconnectivity(&meshPointer, connCoord, nodesPerElem,
-    		                &spatialDim, &localrc);
+                                &spatialDim, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) throw localrc;  // bail out with exception
 
@@ -387,16 +387,16 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
       // catch Mesh exception return code
       if (x.what()) {
         localrc = ESMC_RC_INTNRL_BAD;
-	    ESMC_LogDefault.MsgFoundError(localrc,
-				      x.what(), ESMC_CONTEXT, rc);
-	    if (rc!=NULL) *rc = localrc;
-	    return;
+            ESMC_LogDefault.MsgFoundError(localrc,
+                                      x.what(), ESMC_CONTEXT, rc);
+            if (rc!=NULL) *rc = localrc;
+            return;
       } else {
         localrc = ESMC_RC_INTNRL_BAD;
-	    ESMC_LogDefault.MsgFoundError(localrc,
-				      "UNKNOWN", ESMC_CONTEXT, rc);
-	    if (rc!=NULL) *rc = localrc;
-	    return;
+            ESMC_LogDefault.MsgFoundError(localrc,
+                                      "UNKNOWN", ESMC_CONTEXT, rc);
+            if (rc!=NULL) *rc = localrc;
+            return;
       }
     } catch(int localrc){
       // catch standard ESMF return code
@@ -429,16 +429,16 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
       // catch Mesh exception return code
       if (x.what()) {
         localrc = ESMC_RC_INTNRL_BAD;
-	    ESMC_LogDefault.MsgFoundError(localrc,
-				      x.what(), ESMC_CONTEXT, rc);
-	    if (rc!=NULL) *rc = localrc;
-	    return;
+            ESMC_LogDefault.MsgFoundError(localrc,
+                                      x.what(), ESMC_CONTEXT, rc);
+            if (rc!=NULL) *rc = localrc;
+            return;
       } else {
         localrc = ESMC_RC_INTNRL_BAD;
-	    ESMC_LogDefault.MsgFoundError(localrc,
-				      "UNKNOWN", ESMC_CONTEXT, rc);
-	    if (rc!=NULL) *rc = localrc;
-	    return;
+            ESMC_LogDefault.MsgFoundError(localrc,
+                                      "UNKNOWN", ESMC_CONTEXT, rc);
+            if (rc!=NULL) *rc = localrc;
+            return;
       }
     } catch(int localrc){
       // catch standard ESMF return code
@@ -483,35 +483,35 @@ MeshCXX* MeshCXX::createFromFile(const char *filename, int fileTypeFlag,
     // Make a map between data index and associated node pointer
     std::vector<std::pair<int,MeshObj *> > index_to_node;
     index_to_node.reserve(*num_nodes);
-    
+
     // iterate through local nodes collecting indices and node pointers
     Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
     for (; ni != ne; ++ni) {
       MeshObj &node = *ni;
-      
+
       if (!GetAttr(node).is_locally_owned()) continue;
-      
+
       int idx = node.get_data_index();
       index_to_node.push_back(std::make_pair(idx,&node));
     }
-  
+
     // Sort by data index
     std::sort(index_to_node.begin(), index_to_node.end());
-  
+
     // Load coords in order of index
     int nodeCoordPos=0;
     for (UInt i = 0; i < index_to_node.size(); ++i) {
-      MeshObj &node = *(index_to_node[i].second);      
-      
-      // Copy coords into output array
-      double *c = coords->data(node);    
-      for (int j=0; j<sdim; j++) {
-	    nodeCoord[nodeCoordPos]=c[j];
-	    nodeCoordPos++;
-      } 
-    } 
+      MeshObj &node = *(index_to_node[i].second);
 
-    // Set return code 
+      // Copy coords into output array
+      double *c = coords->data(node);
+      for (int j=0; j<sdim; j++) {
+            nodeCoord[nodeCoordPos]=c[j];
+            nodeCoordPos++;
+      }
+    }
+
+    // Set return code
     if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
@@ -585,10 +585,10 @@ int ElemType2NumNodesCXX(int pdim, int sdim, int etype) {
 
 // RIGHT NOW EXACT COPY OF VERSION IN ESMCI_Mesh_F.C
 
-void triangulateCXX(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
+void triangulateCXX(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind,
                  double *tri_frac) {
           int localrc;
-          
+
 
           // Call into triagulation routines
           int ret;
@@ -596,7 +596,7 @@ void triangulateCXX(int sdim, int num_p, double *p, double *td, int *ti, int *tr
             ret=triangulate_poly<GEOM_CART2D>(num_p, p, td,
                                               ti, tri_ind);
           } else if (sdim==3) {
-            ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td, 
+            ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td,
                                                ti, tri_ind);
           } else {
             if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -608,7 +608,7 @@ void triangulateCXX(int sdim, int num_p, double *p, double *td, int *ti, int *tr
           if (ret != ESMCI_TP_SUCCESS) {
             if (ret == ESMCI_TP_DEGENERATE_POLY) {
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                   " - can't triangulate a polygon with less than 3 sides", 
+                   " - can't triangulate a polygon with less than 3 sides",
                                                 ESMC_CONTEXT, &localrc)) throw localrc;
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -645,7 +645,7 @@ void triangulateCXX(int sdim, int num_p, double *p, double *td, int *ti, int *tr
 
             // Save areas to use for computing fractions
             tri_frac[i]=tri_area;
-            
+
             // compute total
             tot_area += tri_area;
 
@@ -662,8 +662,8 @@ void triangulateCXX(int sdim, int num_p, double *p, double *td, int *ti, int *tr
     return;
 }
 
-int MeshCXX::addElements(int num_elems, int *elemId, 
-                         int *elemType, int *elemConn, 
+int MeshCXX::addElements(int num_elems, int *elemId,
+                         int *elemType, int *elemConn,
                          int *elemMask, double *elemArea,
                          double *elemCoords){
 #undef ESMC_METHOD
@@ -679,7 +679,7 @@ int MeshCXX::addElements(int num_elems, int *elemId,
   // Get parametric dimension
   int parametric_dim=parametricDim;
   int spatial_dim=spatialDim;
-  
+
   // Check size of connectivity list
   int expected_conn_size=0;
   if (parametric_dim==2) {
@@ -688,23 +688,23 @@ int MeshCXX::addElements(int num_elems, int *elemId,
     }
   } else if (parametric_dim==3) {
     for (int i=0; i< num_elems; i++) {
-      if (elemType[i]==10) expected_conn_size += 4;   
-      else if (elemType[i]==12) expected_conn_size += 8;   
+      if (elemType[i]==10) expected_conn_size += 4;
+      else if (elemType[i]==12) expected_conn_size += 8;
     }
   }
-  
-  // num_elemConn doesn't come in, so can't check, instead assign. 
-#if 0      
+
+  // num_elemConn doesn't come in, so can't check, instead assign.
+#if 0
   if (expected_conn_size != num_elemConn) {
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
                                      "- element connectivity list doesn't contain the right number of entries ",
                                      ESMC_CONTEXT, &localrc)) throw localrc;
   }
 #else
-  int num_elemConn=expected_conn_size;   
+  int num_elemConn=expected_conn_size;
 #endif
 
-  int regridConserve = 1; // Set this to 1 to force the frac field to be 
+  int regridConserve = 1; // Set this to 1 to force the frac field to be
                           // added (required for conservative regridding.
 
   InterArray<int> *elemMaskII = NULL;
@@ -714,8 +714,8 @@ int MeshCXX::addElements(int num_elems, int *elemId,
     elemMaskII = new InterArray<int>(elemMask, 1, extent);
   }
   ESMCI_meshaddelements(&meshPointer, &num_elems, elemId, elemType, elemMaskII,
-                        &areaPresent, elemArea, &coordsPresent, elemCoords, 
-                        &num_elemConn, elemConn, &regridConserve, 
+                        &areaPresent, elemArea, &coordsPresent, elemCoords,
+                        &num_elemConn, elemConn, &regridConserve,
                         &coordSys, &spatial_dim, &localrc);
 
   // Set the local number of nodes and elements
@@ -725,23 +725,23 @@ int MeshCXX::addElements(int num_elems, int *elemId,
  // Calc and set the number of owned nodes
   int num_owned_nodes=0;
   // NEW MESH iterator because the one above has probably been trashed by
-  // changes in the commit, etc. 
+  // changes in the commit, etc.
   Mesh::iterator ni2 = meshPointer->node_begin(), ne2 = meshPointer->node_end();
   for (ni2; ni2 != ne2; ++ni2) {
     MeshObj &node = *ni2;
-    
+
     if (!GetAttr(node).is_locally_owned()) continue;
-    
+
     num_owned_nodes++;
   }
   numOwnedNodes=num_owned_nodes;
-  
+
   // Calc and set the number of owned elements
   numOwnedElements=calc_num_owned_elems(*meshPointer);
-  
+
   // Mark Mesh as finshed
   level=MeshCXXLevel_Finished;
-  
+
   return localrc;
 }
 #endif
@@ -765,55 +765,55 @@ int MeshCXX::addNodes(int numNodes, int *nodeId, double *nodeCoord,
 
      // Make sure that we're at the correct level to do this
      if (level >= MeshCXXLevel_NodesAdded) {
-	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
            "- Can't add nodes twice to a Mesh. ", ESMC_CONTEXT, &localrc))
            throw localrc;
      }
 
      if (level < MeshCXXLevel_Created) {
-	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
            "- Mesh must be created before adding nodes. ", ESMC_CONTEXT,
            &localrc)) throw localrc;
      }
 
      // Call into Mesh glue to add nodes
-     ESMCI_meshaddnodes(&meshPointer, &numNodes, nodeId, 
+     ESMCI_meshaddnodes(&meshPointer, &numNodes, nodeId,
                         nodeCoord, nodeOwner, (InterArray<int> *)NULL,
                         &coordSys, &spatialDim,
-                        &localrc); 
+                        &localrc);
        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
               ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
 
 
-     
+
      // Get petCount for error checking
      int petCount = VM::getCurrent(&localrc)->getPetCount();
      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
               ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-     
+
      // Check node owners
      for (int n = 0; n < numNodes; ++n) {
        if ((nodeOwner[n]<0) || (nodeOwner[n]>petCount-1)) {
          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-	  "- Bad nodeOwner value ", ESMC_CONTEXT, &localrc)) throw localrc;
+          "- Bad nodeOwner value ", ESMC_CONTEXT, &localrc)) throw localrc;
        }
      }
 
-     // Set some stuff needed by MeshCXX     
+     // Set some stuff needed by MeshCXX
     numLNodes = numNodes;
 
     // Mark Mesh as having nodes added
     level=MeshCXXLevel_NodesAdded;
 
    } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, &localrc);
+                                          x.what(), ESMC_CONTEXT, &localrc);
       return localrc;
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, &localrc);
+                                          "UNKNOWN", ESMC_CONTEXT, &localrc);
       return localrc;
     }
   }catch(int localrc){
@@ -895,7 +895,7 @@ void getElemGIDS(Mesh &mesh, std::vector<int> &egid) {
     if (!GetAttr(elem).is_locally_owned()) continue;
 
     // Don't do split elements
-    if (mesh.is_split && elem.get_id() > mesh.max_non_split_id) continue; 
+    if (mesh.is_split && elem.get_id() > mesh.max_non_split_id) continue;
 
     int idx = elem.get_data_index();
 
@@ -912,7 +912,7 @@ void getElemGIDS(Mesh &mesh, std::vector<int> &egid) {
 
 
 
-int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes, 
+int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes,
      int *numLElems){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::MeshCXX::createDistGrids()"
@@ -929,11 +929,11 @@ int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes,
        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
      }
-     
+
 
      if (level < MeshCXXLevel_Finished) {
-	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-           "- Mesh must be finished before making distgrids on it. ", 
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- Mesh must be finished before making distgrids on it. ",
            ESMC_CONTEXT, &localrc)) throw localrc;
      }
 
@@ -941,47 +941,47 @@ int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes,
      std::vector<int> ngids;
      std::vector<int> egids;
      {
-       
+
        ngids = getNodeGIDS();
-       
+
        // getMeshGIDS(*this, ae, egids);
        // getMeshGIDS(*meshPointer, ae, egids);
        getElemGIDS(*meshPointer, egids);
      }
-     
-     
+
+
      // Create the distgrids
      {
        int nsize = *numLNodes = ngids.size();
        int rc1;
-       
+
        FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, &ngids[0], &rc1);
-       
+
        ESMC_LogDefault.MsgFoundError(rc1,
-				     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-				     ESMC_NOT_PRESENT_FILTER(&localrc));
-       
+                                     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                     ESMC_NOT_PRESENT_FILTER(&localrc));
+
      }
      {
        int esize = *numLElems = egids.size();
        int rc1;
        FTN_X(f_esmf_getmeshdistgrid)(egrid, &esize, &egids[0], &rc1);
-       
+
        ESMC_LogDefault.MsgFoundError(rc1,
-				     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-				     ESMC_NOT_PRESENT_FILTER(&localrc));
-       
+                                     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                     ESMC_NOT_PRESENT_FILTER(&localrc));
+
      }
-     
+
    } catch(std::exception &x) {
-     // catch Mesh exception return code 
+     // catch Mesh exception return code
      if (x.what()) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				     x.what(), ESMC_CONTEXT, &localrc);
+                                     x.what(), ESMC_CONTEXT, &localrc);
        return localrc;
      } else {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				     "UNKNOWN", ESMC_CONTEXT, &localrc);
+                                     "UNKNOWN", ESMC_CONTEXT, &localrc);
        return localrc;
      }
    }catch(int localrc){
@@ -994,7 +994,7 @@ int MeshCXX::createDistGrids(int *ngrid, int *egrid, int *numLNodes,
         "- Caught unknown exception", ESMC_CONTEXT, &localrc);
      return localrc;
   }
-   
+
   // Return SUCCESS
   return ESMF_SUCCESS;
 
@@ -1021,25 +1021,25 @@ int MeshCXX::freeMemory(){
 
 
      if (level < MeshCXXLevel_Finished) {
-	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
            "- Mesh must be finished before you can free it's memory. ",
            ESMC_CONTEXT, &localrc)) throw localrc;
      }
-     
+
      //cerr << "MeshCXX::freeMemory(): meshPointer = " << meshPointer;
      //cerr << ".  Setting meshFreed to 1." << endl;
      delete meshPointer;
      meshFreed=1;
-          
+
    } catch(std::exception &x) {
-     // catch Mesh exception return code 
+     // catch Mesh exception return code
      if (x.what()) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				     x.what(), ESMC_CONTEXT, &localrc);
+                                     x.what(), ESMC_CONTEXT, &localrc);
        return localrc;
      } else {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				     "UNKNOWN", ESMC_CONTEXT, &localrc);
+                                     "UNKNOWN", ESMC_CONTEXT, &localrc);
        return localrc;
      }
    }catch(int localrc){
@@ -1052,13 +1052,13 @@ int MeshCXX::freeMemory(){
         "- Caught unknown exception", ESMC_CONTEXT, &localrc);
      return localrc;
   }
-   
+
    // Return SUCCESS
    return ESMF_SUCCESS;
-   
+
 } // MeshCXX::freeMemory
-  
-  
+
+
 int MeshVTKHeader(const char *fname, int *numElem, int *numNode, int *connSize){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::MeshVTKHeader()"
@@ -1078,11 +1078,11 @@ int MeshVTKHeader(const char *fname, int *numElem, int *numNode, int *connSize){
      std::string fnames(fname);
      int rank = Par::Rank();
      int psize = Par::Size();
-     
+
      std::string newname;
-     
+
      std::string extension = ".vtk";
-     
+
      // If csize = 1, read fbase.g
      if (psize > 1) {
        std::ostringstream newname_str;
@@ -1091,22 +1091,22 @@ int MeshVTKHeader(const char *fname, int *numElem, int *numNode, int *connSize){
        newname_str << std::setw(ndec) << std::setfill('0') << rank;
        newname = newname_str.str() + extension;
      } else newname = fname + extension;
-     
-     ReadVTKMeshHeader(newname, *numElem, *numNode, *connSize); 
+
+     ReadVTKMeshHeader(newname, *numElem, *numNode, *connSize);
    } catch(std::exception &x) {
-     // catch Mesh exception return code 
+     // catch Mesh exception return code
      if (x.what()) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				     x.what(), ESMC_CONTEXT, &localrc);
+                                     x.what(), ESMC_CONTEXT, &localrc);
        return localrc;
      } else {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				     "UNKNOWN",  ESMC_CONTEXT, &localrc);
+                                     "UNKNOWN",  ESMC_CONTEXT, &localrc);
        return localrc;
      }
    }catch(int localrc){
      // catch standard ESMF return code
-     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, 
+     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &localrc);
      return localrc;
    } catch(...){
@@ -1114,13 +1114,13 @@ int MeshVTKHeader(const char *fname, int *numElem, int *numNode, int *connSize){
         "- Caught unknown exception", ESMC_CONTEXT, &localrc);
      return localrc;
    }
-   
+
    // Return SUCCESS
    return ESMF_SUCCESS;
 
 } // MeshVTKHeader
 
-int MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord, int *nodeOwner, 
+int MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord, int *nodeOwner,
                 int *elemId, int *elemType, int *elemConn){
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::MeshVTKBody()"
@@ -1157,14 +1157,14 @@ int MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord, int *nodeOwne
     ReadVTKMeshBody(newname, nodeId, nodeCoord, nodeOwner, elemId, elemType, elemConn);
 
    } catch(std::exception &x) {
-     // catch Mesh exception return code 
+     // catch Mesh exception return code
      if (x.what()) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				     x.what(), ESMC_CONTEXT, &localrc);
+                                     x.what(), ESMC_CONTEXT, &localrc);
        return localrc;
      } else {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				     "UNKNOWN", ESMC_CONTEXT, &localrc);
+                                     "UNKNOWN", ESMC_CONTEXT, &localrc);
        return localrc;
      }
    }catch(int localrc){
@@ -1177,7 +1177,7 @@ int MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord, int *nodeOwne
       "- Caught unknown exception", ESMC_CONTEXT, &localrc);
      return localrc;
    }
-   
+
    // Return SUCCESS
    return ESMF_SUCCESS;
 
@@ -1227,7 +1227,7 @@ int MeshCXX::meshWrite(const char* fileName){
 
 
      if (level < MeshCXXLevel_Finished) {
-	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
            "- Mesh must be finished before you can write it out.", ESMC_CONTEXT,
             &localrc)) throw localrc;
      }
@@ -1235,10 +1235,10 @@ int MeshCXX::meshWrite(const char* fileName){
 
     WriteMesh(*meshPointer, fileName);
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				    x.what(), ESMC_CONTEXT, &localrc);
+                                    x.what(), ESMC_CONTEXT, &localrc);
       return localrc;
     } else {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -1255,7 +1255,7 @@ int MeshCXX::meshWrite(const char* fileName){
       "- Caught unknown exception", ESMC_CONTEXT, &localrc);
     return localrc;
   }
-   
+
    // Return SUCCESS
    return ESMF_SUCCESS;
 

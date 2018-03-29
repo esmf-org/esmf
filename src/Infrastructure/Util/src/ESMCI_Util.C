@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -108,9 +108,9 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 //
 // !RETURN VALUE:
 //  int number of bytes (negative for error)
-// 
+//
 // !ARGUMENTS:
-    ESMC_TypeKind_Flag dk) {       // in - a data kind 
+    ESMC_TypeKind_Flag dk) {       // in - a data kind
 //EOPI
 
     switch (dk) {
@@ -123,7 +123,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
       case ESMF_C8:  return  8;
       case ESMF_C16: return 16;
       default:
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
         "Unknown TypeKind", ESMC_CONTEXT, NULL);
        return -1;
     }
@@ -142,7 +142,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 //
 // !RETURN VALUE:
 //  const char * to string name of value
-// 
+//
 // !ARGUMENTS:
     ESMC_Status stat) {       // in - a status value
 //EOPI
@@ -155,7 +155,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
       case ESMF_STATUS_BUSY:         return  "Busy";
       case ESMF_STATUS_INVALID:      return  "Invalid";
       default:
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
         "Unknown Status", ESMC_CONTEXT, NULL);
        return NULL;
     }
@@ -174,7 +174,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 //
 // !RETURN VALUE:
 //  const char * to string name of value
-// 
+//
 // !ARGUMENTS:
     ESMC_TypeKind_Flag dk) {       // in - a datakind value
 //EOPI
@@ -191,7 +191,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
       case ESMC_TYPEKIND_LOGICAL: return  "Logical";
       case ESMC_TYPEKIND_CHARACTER: return "Character";
       default:
-         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
           "Unknown TypeKind", ESMC_CONTEXT, NULL);
          return "";
     }
@@ -210,7 +210,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 //
 // !RETURN VALUE:
 //  const char * to string name of value
-// 
+//
 // !ARGUMENTS:
     ESMC_Logical tf) {       // in - a logical value
 //EOPI
@@ -219,7 +219,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
       case ESMF_TRUE:      return  "True";
       case ESMF_FALSE:     return  "False";
       default:
-         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
            "Unknown TypeKind", ESMC_CONTEXT, NULL);
          return NULL;
     }
@@ -242,7 +242,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 //  Analoguous to the Fortran LEN_TRIM intrinsic.  Return type is size_t for
 //  compatibility with the C++ string constructor and other places where
 //  string lengths are needed.
-// 
+//
 // !ARGUMENTS:
     const char *src,                // in - Fortran character string
     ESMCI_FortranStrLenArg slen) {   // in - length of the string
@@ -256,7 +256,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
       // the loop is written this way because ESMCI_FortranStrLenArg,
       // which could be size_t on some systems, might be unsigned.
       do {
-	if (src[i] != ' ') break;
+        if (src[i] != ' ') break;
       } while (i-- != 0);
 
       return i+1;
@@ -275,14 +275,14 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 // !RETURN VALUE:
 //  returns pointer to a newly allocated C string buffer.  This space
 //  must be deleted by the caller when finished!
-// 
+//
 // !ARGUMENTS:
     const char *src,                // in - F90 character source buffer
     ESMCI_FortranStrLenArg slen) {   // in - length of the F90 source buffer
 //EOPI
 
     if (slen == 0) return NULL; // nothing to do, but not an error
-    
+
     // minor idiotproofing
     if ((src == NULL) || (src[0] == '\0') || (slen < 0)) {
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -312,7 +312,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 // !RETURN VALUE:
 //  converts an F90, space padded string into a C++ null terminated string
 //  returns ESMF_SUCCESS or ESMF_FAILURE.
-// 
+//
 // !ARGUMENTS:
     const char *src,               // in - F90 character source buffer
     ESMCI_FortranStrLenArg slen,   // in - length of the F90 source buffer
@@ -334,16 +334,16 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
     // count back from end of string to last non-blank character.
     ESMCI_FortranStrLenArg clen = ESMC_F90lentrim (src, slen);
 
-    // make sure dst space is long enough 
+    // make sure dst space is long enough
     if (clen >= dlen) {
        std::stringstream msgbuf;
        msgbuf << "dest buffer size of " << dlen
            << " bytes too small, must be >= " << clen+1 << " bytes\n";
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf.str (), ESMC_CONTEXT, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf.str (), ESMC_CONTEXT,
          &rc);
        return rc;
     }
-    
+
     strncpy(dst, src, clen);
     dst[clen] = '\0';
 
@@ -365,11 +365,11 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 // !RETURN VALUE:
 //  constructs a space padded F90, non-null terminated string in dst buffer.
 //  returns ESMF_SUCCESS or ESMF_FAILURE.
-// 
+//
 // !ARGUMENTS:
     const char *src,               // in - C++ null term string source buffer
     char *dst,                     // inout - pointer to a buffer holding F90 string
-    
+
     ESMCI_FortranStrLenArg dlen) {  // in - length of dst buffer, space padded
 //EOPI
 
@@ -389,7 +389,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
        std::stringstream msgbuf;
        msgbuf << "dest buffer size of " << dlen
            << " bytes too small, must be >= " << clen << " bytes";
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf.str(), ESMC_CONTEXT, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf.str(), ESMC_CONTEXT,
          &rc);
        return rc;
     }
@@ -398,7 +398,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
     strncpy(dst, src, clen);
     memset (&dst[clen], ' ', dlen-clen);
 
-    // return ok. 
+    // return ok.
     rc = ESMF_SUCCESS;
     return rc;
 }
@@ -418,7 +418,7 @@ extern "C" {
 //  sets *rc to ESMF_SUCCESS or ESMF_FAILURE, returns nothing.
 //  the arguments below labeled *hidden* are added by the fortran compiler
 //  and should not appear in the fortran argument list
-// 
+//
 // !ARGUMENTS:
     const char *src,               // in - F90 character source buffer
     char *dst,                     // inout - pointer to a buffer to hold C string
@@ -441,16 +441,16 @@ extern "C" {
     // count back from end of string to last non-blank character.
     ESMCI_FortranStrLenArg clen = ESMC_F90lentrim (src, slen);
 
-    // make sure dst space is long enough 
+    // make sure dst space is long enough
     if (clen >= dlen) {
        std::stringstream msgbuf;
        msgbuf << "dest buffer size of " << dlen
            << " bytes too small, must be >= " << clen+1 << " bytes";
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf.str(), ESMC_CONTEXT, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf.str(), ESMC_CONTEXT,
          rc);
        return;
     }
-    
+
     strncpy(dst, src, clen);
     dst[clen] = '\0';
 
@@ -465,7 +465,7 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_ctof90string"
 //BOPI
-// !IROUTINE:  ESMF_CtoF90string - Fortran-callable conversion routine from C++ string to F90 character 
+// !IROUTINE:  ESMF_CtoF90string - Fortran-callable conversion routine from C++ string to F90 character
 //
 // !INTERFACE:
 extern "C" {
@@ -476,7 +476,7 @@ extern "C" {
 //  sets *rc to ESMF_SUCCESS or ESMF_FAILURE, returns nothing.
 //  the arguments below labeled *hidden* are added by the fortran compiler
 //  and should not appear in the fortran argument list
-// 
+//
 // !ARGUMENTS:
     const char *src,               // in - F90 character source buffer
     char *dst,                     // inout - pointer to a buffer to hold C string
@@ -502,7 +502,7 @@ extern "C" {
        std::stringstream msgbuf;
        msgbuf << "dest buffer size of " << dlen
            << " bytes too small, must be >= " << clen << " bytes";
-       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf.str(), ESMC_CONTEXT, 
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf.str(), ESMC_CONTEXT,
            rc);
        return;
     }
@@ -532,7 +532,7 @@ extern "C" {
 //
 // !RETURN VALUE:
 //  converts a F90 pointer into a normal integer.
-// 
+//
 // !ARGUMENTS:
     int *n,                    // in - number of expected bytes in a pointer
     short *s,                  // in - F90 pointer of some kind
@@ -543,7 +543,7 @@ extern "C" {
     // we cannot return good values if n is not correct.
     if (sizeof(n) != *n) {
         printf("error: fortran pointer size does not match C pointer size\n");
-        printf("  fortran is sending %d bytes, C expects %ld bytes\n", 
+        printf("  fortran is sending %d bytes, C expects %ld bytes\n",
                   *n, (long) sizeof(n));
         *len = 0;
         return;
@@ -551,7 +551,7 @@ extern "C" {
 
     if (sizeof(n) != sizeof(ESMC_POINTER)) {
         printf("error: C pointer size does not match include file value\n");
-        printf("  C pointer is %ld bytes, ESMC_POINTER is %ld bytes\n",  
+        printf("  C pointer is %ld bytes, ESMC_POINTER is %ld bytes\n",
                    (long) sizeof(n), (long) sizeof(ESMC_POINTER));
         *len = 0;
         return;
@@ -579,20 +579,20 @@ extern "C" {
 //  converts the difference between 2 F90 pointers into a normal integer.
 //  the pointers should be close enough to each other to be less than
 //  2 ^ 32 apart so the result fits in to a standard integer return val.
-// 
+//
 // !ARGUMENTS:
     int *n,            // in - number of expected bytes in a pointer
     short *s1,         // in - F90 pointer of some kind
     short *s2,         // in - F90 pointer of some kind
     int *len) {        // out - that same value cast to an int
 //EOPI
-    ESMC_POINTER t1, t2; 
+    ESMC_POINTER t1, t2;
 
     // if n does not match the actual pointer size, return an error.
     // we cannot return good values if n is not correct.
     if (sizeof(n) != *n) {
         printf("error: fortran pointer size does not match C pointer size\n");
-        printf("  fortran is sending %d bytes, C expects %ld bytes\n", 
+        printf("  fortran is sending %d bytes, C expects %ld bytes\n",
                   *n, (long) sizeof(n));
         *len = 0;
         return;
@@ -600,7 +600,7 @@ extern "C" {
 
     if (sizeof(n) != sizeof(ESMC_POINTER)) {
         printf("error: C pointer size does not match include file value\n");
-        printf("  C pointer is %ld bytes, ESMC_POINTER is %ld bytes\n",  
+        printf("  C pointer is %ld bytes, ESMC_POINTER is %ld bytes\n",
                    (long) sizeof(n), (long) sizeof(ESMC_POINTER));
         *len = 0;
         return;
@@ -614,7 +614,7 @@ extern "C" {
         *len = (int)(t1 - t2);
     else
         *len = (int)(t2 - t1);
-  
+
     return;
  }
 }
@@ -630,12 +630,12 @@ extern "C" {
 //
 // !RETURN VALUE:
 //  returns ESMF_SUCCESS or ESMF_FAILURE.
-// 
+//
 // !ARGUMENTS:
     void) {
-    
+
 // !DESCRIPTION:
-// Initialize a sequence of Globally Unique IDs (GUIDs) in a platform 
+// Initialize a sequence of Globally Unique IDs (GUIDs) in a platform
 // independent way (e.g. does not require UUID library).  Uses <cstdlib> srand()
 //EOPI
 
@@ -644,12 +644,12 @@ extern "C" {
   // Initialize return code; assume routine not implemented
   rc = ESMC_RC_NOT_IMPL;
 
-  // initialize/reset the seed for the random number generator using 
+  // initialize/reset the seed for the random number generator using
   //  the current time
   unsigned int seed = (unsigned int) time((time_t *)NULL);
   srand(seed);  // reset random number sequence with seed
 
-  // return ok. 
+  // return ok.
   rc = ESMF_SUCCESS;
   return rc;
 }
@@ -665,10 +665,10 @@ extern "C" {
 //
 // !RETURN VALUE:
 //  returns ESMF_SUCCESS or ESMF_FAILURE.
-// 
+//
 // !ARGUMENTS:
     string &guid) {    // inout - caller's buffer to hold GUID string
-    
+
 // !DESCRIPTION:
 // Generate a Globally Unique ID (GUID) in a platform independent way (e.g.
 //   does not require UUID library).  Uses <cstdlib> srand(), rand().
@@ -692,7 +692,7 @@ extern "C" {
   // copy into caller's string
   guid = GUIDbuf;
 
-  // return ok. 
+  // return ok.
   rc = ESMF_SUCCESS;
   return rc;
 }
@@ -701,19 +701,19 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FindAndReplaceAll"
 //BOPI
-// !IROUTINE:  ESMC_FindAndReplaceAll - Find and replace all occurrences of a string in a given string with another 
+// !IROUTINE:  ESMC_FindAndReplaceAll - Find and replace all occurrences of a string in a given string with another
 //
 // !INTERFACE:
     int ESMC_FindAndReplaceAll(
 //
 // !RETURN VALUE:
 //  returns ESMF_SUCCESS or ESMF_FAILURE.
-// 
+//
 // !ARGUMENTS:
           string& subjectStr,    // inout - caller's subject string
     const string& searchStr,     // in    - string to search for in subject str
     const string& replaceStr) {  // in    - replacement string
-    
+
 // !DESCRIPTION:
 // Find and replace all occurrences of searchStr within subjectStr with
 // replaceStr.  TODO:  When C++11 STL becomes supported in all our supported
@@ -733,7 +733,7 @@ extern "C" {
     pos += replaceStr.size();
   }
 
-  // return ok. 
+  // return ok.
   rc = ESMF_SUCCESS;
   return rc;
 }

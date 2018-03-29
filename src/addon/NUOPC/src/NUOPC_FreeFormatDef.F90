@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -42,7 +42,7 @@ module NUOPC_FreeFormatDef
 !
 !==============================================================================
   
-  integer, parameter              :: NUOPC_FreeFormatLen = 160
+  integer, parameter              :: NUOPC_FreeFormatLen = 800
 
 !==============================================================================
 ! 
@@ -80,9 +80,9 @@ module NUOPC_FreeFormatDef
     character(len=*),                 intent(in)    :: stringList(:)
     integer,                optional, intent(out)   :: rc
 ! !DESCRIPTION:
-!   Add lines to a FreeFormat object. The capacity of {\tt freeFormat} is 
-!   increased by at least the size of {\tt stringList}, but potentially more.
-!   The elements in {\tt stringList} are added to the end of {\tt freeFormat}.
+!   Add lines to a FreeFormat object. The capacity of {\tt freeFormat} may 
+!   increase during this operation. The elements in {\tt stringList} are 
+!   added to the end of {\tt freeFormat}.
 !EOP
   !-----------------------------------------------------------------------------
     integer             :: stat, i, j
@@ -110,9 +110,18 @@ module NUOPC_FreeFormatDef
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       freeFormat%stringList => newStringList ! point to the new stringList
     endif
-
+    
+    ! fill in the new strings
     i = freeFormat%count + 1
     do j=1, stringCount
+      if (len_trim(stringList(j)) > NUOPC_FreeFormatLen) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="String length is above implementation limit", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
       freeFormat%stringList(i) =  stringList(j)
       i=i+1
     enddo
@@ -182,11 +191,11 @@ module NUOPC_FreeFormatDef
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! conditionally fill initial strings
-    NUOPC_FreeFormatCreateDefault%count = stringCount
     if (present(stringList)) then
-      do i=1, stringCount
-        NUOPC_FreeFormatCreateDefault%stringList(i) = stringList(i)
-      enddo
+      call NUOPC_FreeFormatAdd(NUOPC_FreeFormatCreateDefault, stringList, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
     endif
 
   end function

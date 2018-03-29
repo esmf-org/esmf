@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -54,7 +54,7 @@ module ESMF_RegridWeightGenCheckMod
   !use ESMF_FieldGetMod
   !use ESMF_FieldGatherMod
 
-  
+
   implicit none
 
 !
@@ -89,7 +89,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   integer,                                    intent(out), optional  :: rc
 
 ! !DESCRIPTION:
-! 
+!
 ! The arguments are:
 !   \begin{description}
 !   \item [weightFile]
@@ -190,7 +190,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! read in the grid dimensions
     call NCFileInquire(weightFile, title, normType, src_dim, dst_dim, &
-    	 regridmethod, rc=status)
+         regridmethod, rc=status)
     if (ESMF_LogFoundError(status, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, &
@@ -312,7 +312,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !-------------------- diagnostics -----------------------------------------
     print *, "size of factorList = (", size(factorList,1),")"
     print *, "size of factorIndexList = (", size(factorIndexList,1), ",", size(   factorIndexList,2),")"
-    
+
     do i=1,size(factorList)
     src = factorIndexList(1,i)
     dst = factorIndexList(2,i)
@@ -407,7 +407,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! if frac is below .999, then a significant portion of this cell is
         ! missing from the weight calculation and error is misleading here
         ! also don't look in unitialized cells, for the regional to global cases
-        if (dst_mask(i) /= 0 .and. dst_frac(i) > .999 & 
+        if (dst_mask(i) /= 0 .and. dst_frac(i) > .999 &
             .and. FdstArray(i) /= UNINITVAL) then
 
           ! compute the raw pointwise error
@@ -418,7 +418,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              relError=err/FdstArrayX(i)
           else
              relError=err
-          endif 
+          endif
 
           ! Compute the max relative error
           if (relError > maxRelError) then
@@ -436,7 +436,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! Number of points with frac > .999
           numRelError=numRelError+1
-        
+
           ! masking will screw this one up
           if (FdstArray(i) < grid2min) grid2min = FdstArray(i)
           if (FdstArray(i) > grid2max) grid2max = FdstArray(i)
@@ -515,7 +515,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          deallocate(grid2area)
          deallocate(grid1areaXX)
          deallocate(grid2areaXX)
-      else 
+      else
          print *, "Grid 1 area = 0.000000000000000"
          print *, "Grid 2 area = 0.000000000000000"
          print *, "Conservation error = 0.000000000000000"
@@ -549,9 +549,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       rcToReturn=rc)) return
 
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
-      msg="- ESMF_NETCDF not defined when lib was compiled", & 
-      ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
+      msg="- ESMF_NETCDF not defined when lib was compiled", &
+      ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
 
@@ -634,7 +634,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=__FILE__ , rcToReturn=rc)
       return
     endif
-    
+
     regridmethod = ESMF_REGRIDMETHOD_BILINEAR
     if (trim(methodStr) .eq. "Conservative remapping")  then
        regridmethod = ESMF_REGRIDMETHOD_CONSERVE
@@ -725,9 +725,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(present(rc)) rc = ESMF_SUCCESS
 
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
-      msg="- ESMF_NETCDF not defined when lib was compiled", & 
-      ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
+      msg="- ESMF_NETCDF not defined when lib was compiled", &
+      ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
 
@@ -1102,9 +1102,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if(present(rc)) rc = ESMF_SUCCESS
 
 #else
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, & 
-      msg="- ESMF_NETCDF not defined when lib was compiled", & 
-      ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
+      msg="- ESMF_NETCDF not defined when lib was compiled", &
+      ESMF_CONTEXT, rcToReturn=rc)
     return
 #endif
 

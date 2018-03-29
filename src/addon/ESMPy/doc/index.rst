@@ -10,12 +10,12 @@ Table of Contents
 Welcome to ESMPy - The ESMF Python Interface!
 
 .. toctree::
-    :maxdepth: 4
+    :maxdepth: 3
 
     intro
     install
-    api
     examples
+    api
     appendix
 
 * :ref:`genindex`

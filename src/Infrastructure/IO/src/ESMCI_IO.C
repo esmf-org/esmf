@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -283,7 +283,7 @@ int IO::read(
     &rc)) {
     return ESMF_RC_FILE_READ;
   }
-    
+
   // return
   rc = ESMF_SUCCESS;
   return (rc);
@@ -320,6 +320,10 @@ int IO::read(
   // Read each item from the object list
   std::vector<IO_ObjectContainer *>::iterator it;
   bool need_redist, has_undist;
+  VM *currentVM = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+    return rc;
+  int petCount = currentVM->getPetCount();
   for (it = objects.begin(); it < objects.end(); ++it) {
     Array *temp_array_p = (*it)->getArray();  // default to caller-provided Array
     Array *temp_array_undist_p;               // temp when Array has undistributed dimensions
@@ -339,8 +343,11 @@ int IO::read(
         // Create an aliased Array which treats all dimensions as distributed.
         // std::cout << ESMC_METHOD << ": calling undist_arraycreate_alldist" << std::endl;
         undist_arraycreate_alldist (temp_array_undist_p, &temp_array_p, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+          // Close the file but return original error even if close fails.
+          localrc = close();
           return rc;
+        }
       }
 
       // Check for redistribution (when DE/PET != 1)
@@ -354,7 +361,7 @@ int IO::read(
       if (need_redist) {
         // Create a compatible temp Array with 1 DE per PET
         // std::cout << ESMC_METHOD << ": calling redist_arraycreate1de" << std::endl;
-        redist_arraycreate1de((*it)->getArray(), &temp_array_p, &localrc);
+        redist_arraycreate1de((*it)->getArray(), &temp_array_p, petCount, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
             &rc)) {
         // Close the file but return original error even if close fails.
@@ -411,7 +418,7 @@ int IO::read(
       return rc;
     }
   }
-    
+
   // return successfully
   rc = ESMF_SUCCESS;
   return (rc);
@@ -476,7 +483,7 @@ int IO::write(
     ESMC_CONTEXT, &rc)) {
     return ESMF_RC_FILE_WRITE;
   }
-    
+
   // return
   rc = ESMF_SUCCESS;
   return (rc);
@@ -519,7 +526,7 @@ int IO::write(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
     return rc;
   int petCount = currentVM->getPetCount();
-  
+
   for (it = objects.begin(); it < objects.end(); ++it) {
     Array *temp_array_p = (*it)->getArray();  // default to caller-provided Array
     DistGrid *dg = temp_array_p->getDistGrid ();
@@ -527,10 +534,10 @@ int IO::write(
     int tilecount = dg->getTileCount ();
     if (tilecount != 1) {
       localrc = ESMF_RC_NOT_IMPL;
-      if (ESMC_LogDefault.MsgFoundError(localrc, "tilecount != 1 not supported yet", ESMC_CONTEXT,
-        &rc)) {
+    std::stringstream errmsg;
+    errmsg << "tile count of " << tilecount << " != 1 - not supported yet";
+    if (ESMC_LogDefault.MsgFoundError(localrc, errmsg.str(), ESMC_CONTEXT, &rc)) {
         // Close the file but return original error even if close fails.
-        fprintf(stderr, "dg->getTileCount()=%d\n", tilecount);
         localrc = close();
         return rc;
       }
@@ -554,7 +561,7 @@ int IO::write(
     }
 
     Array *temp_array_undist_p;  // temp in case Array has undistributed dimensions
-    ESMCI::RouteHandle *rh = temp_array_p->getIoRH(); 
+    ESMCI::RouteHandle *rh = temp_array_p->getIoRH();
     switch((*it)->type) {
     case IO_NULL:
       localrc = ESMF_STATUS_UNALLOCATED;
@@ -578,8 +585,8 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: begin", ESMC_LOGMSG_INFO);
 #if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redist_arraycreate1de()", ESMC_LOGMSG_INFO);
 #endif
-        redist_arraycreate1de((*it)->getArray(), &temp_array_p, &localrc);
-      	if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        redist_arraycreate1de((*it)->getArray(), &temp_array_p, petCount, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
           &rc)) {
           // Close the file but return original error even if close fails.
           localrc = close();
@@ -589,7 +596,7 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redist_arraycreate1de()",
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist_arraycreate1de()", ESMC_LOGMSG_INFO);
 #endif
 
-        if (rh==NULL){	// this is the first time in IO for this array
+        if (rh==NULL){  // this is the first time in IO for this array
           // Determine if a previously pre-computed RH could be re-used here
           bool reuseRH=false;
           ESMCI::RouteHandle *rhh;
@@ -598,7 +605,7 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist_arraycreate1de()",
             rhh = (*itt)->getArray()->getIoRH();
             if (rhh != NULL){
               bool isCompatible = rhh->isCompatible((*it)->getArray(), temp_array_p, &localrc);
-      	      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)){
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)){
                 // Close the file but return original error even if close fails.
                 localrc = close();
                 return rc;
@@ -607,7 +614,7 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist_arraycreate1de()",
               if (isCompatible) localCompatible=1;
               int globalCompatible=0; // initialize
               localrc = currentVM->allreduce(&localCompatible, &globalCompatible, 1, vmI4, vmSUM);
-      	      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)){
+              if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)){
                 // Close the file but return original error even if close fails.
                 localrc = close();
                 return rc;
@@ -639,7 +646,7 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef redistStore()", ESMC_LOGM
             }
 #if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redistStore()", ESMC_LOGMSG_INFO);
-#endif  
+#endif
           }
           (*it)->getArray()->setIoRH(rh); // store the RouteHandle for next time this array does IO
         }
@@ -674,8 +681,11 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft redist()", ESMC_LOGMSG_IN
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: bef undist_arraycreate_alldist()", ESMC_LOGMSG_INFO);
 #endif
         undist_arraycreate_alldist (temp_array_undist_p, &temp_array_p, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc))
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+          // Close the file but return original error even if close fails.
+          localrc = close();
           return rc;
+        }
 #if 0
 ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: aft undist_arraycreate_alldist()", ESMC_LOGMSG_INFO);
 #endif
@@ -739,7 +749,7 @@ ESMC_LogDefault.Write("IO::write() case: IO_ARRAY: done", ESMC_LOGMSG_INFO);
       return rc;
     }
   }
-    
+
   // return successfully
   rc = ESMF_SUCCESS;
   return (rc);
@@ -820,7 +830,7 @@ int IO::open(
     PRINTMSG("IO_Handler::open returned " << localrc);
     return localrc;
   }
-    
+
   // return successfully
   rc = localrc;
   return (rc);
@@ -868,7 +878,7 @@ int IO::flush(void
       return rc;
     }
   }
-    
+
   // return successfully
   rc = ESMF_SUCCESS;
   return (rc);
@@ -930,7 +940,7 @@ int IO::close(void
       return rc;
     }
   }
-    
+
   // return successfully
   rc = ESMF_SUCCESS;
   return (rc);
@@ -981,7 +991,7 @@ int IO::addArray(
   Attribute *varAttPack,                    // (in) - Attribute for variable attributes
   Attribute *gblAttPack) {                  // (in) - Attribute for global attributes
 // !DESCRIPTION:
-//      Add an array to the list of objects to read or write. The 
+//      Add an array to the list of objects to read or write. The
 //      {\tt variableName} argument will be used as the field name for
 //      NetCDF files (or other formats requiring a name).
 //      {\tt arr_p} is required
@@ -1023,7 +1033,7 @@ int IO::addArray(
     PRINTMSG("CATCH: Alloc error!!");
     ESMC_LogDefault.AllocError(ESMC_CONTEXT, &rc);
   }
-    
+
   // return
   if (ESMC_RC_NOT_IMPL == rc) {
     rc = localrc;
@@ -1087,7 +1097,7 @@ void IO::dimlabel_get (Attribute *dimAttPack, // in - AttPack with potential dim
 void IO::dimlabel_merge (
     std::vector<std::string> &dimLabels,    // inout - labels associated with the Grid on input,
                                             //         merged labels on output
-    std::vector<std::string> &ugdimLabels,  // in - labels 
+    std::vector<std::string> &ugdimLabels,  // in - labels
     Array *array,                           //
     int *rc) {
 // !DESCRIPTION:
@@ -1197,7 +1207,7 @@ bool IO::redist_check(Array *array_p, int *rc) {
 // !IROUTINE:  IO::redist_array
 //
 // !INTERFACE:
-void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc) {
+void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int petCount, int *rc) {
 // !DESCRIPTION:
 //      Create a dest Array with DE count on each PET = 1, based on src Array.
 //      Assumes that incoming Array has tileCount==1.
@@ -1219,11 +1229,11 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
 
   int ndims = dg_orig->getDimCount();
   int rank = src_array_p->getRank();
-  
+
   int replicatedDims=0;
   for (int i=0; i<ndims; i++)
     if (distgridToArrayMap[i]==0) ++replicatedDims;
-  
+
   std::vector<int> minIndexTileVec;
   std::vector<int> maxIndexTileVec;
   std::vector<int> distgridToArrayMapVec;
@@ -1237,10 +1247,21 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
         distgridToArrayMapVec.push_back(distgridToArrayMap[i]);
       }
     }
+    if (minIndexTileVec.size()<1){
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
+        "Not enough distributed dimensions", ESMC_CONTEXT, rc);
+      return; // bail out
+    }
     // now point to the set of reduced lists
     minIndexTile = &(minIndexTileVec[0]);
     maxIndexTile = &(maxIndexTileVec[0]);
     distgridToArrayMap = &(distgridToArrayMapVec[0]);
+  }
+
+  if ((maxIndexTile[0]-minIndexTile[0]+1)<petCount){
+    ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
+      "Index space too small to be distributed across all PETs", ESMC_CONTEXT, rc);
+    return; // bail out
   }
 
   ESMCI::InterArray<int> minIndexInterface((int*)minIndexTile, ndims-replicatedDims);
@@ -1268,7 +1289,7 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int *rc
 
   ESMCI::Array *temp_arr_p = ESMCI::Array::create(&arrayspec, distgrid,
     &distgridToArrayMapArg,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     &undistLBoundArg, &undistUBoundArg,
     &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
@@ -1323,22 +1344,19 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
 
   int rank = src_array_p->getRank ();
   DistGrid *dg = src_array_p->getDistGrid ();
-  
+
   int dimCount= dg->getDimCount();
   int deCount = dg->getDELayout()->getDeCount();
 
   int tilecount = dg->getTileCount ();
   if (tilecount != 1) {
     localrc = ESMF_RC_NOT_IMPL;
-    if (ESMC_LogDefault.MsgFoundError(localrc, "tilecount != 1 not supported yet", ESMC_CONTEXT,
-      rc)) {
-      // Close the file but return original error even if close fails.
-      fprintf(stderr, "dg->getTileCount()=%d\n", tilecount);
-      localrc = close();
-      return;
-    }
+    std::stringstream errmsg;
+    errmsg << "tile count of " << tilecount << " != 1 - not supported yet";
+    if (ESMC_LogDefault.MsgFoundError(localrc, errmsg.str(), ESMC_CONTEXT,
+      rc)) return;
   }
-  
+
   const int *arrayToDistGridMap = src_array_p->getArrayToDistGridMap();
   const int *undistLBound = src_array_p->getUndistLBound();
   const int *undistUBound = src_array_p->getUndistUBound();
@@ -1376,7 +1394,7 @@ void IO::undist_arraycreate_alldist(Array *src_array_p, Array **dest_array_p, in
       jj++;
     }
   }
-  
+
   // create the fixed up DistGrid, making sure to use original DELayout
   ESMCI::InterArray<int> minIndexInterface(minIndexNew);
   ESMCI::InterArray<int> maxIndexInterface(maxIndexNew);

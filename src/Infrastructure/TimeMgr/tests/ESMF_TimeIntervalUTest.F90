@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -64,7 +64,7 @@
 
       ! individual test result code
       integer :: D, sD, sN, ans, secs, hours, years, ns, &
-		 months, days
+          months, days
       logical :: bool
 
       ! to retrieve time in string format
@@ -75,12 +75,12 @@
       type(ESMF_TimeInterval) :: timeStep2, timeStep3
       integer(ESMF_KIND_I8) :: sD_i8
       real(ESMF_KIND_R8) :: ns_out_r8, sec_in_r8, days_r8, ratio, us_in_r8, &
-			    min_in_r8, hr_out_r8, ns_in_r8, us_out_r8, &
+          min_in_r8, hr_out_r8, ns_in_r8, us_out_r8, &
                             ms_out_r8, ms_in_r8, min_out_r8, hr_in_r8, &
                             sec_out_r8
       integer(ESMF_KIND_I8) :: days2
       type(ESMF_TimeInterval) :: timeInterval1, timeInterval2, timeInterval3, &
-				 timeInterval4, timeInterval5, timeInterval6
+                                 timeInterval4, timeInterval5, timeInterval6
       type(ESMF_TimeInterval) :: diffTime, absoluteTime
 
 #endif

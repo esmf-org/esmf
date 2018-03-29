@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -28,11 +28,11 @@
 // Fortran interface routines. The companion file ESMCI\_LocStream_C.F90  contains
 // the definitions (full code bodies) for the interface routines.
 //
-//EOP 
+//EOP
 //
 
 //-----------------------------------------------------------------------------
-// 
+//
 // !USES:
 #include "ESMC_LocStream.h"
 #include "ESMC_Mesh.h"
@@ -67,12 +67,12 @@ namespace ESMCI{
     static LocStream *create(int ls_size, ESMC_IndexFlag *indexflag,
                              ESMC_CoordSys_Flag *coordSys, int *rc);
     static int getbounds(LocStream *locstream, int localDe,
-			 int *cLBound, int *cUBound);
-    static int addKeyAlloc(LocStream *locstream, const char *keyName, 
-			   ESMC_TypeKind_Flag *typekind);
+                         int *cLBound, int *cUBound);
+    static int addKeyAlloc(LocStream *locstream, const char *keyName,
+                           ESMC_TypeKind_Flag *typekind);
     ESMC_Array getKeyArray(const char *keyName, int *rc);
     static int destroy(LocStream *locstream);
-  }; 
+  };
 }
 
 #endif  // ESMCI_LocStream_H

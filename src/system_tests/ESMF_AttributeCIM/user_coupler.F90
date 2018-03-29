@@ -15,20 +15,20 @@ module user_coupler
 
   ! ESMF Framework module
   use ESMF
-    
+
   implicit none
-  
+
   private
-   
+
   public usercpl_setvm, usercpl_register
-  
+
   contains
 
 !-------------------------------------------------------------------------
 !   !  The Register routine sets the subroutines to be called
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
- 
+
   subroutine usercpl_setvm(comp, rc)
     type(ESMF_CplComp) :: comp
     integer, intent(out) :: rc
@@ -65,7 +65,7 @@ module user_coupler
     integer, intent(out) :: rc
     ! Initialize return code
     rc = ESMF_SUCCESS
-    
+
     ! Register the callback routines.
     call ESMF_CplCompSetEntryPoint(comp, ESMF_METHOD_INITIALIZE, &
       userRoutine=user_init, rc=rc)
@@ -82,7 +82,7 @@ module user_coupler
 !-------------------------------------------------------------------------
 !   !User Comp Component created by higher level calls, here is the
 !   ! Initialization routine.
-    
+
   subroutine user_init(comp, importState, exportState, clock, rc)
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -90,7 +90,7 @@ module user_coupler
     integer, intent(out) :: rc
 
     ! Local variables
-	  type(ESMF_AttPack)        :: attpack
+          type(ESMF_AttPack)        :: attpack
     type(ESMF_VM)          :: vm
     character(ESMF_MAXSTR) :: convCIM, purpComp, purpProp, purpPlatform
     character(ESMF_MAXSTR) :: convISO, purpRP, purpCitation
@@ -111,7 +111,7 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
 !    call ESMF_StateReconcile(exportState, vm=vm, attreconflag=ESMF_ATTRECONCILE_ON, rc=rc)
 !    if (rc/=ESMF_SUCCESS) return ! bail out
-                                  
+
     ! Create the CIM Attribute package on the Coupler Component and set its
     ! values.  The standard Attribute package currently supplied by ESMF for a
     ! CIM Component contains several Attributes, grouped into sub-packages.
@@ -135,8 +135,8 @@ module user_coupler
     nestConv(2) = convISO
     nestPurp(2) = purpCitation
 
-    ! Add CIM Attribute package to top-level coupler component, 
-    !  containing a variable number of Responsible Party and 
+    ! Add CIM Attribute package to top-level coupler component,
+    !  containing a variable number of Responsible Party and
     !  Citation sub-packages
     !   convention = 'CIM 1.7.1'
     !   purpose    = 'ModelComp'
@@ -167,9 +167,9 @@ module user_coupler
     call ESMF_AttributeSet(comp, 'ShortName', 'EarthSys', &
       convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  1) Name of component in navigator bar on the left; 
+    ! ESG Display:  1) Name of component in navigator bar on the left;
     !                  attribute 'Version' appended, if set.
-    !               2) Also "Simulation Metadata:", for top-level component, 
+    !               2) Also "Simulation Metadata:", for top-level component,
     !                  first part of display, at top, 1st line, prepended to
     !                  top-level component's attributes 'Version' (if set) and
     !                  'SimulationShortName'.
@@ -178,7 +178,7 @@ module user_coupler
                            'Earth System High Resolution Global Model', &
       convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Full Name:"  first part of display, at top, 2nd line 
+    ! ESG Display:  "Full Name:"  first part of display, at top, 2nd line
     !               under title, prepended to attribute 'SimulationLongName'.
 
     call ESMF_AttributeSet(comp, 'Description', &
@@ -196,7 +196,7 @@ module user_coupler
       '2.0', &
         convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  Appended to attribute 'ShortName', then displayed as name 
+    ! ESG Display:  Appended to attribute 'ShortName', then displayed as name
     !               of component in navigator bar on the left.
 
     call ESMF_AttributeSet(comp, 'ReleaseDate', &
@@ -208,7 +208,7 @@ module user_coupler
     call ESMF_AttributeSet(comp, 'ModelType', &
       'model', convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  Maps to "Realm:", expanded under component name, in 
+    ! ESG Display:  Maps to "Realm:", expanded under component name, in
     !               navigator bar on the left.
 
     call ESMF_AttributeSet(comp, 'URL', &
@@ -227,9 +227,9 @@ module user_coupler
       'SMS.f09_g16.X.hector', &
       convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Simulation Metadata:"  1st part of display, at top, 
-    !               1st line, appended to top-level component's attributes 
-    !               'ShortName' and 'Version'.  Similarly, shows up as the 
+    ! ESG Display:  "Simulation Metadata:"  1st part of display, at top,
+    !               1st line, appended to top-level component's attributes
+    !               'ShortName' and 'Version'.  Similarly, shows up as the
     !               2nd part of the simulation name when searching the
     !               ESG website for Simulations->Realm->Earth System.
 
@@ -237,7 +237,7 @@ module user_coupler
       'EarthSys - Earth System Modeling Framework Earth System Model 1.0', &
       convention=convCIM, purpose=purpComp, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Full Name:"  1st part of display, at top, 2nd line under 
+    ! ESG Display:  "Full Name:"  1st part of display, at top, 2nd line under
     !               title, appended to attribute 'LongName'.
 
     call ESMF_AttributeSet(comp, 'SimulationProjectName', &
@@ -312,7 +312,7 @@ module user_coupler
      '3.0', &
       convention=convCIM, purpose=purpPlatform, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  Concatenated to attribute 'CompilerName' and displayed as 
+    ! ESG Display:  Concatenated to attribute 'CompilerName' and displayed as
     !               "Compiler" under tabs "Properties->Technical".
 
     call ESMF_AttributeSet(comp, 'MachineName', &
@@ -362,7 +362,7 @@ module user_coupler
      '4', &
       convention=convCIM, purpose=purpPlatform, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Number of Cores per Processor" under tabs 
+    ! ESG Display:  "Number of Cores per Processor" under tabs
     !               "Properties->Technical".
 
     call ESMF_AttributeSet(comp, 'MachineProcessorType', &
@@ -542,7 +542,7 @@ module user_coupler
      'Journal of Earth Modeling, 15 (2). 1261-1296.', &
       convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Reference", concatenated with attribute 'DOI', under 
+    ! ESG Display:  "Reference", concatenated with attribute 'DOI', under
     !               tab "References".
 
     call ESMF_AttributeSet(comp, 'Date', &
@@ -561,20 +561,20 @@ module user_coupler
      'doi:17.1035/2009JCLI4508.1', &
       convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  Concatenated to attribute 'LongTitle' and displayed as 
+    ! ESG Display:  Concatenated to attribute 'LongTitle' and displayed as
     !               "Reference" under tab "References".
 
     call ESMF_AttributeSet(comp, 'URL', &
      'http://www.earthsys.org/publications', &
       convention=convISO, purpose=purpCitation, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  Not output to CIM, as of v1.5/1.7 (no definition for it). 
+    ! ESG Display:  Not output to CIM, as of v1.5/1.7 (no definition for it).
 
 
     ! Citation attributes (2nd Citation attribute package)
     !  note:  nestAttPackName(5) refers to the 2nd
     !         nested Citation attribute package, after
-    !         the 3 Responsible Party packages and 
+    !         the 3 Responsible Party packages and
     !         the 1st Citation package (nestAttPackName(4)).
     !         nestAttPackName(x) is not needed (optional)
     !         when referring to the 1st nested attribute package
@@ -599,7 +599,7 @@ module user_coupler
       convention=convISO, purpose=purpCitation, &
       attPackInstanceName=nestAttPackName(5), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  "Reference", concatenated with attribute 'DOI', under 
+    ! ESG Display:  "Reference", concatenated with attribute 'DOI', under
     !               tab "References".
 
     call ESMF_AttributeSet(comp, 'Date', &
@@ -621,7 +621,7 @@ module user_coupler
       convention=convISO, purpose=purpCitation, &
       attPackInstanceName=nestAttPackName(5), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  Concatenated to attribute 'LongTitle' and displayed as 
+    ! ESG Display:  Concatenated to attribute 'LongTitle' and displayed as
     !               "Reference" under tab "References".
 
     call ESMF_AttributeSet(comp, 'URL', &
@@ -629,7 +629,7 @@ module user_coupler
       convention=convISO, purpose=purpCitation, &
       attPackInstanceName=nestAttPackName(5), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    ! ESG Display:  Not output to CIM, as of v1.5/1.7 (no definition for it). 
+    ! ESG Display:  Not output to CIM, as of v1.5/1.7 (no definition for it).
 
 
   end subroutine user_init
@@ -638,7 +638,7 @@ module user_coupler
 !-------------------------------------------------------------------------
 !   !  The Run routine where data is coupled.
 !   !
- 
+
   subroutine user_run(comp, importState, exportState, clock, rc)
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -654,7 +654,7 @@ module user_coupler
 !-------------------------------------------------------------------------
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
- 
+
   subroutine user_final(comp, importState, exportState, clock, rc)
     type(ESMF_CplComp) :: comp
     type(ESMF_State) :: importState, exportState
@@ -663,9 +663,9 @@ module user_coupler
 
     ! Initialize return code
     rc = ESMF_SUCCESS
-    
+
   end subroutine user_final
 
 end module user_coupler
-    
+
 !\end{verbatim}

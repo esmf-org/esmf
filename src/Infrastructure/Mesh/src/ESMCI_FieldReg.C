@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -57,7 +57,7 @@ FieldReg::~FieldReg() {
 
 MEField<> *FieldReg::GetCoordField() const {
   Trace __trace("FieldReg::GetCoordField()");
-  
+
   MEField<> *cf = GetField("coordinates");
   //ThrowAssert(cf);
   if (!cf) return NULL;
@@ -73,8 +73,8 @@ void FieldReg::MatchFields(UInt nfields, MEField<> **fds, std::vector<MEField<>*
 }
 
 MEField<> *FieldReg::RegisterField(const std::string &name, const MEFamily &mef,
-        UInt obj_type, const Context &ctxt, 
-        UInt dim, bool out, 
+        UInt obj_type, const Context &ctxt,
+        UInt dim, bool out,
         bool interp,
         const _fieldTypeBase &ftype)
 {
@@ -94,7 +94,7 @@ MEField<> *FieldReg::RegisterField(const std::string &name, const MEFamily &mef,
     // Check. If specs match, then just return the fields, otherwise
     // throw error.
     nf = fi->second;
-    
+
     // TODO: a more thourough check of specs (context, etc...)
     if (obj_type != nf->ObjType() || dim != nf->dim())
       Throw() << "MEField name:" << name << " already registered, with different specs";
@@ -106,7 +106,7 @@ MEField<> *FieldReg::RegisterField(const std::string &name, const MEFamily &mef,
 _field *FieldReg::Registerfield(const std::string &name,
                                 const Attr &attr,
                                 const _fieldTypeBase &_ftype,
-                                UInt dim) 
+                                UInt dim)
 {
 
   _field *fd;
@@ -130,7 +130,7 @@ MEField<> *FieldReg::GetField(const std::string &fname) const {
 
 _field *FieldReg::Getfield(const std::string &fname) const {
   fMapType::const_iterator fi = _fmap.find(fname);
-  
+
   return fi == _fmap.end() ? NULL : fi->second;
 }
 
@@ -142,7 +142,7 @@ void FieldReg::CreateDBFields() {
   ctxt.flip();
   {
     UInt n = ndfields.size();
-    // Use the standard lagrange 
+    // Use the standard lagrange
     for (UInt i = 0; i < n; i++) {
 //std::cout << "P:" << Par::Rank() << "nodal field:" << ndfields[i]->name() << std::endl;
       IOField<NodalField> &nf = *ndfields[i];
@@ -154,7 +154,7 @@ void FieldReg::CreateDBFields() {
   // Element fields become lagrange fields
   {
     UInt n = efields.size();
-    // Use the standard lagrange 
+    // Use the standard lagrange
     for (UInt i = 0; i < n; i++) {
       IOField<ElementField> &ef = *efields[i];
       RegisterField(ef.name(), MEFamilyDG0::instance(), MeshObj::ELEMENT,
@@ -171,7 +171,7 @@ void FieldReg::PopulateDBFields(MeshDB &mesh) {
   // Nodal field first
   {
     UInt n = ndfields.size();
-    // Use the standard lagrange 
+    // Use the standard lagrange
     for (UInt i = 0; i < n; i++) {
       IOField<NodalField> &nf = *ndfields[i];
       MEField<> *mf = GetField(nf.name());
@@ -194,14 +194,14 @@ void FieldReg::PopulateDBFields(MeshDB &mesh) {
         double *endd = newd + fdim;
         while (newd != endd) *newd++ = *d++;
       } // ni
-      
+
     } // nfields
   }
-  
+
 
   { // Element fields
     UInt n = efields.size();
-    // Use the standard lagrange 
+    // Use the standard lagrange
     for (UInt i = 0; i < n; i++) {
       IOField<ElementField> &ef = *efields[i];
       MEField<> *mf = GetField(ef.name());
@@ -224,7 +224,7 @@ void FieldReg::PopulateDBFields(MeshDB &mesh) {
         double *endd = newd + fdim;
         while (newd != endd) *newd++ = *d++;
       } // ni
-      
+
     } // nfields
   }
 }
@@ -251,7 +251,7 @@ static void parallel_union_field_info(std::vector<UInt> &nvalSet, std::vector<UI
 
   UInt csize = Par::Size();
 
-  if (csize == 1) return; 
+  if (csize == 1) return;
 
   std::vector<UInt> nvs(nvalSet);
   std::vector<UInt> nvso(nvalSetObj);
@@ -298,7 +298,7 @@ static void parallel_union_field_info(std::vector<UInt> &nvalSet, std::vector<UI
 
   // Loop through results
   for (UInt i = 0; i < (UInt) rdisp[csize]; i++) {
-    std::vector<UInt>::iterator lb = 
+    std::vector<UInt>::iterator lb =
       std::lower_bound(nvs.begin(), nvs.end(), allval[i]);
 
     if (lb == nvs.end() || *lb != allval[i])
@@ -313,7 +313,7 @@ static void parallel_union_field_info(std::vector<UInt> &nvalSet, std::vector<UI
   // Finally, update the return vals
   nvalSet = nvs;
   nvalSetObj = nvso;
-  
+
 }
 
 void FieldReg::Commit(MeshDB &mesh) {
@@ -346,7 +346,7 @@ void FieldReg::Commit(MeshDB &mesh) {
         Kernel &ker = *ki;
         // if kernel wrong type or context doesnt match, move on
         if (ker.type() == f.GetType() && ker.GetContext().any(f.GetContext())) {
-  
+
           const MeshObjTopo *otopo = ker.GetTopo();
           if (!otopo)
             Throw() << "Field " << f.name() << " has no topo on matching kernel";
@@ -361,7 +361,7 @@ void FieldReg::Commit(MeshDB &mesh) {
             oi = on;
           } // oi
         }
-  
+
         ki = kn;
       } // for k
 
@@ -371,15 +371,15 @@ void FieldReg::Commit(MeshDB &mesh) {
 
 #if 0
       if (Par::Rank() == 0) {
-	printf("C nvalset.size()=%d \n",nvalSet.size());
+        printf("C nvalset.size()=%d \n",nvalSet.size());
         for (int i=0; i<nvalSet.size(); i++) {
-	  printf("C [%d]= %d \n",i,nvalSet[i]);
-	}
+          printf("C [%d]= %d \n",i,nvalSet[i]);
+        }
 
-	printf("C nvalsetobj.size()=%d \n",nvalSetObj.size());
+        printf("C nvalsetobj.size()=%d \n",nvalSetObj.size());
         for (int i=0; i<nvalSetObj.size(); i++) {
-	  printf("C [%d]= %d \n",i,nvalSetObj[i]);
-	}
+          printf("C [%d]= %d \n",i,nvalSetObj[i]);
+        }
       }
 #endif
 
@@ -387,14 +387,14 @@ void FieldReg::Commit(MeshDB &mesh) {
       nvalSetSizes.push_back(nvalSet.size());
       nvalSetVals.resize(nvalSetPos+nvalSet.size(),0);
       for (int i=0; i<nvalSet.size(); i++) {
-	nvalSetVals[nvalSetPos]=nvalSet[i];
+        nvalSetVals[nvalSetPos]=nvalSet[i];
         nvalSetPos++;
       }
 
       nvalSetObjSizes.push_back(nvalSetObj.size());
       nvalSetObjVals.resize(nvalSetObjPos+nvalSetObj.size(),0);
       for (int i=0; i<nvalSetObj.size(); i++) {
-	nvalSetObjVals[nvalSetObjPos]=nvalSetObj[i];
+        nvalSetObjVals[nvalSetObjPos]=nvalSetObj[i];
         nvalSetObjPos++;
       }
 
@@ -413,11 +413,11 @@ void FieldReg::Commit(MeshDB &mesh) {
         f.Addfield(Registerfield(buf, fatt, f.FType(), nval*f.dim()), nval);
 //std::cout << "Creating subfield:" << buf << std::endl;
       }
-      
+
       // If field is to be interpolated, register an interpolant field.  This should be parallel
       // safe.
       if (f.has_interp()) {
-        
+
         // IF the field is nodal, we will simply use the nodal field for interpolations,
         // otherwise we must create a special field for interpolation.
         if (!f.is_nodal()) {
@@ -432,7 +432,7 @@ void FieldReg::Commit(MeshDB &mesh) {
           f.SetInterp(f.GetNodalfield());
         }
       }
-      
+
     } // for fi
    }
 
@@ -452,7 +452,7 @@ void FieldReg::Commit(MeshDB &mesh) {
         Kernel &ker = *ki;
         // if kernel wrong type or context doesnt match, move on
         if (ker.type() == f.GetType() && ker.GetContext().any(f.GetContext())) {
-  
+
           const MeshObjTopo *otopo = ker.GetTopo();
           if (!otopo)
             Throw() << "Field " << f.name() << " has no topo on matching kernel";
@@ -467,7 +467,7 @@ void FieldReg::Commit(MeshDB &mesh) {
             oi = on;
           } // oi
         }
-  
+
         ki = kn;
       } // for k
 
@@ -483,24 +483,24 @@ void FieldReg::Commit(MeshDB &mesh) {
 
  nfields = fields.size();
  {
-   for (UInt i = 0; i < nfields; i++) 
+   for (UInt i = 0; i < nfields; i++)
      fields[i]->set_ordinal(i);
  }
- 
+
  // Loop through _fields; there may be some that are not associated with MEFields,
  // so we need to count and number these.
  {
   fMapType::iterator fi = _fmap.begin(), fe = _fmap.end();
-  
+
   for (; fi != fe; ++fi) {
     _field *_f = fi->second;
-    
+
     if (_f->GetOrdinal() < 0) {
       _f->set_ordinal(nfields++);
       fields.push_back(_f);
     }
   }
-  
+
  }
 
   is_committed = true;
@@ -508,9 +508,9 @@ void FieldReg::Commit(MeshDB &mesh) {
 
 
 void FieldReg::ProxyCommit(MeshDB &mesh,
-			   int numSetsArg,
-			   std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
-			   std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg) {
+                           int numSetsArg,
+                           std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
+                           std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg) {
   Trace __trace("FieldReg::ProxyCommit(MeshDB &mesh)");
 
 
@@ -557,13 +557,13 @@ void FieldReg::ProxyCommit(MeshDB &mesh,
       // Load values from deserialize
       nvalSet.resize(nvalSetSizesArg[setPos],0);
       for (int i=0; i<nvalSetSizesArg[setPos]; i++) {
-	nvalSet[i]=nvalSetValsArg[nvalSetPos];
+        nvalSet[i]=nvalSetValsArg[nvalSetPos];
         nvalSetPos++;
       }
 
       nvalSetObj.resize(nvalSetObjSizesArg[setPos],0);
       for (int i=0; i<nvalSetObjSizesArg[setPos]; i++) {
-	nvalSetObj[i]=nvalSetObjValsArg[nvalSetObjPos];
+        nvalSetObj[i]=nvalSetObjValsArg[nvalSetObjPos];
         nvalSetObjPos++;
       }
 
@@ -571,16 +571,16 @@ void FieldReg::ProxyCommit(MeshDB &mesh,
 
 #if 0
       //      if (Par::Rank() == 0) {
-	printf("P nvalset.size()=%d \n",nvalSet.size());
+        printf("P nvalset.size()=%d \n",nvalSet.size());
         for (int i=0; i<nvalSet.size(); i++) {
-	  printf("P [%d]= %d \n",i,nvalSet[i]);
-	}
+          printf("P [%d]= %d \n",i,nvalSet[i]);
+        }
 
-	printf("P nvalsetobj.size()=%d \n",nvalSetObj.size());
+        printf("P nvalsetobj.size()=%d \n",nvalSetObj.size());
         for (int i=0; i<nvalSetObj.size(); i++) {
-	  printf("P [%d]= %d \n",i,nvalSetObj[i]);
-	}
-	//      }
+          printf("P [%d]= %d \n",i,nvalSetObj[i]);
+        }
+        //      }
 #endif
 
 
@@ -596,11 +596,11 @@ void FieldReg::ProxyCommit(MeshDB &mesh,
         f.Addfield(Registerfield(buf, fatt, f.FType(), nval*f.dim()), nval);
 //std::cout << "Creating subfield:" << buf << std::endl;
       }
-      
+
       // If field is to be interpolated, register an interpolant field.  This should be parallel
       // safe.
       if (f.has_interp()) {
-        
+
         // IF the field is nodal, we will simply use the nodal field for interpolations,
         // otherwise we must create a special field for interpolation.
         if (!f.is_nodal()) {
@@ -615,7 +615,7 @@ void FieldReg::ProxyCommit(MeshDB &mesh,
           f.SetInterp(f.GetNodalfield());
         }
       }
-      
+
     } // for fi
    }
 
@@ -635,7 +635,7 @@ void FieldReg::ProxyCommit(MeshDB &mesh,
         Kernel &ker = *ki;
         // if kernel wrong type or context doesnt match, move on
         if (ker.type() == f.GetType() && ker.GetContext().any(f.GetContext())) {
-  
+
           const MeshObjTopo *otopo = ker.GetTopo();
           if (!otopo)
             Throw() << "Field " << f.name() << " has no topo on matching kernel";
@@ -650,7 +650,7 @@ void FieldReg::ProxyCommit(MeshDB &mesh,
             oi = on;
           } // oi
         }
-  
+
         ki = kn;
       } // for k
 
@@ -666,24 +666,24 @@ void FieldReg::ProxyCommit(MeshDB &mesh,
 
  nfields = fields.size();
  {
-   for (UInt i = 0; i < nfields; i++) 
+   for (UInt i = 0; i < nfields; i++)
      fields[i]->set_ordinal(i);
  }
- 
+
  // Loop through _fields; there may be some that are not associated with MEFields,
  // so we need to count and number these.
  {
   fMapType::iterator fi = _fmap.begin(), fe = _fmap.end();
-  
+
   for (; fi != fe; ++fi) {
     _field *_f = fi->second;
-    
+
     if (_f->GetOrdinal() < 0) {
       _f->set_ordinal(nfields++);
       fields.push_back(_f);
     }
   }
-  
+
  }
 
   is_committed = true;
@@ -691,9 +691,9 @@ void FieldReg::ProxyCommit(MeshDB &mesh,
 
 
 void FieldReg::GetImprints(
-			   int *numSetsArg,
-			   UInt **nvalSetSizesArg, UInt **nvalSetValsArg,
-			   UInt **nvalSetObjSizesArg, UInt **nvalSetObjValsArg) {
+                           int *numSetsArg,
+                           UInt **nvalSetSizesArg, UInt **nvalSetValsArg,
+                           UInt **nvalSetObjSizesArg, UInt **nvalSetObjValsArg) {
   Trace __trace("FieldReg::getImprints()");
 
   // Copy Info
@@ -710,19 +710,19 @@ void FieldReg::GetImprints(
 
   if (nvalSetObjVals.size()) *nvalSetObjValsArg=&nvalSetObjVals[0];
   else *nvalSetObjValsArg=NULL;
-  
+
 }
 
 
 
 IOField<NodalField> *FieldReg::RegisterNodalField(const MeshDB &mesh, const std::string &name, UInt dim) {
-  
+
   ndfields.push_back(new IOField<NodalField>(mesh, name, dim));
   return ndfields.back();
 }
 
 IOField<ElementField> *FieldReg::RegisterElementField(const MeshDB &mesh, const std::string &name, UInt dim) {
-  
+
   efields.push_back(new IOField<ElementField>(mesh, name, dim));
   return efields.back();
 }

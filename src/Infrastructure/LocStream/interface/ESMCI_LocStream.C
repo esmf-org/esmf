@@ -1,10 +1,10 @@
 //$1.10 2007/04/26 16:13:59 rosalind Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -59,15 +59,15 @@ static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
 extern "C" {
 // Prototypes of the Fortran interface functions.
-  void FTN_X(f_esmf_locstreamcreate)(ESMCI::LocStream *locstreamp, int *ls_size, 
-				     ESMC_IndexFlag *indexflag, ESMC_CoordSys_Flag *coordSys, int *rc);
+  void FTN_X(f_esmf_locstreamcreate)(ESMCI::LocStream *locstreamp, int *ls_size,
+                                     ESMC_IndexFlag *indexflag, ESMC_CoordSys_Flag *coordSys, int *rc);
   void FTN_X(f_esmf_locstreamgetbounds)(ESMCI::LocStream *locstreamp, int *localDe,
-				        int *cLBound, int *cUBound, int *rc);
-  void FTN_X(f_esmf_locstreamaddkeyalloc)(ESMCI::LocStream *locstreamp, char *keyName, 
+                                        int *cLBound, int *cUBound, int *rc);
+  void FTN_X(f_esmf_locstreamaddkeyalloc)(ESMCI::LocStream *locstreamp, char *keyName,
                                           ESMC_TypeKind_Flag *typekind,
-					  int *rc, ESMCI_FortranStrLenArg nlen);
+                                          int *rc, ESMCI_FortranStrLenArg nlen);
   void FTN_X(f_esmf_locstreamgetkeyarray)(ESMCI::LocStream *locstreamp, char *keyName,
-				          void *array_pointer, int *rc, 
+                                          void *array_pointer, int *rc,
                                           ESMCI_FortranStrLenArg nlen);
   void FTN_X(f_esmf_locstreamdestroy)(ESMCI::LocStream *locstreamp, int *rc);
 
@@ -95,10 +95,10 @@ namespace ESMCI {
 //     pointer to newly allocated ESMCI::LocStream object
 //
 // !ARGUMENTS:
-				   int ls_size,         // size of location stream
-				   ESMC_IndexFlag *indexflag,
-				   ESMC_CoordSys_Flag *coordSys, 
-				   int *rc) {           // out - return code
+                                   int ls_size,         // size of location stream
+                                   ESMC_IndexFlag *indexflag,
+                                   ESMC_CoordSys_Flag *coordSys,
+                                   int *rc) {           // out - return code
 //
 // !DESCRIPTION:
 //      Create a new LocStream.
@@ -120,7 +120,7 @@ namespace ESMCI {
 
       FTN_X(f_esmf_locstreamcreate)(locstream, &ls_size, indexflag, coordSys, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
-	return ESMC_NULL_POINTER;
+        return ESMC_NULL_POINTER;
       }
 
     } catch (std::exception &x) {
@@ -165,10 +165,10 @@ namespace ESMCI {
 //    int error return code
 
 // !ARGUMENTS:
-		       LocStream *locstream,
-		       int localDe,
-		       int *cLBound,
-		       int *cUBound){
+                       LocStream *locstream,
+                       int localDe,
+                       int *cLBound,
+                       int *cUBound){
 
 // !DESCRIPTION:
 //      ESMF routine to return bounds from the LocStream.
@@ -185,7 +185,7 @@ namespace ESMCI {
 
     FTN_X(f_esmf_locstreamgetbounds)(locstream, &localDe, cLBound, cUBound, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-				      &rc)) return rc;
+                                      &rc)) return rc;
 
     localrc = ESMF_SUCCESS;
 
@@ -208,8 +208,8 @@ namespace ESMCI {
 //    int error return code
 
 // !ARGUMENTS:
-		       LocStream *locstream,
-		       const char *keyName,
+                       LocStream *locstream,
+                       const char *keyName,
                        ESMC_TypeKind_Flag *typekind){
 
 // !DESCRIPTION:
@@ -230,19 +230,19 @@ namespace ESMCI {
       char * fName = NULL;
       int slen = 0;
       if(keyName != NULL){
-	slen = strlen(keyName);
-	fName = new char[slen];
-	localrc = ESMC_CtoF90string(keyName, fName, slen);
-	if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
-	  delete[] fName;
-	  return rc;
-	}
+        slen = strlen(keyName);
+        fName = new char[slen];
+        localrc = ESMC_CtoF90string(keyName, fName, slen);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
+          delete[] fName;
+          return rc;
+        }
       }
 
       FTN_X(f_esmf_locstreamaddkeyalloc)(locstream, fName, typekind, &localrc, slen);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) {
-	if (fName) delete[] fName;
-	return rc;
+        if (fName) delete[] fName;
+        return rc;
       }
 
     } catch (std::exception &x) {
@@ -288,8 +288,8 @@ namespace ESMCI {
 //    int error return code
 
 // !ARGUMENTS:
-		       const char *keyName,
-		       int *rc){
+                       const char *keyName,
+                       int *rc){
 
 // !DESCRIPTION:
 //      ESMF routine to retrieve a key in the LocStream.
@@ -311,21 +311,21 @@ namespace ESMCI {
 
       int slen = 0;
       if(keyName != NULL){
-	slen = strlen(keyName);
-	fName = new char[slen];
-	localrc = ESMC_CtoF90string(keyName, fName, slen);
-	if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
-	  delete[] fName;
-	  return array;
-	}
+        slen = strlen(keyName);
+        fName = new char[slen];
+        localrc = ESMC_CtoF90string(keyName, fName, slen);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+          delete[] fName;
+          return array;
+        }
       }
 
-      FTN_X(f_esmf_locstreamgetkeyarray)(this, fName, (ESMCI::Array **)&(array.ptr), 
-					 &localrc, slen);
+      FTN_X(f_esmf_locstreamgetkeyarray)(this, fName, (ESMCI::Array **)&(array.ptr),
+                                         &localrc, slen);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-					rc)) {
-	if (fName) delete[] fName;
-	return array;
+                                        rc)) {
+        if (fName) delete[] fName;
+        return array;
       }
 
     } catch (std::exception &x) {
@@ -367,12 +367,12 @@ namespace ESMCI {
   //
   // !INTERFACE:
   int LocStream::destroy(
-		     //
-		     // !RETURN VALUE:
-		     //    int error return code
+                     //
+                     // !RETURN VALUE:
+                     //    int error return code
 
-		     // !ARGUMENTS:
-		     LocStream *locstream){
+                     // !ARGUMENTS:
+                     LocStream *locstream){
 
     // !DESCRIPTION:
     //      ESMF routine which destroys a LocStream object previously allocated

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -15,6 +15,8 @@
       module ESMF_VMSubrs
       use ESMF
       use ESMF_TestMod
+      
+      implicit none
 
       public
 
@@ -39,7 +41,8 @@
       integer::  func_results, myresults
       integer:: nsize, i, j
       integer:: isum, clock_count
-      real:: fsum
+      real(ESMF_KIND_R4) :: fsum4
+      real(ESMF_KIND_R8) :: fsum
       logical:: vmBool
 
       real(ESMF_KIND_R8)::  vm_prec
@@ -71,7 +74,8 @@
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Test_VM Get Test"
-      call ESMF_VMGet(test_vm, localPet=test_localPet, petCount=test_npets, rc=rc)
+      call ESMF_VMGet(test_vm, localPet=test_localPet, petCount=test_npets, &
+        rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -825,16 +829,16 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      fsum=0.
+      fsum4=0.
       do i=1,nsize
         f4array3_soln(i) = sum( f4array2(i,:) )
         print *, localPet,'f4array3(',i,')=',f4array3(i), &
                           'f4array3_soln(',i,')=',f4array3_soln(i)
-        fsum=fsum + abs( f4array3(i) - f4array3_soln(i) )
+        fsum4=fsum4 + abs( f4array3(i) - f4array3_soln(i) )
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_SUM Results Test"
-      call ESMF_Test((fsum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((fsum4.eq.0.), name, failMsg, result, ESMF_SRCLINE)
 
       end subroutine test_AllReduce_sum
 
@@ -918,16 +922,16 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      sum=0
+      fsum4=0
       do i=1,nsize
         f4array3_soln(i) = minval( f4array2(i,:) )
         print *, localPet,'f4array3(',i,')=',f4array3(i), &
                           'f4array3_soln(',i,')=',f4array3_soln(i)
-        fsum=fsum + abs( f4array3(i) - f4array3_soln(i) )
+        fsum4=fsum4 + abs( f4array3(i) - f4array3_soln(i) )
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MINResults Test:ESMF_KIND_R4"
-      call ESMF_Test((fsum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((fsum4.eq.0.), name, failMsg, result, ESMF_SRCLINE)
 
       end subroutine test_AllReduce_min
 
@@ -993,7 +997,7 @@
         farray3_soln(i) = maxval( farray2(i,:) )
         print *, localPet,'farray3(',i,')=',farray3(i), &
                           'farray3_soln(',i,')=',farray3_soln(i)
-        isum=isum + abs( farray3(i) - farray3_soln(i) )
+        fsum=fsum + abs( farray3(i) - farray3_soln(i) )
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MAXResults Test: ESMF_KIND_R8"
@@ -1017,11 +1021,11 @@
         f4array3_soln(i) = maxval( f4array2(i,:) )
         print *, localPet,'f4array3(',i,')=',f4array3(i), &
                           'f4array3_soln(',i,')=',f4array3_soln(i)
-        isum=isum + abs( f4array3(i) - f4array3_soln(i) )
+        fsum4=fsum4 + abs( f4array3(i) - f4array3_soln(i) )
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MAXResults Test: ESMF_KIND_R4"
-      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((fsum4.eq.0.), name, failMsg, result, ESMF_SRCLINE)
 
       end subroutine test_AllReduce_max
 
@@ -1072,6 +1076,13 @@
       type(ESMF_VMId), allocatable :: vmid1(:), vmid2(:)
       integer   :: id_value
       character :: key_value
+
+      type(ESMF_Grid) :: grid, grid_temp
+      type(ESMF_Pointer) :: grid_tempp
+      type(ESMF_Base) :: base
+      integer :: id_temp
+      type(ESMF_VMId) :: vmid_temp
+      type(ESMF_Logical) :: object_found
 
       logical :: tf
 
@@ -1157,7 +1168,7 @@
       do i=1, nsize
         array1(i) = localPet * 100 + i
         farray1(i)= real( array1(i) , ESMF_KIND_R8)
-        f4array1(i)=farray1(i)
+        f4array1(i)=real(farray1(i))
       enddo
 
       ! Populate array2
@@ -1167,8 +1178,8 @@
       do j=1, npets 
         do i=1, nsize
            array2(i,j) = (j-1) * 100 + i
-          farray2(i,j) = real( array2(i,j) , ESMF_KIND_R8)
-          f4array2(i,j) = farray2(i,j)
+          farray2(i,j)  = real( array2(i,j) , ESMF_KIND_R8)
+          f4array2(i,j) = real(farray2(i,j))
         enddo
       enddo
 
@@ -1239,7 +1250,7 @@
       !EX_UTest
       write(failMsg, *) "Bad comparison result"
       write(name, *) "VMId Compare Test"
-      tf = ESMF_VMIdCompare (vmid1(1), vmid2(1))
+      tf = ESMF_VMIdCompare (vmid1(1), vmid2(1), rc=rc)
       call ESMF_Test(tf, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1247,6 +1258,13 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VMId Set test values Test"
       call c_ESMCI_VMIdSet (vmid1(1), 1234, achar (123), rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VMId print test values Test"
+      call ESMF_VMIdPrint (vmid1(1), rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1293,17 +1311,116 @@
       !EX_UTest
       write(failMsg, *) "Destroy #1 failed"
       write(name, *) "VMId destroy #1 Test"
-      call ESMF_VMIdDestroy (vmid1, rc)
+      call ESMF_VMIdDestroy (vmid1, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Destroy #2 failed"
       write(name, *) "VMId destroy #2 Test"
-      call ESMF_VMIdDestroy (vmid2, rc)
+      call ESMF_VMIdDestroy (vmid2, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       deallocate (vmid1, vmid2)
+
+      ! Test accessing an object by its id and vmid
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Create Grid object.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Create a Grid object"
+      write(failMsg, *) 'Did not return ESMF_SUCCESS'
+      grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=(/10,20/), &
+            regDecomp=(/2,2/), name="Grid", rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_GridPrint (grid, rc=rc)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Access Grids Base ID.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Access Base of Grid"
+      write(failMsg, *) 'Did not return ESMF_SUCCESS'
+      call c_esmc_getid (grid, id_temp, rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, 'Grids Base ID =', id_temp
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Create a temporary VMId.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Create temporary VMId"
+      write(failMsg, *) 'Did not return ESMF_SUCCESS'
+      call ESMF_VMIdCreate (vmid_temp, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Destroy a temporary VMId.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Destroy VMId"
+      write(failMsg, *) 'Did not return ESMF_SUCCESS'
+      call ESMF_VMIdDestroy (vmid_temp, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_VMIdPrint (vmid_temp)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Access Grids Base VMId.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Access Base ID and VMId"
+      write(failMsg, *) 'Did not return ESMF_SUCCESS'
+      call c_esmc_getvmid (grid, vmid_temp, rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_VMIdPrint (vmid_temp)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test obtaining a pointer to an object, given its id and vmid.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Obtain pointer to object via id/vmid lookup"
+      write(failMsg, *) 'Can not access object'
+      call c_esmc_vmgetobject (grid_temp,  &
+          id_temp, vmid_temp,  ESMF_GEOMTYPE_GRID%type,  &
+          object_found, rc)
+      grid_temp%isInit = ESMF_INIT_CREATED
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+          name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test for object found.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Test for object found"
+      write(failMsg, *) 'Did not find object'
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, object_found == ESMF_TRUE)
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Print aliased Grid object.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Print aliased Grid object"
+      write(failMsg, *) 'Could not print object'
+      print *, 'calling ESMF_GridPrint(grid_temp):'
+      call ESMF_GridPrint (grid_temp, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+          name, failMsg, result, ESMF_SRCLINE)
 
 #endif
       call ESMF_TestEnd(ESMF_SRCLINE)

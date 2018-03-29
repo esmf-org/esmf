@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -85,6 +85,7 @@ module ESMF_UtilCubedSphereMod
 
   public :: ESMF_UtilCreateCSCoords
   public :: ESMF_UtilCreateCSCoordsPar
+
 contains
 
 ! routine to create the global edges and centers of the cubed-sphere grid
@@ -94,13 +95,13 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, Lo
 ! !ARGUMENTS:
     integer,           intent(IN)     :: npts
 !    integer,           intent(in)     :: petNo
-    real(ESMF_KIND_R8), optional, intent(inout) :: LonEdge(:,:)
-    real(ESMF_KIND_R8), optional, intent(inout) :: LatEdge(:,:)
+    real(ESMF_KIND_R4), optional, intent(inout) :: LonEdge(:,:)
+    real(ESMF_KIND_R4), optional, intent(inout) :: LatEdge(:,:)
     integer, optional, intent(in)     :: start(:)
     integer, optional, intent(in)     :: count(:)
     integer, optional, intent(in)     :: tile
-    real(ESMF_KIND_R8), optional, intent(inout) :: LonCenter(:,:)
-    real(ESMF_KIND_R8), optional, intent(inout) :: LatCenter(:,:)
+    real(ESMF_KIND_R4), optional, intent(inout) :: LonCenter(:,:)
+    real(ESMF_KIND_R4), optional, intent(inout) :: LatCenter(:,:)
 
 ! ErrLog variables
 !-----------------
@@ -260,13 +261,13 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
 ! !ARGUMENTS:
     integer,           intent(IN)     :: npts
 !    integer,           intent(in)     :: petNo
-    real(ESMF_KIND_R8), intent(inout) :: LonEdge(:,:)
-    real(ESMF_KIND_R8), intent(inout) :: LatEdge(:,:)
+    real(ESMF_KIND_R4), optional, intent(inout) :: LonEdge(:,:)
+    real(ESMF_KIND_R4), optional, intent(inout) :: LatEdge(:,:)
     integer, optional, intent(in)     :: start(:)
     integer, optional, intent(in)     :: count(:)
     integer, optional, intent(in)     :: tile
-    real(ESMF_KIND_R8), optional, intent(inout) :: LonCenter(:,:)
-    real(ESMF_KIND_R8), optional, intent(inout) :: LatCenter(:,:)
+    real(ESMF_KIND_R4), optional, intent(inout) :: LonCenter(:,:)
+    real(ESMF_KIND_R4), optional, intent(inout) :: LatCenter(:,:)
 
  integer                      :: STATUS
 
@@ -282,6 +283,7 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
   integer                       :: rc
   real, allocatable             :: tile_local(:,:,:)
   real, allocatable, save       :: global_tile1(:,:,:)
+  integer                       :: shapLon(2), shapLat(2)
 
     allocate(global_tile1(npts+1,npts+1,ndims))
     call gnomonic_grids(grid_type, npts, global_tile1(:,:,1), global_tile1(:,:,2))
@@ -305,9 +307,13 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
            if (ABS(tile_local(i,j,2)) < 1.e-10) tile_local(i,j,2) = 0.0
        enddo
     enddo
-
-    LonEdge=tile_local(:,:,1)
-    LatEdge=tile_local(:,:,2)
+    
+    if (present(LonEdge) .and. present(LatEdge)) then
+       shapLon=shape(LonEdge)
+       shapLat=shape(LatEdge)
+       LonEdge=tile_local(1:shapLon(1),1:shapLon(2),1)
+       LatEdge=tile_local(1:shapLat(1),1:shapLat(2),2)
+    endif
 
     if (present(LonCenter) .and. present(LatCenter)) then
         do j=1, count(2)

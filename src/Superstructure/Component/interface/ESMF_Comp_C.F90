@@ -1,7 +1,7 @@
 !  $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -441,7 +441,7 @@ end subroutine f_esmf_compdelete
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_compcollectgarbage1()"
-subroutine f_esmf_compcollectgarbage1(comp, rc)
+recursive subroutine f_esmf_compcollectgarbage1(comp, rc)
   use ESMF_UtilTypesMod
   use ESMF_BaseMod
   use ESMF_LogErrMod
@@ -480,7 +480,7 @@ end subroutine f_esmf_compcollectgarbage1
   
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_compcollectgarbage2()"
-subroutine f_esmf_compcollectgarbage2(comp, rc)
+recursive subroutine f_esmf_compcollectgarbage2(comp, rc)
   use ESMF_UtilTypesMod
   use ESMF_BaseMod
   use ESMF_LogErrMod

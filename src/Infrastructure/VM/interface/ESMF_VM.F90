@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -3237,8 +3237,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        is to be broadcasted to all other PETs. On all other PETs 
 !        {\tt bcstData} is used to receive the broadcasted data.
 !   \item[count] 
-!        Number of elements in sendData and recvData. Must be the same on all
-!        PETs.
+!        Number of elements in {/bcstData}. Must be the same on all PETs.
 !   \item[rootPet] 
 !        PET that holds data that is being broadcast.
 !   \item[{[syncflag]}]
@@ -4701,8 +4700,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
-  subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, petCount, &
-    peCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, rc)
+  recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
+    petCount, peCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag,&
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)            :: vm
@@ -5387,7 +5387,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !ARGUMENTS:
 !    type(ESMF_VM),                     intent(in)            :: vm
-!    integer(ESMF_KIND_<kind>), target, intent(out)           :: recvData(:)  
+!    <type>(ESMF_KIND_<kind>), target,  intent(out)           :: recvData(:)  
 !    integer,                           intent(in)            :: count
 !    integer,                           intent(in)            :: srcPet
 !type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
@@ -8159,8 +8159,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Get floating-point number of seconds of elapsed wall-clock time since some
-!   time in the past.
+!   Get floating-point number of seconds of elapsed wall-clock time since the
+!   beginning of execution of the application.
 !
 !   The arguments are:
 !   \begin{description}
@@ -8197,7 +8197,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMWtimeDelay - Delay execution
 
 ! !INTERFACE:
-  subroutine ESMF_VMWtimeDelay(delay, keywordEnforcer, rc)
+  recursive subroutine ESMF_VMWtimeDelay(delay, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     real(ESMF_KIND_R8), intent(in)            :: delay
@@ -8457,7 +8457,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMShutdown - Shutdown a VM
 
 ! !INTERFACE:
-  subroutine ESMF_VMShutdown(vm, vmplan, vm_info, rc)
+  recursive subroutine ESMF_VMShutdown(vm, vmplan, vm_info, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)              :: vm
@@ -8505,7 +8505,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
-      function ESMF_VMGetInit(vm) 
+  recursive function ESMF_VMGetInit(vm) 
 !
 ! !RETURN VALUE:
       ESMF_INIT_TYPE :: ESMF_VMGetInit   
@@ -8531,7 +8531,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ESMF_VMGetInit = ESMF_INIT_CREATED
     endif
 
-    end function ESMF_VMGetInit
+  end function ESMF_VMGetInit
 !------------------------------------------------------------------------------
 
 
@@ -8542,7 +8542,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMSetInitCreated - Set VM init code to "CREATED"
 
 ! !INTERFACE:
-  subroutine ESMF_VMSetInitCreated(vm, rc)
+  recursive subroutine ESMF_VMSetInitCreated(vm, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),  intent(inout)           :: vm
@@ -8583,7 +8583,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMGetThis - Internal access routine for C++ pointer
 
 ! !INTERFACE:
-  subroutine ESMF_VMGetThis(vm, this, rc)
+  recursive subroutine ESMF_VMGetThis(vm, this, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)              :: vm
@@ -8627,7 +8627,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMSetThis - Set C++ pointer in VM
 
 ! !INTERFACE:
-  subroutine ESMF_VMSetThis(vm, this, rc)
+  recursive subroutine ESMF_VMSetThis(vm, this, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(inout)           :: vm

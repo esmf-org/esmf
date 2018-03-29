@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -221,9 +221,9 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
 void dump_elem(const MeshObj & elem, int sdim, const MEField<> & coord, bool check_local){
 
   int rc;
-  int npet = VM::getCurrent(&rc)->getPetCount();
-  int me   = VM::getCurrent(&rc)->getLocalPet();
-  int owner = elem.get_owner();
+  unsigned int npet = VM::getCurrent(&rc)->getPetCount();
+  unsigned int me   = VM::getCurrent(&rc)->getLocalPet();
+  unsigned int owner = elem.get_owner();
   std::cout << elem.get_id() << " Me: " << me << " Owner: " << elem.get_owner()
             << " Locally owned: " << GetAttr(elem).is_locally_owned() << "\n ";
   //if(elem.get_owner() != me) continue;
@@ -415,7 +415,7 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
   int pdim=srcmesh.parametric_dim();
 
   int rc;
-  int me = VM::getCurrent(&rc)->getLocalPet();
+  unsigned int me = VM::getCurrent(&rc)->getLocalPet();
   std::vector<sintd_node *> sintd_nodes;
   std::vector<sintd_cell *> sintd_cells;
 
@@ -547,8 +547,8 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   int pdim=srcmesh.parametric_dim();
 
   int rc;
-  int me = VM::getCurrent(&rc)->getLocalPet();
-  int npet = VM::getCurrent(&rc)->getPetCount();
+  unsigned int me = VM::getCurrent(&rc)->getLocalPet();
+  unsigned int npet = VM::getCurrent(&rc)->getPetCount();
   std::vector<sintd_node *> sintd_nodes;
   std::vector<sintd_cell *> sintd_cells;
 
@@ -797,9 +797,9 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
                          " - can't triangulate a polygon with less than 3 sides", 
                                                       ESMC_CONTEXT, &rc)) throw rc;
                   } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
-                    dump_elem(elem, sdim, coord, false);
+                    //dump_elem(elem, sdim, coord, false);
                     //dump_elem(clip_elem, sdim, clip_coord, false);
-                    {
+                    if(false){
                       std::cout << "dstpoly_it->subject_cd:" << std::endl;
                       for(int npt=0; npt<subject_num_nodes; npt++) std::cout << cd[npt*3] << "," << cd[npt*3+1] << "," << cd[npt*3+2] << std::endl; 
                       cd_sph = new double[subject_num_nodes*2];   cart2sph(subject_num_nodes, cd, cd_sph); 
@@ -962,7 +962,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
 
     // Invalidate masked destination elements
     if (dst_mask_field) {
-      for (int i=0; i<sr.elems.size(); i++) {
+      for (unsigned int i=0; i<sr.elems.size(); i++) {
         const MeshObj &dst_elem = *sr.elems[i];
         double *msk=dst_mask_field->data(dst_elem);
         if (*msk>0.5) {
@@ -973,7 +973,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
 
     // Count number of valid weights
     int num_valid=0;
-    for (int i=0; i<sr.elems.size(); i++) {
+    for (unsigned int i=0; i<sr.elems.size(); i++) {
       if (valid[i]==1) num_valid++;
     }
 
@@ -1045,7 +1045,7 @@ void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResul
 
     // Invalidate masked destination elements
     if (dst_mask_field) {
-      for (int i=0; i<sr.elems.size(); i++) {
+      for (unsigned int i=0; i<sr.elems.size(); i++) {
         const MeshObj &dst_elem = *sr.elems[i];
         double *msk=dst_mask_field->data(dst_elem);
         if (*msk>0.5) {
@@ -1056,7 +1056,7 @@ void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResul
 
     // Count number of valid weights
     int num_valid=0;
-    for (int i=0; i<sr.elems.size(); i++) {
+    for (unsigned int i=0; i<sr.elems.size(); i++) {
       if (valid[i]==1) num_valid++;
     }
 
@@ -1108,7 +1108,7 @@ void calc_clipped_poly_2D_3D_sph(const Mesh &srcmesh, Mesh &dstmesh, SearchResul
     int pdim=dstmesh.parametric_dim();
 
     int rc;
-    int me = VM::getCurrent(&rc)->getLocalPet();
+    unsigned int me = VM::getCurrent(&rc)->getLocalPet();
     std::vector<sintd_node *> sintd_nodes;
     std::vector<sintd_cell *> sintd_cells;
 

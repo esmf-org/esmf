@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -86,8 +86,8 @@ program ESMF_VMScatterUTest
   ! prepare data array1
   do i=1, nlen
     array1(i) = localPet * 100 + i
-    farray1(i) = real(array1(i),ESMF_KIND_R8)
-    f4array1(i) = farray1(i)
+    farray1(i) = real(array1(i), ESMF_KIND_R8)
+    f4array1(i) = real(farray1(i), ESMF_KIND_R4)
   enddo
 
   ! prepare data array2
@@ -139,7 +139,6 @@ program ESMF_VMScatterUTest
   do i=1, nsize
     print *, localPet," array2: ", array2(i)
   enddo
-
 
   !Testing with ESMF_KIND_R8 arguments
   !===================================
@@ -240,8 +239,8 @@ program ESMF_VMScatterUTest
   ! prepare data array1
   do i=1, nlen
     array1(i) = localPet * 100 + i
-    farray1(i) = real(array1(i),ESMF_KIND_R8)
-    f4array1(i) = farray1(i)
+    farray1(i) = real(array1(i), ESMF_KIND_R8)
+    f4array1(i) = real(farray1(i), ESMF_KIND_R4)
   enddo
 
   ! prepare data array2

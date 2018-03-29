@@ -53,7 +53,7 @@ ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),mvapich2)
-# Mvapich2 ---------------------------------------------------
+# Mvapich2 -------------------------------------------------
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXDEFAULT         = mpicxx
 ESMF_CXXLINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.mvapich2f90)
@@ -61,7 +61,7 @@ ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
 else
 ifeq ($(ESMF_COMM),lam)
-# LAM (assumed to be built with gfortran) ----------------
+# LAM (assumed to be built with gfortran) ------------------
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
@@ -105,7 +105,7 @@ ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -v --version
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -Wall -Wno-unused -Wno-unused-dummy-argument -fbacktrace
+ESMF_F90OPTFLAG_G       += -Wall -Wno-unused -Wno-unused-dummy-argument -fbacktrace -fbounds-check
 ESMF_CXXOPTFLAG_G       += -Wall -Wextra -Wno-unused
 
 ############################################################
@@ -197,6 +197,12 @@ ESMF_F90COMPILEFIXCPP    = -cpp -ffixed-form
 ESMF_F90COMPILEOPTS += -ffree-line-length-none
 
 ############################################################
+# Set rpath syntax
+#
+ESMF_F90RPATHPREFIX         = -Wl,-rpath,
+ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
+
+############################################################
 # Determine where clang's libraries are located
 #
 # TODO: The -print-file-name option doesn't seem to work properly yet.
@@ -215,18 +221,12 @@ ESMF_F90COMPILEOPTS += -ffree-line-length-none
 ############################################################
 # Determine where gfortran's libraries are located
 #
-# TODO: The -print-file-name option doesn't seem to work properly yet.
-#ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.dylib)
-#ifeq ($(ESMF_LIBSTDCXX),libgfortran.dylib)
-#ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
-#endif
-#ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
-
-############################################################
-# Blank out variables to prevent rpath encoding
-#
-ESMF_F90LINKRPATHS      =
-ESMF_CXXLINKRPATHS      =
+ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.dylib)
+ifeq ($(ESMF_LIBSTDCXX),libgfortran.dylib)
+ESMF_LIBGFORTRAN := $(shell $(ESMF_F90COMPILER) -print-file-name=libgfortran.a)
+endif
+ESMF_CXXLINKPATHS += -L$(dir $(ESMF_LIBGFORTRAN))
+ESMF_CXXLINKRPATHS += $(ESMF_CXXRPATHPREFIX)$(dir $(ESMF_LIBGFORTRAN))
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end

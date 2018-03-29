@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -20,7 +20,7 @@
 //
 // The code in this file implements the C++ NetEsmfClient methods declared
 // in the companion file ESMCI_WebServNetEsmfClient.h.  This code
-// provides the functionality needed to communicate with an ESMF component 
+// provides the functionality needed to communicate with an ESMF component
 // (grid or coupler) service.
 //
 //-----------------------------------------------------------------------------
@@ -60,7 +60,7 @@ ESMCI_WebServNetEsmfClient::ESMCI_WebServNetEsmfClient(
 //
   const char*  host,   // (in) the name of the host machine running the
                        // component service
-  int          port    // (in) the port number of the component service 
+  int          port    // (in) the port number of the component service
                        // to which this client will connect
   )
 //
@@ -71,18 +71,18 @@ ESMCI_WebServNetEsmfClient::ESMCI_WebServNetEsmfClient(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//***
-	// if the host isn't specified, default to the "localhost"
-	//***
-	theHost = NULL;
+        //***
+        // if the host isn't specified, default to the "localhost"
+        //***
+        theHost = NULL;
 
-	if (host == NULL)
-	{
-		host = "localhost";
-	}
+        if (host == NULL)
+        {
+                host = "localhost";
+        }
 
-	setHost(host);
-	setPort(port);
+        setHost(host);
+        setPort(port);
 }
 
 
@@ -106,8 +106,8 @@ ESMCI_WebServNetEsmfClient::~ESMCI_WebServNetEsmfClient(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theSocket.disconnect();
-	delete theHost;
+        theSocket.disconnect();
+        delete theHost;
 }
 
 
@@ -134,13 +134,13 @@ void  ESMCI_WebServNetEsmfClient::setHost(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	if (theHost)
-	{
-		delete theHost;
-	}
+        if (theHost)
+        {
+                delete theHost;
+        }
 
-	theHost = new char[strlen(host) + 1];
-	strcpy(theHost, host);
+        theHost = new char[strlen(host) + 1];
+        strcpy(theHost, host);
 }
 
 
@@ -157,7 +157,7 @@ void  ESMCI_WebServNetEsmfClient::setPort(
 //
 // !ARGUMENTS:
 //
-  int          port    // (in) the port number of the component service 
+  int          port    // (in) the port number of the component service
                        // to which this client will connect
   )
 //
@@ -167,7 +167,7 @@ void  ESMCI_WebServNetEsmfClient::setPort(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	thePort = port;
+        thePort = port;
 }
 
 
@@ -181,14 +181,14 @@ void  ESMCI_WebServNetEsmfClient::setPort(
 int  ESMCI_WebServNetEsmfClient::sendRequest(
 //
 // !RETURN VALUE:
-//    int  number of bytes written to the socket (in addition to the request 
+//    int  number of bytes written to the socket (in addition to the request
 //         msg); ESMF_FAILURE if there is an error.
 //
 // !ARGUMENTS:
 //
-  int    request,		// (in) the request identifier
-  int    length,		// (in) the length of the data to send
-  void*  data			// (in) the buffer containing the data to send
+  int    request,               // (in) the request identifier
+  int    length,                // (in) the length of the data to send
+  void*  data                   // (in) the buffer containing the data to send
   )
 //
 // !DESCRIPTION:
@@ -198,48 +198,48 @@ int  ESMCI_WebServNetEsmfClient::sendRequest(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("ESMCI_WebServNetEsmfClient::sendRequest()\n");
+        //printf("ESMCI_WebServNetEsmfClient::sendRequest()\n");
 
-	int		localrc = 0;
-	char*		requestStr = ESMCI_WebServGetRequestFromId(request);
+        int             localrc = 0;
+        char*           requestStr = ESMCI_WebServGetRequestFromId(request);
 
-	if (strcmp(requestStr, "UNKN") == 0)
-	{
+        if (strcmp(requestStr, "UNKN") == 0)
+        {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_ARG_VALUE,
          "Invalid request id.",
          ESMC_CONTEXT, &localrc);
 
-		return ESMF_FAILURE;
-	}
+                return ESMF_FAILURE;
+        }
 
-	if (theSocket.send(requestStr) <= 0)
-	{
+        if (theSocket.send(requestStr) <= 0)
+        {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error writing request id to socket.",
          ESMC_CONTEXT, &localrc);
 
       return ESMF_FAILURE;
-	}
-	//printf("\nCLIENT: req: %s\n", requestStr);
+        }
+        //printf("\nCLIENT: req: %s\n", requestStr);
 
-	int	bytesWritten = 0;
+        int     bytesWritten = 0;
 
-	if ((length > 0)  &&  (data != NULL))
-	{
-		if ((bytesWritten = theSocket.write(length, data)) != length)
-		{
-      	ESMC_LogDefault.MsgFoundError(
-         	ESMC_RC_FILE_WRITE,
-         	"Error writing request data to socket.",
-         	ESMC_CONTEXT, &localrc);
+        if ((length > 0)  &&  (data != NULL))
+        {
+                if ((bytesWritten = theSocket.write(length, data)) != length)
+                {
+        ESMC_LogDefault.MsgFoundError(
+                ESMC_RC_FILE_WRITE,
+                "Error writing request data to socket.",
+                ESMC_CONTEXT, &localrc);
 
-      	return ESMF_FAILURE;
-		}
-	}
+        return ESMF_FAILURE;
+                }
+        }
 
-	return bytesWritten;
+        return bytesWritten;
 }
 
 
@@ -258,35 +258,35 @@ int  ESMCI_WebServNetEsmfClient::sendData(
 //
 // !ARGUMENTS:
 //
-  int    length,		// (in) the length of the data to send
-  void*  data			// (in) the buffer containing the data to send
+  int    length,                // (in) the length of the data to send
+  void*  data                   // (in) the buffer containing the data to send
   )
 //
 // !DESCRIPTION:
-//    Sends a packet of data to the service.  
+//    Sends a packet of data to the service.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("ESMCI_WebServNetEsmfClient::sendData()\n");
+        //printf("ESMCI_WebServNetEsmfClient::sendData()\n");
 
-	int	localrc = 0;
-	int	bytesWritten = 0;
+        int     localrc = 0;
+        int     bytesWritten = 0;
 
-	if ((length > 0)  &&  (data != NULL))
-	{
-		if ((bytesWritten = theSocket.write(length, data)) != length)
-		{
-      	ESMC_LogDefault.MsgFoundError(
-         	ESMC_RC_FILE_WRITE,
-         	"Error writing data to socket.",
-         	ESMC_CONTEXT, &localrc);
+        if ((length > 0)  &&  (data != NULL))
+        {
+                if ((bytesWritten = theSocket.write(length, data)) != length)
+                {
+        ESMC_LogDefault.MsgFoundError(
+                ESMC_RC_FILE_WRITE,
+                "Error writing data to socket.",
+                ESMC_CONTEXT, &localrc);
 
-      	return ESMF_FAILURE;
-		}
-	}
+        return ESMF_FAILURE;
+                }
+        }
 
-	return bytesWritten;
+        return bytesWritten;
 }
 
 
@@ -300,36 +300,36 @@ int  ESMCI_WebServNetEsmfClient::sendData(
 int  ESMCI_WebServNetEsmfClient::sendString(
 //
 // !RETURN VALUE:
-//    int  number of bytes written to the socket; ESMF_FAILURE if there is 
+//    int  number of bytes written to the socket; ESMF_FAILURE if there is
 //         an error.
 //
 // !ARGUMENTS:
 //
-  const char*  data		// (in) the string containing the data to send
+  const char*  data             // (in) the string containing the data to send
   )
 //
 // !DESCRIPTION:
-//    Sends a string to the service.  
+//    Sends a string to the service.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("ESMCI_WebServNetEsmfClient::sendString()\n");
+        //printf("ESMCI_WebServNetEsmfClient::sendString()\n");
 
-	int	localrc = 0;
-	int	bytesWritten = 0;
+        int     localrc = 0;
+        int     bytesWritten = 0;
 
-	if ((bytesWritten = theSocket.send(data)) <= 0)
-	{
+        if ((bytesWritten = theSocket.send(data)) <= 0)
+        {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_WRITE,
          "Error writing string to socket.",
          ESMC_CONTEXT, &localrc);
 
       return ESMF_FAILURE;
-	}
+        }
 
-	return bytesWritten;
+        return bytesWritten;
 }
 
 
@@ -348,9 +348,9 @@ int  ESMCI_WebServNetEsmfClient::getResponse(
 //
 // !ARGUMENTS:
 //
-  int    request,		// (in) the request identifier (ignored)
-  int&   length,		// (out) the length of the data placed in the buffer
-  void*  data			// (out) the buffer containing the received data 
+  int    request,               // (in) the request identifier (ignored)
+  int&   length,                // (out) the length of the data placed in the buffer
+  void*  data                   // (out) the buffer containing the received data
   )
 //
 // !DESCRIPTION:
@@ -359,21 +359,21 @@ int  ESMCI_WebServNetEsmfClient::getResponse(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("ESMCI_WebServNetEsmfClient::getResponse()\n");
-	int	localrc = 0;
+        //printf("ESMCI_WebServNetEsmfClient::getResponse()\n");
+        int     localrc = 0;
 
-	length = 0;
-	if (theSocket.read(length, data) <= 0)
-	{
-     	ESMC_LogDefault.MsgFoundError(
-        	ESMC_RC_FILE_WRITE,
-        	"Error reading request response from socket.",
-        	ESMC_CONTEXT, &localrc);
+        length = 0;
+        if (theSocket.read(length, data) <= 0)
+        {
+        ESMC_LogDefault.MsgFoundError(
+                ESMC_RC_FILE_WRITE,
+                "Error reading request response from socket.",
+                ESMC_CONTEXT, &localrc);
 
-     	return ESMF_FAILURE;
-	}
+        return ESMF_FAILURE;
+        }
 
-	return length;
+        return length;
 }
 
 
@@ -400,9 +400,9 @@ int  ESMCI_WebServNetEsmfClient::connect(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("ESMCI_WebServNetEsmfClient::connect()\n");
+        //printf("ESMCI_WebServNetEsmfClient::connect()\n");
 
-	return theSocket.connect(theHost, thePort);
+        return theSocket.connect(theHost, thePort);
 }
 
 
@@ -427,9 +427,9 @@ void  ESMCI_WebServNetEsmfClient::disconnect(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("ESMCI_WebServNetEsmfClient::disconnect()\n");
+        //printf("ESMCI_WebServNetEsmfClient::disconnect()\n");
 
-	return theSocket.disconnect();
+        return theSocket.disconnect();
 }
 
 
@@ -461,18 +461,18 @@ char*  ESMCI_WebServNetEsmfClient::getStateStr(
    switch (state)
    {
    case NET_ESMF_STAT_IDLE:          return (char*)"PENDING";
-	case NET_ESMF_STAT_READY:         return (char*)"READY";
-	case NET_ESMF_STAT_BUSY:          return (char*)"BUSY";
-	case NET_ESMF_STAT_INITIALIZING:  return (char*)"INITIALIZING";
-	case NET_ESMF_STAT_RUNNING:       return (char*)"RUNNING";
-	case NET_ESMF_STAT_FINALIZING:    return (char*)"FINALIZING";
-	case NET_ESMF_STAT_INIT_DONE:     return (char*)"INIT_DONE";
-	case NET_ESMF_STAT_RUN_DONE:      return (char*)"RUN_DONE";
-	case NET_ESMF_STAT_FINAL_DONE:    return (char*)"FINAL_DONE";
-	case NET_ESMF_STAT_DONE:          return (char*)"DONE";
-	case NET_ESMF_STAT_SUBMITTED:     return (char*)"SUBMITTED";
-	case NET_ESMF_STAT_TIMESTEP_DONE: return (char*)"TIMESTEP_DONE";
-	case NET_ESMF_STAT_ERROR:         return (char*)"ERROR";
+        case NET_ESMF_STAT_READY:         return (char*)"READY";
+        case NET_ESMF_STAT_BUSY:          return (char*)"BUSY";
+        case NET_ESMF_STAT_INITIALIZING:  return (char*)"INITIALIZING";
+        case NET_ESMF_STAT_RUNNING:       return (char*)"RUNNING";
+        case NET_ESMF_STAT_FINALIZING:    return (char*)"FINALIZING";
+        case NET_ESMF_STAT_INIT_DONE:     return (char*)"INIT_DONE";
+        case NET_ESMF_STAT_RUN_DONE:      return (char*)"RUN_DONE";
+        case NET_ESMF_STAT_FINAL_DONE:    return (char*)"FINAL_DONE";
+        case NET_ESMF_STAT_DONE:          return (char*)"DONE";
+        case NET_ESMF_STAT_SUBMITTED:     return (char*)"SUBMITTED";
+        case NET_ESMF_STAT_TIMESTEP_DONE: return (char*)"TIMESTEP_DONE";
+        case NET_ESMF_STAT_ERROR:         return (char*)"ERROR";
    default:                          return (char*)"UNKN";
    }
 
@@ -506,20 +506,20 @@ int  ESMCI_WebServNetEsmfClient::getStateValue(
 {
    //printf("ESMCI_WebServNetEsmfClient::getStateValue()\n");
 
-	if (strcmp(stateStr, "PENDING") == 0)      return NET_ESMF_STAT_IDLE;
-	if (strcmp(stateStr, "READY") == 0)        return NET_ESMF_STAT_READY;
-	if (strcmp(stateStr, "BUSY") == 0)         return NET_ESMF_STAT_BUSY;
-	if (strcmp(stateStr, "INITIALIZING") == 0) return NET_ESMF_STAT_INITIALIZING;
-	if (strcmp(stateStr, "RUNNING") == 0)      return NET_ESMF_STAT_RUNNING;
-	if (strcmp(stateStr, "FINALIZING") == 0)   return NET_ESMF_STAT_FINALIZING;
-	if (strcmp(stateStr, "INIT_DONE") == 0)    return NET_ESMF_STAT_INIT_DONE;
-	if (strcmp(stateStr, "RUN_DONE") == 0)     return NET_ESMF_STAT_RUN_DONE;
-	if (strcmp(stateStr, "FINAL_DONE") == 0)   return NET_ESMF_STAT_FINAL_DONE;
-	if (strcmp(stateStr, "DONE") == 0)         return NET_ESMF_STAT_DONE;
-	if (strcmp(stateStr, "SUBMITTED") == 0)    return NET_ESMF_STAT_SUBMITTED;
-	if (strcmp(stateStr, "TIMESTEP_DONE") == 0) 
-														 return NET_ESMF_STAT_TIMESTEP_DONE;
-	if (strcmp(stateStr, "ERROR") == 0)        return NET_ESMF_STAT_ERROR;
+        if (strcmp(stateStr, "PENDING") == 0)      return NET_ESMF_STAT_IDLE;
+        if (strcmp(stateStr, "READY") == 0)        return NET_ESMF_STAT_READY;
+        if (strcmp(stateStr, "BUSY") == 0)         return NET_ESMF_STAT_BUSY;
+        if (strcmp(stateStr, "INITIALIZING") == 0) return NET_ESMF_STAT_INITIALIZING;
+        if (strcmp(stateStr, "RUNNING") == 0)      return NET_ESMF_STAT_RUNNING;
+        if (strcmp(stateStr, "FINALIZING") == 0)   return NET_ESMF_STAT_FINALIZING;
+        if (strcmp(stateStr, "INIT_DONE") == 0)    return NET_ESMF_STAT_INIT_DONE;
+        if (strcmp(stateStr, "RUN_DONE") == 0)     return NET_ESMF_STAT_RUN_DONE;
+        if (strcmp(stateStr, "FINAL_DONE") == 0)   return NET_ESMF_STAT_FINAL_DONE;
+        if (strcmp(stateStr, "DONE") == 0)         return NET_ESMF_STAT_DONE;
+        if (strcmp(stateStr, "SUBMITTED") == 0)    return NET_ESMF_STAT_SUBMITTED;
+        if (strcmp(stateStr, "TIMESTEP_DONE") == 0)
+                                                                                                                 return NET_ESMF_STAT_TIMESTEP_DONE;
+        if (strcmp(stateStr, "ERROR") == 0)        return NET_ESMF_STAT_ERROR;
 
    return ESMF_FAILURE;
 }

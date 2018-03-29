@@ -20,12 +20,12 @@ for more information on ESMF in general.
 gives a nice overview of the ESMF remapping functionality.
 
 The `ESMF Regridding Status
-<http://www.earthsystemmodeling.org/esmf_releases/last/regridding_status.html>`_
+<http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/regridding_status.html>`_
 page gives a good overview of the functionality that is available through
 various interfaces to ESMF regridding.
 
 The `ESMF_RegridWeightGen application
-<http://www.earthsystemmodeling.org/esmf_releases/last/ESMF_refdoc/node3.html#SECTION03020000000000000000>`_
+<http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node3.html#SECTION03020000000000000000>`_
 is a command-line version of the functionality that is available through ESMPy.
 
 Please contact esmf_support@list.woc.noaa.gov with any questions or problems.

@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -35,7 +35,7 @@ module ESMF_IO_NCPutGetMod
 ^ifdef ESMF_NETCDF
   use netcdf
 ^endif
-  
+
   implicit none
   private
 
@@ -138,19 +138,19 @@ contains
       rc)) return @\
  @\
     if (ndims /= mrank) then @\
-	call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & @\
-	       msg=ESMF_StringConcat ("- variable dimension is not equal to ", #mrank), & @\
-	       ESMF_CONTEXT, rcToReturn=rc) @\
+        call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, & @\
+               msg=ESMF_StringConcat ("- variable dimension is not equal to ", #mrank), & @\
+               ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
     end if @\
  @\
     if (present(start) .and. present(count)) then @\
       if (localPutFlag) then @\
          ncStatus = nf90_put_var(gridid, varid, var_buffer, start=start, & @\
-  	       count=count) @\
+               count=count) @\
       else @\
          ncStatus = nf90_get_var(gridid, varid, var_buffer, start=start, & @\
-  	       count=count) @\
+               count=count) @\
       endif @\
     else @\
       if (localPutFlag) then @\
@@ -214,18 +214,18 @@ function ESMF_IO_NCCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
         call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgFlag=ESMF_LOGMSG_ERROR, &
             line=lineNo, file=fileName, method=module)
         print '("NetCDF Error: ", A, " : ", A)', &
-    		trim(errmsg),trim(nf90_strerror(ncStatus))
+                trim(errmsg),trim(nf90_strerror(ncStatus))
         call ESMF_LogFlush()
         if (present(rc)) rc = ESMF_FAILURE
-    	ESMF_IO_NCCheckError = .TRUE.
+        ESMF_IO_NCCheckError = .TRUE.
     else
        if (present(rc)) rc = ESMF_SUCCESS
        return
     end if
 ^else
-    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
-                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
-                 ESMF_CONTEXT, rcToReturn=rc) 
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
     return
 ^endif
 

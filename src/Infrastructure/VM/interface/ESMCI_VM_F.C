@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -564,6 +564,14 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_vmprintmatchtable)(ESMCI::VM **ptr){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmprintmatchtable()"
+    (*ptr)->printMatchTable();
+    // Flush before crossing language interface to ensure correct output order
+    fflush(stdout);
+  }
+
   void FTN_X(c_esmc_vmvalidate)(ESMCI::VM **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmvalidate()"
@@ -953,6 +961,34 @@ extern "C" {
     if (rc!=NULL) *rc = localrc;
   }
 
+  void FTN_X(c_esmc_isinitialized)(ESMC_Logical *isInitialized, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_isinitialized()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    bool flag = ESMCI::VM::isInitialized(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    *isInitialized = flag ? ESMF_TRUE : ESMF_FALSE;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_isfinalized)(ESMC_Logical *isFinalized, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_isfinalized()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    bool flag = ESMCI::VM::isFinalized(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+    *isFinalized = flag ? ESMF_TRUE : ESMF_FALSE;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_vmshutdown)(ESMCI::VM **ptr_vmparent,
     ESMCI::VMPlan **ptr_vmplan,
     void **vm_info, int *rc){
@@ -1237,7 +1273,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     *vmid = new ESMCI::VMId;              // allocate memory off the heap
-    **vmid = ESMCI::VMIdCreate(&localrc); // allocate VMId internal members
+    localrc = (*vmid)->create (); // allocate VMId internal members
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc))
       return;
@@ -1251,7 +1287,7 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    ESMCI::VMIdDestroy(*vmid, &localrc);  // free memory for internal members
+    localrc = (*vmid)->destroy ();      // free memory for internal members
     delete *vmid;                       // free memory for this VMId
     *vmid=NULL;
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1269,7 +1305,9 @@ extern "C" {
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
-    ESMCI::VMIdGet(*vmid, localID, key, key_len, rc);
+    localrc = (*vmid)->get(localID, key, key_len);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc))
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
@@ -1279,7 +1317,8 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmidprint()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
-    ESMCI::VMIdPrint(*vmid);
+    // ESMCI::VMIdPrint(*vmid);
+    int localrc = (*vmid)->ESMCI::VMId::print();
     // Flush before crossing language interface to ensure correct output order
     fflush(stdout);
     // return successfully
@@ -1295,7 +1334,9 @@ extern "C" {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     ESMCI::VMId *localvmid = *vmid;
-    ESMCI::VMIdSet(*vmid, *localID, key, key_len, rc);
+    localrc = (*vmid)->set(*localID, key, key_len);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc))
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS; // TODO: finish error handling
   }
@@ -1407,12 +1448,14 @@ extern "C" {
     ESMCI::VM::addFObject(fobject, *objectID, vmID);
   }
 
-  void FTN_X(c_esmc_vmgetobject)(void **fobject, int *objectID, ESMCI::VMId *vmid,
+  void FTN_X(c_esmc_vmgetobject)(void **fobject, int *objectID, ESMCI::VMId **vmid,
       int *type, ESMC_Logical *obj_found, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgetobject()"
     bool found;
-    ESMCI::VM::getObject(fobject, *objectID, vmid, *type, &found, rc);
+// std::cout << ESMC_METHOD << ": looking for vmid:" << std::endl;
+// (*vmid)->print();
+    ESMCI::VM::getObject(fobject, *objectID, *vmid, *type, &found, rc);
     *obj_found = (found)?ESMF_TRUE:ESMF_FALSE;
   }
     

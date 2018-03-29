@@ -13,6 +13,9 @@
 import ESMF
 import numpy
 
+import ESMF.util.helpers as helpers
+import ESMF.api.constants as constants
+
 gridfile = "examples/data/ll2.5deg_grid.nc"
 
 # This call enables debug logging
@@ -74,13 +77,10 @@ dgridCoordLat = dstgrid.get_coords(lat)
 dstmaskedlats = dgridCoordLat[numpy.where(dstfield.data == missing_val)]
 
 masked_values = dstmaskedlats.size
-try:
-    # use mpi4py to collect values
-    from mpi4py import MPI
-    comm = MPI.COMM_WORLD
-    masked_values = comm.reduce(dstmaskedlats.size, op=MPI.SUM)
-except:
-    pass
+
+# handle the parallel case
+if ESMF.pet_count() > 1:
+    masked_values = helpers.reduce_val(dstmaskedlats.size, op=constants.Reduce.SUM)
 
 if ESMF.local_pet() == 0:
     assert (masked_values > 0)

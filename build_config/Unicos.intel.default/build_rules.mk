@@ -44,14 +44,14 @@ endif
 ############################################################
 # Print compiler version string
 #
-ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V -v
-ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V -v
+ESMF_F90COMPILER_VERSION    = ${ESMF_F90COMPILER} -V
+ESMF_CXXCOMPILER_VERSION    = ${ESMF_CXXCOMPILER} -V
 
 ############################################################
 # Special debug flags
 #
-ESMF_F90OPTFLAG_G       += -traceback
-ESMF_CXXOPTFLAG_G       += -traceback
+ESMF_CXXOPTFLAG_G       += -traceback -Wcheck
+ESMF_F90OPTFLAG_G       += -traceback -check bounds
 
 ############################################################
 # Enable TR15581/F2003 Allocatable array resizing
@@ -115,12 +115,12 @@ ESMF_CXXLINKPATHS += -L$(dir $(shell $(ESMF_DIR)/scripts/libpath.ifort $(ESMF_F9
 ############################################################
 # Determine where icpc's libraries are located
 #
-ESMF_F90LINKPATHS += $(addprefix -L,$(shell $(ESMF_DIR)/scripts/libpath.icpc "$(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS)"))
+ESMF_F90LINKPATHS +=
 
 ############################################################
 # Link against libesmf.a using the F90 linker front-end
 #
-ESMF_F90LINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.icpc "$(ESMF_CXXCOMPILER) $(ESMF_CXXCOMPILEOPTS)") -lrt -ldl
+ESMF_F90LINKLIBS += -cxxlib -lrt -ldl
 
 ############################################################
 # Link against libesmf.a using the C++ linker front-end

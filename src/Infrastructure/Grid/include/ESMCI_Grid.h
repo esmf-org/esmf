@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -42,6 +42,11 @@
 // Define prototype coordGeom flag
 #define ESMC_GRIDCOORDGEOM_CART 0
 #define ESMC_GRIDCOORDGEOM_SPH_DEG 1
+
+// Internal staggerloc numbers
+#define ESMCI_STAGGERLOC_CENTER 0
+#define ESMCI_STAGGERLOC_CORNER 3
+
 
 enum ESMC_GridDecompType {ESMC_GRID_INVALID=1, 
             ESMC_GRID_NONARBITRARY,
@@ -272,6 +277,7 @@ template <class TYPE>
                                  ESMC_InterArrayInt *decompFlagPTile,
                                  ESMC_InterArrayInt *deLabelList,
                                  //ESMC_DELayout *delayout,
+                                 ESMC_InterArrayInt *staggerLocList,
                                  const char *name,
                                  int *rc);
   static Grid* createfromfile(const char *filename, int fileTypeFlag, 
@@ -776,7 +782,7 @@ int getComputationalUBound(
     int uBndDE; // end local DE on this PET (the lower bnd is 0)
 
     int numDE; // the number of DE's on this PET
-
+    int tileCount; // the number of DE's on this PET
 
     bool done; // are we done yet?
 
@@ -845,6 +851,7 @@ int getComputationalUBound(
     int uBndDE; // end local DE on this PET (the lower bnd is 0)
 
     int numDE; // the number of DE's on this PET
+    int tileCount; // the number of DE's on this PET
 
     bool done; // are we done yet?
 

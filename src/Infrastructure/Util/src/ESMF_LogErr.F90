@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -178,7 +178,7 @@ type ESMF_LogPrivate
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY   => null ()
     type(ESMF_Logical)                              ::  FileIsOpen  = ESMF_FALSE
     integer                                         ::  errorMaskCount= 0
-    integer, dimension(:), pointer                  ::  errorMask(:)  => null ()
+    integer, pointer                                ::  errorMask(:)  => null ()
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgList(:) => null ()
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgAbort(:)=> null ()
     logical                                         ::  traceFlag = .false.
@@ -745,7 +745,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_Log), intent(inout), optional :: log
-type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        intent(out), optional :: rc
 
 !
@@ -873,7 +873,7 @@ end subroutine ESMF_LogFinalize
 !
 ! !ARGUMENTS:
       type(ESMF_Log), intent(inout), optional :: log
-type(ESMF_KeywordEnforcer),optional::keywordEnforcer !must use keywords below
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,        intent(out),   optional :: rc
 
 !
@@ -1237,12 +1237,12 @@ end function ESMF_LogFoundDeallocError
 ! !IROUTINE: ESMF_LogFoundError - Check ESMF return code for error and write message
 
 ! !INTERFACE:
-      function ESMF_LogFoundError(rcToCheck,  keywordEnforcer,  &
+  recursive function ESMF_LogFoundError(rcToCheck,  keywordEnforcer,  &
                                   msg, line, file, method, &
-                                  rcToReturn, log)
+                                  rcToReturn, log) result (LogFoundError)
 !
 ! !RETURN VALUE:
-      logical :: ESMF_LogFoundError
+      logical :: LogFoundError
 !
 ! !ARGUMENTS:
 !
@@ -1306,7 +1306,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: msglen
 
     ! set default return
-    ESMF_LogFoundError = .FALSE.
+    LogFoundError = .FALSE.
 
     if (.not.present(rcToCheck)) then
       rcToCheckInternal = ESMF_SUCCESS
@@ -1352,13 +1352,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           end if
           call ESMF_LogWrite(errmsg(:msglen), ESMF_LOGMSG_ERROR,  &
               line=line, file=file, method=method, log=log)
-          ESMF_LogFoundError=.TRUE.
+          LogFoundError=.TRUE.
           if (present(rcToReturn)) rcToReturn = rcToCheckInternal
         endif
       endif
     else
       if (rcToCheckInternal /= ESMF_SUCCESS) then
-        ESMF_LogFoundError=.TRUE.
+        LogFoundError=.TRUE.
         if (present(rcToReturn)) rcToReturn = rcToCheckInternal
       end if
     endif

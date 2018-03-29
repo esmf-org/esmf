@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -154,6 +154,9 @@ end function my_xor
                  regridScheme, &
                  hasStatusArray, &
                  statusArray, &
+                 extrapMethod, &
+                 extrapNumSrcPnts, &
+                 extrapDistExponent, &
                  unmappedaction, &
                  ignoreDegenerate, &
                  srcTermProcessing, &
@@ -178,6 +181,9 @@ end function my_xor
       type(ESMF_PoleMethod_Flag), intent(in)      :: polemethod
       integer, intent(in)                    :: regridPoleNPnts
       integer, intent(in)                    :: regridScheme
+      type(ESMF_ExtrapMethod_Flag),   intent(in) :: extrapMethod
+      integer, intent(in)                    :: extrapNumSrcPnts
+      real(ESMF_KIND_R8)                     :: extrapDistExponent
       type(ESMF_UnmappedAction_Flag), intent(in), optional :: unmappedaction
       logical, intent(in)                              :: ignoreDegenerate
       integer,                       intent(inout), optional :: srcTermProcessing
@@ -337,7 +343,11 @@ end function my_xor
                    lineType, &
                    normType, &
                    polemethod, regridPoleNPnts, &    
-                   regridScheme, localunmappedaction%unmappedaction, &
+                   regridScheme, &
+                   extrapMethod, &
+                   extrapNumSrcPnts, &
+                   extrapDistExponent, &
+                   localunmappedaction%unmappedaction, &
                    localIgnoreDegenerate, &
                    srcTermProcessing, pipelineDepth, &
                    routehandle, has_rh, has_iw, &
@@ -348,7 +358,17 @@ end function my_xor
 
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-
+         
+#ifdef C_SIDE_REGRID_FREE_MESH
+! enabling this freature currently breaks several tests
+       ! Mark Meshes as CMemFreed
+       call ESMF_MeshSetIsCMeshFreed(srcMesh, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+       call ESMF_MeshSetIsCMeshFreed(dstMesh, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
        ! Now we must allocate the F90 pointers and copy weights
        if (present(indices)) then
          allocate(indices(2,nentries))

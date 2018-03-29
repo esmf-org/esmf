@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -34,7 +34,7 @@
 #include <algorithm>
 #include <fstream>
 
-// include ESMF headers                                                                         
+// include ESMF headers
 #include "ESMCI_Macros.h"
 //#include "ESMCI_VM.h"
 
@@ -46,7 +46,7 @@ using namespace std;
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = 
+static const char *const version =
   "$Id$";
 //-----------------------------------------------------------------------------
 
@@ -65,9 +65,9 @@ namespace ESMCI {
   //    Pointer to a new PointList
   //
   // !ARGUMENTS:
-		   int _max_num_pts,
-		   int _coord_dim
-		   ){
+                   int _max_num_pts,
+                   int _coord_dim
+                   ){
     //
     // !DESCRIPTION:
     //   Construct PointList
@@ -138,9 +138,9 @@ namespace ESMCI {
     //
     // !ARGUMENTS:
     //
-		    int _id,
-		    double *_coord
-		    ) {
+                    int _id,
+                    const double *_coord
+                    ) {
     //
     // !DESCRIPTION:
     // Add a point to the PointList.
@@ -157,7 +157,7 @@ namespace ESMCI {
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
                                     "- attempting to add to a full PointList ",
-				    ESMC_CONTEXT, &localrc);
+                                    ESMC_CONTEXT, &localrc);
       throw localrc;
     }
 
@@ -273,7 +273,7 @@ namespace ESMCI {
     //
     // !ARGUMENTS:
     //
-			  ) {
+                          ) {
     //
     // !DESCRIPTION:
     // dump contents of PointList to stdout.
@@ -307,7 +307,7 @@ namespace ESMCI {
 
     if (coord_dim == 3) {
       for (int i=0; i<curr_num_pts; i++) {
-        myfile << points[i].coords[0] << " " << points[i].coords[1] << " " << 
+        myfile << points[i].coords[0] << " " << points[i].coords[1] << " " <<
                   points[i].coords[2] << "\n";
       }
     } else {
@@ -352,7 +352,7 @@ namespace ESMCI {
     //
     // !ARGUMENTS:
     //
-			  ) {
+                          ) {
     //
     // !DESCRIPTION:
     // dump contents of PointList to stdout.
@@ -408,7 +408,7 @@ namespace ESMCI {
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
                                     "- invalid location in PointList ",
-				    ESMC_CONTEXT, &localrc);
+                                    ESMC_CONTEXT, &localrc);
       throw localrc;
     }
 
@@ -430,7 +430,7 @@ namespace ESMCI {
     //
     // !ARGUMENTS:
     //
-			    int loc,double *_coord) const {
+                            int loc,double *_coord) const {
     //
     // !DESCRIPTION:
     // copy coordinates corresponding to given location into a given array.
@@ -442,16 +442,16 @@ namespace ESMCI {
     if (loc<0 || loc>=curr_num_pts) {
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
-				    "- invalid location in PointList ",
-				    ESMC_CONTEXT, &localrc);
+                                    "- invalid location in PointList ",
+                                    ESMC_CONTEXT, &localrc);
       throw localrc;
     }
 
     if (_coord == NULL) {
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
-				    "- provided array pointer is NULL ",
-				    ESMC_CONTEXT, &localrc);
+                                    "- provided array pointer is NULL ",
+                                    ESMC_CONTEXT, &localrc);
       throw localrc;
     }
 
@@ -477,7 +477,7 @@ namespace ESMCI {
     //
     // !ARGUMENTS:
     //
-				      int loc) const {
+                                      int loc) const {
     //
     // !DESCRIPTION:
     // return the id corresponding to given location.
@@ -489,8 +489,8 @@ namespace ESMCI {
     if (loc<0 || loc>=curr_num_pts) {
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
-				    "- invalid location in PointList ",
-				    ESMC_CONTEXT, &localrc);
+                                    "- invalid location in PointList ",
+                                    ESMC_CONTEXT, &localrc);
       throw localrc;
     }
 
@@ -512,7 +512,7 @@ namespace ESMCI {
     //
     // !ARGUMENTS:
     //
-				      int loc) const {
+                                      int loc) const {
     //
     // !DESCRIPTION:
     // return a reference to the id corresponding to given location.
@@ -524,8 +524,8 @@ namespace ESMCI {
     if (loc<0 || loc>=curr_num_pts) {
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
-				    "- invalid location in PointList ",
-				    ESMC_CONTEXT, &localrc);
+                                    "- invalid location in PointList ",
+                                    ESMC_CONTEXT, &localrc);
       throw localrc;
     }
 
@@ -547,7 +547,7 @@ namespace ESMCI {
     //
     // !ARGUMENTS:
     //
-				      int loc) const {
+                                      int loc) const {
     //
     // !DESCRIPTION:
     // return pointer to coordinates corresponding to given location.
@@ -559,8 +559,8 @@ namespace ESMCI {
     if (loc<0 || loc>=curr_num_pts) {
       int localrc;
       ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG,
-				    "- invalid location in PointList ",
-				    ESMC_CONTEXT, &localrc);
+                                    "- invalid location in PointList ",
+                                    ESMC_CONTEXT, &localrc);
       throw localrc;
     }
 

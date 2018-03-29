@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -66,14 +66,14 @@
       ! individual test result code
       logical :: bool
       integer :: dayOfYear, dayOfWeek, D, sD, sN, MS, NS, &
-		 US
+                 US
       real(ESMF_KIND_R8) :: NS_r8, S_r8, US_r8, MS_r8
       real(ESMF_KIND_R8) :: dayOfYear_r8, M_r8, D_r8, H_r8
       integer(ESMF_KIND_I8) :: year, SN_I8, SD_i8
  
       ! instantitate some general times and timeintervals
       type(ESMF_Time) :: time1, time2, time3, time4, time5, time6, time7, &
-			 midMonth, startTime2
+                         midMonth, startTime2
       type(ESMF_TimeInterval) :: timeInterval2, timeInterval3, timeInterval4, &
                                  timeInterval5, timeInterval6, timeInterval7
 

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -514,22 +514,22 @@ int main(void){
 #ifdef meshmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle, 
                              &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL,
-                             &srcFracField, &dstFracField);
+                             NULL, NULL, NULL, &srcFracField, &dstFracField);
 #endif
 #ifdef gridmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, &i_maskValues, &routehandle, 
                              &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL,
-                             &srcFracField, &dstFracField);
+                             NULL, NULL, NULL, &srcFracField, &dstFracField);
 #endif
 #ifdef bothmasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, &i_maskValues, &routehandle, 
                              &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL,
-                             &srcFracField, &dstFracField);
+                             NULL, NULL, NULL, &srcFracField, &dstFracField);
 #endif
 #ifdef nomasking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
                              &regridmethod, NULL, NULL, NULL, NULL, NULL, NULL,
-                             &srcFracField, &dstFracField);
+                             NULL, NULL, NULL, &srcFracField, &dstFracField);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

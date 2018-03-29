@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -18,8 +18,8 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt Function Table} methods 
-// declared in the companion file {\tt ESMCI\_FTable.h}.  
+// The code in this file implements the C++ {\tt Function Table} methods
+// declared in the companion file {\tt ESMCI\_FTable.h}.
 //
 //-----------------------------------------------------------------------------
 // include associated header file
@@ -63,16 +63,17 @@ extern "C" {
   void FTN_X(f_esmf_comprefcopy)(ESMCI::Comp *compp, ESMCI::Comp *compp_src,
     int *rc);
   void FTN_X(f_esmf_compdelete)(ESMCI::Comp *compp, int *rc);
-  
+
   void FTN_X(f_esmf_fortranudtpointersize)(int *size);
   void FTN_X(f_esmf_fortranudtpointercopy)(void *dst, void *src);
-  
+
   void FTN_X(esmf_complianceicregister)(void *comp, int *rc);
-  
+
 #ifdef ESMF_NO_DLFCN
   //for now, assume these are here in the case that dlopen is not available
   void FTN_X(nuopc_model_complianceicr)(void *comp, int *rc);
   void FTN_X(nuopc_driver_complianceicr)(void *comp, int *rc);
+  void FTN_X(nuopc_connector_complianceicr)(void *comp, int *rc);
 #endif
 }
 //==============================================================================
@@ -93,7 +94,7 @@ extern "C" {
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     (*ptr) = new ESMCI::FTable;
     if (*ptr == NULL){
-      ESMC_LogDefault.MsgAllocError("- Ftable allocation", ESMC_CONTEXT, rc);  
+      ESMC_LogDefault.MsgAllocError("- Ftable allocation", ESMC_CONTEXT, rc);
       return;
     }
     // return successfully
@@ -106,7 +107,7 @@ extern "C" {
   void FTN_X(c_esmc_ftabledestroy)(ESMCI::FTable **ptr, int *rc) {
     if (rc) *rc = ESMC_RC_NOT_IMPL;
     if (*ptr == NULL){
-      ESMC_LogDefault.MsgAllocError("- Ftable deallocation", ESMC_CONTEXT, rc);  
+      ESMC_LogDefault.MsgAllocError("- Ftable deallocation", ESMC_CONTEXT, rc);
       return;
     }
     delete (*ptr);
@@ -114,11 +115,11 @@ extern "C" {
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
-  
+
   // set arguments for standard Component methods
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_ftablesetstateargs"
-  void FTN_X(c_esmc_ftablesetstateargs)(ESMCI::FTable **ptr, 
+  void FTN_X(c_esmc_ftablesetstateargs)(ESMCI::FTable **ptr,
     enum ESMCI::method *method, int *phase, void *comp,
     ESMCI::State *importState, ESMCI::State *exportState, ESMCI::Clock **clock,
     ESMCI::CompTunnel **compTunnel, int *rc){
@@ -133,12 +134,12 @@ extern "C" {
       (*compTunnel)->setImportState(importState);
       (*compTunnel)->setExportState(exportState);
       (*compTunnel)->setClock(clock);
-      
+
     }else{
       // this is not a dual component, thus do the actual ftable encoding
 
       char const *methodString = ESMCI::FTable::methodString(*method);
-    
+
       int slen = strlen(methodString);
       char *fname;
       ESMCI::FTable::newtrim(methodString, slen, phase, NULL, &fname);
@@ -213,7 +214,7 @@ extern "C" {
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
-    
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setvm"
   void FTN_X(c_esmc_setvm)(void *ptr, void (*func)(), int *userRc, int *rc){
@@ -225,16 +226,16 @@ extern "C" {
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
-  
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setvmshobj"
-  void FTN_X(c_esmc_setvmshobj)(void *ptr, char const *routineArg, 
-    char const *sharedObjArg, int *userRc, int *rc, 
+  void FTN_X(c_esmc_setvmshobj)(void *ptr, char const *routineArg,
+    char const *sharedObjArg, int *userRc, int *rc,
     ESMCI_FortranStrLenArg rlen, ESMCI_FortranStrLenArg llen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 #ifdef ESMF_NO_DLFCN
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB,
       "- System does not support dynamic loading.", ESMC_CONTEXT, rc);
     return;
 #else
@@ -246,7 +247,7 @@ extern "C" {
     }else
       lib = dlopen(NULL, RTLD_LAZY);  // search in executable
     if (lib == NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "shared object not found", ESMC_CONTEXT, rc);
       return;
     }
@@ -254,7 +255,7 @@ extern "C" {
     routine.resize(routine.find_last_not_of(" ")+1);
     void (*func)() = (void (*)())dlsym(lib, routine.c_str());
     if ((void *)func == NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "routine not found", ESMC_CONTEXT, rc);
       return;
     }
@@ -265,7 +266,7 @@ extern "C" {
     if (rc) *rc = ESMF_SUCCESS;
 #endif
   }
-  
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setservices"
   void FTN_X(c_esmc_setservices)(void *ptr, void (*func)(), int *userRc, int *rc){
@@ -277,16 +278,16 @@ extern "C" {
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
-  
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setservicesshobj"
-  void FTN_X(c_esmc_setservicesshobj)(void *ptr, char const *routineArg, 
+  void FTN_X(c_esmc_setservicesshobj)(void *ptr, char const *routineArg,
     char const *sharedObjArg, ESMC_Logical *foundRoutine, int *userRc, int *rc,
     ESMCI_FortranStrLenArg rlen, ESMCI_FortranStrLenArg llen){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 #ifdef ESMF_NO_DLFCN
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB,
       "- System does not support dynamic loading.", ESMC_CONTEXT, rc);
     return;
 #else
@@ -299,7 +300,7 @@ extern "C" {
     }else
       lib = dlopen(NULL, RTLD_LAZY);  // search in executable
     if (lib == NULL){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "shared object not found", ESMC_CONTEXT, rc);
       return;
     }
@@ -317,11 +318,11 @@ extern "C" {
     if (rc) *rc = ESMF_SUCCESS;
 #endif
   }
-  
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setservicescomp"
-  void FTN_X(c_esmc_setservicescomp)(ESMCI::Comp *dualComp, 
-    ESMCI::CompTunnel **compTunnel, ESMCI::Comp *localActualComp, 
+  void FTN_X(c_esmc_setservicescomp)(ESMCI::Comp *dualComp,
+    ESMCI::CompTunnel **compTunnel, ESMCI::Comp *localActualComp,
     int *localActualCompRootPet, int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -337,7 +338,7 @@ extern "C" {
     *compTunnel = new ESMCI::CompTunnel(localActualComp,
       *localActualCompRootPet);
     if (*compTunnel == NULL){
-      ESMC_LogDefault.MsgAllocError("- CompTunnel allocation", ESMC_CONTEXT, rc);  
+      ESMC_LogDefault.MsgAllocError("- CompTunnel allocation", ESMC_CONTEXT, rc);
       return; // bail out
     }
     // call into setServices with the internal CompTunnel::SetServices wrapper
@@ -355,20 +356,20 @@ extern "C" {
       *compTunnel = NULL; // mark clean
       return; // bail out on userRc b/c setServicesWrap is an internal routine
     }
-    
+
     // Now that everything has returned successfully, mark the tunnel as
     // connected.
     // This must be done up on this level, so that _all_ PETs that call into
     // SetServices() have the tunnel set to connected.
     (*compTunnel)->setConnected(true);
-    
+
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
-  
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setservicessock"
-  void FTN_X(c_esmc_setservicessock)(ESMCI::Comp *dualComp, 
+  void FTN_X(c_esmc_setservicessock)(ESMCI::Comp *dualComp,
     ESMCI::CompTunnel **compTunnel, int *port, char const *serverArg,
     int *timeout, int *rc, ESMCI_FortranStrLenArg len){
     int localrc = ESMC_RC_NOT_IMPL;
@@ -378,7 +379,7 @@ extern "C" {
       *compTunnel = NULL; // mark clean
     }
     if (*port<1024 || *port>65535){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "- The port argument is outside valid range [1024, 65535]",
         ESMC_CONTEXT, rc);
       return;
@@ -392,7 +393,7 @@ extern "C" {
     // also have a valid compTunnel member.
     *compTunnel = new ESMCI::CompTunnel(*port, server);
     if (*compTunnel == NULL){
-      ESMC_LogDefault.MsgAllocError("- CompTunnel allocation", ESMC_CONTEXT, rc);  
+      ESMC_LogDefault.MsgAllocError("- CompTunnel allocation", ESMC_CONTEXT, rc);
       return; // bail out
     }
     (*compTunnel)->setTimeout(*timeout);  // set dual side timeout for setServ.
@@ -407,7 +408,7 @@ extern "C" {
     }
     // CompTunnel::setServicesWrap() is a framework internal method, therefore
     // the code returned in userRc is a framework internal return code and must
-    // be treated as such. 
+    // be treated as such.
     // Do not filter the RC_TIMEOUT at this level, since a timeout needs to
     // bail out until it gets to the upper ESMF level, right before returning
     // to the user, where the filtering is done according to the presence of
@@ -418,41 +419,41 @@ extern "C" {
       *compTunnel = NULL; // mark clean
       return; // bail out on userRc b/c setServicesWrap is an internal routine
     }
-    
+
     // Now that everything has returned successfully, mark the tunnel as
     // connected.
     // This must be done up on this level, so that _all_ PETs that call into
     // SetServices() have the tunnel set to connected.
     (*compTunnel)->setConnected(true);
-    
+
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
-  
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_setentrypoint"
   void FTN_X(c_esmc_setentrypoint)(void *ptr, enum ESMCI::method *method,
     void *func, int *phase, int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
-    
+
     char const *methodString = ESMCI::FTable::methodString(*method);
-    
+
     int slen = strlen(methodString);
     char *fname;
     ESMCI::FTable::newtrim(methodString, slen, phase, NULL, &fname);
-         
+
     ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
     localrc = (tabptr)->setFuncPtr(fname, func, ESMCI::FT_VOIDP4INTP);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
-    
+
     delete[] fname;  // delete memory that "newtrim" allocated above
-    
+
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
-  
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_getentrypointphasecount"
   void FTN_X(c_esmc_getentrypointphasecount)(void *ptr,
@@ -460,53 +461,53 @@ extern "C" {
     int *rc){
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc) *rc = ESMC_RC_NOT_IMPL;
-    
+
     char const *methodString = ESMCI::FTable::methodString(*method);
-    
+
     ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
-    
+
     int slen = strlen(methodString);
     int phase = 0;  // initialize
     int i;
-    
+
     *phaseZeroFlag = ESMF_FALSE; // initialize
-    
+
     char *fname;
     ESMCI::FTable::newtrim(methodString, slen, &phase, NULL, &fname);
     i = tabptr->getEntry(fname, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return; // bail out
     delete[] fname;  // delete memory that "newtrim" allocated above
-    if (i != -1)   
+    if (i != -1)
       *phaseZeroFlag = ESMF_TRUE;  // set the flag
 
     do{
       ++phase;
       ESMCI::FTable::newtrim(methodString, slen, &phase, NULL, &fname);
-      
+
       i = tabptr->getEntry(fname, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return; // bail out
-      
+
       delete[] fname;  // delete memory that "newtrim" allocated above
-      
+
     }while (i != -1);
-    
+
     *phaseCount = phase - 1;
-    
+
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
-  
+
 } // extern "C"
 //==============================================================================
 
 
 //==============================================================================
-// these functions have no leading c_ and are ESMF and not ESMC because 
-// they're intended to be called directly by F90 user code.  
+// these functions have no leading c_ and are ESMF and not ESMC because
+// they're intended to be called directly by F90 user code.
 //
-// also note they CANNOT have prototypes in fortran because the routine 
+// also note they CANNOT have prototypes in fortran because the routine
 // types and data types are private/different for each call so there
 // is no correct prototype syntax which will work.
 //
@@ -532,7 +533,7 @@ extern "C" {
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
-  
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_gridcompgetinternalstate"
   void FTN_X(esmf_gridcompgetinternalstate)(ESMCI::FTable ***ptr, void **datap,
@@ -609,12 +610,12 @@ extern "C" {
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "null pointer found", ESMC_CONTEXT, rc);
       return;
     }
 
-    char *tbuf; 
+    char *tbuf;
     ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
     //printf("after newtrim, name = '%s'\n", tbuf);
 
@@ -622,9 +623,9 @@ extern "C" {
     localrc = (**ptr)->setDataPtr(tbuf, datap, dtype);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
-  
+
     delete[] tbuf;
-    
+
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
@@ -638,12 +639,12 @@ extern "C" {
     if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     if ((ptr == ESMC_NULL_POINTER) || (*ptr == ESMC_NULL_POINTER)){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "null pointer found", ESMC_CONTEXT,rc);
       return;
     }
 
-    char *tbuf; 
+    char *tbuf;
     ESMCI::FTable::newtrim(name, slen, NULL, NULL, &tbuf);
     //printf("after newtrim, name = '%s'\n", tbuf);
 
@@ -651,9 +652,9 @@ extern "C" {
     localrc = (**ptr)->getDataPtr(tbuf, datap, &dtype);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
-  
+
     delete[] tbuf;
-    
+
     // return successfully
     if (rc) *rc = ESMF_SUCCESS;
   }
@@ -663,9 +664,9 @@ extern "C" {
 
 
 //==============================================================================
-// VM-enabled CallBack loop     
+// VM-enabled CallBack loop
 extern "C" {
-     
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_FTableCallEntryPointVMHop"
@@ -674,12 +675,12 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
   // The first argument must be of type (void *) and points to a derived
   // ESMCI::VMK class object. The second argument is also of type (void *)
   // and points to a cargotype structure.
-  
+
   // pull out info from cargo
   ESMCI::cargotype *cargo = (ESMCI::cargotype *)cargoCast;
   char *name = cargo->name;               // name of callback
   ESMCI::FTable *ftable = cargo->ftable;  // ptr to ftable
-  
+
   int localrc;          // local return code
   int esmfrc;           // ESMF return code of ESMCI::FTable::callVFuncPtr()
   int userrc = -99999;  // user return code from the registered component method
@@ -699,7 +700,7 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
     }
   }
   ((ESMCI::VM*)vm)->threadbarrier();  // synchronize all threads in local group
-  
+
   // get a pointer to the CompTunnel object
   ESMCI::Comp *f90comp = cargo->f90comp;
   ESMCI::CompTunnel *compTunnel;
@@ -713,23 +714,23 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
   // determine whether this is a dual component that is ready to execute
   bool dualConnected = false;  // initialize
   if (compTunnel) dualConnected = compTunnel->isConnected();
-  
+
   if (dualConnected){
     // this is a dual component with a compTunnel that is connected
 
     //TODO: check whether "name" is found in dual components ftable. If so then
     //TODO: consider that an override, and execute dual components method
     //TODO: instead
-    
+
     localrc = compTunnel->execute(cargo);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &esmfrc)){
       cargo->esmfrc[mytid] = esmfrc;  // put esmf return code into cargo
       return NULL;
     }
-    
+
     // ...the user return code will not be available until wait() is called
-    
+
   }else{
     // a regular component or a dual component that needs to connect still,
     // use the local ftable for user code or system code callback
@@ -739,11 +740,11 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
       cargo->esmfrc[mytid] = esmfrc;  // put esmf return code into cargo
       return NULL;
     }
-    
+
     // ...back from user code
-    cargo->userrc[mytid] = userrc;  // put the user return code into cargo 
+    cargo->userrc[mytid] = userrc;  // put the user return code into cargo
   }
-      
+
   // return successfully
   cargo->esmfrc[mytid] = ESMF_SUCCESS;
   return NULL;
@@ -768,14 +769,14 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   int *recursionCount,        // keeping track of recursion level of component
   int *rc                     // return code
   ){
-       
+
   // local variables
   int localrc;              // local return code
   char *name;               // trimmed type string
-  
+
   // check to make sure VM has really been started up for this Component
   if (*vm_info == NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "No VM was started for this Component - missing SetServices() call?",
       ESMC_CONTEXT, rc);
     return; // bail out
@@ -794,28 +795,28 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   ESMCI::VM *vm_parent  = *ptr_vm_parent;     // pointer to parent VM
   ESMCI::VMPlan *vmplan = *ptr_vmplan;        // pointer to VMPlan
   ESMCI::FTable *ftable = *ptr;               // pointer to function table
-  
+
   int i = ftable->getEntry(name, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return; // bail out
   enum ESMCI::method currentMethod = ESMCI::METHOD_NONE;  // default invalid
   if (i > -1)
     currentMethod = ftable->methodFromIndex(i);
-  
+
   // support for recursion _and_ re-entrance for non-blocking mode
-  // - recursion:   A component may call into any of its standard methods from 
+  // - recursion:   A component may call into any of its standard methods from
   //                within the context of already executing a standard method.
   //                There is no practical limit to the recursion depth.
   // - re-entrance: This refers to the situation where there is an outstanding
   //                non-blocking call, but the parent calls into the standard
   //                child component method again. This really only happens
-  //                on the dual side of dual-actual pairs connected by a 
+  //                on the dual side of dual-actual pairs connected by a
   //                component tunnel. The dual side then may re-enter with an
   //                associated wait call.
   bool newCargoFlag = true;   // initialize
   if (recursionCount && *recursionCount==0 && *vm_cargo)
     newCargoFlag = false; // this is not a recursion but a re-entrance
-  
+
   if (newCargoFlag){
     ESMCI::cargotype *cargo = new ESMCI::cargotype;
     strcpy(cargo->name, name);    // copy trimmed type string
@@ -839,18 +840,18 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
       else
         cargo->currentPhase = 1;    // default
     }
-    
+
     // store pointer to the cargo structure
     *vm_cargo=(void*)cargo;
-  
+
     if (cargo->previousCargo != NULL){
       // this is a recursive method invocation
       // use the parentVMflag to indicate running in already existing child VM
-      vmplan->parentVMflag = 1; 
+      vmplan->parentVMflag = 1;
     }
   }
   delete[] name;  // delete memory that "newtrim" allocated above
-  
+
   // store the current timeout in the cargo structure
   ESMCI::cargotype *cargo = (ESMCI::cargotype *)*vm_cargo;
   if (timeout)
@@ -865,18 +866,18 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   localrc = vm_parent->enter(vmplan, *vm_info, *vm_cargo);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return; // bail out
-        
-  // ... if the child VM uses threads (multi-threading or single-threading) 
+
+  // ... if the child VM uses threads (multi-threading or single-threading)
   // then this parent PET continues running concurrently to the child PET in the
   // same VAS! In that case the return codes in cargo are not valid here!
   // The status returned by VM::enter() indicates that success of entering the
   // child VM, not failure or success of the callback.
   // The return code of the callback code will be valid in all cases (threading
   // or no threading) _after_ VMK::exit() returns.
-  
+
   // decrement recursionCount again
   if (recursionCount) (*recursionCount)--;
-  
+
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
 }
@@ -903,7 +904,7 @@ void FTN_X(c_esmc_compwait)(
   ESMCI::VM *vm_parent = *ptr_vm_parent;        // pointer to parent VM
   ESMCI::VMPlan *vmplan = *ptr_vmplan;          // pointer to VMPlan
   ESMCI::cargotype *cargo = (ESMCI::cargotype *)*vm_cargo;  // pointer to cargo
-  
+
   // return with errors if there is no cargo to obtain error codes
   if (cargo == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -921,27 +922,27 @@ void FTN_X(c_esmc_compwait)(
   // determine whether this is a dual component that is ready to execute
   bool dualConnected = false;  // initialize
   if (compTunnel) dualConnected = compTunnel->isConnected();
-  
+
   if (dualConnected){
     // this is a dual component with a compTunnel that is connected
     // -> execute compTunnel::wait() on dual components VM.
-    
+
     if (timeout == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
         " - Must provide valid timeout argument", ESMC_CONTEXT, rc);
       return;
     }
-    
+
     ESMCI::State *is = compTunnel->getImportState();
     ESMCI::State *es = compTunnel->getImportState();
     ESMCI::Clock **clock = compTunnel->getClock();
 
     ESMCI::Clock *clockP = NULL; // default initialize
     if (clock) clockP = *clock;
-    
+
     int userRc = ESMC_RC_NOT_IMPL;
-    
-    localrc = f90comp->execute(ESMCI::METHOD_WAIT, is, es, clockP, 
+
+    localrc = f90comp->execute(ESMCI::METHOD_WAIT, is, es, clockP,
       ESMF_NONBLOCKING,       // nonblocking or else endless recursion!!!
       1, *timeout, &userRc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -950,29 +951,29 @@ void FTN_X(c_esmc_compwait)(
     if (ESMC_LogDefault.MsgFoundError(userRc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return; // bail out too because this is for an internal routine
   }
-  
+
   // Now call the vmk_exit function which will block respective PETs
   vm_parent->exit(static_cast<ESMCI::VMKPlan *>(vmplan), *vm_info);
-  
+
   // obtain return codes out of cargo
   //TODO: deal with multiple return codes coming back for multi-threaded VMs
   localrc = cargo->esmfrc[0];
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;
   if (userrc) *userrc = cargo->userrc[0];
-  
+
   // delete cargo structure and handle recursion
   delete [] cargo->esmfrc;
   delete [] cargo->userrc;
   *vm_cargo = cargo->previousCargo; // bring back previous cargo structure
   vmplan->parentVMflag = cargo->previousParentFlag;   // previous value
   delete cargo;
-  
+
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
-  
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_compget"
@@ -985,9 +986,9 @@ void FTN_X(c_esmc_compget)(
 
   // initialize the return codes
   if (rc) *rc = ESMC_RC_NOT_IMPL;
-  
+
   ESMCI::cargotype *cargo = (ESMCI::cargotype *)*vm_cargo;
-  
+
   if (cargo){
     *method = cargo->currentMethod;
     *phase = cargo->currentPhase;
@@ -1003,7 +1004,7 @@ void FTN_X(c_esmc_compget)(
 }
 //-----------------------------------------------------------------------------
 
-  
+
 } // extern "C"
 //==============================================================================
 
@@ -1097,7 +1098,7 @@ int FTable::getDataPtr(
     if (strcmp(namep, data[i].dataname)) continue;
 
     *dtype = data[i].dtype;
-    
+
     if (*dtype == DT_VOIDP){
       *datap = data[i].dataptr;
     }else if (*dtype == DT_FORTRAN_UDT_POINTER){
@@ -1144,7 +1145,7 @@ int FTable::setDataPtr(
   data[datacount].dataname = new char[strlen(namep)+1];
   strcpy(data[datacount].dataname, namep);
   data[datacount].dtype = dtype;
-  
+
   if (dtype == DT_VOIDP){
     data[datacount].dataptr = *datap;
   }else if (dtype == DT_FORTRAN_UDT_POINTER){
@@ -1153,7 +1154,7 @@ int FTable::setDataPtr(
     data[datacount].dataptr = (void *)new char[datumSize];
     FTN_X(f_esmf_fortranudtpointercopy)(data[datacount].dataptr, (void *)datap);
   }
-  
+
   datacount++;
 
   rc = ESMF_SUCCESS;
@@ -1167,14 +1168,14 @@ int FTable::setDataPtr(
 void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   // Check input
   if ((ptr == ESMC_NULL_POINTER) || ((*(void**)ptr) == ESMC_NULL_POINTER)){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found",
       ESMC_CONTEXT, rc);
     return;
   }
-  
+
   // TODO: shouldn't need to expand the table here - should be done inside
   // FTable code on demand.
   ESMCI::FTable *tabptr = **(ESMCI::FTable***)ptr;
@@ -1214,12 +1215,12 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
       rc)) return;
   }
   // ...now the component's VM is started up and placed on hold.
-  
+
   // reset a flag in the component structure
   FTN_X(f_esmf_compresetvmreleased)(f90comp, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;
-  
+
   // call into register routine using the component's VM
   void *vm_cargo = NULL;
   enum method reg = METHOD_SETSERVICES;
@@ -1227,13 +1228,13 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
     &vm_cargo, &tabptr, &reg, NULL, NULL, NULL, NULL, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;
-  
+
   // wait for the register routine to return
   FTN_X(c_esmc_compwait)(&vm_parent, &vmplan_p, &vm_info, &vm_cargo, NULL,
     userRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;
-  
+
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
 }
@@ -1333,7 +1334,7 @@ int FTable::getEntry(
       break;
   }
   if (i==funccount) i=-1; // indicate entry not found
-  
+
 //if (i==-1)
 //printf("gjt: failed attempt to look up method: %s\n", name);
 
@@ -1356,7 +1357,7 @@ int FTable::getEntry(
       }
 //printf("gjt: failed attempt to look up IC method -> try actual method: %s\n",
 //tempname);
-      
+
       for (i=0; i<funccount; i++) {
         if (!strcmp(tempname, funcs[i].funcname))
           break;
@@ -1367,7 +1368,7 @@ int FTable::getEntry(
 //printf("gjt: failed 2nd attempt to look up method: %s\n", name);
     }
   }
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return i;
@@ -1400,7 +1401,7 @@ int FTable::setFuncPtr(
 
   // Check input
   if (name == ESMC_NULL_POINTER){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found", 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, "null pointer found",
       ESMC_CONTEXT, &rc);
     return rc;
   }
@@ -1434,7 +1435,7 @@ int FTable::setFuncPtr(
     strcpy(funcs[thisfunc].funcname, name);
     funccount++;
   }
-   
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1459,7 +1460,7 @@ int FTable::setFuncPtr(
     enum ftype ftype) {    // in, function type
 //
 // !DESCRIPTION:
-//    Sets the named function pointer and type, but specifies no argument 
+//    Sets the named function pointer and type, but specifies no argument
 //    values.  Before this can be called successfully, the user must call
 //    FTable::setFuncArgs to fill in the argument list.
 //
@@ -1504,7 +1505,7 @@ int FTable::setFuncPtr(
     strcpy(funcs[thisfunc].funcname, name);
     funccount++;
   }
-   
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1579,7 +1580,7 @@ int FTable::setFuncPtr(
     strcpy(funcs[thisfunc].funcname, name);
     funccount++;
   }
-   
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -1611,12 +1612,12 @@ int FTable::setFuncArgs(
   // Initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
   int rc = ESMC_RC_NOT_IMPL;
-    
+
   // find the "name" entry
   int i = getEntry(name, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc; // bail out
-  
+
   if (i == -1){
     char msg[80];
     sprintf(msg, "unknown function name: %s", name);
@@ -1665,7 +1666,7 @@ int FTable::callVFuncPtr(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // sanity check userrc
   if (!userrc){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -1677,10 +1678,10 @@ int FTable::callVFuncPtr(
   int i = getEntry(name, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc; // bail out
-  
+
   Comp *comp;       // pointer to PET-local component
   funcinfo *func;   // pointer to PET-local function entry
-  
+
   // optionally insert vm and replicate Component object, according to situation
   if (vm_pointer){
     // vm_pointer was provided -> use to set VM in Component object
@@ -1764,7 +1765,7 @@ int FTable::callVFuncPtr(
         localrc = comp->setEntryPoint(METHOD_SERVICELOOP, ServiceLoop);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc; // bail out
-      }      
+      }
       // conditionally call into compliance IC for register
       if (!strcmp(name, methodString(METHOD_SETSERVICES))){
         char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
@@ -1775,18 +1776,18 @@ int FTable::callVFuncPtr(
           complianceCheckFlag |= value.find("on")!=string::npos;  // turn on
           complianceCheckFlag |= value.find("ON")!=string::npos;  // turn on
         }
-        
-	//if tracing enabled, turn on compliance checker
-	if (!complianceCheckFlag) {
-	  envVar = VM::getenv("ESMF_RUNTIME_TRACE");	  
-	  if (envVar != NULL){
-	    string value(envVar);
+
+        //if tracing enabled, turn on compliance checker
+        if (!complianceCheckFlag) {
+          envVar = VM::getenv("ESMF_RUNTIME_TRACE");    
+          if (envVar != NULL){
+            string value(envVar);
 
             if (value.find("on")!=string::npos ||
                 value.find("ON")!=string::npos) {
 
               complianceCheckFlag = true;
-              
+
               //if component-level tracing is off, do not
               //hook in compliance checker
               envVar = VM::getenv("ESMF_RUNTIME_TRACE_COMPONENT");
@@ -1796,14 +1797,14 @@ int FTable::callVFuncPtr(
                     valueComponent.find("OFF")!=string::npos) {
                   complianceCheckFlag = false;
                 }
-              }            
+              }
             }
-	  }
-	}
-	
+          }
+        }
+        
         if (complianceCheckFlag){
           int registerIcUserRc;
-          
+
           // inspect the ESMF_RUNTIME_COMPLIANCEICOBJECT attribute on comp
           ESMC_Base *base;
           localrc = comp->getBase(&base);
@@ -1812,7 +1813,7 @@ int FTable::callVFuncPtr(
           ESMC_Logical presentFlag;
           base->ESMC_BaseGetRoot()->AttributeIsPresent("ESMF_RUNTIME_COMPLIANCEICREGISTER",
             &presentFlag);
-          
+
 //#ifdef ESMF_NO_DLFCN
           //if (presentFlag==ESMF_TRUE){
           //  presentFlag==ESMF_FALSE;
@@ -1823,28 +1824,28 @@ int FTable::callVFuncPtr(
 
 
           if (presentFlag==ESMF_TRUE){
-            
+
             // access the attribute object in base
             ESMCI::Attribute *attr=base->ESMC_BaseGetRoot()->AttributeGet(
               "ESMF_RUNTIME_COMPLIANCEICREGISTER");
-            
+
             // retrieve the string value of the attribute
             std::vector<string> value;
             localrc = attr->get(&value);
             if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
               ESMC_CONTEXT, &rc)) return rc; // bail out
-            
+
             // check the number of strings associated with the attribute
             if (value.size()!=1){
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                 "Attribute must contain single string", ESMC_CONTEXT, &rc);
               return rc;
             }
-            
+
             // convert routine name according to name mangeling mode
             //TODO: this would be a good Util method to have
 #ifdef ESMF_LOWERCASE_DOUBLEUNDERSCORE
-            std::transform(value[0].begin(), value[0].end(), value[0].begin(), 
+            std::transform(value[0].begin(), value[0].end(), value[0].begin(),
               ::tolower);
             value[0]+="__";
 #else
@@ -1853,27 +1854,27 @@ int FTable::callVFuncPtr(
             value[0]+="_";
 #endif
 
-#if 0            
+#if 0
 std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
 #endif
-            
+
 #ifndef ESMF_NO_DLFCN
             // check and see if an alternate compliance ic object was specified
             envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCEICOBJECT");
             void *lib;
             lib = dlopen(envVar, RTLD_LAZY);  // envVar==NULL -> look into exe
             if (lib == NULL){
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                 "- shared object not found", ESMC_CONTEXT, &rc);
               return rc;
             }
             void *pointer = (void *)dlsym(lib, value[0].c_str());
             if (pointer == NULL){
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                 "- compliance IC register routine not found", ESMC_CONTEXT, &rc);
               return rc;
             }
-          
+
             VoidP1IntPFunc vf = (VoidP1IntPFunc)pointer;
             (*vf)((void *)comp, &registerIcUserRc);
             // compliance IC for register is an internal routine -> look at rc
@@ -1887,24 +1888,29 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
 
             //std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
             if (value[0].find("nuopc_model") != std::string::npos) {
-            	FTN_X(nuopc_model_complianceicr)((void *)comp, &registerIcUserRc);
-            	if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
-            	              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
+                FTN_X(nuopc_model_complianceicr)((void *)comp, &registerIcUserRc);
+                if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
+                              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
             }
             else if (value[0].find("nuopc_driver") != std::string::npos) {
-            	FTN_X(nuopc_driver_complianceicr)((void *)comp, &registerIcUserRc);
-            	if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
-            	              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
+                FTN_X(nuopc_driver_complianceicr)((void *)comp, &registerIcUserRc);
+                if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
+                              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
+            }
+            else if (value[0].find("nuopc_connector") != std::string::npos) {
+                FTN_X(nuopc_connector_complianceicr)((void *)comp, &registerIcUserRc);
+                if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
+                              ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
             }
             else {
-            	ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-            	   "- compliance IC register routine not found", ESMC_CONTEXT, &rc);
-            	return rc;
+                ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+                   "- compliance IC register routine not found", ESMC_CONTEXT, &rc);
+                return rc;
             }
 #endif
-                    
+
           }else{
-            //TODO: In the long run the else branch could be refactored with 
+            //TODO: In the long run the else branch could be refactored with
             //TODO: the if branch. Both in principle should be using dlopen()
             //TODO: for DLFCN based lookup. However, we do not currently build
             //TODO: correct PIC on all combos for which we have DLFCN enabled,
@@ -1912,7 +1918,7 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
             //TODO: Until this is fixed, the else branch will use hardcoded
             //TODO: Fortran function directly.
 #define ESMF_NO_DLFCNdummy
-          
+
 #ifdef ESMF_NO_DLFCNdummy
             FTN_X(esmf_complianceicregister)((void *)comp, &registerIcUserRc);
 
@@ -1924,7 +1930,7 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
             void *lib;
             lib = dlopen(envVar, RTLD_LAZY);  // envVar==NULL -> look into exe
             if (lib == NULL){
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                 "- shared object not found", ESMC_CONTEXT, &rc);
               return rc;
             }
@@ -1936,22 +1942,22 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
               pointer = (void *)dlsym(lib,
                 QUOTEMACRO(FTN(esmf_complianceicregister)) );
             if (pointer == NULL){
-              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+              ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                 "- compliance IC register routine not found", ESMC_CONTEXT, &rc);
               return rc;
             }
-          
+
             VoidP1IntPFunc vf = (VoidP1IntPFunc)pointer;
             (*vf)((void *)comp, &registerIcUserRc);
 #endif
-          
+
             // compliance IC for register is an internal routine -> look at rc
             if (ESMC_LogDefault.MsgFoundError(registerIcUserRc,
               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc; // bail out
           }
         }
       }
-      
+
       break;
     }
     case FT_VOIDP4INTP: {
@@ -1971,7 +1977,7 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
- 
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::FTable::extend()"
@@ -1998,7 +2004,7 @@ int FTable::extend(
     // TODO: allocate space for N items, rounded up?
     if (nfuncp > funcalloc) {
         funcs = (funcinfo *)realloc((void *)funcs, nfuncp * sizeof(funcinfo));
-        funcalloc = nfuncp; 
+        funcalloc = nfuncp;
     }
     if (ndatap > dataalloc) {
         data = (datainfo *)realloc((void *)data, ndatap * sizeof(datainfo));
@@ -2128,7 +2134,7 @@ FTable::FTable(
   funcalloc = 0;
   funcs = NULL;
   datacount = 0;
-  dataalloc = 0; 
+  dataalloc = 0;
   data = NULL;
   componentcount = 0;
   component = NULL;
@@ -2161,14 +2167,14 @@ FTable::~FTable(void) {
   funccount = 0;
   funcalloc = 0;
   funcs = NULL;
-         
+
   for (int i=0; i<datacount; i++)
     data[i].~datainfo();
   free(data);
   datacount = 0;
-  dataalloc = 0; 
+  dataalloc = 0;
   data = NULL;
-  
+
   for (int i=1; i<componentcount; i++){
     // skip i=0 since that is identical to the actual Component object
     Comp *comp = component + i;
@@ -2208,11 +2214,11 @@ FTable::~FTable(void) {
 // a single char string and tacked on the end.
 //
 // (we'd also at some point like to be able to pass back into fortran
-// a really type(State) F90 array - but the bytes on the stack are 
+// a really type(State) F90 array - but the bytes on the stack are
 // compiler dependent - we'd have to create the array in fortran and
 // save a copy of it to be safe.  that code is *NOT* implemented at this
 // point, but i know it would sure seem natural from the user's viewpoint.)
-// 
+//
 
 // this is max of 2 char phase + 'P' + 1 char nstate + 'S' + trailing NULL
 #define MAXPAD 8
@@ -2249,7 +2255,7 @@ void FTable::newtrim(char const *oldc, int clen, int *phase, int *nstate,
   ctmp[clen] = '\0';
   for (cp = &ctmp[clen-1]; *cp == ' '; cp--)   // trim() trailing blanks
     *cp = '\0';
-  
+
   // tack on trailing numbers if phase or nstate
   if (hasphase && hasstate) {
     sprintf(tspace, "%02dP%1dS", *phase, *nstate);
@@ -2265,7 +2271,7 @@ void FTable::newtrim(char const *oldc, int clen, int *phase, int *nstate,
   // set return pointer.  caller MUST free this when finished with it.
   *newc = ctmp;
   //printf("out newtrim, newc = '%s'\n", *newc);
-  
+
   return;
 }
 //==============================================================================

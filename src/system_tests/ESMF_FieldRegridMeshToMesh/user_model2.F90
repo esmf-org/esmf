@@ -19,7 +19,7 @@
     use ESMF
 
     implicit none
-    
+
     public userm2_register
 
     contains
@@ -28,7 +28,7 @@
 !   !  The Register routine sets the subroutines to be called
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
- 
+
     subroutine userm2_register(comp, rc)
         type(ESMF_GridComp) :: comp
         integer, intent(out) :: rc
@@ -52,7 +52,7 @@
 !--------------------------------------------------------------------------------
 !   !  User Comp Component created by higher level calls, here is the
 !   !   Initialization routine.
- 
+
     subroutine user_init(comp, importState, exportState, clock, rc)
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importState, exportState
@@ -86,7 +86,7 @@
 
          ! Allocate and fill the node id array.
          allocate(nodeIds(numNodes))
-         nodeIds=(/1,2,4,5/) 
+         nodeIds=(/1,2,4,5/)
 
          ! Allocate and fill node coordinate array.
          ! Since this is a 2D Mesh the size is 2x the
@@ -111,7 +111,7 @@
 
          ! Allocate and fill the element id array.
          allocate(elemIds(numTotElems))
-         elemIds=(/1/) 
+         elemIds=(/1/)
 
          ! Allocate and fill the element topology type array.
          allocate(elemTypes(numTotElems))
@@ -128,8 +128,8 @@
 
          ! Allocate and fill the node id array.
          allocate(nodeIds(numNodes))
-         nodeIds=(/2,3,5,6/) 
-  
+         nodeIds=(/2,3,5,6/)
+
          ! Allocate and fill node coordinate array.
          ! Since this is a 2D Mesh the size is 2x the
          ! number of nodes.
@@ -153,7 +153,7 @@
 
          ! Allocate and fill the element id array.
          allocate(elemIds(numTotElems))
-         elemIds=(/2,3/) 
+         elemIds=(/2,3/)
 
          ! Allocate and fill the element topology type array.
          allocate(elemTypes(numTotElems))
@@ -171,7 +171,7 @@
 
          ! Allocate and fill the node id array.
          allocate(nodeIds(numNodes))
-         nodeIds=(/4,5,7,8/) 
+         nodeIds=(/4,5,7,8/)
 
          ! Allocate and fill node coordinate array.
          ! Since this is a 2D Mesh the size is 2x the
@@ -197,7 +197,7 @@
 
          ! Allocate and fill the element id array.
          allocate(elemIds(numTotElems))
-         elemIds=(/4/) 
+         elemIds=(/4/)
 
          ! Allocate and fill the element topology type array.
          allocate(elemTypes(numTotElems))
@@ -213,12 +213,12 @@
 
          ! Allocate and fill the node id array.
          allocate(nodeIds(numNodes))
-         nodeIds=(/5,6,8,9/) 
+         nodeIds=(/5,6,8,9/)
 
          ! Allocate and fill node coordinate array.
          ! Since this is a 2D Mesh the size is 2x the
          ! number of nodes.
-         allocate(nodeCoords(2*numNodes)) 
+         allocate(nodeCoords(2*numNodes))
          nodeCoords=(/1.0,1.0, &  ! node id 5
                       2.0,1.0, &  ! node id 6
                       1.0,2.0, &  ! node id 8
@@ -230,7 +230,7 @@
                       1, & ! node id 6
                       2, & ! node id 8
                       3/)  ! node id 9
- 
+
          ! Set the number of each type of element, plus the total number.
          numQuadElems=1
          numTriElems=0
@@ -238,7 +238,7 @@
 
          ! Allocate and fill the element id array.
          allocate(elemIds(numTotElems))
-         elemIds=(/5/)  
+         elemIds=(/5/)
 
          ! Allocate and fill the element topology type array.
          allocate(elemTypes(numTotElems))
@@ -261,7 +261,17 @@
          return
      endif
 
-  
+     ! deallocate node data
+     deallocate(nodeIds)
+     deallocate(nodeCoords)
+     deallocate(nodeOwners)
+
+     ! deallocate elem data
+     deallocate(elemIds)
+     deallocate(elemTypes)
+     deallocate(elemConn)
+
+
     ! Create dest field
     call ESMF_ArraySpecSet(arrayspec, 1, ESMF_TYPEKIND_R8, rc=rc)
 
@@ -272,7 +282,7 @@
        return
     endif
 
-  
+
     ! clear destination Field
     ! Should only be 1 localDE
     call ESMF_FieldGet(dstField, 0, fptr1D,  rc=localrc)
@@ -296,7 +306,7 @@
 !--------------------------------------------------------------------------------
 !   !  The Run routine where data is computed.
 !   !
- 
+
     subroutine user_run(comp, importState, exportState, clock, rc)
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importState, exportState
@@ -363,13 +373,13 @@
          x=ownedNodeCoords(2*i-1)
          y=ownedNodeCoords(2*i)
 
-   	 !! if error is too big report an error
-	 if ( abs( fptr1D(i)-(x+y+20.0) ) > 0.0001) then
+         !! if error is too big report an error
+         if ( abs( fptr1D(i)-(x+y+20.0) ) > 0.0001) then
               rc=ESMF_FAILURE
               return
-         endif	
+         endif  
       enddo
-   
+
       ! deallocate space to hold local node coordinates
       deallocate(ownedNodeCoords)
 
@@ -385,7 +395,7 @@
 !--------------------------------------------------------------------------------
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
- 
+
     subroutine user_final(comp, importState, exportState, clock, rc)
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importState, exportState
@@ -397,7 +407,7 @@
       type(ESMF_Mesh) :: dstMesh
 
       rc = ESMF_SUCCESS
-      print *, "User Comp Final starting"  
+      print *, "User Comp Final starting"
 
       ! check validity of results
       ! Get Fields from import state
@@ -417,11 +427,11 @@
       print *, "User Comp Final returning"
 
       ! Return success
-      rc = ESMF_SUCCESS   
+      rc = ESMF_SUCCESS
     end subroutine user_final
 
 
     end module user_model2
-    
+
 !\end{verbatim}
-    
+

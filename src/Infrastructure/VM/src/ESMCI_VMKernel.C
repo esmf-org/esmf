@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -11,6 +11,9 @@
 //-----------------------------------------------------------------------------
 
 #include "ESMCI_VMKernel.h"
+#include "ESMCI_VM.h"
+
+#define VM_MEMLOG_off
 
 // On SunOS systems there are a couple of macros that need to be set
 // in order to get POSIX compliant functions IPC, pthreads, gethostid
@@ -66,6 +69,7 @@ using namespace std;
 #include <fcntl.h>
 
 #include "ESMCI_AccInfo.h"
+#include "ESMCI_LogErr.h"
 
 // macros used within this source file
 #define VERBOSITY             (0)       // 0: off, 10: max
@@ -103,6 +107,7 @@ int VMK::mpi_thread_level;
 int VMK::ncores;
 int *VMK::cpuid;
 int *VMK::ssiid;
+double VMK::wtime0;
 // Static data members to support command line arguments
 int VMK::argc;
 char *VMK::argv_store[100];
@@ -309,6 +314,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
 #endif
   }
   // so now MPI is for sure initialized...
+  wtime0 = MPI_Wtime();
   // TODO: now it should be safe to call obtain_args() for all MPI impl.
   // Obtain MPI variables
   int rank, size;
@@ -2592,7 +2598,7 @@ int VMK::commtest(commhandle **ch, int *completeFlag, status *status){
 //fprintf(stderr, "(%d)VMK::commtest: *ch=%p\n", mypet, *ch);
   int localrc=0;
   if (status) {
-    memset (status, 0, sizeof (status));      // quiet valgrind
+    memset (status, 0, sizeof (*status));     // quiet valgrind
     status->comm_type = VM_COMM_TYPE_MPIUNI;  // safe initialization
   }
   if ((ch!=NULL) && ((*ch)!=NULL)){
@@ -3061,8 +3067,14 @@ int VMK::send(const void *message, int size, int dest, commhandle **ch,
       else
         tag = 0;
     }
+#ifdef VM_MEMLOG_on
+  VM::logMemInfo(std::string("VM::send():1.0"));
+#endif
     localrc = MPI_Isend(messageC, size, MPI_BYTE, lpid[dest], tag, mpi_c, 
       (*ch)->mpireq);
+#ifdef VM_MEMLOG_on
+  VM::logMemInfo(std::string("VM::send():2.0"));
+#endif
 #ifndef ESMF_NO_PTHREADS
     if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
 #endif
@@ -5067,7 +5079,7 @@ int VMK::broadcast(void *data, int len, int root, commhandle **ch){
 
 
 void VMK::wtime(double *time){
-  *time = MPI_Wtime();
+  *time = MPI_Wtime() - wtime0;
 }
 
 
@@ -5410,7 +5422,191 @@ namespace ESMCI{
 } // namespace ESMCI
 
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+// ComPat2: abstract class providing basic communication patters
+//==============================================================================
+//==============================================================================
+//==============================================================================
 
+#define DEBUG_COMPAT2_off
+
+namespace ESMCI{
+  void ComPat2::totalExchange(VMK *vmk){
+    int petCount = vmk->getNpets();
+    int localPet = vmk->getMypet();
+    // prepare commhandles and message buffers
+    VMK::commhandle *sendCommh1 = NULL;
+    VMK::commhandle *sendCommh2 = NULL;
+    VMK::commhandle *sendCommh3 = NULL;
+    VMK::commhandle *sendCommh4 = NULL;
+    VMK::commhandle *recvCommh1 = NULL;
+    VMK::commhandle *recvCommh2 = NULL;
+    char *sendRequestBuffer;
+    char *sendResponseBuffer;
+    char *recvBuffer1;
+    char *recvBuffer2;
+    for (int i=0; i<petCount; i++){
+      int requestPet = (petCount + localPet-i) % petCount;
+      int responsePet = (localPet+i) % petCount;
+#ifdef DEBUG_COMPAT2
+    {
+      std::stringstream msg;
+      msg << "ComPat2#" << __LINE__
+        << " requestPet=" << requestPet 
+        << " responsePet=" << responsePet;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+      if (i==0){
+        // the localPet handles its own local operations
+        handleLocal();
+      }else{
+        // localPet interacts with requestPet and responsePet as their
+        // responder and requester, respectively.
+        int recvResponseSize=0; // reset
+        int sendResponseSize=0; // reset
+        // localPet acts as responder
+        int recvRequestSize;
+        vmk->recv(&recvRequestSize, sizeof(int), requestPet, &recvCommh1);
+        // localPet acts as requester
+        int sendRequestSize;
+        generateRequest(responsePet, sendRequestBuffer, sendRequestSize);
+        vmk->send(&sendRequestSize, sizeof(int), responsePet, &sendCommh1);
+        // localPet acts as responder
+        vmk->commwait(&recvCommh1); // wait for valid recvRequestSize
+#ifdef DEBUG_COMPAT2
+    {
+      std::stringstream msg;
+      msg << "ComPat2#" << __LINE__
+        << " recvRequestSize=" << recvRequestSize
+        << " sendRequestSize=" << sendRequestSize;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+        if (recvRequestSize>0){
+          recvBuffer1 = new char[recvRequestSize];
+          vmk->recv(recvBuffer1, recvRequestSize, requestPet, &recvCommh1);
+#ifdef DEBUG_COMPAT2
+    {
+      std::stringstream msg;
+      msg << "ComPat2#" << __LINE__
+        << " receiving request from requestPet=" << requestPet
+        << " in recvBuffer1=" << (void*)recvBuffer1;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+        }
+        // localPet acts as requester
+        if (sendRequestSize>0){
+          vmk->send(sendRequestBuffer, sendRequestSize, responsePet,
+            &sendCommh2);
+#ifdef DEBUG_COMPAT2
+    {
+      std::stringstream msg;
+      msg << "ComPat2#" << __LINE__
+        << " sending request to responsePet=" << responsePet
+        << " in sendRequestBuffer=" << (void*)sendRequestBuffer;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+          vmk->recv(&recvResponseSize, sizeof(int), responsePet, &recvCommh2);
+        }
+        // localPet acts as responder
+        if (recvRequestSize>0){
+          vmk->commwait(&recvCommh1); // wait for valid recvBuffer1
+#ifdef DEBUG_COMPAT2
+    {
+      std::stringstream msg;
+      msg << "ComPat2#" << __LINE__
+        << " finished receiving request from requestPet=" << requestPet
+        << " in recvBuffer1=" << (void*)recvBuffer1;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+          sendResponseBuffer = NULL; // detectable reset
+          handleRequest(requestPet, recvBuffer1, recvRequestSize,
+            sendResponseBuffer, sendResponseSize);
+          vmk->send(&sendResponseSize, sizeof(int), requestPet, &sendCommh3);
+        }
+        // localPet acts as requester
+        if (sendRequestSize>0){
+          vmk->commwait(&recvCommh2); // wait for valid recvResponseSize
+          vmk->commwait(&sendCommh2); // wait to be done with sendRequestBuffer
+        }
+#ifdef DEBUG_COMPAT2
+    {
+      std::stringstream msg;
+      msg << "ComPat2#" << __LINE__
+        << " sendResponseSize=" << sendResponseSize
+        << " recvResponseSize=" << recvResponseSize;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+        recvBuffer2 = NULL; // detectable reset
+        if (recvResponseSize>0){
+          recvBuffer2 = new char[recvResponseSize];
+          vmk->recv(recvBuffer2, recvResponseSize, responsePet, &recvCommh2);
+#ifdef DEBUG_COMPAT2
+    {
+      std::stringstream msg;
+      msg << "ComPat2#" << __LINE__
+        << " receiving response from responsePet=" << responsePet
+        << " in recvBuffer2=" << (void*)recvBuffer2;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+        }
+        // localPet acts as responder
+        if (sendResponseSize>0){
+          vmk->send(sendResponseBuffer, sendResponseSize, requestPet,
+            &sendCommh4);
+#ifdef DEBUG_COMPAT2
+    {
+      std::stringstream msg;
+      msg << "ComPat2#" << __LINE__
+        << " sending response to requestPet=" << requestPet
+        << " in sendResponseBuffer=" << (void*)sendResponseBuffer;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+        }
+        // localPet acts as requester
+        if (recvResponseSize>0){        
+          vmk->commwait(&recvCommh2); // wait for valid recvBuffer2
+#ifdef DEBUG_COMPAT2
+    {
+      std::stringstream msg;
+      msg << "ComPat2#" << __LINE__
+        << " finished receiving response from responsePet=" << responsePet
+        << " in recvBuffer2=" << (void*)recvBuffer2;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+          handleResponse(responsePet, recvBuffer2, recvResponseSize);
+        }
+        // localPet acts as requester
+        vmk->commwait(&sendCommh1);
+        if (recvResponseSize>0){
+          delete [] recvBuffer2;
+        }
+        // localPet acts as responder
+        if (sendResponseSize>0){
+          vmk->commwait(&sendCommh4);
+        }
+        if (recvRequestSize>0){
+          vmk->commwait(&sendCommh3);
+          if ((sendResponseBuffer != NULL) && (sendResponseBuffer!=recvBuffer1))
+            delete [] sendResponseBuffer;
+          delete [] recvBuffer1;
+        }
+      }
+      
+    }
+  }
+  
+} // namespace ESMCI
 
 //==============================================================================
 //==============================================================================
@@ -5453,8 +5649,6 @@ typedef void* value_ptr_t;
 #define PORT 54320                // a random port for prototype testing
 
 #endif
-
-#include "ESMCI_LogErr.h"
 
 namespace ESMCI {
 

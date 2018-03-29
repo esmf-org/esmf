@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -82,14 +82,14 @@ int main(void){
 
   double ub_x, lb_x, max_x, min_x, cellwidth_x;
   double ub_y, lb_y, max_y, min_y, cellwidth_y;
-  ub_x = 21;
-  ub_y = 21;
-  lb_x = 0;
-  lb_y = 0;
-  max_x = 21;
-  max_y = 21;
-  min_x = 0;
-  min_y = 0;
+  ub_x = 19;
+  ub_y = 19;
+  lb_x = 1;
+  lb_y = 1;
+  max_x = 19;
+  max_y = 19;
+  min_x = 1;
+  min_y = 1;
   cellwidth_x = (max_x-min_x)/(ub_x-lb_x);
   cellwidth_y = (max_y-min_y)/(ub_y-lb_y);
 
@@ -185,14 +185,14 @@ int main(void){
   //EX_UTest
   // Create a Grid
 
-  ub_x = 19;
-  ub_y = 19;
-  lb_x = 1;
-  lb_y = 1;
-  max_x = 19;
-  max_y = 19;
-  min_x = 1;
-  min_y = 1;
+  ub_x = 21;
+  ub_y = 21;
+  lb_x = 0;
+  lb_y = 0;
+  max_x = 21;
+  max_y = 21;
+  min_x = 0;
+  min_y = 0;
   cellwidth_x = (max_x-min_x)/(ub_x-lb_x);
   cellwidth_y = (max_y-min_y)/(ub_y-lb_y);
 
@@ -388,15 +388,17 @@ int main(void){
   strcpy(name, "Create an ESMC_RouteHandle via ESMC_FieldRegridStore()");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
+  ESMC_ExtrapMethod_Flag extrapmethod = ESMC_EXTRAPMETHOD_NEAREST_IDAVG;
 #ifdef masking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, &i_maskValues, 
                              &routehandle, 
-                             NULL, NULL, NULL, NULL, NULL, &unmappedaction,
+                             NULL, NULL, NULL, NULL, NULL, 
+                             &extrapmethod, NULL, NULL, &unmappedaction,
                              NULL, NULL, NULL);
 #else
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle, 
                              NULL, NULL, NULL, NULL, NULL, NULL,
-                             NULL, NULL, NULL);
+                             NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

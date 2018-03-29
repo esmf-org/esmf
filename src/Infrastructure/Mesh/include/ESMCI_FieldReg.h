@@ -1,9 +1,9 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
@@ -24,7 +24,7 @@
 
 /**
  * @defgroup field
- * 
+ *
  * The field subsystem contains methods that allow the storage of data on
  * the mesh database.
  * @ingroup mesh
@@ -36,7 +36,7 @@ class Kernel;
 /**
  * A collector for fields, i.e. the Field Registrar.  A field (with a particular name)
  * may be registered multiple times, with multiple attrs.
- * @ingroup field 
+ * @ingroup field
 */
 class FieldReg {
 public:
@@ -47,7 +47,7 @@ FieldReg();
 MEField<> *RegisterField(const std::string &name,
        const MEFamily &mef, // Imprint pattern, number dofs, etc
        UInt obj_type, // ELEMENT, FACE ??
-       const Context &ctxt, // set 
+       const Context &ctxt, // set
        UInt dim,
        bool out = false,        // whether to output
        bool interp = false,     // whether to create a field for interpolation
@@ -79,24 +79,24 @@ void Commit(MeshDB &);
 
 
  void ProxyCommit(MeshDB &mesh,
-		  int numSetsArg,
-		  std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
-		  std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg);
- 
+                  int numSetsArg,
+                  std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
+                  std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg);
+
 #if 0
  void GetImprints(
-		  int *numSetsArg,
-		  std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
-		  std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg);
+                  int *numSetsArg,
+                  std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
+                  std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg);
 #endif
- 
+
 void GetImprints(
-		 int *numSetsArg,
-		 UInt **nvalSetSizesArg, UInt **nvalSetValsArg,
-		 UInt **nvalSetObjSizesArg, UInt **nvalSetObjValsArg);
- 
+                 int *numSetsArg,
+                 UInt **nvalSetSizesArg, UInt **nvalSetValsArg,
+                 UInt **nvalSetObjSizesArg, UInt **nvalSetObjValsArg);
+
 UInt NumFields() const { return Fields.size();}
-MEFieldBase **ListOfFields() { 
+MEFieldBase **ListOfFields() {
 // Note that if Fields is empty, most STLs seem to return a NULL pointer
 // when returning &Fields[0].  However the Microsoft STL aborts the
 // program.  So we need an explicit check here.
@@ -123,7 +123,7 @@ _field **ListOffields() { return &fields[0]; }
 _field *Registerfield(const std::string &name, const Attr &attr, const _fieldTypeBase &_ftype, UInt dim);
 
 // Register low-level iofields.  TODO: this interface is currently contorted by
-// having to pass the mesh as an arg.  This is, in reality, a dependency issue.  
+// having to pass the mesh as an arg.  This is, in reality, a dependency issue.
 // Needs to be resolved.
 IOField<NodalField> *RegisterNodalField(const MeshDB &mesh, const std::string &name, UInt dim=1);
 IOField<ElementField> *RegisterElementField(const MeshDB &mesh, const std::string &name, UInt dim=1);
@@ -154,6 +154,6 @@ std::vector<IOField<NodalField>*> ndfields;
 std::vector<IOField<ElementField>*> efields;
 };
 
-} // namespace 
+} // namespace
 
 #endif

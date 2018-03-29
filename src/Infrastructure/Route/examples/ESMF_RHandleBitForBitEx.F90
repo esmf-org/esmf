@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1482,9 +1482,9 @@ do i=1,5
       print *, "result SRCPET#11 = ", farrayPtr(1), " expect: ", sumCompare
       if (farrayPtr(1) /= sumCompare) then
         finalrc = ESMF_FAILURE
-	write (msg, *) "Numerical difference detected: ", &
-	  farrayPtr(1)-sumCompare
-	call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO)
+        write (msg, *) "Numerical difference detected: ", &
+          farrayPtr(1)-sumCompare
+        call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO)
       endif
     endif
   endif

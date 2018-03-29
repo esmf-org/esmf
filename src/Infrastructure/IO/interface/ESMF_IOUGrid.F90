@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1729,7 +1729,7 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
     remain = mod (elmtCount,PetCnt)
     startElmt = localCount*PetNo +1
     if (PetNo==PetCnt-1) localCount=localCount+remain
-    print *, PetNo, 'Before allocating elmtConn', localCount
+    ! print *, PetNo, 'Before allocating elmtConn', localCount
     allocate(elmtConnT(MaxNodePerElmt,localCount) )
     allocate( elmtNums(localCount) )
     ! Get element connectivity... transposed

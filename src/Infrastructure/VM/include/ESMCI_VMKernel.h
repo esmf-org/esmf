@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -212,9 +212,10 @@ class VMK{
     int nhandles;
     commhandle *firsthandle;
     // static info of physical machine
-    static int ncores; // total number of cores in the physical machine
-    static int *cpuid; // cpuid associated with certain core (multi-core cpus)
-    static int *ssiid; // single system image id to which this core belongs
+    static int ncores;  // total number of cores in the physical machine
+    static int *cpuid;  // cpuid associated with certain core (multi-core cpus)
+    static int *ssiid;    // single system image id to which this core belongs
+    static double wtime0; // the MPI WTime at the very beginning of execution
   public:
     // Declaration of static data members - Definitions are in the header of
     // source file ESMF_VMKernel.C
@@ -498,18 +499,54 @@ class VMKPlan{
   
 };
 
+
 class ComPat{
  private:
   // pure virtual methods to be implemented by user
+     
   virtual int messageSize(int srcPet, int dstPet)                  const =0;
+    // will be called on both sides, i.e. localPet==srcPet and localPet==dstPet
+ 
   virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const =0;
+    // will be called only for localPet==srcPet
+  
   virtual void messageProcess(int srcPet, int dstPet, char *buffer)      =0;
+    // will be called only for localPet==dstPet
+  
   virtual void localPrepareAndProcess(int localPet)                      =0;
+    // will be called for every localPet once
+  
  public:
   // communication patterns
   void totalExchange(VMK *vmk);
 }; // ComPat
 
+
+class ComPat2{
+ private:
+  // pure virtual methods to be implemented by user
+     
+  virtual void handleLocal() =0;
+    // called on every localPet exactly once, before any other method
+
+  virtual void generateRequest(int responsePet,
+    char* &requestBuffer, int &requestSize) =0;
+    // called on every localPet for every responsePet != localPet
+ 
+  virtual void handleRequest(int requestPet,
+    char *requestBuffer, int requestSize,
+    char* &responseBuffer, int &responseSize)const =0;
+    // called on every localPet for every requestPet != localPet
+ 
+  virtual void handleResponse(int responsePet,
+    char const *responseBuffer, int responseSize)const =0;
+    // called on every localPet for every responsePet != localPet
+
+ public:
+     
+  // communication patterns
+  void totalExchange(VMK *vmk);
+}; // ComPat2
 
 
 

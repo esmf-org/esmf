@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -548,7 +548,7 @@ program ESMF_CompTunnelUTest
 ! Start of exhaustive block  
 !-------------------------------------------------------------------------------  
   
-  if (petCount /= 8) goto 10  ! skip all of the exhaustive tests of not on 8PET
+  if (petCount /= 8) goto 10  ! skip all of the exhaustive tests if not on 8PET
   
   !------------------------------------------------------------------------
   ! The exhaustive tests break into three dual-actual pairs: A, B, C. The 
@@ -1113,6 +1113,12 @@ program ESMF_CompTunnelUTest
 
   ! --- don't destroy Cs in order to test that automatic garbage collection
   ! --- during ESMF_Finalize() correctly terminates Cs ServiceLoop & cleans up
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+#ifdef ESMF_TESTCOMPTUNNEL
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
   
   !------------------------------------------------------------------------
   ! -- socket based component pair "D" with the following petLists:
@@ -1758,6 +1764,17 @@ program ESMF_CompTunnelUTest
   ! --- don't destroy Es in order to test that automatic garbage collection
   ! --- during ESMF_Finalize() correctly terminates E's ServiceLoop & cleans up
 
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+#else
+  write(name, *) "Dummy test to satisfy scripts for ESMF_TESTCOMPTUNNEL=OFF"
+  write(failMsg, *) "Did not succeed" 
+  do i=1,56
+    call ESMF_Test((.true.), name, failMsg, result, ESMF_SRCLINE)
+  enddo
+#endif
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
 10 continue
 !-------------------------------------------------------------------------------  
 ! End of exhaustive block  

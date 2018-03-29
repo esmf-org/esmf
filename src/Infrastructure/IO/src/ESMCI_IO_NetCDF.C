@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -37,7 +37,7 @@
 #include "ESMCI_LocalArray.h"
 #include "ESMCI_Array.h"
 
-using namespace std; 
+using namespace std;
 
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -87,11 +87,11 @@ namespace ESMCI
     if (rc != ESMC_NULL_POINTER) *rc = ESMC_RC_NOT_IMPL;
 
     // allocate an io object & set defaults via constructor
-    try 
+    try
     {
       io_netcdf = new IO_NetCDF;
     }
-    catch (...) 
+    catch (...)
     {
       ESMC_LogDefault.AllocError(ESMC_CONTEXT,rc);
       return(ESMC_NULL_POINTER);
@@ -162,7 +162,7 @@ namespace ESMCI
       "- Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -203,7 +203,7 @@ namespace ESMCI
     if (ESMC_LogDefault.MsgFoundError (localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, NULL))
       return localrc;
 
-    mypet = globalVM->getLocalPet(); 
+    mypet = globalVM->getLocalPet();
     numPETs = globalVM->getPetCount();
 //printf("mypet = %d, numPETS = %d\n", mypet, numPETs);
 //fflush(stdout);
@@ -213,13 +213,13 @@ namespace ESMCI
     if (mypet != 0) return ESMF_RC_LIB_NOT_PRESENT;
 #endif
 
-    if (!fileName.empty()) 
+    if (!fileName.empty())
     {
       // TODO: only use local of fileName this one time;
       //   don't change set IO_NetCDF member fileName
       this->fileName = fileName;
-    } 
-    else 
+    }
+    else
     {
       // TODO use existing IO_NetCDF fileName member
     }
@@ -244,14 +244,14 @@ namespace ESMCI
     //printf("*** State RC: %d\n", stateRc);
     if (stateRc != ESMF_SUCCESS)
     {
-      return stateRc; 
+      return stateRc;
     }
 #endif
 
     //***
     // Check that the State object that we'll be filling with Arrays is set
     //***
-    if (theState == ESMC_NULL_POINTER) 
+    if (theState == ESMC_NULL_POINTER)
     {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          ": 'theState' pointer is NULL.", ESMC_CONTEXT, &localrc);
@@ -262,7 +262,7 @@ namespace ESMCI
     /*
     ** Dimensions
     */
-    int	numDims;
+    int         numDims;
     if ((ncerr = nc_inq_ndims (netCdfFile, &numDims)) != NC_NOERR) {
       string errstr = string(": nc_inq_ndims failure: ") + nc_strerror(ncerr);
       ESMC_LogDefault.MsgFoundError(ESMF_FAILURE,
@@ -301,7 +301,7 @@ namespace ESMCI
     /*
     ** Variables
     */
-    int	numVars;
+    int         numVars;
     if ((ncerr = nc_inq_nvars (netCdfFile, &numVars)) != NC_NOERR) {
         string errstr = string(": nc_inq_nvars failure: ") + nc_strerror(ncerr);
         ESMC_LogDefault.MsgFoundError(ESMF_FAILURE,
@@ -333,7 +333,7 @@ namespace ESMCI
     /*
     ** Attributes
     */
-    int	numAtts;
+    int         numAtts;
     if ((ncerr = nc_inq_natts (netCdfFile, &numAtts)) != NC_NOERR) {
         string errstr = string(": nc_inq_natts failure: ") + nc_strerror(ncerr);
         ESMC_LogDefault.MsgFoundError(ESMF_FAILURE,
@@ -406,7 +406,7 @@ namespace ESMCI
     ESMCI::VM *globalVM;
     int mypet, numPETs;
 
-    if (this == ESMC_NULL_POINTER) 
+    if (this == ESMC_NULL_POINTER)
     {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          ": 'this' pointer is NULL.", ESMC_CONTEXT, NULL);
@@ -418,7 +418,7 @@ namespace ESMCI
     if (ESMC_LogDefault.MsgFoundError (localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc))
       return localrc;
 
-    mypet = globalVM->getLocalPet(); 
+    mypet = globalVM->getLocalPet();
     numPETs = globalVM->getPetCount();
 //printf("mypet = %d, numPETS = %d\n", mypet, numPETs);
 //fflush(stdout);
@@ -430,7 +430,7 @@ namespace ESMCI
 
 #ifdef ESMF_NETCDF
     // check only when netCDF present
-    if (theState == ESMC_NULL_POINTER) 
+    if (theState == ESMC_NULL_POINTER)
     {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
          ": 'theState' pointer is NULL.", ESMC_CONTEXT, &localrc);
@@ -438,13 +438,13 @@ namespace ESMCI
     }
 #endif
 
-    if (!fileName.empty()) 
+    if (!fileName.empty())
     {
       // TODO: only use local of fileName this one time;
       //   don't change set IO_NetCDF member fileName
       this->fileName = fileName;
-    } 
-    else 
+    }
+    else
     {
       // TODO use existing IO_NetCDF fileName member
     }
@@ -551,7 +551,7 @@ namespace ESMCI
  : ESMC_Base(-1) {  // invoke ESMC_Base constructor with id=(-1); prevents
                     // Base id increment for non-distributed,
                     // non-reconcilable objects such as IO.
-    theState = ESMC_NULL_POINTER; 
+    theState = ESMC_NULL_POINTER;
     // create default name "IO_NetCDF<ID>"
     ESMC_BaseSetName(ESMC_NULL_POINTER, "IO_NetCDF");
     // copy = false;  // TODO: see notes in constructors and destructor below
@@ -597,7 +597,7 @@ void IO_NetCDF::destruct(void) {
     return ESMF_FAILURE;
   } // end ncerrToEsmcRc
 
-  ESMC_TypeKind_Flag  IO_NetCDF::ncToEsmcType(nc_type ncTypeVal) 
+  ESMC_TypeKind_Flag  IO_NetCDF::ncToEsmcType(nc_type ncTypeVal)
   {
 
 #undef  ESMC_METHOD
@@ -638,7 +638,7 @@ void IO_NetCDF::destruct(void) {
 
 //-------------------------------------------------------------------------
 
-  nc_type  IO_NetCDF::esmcToNcType(ESMC_TypeKind_Flag  esmcTypeVal) 
+  nc_type  IO_NetCDF::esmcToNcType(ESMC_TypeKind_Flag  esmcTypeVal)
   {
 
 #undef  ESMC_METHOD
@@ -692,7 +692,7 @@ void IO_NetCDF::destruct(void) {
 //-------------------------------------------------------------------------
 
   Array*  IO_NetCDF::readArray(NcFile  netCdfFile,
-                               int      varIndex, int *rc) 
+                               int      varIndex, int *rc)
   {
 
 #undef  ESMC_METHOD
@@ -743,7 +743,7 @@ void IO_NetCDF::destruct(void) {
       numValues *= dimSizes[j];
     }
 
-    ESMC_TypeKind_Flag	arrayType = ncToEsmcType(nctype);
+    ESMC_TypeKind_Flag  arrayType = ncToEsmcType(nctype);
 
     if (trace)
       std::cerr << ESMC_METHOD << ": allocating values buffer, numValues = " << numValues << std::endl;
@@ -758,12 +758,12 @@ void IO_NetCDF::destruct(void) {
       return thisArray;
     }
 
-//    NcValues*	values = thisVar->values();
+//    NcValues*         values = thisVar->values();
 
     int      localrc;
     if (trace)
       std::cerr << ESMC_METHOD << ": creating locArray" << std::endl;
-    LocalArray*	locArray = LocalArray::create(
+    LocalArray*         locArray = LocalArray::create(
                                    arrayType,
                                    ndims,
                                    &dimSizes_int.front(),
@@ -791,12 +791,12 @@ void IO_NetCDF::destruct(void) {
 
     if (trace)
       std::cerr << ESMC_METHOD << ": creating distGrid" << std::endl;
-    DistGrid*	distGrid = DistGrid::create(
+    DistGrid*   distGrid = DistGrid::create(
                                minIndex, maxIndex,
                                (InterArray<int>*)NULL, (Decomp_Flag*)NULL, 0,
                                (InterArray<int>*)NULL, (InterArray<int>*)NULL,
                                (InterArray<int>*)NULL, (ESMC_IndexFlag*)NULL,
-                               (InterArray<int>*)NULL, 
+                               (InterArray<int>*)NULL,
                                (DELayout*)NULL, (VM*)NULL, &localrc);
     //printf("*** DistGrid RC: %d\n", localrc);
 
@@ -814,8 +814,8 @@ void IO_NetCDF::destruct(void) {
       std::cerr << ESMC_METHOD << ": creating thisArray" << std::endl;
     thisArray = Array::create(&locArray, 1,
                               distGrid, DATA_COPY,
-                              (InterArray<int>*)NULL, (InterArray<int>*)NULL, 
-                              (InterArray<int>*)NULL, (InterArray<int>*)NULL, 
+                              (InterArray<int>*)NULL, (InterArray<int>*)NULL,
+                              (InterArray<int>*)NULL, (InterArray<int>*)NULL,
                               (InterArray<int>*)NULL, (InterArray<int>*)NULL,
                               (InterArray<int>*)NULL, (ESMC_IndexFlag*)NULL,
                               (InterArray<int>*)NULL, (InterArray<int>*)NULL,
@@ -850,7 +850,7 @@ void IO_NetCDF::destruct(void) {
         *rc = ESMF_FAILURE;
         return thisArray;
       }
-//      NcAtt*	thisAtt = thisVar->get_att(j);
+//      NcAtt*  thisAtt = thisVar->get_att(j);
       //printf("      nc att name[%d]: %s\n", j, thisAtt->name());
       //printf("      nc att type[%d]: %d ", j, thisAtt->type());
 
@@ -885,7 +885,7 @@ void IO_NetCDF::destruct(void) {
          valueBase = (void*) (&attValStringVector);
          //printf("(ncChar)\n");
          //printf("     nc att value[%d]: %s\n", j, attValString.c_str());
-         
+
         break;
 
       case NC_INT:
@@ -943,8 +943,8 @@ void IO_NetCDF::destruct(void) {
         break;
       }
 
-      ESMC_TypeKind_Flag	attType = ncToEsmcType(atttype);
-      //printf("   ESMC type[%d]: %d (%s)\n", j, attType, 
+      ESMC_TypeKind_Flag        attType = ncToEsmcType(atttype);
+      //printf("   ESMC type[%d]: %d (%s)\n", j, attType,
       //                                      ESMC_TypeKind_FlagString(attType));
 
       Attribute* esmfAtt = new Attribute(attname,
@@ -963,7 +963,7 @@ void IO_NetCDF::destruct(void) {
 
   int  IO_NetCDF::writeArray(NcFile   netCdfFile,
                              Array*   thisArray,
-                             int      numDims, 
+                             int      numDims,
                              int*  dimensions)
   {
 
@@ -975,7 +975,7 @@ void IO_NetCDF::destruct(void) {
 
     ESMC_TypeKind_Flag  esmcType = thisArray->getTypekind();
 //printf("ESMC Type: %d\n", esmcType);
-    nc_type	       ncType = esmcToNcType(esmcType);
+    nc_type            ncType = esmcToNcType(esmcType);
 
     int thisVar;
 
@@ -994,18 +994,18 @@ void IO_NetCDF::destruct(void) {
       return localrc;
     }
 
-//    NcVar*  thisVar = netCdfFile->add_var(thisArray->getName(), 
-//                                          ncType, 
-//                                          numDims, 
+//    NcVar*  thisVar = netCdfFile->add_var(thisArray->getName(),
+//                                          ncType,
+//                                          numDims,
 //                                          (const NcDim**)dimensions);
 
     ncerr = nc_enddef (netCdfFile);  // ensure we are not in Define Mode
-    
+
     LocalArray*  locArray = (thisArray->getLocalarrayList())[0];
     void*             baseAddr;
     baseAddr = locArray->getBaseAddr();
 
-    size_t*		counts = new size_t[numDims];
+    size_t*             counts = new size_t[numDims];
     for (int i = 0; i < numDims; ++i)
     {
       if ((ncerr = nc_inq_dimlen (netCdfFile, dimensions[i], &counts[i])) != NC_NOERR) {
@@ -1116,7 +1116,7 @@ void IO_NetCDF::destruct(void) {
       case NC_CHAR:
         {
           string  attVal;
-		  vector<string> attValVector;
+                  vector<string> attValVector;
           thisArray->ESMC_BaseGetRoot()->AttributeGet(attName)->get(&attValVector);
           if (numAttValues == 1) {
             attVal = attValVector.at(0);
@@ -1130,7 +1130,7 @@ void IO_NetCDF::destruct(void) {
             }
 //            thisVar->add_att(attName.c_str(), attVal.c_str());
           } else {
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
               "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
             return localrc;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
@@ -1156,7 +1156,7 @@ void IO_NetCDF::destruct(void) {
 
 //          thisVar->add_att(attName.c_str(), attVal);
           } else {
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
               "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
             return localrc;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
@@ -1181,7 +1181,7 @@ void IO_NetCDF::destruct(void) {
             }
 //          thisVar->add_att(attName.c_str(), attVal);
           } else {
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
               "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
             return localrc;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());
@@ -1206,7 +1206,7 @@ void IO_NetCDF::destruct(void) {
             }
 //          thisVar->add_att(attName.c_str(), attVal);
           } else {
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, 
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
               "Write items > 1 - Not yet implemented", ESMC_CONTEXT, &localrc);
             return localrc;}
           //printf("      att name[%d]: %s\n", i, attName.c_str());

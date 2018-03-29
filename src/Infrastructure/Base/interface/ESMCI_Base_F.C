@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -820,6 +820,43 @@ extern "C" {
   return;
 
 }  // end c_ESMC_BaseGetStatus
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_IsProxy - test if this base object is a proxy
+//
+// !INTERFACE:
+      void FTN_X(c_esmc_isproxy)(
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_isproxy()"
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_Base **base,         // in - base object
+      ESMC_Logical *isProxy,    // out - true or false
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Return ESMF\_TRUE or ESMF\_FALSE in {\tt isProxy}.
+//
+//EOP
+
+  // Initialize return code; assume routine not implemented
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
+  
+  *isProxy = ESMF_FALSE;  // initiallize
+  
+  if ((*base)->ESMC_BaseGetProxyFlag()==ESMF_PROXYYES)
+    *isProxy = ESMF_TRUE;
+  
+  // return successfully
+  *rc = ESMF_SUCCESS;
+  return;
+
+}  // end c_ESMC_IsProxy
+
 
 
 } // extern "C"

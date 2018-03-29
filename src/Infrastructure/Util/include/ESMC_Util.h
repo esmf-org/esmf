@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -55,13 +55,17 @@ enum ESMC_CoordSys_Flag {ESMC_COORDSYS_INVALID=-2,
                     ESMC_COORDSYS_SPH_RAD};
 
 enum ESMC_Decomp_Flag {ESMC_DECOMP_INVALID=0,
-		       ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,
-		       ESMC_DECOMP_RESTLAST, ESMC_DECOMP_CYCLIC};
+                       ESMC_DECOMP_BALANCED, ESMC_DECOMP_RESTFIRST,
+                       ESMC_DECOMP_RESTLAST, ESMC_DECOMP_CYCLIC};
+
+enum ESMC_ExtrapMethod_Flag {ESMC_EXTRAPMETHOD_NONE=0,
+                                         ESMC_EXTRAPMETHOD_NEAREST_STOD,
+                             ESMC_EXTRAPMETHOD_NEAREST_IDAVG};
 
 enum ESMC_FileFormat_Flag {ESMC_FILEFORMAT_UNDEFINED, ESMC_FILEFORMAT_VTK,
-			   ESMC_FILEFORMAT_SCRIP, ESMC_FILEFORMAT_ESMFMESH,
-			   ESMC_FILEFORMAT_ESMCGRID, ESMC_FILEFORMAT_UGRID,
-			   ESMC_FILEFORMAT_GRIDSPEC};
+                           ESMC_FILEFORMAT_SCRIP, ESMC_FILEFORMAT_ESMFMESH,
+                           ESMC_FILEFORMAT_ESMCGRID, ESMC_FILEFORMAT_UGRID,
+                           ESMC_FILEFORMAT_GRIDSPEC};
 
 // File status flag (for IO write functions)
 typedef enum ESMC_FileStatus_Flag { ESMC_FILESTATUS_UNKNOWN=0,
@@ -104,10 +108,10 @@ enum ESMC_LogKind_Flag{
                 ESMC_LOGKIND_NONE  =3 };
 
 enum ESMC_LogMsgType_Flag{
-		ESMC_LOGMSG_INFO =1,
-		ESMC_LOGMSG_WARN =2,
-		ESMC_LOGMSG_ERROR=3,
-		ESMC_LOGMSG_TRACE=4,
+                ESMC_LOGMSG_INFO =1,
+                ESMC_LOGMSG_WARN =2,
+                ESMC_LOGMSG_ERROR=3,
+                ESMC_LOGMSG_TRACE=4,
                 ESMC_LOGMSG_JSON =5 };
 
 enum ESMC_MeshLoc_Flag {ESMC_MESHLOC_NODE=0,
@@ -121,19 +125,24 @@ enum ESMC_PoleKind_Flag {ESMC_POLEKIND_NONE=0,
                          ESMC_POLEKIND_BIPOLE=2};
 
 enum ESMC_PoleMethod_Flag {ESMC_POLEMETHOD_NONE=0,
-			               ESMC_POLEMETHOD_ALLAVG,
-			               ESMC_POLEMETHOD_NPNTAVG,
-			               ESMC_POLEMETHOD_TEETH};
+                                       ESMC_POLEMETHOD_ALLAVG,
+                                       ESMC_POLEMETHOD_NPNTAVG,
+                                       ESMC_POLEMETHOD_TEETH};
+
+enum ESMC_Reduce_Flag { ESMC_REDUCE_SUM=1,
+                        ESMC_REDUCE_MIN=2,
+                        ESMC_REDUCE_MAX=3};
 
 enum ESMC_Region_Flag { ESMC_REGION_TOTAL=0,
                         ESMC_REGION_SELECT,
                         ESMC_REGION_EMPTY};
 
 enum ESMC_RegridMethod_Flag {ESMC_REGRIDMETHOD_BILINEAR=0,
-			                 ESMC_REGRIDMETHOD_PATCH,
-			                 ESMC_REGRIDMETHOD_CONSERVE,
+                             ESMC_REGRIDMETHOD_PATCH,
+                             ESMC_REGRIDMETHOD_CONSERVE,
                              ESMC_REGRIDMETHOD_NEAREST_STOD,
-                             ESMC_REGRIDMETHOD_NEAREST_DTOS};
+                             ESMC_REGRIDMETHOD_NEAREST_DTOS,
+                             ESMC_REGRIDMETHOD_CONSERVE_2ND};
 
 enum ESMC_StaggerLoc {ESMC_STAGGERLOC_INVALID=-2,
                       ESMC_STAGGERLOC_UNINIT,
@@ -164,7 +173,7 @@ enum ESMC_TypeKind_Flag {ESMC_TYPEKIND_I1=1,
                     ESMF_NOKIND=99};
 
 enum ESMC_UnmappedAction_Flag {ESMC_UNMAPPEDACTION_ERROR=0,
-			       ESMC_UNMAPPEDACTION_IGNORE};
+                               ESMC_UNMAPPEDACTION_IGNORE};
 
 
 #endif  // ESMC_UTIL_H

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -369,6 +369,8 @@ function ESMF_XGridCreate(keywordEnforcer, &
     !real(ESMF_KIND_R8), pointer   :: fracFptr(:,:)
     integer                       :: localElemCount, sdim, pdim
     type(ESMF_XGridGeomType_Flag), allocatable :: xggt_a(:), xggt_b(:)
+    integer :: tileCount
+    
 
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
@@ -713,13 +715,39 @@ function ESMF_XGridCreate(keywordEnforcer, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       if(xggt_a(i) == ESMF_XGRIDGEOMTYPE_GRID) then
-        meshAt(i) = ESMF_GridToMesh(xgtype%sideA(i)%gbcp%grid, &
-          ESMF_STAGGERLOC_CORNER, AisSphere, &
-          maskValues=sideAMaskValues, &
-          regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
+         ! Get number of tiles in Grid
+         call ESMF_GridGet(grid=xgtype%sideA(i)%gbcp%grid, &
+              tileCount=tileCount, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+         ! Use different methods for GridToMesh depending on tileCount.
+         ! TODO: Get rid of this and just use new method for everything
+         if (tileCount .eq. 1) then
+            ! Create Mesh from Grid
+            meshAt(i) = ESMF_GridToMesh(xgtype%sideA(i)%gbcp%grid, &
+                 ESMF_STAGGERLOC_CORNER, AisSphere, &
+                 maskValues=sideAMaskValues, &
+                 regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                 ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+         else
+            ! Create Mesh from Grid
+            meshAt(i) = ESMF_GridToMeshCell(xgtype%sideA(i)%gbcp%grid, &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+            
+            ! Turn on masking
+            if (present(sideAMaskValues)) then
+               call ESMF_MeshTurnOnCellMask(meshAt(i), &
+                    maskValues=sideAMaskValues,  rc=localrc);
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+         endif
       else if(xggt_a(i) == ESMF_XGRIDGEOMTYPE_MESH) then
         meshAt(i) = xgtype%sideA(i)%gbcp%mesh
         if (present(sideAMaskValues)) then
@@ -765,14 +793,41 @@ function ESMF_XGridCreate(keywordEnforcer, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       if(xggt_b(i) == ESMF_XGRIDGEOMTYPE_GRID) then
-        meshBt(i) = ESMF_GridToMesh(xgtype%sideB(i)%gbcp%grid, &
-          ESMF_STAGGERLOC_CORNER, BisSphere, &
-          maskValues=sideBMaskValues, &
-          regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      else if(xggt_b(i) == ESMF_XGRIDGEOMTYPE_MESH) then
+         ! Get number of tiles in Grid
+         call ESMF_GridGet(grid=xgtype%sideB(i)%gbcp%grid, &
+              tileCount=tileCount, rc=localrc)
+         if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+         ! Use different methods for GridToMesh depending on tileCount.
+         ! TODO: Get rid of this and just use new method for everything
+         if (tileCount .eq. 1) then
+            ! Create Mesh from Grid
+            meshBt(i) = ESMF_GridToMesh(xgtype%sideB(i)%gbcp%grid, &
+                 ESMF_STAGGERLOC_CORNER, BisSphere, &
+                 maskValues=sideBMaskValues, &
+                 regridConserve=ESMF_REGRID_CONSERVE_ON, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                 ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+         else
+            ! Create Mesh from Grid
+            meshBt(i) = ESMF_GridToMeshCell(xgtype%sideB(i)%gbcp%grid, &
+                 rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+            
+            ! Turn on masking
+            if (present(sideBMaskValues)) then
+               call ESMF_MeshTurnOnCellMask(meshBt(i), &
+                    maskValues=sideBMaskValues,  rc=localrc);
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+         endif
+         else if(xggt_b(i) == ESMF_XGRIDGEOMTYPE_MESH) then
         meshBt(i) = xgtype%sideB(i)%gbcp%mesh
         if (present(sideBMaskValues)) then
           call ESMF_MeshTurnOnCellMask(meshBt(i), maskValues=sideBMaskValues, rc=localrc);
@@ -789,6 +844,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
            ESMF_CONTEXT, rcToReturn=rc) 
         return
       endif
+
       if( i == 1) meshB = meshBt(i)
       ! call into mesh merge with priority taken into account
       ! meshBt is truncated(if necessary) and concatenated onto meshB 
@@ -871,7 +927,9 @@ function ESMF_XGridCreate(keywordEnforcer, &
     allocate(xgtype%frac2A(ngrid_a), xgtype%frac2B(ngrid_b))
     do i = 1, ngrid_A
       if(xggt_a(i) == ESMF_XGRIDGEOMTYPE_GRID) then
-        call ESMF_GridGet(xgtype%sideA(i)%gbcp%grid, distgrid=distgridTmp, rc=localrc)
+        call ESMF_GridGet(xgtype%sideA(i)%gbcp%grid, &
+             indexflag=indexflag, &
+             distgrid=distgridTmp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -880,19 +938,22 @@ function ESMF_XGridCreate(keywordEnforcer, &
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! use global index for Mesh
+        indexflag=ESMF_INDEX_GLOBAL
       endif
       xgtype%fracA2X(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
-        indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+        indexflag=indexflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       xgtype%fracX2A(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
-       indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+       indexflag=indexflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       xgtype%frac2A(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
-       indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+       indexflag=indexflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -911,7 +972,9 @@ function ESMF_XGridCreate(keywordEnforcer, &
     enddo
     do i = 1, ngrid_B
       if(xggt_b(i) == ESMF_XGRIDGEOMTYPE_GRID) then
-        call ESMF_GridGet(xgtype%sideB(i)%gbcp%grid, distgrid=distgridTmp, rc=localrc)
+        call ESMF_GridGet(xgtype%sideB(i)%gbcp%grid, &
+             indexflag=indexflag, &
+             distgrid=distgridTmp, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -920,19 +983,22 @@ function ESMF_XGridCreate(keywordEnforcer, &
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
+        ! use global index for Mesh
+        indexflag=ESMF_INDEX_GLOBAL
       endif
       xgtype%fracB2X(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
-        indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+        indexflag=indexflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       xgtype%fracX2B(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
-        indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+        indexflag=indexflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       xgtype%frac2B(i) = ESMF_ArrayCreate(distgridTmp, typekind=ESMF_TYPEKIND_R8, &
-       indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+       indexflag=indexflag, rc=localrc)
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2556,14 +2622,14 @@ end subroutine checkGrid
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        do i = 0, localDeCount-1
-				 call ESMF_ArrayGet(Array, localDe=i, farrayPtr=frac, rc=localrc)
-				 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-					 ESMF_CONTEXT, rcToReturn=rc)) return
+         call ESMF_ArrayGet(Array, localDe=i, farrayPtr=frac, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
-				 ! Call through to the C++ object that does the work
-				 call ESMF_MeshGetElemFrac(Mesh, frac, rc=localrc)
-				 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-					 ESMF_CONTEXT, rcToReturn=rc)) return 
+         ! Call through to the C++ object that does the work
+         call ESMF_MeshGetElemFrac(Mesh, frac, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return 
        enddo
 
       rc = ESMF_SUCCESS
@@ -2624,14 +2690,14 @@ end subroutine checkGrid
          ESMF_CONTEXT, rcToReturn=rc)) return
 
        do i = 0, localDeCount-1
-				 call ESMF_ArrayGet(Array, localDe=i, farrayPtr=frac, rc=localrc)
-				 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-					 ESMF_CONTEXT, rcToReturn=rc)) return
+         call ESMF_ArrayGet(Array, localDe=i, farrayPtr=frac, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
-				 ! Call through to the C++ object that does the work
-				 call ESMF_MeshGetElemFrac2(Mesh, frac, rc=localrc)
-				 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-					 ESMF_CONTEXT, rcToReturn=rc)) return
+         ! Call through to the C++ object that does the work
+         call ESMF_MeshGetElemFrac2(Mesh, frac, rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
 
       rc = ESMF_SUCCESS
@@ -2740,8 +2806,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_XGridDestroy - Release resources associated with an XGrid
 ! !INTERFACE:
 
-  subroutine ESMF_XGridDestroy(xgrid, keywordenforcer, &
-    rc)
+  subroutine ESMF_XGridDestroy(xgrid, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_XGrid), intent(inout)          :: xgrid       
@@ -2851,15 +2916,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       if(associated(xgrid%xgtypep%sparseMatA2X)) then
+          do i = 1, size(xgrid%xgtypep%sparseMatA2X)
+            if(associated(xgrid%xgtypep%sparseMatA2X(i)%factorIndexList)) &
+              deallocate(xgrid%xgtypep%sparseMatA2X(i)%factorIndexList)
+            if(associated(xgrid%xgtypep%sparseMatA2X(i)%factorList)) &
+              deallocate(xgrid%xgtypep%sparseMatA2X(i)%factorList)
+          enddo
           deallocate(xgrid%xgtypep%sparseMatA2X)
       endif
       if(associated(xgrid%xgtypep%sparseMatX2A)) then
+          do i = 1, size(xgrid%xgtypep%sparseMatX2A)
+            if(associated(xgrid%xgtypep%sparseMatX2A(i)%factorIndexList)) &
+              deallocate(xgrid%xgtypep%sparseMatX2A(i)%factorIndexList)
+            if(associated(xgrid%xgtypep%sparseMatX2A(i)%factorList)) &
+              deallocate(xgrid%xgtypep%sparseMatX2A(i)%factorList)
+          enddo
           deallocate(xgrid%xgtypep%sparseMatX2A)
       endif
       if(associated(xgrid%xgtypep%sparseMatB2X)) then
+          do i = 1, size(xgrid%xgtypep%sparseMatB2X)
+            if(associated(xgrid%xgtypep%sparseMatB2X(i)%factorIndexList)) &
+              deallocate(xgrid%xgtypep%sparseMatB2X(i)%factorIndexList)
+            if(associated(xgrid%xgtypep%sparseMatB2X(i)%factorList)) &
+              deallocate(xgrid%xgtypep%sparseMatB2X(i)%factorList)
+          enddo
           deallocate(xgrid%xgtypep%sparseMatB2X)
       endif
       if(associated(xgrid%xgtypep%sparseMatX2B)) then
+          do i = 1, size(xgrid%xgtypep%sparseMatX2B)
+            if(associated(xgrid%xgtypep%sparseMatX2B(i)%factorIndexList)) &
+              deallocate(xgrid%xgtypep%sparseMatX2B(i)%factorIndexList)
+            if(associated(xgrid%xgtypep%sparseMatX2B(i)%factorList)) &
+              deallocate(xgrid%xgtypep%sparseMatX2B(i)%factorList)
+          enddo
           deallocate(xgrid%xgtypep%sparseMatX2B)
       endif
 

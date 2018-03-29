@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -38,20 +38,20 @@ static const char *const version = "$Id$";
 //#define CRE_DEBUG
 
 extern "C" {
-  void FTN_X(f_esmf_meshcreatefromfile)(ESMCI::Mesh **meshp, 
-					const char *filename, int *fileTypeFlag, 
- 					int *convertToDual, int *ctodpresent,
- 					int *addUserArea, int *auapresent,
-					const char *meshname, int *mnpresent,
- 					int *maskFlag, int *mfpresent,
- 					const char *varname, int *vnpresent,
+  void FTN_X(f_esmf_meshcreatefromfile)(ESMCI::Mesh **meshp,
+                                        const char *filename, int *fileTypeFlag,
+                                        int *convertToDual, int *ctodpresent,
+                                        int *addUserArea, int *auapresent,
+                                        const char *meshname, int *mnpresent,
+                                        int *maskFlag, int *mfpresent,
+                                        const char *varname, int *vnpresent,
                                         int *parametricDim,
                                         int *spatialDim,
                                         ESMC_CoordSys_Flag *coordSys,
-					int *rc,
-					ESMCI_FortranStrLenArg len_filename,
-					ESMCI_FortranStrLenArg len_meshname,
-					ESMCI_FortranStrLenArg len_varname);
+                                        int *rc,
+                                        ESMCI_FortranStrLenArg len_filename,
+                                        ESMCI_FortranStrLenArg len_meshname,
+                                        ESMCI_FortranStrLenArg len_varname);
 }
 
 namespace ESMCI {
@@ -71,25 +71,27 @@ Mesh::Mesh() : MeshDB(), FieldReg(), CommReg(),
 }
 
 Mesh::~Mesh() {
+  // Get rid of ghost communication structure
+  if (sghost != NULL) delete sghost;
 }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Mesh::createfromfile()"
-Mesh *Mesh::createfromfile(const char *filename, int fileTypeFlag, 
-			   int *convertToDual,
-			   int *addUserArea,
-			   const char *meshname,
-			   int *maskFlag,
-			   const char *varname,
+Mesh *Mesh::createfromfile(const char *filename, int fileTypeFlag,
+                           int *convertToDual,
+                           int *addUserArea,
+                           const char *meshname,
+                           int *maskFlag,
+                           const char *varname,
                            int *parametricDim,
                            int *spatialDim,
                            ESMC_CoordSys_Flag *coordSys,
-			   int *rc) {
+                           int *rc) {
 
     // Initialize return code. Assume routine not implemented
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
-  
+
     // handle the optional arguments
     int ctodpresent, auapresent, mnpresent, mfpresent, vnpresent;
     ctodpresent = convertToDual != NULL;
@@ -101,24 +103,24 @@ Mesh *Mesh::createfromfile(const char *filename, int fileTypeFlag,
     // allocate the mesh object
     Mesh *mesh;
 
-    FTN_X(f_esmf_meshcreatefromfile)(&mesh, 
-				     filename, &fileTypeFlag, 
-				     convertToDual, &ctodpresent,
-				     addUserArea, &auapresent,
-				     meshname, &mnpresent,
-				     maskFlag, &mfpresent,
-				     varname, &vnpresent,
+    FTN_X(f_esmf_meshcreatefromfile)(&mesh,
+                                     filename, &fileTypeFlag,
+                                     convertToDual, &ctodpresent,
+                                     addUserArea, &auapresent,
+                                     meshname, &mnpresent,
+                                     maskFlag, &mfpresent,
+                                     varname, &vnpresent,
                                      parametricDim,
                                      spatialDim,
                                      coordSys,
-				     &localrc, strlen(filename),
-				     strlen(meshname), strlen(varname));
+                                     &localrc, strlen(filename),
+                                     strlen(meshname), strlen(varname));
 
     if (rc) *rc = localrc;
 
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return ESMC_NULL_POINTER;
-  
+
     return mesh;
 }
 
@@ -173,7 +175,7 @@ void Mesh::assign_new_ids() {
               Throw() << "Error inserting. Key already exists!!! Obj:" << obj << std::endl;
 
             // clear pendinig bit wit base class, below
-            
+
           } // for oi
         } // Pending create
       } // object kernel type
@@ -195,12 +197,12 @@ void build_shared_comm(Mesh &mesh, UInt obj_type, std::vector<CommRel::CommNode>
           std::vector<UInt> procs;
           // Use SymNodeRel for sharing of ALL types!
           MeshObjConn::get_shared_procs(*oi, mesh.GetSymNodeRel(), procs);
-           
+
           // If the object is shared, but no procs come back, make a last try by
           // consulting the shared comm
           if (procs.size() == 0 && GetMeshObjContext(*oi).is_set(Attr::SHARED_ID)) {
             CommRel &crel = mesh.GetCommRel(obj_type);
-            CommRel::MapType::iterator lb = 
+            CommRel::MapType::iterator lb =
               std::lower_bound(crel.domain_begin(), crel.domain_end(), CommRel::CommNode(&*oi, 0));
 
             while(lb != crel.domain_end() && lb->obj == &*oi) {
@@ -249,7 +251,7 @@ void set_owner_to_self(Mesh &mesh) {
 }
 
 /*----------------------------------------------------------------*/
-// Resolve mesh object creation across parallel interfaces 
+// Resolve mesh object creation across parallel interfaces
 /*----------------------------------------------------------------*/
 void Mesh::ResolvePendingCreate() {
   TraceBack __trace("Mesh::ResolvePendingCreate()");
@@ -269,9 +271,9 @@ void Mesh::ResolvePendingCreate() {
   // Step 2:  Now we find out if the objects are shared.  Amongst other things, assign an
   // owning processor.  If the object is shared, add to the sym comm spec and and resolve the global
   // id to be that of the owner.
-  for (UInt tp = 0; csize > 1 && tp < NumMeshObjTypes; tp++) 
+  for (UInt tp = 0; csize > 1 && tp < NumMeshObjTypes; tp++)
   {
-    
+
     UInt obj_type = MeshObjTypes[tp];
 
     // For edges, we process the full and then child cases separately
@@ -297,10 +299,10 @@ Par::Out() << "Resolve object type:" << MeshObjTypeString(obj_type) << std::endl
       // Get the shared objects and the procs they
       // are shared with.
       build_shared_comm(*this, obj_type, ecnodes, Attr::PENDING_CREATE_ID);
-  
+
       // Add these objects to the comm rel.
       orel.add_domain(ecnodes);
-  
+
     }
 
     // At this point, orel is the commspec for all shared objects of this type.
@@ -309,10 +311,10 @@ Par::Out() << "Resolve object type:" << MeshObjTypeString(obj_type) << std::endl
     std::vector<CommRel::CommNode> final_sym_objs;
 
     /*--------------------------------------------------------*/
-    // Broadcast the object to all sharing processors 
+    // Broadcast the object to all sharing processors
     {
       SparseMsg msg;
- 
+
       CommRel::MapType::iterator di = orel.domain_begin(), de = orel.domain_end();
       std::vector<UInt> to_proc;
       std::vector<UInt> send_sizes_all(csize, 0);
@@ -334,14 +336,14 @@ Par::Out() << "Resolve object type:" << MeshObjTypeString(obj_type) << std::endl
           MeshObjConn::common_objs(&obj, &obj + 1, MeshObj::PARENT, obj_type, parents);
 
           if (parents.size() > 0) {
-   
+
             // Don't send the child edges out until we have processed parents.
-            if (obj_type == MeshObj::EDGE && scase == 0) continue;  
+            if (obj_type == MeshObj::EDGE && scase == 0) continue;
             etopo = GetMeshObjTopo(*parents[0]);
           }
           else {
             // Already sent these out in step 0, so no need now.
-            if (obj_type == MeshObj::EDGE && scase == 1) continue;  
+            if (obj_type == MeshObj::EDGE && scase == 1) continue;
             etopo = GetMeshObjTopo(*obj);
           }
 
@@ -372,13 +374,13 @@ Par::Out() << "Resolve object type:" << MeshObjTypeString(obj_type) << std::endl
           send_sizes_all[proc] += SparsePack<MeshObj::id_type>::size();
         }
       } // for di
- 
+
       // Set the communication patter, collect sizes
       UInt nsend = to_proc.size();
       msg.setPattern(nsend, nsend == 0 ? NULL : &to_proc[0]);
 
       std::vector<UInt> to_sizes(nsend,0);
-      for (UInt i = 0; i < nsend; i++) 
+      for (UInt i = 0; i < nsend; i++)
         to_sizes[i] = send_sizes_all[to_proc[i]];
 
       msg.setSizes(nsend == 0 ? NULL : &to_sizes[0]);
@@ -407,7 +409,7 @@ Par::Out() << "Resolve object type:" << MeshObjTypeString(obj_type) << std::endl
 
           if (parents.size() > 0) {
 
-            if (obj_type == MeshObj::EDGE && scase == 0) continue;  
+            if (obj_type == MeshObj::EDGE && scase == 0) continue;
 
             MeshObjConn::get_obj_nodes(*parents[0], enodes);
 
@@ -415,7 +417,7 @@ Par::Out() << "Resolve object type:" << MeshObjTypeString(obj_type) << std::endl
             ThrowRequire(ord >= 0);
           }
           else {
-            if (obj_type == MeshObj::EDGE && scase == 1) continue;  
+            if (obj_type == MeshObj::EDGE && scase == 1) continue;
             MeshObjConn::get_obj_nodes(*obj, enodes);
             ord = -1;
           }
@@ -457,7 +459,7 @@ Par::Out() << "Resolve object type:" << MeshObjTypeString(obj_type) << std::endl
      for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); ++p) {
        UInt proc = *p;
        SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
-  
+
        // Unpack everything from this processor
        while (!b.empty()) {
 
@@ -507,7 +509,7 @@ Par::Out() << std::endl;
 
          bool interior_edge = false;
          if (elems.size() == 0) {
-           // *** This definitely could happen, if the face or edge is on an 
+           // *** This definitely could happen, if the face or edge is on an
            // exterior, but the neighbor processor envelops the boundary of the
            // element.
 #ifdef CRE_DEBUG
@@ -541,7 +543,7 @@ if (elems.size() > 0)
          std::vector<int> ordinals; ordinals.resize(elems.size());
          std::vector<int> polaritys; polaritys.resize(elems.size());
          std::vector<int> rotations; rotations.resize(elems.size());
-    
+
          // Our first bifurcation:  If edges, edge_info, else face_info; nodes may be either
          if (obj_type == MeshObj::NODE) {
            // Must determine the type of topology that was sent:
@@ -583,9 +585,9 @@ if (elems.size() > 0)
            // Use entry 0 to search for object
            MeshObj &elem = *elems[0];
 
-      
+
            const MeshObjTopo *elem_topo = GetMeshObjTopo(elem);
- 
+
            const int *side_nodes = (etopo->parametric_dim == 1 ?
                          elem_topo->get_edge_nodes(ordinals[0]) : elem_topo->get_side_nodes(ordinals[0]));
 
@@ -624,29 +626,29 @@ Par::Out() << "Did not find node on other side, creating" << std::endl; // TODO:
            // object.
            if (obj_ord < 0) {
              if (geri == (*elems.begin())->Relations.end()) {
-  
+
 #ifdef CRE_DEBUG
   Par::Out() << "Did not find " << MeshObjTypeString(obj_type) << " on other side, creating" << std::endl; // TODO: take out of sym spec
 #endif
-  
+
                MeshObj *newside = new MeshObj(obj_type, get_new_local_id(obj_type));
 
                Context ctxt(a.GetContext());
-   
+
                // Add object to mesh; depends on object type.
                if (obj_type == MeshObj::EDGE) {
-   
+
                   add_edge_local(*newside, *elems[0], ordinals[0], a.GetBlock(), etopo, ctxt);
-  
+
                 } else if (obj_type == MeshObj::FACE) {
-  
+
                   add_side_local(*newside, *elems[0], ordinals[0], a.GetBlock(), etopo, ctxt);
-  
+
                 } else Throw() << "Unknown obj type in side create resolution";
-  
+
                // set owner to ridiculously large number so that it is assigned to proc, below.
                newside->set_owner(std::numeric_limits<UInt>::max());
-  
+
              } else {
 
                 eobj = geri->obj; // assign to found object
@@ -672,7 +674,7 @@ Par::Out() << "local obj " << eobj->get_id() << " not pending create, relinquish
              }
 
            } else { // obj_ord >= 0, geri points to parent
-          
+
              // If geri = relations.end, something has gone wrong.  We MUST have the parent on this
              // proc!!
              ThrowRequire(geri != elems[0]->Relations.end());
@@ -733,13 +735,13 @@ Par::Out() << std::endl;
 }
 */
          } else if (interior_edge) {
-           // Don't Create the interior edge.  
+           // Don't Create the interior edge.
            continue;
          }
 
          /*-----------------------------------------------------------------------*/
          // Invariant:  No matter what came before, now eobj points to the shared
-         // object.  It now remains to resolve ownership and id 
+         // object.  It now remains to resolve ownership and id
 
          // If proc < owner, then assign the node to proc and assign proc's gid
 #ifdef CRE_DEBUG
@@ -787,10 +789,10 @@ Par::Out() << "Assigning owner " << proc << ", old owner:" << eobj->get_owner() 
                       final_sym_objs.end(), tnode);
 
            final_sym_objs.insert(lb, tnode);
-            
+
 
            /*-------------------------------------------------------------------------*/
-           // Now update all the polarities so they match the owner.  We do not 
+           // Now update all the polarities so they match the owner.  We do not
            // worry about polarities if the object is a child because either
            // a) the object already existed, which means it has a parent here, which
            // means the child object inherits its orientation from the parent (which must
@@ -836,20 +838,20 @@ Par::Out() << MeshObjTypeString(obj_type) << " " << eobj->get_id() << " has chil
                  // Now the annoying process of flipping the children.  For the edge,
                  // it is actually somewhat simple:  We switch edges, and then reverse
                  // the polarities.
-  
-  
+
+
                  /*-----------------------------------*/
                  // Reset the eobj->child pointers
                  MeshObj::Relation r0 = *eci;
                  eobj->Relations.erase(eci);
-            
+
                  MeshObjRelationList::iterator eci1 = MeshObjConn::find_relation(*eobj, obj_type, 1, MeshObj::CHILD);
                  ThrowRequire(eci1 != eobj->Relations.end());
                  MeshObj::Relation r1 = *eci1;
                  eobj->Relations.erase(eci1);
 
                  // Reset
-                 r0.ordinal = 1; 
+                 r0.ordinal = 1;
                  r1.ordinal = 0;
                  AddMeshObjRelation(*eobj, r0);
                  AddMeshObjRelation(*eobj, r1);
@@ -865,7 +867,7 @@ Par::Out() << MeshObjTypeString(obj_type) << " " << eobj->get_id() << " has chil
 
                  // And now flip the polarity for an objects using these two edges.
                  std::vector<MeshObj*> edge_elem;
-                 
+
                  for (UInt i = 0; i < r0.obj->Relations.size(); i++) {
                    MeshObj::Relation &rel = r0.obj->Relations[i];
                    if (rel.type == MeshObj::USED_BY) {
@@ -886,7 +888,7 @@ Par::Out() << MeshObjTypeString(obj_type) << " " << eobj->get_id() << " has chil
                  }
 
                } // flipped
-               
+
              } // has children to re-orient
            }
          } // if proc < eobj->owner
@@ -901,7 +903,7 @@ Par::Out() << MeshObjTypeString(obj_type) << " " << eobj->get_id() << " has chil
 
     /*-------------------------------------------------------------------*/
     // Now that we have new shared objects, we need to rebuild the sym
-    // commspec for this object type.  We use the resolution spec 
+    // commspec for this object type.  We use the resolution spec
     // to build a symetric spec, then update object attributes to reflect
     // their sharing, and finally add these objects into the symmetric spec.
     /*-------------------------------------------------------------------*/
@@ -928,7 +930,7 @@ Par::Out() << MeshObjTypeString(obj_type) << " " << eobj->get_id() << " has chil
     }
 
 //orel1.Print(Par::Out());
-   
+
     // And, lastly, add all these objects to the symmetric edge comm.
     GetCommRel(obj_type).Append(orel1);
 #ifdef CRE_DEBUG
@@ -937,7 +939,7 @@ GetCommRel(obj_type).Print(Par::Out());
 #endif
 
   } // subcases
-  
+
   } // For object type
 
   // We assume all objects are taken care of.  Let base class remove pendingcreate bit
@@ -961,7 +963,7 @@ void Mesh::ResolvePendingDelete() {
   // but we do not delete ourselves yet.
   UInt csize = Par::Size();
 
-  for (int tp = NumMeshObjTypes - 1; tp >= 0; tp--) 
+  for (int tp = NumMeshObjTypes - 1; tp >= 0; tp--)
   {
 
     UInt obj_type = MeshObjTypes[tp];
@@ -986,7 +988,7 @@ Par::Out() << std::endl;
 */
 
     // For the object to be deleted, we need it to be either on PENDING_DELETE
-    // or unused on all other processors.  Otherwise, we just put object on the 
+    // or unused on all other processors.  Otherwise, we just put object on the
     // we keep it, and we reconnect the parent relations.
 
 
@@ -1106,11 +1108,11 @@ Par::Out() << "request about " << obj_id << " from proc:" << proc << ", del_stat
          // 1) If object is on my pendingdelete, great!
          // 2) If object is not present on this processor (think interior edge)
          // 3) Object is only ghosted (no used_by, only parent/child relations)
-        
+
          // Find object:
          MeshObjIDMap &omap = get_map(obj_type);
          MeshObjIDMap::iterator mi = omap.find(obj_id);
-         
+
 
          // Case 2:
          if (mi == omap.end()) {
@@ -1136,7 +1138,7 @@ Par::Out() << "\tok to delete: on my pending delete" << std::endl;
            if (del_stat == DEL_FORCE) {
              std::vector<MeshObj*>::iterator lb =
                 std::lower_bound(int_edges.begin(), int_edges.end(), &*mi);
-             if (lb == int_edges.end() || *lb != &*mi) 
+             if (lb == int_edges.end() || *lb != &*mi)
                int_edges.insert(lb, &*mi);
            }
 
@@ -1162,7 +1164,7 @@ Par::Out() << "\tok to delete: no used_by relations here" << std::endl;
         }
 
        }
-    
+
       } // unpack
 
       if (!msg.empty())
@@ -1194,7 +1196,7 @@ Par::Out() << "\tok to delete: no used_by relations here" << std::endl;
         for (UInt n = 0; n < proc_reply.size(); n++) {
           SparsePack<int>(b, proc_reply[n]);
         }
-        
+
       } // pack
 
       if (!rmsg.filled()) {
@@ -1226,23 +1228,23 @@ Par::Out() << "\tok to delete: no used_by relations here" << std::endl;
 
         while(clb != ecnodes.end() && clb->processor == proc) {
 
-          MeshObj &obj = *clb->obj; 
+          MeshObj &obj = *clb->obj;
 
           int vote;
           SparseUnpack<int>(b, vote);
- 
+
           // Try to insert the vote (in case object hasn't yet been inserted)
           std::pair<Vote_Map_Type::iterator,bool> ins_it = vote_map.insert(std::make_pair(obj.get_id(), vote));
 
 #ifdef DEL_DEBUG
 Par::Out() << "Vote map insert:" << MeshObjTypeString(obj_type) << " " << obj.get_id() << " from proc:" << proc << ", vote=" << vote << std::endl;
 #endif
-    
+
           // If object already exists, vote: all objects must allow delete or it doesn't happen.
           if (ins_it.second == false) {
             ins_it.first->second = (ins_it.first->second == 1 && vote == 1 ? 1 : 0); // all or nothing
           }
-           
+
           ++clb;
         } // objects for this proc
 
@@ -1276,7 +1278,7 @@ Par::Out() << "Vote map insert:" << MeshObjTypeString(obj_type) << " " << obj.ge
           Throw() << "Did not find vote map obj:" << obj.get_id() << " in map:";
         }
 
-        int vote = vmi->second; 
+        int vote = vmi->second;
 
         // If vote says delete item, forward a delete message to all
         // procs involved.
@@ -1285,7 +1287,7 @@ Par::Out() << "Vote map insert:" << MeshObjTypeString(obj_type) << " " << obj.ge
 
             UInt proc = di->processor;
             send_sizes_all[proc] += SparsePack<MeshObj::id_type>::size();
-            
+
             // add processor
             std::vector<UInt>::iterator lb = std::lower_bound(to_proc.begin(), to_proc.end(), proc);
             if (lb == to_proc.end() || *lb != proc)
@@ -1313,7 +1315,7 @@ Par::Out() << "Vote map insert:" << MeshObjTypeString(obj_type) << " " << obj.ge
         Vote_Map_Type::iterator vmi = vote_map.find(obj.get_id());
         ThrowRequire(vmi != vote_map.end());
 
-        int vote = vmi->second; 
+        int vote = vmi->second;
 
         // If vote says delete item, forward a delete message to all
         // procs involved.
@@ -1325,7 +1327,7 @@ Par::Out() << "Vote map insert:" << MeshObjTypeString(obj_type) << " " << obj.ge
             // Send id of obj to be deleted.
             SparseMsg::buffer &b = *vmsg.getSendBuffer(proc);
             SparsePack<MeshObj::id_type>(b, obj.get_id());
-            
+
           }
         } while ((++di) != ecnodes.end() && di->obj == &obj);
 
@@ -1345,7 +1347,7 @@ Par::Out() << "Vote map insert:" << MeshObjTypeString(obj_type) << " " << obj.ge
 
         while (!b.empty()) {
           MeshObj::id_type obj_id;
-       
+
           SparseUnpack<MeshObj::id_type>(b, obj_id);
 
 
@@ -1373,7 +1375,7 @@ Par::Out() << "Deleting object: " << MeshObjTypeString(obj_type) << " " << obj_i
 
           // Save a list of deleted objects to remove from comm rel
           if (GetAttr(dobj).is_shared()) {
-            std::vector<MeshObj*>::iterator tdl = 
+            std::vector<MeshObj*>::iterator tdl =
                 std::lower_bound(to_delete_list.begin(), to_delete_list.end(), &dobj);
             if (tdl == to_delete_list.end() || *tdl != &dobj)
               to_delete_list.insert(tdl, &dobj);
@@ -1398,7 +1400,7 @@ Par::Out() << "Deleting object: " << MeshObjTypeString(obj_type) << " " << obj_i
       ThrowRequire(mi != omap.end());
       MeshObj &dobj = *mi;
 
-      // Delete all of my requests that either 
+      // Delete all of my requests that either
       //    a) pass the vote test
       //    b) are an interior edge that has been marooned, i.e. no relations
       if (vmi->second == 1 || (obj_type == MeshObj::EDGE && dobj.Relations.size() == 0)) {
@@ -1410,14 +1412,14 @@ Par::Out() << "Deleting object: " << MeshObjTypeString(obj_type) << " " << vmi->
         const Context &ctxt = GetMeshObjContext(dobj);
         Context newctxt(ctxt);
         newctxt.set(Attr::PENDING_DELETE_ID);
-  
+
         if (newctxt != ctxt) {
           Attr attr(GetAttr(dobj), newctxt);
           update_obj(&dobj, attr);
         }
         // Save a list of deleted objects to remove from comm rel
         if (GetAttr(dobj).is_shared()) {
-          std::vector<MeshObj*>::iterator tdl = 
+          std::vector<MeshObj*>::iterator tdl =
               std::lower_bound(to_delete_list.begin(), to_delete_list.end(), &dobj);
           if (tdl == to_delete_list.end() || *tdl != &dobj)
             to_delete_list.insert(tdl, &dobj);
@@ -1438,7 +1440,7 @@ Par::Out() << "Deleting object: " << MeshObjTypeString(obj_type) << " " << vmi->
 
 #ifdef DEL_DEBUG
 Par::Out() << "Objects to delete:" << std::endl;
-for (UInt i = 0; i < to_delete_list.size(); i++) 
+for (UInt i = 0; i < to_delete_list.size(); i++)
   Par::Out() << "\t" << MeshObjTypeString(to_delete_list[i]->GetType()) << " " << to_delete_list[i]->get_id() << std::endl;
 
 Par::Out() << "commrel before delete:" << std::endl;
@@ -1484,7 +1486,7 @@ void Mesh::Commit() {
 
   if (committed)
     Throw() << "Mesh is already committed!";
-  
+
   // Create sides/edges, if requested
   if (use_sides) {
     CreateAllSides();
@@ -1492,10 +1494,10 @@ void Mesh::Commit() {
   if (use_edges && side_type() != MeshObj::EDGE) {
     CreateAllEdges();
   }
-  
+
   ResolvePendingCreate();
-  
-  
+
+
   FieldReg::CreateDBFields();
   FieldReg::Commit(*this);
 
@@ -1519,20 +1521,20 @@ void Mesh::GetImprintContexts(std::vector<UInt> nvalSet, std::vector<UInt> nvalS
 
 
 void FieldReg::GetImprints(
-			   int numSetsArg,
-			   std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
-			   std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg) {
+                           int numSetsArg,
+                           std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
+                           std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg) {
 
 void FieldReg::GetImprints(
-			   int numSetsArg,
-			   std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
-			   std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg) {
+                           int numSetsArg,
+                           std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
+                           std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg) {
 }
 #endif
 
 void Mesh::ProxyCommit(int numSetsArg,
-		       std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
-		       std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg) {    
+                       std::vector<UInt> nvalSetSizesArg, std::vector<UInt> nvalSetValsArg,
+                       std::vector<UInt> nvalSetObjSizesArg, std::vector<UInt> nvalSetObjValsArg) {
   Trace __trace("Mesh::ProxyCommit()");
 
   if (committed)
@@ -1545,17 +1547,17 @@ void Mesh::ProxyCommit(int numSetsArg,
     if (use_edges && side_type() != MeshObj::EDGE) {
       CreateAllEdges();
     }
-    
+
 #if 0
     ResolvePendingCreate();
 #endif
-  
+
   FieldReg::CreateDBFields();
 
   FieldReg::ProxyCommit(*this,
-			numSetsArg,
-			nvalSetSizesArg, nvalSetValsArg,
-			nvalSetObjSizesArg, nvalSetObjValsArg);
+                        numSetsArg,
+                        nvalSetSizesArg, nvalSetValsArg,
+                        nvalSetObjSizesArg, nvalSetObjValsArg);
 
   MeshDB::Commit(FieldReg::NumFields(), FieldReg::ListOfFields(), Numfields(), FieldReg::ListOffields());
 
@@ -1576,49 +1578,49 @@ void Mesh::CreateGhost() {
   // Loop through the shared nodes; add all attached elements.
   KernelList::iterator ms = set_begin(), me = set_end();
   for (; ms != me; ++ms) {
-    
+
     if (ms->type() == (UInt) MeshObj::NODE && ms->GetAttr().is_shared()) {
-      
+
       Kernel::obj_iterator oi = ms->obj_begin(), oe = ms->obj_end();
       for (; oi != oe; ++oi) {
-        
+
         MeshObj &node = *oi;
         std::vector<MeshObj*> elem;
         std::vector<MeshObj*> on(1);
         on[0] = &node;
-        
+
         // Get all the elements this node is used by.
         MeshObjConn::common_objs(on.begin(),on.end(), MeshObj::USED_BY, MeshObj::ELEMENT, elem);
-        
+
         // Find the procs this node goes to and send the element there
         std::vector<UInt> nprocs;
         MeshObjConn::get_node_sharing(node, GetSymNodeRel(), nprocs);
         for (UInt i = 0; i < nprocs.size(); i++) {
-          
+
           // Add the elements (if not already present)
           for (UInt e = 0; e < elem.size(); e++) {
             CommRel::CommNode cnode(elem[e], nprocs[i]);
-            
-            std::vector<CommRel::CommNode>::iterator lb = 
+
+            std::vector<CommRel::CommNode>::iterator lb =
               std::lower_bound(selem.begin(), selem.end(), cnode);
-              
+
             if (lb == selem.end() || *lb != cnode)
               selem.insert(lb, CommRel::CommNode(elem[e], nprocs[i]));
-              
+
           }
-        
+
         } // for i
-        
-      } // for oi 
-      
+
+      } // for oi
+
     } // if kernel matches
-    
+
   } // ms
 
   CommRel &ecomm = sghost->GetCommRel(MeshObj::ELEMENT);
-  
+
   ecomm.add_domain(selem);
-  
+
   ecomm.dependants(sghost->GetCommRel(MeshObj::NODE), MeshObj::NODE);
   ecomm.dependants(sghost->GetCommRel(MeshObj::EDGE), MeshObj::EDGE);
   ecomm.dependants(sghost->GetCommRel(MeshObj::FACE), MeshObj::FACE);
@@ -1639,14 +1641,14 @@ void Mesh::CreateGhost() {
 
 void Mesh::RemoveGhost() {
   if (!sghost) return; // must already be scratched
-  
+
   sghost->Transpose();
-  
+
   sghost->GetCommRel(MeshObj::ELEMENT).delete_domain();
   sghost->GetCommRel(MeshObj::FACE).delete_domain();
   sghost->GetCommRel(MeshObj::EDGE).delete_domain();
   sghost->GetCommRel(MeshObj::NODE).delete_domain();
-  
+
   delete sghost; sghost = 0; // does delete do this?? don't remember...
 }
 
@@ -1657,7 +1659,7 @@ void Mesh::build_sym_comm_rel(UInt obj_type) {
 
   // Loop the mesh; find shared nodes and add
    std::vector<CommRel::CommNode> snodes;
- 
+
    // Ok, now the trick.  Loop through nodes, if _OWNER != rank, then node is owned
    MeshDB::iterator ni = obj_begin_all(obj_type), ne = obj_end_all(obj_type);
    if (Par::Size() > 1)
@@ -1677,20 +1679,20 @@ void Mesh::build_sym_comm_rel(UInt obj_type) {
    }
    ncom.BuildFromOwner(*this, snodes);
    std::vector<CommRel::CommNode>().swap(snodes);
- 
+
    // We now know all the shared objs, so loop through and mark them.  Also,
    // update the locally_owned attr;
    CommRel::MapType::iterator sni = ncom.domain_begin(), sne = ncom.domain_end();
    std::vector<MeshObj*> psnodes;
- 
+
    for (; sni != sne; ++sni) {
-   
+
      psnodes.push_back(sni->obj);
    }
- 
+
    std::sort(psnodes.begin(), psnodes.end());
    psnodes.erase(std::unique(psnodes.begin(), psnodes.end()), psnodes.end());
- 
+
    // snodes now contains the shared node list.  Loop through and update nodes;
    std::vector<MeshObj*>::iterator spi = psnodes.begin(), spe = psnodes.end();
    for (; spi != spe; ++spi) {
@@ -1722,7 +1724,7 @@ void Mesh::proxy_build_sym_comm_rel(UInt obj_type) {
 
   // Loop the mesh; find shared nodes and add
    std::vector<CommRel::CommNode> snodes;
- 
+
    // Ok, now the trick.  Loop through nodes, if _OWNER != rank, then node is owned
    MeshDB::iterator ni = obj_begin_all(obj_type), ne = obj_end_all(obj_type);
    if (Par::Size() > 1)
@@ -1741,20 +1743,20 @@ void Mesh::proxy_build_sym_comm_rel(UInt obj_type) {
    }
    ncom.BuildFromOwner(*this, snodes);
    std::vector<CommRel::CommNode>().swap(snodes);
- 
+
    // We now know all the shared objs, so loop through and mark them.  Also,
    // update the locally_owned attr;
    CommRel::MapType::iterator sni = ncom.domain_begin(), sne = ncom.domain_end();
    std::vector<MeshObj*> psnodes;
- 
+
    for (; sni != sne; ++sni) {
-   
+
      psnodes.push_back(sni->obj);
    }
- 
+
    std::sort(psnodes.begin(), psnodes.end());
    psnodes.erase(std::unique(psnodes.begin(), psnodes.end()), psnodes.end());
- 
+
    // snodes now contains the shared node list.  Loop through and update nodes;
    std::vector<MeshObj*>::iterator spi = psnodes.begin(), spe = psnodes.end();
    for (; spi != spe; ++spi) {
@@ -1783,31 +1785,31 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
   // To every proc send whether we are to be deleted or not
   UInt nproc = Par::Size();
   UInt rank = Par::Rank();
-  
+
   CommRel::MapType::iterator ci = crel.domain_begin(), ce = crel.domain_end();
 
   // First loop the comm.  If staying, set owner=rank, else owner=nproc.
   // Use actfield to min the owners.  At the end, meshobj owner has a valid
   // owner installed, or nproc if all departing.
-  
+
   for (; ci != ce; ++ci) {
-    
+
     MeshObj &obj = *ci->obj;
-    
+
     MeshObj::OwnerType &d = *obj.get_owner_ptr();
-    
+
     if (GetMeshObjContext(obj).is_set(Attr::PENDING_DELETE_ID)) {
       d = nproc;
     } else {
       d = rank;
     }
   }
-  
+
   ActField<OwnerAction> af("_ofield");
   ActField<OwnerAction> *afp = &af;
-  
+
   crel.swap_op<MeshObj::OwnerType, ActField<OwnerAction> >(1, &afp, CommRel::OP_MIN);
-  
+
 }
 
 // This method converts a Mesh to a PointList
@@ -1835,8 +1837,8 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
      if (cfield == NULL) {
        int localrc;
        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-					"- mesh node coordinates unavailable",
-					ESMC_CONTEXT, &localrc)) throw localrc;
+                                        "- mesh node coordinates unavailable",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;
      }
      mb = map_begin(MeshObj::NODE);
      me = map_end(MeshObj::NODE);
@@ -1854,8 +1856,8 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
 
        int localrc;
        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-					"- mesh element coordinates unavailable",
-					ESMC_CONTEXT, &localrc)) throw localrc;
+                                        "- mesh element coordinates unavailable",
+                                        ESMC_CONTEXT, &localrc)) throw localrc;
      }
      mb = map_begin(MeshObj::ELEMENT);
      me = map_end(MeshObj::ELEMENT);
@@ -1866,8 +1868,8 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
      //unknown meshLoc
      int localrc;
      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-				      "- illegal value specified for mesh location",
-				      ESMC_CONTEXT, &localrc)) throw localrc;
+                                      "- illegal value specified for mesh location",
+                                      ESMC_CONTEXT, &localrc)) throw localrc;
    }
 
    int numMaskValues;
@@ -1877,8 +1879,8 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
      //if (maskValuesArg!=NULL) {
      //  int localrc;
      //  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-     //				"- mask values provided but no mask info in mesh",
-     //				ESMC_CONTEXT, &localrc)) throw localrc;
+     //                                 "- mask values provided but no mask info in mesh",
+     //                                 ESMC_CONTEXT, &localrc)) throw localrc;
      //}
 
      int num_local_pts=0;
@@ -1886,10 +1888,10 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
        const MeshObj &obj = *mi;
 
        if (GetAttr(obj).is_locally_owned()) {
-	 num_local_pts++;
+         num_local_pts++;
        }
      }
-   
+
      // Create PointList
      plp = new PointList(num_local_pts,spatial_dim());
 
@@ -1898,8 +1900,8 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
        const MeshObj &obj = *mi;
 
        if (GetAttr(obj).is_locally_owned()) {
-	 double *coords=cfield->data(obj);
-	 plp->add(obj.get_id(),coords);
+         double *coords=cfield->data(obj);
+         plp->add(obj.get_id(),coords);
        }
      }
 
@@ -1919,24 +1921,24 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
        const MeshObj &obj = *mi;
 
        if (GetAttr(obj).is_locally_owned()) {
-	 double *mv=src_mask_val->data(*mi);
+         double *mv=src_mask_val->data(*mi);
          int mv_int = (int)((*mv)+0.5);
 
-	 // Only put objects in if they're not masked
-	 bool mask=false;
-	 for (int i=0; i<numMaskValues; i++) {
-	   int mvi=ptrMaskValues[i];
+         // Only put objects in if they're not masked
+         bool mask=false;
+         for (int i=0; i<numMaskValues; i++) {
+           int mvi=ptrMaskValues[i];
 
            if (mv_int == mvi) {
-	     mask=true;
-	     break;
-	   }
-	 }
-	 if (!mask)
-	   num_local_pts++;
+             mask=true;
+             break;
+           }
+         }
+         if (!mask)
+           num_local_pts++;
        }
      }
-   
+
      // Create PointList
      plp = new PointList(num_local_pts,spatial_dim());
 
@@ -1945,23 +1947,23 @@ void Mesh::resolve_cspec_delete_owners(UInt obj_type) {
        const MeshObj &obj = *mi;
 
        if (GetAttr(obj).is_locally_owned()) {
-	 double *mv=src_mask_val->data(*mi);
-	 int mv_int = (int)((*mv)+0.5);
-       
-	 // Only put objects in if they're not masked
-	 bool mask=false;
-	 for (int i=0; i<numMaskValues; i++) {
-	   int mvi=ptrMaskValues[i];
-	     
-	   if (mv_int == mvi) {
-	     mask=true;
-	     break;
-	   }
-	 }
-	 if (!mask) {
-	   double *coords=cfield->data(obj);
-	   plp->add(obj.get_id(),coords);
-	 }
+         double *mv=src_mask_val->data(*mi);
+         int mv_int = (int)((*mv)+0.5);
+
+         // Only put objects in if they're not masked
+         bool mask=false;
+         for (int i=0; i<numMaskValues; i++) {
+           int mvi=ptrMaskValues[i];
+        
+           if (mv_int == mvi) {
+             mask=true;
+             break;
+           }
+         }
+         if (!mask) {
+           double *coords=cfield->data(obj);
+           plp->add(obj.get_id(),coords);
+         }
        }
      }
    }

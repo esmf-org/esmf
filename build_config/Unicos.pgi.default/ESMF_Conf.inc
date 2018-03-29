@@ -2,7 +2,7 @@
 $Id$
 
 Earth System Modeling Framework
-Copyright 2002-2017, University Corporation for Atmospheric Research,
+Copyright 2002-2018, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -79,6 +79,16 @@ PGI fixed this in 10.1.
 #endif
 #if (ESMF_PGIVERSION_MAJOR < 10) || ((ESMF_PGIVERSION_MAJOR == 10) && (ESMF_PGIVERSION_MINOR == 0))
 #define ESMF_PGI_C_BOOL_BUG
+#endif
+#endif
+
+#if 0
+PGI before 17.9 could not handle the dynamic masking interfaces for different
+typekinds
+#endif
+#if defined (ESMF_PGIVERSION_MAJOR)
+#if (ESMF_PGIVERSION_MAJOR < 17) || ((ESMF_PGIVERSION_MAJOR == 17) && (ESMF_PGIVERSION_MINOR < 9))
+#define ESMF_NO_DYNMASKOVERLOAD
 #endif
 #endif
 

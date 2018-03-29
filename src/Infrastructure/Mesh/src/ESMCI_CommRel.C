@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -375,12 +375,15 @@ void CommRel::Append(const CommRel &rhs) {
   build_domain_procs();
 }
 
+
+
 void CommRel::build_range(bool ghosting) {
   Trace __trace("CommRel::build_range(bool ghosting)");
 
   SparseMsg msg;
   UInt ndproc = domain_processors.size();
   UInt csize = msg.commSize();
+
 
   // If we are calling this function we mean
   // to change the range mesh, so it should not be const.
@@ -390,7 +393,6 @@ void CommRel::build_range(bool ghosting) {
   ndproc > 0 ? msg.setPattern(ndproc, &domain_processors[0]) :
                msg.setPattern(ndproc, NULL);
 
-  
   // ** Sizes.  For each domain object, we send the id_type and object type
   MapType::iterator ci = domain_begin(), ce = domain_end();
   std::vector<UInt> send_size_all(csize, 0); // need vector proc can look up into (Map?)
@@ -422,7 +424,6 @@ void CommRel::build_range(bool ghosting) {
   } else
     msg.setSizes(NULL);
 
-
   // ** Fill buffers
   // First, for each domain proc, put in the number of items to marhsal
   for (UInt i = 0; i < csize; i++) send_size_all[i] = 0;
@@ -445,8 +446,9 @@ std::cout << "P:" << msg.commRank() << " putting in nid=" << send_size_all[domai
   for (; ci != ce; ++ci) {
     UInt proc = ci->processor;
     SparseMsg::buffer &b = *msg.getSendBuffer(proc);
+
     MeshObj &obj = *ci->obj;
- 
+
 //UInt loc = b.loc();
     MeshObjPack(b, obj, ghosting);
 //Par::Out() << "obj:" << obj.get_id() << " size packed:" << b.loc() - loc << std::endl;
@@ -455,11 +457,11 @@ std::cout << "P:" << msg.commRank() << " putting in nid=" << send_size_all[domai
   if (!msg.filled()) 
        Throw() << "P:" << Par::Rank() << ", build range, send buffer not filled, comm:" << comm_name;
 
+
   // ** Marhshal data!!!
   msg.communicate();
 
-
-  // ** Unapck; And now unpack the ids.  Since we don't have a range yet, we use buffer to unpack
+  // ** Unpack; And now unpack the ids.  Since we don't have a range yet, we use buffer to unpack
   for (std::vector<UInt>::iterator p = msg.inProc_begin(); p != msg.inProc_end(); p++) {
     UInt proc = *p;
     SparseMsg::buffer &b = *msg.getRecvBuffer(proc);
@@ -478,16 +480,14 @@ std::cout << "P:" << msg.commRank() << " putting in nid=" << send_size_all[domai
   }
   if (!msg.empty()) throw("build_range, didn't use up buffer!");
 
+
   // Update the unique domain processors
   build_range_procs();
 
   // Some things for range mesh, now;  See if coord field exists, else create
   // and populate.
 
-
   rmesh->set_spatial_dimension(domMesh->spatial_dim());
-
-
 }
 
 bool has_parent_used(MeshObj &obj) {

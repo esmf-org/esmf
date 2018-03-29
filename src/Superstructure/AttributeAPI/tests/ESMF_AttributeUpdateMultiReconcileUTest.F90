@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -27,8 +27,8 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
 
   !-------------------------------------------------------------------------
 !   !  The SetVM Register routines for Gridcomp1
- 
-  subroutine userm1_setvm(comp, rc) 
+
+  subroutine userm1_setvm(comp, rc)
     type(ESMF_GridComp)  :: comp
     integer, intent(out) :: rc
 
@@ -42,11 +42,11 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    
+
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
@@ -92,9 +92,9 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -142,9 +142,9 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -192,9 +192,9 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -241,9 +241,9 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -284,7 +284,7 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_AttPack)        :: attpack   
+    type(ESMF_AttPack)        :: attpack
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
@@ -447,7 +447,7 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_AttPack)        :: attpack, attpack_nested  
+    type(ESMF_AttPack)        :: attpack, attpack_nested
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name2,value2,convESMF,purpGen,purp2,name3
@@ -709,7 +709,7 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
     rc = ESMF_SUCCESS
 
   end subroutine usercpl1_final
- 
+
 !-------------------------------------------------------------------------
 !   !  The Finalization routine where things are deleted and cleaned up.
 !   !
@@ -724,7 +724,7 @@ module ESMF_AttributeUpdateMultiReconcileUTestMod
     rc = ESMF_SUCCESS
 
   end subroutine usercpl2_final
- 
+
 end module
 
 program ESMF_AttributeUpdateMultiReconcileUTest
@@ -778,7 +778,7 @@ program ESMF_AttributeUpdateMultiReconcileUTest
       type(ESMF_CplComp)      :: cplcomp2
       character(ESMF_MAXSTR)  :: convESMF,purpGen
 
-	type(ESMF_AttPack)        :: attpack
+        type(ESMF_AttPack)        :: attpack
     type(ESMF_Field)            :: field
     type(ESMF_FieldBundle)      :: fieldbundle
     type(ESMF_Grid)             :: grid
@@ -802,7 +802,7 @@ program ESMF_AttributeUpdateMultiReconcileUTest
     !-----------------------------------------------------------------------------
 
 #ifdef ESMF_TESTEXHAUSTIVE
-    call ESMF_VMGetCurrent(vm, rc=rc) 
+    call ESMF_VMGetCurrent(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)

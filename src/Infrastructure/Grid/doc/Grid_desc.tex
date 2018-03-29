@@ -1,7 +1,7 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright 2002-2017, University Corporation for Atmospheric Research, 
+% Copyright 2002-2018, University Corporation for Atmospheric Research, 
 % Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 % Laboratory, University of Michigan, National Centers for Environmental 
 % Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -41,9 +41,8 @@ Grids can be created already distributed, so that no single
 resource needs global information during the creation process.\\
 Options to define periodicity and other edge connectivities either 
 explicitly or implicitly via shape shortcuts.\\ 
-Options for users to define grid coordinates themselves or call
-prefabricated coordinate generation routines for standard grids
-[NO GENERATION ROUTINES YET].\\
+Options for users to define grid coordinates themselves or to call
+prefabricated coordinate generation routines for standard grids.\\
 Options for incremental construction of grids.\\
 Options for using a set of pre-defined stagger locations or for setting
 custom stagger locations.\\ [.03in] \hline
@@ -238,8 +237,6 @@ There are two ways of specifying coordinates in ESMF.  The
 first way is for the user to {\bf set} the coordinates.  The second 
 way is to take a shortcut and have the framework {\bf generate}
 the coordinates.  
-
-No ESMF generation routines are currently available.
 
 See Section~\ref{sec:usage:staggerloc} for more description and examples of
 setting coordinates.

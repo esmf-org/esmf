@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -24,7 +24,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the C++ SocketUtils function 
+// The code in this file defines the C++ SocketUtils function
 // signatures (prototypes).  The companion file ESMCI\_WebServSocketUtils.C
 // contains the full code (bodies) for the SocketUtils functions.
 //
@@ -50,16 +50,16 @@ namespace ESMCI
   //***
   // Default wait time before timing out
   //***
-  #define TWAIT	(10)
+  #define TWAIT         (10)
 
   // Levels of severity for "notify" messages
   // (KDS: I think this is going to be replaces by ESMF error hand.ing codes
   enum WebServSeverity
   {
-	  WebServPRINT,
-	  WebServWARN,
-	  WebServERROR,
-	  WebServFATAL
+          WebServPRINT,
+          WebServWARN,
+          WebServERROR,
+          WebServFATAL
   };
 
   // Looks up a request id based on a specified string value.
@@ -88,4 +88,4 @@ namespace ESMCI
 
 } // end namespace
 
-#endif 	// ESMCI_WebServSocketUtils_H
+#endif          // ESMCI_WebServSocketUtils_H

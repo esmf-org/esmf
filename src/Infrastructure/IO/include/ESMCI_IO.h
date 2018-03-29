@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -216,7 +216,7 @@ namespace ESMCI {
         Array *array,
         int *rc);
     bool redist_check(Array *array_p, int *rc);
-    void redist_arraycreate1de(Array *src_array_p, Array **dst_array_p, int *rc);
+    void redist_arraycreate1de(Array *src_array_p, Array **dst_array_p, int petCount, int *rc);
     bool undist_check(Array *array_p, int *rc);
     void undist_arraycreate_alldist(Array *src_array_p, Array **dst_array_p, int *rc);
     void clear();

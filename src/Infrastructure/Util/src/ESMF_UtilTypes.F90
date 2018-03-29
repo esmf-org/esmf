@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -80,14 +80,14 @@
      
 !EOPI
 
-      integer, parameter :: ESMF_VERSION_MAJOR        = 7
-      integer, parameter :: ESMF_VERSION_MINOR        = 1
+      integer, parameter :: ESMF_VERSION_MAJOR        = 8
+      integer, parameter :: ESMF_VERSION_MINOR        = 0
       integer, parameter :: ESMF_VERSION_REVISION     = 0
       integer, parameter :: ESMF_VERSION_PATCHLEVEL   = 0
       logical, parameter :: ESMF_VERSION_PUBLIC       = .false.
       logical, parameter :: ESMF_VERSION_BETASNAPSHOT = .true.
 
-      character(*), parameter :: ESMF_VERSION_STRING  = "7.1.0 beta snapshot"
+      character(*), parameter :: ESMF_VERSION_STRING  = "8.0.0 beta snapshot"
 
 #if defined (ESMF_NETCDF)
       logical, parameter :: ESMF_IO_NETCDF_PRESENT = .true.
@@ -175,26 +175,6 @@
  
 !------------------------------------------------------------------------------
 !
-!    ! Character array pointer.  For use when arrays of character pointers
-!    ! are needed, but can not be directly coded due to Fortran semantics.
-
-     type ESMF_CharPtr
-#ifndef ESMF_NO_SEQUENCE
-    sequence
-#endif
-       character(1), pointer :: cptr(:) => null ()
-     end type
-
-!------------------------------------------------------------------------------
-!
-!    ! Types useful to pass arrays of arrays into Fortran API
-
-     type ESMF_PtrInt1D
-       integer, pointer :: ptr(:) => null ()
-     end type
-
-!------------------------------------------------------------------------------
-!
 !    ! Where we can use a derived type, the compiler will help do 
 !    ! typechecking.  For those places where the compiler refuses to allow
 !    ! anything but an Integer data type, use the second set of constants.
@@ -266,6 +246,34 @@
                    ESMF_KIND_R = kind(defaultRealDummy)
 
 !------------------------------------------------------------------------------
+!
+!    ! Character array pointer.  For use when arrays of character pointers
+!    ! are needed, but can not be directly coded due to Fortran semantics.
+
+     type ESMF_CharPtr
+#ifndef ESMF_NO_SEQUENCE
+    sequence
+#endif
+       character(1), pointer :: cptr(:) => null ()
+     end type
+
+!------------------------------------------------------------------------------
+!
+!    ! Types useful to pass arrays of arrays into Fortran API
+
+     type ESMF_PtrInt1D
+       integer, pointer :: ptr(:) => null ()
+     end type
+
+     type ESMF_PtrR4D1
+       real(ESMF_KIND_R4), pointer :: ptr(:) => null ()
+     end type
+
+     type ESMF_PtrR8D1
+       real(ESMF_KIND_R8), pointer :: ptr(:) => null ()
+     end type
+
+!------------------------------------------------------------------------------
 !    ! Size of default integer, in character storage units.
 !    ! (TODO: In F2003 this could be calculated using the named constants
 !    ! in the iso_fortran_env intrinsic module, by simply dividing
@@ -283,7 +291,7 @@
   integer(ESMF_KIND_I4) , parameter :: ESMF_REGRIDSTATUS_SMSK_MP=5
   integer(ESMF_KIND_I4) , parameter :: ESMF_REGRIDSTATUS_OUT_MP=6
   integer(ESMF_KIND_I4) , parameter :: ESMF_REGRIDSTATUS_SMSK_OUT_MP=7
-
+  integer(ESMF_KIND_I4) , parameter :: ESMF_REGRIDSTATUS_EXMAPPED=8
 
 !------------------------------------------------------------------------------
 !
@@ -725,9 +733,24 @@
            ESMF_REGRIDMETHOD_PATCH       = ESMF_RegridMethod_Flag(1), &
            ESMF_REGRIDMETHOD_CONSERVE    = ESMF_RegridMethod_Flag(2), &
            ESMF_REGRIDMETHOD_NEAREST_STOD  = ESMF_RegridMethod_Flag(3), &
-           ESMF_REGRIDMETHOD_NEAREST_DTOS  = ESMF_RegridMethod_Flag(4)
+           ESMF_REGRIDMETHOD_NEAREST_DTOS  = ESMF_RegridMethod_Flag(4), &
+           ESMF_REGRIDMETHOD_CONSERVE_2ND  = ESMF_RegridMethod_Flag(5)
 
 
+!------------------------------------------------------------------------------
+      type ESMF_ExtrapMethod_Flag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+!  private
+         integer :: extrapmethod
+      end type
+
+
+      type(ESMF_ExtrapMethod_Flag), parameter :: &
+           ESMF_EXTRAPMETHOD_NONE    = ESMF_ExtrapMethod_Flag(0), &
+           ESMF_EXTRAPMETHOD_NEAREST_STOD = ESMF_ExtrapMethod_Flag(1), &
+           ESMF_EXTRAPMETHOD_NEAREST_IDAVG = ESMF_ExtrapMethod_Flag(2)
 
 !------------------------------------------------------------------------------
       type ESMF_LineType_Flag
@@ -967,7 +990,8 @@
              ESMF_REGRIDSTATUS_MAPPED, &
              ESMF_REGRIDSTATUS_SMSK_MP, &
              ESMF_REGRIDSTATUS_OUT_MP, &
-             ESMF_REGRIDSTATUS_SMSK_OUT_MP
+             ESMF_REGRIDSTATUS_SMSK_OUT_MP, &
+             ESMF_REGRIDSTATUS_EXMAPPED
 
 #ifndef ESMF_NO_INTEGER_1_BYTE 
       public ESMF_KIND_I1
@@ -1021,7 +1045,12 @@
                                    ESMF_REGRIDMETHOD_PATCH, &
                                    ESMF_REGRIDMETHOD_CONSERVE, &
                                    ESMF_REGRIDMETHOD_NEAREST_STOD, &
-                                   ESMF_REGRIDMETHOD_NEAREST_DTOS
+                                   ESMF_REGRIDMETHOD_NEAREST_DTOS, &
+                                   ESMF_REGRIDMETHOD_CONSERVE_2ND
+
+       public ESMF_ExtrapMethod_Flag, ESMF_EXTRAPMETHOD_NONE, & 
+                                      ESMF_EXTRAPMETHOD_NEAREST_STOD, &
+                                      ESMF_EXTRAPMETHOD_NEAREST_IDAVG
 
        public ESMF_LineType_Flag,   ESMF_LINETYPE_CART, &
                                    ESMF_LINETYPE_GREAT_CIRCLE
@@ -1078,6 +1107,7 @@
       public ESMF_KeywordEnforcer
 
       public ESMF_Status, ESMF_Pointer, ESMF_CharPtr, ESMF_PtrInt1D
+      public ESMF_PtrR4D1, ESMF_PtrR8D1
       public ESMF_TypeKind_Flag, ESMF_DataValue
 
       public ESMF_MapPtr
@@ -1156,6 +1186,7 @@ interface operator (==)
   module procedure ESMF_LineTypeEqual
   module procedure ESMF_NormTypeEqual
   module procedure ESMF_RWGCheckMethodEqual
+  module procedure ESMF_TermOrderEq
 end interface
 
 interface operator (/=)
@@ -1208,6 +1239,49 @@ end interface
      
   public ESMF_MethodTable
 
+
+!------------------------------------------------------------------------------
+! ! ESMF_DynamicMaskElement
+
+  type ESMF_DynamicMaskElementR8R8R8
+    real(ESMF_KIND_R8), pointer       :: dstElement
+    real(ESMF_KIND_R8), allocatable   :: factor(:)
+    real(ESMF_KIND_R8), allocatable   :: srcElement(:)
+  end type
+
+  type ESMF_DynamicMaskElementR8R8R8V
+    real(ESMF_KIND_R8), pointer       :: dstElement(:)
+    real(ESMF_KIND_R8), allocatable   :: factor(:)
+    type(ESMF_PtrR8D1), allocatable   :: srcElement(:)
+  end type
+
+  type ESMF_DynamicMaskElementR4R8R4
+    real(ESMF_KIND_R4), pointer       :: dstElement
+    real(ESMF_KIND_R8), allocatable   :: factor(:)
+    real(ESMF_KIND_R4), allocatable   :: srcElement(:)
+  end type
+
+  type ESMF_DynamicMaskElementR4R8R4V
+    real(ESMF_KIND_R4), pointer       :: dstElement(:)
+    real(ESMF_KIND_R8), allocatable   :: factor(:)
+    type(ESMF_PtrR4D1), allocatable   :: srcElement(:)
+  end type
+
+  type ESMF_DynamicMaskElementR4R4R4
+    real(ESMF_KIND_R4), pointer       :: dstElement
+    real(ESMF_KIND_R4), allocatable   :: factor(:)
+    real(ESMF_KIND_R4), allocatable   :: srcElement(:)
+  end type
+
+  type ESMF_DynamicMaskElementR4R4R4V
+    real(ESMF_KIND_R4), pointer       :: dstElement(:)
+    real(ESMF_KIND_R4), allocatable   :: factor(:)
+    type(ESMF_PtrR4D1), allocatable   :: srcElement(:)
+  end type
+
+  public ESMF_DynamicMaskElementR8R8R8, ESMF_DynamicMaskElementR8R8R8V
+  public ESMF_DynamicMaskElementR4R8R4, ESMF_DynamicMaskElementR4R8R4V
+  public ESMF_DynamicMaskElementR4R4R4, ESMF_DynamicMaskElementR4R4R4V
 
 !------------------------------------------------------------------------------
 
@@ -1324,18 +1398,18 @@ end function ESMF_atreceq
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Status flags to see if they're the same or not
 
-function ESMF_sfeq(sf1, sf2)
- logical ESMF_sfeq
+recursive function ESMF_sfeq(sf1, sf2) result (sfeq)
+ logical sfeq
  type(ESMF_Status), intent(in) :: sf1, sf2
 
- ESMF_sfeq = (sf1%status == sf2%status)
+ sfeq = (sf1%status == sf2%status)
 end function
 
-function ESMF_sfne(sf1, sf2)
- logical ESMF_sfne
+recursive function ESMF_sfne(sf1, sf2) result (sfne)
+ logical sfne
  type(ESMF_Status), intent(in) :: sf1, sf2
 
- ESMF_sfne = (sf1%status /= sf2%status)
+ sfne = (sf1%status /= sf2%status)
 end function
 
 !------------------------------------------------------------------------------
@@ -1470,14 +1544,14 @@ function ESMF_ptne(pt1, pt2)
  ESMF_ptne = (pt1%ptr /= pt2%ptr)
 end function
 
-subroutine ESMF_ptas(ptval, intval)
+recursive subroutine ESMF_ptas(ptval, intval)
  type(ESMF_Pointer), intent(out) :: ptval
  integer, intent(in) :: intval
 
  ptval%ptr = intval
 end subroutine
 
-subroutine ESMF_ptas2(ptval2, ptval)
+recursive subroutine ESMF_ptas2(ptval2, ptval)
  type(ESMF_Pointer), intent(out) :: ptval2
  type(ESMF_Pointer), intent(in) :: ptval
 
@@ -2019,6 +2093,40 @@ end function
       end function ESMF_RWGCheckMethodNotEqual
 !-------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TermOrderEq"
+!BOPI
+! !IROUTINE: ESMF_TermOrderEq - Equality of TermOrder Flag
+!
+! !INTERFACE:
+      function ESMF_TermOrderEq(termOrder1, termOrder2)
+
+! !RETURN VALUE:
+      logical :: ESMF_TermOrderEq
+
+! !ARGUMENTS:
+
+      type (ESMF_TermOrder_Flag), intent(in) :: &
+         termOrder1,      &
+         termOrder2
+
+! !DESCRIPTION:
+!     This routine compares two ESMF TermOrder flags to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[termOrder1, termOrder2]
+!          termorder flags
+!     \end{description}
+!
+!EOPI
+
+      ESMF_TermOrderEq = (termOrder1%flag == termOrder2%flag)
+
+      end function ESMF_TermOrderEq
+
 !------------------------------------------------------------------------- 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_UtilVersionPrint"
@@ -2077,7 +2185,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         print *, ""
         print *, "Earth System Modeling Framework"
         print *, ""
-        print *, "Copyright (c) 2002-2017 University Corporation for Atmospheric Research,"
+        print *, "Copyright (c) 2002-2018 University Corporation for Atmospheric Research,"
         print *, "Massachusetts Institute of Technology, Geophysical Fluid Dynamics Laboratory,"
         print *, "University of Michigan, National Centers for Environmental Prediction,"
         print *, "Los Alamos National Laboratory, Argonne National Laboratory,"

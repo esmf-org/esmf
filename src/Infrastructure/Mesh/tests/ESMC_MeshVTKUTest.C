@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -140,7 +140,7 @@ int main(void){
     else if (elemType[i]==9) elemType[i]=ESMC_MESHELEMTYPE_QUAD;
   }
 
-  // Calculate the number of owned nodes 
+  // Calculate the number of owned nodes
   numOwnedNodes=0;
   for (int i = 0; i < num_node; i++){
     if (nodeOwner[i]==localPet) numOwnedNodes++;
@@ -184,11 +184,11 @@ int main(void){
   correct=true;
   if (num_node_out != num_node) {
    correct = false;
-   printf("%d OUTPUT - num_node_out = %d, and num_node = %d\n", 
-	       localPet, num_node_out, num_node);
+   printf("%d OUTPUT - num_node_out = %d, and num_node = %d\n",
+               localPet, num_node_out, num_node);
   }
 
-  ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
+  ESMC_Test((rc==ESMF_SUCCESS) && correct==true,
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -202,7 +202,7 @@ int main(void){
   rc = ESMC_MeshGetLocalElementCount(mesh, &num_elem_out);
 
   // Note != below to negate success
-  ESMC_Test((rc!=ESMF_SUCCESS), 
+  ESMC_Test((rc!=ESMF_SUCCESS),
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -227,11 +227,11 @@ int main(void){
   correct=true;
   if (num_elem_out != num_elem) {
     correct = false;
-	printf("OUTPUT - num_elem_out = %d, and num_elem = %d\n", 
-	       num_elem_out, num_elem);
+        printf("OUTPUT - num_elem_out = %d, and num_elem = %d\n",
+               num_elem_out, num_elem);
   }
 
-  ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
+  ESMC_Test((rc==ESMF_SUCCESS) && correct==true,
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -248,11 +248,11 @@ int main(void){
   correct=true;
   if (numOwnedElems2 != numOwnedElems) {
     correct = false;
-	printf("OUTPUT - num owned elems = %d, and actual num owned elems = %d\n", 
-	       numOwnedElems2, numOwnedElems);
+        printf("OUTPUT - num owned elems = %d, and actual num owned elems = %d\n",
+               numOwnedElems2, numOwnedElems);
   }
 
-  ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
+  ESMC_Test((rc==ESMF_SUCCESS) && correct==true,
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -269,11 +269,11 @@ int main(void){
   correct=true;
   if (numOwnedNodes2 != numOwnedNodes) {
     correct = false;
-	printf("%d OUTPUT - num owned nodes = %d, and actual num owned nodes = %d\n", 
-	       localPet, numOwnedNodes2, numOwnedNodes);
+        printf("%d OUTPUT - num owned nodes = %d, and actual num owned nodes = %d\n",
+               localPet, numOwnedNodes2, numOwnedNodes);
   }
 
-  ESMC_Test((rc==ESMF_SUCCESS) && correct==true, 
+  ESMC_Test((rc==ESMF_SUCCESS) && correct==true,
             name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 

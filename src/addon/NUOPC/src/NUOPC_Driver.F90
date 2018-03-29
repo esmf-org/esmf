@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -154,7 +154,7 @@ module NUOPC_Driver
   contains
   !-----------------------------------------------------------------------------
   
-  subroutine SetServices(driver, rc)
+  recursive subroutine SetServices(driver, rc)
     type(ESMF_GridComp)  :: driver
     integer, intent(out) :: rc
     
@@ -273,7 +273,7 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP0(gcomp, importState, exportState, clock, rc)
+  recursive subroutine InitializeP0(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)   :: gcomp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
@@ -287,7 +287,7 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP1(gcomp, importState, exportState, clock, rc)
+  recursive subroutine InitializeP1(gcomp, importState, exportState, clock, rc)
     type(ESMF_GridComp)   :: gcomp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
@@ -894,6 +894,21 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+      
+    ! Before returning the driver must clean up its own importState, which 
+    ! may have Fields advertized that do not have a ConsumerConnection set.
+    ! These are Fields that during the negotiation between driver children
+    ! were mirrored into the driver importState, but then subsequently were
+    ! resolved among the children themselves (sibling-to-sibling). Therefore
+    ! they should not remain in the parent importState. Leaving them in the
+    ! parent State, while not connected with a child anylonger, would lead to
+    ! issues during GeomTransfer.
+    if (ESMF_StateIsCreated(importState, rc=rc)) then
+      ! call into routine that removes fields without ConsumerConnection set
+      call rmFieldsWoConsumerConnection(importState, name=name, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
 
     contains !----------------------------------------------------------------
     
@@ -1578,7 +1593,7 @@ call ESMF_LogWrite(trim(name)//": Exiting InitializeIPDv02p5Data", &
             imState=is%wrap%modelES(i)
           endif
           if (j==0) then
-            ! connect to the drivers import State
+            ! connect to the drivers export State
             call ESMF_GridCompGet(gcomp, exportState=exState, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -1982,10 +1997,12 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
         return  ! bail out
 #endif
       
-      if (loopFlag) then
-        ! increment the loop counter
-        runLoopCounter=runLoopCounter+1
-        runElementCounter = 0
+      if (btest(profiling,0)) then
+        if (loopFlag) then
+          ! increment the loop counter
+          runLoopCounter=runLoopCounter+1
+          runElementCounter = 0
+        endif
       endif
       
       i = runElement%i
@@ -2163,9 +2180,6 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! store element counter high water mark nad reset
-    runElementCounterMax = runElementCounter
-
     ! conditionally output diagnostic to Log file
     if (btest(verbosity,0)) then
       call ESMF_ClockPrint(internalClock, options="currTime", &
@@ -2179,6 +2193,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
         return  ! bail out
     endif
     if (btest(profiling,0)) then
+      ! store element counter high water mark and reset
+      runElementCounterMax = runElementCounter
       ! profile output
       write (msgString, *) "RunSequence Profile:"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -2260,7 +2276,9 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     integer                   :: localrc, stat
     type(type_InternalState)  :: is
     type(ESMF_Clock)          :: internalClock
-    integer                   :: i, j
+    integer                   :: i, j, itemCount
+    type(ComponentMapEntry)   :: cmEntry
+    type(ConnectorMapEntry)   :: cnEntry
     character(ESMF_MAXSTR)    :: iString, jString
     logical                   :: existflag
     character(ESMF_MAXSTR)    :: name
@@ -2382,11 +2400,44 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     enddo
     deallocate(connectorList)
     
-    ! destroy members in the internal state
+    ! destroy componentMap
+    call ESMF_ContainerGet(is%wrap%componentMap, itemCount=itemCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    do i=1, itemCount
+      call ESMF_ContainerGetUDTByIndex(is%wrap%componentMap, i, cmEntry, &
+        ESMF_ITEMORDER_ADDORDER, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      deallocate(cmEntry%wrap, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of cmEntry failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    enddo
     call ESMF_ContainerDestroy(is%wrap%componentMap, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    ! destroy connectorMap
+    call ESMF_ContainerGet(is%wrap%connectorMap, itemCount=itemCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    do i=1, itemCount
+      call ESMF_ContainerGetUDTByIndex(is%wrap%connectorMap, i, cnEntry, &
+        ESMF_ITEMORDER_ADDORDER, rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      deallocate(cnEntry%wrap, stat=stat)
+      if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+        msg="Deallocation of cnEntry failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    enddo
     call ESMF_ContainerDestroy(is%wrap%connectorMap, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2419,6 +2470,16 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       if (associated(is%wrap%modelPhaseMap(i)%phaseKey)) &
         deallocate(is%wrap%modelPhaseMap(i)%phaseKey)
     enddo
+    deallocate(is%wrap%connectorPhaseMap, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of connectorPhaseMap failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    deallocate(is%wrap%modelPhaseMap, stat=stat)
+    if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+      msg="Deallocation of modelPhaseMap failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
 
     ! deallocate run sequence data structures
     call NUOPC_RunSequenceDeallocate(is%wrap%runSeq, rc=rc)
@@ -2444,13 +2505,13 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
-  subroutine NUOPC_DriverAddGridComp(driver, compLabel, &
+  recursive subroutine NUOPC_DriverAddGridComp(driver, compLabel, &
     compSetServicesRoutine, petList, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: compLabel
     interface
-      subroutine compSetServicesRoutine(gridcomp, rc)
+      recursive subroutine compSetServicesRoutine(gridcomp, rc)
         use ESMF
         implicit none
         type(ESMF_GridComp)        :: gridcomp ! must not be optional
@@ -2597,7 +2658,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
-  subroutine NUOPC_DriverAddGridCompSO(driver, compLabel, &
+  recursive subroutine NUOPC_DriverAddGridCompSO(driver, compLabel, &
     sharedObj, petList, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
@@ -2744,14 +2805,14 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
-  subroutine NUOPC_DriverAddCplComp(driver, srcCompLabel, dstCompLabel, &
-    compSetServicesRoutine, petList, comp, rc)
+  recursive subroutine NUOPC_DriverAddCplComp(driver, srcCompLabel, &
+    dstCompLabel, compSetServicesRoutine, petList, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: srcCompLabel
     character(len=*),    intent(in)            :: dstCompLabel
     interface
-      subroutine compSetServicesRoutine(cplcomp, rc)
+      recursive subroutine compSetServicesRoutine(cplcomp, rc)
         use ESMF
         implicit none
         type(ESMF_CplComp)         :: cplcomp  ! must not be optional
@@ -2830,14 +2891,16 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
         return  ! bail out
       if (associated(srcPetList).and.associated(dstPetList)) then
         ! must construct the union petList
-        allocate(connectorPetListTemp(size(srcPetList)+size(dstPetList)), stat=stat)
+        allocate(connectorPetListTemp(size(srcPetList)+size(dstPetList)), &
+          stat=stat)
         if (ESMF_LogFoundAllocError(statusToCheck=stat, &
           msg="Allocation #1 of connector petList failed.", &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        connectorPetListTemp = srcPetList ! copy contents
+        cIndex = size(srcPetList)
+        connectorPetListTemp(1:cIndex) = srcPetList(:) ! copy all src PETs
         ! there is no guarantee of order, no way to optimize construction
-        cIndex = size(srcPetList) + 1
+        cIndex = cIndex+1
         do k=1, size(dstPetList)
           ! append element k in dstPetList to connectorPetList if not yet in
           do l=1, size(srcPetList)
@@ -3030,7 +3093,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddRunElement()
-  subroutine NUOPC_DriverAddRunElementMPL(driver, slot, compLabel, &
+  recursive subroutine NUOPC_DriverAddRunElementMPL(driver, slot, compLabel, &
     keywordEnforcer, phaseLabel, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
@@ -3162,7 +3225,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddRunElement()
-  subroutine NUOPC_DriverAddRunElementCPL(driver, slot, srcCompLabel, &
+  recursive subroutine NUOPC_DriverAddRunElementCPL(driver, slot, srcCompLabel,&
     dstCompLabel, keywordEnforcer, phaseLabel, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
@@ -3315,7 +3378,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddRunElement()
-  subroutine NUOPC_DriverAddRunElementL(driver, slot, linkSlot, rc)
+  recursive subroutine NUOPC_DriverAddRunElementL(driver, slot, linkSlot, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     integer,             intent(in)            :: slot
@@ -3359,7 +3422,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: NUOPC_DriverEgestRunSequence - Egest the run sequence as FreeFormat
 !
 ! !INTERFACE:
-  subroutine NUOPC_DriverEgestRunSequence(driver, freeFormat, rc)
+  recursive subroutine NUOPC_DriverEgestRunSequence(driver, freeFormat, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                           :: driver
     type(NUOPC_FreeFormat), intent(out)           :: freeFormat
@@ -3403,7 +3466,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
-  subroutine NUOPC_DriverGetGridComp(driver, compLabel, comp, petList, &
+  recursive subroutine NUOPC_DriverGetGridComp(driver, compLabel, comp, petList, &
     relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
@@ -3499,8 +3562,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
-  subroutine NUOPC_DriverGetCplComp(driver, srcCompLabel, dstCompLabel, &
-    comp, petList, relaxedflag, rc)
+  recursive subroutine NUOPC_DriverGetCplComp(driver, srcCompLabel, &
+    dstCompLabel, comp, petList, relaxedflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: srcCompLabel
@@ -3580,7 +3643,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
-  subroutine NUOPC_DriverGetAllGridComp(driver, compList, petLists, rc)
+  recursive subroutine NUOPC_DriverGetAllGridComp(driver, compList, petLists, &
+    rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     type(ESMF_GridComp), pointer, optional     :: compList(:)
@@ -3670,7 +3734,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
-  subroutine NUOPC_DriverGetAllCplComp(driver, compList, rc)
+  recursive subroutine NUOPC_DriverGetAllCplComp(driver, compList, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     type(ESMF_CplComp),  pointer               :: compList(:)
@@ -3744,8 +3808,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: NUOPC_DriverIngestRunSequence - Ingest the run sequence from FreeFormat
 !
 ! !INTERFACE:
-  subroutine NUOPC_DriverIngestRunSequence(driver, freeFormat, autoAddConnectors, &
-   rc)
+  recursive subroutine NUOPC_DriverIngestRunSequence(driver, freeFormat, &
+    autoAddConnectors, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                           :: driver
     type(NUOPC_FreeFormat), intent(in)            :: freeFormat
@@ -4052,7 +4116,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: NUOPC_DriverNewRunSequence - Replace the run sequence in a Driver
 !
 ! !INTERFACE:
-  subroutine NUOPC_DriverNewRunSequence(driver, slotCount, rc)
+  recursive subroutine NUOPC_DriverNewRunSequence(driver, slotCount, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     integer,             intent(in)            :: slotCount
@@ -4099,7 +4163,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: NUOPC_DriverPrint - Print internal Driver information
 !
 ! !INTERFACE:
-  subroutine NUOPC_DriverPrint(driver, orderflag, rc)
+  recursive subroutine NUOPC_DriverPrint(driver, orderflag, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     logical,             intent(in),  optional :: orderflag
@@ -4211,7 +4275,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverSetRunSequence()
-  subroutine NUOPC_DriverSetRunSequence(driver, slot, clock, rc)
+  recursive subroutine NUOPC_DriverSetRunSequence(driver, slot, clock, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     integer,             intent(in)            :: slot
@@ -4250,7 +4314,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
   !-----------------------------------------------------------------------------
 
-  subroutine IInitAdvertize(driver, importState, exportState, clock, rc)
+  recursive subroutine IInitAdvertize(driver, importState, exportState, clock, &
+    rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -4286,7 +4351,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
   !-----------------------------------------------------------------------------
 
-  subroutine IInitAdvertizeFinish(driver, importState, exportState, clock, rc)
+  recursive subroutine IInitAdvertizeFinish(driver, importState, exportState, &
+    clock, rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -4322,7 +4388,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   !-----------------------------------------------------------------------------
 
-  subroutine IInitModifyCplLists(driver, importState, exportState, clock, rc)
+  recursive subroutine IInitModifyCplLists(driver, importState, exportState, &
+    clock, rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -4384,7 +4451,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       
   contains
   
-    subroutine addCplListOption(connector, rc)
+    recursive subroutine addCplListOption(connector, rc)
       type(ESMF_CplComp)              :: connector
       integer, intent(out)            :: rc
       ! local variables
@@ -4421,7 +4488,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   !-----------------------------------------------------------------------------
 
-  subroutine IInitCheck(driver, importState, exportState, clock, rc)
+  recursive subroutine IInitCheck(driver, importState, exportState, clock, rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -4455,7 +4522,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
     !---------------------------------------------------------------------------
 
-    subroutine checkProducerConnection(state, rc)
+    recursive subroutine checkProducerConnection(state, rc)
       type(ESMF_State)     :: state
       integer, intent(out) :: rc
       
@@ -4483,14 +4550,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (connected .and. .not.producerConnected) then
             ! a connected field in a Driver state must have a ProducerConnection
-             call ESMF_StateGet(state, name=stateName, rc=rc)
-             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-             call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-                  msg="Connected Field in Driver State "//trim(stateName)//&
-                  " must have ProducerConnection: "//trim(itemNameList(i)), &
-                  line=__LINE__, file=trim(name)//":"//FILENAME, &
-                  rcToReturn=rc)
+            call ESMF_StateGet(state, name=stateName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+              msg="Connected Field in Driver State "//trim(stateName)//&
+              " must have ProducerConnection: "//trim(itemNameList(i)), &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
             return ! bail out
           endif
         enddo
@@ -4502,7 +4568,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     !---------------------------------------------------------------------------
 
-    subroutine checkConnections(field, connected, producerConnected, &
+    recursive subroutine checkConnections(field, connected, producerConnected, &
       consumerConnected, rc)
       type(ESMF_Field), intent(in)  :: field
       logical, intent(out)          :: connected
@@ -4537,7 +4603,55 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
   !-----------------------------------------------------------------------------
 
-  subroutine IInitRealize(driver, importState, exportState, clock, rc)
+  recursive subroutine rmFieldsWoConsumerConnection(state, name, rc)
+    type(ESMF_State)     :: state
+    character(len=*)     :: name
+    integer, intent(out) :: rc
+    
+    ! local variables    
+    integer                         :: i
+    type(ESMF_Field), pointer       :: fieldList(:)
+    character(ESMF_MAXSTR), pointer :: itemNameList(:)
+    logical                         :: consumerConnected
+    character(ESMF_MAXSTR)          :: stateName, fieldName
+    character(len=80)               :: value
+
+    rc = ESMF_SUCCESS
+
+    nullify(fieldList)
+    nullify(itemNameList)
+    call NUOPC_GetStateMemberLists(state, itemNameList=itemNameList, &
+      fieldList=fieldList, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (associated(fieldList)) then
+      do i=1, size(fieldList)
+        call NUOPC_GetAttribute(fieldList(i), name="ConsumerConnection", &
+          value=value, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        consumerConnected = (value/="open")
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (.not.consumerConnected) then
+          ! this field's ConsumerConnection is not set -> remove it from state
+          call ESMF_FieldGet(fieldList(i), name=fieldName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_StateRemove(state, (/fieldName/), rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
+      enddo
+    endif
+    if (associated(fieldList)) deallocate(fieldList)
+    if (associated(itemNameList)) deallocate(itemNameList)
+    
+  end subroutine
+
+  !-----------------------------------------------------------------------------
+
+  recursive subroutine IInitRealize(driver, importState, exportState, clock, rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -4571,7 +4685,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
     !---------------------------------------------------------------------------
 
-    subroutine completeAllFields(state, rc)
+    recursive subroutine completeAllFields(state, rc)
       type(ESMF_State)     :: state
       integer, intent(out) :: rc
       
@@ -4601,30 +4715,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! GridToFieldMap attribute
           call ESMF_AttributeGet(fieldList(i), name="GridToFieldMap", &
-               convention="NUOPC", purpose="Instance", &
-               itemCount=itemCount, isPresent=isPresent, &
-               attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            convention="NUOPC", purpose="Instance", &
+            itemCount=itemCount, isPresent=isPresent, &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (.not. isPresent) then
-             call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-                  msg="Cannot realize field "//trim(itemNameList(i))//&
-                  " because GridToFieldMap attribute is not present", &
-                  line=__LINE__, file=trim(name)//":"//FILENAME, &
-                  rcToReturn=rc)
-             return
+            call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+              msg="Cannot realize field "//trim(itemNameList(i))//&
+              " because GridToFieldMap attribute is not present", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, &
+              rcToReturn=rc)
+            return
           endif
           allocate(gridToFieldMap(itemCount), stat=stat)
           if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-               msg="Allocation of internal gridToFieldMap failed.", &
-               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-               return  ! bail out
+            msg="Allocation of internal gridToFieldMap failed.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
           call ESMF_AttributeGet(fieldList(i), &
-               name="GridToFieldMap", valueList=gridToFieldMap, &
-               convention="NUOPC", purpose="Instance", &
-               attnestflag=ESMF_ATTNEST_ON, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            name="GridToFieldMap", valueList=gridToFieldMap, &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, &
+            msg="Cannot realize field "//trim(itemNameList(i))// &
+            " because error obtaining GridToFieldMap attribute.", &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
           ! UngriddedLBound, UngriddedUBound attributes
           call ESMF_AttributeGet(fieldList(i), name="UngriddedLBound", &
@@ -4697,8 +4813,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
   !-----------------------------------------------------------------------------
 
-  subroutine InternalInitializeComplete(driver, importState, exportState, &
-    clock, rc)
+  recursive subroutine InternalInitializeComplete(driver, importState, &
+    exportState, clock, rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
@@ -4774,7 +4890,8 @@ call ESMF_LogWrite(trim(name)//": Exiting InternalInitializeComplete", &
 
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeIPDv02p5(gcomp, importState, exportState, clock, rc)
+  recursive subroutine InitializeIPDv02p5(gcomp, importState, exportState, &
+    clock, rc)
     ! direct copy of the InitializeP5 routine in NUOPC_Model!!!!
     type(ESMF_GridComp)   :: gcomp
     type(ESMF_State)      :: importState, exportState

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -76,7 +76,7 @@
 
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
- 
+
       ! set up values to use below
       nx = 144
       ny = 90
@@ -87,7 +87,7 @@
       n = 2
       mprime = 1
       nprime = 4
-      
+
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! create first igrid
@@ -102,11 +102,11 @@
       call CreateFields(igrid(1), &
                         sfield(1), sfield(2), sfield(3), sfield(4), sfield(5), &
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
-		        vrelloc1=ESMF_CELL_CELL, &
-		        vrelloc2=ESMF_CELL_CELL, &
-		        vrelloc3=ESMF_CELL_CELL, &
-		        vrelloc4=ESMF_CELL_CELL, &
-		        vrelloc5=ESMF_CELL_CELL, &
+                        vrelloc1=ESMF_CELL_CELL, &
+                        vrelloc2=ESMF_CELL_CELL, &
+                        vrelloc3=ESMF_CELL_CELL, &
+                        vrelloc4=ESMF_CELL_CELL, &
+                        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating first 5 src fields"
       write(failMsg, *) "Unable to create first 5 src fields"
@@ -118,11 +118,11 @@
       call CreateFields(igrid(1), &
                         sfield(6), sfield(7), sfield(8), sfield(9), sfield(10),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
-		        vrelloc1=ESMF_CELL_CELL, &
-		        vrelloc2=ESMF_CELL_CELL, &
-		        vrelloc3=ESMF_CELL_CELL, &
-		        vrelloc4=ESMF_CELL_CELL, &
-		        vrelloc5=ESMF_CELL_CELL, &
+                        vrelloc1=ESMF_CELL_CELL, &
+                        vrelloc2=ESMF_CELL_CELL, &
+                        vrelloc3=ESMF_CELL_CELL, &
+                        vrelloc4=ESMF_CELL_CELL, &
+                        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating next 5 src fields"
       write(failMsg, *) "Unable to create next 5 src fields"
@@ -134,11 +134,11 @@
       call CreateFields(igrid(1), &
                         sfield(11), sfield(12), sfield(13), sfield(14), sfield(15),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
-		        vrelloc1=ESMF_CELL_CELL, &
-		        vrelloc2=ESMF_CELL_CELL, &
-		        vrelloc3=ESMF_CELL_CELL, &
-		        vrelloc4=ESMF_CELL_CELL, &
-		        vrelloc5=ESMF_CELL_CELL, &
+                        vrelloc1=ESMF_CELL_CELL, &
+                        vrelloc2=ESMF_CELL_CELL, &
+                        vrelloc3=ESMF_CELL_CELL, &
+                        vrelloc4=ESMF_CELL_CELL, &
+                        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating next 5 src fields"
       write(failMsg, *) "Unable to create next 5 src fields"
@@ -150,11 +150,11 @@
       call CreateFields(igrid(1), &
                         sfield(16), sfield(17), sfield(18), sfield(19), sfield(20), &
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
-		        vrelloc1=ESMF_CELL_CELL, &
-		        vrelloc2=ESMF_CELL_CELL, &
-		        vrelloc3=ESMF_CELL_CELL, &
-		        vrelloc4=ESMF_CELL_CELL, &
-		        vrelloc5=ESMF_CELL_CELL, &
+                        vrelloc1=ESMF_CELL_CELL, &
+                        vrelloc2=ESMF_CELL_CELL, &
+                        vrelloc3=ESMF_CELL_CELL, &
+                        vrelloc4=ESMF_CELL_CELL, &
+                        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating last 4 src fields"
       write(failMsg, *) "Unable to create last 4 src fields"
@@ -211,11 +211,11 @@
       call CreateFields(igrid(2), &
                         dfield(1), dfield(2), dfield(3), dfield(4), dfield(5),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
-		        vrelloc1=ESMF_CELL_CELL, &
-		        vrelloc2=ESMF_CELL_CELL, &
-		        vrelloc3=ESMF_CELL_CELL, &
-		        vrelloc4=ESMF_CELL_CELL, &
-		        vrelloc5=ESMF_CELL_CELL, &
+                        vrelloc1=ESMF_CELL_CELL, &
+                        vrelloc2=ESMF_CELL_CELL, &
+                        vrelloc3=ESMF_CELL_CELL, &
+                        vrelloc4=ESMF_CELL_CELL, &
+                        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating 1st set of 5 dst fields"
       write(failMsg, *) "Unable to create 1st set 5 dst fields"
@@ -227,11 +227,11 @@
       call CreateFields(igrid(2), &
                         dfield(6), dfield(7), dfield(8), dfield(9), dfield(10),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
-		        vrelloc1=ESMF_CELL_CELL, &
-		        vrelloc2=ESMF_CELL_CELL, &
-		        vrelloc3=ESMF_CELL_CELL, &
-		        vrelloc4=ESMF_CELL_CELL, &
-		        vrelloc5=ESMF_CELL_CELL, &
+                        vrelloc1=ESMF_CELL_CELL, &
+                        vrelloc2=ESMF_CELL_CELL, &
+                        vrelloc3=ESMF_CELL_CELL, &
+                        vrelloc4=ESMF_CELL_CELL, &
+                        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating 2nd set of 5 dst fields"
       write(failMsg, *) "Unable to create 2nd set of 5 dst fields"
@@ -243,11 +243,11 @@
       call CreateFields(igrid(2), &
                         dfield(11), dfield(12), dfield(13), dfield(14), dfield(15),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
-		        vrelloc1=ESMF_CELL_CELL, &
-		        vrelloc2=ESMF_CELL_CELL, &
-		        vrelloc3=ESMF_CELL_CELL, &
-		        vrelloc4=ESMF_CELL_CELL, &
-		        vrelloc5=ESMF_CELL_CELL, &
+                        vrelloc1=ESMF_CELL_CELL, &
+                        vrelloc2=ESMF_CELL_CELL, &
+                        vrelloc3=ESMF_CELL_CELL, &
+                        vrelloc4=ESMF_CELL_CELL, &
+                        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating 3rd set of 5 dst fields"
       write(failMsg, *) "Unable to create 3rd set of 5 dst fields"
@@ -259,11 +259,11 @@
       call CreateFields(igrid(2), &
                         dfield(16), dfield(17), dfield(18), dfield(19), dfield(20),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
-		        vrelloc1=ESMF_CELL_CELL, &
-		        vrelloc2=ESMF_CELL_CELL, &
-		        vrelloc3=ESMF_CELL_CELL, &
-		        vrelloc4=ESMF_CELL_CELL, &
-		        vrelloc5=ESMF_CELL_CELL, &
+                        vrelloc1=ESMF_CELL_CELL, &
+                        vrelloc2=ESMF_CELL_CELL, &
+                        vrelloc3=ESMF_CELL_CELL, &
+                        vrelloc4=ESMF_CELL_CELL, &
+                        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating 4th set of 5 dst fields"
       write(failMsg, *) "Unable to create 4th set of 5 dst fields"
@@ -275,11 +275,11 @@
       call CreateFields(igrid(2), &
                         dfield(21), dfield(22), dfield(23), dfield(24), dfield(25),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
-		        vrelloc1=ESMF_CELL_CELL, &
-		        vrelloc2=ESMF_CELL_CELL, &
-		        vrelloc3=ESMF_CELL_CELL, &
-		        vrelloc4=ESMF_CELL_CELL, &
-		        vrelloc5=ESMF_CELL_CELL, &
+                        vrelloc1=ESMF_CELL_CELL, &
+                        vrelloc2=ESMF_CELL_CELL, &
+                        vrelloc3=ESMF_CELL_CELL, &
+                        vrelloc4=ESMF_CELL_CELL, &
+                        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating 5th set of 5 dst fields"
       write(failMsg, *) "Unable to create 5th set of 5 dst fields"
@@ -291,11 +291,11 @@
       call CreateFields(igrid(2), &
                         dfield(26), dfield(27), dfield(28), dfield(29), dfield(30),&
                         dim1=3, dim2=3, dim3=3, dim4=3, dim5=3, &
-		        vrelloc1=ESMF_CELL_CELL, &
-		        vrelloc2=ESMF_CELL_CELL, &
-		        vrelloc3=ESMF_CELL_CELL, &
-		        vrelloc4=ESMF_CELL_CELL, &
-		        vrelloc5=ESMF_CELL_CELL, &
+                        vrelloc1=ESMF_CELL_CELL, &
+                        vrelloc2=ESMF_CELL_CELL, &
+                        vrelloc3=ESMF_CELL_CELL, &
+                        vrelloc4=ESMF_CELL_CELL, &
+                        vrelloc5=ESMF_CELL_CELL, &
                         rc=rc)
       write(name, *) "Creating 6th set of 5 dst fields"
       write(failMsg, *) "Unable to create 6th set of 5 dst fields"
@@ -389,7 +389,7 @@
       !------------------------------------------------------------------------
       !NEX_removeUTest
       ! now add stuff
-      
+
       call ESMF_StateAdd(state, &
                                   1, bundlelist=bundle(1:1), &
                                   rc=rc)
@@ -474,7 +474,7 @@
       !NEX_removeUTest
       ! now add too much stuff - this should provoke an error
       ! at reconcile time.
-      
+
       call ESMF_StateAdd(state, &
                                   1, bundlelist=bundle(2:2), &
                                   rc=rc)
@@ -535,7 +535,7 @@
 10    continue
 
       call ESMF_TestEnd(ESMF_SRCLINE)
-  
+
       ! -------- end of unit test code ------------------------
 
       end program ESMF_StateLimitUTest

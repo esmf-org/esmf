@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
@@ -64,7 +64,7 @@ module ESMF_FieldEmptyMod
     '$Id$'
 
 !------------------------------------------------------------------------------
-!BOPI 
+!BOPI
 ! !IROUTINE: ESMF_FieldEmptySet - Set a Geombase object in an empty Field
 !
 ! !INTERFACE:
@@ -85,7 +85,7 @@ module ESMF_FieldEmptyMod
 !EOPI
 
 !------------------------------------------------------------------------------
-!BOPI 
+!BOPI
 ! !IROUTINE: ESMF_FieldEmptyComplete - Completes a Field started with FieldEmptyCreate
 !
 ! !INTERFACE:
@@ -113,7 +113,7 @@ module ESMF_FieldEmptyMod
 !   This interface completes a {\tt ESMF\_Field} started with FieldEmptyCreate
 !   These methods all take {\tt ESMF\_Grid}, or {\tt ESMF\_LocStream}, or {\tt ESMF\_Mesh},
 !   or {\tt ESMF\_XGrid}, and Fortran data array or pointer as input to
-!   fill in the {\tt ESMF\_Field} internals. 
+!   fill in the {\tt ESMF\_Field} internals.
   end interface
 !EOPI
 
@@ -133,16 +133,16 @@ subroutine ESMF_FieldEmptyCompAS(field, arrayspec, &
 
 !
 ! !ARGUMENTS:
- type(ESMF_Field),      intent(inout)         :: field 
+ type(ESMF_Field),      intent(inout)         :: field
  type(ESMF_ArraySpec),  intent(in)            :: arrayspec
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below 
- type(ESMF_Index_Flag), intent(in),  optional :: indexflag 
- integer,               intent(in),  optional :: gridToFieldMap(:) 
- integer,               intent(in),  optional :: ungriddedLBound(:) 
- integer,               intent(in),  optional :: ungriddedUBound(:) 
- integer,               intent(in),  optional :: totalLWidth(:) 
- integer,               intent(in),  optional :: totalUWidth(:) 
- integer,               intent(out), optional :: rc 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+ type(ESMF_Index_Flag), intent(in),  optional :: indexflag
+ integer,               intent(in),  optional :: gridToFieldMap(:)
+ integer,               intent(in),  optional :: ungriddedLBound(:)
+ integer,               intent(in),  optional :: ungriddedUBound(:)
+ integer,               intent(in),  optional :: totalLWidth(:)
+ integer,               intent(in),  optional :: totalUWidth(:)
+ integer,               intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -151,18 +151,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! Complete an {\tt ESMF\_Field} and allocate space internally for an
-! {\tt ESMF\_Array} based on arrayspec. 
-! The input {\tt ESMF\_Field} must have a status of 
+! {\tt ESMF\_Array} based on arrayspec.
+! The input {\tt ESMF\_Field} must have a status of
 ! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. After this call the completed {\tt ESMF\_Field}
-! has a status of {\tt ESMF\_FIELDSTATUS\_COMPLETE}. 
+! has a status of {\tt ESMF\_FIELDSTATUS\_COMPLETE}.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item[field]
-!      The input {\tt ESMF\_Field} with a status of 
-!      {\tt ESMF\_FIELDSTATUS\_GRIDSET}. 
+!      The input {\tt ESMF\_Field} with a status of
+!      {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 ! \item[arrayspec]
-!      Data type and kind specification. 
+!      Data type and kind specification.
 ! \item[{[indexflag]}]
 !      Indicate how DE-local indices are defined. By default each DE|s
 !      exclusive region is placed to start at the local index space origin,
@@ -190,7 +190,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
-!       stored in the {\t field}.  
+!       stored in the {\t field}.
 !       If the Field dimCount is less than the Grid dimCount then the default
 !       gridToFieldMap will contain zeros for the rightmost entries. A zero
 !       entry in the {\tt gridToFieldMap} indicates that the particular
@@ -230,7 +230,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
-! \item [{[rc]}] 
+! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !EOP
@@ -247,66 +247,66 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
 
-    ! Initialize return code   
+    ! Initialize return code
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
 
-    call ESMF_FieldGet(field, status=status, rc=localrc) 
-    if (ESMF_LogFoundError(localrc, &   
-        ESMF_ERR_PASSTHRU, &   
-        ESMF_CONTEXT, rcToReturn=rc)) return   
+    call ESMF_FieldGet(field, status=status, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if(status /= ESMF_FIELDSTATUS_GRIDSET) then 
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  
-        msg="- can only use ESMF_FieldEmptyComplete with Fields having geombase set", & 
-        ESMF_CONTEXT, rcToReturn=rc)  
-      return 
-    endif 
+    if(status /= ESMF_FIELDSTATUS_GRIDSET) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+        msg="- can only use ESMF_FieldEmptyComplete with Fields having geombase set", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
 
-    geombase=field%ftypep%geombase 
-    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc) 
-    if (ESMF_LogFoundError(localrc, &   
-        ESMF_ERR_PASSTHRU, &   
-        ESMF_CONTEXT, rcToReturn=rc)) return   
+    geombase=field%ftypep%geombase
+    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Here is where different handling of geomtype class branches off 
-    if(geomtype == ESMF_GEOMTYPE_GRID) then 
+    ! Here is where different handling of geomtype class branches off
+    if(geomtype == ESMF_GEOMTYPE_GRID) then
 
-      call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc) 
-      if (ESMF_LogFoundError(localrc, &   
-          ESMF_ERR_PASSTHRU, &   
-          ESMF_CONTEXT, rcToReturn=rc)) return   
+      call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
-      call ESMF_GridGetDecompType(grid, decompType, rc=localrc) 
-      if (ESMF_LogFoundError(localrc, &   
-          ESMF_ERR_PASSTHRU, &   
-          ESMF_CONTEXT, rcToReturn=rc)) return   
+      call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
-      if (decompType .eq. ESMF_GRID_ARBITRARY) then 
-        if ((present(indexflag) .or. present(totalLWidth)) .or. (present(totalUWidth))) then 
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  
-                 msg="- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", & 
-                 ESMF_CONTEXT, rcToReturn=rc)  
-           return 
-        endif 
-      endif 
+      if (decompType .eq. ESMF_GRID_ARBITRARY) then
+        if ((present(indexflag) .or. present(totalLWidth)) .or. (present(totalUWidth))) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                 msg="- indexflag, totalLWidth or totalUWidth are not allowed for arbitrary grid", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+           return
+        endif
+      endif
 
       call ESMF_GridGet(grid, indexFlag=g_indexflag, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &  
-          ESMF_ERR_PASSTHRU, &  
-          ESMF_CONTEXT, rcToReturn=rc)) return  
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(indexflag)) then
         if(.not. (g_indexflag .eq. indexflag)) then
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
-               msg="- user specified indexflag must be identical with Grid indexflag", &  
-                 ESMF_CONTEXT, rcToReturn=rc)   
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+               msg="- user specified indexflag must be identical with Grid indexflag", &
+                 ESMF_CONTEXT, rcToReturn=rc)
           return
         endif
       endif
-   
+
       ! Create Field from GeomBase
       call ESMF_FieldEmptyGBArraySpec(field, geombase, &
           arrayspec, gridToFieldMap=gridToFieldMap, &
@@ -319,14 +319,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(geomtype == ESMF_GEOMTYPE_MESH .or. &
        geomtype == ESMF_GEOMTYPE_LOCSTREAM .or. &
-       geomtype == ESMF_GEOMTYPE_XGRID) then 
+       geomtype == ESMF_GEOMTYPE_XGRID) then
 
-      if ((present(indexflag) .or. present(totalLWidth)) .or. (present(totalUWidth))) then 
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  
-          msg="- indexflag, totalLWidth or totalUWidth are not allowed for Mesh, LS, XGrid", & 
-          ESMF_CONTEXT, rcToReturn=rc)  
-        return 
-      endif 
+      if ((present(indexflag) .or. present(totalLWidth)) .or. (present(totalUWidth))) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+          msg="- indexflag, totalLWidth or totalUWidth are not allowed for Mesh, LS, XGrid", &
+          ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
 
       call ESMF_FieldConstructIANew(field%ftypep, geombase, arrayspec, &
                             gridToFieldMap=gridToFieldMap, &
@@ -360,16 +360,16 @@ subroutine ESMF_FieldEmptyCompTK(field, typekind, &
 
 !
 ! !ARGUMENTS:
- type(ESMF_Field),         intent(inout)         :: field 
+ type(ESMF_Field),         intent(inout)         :: field
  type(ESMF_TypeKind_Flag), intent(in)            :: typekind
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below 
- type(ESMF_Index_Flag),    intent(in),  optional :: indexflag 
- integer,                  intent(in),  optional :: gridToFieldMap(:) 
- integer,                  intent(in),  optional :: ungriddedLBound(:) 
- integer,                  intent(in),  optional :: ungriddedUBound(:) 
- integer,                  intent(in),  optional :: totalLWidth(:) 
- integer,                  intent(in),  optional :: totalUWidth(:) 
- integer,                  intent(out), optional :: rc 
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+ type(ESMF_Index_Flag),    intent(in),  optional :: indexflag
+ integer,                  intent(in),  optional :: gridToFieldMap(:)
+ integer,                  intent(in),  optional :: ungriddedLBound(:)
+ integer,                  intent(in),  optional :: ungriddedUBound(:)
+ integer,                  intent(in),  optional :: totalLWidth(:)
+ integer,                  intent(in),  optional :: totalUWidth(:)
+ integer,                  intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -379,26 +379,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 ! \begin{sloppypar}
 ! Complete an {\tt ESMF\_Field} and allocate space internally for an
-! {\tt ESMF\_Array} based on typekind. 
-! The input {\tt ESMF\_Field} must have a status of 
+! {\tt ESMF\_Array} based on typekind.
+! The input {\tt ESMF\_Field} must have a status of
 ! {\tt ESMF\_FIELDSTATUS\_GRIDSET}. After this call the completed {\tt ESMF\_Field}
-! has a status of {\tt ESMF\_FIELDSTATUS\_COMPLETE}. 
+! has a status of {\tt ESMF\_FIELDSTATUS\_COMPLETE}.
 ! \end{sloppypar}
 !
 ! For an example and
 ! associated documentation using this method see section
 ! \ref{sec:field:usage:partial_creation}.
-! 
-! 
+!
+!
 ! The arguments are:
 ! \begin{description}
 ! \item[field]
 ! \begin{sloppypar}
-!      The input {\tt ESMF\_Field} with a status of 
-!      {\tt ESMF\_FIELDSTATUS\_GRIDSET}. 
+!      The input {\tt ESMF\_Field} with a status of
+!      {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 ! \end{sloppypar}
 ! \item[typekind]
-!      Data type and kind specification. 
+!      Data type and kind specification.
 ! \item[{[indexflag]}]
 !      Indicate how DE-local indices are defined. By default each DE|s
 !      exclusive region is placed to start at the local index space origin,
@@ -426,7 +426,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
-!       stored in the {\t field}.  
+!       stored in the {\t field}.
 !       If the Field dimCount is less than the Grid dimCount then the default
 !       gridToFieldMap will contain zeros for the rightmost entries. A zero
 !       entry in the {\tt gridToFieldMap} indicates that the particular
@@ -466,7 +466,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
-! \item [{[rc]}] 
+! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !EOP
@@ -485,28 +485,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
 
-    ! Initialize return code   
+    ! Initialize return code
     if(present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ESMF_INIT_CHECK_DEEP(ESMF_FieldGetInit,field,rc)
 
-    call ESMF_FieldGet(field, status=status, rc=localrc) 
-    if (ESMF_LogFoundError(localrc, &   
-        ESMF_ERR_PASSTHRU, &   
-        ESMF_CONTEXT, rcToReturn=rc)) return   
+    call ESMF_FieldGet(field, status=status, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
-    if(status /= ESMF_FIELDSTATUS_GRIDSET) then 
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  
-        msg="- can only use ESMF_FieldEmptyComplete with Fields having geombase set", & 
-        ESMF_CONTEXT, rcToReturn=rc)  
-      return 
-    endif 
+    if(status /= ESMF_FIELDSTATUS_GRIDSET) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+        msg="- can only use ESMF_FieldEmptyComplete with Fields having geombase set", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
 
-    geombase=field%ftypep%geombase 
-    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc) 
-    if (ESMF_LogFoundError(localrc, &   
-        ESMF_ERR_PASSTHRU, &   
-        ESMF_CONTEXT, rcToReturn=rc)) return   
+    geombase=field%ftypep%geombase
+    call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! compute arrayspec rank, distgrid dimcount is 1 for Mesh, LocStream and XGrid
     ! arrayspec rank = distgrid_dimcount + ungridded_dimcount
@@ -522,19 +522,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if(present(ungriddedLBound) .and. present(ungriddedUBound)) then
       if(ungridded_ldimcount /= ungridded_udimcount) then
-        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
-          msg="- ungriddedLBound size must equal to ungriddedUBound size", &  
-          ESMF_CONTEXT, rcToReturn=rc) 
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+          msg="- ungriddedLBound size must equal to ungriddedUBound size", &
+          ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
     endif
     rank = ungridded_dimcount + 1
-    if(geomtype == ESMF_GEOMTYPE_GRID) then 
+    if(geomtype == ESMF_GEOMTYPE_GRID) then
 
-      call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc) 
-      if (ESMF_LogFoundError(localrc, &   
-          ESMF_ERR_PASSTHRU, &   
-          ESMF_CONTEXT, rcToReturn=rc)) return   
+      call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+          ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
       call ESMF_GridGet(grid, rank=memDimCount, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -575,25 +575,25 @@ end subroutine ESMF_FieldEmptyCompTK
 ! !ARGUMENTS:
     type(ESMF_Field), intent(inout)    :: field
     type(ESMF_GeomBase), intent(in)    :: geombase
-    type(ESMF_ArraySpec), intent(in)   :: arrayspec     
-    integer, intent(in), optional :: gridToFieldMap(:)    
+    type(ESMF_ArraySpec), intent(in)   :: arrayspec
+    integer, intent(in), optional :: gridToFieldMap(:)
     integer, intent(in), optional :: ungriddedLBound(:)
     integer, intent(in), optional :: ungriddedUBound(:)
     integer, intent(in), optional :: totalLWidth(:)
     integer, intent(in), optional :: totalUWidth(:)
-    integer, intent(out), optional :: rc              
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Complete an {\tt ESMF\_Field} and allocate space internally for an
 ! {\tt ESMF\_Array}.
 ! The arguments are:
 ! \begin{description}
-! \item [field] 
-!       {\tt ESMF\_Field} object. 
-! \item [geombase] 
-!       {\tt ESMF\_GeomBase} object. 
+! \item [field]
+!       {\tt ESMF\_Field} object.
+! \item [geombase]
+!       {\tt ESMF\_GeomBase} object.
 ! \item [arrayspec]
-!       Data type and kind specification. 
+!       Data type and kind specification.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -608,7 +608,7 @@ end subroutine ESMF_FieldEmptyCompTK
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
-!       stored in the {\t field}.  
+!       stored in the {\t field}.
 ! \item [{[ungriddedLBound]}]
 !       Lower bounds of the ungridded dimensions of the {\tt field}.
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
@@ -643,7 +643,7 @@ end subroutine ESMF_FieldEmptyCompTK
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
-! \item [{[rc]}] 
+! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !EOPI
@@ -651,9 +651,9 @@ end subroutine ESMF_FieldEmptyCompTK
     type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
     integer :: localrc                          !  Local error code
     logical :: rcpresent                        ! Return code present
-    integer :: memDimCount, fieldDimCount, fieldUngriddedDimCount 
+    integer :: memDimCount, fieldDimCount, fieldUngriddedDimCount
     integer :: gridDimCount, gridDimCount_norep, grid_repdimcount
-    integer :: fieldUndistDimCount 
+    integer :: fieldUndistDimCount
     integer :: i,j
     integer :: localGridToFieldMap(ESMF_MAXDIM)
     integer :: localMaxHaloLWidth (ESMF_MAXDIM)
@@ -671,7 +671,7 @@ end subroutine ESMF_FieldEmptyCompTK
     localrc = ESMF_RC_NOT_IMPL
     rcpresent = .FALSE.
 
-    ! Initialize return code   
+    ! Initialize return code
     if(present(rc)) then
       rcpresent=.TRUE.
       rc = ESMF_RC_NOT_IMPL
@@ -685,45 +685,45 @@ end subroutine ESMF_FieldEmptyCompTK
     ! Check if geombase is a grid, if so, check if it is arbitrary
     decompType = ESMF_GRID_NONARBITRARY
     call ESMF_GeomBaseGet(geombase, geomtype=geomtype, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &  
-        ESMF_ERR_PASSTHRU, &  
-        ESMF_CONTEXT, rcToReturn=rc)) return  
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (geomtype .eq. ESMF_GEOMTYPE_GRID) then
        call ESMF_GeomBaseGet(geombase, grid=grid, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &  
-           ESMF_ERR_PASSTHRU, &  
-           ESMF_CONTEXT, rcToReturn=rc)) return  
+       if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
        call ESMF_GridGetDecompType(grid, decompType, rc=localrc)
-       if (ESMF_LogFoundError(localrc, &  
-           ESMF_ERR_PASSTHRU, &  
-           ESMF_CONTEXT, rcToReturn=rc)) return  
+       if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-    ! Get rank of proposed Field.  
-    call ESMF_ArraySpecGet(arrayspec, rank=memDimCount, rc=localrc) 
-    if (ESMF_LogFoundError(localrc, &  
-         ESMF_ERR_PASSTHRU, &  
-         ESMF_CONTEXT, rcToReturn=rc)) return   
+    ! Get rank of proposed Field.
+    call ESMF_ArraySpecGet(arrayspec, rank=memDimCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Get number of grid dimensions, number  
-    ! of distributed grid dimensions, distgrid,  
-    ! number of ungridded Field dimensions,  
-    ! and number of undistributed Field Dimensions  
+    ! Get number of grid dimensions, number
+    ! of distributed grid dimensions, distgrid,
+    ! number of ungridded Field dimensions,
+    ! and number of undistributed Field Dimensions
     call ESMF_GeomBaseGet(geombase, dimCount=gridDimCount, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &  
-        ESMF_ERR_PASSTHRU, &  
-        ESMF_CONTEXT, rcToReturn=rc)) return  
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Error Check Input  
-    if (present(gridToFieldMap)) then   
-        if (size(gridToFieldMap) .ne. gridDimCount) then  
-           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
-             msg="- gridToFieldMap size must equal to grid_rank", &  
-             ESMF_CONTEXT, rcToReturn=rc)   
-            return  
-        endif  
-    endif  
+    ! Error Check Input
+    if (present(gridToFieldMap)) then
+        if (size(gridToFieldMap) .ne. gridDimCount) then
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+             msg="- gridToFieldMap size must equal to grid_rank", &
+             ESMF_CONTEXT, rcToReturn=rc)
+            return
+        endif
+    endif
 
     grid_repdimcount = 0
     localGridToFieldMap = -1
@@ -741,14 +741,14 @@ end subroutine ESMF_FieldEmptyCompTK
     gridDimCount_norep = gridDimCount - grid_repdimcount
 
     if (decompType .eq. ESMF_GRID_NONARBITRARY) then
-	    fieldDimCount = memDimCount
+            fieldDimCount = memDimCount
     else
         call ESMF_GridGet(grid, distgridToGridMap=distgridToGridMap, &
-	    rc=localrc)
-        if (ESMF_LogFoundError(localrc, &  
-            ESMF_ERR_PASSTHRU, &  
-            ESMF_CONTEXT, rcToReturn=rc)) return  
-        ! find out how many grid dimensions are arbitrarily distributed and calculate 
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        ! find out how many grid dimensions are arbitrarily distributed and calculate
         ! fieldDimCount accordingly
         arbdim = 0
         do i=1,gridDimCount
@@ -771,8 +771,8 @@ end subroutine ESMF_FieldEmptyCompTK
                   do j=1,arbdim
                     if (distgridToGridMap(j) .ne. i) then
                         if (localGridToFieldMap(distgridToGridMap(j)) .ne. 0) then
-                            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
-  msg="- Arb. grid dimensions have to be either all replicated or not replicated", &  
+                            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+  msg="- Arb. grid dimensions have to be either all replicated or not replicated", &
   ESMF_CONTEXT, rcToReturn=rc)
                             return
                         endif
@@ -782,18 +782,18 @@ end subroutine ESMF_FieldEmptyCompTK
                   ! fieldDimCount should be the same as the memDimCount
                   fieldDimCount = memDimCount
                   exit
-                endif	
+                endif   
              endif
            enddo
-        endif        	
+        endif           
     endif
 
-    if(fieldDimCount .lt. gridDimCount_norep) then  
-      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
-        msg="- Field rank must be greater than or equal to its gridded rank", &  
-        ESMF_CONTEXT, rcToReturn=rc)   
+    if(fieldDimCount .lt. gridDimCount_norep) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+        msg="- Field rank must be greater than or equal to its gridded rank", &
+        ESMF_CONTEXT, rcToReturn=rc)
       return
-    endif  
+    endif
 
     if(fieldDimCount .gt. gridDimCount_norep) then
       if( (.not. present(ungriddedLBound)) .or. &
@@ -807,48 +807,48 @@ end subroutine ESMF_FieldEmptyCompTK
 
     fieldUngriddedDimCount = fieldDimCount-gridDimCount  + grid_repdimcount
     fieldUndistDimCount = fieldDimCount-gridDimCount + grid_repdimcount
- 
-    if (present(ungriddedLBound)) then   
-       if (size(ungriddedLBound) .ne. fieldUngriddedDimCount) then  
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
-               msg="- ungriddedLBound size must equal to array_rank-grid_rank", &  
-               ESMF_CONTEXT, rcToReturn=rc)   
-          return  
-       endif  
-    endif  
- 
-    if (present(ungriddedUBound)) then   
-       if (size(ungriddedUBound) .ne. fieldUngriddedDimCount) then  
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
-                 msg="- ungriddedUBound size must equal to array_rank-grid_rank", &  
-                 ESMF_CONTEXT, rcToReturn=rc)   
-          return  
-       endif  
-    endif  
- 
-    if (present(totalLWidth)) then   
-        if (size(totalLWidth) .ne. gridDimCount_norep) then  
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
-              msg="- totalLWidth must equal to grid dimCount", &  
-                ESMF_CONTEXT, rcToReturn=rc)   
-            return  
-        endif  
-    endif  
- 
-    if (present(totalUWidth)) then   
-       if (size(totalUWidth) .ne. gridDimCount_norep) then  
-           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &   
-              msg="- totalUWidth must equal to grid dimCount", &  
-                ESMF_CONTEXT, rcToReturn=rc)   
-           return  
-       endif  
-    endif  
- 
-    ! gridToFieldMap elements must be in range 1...fieldRank and unique  
-    ! algorithm to check element uniqueness:  
-    !   run time: O(ESMF_MAXDIM)  
-    !   memory:   O(2*ESMF_MAXDIM)  
-    !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector  
+
+    if (present(ungriddedLBound)) then
+       if (size(ungriddedLBound) .ne. fieldUngriddedDimCount) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+               msg="- ungriddedLBound size must equal to array_rank-grid_rank", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+    endif
+
+    if (present(ungriddedUBound)) then
+       if (size(ungriddedUBound) .ne. fieldUngriddedDimCount) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+                 msg="- ungriddedUBound size must equal to array_rank-grid_rank", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+    endif
+
+    if (present(totalLWidth)) then
+        if (size(totalLWidth) .ne. gridDimCount_norep) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+              msg="- totalLWidth must equal to grid dimCount", &
+                ESMF_CONTEXT, rcToReturn=rc)
+            return
+        endif
+    endif
+
+    if (present(totalUWidth)) then
+       if (size(totalUWidth) .ne. gridDimCount_norep) then
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+              msg="- totalUWidth must equal to grid dimCount", &
+                ESMF_CONTEXT, rcToReturn=rc)
+           return
+       endif
+    endif
+
+    ! gridToFieldMap elements must be in range 1...fieldRank and unique
+    ! algorithm to check element uniqueness:
+    !   run time: O(ESMF_MAXDIM)
+    !   memory:   O(2*ESMF_MAXDIM)
+    !          or O(ESMF_MAXDIM+ESMF_MAXDIM/sizeof(integer)) with bitvector
     flipflop = .false.
     do i = 1, gridDimCount
        if(localGridToFieldMap(i) .lt. 0 .and. &
@@ -868,20 +868,20 @@ end subroutine ESMF_FieldEmptyCompTK
            flipflop(localGridToFieldMap(i)) = .true.
        endif
     enddo
- 
-     if(present(totalLWidth)) then  
-       localMaxHaloLWidth(1:gridDimCount_norep) = &  
-          totalLWidth (1:gridDimCount_norep)  
-     else  
-          localMaxHaloLWidth = 0  
-     endif  
- 
-     if(present(totalUWidth)) then  
-       localMaxHaloUWidth(1:gridDimCount_norep) = &  
-          totalUWidth (1:gridDimCount_norep)  
-     else  
-          localMaxHaloUWidth = 0  
-     endif  
+
+     if(present(totalLWidth)) then
+       localMaxHaloLWidth(1:gridDimCount_norep) = &
+          totalLWidth (1:gridDimCount_norep)
+     else
+          localMaxHaloLWidth = 0
+     endif
+
+     if(present(totalUWidth)) then
+       localMaxHaloUWidth(1:gridDimCount_norep) = &
+          totalUWidth (1:gridDimCount_norep)
+     else
+          localMaxHaloUWidth = 0
+     endif
 
     ! assign ftype
     ftype => field%ftypep
@@ -897,7 +897,7 @@ end subroutine ESMF_FieldEmptyCompTK
        if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-    else 
+    else
        call ESMF_FieldConstructIANew(ftype, geombase, arrayspec, &
                               localGridToFieldMap(1:gridDimCount), ungriddedLBound, &
                               ungriddedUBound, &
@@ -907,7 +907,7 @@ end subroutine ESMF_FieldEmptyCompTK
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-   
+
     call ESMF_FieldValidate(field, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
@@ -932,17 +932,17 @@ end subroutine ESMF_FieldEmptyCompTK
     totalLWidth, totalUWidth, hasBase, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldType), pointer            :: ftype 
-    type(ESMF_GeomBase)                      :: geombase  
+    type(ESMF_FieldType), pointer            :: ftype
+    type(ESMF_GeomBase)                      :: geombase
     type(ESMF_ArraySpec), intent(in)         :: arrayspec
     integer, intent(in), optional            :: gridToFieldMap(:)
     integer, intent(in), optional            :: ungriddedLBound(:)
-    integer, intent(in), optional            :: ungriddedUBound(:)      
+    integer, intent(in), optional            :: ungriddedUBound(:)
     integer, intent(in), optional            :: totalLWidth(:)
     integer, intent(in), optional            :: totalUWidth(:)
     logical, intent(in), optional            :: hasBase
     character (len=*), intent(in), optional  :: name
-    integer, intent(out), optional           :: rc              
+    integer, intent(out), optional           :: rc
 !
 ! !DESCRIPTION:
 ! Constructs all {\tt ESMF\_Field} internals, including the allocation
@@ -955,8 +955,8 @@ end subroutine ESMF_FieldEmptyCompTK
 ! \begin{description}
 ! \item [ftype]
 !       Pointer to an {\tt ESMF\_Field} object.
-! \item [geombase] 
-!       {\tt ESMF\_GeomBase} object. 
+! \item [geombase]
+!       {\tt ESMF\_GeomBase} object.
 ! \item [arrayspec]
 !       Data specification.
 ! \item [{[gridToFieldMap]}]
@@ -973,7 +973,7 @@ end subroutine ESMF_FieldEmptyCompTK
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
-!       stored in the {\t field}.  
+!       stored in the {\t field}.
 ! \item [{[ungriddedLBound]}]
 !       Lower bounds of the ungridded dimensions of the {\tt field}.
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
@@ -1010,26 +1010,26 @@ end subroutine ESMF_FieldEmptyCompTK
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
 ! \item [{[hasBase]}]
 !       Input ftype already has a base associated with it.
-! \item [{[name]}] 
-!       Field name. 
-! \item [{[rc]}] 
+! \item [{[name]}]
+!       Field name.
+! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       
+!
 ! \end{description}
 !EOPI
 !------------------------------------------------------------------------------
     integer :: localrc
-    type(ESMF_Array) :: array                  
+    type(ESMF_Array) :: array
     integer :: i, arrayRank, gridDimCount, gridDimCount_norep, grid_repdimcount
     type(ESMF_DistGrid) :: distgrid
-    type(ESMF_Index_Flag) :: indexflag    
+    type(ESMF_Index_Flag) :: indexflag
     integer, pointer :: distgridToArrayMap(:)
     integer, pointer :: arrayLBound(:),arrayUBound(:)
     integer              :: ungriddedDimCount
     integer              :: distgridDimCount, distgridDimCount_norep
     logical              :: l_hasBase
 
-    ! Initialize return code   
+    ! Initialize return code
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -1078,16 +1078,16 @@ end subroutine ESMF_FieldEmptyCompTK
     ! allocate distgridToArrayMap
     allocate(distgridToArrayMap(distgridDimCount) , stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating distgridToArrayMap", &
-      ESMF_CONTEXT, rcToReturn=rc)) return   
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! allocate undistributed Bounds
     if(ungriddedDimCount /= 0) then
       allocate(arrayLBound(ungriddedDimCount) , stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridLBound", &
-        ESMF_CONTEXT, rcToReturn=rc)) return   
+        ESMF_CONTEXT, rcToReturn=rc)) return
       allocate(arrayUBound(ungriddedDimCount) , stat=localrc)
       if (ESMF_LogFoundAllocError(localrc, msg="Allocating gridUBound", &
-        ESMF_CONTEXT, rcToReturn=rc)) return   
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Get dimmap and undistibuted bounds
       call ESMF_GeomBaseGetArrayInfo(geombase,                                            &
@@ -1102,14 +1102,14 @@ end subroutine ESMF_FieldEmptyCompTK
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! create Array
-      ! For arbitrary grid:  distgridDim is different from gridDimCount and 
-      ! the dimension of the computationalEdgeLWidth, computationslEdgeUWidth 
-      ! are the dimension of the array, 
-      distgridDimCount_norep = arrayRank - ungriddedDimCount 
-      array=ESMF_ArrayCreate(distgrid=distgrid, arrayspec=arrayspec, &                     
-                distgridToArrayMap=distgridToArrayMap, &                   
-                totalLWidth=totalLWidth, totalUWidth=totalUWidth, & 
-                indexflag=indexflag, &                                                              
+      ! For arbitrary grid:  distgridDim is different from gridDimCount and
+      ! the dimension of the computationalEdgeLWidth, computationslEdgeUWidth
+      ! are the dimension of the array,
+      distgridDimCount_norep = arrayRank - ungriddedDimCount
+      array=ESMF_ArrayCreate(distgrid=distgrid, arrayspec=arrayspec, &
+                distgridToArrayMap=distgridToArrayMap, &
+                totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+                indexflag=indexflag, &
                 undistLBound=arrayLBound, undistUBound=arrayUBound, &
                 name=name, &
                 rc=localrc)
@@ -1129,14 +1129,14 @@ end subroutine ESMF_FieldEmptyCompTK
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! create Array
-      ! For arbitrary grid:  distgridDim is different from gridDimCount and 
-      ! the dimension of the computationalEdgeLWidth, computationslEdgeUWidth 
-      ! are the dimension of the array, 
-      distgridDimCount_norep = arrayRank - ungriddedDimCount 
-      array=ESMF_ArrayCreate(distgrid=distgrid, arrayspec=arrayspec, &                     
-                distgridToArrayMap=distgridToArrayMap, &                   
-                totalLWidth=totalLWidth, totalUWidth=totalUWidth, & 
-                indexflag=indexflag, &                                                              
+      ! For arbitrary grid:  distgridDim is different from gridDimCount and
+      ! the dimension of the computationalEdgeLWidth, computationslEdgeUWidth
+      ! are the dimension of the array,
+      distgridDimCount_norep = arrayRank - ungriddedDimCount
+      array=ESMF_ArrayCreate(distgrid=distgrid, arrayspec=arrayspec, &
+                distgridToArrayMap=distgridToArrayMap, &
+                totalLWidth=totalLWidth, totalUWidth=totalUWidth, &
+                indexflag=indexflag, &
                 name=name, &
                 rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1198,35 +1198,35 @@ end subroutine ESMF_FieldEmptyCompTK
     totalLWidth, totalUWidth, name, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldType), pointer :: ftype 
-    type(ESMF_GeomBase) :: geombase 
-    type(ESMF_Array), intent(in) :: array     
+    type(ESMF_FieldType), pointer :: ftype
+    type(ESMF_GeomBase) :: geombase
+    type(ESMF_Array), intent(in) :: array
     type(ESMF_DataCopy_Flag), intent(in) :: datacopyflag
     integer, intent(in) :: gridToFieldMap(:)
     integer, intent(in),optional :: ungriddedLBound(:)
-    integer, intent(in),optional :: ungriddedUBound(:)      
+    integer, intent(in),optional :: ungriddedUBound(:)
     integer, intent(in),optional :: totalLWidth(:)
     integer, intent(in),optional :: totalUWidth(:)
     character (len=*), intent(in), optional :: name
-    integer, intent(out), optional :: rc              
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Constructs all {\tt ESMF\_Field} internals, including the allocation
-! of a data {\tt ESMF\_Array}.  
+! of a data {\tt ESMF\_Array}.
 !
 ! The arguments are:
 ! \begin{description}
 ! \item [ftype]
 !       Pointer to an {\tt ESMF\_Field} object.
-! \item [geombase] 
-!       {\tt ESMF\_GeomBase} object. 
+! \item [geombase]
+!       {\tt ESMF\_GeomBase} object.
 ! \item [array]
-!       Data. 
+!       Data.
 ! \item [datacopyflag]
 !       Whether to copy the existing data space or reference directly. Valid
 !       values are {\tt ESMF\_DATACOPY\_VALUE} or {\tt ESMF\_DATACOPY\_REFERENCE} (default).
-! \item [staggerloc] 
-!       Stagger location of data in grid cells.  For valid 
+! \item [staggerloc]
+!       Stagger location of data in grid cells.  For valid
 !       predefined values see section \ref{const:staggerloc}.
 !       To create a custom stagger location see section
 !       \ref{sec:usage:staggerloc:adv}. The default
@@ -1245,7 +1245,7 @@ end subroutine ESMF_FieldEmptyCompTK
 !       are the total {\tt field} dimensions less
 !       the dimensions in
 !       the {\tt grid}.  Ungridded dimensions must be in the same order they are
-!       stored in the {\t field}.  
+!       stored in the {\t field}.
 ! \item [{[ungriddedLBound]}]
 !       Lower bounds of the ungridded dimensions of the {\tt field}.
 !       The number of elements in the {\tt ungriddedLBound} is equal to the number of ungridded
@@ -1280,14 +1280,14 @@ end subroutine ESMF_FieldEmptyCompTK
 !       the size of the {\tt field}.  That is, for each gridded dimension the
 !       {\tt field} size should max( {\tt totalLWidth} + {\tt totalUWidth}
 !       + {\tt computationalCount}, {\tt exclusiveCount} ).
-! \item [{[name]}] 
-!       Field name. 
-! \item [{[rc]}] 
+! \item [{[name]}]
+!       Field name.
+! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: localrc 
+    integer :: localrc
     type(ESMF_Array)     :: newarray
     integer              :: ungriddedDimCount, gridDimCount, gridDimCount_norep
     integer              :: grid_repdimcount, i, dimCount, lDeCount, j
@@ -1337,7 +1337,7 @@ end subroutine ESMF_FieldEmptyCompTK
     else
         ftype%ungriddedUBound = -1
     endif
- 
+
     ! make sure the user passed in haloWidths are consistent with those stored in Array
     call ESMF_ArrayGet(array, dimCount=dimCount, localDeCount=lDeCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
@@ -1347,7 +1347,7 @@ end subroutine ESMF_FieldEmptyCompTK
 !    if(lDeCount .lt. 1) then
 !      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
 !      msg="- the number of local DEs in array is less than 1 ", &
-!      ESMF_CONTEXT, rcToReturn=rc) 
+!      ESMF_CONTEXT, rcToReturn=rc)
 !      return
 !    endif
     allocate(tlw(dimCount, lDeCount), tuw(dimCount, lDeCount))
@@ -1369,19 +1369,19 @@ end subroutine ESMF_FieldEmptyCompTK
       enddo
     enddo
 
-    if(present(totalLWidth)) then  
-        ftype%totalLWidth(1:gridDimCount_norep) = &  
-         totalLWidth (1:gridDimCount_norep)  
-    else  
-         ftype%totalLWidth = 0  
-    endif  
+    if(present(totalLWidth)) then
+        ftype%totalLWidth(1:gridDimCount_norep) = &
+         totalLWidth (1:gridDimCount_norep)
+    else
+         ftype%totalLWidth = 0
+    endif
 
-    if(present(totalUWidth)) then  
-        ftype%totalUWidth(1:gridDimCount_norep) = &  
-         totalUWidth (1:gridDimCount_norep)  
-    else  
-         ftype%totalUWidth = 0  
-    endif  
+    if(present(totalUWidth)) then
+        ftype%totalUWidth(1:gridDimCount_norep) = &
+         totalUWidth (1:gridDimCount_norep)
+    else
+         ftype%totalUWidth = 0
+    endif
     ftype%gridToFieldMap(1:size(gridToFieldMap)) = gridToFieldMap
 
     ! default datacopyflag value is ESMF_DATACOPY_REFERENCE
@@ -1396,7 +1396,7 @@ end subroutine ESMF_FieldEmptyCompTK
         ftype%array = newarray
         ftype%array_internal = .true.
     endif
-        
+
     ftype%geombase  = geombase
     ftype%status = ESMF_FIELDSTATUS_COMPLETE
     call ESMF_BaseSetStatus(ftype%base, ESMF_STATUS_READY, rc=localrc)
@@ -2015,14 +2015,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set default values.  @\
     if (present(staggerloc)) then @\
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. & @\
- 	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
+          (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
                  msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &  @\
                  ESMF_CONTEXT, rcToReturn=rc)  @\
            return @\
-	 else @\
-	    localStaggerloc=staggerloc @\
-	 endif @\
+         else @\
+            localStaggerloc=staggerloc @\
+         endif @\
     else   @\
        localStaggerLoc = ESMF_STAGGERLOC_CENTER   @\
     endif   @\
@@ -2220,14 +2220,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Set default values.  @\
     if (present(staggerloc)) then @\
        if ((decompType .eq. ESMF_GRID_ARBITRARY) .and. & @\
- 	  (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
+          (staggerloc .ne. ESMF_STAGGERLOC_CENTER)) then @\
            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &  @\
                  msg="- staggerloc has to be ESMF_STAGGERLOC_CENTER for arbitrary grid", &  @\
                  ESMF_CONTEXT, rcToReturn=rc)  @\
            return @\
-	 else @\
-	    localStaggerloc=staggerloc @\
-	 endif @\
+         else @\
+            localStaggerloc=staggerloc @\
+         endif @\
     else   @\
        localStaggerLoc = ESMF_STAGGERLOC_CENTER   @\
     endif   @\
@@ -3487,10 +3487,10 @@ subroutine ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, &
                 ! fieldDimCount should be the same as the memDimCount @\
                 fieldDimCount = memDimCount @\
                 exit @\
-              endif	 @\
+              endif      @\
            endif @\
          enddo @\
-      endif        	 @\
+      endif              @\
   endif @\
 @\
   if(fieldDimCount .lt. gridDimCount_norep) then @\
@@ -4006,10 +4006,10 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
                 ! fieldDimCount should be the same as the memDimCount @\
                 fieldDimCount = memDimCount @\
                 exit @\
-              endif	 @\
+              endif      @\
            endif @\
          enddo @\
-      endif        	 @\
+      endif              @\
   endif @\
 @\
   if(fieldDimCount .lt. gridDimCount_norep) then @\
@@ -4195,8 +4195,8 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGBPtr)
 !
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character (len = *), intent(in),  optional :: name  
-    integer,             intent(out), optional :: rc               
+    character (len = *), intent(in),  optional :: name
+    integer,             intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -4205,29 +4205,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! \begin{sloppypar}
-! This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
-! and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
+! This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field}
+! and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to
 ! it. The empty {\tt ESMF\_Field} can be completed in one more step or two more steps by
 ! the {\tt ESMF\_FieldEmptySet} and {\tt ESMF\_FieldEmptyComplete} methods.
 ! Attributes can be added to an empty Field object. For an example and
-! associated documentation using this method see section 
+! associated documentation using this method see section
 ! \ref{sec:field:usage:create_empty} and \ref{sec:field:usage:partial_creation}.
 ! \end{sloppypar}
 !
 !
 ! The arguments are:
 ! \begin{description}
-! \item [{[name]}] 
-!       Field name. 
-! \item [{[rc]}] 
+! \item [{[name]}]
+!       Field name.
+! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
     type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
-    integer :: localrc                     
-    
+    integer :: localrc
+
     ! Initialize
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -4237,7 +4237,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     allocate(ftype, stat=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating Field information", &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_FieldInitialize(ftype, rc=localrc) 
+    call ESMF_FieldInitialize(ftype, rc=localrc)
     if (ESMF_LogFoundAllocError(localrc, msg="Default initialize Field", &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -4249,7 +4249,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Set return values.
     ESMF_FieldEmptyCreate%ftypep => ftype
-    
+
     ! Add reference to this object into ESMF garbage collection table
     ! Only call this in those Create() methods that call Construct()
     call c_ESMC_VMAddFObject(ESMF_FieldEmptyCreate, ESMF_ID_FIELD%objectID)
@@ -4289,15 +4289,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added argument {\tt vm} to support object creation on a
+!               different VM than that of the current context.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
 ! \begin{sloppypar}
-! Set a grid and an optional staggerloc (default to center stagger 
-! {\tt ESMF\_STAGGERLOC\_CENTER}) in a non-completed {\tt ESMF\_Field}. The 
-! {\tt ESMF\_Field} must not be completed for this to succeed. After this 
-! operation, the {\tt ESMF\_Field} contains 
-! the {\tt ESMF\_Grid} internally but holds no data. 
+! Set a grid and an optional staggerloc (default to center stagger
+! {\tt ESMF\_STAGGERLOC\_CENTER}) in a non-completed {\tt ESMF\_Field}. The
+! {\tt ESMF\_Field} must not be completed for this to succeed. After this
+! operation, the {\tt ESMF\_Field} contains
+! the {\tt ESMF\_Grid} internally but holds no data.
 ! The status of the field changes from
 ! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET} or
 ! stays {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
@@ -4313,12 +4318,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [field]
 !       Empty {\tt ESMF\_Field}. After this
 !       operation, the {\tt ESMF\_Field} contains
-!       the {\tt ESMF\_Grid} internally but holds no data. 
+!       the {\tt ESMF\_Grid} internally but holds no data.
 !       The status of the field changes from
 !       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 ! \item [grid]
 !       {\tt ESMF\_Grid} to be set in the {\tt ESMF\_Field}.
-! \item [{[StaggerLoc]}] 
+! \item [{[StaggerLoc]}]
 !       Stagger location of data in grid cells.  For valid
 !       predefined values see section \ref{const:staggerloc}.
 !       To create a custom stagger location see section
@@ -4326,7 +4331,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
 ! \item[{[vm]}]
 !       If present, the Field object will only be accessed, and the Grid object
-!       set, on those PETs contained in the specified {\tt ESMF\_VM} object. 
+!       set, on those PETs contained in the specified {\tt ESMF\_VM} object.
 !       The default is to assume the VM of the current context.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4362,7 +4367,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_CONTEXT, rcToReturn=rc)) return
 
   if(status == ESMF_FIELDSTATUS_COMPLETE ) then
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
       msg="FieldEmptySet - cannot set a Grid in a completed Field", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
@@ -4411,11 +4416,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! \begin{sloppypar}
-! Set a mesh and an optional meshloc (default to center stagger 
-! {\tt ESMF\_MESHLOC\_NODE}) in a non-completed {\tt ESMF\_Field}. The 
-! {\tt ESMF\_Field} must not be completed for this to succeed. After this 
+! Set a mesh and an optional meshloc (default to center stagger
+! {\tt ESMF\_MESHLOC\_NODE}) in a non-completed {\tt ESMF\_Field}. The
+! {\tt ESMF\_Field} must not be completed for this to succeed. After this
 ! operation, the {\tt ESMF\_Field} contains
-! the {\tt ESMF\_Mesh} internally but holds no data. 
+! the {\tt ESMF\_Mesh} internally but holds no data.
 ! The status of the field changes from
 ! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET} or
 ! stays {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
@@ -4428,18 +4433,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [field]
 !       Empty {\tt ESMF\_Field}. After this
 !       operation, the {\tt ESMF\_Field} contains
-!       the {\tt ESMF\_Mesh} internally but holds no data. 
+!       the {\tt ESMF\_Mesh} internally but holds no data.
 !       The status of the field changes from
 !       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 ! \item [mesh]
 !       {\tt ESMF\_Mesh} to be set in the {\tt ESMF\_Field}.
-! \item [{[meshloc]}] 
+! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       Which part of the mesh to build the Field on. Can be set to either
 !       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set,
 !       defaults to {\tt ESMF\_MESHLOC\_NODE}.
 !       \end{sloppypar}
-! \item [{[rc]}] 
+! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -4461,7 +4466,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_CONTEXT, rcToReturn=rc)) return
 
   if( status == ESMF_FIELDSTATUS_COMPLETE ) then
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
       msg="FieldEmptySet - cannot set a Mesh in a completed Field", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
@@ -4503,10 +4508,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! \begin{sloppypar}
-! Set a {\tt ESMF\_LocStream} in a non-completed {\tt ESMF\_Field}. The 
-! {\tt ESMF\_Field} must not be completed for this to succeed. After this 
+! Set a {\tt ESMF\_LocStream} in a non-completed {\tt ESMF\_Field}. The
+! {\tt ESMF\_Field} must not be completed for this to succeed. After this
 ! operation, the {\tt ESMF\_Field} contains
-! the {\tt ESMF\_LocStream} internally but holds no data. 
+! the {\tt ESMF\_LocStream} internally but holds no data.
 ! The status of the field changes from
 ! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET} or
 ! stays {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
@@ -4520,7 +4525,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{sloppypar}
 !       Empty {\tt ESMF\_Field}. After this
 !       operation, the {\tt ESMF\_Field} contains
-!       the {\tt ESMF\_LocStream} internally but holds no data. 
+!       the {\tt ESMF\_LocStream} internally but holds no data.
 !       The status of the field changes from
 !       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 ! \end{sloppypar}
@@ -4528,9 +4533,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       {\tt ESMF\_LocStream} to be set in the {\tt ESMF\_Field}.
 ! \item[{[vm]}]
 !       If present, the Field object will only be accessed, and the Grid object
-!       set, on those PETs contained in the specified {\tt ESMF\_VM} object. 
+!       set, on those PETs contained in the specified {\tt ESMF\_VM} object.
 !       The default is to assume the VM of the current context.
-! \item [{[rc]}] 
+! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -4563,7 +4568,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_CONTEXT, rcToReturn=rc)) return
 
   if( status == ESMF_FIELDSTATUS_COMPLETE ) then
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
       msg="FieldEmptySet - cannot set a LocStream in a completed Field", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
@@ -4611,12 +4616,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 ! \begin{sloppypar}
-! Set a xgrid and optional xgridside (default to balanced side 
-! {\tt ESMF\_XGRIDSIDE\_Balanced}) and gridindex (default to 1) 
-! in a non-complete {\tt ESMF\_Field}. The 
-! {\tt ESMF\_Field} must not be completed for this to succeed. After this 
+! Set a xgrid and optional xgridside (default to balanced side
+! {\tt ESMF\_XGRIDSIDE\_Balanced}) and gridindex (default to 1)
+! in a non-complete {\tt ESMF\_Field}. The
+! {\tt ESMF\_Field} must not be completed for this to succeed. After this
 ! operation, the {\tt ESMF\_Field} contains
-! the {\tt ESMF\_XGrid} internally but holds no data. 
+! the {\tt ESMF\_XGrid} internally but holds no data.
 ! The status of the field changes from
 ! {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}
 ! or stays {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
@@ -4630,20 +4635,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{sloppypar}
 !       Empty {\tt ESMF\_Field}. After this
 !       operation, the {\tt ESMF\_Field} contains
-!       the {\tt ESMF\_XGrid} internally but holds no data. 
+!       the {\tt ESMF\_XGrid} internally but holds no data.
 !       The status of the field changes from
 !       {\tt ESMF\_FIELDSTATUS\_EMPTY} to {\tt ESMF\_FIELDSTATUS\_GRIDSET}.
 ! \end{sloppypar}
 ! \item [xgrid]
 !       {\tt ESMF\_XGrid} to be set in the {\tt ESMF\_Field}.
-! \item [{[xgridside]}] 
+! \item [{[xgridside]}]
 !       Side of XGrid to retrieve a DistGrid.  For valid
 !       predefined values see section \ref{const:xgridside}.
 !       The default value is {\tt ESMF\_XGRIDSIDE\_BALANCED}.
-! \item [{[gridindex]}] 
-!       Index to specify which DistGrid when on side A or side B. 
+! \item [{[gridindex]}]
+!       Index to specify which DistGrid when on side A or side B.
 !       The default value is 1.
-! \item [{[rc]}] 
+! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -4665,7 +4670,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_CONTEXT, rcToReturn=rc)) return
 
   if( status == ESMF_FIELDSTATUS_COMPLETE ) then
-    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
       msg="FieldEmptySet - cannot set a XGrid in a completed Field", &
       ESMF_CONTEXT, rcToReturn=rc)
     return
@@ -4697,10 +4702,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   subroutine ESMF_FieldConstructEmpty(ftypep, name, rc)
 !
-! !ARGUMENTS:     
+! !ARGUMENTS:
     type(ESMF_FieldType), pointer :: ftypep
-    character (len = *), intent(in), optional :: name  
-    integer, intent(out), optional :: rc               
+    character (len = *), intent(in), optional :: name
+    integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Constructs an empty {\tt ESMF\_Field}.
@@ -4738,7 +4743,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ftypep%status = ESMF_FIELDSTATUS_EMPTY
 
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_FieldConstructEmpty
 !------------------------------------------------------------------------------
 

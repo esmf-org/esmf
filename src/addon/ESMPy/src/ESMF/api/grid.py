@@ -19,7 +19,7 @@ from ESMF.util.slicing import get_formatted_slice, get_none_or_slice, get_none_o
 
 class Grid(object):
     """
-    The Grid class is a Python wrapper object for the ESMF Grid.  The individual 
+    The :class:`~ESMF.api.grid.Grid` class is a Python wrapper object for the ESMF Grid.  The individual 
     values of all coordinate and mask arrays are referenced to those of the
     underlying Fortran ESMF object.
 
@@ -33,10 +33,10 @@ class Grid(object):
 
     For more information about the ESMF Grid class, please see the 
     `ESMF Grid documentation
-    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05080000000000000000>`_.
+    <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05080000000000000000>`_.
  
     A :class:`~ESMF.api.grid.Grid` can be created in two different ways, as a
-    Grid in memory, or from SCRIP formatted or CF compliant GRIDSPEC file. The
+    :class:`~ESMF.api.grid.Grid` in memory, or from SCRIP formatted or CF compliant GRIDSPEC file. The
     arguments for each type of :class:`~ESMF.api.grid.Grid` creation are
     outlined below.
 
@@ -178,7 +178,7 @@ class Grid(object):
             if is_sphere is not None:
                 warnings.warn("is_sphere is only used for grids created from file, this argument will be ignored.")
             if add_corner_stagger is not None:
-                warnings.warn("add_corner_stagger is only used for grids created from file, this argument will be ignored.")
+                warnings.warn("add_corner_stagger is only used for grids created from file or cubed sphere grids, this argument will be ignored.")
             if add_user_area is not None:
                 warnings.warn("add_user_area is only used for grids created from file, this argument will be ignored.")
             if add_mask is not None:
@@ -263,8 +263,6 @@ class Grid(object):
                 warnings.warn("decompflag is only used for grids created from file, this argument will be ignored.")
             if is_sphere is not None:
                 warnings.warn("is_sphere is only used for grids created from file, this argument will be ignored.")
-            if add_corner_stagger is not None:
-                warnings.warn("add_corner_stagger is only used for grids created from file, this argument will be ignored.")
             if add_user_area is not None:
                 warnings.warn("add_user_area is only used for grids created from file, this argument will be ignored.")
             if add_mask is not None:
@@ -357,10 +355,14 @@ class Grid(object):
                 # TODO: we assume that all periodic grids create from file will be periodic across the first
                 #       dimension.. is that true?
         elif cubed_sphere:
+            staggerloclist = np.array([StaggerLoc.CENTER], dtype=np.int32)
+            if add_corner_stagger is True:
+                staggerloclist.push_back(StaggerLoc.CORNER)
             self._struct = ESMP_GridCreateCubedSphere(tilesize,
                 regDecompPTile=regDecompPTile,
                 #decompFlagPTile=decompFlagPTile,
                 #deLabelList=deLabelList,
+                staggerLocList=staggerloclist,
                 name=name)
 
             # grid rank for cubed sphere is currently 2
@@ -368,7 +370,7 @@ class Grid(object):
             self._ndims = 2
 
             # allocate space for staggger
-            staggerloc = [StaggerLoc.CENTER,StaggerLoc.CORNER]
+            staggerloc = list(staggerloclist)
 
             # set from_file so coordinates are not reallocated
             from_file = True
@@ -768,7 +770,7 @@ class Grid(object):
             in 2D and :attr:`~ESMF.api.constants.StaggerLoc.CENTER_VCENTER` in
             3D.
         :param int coord_dim: The dimension number of the coordinates to return
-            e.g. ``[x, y, z] = (0, 1, 2)``, or ``[lat, lon] = (0, 1)``
+            e.g. ``[x, y, z] = (0, 1, 2)``, or ``[lon, lat] = (0, 1)``
             (coordinates will not be returned if coord_dim is not specified and
             staggerlocs is a list with more than one element).
         :param bool from_file: Boolean for internal use to determine whether the

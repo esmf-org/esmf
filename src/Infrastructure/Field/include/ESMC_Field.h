@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -750,8 +750,11 @@ int ESMC_FieldRegridStore(
     int *regridPoleNPnts,                          // in
     enum ESMC_LineType_Flag *lineType,             // in
     enum ESMC_NormType_Flag *normType,             // in
+    enum ESMC_ExtrapMethod_Flag *extrapMethod,     // in
+    int *extrapNumSrcPnts,                         // in
+    float *extrapDistExponent,                     // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
-    ESMC_Logical *ignoreDegenerate,                // in
+    enum ESMC_Logical *ignoreDegenerate,           // in
     ESMC_Field *srcFracField,                      // out
     ESMC_Field *dstFracField);                     // out
 
@@ -804,6 +807,17 @@ int ESMC_FieldRegridStore(
 //    This argument controls the type of normalization used when generating conservative weights.
 //    This option only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}.
 //    If not specified normType defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}.
+//  \item [{[extrapMethod]}]
+//    The type of extrapolation. Please see Section~\ref{opt:cextrapmethod} 
+//    for a list of valid options. If not specified, defaults to 
+//    {\tt ESMC\_EXTRAPMETHOD\_NONE}.
+//  \item [{[extrapNumSrcPnts]}] 
+//    The number of source points to use for the extrapolation methods that use more than one source point 
+//    (e.g. {\tt ESMC\_EXTRAPMETHOD\_NEAREST\_IDAVG}). If not specified, defaults to 8.
+//  \item [{[extrapDistExponent]}] 
+//    The exponent to raise the distance to when calculating weights for 
+//    the {\tt ESMC\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
+//    of more distant points. If not specified, defaults to 2.0.
 //  \item[unmappedaction]
 //    Specifies what should happen if there are destination points that can't 
 //    be mapped to a source cell. Options are {\tt ESMF\_UNMAPPEDACTION\_ERROR} or
@@ -817,6 +831,103 @@ int ESMC_FieldRegridStore(
 //    The fraction of each destination cell participating in the regridding. Only 
 //    valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
 //    This Field needs to be created on the same location (e.g staggerloc) 
+//    as the dstField.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_FieldRegridStoreFile - Precompute a Field regridding operation and return a RouteHandle
+//
+// !INTERFACE:
+int ESMC_FieldRegridStoreFile(
+    ESMC_Field srcField,                           // in
+    ESMC_Field dstField,                           // in
+    const char *filename,                          // in
+    ESMC_InterArrayInt *srcMaskValues,              // in
+    ESMC_InterArrayInt *dstMaskValues,              // in
+    ESMC_RouteHandle *routehandle,                 // inout
+    enum ESMC_RegridMethod_Flag *regridmethod,     // in
+    enum ESMC_PoleMethod_Flag *polemethod,         // in
+    int *regridPoleNPnts,                          // in
+    enum ESMC_LineType_Flag *lineType,             // in
+    enum ESMC_NormType_Flag *normType,             // in
+    enum ESMC_UnmappedAction_Flag *unmappedaction, // in
+    enum ESMC_Logical *ignoreDegenerate,           // in
+    enum ESMC_Logical *create_rh,                  // in
+    ESMC_Field *srcFracField,                      // out
+    ESMC_Field *dstFracField);                     // out
+
+// !RETURN VALUE:
+//   Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//   Creates a sparse matrix operation (stored in routehandle) that contains
+//   the calculations and communications necessary to interpolate from srcField
+//   to dstField. The routehandle can then be used in the call ESMC\_FieldRegrid()
+//   to interpolate between the Fields. The weights will be output to the file
+//   with name {\tt filename}.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[srcField]
+//    ESMC\_Field with source data.
+//  \item[dstField]
+//    ESMC\_Field with destination data.
+//  \item[{[filename]}]
+//    The output filename for the factorList and factorIndexList.
+//  \item[{[srcMaskValues]}]
+//    List of values that indicate a source point should be masked out.
+//    If not specified, no masking will occur.
+//  \item[{[dstMaskValues]}]
+//    List of values that indicate a destination point should be masked out.
+//    If not specified, no masking will occur.
+//  \item[{[routehandle]}]
+//    The handle that implements the regrid, to be used in {\tt ESMC\_FieldRegrid()}.
+//  \item[{[regridmethod]}]
+//    The type of interpolation. If not specified, defaults to {\tt ESMC\_REGRIDMETHOD\_BILINEAR}.
+//  \item [{[polemethod]}]
+//    Which type of artificial pole
+//    to construct on the source Grid for regridding.
+//    If not specified, defaults to {\tt ESMC\_POLEMETHOD\_ALLAVG} for non-conservative regrid methods,
+//    and {\tt ESMC\_POLEMETHOD\_NONE} for conservative methods.
+//    If not specified, defaults to {\tt ESMC\_POLEMETHOD\_ALLAVG}.
+//  \item [{[regridPoleNPnts]}]
+//    If {\tt polemethod} is {\tt ESMC\_POLEMETHOD\_NPNTAVG}.
+//    This parameter indicates how many points should be averaged
+//    over. Must be specified if {\tt polemethod} is
+//    {\tt ESMC\_POLEMETHOD\_NPNTAVG}.
+//  \item [{[lineType]}]
+//    This argument controls the path of the line which connects two points on a sphere surface. This in
+//    turn controls the path along which distances are calculated and the shape of the edges that make
+//    up a cell. Both of these quantities can influence how interpolation weights are calculated.
+//    As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
+//    built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a
+//    list of valid options for this argument. If not specified, the default depends on the
+//    regrid method. Section~\ref{opt:lineType} has the defaults by line type.
+//  \item[{[normType]}]
+//    This argument controls the type of normalization used when generating conservative weights.
+//    This option only applies to weights generated with {\tt regridmethod=ESMC\_REGRIDMETHOD\_CONSERVE}.
+//    If not specified normType defaults to {\tt ESMC\_NORMTYPE\_DSTAREA}.
+//  \item[{[unmappedaction]}]
+//    Specifies what should happen if there are destination points that can't
+//    be mapped to a source cell. Options are {\tt ESMC\_UNMAPPEDACTION\_ERROR} or
+//    {\tt ESMC\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults to {\tt ESMC\_UNMAPPEDACTION\_ERROR}.
+//  \item[{create\_rh}]
+//    Specifies whether or not to create a routehandle, or just write weights to file.
+//    If not specified, defaults to {\tt ESMF\_TRUE}.
+//  \item [{[srcFracField]}]
+//    The fraction of each source cell participating in the regridding. Only
+//    valid when regridmethod is {\tt ESMC\_REGRIDMETHOD\_CONSERVE}.
+//    This Field needs to be created on the same location (e.g staggerloc)
+//    as the srcField.
+//  \item [{[dstFracField]}]
+//    The fraction of each destination cell participating in the regridding. Only
+//    valid when regridmethod is {\tt ESMC\_REGRIDMETHOD\_CONSERVE}.
+//    This Field needs to be created on the same location (e.g staggerloc)
 //    as the dstField.
 //  \end{description}
 //
@@ -895,8 +1006,104 @@ int ESMC_FieldRegridStore(
 
 
 //-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_FieldSMMStore - Precompute a Field regridding operation and return a RouteHandle
+//
+// !INTERFACE:
+int ESMC_FieldSMMStore(
+    ESMC_Field srcField,                           // in
+    ESMC_Field dstField,                           // in
+    const char *filename,                          // in
+    ESMC_RouteHandle *routehandle,                 // out
+    ESMC_Logical *ignoreUnmatchedIndices,          // in
+    int *srcTermProcessing,                        // in
+    int *pipeLineDepth);                           // in
+
+// !RETURN VALUE:
+//   Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//   Creates a sparse matrix operation (stored in routehandle) that contains
+//   the calculations and communications necessary to interpolate from srcField
+//   to dstField. The routehandle can then be used in the call ESMC\_FieldRegrid()
+//   to interpolate between the Fields.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[srcField]
+//    ESMC\_Field with source data.
+//  \item[dstField]
+//    ESMC\_Field with destination data.
+//  \item [filename]
+//    Path to the file containing weights for creating an {\tt ESMC\_RouteHandle}.
+//    Only "row", "col", and "S" variables are required. They
+//    must be one-dimensionsal with dimension "n\_s".
+//  \item[routehandle]
+//    The handle that implements the regrid, to be used in {\tt ESMC\_FieldRegrid()}.
+//  \item [{[ignoreUnmatchedIndices]}]
+//    A logical flag that affects the behavior for when sequence indices
+//    in the sparse matrix are encountered that do not have a match on the
+//    {\tt srcField} or {\tt dstField} side. The default setting is
+//    {\tt .false.}, indicating that it is an error when such a situation is
+//    encountered. Setting {\tt ignoreUnmatchedIndices} to {\tt .true.} ignores
+//    entries with unmatched indices.
+//  \item [{[srcTermProcessing]}]
+//    The {\tt srcTermProcessing} parameter controls how many source terms,
+//    located on the same PET and summing into the same destination element,
+//    are summed into partial sums on the source PET before being transferred
+//    to the destination PET. A value of 0 indicates that the entire arithmetic
+//    is done on the destination PET; source elements are neither multiplied
+//    by their factors nor added into partial sums before being sent off by the
+//    source PET. A value of 1 indicates that source elements are multiplied
+//    by their factors on the source side before being sent to the destination
+//    PET. Larger values of {\tt srcTermProcessing} indicate the maximum number
+//    of terms in the partial sums on the source side.
+//    Note that partial sums may lead to bit-for-bit differences in the results.
+//    See section \ref{RH:bfb} for an in-depth discussion of {\em all}
+//    bit-for-bit reproducibility aspects related to route-based communication
+//    methods.
+//    The {\tt ESMC\_FieldSMMStore()} method implements an auto-tuning scheme
+//    for the {\tt srcTermProcessing} parameter. The intent on the
+//    {\tt srcTermProcessing} argument is "{\tt inout}" in order to
+//    support both overriding and accessing the auto-tuning parameter.
+//    If an argument $>= 0$ is specified, it is used for the
+//    {\tt srcTermProcessing} parameter, and the auto-tuning phase is skipped.
+//    In this case the {\tt srcTermProcessing} argument is not modified on
+//    return. If the provided argument is $< 0$, the {\tt srcTermProcessing}
+//    parameter is determined internally using the auto-tuning scheme. In this
+//    case the {\tt srcTermProcessing} argument is re-set to the internally
+//    determined value on return. Auto-tuning is also used if the optional
+//    {\tt srcTermProcessing} argument is omitted.
+//  \item [{[pipelineDepth]}]
+//    The {\tt pipelineDepth} parameter controls how many messages a PET
+//    may have outstanding during a sparse matrix exchange. Larger values
+//    of {\tt pipelineDepth} typically lead to better performance. However,
+//    on some systems too large a value may lead to performance degradation,
+//    or runtime errors.
+//    Note that the pipeline depth has no effect on the bit-for-bit
+//    reproducibility of the results. However, it may affect the performance
+//    reproducibility of the exchange.
+//    The {\tt ESMC\_FieldSMMStore()} method implements an auto-tuning scheme
+//    for the {\tt pipelineDepth} parameter. The intent on the
+//    {\tt pipelineDepth} argument is "{\tt inout}" in order to
+//    support both overriding and accessing the auto-tuning parameter.
+//    If an argument $>= 0$ is specified, it is used for the
+//    {\tt pipelineDepth} parameter, and the auto-tuning phase is skipped.
+//    In this case the {\tt pipelineDepth} argument is not modified on
+//    return. If the provided argument is $< 0$, the {\tt pipelineDepth}
+//    parameter is determined internally using the auto-tuning scheme. In this
+//    case the {\tt pipelineDepth} argument is re-set to the internally
+//    determined value on return. Auto-tuning is also used if the optional
+//    {\tt pipelineDepth} argument is omitted.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 //BOPI
-// !IROUTINE: ESMC_FieldRead - Read Array data into a Field
+// !IROUTINE: ESMC_FieldWrite - Write Field
 //
 // !INTERFACE:
   int ESMC_FieldWrite(ESMC_Field field,  // inout

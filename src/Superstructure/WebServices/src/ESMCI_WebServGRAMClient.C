@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -70,7 +70,7 @@ ESMCI_WebServGRAMClient::ESMCI_WebServGRAMClient(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-	: ESMCI_WebServCompSvrMgr(hostName, scriptDir, scriptName)
+        : ESMCI_WebServCompSvrMgr(hostName, scriptDir, scriptName)
 {
 }
 
@@ -94,7 +94,7 @@ ESMCI_WebServGRAMClient::~ESMCI_WebServGRAMClient(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	// need to free up memory here
+        // need to free up memory here
 }
 
 
@@ -120,7 +120,7 @@ int  ESMCI_WebServGRAMClient::loginToServer(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	return 0; // do something
+        return 0; // do something
 }
 
 
@@ -147,7 +147,7 @@ string  ESMCI_WebServGRAMClient::submitJob(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	return string(""); // do something
+        return string(""); // do something
 }
 
 
@@ -172,7 +172,7 @@ int  ESMCI_WebServGRAMClient::cancelJob(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	return 0; // do something
+        return 0; // do something
 }
 
 
@@ -197,7 +197,7 @@ int  ESMCI_WebServGRAMClient::jobStatus(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	return 0; // do something
+        return 0; // do something
 }
 
 

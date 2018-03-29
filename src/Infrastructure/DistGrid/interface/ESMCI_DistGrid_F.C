@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -205,7 +205,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER) opt_vm = NULL;
     else opt_vm = *vm;
     if (ESMC_NOT_PRESENT_FILTER(indexTK) == ESMC_NULL_POINTER) 
-      opt_indexTK = ESMC_TYPEKIND_I4;
+      opt_indexTK = ESMF_NOKIND;
     else opt_indexTK = *indexTK;
     // call into C++
     *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, deBlockList,
@@ -345,8 +345,15 @@ extern "C" {
         return;
       }
       // fill in values
+#ifdef TYPESMATCH
       memcpy((elementCountPTile)->array, (*ptr)->getElementCountPTile(),
         sizeof(int)*(*ptr)->getTileCount());
+#else
+      int tileCount = (*ptr)->getTileCount();
+      const ESMC_I8 *access = (*ptr)->getElementCountPTile();
+      for (int i=0; i<tileCount; i++)
+        (elementCountPTile)->array[i] = (int)(access[i]); // explicit type cast
+#endif
     }
     // fill minIndexPDimPDe
     if (present(minIndexPDimPDe)){
@@ -425,8 +432,15 @@ extern "C" {
         return;
       }
       // fill in values
+#ifdef TYPESMATCH
       memcpy((elementCountPDe)->array, (*ptr)->getElementCountPDe(),
         sizeof(int)*(*ptr)->getDELayout()->getDeCount());
+#else
+      int deCount = (*ptr)->getDELayout()->getDeCount();
+      const ESMC_I8 *access = (*ptr)->getElementCountPDe();
+      for (int i=0; i<deCount; i++)
+        (elementCountPDe)->array[i] = (int)(access[i]); // explicit type cast
+#endif
     }
     // fill tileListPDe
     if (present(tileListPDe)){

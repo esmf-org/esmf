@@ -69,8 +69,34 @@ class TestBase(unittest.TestCase):
                 self.assertEqual(v, d2[k])
             self.assertEqual(set(d1.keys()), set(d2.keys()))
 
-    def iter_product_keywords(self, keywords, as_namedtuple=True):
+    def assertWeightFileIsRational(self, filename, src_size, dst_size):
+        try:
+            from netCDF4 import Dataset
+        except ImportError:
+            pass
+        else:
+            ds = Dataset(filename)
+            try:
+                S = ds.variables['S'][:]
+                row = ds.variables['row'][:]
+                col = ds.variables['col'][:]
+                actual_col_max = col.max()
+                actual_row_max = row.max()
+
+                self.assertEqual(actual_col_max, src_size)
+                self.assertEqual(actual_row_max, dst_size)
+
+                for urow in np.unique(row):
+                    select = row == urow
+                    self.assertAlmostEqual(S[select].sum(), 1.0)
+            finally:
+                ds.close()
+
+
+    @staticmethod
+    def iter_product_keywords(keywords, as_namedtuple=True):
         return iter_product_keywords(keywords, as_namedtuple=as_namedtuple)
+
 
 def attr(*args, **kwargs):
     """

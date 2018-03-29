@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -205,10 +205,10 @@ class Attribute
     int streamAttributeToJSON(ESMC_Logical flattenPackList, ESMC_Logical includeUnset, ESMC_Logical includeLinks, std::string &output,  int *totalStreamed) const;
     int streamAttributeRootToJSON(ESMC_Logical flattenPackList, ESMC_Logical includeUnset, ESMC_Logical includeLinks, std::string &output, int *totalStreamed) const;
     int streamAttributeListToJSON(std::vector<Attribute *> attrVector, ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output, int *totalStreamed) const;
-  	int streamAttributePackToJSON(std::vector<Attribute *> attrVector, ESMC_Logical flattenPackList, ESMC_Logical includeUnset, ESMC_Logical includeLinks, std::string &output, int *totalStreamed) const;
-  	int streamAttributeLinksToJSON(std::vector<Attribute *> attrVector, ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output, int *totalStreamed) const;
+        int streamAttributePackToJSON(std::vector<Attribute *> attrVector, ESMC_Logical flattenPackList, ESMC_Logical includeUnset, ESMC_Logical includeLinks, std::string &output, int *totalStreamed) const;
+        int streamAttributeLinksToJSON(std::vector<Attribute *> attrVector, ESMC_Logical flattenPackList, ESMC_Logical includeUnset, std::string &output, int *totalStreamed) const;
 
-  	template<typename T>
+        template<typename T>
     std::string attrValuesToString(const std::vector<T> *vec) const;
 
     // return an Attribute by name or number
@@ -465,14 +465,14 @@ extern "C" {
 // error: more than one instance of overloaded function "c_esmc_attpackremove_" has "C" linkage
   void FTN_X(c_esmc_attpackstreamjson)(ESMCI::Attribute **attpack,
                                   int *flattenPackList,
-								  int *includeUnset,
-								  int *includeLinks,
-								  char *output, int *rc,
+                                                                  int *includeUnset,
+                                                                  int *includeLinks,
+                                                                  char *output, int *rc,
                                   ESMCI_FortranStrLenArg olen);
   void FTN_X(c_esmc_attpackstreamjsonstrlen)(ESMCI::Attribute **attpack,
-		  	  	  	  	  	  	  int *flattenPackList,
-								  int *includeUnset,
-								  int *includeLinks,
+                                                                  int *flattenPackList,
+                                                                  int *includeUnset,
+                                                                  int *includeLinks,
                                   int *jsonstrlen, int *rc);
   void FTN_X(c_esmc_attpackget)(ESMC_Base **base, ESMCI::Attribute **attpack,
                                   int *count, char *specList, int *lens,

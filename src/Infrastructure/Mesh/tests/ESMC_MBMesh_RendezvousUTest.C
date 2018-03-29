@@ -21,6 +21,8 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
+#if defined ESMF_MOAB
+
 #include "ESMC_MBMeshTestUtilMBMesh.C"
 #include "ESMC_MBMeshTestUtilPL.C"
 
@@ -33,12 +35,12 @@
 
 #include "MBTagConventions.hpp"
 #include "moab/Core.hpp"
-
+#endif
 
 #include <iostream>
 #include <iterator>
 #include <vector>
-
+#include <cstring>
 
 #if !defined (M_PI)
 // for Windows...
@@ -46,6 +48,8 @@
 #endif
 
 using namespace std;
+
+#if defined ESMF_MOAB
 
 int mesh_print(MBMesh *mesh) {
   int rc;
@@ -63,7 +67,6 @@ int mesh_print(MBMesh *mesh) {
                 (int *)NULL, (int *)NULL);
   if (rc != ESMF_SUCCESS) return 0;
 
-  #if defined (ESMF_MOAB)
   //Get MOAB Mesh
   Interface *interface=mesh->mesh;
 
@@ -85,7 +88,6 @@ int mesh_print(MBMesh *mesh) {
               << std::endl;
   }
 
-#endif
   return 0;
 }
 
@@ -114,6 +116,7 @@ int pl_print(PointList *pl) {
 
   return 0;
 }
+#endif
 
 int main(int argc, char *argv[]) {
 
@@ -130,8 +133,10 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
+#if defined ESMF_MOAB
   //----------------------------------------------------------------------------
   //ESMC_MoabSet(true);
+#endif
 
   // Get parallel information
   vm=ESMC_VMGetGlobal(&rc);
@@ -143,6 +148,8 @@ int main(int argc, char *argv[]) {
 
   // common vector for pointlist verification
   vector<double*> cv;
+
+#if defined ESMF_MOAB
 
   // build a mesh
   MBMesh *mesh;
@@ -158,7 +165,9 @@ int main(int argc, char *argv[]) {
   MBMesh *mesh_rend=NULL;
   PointList *pl_rend=NULL;
   create_rendez_mbmesh_etop(mesh, pl, &mesh_rend, &pl_rend);
-
+#else
+  rc = ESMF_SUCCESS;
+#endif
   strcpy(name, "Rendezvous between a Mesh and a PointList");
   strcpy(failMsg, "Mesh to PointList rendezvous failed");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -175,11 +184,13 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "pointlist rendezvous incorrect");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
+#if defined ESMF_MOAB
   // clean up
   delete pl;
   delete mesh;
   delete pl_rend;
   delete mesh_rend;
+#endif
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

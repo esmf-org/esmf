@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -77,16 +77,16 @@
       integer :: argindex
 
       real(ESMF_KIND_R8) :: random_values(50) = (/  &
-	0.997560, 0.566825, 0.965915, 0.747928, 0.367391,  &
-	0.480637, 0.073754, 0.005355, 0.347081, 0.342244,  &
-	0.217952, 0.133160, 0.900524, 0.386766, 0.445482,  &
-	0.661932, 0.016108, 0.650855, 0.646409, 0.322987,  &
-	0.855692, 0.401287, 0.206874, 0.968539, 0.598400,  &
-	0.672981, 0.456882, 0.330015, 0.100383, 0.755453,  &
-	0.605693, 0.719048, 0.897335, 0.658229, 0.150717,  &
-	0.612315, 0.978660, 0.999142, 0.256798, 0.550865,  &
-	0.659047, 0.554005, 0.977760, 0.901923, 0.657925,  &
-	0.728858, 0.402455, 0.928628, 0.147835, 0.674529   &
+        0.997560, 0.566825, 0.965915, 0.747928, 0.367391,  &
+        0.480637, 0.073754, 0.005355, 0.347081, 0.342244,  &
+        0.217952, 0.133160, 0.900524, 0.386766, 0.445482,  &
+        0.661932, 0.016108, 0.650855, 0.646409, 0.322987,  &
+        0.855692, 0.401287, 0.206874, 0.968539, 0.598400,  &
+        0.672981, 0.456882, 0.330015, 0.100383, 0.755453,  &
+        0.605693, 0.719048, 0.897335, 0.658229, 0.150717,  &
+        0.612315, 0.978660, 0.999142, 0.256798, 0.550865,  &
+        0.659047, 0.554005, 0.977760, 0.901923, 0.657925,  &
+        0.728858, 0.402455, 0.928628, 0.147835, 0.674529   &
       /)
 
       integer :: sorted_ints (size (random_values))
@@ -177,7 +177,7 @@
         name, failMsg, result, ESMF_SRCLINE)
     else
       write (failMsg, *) 'Could not find revision number in string'
-      call ESMF_Test(i >= 2, name, failMsg, result, ESMF_SRCLINE)      
+      call ESMF_Test(i >= 2, name, failMsg, result, ESMF_SRCLINE)
     end if
 
   !------------------------------------------------------------------------
@@ -373,8 +373,8 @@
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_reals)
       if (sorted_reals(i-1) > sorted_reals(i)) then
-	rc = ESMF_FAILURE
-	exit
+        rc = ESMF_FAILURE
+        exit
       end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -396,8 +396,8 @@
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_reals)
       if (sorted_reals(i-1) < sorted_reals(i)) then
-	rc = ESMF_FAILURE
-	exit
+        rc = ESMF_FAILURE
+        exit
       end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -421,8 +421,8 @@
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_dblreals)
       if (sorted_dblreals(i-1) > sorted_dblreals(i)) then
-	rc = ESMF_FAILURE
-	exit
+        rc = ESMF_FAILURE
+        exit
       end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -444,8 +444,8 @@
     rc = ESMF_SUCCESS
     do, i=2, size (sorted_dblreals)
       if (sorted_dblreals(i-1) < sorted_dblreals(i)) then
-	rc = ESMF_FAILURE
-	exit
+        rc = ESMF_FAILURE
+        exit
       end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -470,8 +470,8 @@
     do, i=2, size (sorted_ints)
       if (sorted_ints(i-1) > sorted_ints(i)) then
         print *, 'failed testing: ', sorted_ints(i-1), " < ", sorted_ints(i)
-	rc = ESMF_FAILURE
-	exit
+        rc = ESMF_FAILURE
+        exit
       end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -494,8 +494,8 @@
     do, i=2, size (sorted_ints)
       if (sorted_ints(i-1) < sorted_ints(i)) then
         print *, 'failed testing: ', sorted_ints(i-1), " > ", sorted_ints(i)
-	rc = ESMF_FAILURE
-	exit
+        rc = ESMF_FAILURE
+        exit
       end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -520,8 +520,8 @@
     do, i=2, size (sorted_dblints)
       if (sorted_dblints(i-1) > sorted_dblints(i)) then
         print *, 'failed testing: ', sorted_dblints(i-1), " < ", sorted_dblints(i)
-	rc = ESMF_FAILURE
-	exit
+        rc = ESMF_FAILURE
+        exit
       end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -544,8 +544,8 @@
     do, i=2, size (sorted_dblints)
       if (sorted_dblints(i-1) < sorted_dblints(i)) then
         print *, 'failed testing: ', sorted_dblints(i-1), " > ", sorted_dblints(i)
-	rc = ESMF_FAILURE
-	exit
+        rc = ESMF_FAILURE
+        exit
       end if
     end do
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
@@ -862,5 +862,5 @@
       ! This calls finalize before returning, so it must be the last
       ! ESMF-related thing the test does.
       call ESMF_TestEnd(ESMF_SRCLINE)
-  
+
       end program ESMF_UtilUTest

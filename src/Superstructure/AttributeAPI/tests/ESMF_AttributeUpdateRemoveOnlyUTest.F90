@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -198,7 +198,7 @@ module ESMF_AttributeUpdateRemoveOnlyUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_AttPack)        :: attpack   
+    type(ESMF_AttPack)        :: attpack
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
@@ -510,7 +510,7 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
       type(ESMF_CplComp)      :: cplcomp
       character(ESMF_MAXSTR)  :: convESMF,purpGen
 
-	  type(ESMF_AttPack)    :: attpack
+          type(ESMF_AttPack)    :: attpack
       type(ESMF_Field)        :: field
       type(ESMF_FieldBundle)  :: fieldbundle
 
@@ -611,7 +611,7 @@ program ESMF_AttributeUpdateRemoveOnlyUTest
     call ESMF_AttributeGetAttPack(field, convention="CF", &
                          purpose="Extended", attpack=attpack, rc=rc)
     call ESMF_AttributeGet(field, name2, attpack=attpack, &
-    					   isPresent=isPresent, rc=rc)
+                                           isPresent=isPresent, rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
     write(name, *) "Getting an updated deleted Attribute value from a Field test"
     call ESMF_Test((rc==ESMF_SUCCESS).and.(isPresent.eqv..false.), &

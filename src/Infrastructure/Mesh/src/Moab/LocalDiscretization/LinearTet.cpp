@@ -104,7 +104,9 @@ namespace moab
 
         // find best initial guess to improve convergence
       CartVect tmp_params[] = {CartVect(-1,-1,-1), CartVect(1,-1,-1), CartVect(-1,1,-1), CartVect(-1,-1,1)};
-      double resl = HUGE;
+      //TODO: RLO replaced this code with same line from 5.0.0 release because it seems like a bug, and ESMF will be
+      // updating to newer version of MOAB soon anyway
+      double resl = std::numeric_limits<double>::max();
       CartVect new_pos, tmp_pos;
       ErrorCode rval;
       for (unsigned int i = 0; i < 4; i++) {

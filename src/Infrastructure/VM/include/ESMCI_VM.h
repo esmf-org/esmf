@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -42,15 +42,29 @@
 #include "ESMCI_Util.h"
 
 #include <string>
+#include <map>
 
 //-------------------------------------------------------------------------
 
 namespace ESMCI {
 
-typedef struct{
+class VMId {
+  public:
   char *vmKey;    // bit-pattern that identifies VM VAS context
   int localID;    // local ID of the VM within VAS context
-}VMId;
+
+  public:
+  VMId() { vmKey=NULL; localID=0; }
+
+  int create ();      // allocates memory for vmKey member
+  int destroy ();     // frees memory for vmKey member
+  int get(int *localID, char *key, int key_len);
+  int set(int  localID, const char *key, int key_len);
+  int serialize(const char *buffer, int *length, int *offset,
+                const ESMC_InquireFlag &inquireflag);
+  int deserialize(const char *buffer, int *offset, bool offsetonly);
+  int print () const;
+};
 
 } // namespace ESMCI
 
@@ -63,14 +77,12 @@ typedef struct{
 namespace ESMCI {
 
 // ESMCI::VMId methods:
-VMId VMIdCreate(int *rc);      // allocates memory for vmKey member
-void VMIdDestroy(VMId *vmID, int *rc); // frees memory for vmKey memb
+// VMId VMIdCreate(int *rc);      // allocates memory for vmKey member
+// void VMIdDestroy(VMId *vmID, int *rc); // frees memory for vmKey memb
 bool VMIdCompare(VMId *vmID1, VMId *vmID2);
 int VMIdCopy(VMId *vmIDdst, VMId *vmIDsrc);
-void VMIdGet(VMId *vmID, int *localID, char *key, int key_len, int *rc);
-void VMIdPrint(VMId *vmID);
-void VMIdSet(VMId *vmID, int  localID, char *key, int key_len, int *rc);
-
+// void VMIdGet(VMId *vmID, int *localID, char *key, int key_len, int *rc);
+// void VMIdSet(VMId *vmID, int  localID, char *key, int key_len, int *rc);
 } // namespace ESMCI
 
 
@@ -84,15 +96,25 @@ namespace ESMCI {
 class VM;
 class VMPlan;
 
+class VMTimer {
+  double t0;
+  double taccu;
+  unsigned long iters;
+  friend class VM;
+};
+
 // class definition
 class VM : public VMK {   // inherits from ESMCI::VMK class
   // This is the ESMF derived virtual machine class.
-
+    // performance timers
+    std::map<std::string, VMTimer> timers;
   public:
     // initialize(), finalize() and abort() of global VM
     static VM *initialize(MPI_Comm mpiCommunicator, int *rc);
-    static void finalize(ESMC_Logical *keepMpiFlag, int *rc);   
+    static void finalize(ESMC_Logical *keepMpiFlag, int *rc);
     static void abort(int *rc);
+    static bool isInitialized(int *rc);
+    static bool isFinalized(int *rc);
     // life cycle methods      
     void *startup(class VMPlan *vmp, void *(fctp)(void *, void *), void *cargo,
       int *rc);
@@ -129,6 +151,31 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
                        VMId **recvvmid, int *recvcounts, int *recvoffsets);
     int alltoallvVMId(VMId **sendvmid, int *sendcounts, int *sendoffsets,
                       VMId **recvvmid, int *recvcounts, int *recvoffsets);
+    // performance timers API
+    void timerReset(std::string timer){
+      std::map<std::string, VMTimer>::iterator t = timers.find(timer);
+      if (t==timers.end()){
+        // create the new timer
+        timers[timer].taccu = 0.;   // set to zero
+        timers[timer].iters = 0;    // set to zero
+      }else{
+        // reset the timer
+        t->second.taccu = 0.; // reset to zero
+        t->second.iters = 0;  // reset to zero
+      }
+    }
+    void timerStart(std::string timer){
+      std::map<std::string, VMTimer>::iterator t = timers.find(timer);
+      wtime(&(t->second.t0));   // start time
+    }
+    void timerStop(std::string timer){
+      double t1;
+      wtime(&t1);   // stop time
+      std::map<std::string, VMTimer>::iterator t = timers.find(timer);
+      t->second.taccu += t1 - t->second.t0;
+      ++(t->second.iters);
+    }
+    void timerLog(std::string timer);
 };  // class VM
 
 

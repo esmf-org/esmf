@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -61,19 +61,19 @@ ESMCI_WebServDataContent::ESMCI_WebServDataContent(
 //
 // !ARGUMENTS:
 //
-  int		numLatValues,
-  int		numLonValues
+  int           numLatValues,
+  int           numLonValues
   )
 //
 // !DESCRIPTION:
-//    Creates and sets up a container for a set of grid-based data variables 
+//    Creates and sets up a container for a set of grid-based data variables
 //    for the specified timestamp.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theNumLatValues = numLatValues;
-	theNumLonValues = numLonValues;
+        theNumLatValues = numLatValues;
+        theNumLonValues = numLonValues;
 }
 
 
@@ -97,7 +97,7 @@ ESMCI_WebServDataContent::~ESMCI_WebServDataContent(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	// need to free up memory here
+        // need to free up memory here
 }
 
 
@@ -114,7 +114,7 @@ void  ESMCI_WebServDataContent::setTimeStamp(
 //
 // !ARGUMENTS:
 //
-  double  timestamp		// the timestamp for the data values
+  double  timestamp             // the timestamp for the data values
   )
 //
 // !DESCRIPTION:
@@ -123,7 +123,7 @@ void  ESMCI_WebServDataContent::setTimeStamp(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theTimeStamp = timestamp;
+        theTimeStamp = timestamp;
 }
 
 
@@ -140,8 +140,8 @@ void  ESMCI_WebServDataContent::addDataValues(
 //
 // !ARGUMENTS:
 //
-  string   varName,		// the variable name
-  double*  dataValues	// array of doubles containing the data values
+  string   varName,             // the variable name
+  double*  dataValues   // array of doubles containing the data values
   )
 //
 // !DESCRIPTION:
@@ -150,12 +150,12 @@ void  ESMCI_WebServDataContent::addDataValues(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int		numValues = theNumLatValues * theNumLonValues;
-	double*	valuesCopy = new double[numValues];
+        int             numValues = theNumLatValues * theNumLonValues;
+        double*         valuesCopy = new double[numValues];
 
-	memcpy(valuesCopy, dataValues, sizeof(double) * numValues);
+        memcpy(valuesCopy, dataValues, sizeof(double) * numValues);
 
-	theDataValues[varName] = valuesCopy;
+        theDataValues[varName] = valuesCopy;
 }
 
 
@@ -173,7 +173,7 @@ double*  ESMCI_WebServDataContent::getDataValues(
 //
 // !ARGUMENTS:
 //
-  string  varName		// variable name of data value to lookup
+  string  varName               // variable name of data value to lookup
   )
 //
 // !DESCRIPTION:
@@ -183,9 +183,9 @@ double*  ESMCI_WebServDataContent::getDataValues(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	double*	retValue = theDataValues[varName];
+        double*         retValue = theDataValues[varName];
 
-	return retValue;
+        return retValue;
 }
 
 
@@ -203,9 +203,9 @@ double  ESMCI_WebServDataContent::getDataValue(
 //
 // !ARGUMENTS:
 //
-  string  varName,		// variable name of data value to lookup
-  int     latValueIdx,		// latitude value name of data value to lookup
-  int     lonValueIdx		// longitude value name of data value to lookup
+  string  varName,              // variable name of data value to lookup
+  int     latValueIdx,          // latitude value name of data value to lookup
+  int     lonValueIdx           // longitude value name of data value to lookup
   )
 //
 // !DESCRIPTION:
@@ -215,9 +215,9 @@ double  ESMCI_WebServDataContent::getDataValue(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	double	retValue = 0.0;
+        double  retValue = 0.0;
 
-	return retValue;
+        return retValue;
 }
 
 
@@ -243,27 +243,27 @@ void  ESMCI_WebServDataContent::print(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	map<string, double*>::iterator	iter;
-	double*									dataValues = NULL;
+        map<string, double*>::iterator  iter;
+        double*                                                                         dataValues = NULL;
 
-	for (iter = theDataValues.begin(); iter != theDataValues.end(); ++iter)
-	{
-		cout << "===========================================" << endl;
-		cout << "Var Name: " << iter->first << endl;
-		cout << "===========================================" << endl;
+        for (iter = theDataValues.begin(); iter != theDataValues.end(); ++iter)
+        {
+                cout << "===========================================" << endl;
+                cout << "Var Name: " << iter->first << endl;
+                cout << "===========================================" << endl;
 
-		dataValues = iter->second;
+                dataValues = iter->second;
 
-		for (int i = 0; i < theNumLatValues; ++i)
-		{
-			for (int j = 0; j < theNumLonValues; ++j)
-			{
-				cout << dataValues[(j * theNumLatValues) + i] << " ";
-			}
-			cout << endl;
-		}
-		cout << endl;
-	}
+                for (int i = 0; i < theNumLatValues; ++i)
+                {
+                        for (int j = 0; j < theNumLonValues; ++j)
+                        {
+                                cout << dataValues[(j * theNumLatValues) + i] << " ";
+                        }
+                        cout << endl;
+                }
+                cout << endl;
+        }
 }
 
 } // end namespace

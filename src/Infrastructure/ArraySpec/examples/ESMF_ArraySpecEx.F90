@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -13,7 +13,7 @@
       program ESMF_ArraySpecEx
 
 !------------------------------------------------------------------------------
-!ESMF_EXAMPLE	String used by test script to count examples.
+!ESMF_EXAMPLE   String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_ArraySpecEx - ArraySpec manipulation examples
@@ -29,7 +29,7 @@
       use ESMF_TestMod
       implicit none
 
-      ! local variables 
+      ! local variables
       type(ESMF_ArraySpec) :: arrayDS
       integer :: myrank
       type(ESMF_TypeKind_Flag) :: mytypekind

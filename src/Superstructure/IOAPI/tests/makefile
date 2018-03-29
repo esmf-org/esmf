@@ -6,11 +6,12 @@ run_uni: run_unit_tests_uni
 
 LOCDIR	  = src/Superstructure/IOAPI/tests
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_IOGridCompUTest
+.NOTPARALLEL:
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_IOCompUTest
 
-TESTS_RUN     = RUN_ESMF_IOGridCompUTest
+TESTS_RUN     = RUN_ESMF_IOCompUTest
 
-TESTS_RUN_UNI = RUN_ESMF_IOGridCompUTestUNI
+TESTS_RUN_UNI = RUN_ESMF_IOCompUTestUNI
 
 
 include ${ESMF_DIR}/makefile
@@ -21,14 +22,11 @@ CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD) 
 CLOBBERDIRS =
 
-# --- GridComp
+# --- 
 
-RUN_ESMF_IOGridCompUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
-	$(MAKE) TNAME=IOGridComp NP=4 ftest
+RUN_ESMF_IOCompUTest:
+	$(MAKE) TNAME=IOComp NP=4 ftest
 
-RUN_ESMF_IOGridCompUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/esmf_gridcomp.xml $(ESMF_TESTDIR)
-	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_TESTDIR)
-	$(MAKE) TNAME=IOGridComp NP=1 ftest
+RUN_ESMF_IOCompUTestUNI:
+	$(MAKE) TNAME=IOComp NP=1 ftest
+

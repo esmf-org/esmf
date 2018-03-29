@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -23,7 +23,7 @@ program ESMF_AttributeCIMEx
 !\begin{sloppypar}
 ! This example illustrates the use of the Metafor CIM Attribute packages,
 ! supplied by ESMF, to create an Attribute hierarchy on an ESMF object tree.
-! Gridded, coupler and science Components are used together with a State 
+! Gridded, coupler and science Components are used together with a State
 ! and a realistic Field
 ! to create a simple ESMF object tree.  CIM Attributes packages are created
 ! on the Components and Field, and then the individual Attributes within the
@@ -39,7 +39,7 @@ program ESMF_AttributeCIMEx
 !
 !  !PROGRAM: ESMF\_AttributeCIMEx - Example of Attribute Package usage.
 !
-!  !DESCRIPTION: 
+!  !DESCRIPTION:
 !
 !  This program shows an example of CIM Attribute usage.
 
@@ -49,9 +49,9 @@ program ESMF_AttributeCIMEx
       use ESMF_TestMod
       implicit none
 
-      ! Local variables  
+      ! Local variables
       integer                 :: rc, finalrc, petCount, localPet, result
-  	  type(ESMF_AttPack)      :: attpack
+          type(ESMF_AttPack)      :: attpack
       type(ESMF_VM)           :: vm
       type(ESMF_Field)        :: ozone
       type(ESMF_State)        :: exportState
@@ -81,18 +81,18 @@ program ESMF_AttributeCIMEx
 
 !BOC
 
-      
+
       ! initialize ESMF
       finalrc = ESMF_SUCCESS
       call ESMF_Initialize(vm=vm, defaultlogfilename="AttributeCIMEx.Log", &
         logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      
+
       ! get the vm
       call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !EOC
-      
+
       if (localPet==0) then
         print *, "--------------------------------------- "
         print *, "Start of ESMF_AttributeCIMEx Example"
@@ -102,7 +102,7 @@ program ESMF_AttributeCIMEx
 !BOE
 !\begin{sloppypar}
 !    Create the ESMF objects that will hold the CIM Attributes.
-!    These objects include all three Component types (coupler, gridded, 
+!    These objects include all three Component types (coupler, gridded,
 !    and science Components) as well as a State, and a Field.
 !    In this example we are constructing empty Fields without an
 !    underlying Grid.
@@ -151,7 +151,7 @@ program ESMF_AttributeCIMEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
-!BOC 
+!BOC
       convCIM = 'CIM 1.5'
       purpComp = 'ModelComp'
       purpProp = 'CompProp'
@@ -166,7 +166,7 @@ program ESMF_AttributeCIMEx
 
 !BOE
 !\begin{sloppypar}
-!    Add CIM Component package and Attributes to the Coupler Component.  
+!    Add CIM Component package and Attributes to the Coupler Component.
 !\end{sloppypar}
 !EOE
 
@@ -224,8 +224,8 @@ program ESMF_AttributeCIMEx
 
 !BOE
 !\begin{sloppypar}
-!    Now add CIM Attribute packages and Attributes to the Gridded Component 
-!    and Field.  Also, add a CIM Component Properties package, to contain 
+!    Now add CIM Attribute packages and Attributes to the Gridded Component
+!    and Field.  Also, add a CIM Component Properties package, to contain
 !    two custom attributes.
 !\end{sloppypar}
 !EOE
@@ -249,18 +249,18 @@ program ESMF_AttributeCIMEx
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
 
-      
+
       ! Add CIM Attribute package to the Field
       call ESMF_AttributeAdd(ozone, convention=convCIM, purpose=purpField, &
         rc=rc)
-!EOC  
+!EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 
 !BOE
 !\begin{sloppypar}
 !     The standard Attribute package supplied by ESMF for a CIM Component
-!     contains several Attributes, grouped into sub-packages.  These 
+!     contains several Attributes, grouped into sub-packages.  These
 !     Attributes conform to the CIM convention as defined by Metafor and
 !     their values are set individually.
 !\end{sloppypar}
@@ -341,7 +341,7 @@ program ESMF_AttributeCIMEx
 !EOC
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-      
+
       call ESMF_AttributeGetAttPack(gridcomp, convCIM, purpPlatform, &
         attpack=attpack, rc=rc)
 
@@ -429,7 +429,7 @@ program ESMF_AttributeCIMEx
 !\end{sloppypar}
 !EOE
 
-!BOC 
+!BOC
       call ESMF_AttributeGetAttPack(gridcomp, convISO, purpRP, &
         attpack=attpack, rc=rc)
 
@@ -552,7 +552,7 @@ program ESMF_AttributeCIMEx
 
 !BOE
 !\begin{sloppypar}
-!     The standard Attribute package currently supplied by ESMF for 
+!     The standard Attribute package currently supplied by ESMF for
 !     CIM Fields contains a standard CF-Extended package nested within it.
 !\end{sloppypar}
 !EOE
@@ -631,7 +631,7 @@ program ESMF_AttributeCIMEx
 
 !BOE
 !\begin{sloppypar}
-!     Adding the Field to the State will automatically link the 
+!     Adding the Field to the State will automatically link the
 !     Attribute hierarchies from the State to the Field
 !\end{sloppypar}
 !EOE
@@ -713,12 +713,12 @@ program ESMF_AttributeCIMEx
 10    continue
       if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
       call ESMF_Finalize(rc=rc)
-  
+
       if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
       if (finalrc==ESMF_SUCCESS) then
         print *, "PASS: ESMF_AttributeCIMEx.F90"
       else
         print *, "FAIL: ESMF_AttributeCIMEx.F90"
       endif
-  
+
 end program

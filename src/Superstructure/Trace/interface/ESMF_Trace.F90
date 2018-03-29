@@ -619,7 +619,7 @@ contains
                attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, rc=rc)
           if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) then
-             print *, "incorrect tk = ", attrName(i)
+             !print *, "incorrect tk = ", attrName(i)
              return
           endif
           !attributeKeys = trim(attributeKeys)//trim(delim)// &
@@ -668,8 +668,8 @@ contains
 !EOPI
 !-------------------------------------------------------------------------------    
     ! local
-    type(ESMF_VMId), pointer   :: vmidptr(:)
-    character                  :: vmkey
+    type(ESMF_VM)   :: vm
+    type(ESMF_VMId) :: vmIdObj
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -677,17 +677,18 @@ contains
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     
-    allocate(vmidptr(1))
-    call ESMF_BaseGetVMId(comp%compp%base, vmidptr(1), rc=rc)
+    call ESMF_GridCompGet(comp, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
-    call c_ESMCI_VMIdGet (vmidptr(1), vmid, vmkey, rc)
+    call ESMF_VMGetVMId(vm=vm, vmId=vmIdObj, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    deallocate(vmidptr)
-    
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_esmftrace_mapvmid(vmIdObj, vmid, rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+        
   end subroutine ESMF_TraceGetGridCompID
 
 #undef  ESMF_METHOD
@@ -706,25 +707,26 @@ contains
 !EOPI
 !-------------------------------------------------------------------------------    
     ! local
-    type(ESMF_VMId), pointer   :: vmidptr(:)
-    character                  :: vmkey
+    type(ESMF_VM)   :: vm
+    type(ESMF_VMId) :: vmIdObj
     
     if (present(rc)) rc = ESMF_SUCCESS
     
     call ESMF_BaseGetID(comp%compp%base, baseid, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    allocate(vmidptr(1))
-    call ESMF_BaseGetVMId(comp%compp%base, vmidptr(1), rc=rc)
+
+    call ESMF_CplCompGet(comp, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
-    call c_ESMCI_VMIdGet (vmidptr(1), vmid, vmkey, rc)
+    call ESMF_VMGetVMId(vm=vm, vmId=vmIdObj, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    deallocate(vmidptr)
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_esmftrace_mapvmid(vmIdObj, vmid, rc)
+    if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
   end subroutine ESMF_TraceGetCplCompID
 

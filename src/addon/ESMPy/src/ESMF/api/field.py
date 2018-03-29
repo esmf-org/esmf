@@ -16,22 +16,22 @@ from ESMF.util.esmpyarray import *
 
 class Field(object):
     """
-    The Field class is a Python wrapper object for the ESMF Field.
+    The :class:`~ESMF.api.field.Field` class is a Python wrapper object for the ESMF Field.
     The individual values of all data arrays are referenced to those of the
     underlying Fortran ESMF object.
 
-    A Field represents a physical field, such as temperature.   The Field class
+    A :class:`~ESMF.api.field.Field` represents a physical field, such as temperature.   The :class:`~ESMF.api.field.Field` class
     contains distributed and discretized field data, a reference to its
-    associated grid, and metadata. The Field class stores the grid staggering
+    associated grid, and metadata. The :class:`~ESMF.api.field.Field` class stores the grid staggering
     for that physical field. This is the relationship of how the data array of
     a field maps onto a grid (e.g. one item per cell located at the cell center,
     one item per cell located at the NW corner, one item per cell vertex, etc.).
-    This means that different Fields which are on the same underlying Grid but
-    have different staggerings can share the same Grid object without needing to
+    This means that different :class:`Fields <ESMF.api.field.Field>` which are on the same underlying :class:`~ESMF.api.grid.Grid` but
+    have different staggerings can share the same :class:`~ESMF.api.grid.Grid` object without needing to
     replicate it multiple times.
 
     For more information about the ESMF Field class, please see the `ESMF Field documentation
-    <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
+    <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05030000000000000000>`_.
 
     The following parameters are used to create a :class:`~ESMF.api.field.Field`
     from a :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh` or
@@ -39,7 +39,7 @@ class Field(object):
 
     *REQUIRED:*
 
-    :param Grid/Mesh/LocStream grid: A :class:`~ESMF.api.grid.Grid`,
+    :param :class:`~ESMF.api.grid.Grid`/Mesh/:class:`~ESMF.api.locstream.LocStream` grid: A :class:`~ESMF.api.grid.Grid`,
         :class:`~ESMF.api.mesh.Mesh` or :class:`~ESMF.api.locstream.LocStream`
         with coordinates allocated on at least one stagger location.
 
@@ -140,8 +140,9 @@ class Field(object):
         lbounds, ubounds = ESMP_FieldGetBounds(struct, rank)
 
         # initialize field data
-        #TODO: MaskedArray gives better interpolation values than Array
-        self._data = MaskedArray(ESMP_FieldGetPtr(struct), None, typekind, ubounds-lbounds).data
+        # TODO: MaskedArray gives better interpolation values than Array (171128 removed .copy from .data below
+        # self._data = MaskedArray(ESMP_FieldGetPtr(struct), None, typekind, ubounds-lbounds).data
+        self._data = ndarray_from_esmf(ESMP_FieldGetPtr(struct), typekind, ubounds-lbounds)
         self._name = name
         self._type = typekind
         self._rank = rank
@@ -370,6 +371,9 @@ class Field(object):
         :note: This interface is not supported when ESMF is built with
             ``ESMF_COMM=mpiuni``.
 
+        :note: This interface does not currently support reading ungridded 
+               dimensions.
+
         *REQUIRED:*
 
         :param str filename: The name of the NetCDF file.
@@ -382,7 +386,7 @@ class Field(object):
 
         import ESMF.api.constants as constants
         if constants._ESMF_COMM is constants._ESMF_COMM_MPIUNI:
-            raise ImportError("Field.Read() does not work if ESMF has not been built with MPI support")
+            raise ImportError("Field.Read() requires PIO and does not work if ESMF has not been built with MPI support")
 
         assert (type(filename) is str)
         assert (type(variable) is str)

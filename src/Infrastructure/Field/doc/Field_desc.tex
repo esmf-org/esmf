@@ -43,12 +43,10 @@ for an example of the sparse matrix multiply capability.
 
 The regridding operation ({\tt ESMF\_FieldRegridStore()}) allows the user to move data from one grid to another while maintaining certain properties
 of the data. Regridding is also called interpolation or remapping. In the Field regridding operation the grids the data is being moved between
-are the grids associated with the Fields storing the data. The regridding operation works on Fields built on 2D or 3D Meshes and 2D or 3D Grids. 
-There are three regridding methods available: bilinear, higher-order patch, and first-order conservative. All three of these methods are 
-supported on 2D Grids or 2D Meshes. In 3D the situation is more complicated. Bilinear 
-is supported on 3D Grid or 3D Meshes composed of hexahedrons. Higher-order patch is not supported in 3D. First-order conservative 
-is supported on 3D Grids or 3D Meshes composed of hexahdrons or tetrahedrons. There are also a range of options for what to do at the poles and what to do 
-if a point does not map. Please see Section~\ref{sec:fieldregrid} for a full description of the regridding capability. Several sections following Section~\ref{sec:fieldregrid} 
+are the grids associated with the Fields storing the data. The regridding operation works on Fields built on Meshes, Grids, or Location Streams.  
+There are six regridding methods available: bilinear, higher-order patch, two types of nearest neighbor, first-order conservative, and second-order conservative.
+Please see section~\ref{sec:regrid} for a more indepth description of regridding including in which situations each method is supported. 
+Please see section~\ref{sec:fieldregrid} for a description of the regridding capability as it applies to Fields. Several sections following section~\ref{sec:fieldregrid} 
 contain examples of using regridding. 
 
 

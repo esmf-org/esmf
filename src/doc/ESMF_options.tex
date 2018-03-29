@@ -184,11 +184,71 @@ This flag is documented in section \ref{const:distgridmatch}.
 
 This flag is documented in section \ref{const:endflag}.
 
+\subsection{ESMF\_EXTRAPMETHOD}
+\label{opt:extrapmethod}
+
+{\sf DESCRIPTION:\\}  
+Specify which extrapolation method to use on unmapped destination points after regridding. 
+
+The type of this flag is:
+
+{\tt type(ESMF\_ExtrapMethod\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMF\_EXTRAPMETHOD\_NONE]
+     Indicates that no extrapolation should be done. 
+\item [ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG]
+      Inverse distance weighted average. 
+      Here the value of a destination point is the weighted average
+      of the closest N source points. The weight is 
+      the reciprocal of the distance of the source point from the destination point raised to a power P.
+      All the weights contributing to one destination point are normalized so that they sum to 1.0. 
+      The user can choose N and P when using this method, but defaults are also provided.  
+      This extrapolation method not supported with conservative regrid methods 
+      (e.g. {\tt ESMF\_REGRIDMETHOD\_CONSERVE}).
+\item [ESMF\_EXTRAPMETHOD\_NEAREST\_STOD]
+      Nearest source to destination. 
+      Here each destination point is mapped to the closest source point. A given source point may go 
+      to multiple destination points, but no destination point will receive input from more than
+      one source point. This extrapolation method not supported with conservative regrid methods
+      (e.g. {\tt ESMF\_REGRIDMETHOD\_CONSERVE}).
+\end{description}
+
 \subsection{ESMF\_FIELDSTATUS}
 This flag is documented in section \ref{const:fieldstatus}.
 
 \subsection{ESMF\_FILEFORMAT}
-This flag is documented in section \ref{const:grid:fileformat}.
+\label{const:fileformatflag}
+{\sf DESCRIPTION:\\}
+This flag is used in {\tt ESMF\_GridCreate} and {\tt ESMF\_MeshCreate}
+functions.  It is also used in the {\tt ESMF\_RegridWeightGen} API as an
+optional argument.
+
+The type of this flag is:
+
+{\tt type(ESMF\_FileFormat\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMF\_FILEFORMAT\_CFGRID]  A single tile logically rectangular
+  grid file that follows the NetCDF CF convention. See section~\ref{sec:fileformat:gridspec} for more detailed description.
+
+\item [ESMF\_FILEFORMAT\_ESMFMESH] ESMF unstructured grid file format. This format was developed by the ESMF team to match the capabilities of the Mesh class and to be efficient to convert to that class. See section~\ref{sec:fileformat:esmf} for more detailed description.
+
+\item [ESMF\_FILEFORMAT\_GRIDSPEC]  Equivalent to {\tt ESMF\_FILEFORMAT\_CFGRID} flag.  
+
+\item [ESMF\_FILEFORMAT\_MOSAIC] This format is a proposed extension to the 
+CF-conventions for grid mosaics consisting of multiple logically rectangular grid
+tiles. See section~\ref{sec:fileformat:mosaic} for more detailed description.
+
+\item [ESMF\_FILEFORMAT\_SCRIP] SCRIP format grid file. The SCRIP format is
+  the format accepted by the SCRIP regridding tool~\cite{ref:SCRIP}.  See section\ref{sec:fileformat:scrip} for more detailed description.
+
+\item [ESMF\_FILEFORMAT\_UGRID] CF-convention unstructured grid file format. This format is a proposed extension to the 
+CF-conventions for unstructured grid data model. See section~\ref{sec:fileformat:ugrid} for more detailed description.
+
+\end{description}
 
 \subsection{ESMF\_FILESTATUS}
 \label{const:filestatusflag}
@@ -286,6 +346,8 @@ The valid values are:
       Binary format.
 \item [ESMF\_IOFMT\_NETCDF]
       NETCDF and PNETCDF format.
+\item [ESMF\_IOFMT\_NETCDF\_64BIT\_OFFSET]
+      NETCDF and PNETCDF 64-bit format.
 \end{description}
 
 \subsection{ESMF\_IO\_NETCDF\_PRESENT}
@@ -503,7 +565,6 @@ The valid values are:
 \end{description}
 
 
-
 \subsection{ESMF\_NORMTYPE}
 
 \label{opt:normType}
@@ -558,7 +619,7 @@ The valid values are:
 \subsection{ESMF\_REDUCE}
 \label{const:reduce}
 {\sf DESCRIPTION:\\}
-Indicates reduce operation
+Indicates reduce operation.
 
 The type of this flag is:
 
@@ -615,7 +676,12 @@ The valid values are:
 \item [ESMF\_REGRIDMETHOD\_NEAREST\_DTOS]
       In this version of nearest neighbor interpolation each source point is mapped to the closest destination point. A given destination point may receive input from multiple source points, but no source point will go to more than one destination point. 
 \item [ESMF\_REGRIDMETHOD\_CONSERVE]
-      First order conservative interpolation. Value of a destination cell is the weighted sum of the values of the source cells that it overlaps. The weights are determined by the amount the source cell overlaps the destination cell. Will typically give less accurate approximations to values than the other interpolation methods, however, will do a much better job preserving the integral of the value between the source and destination.  Needs corner coordinate values to be provided in the Grid. Currently only works for Fields created on the Grid center stagger (or the Mesh element location). 
+      First-order conservative interpolation. The main purpose of this method is to preserve the integral of the field between the source and destination. 
+      Will typically give a less accurate approximation to the individual field values than the bilinear or patch methods. The value of a destination cell is calculated as the weighted sum of the values of the source cells that it overlaps. The weights are determined by the amount the source cell overlaps the destination cell. Needs corner coordinate values to be provided in the Grid. Currently only works for Fields created on the Grid center stagger or the Mesh element location. 
+\item [ESMF\_REGRIDMETHOD\_CONSERVE\_2ND]
+      Second-order conservative interpolation. As with first-order, preserves the integral of the value between the source and destination. However, typically produces a smoother more accurate result than first-order. Also like first-order, the value of a destination cell is calculated as the weighted sum of the values of the source cells that it overlaps. However, second-order also includes additional terms to take into account the gradient of the field across the source cell. Needs corner coordinate values to be provided in the Grid. Currently only works for Fields created on the Grid center stagger or the Mesh element location. 
+
+
 \end{description}
 
 
@@ -635,6 +701,7 @@ The valid values for all regrid methods are:
 \item [ESMF\_REGRIDSTATUS\_SRCMASKED] The destination location is within a masked part of the source grid, so no regridding has been performed on it. 
 \item [ESMF\_REGRIDSTATUS\_OUTSIDE] The destination location is outside the source grid, so no regridding has been performed on it. 
 \item [ESMF\_REGRIDSTATUS\_MAPPED] The destination location is within the unmasked source grid, and so has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). 
+\item [ESMF\_REGRIDSTATUS\_EXMAPPED] The destination location was not within the unmasked source grid, and so typically it wouldn't be regridded. However, extrapolation was used, and so it has been regridded (i.e. there is an entry for it within the factorIndexList or routeHandle). 
 \end{description}
 
 In addition to the above, regridding using the conservative method can result in other values. The reason for this is that in that method one destination cell can overlap multiple source cells, so a single destination can have a combination of values.  
@@ -880,9 +947,13 @@ The named constants numerical types are:
 \begin{description}
 
 \item [ESMF\_TYPEKIND\_I1]
-      Indicates 1 byte integer.
+      Indicates 1 byte integer. \newline
+      (Only available if ESMF was built with 
+      {\tt ESMF\_NO\_INTEGER\_1\_BYTE = FALSE}. This is {\em not} the default.)
 \item [ESMF\_TYPEKIND\_I2]
-      Indicates 2 byte integer.
+      Indicates 2 byte integer. \newline
+      (Only available if ESMF was built with 
+      {\tt ESMF\_NO\_INTEGER\_2\_BYTE = FALSE}. This is {\em not} the default.)
 \item [ESMF\_TYPEKIND\_I4]
       Indicates 4 byte integer.
 \item [ESMF\_TYPEKIND\_I8]

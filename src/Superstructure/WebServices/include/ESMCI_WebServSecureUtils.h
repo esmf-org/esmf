@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -27,7 +27,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the C++ SecureUtils function 
+// The code in this file defines the C++ SecureUtils function
 // signatures (prototypes).  The companion file ESMCI\_WebServSecureUtils.C
 // contains the full code (bodies) for the SecureUtils functions.
 //
@@ -62,4 +62,4 @@ namespace ESMCI
 
 } // end namespace
 
-#endif 	// ESMCI_WebServSecureUtils_H
+#endif          // ESMCI_WebServSecureUtils_H

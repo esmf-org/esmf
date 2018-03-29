@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -32,8 +32,8 @@ void ESMC_ScripInq (const char *filename, int *grid_dims, int *grid_rank,
   ESMCI::IO_Scrip::inq(filename, grid_dims, grid_rank, &localrc);
   localrc = ESMF_SUCCESS;
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-				    rc)) return; // bail out
+                                    rc)) return; // bail out
 
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
-}  
+}

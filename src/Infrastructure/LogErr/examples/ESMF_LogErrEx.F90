@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -14,7 +14,7 @@
     program ESMF_LogErrEx
 
 !------------------------------------------------------------------------------
-!ESMF_EXAMPLE	Writing messages to log with different methods.
+!ESMF_EXAMPLE   Writing messages to log with different methods.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_LogErrEx - Log Error examples
@@ -38,7 +38,7 @@
     use ESMF
     use ESMF_TestMod
     implicit none
-    
+
     ! return variables
     integer :: rc1, rc2, rc3, rcToTest, allocRcToTest, result
     type(ESMF_LOG) :: alog  ! a log object that is not the default log
@@ -81,7 +81,7 @@
     if (rc1 /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOC
-    ! LogWrite 
+    ! LogWrite
     call ESMF_LogWrite("Log Write 2", ESMF_LOGMSG_INFO, rc=rc2)
 !EOC
 

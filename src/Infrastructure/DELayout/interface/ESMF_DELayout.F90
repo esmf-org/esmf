@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -398,18 +398,18 @@ contains
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_ServiceReply_Flag args to see if they're the same
 
-  function ESMF_sreq(sr1, sr2)
-    logical ESMF_sreq
+  recursive function ESMF_sreq(sr1, sr2) result (sreq)
+    logical sreq
     type(ESMF_ServiceReply_Flag), intent(in) :: sr1, sr2
 
-    ESMF_sreq = (sr1%value == sr2%value)    
+    sreq = (sr1%value == sr2%value)    
   end function
 
-  function ESMF_srne(sr1, sr2)
-    logical ESMF_srne
+  recursive function ESMF_srne(sr1, sr2) result (srne)
+    logical srne
     type(ESMF_ServiceReply_Flag), intent(in) :: sr1, sr2
 
-    ESMF_srne = (sr1%value /= sr2%value)
+    srne = (sr1%value /= sr2%value)
   end function
 !------------------------------------------------------------------------------
 
@@ -497,6 +497,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! Mark this DELayout as invalid
+    delayout%this = ESMF_NULL_POINTER
+    ESMF_DELayoutCreateDefault = delayout 
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
@@ -508,9 +512,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
-    ! Mark this DELayout as invalid
-    delayout%this = ESMF_NULL_POINTER
-
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateDefault(delayout, deCount, deGroupingArg, &
       pinflag, petListArg, vm, localrc)
@@ -605,14 +606,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! Mark this DELayout as invalid
+    delayout%this = ESMF_NULL_POINTER
+    ESMF_DELayoutCreateFromPetMap = delayout 
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
     ! Set arguments
     len_petMap = size(petMap)
-
-    ! Mark this DELayout as invalid
-    delayout%this = ESMF_NULL_POINTER
 
     ! Call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DELayoutCreateFromPetMap(delayout, petMap(1), len_petMap, &
@@ -725,6 +727,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! Mark this DELayout as invalid
+    delayout%this = ESMF_NULL_POINTER
+    ESMF_DELayoutCreateHintWeights = delayout 
+    
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
@@ -735,9 +741,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     petListArg = ESMF_InterArrayCreate(petList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
-    ! Mark this DELayout as invalid
-    delayout%this = ESMF_NULL_POINTER
     
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
@@ -877,12 +880,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! Mark this DELayout as invalid
+    delayout%this = ESMF_NULL_POINTER
+    ESMF_DELayoutCreateDeprecated = delayout 
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vmObject, rc)
     
-    ! Mark this DELayout as invalid
-    delayout%this = ESMF_NULL_POINTER
-
     ! Deal with optional array arguments
     if (present(deCountList)) then
       len_deCountList = size(deCountList)
@@ -1033,8 +1037,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DELayoutGet - Get object-wide DELayout information
 
 ! !INTERFACE:
-  subroutine ESMF_DELayoutGet(delayout, keywordEnforcer, vm, deCount, petMap, &
-    vasMap, oneToOneFlag, pinflag, localDeCount, localDeToDeMap, &
+  recursive subroutine ESMF_DELayoutGet(delayout, keywordEnforcer, vm, deCount,&
+    petMap, vasMap, oneToOneFlag, pinflag, localDeCount, localDeToDeMap, &
     localDeList, &      ! DEPRECATED ARGUMENT
     vasLocalDeCount, vasLocalDeToDeMap, &
     vasLocalDeList, &   ! DEPRECATED ARGUMENT
@@ -2141,10 +2145,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DELayoutGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
-  function ESMF_DELayoutGetInit(delayout) 
+  recursive function ESMF_DELayoutGetInit(delayout) result (DELayoutGetInit)
 !
 ! !RETURN VALUE:
-    ESMF_INIT_TYPE :: ESMF_DELayoutGetInit   
+    ESMF_INIT_TYPE :: DELayoutGetInit
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout), intent(in), optional :: delayout
@@ -2161,9 +2165,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     if (present(delayout)) then
-      ESMF_DELayoutGetInit = ESMF_INIT_GET(delayout)
+      DELayoutGetInit = ESMF_INIT_GET(delayout)
     else
-      ESMF_DELayoutGetInit = ESMF_INIT_CREATED
+      DELayoutGetInit = ESMF_INIT_CREATED
     endif
 
   end function ESMF_DELayoutGetInit
@@ -2177,7 +2181,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_DELayoutSetInitCreated - Set DELayout init code to "CREATED"
 
 ! !INTERFACE:
-  subroutine ESMF_DELayoutSetInitCreated(delayout, rc)
+  recursive subroutine ESMF_DELayoutSetInitCreated(delayout, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(inout)           :: delayout

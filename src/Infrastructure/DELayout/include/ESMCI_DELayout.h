@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -32,10 +32,15 @@
 //-------------------------------------------------------------------------
 
 #include <vector>
+#include <map>
 
 #include "ESMCI_Base.h"       // Base is superclass to DELayout
 #include "ESMCI_VM.h"
 #include "ESMCI_F90Interface.h"
+
+namespace ESMCI {
+  class RouteHandle;
+}
 
 //-------------------------------------------------------------------------
 
@@ -297,33 +302,42 @@ class XXE{
       // information is also provided to support buffer resizing during exec(),
       // when the actual execution time vectorLength is known.
       char *buffer;                 // buffer
-      int size;                     // size of buffer in byte
+      unsigned long size;           // size of buffer in byte
       int vectorLengthMultiplier;   // multiplier that allows to determine size
                                     // requirement depending on vectorLength
                                     // during exec()
       
-      BufferInfo(char *buffer_, int size_, int vectorLengthMultiplier_){
+      BufferInfo(char *buffer_, unsigned long size_, 
+        int vectorLengthMultiplier_){
         // constructor
         buffer = buffer_;
         size = size_;
         vectorLengthMultiplier = vectorLengthMultiplier_;
       }
     };
-        
+    
   public:
     VM *vm;
-    StreamElement *stream;          // actual stream containing XXE elements
+    // OPSTREAM
+    StreamElement *opstream;        // actual stream containing XXE operations
     int count;                      // number of elements in the stream
-    char **storage;                 // list of (char *) entries to allocations
+    // DATA
+    std::map<void *, unsigned long>
+      dataMap;                      // map object to hold (pointer,size) pairs
+    char **dataList;                // list of (char *) entries to allocations
                                     // for which this XXE object is responsible
-    int storageCount;               // number of elements in storage
+    int dataCount;                  // number of elements in dataList
+    // COMMHANDLES
     VMK::commhandle ***commhandle;  // list of (commhandle **) entries for 
                                     // which this XXE object is responsible
     int commhandleCount;            // number of elements in commhandle
+    // SUBXXES
     XXE **xxeSubList;               // list of (XXE *) entries for which this
                                     // XXE object is responsible
     int xxeSubCount;                // number of elements in xxeSubList
+    // TYPEKINDS
     ESMC_TypeKind_Flag typekind[10];     // place the XXE can store TypeKind info
+    // BUFFERS
     std::vector<BufferInfo *>bufferInfoList; // vector of (BufferInfo *) entries
       // The bufferInfoList provides an extra level of indirection to XXE
       // managed communication buffers, and associated size information.
@@ -335,24 +349,26 @@ class XXE{
       // updates during exec() through the bufferInfoList indirection, without
       // the need for XXE stream rewrite (which would be far too expensive to
       // do during exec())!
+    // MISC
     int lastFilterBitField;         // filterBitField during last exec() call
     bool superVectorOkay;           // flag to indicate that super-vector okay
   private:
     int max;                        // maximum number of elements in stream
-    int storageMaxCount;            // maximum number of elements in storage
+    int dataMaxCount;               // maximum number of elements in data
     int commhandleMaxCount;         // maximum number of elements in commhandle
     int xxeSubMaxCount;             // maximum number of elements in xxeSubList
+    RouteHandle *rh;                // associated RouteHandle
     
   public:
-    XXE(VM *vmArg, int maxArg=1000, int storageMaxCountArg=1000,
+    XXE(VM *vmArg, int maxArg=1000, int dataMaxCountArg=1000,
       int commhandleMaxCountArg=1000, int xxeSubMaxCountArg=1000){
-      // constructor
+      // constructor...
       vm = vmArg;
-      // -> set up internal stream and bookkeeping members
-      stream = new StreamElement[maxArg]; count = 0; max = maxArg;
-      storage = new char*[storageMaxCountArg];
-      storageCount  = 0;
-      storageMaxCount = storageMaxCountArg;
+      // -> set up internal opstream and bookkeeping members
+      opstream = new StreamElement[maxArg]; count = 0; max = maxArg;
+      dataList = new char*[dataMaxCountArg];
+      dataCount  = 0;
+      dataMaxCount = dataMaxCountArg;
       commhandle = new VMK::commhandle**[commhandleMaxCountArg];
       commhandleCount  = 0;
       commhandleMaxCount = commhandleMaxCountArg;
@@ -362,72 +378,27 @@ class XXE{
       bufferInfoList.reserve(1000);  // initial preparation
       lastFilterBitField = 0x0;
       superVectorOkay = true;
+      rh = NULL;
     }
-    ~XXE(){
-      // destructor
-      // -> clean-up all allocations for which this XXE object is responsible:
-      // stream of XXE elements
-      delete [] stream;
-      // memory allocations held in storage
-      for (int i=0; i<storageCount; i++)
-        delete [] storage[i];
-      delete [] storage;
-      // CommHandles held in commhandle
-      for (int i=0; i<commhandleCount; i++){
-        delete *commhandle[i];
-        delete commhandle[i];
-      }
-      delete [] commhandle;
-      // XXE sub objects held in xxeSubList
-      for (int i=0; i<xxeSubCount; i++)
-        delete xxeSubList[i];
-      delete [] xxeSubList;
-      // BufferInfo objects held in bufferInfoList
-      for (unsigned int i=0; i<bufferInfoList.size(); i++)
-        delete bufferInfoList[i];
-      bufferInfoList.clear();
-    }
-    void clearReset(int countArg, int storageCountArg=-1, 
+    XXE(std::stringstream &streami,
+      std::vector<int> *originToTargetMap=NULL,
+      std::map<void *, void *> *bufferOldNewMap=NULL,
+      std::map<void *, void *> *dataOldNewMap=NULL);
+    ~XXE();      // destructor
+    void clearReset(int countArg, int dataCountArg=-1, 
       int commhandleCountArg=-1, int xxeSubCountArg=-1, 
-      int bufferInfoListArg=-1){
-      // reset the stream back to a specified position, and clear all
-      // bookkeeping elements above specified positions
-      count = countArg; // reset
-      if (storageCountArg>0){
-        for (int i=storageCountArg; i<storageCount; i++)
-          delete [] storage[i];
-        storageCount = storageCountArg; // reset
-      }
-      if (commhandleCountArg>0){
-        for (int i=commhandleCountArg; i<commhandleCount; i++){
-          delete *commhandle[i];
-          delete commhandle[i];
-        }
-        commhandleCount = commhandleCountArg; // reset
-      }
-      if (xxeSubCountArg>0){
-        for (int i=xxeSubCountArg; i<xxeSubCount; i++)
-          delete xxeSubList[i];
-        xxeSubCount = xxeSubCountArg; // reset
-      }
-      if (bufferInfoListArg>0){
-        std::vector<BufferInfo *>::iterator first =
-          bufferInfoList.begin() + bufferInfoListArg;
-        std::vector<BufferInfo *>::iterator last = bufferInfoList.end();
-        for (std::vector<BufferInfo *>::iterator bi=first; bi!=last; ++bi)
-          delete *bi;
-        bufferInfoList.erase(first, last);
-      }
-    }
+      int bufferInfoListArg=-1);
+    void streamify(std::stringstream &streami);
     bool getNextSubSuperVectorOkay(int *k){
-      // search for the next xxeSub element in the stream, starting at index k.
-      // when found return the element's superVectorOkay setting, and also 
-      // update k to point to the next stream element for continued search
+      // search for the next xxeSub element in the opstream, starting at 
+      // index k. when found return the element's superVectorOkay setting,
+      // and also update k to point to the next stream element for continued
+      // search
       XxeSubInfo *xxeSubInfo;
       for (int i=*k; i<count; i++){
-        if (stream[i].opId==xxeSub){
+        if (opstream[i].opId==xxeSub){
           *k = i+1;   // index where to start next time
-          xxeSubInfo = (XxeSubInfo *)&(stream[i]);
+          xxeSubInfo = (XxeSubInfo *)&(opstream[i]);
           if (xxeSubInfo->xxe)
             return xxeSubInfo->xxe->superVectorOkay;
           else
@@ -450,19 +421,20 @@ class XXE{
     int optimizeElement(int index);
     
     int growStream(int increase);
-    int growStorage(int increase);
+    int growDataList(int increase);
     int growCommhandle(int increase);
     int growXxeSub(int increase);
     
     int incCount();
-    int incStorageCount();
+    int incDataCount();
     int incCommhandleCount();
     int incXxeSubCount();
     
-    int storeStorage(char *storage);
+    int storeData(char *data, unsigned long size);
     int storeCommhandle(VMK::commhandle **commhandle);
     int storeXxeSub(XXE *xxeSub);
-    int storeBufferInfo(char *buffer, int size, int vectorLengthMultiplier);
+    int storeBufferInfo(char *buffer, unsigned long size,
+      int vectorLengthMultiplier);
     char *getBufferInfoPtr(){
       size_t i=bufferInfoList.size();
       if (i>0)
@@ -541,11 +513,16 @@ class XXE{
     int appendProfileMessage(int predicateBitField, char *messageString);
     int appendMessage(int predicateBitField, char *messageString);
     
+    void setRouteHandle(RouteHandle *routehandle){
+      rh = routehandle;
+    }
+    RouteHandle *getRouteHandle(){return rh;}
+        
   public:
       
-    // specific stream element types, used to interpret the elements in stream
+    // opstream element types, used to interpret the elements in opstream
     
-    // Common stream element members and their meaning:
+    // Common opstream element members and their meaning:
     //  opId                - operation id according to "enum OpId"
     //  predicateBitField   - predicate bit field to control conditional exec
     //  vectorFlag          - true:  scale with vectorLength during exec()
@@ -558,12 +535,12 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
-      void *buffer;
-      int size;
       int dstPet;
-      int tag;
       bool vectorFlag;
       bool indirectionFlag;
+      void *buffer;
+      int size;
+      int tag;
     }SendInfo;
 
     typedef struct{
@@ -571,12 +548,12 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
-      void *buffer;
-      int size;
       int srcPet;
-      int tag;
       bool vectorFlag;
       bool indirectionFlag;
+      void *buffer;
+      int size;
+      int tag;
     }RecvInfo;
 
     typedef struct{
@@ -584,12 +561,12 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      int dstPet;
+      bool vectorFlag;
       int rraOffset;
       int size;
-      int dstPet;
       int rraIndex;
       int tag;
-      bool vectorFlag;
     }SendRRAInfo;
 
     typedef struct{
@@ -597,12 +574,12 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      int srcPet;
+      bool vectorFlag;
       int rraOffset;
       int size;
-      int srcPet;
       int rraIndex;
       int tag;
-      bool vectorFlag;
     }RecvRRAInfo;
 
     typedef struct{
@@ -610,17 +587,17 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      int srcPet;
+      int dstPet;
+      bool vectorFlag;
+      bool srcIndirectionFlag;
+      bool dstIndirectionFlag;
       void *srcBuffer;
       void *dstBuffer;
       int srcSize;
       int dstSize;
-      int srcPet;
-      int dstPet;
       int srcTag;
       int dstTag;
-      bool vectorFlag;
-      bool srcIndirectionFlag;
-      bool dstIndirectionFlag;
     }SendRecvInfo;
 
     typedef struct{
@@ -628,17 +605,17 @@ class XXE{
       int predicateBitField;
       bool activeFlag;
       bool cancelledFlag;
+      int srcPet;
+      int dstPet;
+      bool vectorFlag;
+      bool dstIndirectionFlag;
       int rraOffset;
       void *dstBuffer;
       int srcSize;
       int dstSize;
-      int srcPet;
-      int dstPet;
       int rraIndex;
       int srcTag;
       int dstTag;
-      bool vectorFlag;
-      bool dstIndirectionFlag;
     }SendRRARecvInfo;
 
     typedef struct{
@@ -647,12 +624,12 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
-      void *buffer;
-      int size;
       int dstPet;
-      int tag;
       bool vectorFlag;
       bool indirectionFlag;
+      void *buffer;
+      int size;
+      int tag;
     }SendnbInfo;
 
     typedef struct{
@@ -661,12 +638,12 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
-      void *buffer;
-      int size;
       int srcPet;
-      int tag;
       bool vectorFlag;
       bool indirectionFlag;
+      void *buffer;
+      int size;
+      int tag;
     }RecvnbInfo;
 
     typedef struct{
@@ -675,12 +652,12 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      int dstPet;
+      bool vectorFlag;
       int rraOffset;
       int size;
-      int dstPet;
       int rraIndex;
       int tag;
-      bool vectorFlag;
     }SendnbRRAInfo;
 
     typedef struct{
@@ -689,12 +666,12 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      int srcPet;
+      bool vectorFlag;
       int rraOffset;
       int size;
-      int srcPet;
       int rraIndex;
       int tag;
-      bool vectorFlag;
     }RecvnbRRAInfo;
 
     typedef struct{
@@ -822,7 +799,7 @@ class XXE{
       TKId factorTK;
       TKId valueTK;
       int *rraOffsetList;
-      void **factorList;
+      void *factorList;
       void *valueBase;
       int rraIndex;
       int termCount;
@@ -838,7 +815,7 @@ class XXE{
       TKId factorTK;
       TKId valueTK;
       int *rraOffsetList;
-      void **factorList;
+      void *factorList;
       void **valueBaseList;
       void **valueBaseListResolve;
       int valueBaseListSize;
@@ -857,7 +834,7 @@ class XXE{
       TKId factorTK;
       TKId valueTK;
       int *rraOffsetList;
-      void **factorList;
+      void *factorList;
       void *elementBase;
       int rraIndex;
       int termCount;
@@ -873,7 +850,7 @@ class XXE{
       TKId factorTK;
       TKId valueTK;
       int *rraOffsetList;
-      void **factorList;
+      void *factorList;
       void *valueList;
       int rraIndex;
       int termCount;
@@ -902,10 +879,10 @@ class XXE{
     typedef struct{
       OpId opId;
       int predicateBitField;
-      void *buffer;
-      int byteCount;
       bool vectorFlag;
       bool indirectionFlag;
+      void *buffer;
+      int byteCount;
     }ZeroMemsetInfo;
 
     typedef struct{
@@ -946,7 +923,7 @@ class XXE{
       bool indirectionFlag;
     }MemGatherSrcRRAInfo;
     
-    // --- sub-streams
+    // --- sub-opstreams
     
     typedef struct{
       OpId opId;
@@ -995,7 +972,7 @@ class XXE{
       char *messageString;
     }ProfileMessageInfo;
     
-    // --- meta Info structs (i.e. don't correspond to OpIds)
+    // --- meta Info structs (i.e. don't correspond to specific OpIds)
 
     typedef struct{
       OpId opId;
@@ -1003,8 +980,47 @@ class XXE{
       VMK::commhandle **commhandle;
       bool activeFlag;
       bool cancelledFlag;
+      int pet;
     }CommhandleInfo;
+    
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      bool activeFlag;
+      bool cancelledFlag;
+      int pet;
+      bool vectorFlag;
+      bool indirectionFlag;
+      void *buffer;
+      int size;
+    }BuffInfo;
+    
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      VMK::commhandle **commhandle;
+      bool activeFlag;
+      bool cancelledFlag;
+      int pet;
+      bool vectorFlag;
+      bool indirectionFlag;
+      void *buffer;
+      int size;
+    }BuffnbInfo;
 
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      XXE *xxe;
+    }SingleSubInfo;
+    
+    typedef struct{
+      OpId opId;
+      int predicateBitField;
+      int count;
+      XXE **xxe;
+    }MultiSubInfo;
+    
   private:
     template<typename T>
     inline static void exec_memGatherSrcRRA(
@@ -1061,56 +1077,70 @@ class XXE{
       int size_r, int size_s, int size_t, int *size_i, int *size_j);
     template<typename T, typename U, typename V>
     static void psssDstRra(T *rraBase, TKId elementTK, int *rraOffsetList,
-      U **factorList, TKId factorTK, V *valueBase, int *valueOffsetList,
+      U *factorList, TKId factorTK, V *valueBase, int *valueOffsetList,
       TKId valueTK, int termCount, int vectorL, int resolved,
       int localDeIndexOff,
       int size_r, int size_s, int size_t, int *size_i, int *size_j,
       bool superVector);
     template<typename T, typename U, typename V>
-    static void exec_psssDstRra(T *rraBase, int *rraOffsetList, U **factorList,
+    static void exec_psssDstRra(T *rraBase, int *rraOffsetList, U *factorList,
       V *valueBase, int *valueOffsetList, int termCount, int vectorL);
     template<typename T, typename U, typename V>
     static void exec_psssDstRraSuper(T *rraBase, int *rraOffsetList,
-      U **factorList, V *valueBase, int *valueOffsetList, int termCount,
+      U *factorList, V *valueBase, int *valueOffsetList, int termCount,
       int vectorL, int localDeIndexOff,
       int size_r, int size_s, int size_t, int *size_i, int *size_j);
     template<typename T, typename U, typename V>
     static void pssslDstRra(T **rraBaseList, int *rraIndexList, TKId elementTK,
-      int *rraOffsetList, U **factorList, TKId factorTK, V **valueBaseList,
+      int *rraOffsetList, U *factorList, TKId factorTK, V **valueBaseList,
       int *valueOffsetList, int *baseListIndexList,
       TKId valueTK, int termCount, int vectorL, int resolved, 
       int localDeIndexOff,
       int size_r, int size_s, int size_t, int *size_i, int *size_j, 
-      bool superVector);
+      bool superVector, RouteHandle *rh);
     template<typename T, typename U, typename V>
     static void exec_pssslDstRra(T **rraBaseList, int *rraIndexList, 
-      int *rraOffsetList, U **factorList, V **valueBaseList,
+      int *rraOffsetList, U *factorList, V **valueBaseList,
       int *valueOffsetList, int *baseListIndexList,
       int termCount, int vectorL);
     template<typename T, typename U, typename V>
+    static void exec_pssslDstRraDynMask(T **rraBaseList, int *rraIndexList, 
+      int *rraOffsetList, U *factorList, V **valueBaseList,
+      int *valueOffsetList, int *baseListIndexList,
+      int termCount, int vectorL, RouteHandle *rh);
+    template<typename T, typename U, typename V>
     static void exec_pssslDstRraSuper(T **rraBaseList, int *rraIndexList, 
-      int *rraOffsetList, U **factorList, V **valueBaseList,
+      int *rraOffsetList, U *factorList, V **valueBaseList,
       int *valueOffsetList, int *baseListIndexList,
       int termCount, int vectorL, int localDeIndexOff,
       int size_r, int size_s, int size_t, int *size_i, int *size_j);
     template<typename T, typename U, typename V>
     static void psssSrcRra(T *rraBase, TKId valueTK, int *rraOffsetList,
-      U **factorList, TKId factorTK, V *elementBase, int *elementOffsetList,
+      U *factorList, TKId factorTK, V *elementBase, int *elementOffsetList,
       TKId elementTK, int termCount, int vectorL, int resolved, 
       int localDeIndexOff, int size_r, int size_s, int size_t, int *size_i, 
       int *size_j, bool superVector);
     template<typename T, typename U, typename V>
-    static void exec_psssSrcRra(T *rraBase, int *rraOffsetList, U **factorList,
+    static void exec_psssSrcRra(T *rraBase, int *rraOffsetList, U *factorList,
       V *elementBase, int *elementOffsetList, int termCount, int vectorL);
     template<typename T, typename U, typename V>
-    static void exec_psssSrcRraSuper(T *rraBase, int *rraOffsetList, U **factorList,
-      V *elementBase, int *elementOffsetList, int termCount, int vectorL,
-      int localDeIndexOff, int size_r, int size_s, int size_t,
+    static void exec_psssSrcRraSuper(T *rraBase, int *rraOffsetList,
+      U *factorList, V *elementBase, int *elementOffsetList, int termCount,
+      int vectorL, int localDeIndexOff, int size_r, int size_s, int size_t,
       int *size_i, int *size_j, bool superVector);
     template<typename T, typename U, typename V>
     static void pssscRra(T *rraBase, TKId elementTK, int *rraOffsetList,
-      U **factorList, TKId factorTK, V *valueList, TKId valueTK,
+      U *factorList, TKId factorTK, V *valueList, TKId valueTK,
       int termCount, int vectorL, int resolved);
+
+    template<typename T, typename U, typename V> struct DynMaskElement{
+      T *element;
+      std::vector<U*> factors;
+      std::vector<V*> values;
+    };
+    template<typename T, typename U, typename V>
+    static void dynMaskHandler(std::vector<DynMaskElement<T,U,V> > &dynMaskList,
+      RouteHandle *rh, int vectorL);
 
 };  // class XXE
 

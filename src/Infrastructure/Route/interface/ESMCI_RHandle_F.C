@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -44,6 +44,23 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     *ptr = ESMCI::RouteHandle::create(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_routehandlecreaterh)(ESMCI::RouteHandle **ptr, 
+    ESMCI::RouteHandle **rh, ESMCI::InterArray<int> *originPetList, 
+    ESMCI::InterArray<int> *targetPetList, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlecreaterh()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    *ptr = ESMCI::RouteHandle::create(*rh, originPetList, targetPetList,
+      &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -198,6 +215,99 @@ extern "C" {
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
     localrc = (*ptr)->optimize();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_routehandlesetas)(ESMCI::RouteHandle **ptr, void **datap,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlesetas()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    localrc = (*ptr)->setASPtr(datap);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_routehandleresetas)(ESMCI::RouteHandle **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandleresetas()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    localrc = (*ptr)->resetASPtr();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_routehandlegetas)(ESMCI::RouteHandle **ptr, void **datap,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlegetas()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    localrc = (*ptr)->getASPtr(datap);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_routehandlesetdynsrcmask)(ESMCI::RouteHandle **ptr, 
+    void *dynamicSrcMaskValue, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlesetdynsrcmask()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    localrc = (*ptr)->setDynSrcMaskValue(
+      ESMC_NOT_PRESENT_FILTER(dynamicSrcMaskValue));
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_routehandlesetdyndstmask)(ESMCI::RouteHandle **ptr, 
+    void *dynamicDstMaskValue, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlesetdyndstmask()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    localrc = (*ptr)->setDynDstMaskValue(
+      ESMC_NOT_PRESENT_FILTER(dynamicDstMaskValue));
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_routehandlesethandleall)(ESMCI::RouteHandle **ptr, 
+    ESMC_Logical *handleAll, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlesetdyndstmask()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    bool handleAllElements = false; // default
+    if (*handleAll == ESMF_TRUE) handleAllElements = true;
+    localrc = (*ptr)->setHandleAllElements(handleAllElements);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully

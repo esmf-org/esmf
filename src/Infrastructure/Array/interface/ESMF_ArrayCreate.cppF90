@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
@@ -58,7 +58,7 @@ module ESMF_ArrayCreateMod
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
-      
+
 !------------------------------------------------------------------------------
 !     ! ESMF_Array
 !
@@ -97,7 +97,8 @@ module ESMF_ArrayCreateMod
   public ESMF_ArraySetThisNull
   public ESMF_ArraySetPLocalDeInternal
   public ESMF_ArrayCopyThis
-! ESMF_ArrayCreateFromGrid - defined in ESMF_Grid.F90 due to circularity issues 
+  public ESMF_ArrayIsProxy
+! ESMF_ArrayCreateFromGrid - defined in ESMF_Grid.F90 due to circularity issues
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -108,7 +109,7 @@ module ESMF_ArrayCreateMod
     '$Id$'
 
 !==============================================================================
-! 
+!
 ! INTERFACE BLOCKS
 !
 !==============================================================================
@@ -142,10 +143,10 @@ module ESMF_ArrayCreateMod
 
     module procedure ESMF_ArrayCreateFromLA         !1st prototype
 
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-! types of {\tt ESMF\_ArrayCreate} functions.   
-!EOPI 
+! !DESCRIPTION:
+! This interface provides a single entry point for the various
+! types of {\tt ESMF\_ArrayCreate} functions.
+!EOPI
   end interface
 
   interface ESMF_ArraySetPLocalDeInternal
@@ -297,7 +298,7 @@ contains
 !
 ! !INTERFACE:
   function ESMF_ArrayEQ(array1, array2)
-! 
+!
 ! !RETURN VALUE:
     logical :: ESMF_ArrayEQ
 
@@ -306,7 +307,7 @@ contains
     type(ESMF_Array), intent(in) :: array2
 
 ! !DESCRIPTION:
-!   Test if both {\tt array1} and {\tt array2} alias the same ESMF Array 
+!   Test if both {\tt array1} and {\tt array2} alias the same ESMF Array
 !   object.
 !
 !EOPI
@@ -316,7 +317,7 @@ contains
     integer :: localrc1, localrc2
     logical :: lval1, lval2
 
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
     ! deleted).
@@ -348,7 +349,7 @@ contains
 !
 ! !INTERFACE:
   function ESMF_ArrayNE(array1, array2)
-! 
+!
 ! !RETURN VALUE:
     logical :: ESMF_ArrayNE
 
@@ -357,7 +358,7 @@ contains
     type(ESMF_Array), intent(in) :: array2
 
 ! !DESCRIPTION:
-!   Test if both {\tt array1} and {\tt array2} alias the same ESMF Array 
+!   Test if both {\tt array1} and {\tt array2} alias the same ESMF Array
 !   object.
 !
 !EOPI
@@ -367,11 +368,11 @@ contains
     integer :: localrc1, localrc2
     logical :: lval1, lval2
 
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
     ! deleted).
-    
+
     ESMF_ArrayNE = .not.ESMF_ArrayEQ(array1, array2)
 
   end function ESMF_ArrayNE
@@ -398,10 +399,10 @@ contains
 !
 ! The arguments are:
 ! \begin{description}
-! \item[arrayOut] 
-!     {\tt ESMF\_Array} object into which to copy the data. The incoming 
+! \item[arrayOut]
+!     {\tt ESMF\_Array} object into which to copy the data. The incoming
 !     {\tt arrayOut} must already references a matching memory allocation.
-! \item[arrayIn] 
+! \item[arrayIn]
 !     {\tt ESMF\_Array} object that holds the data to be copied.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -414,7 +415,7 @@ contains
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, arrayIn, rc)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, arrayOut, rc)
 
@@ -422,10 +423,10 @@ contains
     call c_ESMC_ArrayCopy(arrayOut, arrayIn, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_ArrayCopy
 !------------------------------------------------------------------------------
 
@@ -613,11 +614,12 @@ contains
     localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
-    ! Check init status of arguments @\
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
-@\
     ! Mark this Array object as invalid @\
     array%this = ESMF_NULL_POINTER @\
+    ESMF_ArrayCreateFrmPtr##mrank##D##mtypekind = array @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
 @\
     ! Set copy/ref behavior @\
     datacopyflag_opt = ESMF_DATACOPY_REFERENCE  ! default @\
@@ -675,7 +677,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFrmPtr)
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_ArrayCreate() @\
 ! function ESMF_ArrayCreateFrmPtrArb<indexkind><rank><type><kind>(distgrid, & @\
-!   farrayPtr, haloSeqIndexList, keywordEnforcer datacopyflag, & @\
+!   farrayPtr, haloSeqIndexList, keywordEnforcer, datacopyflag, & @\
 !   distgridToArrayMap, name, rc) @\
 ! @\
 ! !RETURN VALUE: @\
@@ -786,7 +788,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFrmPtr)
     type(ESMF_DistGrid),   intent(in)              :: distgrid @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: farrayPtr @\
     integer(ESMF_KIND_I4), intent(in)              :: haloSeqIndexList(:) @\
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag),   intent(in),   optional  :: datacopyflag @\
     integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
     character (len=*),     intent(in),   optional  :: name @\
@@ -801,6 +803,9 @@ TypeKindRankDeclarationMacro(ArrayCreateFrmPtr)
     ! Initialize return code; assume failure until success is certain @\
     localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+@\
+    ! invalidate return value @\
+    ESMF_ArrayCreateFrmPtrArb##mrank##D##mtypekind%this = ESMF_NULL_POINTER @\
 @\
     ! Check init status of arguments used directly @\
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
@@ -870,7 +875,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFrmPtrArb)
     type(ESMF_DistGrid),   intent(in)              :: distgrid @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: farrayPtr @\
     integer(ESMF_KIND_I8), intent(in)              :: haloSeqIndexList(:) @\
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag),   intent(in),   optional  :: datacopyflag @\
     integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
     character (len=*),     intent(in),   optional  :: name @\
@@ -885,6 +890,9 @@ TypeKindRankDeclarationMacro(ArrayCreateFrmPtrArb)
     ! Initialize return code; assume failure until success is certain @\
     localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+@\
+    ! invalidate return value @\
+    ESMF_ArrayCreateFrmPtrArbI8##mrank##D##mtypekind%this = ESMF_NULL_POINTER @\
 @\
     ! Check init status of arguments used directly @\
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
@@ -1109,7 +1117,7 @@ TypeKindRankDeclarationMacro(ArrayCreateFrmPtrArbI8)
     type(ESMF_DistGrid),   intent(in)              :: distgrid @\
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
     type(ESMF_Index_Flag),  intent(in)              :: indexflag @\
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag),   intent(in),   optional  :: datacopyflag @\
     integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
     integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
@@ -1134,11 +1142,12 @@ TypeKindRankDeclarationMacro(ArrayCreateFrmPtrArbI8)
     localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
-    ! Check init status of arguments @\
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
-@\
     ! Mark this Array object as invalid @\
     array%this = ESMF_NULL_POINTER @\
+    ESMF_ArrayCreateAsmdSp##mrank##D##mtypekind = array @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
 @\
     ! Set copy/ref behavior @\
     datacopyflag_opt = ESMF_DATACOPY_REFERENCE  ! default @\
@@ -1376,7 +1385,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSp)
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
     type(ESMF_Index_Flag), intent(in)              :: indexflag @\
     integer(ESMF_KIND_I4), intent(in)              :: haloSeqIndexList(:) @\
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag),   intent(in),   optional  :: datacopyflag @\
     integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
     integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
@@ -1401,11 +1410,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSp)
     localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
-    ! Check init status of arguments @\
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
-@\
     ! Mark this Array object as invalid @\
     array%this = ESMF_NULL_POINTER @\
+    ESMF_ArrayCreateAsmdSpArb##mrank##D##mtypekind = array @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
 @\
     ! Set copy/ref behavior @\
     datacopyflag_opt = ESMF_DATACOPY_REFERENCE  ! default @\
@@ -1483,7 +1493,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArb)
     mtype (ESMF_KIND_##mtypekind),dimension(mdim),intent(in),target :: farray @\
     type(ESMF_Index_Flag), intent(in)              :: indexflag @\
     integer(ESMF_KIND_I8), intent(in)              :: haloSeqIndexList(:) @\
-	type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
+        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
     type(ESMF_DataCopy_Flag),   intent(in),   optional  :: datacopyflag @\
     integer,               intent(in),   optional  :: distgridToArrayMap(:) @\
     integer,               intent(in),   optional  :: computationalEdgeLWidth(:) @\
@@ -1508,11 +1518,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArb)
     localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
 @\
-    ! Check init status of arguments @\
-    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
-@\
     ! Mark this Array object as invalid @\
     array%this = ESMF_NULL_POINTER @\
+    ESMF_ArrayCreateAsmdSpArbI8##mrank##D##mtypekind = array @\
+@\
+    ! Check init status of arguments @\
+    ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc) @\
 @\
     ! Set copy/ref behavior @\
     datacopyflag_opt = ESMF_DATACOPY_REFERENCE  ! default @\
@@ -1586,7 +1597,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     indexflag, datacopyflag, distgridToArrayMap, computationalEdgeLWidth, &
     computationalEdgeUWidth, computationalLWidth, computationalUWidth, &
     totalLWidth, totalUWidth, undistLBound, undistUBound, name, rc)
-!     
+!
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateLocalArray
 !
@@ -1630,10 +1641,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !
 ! This interface is able to handle multiple DEs per PET.
 !
-! The not distributed Array dimensions form a tensor of rank = array.rank - 
-! distgrid.dimCount. The widths of the computational region are set to 
-! the provided value, or zero by default, for all tensor elements. Use 
-! {\tt ESMF\_ArraySet()} to change these default settings after the 
+! The not distributed Array dimensions form a tensor of rank = array.rank -
+! distgrid.dimCount. The widths of the computational region are set to
+! the provided value, or zero by default, for all tensor elements. Use
+! {\tt ESMF\_ArraySet()} to change these default settings after the
 ! Array object has been created.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
@@ -1645,12 +1656,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
-! \item[localarrayList] 
-!      List of valid {\tt ESMF\_LocalArray} objects, i.e. memory must be 
-!      associated with the actual arguments. The type/kind/rank information of 
+! \item[localarrayList]
+!      List of valid {\tt ESMF\_LocalArray} objects, i.e. memory must be
+!      associated with the actual arguments. The type/kind/rank information of
 !      all {\tt localarrayList} elements must be identical and will
 !      be used to set {\tt Array}|s properties accordingly. The shape of each
-!      {\tt localarrayList} element will be checked against the information 
+!      {\tt localarrayList} element will be checked against the information
 !      contained in the {\tt distgrid}.
 ! \item[{[indexflag]}]
 !      Indicate how DE-local indices are defined. By default, the exclusive
@@ -1673,7 +1684,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      of the {\tt localarrayList} elements in sequence, i.e.
 !      {\tt distgridToArrayMap = (/1, 2, .../)}.
 !      Unmapped dimensions in the {\tt localarrayList} elements are not
-!      decomposed dimensions and form a tensor of 
+!      decomposed dimensions and form a tensor of
 !      rank = Array.rank - DistGrid.dimCount.
 !      All {\tt distgridToArrayMap} entries must be greater than or equal
 !      to zero and smaller than or equal to the Array rank. It is erroneous
@@ -1750,16 +1761,20 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Determine the number of LocalArray elements in list
     localarrayCount = size(localarrayList)
-    
+
+    ! invalidate return value
+    array%this = ESMF_NULL_POINTER
+    ESMF_ArrayCreateLocalArray = array
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
     do i=1, localarrayCount
       ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocalArrayGetInit, localarrayList(i), rc)
     enddo
-    
+
     ! Copy C++ pointers of deep objects into a simple ESMF_Pointer array
     ! This is necessary in order to strip off the Fortran init check members
     ! when passing into C++
@@ -1769,7 +1784,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
-    
+
     ! Set copy/ref behavior
     datacopyflag_opt = ESMF_DATACOPY_REFERENCE  ! default
     if (present(datacopyflag)) datacopyflag_opt = datacopyflag
@@ -1784,7 +1799,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !        return
 !      endif
 !    endif
-    
+
     ! Deal with (optional) array arguments
     distgridToArrayMapArg = ESMF_InterArrayCreate(distgridToArrayMap, &
       rc=localrc)
@@ -1819,9 +1834,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! Mark this Array object as invalid
-    array%this = ESMF_NULL_POINTER
-
     ! Call into the C++ interface, which will sort out optional arguments
     ! Optional name argument requires separate calls into C++
     if (present(name)) then
@@ -1844,8 +1856,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
         undistLBoundArg, undistUBoundArg, "", len_name, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    endif    
-      
+    endif
+
     ! Garbage collection
     deallocate(localarrayPointerList)
     call ESMF_InterArrayDestroy(distgridToArrayMapArg, rc=localrc)
@@ -1875,16 +1887,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     call ESMF_InterArrayDestroy(undistUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! Set return value
-    ESMF_ArrayCreateLocalArray = array 
- 
+    ESMF_ArrayCreateLocalArray = array
+
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_ArrayCreateLocalArray)
- 
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end function ESMF_ArrayCreateLocalArray
 !------------------------------------------------------------------------------
 
@@ -1900,7 +1912,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !    distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
 !    computationalLWidth, computationalUWidth, &
 !    totalLWidth, totalUWidth, undistLBound, undistUBound, name, rc)
-!     
+!
 ! !RETURN VALUE:
 !    type(ESMF_Array) :: ESMF_ArrayCreateLocalArrayArb
 !
@@ -1928,8 +1940,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.0.0] Added arguments {\tt indexflag}, {\tt computationalEdgeLWidth}, 
-!   {\tt computationalEdgeUWidth}, {\tt computationalLWidth}, 
+! \item[7.0.0] Added arguments {\tt indexflag}, {\tt computationalEdgeLWidth},
+!   {\tt computationalEdgeUWidth}, {\tt computationalLWidth},
 !   {\tt computationalUWidth}, {\tt totalLWidth}, {\tt totalUWidth}. These
 !   arguments were missed in previous versions by mistake.
 ! \end{description}
@@ -1937,11 +1949,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object from existing {\tt ESMF\_LocalArray}
-! objects according to distgrid. Each PET must issue this call in unison 
+! objects according to distgrid. Each PET must issue this call in unison
 ! in order to create a consistent Array object. The local arrays provided must
-! be dimensioned according to the DE-local total region. Bounds of the 
-! exclusive regions are set as specified in the distgrid argument. Bounds 
-! for array dimensions that are not distributed can be chosen freely using 
+! be dimensioned according to the DE-local total region. Bounds of the
+! exclusive regions are set as specified in the distgrid argument. Bounds
+! for array dimensions that are not distributed can be chosen freely using
 ! the {\tt undistLBound} and {\tt undistUBound} arguments.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
@@ -1953,12 +1965,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
-! \item[localarrayList] 
-!      List of valid {\tt ESMF\_LocalArray} objects, i.e. memory must be 
-!      associated with the actual arguments. The type/kind/rank information of 
+! \item[localarrayList]
+!      List of valid {\tt ESMF\_LocalArray} objects, i.e. memory must be
+!      associated with the actual arguments. The type/kind/rank information of
 !      all {\tt localarrayList} elements must be identical and will
 !      be used to set {\tt Array}|s properties accordingly. The shape of each
-!      {\tt localarrayList} element will be checked against the information 
+!      {\tt localarrayList} element will be checked against the information
 !      contained in the {\tt distgrid}.
 ! \item[haloSeqIndexList]
 !      One dimensional array containing sequence indices of local halo region.
@@ -1988,7 +2000,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      of the {\tt localarrayList} elements in sequence, i.e.
 !      {\tt distgridToArrayMap = (/1, 2, .../)}.
 !      Unmapped dimensions in the {\tt localarrayList} elements are not
-!      decomposed dimensions and form a tensor of 
+!      decomposed dimensions and form a tensor of
 !      rank = Array.rank - DistGrid.dimCount.
 !      All {\tt distgridToArrayMap} entries must be greater than or equal
 !      to zero and smaller than or equal to the Array rank. It is erroneous
@@ -2060,7 +2072,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, &
     totalLWidth, totalUWidth, undistLBound, undistUBound, name, rc)
-!     
+!
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateLocalArrayArb
 !
@@ -2088,8 +2100,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.0.0] Added arguments {\tt indexflag}, {\tt computationalEdgeLWidth}, 
-!   {\tt computationalEdgeUWidth}, {\tt computationalLWidth}, 
+! \item[7.0.0] Added arguments {\tt indexflag}, {\tt computationalEdgeLWidth},
+!   {\tt computationalEdgeUWidth}, {\tt computationalLWidth},
 !   {\tt computationalUWidth}, {\tt totalLWidth}, {\tt totalUWidth}. These
 !   arguments were missed in previous versions by mistake.
 ! \end{description}
@@ -2097,11 +2109,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object from existing {\tt ESMF\_LocalArray}
-! objects according to distgrid. Each PET must issue this call in unison 
+! objects according to distgrid. Each PET must issue this call in unison
 ! in order to create a consistent Array object. The local arrays provided must
-! be dimensioned according to the DE-local total region. Bounds of the 
-! exclusive regions are set as specified in the distgrid argument. Bounds 
-! for array dimensions that are not distributed can be chosen freely using 
+! be dimensioned according to the DE-local total region. Bounds of the
+! exclusive regions are set as specified in the distgrid argument. Bounds
+! for array dimensions that are not distributed can be chosen freely using
 ! the {\tt undistLBound} and {\tt undistUBound} arguments.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
@@ -2113,12 +2125,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
-! \item[localarrayList] 
-!      List of valid {\tt ESMF\_LocalArray} objects, i.e. memory must be 
-!      associated with the actual arguments. The type/kind/rank information of 
+! \item[localarrayList]
+!      List of valid {\tt ESMF\_LocalArray} objects, i.e. memory must be
+!      associated with the actual arguments. The type/kind/rank information of
 !      all {\tt localarrayList} elements must be identical and will
 !      be used to set {\tt Array}|s properties accordingly. The shape of each
-!      {\tt localarrayList} element will be checked against the information 
+!      {\tt localarrayList} element will be checked against the information
 !      contained in the {\tt distgrid}.
 ! \item[haloSeqIndexList]
 !      One dimensional array containing sequence indices of local halo region.
@@ -2145,7 +2157,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      of the {\tt localarrayList} elements in sequence, i.e.
 !      {\tt distgridToArrayMap = (/1, 2, .../)}.
 !      Unmapped dimensions in the {\tt localarrayList} elements are not
-!      decomposed dimensions and form a tensor of 
+!      decomposed dimensions and form a tensor of
 !      rank = Array.rank - DistGrid.dimCount.
 !      All {\tt distgridToArrayMap} entries must be greater than or equal
 !      to zero and smaller than or equal to the Array rank. It is erroneous
@@ -2211,16 +2223,19 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
+    ! invalidate return value
+    ESMF_ArrayCreateLocalArrayArb%this = ESMF_NULL_POINTER
+
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
-    
+
     ! Ensure incoming DistGrid is 1D
     call ESMF_DistGridGet(distgrid, dimCount=dimCount, delayout=delayout, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     if (dimCount /= 1) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
         msg="- this ArrayCreate() interface requires 1D DistGrid", &
@@ -2232,7 +2247,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     if (localDeCount /= 1) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
         msg="- this ArrayCreate() interface only supports 1DE/PETs", &
@@ -2242,7 +2257,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
     ! Prepare for actual ArrayCreate() call
     localHaloCount = size(haloSeqIndexList)
-    
+
     ! Call into conventional interface to create the Array object
     if (present(totalUWidth)) then
       ESMF_ArrayCreateLocalArrayArb = ESMF_ArrayCreate(distgrid, &
@@ -2273,16 +2288,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-      
+
     ! Set the arbitrary sequence indices in the Array halo rim
     call ESMF_ArraySetPLocalDeInternal(ESMF_ArrayCreateLocalArrayArb, &
       localDe=0, rimSeqIndex=haloSeqIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
- 
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end function ESMF_ArrayCreateLocalArrayArb
 !------------------------------------------------------------------------------
 
@@ -2300,7 +2315,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, &
     totalLWidth, totalUWidth, undistLBound, undistUBound, name, rc)
-!     
+!
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateLocalArrayArbI8
 !
@@ -2328,8 +2343,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.0.0] Added arguments {\tt indexflag}, {\tt computationalEdgeLWidth}, 
-!   {\tt computationalEdgeUWidth}, {\tt computationalLWidth}, 
+! \item[7.0.0] Added arguments {\tt indexflag}, {\tt computationalEdgeLWidth},
+!   {\tt computationalEdgeUWidth}, {\tt computationalLWidth},
 !   {\tt computationalUWidth}, {\tt totalLWidth}, {\tt totalUWidth}. These
 !   arguments were missed in previous versions by mistake.
 ! \end{description}
@@ -2337,11 +2352,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_Array} object from existing {\tt ESMF\_LocalArray}
-! objects according to distgrid. Each PET must issue this call in unison 
+! objects according to distgrid. Each PET must issue this call in unison
 ! in order to create a consistent Array object. The local arrays provided must
-! be dimensioned according to the DE-local total region. Bounds of the 
-! exclusive regions are set as specified in the distgrid argument. Bounds 
-! for array dimensions that are not distributed can be chosen freely using 
+! be dimensioned according to the DE-local total region. Bounds of the
+! exclusive regions are set as specified in the distgrid argument. Bounds
+! for array dimensions that are not distributed can be chosen freely using
 ! the {\tt undistLBound} and {\tt undistUBound} arguments.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
@@ -2353,12 +2368,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
-! \item[localarrayList] 
-!      List of valid {\tt ESMF\_LocalArray} objects, i.e. memory must be 
-!      associated with the actual arguments. The type/kind/rank information of 
+! \item[localarrayList]
+!      List of valid {\tt ESMF\_LocalArray} objects, i.e. memory must be
+!      associated with the actual arguments. The type/kind/rank information of
 !      all {\tt localarrayList} elements must be identical and will
 !      be used to set {\tt Array}|s properties accordingly. The shape of each
-!      {\tt localarrayList} element will be checked against the information 
+!      {\tt localarrayList} element will be checked against the information
 !      contained in the {\tt distgrid}.
 ! \item[haloSeqIndexList]
 !      One dimensional array containing sequence indices of local halo region.
@@ -2385,7 +2400,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      of the {\tt localarrayList} elements in sequence, i.e.
 !      {\tt distgridToArrayMap = (/1, 2, .../)}.
 !      Unmapped dimensions in the {\tt localarrayList} elements are not
-!      decomposed dimensions and form a tensor of 
+!      decomposed dimensions and form a tensor of
 !      rank = Array.rank - DistGrid.dimCount.
 !      All {\tt distgridToArrayMap} entries must be greater than or equal
 !      to zero and smaller than or equal to the Array rank. It is erroneous
@@ -2451,16 +2466,19 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
+    ! invalidate return value
+    ESMF_ArrayCreateLocalArrayArbI8%this = ESMF_NULL_POINTER
+
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
-    
+
     ! Ensure incoming DistGrid is 1D
     call ESMF_DistGridGet(distgrid, dimCount=dimCount, delayout=delayout, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     if (dimCount /= 1) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
         msg="- this ArrayCreate() interface requires 1D DistGrid", &
@@ -2472,7 +2490,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     if (localDeCount /= 1) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
         msg="- this ArrayCreate() interface only supports 1DE/PETs", &
@@ -2482,7 +2500,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
     ! Prepare for actual ArrayCreate() call
     localHaloCount = size(haloSeqIndexList)
-    
+
     ! Call into conventional interface to create the Array object
     if (present(totalUWidth)) then
       ESMF_ArrayCreateLocalArrayArbI8 = ESMF_ArrayCreate(distgrid, &
@@ -2513,16 +2531,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-      
+
     ! Set the arbitrary sequence indices in the Array halo rim
     call ESMF_ArraySetPLocalDeInternal(ESMF_ArrayCreateLocalArrayArbI8, &
       localDe=0, rimSeqIndex=haloSeqIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
- 
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end function ESMF_ArrayCreateLocalArrayArbI8
 !------------------------------------------------------------------------------
 
@@ -2539,7 +2557,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
     undistLBound, undistUBound, name, vm, rc)
-!     
+!
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocate
 !
@@ -2572,7 +2590,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
+! Create an {\tt ESMF\_Array} object and allocate uninitialized data space
 ! according to typekind and distgrid. The Array rank is indirectly determined
 ! by the incoming information. Each PET must issue this call in unison in order
 ! to create a consistent Array object. DE-local allocations are made according
@@ -2655,8 +2673,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \item[{[name]}]
 !      Name of the Array object.
 ! \item[{[vm]}]
-!      If present, the Array object is created on the specified 
-!      {\tt ESMF\_VM} object. The default is to create on the VM of the 
+!      If present, the Array object is created on the specified
+!      {\tt ESMF\_VM} object. The default is to create on the VM of the
 !      current context.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2669,14 +2687,17 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     type(ESMF_ArraySpec)    :: arrayspec
     type(ESMF_Pointer)      :: vmThis
     logical                 :: actualFlag
-    
+
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
+    ! invalidate return value
+    ESMF_ArrayCreateAllocate%this = ESMF_NULL_POINTER
+
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
-    
+
     ! Must make sure the local PET is associated with an actual member
     actualFlag = .true.
     if (present(vm)) then
@@ -2685,18 +2706,18 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
         actualFlag = .false.  ! local PET is not for an actual member of Array
       endif
     endif
-    
+
     if (actualFlag) then
       ! Safe to access distgrid on local PET to get rank from input information
       call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
       rank = dimCount ! default value
     else
       rank = 1  ! bogus but valid default value
     endif
-    
+
     if (present(distgridToArrayMap)) then
       rank = 0 ! reset
       do i=1, size(distgridToArrayMap)
@@ -2709,12 +2730,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     else if (present(undistUBound)) then
       rank = rank + size(undistUBound)
     endif
-      
+
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return    
-        
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Call into ArraySpec overloaded interface
     ESMF_ArrayCreateAllocate = ESMF_ArrayCreate(distgrid, arrayspec, &
       indexflag=indexflag, distgridToArrayMap=distgridToArrayMap, &
@@ -2727,10 +2748,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
       name=name, vm=vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
- 
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end function ESMF_ArrayCreateAllocate
 !------------------------------------------------------------------------------
 
@@ -2744,7 +2765,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !  function ESMF_ArrayCreateAllocateArb<indexkind>(distgrid, typekind, &
 !    haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
 !    undistLBound, undistUBound, name, rc)
-!     
+!
 ! !RETURN VALUE:
 !    type(ESMF_Array) :: ESMF_ArrayCreateAllocateArb
 !
@@ -2766,7 +2787,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
+! Create an {\tt ESMF\_Array} object and allocate uninitialized data space
 ! according to typekind and distgrid. The Array rank is indirectly determined
 ! by the incoming information. Each PET must issue this call in unison in order
 ! to create a consistent Array object. DE-local allocations are made according
@@ -2834,7 +2855,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
   function ESMF_ArrayCreateAllocateArb(distgrid, typekind, &
     haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
     undistLBound, undistUBound, name, rc)
-!     
+!
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocateArb
 !
@@ -2856,7 +2877,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
+! Create an {\tt ESMF\_Array} object and allocate uninitialized data space
 ! according to typekind and distgrid. The Array rank is indirectly determined
 ! by the incoming information. Each PET must issue this call in unison in order
 ! to create a consistent Array object. DE-local allocations are made according
@@ -2912,21 +2933,24 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     integer                 :: localrc    ! local return code
     integer                 :: rank, dimCount, i
     type(ESMF_ArraySpec)    :: arrayspec
-    
+
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
+    ! invalidate return value
+    ESMF_ArrayCreateAllocateArb%this = ESMF_NULL_POINTER
+
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
-    
+
     ! Determine rank from input information
     call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     rank = dimCount ! default value
-    
+
     if (present(distgridToArrayMap)) then
       rank = 0 ! reset
       do i=1, size(distgridToArrayMap)
@@ -2939,12 +2963,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     else if (present(undistUBound)) then
       rank = rank + size(undistUBound)
     endif
-      
+
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return    
-        
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Call into ArraySpec overloaded interface
     ESMF_ArrayCreateAllocateArb = ESMF_ArrayCreate(distgrid, arrayspec, &
       haloSeqIndexList, distgridToArrayMap=distgridToArrayMap, &
@@ -2952,10 +2976,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
       name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
- 
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end function ESMF_ArrayCreateAllocateArb
 !------------------------------------------------------------------------------
 
@@ -2971,7 +2995,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
   function ESMF_ArrayCreateAllocateArbI8(distgrid, typekind, &
     haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
     undistLBound, undistUBound, name, rc)
-!     
+!
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocateArbI8
 !
@@ -2993,7 +3017,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
+! Create an {\tt ESMF\_Array} object and allocate uninitialized data space
 ! according to typekind and distgrid. The Array rank is indirectly determined
 ! by the incoming information. Each PET must issue this call in unison in order
 ! to create a consistent Array object. DE-local allocations are made according
@@ -3049,21 +3073,24 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     integer                 :: localrc    ! local return code
     integer                 :: rank, dimCount, i
     type(ESMF_ArraySpec)    :: arrayspec
-    
+
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
+    ! invalidate return value
+    ESMF_ArrayCreateAllocateArbI8%this = ESMF_NULL_POINTER
+
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
-    
+
     ! Determine rank from input information
     call ESMF_DistGridGet(distgrid, dimCount=dimCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     rank = dimCount ! default value
-    
+
     if (present(distgridToArrayMap)) then
       rank = 0 ! reset
       do i=1, size(distgridToArrayMap)
@@ -3076,12 +3103,12 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     else if (present(undistUBound)) then
       rank = rank + size(undistUBound)
     endif
-      
+
     ! Set ArraySpec from rank and typekind input
     call ESMF_ArraySpecSet(arrayspec, rank=rank, typekind=typekind, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return    
-        
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! Call into ArraySpec overloaded interface
     ESMF_ArrayCreateAllocateArbI8 = ESMF_ArrayCreate(distgrid, arrayspec, &
       haloSeqIndexList, distgridToArrayMap=distgridToArrayMap, &
@@ -3089,10 +3116,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
       name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
- 
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end function ESMF_ArrayCreateAllocateArbI8
 !------------------------------------------------------------------------------
 
@@ -3109,7 +3136,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
     computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
     undistLBound, undistUBound, name, vm, rc)
-!     
+!
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocateAS
 !
@@ -3142,11 +3169,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
+! Create an {\tt ESMF\_Array} object and allocate uninitialized data space
 ! according to arrayspec and distgrid. Each PET must issue
-! this call with identical arguments in order to create a consistent Array 
+! this call with identical arguments in order to create a consistent Array
 ! object. DE-local allocations are made according to the total region defined
-! by the arguments to this call: {\tt distgrid} and the optional {\tt Width} 
+! by the arguments to this call: {\tt distgrid} and the optional {\tt Width}
 ! arguments.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
@@ -3158,7 +3185,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
-! \item[arrayspec] 
+! \item[arrayspec]
 !      {\tt ESMF\_ArraySpec} object containing the type/kind/rank information.
 ! \item[{[indexflag]}]
 !      Indicate how DE-local indices are defined. By default, the exclusive
@@ -3224,8 +3251,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \item[{[name]}]
 !      Name of the Array object.
 ! \item[{[vm]}]
-!      If present, the Array object is created on the specified 
-!      {\tt ESMF\_VM} object. The default is to create on the VM of the 
+!      If present, the Array object is created on the specified
+!      {\tt ESMF\_VM} object. The default is to create on the VM of the
 !      current context.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3249,7 +3276,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
+    ! invalidate return value
+    array%this = ESMF_NULL_POINTER
+    ESMF_ArrayCreateAllocateAS = array
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
@@ -3263,7 +3294,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
         return
       endif
     endif
-    
+
     ! Deal with (optional) array arguments
     distgridToArrayMapArg = ESMF_InterArrayCreate(distgridToArrayMap, &
       rc=localrc)
@@ -3297,9 +3328,6 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     undistUBoundArg = ESMF_InterArrayCreate(undistUBound, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
-    ! Mark this Array object as invalid
-    array%this = ESMF_NULL_POINTER
 
     ! Call into the C++ interface, which will sort out optional arguments
     ! Optional name argument requires separate calls into C++
@@ -3324,7 +3352,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-      
+
     ! Garbage collection
     call ESMF_InterArrayDestroy(distgridToArrayMapArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3353,16 +3381,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     call ESMF_InterArrayDestroy(undistUBoundArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! Set return value
-    ESMF_ArrayCreateAllocateAS = array 
- 
+    ESMF_ArrayCreateAllocateAS = array
+
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_ArrayCreateAllocateAS)
- 
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end function ESMF_ArrayCreateAllocateAS
 !------------------------------------------------------------------------------
 
@@ -3376,7 +3404,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !  function ESMF_ArrayCreateAllocateASArb<indexkind>(distgrid, arrayspec, &
 !    haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
 !    undistLBound, undistUBound, name, rc)
-!     
+!
 ! !RETURN VALUE:
 !    type(ESMF_Array) :: ESMF_ArrayCreateAllocateASArb
 !
@@ -3397,10 +3425,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
+! Create an {\tt ESMF\_Array} object and allocate uninitialized data space
 ! according to arrayspec and distgrid. Each PET must issue this call in unison
 ! in order to create a consistent Array object. DE-local allocations are made
-! according to the total region defined by the arguments to this call: 
+! according to the total region defined by the arguments to this call:
 ! {\tt distgrid} and {\tt haloSeqIndexList} arguments.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
@@ -3412,7 +3440,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
-! \item[arrayspec] 
+! \item[arrayspec]
 !      {\tt ESMF\_ArraySpec} object containing the type/kind/rank information.
 ! \item[haloSeqIndexList]
 !      One dimensional array containing sequence indices of local halo region.
@@ -3463,7 +3491,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
   function ESMF_ArrayCreateAllocateASArb(distgrid, arrayspec, &
     haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
     undistLBound, undistUBound, name, rc)
-!     
+!
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocateASArb
 !
@@ -3484,10 +3512,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
+! Create an {\tt ESMF\_Array} object and allocate uninitialized data space
 ! according to arrayspec and distgrid. Each PET must issue this call in unison
 ! in order to create a consistent Array object. DE-local allocations are made
-! according to the total region defined by the arguments to this call: 
+! according to the total region defined by the arguments to this call:
 ! {\tt distgrid} and {\tt haloSeqIndexList} arguments.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
@@ -3499,7 +3527,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
-! \item[arrayspec] 
+! \item[arrayspec]
 !      {\tt ESMF\_ArraySpec} object containing the type/kind/rank information.
 ! \item[haloSeqIndexList]
 !      One dimensional array containing sequence indices of local halo region.
@@ -3543,16 +3571,19 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
+    ! invalidate return value
+    ESMF_ArrayCreateAllocateASArb%this = ESMF_NULL_POINTER
+
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
-    
+
     ! Ensure incoming DistGrid is 1D
     call ESMF_DistGridGet(distgrid, dimCount=dimCount, delayout=delayout, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     if (dimCount /= 1) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
         msg="- this ArrayCreate() interface requires 1D DistGrid", &
@@ -3564,7 +3595,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     if (localDeCount /= 1) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
         msg="- this ArrayCreate() interface only supports 1DE/PETs", &
@@ -3572,9 +3603,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
       return
     endif
 
-    ! Prepare for actual ArrayCreate() call  
+    ! Prepare for actual ArrayCreate() call
     localHaloCount = size(haloSeqIndexList)
-    
+
     ! Call into conventional interface to create the Array object
     ESMF_ArrayCreateAllocateASArb = ESMF_ArrayCreate(distgrid, arrayspec, &
       distgridToArrayMap=distgridToArrayMap, totalUWidth=(/localHaloCount/), &
@@ -3582,16 +3613,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     ! Set the arbitrary sequence indices in the Array halo rim
     call ESMF_ArraySetPLocalDeInternal(ESMF_ArrayCreateAllocateASArb, &
       localDe=0, rimSeqIndex=haloSeqIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
- 
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end function ESMF_ArrayCreateAllocateASArb
 !------------------------------------------------------------------------------
 
@@ -3607,7 +3638,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
   function ESMF_ArrayCreateAllocateASArbI8(distgrid, arrayspec, &
     haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
     undistLBound, undistUBound, name, rc)
-!     
+!
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocateASArbI8
 !
@@ -3628,10 +3659,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Array} object and allocate uninitialized data space 
+! Create an {\tt ESMF\_Array} object and allocate uninitialized data space
 ! according to arrayspec and distgrid. Each PET must issue this call in unison
 ! in order to create a consistent Array object. DE-local allocations are made
-! according to the total region defined by the arguments to this call: 
+! according to the total region defined by the arguments to this call:
 ! {\tt distgrid} and {\tt haloSeqIndexList} arguments.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
@@ -3643,7 +3674,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      distributed over DEs. The dimCount of distgrid must be smaller or equal
 !      to the rank specified in arrayspec, otherwise a runtime ESMF error will be
 !      raised.
-! \item[arrayspec] 
+! \item[arrayspec]
 !      {\tt ESMF\_ArraySpec} object containing the type/kind/rank information.
 ! \item[haloSeqIndexList]
 !      One dimensional array containing sequence indices of local halo region.
@@ -3687,16 +3718,19 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
+    ! invalidate return value
+    ESMF_ArrayCreateAllocateASArbI8%this = ESMF_NULL_POINTER
+
     ! Check init status of arguments used directly
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
-    
+
     ! Ensure incoming DistGrid is 1D
     call ESMF_DistGridGet(distgrid, dimCount=dimCount, delayout=delayout, &
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     if (dimCount /= 1) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
         msg="- this ArrayCreate() interface requires 1D DistGrid", &
@@ -3708,7 +3742,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     call ESMF_DELayoutGet(delayout, localDeCount=localDeCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     if (localDeCount /= 1) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
         msg="- this ArrayCreate() interface only supports 1DE/PETs", &
@@ -3716,9 +3750,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
       return
     endif
 
-    ! Prepare for actual ArrayCreate() call  
+    ! Prepare for actual ArrayCreate() call
     localHaloCount = size(haloSeqIndexList)
-    
+
     ! Call into conventional interface to create the Array object
     ESMF_ArrayCreateAllocateASArbI8 = ESMF_ArrayCreate(distgrid, arrayspec, &
       distgridToArrayMap=distgridToArrayMap, totalUWidth=(/localHaloCount/), &
@@ -3726,16 +3760,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     ! Set the arbitrary sequence indices in the Array halo rim
     call ESMF_ArraySetPLocalDeInternal(ESMF_ArrayCreateAllocateASArbI8, &
       localDe=0, rimSeqIndex=haloSeqIndexList, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
- 
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end function ESMF_ArrayCreateAllocateASArbI8
 !------------------------------------------------------------------------------
 
@@ -3749,7 +3783,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
   function ESMF_ArrayCreateCopy(array, keywordEnforcer, rc)
-!     
+!
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateCopy
 !
@@ -3764,13 +3798,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-! Create an {\tt ESMF\_Array} object as the copy of an existing Array. 
+! Create an {\tt ESMF\_Array} object as the copy of an existing Array.
 !
 ! The return value is the newly created {\tt ESMF\_Array} object.
 !
 ! The arguments are:
 ! \begin{description}
-! \item[array] 
+! \item[array]
 !     {\tt ESMF\_Array} object to be copied.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3784,9 +3818,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Mark this Array object as invalid
     arrayOut%this = ESMF_NULL_POINTER
+    ESMF_ArrayCreateCopy = arrayOut
 
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, array, rc)
 
@@ -3794,16 +3829,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     call c_ESMC_ArrayCreateCopy(array, arrayOut, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-      
+
     ! Set return value
     ESMF_ArrayCreateCopy = arrayOut
- 
+
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_ArrayCreateCopy)
- 
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end function ESMF_ArrayCreateCopy
 !------------------------------------------------------------------------------
 
@@ -3821,7 +3856,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     type(ESMF_Array), intent(inout)          :: array
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,          intent(in),   optional :: noGarbage
-    integer,          intent(out),  optional :: rc  
+    integer,          intent(out),  optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -3838,33 +3873,33 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !   Destroy an {\tt ESMF\_Array}, releasing the resources associated with
 !   the object.
 !
-!   By default a small remnant of the object is kept in memory in order to 
+!   By default a small remnant of the object is kept in memory in order to
 !   prevent problems with dangling aliases. The default garbage collection
 !   mechanism can be overridden with the {\tt noGarbage} argument.
 !
 ! The arguments are:
 ! \begin{description}
-! \item[array] 
+! \item[array]
 !      {\tt ESMF\_Array} object to be destroyed.
 ! \item[{[noGarbage]}]
 !      If set to {\tt .TRUE.} the object will be fully destroyed and removed
-!      from the ESMF garbage collection system. Note however that under this 
-!      condition ESMF cannot protect against accessing the destroyed object 
-!      through dangling aliases -- a situation which may lead to hard to debug 
+!      from the ESMF garbage collection system. Note however that under this
+!      condition ESMF cannot protect against accessing the destroyed object
+!      through dangling aliases -- a situation which may lead to hard to debug
 !      application crashes.
-! 
+!
 !      It is generally recommended to leave the {\tt noGarbage} argument
-!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF
 !      garbage collection system which will prevent problems with dangling
 !      aliases or incorrect sequences of destroy calls. However this level of
 !      support requires that a small remnant of the object is kept in memory
 !      past the destroy call. This can lead to an unexpected increase in memory
-!      consumption over the course of execution in applications that use 
-!      temporary ESMF objects. For situations where the repeated creation and 
-!      destruction of temporary objects leads to memory issues, it is 
-!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!      consumption over the course of execution in applications that use
+!      temporary ESMF objects. For situations where the repeated creation and
+!      destruction of temporary objects leads to memory issues, it is
+!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully
 !      removing the entire temporary object from memory.
-! \item[{[rc]}] 
+! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
@@ -3879,7 +3914,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_ArrayGetInit, array, rc)
-    
+
     ! Set default flags
     opt_noGarbage = ESMF_FALSE
     if (present(noGarbage)) opt_noGarbage = noGarbage
@@ -3888,16 +3923,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     call c_ESMC_ArrayDestroy(array, opt_noGarbage, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
- 
+
     ! Mark this Array object as invalid
     array%this = ESMF_NULL_POINTER
 
     ! Set init code
     ESMF_INIT_SET_DELETED(array)
- 
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end subroutine ESMF_ArrayDestroy
 !------------------------------------------------------------------------------
 
@@ -3909,10 +3944,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !IROUTINE: ESMF_ArrayGetInit - Internal access routine for init code
 !
 ! !INTERFACE:
-      function ESMF_ArrayGetInit(array) 
+      function ESMF_ArrayGetInit(array)
 !
 ! !RETURN VALUE:
-      ESMF_INIT_TYPE :: ESMF_ArrayGetInit   
+      ESMF_INIT_TYPE :: ESMF_ArrayGetInit
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in), optional :: array
@@ -3949,17 +3984,17 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(inout)           :: array
-    integer,          intent(out),  optional  :: rc  
-!         
+    integer,          intent(out),  optional  :: rc
+!
 !
 ! !DESCRIPTION:
 !      Set init code in Array object to "CREATED".
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[array] 
+!     \item[array]
 !          Specified {\tt ESMF\_Array} object.
-!     \item[{[rc]}] 
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -3970,13 +4005,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
-    
+
     ! Set init code
     ESMF_INIT_SET_CREATED(array)
 
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_ArraySetInitCreated
 !------------------------------------------------------------------------------
 
@@ -3993,19 +4028,19 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !ARGUMENTS:
     type(ESMF_Array),   intent(in)              :: array
     type(ESMF_Pointer), intent(out)             :: this
-    integer,            intent(out),  optional  :: rc  
-!         
+    integer,            intent(out),  optional  :: rc
+!
 !
 ! !DESCRIPTION:
 !     Internal access routine for C++ pointer.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[array] 
+!     \item[array]
 !          Specified {\tt ESMF\_Array} object.
-!     \item[this] 
+!     \item[this]
 !          C++ pointer.
-!     \item[{[rc]}] 
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -4014,13 +4049,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Copy C++ pointer
     this = array%this
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_ArrayGetThis
 !------------------------------------------------------------------------------
 
@@ -4037,19 +4072,19 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !ARGUMENTS:
     type(ESMF_Array),   intent(inout)           :: array
     type(ESMF_Pointer), intent(in)              :: this
-    integer,            intent(out),  optional  :: rc  
-!         
+    integer,            intent(out),  optional  :: rc
+!
 !
 ! !DESCRIPTION:
 !     Set C++ pointer in Array.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[array] 
+!     \item[array]
 !          Specified {\tt ESMF\_Array} object.
-!     \item[this] 
+!     \item[this]
 !          C++ pointer.
-!     \item[{[rc]}] 
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -4058,13 +4093,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
     ! initialize return code; assume routine not implemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Copy C++ pointer
     array%this = this
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_ArraySetThis
 !------------------------------------------------------------------------------
 
@@ -4080,17 +4115,17 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !
 ! !ARGUMENTS:
     type(ESMF_Array), intent(inout)           :: array
-    integer,          intent(out),  optional  :: rc  
-!         
+    integer,          intent(out),  optional  :: rc
+!
 !
 ! !DESCRIPTION:
 !      Set Array this member to ESMF_NULL_POINTER.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[array] 
+!     \item[array]
 !          Specified {\tt ESMF\_Array} object.
-!     \item[{[rc]}] 
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -4101,13 +4136,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
-    
+
     ! Set this member to NULL
     array%this = ESMF_NULL_POINTER
 
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_ArraySetThisNull
 !------------------------------------------------------------------------------
 
@@ -4139,7 +4174,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !       {\tt ESMF\_Array} object for which to set properties.
 !     \item [localDe]
 !       Local DE for which to set values.
-!     \item[{[rimSeqIndex]}] 
+!     \item[{[rimSeqIndex]}]
 !       Sequence indices in the halo rim of localDe.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4153,10 +4188,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
-    
+
     ! Deal with (optional) array arguments
     rimSeqIndexArg = ESMF_InterArrayCreate(farray1D=rimSeqIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4166,7 +4201,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     call c_esmc_arraysetplocalde(array, localDe, rimSeqIndexArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! Garbage collection
     call ESMF_InterArrayDestroy(rimSeqIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4206,7 +4241,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !       {\tt ESMF\_Array} object for which to set properties.
 !     \item [localDe]
 !       Local DE for which to set values.
-!     \item[rimSeqIndex] 
+!     \item[rimSeqIndex]
 !       Sequence indices in the halo rim of localDe.
 !     \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4220,10 +4255,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
-    
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, array, rc)
-    
+
     ! Deal with (optional) array arguments
     rimSeqIndexArg = ESMF_InterArrayCreate(farray1DI8=rimSeqIndex, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4233,7 +4268,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     call c_esmc_arraysetplocaldei8(array, localDe, rimSeqIndexArg, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! Garbage collection
     call ESMF_InterArrayDestroy(rimSeqIndexArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -4258,19 +4293,19 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !ARGUMENTS:
     type(ESMF_Array), intent(in)              :: arrayIn
     type(ESMF_Array), intent(inout)           :: arrayOut
-    integer,          intent(out),  optional  :: rc  
-!         
+    integer,          intent(out),  optional  :: rc
+!
 !
 ! !DESCRIPTION:
 !     Copy Array this member. Do not set init code.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[arrayIn] 
+!     \item[arrayIn]
 !          Input {\tt ESMF\_Array} object.
-!     \item[arrayOut] 
+!     \item[arrayOut]
 !          Output {\tt ESMF\_Array} object.
-!     \item[{[rc]}] 
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -4281,14 +4316,73 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
-    
+
     ! Copy this member
     arrayOut%this = arrayIn%this
 
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
   end subroutine ESMF_ArrayCopyThis
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+^undef  ESMF_METHOD
+^define ESMF_METHOD "ESMF_ArrayIsProxy()"
+!BOPI
+! !IROUTINE: ESMF_ArrayIsProxy - Determine whether this Array object is a proxy
+
+! !INTERFACE:
+  function ESMF_ArrayIsProxy(array, rc)
+!
+! !RETURN VALUE:
+    logical :: ESMF_ArrayIsProxy
+!
+! !ARGUMENTS:
+    type(ESMF_Array), intent(in),  optional :: array
+    integer,          intent(out), optional :: rc
+!
+!
+! !DESCRIPTION:
+!     Determine whether this Array object is a proxy object or not. Returns
+!     .true. or .false. accordingly.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[array]}]
+!          Input {\tt ESMF\_Array} object.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer             :: localrc      ! local return code
+    type(ESMF_Logical)  :: isProxy
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    localrc = ESMF_RC_NOT_IMPL
+
+    ESMF_ArrayIsProxy = .false. ! initialize
+
+    if (.not.present(array)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
+        msg="Array object must be present.", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    else
+      call c_ESMC_IsProxy(array, isProxy, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_ArrayIsProxy = isProxy
+    endif
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_ArrayIsProxy
 !------------------------------------------------------------------------------
 
 
@@ -4313,7 +4407,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
   function ESMF_ArrayCreateFromLA(localarray, haloWidth, deCount, rootPET, rc)
-!         
+!
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateFromLA
 !
@@ -4325,16 +4419,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     integer,                intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
-!     Create a new {\tt ESMF\_Array} from an {\tt ESMF\_LocalArray} on 
+!     Create a new {\tt ESMF\_Array} from an {\tt ESMF\_LocalArray} on
 !     {\tt rootPET}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[localarray]}] 
+!     \item[{[localarray]}]
 !          The {\tt ESMF\_LocalArray} object that will be used to determine
-!          the index space of the {\tt ESMF\_Array}. The data in 
+!          the index space of the {\tt ESMF\_Array}. The data in
 !          {\tt rootPET}|s {\tt localarray} will be scattered across the newly
-!          created {\tt ESMF\_Array} object before returning. Only 
+!          created {\tt ESMF\_Array} object before returning. Only
 !         {\tt rootPET} must provide a (valid) {\tt localarray} argument.
 !     \item[{[haloWidth]}]
 !          Array holding the halo width for each array dimension. Default is
@@ -4343,9 +4437,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !          {\tt rootPET} must provide a (valid) {\tt haloWidth} argument.
 !     \item[{[deCount]}]
 !          Number of DEs into which this Array is to be decomposed. By default
-!          deCount will equal petCount of the current VM context. Only 
+!          deCount will equal petCount of the current VM context. Only
 !          {\tt rootPET} must provide a (valid) {\tt deCount} argument.
-!     \item[rootPET] 
+!     \item[rootPET]
 !          PET that holds the valid data in {\tt localarray}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4367,12 +4461,13 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
+    ! invalidate return value
+    array%this = ESMF_NULL_POINTER
+    ESMF_ArrayCreateFromLA = array
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_LocalArrayGetInit, localarray, rc)
-    
-    ! Initialize the pointer to NULL
-    array%this = ESMF_NULL_POINTER
-    
+
     if (present(haloWidth)) then
       opt_haloWidth => haloWidth
       len_haloWidth = size(haloWidth)
@@ -4391,12 +4486,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
       opt_haloWidth => dummy
       len_haloWidth = 0
     endif
-    
+
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
     if (size(opt_haloWidth) == size(opt_haloWidth)) continue
-
-
 
     ! Call into the C++ interface, which will sort out optional arguments.
 !    call c_ESMC_ArrayCreate(array, localarray, opt_haloWidth, len_haloWidth, &
@@ -4405,16 +4498,16 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Use LogErr to handle return code
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
     ! Set return value
     ESMF_ArrayCreateFromLA = array
- 
+
     ! Set init code
     ESMF_INIT_SET_CREATED(ESMF_ArrayCreateFromLA)
- 
+
     ! Return successfully
     if (present(rc)) rc = ESMF_SUCCESS
- 
+
   end function ESMF_ArrayCreateFromLA
 !------------------------------------------------------------------------------
 

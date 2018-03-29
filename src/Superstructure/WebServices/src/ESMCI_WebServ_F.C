@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -62,8 +62,8 @@ static const char *const version = "$Id$";
 #define VERBOSITY             (1)       // 0: off, 10: max
 //-----------------------------------------------------------------------------
 
-ESMCI::ESMCI_WebServComponentSvr*	theComponentServer = NULL;
-string		theClientId = "";
+ESMCI::ESMCI_WebServComponentSvr*       theComponentServer = NULL;
+string          theClientId = "";
 
 
 //-----------------------------------------------------------------------------
@@ -79,17 +79,17 @@ void FTN_X(c_esmc_componentsvcloop)(
 //
 // !ARGUMENTS:
 //
-  char*                   clientId, 		// (in) the client identifier
+  char*                   clientId,             // (in) the client identifier
   char*                   registrarHost,
-  ESMCI::GridComp*        comp,				// (in) the grid component
-  ESMCI::State*           importState,		// (in) the component import state
-  ESMCI::State*           exportState,		// (in) the component export state
-  ESMCI::Clock*           clock,				// (in) the component clock
-  ESMC_BlockingFlag*      blockingFlag,  	// (in) the blocking flag
-  int*                    phase,         	// (in) the phase
-  int*                    portNum,			// (in) the service port number
-  int*                    rc,			      // (in) the return code
-  ESMCI_FortranStrLenArg  clientIdLen,		// (in) the length of the client id
+  ESMCI::GridComp*        comp,                                 // (in) the grid component
+  ESMCI::State*           importState,          // (in) the component import state
+  ESMCI::State*           exportState,          // (in) the component export state
+  ESMCI::Clock*           clock,                                // (in) the component clock
+  ESMC_BlockingFlag*      blockingFlag,         // (in) the blocking flag
+  int*                    phase,                // (in) the phase
+  int*                    portNum,                      // (in) the service port number
+  int*                    rc,                         // (in) the return code
+  ESMCI_FortranStrLenArg  clientIdLen,          // (in) the length of the client id
   ESMCI_FortranStrLenArg  registrarHostLen
   )
 //
@@ -114,26 +114,26 @@ void FTN_X(c_esmc_componentsvcloop)(
    // This loop should not return until either an "exit" message has been
    // received or an error has occurred.
    //***
-	theComponentServer = 
+        theComponentServer =
       new ESMCI::ESMCI_WebServComponentSvr(*portNum,
                                            atoi(clientIdStr.c_str()),
                                            registrarHostStr);
 
-	if (theComponentServer->requestLoop(comp, 
-                                       importState, 
-                                       exportState, 
-                                       clock, 
-                                       *phase, 
+        if (theComponentServer->requestLoop(comp,
+                                       importState,
+                                       exportState,
+                                       clock,
+                                       *phase,
                                        *blockingFlag) != ESMF_SUCCESS)
-	{
+        {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Error during request loop setup.",
          ESMC_CONTEXT, &localrc);
 
-		*rc = localrc;
-		return;
-	}
+                *rc = localrc;
+                return;
+        }
 
    *rc = ESMF_SUCCESS;
 }
@@ -152,17 +152,17 @@ void FTN_X(c_esmc_cplcomponentsvcloop)(
 //
 // !ARGUMENTS:
 //
-  char*                   clientId, 		// (in) the client identifier
+  char*                   clientId,             // (in) the client identifier
   char*                   registrarHost,
-  ESMCI::CplComp*         comp,				// (in) the grid component
-  ESMCI::State*           importState,		// (in) the component import state
-  ESMCI::State*           exportState,		// (in) the component export state
-  ESMCI::Clock*           clock,				// (in) the component clock
-  ESMC_BlockingFlag*      blockingFlag,  	// (in) the blocking flag
-  int*                    phase,         	// (in) the phase
-  int*                    portNum,			// (in) the service port number
-  int*                    rc,			      // (in) the return code
-  ESMCI_FortranStrLenArg  clientIdLen,		// (in) the length of the client id
+  ESMCI::CplComp*         comp,                                 // (in) the grid component
+  ESMCI::State*           importState,          // (in) the component import state
+  ESMCI::State*           exportState,          // (in) the component export state
+  ESMCI::Clock*           clock,                                // (in) the component clock
+  ESMC_BlockingFlag*      blockingFlag,         // (in) the blocking flag
+  int*                    phase,                // (in) the phase
+  int*                    portNum,                      // (in) the service port number
+  int*                    rc,                         // (in) the return code
+  ESMCI_FortranStrLenArg  clientIdLen,          // (in) the length of the client id
   ESMCI_FortranStrLenArg  registrarHostLen
   )
 //
@@ -186,28 +186,28 @@ void FTN_X(c_esmc_cplcomponentsvcloop)(
    // This loop should not return until either an "exit" message has been
    // received or an error has occurred.
    //***
-//	ESMCI::ESMCI_WebServComponentSvr	server(*portNum);
-	theComponentServer = 
+//      ESMCI::ESMCI_WebServComponentSvr        server(*portNum);
+        theComponentServer =
       new ESMCI::ESMCI_WebServComponentSvr(*portNum,
                                            atoi(clientIdStr.c_str()),
                                            registrarHostStr);
 
 printf("Component Server Request Loop\n");
-	if (theComponentServer->cplCompRequestLoop(comp, 
-                                              importState, 
-                                              exportState, 
-                                              clock, 
-                                              *phase, 
+        if (theComponentServer->cplCompRequestLoop(comp,
+                                              importState,
+                                              exportState,
+                                              clock,
+                                              *phase,
                                               *blockingFlag) != ESMF_SUCCESS)
-	{
+        {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_OPEN,
          "Error during request loop setup.",
          ESMC_CONTEXT, &localrc);
 
-		*rc = localrc;
-		return;
-	}
+                *rc = localrc;
+                return;
+        }
 
    *rc = ESMF_SUCCESS;
 }
@@ -226,15 +226,15 @@ void FTN_X(c_esmc_registercomponent)(
 //
 // !ARGUMENTS:
 //
-  char*                   compName,		// (in) the grid component name
-  char*                   compDesc,		// (in) the grid component description
-  char*                   clientId, 	// (in) the client identifier
+  char*                   compName,             // (in) the grid component name
+  char*                   compDesc,             // (in) the grid component description
+  char*                   clientId,     // (in) the client identifier
   char*                   registrarHost,
   int*                    portNum,     // (in) the service port number
   int*                    rc,          // (in) the return code
-  ESMCI_FortranStrLenArg  compNameLen,	// (in) the length of the component name
-  ESMCI_FortranStrLenArg  compDescLen,	// (in) the length of the comp desc
-  ESMCI_FortranStrLenArg  clientIdLen,	// (in) the length of the client id
+  ESMCI_FortranStrLenArg  compNameLen,  // (in) the length of the component name
+  ESMCI_FortranStrLenArg  compDescLen,  // (in) the length of the comp desc
+  ESMCI_FortranStrLenArg  clientIdLen,  // (in) the length of the client id
   ESMCI_FortranStrLenArg  registrarHostLen
   )
 //
@@ -245,48 +245,48 @@ void FTN_X(c_esmc_registercomponent)(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int	localrc = 0;
+        int     localrc = 0;
 
-	string nameStr = string (compName, ESMC_F90lentrim (compName, compNameLen));
-	string descStr = string (compDesc, ESMC_F90lentrim (compDesc, compDescLen));
-	string clientIdStr = string (clientId, ESMC_F90lentrim (clientId, clientIdLen));
+        string nameStr = string (compName, ESMC_F90lentrim (compName, compNameLen));
+        string descStr = string (compDesc, ESMC_F90lentrim (compDesc, compDescLen));
+        string clientIdStr = string (clientId, ESMC_F90lentrim (clientId, clientIdLen));
         string registrarHostStr = string (registrarHost, ESMC_F90lentrim (registrarHost, registrarHostLen));
-	stringstream portStr;
-	char	hostStr[HOST_NAME_MAX];
+        stringstream portStr;
+        char    hostStr[HOST_NAME_MAX];
 
-	theClientId = clientIdStr;
+        theClientId = clientIdStr;
 
-	portStr << *portNum;
-	gethostname(hostStr, HOST_NAME_MAX);
+        portStr << *portNum;
+        gethostname(hostStr, HOST_NAME_MAX);
 
-	cout << "Name: " << nameStr << endl;
-	cout << "Desc: " << descStr << endl;
-	cout << "Port: " << portStr.str() << " (currently unused)" << endl;
-	cout << "Client ID: " << clientIdStr << endl;
+        cout << "Name: " << nameStr << endl;
+        cout << "Desc: " << descStr << endl;
+        cout << "Port: " << portStr.str() << " (currently unused)" << endl;
+        cout << "Client ID: " << clientIdStr << endl;
         cout << "RegistrarHost: " << registrarHostStr << endl;
-	cout << "Host: " << hostStr << endl;
+        cout << "Host: " << hostStr << endl;
 
-//	ESMCI::ESMCI_WebServRegistrarClient	client("localhost", REGISTRAR_PORT);
+//      ESMCI::ESMCI_WebServRegistrarClient     client("localhost", REGISTRAR_PORT);
    ESMCI::ESMCI_WebServRegistrarClient client(registrarHostStr.c_str(),
                                               REGISTRAR_PORT);
 
-	if (client.compStarted(clientIdStr.c_str(), 
-                          nameStr.c_str(), 
-                          descStr.c_str(), 
+        if (client.compStarted(clientIdStr.c_str(),
+                          nameStr.c_str(),
+                          descStr.c_str(),
                           hostStr) == ESMF_FAILURE)
-	{
+        {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_UNEXPECTED,
          "Error registering component service.",
          ESMC_CONTEXT, &localrc);
 
-		*rc = localrc;
-	}
+                *rc = localrc;
+        }
    cout << "Successfully notified Registrar of component ready." << endl;
 
    *rc = ESMF_SUCCESS;
 
-	return;
+        return;
 }
 
 
@@ -303,10 +303,10 @@ void FTN_X(c_esmc_unregistercomponent)(
 //
 // !ARGUMENTS:
 //
-  char*                   clientId,		// (in) the client identifier
+  char*                   clientId,             // (in) the client identifier
   char*                   registrarHost,
   int*                    rc,          // (in) the return code
-  ESMCI_FortranStrLenArg  clientIdLen,	// (in) the length of the clientId
+  ESMCI_FortranStrLenArg  clientIdLen,  // (in) the length of the clientId
   ESMCI_FortranStrLenArg  registrarHostLen
   )
 //
@@ -317,9 +317,9 @@ void FTN_X(c_esmc_unregistercomponent)(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("unregisterComponent()\n");
+        //printf("unregisterComponent()\n");
 
-	int	localrc = 0;
+        int     localrc = 0;
 
 
    string clientIdStr = string (clientId, ESMC_F90lentrim (clientId, clientIdLen));
@@ -328,21 +328,21 @@ void FTN_X(c_esmc_unregistercomponent)(
    cout << "Client ID     : " << atoi (clientIdStr.c_str()) << endl;
    cout << "Registrar Host: " << registrarHostStr << endl;
 
-//	ESMCI::ESMCI_WebServRegistrarClient	client("localhost", REGISTRAR_PORT);
+//      ESMCI::ESMCI_WebServRegistrarClient     client("localhost", REGISTRAR_PORT);
    ESMCI::ESMCI_WebServRegistrarClient client(registrarHostStr.c_str(),
                                               REGISTRAR_PORT);
 
-	char	response[1024];
-	if (client.setStatus(clientIdStr.c_str(), 
+        char    response[1024];
+        if (client.setStatus(clientIdStr.c_str(),
                         client.getStateStr(NET_ESMF_STAT_DONE)) == ESMF_FAILURE)
-	{
+        {
       ESMC_LogDefault.MsgFoundError(
          ESMC_RC_FILE_UNEXPECTED,
          "Error unregistering component service.",
          ESMC_CONTEXT, &localrc);
 
-		*rc = localrc;
-	}
+                *rc = localrc;
+        }
 
    *rc = ESMF_SUCCESS;
 }
@@ -361,8 +361,8 @@ void FTN_X(c_esmc_getportnum)(
 //
 // !ARGUMENTS:
 //
-  int*               portNum,			// (out) the service port number
-  int*               rc			      // (out) the return code
+  int*               portNum,                   // (out) the service port number
+  int*               rc                               // (out) the return code
   )
 //
 // !DESCRIPTION:
@@ -371,7 +371,7 @@ void FTN_X(c_esmc_getportnum)(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int	localrc = 0;
+        int     localrc = 0;
 
    *portNum = 27061;
 
@@ -392,9 +392,9 @@ void FTN_X(c_esmc_addoutputfilename)(
 //
 // !ARGUMENTS:
 //
-  char*                   filename,		// (in) the output filename
-  int*                    rc,			   // (out) the return code
-  ESMCI_FortranStrLenArg  filenameLen	// (in) the length of the filename
+  char*                   filename,             // (in) the output filename
+  int*                    rc,                      // (out) the return code
+  ESMCI_FortranStrLenArg  filenameLen   // (in) the length of the filename
   )
 //
 // !DESCRIPTION:
@@ -403,7 +403,7 @@ void FTN_X(c_esmc_addoutputfilename)(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-   int	localrc = 0;
+   int  localrc = 0;
    string filenameStr = string (filename, ESMC_F90lentrim (filename, filenameLen));
 
    // TODO: everything
@@ -428,11 +428,11 @@ void FTN_X(c_esmc_addoutputdata)(
 //
 // !ARGUMENTS:
 //
-  double*                 timestamp,	// (in) 
-  char*                   varName,		// (in) 
-  double**                dataValues,	// (in) 
-  int*                    rc,			   // (out) the return code
-  ESMCI_FortranStrLenArg  varNameLen	// (in) the length of the var name
+  double*                 timestamp,    // (in)
+  char*                   varName,              // (in)
+  double**                dataValues,   // (in)
+  int*                    rc,                      // (out) the return code
+  ESMCI_FortranStrLenArg  varNameLen    // (in) the length of the var name
   )
 //
 // !DESCRIPTION:
@@ -441,22 +441,22 @@ void FTN_X(c_esmc_addoutputdata)(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int	localrc = 0;
-	char	varNameStr[ESMF_MAXSTR];
+        int     localrc = 0;
+        char    varNameStr[ESMF_MAXSTR];
 
-	strncpy(varNameStr, varName, varNameLen);
-	printf("Var Name: %s\n", varName);
-	for (int i = 0; i < 5; ++i)
-	{
-		printf("Values[%d]: %g\n", i, dataValues[i]);
-	}
+        strncpy(varNameStr, varName, varNameLen);
+        printf("Var Name: %s\n", varName);
+        for (int i = 0; i < 5; ++i)
+        {
+                printf("Values[%d]: %g\n", i, dataValues[i]);
+        }
 
    // TODO: everything
    if (theComponentServer != NULL)
-	{
-		//strncpy(filenameStr, filename, filenameLen);
-		//theComponentServer->addOutputFilename(filenameStr);
-	}
+        {
+                //strncpy(filenameStr, filename, filenameLen);
+                //theComponentServer->addOutputFilename(filenameStr);
+        }
 
    *rc = ESMF_SUCCESS;
 }

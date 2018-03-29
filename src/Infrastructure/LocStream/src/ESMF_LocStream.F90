@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1157,11 +1157,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
      if (ESMF_LogFoundError(localrc, &
          ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
-      
 
-      if (present(rc)) rc = ESMF_SUCCESS
+     ! Get rid of mesh created above
+     call ESMF_MeshDestroy(mesh, rc=localrc)
+     if (ESMF_LogFoundError(localrc, &
+         ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return      
 
-       end function ESMF_LocStreamCreateByBkgGrid
+     ! return success
+     if (present(rc)) rc = ESMF_SUCCESS
+
+   end function ESMF_LocStreamCreateByBkgGrid
 
 
 !------------------------------------------------------------------------------
@@ -2194,10 +2200,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[filename]
 !          Name of grid file to be used to create the location stream.  
 !     \item[{[fileformat]}]
-!          Flag that indicates the file format of the grid file.  Please see
-!          Section~\ref{const:grid:fileformat} and Section~\ref{const:mesh:fileformat} for a 
-!          list of valid options (note that the {\tt ESMF\_FILEFORMAT\_GRIDSPEC} format is not
-!          supported).  If not specified, the default is {\tt ESMF\_FILEFORMAT\_SCRIP}.
+!     The file format.  The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP},
+!     {\tt ESMF\_FILEFORMAT\_ESMFMESH}, and {\tt ESMF\_FILEFORMAT\_UGRID}.
+!      Please see section~\ref{const:fileformatflag} for a detailed description of the options.
+!     If not specified, the default is {\tt ESMF\_FILEFORMAT\_SCRIP}.
 !     \item[{[varname]}]
 !         An optional variable name stored in the UGRID file to be used to
 !         generate the mask using the missing value of the data value of
@@ -2384,59 +2390,61 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     allocate(coordX(localcount), coordY(localcount),imask(localcount))
-    if (localfileformat == ESMF_FILEFORMAT_SCRIP) then 
-       call ESMF_ScripGetVar(filename, grid_center_lon=coordX, grid_center_lat=coordY, &
+    if (localcount > 0) then 
+       if (localfileformat == ESMF_FILEFORMAT_SCRIP) then 
+          call ESMF_ScripGetVar(filename, grid_center_lon=coordX, grid_center_lat=coordY, &
                           grid_imask=imask, start=starti, count=localcount, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
 #if 0
-    elseif (localfileformat == ESMF_FILEFORMAT_GRIDSPEC) then 
-       if (totaldims == 1) then
-          call ESMF_GridspecGetVar1D(filename, varids, coordX, coordY, rc=localrc)
-          !construct 2D arrays and do the distribution
-          xdim=size(coordX)
-          ydim=size(coordY)
+       elseif (localfileformat == ESMF_FILEFORMAT_GRIDSPEC) then 
+          if (totaldims == 1) then
+             call ESMF_GridspecGetVar1D(filename, varids, coordX, coordY, rc=localrc)
+             !construct 2D arrays and do the distribution
+             xdim=size(coordX)
+             ydim=size(coordY)
 #endif
-    elseif (localfileformat == ESMF_FILEFORMAT_ESMFMESH) then
-       allocate(coord2D(totaldims,localcount))
-       call ESMF_EsmfGetCoords(filename, coord2D, imask, &
+       elseif (localfileformat == ESMF_FILEFORMAT_ESMFMESH) then
+          allocate(coord2D(totaldims,localcount))
+          call ESMF_EsmfGetCoords(filename, coord2D, imask, &
                                starti, localcount, localcenterflag, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-       coordX(:) = coord2D(1,:)
-       coordY(:) = coord2D(2,:)
-       if (totaldims == 3) then
-         allocate(coordZ(localcount))
-         coordZ(:) = coord2D(3,:)
-       endif
-       deallocate(coord2D)
-    elseif (localfileformat == ESMF_FILEFORMAT_UGRID) then
-       allocate(coord2D(localcount, totaldims))
-       call ESMF_UGridGetCoords(filename, meshid, coord2D, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+          coordX(:) = coord2D(1,:)
+          coordY(:) = coord2D(2,:)
+          if (totaldims == 3) then
+            allocate(coordZ(localcount))
+            coordZ(:) = coord2D(3,:)
+          endif
+          deallocate(coord2D)
+       elseif (localfileformat == ESMF_FILEFORMAT_UGRID) then
+          allocate(coord2D(localcount, totaldims))
+          call ESMF_UGridGetCoords(filename, meshid, coord2D, &
                                 starti, localcount, localcenterflag, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-       coordX(:) = coord2D(:,1)
-       coordY(:) = coord2D(:,2)
-       if (totaldims == 3) then
-          allocate(coordZ(localcount))
-          coordZ(:) = coord2D(:,3)
-       endif
-       deallocate(coord2D)
-       ! Get mask from varname
-       imask(:)=1
-       if (present(varname)) then
-          allocate(varbuffer(localcount))
-          call ESMF_UGridGetVarByName(filename, varname, varbuffer, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+          coordX(:) = coord2D(:,1)
+          coordY(:) = coord2D(:,2)
+          if (totaldims == 3) then
+             allocate(coordZ(localcount))
+             coordZ(:) = coord2D(:,3)
+          endif
+          deallocate(coord2D)
+          ! Get mask from varname
+          imask(:)=1
+          if (present(varname)) then
+             allocate(varbuffer(localcount))
+             call ESMF_UGridGetVarByName(filename, varname, varbuffer, &
                                       startind=starti, count=localcount, &
                                       location=location, &
                                       missingvalue=missingvalue, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-          do i=1,localcount
-            if (varbuffer(i)==missingvalue) imask(i)=0
-          enddo
-          deallocate(varbuffer)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+             do i=1,localcount
+                if (varbuffer(i)==missingvalue) imask(i)=0
+             enddo
+             deallocate(varbuffer)
+          endif
        endif
     endif
     ! create Location Stream
@@ -2448,29 +2456,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !print *, PetNo, starti, localcount, coordX(1), coordY(1)
     ! Add coordinate keys
     call ESMF_LocStreamAddKey(locStream, 'ESMF:Lon',coordX, keyUnits=units, &
-                              keyLongName='Longitude', rc=localrc)
+                              keyLongName='Longitude', &
+                              datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_LocStreamAddKey(locStream, 'ESMF:Lat',coordY, keyUnits=units, &
-                              keyLongName='Latitude', rc=localrc)
+                              keyLongName='Latitude', &
+                              datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
     !If 3D grid, add the height coordinates
     if (totaldims == 3) then
-       call ESMF_LocStreamAddKey(locStream, 'ESMF:Radius',coordZ, keyUnits='radius', &
-                                 keyLongName='Height', rc=localrc)
+       if (localcount == 0) allocate(coordZ(localcount))
+       call ESMF_LocStreamAddKey(locStream, 'ESMF:Radius',coordZ, &
+                                 keyUnits='radius', &
+                                 keyLongName='Height', &
+                                 datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+        deallocate(coordZ)
     endif
     !Add mask key
     call ESMF_LocStreamAddKey(locStream, 'ESMF:Mask',imask,  &
-                              keyLongName='Mask', rc=localrc)
+                              keyLongName='Mask', &
+                              datacopyflag=ESMF_DATACOPY_VALUE, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
    
+    ! local garbage collection
+    deallocate(coordX, coordY, imask)
+    
     ESMF_LocStreamCreateFromFile = locStream
+    
     if (present(rc)) rc=ESMF_SUCCESS
     return
 
@@ -2487,7 +2506,7 @@ end function ESMF_LocStreamCreateFromFile
 ! !IROUTINE: ESMF_LocStreamDestroy - Release resources associated with a LocStream 
 
 ! !INTERFACE:
-      subroutine ESMF_LocStreamDestroy(locstream, keywordenforcer, rc)
+      subroutine ESMF_LocStreamDestroy(locstream, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_LocStream), intent(inout)          :: locstream 
@@ -2982,7 +3001,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-  subroutine ESMF_LocStreamGetKeyInfo(locstream, keyName, keywordEnforcer,&
+  subroutine ESMF_LocStreamGetKeyInfo(locstream, keyName, keywordEnforcer, &
        keyUnits, keyLongName, typekind, isPresent, rc)
 !
 ! !ARGUMENTS:
@@ -3447,7 +3466,7 @@ end subroutine ESMF_LocStreamGetKeyR4
 
 ! !INTERFACE:
   ! Private name; call using ESMF_LocStreamGetKey()
-      subroutine ESMF_LocStreamGetKeyR8(locstream, keyName, keywordEnforcer,&
+      subroutine ESMF_LocStreamGetKeyR8(locstream, keyName, keywordEnforcer, &
           localDE, exclusiveLBound, exclusiveUBound, exclusiveCount,     &
           computationalLBound, computationalUBound, computationalCount,     &
           totalLBound, totalUBound, totalCount,     &
@@ -4000,23 +4019,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
 
-      ! Allocate arrays for names, etc.
-      allocate (lstypep%keyNames(lstypep%keyCount), stat=localrc )
-      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating KeyNames", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-      allocate (lstypep%keyUnits(lstypep%keyCount), stat=localrc )
-      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating units", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-      allocate (lstypep%keyLongNames(lstypep%keyCount), stat=localrc )
-      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating longNames", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-      allocate( lstypep%keys(lstypep%keyCount), stat=localrc )  ! Array of keys
-      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating keys", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
-      allocate( lstypep%destroyKeys(lstypep%keyCount), stat=localrc )  ! Array of keys
-      if (ESMF_LogFoundAllocError(localrc, msg=" Allocating keys", &
-                                     ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Initialize key member variables
+      nullify(lstypep%keyNames)
+      nullify(lstypep%keyUnits)
+      nullify(lstypep%keyLongNames)
+      nullify(lstypep%keys)
+      nullify(lstypep%destroyKeys)
 
+      ! Allocate arrays for names, etc.
+      if (lstypep%keyCount .gt. 0) then
+         allocate (lstypep%keyNames(lstypep%keyCount), stat=localrc )
+         if (ESMF_LogFoundAllocError(localrc, msg=" Allocating KeyNames", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+         allocate (lstypep%keyUnits(lstypep%keyCount), stat=localrc )
+         if (ESMF_LogFoundAllocError(localrc, msg=" Allocating units", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+         allocate (lstypep%keyLongNames(lstypep%keyCount), stat=localrc )
+         if (ESMF_LogFoundAllocError(localrc, msg=" Allocating longNames", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+         allocate( lstypep%keys(lstypep%keyCount), stat=localrc )  ! Array of keys
+         if (ESMF_LogFoundAllocError(localrc, msg=" Allocating keys", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+         allocate( lstypep%destroyKeys(lstypep%keyCount), stat=localrc )  ! Array of keys
+         if (ESMF_LogFoundAllocError(localrc, msg=" Allocating keys", &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      
       ! Serialize locstream key info
       do i=1,lstypep%keyCount
          ! Deserialize key info
@@ -4041,12 +4069,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
+        ! Set to destroy proxy objects
+        lstypep%destroyKeys(i)=.true.
       enddo
 
 
      ! Set to destroy proxy objects
      lstypep%destroyDistgrid=.true.
-     lstypep%destroyKeys=.true.
 
      ! Set pointer to locstream
      ESMF_LocStreamDeserialize%lstypep=>lstypep

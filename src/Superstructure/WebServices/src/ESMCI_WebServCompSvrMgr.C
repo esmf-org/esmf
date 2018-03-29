@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -60,9 +60,9 @@ ESMCI_WebServCompSvrMgr::ESMCI_WebServCompSvrMgr(
 //
 // !ARGUMENTS:
 //
-  string		hostName,
-  string		scriptDir,
-  string		scriptName
+  string                hostName,
+  string                scriptDir,
+  string                scriptName
   )
 //
 // !DESCRIPTION:
@@ -71,9 +71,9 @@ ESMCI_WebServCompSvrMgr::ESMCI_WebServCompSvrMgr(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theHostName = hostName;
-	theScriptDir = scriptDir;
-	theScriptName = scriptName;
+        theHostName = hostName;
+        theScriptDir = scriptDir;
+        theScriptName = scriptName;
 }
 
 
@@ -97,7 +97,7 @@ ESMCI_WebServCompSvrMgr::~ESMCI_WebServCompSvrMgr(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	// need to free up memory here
+        // need to free up memory here
 }
 
 

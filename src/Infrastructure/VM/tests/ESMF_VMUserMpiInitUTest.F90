@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -307,7 +307,7 @@
         farray3_soln(i) = sum( farray2(i,:) )
         print *, localPet,'farray3(',i,')=',farray3(i), &
                           'farray3_soln(',i,')=',farray3_soln(i)
-        fsum=fsum + abs( farray3(i) - farray3_soln(i) )
+        fsum=fsum + real(abs( farray3(i) - farray3_soln(i) ))
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_SUM Results Test"
@@ -380,7 +380,7 @@
         farray3_soln(i) = minval( farray2(i,:) )
         print *, localPet,'farray3(',i,')=',farray3(i), &
                           'farray3_soln(',i,')=',farray3_soln(i)
-        fsum=fsum + abs( farray3(i) - farray3_soln(i) )
+        fsum=fsum + real(abs( farray3(i) - farray3_soln(i) ))
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MINResults Test:ESMF_KIND_R8"
@@ -456,7 +456,7 @@
         farray3_soln(i) = maxval( farray2(i,:) )
         print *, localPet,'farray3(',i,')=',farray3(i), &
                           'farray3_soln(',i,')=',farray3_soln(i)
-        isum=isum + abs( farray3(i) - farray3_soln(i) )
+        isum=isum + int(abs( farray3(i) - farray3_soln(i) ))
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MAXResults Test: ESMF_KIND_R8"
@@ -480,7 +480,7 @@
         f4array3_soln(i) = maxval( f4array2(i,:) )
         print *, localPet,'f4array3(',i,')=',f4array3(i), &
                           'f4array3_soln(',i,')=',f4array3_soln(i)
-        isum=isum + abs( f4array3(i) - f4array3_soln(i) )
+        isum=isum + int(abs( f4array3(i) - f4array3_soln(i) ))
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MAXResults Test: ESMF_KIND_R4"
@@ -598,8 +598,8 @@
       ! prepare data array1, farray1, f4array1
       do i=1, nsize
         array1(i) = localPet * 100 + i
-        farray1(i)= real( array1(i) , ESMF_KIND_R8 )
-        f4array1(i)=farray1(i)
+        farray1(i)= real(array1(i), ESMF_KIND_R8)
+        f4array1(i)=real(farray1(i), ESMF_KIND_R4)
       enddo
 
       ! Populate array2
@@ -607,13 +607,12 @@
       allocate(farray2(nsize,npets))
       allocate(f4array2(nsize,npets))
       do j=1, npets 
-      	do i=1, nsize
-        	array2(i,j) = (j-1) * 100 + i
-               farray2(i,j) = real( array2(i,j) , ESMF_KIND_R8 )
-              f4array2(i,j) = farray2(i,j)
-      	enddo
+        do i=1, nsize
+          array2(i,j) = (j-1) * 100 + i
+          farray2(i,j) = real(array2(i,j), ESMF_KIND_R8)
+          f4array2(i,j) = real(farray2(i,j), ESMF_KIND_R4)
+        enddo
       enddo
-
 
       call test_AllFullReduce_sum
       call test_allReduce_sum

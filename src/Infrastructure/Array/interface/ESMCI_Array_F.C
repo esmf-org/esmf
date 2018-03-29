@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -10,6 +10,10 @@
 //
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_Array_F.C"
+//==============================================================================
+
+#define ASMM_STORE_MEMLOG_off
+
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
@@ -874,17 +878,21 @@ extern "C" {
     }
   }
   
-  void FTN_X(c_esmc_arraysmmstore)(ESMCI::Array **srcArray,
+  void FTN_X(c_esmc_arraysmmstoreind4)(ESMCI::Array **srcArray,
     ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
     ESMC_TypeKind_Flag *typekindFactors, void *factorList, int *factorListCount,
-    ESMCI::InterArray<int> *factorIndexList, 
+    ESMCI::InterArray<ESMC_I4> *factorIndexList, 
     ESMC_Logical *ignoreUnmatched,
     int *srcTermProcessing, int *pipelineDepth, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_arraysmmstore()"
+#define ESMC_METHOD "c_esmc_arraysmmstoreind4()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 1.0"));
+#endif
+
     try{
     
     // check argument consistency
@@ -914,6 +922,9 @@ extern "C" {
         return;
       }
     }
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 2.0"));
+#endif
     // ignoreUnmatched flag
     bool ignoreUnmatchedOpt = false;  // default
     if (ESMC_NOT_PRESENT_FILTER(ignoreUnmatched) != ESMC_NULL_POINTER)
@@ -925,6 +936,9 @@ extern "C" {
     sparseMatrix.push_back(ESMCI::SparseMatrix<ESMC_I4,ESMC_I4>(
       *typekindFactors, factorList, *factorListCount, srcN, dstN, 
       (factorIndexList)->array));
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 3.0"));
+#endif
     // Call into the actual C++ method wrapped inside LogErr handling
     if (ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
       *srcArray, *dstArray, routehandle, sparseMatrix, false, ignoreUnmatchedOpt,
@@ -932,6 +946,9 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(pipelineDepth)),
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 4.0"));
+#endif
     
     }catch(int localrc){
       // catch standard ESMF return code
@@ -948,6 +965,105 @@ extern "C" {
       return;
     }
   
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 5.0"));
+#endif
+
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_arraysmmstoreind8)(ESMCI::Array **srcArray,
+    ESMCI::Array **dstArray, ESMCI::RouteHandle **routehandle, 
+    ESMC_TypeKind_Flag *typekindFactors, void *factorList, int *factorListCount,
+    ESMCI::InterArray<ESMC_I8> *factorIndexList, 
+    ESMC_Logical *ignoreUnmatched,
+    int *srcTermProcessing, int *pipelineDepth, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraysmmstoreind8()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 1.0"));
+#endif
+
+    try{
+    
+    // check argument consistency
+    if (*factorListCount > 0){
+      // must provide valid factorList and factorIndexList args
+      if (!present(factorIndexList)){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+          "Not a valid pointer to factorIndexList array", ESMC_CONTEXT, rc);
+        return;
+      }
+      if ((factorIndexList)->dimCount != 2){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "factorIndexList array must be of rank 2", ESMC_CONTEXT, rc);
+        return;
+      }
+      if ((factorIndexList)->extent[0] != 2 && 
+        (factorIndexList)->extent[0] != 4){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "1st dimension of factorIndexList array must be of size 2 or 4",
+          ESMC_CONTEXT, rc);
+        return;
+      }
+      if ((factorIndexList)->extent[1] != *factorListCount){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "2nd dimension of factorIndexList does not match factorListCount",
+          ESMC_CONTEXT, rc);
+        return;
+      }
+    }
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 2.0"));
+#endif
+    // ignoreUnmatched flag
+    bool ignoreUnmatchedOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(ignoreUnmatched) != ESMC_NULL_POINTER)
+      if (*ignoreUnmatched == ESMF_TRUE) ignoreUnmatchedOpt = true;
+    // prepare SparseMatrix vector
+    vector<ESMCI::SparseMatrix<ESMC_I8,ESMC_I8> > sparseMatrix;
+    int srcN = (factorIndexList)->extent[0]/2;
+    int dstN = (factorIndexList)->extent[0]/2;
+    sparseMatrix.push_back(ESMCI::SparseMatrix<ESMC_I8,ESMC_I8>(
+      *typekindFactors, factorList, *factorListCount, srcN, dstN, 
+      (factorIndexList)->array));
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 3.0"));
+#endif
+    // Call into the actual C++ method wrapped inside LogErr handling
+    if (ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
+      *srcArray, *dstArray, routehandle, sparseMatrix, false, ignoreUnmatchedOpt,
+      ESMC_NOT_PRESENT_FILTER(srcTermProcessing),
+      ESMC_NOT_PRESENT_FILTER(pipelineDepth)),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 4.0"));
+#endif
+    
+    }catch(int localrc){
+      // catch standard ESMF return code
+      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(exception &x){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, x.what(), ESMC_CONTEXT,
+        rc);
+      return;
+    }catch(...){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "Caught exception", ESMC_CONTEXT, rc);
+      return;
+    }
+  
+#ifdef ASMM_STORE_MEMLOG_on
+    ESMCI::VM::logMemInfo(std::string(ESMC_METHOD": 5.0"));
+#endif
+
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
@@ -965,14 +1081,33 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(ignoreUnmatched) != ESMC_NULL_POINTER)
       if (*ignoreUnmatched == ESMF_TRUE) ignoreUnmatchedOpt = true;
     // prepare empty SparseMatrix vector
-    vector<ESMCI::SparseMatrix<ESMC_I4,ESMC_I4> > sparseMatrix;
-    // Call into the actual C++ method wrapped inside LogErr handling
-    ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
-      *srcArray, *dstArray, routehandle, sparseMatrix, false, ignoreUnmatchedOpt,
-      ESMC_NOT_PRESENT_FILTER(srcTermProcessing),
-      ESMC_NOT_PRESENT_FILTER(pipelineDepth)),
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      ESMC_NOT_PRESENT_FILTER(rc));
+    ESMC_TypeKind_Flag srcIndexTK = (*srcArray)->getDistGrid()->getIndexTK();
+    ESMC_TypeKind_Flag dstIndexTK = (*dstArray)->getDistGrid()->getIndexTK();
+    if (srcIndexTK==ESMC_TYPEKIND_I4 && dstIndexTK==ESMC_TYPEKIND_I4){
+      vector<ESMCI::SparseMatrix<ESMC_I4,ESMC_I4> > sparseMatrix;
+      // Call into the actual C++ method wrapped inside LogErr handling
+      if (ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
+        *srcArray, *dstArray, routehandle, sparseMatrix, false, 
+        ignoreUnmatchedOpt, ESMC_NOT_PRESENT_FILTER(srcTermProcessing),
+        ESMC_NOT_PRESENT_FILTER(pipelineDepth)),
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
+    }else if (srcIndexTK==ESMC_TYPEKIND_I8 && dstIndexTK==ESMC_TYPEKIND_I8){
+      vector<ESMCI::SparseMatrix<ESMC_I8,ESMC_I8> > sparseMatrix;
+      // Call into the actual C++ method wrapped inside LogErr handling
+      if (ESMC_LogDefault.MsgFoundError(ESMCI::Array::sparseMatMulStore(
+        *srcArray, *dstArray, routehandle, sparseMatrix, false, 
+        ignoreUnmatchedOpt, ESMC_NOT_PRESENT_FILTER(srcTermProcessing),
+        ESMC_NOT_PRESENT_FILTER(pipelineDepth)),
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
+    }else{
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "Type option not supported", ESMC_CONTEXT, rc);
+      return;
+    }
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
   void FTN_X(c_esmc_arraysmm)(ESMCI::Array **srcArray,

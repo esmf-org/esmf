@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -133,6 +133,7 @@ ESMC_Grid ESMC_GridCreateCubedSphere(int *tilesize,
                                   //ESMC_InterArrayInt *decompFlagPTile,
                                   //ESMC_InterArrayInt *deLabelList,
                                   //ESMC_DELayout *delayout,
+                                  ESMC_InterArrayInt *staggerLocList,
                                   const char *name,
                                   int *rc){
   int localrc = ESMC_RC_NOT_IMPL;
@@ -144,7 +145,7 @@ ESMC_Grid ESMC_GridCreateCubedSphere(int *tilesize,
 
   grid.ptr = reinterpret_cast<void *>(ESMCI::Grid::createcubedsphere(
     tilesize, regDecompPTile, NULL, NULL, //decompFlagPTile, deLabelList, //delayout,
-    name, &localrc));
+    staggerLocList, name, &localrc));
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return grid; // bail out
 

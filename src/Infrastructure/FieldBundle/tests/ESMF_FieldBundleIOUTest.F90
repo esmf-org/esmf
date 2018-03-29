@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National
@@ -638,6 +638,7 @@
   deallocate(Farray_2w)
   deallocate(Farray_1r)
   deallocate(Farray_2r)
+  deallocate(attrNameVals)
 
 !------------------------------------------------------------------------
 

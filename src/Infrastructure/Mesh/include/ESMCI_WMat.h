@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -14,7 +14,10 @@
 
 #include <Mesh/include/ESMCI_Migrator.h>
 #include "PointList/include/ESMCI_PointList.h"
+
+#if defined ESMF_MOAB
 #include <Mesh/include/ESMCI_MBMesh.h>
+#endif
 
 #include <ostream>
 
@@ -93,6 +96,8 @@ public:
   void InsertRowMerge(const Entry &row, const std::vector<Entry> &cols);
 
   void InsertRowMergeSingle(const Entry &row, const Entry &col);
+
+  void InsertRowSumSingle(const Entry &row, const Entry &col);
   
   void GetRowGIDS(std::vector<UInt> &gids);
 
@@ -101,7 +106,9 @@ public:
   void GetColGIDS(std::vector<UInt> &gids);
   
   void Print(std::ostream &);
-  
+
+  void MergeDisjoint(const WMat &wmat2);
+
   /*
    * Migrate the matrix to the row decomposition given by
    * mesh.
@@ -111,8 +118,8 @@ public:
   void MigrateToElem(Mesh &mesh);
 
 // Take out if MOAB isn't being used
-#ifdef ESMF_MOAB
-  void MigrateToElem(MBMesh &mesh);  
+#if defined ESMF_MOAB
+  void MigrateToElem(MBMesh &mesh);
 #endif // ESMF_MOAB
 
   // Return the number of rows that use this id
@@ -128,6 +135,8 @@ public:
 
  
   void GatherToRowSrc(WMat &rhs);
+
+  void MergeReplace(const WMat &wmat2);
 
   /*
    * Removes the columns referencing the constraint row entries.  

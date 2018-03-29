@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -30,7 +30,7 @@
     ! ESMF Framework module
     use ESMF
     implicit none
-    
+
     ! Local variables
     integer :: finalrc, haloWidth, i, rc
     integer :: igridCount(2), igridStart(2)
@@ -58,7 +58,7 @@
 !   !  stored in an Array object.  This version of create simply
 !   !  associates the data with the IGrid.  The data is referenced
 !   !  by default.
- 
+
     call ESMF_VMGetGlobal(vm, rc)
     layout = ESMF_DELayoutCreate(vm, (/ 3, 2 /), rc=rc)
 
@@ -154,11 +154,11 @@
 !-------------------------------------------------------------------------
 
     if (finalrc.EQ.ESMF_SUCCESS) then
-	print *, "PASS: ESMF_FieldGlobalEx.F90"
+        print *, "PASS: ESMF_FieldGlobalEx.F90"
     else
-	print *, "FAIL: ESMF_FieldGlobalEx.F90"
+        print *, "FAIL: ESMF_FieldGlobalEx.F90"
     end if
 !BOC
      end program ESMF_FieldGlobalEx
 !EOC
-    
+

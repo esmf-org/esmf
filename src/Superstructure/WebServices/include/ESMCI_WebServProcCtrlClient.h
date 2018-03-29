@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -45,7 +45,7 @@ using namespace std;
 // ESMF Component service implemented with the ESMCI_WebServComponentSvr class.
 // This class is intended to be used only by a PassThruSvr service which
 // is the intermediary between the client (web service) and the component
-// service.  
+// service.
 //
 //EOPI
 //-------------------------------------------------------------------------
@@ -58,38 +58,38 @@ namespace ESMCI
   public:
 
      // constructor and destructor
-	  ESMCI_WebServProcCtrlClient(const char*  host,
+          ESMCI_WebServProcCtrlClient(const char*  host,
                                  int          port,
                                  const char*  userName,
                                  const char*  password);
-	  ~ESMCI_WebServProcCtrlClient();
+          ~ESMCI_WebServProcCtrlClient();
 
      // access methods
      int  getClientId() { return theClientId; }
 
      // methods to send client requests to the server
-     int  								state();
-     int  								init();
-     int  								run();
-     int  								timestep(int  numTimesteps);
-     int  								final();
+     int                                                                state();
+     int                                                                init();
+     int                                                                run();
+     int                                                                timestep(int  numTimesteps);
+     int                                                                final();
      ESMCI_WebServDataDesc*      dataDesc();
      ESMCI_WebServDataContent*   outputData(double  timestamp);
-     int  								end();
-     int  								killServer();
-   
+     int                                                                end();
+     int                                                                killServer();
+
 
   private:
 
      int   newClient();
-	  void  setClientId(int  clientId);
+          void  setClientId(int  clientId);
 
-	  char    theMsg[8192];	     // the message buffer
+          char    theMsg[8192];              // the message buffer
      char    theUserName[256];  // the login name for the user on the server
      char    thePassword[256];  // the password for the user on the server
-	  int	    theClientId;	     // the id of the client on the PassThruSvr
+          int       theClientId;             // the id of the client on the PassThruSvr
   };
 
 } // end namespace
 
-#endif 	// ESMCI_WebServProcCtrlClient_H
+#endif          // ESMCI_WebServProcCtrlClient_H

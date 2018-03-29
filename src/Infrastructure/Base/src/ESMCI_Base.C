@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -34,8 +34,6 @@
 
 // include higher level, 3rd party or system headers
 #include <iostream>
-#include <string.h>
-#include <stdlib.h>
 #include <vector>
 
 // include ESMF headers
@@ -181,8 +179,6 @@ static const char *const version = "$Id$";
 //  
 //EOPI
 
-  ESMC_Print();
-
   return ID;
 
 } // end ESMC_BaseGetID
@@ -230,8 +226,15 @@ static const char *const version = "$Id$";
 //EOPI
   int localrc;
   
-  this->vmID = new ESMCI::VMId;             // allocate space for this VMId
-  *(this->vmID) = ESMCI::VMIdCreate(&localrc);// allocate internal VMId memory
+  // first deal with old vmID if this is the creator  
+  if (vmIDCreator){
+    // responsible for vmID deallocation
+    localrc = this->vmID->destroy();
+    delete this->vmID;
+  }
+  // now create the new vmID
+  this->vmID = new ESMCI::VMId;       // allocate space for this VMId
+  localrc = this->vmID->create();     // allocate internal VMId memory
   ESMCI::VMIdCopy(this->vmID, vmID);  // copy content of vmID to this->vmID.
   vmIDCreator = true;  // Base object is responsible for vmID deallocation
 
@@ -353,15 +356,15 @@ static const char *const version = "$Id$";
 //
 //EOPI
 
-  int rc, len;
-  char msgbuf[ESMF_MAXSTR];
+  int rc;
  
     // Initialize local return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
   if (classname) {
-     len = strlen(classname);
+     int len = strlen(classname);
      if (len >= ESMF_MAXSTR) {
+       char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "Error: object type %d bytes longer than limit of %d",
                           len, ESMF_MAXSTR-1);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
@@ -397,12 +400,12 @@ static const char *const version = "$Id$";
 //
 //EOPI
   int rc;
-  char msgbuf[ESMF_MAXSTR];
 
     // Initialize local return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
   if (nlen > ESMF_MAXSTR) {
+       char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "string name %d bytes longer than limit of %d bytes",
                        nlen, ESMF_MAXSTR);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
@@ -461,7 +464,6 @@ static const char *const version = "$Id$";
 
   int len, rc;
   int defname, defclass;
-  char msgbuf[ESMF_MAXSTR];
  
     // Initialize local return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
@@ -476,6 +478,7 @@ static const char *const version = "$Id$";
   if (name && (name[0]!='\0')) { 
      len = strlen(name);
      if (len >= ESMF_MAXSTR) {
+       char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "object name %d bytes longer than limit of %d bytes",
                        len, ESMF_MAXSTR-1);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
@@ -485,6 +488,7 @@ static const char *const version = "$Id$";
      // look for slash in name.  Conflicts with syntax used in StateGet for items in
      // nested States.
      if (strchr (name, '/') != NULL) {
+       char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "%s must not have a slash (/) in its name", name);
        ESMC_LogDefault.MsgFoundError (ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
            &rc);
@@ -496,6 +500,7 @@ static const char *const version = "$Id$";
   if (classname && (classname[0]!='\0')) {
      len = strlen(classname);
      if (len >= ESMF_MAXSTR) {
+       char msgbuf[ESMF_MAXSTR];
        sprintf(msgbuf, "object type %d bytes longer than limit of %d bytes",
                        len, ESMF_MAXSTR-1);
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
@@ -541,12 +546,12 @@ static const char *const version = "$Id$";
 //
 //EOPI
   int rc;
-  std::string msgbuf;
 
     // Initialize local return code; assume routine not implemented
     rc = ESMC_RC_NOT_IMPL;
 
   if (nlen > ESMF_MAXSTR) {
+       std::string msgbuf;
        msgbuf = "Base name " + std::string(name, nlen) + " is longer than ESMF_MAXSTR";
        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT, 
            &rc);
@@ -555,6 +560,7 @@ static const char *const version = "$Id$";
   // look for slash in name.  Conflicts with syntax used in StateGet for items in
   // nested States.
   if (memchr (name, '/', nlen) != NULL) {
+    std::string msgbuf;
     msgbuf = "Base name " + std::string (name, nlen) + " must not have a slash (/) in its name";
     ESMC_LogDefault.MsgFoundError (ESMC_RC_ARG_VALUE, msgbuf, ESMC_CONTEXT,
         &rc);
@@ -661,9 +667,20 @@ static const char *const version = "$Id$";
     // update offset to point to past the current obj
     *offset = (cp - buffer);
 
+    // Update the offset
+    if (*offset%8 != 0)
+      *offset += 8 - *offset%8;
+    localrc = vmID_remote->create();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &localrc)) return localrc;
+    localrc = vmID_remote->deserialize (buffer, offset, false);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &localrc)) return localrc;
+
     // setup the root Attribute, passing the address of this
     root = new ESMCI::Attribute(ESMF_TRUE);
     root->setBase(this);
+    rootalias = false;
 
     // Deserialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
@@ -695,10 +712,11 @@ static const char *const version = "$Id$";
       const char *buffer,   // in - byte stream to read
       const int *offset,    // in - original offset
       int *ID,              // out - Object ID
-      ESMCI::VMId *vmID) {  // out - VMId
+      ESMCI::VMId *vmID) {  // in/out - VMId
 //
 // !DESCRIPTION:
-//    Turn a stream of bytes into an object.
+//    Turn a stream of bytes into an object.  VMId is assumed to have the
+//    vmkey array pre-allocated.
 //
 //EOPI
 
@@ -717,19 +735,38 @@ static const char *const version = "$Id$";
     if (r!=0) offset_local += 8-r;  // alignment
 
     ip = (int *)(buffer + offset_local);
-    *ID = *ip++;
-    ip++;  // refcount
-    ip++;  // classID
+    *ID = *ip;
+    ip+=3;
 
     sp = (ESMC_Status *)ip;
-    sp++;  // baseStatus
-    sp++;  // status
+    sp+=2;
 
     pfp = (ESMC_ProxyFlag *)sp;
-    pfp++; // proxyFlag
+    pfp++;
 
     vmIDp = (ESMCI::VMId *)pfp;
-    VMIdCopy (vmID, vmIDp);
+    vmIDp++;
+
+    cp = (char *)vmIDp;
+    cp += 3*ESMF_MAXSTR;
+
+    ip = (int*)cp;
+    cp = (char *)ip;
+
+    offset_local = (cp - buffer);
+
+#if 1
+    if (!vmID) {
+      if (ESMC_LogDefault.MsgFoundError(ESMF_RC_PTR_NULL, "vmID must be initialized",
+            ESMC_CONTEXT, &localrc)) return localrc;
+    }
+#endif
+
+    // Turn on full deserialize for inquiries.
+    if (offset_local%8 != 0)
+      offset_local += 8 - offset_local%8;
+// std::cout << ESMC_METHOD << ": calling vmID deserialize inquiry at offset: " << offset_local << std::endl;
+    vmID->deserialize (buffer, &offset_local, false);
 
   return ESMF_SUCCESS;
 
@@ -760,7 +797,6 @@ static const char *const version = "$Id$";
 //
 //EOPI
 
-  char msgbuf[ESMF_MAXSTR];
   int localrc;
   int lpet = 0;
 
@@ -779,18 +815,27 @@ static const char *const version = "$Id$";
     
   // root Attribute
   if (level > 0) {
-    printf (" ");
+    std::cout << " ";
     for (int i=0; i<level; i++)
-      printf ("->");
+      std::cout << "->";
   }
+  std::cout << " Base name = " << baseName << std::endl;
+  std::cout << " Proxy     = " << ((proxyflag == ESMF_PROXYYES)?"yes":"no") << std::endl;
   if (options) {
     if (strcmp (options, "debug") == 0) {
-      printf ("ID = %i, ", ID);
+      std::cout << " Base ID = " << ID << ", vmID:" << std::endl;
+      vmID->print ();
+      if (proxyflag == ESMF_PROXYYES) {
+        if (vmID_remote) {
+          std::cout << " Remote vmID:" << std::endl;
+          vmID_remote->print ();
+        } else
+          std::cout << " Proxy with NO remote vmID!  (Probable error)" << std::endl;
+      }
     }
   }
   if ((root->getCountAttr() > 0 || root->getCountPack() > 0) && tofile) {
-    sprintf(msgbuf, "Root Attributes:\n");
-    printf("%s", msgbuf);
+    std::cout << " Root Attributes:" << std::endl;
     // ESMC_LogDefault.Write(msgbuf, ESMC_LOGMSG_INFO);
 
     // traverse the Attribute hierarchy, printing as we go
@@ -799,6 +844,7 @@ static const char *const version = "$Id$";
     else
       root->ESMC_Print(tofile, filename, false);
   }
+  fflush (NULL);
 
   return ESMF_SUCCESS;
 
@@ -927,9 +973,17 @@ static const char *const version = "$Id$";
       ip = (int *)cp;
       cp = (char *)ip;
 
-      // update the offset before calling AttributeSerialize
+      // update the offset before calling vmID and Attribute serialize
       *offset = (cp - buffer);
     }
+
+    // serialize vmID for inquiries when deserializing proxy objects
+    if (*offset%8 != 0)
+      *offset += 8 - *offset%8;
+// std::cout << ESMC_METHOD << ": serializing vmID at offset: " << *offset << std::endl;
+    localrc = vmID->serialize (buffer, length, offset, inquireflag);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, &localrc)) return localrc;
 
     // Serialize the Attribute hierarchy
     if (attreconflag == ESMC_ATTRECONCILE_ON) {
@@ -1040,7 +1094,10 @@ static const char *const version = "$Id$";
   // set ID
   ID = ESMCI::VM::getBaseIDAndInc(vmID);
   classID = 0;
-  
+
+  ID_remote = 0;
+  vmID_remote = NULL;
+
   refCount = 1;
   strcpy(className, "global");
   sprintf(baseName, "%s%3d", "unnamed", ID);
@@ -1090,17 +1147,22 @@ static const char *const version = "$Id$";
   
   vmID = ESMCI::VM::getCurrentID(&rc);  // get vmID of current VM context
   if (id==-1){
-    // proxy members hold NULL for the vm
+    // proxy members hold NULL for the vm and space for a remote VMId
     vm = NULL;
-  }else
+    vmID_remote = new ESMCI::VMId;
+  }else {
     vm = ESMCI::VM::getCurrent(&rc);
+    vmID_remote = NULL;
+  }
 //  ESMCI::VMIdPrint(vmID);
   vmIDCreator = false;  // vmID points into global table
   
   // set ID to objectCount;
   ID = id;
   classID = 0;
-  
+
+  ID_remote = 0;
+
   refCount = 1;
   strcpy(className, "global");
   sprintf(baseName, "%s%3d", "unnamed", ID);
@@ -1117,9 +1179,13 @@ static const char *const version = "$Id$";
   ESMCI::VM::addObject(this, vmID);
 
   // setup the root Attribute, passing the address of this
-  root = new ESMCI::Attribute(ESMF_TRUE);
-  root->setBase(this);
-  rootalias = false;
+  if (id==-1){
+    rootalias = true; // protect root Attribute from being used in delete
+  }else{
+    root = new ESMCI::Attribute(ESMF_TRUE);
+    root->setBase(this);
+    rootalias = false;
+  }
 
   baseStatus  = ESMF_STATUS_READY;
   status      = ESMF_STATUS_READY;
@@ -1157,7 +1223,10 @@ static const char *const version = "$Id$";
   // set ID to objectCount
   ID = ESMCI::VM::getBaseIDAndInc(vmID);
   classID = 0;
-  
+
+  ID_remote = 0;
+  vmID_remote = NULL;
+
   refCount = 1;
   strcpy(className, superclass ? superclass : "global");
   if (name && (name[0]!='\0')) 
@@ -1220,13 +1289,25 @@ static const char *const version = "$Id$";
   
   if (vmIDCreator){
     // Base object is responsible for vmID deallocation
-    ESMCI::VMIdDestroy(vmID, &rc);
+    rc = vmID->destroy();
     delete vmID;
+  }
+
+  if (vmID_remote) {
+    // Base object is responsible for vmID_remote deallocation
+    rc = vmID_remote->destroy();
+    delete vmID_remote;
   }
 
   baseStatus  = ESMF_STATUS_INVALID;
   status      = ESMF_STATUS_INVALID;
-  
+
+#if 0
+  std::stringstream debugmsg;
+  debugmsg << "From ~ESMC_Base(): rootalias=" << rootalias;
+  ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+#endif
+
   // delete the root Attribute
   if (!rootalias)
     delete root;

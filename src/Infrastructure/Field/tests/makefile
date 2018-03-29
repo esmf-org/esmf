@@ -19,9 +19,11 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMC_FieldGridGridRegridUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldGridGridRegridCsrvUTest \
 		$(ESMF_TESTDIR)/ESMC_FieldTripoleRegridUTest \
+		$(ESMF_TESTDIR)/ESMC_FieldSMMFromFileUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldCreateGetUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridCsrvUTest \
+		$(ESMF_TESTDIR)/ESMF_FieldRegridCsrv2ndUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldRegridCSUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldArbGridUTest \
@@ -37,7 +39,7 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldMeshSMMUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldHaloUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest
-               
+
 TESTS_RUN     = \
 		RUN_ESMC_FieldUTest \
 		RUN_ESMC_FieldRegridUTest \
@@ -49,11 +51,13 @@ TESTS_RUN     = \
 		RUN_ESMC_FieldGridRegridParUTest \
 		RUN_ESMC_FieldGridGridRegridUTest \
 		RUN_ESMC_FieldGridGridRegridCsrvUTest \
+		RUN_ESMC_FieldSMMFromFileUTest \
 		RUN_ESMF_FieldUTest \
 		RUN_ESMF_FieldCreateGetUTest \
 		RUN_ESMF_FieldRegridUTest \
 		RUN_ESMF_FieldRegridCSUTest \
 		RUN_ESMF_FieldRegridCsrvUTest \
+		RUN_ESMF_FieldRegridCsrv2ndUTest \
 		RUN_ESMF_FieldArbGridUTest \
 		RUN_ESMF_FieldIOUTest \
 		RUN_ESMF_FieldStressUTest \
@@ -79,6 +83,7 @@ TESTS_RUN_UNI = \
 		RUN_ESMC_FieldGridRegridCsrvUTestUNI \
 		RUN_ESMC_FieldGridRegridCsrv2UTestUNI \
 		RUN_ESMC_FieldGridGridRegridUTestUNI \
+		RUN_ESMC_FieldSMMFromFileUTestUNI \
 		RUN_ESMC_FieldGridGridRegridCsrvUTestUNI \
 		RUN_ESMF_FieldStressUTestUNI \
 		RUN_ESMF_FieldRegridUTestUNI \
@@ -87,6 +92,7 @@ TESTS_RUN_UNI = \
 		RUN_ESMF_FieldArbGridUTestUNI \
 		RUN_ESMF_FieldRedistArbUTestUNI \
 		RUN_ESMF_FieldRegridCsrvUTestUNI \
+		RUN_ESMF_FieldRegridCsrv2ndUTestUNI \
 		RUN_ESMF_FieldSMMFromFileUTestUNI
 
 
@@ -201,6 +207,12 @@ RUN_ESMF_FieldRegridCsrvUTest:
 RUN_ESMF_FieldRegridCsrvUTestUNI:
 	$(MAKE) TNAME=FieldRegridCsrv NP=1 ftest
 
+RUN_ESMF_FieldRegridCsrv2ndUTest:
+	$(MAKE) TNAME=FieldRegridCsrv2nd NP=4 ftest
+
+RUN_ESMF_FieldRegridCsrv2ndUTestUNI:
+	$(MAKE) TNAME=FieldRegridCsrv2nd NP=1 ftest
+
 RUN_ESMF_FieldRegridXGSMMUTest:
 	$(MAKE) TNAME=FieldRegridXGSMM NP=2 ftest
 
@@ -277,14 +289,24 @@ RUN_ESMF_TestHarnessFieldUNI_1:
 
 # ---
 
+RUN_ESMC_FieldSMMFromFileUTest:
+	mkdir -p $(ESMF_TESTDIR)/data
+	$(MAKE) TNAME=FieldSMMFromFile NP=4 ctest
+
+RUN_ESMC_FieldSMMFromFileUTestUNI:
+	mkdir -p $(ESMF_TESTDIR)/data
+	$(MAKE) TNAME=FieldSMMFromFile NP=1 ctest
+
 RUN_ESMF_FieldSMMFromFileUTest:
 	mkdir -p $(ESMF_TESTDIR)/data
+	rm -f $(ESMF_TESTDIR)/data/test_smm_from_file_weights.nc
 	cp -f ../../IO/tests/T42_grid.nc $(ESMF_TESTDIR)/data
 	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=FieldSMMFromFile NP=4 ftest
 
 RUN_ESMF_FieldSMMFromFileUTestUNI:
 	mkdir -p $(ESMF_TESTDIR)/data
+	rm -f $(ESMF_TESTDIR)/data/test_smm_from_file_weights.nc
 	cp -f ../../IO/tests/T42_grid.nc $(ESMF_TESTDIR)/data
 	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=FieldSMMFromFile NP=1 ftest

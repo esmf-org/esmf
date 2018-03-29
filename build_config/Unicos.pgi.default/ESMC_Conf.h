@@ -5,7 +5,7 @@
 
 #if 0
 Earth System Modeling Framework
-Copyright 2002-2017, University Corporation for Atmospheric Research,
+Copyright 2002-2018, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -48,7 +48,7 @@ extern char pghpf_0_[];
 extern char pghpf_0c_;
 #define ESMC_PRESENT(arg) ( ! ( ( (char*)(arg) >=  pghpf_0_ && \
                                   (char*)(arg) <= &pghpf_0_[12] ) || \
-		                  (char*)(arg) == &pghpf_0c_ ) )
+                                  (char*)(arg) == &pghpf_0c_ ) )
 #endif
 
 #ifdef S32
@@ -56,6 +56,16 @@ extern char pghpf_0c_;
 #endif
 #ifdef S64
 #define ESMC_POINTER_SIZE 8
+#endif
+
+#if 0
+PGI before 17.9 could not handle the dynamic masking interfaces for different
+typekinds
+#endif
+#if defined (ESMF_PGIVERSION_MAJOR)
+#if (ESMF_PGIVERSION_MAJOR < 17) || ((ESMF_PGIVERSION_MAJOR == 17) && (ESMF_PGIVERSION_MINOR < 9))
+#define ESMF_NO_DYNMASKOVERLOAD
+#endif
 #endif
 
 #endif

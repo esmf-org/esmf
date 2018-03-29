@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -1225,8 +1225,9 @@ module NUOPC_Comp
       file=FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! Add more Attributes -> NUOPC/Connector AttPack
-    allocate(attrList(1))
+    allocate(attrList(2))
     attrList(1) = "CplList"
+    attrList(2) = "CplSetList"
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Connector", &
       attrList=attrList, nestConvention="NUOPC", nestPurpose="Component", rc=rc)
@@ -1504,7 +1505,7 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompDerive - Derive a GridComp from a generic component
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompDerive() 
-  subroutine NUOPC_GridCompDerive(comp, genericSetServicesRoutine, rc)
+  recursive subroutine NUOPC_GridCompDerive(comp, genericSetServicesRoutine, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(in)            :: comp
     interface
@@ -1547,7 +1548,7 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompDerive - Derive a CplComp from a generic component
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompDerive() 
-  subroutine NUOPC_CplCompDerive(comp, genericSetServicesRoutine, rc)
+  recursive subroutine NUOPC_CplCompDerive(comp, genericSetServicesRoutine, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(in)            :: comp
     interface

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -42,7 +42,7 @@ extern "C" {
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshCreate()"
-ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, enum ESMC_CoordSys_Flag *coordSys, 
+ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, enum ESMC_CoordSys_Flag *coordSys,
                           int *rc){
   // Initialize return code. Assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
@@ -74,13 +74,13 @@ ESMC_Mesh ESMC_MeshCreate(int parametricDim, int spatialDim, enum ESMC_CoordSys_
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshCreateFromFile()"
-ESMC_Mesh ESMC_MeshCreateFromFile(const char *filename, int fileTypeFlag, 
-				  int *convertToDual,
-				  int *addUserArea,
-				  const char *meshname,
-				  int *maskFlag,
-				  const char *varname,
-				  int *rc) {
+ESMC_Mesh ESMC_MeshCreateFromFile(const char *filename, int fileTypeFlag,
+                                  int *convertToDual,
+                                  int *addUserArea,
+                                  const char *meshname,
+                                  int *maskFlag,
+                                  const char *varname,
+                                  int *rc) {
   // Initialize return code. Assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;
 
@@ -91,10 +91,10 @@ ESMC_Mesh ESMC_MeshCreateFromFile(const char *filename, int fileTypeFlag,
   mesh.ptr = NULL;
 
   // Call into ESMCI method
-  mesh.ptr = (void *)MeshCXX::createFromFile(filename, fileTypeFlag, 
-					     convertToDual, addUserArea,
-					     meshname, maskFlag, varname,
-					     &localrc);
+  mesh.ptr = (void *)MeshCXX::createFromFile(filename, fileTypeFlag,
+                                             convertToDual, addUserArea,
+                                             meshname, maskFlag, varname,
+                                             &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return mesh; // bail out
 
@@ -109,14 +109,14 @@ ESMC_Mesh ESMC_MeshCreateFromFile(const char *filename, int fileTypeFlag,
 #define ESMC_METHOD "ESMC_MeshAddNodes"
 int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
   double *nodeCoords, int *nodeOwners){
-  
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
-  
+
   // call into ESMCI method
   localrc = mep->addNodes(nodeCount, nodeIds, nodeCoords, nodeOwners);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -133,20 +133,20 @@ int ESMC_MeshAddNodes(ESMC_Mesh mesh, int nodeCount, int *nodeIds,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshAddElements()"
 int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
-                         int *elementTypes, int *elementConn, 
+                         int *elementTypes, int *elementConn,
                          int *elementMask, double *elementArea,
                          double *elementCoords){
-   
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
-  
+
   // call into ESMCI method
-  localrc = mep->addElements(elementCount, elementIds, elementTypes, 
-                             elementConn, elementMask, elementArea, 
+  localrc = mep->addElements(elementCount, elementIds, elementTypes,
+                             elementConn, elementMask, elementArea,
                              elementCoords);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
@@ -161,18 +161,18 @@ int ESMC_MeshAddElements(ESMC_Mesh mesh, int elementCount, int *elementIds,
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshCreateDistGrids()"
-int ESMC_MeshCreateDistGrids(ESMC_Mesh mesh, int *nodeDistGrid, 
+int ESMC_MeshCreateDistGrids(ESMC_Mesh mesh, int *nodeDistGrid,
   int *elemDistGrid, int *num_nodes, int *num_elements){
-  
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
-  
+
   // call into ESMCI method
-  localrc = mep->createDistGrids(nodeDistGrid, elemDistGrid, num_nodes, 
+  localrc = mep->createDistGrids(nodeDistGrid, elemDistGrid, num_nodes,
     num_elements);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;  // bail out
@@ -199,7 +199,7 @@ int ESMC_MeshDestroy(ESMC_Mesh *mesh){
   // Do destroy
   localrc= MeshCXX::destroy(&mep);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;  // bail out    
+    &rc)) return rc;  // bail out
 
   // Set to NULL
   mesh->ptr=NULL;
@@ -214,14 +214,14 @@ int ESMC_MeshDestroy(ESMC_Mesh *mesh){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshFreeMemory()"
 int ESMC_MeshFreeMemory(ESMC_Mesh mesh){
-  
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
-  
+
   // call into ESMCI method
   localrc = mep->freeMemory();
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -285,7 +285,7 @@ void ESMC_MeshGetElemCoord(ESMC_Mesh mesh_in,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshGetConnectivity()"
 void ESMC_MeshGetConnectivity(ESMC_Mesh mesh_in, double *connCoord,
-		                   int *nodesPerElem, int *rc){
+                                   int *nodesPerElem, int *rc){
 
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
@@ -309,7 +309,7 @@ void ESMC_MeshGetConnectivity(ESMC_Mesh mesh_in, double *connCoord,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshGetLocalNodeCount()"
 int ESMC_MeshGetLocalNodeCount(ESMC_Mesh mesh, int* num_nodes){
-  
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -326,7 +326,7 @@ int ESMC_MeshGetLocalNodeCount(ESMC_Mesh mesh, int* num_nodes){
       "- Mesh must have had its nodes added to get local node count ",
       ESMC_CONTEXT, &localrc)) return localrc;
   }
-  
+
   // call into ESMCI method
   *num_nodes = mep->getNumLocalNodes();
 
@@ -342,7 +342,7 @@ int ESMC_MeshGetLocalNodeCount(ESMC_Mesh mesh, int* num_nodes){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshGetOwnedNodeCount()"
 int ESMC_MeshGetOwnedNodeCount(ESMC_Mesh mesh, int* num_nodes){
-  
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -359,7 +359,7 @@ int ESMC_MeshGetOwnedNodeCount(ESMC_Mesh mesh, int* num_nodes){
       "- Mesh must be finished to get owned node count ", ESMC_CONTEXT,
       &localrc)) return localrc;
   }
-  
+
   // call into ESMCI method
   *num_nodes = mep->getNumOwnedNodes();
 
@@ -374,7 +374,7 @@ int ESMC_MeshGetOwnedNodeCount(ESMC_Mesh mesh, int* num_nodes){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshGetLocalElementCount()"
 int ESMC_MeshGetLocalElementCount(ESMC_Mesh mesh, int* num_elems){
-  
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -407,7 +407,7 @@ int ESMC_MeshGetLocalElementCount(ESMC_Mesh mesh, int* num_elems){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshGetOwnedElementCount()"
 int ESMC_MeshGetOwnedElementCount(ESMC_Mesh mesh, int* num_elems){
-  
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -440,7 +440,7 @@ int ESMC_MeshGetOwnedElementCount(ESMC_Mesh mesh, int* num_elems){
 #define ESMC_METHOD "ESMC_MeshVTKHeader()"
 int ESMC_MeshVTKHeader(const char *fname, int *num_elem, int *num_node,
   int *conn_size){
-  
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -462,7 +462,7 @@ int ESMC_MeshVTKHeader(const char *fname, int *num_elem, int *num_node,
 #define ESMC_METHOD "ESMC_MeshVTKBody()"
 int ESMC_MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord,
   int *nodeOwner, int *elemId, int *elemType, int *elemConn){
-  
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -484,14 +484,14 @@ int ESMC_MeshVTKBody(const char *fname, int *nodeId, double *nodeCoord,
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshWrite()"
 int ESMC_MeshWrite(ESMC_Mesh mesh, const char* filename){
-  
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   // typecast into ESMCI type
   MeshCXX* mep = (MeshCXX*)(mesh.ptr);
-  
+
   // call into ESMCI method
   localrc = mep->meshWrite(filename);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,

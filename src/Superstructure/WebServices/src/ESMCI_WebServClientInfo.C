@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -64,7 +64,7 @@ ESMCI_WebServClientInfo::ESMCI_WebServClientInfo(
 //
 // !ARGUMENTS:
 //
-  int  clientId	// the client session id
+  int  clientId         // the client session id
   )
 //
 // !DESCRIPTION:
@@ -73,10 +73,10 @@ ESMCI_WebServClientInfo::ESMCI_WebServClientInfo(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theClientId = clientId;
-	theCurrentStatus = NET_ESMF_STAT_IDLE;
-	theServerHost = "";
-	theServerPort = 0;
+        theClientId = clientId;
+        theCurrentStatus = NET_ESMF_STAT_IDLE;
+        theServerHost = "";
+        theServerPort = 0;
 }
 
 
@@ -117,7 +117,7 @@ void  ESMCI_WebServClientInfo::setUserName(
 //
 // !ARGUMENTS:
 //
-  string  userName		// the login name of the client on the server
+  string  userName              // the login name of the client on the server
   )
 //
 // !DESCRIPTION:
@@ -126,7 +126,7 @@ void  ESMCI_WebServClientInfo::setUserName(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theUserName = userName;
+        theUserName = userName;
 }
 
 
@@ -143,7 +143,7 @@ void  ESMCI_WebServClientInfo::setPassword(
 //
 // !ARGUMENTS:
 //
-  string  password		// the password of the client on the server
+  string  password              // the password of the client on the server
   )
 //
 // !DESCRIPTION:
@@ -152,7 +152,7 @@ void  ESMCI_WebServClientInfo::setPassword(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	thePassword = password;
+        thePassword = password;
 }
 
 
@@ -169,7 +169,7 @@ void  ESMCI_WebServClientInfo::setStatus(
 //
 // !ARGUMENTS:
 //
-  int  status		// the status value 
+  int  status           // the status value
   )
 //
 // !DESCRIPTION:
@@ -178,7 +178,7 @@ void  ESMCI_WebServClientInfo::setStatus(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theCurrentStatus = status;
+        theCurrentStatus = status;
 }
 
 
@@ -195,8 +195,8 @@ void  ESMCI_WebServClientInfo::setServerHost(
 //
 // !ARGUMENTS:
 //
-  string  serverHost		// the name of the host machine to which the client 
-  								// is connected
+  string  serverHost            // the name of the host machine to which the client
+                                                                // is connected
   )
 //
 // !DESCRIPTION:
@@ -205,7 +205,7 @@ void  ESMCI_WebServClientInfo::setServerHost(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theServerHost = serverHost;
+        theServerHost = serverHost;
 }
 
 
@@ -222,8 +222,8 @@ void  ESMCI_WebServClientInfo::setServerPort(
 //
 // !ARGUMENTS:
 //
-  int  serverPort		// the port number to which the client session is
-  							// connected
+  int  serverPort               // the port number to which the client session is
+                                                        // connected
   )
 //
 // !DESCRIPTION:
@@ -232,7 +232,7 @@ void  ESMCI_WebServClientInfo::setServerPort(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theServerPort = serverPort;
+        theServerPort = serverPort;
 }
 
 
@@ -249,7 +249,7 @@ void  ESMCI_WebServClientInfo::setJobId(
 //
 // !ARGUMENTS:
 //
-  string  jobId		// the unique id of the component server for this client
+  string  jobId                 // the unique id of the component server for this client
   )
 //
 // !DESCRIPTION:
@@ -258,7 +258,7 @@ void  ESMCI_WebServClientInfo::setJobId(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theJobId = jobId;
+        theJobId = jobId;
 }
 
 
@@ -275,18 +275,18 @@ void  ESMCI_WebServClientInfo::addOutputFile(
 //
 // !ARGUMENTS:
 //
-  string  outputFile		// the name of the output file to add to the list
-  								// of output files
+  string  outputFile            // the name of the output file to add to the list
+                                                                // of output files
   )
 //
 // !DESCRIPTION:
-//    Adds the output filename to the list of output files for the client 
+//    Adds the output filename to the list of output files for the client
 //    session.
 //
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	theOutputFiles.push_back(outputFile);
+        theOutputFiles.push_back(outputFile);
 }
 
 
@@ -311,14 +311,14 @@ void  ESMCI_WebServClientInfo::print(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	cout << "***** BEGIN ESMCI_WebServClientInfo *****" << endl;
-	cout << "Client ID       : " << theClientId << endl;
-	cout << "User Name       : " << theUserName << endl;
-	cout << "Password        : " << thePassword << endl;
-	cout << "Status          : " << theCurrentStatus << endl;
-	cout << "Server Host     : " << theServerHost << endl;
-	cout << "Server Port     : " << theServerPort << endl;
-	cout << "*****  END ESMCI_WebServClientInfo  *****" << endl;
+        cout << "***** BEGIN ESMCI_WebServClientInfo *****" << endl;
+        cout << "Client ID       : " << theClientId << endl;
+        cout << "User Name       : " << theUserName << endl;
+        cout << "Password        : " << thePassword << endl;
+        cout << "Status          : " << theCurrentStatus << endl;
+        cout << "Server Host     : " << theServerHost << endl;
+        cout << "Server Port     : " << theServerPort << endl;
+        cout << "*****  END ESMCI_WebServClientInfo  *****" << endl;
 }
 
 

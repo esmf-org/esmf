@@ -61,7 +61,7 @@ const char*  getDateAndTime(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-   static char 	datestr[1024];
+   static char          datestr[1024];
    time_t         ttime;
    struct tm*     tm;
 
@@ -89,18 +89,18 @@ const char*  getDateAndTime(
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int main(int    argc, 
+int main(int    argc,
          char*  argv[])
 {
-  	printf("hello from ESMCI_WebServCompSvrClientUTest\n");
+        printf("hello from ESMCI_WebServCompSvrClientUTest\n");
 
-   int	rc;
-	int	result = 0;
+   int  rc;
+        int     result = 0;
    char  name[80];
    char  failMsg[80];
-	int	portNum = 27060;
-	int	clientId = 1001;
-	char	host[512] = { "" };
+        int     portNum = 27060;
+        int     clientId = 1001;
+        char    host[512] = { "" };
 
 
 
@@ -108,10 +108,10 @@ int main(int    argc,
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-//	strcpy(runDir, argv[2]);
-	gethostname(host, sizeof(host) - 1);
+//      strcpy(runDir, argv[2]);
+        gethostname(host, sizeof(host) - 1);
 
-	ESMCI::ESMCI_WebServCompSvrClient		client(host, portNum, clientId);
+        ESMCI::ESMCI_WebServCompSvrClient               client(host, portNum, clientId);
 
    printf("\n");
    printf("ESMF_WebServCompSvrClientUTest\n");
@@ -133,10 +133,10 @@ int main(int    argc,
    rc = client.init();
 
    ESMC_Test((rc!=ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
+        printf("\n");
    //---------------------------------------------------------------------------
 
-	printf("Waiting for initialize...\n");
+        printf("Waiting for initialize...\n");
 
    int   currentState = client.state();
    int   waitCount = 0;
@@ -148,8 +148,8 @@ int main(int    argc,
       currentState = client.state();
    }
 
-	printf("Done Waiting... waited for %d seconds\n", waitCount);
-	printf("\n");
+        printf("Done Waiting... waited for %d seconds\n", waitCount);
+        printf("\n");
 
    //---------------------------------------------------------------------------
    //NEX_disable_UTest
@@ -159,10 +159,10 @@ int main(int    argc,
    rc = client.run();
 
    ESMC_Test((rc!=ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
+        printf("\n");
    //---------------------------------------------------------------------------
 
-	printf("Waiting for run...\n");
+        printf("Waiting for run...\n");
 
    currentState = client.state();
    waitCount = 0;
@@ -174,8 +174,8 @@ int main(int    argc,
       currentState = client.state();
    }
 
-	printf("Done Waiting... waited for %d seconds\n", waitCount);
-	printf("\n");
+        printf("Done Waiting... waited for %d seconds\n", waitCount);
+        printf("\n");
 
    //---------------------------------------------------------------------------
    //NEX_disable_UTest
@@ -185,10 +185,10 @@ int main(int    argc,
    rc = client.final();
 
    ESMC_Test((rc!=ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
+        printf("\n");
    //---------------------------------------------------------------------------
 
-	printf("Waiting for finalize...\n");
+        printf("Waiting for finalize...\n");
 
    currentState = client.state();
    waitCount = 0;
@@ -200,8 +200,8 @@ int main(int    argc,
       currentState = client.state();
    }
 
-	printf("Done Waiting... waited for %d seconds\n", waitCount);
-	printf("\n");
+        printf("Done Waiting... waited for %d seconds\n", waitCount);
+        printf("\n");
 
    //---------------------------------------------------------------------------
    //NEX_disable_UTest
@@ -211,7 +211,7 @@ int main(int    argc,
    rc = client.state();
 
    ESMC_Test((rc!=ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
+        printf("\n");
    //---------------------------------------------------------------------------
 
    //---------------------------------------------------------------------------
@@ -219,11 +219,11 @@ int main(int    argc,
    strcpy(name, "Call Component Files");
    strcpy(failMsg, "No files returned");
 
-	vector<string>	retFiles = client.files();
+        vector<string>  retFiles = client.files();
 
-   ESMC_Test((retFiles.size()==0), 
-		name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
+   ESMC_Test((retFiles.size()==0),
+                name, failMsg, &result, __FILE__, __LINE__, 0);
+        printf("\n");
    //---------------------------------------------------------------------------
 
    //---------------------------------------------------------------------------
@@ -234,7 +234,7 @@ int main(int    argc,
    rc = client.end();
 
    ESMC_Test((rc!=ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
+        printf("\n");
    //---------------------------------------------------------------------------
 
    //---------------------------------------------------------------------------
@@ -245,7 +245,7 @@ int main(int    argc,
    rc = client.killServer();
 
    ESMC_Test((rc!=ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
+        printf("\n");
    //---------------------------------------------------------------------------
 
 
@@ -256,5 +256,5 @@ int main(int    argc,
    printf("\n-----------------------------------------------------\n");
    fflush(stdout);
 
-  	return 0;
+        return 0;
 }

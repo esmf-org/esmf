@@ -21,6 +21,8 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
+#if defined ESMF_MOAB
+
 #include "ESMC_MBMeshTestUtilMBMesh.C"
 
 // other headers
@@ -32,11 +34,12 @@
 #include "MBTagConventions.hpp"
 #include "moab/Core.hpp"
 #include "moab/ElemEvaluator.hpp"
+#endif
 
-
-#include<iostream>
+#include <iostream>
 #include <iterator>
 #include <vector>
+#include <cstring>
 
 
 #if !defined (M_PI)
@@ -62,8 +65,10 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
+#if defined ESMF_MOAB
   //----------------------------------------------------------------------------
   //ESMC_MoabSet(true);
+#endif
 
   // Get parallel information
   vm=ESMC_VMGetGlobal(&rc);
@@ -76,23 +81,29 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
   // get entities from meshes created with quadrilaterals
   // --------------------------------------------------------------------------
+#if defined ESMF_MOAB
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
   MBMesh *mesh_quad_10;
   mesh_quad_10 = create_mesh_quad_10_parallel(ESMC_COORDSYS_CART, rc);
   if (!mesh_quad_10) rc = ESMC_RC_PTR_NULL;
+#else
+  rc = ESMF_SUCCESS;
+#endif
   strcpy(name, "Quadrilaterals 10mesh creation");
   strcpy(failMsg, "Mesh creation failed");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB
   Range range_quad_10;
   Interface *mb_mesh_quad_10=mesh_quad_10->mesh;
   int merr_quad_10=mb_mesh_quad_10->get_entities_by_dimension(0,mesh_quad_10->pdim,range_quad_10);
   if (merr_quad_10 != MB_SUCCESS) rc = ESMF_FAILURE;
+  // clean up
+  delete mesh_quad_10;
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -100,25 +111,30 @@ int main(int argc, char *argv[]) {
   strcpy(name, "get_entities");
   strcpy(failMsg, "Cannot get entities");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-  // clean up
-  delete mesh_quad_10;
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
+#if defined ESMF_MOAB
   MBMesh *mesh_quad_9;
   mesh_quad_9 = create_mesh_quad_9_parallel(ESMC_COORDSYS_CART, rc);
   if (!mesh_quad_9) rc = ESMC_RC_PTR_NULL;
+#else
+  rc = ESMF_SUCCESS;
+#endif
   strcpy(name, "Quadrilaterals 9 mesh creation");
   strcpy(failMsg, "Mesh creation failed");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
-#if defined (ESMF_MOAB)
+#if defined ESMF_MOAB
   Range range_quad_9;
   Interface *mb_mesh_quad_9=mesh_quad_9->mesh;
   int merr_quad_9=mb_mesh_quad_9->get_entities_by_dimension(0,mesh_quad_9->pdim,range_quad_9);
   if (merr_quad_9 != MB_SUCCESS) rc = ESMF_FAILURE;
+
+  // clean up
+  delete mesh_quad_9;
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -126,8 +142,7 @@ int main(int argc, char *argv[]) {
   strcpy(name, "get_entities");
   strcpy(failMsg, "Cannot get entities");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-  // clean up
-  delete mesh_quad_9;
+
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

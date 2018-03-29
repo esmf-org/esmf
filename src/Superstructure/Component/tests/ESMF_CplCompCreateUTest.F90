@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -46,23 +46,25 @@
     ! Internal State Variables
     type testData
     sequence
-	integer :: testNumber
+      integer :: testNumber
     end type
 
     type dataWrapper
     sequence
-	type(testData), pointer :: p
+      type(testData), pointer :: p
     end type
     
 #ifdef ESMF_TESTEXHAUSTIVE
-    logical :: bool
-    type(ESMF_VM) :: vm
-    type(ESMF_CplComp) :: cpl2
-    integer :: localPet
-    character(ESMF_MAXSTR) :: cname, bname
-    type (dataWrapper) :: wrap1, wrap2
-    type(testData), target :: data1, data2
-    logical         :: isPresent
+    logical                 :: bool
+    type(ESMF_VM)           :: vm
+    type(ESMF_CplComp)      :: cpl2
+    integer                 :: localPet
+    character(ESMF_MAXSTR)  :: cname, bname
+    type (dataWrapper)      :: wrap1, wrap2
+    type(testData), target  :: data1, data2
+    logical                 :: isPresent
+    type(ESMF_Config)       :: config
+    integer                 :: fred
 #endif
 
 !-------------------------------------------------------------------------------
@@ -74,14 +76,12 @@
 !   added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
         
-   ! Initialize framework
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-
     !-----------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Testing CplComp IsCreated for uncreated object"
+    write(name, *) "Testing CplComp IsCreated w/o keyword for uncreated object"
     write(failMsg, *) "Did not return .false."
     isCreated = ESMF_CplCompIsCreated(cpl)
     call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
@@ -93,17 +93,23 @@
     isCreated = ESMF_CplCompIsCreated(cpl, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing CplComp IsCreated value for uncreated object"
+    write(failMsg, *) "Did not return .false."
+    call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+
     !------------------------------------------------------------------------
     !NEX_UTest
     cplname = "One Way Coupler"
-    cpl = ESMF_CplCompCreate(name=cplname, rc=rc)
+    cpl = ESMF_CplCompCreate(name=cplname, configFile="comp.rc", rc=rc)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Coupler Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     !-----------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Testing CplComp IsCreated for created object"
+    write(name, *) "Testing CplComp IsCreated w/o keyword for created object"
     write(failMsg, *) "Did not return .true."
     isCreated = ESMF_CplCompIsCreated(cpl)
     call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
@@ -114,6 +120,12 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     isCreated = ESMF_CplCompIsCreated(cpl, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing CplComp IsCreated value for created object"
+    write(failMsg, *) "Did not return .true."
+    call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
 
     !------------------------------------------------------------------------
     !NEX_UTest
@@ -140,7 +152,7 @@
 
     !-----------------------------------------------------------------------------
     !NEX_UTest
-    write(name, *) "Testing CplComp IsCreated for destroyed object"
+    write(name, *) "Testing CplComp IsCreated w/o keyword for destroyed object"
     write(failMsg, *) "Did not return .false."
     isCreated = ESMF_CplCompIsCreated(cpl)
     call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
@@ -151,6 +163,12 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     isCreated = ESMF_CplCompIsCreated(cpl, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+    !-----------------------------------------------------------------------------
+    !NEX_UTest
+    write(name, *) "Testing CplComp IsCreated value for destroyed object"
+    write(failMsg, *) "Did not return .false."
+    call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
     
     !------------------------------------------------------------------------
     !NEX_UTest
@@ -195,7 +213,7 @@
 
     !------------------------------------------------------------------------
     !EX_UTest
-    ! Query the run status of a deleted Coupler Component
+    ! Query the deleted Coupler Component
     bool = ESMF_CplCompIsPetLocal(cpl, rc=rc)
     write(failMsg, *) "Did not return ESMF_RC_OBJ_DELETED"
     write(name, *) "Query run status of a deleted Coupler Component"
@@ -203,7 +221,7 @@
 
     !------------------------------------------------------------------------
     !EX_UTest
-    ! Verify that the run status is false
+    ! Verify that the returned status is false
     write(failMsg, *) "Did not return false"
     write(name, *) "Query run status of a deleted Coupler Component"
     call ESMF_Test((.not.bool), name, failMsg, result, ESMF_SRCLINE)
@@ -230,10 +248,10 @@
 
     !------------------------------------------------------------------------
     !EX_UTest
-    ! Query the run status of a Gridded Component
+    ! Status of a Coupler Component
     bool = ESMF_CplCompIsPetLocal(cpl2, rc=rc)
     write(failMsg, *) "Did not return ESMF_RC_OBJ_NOT_CREATED"
-    write(name, *) "Query run status of a non- created Gridded Component"
+    write(name, *) "Query run status of a non- created Coupler Component"
     ! most compilers return "ESMF_RC_OBJ_NOT_CREATED
     ! pgi returns "ESMF_RC_OBJ_BAD"
     call ESMF_Test(((rc.eq.ESMF_RC_OBJ_NOT_CREATED).or.(rc.eq.ESMF_RC_OBJ_BAD)), &
@@ -388,6 +406,129 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Wait for a Coupler Component Test"
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+
+    call ESMF_CplCompGet(cpl, configIsPresent=isPresent, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Config handling Test - configIsPresent before setting"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+    write(failMsg, *) "Did not return correct isPresent status"
+    write(name, *) "Config handling Test - configIsPresent value before setting"
+    call ESMF_Test((.not.isPresent), name, failMsg, result, ESMF_SRCLINE)
+    
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+
+    call ESMF_CplCompGet(cpl, configFileIsPresent=isPresent, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Config handling Test - configFileIsPresent before setting"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+    write(failMsg, *) "Did not return correct isPresent status"
+    write(name, *) "Config handling Test - configFileIsPresent value before setting"
+    call ESMF_Test((.not.isPresent), name, failMsg, result, ESMF_SRCLINE)
+    
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Set a configFile
+
+    call ESMF_CplCompSet(cpl, configFile="comp.rc", rc=rc)
+
+    write(failMsg, *) "Did return ESMF_SUCCESS"
+    write(name, *) "Setting a ConfigFile Test"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+
+    call ESMF_CplCompGet(cpl, configFileIsPresent=isPresent, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Config handling Test - configFileIsPresent"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+    write(failMsg, *) "Did not return correct isPresent status"
+    write(name, *) "Config handling Test - configFileIsPresent value"
+    call ESMF_Test((isPresent), name, failMsg, result, ESMF_SRCLINE)
+    
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+
+    call ESMF_CplCompGet(cpl, configIsPresent=isPresent, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Config handling Test - configIsPresent"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+    write(failMsg, *) "Did not return correct isPresent status"
+    write(name, *) "Config handling Test - configIsPresent value"
+    call ESMF_Test((isPresent), name, failMsg, result, ESMF_SRCLINE)
+    
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+
+    call ESMF_CplCompGet(cpl, config=config, rc=rc)
+
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Config handling Test - get config"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+
+    call ESMF_ConfigGetAttribute(config, fred, label="fred:", rc=rc)
+    
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Config handling Test - access attribute through config"
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test correct config handling
+
+    print *, "fred = ", fred
+
+    write(failMsg, *) "Did not return correct value in fred"
+    write(name, *) "Config handling Test - validate attribute value"
+    call ESMF_Test((fred==1), name, failMsg, result, ESMF_SRCLINE)
+    
+
+
 
 !-------------------------------------------------------------------------
 !   !

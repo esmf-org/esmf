@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -35,8 +35,8 @@ int main(void){
   char failMsg[80];
   int result = 0;
   int rc;
-  
-  ESMC_ArraySpec arrayspec;
+
+  ESMC_ArraySpec arrayspec, arrayspec2;
   enum ESMC_StaggerLoc staggerloc=ESMC_STAGGERLOC_CENTER;
   int *gridToFieldMap, *ungriddedLBound, *ungriddedUBound, *maxIndex;
   ESMC_InterArrayInt i_gridToFieldMap, i_ungriddedLBound, i_ungriddedUBound;
@@ -57,6 +57,20 @@ int main(void){
   int *elemId;
   int *elemType;
   int *elemConn;
+
+  ESMC_LocStream locstream;
+  int ls_size=16;
+  const char *keyNameX="ESMF:X";
+  const char *keyNameY="ESMF:Y";
+  const char *keyNameM="ESMF:Mask";
+  ESMC_Array keyArray;
+  double *farray;
+  double *farray2;
+  int *farray3;
+  ESMC_Field fieldls1, fieldls2;
+  double * fieldls1ptr, *fieldls2ptr;
+
+  bool correct = false;
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
@@ -127,10 +141,10 @@ int main(void){
   // Add element information to the mesh
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn, NULL, 
+  rc = ESMC_MeshAddElements(mesh, num_elem, elemId, elemType, elemConn, NULL,
                             NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   // Set the arrayspec
@@ -139,7 +153,7 @@ int main(void){
   rc = ESMC_ArraySpecSet(&arrayspec, 1, ESMC_TYPEKIND_I4);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-    
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Set up gridToFieldMap");
@@ -149,7 +163,7 @@ int main(void){
   rc = ESMC_InterArrayIntSet(&i_gridToFieldMap, gridToFieldMap, 1);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Set up ungriddedLBound");
@@ -171,7 +185,7 @@ int main(void){
   rc = ESMC_InterArrayIntSet(&i_ungriddedUBound, ungriddedUBound, 2);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
- 
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Create ESMC_Field object");
@@ -180,17 +194,17 @@ int main(void){
     &i_gridToFieldMap, NULL, NULL, "field1", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Create ESMC_Field object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  field2 = ESMC_FieldCreateMeshTypeKind(mesh, 
-    ESMC_TYPEKIND_R8, ESMC_MESHLOC_ELEMENT, 
+  field2 = ESMC_FieldCreateMeshTypeKind(mesh,
+    ESMC_TYPEKIND_R8, ESMC_MESHLOC_ELEMENT,
     NULL, NULL, NULL, "field2", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Get an ESMC_Mesh object from ESMC_Field object");
@@ -300,7 +314,174 @@ int main(void){
   field=ESMC_FieldCreateGridArraySpec(grid, arrayspec, staggerloc, 0, 0, 0, 0, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  
+
+
+  //---------------------------- LOCSTREAM -------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "LocStreamCreateLocal");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  locstream = ESMC_LocStreamCreateLocal(ls_size, NULL, &local_coordSys, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "LocStreamAddKeyAlloc");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  ESMC_TypeKind_Flag local_typeKind = ESMC_TYPEKIND_R8;
+  rc = ESMC_LocStreamAddKeyAlloc(locstream,keyNameX,&local_typeKind);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "LocStreamGetKeyPtr");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  farray = (double *) ESMC_LocStreamGetKeyPtr(locstream,keyNameX,0,&rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  farray[0]=0.0;
+  farray[1]=0.5;
+  farray[2]=1.5;
+  farray[3]=2.0;
+  farray[4]=0.0;
+  farray[5]=0.5;
+  farray[6]=1.5;
+  farray[7]=2.0;
+  farray[8]=0.0;
+  farray[9]=0.5;
+  farray[10]=1.5;
+  farray[11]=2.0;
+  farray[12]=0.0;
+  farray[13]=0.5;
+  farray[14]=1.5;
+  farray[15]=2.0;
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "LocStreamAddKeyAlloc");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_LocStreamAddKeyAlloc(locstream,keyNameY,&local_typeKind);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "LocStreamGetKeyPtr");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  farray2 = (double *) ESMC_LocStreamGetKeyPtr(locstream,keyNameY,0,&rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  farray2[0]=0.0;
+  farray2[1]=0.0;
+  farray2[2]=0.0;
+  farray2[3]=0.0;
+  farray2[4]=0.5;
+  farray2[5]=0.5;
+  farray2[6]=0.5;
+  farray2[7]=0.5;
+  farray2[8]=1.5;
+  farray2[9]=1.5;
+  farray2[10]=1.5;
+  farray2[11]=1.5;
+  farray2[12]=2.0;
+  farray2[13]=2.0;
+  farray2[14]=2.0;
+  farray2[15]=2.0;
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "LocStreamAddKeyAlloc");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  local_typeKind = ESMC_TYPEKIND_I4;
+  rc = ESMC_LocStreamAddKeyAlloc(locstream,keyNameM,&local_typeKind);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "LocStreamGetKeyPtr");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  farray3 = (int *) ESMC_LocStreamGetKeyPtr(locstream,keyNameM,0,&rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  farray3[0]=0;
+  farray3[1]=0;
+  farray3[2]=0;
+  farray3[3]=1;
+  farray3[4]=0;
+  farray3[5]=2;
+  farray3[6]=0;
+  farray3[7]=0;
+  farray3[8]=0;
+  farray3[9]=0;
+  farray3[10]=0;
+  farray3[11]=0;
+  farray3[12]=0;
+  farray3[13]=0;
+  farray3[14]=0;
+  farray3[15]=0;
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Create ESMC_Field object on LocStream using TypeKind");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  fieldls1 = ESMC_FieldCreateLocStreamTypeKind(locstream, ESMC_TYPEKIND_R8,
+                                               NULL, NULL, NULL, "dstfield", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Get a void * C pointer to data from ESMC_Field object");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  fieldls1ptr = (double *)ESMC_FieldGetPtr(fieldls1, 0, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  // initialize destination field
+  {
+    int i;
+    for(i=0;i<ls_size;++i)
+      fieldls1ptr[i] = -9999.0;
+  }
+
+#if 0
+  //----------------------------------------------------------------------------
+  //NEX_disable_UTest
+  strcpy(name, "Create ESMC_Field object on LocStream using ArraySpec");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_ArraySpecSet(&arrayspec2, 1, ESMC_TYPEKIND_R8);
+  fieldls2 = ESMC_FieldCreateLocStreamArraySpec(locstream, arrayspec2,
+    NULL, NULL, NULL, "dstfield", &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  //----------------------------------------------------------------------------
+  //NEX_disable_UTest
+  strcpy(name, "Get a void * C pointer to data from ESMC_Field object 2");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  fieldls2ptr = (double *) ESMC_FieldGetPtr(fieldls2, 0, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+
+  // initialize destination field
+  {
+    int i;
+    for(i=0;i<ls_size;++i) {
+      fieldls2ptr[i] = -9999.0;
+      if (fieldls2ptr[i] != fieldls1ptr[i]) correct = false;
+    }
+  }
+
+  //----------------------------------------------------------------------------
+  //NEX_disable_UTest
+  strcpy(name, "Validate C pointers to data from ESMC_Field objects created on LocStream");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  ESMC_Test((correct == true), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+#endif
+
+  //----------------------------------------------------------------------------
   free(nodeId);
   free(nodeCoord);
   free(nodeOwner);
@@ -313,10 +494,10 @@ int main(void){
   free(ungriddedLBound);
   free(ungriddedUBound);
   free(maxIndex);
-  
+
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  
+
   return 0;
 }

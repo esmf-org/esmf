@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -28,7 +28,7 @@
     use ESMF_XGridMod
     use ESMF_XGridCreateMod
     implicit none
-    
+
     ! Local variables
     integer                             :: localrc, i
     type(ESMF_XGrid)                    :: xgrid
@@ -80,7 +80,7 @@
 ! area and centroid information of XGrid cells, sparse matrix matmul information.
 ! The functionalities provided by the
 ! XGrid object is constrained by the user supplied input during its creation time.
-! 
+!
 ! In this example, we will set up a simple XGrid from overlapping Grids on
 ! either side of the XGrid. Then we perform a flux exchange from one side
 ! to the other side of the XGrid. The Grids are laid out in the following figure:
@@ -91,7 +91,7 @@
 !\caption{Grid layout for simple XGrid creation example. Overlapping of 3 Grids
 !(Green 2x2, Red 2x1, Blue 2x2). Green and red Grids on side A, blue Grid on side
 !B, black indicates the resulting XGrid. Color coded sequence indices are shown.
-!Physical coordinates are the tuples in parenthesis, e.g. at the four 
+!Physical coordinates are the tuples in parenthesis, e.g. at the four
 !corners of rectangular computational domain.}
 !\label{fig:xgridsimple}
 !\end{figure}
@@ -123,13 +123,13 @@
             rc=localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-						endflag=ESMF_END_ABORT)
+                                                endflag=ESMF_END_ABORT)
 !BOC
     enddo
 !EOC
 
 !BOE
-! Coordinate for the Grids on sideA, refer to the Grid layout diagram for the 
+! Coordinate for the Grids on sideA, refer to the Grid layout diagram for the
 ! interpretation of the coordinate values:
 !EOE
 !BOC
@@ -141,7 +141,7 @@
         farrayPtr=coordX, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
     coordX = centroidA1X
     call ESMF_GridGetCoord(sideA(1), localDE=0, &
@@ -169,7 +169,7 @@
         farrayPtr=coordY, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
     coordY = centroidA2Y
 !EOC
@@ -184,14 +184,14 @@
         name='destination Grid on side B', rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
     do i = 1, 1
         call ESMF_GridAddCoord(sideB(i), staggerloc=ESMF_STAGGERLOC_CENTER, &
             rc=localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
     enddo
 
@@ -203,7 +203,7 @@
                 rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
     coordX = centroidBX
     call ESMF_GridGetCoord(sideB(1), localDE=0, &
@@ -211,7 +211,7 @@
                 rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
     coordY = centroidBY
 !EOC
@@ -227,17 +227,17 @@
 
 !BOE
 !
-! Set up the mapping indices and weights from A side to the XGrid. For details of 
-! sequence indices, factorIndexList, and factorList, please see section 
+! Set up the mapping indices and weights from A side to the XGrid. For details of
+! sequence indices, factorIndexList, and factorList, please see section
 ! \ref{Array:SparseMatMul} in the reference manual. Please refer to the figure above
 ! for interpretation of the sequence indices used here.
 !
-! In order to compute the destination flux on sideB through the XGrid as an mediator, 
-! we need to set up the factorList (weights) and factorIndexList (indices) 
+! In order to compute the destination flux on sideB through the XGrid as an mediator,
+! we need to set up the factorList (weights) and factorIndexList (indices)
 ! for sparse matrix multiplication in this formulation:
-! dst\_flux = W'*W*src\_flux, where W' is the weight matrix from the XGrid to 
+! dst\_flux = W'*W*src\_flux, where W' is the weight matrix from the XGrid to
 ! destination; and W is the weight matrix from source to the XGrid. The weight matrix
-! is generated using destination area weighted algorithm. Please refer to figure 
+! is generated using destination area weighted algorithm. Please refer to figure
 ! \ref {fig:xgridsimple} for details.
 !
 !EOE
@@ -277,7 +277,7 @@
 ! Set up the mapping weights from side A to the XGrid:
 !EOE
 !BOC
-    ! Note that the weights are dest area weighted, they are ratio 
+    ! Note that the weights are dest area weighted, they are ratio
     ! of areas with destination area as the denominator.
     ! Set up mapping weights from A1 -> X
     sparseMatA2X(1)%factorList(:)=1.
@@ -361,12 +361,12 @@
 !EOE
 !BOC
     xgrid = ESMF_XGridCreateFromSparseMat(sideAGrid=sideA, &
-	sideBGrid=sideB, area=xgrid_area, &
+        sideBGrid=sideB, area=xgrid_area, &
         centroid=centroid, sparseMatA2X=sparseMatA2X, &
         sparseMatX2B=sparseMatX2B, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 
 !BOE
 ! Create an {\tt ESMF\_Field} on the XGrid:
@@ -376,7 +376,7 @@
                 rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOE
 ! Query the Field for its Fortran data pointer and its exclusive bounds:
 !EOE
@@ -385,12 +385,12 @@
         exclusiveLBound=xlb, exclusiveUBound=xub, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 
     xfarrayPtr = 0.0
 
 !BOE
-! Setup and initialize src and dst Fields on side A and side B Grids, 
+! Setup and initialize src and dst Fields on side A and side B Grids,
 ! source Fields have different source flux:
 !EOE
 !BOC
@@ -399,12 +399,12 @@
                 typekind=ESMF_TYPEKIND_R8, rc=localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
         call ESMF_FieldGet(srcField(i), farrayPtr=farrayPtr, rc=localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
         farrayPtr = i
     enddo
@@ -413,12 +413,12 @@
                 typekind=ESMF_TYPEKIND_R8, rc=localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
         call ESMF_FieldGet(dstField(i), farrayPtr=farrayPtr, rc=localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
         farrayPtr = 0.0
     enddo
@@ -434,27 +434,27 @@
 !
 ! First we compute the regrid routehandles, these routehandles can be used repeatedly
 ! afterwards. Then we initialize the values in the Fields. Finally we execute the Regrid.
-! 
+!
 !EOE
 !BOC
-    ! Compute regrid routehandles. The routehandles can be used 
+    ! Compute regrid routehandles. The routehandles can be used
     ! repeatedly afterwards.
     ! From A -> X
     do i = 1, 2
         call ESMF_FieldRegridStore(xgrid, srcField(i), field, &
-		routehandle=rh_src2xgrid(i), rc = localrc)
+                routehandle=rh_src2xgrid(i), rc = localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
     enddo
     ! from X -> B
     do i = 1, 1
         call ESMF_FieldRegridStore(xgrid, field, dstField(i), &
-		routehandle=rh_xgrid2dst(i), rc = localrc)
+                routehandle=rh_xgrid2dst(i), rc = localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
     enddo
 
@@ -463,7 +463,7 @@
         call ESMF_FieldGet(srcField(i), farrayPtr=farrayPtr, rc=localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
         farrayPtr = i
     enddo
@@ -474,7 +474,7 @@
         call ESMF_FieldGet(dstField(i), farrayPtr=farrayPtr, rc=localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
         farrayPtr = 0.0
     enddo
@@ -490,7 +490,7 @@
             zeroregion=ESMF_REGION_SELECT, rc = localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
     enddo
 !EOC
@@ -499,7 +499,7 @@
     ! To get the surface integral of flux on XGrid, adjust by dst area
 
     !do i = xlb(1), xub(1)
-    !    xfarrayPtr(i) = xfarrayPtr(i) * xgrid_area(i) 
+    !    xfarrayPtr(i) = xfarrayPtr(i) * xgrid_area(i)
     !enddo
 
     print *, '- after SMM from A -> X'
@@ -517,7 +517,7 @@
             routehandle=rh_xgrid2dst(i), rc = localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
     enddo
 !EOC
@@ -552,7 +552,7 @@
         rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 
 !BOC
     call ESMF_XGridGet(xgrid, localDe=0, &
@@ -563,7 +563,7 @@
         rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 
 !BOC
     call ESMF_XGridGet(xgrid, &
@@ -573,15 +573,15 @@
         rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
     call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRIDSIDE_A, gridIndex=2, &
         distgrid=distgrid, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
     call ESMF_XGridGet(xgrid, xgridSide=ESMF_XGRIDSIDE_B, gridIndex=1, &
         distgrid=distgrid, rc=localrc)
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 
 !BOE
 !\subsubsection{Destroying the XGrid and other resources}
@@ -589,30 +589,30 @@
 ! Clean up the resources by destroying the XGrid and other objects:
 !EOE
 !BOC
-    ! After the regridding is successful. 
+    ! After the regridding is successful.
     ! Clean up all the allocated resources:
     call ESMF_FieldDestroy(field, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 
 !BOC
     call ESMF_XGridDestroy(xgrid, rc=localrc)
 !EOC
     if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 
 !BOC
     do i = 1, 2
         call ESMF_FieldDestroy(srcField(i), rc = localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
         call ESMF_GridDestroy(sideA(i), rc = localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
     enddo
 
@@ -620,12 +620,12 @@
         call ESMF_FieldDestroy(dstField(i), rc = localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
         call ESMF_GridDestroy(sideB(i), rc = localrc)
 !EOC
         if(localrc /= ESMF_SUCCESS) call ESMF_Finalize(rc=localrc, &
-		endflag=ESMF_END_ABORT)
+                endflag=ESMF_END_ABORT)
 !BOC
     enddo
 

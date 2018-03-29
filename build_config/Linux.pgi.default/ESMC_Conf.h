@@ -5,7 +5,7 @@
 
 #if 0
 Earth System Modeling Framework
-Copyright 2002-2017, University Corporation for Atmospheric Research,
+Copyright 2002-2018, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 Laboratory, University of Michigan, National Centers for Environmental
 Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -22,6 +22,14 @@ Licensed under the University of Illinois-NCSA License.
 #define FTNX(func) func##_
 
 #if defined (__cplusplus)
+#if 0
+PGI v16.0 - onwards supports std::isfinite and friends.  This
+is a c++-11 feature.
+#endif
+#if (ESMF_PGIVERSION_MAJOR < 16)
+#define ESMF_PGI_NO_STDISFINITE
+#endif
+
 // Typedef to match the data type of the 'hidden' string length
 // argument that Fortran uses when passing CHARACTER strings.
 #if (ESMF_PGIVERSION_MAJOR < 12)
@@ -48,7 +56,7 @@ extern char pghpf_0_[];
 extern char pghpf_0c_;
 #define ESMC_PRESENT(arg) ( ! ( ( (char*)(arg) >=  pghpf_0_ && \
                                   (char*)(arg) <= &pghpf_0_[12] ) || \
-		                  (char*)(arg) == &pghpf_0c_ ) )
+                                  (char*)(arg) == &pghpf_0c_ ) )
 #endif
 
 #ifdef S32
@@ -65,6 +73,16 @@ extern char pghpf_0c_;
 #endif
 #ifdef Sx86_64_medium
 #define ESMC_POINTER_SIZE 8
+#endif
+
+#if 0
+PGI before 17.9 could not handle the dynamic masking interfaces for different
+typekinds
+#endif
+#if defined (ESMF_PGIVERSION_MAJOR)
+#if (ESMF_PGIVERSION_MAJOR < 17) || ((ESMF_PGIVERSION_MAJOR == 17) && (ESMF_PGIVERSION_MINOR < 9))
+#define ESMF_NO_DYNMASKOVERLOAD
+#endif
 #endif
 
 #endif

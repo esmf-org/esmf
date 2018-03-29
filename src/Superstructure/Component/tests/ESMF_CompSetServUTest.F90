@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -94,7 +94,7 @@ program ESMF_CompSetServUTest
 
     cname = "Atmosphere"
     comp1 = ESMF_GridCompCreate(name=cname, petList=petList, &
-      configFile="grid.rc", rc=rc)  
+      configFile="comp.rc", rc=rc)  
 
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -162,7 +162,7 @@ program ESMF_CompSetServUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     cname = "Atmosphere - child in parent VM context"
-    comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", &
+    comp1 = ESMF_GridCompCreate(name=cname, configFile="comp.rc", &
       contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
 
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -202,7 +202,7 @@ program ESMF_CompSetServUTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
 
     cname = "Atmosphere - child in parent VM context"
-    comp1 = ESMF_GridCompCreate(name=cname, configFile="grid.rc", &
+    comp1 = ESMF_GridCompCreate(name=cname, configFile="comp.rc", &
       contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
 
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -273,7 +273,7 @@ program ESMF_CompSetServUTest
 
     cname = "Atmosphere - in its own context"
     comp1 = ESMF_GridCompCreate(name=cname, petList=petList, &
-      configFile="grid.rc", rc=rc)  
+      configFile="comp.rc", rc=rc)  
 
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -415,7 +415,7 @@ program ESMF_CompSetServUTest
 
     cname = "Atmosphere - child in parent VM context"
     comp1 = ESMF_GridCompCreate(name=cname, &
-      configFile="grid.rc", contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
+      configFile="comp.rc", contextflag=ESMF_CONTEXT_PARENT_VM, rc=rc)  
 
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 

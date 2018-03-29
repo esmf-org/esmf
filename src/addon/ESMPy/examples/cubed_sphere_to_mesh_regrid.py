@@ -1,27 +1,31 @@
-# This example demonstrates how to regrid between a cubed sphere Grid and a Mesh.
-# The data files can be retrieved from the ESMF data repository by uncommenting the
-# following block of code:
+# This example demonstrates how to regrid between a cubed sphere Grid and a 
+# one degree lat-long Grid.
+# The data files can be retrieved from the ESMF data repository by uncommenting
+# the following block of code:
 #
 # import os
 # DD = os.path.join(os.getcwd(), "examples/data")
 # if not os.path.isdir(DD):
 #     os.makedirs(DD)
 # from ESMF.util.cache_data import cache_data_file
-# cache_data_file(os.path.join(DD, "mpas_uniform_10242_dual_counterclockwise.nc"))
+# cache_data_file(os.path.join(DD, "ll1deg_grid.nc"))
 
 import ESMF
 import numpy
 
-# This call enables debug logging
-# esmpy = ESMF.Manager(debug=True)
+import ESMF.util.helpers as helpers
+import ESMF.api.constants as constants
 
-if ESMF.pet_count() != 6:
-    print ("ESMPy cubed sphere Grid Mesh Regridding Example requires 6 processors")
-    import sys; sys.exit(0)
+# This call enables debug logging when debug=True
+mg = ESMF.Manager(debug=False)
+
+# if ESMF.pet_count() != 6:
+#     print ("ESMPy cubed sphere regridding example requires 6 processors")
+#     import sys; sys.exit(0)
 
 grid1 = "examples/data/ll1deg_grid.nc"
 
-# Create a cubed sphere grid with 45 elements per tile
+# Create a cubed sphere grid with 20 elements per tile
 srcgrid = ESMF.Grid(tilesize=20, name="cubed_sphere")
 
 # create an regular lat lon grid from file
@@ -31,7 +35,7 @@ dstgrid = ESMF.Grid(filename=grid1, filetype=ESMF.FileFormat.SCRIP)
 srcfield = ESMF.Field(srcgrid, name='srcfield', staggerloc=ESMF.StaggerLoc.CENTER)
 srcfracfield = ESMF.Field(srcgrid, name='srcfracfield', staggerloc=ESMF.StaggerLoc.CENTER)
 
-# create a field on the nodes of the destination mesh
+# create a field on the center stagger locations of the destination grid
 dstfield = ESMF.Field(dstgrid, name='dstfield', staggerloc=ESMF.StaggerLoc.CENTER)
 xctfield = ESMF.Field(dstgrid, name='xctfield', staggerloc=ESMF.StaggerLoc.CENTER)
 dstfracfield = ESMF.Field(dstgrid, name='dstfracfield', staggerloc=ESMF.StaggerLoc.CENTER)
@@ -61,12 +65,25 @@ xctfield.data[...] = 200.0 + x + y + z
 
 dstfield.data[...] = 1e20
 
-# create an object to regrid data from the source to the destination field
-regrid = ESMF.Regrid(srcfield, dstfield,
+# write regridding weights to file
+import os
+filename = "esmpy_example_weight_file_cs.nc"
+if ESMF.local_pet() == 0:
+    if os.path.isfile(
+        os.path.join(os.getcwd(), filename)):
+        os.remove(os.path.join(os.getcwd(), filename))
+
+mg.barrier()
+
+regrid = ESMF.Regrid(srcfield, dstfield, filename=filename,
                      regrid_method=ESMF.RegridMethod.BILINEAR,
                      unmapped_action=ESMF.UnmappedAction.ERROR)
 
+mg.barrier()
+regrid = ESMF.RegridFromFile(srcfield, dstfield, filename=filename)
+
 # do the regridding from source to destination field
+mg.barrier()
 dstfield = regrid(srcfield, dstfield)
 
 # compute the mean relative error
@@ -82,19 +99,14 @@ if num_nodes is not 0:
 
 # handle the parallel case
 if ESMF.pet_count() > 1:
-    try:
-        from mpi4py import MPI
-    except:
-        raise ImportError
-    comm = MPI.COMM_WORLD
-    relerr = comm.reduce(relerr, op=MPI.SUM)
-    maxrelerr = comm.reduce(maxrelerr, op=MPI.MAX)
-    num_nodes = comm.reduce(num_nodes, op=MPI.SUM)
+    relerr = helpers.reduce_val(relerr, op=constants.Reduce.SUM)
+    maxrelerr = helpers.reduce_val(maxrelerr, op=constants.Reduce.MAX)
+    num_nodes = helpers.reduce_val(num_nodes, op=constants.Reduce.SUM)
 
 # output the results from one processor only
 if ESMF.local_pet() is 0:
     meanrelerr = relerr / num_nodes
-    print ("ESMPy cubed sphere Grid Mesh Regridding Example")
+    print ("ESMPy cubed sphere regridding example")
     print ("  interpolation mean relative error = {0}".format(meanrelerr))
     print ("  interpolation max relative (pointwise) error = {0}".format(maxrelerr))
 

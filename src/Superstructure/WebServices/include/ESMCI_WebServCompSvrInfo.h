@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -48,45 +48,45 @@ namespace ESMCI
   public:
 
      // constructor and destructor
-	  ESMCI_WebServCompSvrInfo();
-	  ~ESMCI_WebServCompSvrInfo();
+          ESMCI_WebServCompSvrInfo();
+          ~ESMCI_WebServCompSvrInfo();
 
      // get methods
-	  int    				clientId()		{ return theClientId; }
-	  string    			jobId()	   	{ return theJobId; }
-	  string    			hostName()		{ return theHostName; }
-	  int    				portNum()		{ return thePortNum; }
-	  string    			name()			{ return theName; }
-	  string    			desc()			{ return theDesc; }
-	  string    			physHostName()	{ return thePhysHostName; }
-	  int    				status()			{ return theCurrentStatus; }
+          int                                   clientId()              { return theClientId; }
+          string                        jobId()                 { return theJobId; }
+          string                        hostName()              { return theHostName; }
+          int                                   portNum()               { return thePortNum; }
+          string                        name()                  { return theName; }
+          string                        desc()                  { return theDesc; }
+          string                        physHostName()  { return thePhysHostName; }
+          int                                   status()                        { return theCurrentStatus; }
 
      // set methods
      void  setClientId(int  clientId);
-	  void  setJobId(string  jobId);
-	  void  setHostName(string  hostName);
-	  void  setPortNum(int  portNum);
-	  void  setName(string  name);
-	  void  setDesc(string  desc);
-	  void  setPhysHostName(string  hostName);
+          void  setJobId(string  jobId);
+          void  setHostName(string  hostName);
+          void  setPortNum(int  portNum);
+          void  setName(string  name);
+          void  setDesc(string  desc);
+          void  setPhysHostName(string  hostName);
      void  setStatus(int  status);
 
      void  print();
 
   private:
 
-	  int					theClientId;		// id for the client assigned to svr
-     string				theJobId;			// the unique id for the svr
-	  string				theHostName;		// name of the host which initiated
+          int                                   theClientId;            // id for the client assigned to svr
+     string                             theJobId;                       // the unique id for the svr
+          string                                theHostName;            // name of the host which initiated
                                        //   server started
-	  int					thePortNum;       // port number of the server socket 
-     string				theName;			   // name of the component
-     string				theDesc;			   // description for the component
-	  string				thePhysHostName;	// name of the host on which the svr
+          int                                   thePortNum;       // port number of the server socket
+     string                             theName;                           // name of the component
+     string                             theDesc;                           // description for the component
+          string                                thePhysHostName;        // name of the host on which the svr
                                        //   is actually running
-	  int					theCurrentStatus;	// current status of the server
+          int                                   theCurrentStatus;       // current status of the server
   };
 
 } // end namespace
 
-#endif 	// ESMCI_WebServCompSvrInfo_H
+#endif          // ESMCI_WebServCompSvrInfo_H

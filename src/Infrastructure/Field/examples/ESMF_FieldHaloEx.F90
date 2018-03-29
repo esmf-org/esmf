@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -17,10 +17,10 @@
 !==============================================================================
 !
 ! !PROGRAM: ESMF_FieldHaloEx - Field Halo demonstration
-!     
+!
 ! !DESCRIPTION:
-!     
-! This program shows examples of Field interfaces for 
+!
+! This program shows examples of Field interfaces for
 ! Halo operations
 !-----------------------------------------------------------------------------
 #include "ESMF.h"
@@ -66,7 +66,7 @@
 
 ! ------------------------------------------------------------------------------
 ! ------------------------------------------------------------------------------
-        
+
     rc = ESMF_SUCCESS
     finalrc = ESMF_SUCCESS
 !------------------------------------------------------------------------------
@@ -90,13 +90,13 @@
 ! The temperature field $u$
 ! is represented by a {\tt ESMF\_Field}. A finite difference explicit time stepping scheme is employed.
 ! During each time step, FieldHalo update is called to communicate values in the halo region
-! to neighboring domain elements. The steady state (as $t \rightarrow \infty$) solution 
+! to neighboring domain elements. The steady state (as $t \rightarrow \infty$) solution
 ! is a linear temperature profile along $x$. The numerical solution is an approximation of
 ! the steady state solution. It can be verified to represent a linear temperature profile.
-! 
-! Section \ref{Array:Halo} provides a discussion of the 
+!
+! Section \ref{Array:Halo} provides a discussion of the
 ! halo operation implemented in {\tt ESMF\_Array}.
-! 
+!
 !EOE
 
     ! Get current VM and pet number
@@ -106,7 +106,7 @@
     call ESMF_VMGet(vm, localPet=lpe, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-!BOC 
+!BOC
 ! create 1D distgrid and grid decomposed according to the following diagram:
 ! +------------+   +----------------+   +---------------+   +--------------+
 ! |   DE 0  |  |   |  |   DE 1   |  |   |  |   DE 2  |  |   |  |   DE 3    |
@@ -121,7 +121,7 @@
     grid = ESMF_GridCreate(distgrid=distgrid, name="grid", rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-    ! set up initial condition and boundary conditions of the 
+    ! set up initial condition and boundary conditions of the
     ! temperature Field
     if(lpe == 0) then
         allocate(fptr(17), tmp_farray(17))
@@ -132,7 +132,7 @@
         endx = 16
 
         field = ESMF_FieldCreate(grid, fptr, totalUWidth=(/1/), &
-		name="temperature", rc=rc)
+                name="temperature", rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     else if(lpe == 3) then
         allocate(fptr(17), tmp_farray(17))
@@ -143,7 +143,7 @@
         endx = 16
 
         field = ESMF_FieldCreate(grid, fptr, totalLWidth=(/1/), &
-		name="temperature", rc=rc)
+                name="temperature", rc=rc)
         if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     else
         allocate(fptr(18), tmp_farray(18))
@@ -168,14 +168,14 @@
     ! Solution converges after about 9000 steps based on apriori knowledge.
     ! The result is a linear temperature profile stored in field.
     do iter = 1, 9000
-     ! only elements in the exclusive region are updated locally 
+     ! only elements in the exclusive region are updated locally
      ! in each domain
      do i = startx, endx
        tmp_farray(i) = &
        fptr(i)+alpha*alpha*dt/dx/dx*(fptr(i+1)-2.*fptr(i)+fptr(i-1))
       enddo
       fptr = tmp_farray
-     ! call halo update to communicate the values in the halo region to 
+     ! call halo update to communicate the values in the halo region to
      ! neighboring domains
      call ESMF_FieldHalo(field, routehandle=routehandle, rc=rc)
      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

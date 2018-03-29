@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -462,6 +462,15 @@ contains
 !        attributeName = "CplList"
 !        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
 !            attributeName=attributeName, convention=convention, purpose=purpose, &
+!            rc=rc)
+!        if (ESMF_LogFoundError(rc, &
+!            line=__LINE__, &
+!            file=FILENAME)) &
+!            return  ! bail out
+!        attributeName = "CplSetList"
+!        call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
+!            attributeName=attributeName, convention=convention,
+!            purpose=purpose, &
 !            rc=rc)
 !        if (ESMF_LogFoundError(rc, &
 !            line=__LINE__, &

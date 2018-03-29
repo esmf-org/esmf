@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -61,9 +61,9 @@
     integer                                  :: nx, ny      ! the size of the tile, maybe a rectangular grid
     integer                                  :: ncontacts   ! number of contacts
     character(len=ESMF_MAXPATHLEN)           :: tileDirectory  ! the path of the tile files
-    character(len=ESMF_MAXPATHLEN),  pointer :: filenames(:)  ! the tile filename array
-    integer, pointer                         :: contact(:,:)   ! pair of tiles in each contact
-    integer, pointer                         :: connindex(:,:,:)  ! the end points of the contact edges
+    character(len=ESMF_MAXPATHLEN), pointer  :: filenames(:)  ! the tile filename array
+    integer, allocatable                     :: contact(:,:)   ! pair of tiles in each contact
+    integer, allocatable                     :: connindex(:,:,:)  ! the end points of the contact edges
   end type
     
 !------------------------------------------------------------------------------
@@ -77,6 +77,7 @@
   public ESMF_GridspecReadMosaic
   public ESMF_GridspecQueryTileSize
   public ESMF_GridspecQueryTileGlobal
+  public ESMF_MosaicDestroy
 
 !==============================================================================
 
@@ -984,8 +985,8 @@ subroutine readContacts(ncid, varid, dims, mosaicname, tilenames, &
   integer, intent(in)                       :: dims(2)
   character(len=*), intent(in)              :: mosaicname
   character(len=*), intent(in), target      :: tilenames(:)
-  integer, pointer                          :: contact(:,:)
-  integer, pointer                          :: connindex(:,:,:)
+  integer, intent(inout)                     :: contact(:,:)
+  integer, intent(inout)                    :: connindex(:,:,:)
   integer, intent(out)                      :: rc
 
   ! varid is the id for the "contact_region" variable
@@ -1235,6 +1236,33 @@ subroutine parse_contactindex(string, tiletuple)
   enddo
   return
 end subroutine parse_contactindex
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MosaicDestroy"
+
+!BOPI
+! !INTERFACE:
+subroutine ESMF_MosaicDestroy(mosaic, rc)
+
+! !ARGUMENTS:
+ 
+    type(ESMF_Mosaic), intent(inout)       :: mosaic
+    integer, optional, intent(out)         :: rc
+
+   ! Only allocated when there is netcdf
+#ifdef ESMF_NETCDF
+
+    ! Get rid of allocated members
+    deallocate(mosaic%filenames)
+    if (allocated(mosaic%contact)) deallocate(mosaic%contact)
+    if (allocated(mosaic%connindex)) deallocate(mosaic%connindex)
+#endif
+
+    ! return success
+    if (present(rc)) rc=ESMF_SUCCESS   
+
+end subroutine ESMF_MosaicDestroy
+
 
 
 !------------------------------------------------------------------------------

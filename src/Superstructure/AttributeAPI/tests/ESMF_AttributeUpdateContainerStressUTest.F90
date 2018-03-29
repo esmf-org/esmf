@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -25,8 +25,8 @@ module AttributeUpdateContainerStressUTestMod
 
   !-------------------------------------------------------------------------
 !   !  The SetVM Register routines for Gridcomp1
- 
-  subroutine userm1_setvm(comp, rc) 
+
+  subroutine userm1_setvm(comp, rc)
     type(ESMF_GridComp)  :: comp
     integer, intent(out) :: rc
 
@@ -40,11 +40,11 @@ module AttributeUpdateContainerStressUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    
+
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
@@ -90,9 +90,9 @@ module AttributeUpdateContainerStressUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -140,9 +140,9 @@ module AttributeUpdateContainerStressUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -183,7 +183,7 @@ module AttributeUpdateContainerStressUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_AttPack)        :: attpack   
+    type(ESMF_AttPack)        :: attpack
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
@@ -366,10 +366,10 @@ AttributeUpdateContainerStress
 
 The State and FieldBundle containers will be stressed with Add, Replace, and Remove
 operations on the Attribute bearing objects before they are Reconciled.  After the
-Reconcile call tests are done to verify that the structure of the Container is 
+Reconcile call tests are done to verify that the structure of the Container is
 correct.  Then the remaining Attribute bearing objects will be heavily manipulated
 with Attribute packages Added and Removed, and the individual Attributes within them
-Set and re-Set and Removed multiple times.  AttributeUpdate will be called and then 
+Set and re-Set and Removed multiple times.  AttributeUpdate will be called and then
 another round of tests is done to verify that the Attribute structure and values are
 correct.
 
@@ -378,7 +378,7 @@ Pre-Reconcile
 create 10 fields and 3 fieldbundles.  each field receives a standard attribute package
 with one of the attributes set.  field1 is added to fieldbundle1 which is added to the
 state.  fields 2-9 are added to fieldbundle2. field10 is added directly to the state.
-field2 and field3 are removed from fieldbundle2, then fieldbundle1 is replaced by 
+field2 and field3 are removed from fieldbundle2, then fieldbundle1 is replaced by
 fieldbundle2.  field2 and field3 are added back to fieldbundle2 with an addreplace call
 and then field4 and field5 are removed.
 
@@ -439,7 +439,7 @@ should include field2, 3, 6, 7, 8, 9.
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_AttPack)          :: attpack, attpack_parent 
+    type(ESMF_AttPack)          :: attpack, attpack_parent
     type(ESMF_VM)               :: vm
     integer                     :: petCount, myPet
     character(ESMF_MAXSTR)      :: name,value,convESMF,purpGen, outVal
@@ -520,7 +520,7 @@ then for each of the fields we will make different run time modifications:
     call ESMF_AttributeSet(field6, "att1", "val1", attpack=attpack, rc=rc)
     if (rc/=ESMF_SUCCESS) return
 
-    ! field7: add a nested attribute package (around old package), set a value, 
+    ! field7: add a nested attribute package (around old package), set a value,
     ! remove the whole nested package structure, then readd the outside part
     ! of the nested package and set a value
     call ESMF_AttributeAdd(field7, "newConvention", "newPurpose", &
@@ -730,7 +730,7 @@ then for each of the fields we will make different run time modifications:
     rc = ESMF_SUCCESS
 
   end subroutine usercpl_final
- 
+
 end module
 
 program ESMF_AttributeUpdateContainerStressUTest
@@ -783,7 +783,7 @@ program ESMF_AttributeUpdateContainerStressUTest
     type(ESMF_CplComp)      :: cplcomp
     character(ESMF_MAXSTR)  :: convESMF,purpGen
 
-  	type(ESMF_AttPack)      :: attpack, attpack_parent
+        type(ESMF_AttPack)      :: attpack, attpack_parent
     type(ESMF_Field)        :: field2, field3, field6, field7, field8, field9, field10
     type(ESMF_FieldBundle)  :: fieldbundle2
     type(ESMF_Grid)         :: grid
@@ -807,7 +807,7 @@ program ESMF_AttributeUpdateContainerStressUTest
     !-----------------------------------------------------------------------------
 
 #ifdef ESMF_TESTEXHAUSTIVE
-    call ESMF_VMGetCurrent(vm, rc=rc) 
+    call ESMF_VMGetCurrent(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
@@ -929,7 +929,7 @@ program ESMF_AttributeUpdateContainerStressUTest
     call ESMF_Test((rc==ESMF_SUCCESS .and. outVal == "val1"), &
                     name, failMsg, result, ESMF_SRCLINE)
 
-    ! field7: add a nested attribute package, set a value, remove the nested package, 
+    ! field7: add a nested attribute package, set a value, remove the nested package,
     ! then readd the nested package and reset the value
     !EX_UTest_Multi_Proc_Only
     call ESMF_AttributeGetAttPack(field7, "newConvention", "newPurpose", &

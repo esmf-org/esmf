@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -38,7 +38,7 @@ namespace ESMCI{
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN_X(c_esmc_calendarinitialize)(ESMC_CalKind_Flag *calkindflag, 
+       void FTN_X(c_esmc_calendarinitialize)(ESMC_CalKind_Flag *calkindflag,
                                            int *status) {
           int rc =
                 ESMCI_CalendarInitialize(
@@ -54,11 +54,11 @@ extern "C" {
        void FTN_X(c_esmc_calendarcreatebuiltin)(Calendar    **ptr,
                                               int               *nameLen,
                                               const char        *name,
-                                              ESMC_CalKind_Flag *calkindflag, 
+                                              ESMC_CalKind_Flag *calkindflag,
                                               int *status,
                                               ESMCI_FortranStrLenArg name_l) {
           *ptr = ESMCI_CalendarCreate(
-                                           *nameLen,      // always present 
+                                           *nameLen,      // always present
                                                           //  internal argument.
                     ESMC_NOT_PRESENT_FILTER(name),
                                            *calkindflag, // required
@@ -80,7 +80,7 @@ extern "C" {
                                            *nameLen,    // always present
                                                         //   internal argument.
                     ESMC_NOT_PRESENT_FILTER(name),
-                                            daysPerMonth,   // daysPerMonth 
+                                            daysPerMonth,   // daysPerMonth
                                                             //   present
                                            *monthsPerYear,  // always present
                                                           // internal argument.
@@ -132,7 +132,7 @@ extern "C" {
        void FTN_X(c_esmc_calendarsetbuiltin)(Calendar **ptr,
                                            int *nameLen,
                                            const char *name,
-                                           ESMC_CalKind_Flag *calkindflag, 
+                                           ESMC_CalKind_Flag *calkindflag,
                                            int *status,
                                            ESMCI_FortranStrLenArg name_l) {
            ESMF_CHECK_POINTER(*ptr, status)
@@ -144,7 +144,7 @@ extern "C" {
            if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN_X(c_esmc_calendarsetdefaultcal)(Calendar **calendar, 
+       void FTN_X(c_esmc_calendarsetdefaultcal)(Calendar **calendar,
                                               int *status) {
           int rc =
                 ESMCI_CalendarSetDefault(
@@ -152,7 +152,7 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN_X(c_esmc_calendarsetdefaultkind)(ESMC_CalKind_Flag *calkindflag, 
+       void FTN_X(c_esmc_calendarsetdefaultkind)(ESMC_CalKind_Flag *calkindflag,
                                                int *status) {
           int rc =
                 ESMCI_CalendarSetDefault(
@@ -176,7 +176,7 @@ extern "C" {
                                             *nameLen,    // always present
                                                          //   internal argument.
                      ESMC_NOT_PRESENT_FILTER(name),
-                                             daysPerMonth,   // daysPerMonth 
+                                             daysPerMonth,   // daysPerMonth
                                                              //   present
                                             *monthsPerYear,  // always present
                                                            // internal argument.
@@ -231,7 +231,7 @@ extern "C" {
                                     ESMCI_FortranStrLenArg tempName_l) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->Calendar::get(
-			                 // always present internal arguments.
+                                         // always present internal arguments.
                                             *nameLen,
                                              tempNameLen,
                                              tempName,
@@ -268,7 +268,7 @@ extern "C" {
                                     ESMCI_FortranStrLenArg tempName_l) {
            ESMF_CHECK_POINTER(*ptr, status)
            int rc = (*ptr)->Calendar::get(
-			                 // always present interval arguments.
+                                         // always present interval arguments.
                                             *nameLen,
                                              tempNameLen,
                                              tempName,
@@ -288,7 +288,7 @@ extern "C" {
            if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN_X(c_esmc_calendarisleapyeari4)(Calendar **ptr, 
+       void FTN_X(c_esmc_calendarisleapyeari4)(Calendar **ptr,
                                    ESMC_I4 *yy,
                                    int *esmf_calendarIsLeapYear, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
@@ -297,7 +297,7 @@ extern "C" {
                                              ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN_X(c_esmc_calendarisleapyeari8)(Calendar **ptr, 
+       void FTN_X(c_esmc_calendarisleapyeari8)(Calendar **ptr,
                                    ESMC_I8 *yy,
                                    int *esmf_calendarIsLeapYear, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)

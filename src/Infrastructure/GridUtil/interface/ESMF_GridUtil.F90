@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !
@@ -47,16 +47,16 @@ module ESMF_GridUtilMod
   use ESMF_StaggerLocMod
   use ESMF_ArrayMod
   use ESMF_MeshMod
-  
+
   implicit none
 
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
   private
-      
+
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      
+
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
@@ -66,7 +66,9 @@ module ESMF_GridUtilMod
 ! - ESMF-public methods:
   public ESMF_MeshIO
   public ESMF_GridWriteVTK
+  public ESMF_GridCellWriteVTK
   public ESMF_GridToMesh
+  public ESMF_GridToMeshCell
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -77,7 +79,7 @@ module ESMF_GridUtilMod
     '$Id$'
 
 !==============================================================================
-! 
+!
 ! INTERFACE BLOCKS
 !
 !==============================================================================
@@ -99,7 +101,7 @@ module ESMF_GridUtilMod
     type(ESMF_VM), intent(inout)                  :: vm
     type(ESMF_Grid), intent(inout)                :: grid
     type(ESMF_StaggerLoc), intent(in)             :: staggerLoc
-    character(len = *), intent(in)                :: filename 
+    character(len = *), intent(in)                :: filename
     type(ESMF_Array), intent(inout), optional     :: array1
     type(ESMF_Array), intent(inout), optional     :: array2
     type(ESMF_Array), intent(inout), optional     :: array3
@@ -116,7 +118,7 @@ module ESMF_GridUtilMod
 !   \begin{description}
 !   \item [vm]
 !         Virutal machine
-!   \item[staggerLoc] 
+!   \item[staggerLoc]
 !         stagger of field
 !   \item[filename]
 !         File (stub) to write results to
@@ -152,23 +154,23 @@ module ESMF_GridUtilMod
 
     select case (minidx)
       case (1)
-        return 
+        return
       case (2)
         call c_ESMC_MeshIO(vm, grid, staggerLoc, 1, filename, localrc, &
              array1, array1, array1, array1, array1, array1, lspherical)
-      case (3) 
+      case (3)
         call c_ESMC_MeshIO(vm, grid, staggerLoc, 2, filename, localrc, &
              array1, array2, array1, array1, array1, array1, lspherical)
-      case (4) 
+      case (4)
         call c_ESMC_MeshIO(vm, grid, staggerLoc, 3, filename, localrc, &
              array1, array2, array3, array1, array1, array1, lspherical)
-      case (5) 
+      case (5)
         call c_ESMC_MeshIO(vm, grid, staggerLoc, 4, filename, localrc, &
              array1, array2, array3, array4, array1, array1, lspherical)
-      case (6) 
+      case (6)
         call c_ESMC_MeshIO(vm, grid, staggerLoc, 5, filename, localrc, &
              array1, array2, array3, array4, array5, array1, lspherical)
-      case (10) 
+      case (10)
         call c_ESMC_MeshIO(vm, grid, staggerLoc, 6, filename, localrc, &
              array1, array2, array3, array4, array5, array6, lspherical)
       case default
@@ -195,7 +197,7 @@ module ESMF_GridUtilMod
 ! !ARGUMENTS:
     type(ESMF_Grid), intent(inout)                :: grid
     type(ESMF_StaggerLoc), intent(in),optional    :: staggerLoc
-    character(len = *), intent(in)                :: filename 
+    character(len = *), intent(in)                :: filename
     type(ESMF_Array), intent(inout), optional     :: array1
     type(ESMF_Array), intent(inout), optional     :: array2
     type(ESMF_Array), intent(inout), optional     :: array3
@@ -211,7 +213,7 @@ module ESMF_GridUtilMod
 !   \begin{description}
 !   \item [grid]
 !         grid to write
-!   \item[{[staggerLoc]}] 
+!   \item[{[staggerLoc]}]
 !         stagger of field
 !   \item[filename]
 !         File (stub) to write results to
@@ -267,23 +269,23 @@ module ESMF_GridUtilMod
         call c_ESMC_GridIO(grid, tmp_staggerloc, 1, filename, localrc, &
              array1, arrayEmpty, arrayEmpty, arrayEmpty, arrayEmpty, &
              arrayEmpty, lspherical, lisLatLonDeg)
-      case (3) 
+      case (3)
         call c_ESMC_GridIO(grid, tmp_staggerloc, 2, filename, localrc, &
              array1, array2, arrayEmpty, arrayEmpty, arrayEmpty, &
              arrayEmpty, lspherical, lisLatLonDeg)
-      case (4) 
+      case (4)
         call c_ESMC_GridIO(grid, tmp_staggerloc, 3, filename, localrc, &
              array1, array2, array3, arrayEmpty, arrayEmpty, &
              arrayEmpty, lspherical, lisLatLonDeg)
-      case (5) 
+      case (5)
         call c_ESMC_GridIO(grid, tmp_staggerloc, 4, filename, localrc, &
              array1, array2, array3, array4, arrayEmpty, &
              arrayEmpty, lspherical, lisLatLonDeg)
-      case (6) 
+      case (6)
         call c_ESMC_GridIO(grid, tmp_staggerloc, 5, filename, localrc, &
              array1, array2, array3, array4, array5, &
              arrayEmpty, lspherical, lisLatLonDeg)
-      case (10) 
+      case (10)
         call c_ESMC_GridIO(grid, tmp_staggerloc, 5, filename, localrc, &
              array1, array2, array3, array4, array5, &
              array6, lspherical, lisLatLonDeg)
@@ -294,6 +296,59 @@ module ESMF_GridUtilMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_GridWriteVTK
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCellWriteVTK()"
+!BOPI
+! !IROUTINE: ESMF_GridCellWriteVTK -- Write Grid and associated Arrays
+!
+! !INTERFACE:
+    subroutine ESMF_GridCellWriteVTK(grid, filename, rc)
+!
+!
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(inout)                :: grid
+    character(len = *), intent(in)                :: filename
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Write the fields out for purview.  This function overcomes certain
+!   difficulties in passing strings with an optional number of arguments.
+!
+!   \begin{description}
+!   \item [grid]
+!         grid to write
+!   \item[{[staggerLoc]}]
+!         stagger of field
+!   \item[filename]
+!         File (stub) to write results to
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    integer                 :: minidx
+    integer                 :: tmp_staggerloc
+    type(ESMF_Array)        :: arrayEmpty
+
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! Call into write
+    call c_ESMC_GridCellIO(grid, 0, filename, localrc, &
+         arrayEmpty, arrayEmpty, arrayEmpty, arrayEmpty, arrayEmpty, &
+         arrayEmpty)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_GridCellWriteVTK
 !------------------------------------------------------------------------------
 
 
@@ -332,7 +387,7 @@ module ESMF_GridUtilMod
 !         1 = a spherical grid make peridoic
 !   \item [isLatLonDeg]
 !         true coords of grids are lat lon in deg, default depends on isSphere
-!         if isSphere=1 then default is true, else is false.  
+!         if isSphere=1 then default is true, else is false.
 !   \item [regridConserve]
 !         ESMF\_REGRID\_CONSERVE\_ON turns on the conservative regridding
 !   \item [{[rc]}]
@@ -341,12 +396,12 @@ module ESMF_GridUtilMod
 !
 !EOPI
 !------------------------------------------------------------------------------
-    integer :: localrc 
+    integer :: localrc
     type(ESMF_Pointer) :: theMesh
     type(ESMF_InterArray) :: maskValuesArg
     type(ESMF_Index_Flag) :: indexflag
     type(ESMF_RegridConserve) :: lregridConserve
-    integer :: localIsLatLonDeg     
+    integer :: localIsLatLonDeg
     type(ESMF_CoordSys_Flag) :: coordSys
     integer :: dimCount
 
@@ -355,7 +410,7 @@ module ESMF_GridUtilMod
     ! Error check Grid
     call ESMF_GridGet(grid, indexflag=indexflag, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      	  ESMF_CONTEXT, rcToReturn=rc)) return
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Handle optional conserve argument
     if (present(regridConserve)) then
@@ -380,20 +435,20 @@ module ESMF_GridUtilMod
     endif
 
 
-    ! convert mask values 
+    ! convert mask values
     maskValuesArg = ESMF_InterArrayCreate(maskValues, rc=localrc)
-    	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      	  ESMF_CONTEXT, rcToReturn=rc)) return
- 
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
     call c_esmc_gridtomesh(grid, staggerLoc%staggerloc, isSphere, &
       localIsLatLonDeg, theMesh, maskValuesArg, &
       lregridConserve%regridconserve, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      	    ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     call ESMF_InterArrayDestroy(maskValuesArg, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      	    ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_GridToMesh = ESMF_MeshCreate(theMesh)
 
@@ -403,7 +458,7 @@ module ESMF_GridUtilMod
                       dimCount=dimCount, &
                       rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      	    ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_GridToMesh%coordSys=coordSys
     ESMF_GridToMesh%parametricDim=dimCount
@@ -412,6 +467,72 @@ module ESMF_GridUtilMod
     if (present(rc)) rc = ESMF_SUCCESS
 
     end function ESMF_GridToMesh
+
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridToMeshCell()"
+!BOPI
+! !IROUTINE: ESMF_GridToMeshCell -- return a mesh with same topo as mesh
+!
+! !INTERFACE:
+   function ESMF_GridToMeshCell(grid, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)                               :: ESMF_GridToMeshCell
+!
+! !ARGUMENTS:
+    type(ESMF_Grid), intent(in)                :: grid
+    integer, intent(out) , optional               :: rc
+!
+! !DESCRIPTION:
+!   Create a mesh object with the same topology as the grid.
+!
+!   \begin{description}
+!   \item [grid]
+!         The grid to copy.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer :: localrc
+    type(ESMF_Pointer) :: theMesh
+    type(ESMF_Index_Flag) :: indexflag
+    type(ESMF_CoordSys_Flag) :: coordSys
+    integer :: dimCount
+
+    localrc = ESMF_SUCCESS
+
+    ! Error check Grid
+    call ESMF_GridGet(grid, indexflag=indexflag, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call c_esmc_gridtomeshcell(grid, theMesh, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_GridToMeshCell = ESMF_MeshCreate(theMesh)
+
+    ! Set these here, eventually this will happen automatically internally inside ESMF_MeshCreate()
+    call ESMF_GridGet(grid,              &
+                      coordSys=coordSys, &
+                      dimCount=dimCount, &
+                      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ESMF_GridToMeshCell%coordSys=coordSys
+    ESMF_GridToMeshCell%parametricDim=dimCount
+    ESMF_GridToMeshCell%spatialDim=dimCount
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    end function ESMF_GridToMeshCell
 
 end module ESMF_GridUtilMod
 

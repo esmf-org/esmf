@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -36,7 +36,10 @@
       use ESMF_VMMod
       use ESMF_IOUGridMod
       use ESMF_IOGridspecMod
+      use ESMF_DistGridMod
+      use ESMF_ArrayMod
       use ESMF_IOGridmosaicMod
+      use ESMF_AttPackTypeMod
 #ifdef ESMF_NETCDF
       use netcdf
 #endif
@@ -48,6 +51,7 @@
 ! !PRIVATE:
       private
 !------------------------------------------------------------------------------
+
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
@@ -55,6 +59,7 @@
   public ESMF_ScripInq
   public ESMF_ScripInqUnits
   public ESMF_ScripGetVar
+  public ESMF_OutputWeightFile
   public ESMF_OutputScripWeightFile
   public ESMF_OutputSimpleWeightFile
   public ESMF_EsmfGetNode
@@ -64,6 +69,9 @@
   public ESMF_EsmfInqUnits
   public ESMF_EsmfGetCoords
 
+  public ESMF_SparseMatrixWrite     !TODO: move this into SparseMatrix class
+                                    !TODO: once implemented
+
 !==============================================================================
 
       contains
@@ -71,6 +79,321 @@
 !==============================================================================
 
 ! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_SparseMatrixWrite"
+!BOP
+! !IROUTINE: ESMF_SparseMatrixWrite - Write a sparse matrix to file
+! \label{api:SparseMatrixWrite}
+!
+! !INTERFACE:
+  subroutine ESMF_SparseMatrixWrite(factorList, factorIndexList, fileName, &
+    keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    real(ESMF_KIND_R8),    intent(in)            :: factorList(:)
+    integer(ESMF_KIND_I4), intent(in)            :: factorIndexList(:,:)
+    character(*),          intent(in)            :: fileName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,               intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Write the {\tt factorList} and {\tt factorIndexList} into a NetCDF file.
+!   The data is stored in SCRIP format documented under section 
+!   ~(\ref{sec:weightfileformat}).
+!
+!   Limitations:
+!   \begin{itemize}
+!     \item Only {\tt real(ESMF\_KIND\_R8) factorList} and 
+!           {\tt integer(ESMF\_KIND\_I4) factorIndexList} supported.
+!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
+!   \end{itemize}
+!
+!  The arguments are:
+!  \begin{description}
+!   \item[factorList]
+!    The sparse matrix factors to be written.
+!   \item[factorIndexList]
+!    The sparse matrix sequence indices to be written.
+!   \item[fileName]
+!    The name of the output file to be written.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! Local vars
+    integer                    :: localrc           ! local return code
+
+    ! Initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into lower level implementation
+    call ESMF_OutputWeightFile(weightFile=fileName, factorList=factorList, &
+      factorIndexList=factorIndexList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_SparseMatrixWrite
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-public method -------------------------------
+!------------------------------------------------------------------------------
+#undef ESMF_METHOD
+#define ESMF_METHOD "ESMF_OutputWeightFile"
+!BOPI
+! !ROUTINE: ESMF_OutputWeightFile
+! output the weight and indices tables only
+!
+
+! !INTERFACE:
+subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
+!
+! !ARGUMENTS:
+    character(len=*), intent(in) :: weightFile
+    real(ESMF_KIND_R8), intent(in) :: factorList(:)
+    integer(ESMF_KIND_I4), intent(in) :: factorIndexList(:,:)
+    integer, intent(inout), optional :: rc
+
+    type(ESMF_DistGrid) :: distgridFL
+    type(ESMF_Array) :: arrayFL, arrayFIL1, arrayFIL2
+
+    type(ESMF_AttPack) :: attpack
+    integer :: lens(3), lens2(1), nfactors, ii, localPet, petCount, startIndex, &
+               stopIndex, localrc, memstat, hasFactors, nLivePETs(1), offset
+    character(len=22), parameter :: specString = "distgridnetcdfmetadata"
+    character(len=23), parameter :: name = "ESMF:gridded_dim_labels"
+    character(len=3), parameter :: value = "n_s"
+    character(len=70), parameter :: noFactorsMsg = '"factorList" has size 0 and PET count is 1. There is nothing to write.'
+    integer(ESMF_KIND_I4), allocatable, dimension(:) :: col, row
+    type(ESMF_VM) :: vm
+    integer(ESMF_KIND_I4), dimension(1) :: sendData, recvData
+    integer(ESMF_KIND_I4), dimension(2) :: bcstData
+    integer(ESMF_KIND_I4), allocatable, dimension(:,:,:) :: deBlockList
+    
+    ! ==============================================================================
+    
+    if (present(rc)) then
+      localrc = rc
+    else
+      localrc = ESMF_RC_NOT_IMPL
+    endif
+    
+#if (!defined ESMF_PIO || (!defined ESMF_NETCDF && !defined ESMF_PNETCDF))
+    ! Writing weights requires netCDF and the subroutine should not continue if
+    ! the netCDF library is not available.
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
+    
+    call ESMF_VMGetGlobal(vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! ==============================================================================
+    ! Create the DistGrid. The factors may be ragged (factor count differs between
+    ! PETs). Synchronize min and max indices across PETs.
+    
+    ! Number of local factors.
+    nfactors = size(factorList, 1)
+    
+    ! Bail out if there are no factors and this is a single process.
+    if ((nfactors .eq. 0) .and. (petCount .eq. 1)) then
+      if (ESMF_LogFoundError(ESMF_RC_NOT_IMPL, msg=noFactorsMsg, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    ! Determine if we need a redistribution. A redistribution is needed if one of
+    ! the PETs does not have any factors.
+    if (nfactors .eq. 0) then
+      hasFactors = 0
+    else
+      hasFactors = 1
+    endif
+    call ESMF_VMAllReduce(vm, (/hasFactors/), nLivePETs, 1, ESMF_REDUCE_SUM, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+    
+    ! Chain start and stop index calculation.
+    if (localPet .ne. 0) then
+      call ESMF_VMRecv(vm, recvData, 1, localPet-1, rc=localrc)
+      startIndex = recvData(1)
+    else
+      startIndex = 1
+    endif
+    if (nfactors .eq. 0) then
+      stopIndex = startIndex
+    else
+      stopIndex = startIndex + nfactors - 1
+    endif
+    if ((localPet .ne. petCount-1) .and. (petCount > 1)) then
+      if (nfactors == 0) then
+        offset = 0
+      else
+        offset = 1
+      endif
+      call ESMF_VMSend(vm, (/stopIndex+offset/), 1, localPet+1, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    ! Some PETs do not have data. We need to gather and scatter to ensure the
+    ! asynchronous write has data for each proc - or - we can use the simple weight
+    ! file write implementation that can handle zero-length factor lists.
+    
+    ! TODO (bekozi): Array should be able to handle empty data and the write should
+    !  correspondingly work.
+
+    if (nLivePETs(1) .ne. petCount) then
+      ! This streams everything to a single PET for writing avoiding the need for an
+      ! asynchronous write.
+      call ESMF_OutputSimpleWeightFile(weightFile, factorList, factorIndexList, &
+                                       rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+      return
+    endif
+    !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    
+    ! Ragged factor counts may require a non-regular decomposition. This requires a 
+    ! custom block definition per DE.
+    allocate(deBlockList(1, 2, petCount), stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    do ii=1,petCount
+      if (localPet .eq. ii-1) then
+        bcstData = (/startIndex, stopIndex/)
+      else
+        bcstData = (/0, 0/)
+      endif
+      call ESMF_VMBroadcast(vm, bcstData, 2, ii-1, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      deBlockList(1, :, ii) = bcstData
+    enddo
+    
+    distgridFL = ESMF_DistGridCreate(minIndex=(/1/), &
+                                     maxIndex=(/deBlockList(1, 2, petCount)/), &
+                                     deBlockList=deBlockList, &
+                                     rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+        
+    ! ==============================================================================
+    ! Set up attributes to allow variables to share a common dimension name in the
+    ! output file.
+
+    !NOTE: removed distgridcreate from factorIndexList so that all
+    !      Arrays could share the same DistGrid (i.e. dimensions)
+
+    ! distgrid metadata
+    lens(1) = 8
+    lens(2) = 6
+    lens(3) = 8
+    
+    lens2(1) = 3
+    
+    ! set up the metadata on distgrid
+    call c_ESMC_AttPackCreateCustom(distgridFL, size(lens), specString, &
+                                    lens, attpack, localrc)
+    !call ESMF_AttributeAdd(grid, convention="netcdf", purpose="metadata",  &
+    !  attrList=(/ ESMF_ATT_GRIDDED_DIM_LABELS /), rc=rc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    !call c_ESMC_AttPackAddAtt(grid, name, size(lens), specString, &
+    !                          lens, rc)
+    call c_ESMC_AttPackAddAtt(name, attpack, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    call c_ESMC_AttPackSetCharList(distgridFL, name, ESMF_TYPEKIND_CHARACTER, &
+                                  1, value, lens2, attpack, 0, localrc)
+    !call ESMF_AttributeSet(grid, name=ESMF_ATT_GRIDDED_DIM_LABELS, &
+    !                       convention="netcdf", purpose="metadata",  &
+    !                       valueList=(/ "n_s"/), rc=rc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! ==============================================================================
+    ! Create arrays.
+
+    arrayFL = ESMF_ArrayCreate(farray=factorList, distgrid=distgridFL, &
+                               indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Copy factor indexing before passing to array create. Passing an array section 
+    ! here causes undefined behavior in the array buffer access. "datacopyflag" does 
+    ! not work with this interface??
+    allocate(col(nfactors), row(nfactors), stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    do ii=1,nfactors
+      col(ii) = factorIndexList(1, ii)
+      row(ii) = factorIndexList(2, ii)
+    enddo
+    
+    arrayFIL1 = ESMF_ArrayCreate(farray=col, distgrid=distgridFL, &
+                                 indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    arrayFIL2 = ESMF_ArrayCreate(farray=row, distgrid=distgridFL, &
+                                 indexflag=ESMF_INDEX_DELOCAL, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! ==============================================================================
+    ! Write arrays to file.
+
+    ! Do not overwrite the output file by default.
+    call ESMF_ArrayWrite(arrayFL, weightFile, variableName="S", &
+                         convention="netcdf", purpose="metadata", &
+                         overwrite=.false., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set overwrite to true for consecutive writes. The file is created on the first
+    ! write.
+    call ESMF_ArrayWrite(arrayFIL1, weightFile, variableName="col", &
+                         convention="netcdf", purpose="metadata", &
+                         overwrite=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_ArrayWrite(arrayFIL2, weightFile, variableName="row", &
+                         convention="netcdf", purpose="metadata", &
+                         overwrite=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! ==============================================================================
+
+    deallocate(col, row, deBlockList, stat=memstat)
+    if (ESMF_LogFoundDeallocError(memstat,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_ArrayDestroy(arrayFL, rc=localrc)
+    call ESMF_ArrayDestroy(arrayFIL1, rc=localrc)
+    call ESMF_ArrayDestroy(arrayFIL2, rc=localrc)
+    call ESMF_DistGridDestroy(distgridFL, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+        
+    rc = localrc
+
+end subroutine ESMF_OutputWeightFile
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ScripInq"
@@ -676,6 +999,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       character(len=ESMF_MAXPATHLEN) :: tempname
       integer            :: totalsize, totallen
       integer            :: meshId
+      integer            :: memstat
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -735,7 +1059,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       if (rc /= ESMF_SUCCESS) return
 
       localCount(1)=size(factorList,1)
-      allocate(allCounts(PetCnt))
+      allocate(allCounts(PetCnt), stat=memstat)
+      if (ESMF_LogFoundAllocError(memstat,  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
       call ESMF_VMAllGather(vm,localCount,allCounts,1,rc=status)
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -797,6 +1124,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
               map_method = "Conservative remapping"
               esmf_regrid_method = "First-order Conservative"
+           elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
+              map_method = "Conservative remapping"
+              esmf_regrid_method = "Second-order Conservative"
            elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod) then
               map_method = "Bilinear remapping"
               esmf_regrid_method = "Nearest source to destination"
@@ -900,7 +1230,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 
         ! Get Source Grid dimension and variables
         if (srcFileTypeLocal == ESMF_FILEFORMAT_SCRIP) then
-          allocate(src_grid_dims(2))
+          allocate(src_grid_dims(2), stat=memstat)
+          if (ESMF_LogFoundAllocError(memstat,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
           call ESMF_ScripInq(srcFile, grid_rank=src_grid_rank, grid_size=srcDim, &
               grid_dims=src_grid_dims, grid_corners=src_grid_corner, &
               has_area=src_has_area, rc=status)
@@ -911,7 +1244,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           if (src_grid_rank == 1) src_grid_dims(1) = srcDim
           call ESMF_ScripInqUnits(srcFile,units = srcunits, rc=status)
         else if (srcFileTypeLocal == ESMF_FILEFORMAT_GRIDSPEC) then
-          allocate(src_grid_dims(2))
+          allocate(src_grid_dims(2), stat=memstat)
+          if (ESMF_LogFoundAllocError(memstat,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
           call ESMF_GridspecInq(srcFile, src_ndims, src_grid_dims, &
                 dimids = src_dimids, coordids = src_coordids, &
                 coord_names = srccoordnames, hasbound=srchasbound, rc=status)
@@ -942,7 +1278,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 coordDim = srcCoordDim, nodeCount=srcNodeDim, haveArea=src_has_area, rc=status)
           endif
           call ESMF_EsmfInqUnits(srcFile,units = srcunits, rc=status)
-          allocate(src_grid_dims(1))
+          allocate(src_grid_dims(1), stat=memstat)
+          if (ESMF_LogFoundAllocError(memstat,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
           src_grid_dims(1)=srcDim
           src_grid_rank = 1
         else if (srcFileTypeLocal == ESMF_FILEFORMAT_UGRID) then
@@ -962,7 +1301,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
           srcCoordDim = 2
-          allocate(src_grid_dims(1))
+          allocate(src_grid_dims(1), stat=memstat)
+          if (ESMF_LogFoundAllocError(memstat,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
           src_grid_dims(1)=srcDim
           src_grid_rank = 1
         else if (srcFileTypeLocal == ESMF_FILEFORMAT_MOSAIC) then
@@ -979,7 +1321,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         endif
 
         if (dstFileTypelocal == ESMF_FILEFORMAT_SCRIP) then
-          allocate(dst_grid_dims(2))
+          allocate(dst_grid_dims(2), stat=memstat)
+          if (ESMF_LogFoundAllocError(memstat,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
           call ESMF_ScripInq(dstFile, grid_rank=dst_grid_rank, grid_size=dstDim, &
              grid_dims=dst_grid_dims, grid_corners=dst_grid_corner, &
              has_area=dst_has_area, rc=status)
@@ -990,7 +1335,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           if (dst_grid_rank == 1) dst_grid_dims(1) = dstDim
           call ESMF_ScripInqUnits(dstFile,units = dstunits, rc=status)
         else if (dstFileTypeLocal == ESMF_FILEFORMAT_GRIDSPEC) then
-          allocate(dst_grid_dims(2))
+          allocate(dst_grid_dims(2), stat=memstat)
+          if (ESMF_LogFoundAllocError(memstat,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
           call ESMF_GridspecInq(dstFile, dst_ndims, dst_grid_dims, &
                 dimids = dst_dimids, coordids = dst_coordids, &
                 coord_names = dstcoordnames, hasbound=dsthasbound, rc=status)
@@ -1021,7 +1369,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               coordDim = dstCoordDim, nodeCount=dstNodeDim, haveArea=dst_has_area, rc=status)
           endif
           call ESMF_EsmfInqUnits(dstFile,units = dstunits, rc=status)
-          allocate(dst_grid_dims(1))
+          allocate(dst_grid_dims(1), stat=memstat)
+          if (ESMF_LogFoundAllocError(memstat,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
           dst_grid_dims(1)=dstDim
           dst_grid_rank = 1
         else if (dstFileTypeLocal == ESMF_FILEFORMAT_UGRID) then
@@ -1041,7 +1392,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                         ESMF_CONTEXT, rcToReturn=rc)) return
           dstCoordDim = 2
-          allocate(dst_grid_dims(1))
+          allocate(dst_grid_dims(1), stat=memstat)
+          if (ESMF_LogFoundAllocError(memstat,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
           dst_grid_dims(1)=dstDim
           dst_grid_rank = 1
         else if (dstFileTypeLocal == ESMF_FILEFORMAT_MOSAIC) then
@@ -1051,7 +1405,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           dstCoordDim = 2
           dst_grid_rank = 1
           dst_grid_corner = 0
-          allocate(dst_grid_dims(1))
+          allocate(dst_grid_dims(1), stat=memstat)
+          if (ESMF_LogFoundAllocError(memstat,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
           dstDim = dstmosaic%nx * dstmosaic%ny * dstmosaic%ntiles
           dst_grid_dims(1)=dstDim
           dstunits = 'degrees'
@@ -1419,7 +1776,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
 
         if (srcFileTypeLocal == ESMF_FILEFORMAT_SCRIP) then
            ! Read the srcGrid variables and write them out
-           allocate(latBuffer(srcDim), lonBuffer(srcDim))
+           allocate(latBuffer(srcDim), lonBuffer(srcDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            call ESMF_ScripGetVar(srcFile, grid_center_lon=lonBuffer, &
                 grid_center_lat=latBuffer, rc=status)
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -1442,10 +1802,16 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,&
              errmsg,&
              rc)) return
-           deallocate(latBuffer, lonBuffer)
+           deallocate(latBuffer, lonBuffer, stat=memstat)
+           if (ESMF_LogFoundDeallocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
 
           ! Write xv_a, yv_a    
-           allocate(latBuffer2(src_grid_corner,srcDim),lonBuffer2(src_grid_corner,srcDim))
+           allocate(latBuffer2(src_grid_corner,srcDim),lonBuffer2(src_grid_corner,srcDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            call ESMF_ScripGetVar(srcFile, grid_corner_lon=lonBuffer2, &
                 grid_corner_lat=latBuffer2, rc=status)
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -1468,9 +1834,15 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,&
              errmsg,&
              rc)) return
-           deallocate(latBuffer2, lonBuffer2)
+           deallocate(latBuffer2, lonBuffer2, stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
 
-           allocate(mask(srcDim))
+
+           allocate(mask(srcDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            call ESMF_ScripGetVar(srcFile, grid_imask=mask, rc=status)
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1482,10 +1854,16 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,&
              errmsg,&
              rc)) return
-           deallocate(mask)
+           deallocate(mask, stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
 
            if (src_has_area .and. .not. present(srcArea)) then
-              allocate(area(srcDim))
+              allocate(area(srcDim), stat=memstat)
+              if (ESMF_LogFoundAllocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
               call ESMF_ScripGetVar(srcFile, grid_area=area, rc=status)
               if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1497,15 +1875,27 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 ESMF_SRCLINE,&
                 errmsg,&
                 rc)) return
-              deallocate(area)
+              deallocate(area, stat=memstat)
+              if (ESMF_LogFoundAllocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
            endif
         else if (srcFileTypeLocal == ESMF_FILEFORMAT_GRIDSPEC) then
-           allocate(lonBuffer(srcDim), latBuffer(srcDim))
+           allocate(lonBuffer(srcDim), latBuffer(srcDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            if (src_ndims == 1) then
-             allocate(lonBuffer1D(src_grid_dims(1)), latBuffer1D(src_grid_dims(2)))
+             allocate(lonBuffer1D(src_grid_dims(1)), latBuffer1D(src_grid_dims(2)), stat=memstat)
+             if (ESMF_LogFoundAllocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
              if (srchasbound) then
                 allocate(cornerlon2D(src_grid_corner,src_grid_dims(1)), &
-                      cornerlat2D(src_grid_corner,src_grid_dims(2)))
+                      cornerlat2D(src_grid_corner,src_grid_dims(2)), stat=memstat)
+                if (ESMF_LogFoundAllocError(memstat,  &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+
                 call ESMF_GridspecGetVar1D(srcFile, src_coordids, lonBuffer1D, latBuffer1D, &
                       cornerlon = cornerlon2D, cornerlat=cornerlat2D, rc=status)
                 if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -1524,9 +1914,15 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 k=k+1
               enddo
             enddo
-            deallocate(lonBuffer1D, latBuffer1D)
+            deallocate(lonBuffer1D, latBuffer1D, stat=memstat)
+            if (ESMF_LogFoundDeallocError(memstat,  &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
             if (srchasbound) then
-               allocate(lonBuffer2(src_grid_corner, srcDim),latBuffer2(src_grid_corner,srcDim))
+               allocate(lonBuffer2(src_grid_corner, srcDim),latBuffer2(src_grid_corner,srcDim), stat=memstat)
+               if (ESMF_LogFoundAllocError(memstat,  &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
                k=1
                do j=1,src_grid_dims(2)
                  do i=1,src_grid_dims(1)
@@ -1538,10 +1934,16 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
             endif
           else
              allocate(lonBuffer2(src_grid_dims(1),src_grid_dims(2)), &
-                      latBuffer2(src_grid_dims(1),src_grid_dims(2)))
+                      latBuffer2(src_grid_dims(1),src_grid_dims(2)), stat=memstat)
+             if (ESMF_LogFoundAllocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
              if (srchasbound) then              
                 allocate(cornerlon3D(src_grid_corner,src_grid_dims(1), src_grid_dims(2)),&
-                    cornerlat3D(src_grid_corner,src_grid_dims(1), src_grid_dims(2)))
+                    cornerlat3D(src_grid_corner,src_grid_dims(1), src_grid_dims(2)), stat=memstat)
+                if (ESMF_LogFoundAllocError(memstat,  &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+
                 call ESMF_GridspecGetVar2D(srcFile, src_coordids, lonBuffer2, latBuffer2, &
                     cornerlon=cornerlon3D, cornerlat=cornerlat3D, rc=status)
                 if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -1554,12 +1956,21 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              endif
              lonBuffer = reshape(lonBuffer2, (/srcDim/))
              latBuffer = reshape(latBuffer2, (/srcDim/))
-             deallocate(lonBuffer2, latBuffer2)
+             deallocate(lonBuffer2, latBuffer2, stat=memstat)
+             if (ESMF_LogFoundAllocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
              if (srchasbound) then
-                allocate(lonBuffer2(src_grid_corner, srcDim),latBuffer2(src_grid_corner,srcDim))
+                allocate(lonBuffer2(src_grid_corner, srcDim),latBuffer2(src_grid_corner,srcDim), stat=memstat)
+                if (ESMF_LogFoundAllocError(memstat,  &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+
                 lonBuffer2=reshape(cornerlon3D, (/src_grid_corner, srcDim/))
                 latBuffer2=reshape(cornerlat3D, (/src_grid_corner, srcDim/))
-                deallocate(cornerlon3D, cornerlat3D)
+                deallocate(cornerlon3D, cornerlat3D, stat=memstat)
+                if (ESMF_LogFoundAllocError(memstat,  &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+
              endif
            endif
 
@@ -1580,7 +1991,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,&
              errmsg,&
              rc)) return
-           deallocate(latBuffer, lonBuffer)
+           deallocate(latBuffer, lonBuffer, stat=memstat)
+           if (ESMF_LogFoundDeallocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
         
           ! Write xv_a, yv_a    
            if (srchasbound) then
@@ -1601,15 +2015,24 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,&
              errmsg,&
              rc)) return
-           deallocate(lonBuffer2, latBuffer2)
+           deallocate(lonBuffer2, latBuffer2, stat=memstat)
+           if (ESMF_LogFoundDeallocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            endif
 
            ! Mask
-           allocate(mask(srcDim))
+           allocate(mask(srcDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            mask(:)=1
            if (present(srcMissingValue)) then
              if (srcMissingValue) then
-              allocate(varBuffer(src_grid_dims(1),src_grid_dims(2)))
+              allocate(varBuffer(src_grid_dims(1),src_grid_dims(2)), stat=memstat)
+              if (ESMF_LogFoundAllocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
               call ESMF_GridspecGetVarByName(srcFile, srcvarname, src_dimids, &
                                 varBuffer, missing_value = missing_value, &
                                 rc=status)
@@ -1622,7 +2045,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                    k=k+1
                 enddo   
               enddo
-              deallocate(varBuffer)
+              deallocate(varBuffer, stat=memstat)
+              if (ESMF_LogFoundDeallocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
             endif
            endif
 
@@ -1634,7 +2060,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,&
              errmsg,&
              rc)) return
-           deallocate(mask)
+           deallocate(mask, stat=memstat)
+           if (ESMF_LogFoundDeallocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
 
         else if (srcFileTypeLocal == ESMF_FILEFORMAT_ESMFMESH) then
            ! ESMF unstructured grid
@@ -1661,8 +2090,14 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 " not present in src grid file, so not outputting xc_a and yc_a to weight file."
              write(*,*)
            else
-             allocate(latBuffer2(srcCoordDim, srcDim))
-             allocate(latBuffer(srcDim), lonBuffer(srcDim))
+             allocate(latBuffer2(srcCoordDim, srcDim), stat=memstat)
+             if (ESMF_LogFoundAllocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+             allocate(latBuffer(srcDim), lonBuffer(srcDim), stat=memstat)
+             if (ESMF_LogFoundAllocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
              ncStatus=nf90_get_var(ncid1,VarId, latBuffer2)
              errmsg = "Variable "//trim(varStr)//" in "//trim(srcFile)
              if (CDFCheckError (ncStatus, &
@@ -1691,16 +2126,24 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_SRCLINE,&
                errmsg,&
                rc)) return
-             deallocate(latBuffer, lonBuffer, latBuffer2)
+             deallocate(latBuffer, lonBuffer, latBuffer2, stat=memstat)
+             if (ESMF_LogFoundDeallocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
            endif
 
            ! only write out xv_a and yv_a when the regrid method is conserve
-           if (.not. useSrcCornerlocal .or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+           if (.not. useSrcCornerlocal .or. &
+                methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
            ! output xv_a and yv_a is harder, we have to read in the nodeCoords and
            ! elementConn and construct the the latitudes and longitudes for
            ! all the corner vertices
              if (src_grid_corner > 0) then
-             allocate(latBuffer2(src_grid_corner,srcDim),lonBuffer2(src_grid_corner,srcDim))
+             allocate(latBuffer2(src_grid_corner,srcDim),lonBuffer2(src_grid_corner,srcDim), stat=memstat)
+             if (ESMF_LogFoundAllocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
              call ESMF_EsmfGetVerts(ncid1, srcFile, srcDim, src_grid_corner, srcNodeDim, &
                   latBuffer2, lonBuffer2,status)
              if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -1721,12 +2164,19 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_METHOD, &
                ESMF_SRCLINE,errmsg,&
                rc)) return
-             deallocate(latBuffer2, lonBuffer2)
+             deallocate(latBuffer2, lonBuffer2, stat=memstat)
+             if (ESMF_LogFoundDeallocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
              endif
            endif
-           allocate(mask(srcDim))
+           allocate(mask(srcDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            if (.not. useSrcCornerlocal .and. &
-               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+               (methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod)) then
              ncStatus=nf90_inq_varid(ncid1,"elementMask",VarId)
              if (ncStatus /= nf90_noerror) then
                write(*,*) "Warning: elementMask"// &
@@ -1751,9 +2201,15 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_METHOD, &
              ESMF_SRCLINE,errmsg,&
              rc)) return
-           deallocate(mask)
+           deallocate(mask, stat=memstat)
+           if (ESMF_LogFoundDeallocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            if (src_has_area .and. .not. present(srcArea)) then
-             allocate(area(srcDim))
+             allocate(area(srcDim), stat=memstat)
+             if (ESMF_LogFoundAllocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
              ncStatus=nf90_inq_varid(ncid1,"elementArea",VarId)
              errmsg = "Variable elementArea in "//trim(srcFile)
              if (CDFCheckError (ncStatus, &
@@ -1773,7 +2229,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_METHOD, &
                ESMF_SRCLINE,errmsg,&
                rc)) return
-             deallocate(area)
+             deallocate(area, stat=memstat)
+             if (ESMF_LogFoundDeallocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
            endif
            ncStatus=nf90_close(ncid1)
            if (CDFCheckError (ncStatus, &
@@ -1785,12 +2244,20 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            call ESMF_UGridInq(srcfile, srcmeshname, meshId=meshId, faceCoordFlag=faceCoordFlag)
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
-           if (.not. useSrcCornerlocal .or. methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+           if (.not. useSrcCornerlocal .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
              ! check if faceCoords exit
               allocate(latBuffer2(src_grid_corner,srcDim),&
-                       lonBuffer2(src_grid_corner,srcDim))
+                       lonBuffer2(src_grid_corner,srcDim), stat=memstat)
+              if (ESMF_LogFoundAllocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
               if (faceCoordFlag) then
-                allocate(latBuffer(srcDim), lonBuffer(srcDim))
+                allocate(latBuffer(srcDim), lonBuffer(srcDim), stat=memstat)
+                if (ESMF_LogFoundAllocError(memstat,  &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+
                 call ESMF_UGridGetVar(srcfile, meshId, &
                    faceXcoords=lonBuffer, faceYcoords=latBuffer, &
                    faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
@@ -1818,7 +2285,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                   ESMF_METHOD, &
                   ESMF_SRCLINE,errmsg,&
                   rc)) return
-                deallocate(latBuffer, lonBuffer)
+                deallocate(latBuffer, lonBuffer, stat=memstat)
+                if (ESMF_LogFoundDeallocError(memstat,  &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+
               endif
               ncStatus=nf90_inq_varid(ncid,"xv_a",VarId)
               ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)
@@ -1834,9 +2304,15 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                   ESMF_METHOD, &
                   ESMF_SRCLINE,errmsg,&
                   rc)) return
-              deallocate(latBuffer2, lonBuffer2)
+              deallocate(latBuffer2, lonBuffer2, stat=memstat)
+              if (ESMF_LogFoundDeallocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
            else
-              allocate(latBuffer(srcDim), lonBuffer(srcDim))
+              allocate(latBuffer(srcDim), lonBuffer(srcDim), stat=memstat)
+              if (ESMF_LogFoundAllocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
               call ESMF_UGridGetVar(srcfile, meshId, &
                    nodeXcoords=lonBuffer, nodeYcoords=latBuffer, rc=status)
               if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -1855,15 +2331,24 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 ESMF_METHOD, &
                 ESMF_SRCLINE,errmsg,&
               rc)) return
-              deallocate(latBuffer, lonBuffer)
+              deallocate(latBuffer, lonBuffer, stat=memstat)
+              if (ESMF_LogFoundAllocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
            endif
 
            ! Write out mask
-           allocate(mask(srcDim))
+           allocate(mask(srcDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            mask(:)=1
            if (present(srcMissingValue)) then
              if (srcMissingValue) then
-              allocate(varBuffer1D(srcDim))
+              allocate(varBuffer1D(srcDim), stat=memstat)
+              if (ESMF_LogFoundAllocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
               call ESMF_UgridGetVarByName(srcFile, srcvarname, &
                                 varBuffer1D, missingvalue = missing_value, &
                                 rc=status)
@@ -1872,7 +2357,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               do j=1,size(varBuffer1D)
                  if (varBuffer1D(j) == missing_value) mask(j)=0
               enddo
-              deallocate(varBuffer1D)
+              deallocate(varBuffer1D, stat=memstat)
+              if (ESMF_LogFoundDeallocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
              endif
             endif
 
@@ -1884,13 +2372,25 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,&
              errmsg,&
              rc)) return
-           deallocate(mask)
+           deallocate(mask, stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
         else if (srcFileTypeLocal == ESMF_FILEFORMAT_MOSAIC) then
            !read coordinates from the tile files
-           allocate(latBuffer2(srcmosaic%nx, srcmosaic%ny))
-           allocate(lonBuffer2(srcmosaic%nx, srcmosaic%ny))
+           allocate(latBuffer2(srcmosaic%nx, srcmosaic%ny), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+           allocate(lonBuffer2(srcmosaic%nx, srcmosaic%ny), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            totalsize = srcmosaic%nx*srcmosaic%ny
-           allocate(varBuffer1D(totalsize))
+           allocate(varBuffer1D(totalsize), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            ncStatus=nf90_inq_varid(ncid,"xc_a",VarId1)
            ncStatus=nf90_inq_varid(ncid,"yc_a",VarId2)
            errmsg = "Variable xc_a or yc_a in "//trim(wgtfile)
@@ -1922,12 +2422,18 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 "writing xc_a in weight file", &
              rc)) return
           enddo
-          deallocate(lonBuffer2, latBuffer2, varBuffer1D)
+          deallocate(lonBuffer2, latBuffer2, varBuffer1D, stat=memstat)
+          if (ESMF_LogFoundDeallocError(memstat,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
         endif
 
         ! Read the dstGrid variables and write them out
         if (dstFileTypeLocal == ESMF_FILEFORMAT_SCRIP) then
-         allocate(latBuffer(dstDim), lonBuffer(dstDim))
+         allocate(latBuffer(dstDim), lonBuffer(dstDim), stat=memstat)
+         if (ESMF_LogFoundAllocError(memstat,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
          call ESMF_ScripGetVar(dstFile, grid_center_lon=lonBuffer, &
                 grid_center_lat=latBuffer, rc=status)
          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -1947,9 +2453,15 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_METHOD, &
            ESMF_SRCLINE,errmsg,&
            rc)) return
-         deallocate(latBuffer, lonBuffer)
+         deallocate(latBuffer, lonBuffer, stat=memstat)
+         if (ESMF_LogFoundDeallocError(memstat,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
 
-         allocate(latBuffer2(dst_grid_corner,dstDim),lonBuffer2(dst_grid_corner,dstDim))
+
+         allocate(latBuffer2(dst_grid_corner,dstDim),lonBuffer2(dst_grid_corner,dstDim), stat=memstat)
+         if (ESMF_LogFoundAllocError(memstat,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
          call ESMF_ScripGetVar(dstFile, grid_corner_lon=lonBuffer2, &
                 grid_corner_lat=latBuffer2, rc=status)
          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -1970,8 +2482,14 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_METHOD, &
            ESMF_SRCLINE,errmsg,&
            rc)) return
-         deallocate(latBuffer2, lonBuffer2)
-         allocate(mask(dstDim))
+         deallocate(latBuffer2, lonBuffer2, stat=memstat)
+         if (ESMF_LogFoundDeallocError(memstat,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
+         allocate(mask(dstDim), stat=memstat)
+         if (ESMF_LogFoundAllocError(memstat,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
          call ESMF_ScripGetVar(dstFile, grid_imask=mask, rc=status)
          if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1982,9 +2500,15 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            ESMF_METHOD, &
            ESMF_SRCLINE,errmsg,&
            rc)) return
-         deallocate(mask)
+         deallocate(mask, stat=memstat)
+         if (ESMF_LogFoundDeallocError(memstat,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
          if (dst_has_area .and. .not. present(dstArea)) then
-              allocate(area(dstDim))
+              allocate(area(dstDim), stat=memstat)
+              if (ESMF_LogFoundAllocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
               call ESMF_ScripGetVar(dstFile, grid_area=area, rc=status)
               if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1996,16 +2520,30 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 ESMF_SRCLINE,&
                 errmsg,&
                 rc)) return
-              deallocate(area)
+              deallocate(area, stat=memstat)
+              if (ESMF_LogFoundDeallocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
          endif
         else if (dstFileTypeLocal == ESMF_FILEFORMAT_GRIDSPEC) then
-           allocate(lonBuffer(dstDim), latBuffer(dstDim))
+           allocate(lonBuffer(dstDim), latBuffer(dstDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+
            ! check if bound variables exist or not
            if (dst_ndims == 1) then
-             allocate(lonBuffer1D(dst_grid_dims(1)), latBuffer1D(dst_grid_dims(2)))
+             allocate(lonBuffer1D(dst_grid_dims(1)), latBuffer1D(dst_grid_dims(2)), stat=memstat)
+             if (ESMF_LogFoundAllocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+
              if (dsthasbound) then
                 allocate(cornerlon2D(dst_grid_corner,dst_grid_dims(1)), &
-                      cornerlat2D(dst_grid_corner,dst_grid_dims(2)))
+                      cornerlat2D(dst_grid_corner,dst_grid_dims(2)), stat=memstat)
+                if (ESMF_LogFoundAllocError(memstat,  &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+
                 call ESMF_GridspecGetVar1D(dstFile, dst_coordids, lonBuffer1D, latBuffer1D,&
                         cornerlon=cornerlon2D, cornerlat=cornerlat2D, rc=status)
              else
@@ -2022,9 +2560,17 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 k=k+1
               enddo
              enddo
-             deallocate(lonBuffer1D, latBuffer1D)
+             deallocate(lonBuffer1D, latBuffer1D, stat=memstat)
+             if (ESMF_LogFoundDeallocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+
              if (dsthasbound) then
-               allocate(lonBuffer2(dst_grid_corner, dstDim),latBuffer2(dst_grid_corner,dstDim))
+               allocate(lonBuffer2(dst_grid_corner, dstDim),latBuffer2(dst_grid_corner,dstDim), stat=memstat)
+               if (ESMF_LogFoundAllocError(memstat,  &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+
                k=1
                do j=1,dst_grid_dims(2)
                  do i=1,dst_grid_dims(1)
@@ -2033,14 +2579,26 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                    k=k+1
                  enddo
                enddo
-               deallocate(cornerlon2D, cornerlat2D)
+               deallocate(cornerlon2D, cornerlat2D, stat=memstat)
+               if (ESMF_LogFoundDeallocError(memstat,  &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+
              endif
            else
              allocate(lonBuffer2(dst_grid_dims(1),dst_grid_dims(2)), &
-                      latBuffer2(dst_grid_dims(1),dst_grid_dims(2)))
+                      latBuffer2(dst_grid_dims(1),dst_grid_dims(2)), stat=memstat)
+             if (ESMF_LogFoundAllocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+
              if (dsthasbound) then
                allocate(cornerlon3D(dst_grid_corner,dst_grid_dims(1), dst_grid_dims(2)),&
-                    cornerlat3D(dst_grid_corner,dst_grid_dims(1), dst_grid_dims(2)))
+                    cornerlat3D(dst_grid_corner,dst_grid_dims(1), dst_grid_dims(2)), stat=memstat)
+               if (ESMF_LogFoundAllocError(memstat,  &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+
                call ESMF_GridspecGetVar2D(dstFile, dst_coordids, lonBuffer2, latBuffer2, &
                    cornerlon=cornerlon3D, cornerlat=cornerlat3D, rc=status)
              else
@@ -2051,12 +2609,23 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
              lonBuffer = reshape(lonBuffer2, (/dstDim/))
              latBuffer = reshape(latBuffer2, (/dstDim/))
-             deallocate(lonBuffer2, latBuffer2)
+             deallocate(lonBuffer2, latBuffer2, stat=memstat)
+             if (ESMF_LogFoundDeallocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+
              if (dsthasbound) then
-               allocate(lonBuffer2(dst_grid_corner, dstDim),latBuffer2(dst_grid_corner,dstDim))
+               allocate(lonBuffer2(dst_grid_corner, dstDim),latBuffer2(dst_grid_corner,dstDim),  &
+                   stat=memstat)
+               if (ESMF_LogFoundAllocError(memstat,  &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+
                lonBuffer2=reshape(cornerlon3D, (/dst_grid_corner, dstDim/))
                latBuffer2=reshape(cornerlat3D, (/dst_grid_corner, dstDim/))
-               deallocate(cornerlon3D, cornerlat3D)
+               deallocate(cornerlon3D, cornerlat3D, stat=memstat)
+               if (ESMF_LogFoundDeallocError(memstat,  &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
              endif
            endif
 
@@ -2077,7 +2646,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,&
              errmsg,&
              rc)) return
-           deallocate(latBuffer, lonBuffer)
+           deallocate(latBuffer, lonBuffer, stat=memstat)
+           if (ESMF_LogFoundDeallocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
 
           ! Write xv_b, yv_b    
            if (dsthasbound) then
@@ -2098,15 +2669,24 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,&
              errmsg,&
              rc)) return
-           deallocate(lonBuffer2, latBuffer2)
+           deallocate(lonBuffer2, latBuffer2, stat=memstat)
+           if (ESMF_LogFoundDeallocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            endif
 
            ! Mask
-           allocate(mask(dstDim))
+           allocate(mask(dstDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            mask(:)=1
            if (present(dstMissingValue)) then
              if (dstMissingValue) then
-              allocate(varBuffer(dst_grid_dims(1),dst_grid_dims(2)))
+              allocate(varBuffer(dst_grid_dims(1),dst_grid_dims(2)), stat=memstat)
+              if (ESMF_LogFoundAllocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
               call ESMF_GridspecGetVarByName(dstFile, dstvarname, dst_dimids, &
                                 varBuffer, missing_value = missing_value, &
                                 rc=status)
@@ -2119,7 +2699,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                    k=k+1
                 enddo   
               enddo
-              deallocate(varBuffer)
+              deallocate(varBuffer, stat=memstat)
+              if (ESMF_LogFoundDeallocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
             endif
            endif
 
@@ -2131,7 +2714,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,&
              errmsg,&
              rc)) return
-           deallocate(mask)
+           deallocate(mask, stat=memstat)
+           if (ESMF_LogFoundDeallocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
 
         else if (dstFileTypeLocal == ESMF_FILEFORMAT_ESMFMESH) then
            ncStatus=nf90_open(dstFile,NF90_NOWRITE,ncid1)
@@ -2157,8 +2742,14 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 " not present in dst grid file, so not outputting xc_b and yc_b to weight file."
              write(*,*)
            else
-             allocate(latBuffer2(dstCoordDim, dstDim))
-             allocate(latBuffer(dstDim), lonBuffer(dstDim))
+             allocate(latBuffer2(dstCoordDim, dstDim), stat=memstat)
+             if (ESMF_LogFoundAllocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+             allocate(latBuffer(dstDim), lonBuffer(dstDim), stat=memstat)
+             if (ESMF_LogFoundAllocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
              ncStatus=nf90_get_var(ncid1,VarId, latBuffer2)
              errmsg = "Variable "//varStr//" in "//trim(dstFile)
              if (CDFCheckError (ncStatus, &
@@ -2184,16 +2775,23 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_METHOD, &
                ESMF_SRCLINE,errmsg,&
                rc)) return
-             deallocate(latBuffer, lonBuffer, latBuffer2)
+             deallocate(latBuffer, lonBuffer, latBuffer2, stat=memstat)
+             if (ESMF_LogFoundDeallocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
            endif
 
            ! output xv_b and yv_b is harder, we have to read in the nodeCoords and
            ! elementConn and construct the the latitudes and longitudes for
            ! all the corner vertices
            if (.not. useDstCornerlocal .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
            if (dst_grid_corner > 0) then
-           allocate(latBuffer2(dst_grid_corner,dstDim),lonBuffer2(dst_grid_corner,dstDim))
+           allocate(latBuffer2(dst_grid_corner,dstDim),lonBuffer2(dst_grid_corner,dstDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            call ESMF_EsmfGetVerts(ncid1, dstFile, dstDim, dst_grid_corner, dstNodeDim, &
                 latBuffer2, lonBuffer2, status)
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
@@ -2214,13 +2812,20 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_METHOD, &
              ESMF_SRCLINE,errmsg,&
              rc)) return
-           deallocate(latBuffer2, lonBuffer2)
+           deallocate(latBuffer2, lonBuffer2, stat=memstat)
+           if (ESMF_LogFoundDeallocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            endif
            endif
            ! Write mask_b
-           allocate(mask(dstDim))
+           allocate(mask(dstDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            if (.not. useDstCornerlocal .or. &
-              methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
              ncStatus=nf90_inq_varid(ncid1,"elementMask",VarId)
              if (ncStatus /= nf90_noerror) then
                write(*,*) "Warning: elementMask"// &
@@ -2246,9 +2851,15 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_METHOD, &
              ESMF_SRCLINE,errmsg,&
              rc)) return
-           deallocate(mask)
+           deallocate(mask, stat=memstat)
+           if (ESMF_LogFoundDeallocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            if (dst_has_area .and. .not. present(dstArea)) then
-             allocate(area(dstDim))
+             allocate(area(dstDim), stat=memstat)
+             if (ESMF_LogFoundAllocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
              ncStatus=nf90_inq_varid(ncid1,"elementArea",VarId)
              errmsg = "Variable elementArea in "//trim(dstFile)
              if (CDFCheckError (ncStatus, &
@@ -2268,7 +2879,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_METHOD, &
                ESMF_SRCLINE,errmsg,&
                rc)) return
-             deallocate(area)
+             deallocate(area, stat=memstat)
+             if (ESMF_LogFoundDeallocError(memstat,  &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
            endif
            ncStatus=nf90_close(ncid1)
            if (CDFCheckError (ncStatus, &
@@ -2280,12 +2894,19 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
            if (.not. useDstCornerlocal .or. &
-             methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE%regridmethod .or. &
+                methodlocal%regridmethod ==ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
              ! check if faceCoords exit
                 allocate(latBuffer2(dst_grid_corner,dstDim),&
-                        lonBuffer2(dst_grid_corner,dstDim))
+                        lonBuffer2(dst_grid_corner,dstDim), stat=memstat)
+                if (ESMF_LogFoundAllocError(memstat,  &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+
               if (faceCoordFlag) then
-                allocate(latBuffer(dstDim), lonBuffer(dstDim))
+                allocate(latBuffer(dstDim), lonBuffer(dstDim), stat=memstat)
+                if (ESMF_LogFoundAllocError(memstat,  &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+
                 call ESMF_UGridGetVar(dstfile, meshId, &
                    faceXcoords=lonBuffer, faceYcoords=latBuffer, &
                    faceNodeConnX=lonBuffer2, faceNodeConnY=latBuffer2, rc=status)
@@ -2313,7 +2934,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                   ESMF_METHOD, &
                   ESMF_SRCLINE,errmsg,&
                 rc)) return
-                deallocate(latBuffer, lonBuffer)
+                deallocate(latBuffer, lonBuffer, stat=memstat)
+                if (ESMF_LogFoundDeallocError(memstat,  &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+
               endif
               ncStatus=nf90_inq_varid(ncid,"xv_b",VarId)
               ncStatus=nf90_put_var(ncid,VarId, lonBuffer2)
@@ -2330,9 +2954,15 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 ESMF_METHOD, &
                 ESMF_SRCLINE,errmsg,&
                 rc)) return
-              deallocate(latBuffer2, lonBuffer2)
+              deallocate(latBuffer2, lonBuffer2, stat=memstat)
+              if (ESMF_LogFoundDeallocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
            else
-              allocate(latBuffer(dstDim), lonBuffer(dstDim))
+              allocate(latBuffer(dstDim), lonBuffer(dstDim), stat=memstat)
+              if (ESMF_LogFoundAllocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
               call ESMF_UGridGetVar(dstfile, meshId, &
                    nodeXcoords=lonBuffer, nodeYcoords=latBuffer, rc=rc)
               ncStatus=nf90_inq_varid(ncid,"xc_b",VarId)
@@ -2349,15 +2979,24 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 ESMF_METHOD, &
                 ESMF_SRCLINE,errmsg,&
               rc)) return
-              deallocate(latBuffer, lonBuffer)
+              deallocate(latBuffer, lonBuffer, stat=memstat)
+              if (ESMF_LogFoundDeallocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
           endif
 
            ! Write out mask
-           allocate(mask(dstDim))
+           allocate(mask(dstDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            mask(:)=1
            if (present(dstMissingValue)) then
              if (dstMissingValue) then
-              allocate(varBuffer1D(dstDim))
+              allocate(varBuffer1D(dstDim), stat=memstat)
+              if (ESMF_LogFoundAllocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
               call ESMF_UgridGetVarByName(dstFile, dstvarname, &
                                 varBuffer1D, missingvalue = missing_value, &
                                 rc=status)
@@ -2366,7 +3005,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               do j=1,size(varBuffer1D)
                  if (varBuffer1D(j) == missing_value) mask(j)=0
               enddo
-              deallocate(varBuffer1D)
+              deallocate(varBuffer1D, stat=memstat)
+              if (ESMF_LogFoundDeallocError(memstat,  &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
              endif
             endif
 
@@ -2378,13 +3020,25 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,&
              errmsg,&
              rc)) return
-           deallocate(mask)
+           deallocate(mask, stat=memstat)
+           if (ESMF_LogFoundDeallocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
         else if (dstFileTypeLocal == ESMF_FILEFORMAT_MOSAIC) then
            !read coordinates from the tile files
-           allocate(latBuffer2(dstmosaic%nx, dstmosaic%ny))
-           allocate(lonBuffer2(dstmosaic%nx, dstmosaic%ny))
+           allocate(latBuffer2(dstmosaic%nx, dstmosaic%ny), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
+           allocate(lonBuffer2(dstmosaic%nx, dstmosaic%ny), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            totalsize = dstmosaic%nx*dstmosaic%ny
-           allocate(varBuffer1D(totalsize))
+           allocate(varBuffer1D(totalsize), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            ncStatus=nf90_inq_varid(ncid,"xc_b",VarId1)
            ncStatus=nf90_inq_varid(ncid,"yc_b",VarId2)
            errmsg = "Variable xc_b or yc_b in "//trim(wgtfile)
@@ -2416,7 +3070,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 "writing yc_b in weight file", &
              rc)) return
           enddo
-          deallocate(lonBuffer2, latBuffer2, varBuffer1D)
+          deallocate(lonBuffer2, latBuffer2, varBuffer1D, stat=memstat)
+          if (ESMF_LogFoundDeallocError(memstat,  &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
         endif
 
          ! Write area_a
@@ -2430,7 +3087,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                rc)) return
          else if (.not. src_has_area) then
           ! Just set these to 0.0, because not provided
-           allocate(area(srcDim))
+           allocate(area(srcDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            area=0.0
            ncStatus=nf90_put_var(ncid,VarId, area)
            errmsg = "Variable area_a in "//trim(wgtfile)
@@ -2438,7 +3098,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_METHOD, &
                ESMF_SRCLINE,errmsg,&
                rc)) return
-           deallocate(area)
+           deallocate(area, stat=memstat)
+           if (ESMF_LogFoundDeallocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
 
          endif
 
@@ -2453,7 +3116,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                rc)) return
          else if (.not. dst_has_area) then
           ! Just set these to 0.0, because not provided
-           allocate(area(dstDim))
+           allocate(area(dstDim), stat=memstat)
+           if (ESMF_LogFoundAllocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
            area=0.0
            ncStatus=nf90_put_var(ncid,VarId, area)
            errmsg = "Variable area_b in "//trim(wgtfile)
@@ -2461,7 +3127,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                ESMF_METHOD, &
                ESMF_SRCLINE,errmsg,&
                rc)) return
-           deallocate(area)
+           deallocate(area, stat=memstat)
+           if (ESMF_LogFoundDeallocError(memstat,  &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+
          endif
 
          ! Write frac_a
@@ -2469,10 +3138,16 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          if (present(srcFrac)) then
             ncStatus=nf90_put_var(ncid,VarId, srcFrac)
          else
-            allocate(frac(srcDim))
+            allocate(frac(srcDim), stat=memstat)
+            if (ESMF_LogFoundAllocError(memstat,  &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
             frac=0.0
             ncStatus=nf90_put_var(ncid,VarId, frac)
-            deallocate(frac)
+            deallocate(frac, stat=memstat)
+            if (ESMF_LogFoundDeallocError(memstat,  &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
          endif
          errmsg = "Variable frac_a in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
@@ -2485,17 +3160,26 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
          if (present(dstFrac)) then
             ncStatus=nf90_put_var(ncid,VarId, dstFrac)
          else
-            allocate(frac(dstDim))
+            allocate(frac(dstDim), stat=memstat)
+            if (ESMF_LogFoundAllocError(memstat,  &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
             frac=1.0
             ncStatus=nf90_put_var(ncid,VarId, frac)
-            deallocate(frac)
+            deallocate(frac, stat=memstat)
+            if (ESMF_LogFoundDeallocError(memstat,  &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
          endif
          errmsg = "Variable frac_b in "//trim(wgtfile)
          if (CDFCheckError (ncStatus, &
            ESMF_METHOD, &
            ESMF_SRCLINE,errmsg,&
            rc)) return
-         deallocate(src_grid_dims, dst_grid_dims)
+         deallocate(src_grid_dims, dst_grid_dims, stat=memstat)
+         if (ESMF_LogFoundAllocError(memstat,  &
+             ESMF_CONTEXT, rcToReturn=rc)) return
+
     endif  ! PetNo==0
     ! Block all other PETs until the NetCDF file has been created
     call ESMF_VMBarrier(vm)
@@ -2511,7 +3195,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
         ! other PETs and write them out
         start = 1
         ! allocate indexbuf and weightbuf to receive data from other PETs
-        allocate(indexbuf(maxcount*2), weightbuf(maxcount))
+        allocate(indexbuf(maxcount*2), weightbuf(maxcount), stat=memstat)
+        if (ESMF_LogFoundAllocError(memstat,  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
         do i=1, PetCnt
           ! write the local factorList and factorIndexList first
           localCount(1)=allCounts(i)
@@ -2584,7 +3271,10 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           start = start + localCount(1)
        end do
     else
-       allocate(indexbuf(localcount(1)*2))
+       allocate(indexbuf(localcount(1)*2), stat=memstat)
+       if (ESMF_LogFoundAllocError(memstat,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
        if (localcount(1) > 0) then
          do j=1,localCount(1)
              indexbuf(j) = factorIndexList(1,j)
@@ -2601,16 +3291,25 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
     end if
 
     call ESMF_VMBarrier(vm)
-    deallocate(allCounts)
+    deallocate(allCounts, stat=memstat)
+    if (ESMF_LogFoundDeallocError(memstat,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     if (PetNo == 0) then
        ncStatus = nf90_close(ncid)
        if (CDFCheckError (ncStatus, &
          ESMF_METHOD, &
          ESMF_SRCLINE, trim(wgtfile),&
          rc)) return
-       deallocate(weightbuf)
+       deallocate(weightbuf, stat=memstat)
+       if (ESMF_LogFoundDeallocError(memstat,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
     end if
-    deallocate(indexbuf)
+    deallocate(indexbuf, stat=memstat)
+    if (ESMF_LogFoundDeallocError(memstat,  &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
     if (present(rc)) rc = ESMF_SUCCESS
     return
 #else
@@ -2661,6 +3360,7 @@ subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
       integer :: nsDimId, VarId
       real(ESMF_KIND_R8), pointer   :: weightbuf(:)
       character(len=256) :: errmsg
+      integer :: memstat
 
 #ifdef ESMF_NETCDF
 
@@ -2684,7 +3384,10 @@ subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
       endif
 
       localCount(1)=size(factorList,1)
-      allocate(allCounts(PetCnt))
+      allocate(allCounts(PetCnt), stat=memstat)
+      if (ESMF_LogFoundAllocError(memstat,  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
       call ESMF_VMAllGather(vm,localCount,allCounts,1,rc=status)
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2723,6 +3426,9 @@ subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
            elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE%regridmethod) then
               map_method = "Conservative remapping"
               esmf_regrid_method = "First-order Conservative"
+           elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_CONSERVE_2ND%regridmethod) then
+              map_method = "Conservative remapping"
+              esmf_regrid_method = "Second-order Conservative"
            elseif (methodlocal%regridmethod == ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod) then
               map_method = "Bilinear remapping"
               esmf_regrid_method = "Nearest source to destination"
@@ -2822,7 +3528,10 @@ subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
         ! other PETs and write them out
         start = 1
         ! allocate indexbuf and weightbuf to receive data from other PETs
-        allocate(indexbuf(maxcount*2), weightbuf(maxcount))
+        allocate(indexbuf(maxcount*2), weightbuf(maxcount), stat=memstat)
+        if (ESMF_LogFoundAllocError(memstat,  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
         do i=1, PetCnt
           ! write the local factorList and factorIndexList first
           localCount(1)=allCounts(i)
@@ -2895,7 +3604,10 @@ subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
           start = start + localCount(1)
        end do
      else
-       allocate(indexbuf(localcount(1)*2))
+       allocate(indexbuf(localcount(1)*2), stat=memstat)
+       if (ESMF_LogFoundAllocError(memstat,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
        if (localcount(1) > 0) then
          do j=1,localCount(1)
              indexbuf(j) = factorIndexList(1,j)
@@ -2912,16 +3624,25 @@ subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
      end if
 
      call ESMF_VMBarrier(vm)
-     deallocate(allCounts)
+     deallocate(allCounts, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat,  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
      if (PetNo == 0) then
        ncStatus = nf90_close(ncid)
        if (CDFCheckError (ncStatus, &
          ESMF_METHOD, &
          ESMF_SRCLINE, trim(wgtfile),&
          rc)) return
-       deallocate(weightbuf)
+       deallocate(weightbuf, stat=memstat)
+       if (ESMF_LogFoundDeallocError(memstat,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
      end if
-     deallocate(indexbuf)
+     deallocate(indexbuf, stat=memstat)
+     if (ESMF_LogFoundAllocError(memstat,  &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
      if (present(rc)) rc = ESMF_SUCCESS
      return
 #else
@@ -3274,6 +3995,7 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
     integer :: len
     logical :: convertToDegLocal
     type(ESMF_CoordSys_Flag) :: coordSysLocal
+    integer :: memstat
 
 #ifdef ESMF_NETCDF
     coordSysLocal = ESMF_COORDSYS_SPH_DEG
@@ -3321,7 +4043,10 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
       rc)) return
 
     ! allocate memory for verticies
-    allocate (nodeCoords (NodeDim, nodeCnt))
+    allocate (nodeCoords (NodeDim, nodeCnt), stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
 
     RecCnt(:) = ubound(nodeCoords)
     !print *, "nodeCoords:",nodeCnt, NodeDim
@@ -3387,7 +4112,10 @@ subroutine ESMF_EsmfGetNode (filename, nodeCoords, nodeMask, &
 
     ! get nodeMask
     if (present(nodeMask)) then
-       allocate(nodeMask(nodeCnt))
+       allocate(nodeMask(nodeCnt), stat=memstat)
+       if (ESMF_LogFoundAllocError(memstat,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
        ncStatus = nf90_inq_varid (ncid, "nodeMask", VarNo)
        errmsg = "Variable nodeMask in "//trim(filename)
        if (CDFCheckError (ncStatus, &
@@ -3428,6 +4156,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     character(len=*), intent(in)   :: filename
     integer(ESMF_KIND_I4), pointer :: elementConn (:)
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
+    integer(selected_int_kind(1)), allocatable :: elmtNums_i1(:)
     integer,           intent(out) :: startElmt
     integer(ESMF_KIND_I4), pointer, optional :: elementMask (:)
     real(ESMF_KIND_R8), pointer, optional :: elementArea (:)
@@ -3446,7 +4175,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     integer :: nodeCnt, ElmtCount, MaxNodePerElmt, coordDim
     integer :: localCount, remain
 
-    integer :: VarNo
+    integer :: VarNo, VarType
     character(len=256)::errmsg
     character(len=80) :: units
     integer :: len
@@ -3459,6 +4188,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     integer :: totalConn, startConn
     integer :: senddata(1)
     integer, allocatable :: recvdata(:)
+    integer :: memstat
 
 #ifdef ESMF_NETCDF
      convertToDegLocal = .false.
@@ -3518,7 +4248,9 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     if (PetNo == (PetCnt-1)) localcount = localcount+remain
 
     ! allocate memory for elmts
-    allocate (elmtNums (localcount))
+    allocate (elmtNums (localcount), stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! read num_elmt_verts
     ncStatus = nf90_inq_varid (ncid, "numElementConn", VarNo)
@@ -3528,18 +4260,54 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
       ESMF_SRCLINE, errmsg, &
       rc)) return
 
-    ncStatus = nf90_get_var (ncid, VarNo, elmtNums, start=(/startElmt/), count=(/localcount/))
+    ncStatus = nf90_inquire_variable (ncid, VarNo, xtype=VarType)
+    errmsg = "Variable numElementConn type inquiry in "//trim(filename)
     if (CDFCheckError (ncStatus, &
       ESMF_METHOD,  &
       ESMF_SRCLINE, errmsg, &
       rc)) return
+
+    select case (VarType)
+    case (NF90_INT)
+      ncStatus = nf90_get_var (ncid, VarNo, elmtNums, start=(/startElmt/), count=(/localcount/))
+      errmsg = "Reading numElementConn from int variable in " // trim (filename)
+      if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+
+    case (NF90_BYTE)
+      allocate (elmtNums_i1(localcount), stat=memstat)
+      if (ESMF_LogFoundAllocError(memstat,  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ncStatus = nf90_get_var (ncid, VarNo, elmtNums_i1, start=(/startElmt/), count=(/localcount/))
+      errmsg = "Reading numElementConn from byte variable in " // trim (filename)
+      if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
+
+      elmtNums = elmtNums_i1
+      deallocate (elmtNums_i1, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat,  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
+    case default
+      if (ESMF_LogFoundError(ESMF_RC_FILE_UNEXPECTED,  &
+          msg='unsupport numElementConn variable type', &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+    end select
 
     ! calculate the RaggedArray size
     totalConn = 0
     do i=1,localcount
       totalConn=totalConn+elmtNums(i)
     enddo
-    allocate(elementConn(totalConn))
+    allocate(elementConn(totalConn), stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     ! read elmt_verts data
     ncStatus = nf90_inq_varid (ncid, "elementConn", VarNo)
     errmsg = "Variable elementConn in "//trim(filename)
@@ -3551,7 +4319,10 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     if (isRaggedArray) then
       ! need to find out the start index, broadcast the totalConn
       senddata(1)=totalConn
-      allocate(recvdata(PetCnt))
+      allocate(recvdata(PetCnt), stat=memstat)
+      if (ESMF_LogFoundAllocError(memstat,  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
       call ESMF_VMAllGather(vm, senddata, recvdata, 1, rc=status)
       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3559,7 +4330,10 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
       do i=1,PetNo
         startConn=startConn+recvdata(i)
       enddo
-      deallocate(recvdata)
+      deallocate(recvdata, stat=memstat)
+      if (ESMF_LogFoundDeallocError(memstat,  &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+
       print *, PetNo, ' read block ', startConn, totalConn
       ncStatus = nf90_get_var(ncid, VarNo, elementConn, start=(/startConn/), &
                               count=(/totalConn/))
@@ -3569,7 +4343,10 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
           rc)) return
     else
        ! allocate local 2D array to read the data
-       allocate (elementConnLocal (MaxNodePerElmt, localcount))
+       allocate (elementConnLocal (MaxNodePerElmt, localcount), stat=memstat)
+       if (ESMF_LogFoundAllocError(memstat,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
        ncStatus = nf90_get_var(ncid, VarNo, elementConnLocal, start=(/1,startElmt/), &
                               count=(/MaxNodePerElmt, localcount/))
        if (CDFCheckError (ncStatus, &
@@ -3582,7 +4359,10 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
           elementConn(j:j+elmtNums(i)-1)=elementConnLocal(1:elmtNums(i),i)
           j = j + elmtNums(i)
        end do
-       deallocate(elementConnLocal)
+       deallocate(elementConnLocal, stat=memstat)
+       if (ESMF_LogFoundAllocError(memstat,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
     endif
 
     ! Get polybreak if it exists
@@ -3617,7 +4397,10 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     endif
 
     if (present(elementMask)) then
-       allocate(elementMask(localcount))
+       allocate(elementMask(localcount), stat=memstat)
+       if (ESMF_LogFoundAllocError(memstat,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
        ncStatus = nf90_inq_varid (ncid, "elementMask", VarNo)
        errmsg = "Variable elementMask in "//trim(filename)
        if (CDFCheckError (ncStatus, &
@@ -3634,7 +4417,10 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     end if
 
     if (present(elementArea)) then
-       allocate(elementArea(localcount))
+       allocate(elementArea(localcount), stat=memstat)
+       if (ESMF_LogFoundAllocError(memstat,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
        ncStatus = nf90_inq_varid (ncid, "elementArea", VarNo)
        errmsg = "Variable elementArea in "//trim(filename)
        if (CDFCheckError (ncStatus, &
@@ -3673,7 +4459,10 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
            ESMF_SRCLINE, errmsg, &
            rc)) return
 
-       allocate(centerCoords(coordDim, localcount))
+       allocate(centerCoords(coordDim, localcount), stat=memstat)
+       if (ESMF_LogFoundAllocError(memstat,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
        ncStatus = nf90_inq_varid (ncid, "centerCoords", VarNo)
        errmsg = "Variable centerCoords in "//trim(filename)
        if (CDFCheckError (ncStatus, &
@@ -3968,3 +4757,35 @@ end function CDFCheckError
 
 
 end module ESMF_IOScripMod
+
+
+!!!!!! f_esmf_ interfaces to be callable from ESMCI !!!!!!!!!!!!!!!!!!!!!!!
+
+subroutine f_esmf_outputsimpleweightfile(fileName, count, factorList, &
+  factorIndexList, rc)
+  use ESMF_UtilTypesMod
+  use ESMF_IOScripMod
+  use ESMF_LogErrMod
+  
+  implicit none
+  
+  character(len=*)          :: fileName
+  integer                   :: count
+  real(ESMF_KIND_R8)        :: factorList(count)
+  integer(ESMF_KIND_I4)     :: factorIndexList(2,count)
+  integer                   :: rc
+  
+  ! Initialize return code; assume routine not implemented
+  rc = ESMF_RC_NOT_IMPL
+
+  ! call into the ESMF_ routine
+  call ESMF_OutputSimpleWeightFile(fileName, factorList, &
+    factorIndexList, rc=rc)
+  if (ESMF_LogFoundError(rc, &
+    ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT)) return
+  
+  ! return successfully
+  rc = ESMF_SUCCESS
+  
+end subroutine f_esmf_outputsimpleweightfile

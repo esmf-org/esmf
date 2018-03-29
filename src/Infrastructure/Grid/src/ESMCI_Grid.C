@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -83,6 +83,7 @@ void FTN_X(f_esmf_gridcreatecubedsphere)(ESMCI::Grid **grid,
     int *decompFlagPTile, int *len21, int *len22, int *dfpresent,
     int *deLabelList, int *len3, int *llpresent,
     //ESMC_DELayout *delayout,
+    int *staggerLocList, int *len4,
     const char *name,
     int *rc,
     ESMCI_FortranStrLenArg len_name);
@@ -367,6 +368,7 @@ int setDefaultsLUA(int dimCount,
     ESMC_InterArrayInt *decompFlagPTile,
     ESMC_InterArrayInt *deLabelList,
     //ESMC_DELayout *delayout,
+    ESMC_InterArrayInt *staggerLocList,
     const char *name,
     int *rc) {
 //
@@ -381,8 +383,8 @@ int setDefaultsLUA(int dimCount,
     int localrc = ESMC_RC_NOT_IMPL;
     if(rc!=NULL) *rc=ESMC_RC_NOT_IMPL;
     int rdpresent = 0, dfpresent = 0, llpresent = 0;
-    int *rdarray=NULL, *dfarray=NULL, *llarray=NULL;
-    int rdlen1, rdlen2, dflen1, dflen2, lllen, nlen;
+    int *rdarray=NULL, *dfarray=NULL, *llarray=NULL, *ssarray=NULL;
+    int rdlen1, rdlen2, dflen1, dflen2, lllen, nlen, sslen;
 
     ESMCI::InterArray<int> *rd = (ESMCI::InterArray<int> *)regDecompPTile;
     if (present(rd)) {
@@ -465,6 +467,30 @@ int setDefaultsLUA(int dimCount,
       lllen=0;
     }
 
+    ESMCI::InterArray<int> *ss = (ESMCI::InterArray<int> *)staggerLocList;
+    if (present(ss)) {
+      if(ss->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- staggerLocList array must be of rank 1", ESMC_CONTEXT, rc);
+         return ESMC_NULL_POINTER;
+      }
+      ssarray=ss->array;
+      sslen=ss->extent[0];
+
+      /*// this is a test to see if the data is passed in correctly
+      printf("\nstaggerLocList:\n  array = [");
+      for (int i=0; i<ss->extent[0]; ++i)
+        printf("%d,", ss->array[i]);
+      printf("]\n  extent = [");
+      for (int i=0; i<7; ++i)
+          printf("%d,", ss->extent[i]);
+      printf("]\n  dimCount = %d\n", ss->dimCount);*/
+
+    } else {
+      ssarray=NULL;
+      sslen=0;
+    }
+
     if (name) nlen = strlen(name);
     else nlen = 0;
 
@@ -474,6 +500,7 @@ int setDefaultsLUA(int dimCount,
         rdarray, &rdlen1, &rdlen2, &rdpresent,
         dfarray, &dflen1, &dflen2, &dfpresent,
         llarray, &lllen, &llpresent,
+        ssarray, &sslen,
         name,
         &localrc, nlen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -5382,15 +5409,9 @@ int Grid::getStaggerDistgrid(
         //       grid with a pole and you are getting bowtie shaped elements, this is probably why. Ask Bob how to fix. 
          //       (If you take out the poles, then you need to add them back in here. See _add_poles_to_conn(), etc. in the if part above)
 
-//gjt: The updated DistGrid::create() now will automatically adjust the center connections
-//gjt: inside of a DistGrid to corner connections when stagger edge paddings are supplied.
-//gjt: So just call into DistGrid::create() here without any higher level logic needed!
-//gjt: Activate this option by renaming REMOVE_CONNECTIONS_on to REMOVE_CONNECTIONS_off
-#define REMOVE_CONNECTIONS_on
-#ifdef REMOVE_CONNECTIONS_on
-        // For non-center staggers, take out connections, so conservative works
-        // For center stagger, leave connections, so bilinear, etc works
-        if (staggerloc > 0) {
+        // Remove connections for everything but centers and corners for multi-tile grids, since those are the only ones that seem to work with connections
+        // TODO: talk to Gerhard about fixing for EDGE1 and EDGE2
+        if ((staggerloc != ESMCI_STAGGERLOC_CENTER) && (staggerloc != ESMCI_STAGGERLOC_CORNER))  {
 
           // Create 0 sized connection list to indicate that there should be no connections
            // Allocate list without poles
@@ -5417,7 +5438,6 @@ int Grid::getStaggerDistgrid(
           delete emptyConnListII;
 
         } else {
-#endif
           // Leave connections, so bilinear, etc. works
           staggerDistgridList[staggerloc]=DistGrid::create(distgrid,
                                                            staggerEdgeLWidthIntInt, 
@@ -5427,10 +5447,9 @@ int Grid::getStaggerDistgrid(
                                                            &localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                             &rc)) return rc;
-#ifdef REMOVE_CONNECTIONS_on
-        }
-#endif
  
+        }
+
         // Get rid of Interface ints
         delete staggerEdgeLWidthIntInt;
         delete [] staggerEdgeLWidthIntIntArray;
@@ -7445,11 +7464,11 @@ int setDefaultsLUA(
         // present:       ,       , alignIn        
         for (int i=0; i<dimCount; i++) {
           if (alignIn->array[i] > 0) {
-            lWidthOut[i]= lWidthDefault[i];
+            lWidthOut[i]= 1;
             uWidthOut[i]= 0;
           } else if (alignIn->array[i] < 0) {
             lWidthOut[i]= 0;
-            uWidthOut[i]= uWidthDefault[i];
+            uWidthOut[i]= 1;
           } else {
             lWidthOut[i]= 0;
             uWidthOut[i]= 0;
@@ -7782,6 +7801,9 @@ GridIter::GridIter(
   // set end of local DEs
   uBndDE=numDE-1;
 
+  // Get number of tiles
+  tileCount=grid->getTileCount();
+
   // set to beginning (just in case)
   this->toBeg();
 
@@ -7965,7 +7987,7 @@ int GridIter::getGlobalID(
   std::vector<int> seqIndex;
   localrc=staggerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,seqIndex);
   
-#define REPORT_DEGENERACY
+  //#define REPORT_DEGENERACY
 #ifdef REPORT_DEGENERACY
   {
     std::stringstream debugmsg;
@@ -8198,18 +8220,30 @@ bool GridIter::isShared(
   // if not cell then they're no shared nodes
   if (!cellNodes) return false;
 
-   // If we're more than 1 inside the exclusive region then we shouldn't be shared
+  // For single tile grids, if we're more than 1 inside the 
+  //  exclusive region then we shouldn't be shared
   bool interior=true;
-  for (int i=0; i<rank; i++) {
-    if ((curInd[i]<lBndOrig[i]+1) || (curInd[i]>uBndOrig[i]-1)) {
-      interior=false;
-       break;
+  if (tileCount <= 1) {
+    for (int i=0; i<rank; i++) {
+      if ((curInd[i]<lBndOrig[i]+1) || (curInd[i]>uBndOrig[i]-1)) {
+        interior=false;
+        break;
+      }
+    }
+  } else {
+    // multi-tile grids need 1 deeper sharing because of inter-tile connections
+    for (int i=0; i<rank; i++) {
+      if ((curInd[i]<lBndOrig[i]+2) || (curInd[i]>uBndOrig[i]-2)) {
+        interior=false;
+        break;
+      }
     }
   }
+
+  // If we're inside then we're not shared
   if (interior) return false;
 
   // TODO: Could also check if we're next to a non-shared edge
-
 
   // If none of the above are true then return true, because we might be shared
    return true;
@@ -8449,9 +8483,6 @@ void GridIter::getArrayData(
   
   //// Get pointer to LocalArray data
   localArray->getDataInternal(curInd, data);
- 
-
- 
  }
 
 // Add more types here if necessary
@@ -8643,29 +8674,63 @@ void GridCellIter::getDEBnds(
 
   // if cell iterator then expand bounds
   // If center stagger, expand if not bipole
-  if (staggerloc==0) {
-    for (int i=0; i<rank; i++) {
-      bool isLBnd=grid->isStaggerLBnd(staggerloc, curDE, i);
-      bool isUBnd=grid->isStaggerUBnd(staggerloc, curDE, i);
-      
-      if (align[i] <0) {
-        if (isUBnd && (connU[i] != ESMC_GRIDCONN_BIPOLE)) uBnd[i]--;
+    if (staggerloc==0) {
+      for (int i=0; i<rank; i++) {
+        bool isLBnd=grid->isStaggerLBnd(staggerloc, localDE, i);
+        bool isUBnd=grid->isStaggerUBnd(staggerloc, localDE, i);
+        
+        if (align[i] <0) {
+          if (isUBnd && (connU[i] != ESMC_GRIDCONN_BIPOLE)) uBnd[i]--;
+        } else {
+          if (isLBnd && (connL[i] != ESMC_GRIDCONN_BIPOLE)) lBnd[i]++;
+        }    
+      }
+    } else {
+      // Calculations are different for single and multi-tile cases
+      if (tileCount <= 1) {
+        for (int i=0; i<rank; i++) {
+          bool isLBnd=grid->isStaggerLBnd(staggerloc, localDE, i);
+          bool isUBnd=grid->isStaggerUBnd(staggerloc, localDE, i);
+          
+          if (align[i] <0) {
+            if (isUBnd) uBnd[i]--;
+          } else {
+            if (isLBnd) lBnd[i]++;
+          }    
+        }
       } else {
-        if (isLBnd && (connL[i] != ESMC_GRIDCONN_BIPOLE)) lBnd[i]++;
-      }    
+        // Get tile min/max
+        int localrc,rc;
+        const int *localDEList= staggerDistgrid->getDELayout()->getLocalDeToDeMap();
+        const int *DETileList = staggerDistgrid->getTileListPDe();
+        int tile=DETileList[localDEList[localDE]];
+        
+        const int *tileMin=staggerDistgrid->getMinIndexPDimPTile(tile, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          &rc)) throw rc;
+        const int *tileMax=staggerDistgrid->getMaxIndexPDimPTile(tile, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                          &rc)) throw rc;        
+
+        // Loop setting bounds based on tile edges
+        for (int i=0; i<rank; i++) {
+          
+          // See if we're on the tile edge
+          bool isLBnd=false;
+          if (lBnd[i] == tileMin[i]) isLBnd=true;
+          
+          bool isUBnd=false;
+          if (uBnd[i] == tileMax[i]) isUBnd=true;
+          
+          // Adjust bounds
+          if (align[i] <0) {
+            if (isUBnd) uBnd[i]--;
+          } else {
+            if (isLBnd) lBnd[i]++;
+          }    
+        }
+      }
     }
-  } else {
-    for (int i=0; i<rank; i++) {
-      bool isLBnd=grid->isStaggerLBnd(staggerloc, curDE, i);
-      bool isUBnd=grid->isStaggerUBnd(staggerloc, curDE, i);
-      
-      if (align[i] <0) {
-        if (isUBnd) uBnd[i]--;
-      } else {
-        if (isLBnd) lBnd[i]++;
-      }    
-    }
-  }
 }
 
 //-----------------------------------------------------------------------------
@@ -8831,6 +8896,7 @@ GridCellIter::GridCellIter(
   rank=grid->getDimCount();
   connL=grid->getConnL();
   connU=grid->getConnU();
+
     
   // Get Alignment for staggerloc
   const int *staggerAlign= grid->getStaggerAlign(staggerloc);
@@ -8864,6 +8930,10 @@ GridCellIter::GridCellIter(
 
    // set end of local DEs
   uBndDE=numDE-1;
+
+  // Get number of tiles
+  tileCount=grid->getTileCount();
+
 
   // set to beginning (just in case)
   this->toBeg();
@@ -9043,6 +9113,8 @@ int GridCellIter::getGlobalID(
   // determine sequence index
   std::vector<int> seqIndex;
   localrc=centerDistgrid->getSequenceIndexLocalDe(curDE,deBasedInd,seqIndex);
+
+
 
 #define REPORT_DEGENERACY
 #ifdef REPORT_DEGENERACY

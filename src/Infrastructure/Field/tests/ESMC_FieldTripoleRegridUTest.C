@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -57,7 +57,7 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
   polekind[1] = ESMC_POLEKIND_BIPOLE;
   ESMC_PoleKind_Flag *pkptr = polekind;
 
-  grid = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, NULL, &coordsys, &typekind, 
+  grid = ESMC_GridCreate1PeriDim(&i_maxIndex, NULL, NULL, &coordsys, &typekind,
                                  pkptr, NULL, NULL);
 
   // free memory
@@ -70,7 +70,7 @@ void create_grid(ESMC_Grid &grid, double max_x_in, double max_y_in)
 #ifdef masking
   rc = ESMC_GridAddItem(grid, ESMC_GRIDITEM_MASK, ESMC_STAGGERLOC_CENTER);
 
-  int *mask = (int *)ESMC_GridGetItem(grid, ESMC_GRIDITEM_MASK, 
+  int *mask = (int *)ESMC_GridGetItem(grid, ESMC_GRIDITEM_MASK,
                                             ESMC_STAGGERLOC_CENTER, NULL);
 #endif
 
@@ -144,7 +144,7 @@ int main(void){
   // VM variables
   int localPet, petCount;
   ESMC_VM vm;
-  
+
   // Field variables
   ESMC_RouteHandle routehandle;
   ESMC_Field srcfield, dstfield;
@@ -181,9 +181,9 @@ int main(void){
   //----------------------- Field CREATION --------------------------------------
   //----------------------------------------------------------------------------
 
-  srcfield = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8, 
+  srcfield = ESMC_FieldCreateGridTypeKind(srcgrid, ESMC_TYPEKIND_R8,
     ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "srcfield", &rc);
-  dstfield = ESMC_FieldCreateGridTypeKind(dstgrid, ESMC_TYPEKIND_R8, 
+  dstfield = ESMC_FieldCreateGridTypeKind(dstgrid, ESMC_TYPEKIND_R8,
     ESMC_STAGGERLOC_CENTER, NULL, NULL, NULL, "dstfield", &rc);
 
   //----------------------------------------------------------------------------
@@ -221,7 +221,7 @@ int main(void){
     }
   }
 
-  
+
   // get grid bounds and field pointers
   int *exLBound_d = (int *)malloc(dimcount*sizeof(int));
   int *exUBound_d = (int *)malloc(dimcount*sizeof(int));
@@ -256,11 +256,12 @@ int main(void){
   ESMC_UnmappedAction_Flag unmappedaction = ESMC_UNMAPPEDACTION_IGNORE;
   ESMC_RegridMethod_Flag regridmethod = ESMC_REGRIDMETHOD_CONSERVE;
 #ifdef masking
-  rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle, 
-			     NULL, NULL, NULL, NULL, NULL, &unmappedaction, NULL, NULL, NULL);
+  rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle,
+                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &unmappedaction,
+           NULL, NULL, NULL);
 #else
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle,
-			     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
   //----------------------------------------------------------------------------
 
@@ -271,7 +272,7 @@ int main(void){
   //----------------------------------------------------------------------------
   rc = ESMC_FieldRegridRelease(&routehandle);
   //----------------------------------------------------------------------------
-  
+
 #ifdef ESMF_TESTEXHAUSTIVE
   //----------------------------------------------------------------------------
   //-------------------------- REGRID VALIDATION -------------------------------
@@ -299,7 +300,7 @@ int main(void){
       tol = .0001;
 #endif
       if (ESMC_dabs(dstfieldptr[p]-exact) > tol) {
-        printf("dstfieldptr[%d] (%f,%f):\n%f /= %f\n", 
+        printf("dstfieldptr[%d] (%f,%f):\n%f /= %f\n",
                p, x, y, dstfieldptr[p], exact);
         correct=false;
       }
@@ -325,6 +326,6 @@ int main(void){
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
-  
+
   return 0;
 }

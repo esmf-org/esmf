@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -17,7 +17,7 @@
 !
 !==============================================================================
 !
-! This file contains the Alarm class definition and all Alarm class 
+! This file contains the Alarm class definition and all Alarm class
 ! methods.
 !
 !------------------------------------------------------------------------------
@@ -137,7 +137,7 @@
 ! !ARGUMENTS:
 !     type(ESMF_Alarm) :: alarm1
 !     type(ESMF_Alarm) :: alarm2
-! 
+!
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -145,30 +145,30 @@
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!     Assign {\tt alarm1} as an alias to the same {\tt ESMF\_Alarm} object in 
-!     memory as {\tt alarm2}. If {\tt alarm2} is invalid, then {\tt alarm1} 
+!     Assign {\tt alarm1} as an alias to the same {\tt ESMF\_Alarm} object in
+!     memory as {\tt alarm2}. If {\tt alarm2} is invalid, then {\tt alarm1}
 !     will be equally invalid after the assignment.
 !
 !     The arguments are:
-!     \begin{description} 
-!     \item[alarm1] 
-!          The {\tt ESMF\_Alarm} object on the left hand side of the 
+!     \begin{description}
+!     \item[alarm1]
+!          The {\tt ESMF\_Alarm} object on the left hand side of the
 !          assignment.
-!     \item[alarm2] 
-!          The {\tt ESMF\_Alarm} object on the right hand side of the 
+!     \item[alarm2]
+!          The {\tt ESMF\_Alarm} object on the right hand side of the
 !          assignment.
 !     \end{description}
 !
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
-!     None, documentation only, to describe the behavior of the default 
+!     None, documentation only, to describe the behavior of the default
 !     Fortran assignment(=).
 !
 ! !REQUIREMENTS:
 !     API review 11/2010.
-! 
+!
 !     end interface
-! 
+!
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_AlarmOperator(==) - Test if Alarm 1 is equal to Alarm 2
@@ -249,10 +249,10 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm1]
-!          The {\tt ESMF\_Alarm} object on the left hand side of the 
+!          The {\tt ESMF\_Alarm} object on the left hand side of the
 !          non-equality operation.
 !     \item[alarm2]
-!          The {\tt ESMF\_Alarm} object on the right hand side of the 
+!          The {\tt ESMF\_Alarm} object on the right hand side of the
 !          non-equality operation.
 !     \end{description}
 !
@@ -270,7 +270,7 @@
 ! !IROUTINE: ESMF_AlarmCreate - Create an ESMF Alarm
 !
 ! !INTERFACE:
-      interface ESMF_AlarmCreate    
+      interface ESMF_AlarmCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_AlarmCreateNew
@@ -325,8 +325,8 @@
 ! !DESCRIPTION:
 !     Creates and sets the initial values in a new {\tt ESMF\_Alarm}.
 !
-!     In {\tt ESMF\_DIRECTION\_REVERSE} (see Section~\ref{sec:Clock}), alarms 
-!     ring in reverse, i.e., they begin ringing when they originally ended, 
+!     In {\tt ESMF\_DIRECTION\_REVERSE} (see Section~\ref{sec:Clock}), alarms
+!     ring in reverse, i.e., they begin ringing when they originally ended,
 !     and end ringing when they originally began.
 !
 !     The arguments are:
@@ -334,7 +334,7 @@
 !     \item[clock]
 !          The clock with which to associate this newly created alarm.
 !     \item[{[ringTime]}]
-!          The ring time for a one-shot alarm or the first ring time for a 
+!          The ring time for a one-shot alarm or the first ring time for a
 !          repeating (interval) alarm.  Must specify at least one of ringTime
 !          or ringInterval.
 !     \item[{[ringInterval]}]
@@ -369,7 +369,7 @@
 !          See also {\tt ESMF\_AlarmEnable()}, {\tt ESMF\_AlarmDisable()}.
 !     \item[{[sticky]}]
 !          Sets the sticky state; default is on (true).  If sticky,
-!          once an alarm is ringing, it will remain ringing until turned off 
+!          once an alarm is ringing, it will remain ringing until turned off
 !          manually via a user call to {\tt ESMF\_AlarmRingerOff()}.
 !          If not sticky, an alarm will turn itself off after a certain
 !          ring duration specified by either ringDuration or
@@ -458,7 +458,7 @@
 !     Creates a complete (deep) copy of a given {\tt ESMF\_Alarm}.
 !     The returned {\tt ESMF\_Alarm} copy is associated with the same
 !     {\tt ESMF\_Clock} as the original {\tt ESMF\_Alarm}.  If desired, use
-!     {\tt ESMF\_AlarmSet(...clock=...)} to re-associate the 
+!     {\tt ESMF\_AlarmSet(...clock=...)} to re-associate the
 !     {\tt ESMF\_Alarm} copy with a different {\tt ESMF\_Clock}.
 !
 !     The arguments are:
@@ -505,7 +505,7 @@
       type(ESMF_Alarm), intent(inout)          :: alarm
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out),  optional :: rc
-!     
+!
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -590,7 +590,7 @@
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
-    
+
       ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
@@ -709,27 +709,27 @@
 !     \item[{[stopTime]}]
 !          The stop time for repeating (interval) alarms.
 !     \item[{[ringDuration]}]
-!          The ring duration.  Mutually exclusive with 
+!          The ring duration.  Mutually exclusive with
 !          ringTimeStepCount (see below).
 !     \item[{[ringTimeStepCount]}]
 !          The number of time steps comprising the ring duration.  Mutually
 !          exclusive with ringDuration (see above).
 !     \item[{[timeStepRingingCount]}]
 !          The number of time steps for which the alarm has been ringing thus
-!          far.  Used internally for tracking ringTimeStepCount ring 
+!          far.  Used internally for tracking ringTimeStepCount ring
 !          durations (see above).  Mutually exclusive with ringBegin
-!          (see below).  Increments in {\tt ESMF\_DIRECTION\_FORWARD} and 
-!          decrements in {\tt ESMF\_DIRECTION\_REVERSE}; 
+!          (see below).  Increments in {\tt ESMF\_DIRECTION\_FORWARD} and
+!          decrements in {\tt ESMF\_DIRECTION\_REVERSE};
 !          see Section~\ref{sec:Clock}.
 !     \item[{[ringBegin]}]
 !          The time when the alarm began ringing.  Used internally for tracking
 !          ringDuration (see above).  Mutually exclusive with
 !          timeStepRingingCount (see above).
 !     \item[{[ringEnd]}]
-!	   \begin{sloppypar}
+!          \begin{sloppypar}
 !          The time when the alarm ended ringing.  Used internally for
 !          re-ringing alarm in {\tt ESMF\_DIRECTION\_REVERSE}.
-!	   \end{sloppypar}
+!          \end{sloppypar}
 !     \item[{[refTime]}]
 !          The reference (i.e. base) time for an interval alarm.
 !     \item[{[ringing]}]
@@ -744,7 +744,7 @@
 !          The enabled state.
 !          See also {\tt ESMF\_AlarmEnable()}, {\tt ESMF\_AlarmDisable()}.
 !     \item[{[sticky]}]
-!          The sticky state. 
+!          The sticky state.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[name]}]
 !          The name of this alarm.
@@ -826,8 +826,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!   Return {\tt .true.} if the {\tt alarm} has been created. Otherwise return 
-!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   Return {\tt .true.} if the {\tt alarm} has been created. Otherwise return
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is
 !   returned, the return value of the function will also be {\tt .false.}.
 !
 ! The arguments are:
@@ -839,7 +839,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \end{description}
 !
 !EOP
-  !-----------------------------------------------------------------------------    
+  !-----------------------------------------------------------------------------
     ESMF_AlarmIsCreated = .false.   ! initialize
     if (present(rc)) rc = ESMF_SUCCESS
     if (ESMF_AlarmGetInit(alarm)==ESMF_INIT_CREATED) &
@@ -956,7 +956,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
-    
+
       ! invoke C to C++ entry point
       call c_ESMC_AlarmIsRinging(alarm, ESMF_AlarmIsRinging, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1013,7 +1013,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
-    
+
       ! invoke C to C++ entry point
       call c_ESMC_AlarmIsSticky(alarm, ESMF_AlarmIsSticky, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1040,7 +1040,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_TimeInterval), intent(in),  optional :: ringDuration
       integer,                 intent(in),  optional :: ringTimeStepCount
       integer,                 intent(out), optional :: rc
-    
+
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1113,7 +1113,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Prints out an {\tt ESMF\_Alarm}'s properties to {\tt stdout}, in support
 !     of testing and debugging.  The options control the type of information
 !     and level of detail. \\
-! 
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
@@ -1128,7 +1128,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          "ringDuration" - print how long this alarm is to remain ringing. \\
 !          "ringEnd"      - print time when the alarm actually ends ringing.\\
 !          "ringing"                - print the alarm's current ringing state.\\
-!          "ringingOnPrevTimeStep"  - print whether the alarm was ringing 
+!          "ringingOnPrevTimeStep"  - print whether the alarm was ringing
 !                                     immediately after the previous clock
 !                                     time step. \\
 !          "ringInterval" - print the alarm's periodic ring interval. \\
@@ -1154,7 +1154,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
-      
+
       ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
@@ -1219,7 +1219,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! mark output as successfully initialized
-      call ESMF_AlarmSetInitCreated(ESMF_AlarmReadRestart) 
+      call ESMF_AlarmSetInitCreated(ESMF_AlarmReadRestart)
 
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
@@ -1238,7 +1238,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Alarm), intent(inout)         :: alarm
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
-    
+
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1293,7 +1293,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Alarm), intent(inout)         :: alarm
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
-    
+
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1423,7 +1423,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          will be logged when this limitation is not satisfied.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[name]}]
-!          The new name for this alarm.  
+!          The new name for this alarm.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1481,7 +1481,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Alarm), intent(inout)         :: alarm
       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,          intent(out), optional :: rc
-    
+
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -1552,13 +1552,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Must have a valid ringTime, set either directly or indirectly via
 !     ringInterval.  See {\tt ESMF\_AlarmCreate()}.
 !
-!     The arguments are:  
+!     The arguments are:
 !     \begin{description}
 !     \item[alarm]
 !          {\tt ESMF\_Alarm} to be validated.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description} 
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -1569,7 +1569,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
-      
+
       ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
 
@@ -1577,7 +1577,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call c_ESMC_AlarmValidate(alarm, options, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    
+
       ! Return success
       if (present(rc)) rc = ESMF_SUCCESS
       end subroutine ESMF_AlarmValidate
@@ -1634,7 +1634,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ! check input
       ESMF_INIT_CHECK_DEEP(ESMF_AlarmGetInit,alarm,rc)
-    
+
       ! invoke C to C++ entry point
       call c_ESMC_AlarmWasPrevRinging(alarm, ESMF_AlarmWasPrevRinging, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -1694,7 +1694,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
-    
+
       ! Initialize output value in case of error
       ESMF_AlarmWillRingNext = .false.
 
@@ -1783,7 +1783,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc1, localrc2                 ! local return codes
       logical :: lval1, lval2
 
-      ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+      ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
       ! init checks on both args, and in the case where both are uninitialized,
       ! to distinguish equality based on uninitialized type (uncreated,
       ! deleted).
@@ -1833,7 +1833,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localrc1, localrc2                 ! local return codes
       logical :: lval1, lval2
 
-      ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+      ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
       ! init checks on both args, and in the case where both are uninitialized,
       ! to distinguish equality based on uninitialized type (uncreated,
       ! deleted).

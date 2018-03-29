@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -16,8 +16,9 @@
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
 #define ASMM_STORE_MEMLOG_off
-#define ASMM_STORE_COMMMATRIX_off
-#define ASMM_STORE_OPT_PRINT_off
+#define ASMM_STORE_TUNELOG_off
+#define ASMM_STORE_COMMMATRIX_on
+#define ASMM_STORE_DUMPSMM_off
 
 #define ASMM_EXEC_INFO_off
 #define ASMM_EXEC_TIMING_off
@@ -34,9 +35,9 @@
 // in the companion file ESMCI_Array.h
 //
 // Macros that affect the code:
-//   * WORKAROUND_NONBLOCKPROGRESSBUG - when defined limits the outsanding 
+//   * WORKAROUND_NONBLOCKPROGRESSBUG - when defined limits the outstanding
 //     non-blocking sends to one at a time, or in other places uses blocking
-//     send calls instead. This work-around was introduced for the 
+//     send calls instead. This work-around was introduced for the
 //     discover/pgi-14.1.0/mvapich2-2.0b combination that started hanging some
 //     of the RegridWeightGen tests in the --check part.
 //-----------------------------------------------------------------------------
@@ -47,6 +48,7 @@
 #include <cstdio>
 #include <cstring>
 #include <vector>
+#include <list>
 #include <map>
 #include <algorithm>
 #include <sstream>
@@ -55,6 +57,14 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_IO.h"
+
+#ifdef ASMM_STORE_DUMPSMM_on
+extern "C" {
+  void FTN_X(f_esmf_outputsimpleweightfile)(char const *fileName, int *count,
+    double const *factorList, int const *factorIndexList,
+    int *rc, ESMCI_FortranStrLenArg len);
+}
+#endif
 
 using namespace std;
 
@@ -76,9 +86,9 @@ namespace ESMCI {
 //
 // Explicit template instantiation (do not confuse with specialization!!!)
 // The reason for explicit instantiation here is that it will tell the compiler
-// explicitly to instantiate the following special instantiations of the 
+// explicitly to instantiate the following special instantiations of the
 // template. This way the definition of the templated methods do not have to
-// sit with the declaration in the header file, but can be located in the 
+// sit with the declaration in the header file, but can be located in the
 // source file.
 //
 //-----------------------------------------------------------------------------
@@ -109,7 +119,7 @@ template SparseMatrix<ESMC_I8,ESMC_I8>::SparseMatrix(
 Array::Array(
 //
 // !RETURN VALUE:
-//    
+//
 //
 // !ARGUMENTS:
 //
@@ -148,7 +158,7 @@ Array::Array(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  try{  
+  try{
 
   // fill in the Array object
   typekind = typekindArg;
@@ -211,7 +221,7 @@ Array::Array(
     for (int jj=0; jj<rank; jj++){
       int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor d
       if (j){
-        // decomposed dimension 
+        // decomposed dimension
         --j;  // shift to basis 0
         exclusiveElementCountPDe[i] *= indexCountPDimPDe[i*dimCount+j];
       }
@@ -226,15 +236,15 @@ Array::Array(
         totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
     }
   }
-  
+
   // contiguous flag
   contiguousFlag = new int[localDeCount];
   for (int i=0; i<localDeCount; i++)
     contiguousFlag[i] = -1;  // initialize as "not yet constructed"
-  
+
   // Set up rim members and fill with canonical seqIndex values
   this->setRimMembers();
-      
+
   // special variables for super-vectorization in XXE
   sizeSuperUndist = new int[redDimCount+1];
   sizeDist = new int[redDimCount*localDeCount];
@@ -262,12 +272,12 @@ Array::Array(
       }
     }
   }
-  
-  // Auxiliary 
+
+  // Auxiliary
   localDeCountAux = localDeCount; // TODO: auxiliary for garb until ref. counting
-  
+
   ioRH = NULL; // invalidate
-  
+
   // invalidate the name for this Array object in the Base class
   ESMC_BaseSetName(NULL, "Array");
 
@@ -281,7 +291,7 @@ Array::Array(
       "Caught exception", ESMC_CONTEXT, rc);
     return;
   }
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
@@ -380,7 +390,7 @@ int Array::constructContiguousFlag(int redDimCount){
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  
+
   int const localDeCount = delayout->getLocalDeCount();
   const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
@@ -393,7 +403,7 @@ int Array::constructContiguousFlag(int redDimCount){
     for (int jj=0; jj<rank; jj++){
       int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 for tensor d
       if (j){
-        // decomposed dimension 
+        // decomposed dimension
         if (totalLBound[i*redDimCount+pI] != exclusiveLBound[i*redDimCount+pI]
           || totalUBound[i*redDimCount+pI] !=exclusiveUBound[i*redDimCount+pI]){
           contiguousFlag[i] = 0; // reset
@@ -416,7 +426,7 @@ int Array::constructContiguousFlag(int redDimCount){
       }
     } // jj
   }
-  
+
   // return successfully
   return ESMF_SUCCESS;
 }
@@ -467,10 +477,10 @@ Array *Array::create(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   Array *array;
   try{
-  
+
   // check the input and get the information together to call construct()
   // larrayListArg -> typekind/rank
   if (larrayListArg == NULL){
@@ -656,13 +666,13 @@ Array *Array::create(
   int tensorElementCount = 1;  // prime tensorElementCount
   for (int i=0; i<tensorCount; i++)
     tensorElementCount *= (undistUBoundArray[i] - undistLBoundArray[i] + 1);
-  
+
   // delayout -> deCount, localDeCount, localDeToDeMap
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
   if ((localDeCount > 0) && (localDeCount != larrayCount)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "Mismatch in localDeCount between larrayList argument and DELayout", 
+      "Mismatch in localDeCount between larrayList argument and DELayout",
       ESMC_CONTEXT, rc);
     return ESMC_NULL_POINTER;
   }
@@ -905,7 +915,7 @@ Array *Array::create(
     if (exclusiveUBound[i] > totalUBound[i])
       totalUBound[i] = exclusiveUBound[i];
   }
-  
+
   // check computational bounds against total bounds
   for (int i=0; i<localDeCount*redDimCount; i++){
     if (totalLBound[i] <= totalUBound[i]){
@@ -947,7 +957,7 @@ Array *Array::create(
       for (int jj=0; jj<rank; jj++){
         if (arrayToDistGridMapArray[jj]){
           // distributed dimension
-          if (temp_counts[jj] < 
+          if (temp_counts[jj] <
             totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1){
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
               "LocalArray does not accommodate requested element count",
@@ -977,7 +987,7 @@ Array *Array::create(
               // totalLBound and totalUBound not fixed
               // -> shift computational/excl. region into center of total region
               int lBound = computationalLBound[i*redDimCount+j];
-              if (exclusiveLBound[i*redDimCount+j] 
+              if (exclusiveLBound[i*redDimCount+j]
                 < computationalLBound[i*redDimCount+j])
                 lBound = exclusiveLBound[i*redDimCount+j];
               int uBound = computationalUBound[i*redDimCount+j];
@@ -1028,7 +1038,7 @@ Array *Array::create(
           exclusiveUBound[i*redDimCount+j] += shift;
           ++j;
         }
-      }      
+      }
       // Use the incoming LocalArray objects directly. No need for a create
       // from copy here because the bounds and Fortran dope vector will stay
       // unchanged.
@@ -1041,11 +1051,11 @@ Array *Array::create(
       for (int jj=0; jj<rank; jj++){
         if (arrayToDistGridMapArray[jj]){
           // distributed dimension
-          if (temp_counts[jj] < 
+          if (temp_counts[jj] <
             totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1){
             std::stringstream debugmsg;
             debugmsg << "jj=" << jj << ": " << temp_counts[jj] << " < "
-              << totalUBound[i*redDimCount+j] << " - " 
+              << totalUBound[i*redDimCount+j] << " - "
               << totalLBound[i*redDimCount+j] << " + 1";
             ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -1080,7 +1090,7 @@ Array *Array::create(
               // totalLBound and totalUBound not fixed
               // -> shift computational/excl. region into center of total region
               int lBound = computationalLBound[i*redDimCount+j];
-              if (exclusiveLBound[i*redDimCount+j] 
+              if (exclusiveLBound[i*redDimCount+j]
                 < computationalLBound[i*redDimCount+j])
                 lBound = exclusiveLBound[i*redDimCount+j];
               int uBound = computationalUBound[i*redDimCount+j];
@@ -1119,15 +1129,15 @@ Array *Array::create(
         &temp_larrayLBound[0], &temp_larrayUBound[0], &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
-    }        
+    }
   }
-  
+
   // call class constructor
   try{
     array = new Array(typekind, rank, larrayList, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
-      tensorElementCount, undistLBoundArray, undistUBoundArray, 
+      tensorElementCount, undistLBoundArray, undistUBoundArray,
       distgridToArrayMapArray, arrayToDistGridMapArray,
       distgridToPackedArrayMap, indexflag, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1143,11 +1153,11 @@ Array *Array::create(
     return NULL;
   }catch(...){
     // allocation error
-    ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", ESMC_CONTEXT, rc);  
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", ESMC_CONTEXT, rc);
     array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
-  
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -1158,7 +1168,7 @@ Array *Array::create(
       "Caught exception", ESMC_CONTEXT, rc);
     return NULL;
   }
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return array;
@@ -1204,10 +1214,10 @@ Array *Array::create(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   Array *array;
   try{
-  
+
   // check the input and get the information together to call construct()
   // arrayspec -> typekind/rank
   if (arrayspec == NULL){
@@ -1360,7 +1370,7 @@ Array *Array::create(
   int tensorElementCount = 1;  // prime tensorElementCount
   for (int i=0; i<tensorCount; i++)
     tensorElementCount *= (undistUBoundArray[i] - undistLBoundArray[i] + 1);
-  
+
   // delayout -> deCount, localDeCount, localDeToDeMap
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
@@ -1607,7 +1617,7 @@ Array *Array::create(
     if (exclusiveUBound[i] > totalUBound[i])
       totalUBound[i] = exclusiveUBound[i];
   }
-  
+
   // check computational bounds against total bounds
   for (int i=0; i<localDeCount*redDimCount; i++){
     if (totalLBound[i] <= totalUBound[i]){
@@ -1634,7 +1644,7 @@ Array *Array::create(
       }
     }
   }
-  
+
   // optionally shift to supplied lower bounds
   if (present(distLBoundArg)){
     if (distLBoundArg->dimCount != 1){
@@ -1665,7 +1675,7 @@ Array *Array::create(
       }
     }
   }
-  
+
   // allocate LocalArray list that holds all PET-local DEs
   vector<LocalArray *> larrayListV(localDeCount);
   LocalArray **larrayList = &larrayListV[0];
@@ -1697,13 +1707,13 @@ Array *Array::create(
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
   }
-  
+
   // call class constructor
   try{
     array = new Array(typekind, rank, larrayList, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
-      tensorElementCount, undistLBoundArray, undistUBoundArray, 
+      tensorElementCount, undistLBoundArray, undistUBoundArray,
       distgridToArrayMapArray, arrayToDistGridMapArray,
       distgridToPackedArrayMap, indexflag, &localrc, vm);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -1719,11 +1729,11 @@ Array *Array::create(
     return NULL;
   }catch(...){
     // allocation error
-    ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", ESMC_CONTEXT, rc);  
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", ESMC_CONTEXT, rc);
     array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
-  
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,\
@@ -1734,7 +1744,7 @@ Array *Array::create(
       "Caught exception", ESMC_CONTEXT, rc);
     return NULL;
   }
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return array;
@@ -1769,9 +1779,9 @@ Array *Array::create(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   Array *arrayOut;
-  
+
   try{
     // get an allocation for the new Array object
     try{
@@ -1783,7 +1793,7 @@ Array *Array::create(
       return NULL;
     }catch(...){
       // allocation error
-      ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", ESMC_CONTEXT, rc);  
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", ESMC_CONTEXT, rc);
       return NULL;
     }
     // copy all scalar members and reference members
@@ -1799,7 +1809,7 @@ Array *Array::create(
     for (int i=0; i<rmLeadingTensors; i++)
       leadingTensorElementCount *=
         arrayIn->undistUBound[i] - arrayIn->undistLBound[i] + 1;
-    arrayOut->tensorElementCount = 
+    arrayOut->tensorElementCount =
       arrayIn->tensorElementCount - leadingTensorElementCount;
     if (arrayOut->tensorElementCount==0) arrayOut->tensorElementCount=1;
     arrayOut->distgrid = arrayIn->distgrid; // copy reference
@@ -1814,7 +1824,7 @@ Array *Array::create(
       for (int i=0; i<localDeCount; i++){
         arrayOut->larrayList[i] =
           LocalArray::create(arrayIn->larrayList[i], NULL, NULL, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, 
+        if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
           arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
           return ESMC_NULL_POINTER;
@@ -1827,7 +1837,7 @@ Array *Array::create(
         arrayOut->larrayList[i] =
           LocalArray::create(typekind, rank, &(temp_counts[rmLeadingTensors]),
             NULL, NULL, NULL, DATA_REF, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, 
+        if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
           arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
           return ESMC_NULL_POINTER;
@@ -1874,7 +1884,7 @@ Array *Array::create(
       for (int i=0; i<dimCount; i++)
         arrayOut->distgridToArrayMap[i] -= rmLeadingTensors;
     arrayOut->arrayToDistGridMap = new int[rank];
-    memcpy(arrayOut->arrayToDistGridMap, 
+    memcpy(arrayOut->arrayToDistGridMap,
       arrayIn->arrayToDistGridMap + rmLeadingTensors,
       rank * sizeof(int));
     arrayOut->distgridToPackedArrayMap = new int[dimCount];
@@ -1893,17 +1903,17 @@ Array *Array::create(
     arrayOut->totalElementCountPLocalDe = new int[localDeCount];
     memcpy(arrayOut->totalElementCountPLocalDe,
       arrayIn->totalElementCountPLocalDe, localDeCount * sizeof(int));
-    
+
     // Set up rim members and fill with canonical seqIndex values
     arrayOut->setRimMembers();
-     
+
     // invalidate the name for this Array object in the Base class
     arrayOut->ESMC_BaseSetName(NULL, "Array");
-    
-    arrayOut->localDeCountAux = 
+
+    arrayOut->localDeCountAux =
       arrayOut->delayout->getLocalDeCount(); // TODO: auxilary for garb
                                              // TODO: until ref. counting
-					     
+                                        
     arrayOut->ioRH = NULL; // invalidate
 
   }catch(int localrc){
@@ -1918,7 +1928,7 @@ Array *Array::create(
     arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
-  
+
   // reset the distgridCreator flag in the src Array, because the newly
   // created Array will now point to the same DistGrid by reference
   // -> leave it up to ESMF automatic garbage collection to clean up the
@@ -1930,8 +1940,8 @@ Array *Array::create(
   return arrayOut;
 }
 //-----------------------------------------------------------------------------
-    
-    
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::create()"
@@ -1959,9 +1969,9 @@ Array *Array::create(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   Array *arrayOut;
-  
+
   try{
     // get an allocation for the new Array object
     try{
@@ -1973,10 +1983,10 @@ Array *Array::create(
       return NULL;
     }catch(...){
       // allocation error
-      ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", ESMC_CONTEXT, rc);  
+      ESMC_LogDefault.MsgAllocError("for new ESMCI::Array.", ESMC_CONTEXT, rc);
       return NULL;
     }
-    // 
+    //
     int rmTensors = 0;  // initialize
     if (rmTensorFlag)
       rmTensors = arrayIn->tensorCount;
@@ -2029,13 +2039,13 @@ Array *Array::create(
         arrayOut->larrayList[i] =
           LocalArray::create(typekind, rank, &(counts[0]),
             NULL, NULL, NULL, DATA_REF, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, 
+        if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
           arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
           return ESMC_NULL_POINTER;
         }
         // initialize the data in the newly created array to zero
-        memset(arrayOut->larrayList[i]->getBaseAddr(), 0, 
+        memset(arrayOut->larrayList[i]->getBaseAddr(), 0,
           arrayOut->larrayList[i]->getByteCount());
       }
     }else{
@@ -2043,13 +2053,13 @@ Array *Array::create(
       for (int i=0; i<localDeCount; i++){
         arrayOut->larrayList[i] =
           LocalArray::create(arrayIn->larrayList[i], NULL, NULL, &localrc);
-        if (ESMC_LogDefault.MsgFoundError(localrc, 
+        if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
           arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
           return ESMC_NULL_POINTER;
         }
         // initialize the data in the newly created array to zero
-        memset(arrayOut->larrayList[i]->getBaseAddr(), 0, 
+        memset(arrayOut->larrayList[i]->getBaseAddr(), 0,
           arrayOut->larrayList[i]->getByteCount());
       }
     }
@@ -2059,7 +2069,7 @@ Array *Array::create(
       arrayOut->larrayBaseAddrList[i] = arrayOut->larrayList[i]->getBaseAddr();
     // tensor dimensions
     arrayOut->undistLBound = new int[tensorCount];
-    memcpy(arrayOut->undistLBound, arrayIn->undistLBound, 
+    memcpy(arrayOut->undistLBound, arrayIn->undistLBound,
       tensorCount * sizeof(int));
     arrayOut->undistUBound = new int[tensorCount];
     memcpy(arrayOut->undistUBound, arrayIn->undistUBound,
@@ -2095,17 +2105,17 @@ Array *Array::create(
     arrayOut->totalElementCountPLocalDe = new int[localDeCount];
     memcpy(arrayOut->totalElementCountPLocalDe,
       arrayIn->totalElementCountPLocalDe, localDeCount * sizeof(int));
-    
+
     // Set up rim members and fill with canonical seqIndex values
     arrayOut->setRimMembers();
-     
+
     // invalidate the name for this Array object in the Base class
     arrayOut->ESMC_BaseSetName(NULL, "Array");
-    
-    arrayOut->localDeCountAux = 
+
+    arrayOut->localDeCountAux =
       arrayOut->delayout->getLocalDeCount(); // TODO: auxilary for garb
                                              // TODO: until ref. counting
-					     
+                                        
     arrayOut->ioRH = NULL; // invalidate
 
   }catch(int localrc){
@@ -2120,7 +2130,7 @@ Array *Array::create(
     arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
-  
+
   // reset the distgridCreator flag in the src Array, because the newly
   // created Array will now point to the same DistGrid by reference
   // -> leave it up to ESMF automatic garbage collection to clean up the
@@ -2132,8 +2142,8 @@ Array *Array::create(
   return arrayOut;
 }
 //-----------------------------------------------------------------------------
-    
-    
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::destroy()"
@@ -2157,7 +2167,7 @@ int Array::destroy(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // return with errors for NULL pointer
   if (array == ESMC_NULL_POINTER || *array == ESMC_NULL_POINTER){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -2180,7 +2190,7 @@ int Array::destroy(
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // optionally delete the complete object and remove from garbage collection
   if (noGarbage){
     VM::rmObject(*array); // remove object from garbage collection
@@ -2225,15 +2235,15 @@ int Array::copy(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   try{
-  
+
     if (!match(this, arrayIn)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "Arrays must match for data copy", ESMC_CONTEXT, &rc);
       return rc;
     }
-    
+
     // do the actual data copy
     int const dataSize = ESMC_TypeKind_FlagSize(typekind);
     int const localDeCount = delayout->getLocalDeCount();
@@ -2242,7 +2252,7 @@ int Array::copy(
         totalElementCountPLocalDe[i]*tensorElementCount*dataSize;  // bytes
       memcpy(larrayBaseAddrList[i], arrayIn->larrayBaseAddrList[i], size);
     }
-      
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -2257,7 +2267,7 @@ int Array::copy(
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -2286,9 +2296,8 @@ int Array::getLinearIndexExclusive(
 // !ARGUMENTS:
 //
   int localDe,                      // in - local DE
-  int const *index,                 // in - DE-local index tuple in exclusive
+  int const *index                  // in - DE-local index tuple in exclusive
                                     //      region basis 0
-  int *rc                           // out - return code
   )const{
 //
 // !DESCRIPTION:
@@ -2296,9 +2305,6 @@ int Array::getLinearIndexExclusive(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-
   // determine the linearized index
   int redDimCount = rank - tensorCount;
   int joff = localDe*redDimCount;   // offset according to localDe index
@@ -2307,11 +2313,11 @@ int Array::getLinearIndexExclusive(
   int packedIndex = redDimCount-1;  // reset
   for (int jj=rank-1; jj>=0; jj--){
     if (arrayToDistGridMap[jj]){
-      // decomposed dimension 
+      // decomposed dimension
       int j = packedIndex;
       // first time multiply with zero intentionally:
       linIndex *= totalUBound[joff+j] - totalLBound[joff+j] + 1;
-      linIndex += exclusiveLBound[joff+j] - totalLBound[joff+j] + index[jj];    
+      linIndex += exclusiveLBound[joff+j] - totalLBound[joff+j] + index[jj];
       --packedIndex;
     }else{
       // tensor dimension
@@ -2321,9 +2327,7 @@ int Array::getLinearIndexExclusive(
       --tensorIndex;
     }
   }
-   
-  // return successfully
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
   return linIndex;    // leave this index basis 0
 }
 //-----------------------------------------------------------------------------
@@ -2346,7 +2350,10 @@ template<typename IT> int Array::getSequenceIndexExclusive(
   int localDe,                      // in  - local DE
   int const *index,                 // in  - DE-local index tuple in exclusive
                                     //       region basis 0
-  SeqIndex<IT> *seqIndex            // out - sequence index
+  SeqIndex<IT> *seqIndex,           // out - sequence index
+  bool recursive,                   // in  - recursive mode or not
+  bool canonical                    // in  - return canonical seqIndex even if
+                                    //       arbitrary seqIndices available
   )const{
 //
 // !DESCRIPTION:
@@ -2359,7 +2366,7 @@ template<typename IT> int Array::getSequenceIndexExclusive(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check seqIndex argument
   if (seqIndex==NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
@@ -2369,7 +2376,7 @@ template<typename IT> int Array::getSequenceIndexExclusive(
 
   // prepare decompIndex for decomposed dimensions in the DistGrid order
   int dimCount = distgrid->getDimCount();
-  int *decompIndex = new int[dimCount];
+  vector<int> decompIndex(dimCount);
   for (int i=0; i<dimCount; i++){
     if (distgridToArrayMap[i] > 0){
       // DistGrid dim associated with Array dim
@@ -2381,20 +2388,18 @@ template<typename IT> int Array::getSequenceIndexExclusive(
   }
   // determine the sequentialized index for decomposed dimensions
   vector<IT> decompSeqIndex;
-  localrc = distgrid->getSequenceIndexLocalDe(localDe, decompIndex,
-    decompSeqIndex);  
+  localrc = distgrid->getSequenceIndexLocalDe(localDe, &(decompIndex[0]),
+    decompSeqIndex, recursive, canonical);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   if (decompSeqIndex.size() > 0)
-    seqIndex->decompSeqIndex = decompSeqIndex[0];
+    seqIndex->decompSeqIndex = decompSeqIndex[0]; // use the first seqIndex
   else
     seqIndex->decompSeqIndex = -1;  // invalidate
-  // garbage collection
-  delete [] decompIndex;
-  
+
   // determine sequentialized index for tensor dimensions
   seqIndex->tensorSeqIndex = getTensorSequenceIndex(index);
-  
+
   // return successfully
   return ESMF_SUCCESS;
 }
@@ -2408,7 +2413,7 @@ template<typename IT> int Array::getSequenceIndexExclusive(
 // !IROUTINE:  ESMCI::Array::getSequenceIndexTile
 //
 // !INTERFACE:
-SeqIndex<> Array::getSequenceIndexTile(
+template<typename IT> SeqIndex<IT> Array::getSequenceIndexTile(
 //
 // !RETURN VALUE:
 //    SeqIndex sequence index
@@ -2416,7 +2421,7 @@ SeqIndex<> Array::getSequenceIndexTile(
 // !ARGUMENTS:
 //
   int tile,                        // in - tile = {1,..., tileCount}
-  const int *index,                 // in - index tuple within tile 
+  const int *index,                 // in - index tuple within tile
                                     //    - basis 0
   int *rc                           // out - return code
   )const{
@@ -2429,9 +2434,9 @@ SeqIndex<> Array::getSequenceIndexTile(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   // initialize seqIndex
-  SeqIndex<> seqIndex;
+  SeqIndex<IT> seqIndex;
   seqIndex.decompSeqIndex = seqIndex.tensorSeqIndex = -1;
 
   // prepare decompIndex for decomposed dimensions in the DistGrid order
@@ -2448,19 +2453,19 @@ SeqIndex<> Array::getSequenceIndexTile(
     }
   }
   // determine the sequentialized index for decomposed dimensions
-  int decompSeqIndex;
+  IT decompSeqIndex;
   localrc = distgrid->getSequenceIndexTileRelative(tile, decompIndex,
     &decompSeqIndex);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return seqIndex;
   seqIndex.decompSeqIndex = decompSeqIndex;
-  
+
   // garbage collection
   delete [] decompIndex;
-        
+
   // determine sequentialized index for tensor dimensions
   seqIndex.tensorSeqIndex = getTensorSequenceIndex(index);
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return seqIndex;
@@ -2494,7 +2499,7 @@ int Array::getTensorSequenceIndex(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   // determine the sequentialized index for tensor dimensions
   int tensorSeqIndex = 0;             // reset
   int tensorIndex = tensorCount - 1;  // reset
@@ -2509,7 +2514,7 @@ int Array::getTensorSequenceIndex(
     }
   }
   ++tensorSeqIndex; // shift tensor sequentialized index to basis 1 !!!!
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return tensorSeqIndex;
@@ -2544,7 +2549,7 @@ int Array::getArbSequenceIndexOffset(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
-  
+
   // determine the sequentialized index for tensor dimensions
   int arbSeqIndexOffset = 0;             // reset
   int arbIndex = (rank - tensorCount) - 1;  // reset
@@ -2557,7 +2562,7 @@ int Array::getArbSequenceIndexOffset(
       --arbIndex;
     }
   }
-  
+
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
   return arbSeqIndexOffset;
@@ -2739,7 +2744,9 @@ void Array::setRimMembers(
 //EOPI
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  try{
 
   // Set up rim members and fill with canonical seqIndex values
   //TODO: rim setup has potentially sizable memory and performance impact???
@@ -2750,18 +2757,17 @@ void Array::setRimMembers(
   if (indexTK==ESMC_TYPEKIND_I4){
     rimSeqIndexI4.resize(localDeCount);
     for (int i=0; i<localDeCount; i++){
-      ArrayElement arrayElement(this, i, true); // iterator through total w/o excl
+      // iterator through total region, skipping over exclusive region
+      ArrayElement arrayElement(this, i, true, true, true, false);
       int element = 0;
       while(arrayElement.isWithin()){
         // obtain linear index for this element
-        int linIndex = arrayElement.getLinearIndexExclusive();
+        int linIndex = arrayElement.getLinearIndex();
         // obtain canonical seqIndex value according to DistGrid topology
         SeqIndex<ESMC_I4> seqIndex;  // invalidated by default constructor
         if (arrayElement.hasValidSeqIndex()){
           // seqIndex is well defined for this arrayElement
-          localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
-          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+          seqIndex = arrayElement.getSequenceIndex<ESMC_I4>();
         }
         rimSeqIndexI4[i].push_back(seqIndex); // store seqIndex for this rim element
         rimLinIndex[i].push_back(linIndex); // store linIndex for this rim element
@@ -2773,18 +2779,17 @@ void Array::setRimMembers(
   }else if (indexTK==ESMC_TYPEKIND_I8){
     rimSeqIndexI8.resize(localDeCount);
     for (int i=0; i<localDeCount; i++){
-      ArrayElement arrayElement(this, i, true); // iterator through total w/o excl
+      // iterator through total region, skipping over exclusive region
+      ArrayElement arrayElement(this, i, true, true, true, false);
       int element = 0;
       while(arrayElement.isWithin()){
         // obtain linear index for this element
-        int linIndex = arrayElement.getLinearIndexExclusive();
+        int linIndex = arrayElement.getLinearIndex();
         // obtain canonical seqIndex value according to DistGrid topology
         SeqIndex<ESMC_I8> seqIndex;  // invalidated by default constructor
         if (arrayElement.hasValidSeqIndex()){
           // seqIndex is well defined for this arrayElement
-          localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
-          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+          seqIndex = arrayElement.getSequenceIndex<ESMC_I8>();
         }
         rimSeqIndexI8[i].push_back(seqIndex); // store seqIndex for this rim element
         rimLinIndex[i].push_back(linIndex); // store linIndex for this rim element
@@ -2793,6 +2798,21 @@ void Array::setRimMembers(
       } // multi dim index loop
       rimElementCount[i] = element; // store element count
     }
+  }
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
+    throw rc;
+  }catch(exception &x){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      x.what(), ESMC_CONTEXT, &rc);
+    throw rc;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception", ESMC_CONTEXT, &rc);
+    throw rc;
   }
 }
 //-----------------------------------------------------------------------------
@@ -2846,7 +2866,7 @@ template<>
         "rimSeqIndexArg array must be of rank 1", ESMC_CONTEXT, &rc);
       return rc;  // bail out
     }
-    if (rimSeqIndexArg->extent[0]*tensorElementCount 
+    if (rimSeqIndexArg->extent[0]*tensorElementCount
       != (int)rimSeqIndexI4[localDe].size()){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
         "rimSeqIndexArg argument must be of size rimSeqIndex[localDe].size()",
@@ -2855,9 +2875,9 @@ template<>
     }
 
     // fill Array rim elements with sequence indices provided in rimSeqIndexArg
-    ArrayElement arrayElement(this, localDe, true);
+    ArrayElement arrayElement(this, localDe, true, false, false, false);
     int i=0;
-    int offStart = arrayElement.getArbSequenceIndexOffset();    
+    int offStart = arrayElement.getArbSequenceIndexOffset();
     while(arrayElement.isWithin()){
       int off = arrayElement.getArbSequenceIndexOffset() - offStart;
       rimSeqIndexI4[localDe][i].decompSeqIndex =
@@ -2865,11 +2885,11 @@ template<>
       rimSeqIndexI4[localDe][i].tensorSeqIndex =
         arrayElement.getTensorSequenceIndex();
 #if 0
-printf("setRimSeqIndex(): %d, %d, %d, (%d, %d), %d\n", i, offStart, off, 
+printf("setRimSeqIndex(): %d, %d, %d, (%d, %d), %d\n", i, offStart, off,
   rimSeqIndexI4[localDe][i].decompSeqIndex,
   rimSeqIndexI4[localDe][i].tensorSeqIndex,
   rimLinIndex[localDe][i]);
-#endif 
+#endif
       ++i;
       arrayElement.next();  // next element
     } // multi dim index loop
@@ -2915,7 +2935,7 @@ template<>
       "mismatch between indexing typekind", ESMC_CONTEXT, &rc);
     return rc;  // bail out
   }
-  
+
   // ensure localDe is in range
   if (localDe < 0 || localDe >= delayout->getLocalDeCount()){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
@@ -2930,9 +2950,9 @@ template<>
         "rimSeqIndexArg array must be of rank 1", ESMC_CONTEXT, &rc);
       return rc;  // bail out
     }
-    if (rimSeqIndexArg->extent[0]>0){ 
+    if (rimSeqIndexArg->extent[0]>0){
       // there are sequence indices passed in
-      if (rimSeqIndexArg->extent[0]*tensorElementCount 
+      if (rimSeqIndexArg->extent[0]*tensorElementCount
         != (int)rimSeqIndexI8[localDe].size()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
           "rimSeqIndexArg argument must be of size rimSeqIndex[localDe].size()",
@@ -2941,9 +2961,9 @@ template<>
       }
 
       // fill Array rim elements with seq indices provided in rimSeqIndexArg
-      ArrayElement arrayElement(this, localDe, true);
+      ArrayElement arrayElement(this, localDe, true, false, false, false);
       int i=0;
-      int offStart = arrayElement.getArbSequenceIndexOffset();    
+      int offStart = arrayElement.getArbSequenceIndexOffset();
       while(arrayElement.isWithin()){
         int off = arrayElement.getArbSequenceIndexOffset() - offStart;
         rimSeqIndexI8[localDe][i].decompSeqIndex =
@@ -2951,11 +2971,11 @@ template<>
         rimSeqIndexI8[localDe][i].tensorSeqIndex =
           arrayElement.getTensorSequenceIndex();
 #if 0
-printf("setRimSeqIndex(): %d, %d, %d, (%lld, %d), %d\n", i, offStart, off, 
+printf("setRimSeqIndex(): %d, %d, %d, (%lld, %d), %d\n", i, offStart, off,
   rimSeqIndexI8[localDe][i].decompSeqIndex,
   rimSeqIndexI8[localDe][i].tensorSeqIndex,
   rimLinIndex[localDe][i]);
-#endif 
+#endif
         ++i;
         arrayElement.next();  // next element
       } // multi dim index loop
@@ -2984,7 +3004,7 @@ template<>
 //
 // !ARGUMENTS:
 //
-    const std::vector<std::vector<SeqIndex<ESMC_I4> > > **rimSeqIndex_  // out - 
+    const std::vector<std::vector<SeqIndex<ESMC_I4> > > **rimSeqIndex_  // out -
   )const{
 //
 // !DESCRIPTION:
@@ -3019,7 +3039,7 @@ template<>
 //
 // !ARGUMENTS:
 //
-    const std::vector<std::vector<SeqIndex<ESMC_I8> > > **rimSeqIndex_  // out - 
+    const std::vector<std::vector<SeqIndex<ESMC_I8> > > **rimSeqIndex_  // out -
   )const{
 //
 // !DESCRIPTION:
@@ -3079,7 +3099,7 @@ bool Array::match(
 
   // initialize return value
   bool matchResult = false;
-  
+
   // return with errors for NULL pointer
   if (array1 == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -3091,7 +3111,7 @@ bool Array::match(
       "Not a valid pointer to Array", ESMC_CONTEXT, rc);
     return matchResult;
   }
-  
+
   // check if Array pointers are identical
   if (array1 == array2){
     // pointers are identical -> nothing more to check
@@ -3099,7 +3119,7 @@ bool Array::match(
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
-  
+
   // check typekind, rank match
   if (array1->typekind != array2->typekind){
     matchResult = false;
@@ -3121,7 +3141,7 @@ bool Array::match(
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
-  
+
   // compare Array members to ensure DE-local tiles are congruent
   if (array1->tensorCount != array2->tensorCount){
     matchResult = false;
@@ -3182,7 +3202,7 @@ int Array::read(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   ESMC_IOFmt_Flag localiofmt;
- 
+
  // Set optional parameters which are not optional at next layer
   if ((ESMC_IOFmt_Flag *)NULL != iofmt) {
     localiofmt = *iofmt;
@@ -3192,7 +3212,7 @@ int Array::read(
   // It is an error to supply a variable name if not in NetCDF mode
   if (ESMF_IOFMT_NETCDF != localiofmt) {
     if (variableName.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
           "Array variable name not allowed in binary mode",
           ESMC_CONTEXT, &rc);
       return rc;
@@ -3251,8 +3271,8 @@ int Array::write(
   ){
 //
 // !DESCRIPTION:
-//   Write Array data into a file. For this API to be functional, the 
-//   environment variable {\tt ESMF\_PIO} should be set to "internal" when 
+//   Write Array data into a file. For this API to be functional, the
+//   environment variable {\tt ESMF\_PIO} should be set to "internal" when
 //   the ESMF library is built.
 //
 //EOPI
@@ -3286,7 +3306,7 @@ int Array::write(
   // It is an error to supply a variable name in binary mode
   if (ESMF_IOFMT_BIN == localiofmt) {
     if (variableName.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
           "NetCDF variable name not allowed in binary mode",
           ESMC_CONTEXT, &rc);
       return rc;
@@ -3296,7 +3316,7 @@ int Array::write(
   // It is an error to supply Attribute convention in binary mode
   if (ESMF_IOFMT_BIN == localiofmt) {
     if (convention.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
           "NetCDF Attribute convention not allowed in binary mode",
           ESMC_CONTEXT, &rc);
       return rc;
@@ -3306,7 +3326,7 @@ int Array::write(
   // It is an error to supply Attribute purpose in binary mode
   if (ESMF_IOFMT_BIN == localiofmt) {
     if (purpose.size() > 0) {
-      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD,
           "NetCDF Attribute convention not allowed in binary mode",
           ESMC_CONTEXT, &rc);
       return rc;
@@ -3375,7 +3395,7 @@ int Array::write(
   IO::destroy(&newIO);
   newIO = (IO *)NULL;
 
-  // return 
+  // return
   return rc;
 }
 //-----------------------------------------------------------------------------
@@ -3394,7 +3414,7 @@ int Array::print()const{
 //
 //
 // !DESCRIPTION:
-//    Print details of Array object 
+//    Print details of Array object
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -3433,8 +3453,8 @@ int Array::print()const{
       for (int jj=0; jj<rank; jj++){
         if (arrayToDistGridMap[jj]){
           // distributed dimension
-          printf("dim %d: [%d]: [%d [%d [%d, %d] %d] %d]\n", 
-            jj+1, j, 
+          printf("dim %d: [%d]: [%d [%d [%d, %d] %d] %d]\n",
+            jj+1, j,
             totalLBound[i*redDimCount+j], computationalLBound[i*redDimCount+j],
             exclusiveLBound[i*redDimCount+j], exclusiveUBound[i*redDimCount+j],
             computationalUBound[i*redDimCount+j], totalUBound[i*redDimCount+j]);
@@ -3452,7 +3472,7 @@ int Array::print()const{
     }
   }
   printf("--- ESMCI::Array::print end ---\n");
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -3474,7 +3494,7 @@ int Array::validate()const{
 //
 //
 // !DESCRIPTION:
-//    Validate details of Array object 
+//    Validate details of Array object
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -3526,18 +3546,20 @@ int Array::constructFileMap(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   try{
-  
+
     if (tensorElementCount != 1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
         "fileMapList is only defined for tensorElementCount == 1",
         ESMC_CONTEXT, &rc);
       return rc;
     }
-    ArrayElement arrayElement(this, localDe, false);  // also checks localDe
+    // force the seqIndex lookup to use canonical mode because PIO expects
+    // canonical sequence indices for its global ids---------------v
+    ArrayElement arrayElement(this, localDe, false, true, false, true);
     int elementCount = totalElementCountPLocalDe[localDe];
-  
+
     if (fileMapList != NULL){
       // fileMapList provided -> error checking
       if (mapListSize < elementCount){
@@ -3550,23 +3572,38 @@ int Array::constructFileMap(
       //TODO: from DistGrid for all the exclusive elements once, and then copy
       //TODO: from that list into fileMapList for each exclusive element.
       int element = 0;
-      while(arrayElement.isWithin()){
-        if (arrayElement.isWithinWatch()){
-          // within exclusive Array region -> obtain seqIndex value
-          SeqIndex<> seqIndex;
-          localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
-          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-          fileMapList[element] = seqIndex.decompSeqIndex;
-        }else{
-          // outside exclusive Array region -> mark this as unmapped element
-          fileMapList[element] = unmap_val;
+      ESMC_TypeKind_Flag indexTK = distgrid->getIndexTK();
+      if (indexTK==ESMC_TYPEKIND_I4){
+        SeqIndex<ESMC_I4> seqIndex;
+        while(arrayElement.isWithin()){
+          if (arrayElement.isWithinWatch()){
+            // within exclusive Array region -> obtain seqIndex value
+            seqIndex = arrayElement.getSequenceIndex<ESMC_I4>();
+            fileMapList[element] = seqIndex.decompSeqIndex;
+          }else{
+            // outside exclusive Array region -> mark this as unmapped element
+            fileMapList[element] = unmap_val;
+          }
+          arrayElement.next();
+          ++element;
         }
-        arrayElement.next();
-        ++element;
+      }else if (indexTK==ESMC_TYPEKIND_I8){
+        SeqIndex<ESMC_I8> seqIndex;
+        while(arrayElement.isWithin()){
+          if (arrayElement.isWithinWatch()){
+            // within exclusive Array region -> obtain seqIndex value
+            seqIndex = arrayElement.getSequenceIndex<ESMC_I8>();
+            fileMapList[element] = seqIndex.decompSeqIndex;
+          }else{
+            // outside exclusive Array region -> mark this as unmapped element
+            fileMapList[element] = unmap_val;
+          }
+          arrayElement.next();
+          ++element;
+        }
       }
     }
-  
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -3581,7 +3618,7 @@ int Array::constructFileMap(
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -3631,7 +3668,7 @@ int Array::serialize(
   int r;
 
   // Check if buffer has enough free memory to hold object
-  if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < 
+  if ((inquireflag != ESMF_INQUIREONLY) && (*length - *offset) <
     (int)sizeof(Array)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "Buffer too short to add an Array object", ESMC_CONTEXT, &rc);
@@ -3686,15 +3723,15 @@ int Array::serialize(
   } else
     ip += 2 + 2*tensorCount + 2*distgrid->getDimCount () +
       rank + delayout->getDeCount ();
-  
-  // fix offset  
+
+  // fix offset
   cp = (char *)ip;
   *offset = (cp - buffer);
-  
+
   if (inquireflag == ESMF_INQUIREONLY)
     if (*offset < (int)sizeof (Array))
       *offset = sizeof (Array);
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -3775,11 +3812,11 @@ int Array::deserialize(
   exclusiveElementCountPDe = new int[delayout->getDeCount()];
   for (int i=0; i<delayout->getDeCount(); i++)
     exclusiveElementCountPDe[i] = *ip++;
-  
+
   // fix offset
   cp = (char *)ip;
   *offset = (cp - buffer);
-  
+
   // set values with local dependency
   larrayList = new LocalArray*[0];     // no DE on proxy object
   larrayBaseAddrList = new void*[0];        // no DE on proxy object
@@ -3851,7 +3888,7 @@ int Array::gather(
   // query the VM for localPet and petCount
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
-  
+
   // deal with optional tile argument
   int tile = 1;  // default
   if (tileArg)
@@ -3871,7 +3908,7 @@ int Array::gather(
   const int *maxIndexPDim = distgrid->getMaxIndexPDimPTile(tile, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // only rootPet checks for consistency of input, others listen
   if (localPet == rootPet){
     // check consistency of input information: shape = (typekind, rank, extents)
@@ -3926,7 +3963,7 @@ int Array::gather(
 
   // size in bytes of each piece of data
   int dataSize = ESMC_TypeKind_FlagSize(typekind);
-  
+
   // distgrid and delayout values
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
   const int *contigFlagPDimPDe = distgrid->getContigFlagPDimPDe();
@@ -3935,14 +3972,14 @@ int Array::gather(
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
   const int *localDeToDeMap = delayout->getLocalDeToDeMap();
-  
+
   int redDimCount = rank - tensorCount;
-  
+
   // prepare for comms
   VMK::commhandle **commh = new VMK::commhandle*; // used by all comm calls
-  VMK::commhandle **commhList = 
+  VMK::commhandle **commhList =
     new VMK::commhandle*[dimCount]; // used for indexList comm
-  
+
   // the following code depends on the "contiguousFlag" -> may need to construct
   if (localDeCount && (contiguousFlag[0]==-1)){
     // has local DEs and contiguousFlag has no yet been constructed
@@ -3951,7 +3988,7 @@ int Array::gather(
       ESMC_CONTEXT, &rc))
       return rc;
   }
-  
+
   // all PETs may be senders of data, each PET issues a maximum of one
   // non-blocking send, so no problem with too many outstanding comms here
   char **sendBuffer = new char*[localDeCount];
@@ -3968,13 +4005,13 @@ int Array::gather(
       char *larrayBaseAddr = (char *)larrayBaseAddrList[i];
       int contigLength = exclusiveUBound[i*redDimCount]
         - exclusiveLBound[i*redDimCount] + 1;
-      ArrayElement arrayElement(this, i);
+      ArrayElement arrayElement(this, i, false, false, false);
       arrayElement.setSkipDim(0); // next() will skip ahead to next contig. line
       // loop over all elements in exclusive region for this DE and memcpy data
       int sendBufferIndex = 0;  // reset
       while(arrayElement.isWithin()){
         // copy this element from excl. region into the contiguous sendBuffer
-        int linearIndex = arrayElement.getLinearIndexExclusive();
+        int linearIndex = arrayElement.getLinearIndex();
         // contiguous data copy in 1st dim
         memcpy(sendBuffer[i]+sendBufferIndex*dataSize,
           larrayBaseAddr+linearIndex*dataSize, contigLength*dataSize);
@@ -3982,7 +4019,7 @@ int Array::gather(
         arrayElement.next();  // skip ahead to next contiguous line
       } // multi dim index loop
     } // !contiguousFlag
-        
+
     // ready to send the sendBuffer to rootPet
     *commh = NULL; // invalidate
     localrc = vm->send(sendBuffer[i], sendSize, rootPet, commh);
@@ -3995,18 +4032,18 @@ int Array::gather(
       return rc;
     }
   } // i -> de
-  
+
   // rootPet is the only receiver for gather data
   char **recvBuffer;
   if (localPet == rootPet){
     int nbCount = 0;  // reset: count of outstanding non-blocking comms
     const int boostSize = 512;  // max number of posted non-blocking calls:
                                 // stay below typical system limits
-    VMK::commhandle **commhDataList = 
+    VMK::commhandle **commhDataList =
       new VMK::commhandle*[boostSize]; // used for data comms
-    
+
     // for each DE of the Array receive a single contiguous recvBuffer
-    // from the associated PET non-blocking and memcpy it into the right 
+    // from the associated PET non-blocking and memcpy it into the right
     // location in "array".
     recvBuffer = new char*[deCount]; // contiguous recvBuffer
     for (int i=0; i<deCount; i++){
@@ -4031,7 +4068,7 @@ int Array::gather(
           delete [] message;
           return rc;
         }
-        
+
         // see if outstanding nb-recvs have reached boostSize limit
         if (nbCount >= boostSize){
 //printf("clearing Gather() boost at nbCount = %d\n", nbCount);
@@ -4042,7 +4079,7 @@ int Array::gather(
           }
           nbCount = 0;  // reset
         }
-        
+
       } // DE on tile
     } // i -> de
 //printf("clearing Gather() boost at nbCount = %d\n", nbCount);
@@ -4054,11 +4091,11 @@ int Array::gather(
     nbCount = 0;  // reset
     delete [] commhDataList;
   }
-  
+
   // wait until all the local sends are complete
   vm->commqueuewait();
   // - done waiting on sends -
-  
+
   if (localPet == rootPet){
     char *array = (char *)arrayArg;
     // rootPet gathers information from _all_ DEs
@@ -4075,7 +4112,7 @@ int Array::gather(
             // -> obtain indexList for this DE and dim
             indexList[j] = new int[indexCountPDimPDe[de*dimCount+j]];
             commhList[commhListCount] = NULL; // prime for later test
-            localrc = distgrid->fillIndexListPDimPDe(indexList[j], de, j+1, 
+            localrc = distgrid->fillIndexListPDimPDe(indexList[j], de, j+1,
               &(commhList[commhListCount]), localPet, vm);
             if (commhList[commhListCount] != NULL)
               ++commhListCount;
@@ -4090,7 +4127,7 @@ int Array::gather(
         for (int jj=0; jj<rank; jj++){
           int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 f tensor
           if (j){
-            // decomposed dimension 
+            // decomposed dimension
             --j;  // shift to basis 0
             sizes.push_back(indexCountPDimPDe[de*dimCount+j]);
           }else{
@@ -4100,17 +4137,17 @@ int Array::gather(
             ++tensorIndex;
           }
         }
-        
+
         // wait for all outstanding receives issued by fillIndexListPDimPDe()
         for (int j=0; j<commhListCount; j++){
           vm->commwait(&(commhList[j]));
           delete commhList[j];
         }
-        
+
         MultiDimIndexLoop multiDimIndexLoop(sizes);
         if (contigFlagPDimPDe[de*dimCount])
           multiDimIndexLoop.setSkipDim(0); // contiguous data in first dimension
-        // loop over all elements in exclusive region for this DE 
+        // loop over all elements in exclusive region for this DE
         int recvBufferIndex = 0;  // reset
         while(multiDimIndexLoop.isWithin()){
           // determine linear index for this element into array
@@ -4119,7 +4156,7 @@ int Array::gather(
             linearIndex *= counts[jj];  // first time zero o.k.
             int j = arrayToDistGridMap[jj];// j is dimIndex bas 1, or 0 f tensor
             if (j){
-              // decomposed dimension 
+              // decomposed dimension
               --j;  // shift to basis 0
               if (contigFlagPDimPDe[de*dimCount+j]){
                 linearIndex += minIndexPDimPDe[de*dimCount+j]
@@ -4138,20 +4175,20 @@ int Array::gather(
           // copy this element from the contiguous recvBuffer for this DE
           if (contigFlagPDimPDe[de*dimCount]){
             // contiguous data in first dimension
-            memcpy(array+linearIndex*dataSize, 
+            memcpy(array+linearIndex*dataSize,
               recvBuffer[de]+recvBufferIndex*dataSize,
               multiDimIndexLoop.getIndexTupleEnd()[0]*dataSize);
             multiDimIndexLoop.next(); // skip to next contiguous line
             recvBufferIndex += multiDimIndexLoop.getIndexTupleEnd()[0];
           }else{
             // non-contiguous data in first dimension
-            memcpy(array+linearIndex*dataSize, 
+            memcpy(array+linearIndex*dataSize,
               recvBuffer[de]+recvBufferIndex*dataSize, dataSize);
             multiDimIndexLoop.next(); // next element
             ++recvBufferIndex;
           }
         } // multi dim index loop
-            
+
         // clean-up
         for (int j=0; j<dimCount; j++)
           if(contigFlagPDimPDe[de*dimCount+j]==0)
@@ -4171,7 +4208,7 @@ int Array::gather(
             // associated and non-contiguous dimension
             // -> send local indexList for this DE and dim to rootPet
             commhList[commhListCount] = NULL; // prime for later test
-            localrc = distgrid->fillIndexListPDimPDe(NULL, de, j+1, 
+            localrc = distgrid->fillIndexListPDimPDe(NULL, de, j+1,
               &(commhList[commhListCount]), rootPet, vm);
             if (commhList[commhListCount] != NULL)
               ++commhListCount;
@@ -4187,14 +4224,14 @@ int Array::gather(
         delete commhList[j];
     }
   }
-  
+
   // garbage collection
   if (localPet == rootPet){
     for (int i=0; i<deCount; i++){
       int de = i;
       if (tileListPDe[de] == tile)
         delete [] recvBuffer[de];
-    }    
+    }
     delete [] recvBuffer;
   }
   for (int i=0; i<localDeCount; i++){
@@ -4206,7 +4243,7 @@ int Array::gather(
   delete [] sendBuffer;
   delete commh;
   delete [] commhList;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -4239,7 +4276,7 @@ int Array::scatter(
 //
 //
 // !DESCRIPTION:
-//    Scatter native array across Array object 
+//    Scatter native array across Array object
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -4263,7 +4300,7 @@ int Array::scatter(
 
   // query the VM
   int localPet = vm->getLocalPet();
-  
+
   // deal with optional tile argument
   int tile = 1;  // default
   if (tileArg)
@@ -4283,7 +4320,7 @@ int Array::scatter(
   const int *maxIndexPDim = distgrid->getMaxIndexPDimPTile(tile, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // only rootPet checks for consistency of input, others listen
   if (localPet == rootPet){
     // check consistency of input information: shape = (typekind, rank, extents)
@@ -4347,14 +4384,14 @@ int Array::scatter(
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
   const int *localDeToDeMap = delayout->getLocalDeToDeMap();
-  
+
   int redDimCount = rank - tensorCount;
-  
+
   // prepare for comms
   VMK::commhandle **commh = new VMK::commhandle*; // used by all comm calls
-  VMK::commhandle **commhList = 
+  VMK::commhandle **commhList =
     new VMK::commhandle*[dimCount]; // used for indexList comm
-  
+
   // the following code depends on the "contiguousFlag" -> may need to construct
   if (localDeCount && (contiguousFlag[0]==-1)){
     // has local DEs and contiguousFlag has no yet been constructed
@@ -4363,7 +4400,7 @@ int Array::scatter(
       ESMC_CONTEXT, &rc))
       return rc;
   }
-  
+
   // all PETs may be receivers of data, each PET issues a maximum of one
   // non-blocking receive, so no problem with too many outstanding comms here
   char **recvBuffer = new char*[localDeCount];
@@ -4395,9 +4432,9 @@ int Array::scatter(
     int nbCount = 0; // reset: count of outstanding non-blocking comms
     const int boostSize = 512;  // max number of posted non-blocking calls:
                                 // stay below typical system limits
-    VMK::commhandle **commhDataList = 
+    VMK::commhandle **commhDataList =
       new VMK::commhandle*[boostSize]; // used for data comms
-    
+
     char *array = (char *)arrayArg;
     // rootPet scatters information to _all_ DEs
     // for each DE of the Array memcpy together a single contiguous sendBuffer
@@ -4416,7 +4453,7 @@ int Array::scatter(
             // -> obtain indexList for this DE and dim
             indexList[j] = new int[indexCountPDimPDe[de*dimCount+j]];
             commhList[commhListCount] = NULL; // prime for later test
-            localrc = distgrid->fillIndexListPDimPDe(indexList[j], de, j+1, 
+            localrc = distgrid->fillIndexListPDimPDe(indexList[j], de, j+1,
               &(commhList[commhListCount]), localPet, vm);
             if (commhList[commhListCount] != NULL)
               ++commhListCount;
@@ -4429,14 +4466,14 @@ int Array::scatter(
         int sendSize =
           exclusiveElementCountPDe[de]*tensorElementCount*dataSize;  // bytes
         sendBuffer[de] = new char[sendSize];
-        
+
         // initialize multi dim index loop
         vector<int> sizes;
         tensorIndex=0;  // reset
         for (int jj=0; jj<rank; jj++){
           int j = arrayToDistGridMap[jj];// j is dimIndex basis 1, or 0 f tensor
           if (j){
-            // decomposed dimension 
+            // decomposed dimension
             --j;  // shift to basis 0
             sizes.push_back(indexCountPDimPDe[de*dimCount+j]);
           }else{
@@ -4446,17 +4483,17 @@ int Array::scatter(
             ++tensorIndex;
           }
         }
-        
+
         // wait for all outstanding receives issued by fillIndexListPDimPDe()
         for (int j=0; j<commhListCount; j++){
           vm->commwait(&(commhList[j]));
           delete commhList[j];
         }
-        
+
         MultiDimIndexLoop multiDimIndexLoop(sizes);
         if (contigFlagPDimPDe[de*dimCount])
           multiDimIndexLoop.setSkipDim(0); // contiguous data in first dimension
-        // loop over all elements in exclusive region for this DE 
+        // loop over all elements in exclusive region for this DE
         int sendBufferIndex = 0;  // reset
         while(multiDimIndexLoop.isWithin()){
           // determine linear index for this element into array
@@ -4465,7 +4502,7 @@ int Array::scatter(
             linearIndex *= counts[jj];  // first time zero o.k.
             int j = arrayToDistGridMap[jj];// j is dimIndex bas 1, or 0 f tensor
             if (j){
-              // decomposed dimension 
+              // decomposed dimension
               --j;  // shift to basis 0
               if (contigFlagPDimPDe[de*dimCount+j]){
                 linearIndex += minIndexPDimPDe[de*dimCount+j]
@@ -4497,7 +4534,7 @@ int Array::scatter(
             ++sendBufferIndex;
           }
         } // multi dim index loop
-    
+
         // ready to send the sendBuffer
         int dstPet;
         delayout->getDEMatchPET(de, *vm, NULL, &dstPet, 1);
@@ -4513,13 +4550,13 @@ int Array::scatter(
           delete [] message;
           return rc;
         }
-        
+
         // clean-up
         for (int j=0; j<dimCount; j++)
           if(contigFlagPDimPDe[de*dimCount+j]==0)
             delete [] indexList[j];
         delete [] indexList;
-        
+
         // see if outstanding nb-sends have reached boostSize limit
         if (nbCount >= boostSize){
 //printf("clearing Scatter() boost at nbCount = %d\n", nbCount);
@@ -4530,7 +4567,7 @@ int Array::scatter(
           }
           nbCount = 0;  // reset
         }
-        
+
       } // DE on tile
     } // i -> de
 //printf("clearing Scatter() boost at nbCount = %d\n", nbCount);
@@ -4549,7 +4586,7 @@ int Array::scatter(
     delete [] sendBuffer;
   }
   // - done issuing nb sends (from rootPet) -
-  
+
   // send localIndexList information to rootPet if necessary
   if (localPet != rootPet){
     // localPet is _not_ rootPet -> provide localIndexList to rootPet if nec.
@@ -4563,7 +4600,7 @@ int Array::scatter(
             // associated and non-contiguous dimension
             // -> send local indexList for this DE and dim to rootPet
             commhList[commhListCount] = NULL; // prime for later test
-            localrc = distgrid->fillIndexListPDimPDe(NULL, de, j+1, 
+            localrc = distgrid->fillIndexListPDimPDe(NULL, de, j+1,
               &(commhList[commhListCount]), rootPet, vm);
             if (commhList[commhListCount] != NULL)
               ++commhListCount;
@@ -4583,7 +4620,7 @@ int Array::scatter(
   // wait until all the local receives are complete
   vm->commqueuewait();
   // - done waiting on receives -
-    
+
   // distribute received data into non-contiguous exclusive regions
   for (int i=0; i<localDeCount; i++){
     int de = localDeToDeMap[i];
@@ -4594,13 +4631,13 @@ int Array::scatter(
       char *larrayBaseAddr = (char *)larrayBaseAddrList[i];
       int contigLength = exclusiveUBound[i*redDimCount]
         - exclusiveLBound[i*redDimCount] + 1;
-      ArrayElement arrayElement(this, i);
+      ArrayElement arrayElement(this, i, false, false, false);
       arrayElement.setSkipDim(0); // next() will skip ahead to next contig. line
       // loop over all elements in exclusive region for this DE and memcpy data
       int recvBufferIndex = 0;  // reset
       while(arrayElement.isWithin()){
         // copy this element from the contiguous recvBuffer into excl. region
-        int linearIndex = arrayElement.getLinearIndexExclusive();
+        int linearIndex = arrayElement.getLinearIndex();
         // since the data in the recvBuffer was constructed to be contiguous
         // wrt data layout on destination DE -> contiguous data copy in 1st dim
         memcpy(larrayBaseAddr+linearIndex*dataSize,
@@ -4618,7 +4655,7 @@ int Array::scatter(
   delete [] recvBuffer;
   delete commh;
   delete [] commhList;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -4670,7 +4707,7 @@ int Array::haloStore(
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -4711,25 +4748,25 @@ template<typename IT>
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   try{
-    
+
     // every Pet must provide array argument
     if (array == NULL){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
         "Not a valid pointer to array", ESMC_CONTEXT, &rc);
       return rc;
     }
-    
+
     // get the current VM and VM releated information
     VM *vm = VM::getCurrent(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
     int localPet = vm->getLocalPet();
     int petCount = vm->getPetCount();
-    
+
 #ifdef HALO_STORE_MEMLOG_on
     VM::logMemInfo(std::string("HaloStore1"));
 #endif
-    
+
     // prepare haloOutsideLBound and haloInsideLBound arrays
     int localDeCount = array->getDELayout()->getLocalDeCount();
     int redDimCount = array->rank - array->tensorCount;
@@ -4758,7 +4795,7 @@ template<typename IT>
           }else{
             // tensor dimension
             haloOutsideLBound[i][k] = 0;
-          }   
+          }
         }
       }
     }else{
@@ -4795,7 +4832,7 @@ template<typename IT>
           }else{
             // tensor dimension
             haloOutsideLBound[i][k] = 0;
-          }   
+          }
         }
       }
     }
@@ -4828,7 +4865,7 @@ template<typename IT>
             haloOutsideUBound[i][k] = array->undistUBound[kTensor]
               - array->undistLBound[kTensor] + 1;
             ++kTensor;
-          }   
+          }
         }
       }
     }else{
@@ -4870,11 +4907,11 @@ template<typename IT>
             haloOutsideUBound[i][k] = array->undistUBound[kTensor]
               - array->undistLBound[kTensor] + 1;
             ++kTensor;
-          }   
+          }
         }
       }
     }
-    
+
 #ifdef HALO_STORE_MEMLOG_on
     VM::logMemInfo(std::string("HaloStore2"));
 #endif
@@ -4890,7 +4927,7 @@ template<typename IT>
     const std::vector<std::vector<SeqIndex<IT> > > *rimSeqIndex;
     array->getRimSeqIndex(&rimSeqIndex);
     for (int i=0; i<localDeCount; i++){
-      ArrayElement arrayElement(array, i, true);
+      ArrayElement arrayElement(array, i, true, false, false, false);
       int element = 0;
       while(arrayElement.isWithin()){
         SeqIndex<IT> seqIndex = (*rimSeqIndex)[i][element];
@@ -4939,8 +4976,8 @@ template<typename IT>
         arrayElement.next();  // next element
         ++element;
       } // multi dim index loop
-    }    
-    
+    }
+
     // load type specific factorList with "1" for the identity matrix
     ESMC_TypeKind_Flag typekindFactor = array->getTypekind();
     void *factorList;
@@ -4983,11 +5020,11 @@ template<typename IT>
     int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
     localrc = sparseMatMulStore(array, array, routehandle, sparseMatrix, true,
       false, &srcTermProcessing, pipelineDepthArg);
-    
+
 #ifdef HALO_STORE_MEMLOG_on
     VM::logMemInfo(std::string("HaloStore4"));
 #endif
-    
+
     // remove seqIndex masking in Array rim region before evaluating return code
     if (indexTK==ESMC_TYPEKIND_I4){
       for (int i=0; i<localDeCount; i++){
@@ -5006,11 +5043,11 @@ template<typename IT>
         }
       }
     }
-    
+
 #ifdef HALO_STORE_MEMLOG_on
     VM::logMemInfo(std::string("HaloStore5"));
 #endif
-    
+
     // garbage collection before evaluating return code
     if (typekindFactor == ESMC_TYPEKIND_R4){
       ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
@@ -5025,15 +5062,15 @@ template<typename IT>
       ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
       delete [] factorListT;
     }
-    
+
 #ifdef HALO_STORE_MEMLOG_on
     VM::logMemInfo(std::string("HaloStore6"));
 #endif
-    
+
     // error handling
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, &rc)) return rc;
-    
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -5048,7 +5085,7 @@ template<typename IT>
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -5089,11 +5126,11 @@ int Array::halo(
 
   // implemented via sparseMatMul
   localrc = sparseMatMul(array, array, routehandle,
-    commflag, finishedflag, cancelledflag, ESMC_REGION_SELECT, 
+    commflag, finishedflag, cancelledflag, ESMC_REGION_SELECT,
     ESMC_TERMORDER_FREE, checkflag, true);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -5126,7 +5163,7 @@ int Array::haloRelease(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // implemented via sparseMatMul
   localrc = sparseMatMulRelease(routehandle);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -5173,8 +5210,86 @@ int Array::redistStore(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  // every Pet must provide srcArray and dstArray
+  if (srcArray == NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to srcArray", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  if (dstArray == NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to dstArray", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // determine indexTK for src and dst
+  ESMC_TypeKind_Flag srcIndexTK = srcArray->getDistGrid()->getIndexTK();
+  ESMC_TypeKind_Flag dstIndexTK = dstArray->getDistGrid()->getIndexTK();
+
+  if (srcIndexTK==ESMC_TYPEKIND_I4 && dstIndexTK==ESMC_TYPEKIND_I4){
+    // call into the actual store method
+    localrc = tRedistStore<ESMC_I4,ESMC_I4>(
+      srcArray, dstArray, routehandle, srcToDstTransposeMap,
+      typekindFactor, factor, ignoreUnmatched, pipelineDepthArg);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+  }else if (srcIndexTK==ESMC_TYPEKIND_I8 && dstIndexTK==ESMC_TYPEKIND_I8){
+    // call into the actual store method
+    localrc = tRedistStore<ESMC_I8,ESMC_I8>(
+      srcArray, dstArray, routehandle, srcToDstTransposeMap,
+      typekindFactor, factor, ignoreUnmatched, pipelineDepthArg);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+  }else{
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Type option not supported", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::tRedistStore()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::tRedistStore
+//
+// !INTERFACE:
+template<typename SIT, typename DIT>
+  int Array::tRedistStore(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  Array *srcArray,                        // in    - source Array
+  Array *dstArray,                        // in    - destination Array
+  RouteHandle **routehandle,              // inout - handle to precomputed comm
+  InterArray<int> *srcToDstTransposeMap,  // in    - mapping src -> dst dims
+  ESMC_TypeKind_Flag typekindFactor,      // in    - typekind of factor
+  void *factor,                           // in    - redist factor
+  bool ignoreUnmatched,                   // in    - support unmatched indices
+  int *pipelineDepthArg                   // in (optional)
+  ){
+//
+// !DESCRIPTION:
+//  Precompute and store communication pattern for redistribution
+//  from srcArray to dstArray.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
   try{
-    
+
   // every Pet must provide srcArray and dstArray
   if (srcArray == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -5192,7 +5307,7 @@ int Array::redistStore(
       "srcArray and dstArray must not be identical", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // get the current VM and VM releated information
   VM *vm = VM::getCurrent(&localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -5219,11 +5334,11 @@ int Array::redistStore(
       return rc;
     }
   }else{
-    // set typekindFactor to ESMF_NOKIND 
+    // set typekindFactor to ESMF_NOKIND
     // -> this Pet will not provide factor
     typekindFactor = ESMF_NOKIND;
   }
-  
+
   // communicate typekindFactor across all Pets
   ESMC_TypeKind_Flag *typekindList = new ESMC_TypeKind_Flag[petCount];
   vm->allgather(&typekindFactor, typekindList, sizeof(ESMC_TypeKind_Flag));
@@ -5253,7 +5368,7 @@ int Array::redistStore(
   // set typekindFactor default in case there were no factors provided
   if (factorPetCount == 0)
     typekindFactor = srcArray->getTypekind();
-  
+
   // set factorLocal
   void *factorLocal;
   ESMC_R4 factorLocalTR4; // type specific factor, persisting during store call
@@ -5289,7 +5404,7 @@ int Array::redistStore(
       *factorLocalT = 1;
     factorLocal = (void *)factorLocalT;
   }
-  
+
   if (factorPetCount > 0){
     // communicate factorLocal variables and check for consistency
     int factorSize = ESMC_TypeKind_FlagSize(typekindFactor);
@@ -5310,24 +5425,24 @@ int Array::redistStore(
     delete [] factorLocalList;
   }
   delete [] factorPetList;
-  
+
   // set up local factorList and factorIndexList
   int factorListCount;
   int srcN;
   int dstN;
-  int *factorIndexList;
-  
+  SIT *factorIndexList;
+
   if (!present(srcToDstTransposeMap)){
     // srcToDstTransposeMap not specified -> default mode
-    
+
     // src and dst Arrays must have identical number of exclusive elements
-    int srcElementCount = 0; // init
-    const int *srcElementCountPTile =
+    ESMC_I8 srcElementCount = 0; // init
+    const ESMC_I8 *srcElementCountPTile =
       srcArray->distgrid->getElementCountPTile();
     for (int i=0; i<srcArray->distgrid->getTileCount(); i++)
       srcElementCount += srcElementCountPTile[i];
-    int dstElementCount = 0; // init
-    const int *dstElementCountPTile =
+    ESMC_I8 dstElementCount = 0; // init
+    const ESMC_I8 *dstElementCountPTile =
       dstArray->distgrid->getElementCountPTile();
     for (int i=0; i<dstArray->distgrid->getTileCount(); i++)
       dstElementCount += dstElementCountPTile[i];
@@ -5337,9 +5452,10 @@ int Array::redistStore(
         " elements", ESMC_CONTEXT, &rc);
       return rc;
     }
-  
+
     // implemented via sparseMatMul using identity matrix
-    const int *srcElementCountPDe = srcArray->distgrid->getElementCountPDe();
+    const ESMC_I8 *srcElementCountPDe =
+      srcArray->distgrid->getElementCountPDe();
     int *const*srcArbSeqIndexCountPCollPLocalDe =
       srcArray->distgrid->getElementCountPCollPLocalDe();
     const int *srcLocalDeToDeMap = srcArray->delayout->getLocalDeToDeMap();
@@ -5350,13 +5466,13 @@ int Array::redistStore(
     // set up factorIndexList
     srcN = 1; // 1 component seqIndex
     dstN = 1; // 1 component seqIndex
-    factorIndexList = new int[(srcN+dstN)*factorListCount];
+    factorIndexList = new SIT[(srcN+dstN)*factorListCount];
     int jj = 0; // reset
     for (int i=0; i<srcLocalDeCount; i++){
       //TODO: this is hardcoded for first collocation only
       int arbSeqIndexCount = srcArbSeqIndexCountPCollPLocalDe[0][i];
-      const int *srcArbSeqIndexListPLocalDe =
-        (const int *)srcArray->distgrid->getArbSeqIndexList(i,1);
+      const SIT *srcArbSeqIndexListPLocalDe =
+        (const SIT *)srcArray->distgrid->getArbSeqIndexList(i,1);
       if (srcArbSeqIndexListPLocalDe){
         for (int j=0; j<arbSeqIndexCount; j++){
           factorIndexList[2*jj] = factorIndexList[2*jj+1] =
@@ -5365,28 +5481,25 @@ int Array::redistStore(
         }
       }else{
         // multi-dim loop object
-        ArrayElement arrayElement(srcArray, i);
+        ArrayElement arrayElement(srcArray, i, true, false, false);
         // set up to skip over undistributed, i.e. tensor dimensions
         const int *srcArrayToDistGridMap = srcArray->getArrayToDistGridMap();
         for (int j=0; j<srcArray->getRank(); j++)
           if (srcArrayToDistGridMap[j]==0) arrayElement.setSkipDim(j);
         // fill in the factorIndexList
         while(arrayElement.isWithin()){
-          SeqIndex<> seqIndex;
-          localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
-          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+          SeqIndex<SIT> seqIndex = arrayElement.getSequenceIndex<SIT>();
           factorIndexList[2*jj] = factorIndexList[2*jj+1] =
             seqIndex.decompSeqIndex;
           ++jj; // increment counter
           arrayElement.next();
         } // end while over all exclusive elements
       }
-    }  
-    
+    }
+
   }else{
     // srcToDstTransposeMap specified -> transpose mode
-    
+
     // src and dst Arrays must be of same rank
     int rank = srcArray->getRank();
     if (rank != dstArray->getRank()){
@@ -5430,7 +5543,7 @@ int Array::redistStore(
         return rc;
       }
     }
-    
+
     // size of dims in src and dst Arrays must pairwise match in each tile
     const int *srcArrayToDistGridMap = srcArray->getArrayToDistGridMap();
     const int *dstArrayToDistGridMap = dstArray->getArrayToDistGridMap();
@@ -5483,7 +5596,7 @@ fprintf(stderr, "%d start:%d, size:%d\n", localPet, localStart[i], localSize[i])
         int dstSize;
         int j = srcArrayToDistGridMap[jj];  // j is dimIndex bas 1, or 0 undist.
         if (j){
-          // decomposed dimension 
+          // decomposed dimension
           --j;  // shift to basis 0
           srcSize = srcMaxIndexPDimPTile[i*srcDimCount+j]
             - srcMinIndexPDimPTile[i*srcDimCount+j] + 1;
@@ -5501,7 +5614,7 @@ fprintf(stderr, "%d start:%d, size:%d\n", localPet, localStart[i], localSize[i])
         int jjj = srcToDstTMap[jj];         // src -> dst dimension mapping
         j = dstArrayToDistGridMap[jjj];     // j is dimIndex bas 1, or 0 undist.
         if (j){
-          // decomposed dimension 
+          // decomposed dimension
           --j;  // shift to basis 0
           dstSize = dstMaxIndexPDimPTile[i*dstDimCount+j]
             - dstMinIndexPDimPTile[i*dstDimCount+j] + 1;
@@ -5529,7 +5642,7 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
     // set up factorIndexList
     srcN = 2; // 2 component seqIndex
     dstN = 2; // 2 component seqIndex
-    factorIndexList = new int[(srcN+dstN)*factorListCount];
+    factorIndexList = new SIT[(srcN+dstN)*factorListCount];
     // prepare to fill in factorIndexList elements
     int factorIndexListIndex = 0; // reset
     int *dstTuple = new int[rank];
@@ -5541,7 +5654,7 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
       for (int jj=0; jj<rank; jj++){
         int j = srcArrayToDistGridMap[jj];  // j is dimIndex bas 1, or 0 undist.
         if (j){
-          // decomposed dimension 
+          // decomposed dimension
           --j;  // shift to basis 0
           if (j == srcDimCount-1){
             // share work across PETs for last decomposed dim
@@ -5560,7 +5673,7 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
           ++tensorIndex;
         }
       }
-      
+
       MultiDimIndexLoop multiDimIndexLoop(offsets, sizes);
       while(multiDimIndexLoop.isWithin()){
         const int *srcTuple = multiDimIndexLoop.getIndexTuple();
@@ -5569,8 +5682,10 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
         for (int j=0; j<rank; j++)
           dstTuple[srcToDstTMap[j]] = srcTuple[j];
         // determine seq indices
-        SeqIndex<> srcSeqIndex = srcArray->getSequenceIndexTile(i+1, srcTuple);
-        SeqIndex<> dstSeqIndex = dstArray->getSequenceIndexTile(i+1, dstTuple);
+        SeqIndex<SIT> srcSeqIndex =
+          srcArray->getSequenceIndexTile<SIT>(i+1, srcTuple);
+        SeqIndex<DIT> dstSeqIndex =
+          dstArray->getSequenceIndexTile<DIT>(i+1, dstTuple);
         // fill this info into factorIndexList
         int fili = 4*factorIndexListIndex;
         factorIndexList[fili]   = srcSeqIndex.decompSeqIndex;
@@ -5578,22 +5693,22 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
         factorIndexList[fili+2] = dstSeqIndex.decompSeqIndex;
         factorIndexList[fili+3] = dstSeqIndex.tensorSeqIndex;
 
-        ++factorIndexListIndex;        
+        ++factorIndexListIndex;
         multiDimIndexLoop.next();
       } // multi dim index loop
     }
-    // garbage collection    
+    // garbage collection
     delete [] srcToDstTMap;
     delete [] dstArrayToTensorMap;
     delete [] localStart;
     delete [] localSize;
     delete [] dstTuple;
   }
-  
+
 #if 0
 fprintf(stderr, "factorListCount = %d\n", factorListCount);
 for (int i=0; i<factorListCount; i++)
-  fprintf(stderr, "%d, %d, %d\n", i, factorIndexList[2*i], 
+  fprintf(stderr, "%d, %d, %d\n", i, factorIndexList[2*i],
     factorIndexList[2*i+1]);
 #endif
 
@@ -5620,17 +5735,17 @@ for (int i=0; i<factorListCount; i++)
       factorListT[i] = *(ESMC_I8 *)factorLocal;
     factorList = (void *)factorListT;
   }
-  
+
   // prepare SparseMatrix vector
-  vector<SparseMatrix<int,int> > sparseMatrix;  //TODO: needs correct types
-  sparseMatrix.push_back(SparseMatrix<int,int> (typekindFactor, factorList,
+  vector<SparseMatrix<SIT,DIT> > sparseMatrix;
+  sparseMatrix.push_back(SparseMatrix<SIT,DIT> (typekindFactor, factorList,
     factorListCount, srcN, dstN, factorIndexList));
-  
+
   // precompute sparse matrix multiplication
   int srcTermProcessing = 0;  // no need to use auto-tuning to figure this out
   localrc = sparseMatMulStore(srcArray, dstArray, routehandle, sparseMatrix,
     false, ignoreUnmatched, &srcTermProcessing, pipelineDepthArg);
-  // garbage collection
+  // garbage collection here, to not cause memory leak when bail on failure
   delete [] factorIndexList;
   if (typekindFactor == ESMC_TYPEKIND_R4){
     ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
@@ -5663,14 +5778,15 @@ for (int i=0; i<factorListCount; i++)
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
 }
 //-----------------------------------------------------------------------------
 
-  //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::redist()"
 //BOPI
@@ -5711,11 +5827,11 @@ int Array::redist(
 
   // implemented via sparseMatMul
   localrc = sparseMatMul(srcArray, dstArray, routehandle,
-    commflag, finishedflag, cancelledflag, zeroflag, 
+    commflag, finishedflag, cancelledflag, zeroflag,
     ESMC_TERMORDER_FREE, checkflag);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -5748,7 +5864,7 @@ int Array::redistRelease(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // implemented via sparseMatMul
   localrc = sparseMatMulRelease(routehandle);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -5782,7 +5898,7 @@ template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b){
 
 
 namespace ArrayHelper{
-  
+
   template<typename IT> struct Deflator{
     SeqIndex<IT> seqIndex;
     int index;
@@ -5796,7 +5912,7 @@ namespace ArrayHelper{
   template<typename IT> bool operator<(Deflator<IT> a, Deflator<IT> b){
     return (a.seqIndex < b.seqIndex);
   }
-  
+
 #define MSG_DST_CONTIG
 
   template<typename IT1, typename IT2> struct DstInfo{
@@ -5807,7 +5923,7 @@ namespace ArrayHelper{
     void *factor;               // if vector element then this factor for all
     int bufferIndex;            // index into the receive buffer
   };
-  template<typename IT1, typename IT2> 
+  template<typename IT1, typename IT2>
     bool scalarOrderDstInfo(DstInfo<IT1,IT2> a, DstInfo<IT1,IT2> b){
 #ifdef MSG_DST_CONTIG
     if (a.seqIndex == b.seqIndex)
@@ -5821,7 +5937,7 @@ namespace ArrayHelper{
       return (a.partnerSeqIndex < b.partnerSeqIndex);
 #endif
   }
-  template<typename IT1, typename IT2> 
+  template<typename IT1, typename IT2>
     bool vectorOrderDstInfo(DstInfo<IT1,IT2> a, DstInfo<IT1,IT2> b){
     if (a.seqIndex.decompSeqIndex == b.seqIndex.decompSeqIndex)
       if (a.partnerSeqIndex.decompSeqIndex == b.partnerSeqIndex.decompSeqIndex)
@@ -5836,17 +5952,27 @@ namespace ArrayHelper{
   template<typename IT1, typename IT2> struct DstInfoSrcSeqSort{
     typename vector<DstInfo<IT1,IT2> >::iterator pp;
     int recvnbVectorIndex;
-    DstInfoSrcSeqSort(typename vector<DstInfo<IT1,IT2> >::iterator pp_, 
-      int recvnbVectorIndex_){
+    int rraIndexListIndex;
+    DstInfoSrcSeqSort(typename vector<DstInfo<IT1,IT2> >::iterator pp_,
+      int recvnbVectorIndex_, int rraIndexListIndex_){
       pp=pp_;
       recvnbVectorIndex=recvnbVectorIndex_;
+      rraIndexListIndex=rraIndexListIndex_;
     }
   };
   template<typename IT1, typename IT2> bool operator<
     (DstInfoSrcSeqSort<IT1,IT2> a, DstInfoSrcSeqSort<IT1,IT2> b){
+    // sorting hierarchy: 1) rraIndexListIndex, 2) linIndex, 3) partnerSeqIndex
+    // 1) rraIndexListIndex
+    if (a.rraIndexListIndex != b.rraIndexListIndex)
+      return (a.rraIndexListIndex < b.rraIndexListIndex);
+    // 2) linIndex
+    if (a.pp->linIndex != b.pp->linIndex)
+      return (a.pp->linIndex < b.pp->linIndex);
+    // 3) partnerSeqIndex
     return (a.pp->partnerSeqIndex < b.pp->partnerSeqIndex);
   }
-  
+
   template<typename IT1, typename IT2> struct SrcInfo{
     int linIndex;               // if vector element then this is start
     int vectorLength;           // ==1 single element, > 1 vector element
@@ -5880,7 +6006,7 @@ namespace ArrayHelper{
       return
         (a.partnerSeqIndex.decompSeqIndex < b.partnerSeqIndex.decompSeqIndex);
   }
-  
+
   template<typename IT1, typename IT2> struct RecvnbElement{
     int srcPet;
     int srcDe;          // global DE index of src DE in src DELayout
@@ -5908,7 +6034,7 @@ namespace ArrayHelper{
       char **rraList, int rraCount);
     static int appendSingleProductSum(XXE *xxe,
       int predicateBitField, int srcTermProcessing,  int srcLocalDeCount,
-      XXE::TKId elementTK, XXE::TKId valueTK, XXE::TKId factorTK, 
+      XXE::TKId elementTK, XXE::TKId valueTK, XXE::TKId factorTK,
       int dataSizeDst, int dataSizeSrc, int dataSizeFactors, char **rraList,
       int rraCount, vector<RecvnbElement> recvnbVector);
     int appendTestWaitProductSum(XXE *xxe, int predicateBitField,
@@ -5962,7 +6088,7 @@ namespace ArrayHelper{
       }
     }
     // append the recvnb operation
-    localrc = xxe->appendRecvnb(predicateBitField, bufferInfo, 
+    localrc = xxe->appendRecvnb(predicateBitField, bufferInfo,
       bufferItemCount * dataSizeSrc, srcPet, tag, vectorFlag, true);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -5998,8 +6124,8 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: XXE::recv on localPet=" << localPet <<
-      " from Pet=" << srcPet;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " XXE::recv on localPet="
+        << localPet << " from Pet=" << srcPet;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
@@ -6013,7 +6139,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::DstInfo<IT1,IT2> >::iterator pp =
         dstInfoTable.begin();
       while (pp != dstInfoTable.end()){
-        SeqIndex<> seqIndex = pp->seqIndex;
+        SeqIndex<IT1> seqIndex = pp->seqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == dstInfoTable.end()) || !(seqIndex == pp->seqIndex)) break;
@@ -6022,7 +6148,7 @@ namespace ArrayHelper{
       }
     }
     // append the recv operation
-    localrc = xxe->appendRecv(predicateBitField, bufferInfo, 
+    localrc = xxe->appendRecv(predicateBitField, bufferInfo,
       bufferItemCount * dataSizeSrc, srcPet, tag, vectorFlag, true);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -6057,7 +6183,7 @@ namespace ArrayHelper{
     int localrc = ESMC_RC_NOT_IMPL;         // local return code
     int rc = ESMC_RC_NOT_IMPL;              // final return code
     int j = dstLocalDe;
-    int rraIndex = srcLocalDeCount + j; // localDe index into dstArray shifted 
+    int rraIndex = srcLocalDeCount + j; // localDe index into dstArray shifted
                                         // by srcArray localDeCount
 #ifdef ASMM_EXEC_PROFILE_on
     localrc = xxe->appendWtimer(predicateBitField, "slct zero",
@@ -6071,7 +6197,7 @@ namespace ArrayHelper{
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     XXE::ZeroSuperScalarRRAInfo *xxeZeroSuperScalarRRAInfo =
-      (XXE::ZeroSuperScalarRRAInfo *)&(xxe->stream[xxeIndex]);
+      (XXE::ZeroSuperScalarRRAInfo *)&(xxe->opstream[xxeIndex]);
     // fill rraOffsetList[]
     int vectorLength = dstInfoTable.begin()->vectorLength;  // store time vLen
     int k=0;  // reset
@@ -6113,23 +6239,64 @@ namespace ArrayHelper{
       localrc = xxe->appendProductSumSuperScalarDstRRA(predicateBitField,
         elementTK, valueTK, factorTK, rraIndex, termCount, bufferInfo,
         vectorFlag, true);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       XXE::ProductSumSuperScalarDstRRAInfo *xxeProductSumSuperScalarDstRRAInfo =
-        (XXE::ProductSumSuperScalarDstRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::ProductSumSuperScalarDstRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarDstRRAInfo->rraOffsetList;
-      void **factorList = xxeProductSumSuperScalarDstRRAInfo->factorList;
+      void *factorList = xxeProductSumSuperScalarDstRRAInfo->factorList;
       int *valueOffsetList =
         xxeProductSumSuperScalarDstRRAInfo->valueOffsetList;
-      // fill in rraOffsetList, factorList, valueOffsetList
+      // fill in rraOffsetList, valueOffsetList
       typename vector<ArrayHelper::DstInfo<IT1,IT2> >::iterator pp =
         dstInfoTable.begin();
       for (int kk=0; kk<termCount; kk++){
         rraOffsetList[kk] = pp->linIndex/vectorLength;
-        factorList[kk] = (void *)(pp->factor);
         valueOffsetList[kk] = pp->bufferIndex;
         ++pp;
       } // for kk - termCount
+      // fill in factorList according to factorTK
+      pp = dstInfoTable.begin();
+      switch (factorTK){
+      case XXE::R4:
+        {
+          ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
+          for (int kk=0; kk<termCount; kk++){
+            factorListT[kk] = *(ESMC_R4 *)(pp->factor);
+            ++pp;
+          } // for kk - termCount
+        }
+        break;
+      case XXE::R8:
+        {
+          ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
+          for (int kk=0; kk<termCount; kk++){
+            factorListT[kk] = *(ESMC_R8 *)(pp->factor);
+            ++pp;
+          } // for kk - termCount
+        }
+        break;
+      case XXE::I4:
+        {
+          ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
+          for (int kk=0; kk<termCount; kk++){
+            factorListT[kk] = *(ESMC_I4 *)(pp->factor);
+            ++pp;
+          } // for kk - termCount
+        }
+        break;
+      case XXE::I8:
+        {
+          ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
+          for (int kk=0; kk<termCount; kk++){
+            factorListT[kk] = *(ESMC_I8 *)(pp->factor);
+            ++pp;
+          } // for kk - termCount
+        }
+        break;
+      default:
+        break;
+      }
       // need to fill in sensible elements and values or timing will be bogus
       switch (elementTK){ // elements in dstArray
       case XXE::R4:
@@ -6205,7 +6372,7 @@ namespace ArrayHelper{
         break;
       }
       xxe->optimizeElement(xxeIndex);
-      
+
 #define MSG_DEFLATE___disable
 #define MSG_DEFLATE
 
@@ -6222,11 +6389,11 @@ namespace ArrayHelper{
         &dt_sScalar, xxeIndex, xxeIndex);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
-      // try super-scalar contig "+=*" operation in XXE stream
-      xxe->stream[xxeIndex].opId = XXE::productSumSuperScalarContigRRA;
+      // try super-scalar contig "+=*" operation in XXE opstream
+      xxe->opstream[xxeIndex].opId = XXE::productSumSuperScalarContigRRA;
       XXE::ProductSumSuperScalarContigRRAInfo
         *xxeProductSumSuperScalarContigRRAInfo =
-        (XXE::ProductSumSuperScalarContigRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::ProductSumSuperScalarContigRRAInfo *)&(xxe->opstream[xxeIndex]);
       // only change members that are different wrt super-scalar operation
       xxeProductSumSuperScalarContigRRAInfo->valueList = bufferInfo;
       xxe->optimizeElement(xxeIndex);
@@ -6246,7 +6413,7 @@ namespace ArrayHelper{
         if (sortOffsetList[i] != sortOffsetList[i-1]) ++diffElements;
 #endif
       // decide for the fastest option
-      
+
       if (dt_sScalar < dt_sScalarC){
         // use productSumSuperScalarDstRRA
 #ifdef ASMM_EXEC_PROFILE_on
@@ -6254,7 +6421,7 @@ namespace ArrayHelper{
           " (diffElements=%d), vectorFlag=%d", termCount, diffElements,
           vectorFlag);
 #endif
-        xxe->stream[xxeIndex].opId = XXE::productSumSuperScalarDstRRA;
+        xxe->opstream[xxeIndex].opId = XXE::productSumSuperScalarDstRRA;
         xxeProductSumSuperScalarDstRRAInfo->valueBase = bufferInfo;
       }else{
         // use productSumSuperScalarContigRRA
@@ -6291,10 +6458,10 @@ namespace ArrayHelper{
       int xxeIndex = xxe->count;  // need this beyond the increment
       localrc = xxe->appendSumSuperScalarDstRRA(predicateBitField, elementTK,
         valueTK, rraIndex, bufferItemCount, bufferInfo, vectorFlag, true);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       XXE::SumSuperScalarDstRRAInfo *xxeSumSuperScalarDstRRAInfo =
-        (XXE::SumSuperScalarDstRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::SumSuperScalarDstRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeSumSuperScalarDstRRAInfo->rraOffsetList;
       int *valueOffsetList = xxeSumSuperScalarDstRRAInfo->valueOffsetList;
       // fill in rraOffsetList, valueList
@@ -6351,7 +6518,7 @@ namespace ArrayHelper{
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     delete [] tempString;
 #endif
-    // use substream for doing the productSum
+    // use subopstream for doing the productSum
     XXE *xxeSub;
     try{
       xxeSub = new XXE(xxe->vm, 10, 10, 10);
@@ -6371,17 +6538,17 @@ namespace ArrayHelper{
     // attach to testOnIndexSub element with filterBitNbTestFinish
     localrc = xxe->appendTestOnIndexSub(
       predicateBitField|XXE::filterBitNbTestFinish, xxeSub, 0, 0, recvnbIndex);
-    if (ESMC_LogDefault.MsgFoundError(localrc, 
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     // attach to waitOnIndexSub element with filterBitNbWaitFinish
     localrc = xxe->appendWaitOnIndexSub(
       predicateBitField|XXE::filterBitNbWaitFinish, xxeSub, 0, 0, recvnbIndex);
-    if (ESMC_LogDefault.MsgFoundError(localrc, 
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     // cancel for this receive operations
-    localrc = xxe->appendCancelIndex(     
+    localrc = xxe->appendCancelIndex(
       predicateBitField|XXE::filterBitCancel, recvnbIndex);
-    if (ESMC_LogDefault.MsgFoundError(localrc, 
+    if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #ifdef ASMM_EXEC_PROFILE_on
     tempString = new char[160];
@@ -6400,7 +6567,7 @@ namespace ArrayHelper{
     int RecvnbElement<IT1,IT2>::appendSingleProductSum(
     XXE *xxe,
     int predicateBitField, int srcTermProcessing,  int srcLocalDeCount,
-    XXE::TKId elementTK, XXE::TKId valueTK, XXE::TKId factorTK, 
+    XXE::TKId elementTK, XXE::TKId valueTK, XXE::TKId factorTK,
     int dataSizeDst, int dataSizeSrc, int dataSizeFactors, char **rraList,
     int rraCount, vector<RecvnbElement> recvnbVector){
 #undef  ESMC_METHOD
@@ -6434,15 +6601,15 @@ namespace ArrayHelper{
       localrc = xxe->appendProductSumSuperScalarListDstRRA(predicateBitField,
         elementTK, valueTK, factorTK, rraIndexList, termCount, bufferInfoList,
         vectorFlag, true);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-      
+
       XXE::ProductSumSuperScalarListDstRRAInfo
         *xxeProductSumSuperScalarListDstRRAInfo =
-        (XXE::ProductSumSuperScalarListDstRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::ProductSumSuperScalarListDstRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList =
         xxeProductSumSuperScalarListDstRRAInfo->rraOffsetList;
-      void **factorList = xxeProductSumSuperScalarListDstRRAInfo->factorList;
+      void *factorList = xxeProductSumSuperScalarListDstRRAInfo->factorList;
       int *valueOffsetList =
         xxeProductSumSuperScalarListDstRRAInfo->valueOffsetList;
       int *baseListIndexList =
@@ -6454,17 +6621,50 @@ namespace ArrayHelper{
         // append terms from buffer "i"
         for (pp=recvnbVector[i].dstInfoTable.begin();
           pp!=recvnbVector[i].dstInfoTable.end(); ++pp){
-          dstInfoSort.push_back(DstInfoSrcSeqSort<IT1,IT2>(pp, i));
+          dstInfoSort.push_back(DstInfoSrcSeqSort<IT1,IT2>(pp, i,
+            rraIndexList[i]));
         }
       }
       // do the actual sort
       sort(dstInfoSort.begin(), dstInfoSort.end());
-      // fill in rraOffsetList, factorList, valueOffsetList, baseListIndexList
+      // fill in rraOffsetList, valueOffsetList, baseListIndexList
       for (unsigned i=0; i<dstInfoSort.size(); i++){
         rraOffsetList[i] = dstInfoSort[i].pp->linIndex/vectorLength;
-        factorList[i] = (void *)(dstInfoSort[i].pp->factor);
         valueOffsetList[i] = dstInfoSort[i].pp->bufferIndex;
         baseListIndexList[i] = dstInfoSort[i].recvnbVectorIndex;
+      }
+      // fill in factorList according to factorTK
+      switch (factorTK){
+      case XXE::R4:
+        {
+          ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
+          for (unsigned i=0; i<dstInfoSort.size(); i++)
+            factorListT[i] = *(ESMC_R4 *)(dstInfoSort[i].pp->factor);
+        }
+        break;
+      case XXE::R8:
+        {
+          ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
+          for (unsigned i=0; i<dstInfoSort.size(); i++)
+            factorListT[i] = *(ESMC_R8 *)(dstInfoSort[i].pp->factor);
+        }
+        break;
+      case XXE::I4:
+        {
+          ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
+          for (unsigned i=0; i<dstInfoSort.size(); i++)
+            factorListT[i] = *(ESMC_I4 *)(dstInfoSort[i].pp->factor);
+        }
+        break;
+      case XXE::I8:
+        {
+          ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
+          for (unsigned i=0; i<dstInfoSort.size(); i++)
+            factorListT[i] = *(ESMC_I8 *)(dstInfoSort[i].pp->factor);
+        }
+        break;
+      default:
+        break;
       }
     }else{
       // do some processing on the src side
@@ -6473,7 +6673,7 @@ namespace ArrayHelper{
       // -> construct the necessary helper variables
 
       //TODO: need to fix this implementation to work with srcTermProcessing > 1
-      
+
       unsigned bufferItemCount = 0;
       vector<void *>bufferInfoList;
       vector<int> rraIndexList;
@@ -6484,7 +6684,7 @@ namespace ArrayHelper{
           SeqIndex<IT1> seqIndex = pp->seqIndex;
           for (int term=0; term<srcTermProcessing; term++){
             ++pp;
-            if ((pp == recvnbVector[i].dstInfoTable.end()) 
+            if ((pp == recvnbVector[i].dstInfoTable.end())
             || !(seqIndex == pp->seqIndex)) break;
           } // for srcTermProcessing
           ++bufferItemCount;
@@ -6496,12 +6696,12 @@ namespace ArrayHelper{
       localrc = xxe->appendSumSuperScalarListDstRRA(predicateBitField,
         elementTK, valueTK, rraIndexList, bufferItemCount, bufferInfoList,
         vectorFlag, true);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-      
+
       XXE::SumSuperScalarListDstRRAInfo
         *xxeSumSuperScalarListDstRRAInfo =
-        (XXE::SumSuperScalarListDstRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::SumSuperScalarListDstRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList =
         xxeSumSuperScalarListDstRRAInfo->rraOffsetList;
       int *valueOffsetList =
@@ -6515,12 +6715,13 @@ namespace ArrayHelper{
         int bufferItem = 0; // reset
         pp = recvnbVector[i].dstInfoTable.begin();
         while (pp != recvnbVector[i].dstInfoTable.end()){
-          dstInfoSort.push_back(DstInfoSrcSeqSort<IT1,IT2>(pp, i));
+          dstInfoSort.push_back(DstInfoSrcSeqSort<IT1,IT2>(pp, i,
+            rraIndexList[i]));
           pp->bufferIndex = bufferItem; // adjust to modified buffer structure
           SeqIndex<IT1> seqIndex = pp->seqIndex;
           for (int term=0; term<srcTermProcessing; term++){
             ++pp;
-            if ((pp == recvnbVector[i].dstInfoTable.end()) 
+            if ((pp == recvnbVector[i].dstInfoTable.end())
             || !(seqIndex == pp->seqIndex)) break;
           } // for srcTermProcessing
           ++bufferItem;
@@ -6546,7 +6747,7 @@ namespace ArrayHelper{
     return rc;
   }
 
-  
+
   struct LinIndexContigBlock{
     int linIndex;
     int linIndexCount;
@@ -6578,7 +6779,7 @@ namespace ArrayHelper{
       int dataSizeSrc, char **rraList, int rraCount, int kSend,
       typename vector<RecvnbElement<IT2,IT1> >::iterator pRecv, int kRecv);
   };
-  template<typename IT1, typename IT2> 
+  template<typename IT1, typename IT2>
     bool operator<(SendnbElement<IT1,IT2> a, SendnbElement<IT1,IT2> b){
     int aDstPet = (a.dstPet - a.localPet + a.petCount) % a.petCount;
     int bDstPet = (b.dstPet - b.localPet + b.petCount) % b.petCount;
@@ -6590,7 +6791,7 @@ namespace ArrayHelper{
     else
       return (aDstPet < bDstPet);
   }
-  template<typename IT1, typename IT2> 
+  template<typename IT1, typename IT2>
     int SendnbElement<IT1,IT2>::appendSendnb(XXE *xxe, int predicateBitField,
     int srcTermProcessing, XXE::TKId elementTK, XXE::TKId valueTK,
     XXE::TKId factorTK, int dataSizeSrc, char **rraList, int rraCount, int k){
@@ -6621,7 +6822,7 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
-    msg << "ASMM_STORE_LOG:" << __LINE__ << 
+    msg << "ASMM_STORE_LOG:" << __LINE__ <<
       " single contiguous linIndex run on src side";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   }
@@ -6658,7 +6859,7 @@ namespace ArrayHelper{
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
         XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo =
-          (XXE::MemGatherSrcRRAInfo *) &(xxe->stream[xxeIndex]);
+          (XXE::MemGatherSrcRRAInfo *) &(xxe->opstream[xxeIndex]);
         // try typekind specific memGatherSrcRRA
         for (int kk=0; kk<count; kk++){
           xxeMemGatherSrcRRAInfo->rraOffsetList[kk] =
@@ -6668,7 +6869,7 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
   {
     std::stringstream msg;
-    msg << "ASMM_STORE_LOG:" << __LINE__ << " countList[]=" << 
+    msg << "ASMM_STORE_LOG:" << __LINE__ << " countList[]=" <<
       xxeMemGatherSrcRRAInfo->countList[kk];
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   }
@@ -6754,7 +6955,7 @@ namespace ArrayHelper{
       // zero out intermediate buffer
       localrc = xxe->appendZeroMemset(predicateBitField, bufferInfo,
         bufferItemCount * dataSizeSrc, vectorFlag, true);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #ifdef ASMM_EXEC_PROFILE_on
       char *tempString = new char[160];
@@ -6768,32 +6969,95 @@ namespace ArrayHelper{
       // use super-scalar "+=*" operation containing all terms
       int xxeIndex = xxe->count;  // need this beyond the increment
       localrc = xxe->appendProductSumSuperScalarSrcRRA(predicateBitField,
-        valueTK, valueTK, factorTK, j, srcInfoTable.size(), bufferInfo, 
+        valueTK, valueTK, factorTK, j, srcInfoTable.size(), bufferInfo,
         vectorFlag, true);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       XXE::ProductSumSuperScalarSrcRRAInfo *xxeProductSumSuperScalarSrcRRAInfo =
-        (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList;
-      void **factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
+      void *factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
       int *elementOffsetList =
         xxeProductSumSuperScalarSrcRRAInfo->elementOffsetList;
       // fill in rraOffsetList, factorList, elementOffsetList
       int bufferItem = 0; // reset
       int kk = 0; // reset
       pp = srcInfoTable.begin();  // reset
-      while (pp != srcInfoTable.end()){
-        SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
-        for (int term=0; term<srcTermProcessing; term++){
-          rraOffsetList[kk] = pp->linIndex/vectorLength;
-          factorList[kk] = (void *)(pp->factor);
-          elementOffsetList[kk] = bufferItem;
-          ++pp;
-          ++kk;
-          if ((pp == srcInfoTable.end()) ||
-            !(partnerSeqIndex == pp->partnerSeqIndex)) break;
-        } // for srcTermProcessing
-        ++bufferItem;
+      switch (factorTK){
+      case XXE::R4:
+        {
+          ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_R4 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::R8:
+        {
+          ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_R8 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::I4:
+        {
+          ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_I4 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::I8:
+        {
+          ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_I8 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      default:
+        break;
       }
 #ifdef ASMM_EXEC_PROFILE_on
       tempString = new char[160];
@@ -6839,8 +7103,8 @@ namespace ArrayHelper{
     rc = ESMF_SUCCESS;
     return rc;
   }
-      
-  template<typename IT1, typename IT2> 
+
+  template<typename IT1, typename IT2>
     int SendnbElement<IT1,IT2>::appendSend(XXE *xxe, int predicateBitField,
     int srcTermProcessing, XXE::TKId elementTK, XXE::TKId valueTK,
     XXE::TKId factorTK, int dataSizeSrc, char **rraList, int rraCount, int k){
@@ -6857,8 +7121,8 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: XXE::send from localPet=" << localPet <<
-        " to Pet=" << dstPet;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " XXE::send from localPet="
+        << localPet << " to Pet=" << dstPet;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
@@ -6871,7 +7135,8 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: single contiguous linIndex run on src side";
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " single contiguous linIndex "
+        "run on src side";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
@@ -6894,7 +7159,7 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: non-contiguous linIndex on "
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " non-contiguous linIndex on "
         "src side -> need buffer";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
@@ -6907,7 +7172,7 @@ namespace ArrayHelper{
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
         XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo =
-          (XXE::MemGatherSrcRRAInfo *) &(xxe->stream[xxeIndex]);
+          (XXE::MemGatherSrcRRAInfo *) &(xxe->opstream[xxeIndex]);
         // try typekind specific memGatherSrcRRA
         for (int kk=0; kk<count; kk++){
           xxeMemGatherSrcRRAInfo->rraOffsetList[kk] =
@@ -6936,7 +7201,7 @@ namespace ArrayHelper{
     {
       std::stringstream msg;
       msg << "ASMM_STORE_LOG:" << __LINE__ << " on localPet=" << localPet <<
-          " memGatherSrcRRA took dt_tk=" << dt_tk << "s and dt_byte=" << 
+          " memGatherSrcRRA took dt_tk=" << dt_tk << "s and dt_byte=" <<
           dt_byte << " for count=" << count;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
@@ -6984,7 +7249,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::SrcInfo<IT1,IT2> >::iterator pp =
         srcInfoTable.begin();
       while (pp != srcInfoTable.end()){
-        SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+        SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == srcInfoTable.end()) ||
@@ -6995,7 +7260,7 @@ namespace ArrayHelper{
       // zero out intermediate buffer
       localrc = xxe->appendZeroMemset(predicateBitField, bufferInfo,
         bufferItemCount * dataSizeSrc, vectorFlag, true);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #ifdef ASMM_EXEC_PROFILE_on
       char *tempString = new char[160];
@@ -7009,32 +7274,95 @@ namespace ArrayHelper{
       // use super-scalar "+=*" operation containing all terms
       int xxeIndex = xxe->count;  // need this beyond the increment
       localrc = xxe->appendProductSumSuperScalarSrcRRA(predicateBitField,
-        valueTK, valueTK, factorTK, j, srcInfoTable.size(), bufferInfo, 
+        valueTK, valueTK, factorTK, j, srcInfoTable.size(), bufferInfo,
         vectorFlag, true);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       XXE::ProductSumSuperScalarSrcRRAInfo *xxeProductSumSuperScalarSrcRRAInfo =
-        (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList;
-      void **factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
+      void *factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
       int *elementOffsetList =
         xxeProductSumSuperScalarSrcRRAInfo->elementOffsetList;
       // fill in rraOffsetList, factorList, elementOffsetList
       int bufferItem = 0; // reset
       int kk = 0; // reset
       pp = srcInfoTable.begin();  // reset
-      while (pp != srcInfoTable.end()){
-        SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
-        for (int term=0; term<srcTermProcessing; term++){
-          rraOffsetList[kk] = pp->linIndex/vectorLength;
-          factorList[kk] = (void *)(pp->factor);
-          elementOffsetList[kk] = bufferItem;
-          ++pp;
-          ++kk;
-          if ((pp == srcInfoTable.end()) ||
-            !(partnerSeqIndex == pp->partnerSeqIndex)) break;
-        } // for srcTermProcessing
-        ++bufferItem;
+      switch (factorTK){
+      case XXE::R4:
+        {
+          ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_R4 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::R8:
+        {
+          ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_R8 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::I4:
+        {
+          ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_I4 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::I8:
+        {
+          ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_I8 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      default:
+        break;
       }
 #ifdef ASMM_EXEC_PROFILE_on
       tempString = new char[160];
@@ -7080,13 +7408,13 @@ namespace ArrayHelper{
     rc = ESMF_SUCCESS;
     return rc;
   }
-      
-  template<typename IT1, typename IT2> 
+
+  template<typename IT1, typename IT2>
     int SendnbElement<IT1,IT2>::appendSendRecv(
     XXE *xxe, int predicateBitField,
     int srcTermProcessing, XXE::TKId elementTK, XXE::TKId valueTK,
     XXE::TKId factorTK, int dataSizeSrc, char **rraList, int rraCount,
-    int kSend, typename vector<RecvnbElement<IT2,IT1> >::iterator pRecv, 
+    int kSend, typename vector<RecvnbElement<IT2,IT1> >::iterator pRecv,
     int kRecv){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ArrayHelper::SendnbElement::appendSendRecv()"
@@ -7100,13 +7428,13 @@ namespace ArrayHelper{
     if (srcTermProcessing == 0)
       dstBufferItemCount = pRecv->partnerDeDataCount;
     else{
-      typename vector<ArrayHelper::DstInfo<IT2,IT1> >::iterator pp = 
+      typename vector<ArrayHelper::DstInfo<IT2,IT1> >::iterator pp =
         pRecv->dstInfoTable.begin();
       while (pp != pRecv->dstInfoTable.end()){
-        SeqIndex<> seqIndex = pp->seqIndex;
+        SeqIndex<IT1> seqIndex = pp->seqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
-          if ((pp == pRecv->dstInfoTable.end()) || 
+          if ((pp == pRecv->dstInfoTable.end()) ||
             !(seqIndex == pp->seqIndex)) break;
         } // for srcTermProcessing
         ++dstBufferItemCount;
@@ -7118,8 +7446,8 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: XXE::sendrecv from localPet=" << localPet <<
-        " to Pet=" << dstPet;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " XXE::sendrecv from localPet="
+        << localPet << " to Pet=" << dstPet;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
@@ -7132,7 +7460,8 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: single contiguous linIndex run on src side";
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " single contiguous linIndex "
+        "run on src side";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
@@ -7140,8 +7469,8 @@ namespace ArrayHelper{
         pRecv->recvnbIndex = xxe->count;  // store index for the associated wait
         localrc = xxe->appendSendRRARecv(predicateBitField,
           linIndexContigBlockList[0].linIndex/vectorLength * dataSizeSrc,
-          pRecv->bufferInfo, partnerDeDataCount * dataSizeSrc, 
-          dstBufferItemCount * dataSizeSrc, pRecv->srcPet, dstPet, 
+          pRecv->bufferInfo, partnerDeDataCount * dataSizeSrc,
+          dstBufferItemCount * dataSizeSrc, pRecv->srcPet, dstPet,
           j, tag, tag, vectorFlag, true);
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -7158,7 +7487,7 @@ namespace ArrayHelper{
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG: non-contiguous linIndex on "
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " non-contiguous linIndex on "
           "src side -> need buffer";
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
@@ -7171,7 +7500,7 @@ namespace ArrayHelper{
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
         XXE::MemGatherSrcRRAInfo *xxeMemGatherSrcRRAInfo =
-          (XXE::MemGatherSrcRRAInfo *) &(xxe->stream[xxeIndex]);
+          (XXE::MemGatherSrcRRAInfo *) &(xxe->opstream[xxeIndex]);
         // try typekind specific memGatherSrcRRA
         for (int kk=0; kk<count; kk++){
           xxeMemGatherSrcRRAInfo->rraOffsetList[kk] =
@@ -7196,10 +7525,14 @@ namespace ArrayHelper{
           &dt_byte, xxeIndex, xxeIndex);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMM_STORE_LOG_on_disabled
-        fprintf(asmm_store_log_fp, "gjt - on localPet %d memGatherSrcRRA took "
-          "dt_tk=%g s and dt_byte=%g s for count=%d\n", localPet, dt_tk,
-          dt_byte, count);
+#ifdef ASMM_STORE_LOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " on localPet " << localPet <<
+        " memGatherSrcRRA took dt_tk=" << dt_tk << "s and dt_byte=" <<
+        dt_byte << "byte for count=" << count;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
         // decide for the fastest option
 //gjt-hack: force typekind option for now        if (dt_byte < dt_tk){
@@ -7234,7 +7567,7 @@ namespace ArrayHelper{
         sendnbIndex = xxe->count;  // store index for the associated wait
         pRecv->recvnbIndex = xxe->count;  // store index for the associated wait
         localrc = xxe->appendSendRecv(predicateBitField, bufferInfo,
-          pRecv->bufferInfo, partnerDeDataCount * dataSizeSrc, 
+          pRecv->bufferInfo, partnerDeDataCount * dataSizeSrc,
           dstBufferItemCount * dataSizeSrc, pRecv->srcPet, dstPet, tag, tag,
           vectorFlag, true, true);
         if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -7247,7 +7580,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::SrcInfo<IT1,IT2> >::iterator pp =
         srcInfoTable.begin();
       while (pp != srcInfoTable.end()){
-        SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
+        SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == srcInfoTable.end()) ||
@@ -7258,7 +7591,7 @@ namespace ArrayHelper{
       // zero out intermediate buffer
       localrc = xxe->appendZeroMemset(predicateBitField, bufferInfo,
         bufferItemCount * dataSizeSrc, vectorFlag, true);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #ifdef ASMM_EXEC_PROFILE_on
       char *tempString = new char[160];
@@ -7272,32 +7605,95 @@ namespace ArrayHelper{
       // use super-scalar "+=*" operation containing all terms
       int xxeIndex = xxe->count;  // need this beyond the increment
       localrc = xxe->appendProductSumSuperScalarSrcRRA(predicateBitField,
-        valueTK, valueTK, factorTK, j, srcInfoTable.size(), bufferInfo, 
+        valueTK, valueTK, factorTK, j, srcInfoTable.size(), bufferInfo,
         vectorFlag, true);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       XXE::ProductSumSuperScalarSrcRRAInfo *xxeProductSumSuperScalarSrcRRAInfo =
-        (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->stream[xxeIndex]);
+        (XXE::ProductSumSuperScalarSrcRRAInfo *)&(xxe->opstream[xxeIndex]);
       int *rraOffsetList = xxeProductSumSuperScalarSrcRRAInfo->rraOffsetList;
-      void **factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
+      void *factorList = xxeProductSumSuperScalarSrcRRAInfo->factorList;
       int *elementOffsetList =
         xxeProductSumSuperScalarSrcRRAInfo->elementOffsetList;
       // fill in rraOffsetList, factorList, elementOffsetList
       int bufferItem = 0; // reset
       int kk = 0; // reset
       pp = srcInfoTable.begin();  // reset
-      while (pp != srcInfoTable.end()){
-        SeqIndex<> partnerSeqIndex = pp->partnerSeqIndex;
-        for (int term=0; term<srcTermProcessing; term++){
-          rraOffsetList[kk] = pp->linIndex/vectorLength;
-          factorList[kk] = (void *)(pp->factor);
-          elementOffsetList[kk] = bufferItem;
-          ++pp;
-          ++kk;
-          if ((pp == srcInfoTable.end()) ||
-            !(partnerSeqIndex == pp->partnerSeqIndex)) break;
-        } // for srcTermProcessing
-        ++bufferItem;
+      switch (factorTK){
+      case XXE::R4:
+        {
+          ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_R4 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::R8:
+        {
+          ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_R8 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::I4:
+        {
+          ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_I4 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      case XXE::I8:
+        {
+          ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
+          while (pp != srcInfoTable.end()){
+            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            for (int term=0; term<srcTermProcessing; term++){
+              rraOffsetList[kk] = pp->linIndex/vectorLength;
+              factorListT[kk] = *(ESMC_I8 *)(pp->factor);
+              elementOffsetList[kk] = bufferItem;
+              ++pp;
+              ++kk;
+              if ((pp == srcInfoTable.end()) ||
+                !(partnerSeqIndex == pp->partnerSeqIndex)) break;
+            } // for srcTermProcessing
+            ++bufferItem;
+          }
+        }
+        break;
+      default:
+        break;
       }
 #ifdef ASMM_EXEC_PROFILE_on
       tempString = new char[160];
@@ -7322,8 +7718,8 @@ namespace ArrayHelper{
       sendnbIndex = xxe->count;  // store index for the associated wait
       pRecv->recvnbIndex = xxe->count;  // store index for the associated wait
       localrc = xxe->appendSendRecv(predicateBitField, bufferInfo,
-        pRecv->bufferInfo, bufferItemCount * dataSizeSrc, 
-        dstBufferItemCount * dataSizeSrc, pRecv->srcPet, dstPet, tag, tag, 
+        pRecv->bufferInfo, bufferItemCount * dataSizeSrc,
+        dstBufferItemCount * dataSizeSrc, pRecv->srcPet, dstPet, tag, tag,
         vectorFlag, true, true);
       if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
@@ -7396,1463 +7792,39 @@ namespace ArrayHelper{
       }
     }
   };
-  
+
 } // ArrayHelper
 
 
-namespace DD{
-  
-  template<typename IT> struct Interval{
-    IT min;
-    IT max;
-    int count;
-  };
-  
-  template<typename IT> struct FactorElement{
-    SeqIndex<IT> partnerSeqIndex;
-    vector<int> partnerDe;
-    int padding;    // padding for 8-byte alignment
-    char factor[8]; // large enough for R8 and I8
-  };
-  template<typename IT>
-    bool operator==(FactorElement<IT> a, FactorElement<IT> b){
-    return (a.partnerSeqIndex == b.partnerSeqIndex);
-  }
-  template<typename IT>
-    bool operator!=(FactorElement<IT> a, FactorElement<IT> b){
-    return (a.partnerSeqIndex != b.partnerSeqIndex);
-  }
-  template<typename IT>
-    bool operator<(FactorElement<IT> a, FactorElement<IT> b){
-    return (a.partnerSeqIndex < b.partnerSeqIndex);
-  }
-
-  template<typename IT> struct SeqIndexFactorLookup{
-    vector<int> de;
-    int factorCount;
-    vector<FactorElement<IT> > factorList;
-  public:
-    SeqIndexFactorLookup(){
-      factorCount = 0;
-    }
-  };
-  
-  // the following structs could be moved out of this namespace
-  template<typename IT1, typename IT2> struct AssociationElement{
-    int linIndex;
-    SeqIndex<IT1> seqIndex;
-    int factorCount;
-    vector<FactorElement<IT2> > factorList;
-  };
-  template<typename IT1, typename IT2> struct FillLinSeqVectInfo{
-    Array const *array;
-    vector<AssociationElement<IT1,IT2> > *linSeqVect;
-    int localPet;
-    int localDeCount;
-    const int *localDeElementCount;
-    const Interval<IT1> *seqIndexInterval;
-    vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookup;
-    bool tensorMixFlag;
-    bool haloRimFlag;   // true indicates that halo rim instead of excl reg used
-  public:
-    FillLinSeqVectInfo(
-      vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookup_
-    ):
-      // members that need to be set on this level because of reference
-      seqIndexFactorLookup(seqIndexFactorLookup_)
-    {}
-  };
-  template<typename IT1, typename IT2> struct FillPartnerDeInfo{
-    int localPet;
-    const Interval<IT1> *seqIndexIntervalIn;
-    const Interval<IT2> *seqIndexIntervalOut;
-    vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookupIn;
-    vector<SeqIndexFactorLookup<IT2> > &seqIndexFactorLookupOut;
-    bool tensorMixFlag;
-  public:
-    FillPartnerDeInfo(
-      vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookupIn_,
-      vector<SeqIndexFactorLookup<IT2> > &seqIndexFactorLookupOut_
-    ):
-      // members that need to be set on this level because of reference
-      seqIndexFactorLookupIn(seqIndexFactorLookupIn_),
-      seqIndexFactorLookupOut(seqIndexFactorLookupOut_)
-    {}
-  };
-
-// -- accessLookup()
-
-template<typename T>
-int requestSizeFactor(T *t);
-
-template<typename T>
-void clientRequest(T *t, int i, char **requestStreamClient);
-
-template<typename T>
-void localClientServerExchange(T *t);
-
-template<typename T>
-int serverResponseSize(T *t, int count, int i, char **requestStreamServer);
-
-template<typename T>
-void serverResponse(T *t, int count, int i, char **requestStreamServer,
-  char **responseStreamServer);
-
-template<typename T>
-void clientProcess(T *t, char *responseStream, int responseStreamSize);
-
-template<typename T>
-void accessLookup(
-  ESMCI::VM *vm,
-  int petCount,
-  int localPet,
-  int *localIntervalPerPetCount,
-  int *localElementsPerIntervalCount,
-  T *t
-  ){
-  // access look up table
-  VMK::commhandle **send1commhList = new VMK::commhandle*[petCount];
-  VMK::commhandle **send2commhList = new VMK::commhandle*[petCount];
-  VMK::commhandle **send3commhList = new VMK::commhandle*[petCount];
-  VMK::commhandle **recv1commhList = new VMK::commhandle*[petCount];
-  VMK::commhandle **recv2commhList = new VMK::commhandle*[petCount];
-  VMK::commhandle **recv3commhList = new VMK::commhandle*[petCount];
-  char **requestStreamClient = new char*[petCount];
-  char **requestStreamServer = new char*[petCount];
-  int *responseStreamSizeClient = new int[petCount];
-  int *responseStreamSizeServer = new int[petCount];
-  char **responseStreamClient = new char*[petCount];
-  char **responseStreamServer = new char*[petCount];
-  
-//char msg[1024];
-  
-  // t-specific routine
-  int requestFactor = requestSizeFactor(t);
-  // localPet acts as server, posts non-blocking recvs for all client requests
-//ESMC_LogDefault.Write("accessLookup: step 1", ESMC_LOGMSG_INFO); 
-  for (int ii=localPet+1; ii<localPet+petCount; ii++){
-    // localPet-dependent shifted loop reduces communication contention
-    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-    // receive request from Pet "i"
-    int count = localIntervalPerPetCount[i];
-    if (count>0){
-//sprintf(msg, "posting nb-recv for message from PET %d size=%d", i, requestFactor*count);
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
-      requestStreamServer[i] = new char[requestFactor*count];
-      recv3commhList[i] = NULL;
-      vm->recv(requestStreamServer[i], requestFactor*count, i,
-        &(recv3commhList[i]));
-    }
-  }
-  // localPet acts as a client, sends its requests to the appropriate servers
-//ESMC_LogDefault.Write("accessLookup: step 2", ESMC_LOGMSG_INFO); 
-  for (int ii=localPet+petCount-1; ii>localPet; ii--){
-    // localPet-dependent shifted loop reduces communication contention
-    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-    if (localElementsPerIntervalCount[i]>0){
-      // localPet has elements that are located in interval of server Pet "i"
-      requestStreamClient[i] =
-        new char[requestFactor*localElementsPerIntervalCount[i]];
-      // t-specific client routine
-      clientRequest(t, i, requestStreamClient);
-      // send information to the serving Pet
-      send1commhList[i] = NULL;
-//sprintf(msg, "posting nb-send to PET %d size=%d", i, requestFactor*localElementsPerIntervalCount[i]);
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
-#ifdef WORKAROUND_NONBLOCKPROGRESSBUG
-      vm->send(requestStreamClient[i],
-        requestFactor*localElementsPerIntervalCount[i], i); 
-#else
-      vm->send(requestStreamClient[i],
-        requestFactor*localElementsPerIntervalCount[i], i, 
-        &(send1commhList[i]));
-#endif
-      // post receive to obtain response size from server Pet
-      recv1commhList[i] = NULL;
-//sprintf(msg, "posting nb-recv for message from PET %d size=%d", i, sizeof(int));
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
-
-      vm->recv(&(responseStreamSizeClient[i]), sizeof(int), i,
-        &(recv1commhList[i]));
-    }
-  }
-  // localPet locally acts as server and client to fill its own request
-  // t-specific client-server routine
-//ESMC_LogDefault.Write("accessLookup: step 3", ESMC_LOGMSG_INFO); 
-  localClientServerExchange(t);
-  // localPet acts as server, processing requests from clients, send response sz
-//ESMC_LogDefault.Write("accessLookup: step 4", ESMC_LOGMSG_INFO); 
-  for (int ii=localPet+1; ii<localPet+petCount; ii++){
-    // localPet-dependent shifted loop reduces communication contention
-    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-    int count = localIntervalPerPetCount[i];
-    if (count>0){
-      // wait for request from Pet "i"
-//sprintf(msg, "waiting on nb-recv for message from PET %d", i);
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
-      vm->commwait(&(recv3commhList[i]));
-      // t-specific server routine
-      int responseStreamSize =
-        serverResponseSize(t, count, i, requestStreamServer);
-      // send response size to client Pet "i"
-      responseStreamSizeServer[i] = responseStreamSize;
-      send2commhList[i] = NULL;
-//sprintf(msg, "posting nb-send to PET %d size=%d", i, sizeof(int));
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
-
-#ifdef WORKAROUND_NONBLOCKPROGRESSBUG
-      vm->send(&(responseStreamSizeServer[i]), sizeof(int), i);
-#else
-      vm->send(&(responseStreamSizeServer[i]), sizeof(int), i,
-        &(send2commhList[i]));
-#endif
-    }
-  }
-  // localPet acts as a client, waits for response size from server and posts
-  // receive for response stream
-//ESMC_LogDefault.Write("accessLookup: step 5", ESMC_LOGMSG_INFO); 
-  for (int ii=localPet+petCount-1; ii>localPet; ii--){
-    // localPet-dependent shifted loop reduces communication contention
-    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-    if (localElementsPerIntervalCount[i]>0){
-      // localPet has elements that are located in interval of server Pet i
-      // wait to receive response size from the serving Pet "i"
-      vm->commwait(&(recv1commhList[i]));
-      int responseStreamSize = responseStreamSizeClient[i];
-      if (responseStreamSize>0){
-        responseStreamClient[i] = new char[responseStreamSize];
-        recv2commhList[i] = NULL;
-//sprintf(msg, "posting nb-recv for message from PET %d size=%d", i, responseStreamSize);
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
-
-        vm->recv(responseStreamClient[i], responseStreamSize, i,
-          &(recv2commhList[i]));
-      }
-    }
-  }
-  // localPet acts as server, send response stream
-//ESMC_LogDefault.Write("accessLookup: step 6", ESMC_LOGMSG_INFO); 
-  for (int ii=localPet+1; ii<localPet+petCount; ii++){
-    // localPet-dependent shifted loop reduces communication contention
-    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-    int count = localIntervalPerPetCount[i];
-    if (count>0){
-      int responseStreamSize = responseStreamSizeServer[i];
-      if (responseStreamSize>0){
-        // construct response stream
-        responseStreamServer[i] = new char[responseStreamSize];
-        // t-specific server routine
-        serverResponse(t, count, i, requestStreamServer, responseStreamServer);
-        // send response stream to client Pet "i"
-        send3commhList[i] = NULL;
-//sprintf(msg, "posting nb-send to PET %d size=%d", i, responseStreamSize);
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
-
-#ifdef WORKAROUND_NONBLOCKPROGRESSBUG
-        vm->send(responseStreamServer[i], responseStreamSize, i);
-#else
-        vm->send(responseStreamServer[i], responseStreamSize, i,
-          &(send3commhList[i]));
-#endif
-      }
-      // garbage collection
-      delete [] requestStreamServer[i];
-    }
-  }
-  // localPet acts as a client, waits for response stream from server, process
-//ESMC_LogDefault.Write("accessLookup: step 7", ESMC_LOGMSG_INFO); 
-  for (int ii=localPet+petCount-1; ii>localPet; ii--){
-    // localPet-dependent shifted loop reduces communication contention
-    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-    if (localElementsPerIntervalCount[i]>0){
-      // localPet has elements that are located in interval of server Pet i
-      int responseStreamSize = responseStreamSizeClient[i];
-      if (responseStreamSize>0){
-        // wait to receive response stream from the serving Pet "i"
-//sprintf(msg, "commwait for message from PET %d, of size %d, with localElements: %d", i, responseStreamSize, localElementsPerIntervalCount[i]);
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
-        vm->commwait(&(recv2commhList[i]));
-        // process responseStream and complete t[][] info
-        char *responseStream = responseStreamClient[i];
-        // t-specific client routine
-        clientProcess(t, responseStream, responseStreamSize);
-        // garbage collection
-        delete [] responseStreamClient[i];
-      }
-    }
-  }
-  // localPet acts as a client, wait for sends to complete and collect garbage
-//ESMC_LogDefault.Write("accessLookup: step 8", ESMC_LOGMSG_INFO); 
-  for (int ii=localPet+petCount-1; ii>localPet; ii--){
-    // localPet-dependent shifted loop reduces communication contention
-    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-    if (localElementsPerIntervalCount[i]>0){
-      // localPet has elements that are located in interval of server Pet i
-#ifndef WORKAROUND_NONBLOCKPROGRESSBUG
-      // wait for send
-      vm->commwait(&(send1commhList[i]));
-#endif
-      // garbage collection
-      delete [] requestStreamClient[i];
-    }
-  }
-  // localPet acts as server, wait for sends to complete and collect garbage
-//ESMC_LogDefault.Write("accessLookup: step 9", ESMC_LOGMSG_INFO); 
-  for (int ii=localPet+1; ii<localPet+petCount; ii++){
-    // localPet-dependent shifted loop reduces communication contention
-    int i = ii%petCount;  // fold back into [0,..,petCount-1] range
-    int count = localIntervalPerPetCount[i];
-    if (count>0){
-#ifndef WORKAROUND_NONBLOCKPROGRESSBUG
-      vm->commwait(&(send2commhList[i]));
-#endif
-      if (responseStreamSizeServer[i]>0){
-#ifndef WORKAROUND_NONBLOCKPROGRESSBUG
-        vm->commwait(&(send3commhList[i]));
-#endif
-        // garbage collection
-        delete [] responseStreamServer[i];
-      }
-    }
-  }  
-  // garbage collection
-  delete [] requestStreamClient;
-  delete [] requestStreamServer;
-  delete [] responseStreamClient;
-  delete [] responseStreamServer;
-  delete [] responseStreamSizeClient;
-  delete [] responseStreamSizeServer;
-  delete [] send1commhList;
-  delete [] send2commhList;
-  delete [] send3commhList;
-  delete [] recv1commhList;
-  delete [] recv2commhList;
-  delete [] recv3commhList;
-//ESMC_LogDefault.Write("accessLookup: step 10", ESMC_LOGMSG_INFO); 
+// FactorElement
+template<typename IT> struct FactorElement{
+  char factor[8]; // large enough for R8 and I8
+  SeqIndex<IT> partnerSeqIndex;
+  vector<int> partnerDe;
+};
+template<typename IT>
+  bool operator==(FactorElement<IT> a, FactorElement<IT> b){
+  return (a.partnerSeqIndex == b.partnerSeqIndex);
+}
+template<typename IT>
+  bool operator!=(FactorElement<IT> a, FactorElement<IT> b){
+  return (a.partnerSeqIndex != b.partnerSeqIndex);
+}
+template<typename IT>
+  bool operator<(FactorElement<IT> a, FactorElement<IT> b){
+  return (a.partnerSeqIndex < b.partnerSeqIndex);
 }
 
-// --------------------------------------------------
-// FillLinSeqVectInfo-specific accessLookup routines:
-
-template<typename IT1, typename IT2> 
-  int requestSizeFactor(FillLinSeqVectInfo<IT1,IT2> *fillLinSeqVectInfo){
-  return 5*sizeof(int); // lookupIndex, j, decompSeqIndex, tensorSeqIndex,
-                        // linIndex
-}
-
-template<typename IT1, typename IT2> 
-  void clientRequest(FillLinSeqVectInfo<IT1,IT2> *fillLinSeqVectInfo, 
-  int dstPet, char **requestStreamClient){
-  const int localDeCount = fillLinSeqVectInfo->localDeCount;
-  const int *localDeElementCount = fillLinSeqVectInfo->localDeElementCount;
-  const Interval<IT1> *seqIndexInterval = fillLinSeqVectInfo->seqIndexInterval;
-  const bool tensorMixFlag = fillLinSeqVectInfo->tensorMixFlag;
-  // fill the requestStreamClient[dstPet] element
-  int *requestStreamClientInt = (int *)requestStreamClient[dstPet];
-  int seqIndMin = seqIndexInterval[dstPet].min;
-  int seqIndMax = seqIndexInterval[dstPet].max;
-  int seqIndCount = seqIndexInterval[dstPet].count;
-  int jj = 0; // reset
-  for (int j=0; j<localDeCount; j++){
-    if (fillLinSeqVectInfo->haloRimFlag){
-      // loop over the halo rim elements for localDe j
-      for (int k=0; k<fillLinSeqVectInfo->array->getRimElementCount()[j]; k++){
-        const std::vector<std::vector<SeqIndex<IT1> > > *rimSeqIndex;
-        fillLinSeqVectInfo->array->getRimSeqIndex(&rimSeqIndex);
-        SeqIndex<IT1> seqIndex = (*rimSeqIndex)[j][k];
-        if (seqIndex.valid()){
-          int seqInd = seqIndex.decompSeqIndex; //TODO: beware of typecast!!
-          if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-            int lookupIndex = seqInd - seqIndMin;
-            if (tensorMixFlag)
-              lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-            requestStreamClientInt[5*jj]   = lookupIndex;
-            requestStreamClientInt[5*jj+1] = j;
-            requestStreamClientInt[5*jj+2] = seqIndex.decompSeqIndex;
-            requestStreamClientInt[5*jj+3] = seqIndex.tensorSeqIndex;
-            requestStreamClientInt[5*jj+4] =
-              fillLinSeqVectInfo->array->getRimLinIndex()[j][k];
-            ++jj; // increment counter
-          }
-        }
-      }
-    }else{
-      // loop over all elements in the exclusive region for localDe j
-      ArrayElement arrayElement(fillLinSeqVectInfo->array, j);
-      while(arrayElement.isWithin()){
-        SeqIndex<IT1> seqIndex;
-        int localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-        int seqInd = seqIndex.decompSeqIndex; //TODO: beware of typecast!!
-        if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-          int lookupIndex = seqInd - seqIndMin;
-          if (tensorMixFlag)
-            lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-          requestStreamClientInt[5*jj]   = lookupIndex;
-          requestStreamClientInt[5*jj+1] = j;
-          requestStreamClientInt[5*jj+2] = seqIndex.decompSeqIndex;
-          requestStreamClientInt[5*jj+3] = seqIndex.tensorSeqIndex;
-          requestStreamClientInt[5*jj+4] =
-            arrayElement.getLinearIndexExclusive();
-          ++jj; // increment counter
-        }
-        arrayElement.next();
-      } // end while over all exclusive elements
-    }
-  }
-}
-
-template<typename IT1, typename IT2> 
-  void localClientServerExchange(FillLinSeqVectInfo<IT1,IT2> 
-    *fillLinSeqVectInfo){
-  const int localPet = fillLinSeqVectInfo->localPet;
-  const int localDeCount = fillLinSeqVectInfo->localDeCount;
-  const int *localDeElementCount = fillLinSeqVectInfo->localDeElementCount;
-  vector<AssociationElement<IT1,IT2> > *linSeqVect =
-    fillLinSeqVectInfo->linSeqVect;
-  const Interval<IT1> *seqIndexInterval = fillLinSeqVectInfo->seqIndexInterval;
-  const bool tensorMixFlag = fillLinSeqVectInfo->tensorMixFlag;
-  vector<SeqIndexFactorLookup<IT1> > const &seqIndexFactorLookup =
-    fillLinSeqVectInfo->seqIndexFactorLookup;
-  // localPet locally acts as server and client
-  int seqIndMin = seqIndexInterval[localPet].min;
-  int seqIndMax = seqIndexInterval[localPet].max;
-  int seqIndCount = seqIndexInterval[localPet].count;
-  for (int j=0; j<localDeCount; j++){
-    if (fillLinSeqVectInfo->haloRimFlag){
-      // loop over the halo rim elements for localDe j
-      for (int k=0; k<fillLinSeqVectInfo->array->getRimElementCount()[j]; k++){
-        const std::vector<std::vector<SeqIndex<IT1> > > *rimSeqIndex;
-        fillLinSeqVectInfo->array->getRimSeqIndex(&rimSeqIndex);
-        SeqIndex<IT1> seqIndex = (*rimSeqIndex)[j][k];
-        if (seqIndex.valid()){
-          int seqInd = seqIndex.decompSeqIndex;
-          if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-            int lookupIndex = seqInd - seqIndMin;
-            if (tensorMixFlag)
-              lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-            int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
-            if (factorCount > 0){
-              AssociationElement<IT1,IT2> element;
-              element.factorCount = factorCount;
-              element.factorList =
-                seqIndexFactorLookup[lookupIndex].factorList;
-              element.linIndex =
-                fillLinSeqVectInfo->array->getRimLinIndex()[j][k];
-              element.seqIndex = seqIndex;
-              linSeqVect[j].push_back(element);
-            }
-          }
-        }
-      }
-    }else{
-      // loop over all elements in the exclusive region for localDe j
-      ArrayElement arrayElement(fillLinSeqVectInfo->array, j);
-      while(arrayElement.isWithin()){
-        SeqIndex<IT1> seqIndex;
-        int localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-        int seqInd = seqIndex.decompSeqIndex; //TODO: beware of typecast!!
-        if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-          int lookupIndex = seqInd - seqIndMin;
-          if (tensorMixFlag)
-            lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-          int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
-          if (factorCount > 0){
-            AssociationElement<IT1,IT2> element;
-            element.factorCount = factorCount;
-            element.factorList = seqIndexFactorLookup[lookupIndex].factorList;
-            element.linIndex = arrayElement.getLinearIndexExclusive();
-            element.seqIndex = seqIndex;
-            linSeqVect[j].push_back(element);
-         }
-        }
-        arrayElement.next();
-      } // end while over all exclusive elements
-    }
-  }
-}
-
-template<typename IT1, typename IT2> 
-  int serverResponseSize(FillLinSeqVectInfo<IT1,IT2> *fillLinSeqVectInfo, 
-    int count, int srcPet, char **requestStreamServer){
-  vector<SeqIndexFactorLookup<IT1> > const &seqIndexFactorLookup =
-    fillLinSeqVectInfo->seqIndexFactorLookup;
-  // process requestStreamServer[srcPet] and return response stream size
-  int indexCounter = 0; // reset
-  int factorElementCounter = 0; // reset
-  int partnerDeCounter = 0; // reset
-  int *requestStreamServerInt = (int *)requestStreamServer[srcPet];
-  for (int j=0; j<count; j++){
-    int lookupIndex = requestStreamServerInt[5*j];
-    int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
-    if (factorCount > 0){
-      ++indexCounter;
-      factorElementCounter += factorCount;
-      for (int jj=0; jj<factorCount; jj++)
-        partnerDeCounter +=
-          seqIndexFactorLookup[lookupIndex].factorList[jj].partnerDe.size();
-    }
-  }
-  int responseStreamSize = 
-    5*indexCounter*sizeof(int) +            // AssociationElement members
-    3*factorElementCounter*sizeof(int) +    // FactorElement members
-    partnerDeCounter*sizeof(int) +          // partnerDe elements
-    8*factorElementCounter;                 // FactorElement factor
-  return responseStreamSize;
-}
-      
-template<typename IT1, typename IT2> 
-  void serverResponse(FillLinSeqVectInfo<IT1,IT2> *fillLinSeqVectInfo,
-    int count, int srcPet, char **requestStreamServer, 
-    char **responseStreamServer){
-  vector<SeqIndexFactorLookup<IT1> > const &seqIndexFactorLookup =
-    fillLinSeqVectInfo->seqIndexFactorLookup;
-  // construct response stream
-  int *responseStreamInt = (int *)responseStreamServer[srcPet];
-  int *requestStreamServerInt = (int *)requestStreamServer[srcPet];
-  for (int jj=0; jj<count; jj++){
-    int lookupIndex = requestStreamServerInt[5*jj];
-    int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
-    if (factorCount > 0){
-      *responseStreamInt++ = requestStreamServerInt[5*jj+1];  // j
-      *responseStreamInt++ = requestStreamServerInt[5*jj+2];  // decompSeqIndex
-      *responseStreamInt++ = requestStreamServerInt[5*jj+3];  // tensorSeqIndex
-      *responseStreamInt++ = requestStreamServerInt[5*jj+4];  // linIndex
-      *responseStreamInt++ = factorCount;
-      for (int k=0; k<factorCount; k++){
-        *responseStreamInt++ = seqIndexFactorLookup[lookupIndex].factorList[k]
-          .partnerSeqIndex.decompSeqIndex;
-        *responseStreamInt++ = seqIndexFactorLookup[lookupIndex].factorList[k]
-          .partnerSeqIndex.tensorSeqIndex;
-        int size = seqIndexFactorLookup[lookupIndex]
-          .factorList[k].partnerDe.size();
-        *responseStreamInt++ = size;
-        for (int kk=0; kk<size; kk++)
-          *responseStreamInt++ = seqIndexFactorLookup[lookupIndex]
-            .factorList[k].partnerDe[kk];
-        char *responseStreamChar = (char *)responseStreamInt;
-        for (int kk=0; kk<8; kk++)
-          *responseStreamChar++ =
-            seqIndexFactorLookup[lookupIndex].factorList[k].factor[kk];
-        responseStreamInt = (int *)responseStreamChar;
-      }
-    }
-  }
-}        
-        
-template<typename IT1, typename IT2> 
-  void clientProcess(FillLinSeqVectInfo<IT1,IT2> *fillLinSeqVectInfo, 
-    char *responseStream, int responseStreamSize){
-  vector<AssociationElement<IT1,IT2> > *linSeqVect =
-    fillLinSeqVectInfo->linSeqVect;
-  // process responseStream and fill linSeqVect[][]
-  int *responseStreamInt = (int *)responseStream;
-  while ((char *)responseStreamInt != responseStream+responseStreamSize){
-    int j = *responseStreamInt++;
-    IT1 decompSeqIndex = *responseStreamInt++;
-    IT1 tensorSeqIndex = *responseStreamInt++;
-    int linIndex = *responseStreamInt++;
-    int factorCount = *responseStreamInt++;
-    AssociationElement<IT1,IT2> element;
-    element.factorCount = factorCount;
-    element.factorList.resize(factorCount);
-    for (int jj=0; jj<factorCount; jj++){
-      element.factorList[jj].partnerSeqIndex.decompSeqIndex =
-        *responseStreamInt++;
-      element.factorList[jj].partnerSeqIndex.tensorSeqIndex =
-        *responseStreamInt++;
-      int size = *responseStreamInt++;
-      element.factorList[jj].partnerDe.resize(size);
-      for (int kk=0; kk<size; kk++)
-        element.factorList[jj].partnerDe[kk] = *responseStreamInt++;
-      char *responseStreamChar = (char *)responseStreamInt;
-      for (int kk=0; kk<8; kk++)
-        element.factorList[jj].factor[kk] = *responseStreamChar++;
-      responseStreamInt = (int *)responseStreamChar;
-    }
-    element.linIndex = linIndex;
-    element.seqIndex.decompSeqIndex = decompSeqIndex;
-    element.seqIndex.tensorSeqIndex = tensorSeqIndex;
-    linSeqVect[j].push_back(element);
-  }
-}
-        
-// -------------------------------------------------
-// FillPartnerDeInfo-specific accessLookup routines:
-
+// AssociationElement
+template<typename IT1, typename IT2> struct AssociationElement{
+  SeqIndex<IT1> seqIndex;
+  vector<FactorElement<IT2> > factorList;
+  int linIndex;
+};
 template<typename IT1, typename IT2>
-  int requestSizeFactor(FillPartnerDeInfo<IT1,IT2> *fillPartnerDeInfo){
-  return 3*sizeof(int); // lookupIndex, localLookupIndex, k
+  bool operator<(AssociationElement<IT1,IT2> a,AssociationElement<IT1,IT2> b){
+  return (a.seqIndex < b.seqIndex);
 }
-
-template<typename IT1, typename IT2>
-  void clientRequest(FillPartnerDeInfo<IT1,IT2> *fillPartnerDeInfo, int dstPet,
-  char **requestStreamClient){
-  const int localPet = fillPartnerDeInfo->localPet;
-  const Interval<IT1> *seqIndexIntervalIn =
-    fillPartnerDeInfo->seqIndexIntervalIn;
-  const Interval<IT2> *seqIndexIntervalOut =
-    fillPartnerDeInfo->seqIndexIntervalOut;
-  vector<SeqIndexFactorLookup<IT2> > &seqIndexFactorLookupOut =
-    fillPartnerDeInfo->seqIndexFactorLookupOut;
-  const bool tensorMixFlag = fillPartnerDeInfo->tensorMixFlag;
-  // fill the requestStreamClient[dstPet] element
-  int seqIndMin = seqIndexIntervalIn[dstPet].min;
-  int seqIndMax = seqIndexIntervalIn[dstPet].max;
-  int seqIndCount = seqIndexIntervalIn[dstPet].count;
-  int jj = 0; // reset
-  int localLookupIndex = 0; // reset
-  for (typename vector<DD::SeqIndexFactorLookup<IT2> >::const_iterator
-    j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){
-    for (int k=0; k<j->factorCount; k++){
-      int partnerSeqInd = j->factorList[k]
-        .partnerSeqIndex.decompSeqIndex;
-      if (partnerSeqInd >= seqIndMin && partnerSeqInd <= seqIndMax){
-        int lookupIndex = partnerSeqInd - seqIndMin;
-        if (tensorMixFlag){
-          lookupIndex += (j->factorList[k]
-            .partnerSeqIndex.tensorSeqIndex - 1) * seqIndCount;
-        }
-        int *requestStreamClientInt = (int *)requestStreamClient[dstPet];
-        requestStreamClientInt[3*jj] = lookupIndex;
-        requestStreamClientInt[3*jj+1] = localLookupIndex;
-        requestStreamClientInt[3*jj+2] = k;
-        ++jj; // increment counter
-      }
-    }
-    ++localLookupIndex;
-  }
-}
-
-template<typename IT1, typename IT2>
-  void localClientServerExchange(FillPartnerDeInfo<IT1,IT2> *fillPartnerDeInfo){
-  const int localPet = fillPartnerDeInfo->localPet;
-  const Interval<IT1> *seqIndexIntervalIn =
-    fillPartnerDeInfo->seqIndexIntervalIn;
-  const Interval<IT2> *seqIndexIntervalOut =
-    fillPartnerDeInfo->seqIndexIntervalOut;
-  vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookupIn =
-    fillPartnerDeInfo->seqIndexFactorLookupIn;
-  vector<SeqIndexFactorLookup<IT2> > &seqIndexFactorLookupOut =
-    fillPartnerDeInfo->seqIndexFactorLookupOut;
-  const bool tensorMixFlag = fillPartnerDeInfo->tensorMixFlag;
-  // localPet locally acts as server and client
-  int seqIndMin = seqIndexIntervalIn[localPet].min;
-  int seqIndMax = seqIndexIntervalIn[localPet].max;
-  int seqIndCount = seqIndexIntervalIn[localPet].count;
-  for (typename vector<DD::SeqIndexFactorLookup<IT2> >::iterator
-    j=seqIndexFactorLookupOut.begin(); j!=seqIndexFactorLookupOut.end(); ++j){
-    for (int k=0; k<j->factorCount; k++){
-      int partnerSeqInd = j->factorList[k]
-        .partnerSeqIndex.decompSeqIndex;
-      if (partnerSeqInd >= seqIndMin && partnerSeqInd <= seqIndMax){
-        int lookupIndex = partnerSeqInd - seqIndMin;
-        if (tensorMixFlag){
-          lookupIndex += (j->factorList[k]
-            .partnerSeqIndex.tensorSeqIndex - 1) * seqIndCount;
-        }
-        j->factorList[k].partnerDe.insert(
-          j->factorList[k].partnerDe.end(),
-          seqIndexFactorLookupIn[lookupIndex].de.begin(),
-          seqIndexFactorLookupIn[lookupIndex].de.end());
-      }
-    }
-  }
-}
-
-template<typename IT1, typename IT2>
-  int serverResponseSize(FillPartnerDeInfo<IT1,IT2> *fillPartnerDeInfo, 
-    int count, int srcPet, char **requestStreamServer){
-  vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookupIn =
-    fillPartnerDeInfo->seqIndexFactorLookupIn;
-  int *requestStreamServerInt = (int *)requestStreamServer[srcPet];
-  int responseCount = 0;  // reset
-  for (int i=0; i<count; i++){
-    int lookupIndex = requestStreamServerInt[3*i];
-    responseCount += seqIndexFactorLookupIn[lookupIndex].de.size();
-    responseCount += 3; // localLookupIndex, k, size
-  }
-  int responseStreamSize = responseCount * sizeof(int);
-  return responseStreamSize;
-}
-      
-template<typename IT1, typename IT2>
-  void serverResponse(FillPartnerDeInfo<IT1,IT2> *fillPartnerDeInfo, int count,
-    int srcPet, char **requestStreamServer, char **responseStreamServer){
-  vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookupIn =
-    fillPartnerDeInfo->seqIndexFactorLookupIn;
-  // construct response stream
-  int *responseStreamInt = (int *)responseStreamServer[srcPet];
-  int *requestStreamServerInt = (int *)requestStreamServer[srcPet];
-  for (int i=0; i<count; i++){
-    int lookupIndex = requestStreamServerInt[3*i];
-    *responseStreamInt++ = requestStreamServerInt[3*i+1];   // localLookupIndex
-    *responseStreamInt++ = requestStreamServerInt[3*i+2];   // k
-    int size = seqIndexFactorLookupIn[lookupIndex].de.size();
-    *responseStreamInt++ = size;                            // size
-    for (int j=0; j<size; j++)
-      *responseStreamInt++ = seqIndexFactorLookupIn[lookupIndex].de[j]; // de
-  }
-}        
-        
-template<typename IT1, typename IT2>
-  void clientProcess(FillPartnerDeInfo<IT1,IT2> *fillPartnerDeInfo,
-    char *responseStream, int responseStreamSize){
-  vector<SeqIndexFactorLookup<IT2> > &seqIndexFactorLookupOut =
-    fillPartnerDeInfo->seqIndexFactorLookupOut;
-  // process responseStream and complete seqIndexFactorLookupOut info
-  int *responseStreamInt = (int *)responseStream;
-  while ((char *)responseStreamInt != responseStream+responseStreamSize){
-    int localLookupIndex = *responseStreamInt++;
-    int k = *responseStreamInt++;
-    int size = *responseStreamInt++;
-    for (int j=0; j<size; j++){
-      int de = *responseStreamInt++;
-      seqIndexFactorLookupOut[localLookupIndex].factorList[k].partnerDe
-        .push_back(de);
-    }
-  }
-}
-
-  // -------------------------------------------------
-  // specialize ComPat class for total exchange during DE info fill.
-  template<typename IT> class FillSelfDeInfo:public ComPat{
-    Array const *array;
-    int localPet;
-    int localDeCount;
-    int const *localDeElementCount;
-    int const *localDeToDeMap;
-    Interval<IT> const *seqIndexInterval;
-    vector<SeqIndexFactorLookup<IT> > &seqIndexFactorLookup;
-    bool tensorMixFlag;
-    int const *localIntervalPerPetCount;
-    int const *localElementsPerIntervalCount;
-    bool haloRimFlag;
-   public:
-    FillSelfDeInfo(
-      Array const *array_,
-      int localPet_,
-      int localDeCount_,
-      int const *localDeElementCount_,
-      int const *localDeToDeMap_,
-      Interval<IT> const *seqIndexInterval_,
-      vector<SeqIndexFactorLookup<IT> > &seqIndexFactorLookup_,
-      bool tensorMixFlag_,
-      int const *localIntervalPerPetCount_,
-      int const *localElementsPerIntervalCount_,
-      bool haloRimFlag_
-    ):
-      // members that need to be set on this level because of reference
-      seqIndexFactorLookup(seqIndexFactorLookup_)
-    {
-      array = array_;
-      localPet = localPet_;
-      localDeCount = localDeCount_;
-      localDeElementCount = localDeElementCount_;
-      localDeToDeMap = localDeToDeMap_;
-      seqIndexInterval = seqIndexInterval_;
-      tensorMixFlag = tensorMixFlag_;
-      localIntervalPerPetCount = localIntervalPerPetCount_;
-      localElementsPerIntervalCount = localElementsPerIntervalCount_;
-      haloRimFlag = haloRimFlag_;
-    }
-   private:
-    int messageSizeCount(int srcPet, int dstPet)const{
-      if (localPet == srcPet)
-        return localElementsPerIntervalCount[dstPet];
-      else if (localPet == dstPet)
-        return localIntervalPerPetCount[srcPet];
-      else{
-        return 0; // provoke MPI errors
-      }
-    }
-    virtual int messageSize(int srcPet, int dstPet)const{
-      return 2 * sizeof(int) * messageSizeCount(srcPet, dstPet);
-    }
-    virtual void messagePrepare(int srcPet, 
-      int dstPet, char *buffer)const{
-      int seqIndMin = seqIndexInterval[dstPet].min;
-      int seqIndMax = seqIndexInterval[dstPet].max;
-      int seqIndCount = seqIndexInterval[dstPet].count;
-      int *bufferInt = (int *)buffer;
-      int jj = 0; // reset
-      for (int j=0; j<localDeCount; j++){
-        int de = localDeToDeMap[j];  // global DE number
-        if (haloRimFlag){
-          // loop over the halo rim elements for localDe j
-          for (int k=0; k<array->getRimElementCount()[j]; k++){
-            const std::vector<std::vector<SeqIndex<IT> > > *rimSeqIndex;
-            array->getRimSeqIndex(&rimSeqIndex);
-            SeqIndex<IT> seqIndex = (*rimSeqIndex)[j][k];
-            if (seqIndex.valid()){
-              int seqInd = seqIndex.decompSeqIndex; //TODO: beware of typecast!!
-              if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-                int lookupIndex = seqInd - seqIndMin;
-                if (tensorMixFlag)
-                  lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-                bufferInt[2*jj] = lookupIndex;
-                bufferInt[2*jj+1] = de;
-                ++jj; // increment counter
-              }
-            }
-          }
-        }else{
-          // loop over all elements in the exclusive region for localDe j
-          ArrayElement arrayElement(array, j);
-          while(arrayElement.isWithin()){
-            SeqIndex<IT> seqIndex;
-            int localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
-            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-              ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-            int seqInd = seqIndex.decompSeqIndex; //TODO: beware of typecast!!
-            if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-              int lookupIndex = seqInd - seqIndMin;
-              if (tensorMixFlag)
-                lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-              bufferInt[2*jj] = lookupIndex;
-              bufferInt[2*jj+1] = de;
-              ++jj; // increment counter
-            }
-            arrayElement.next();
-          } // end while over all exclusive elements
-        }
-      }
-    }
-    virtual void messageProcess(int srcPet, int dstPet, char *buffer){
-      int count = messageSizeCount(srcPet, dstPet);
-      int *bufferInt = (int *)buffer;    
-      for (int jj=0; jj<count; jj++){
-        int lookupIndex = bufferInt[2*jj];
-        if (seqIndexFactorLookup[lookupIndex].factorCount > 0){
-          // element with factors -> fill in the DE
-          seqIndexFactorLookup[lookupIndex].de.push_back(bufferInt[2*jj+1]);
-          // this will lead to duplicate de entries for cases with tensor
-          // elements but no tensor mixing
-          // -> duplicates must be eliminated by the calling code
-        }
-      }
-    }
-    virtual void localPrepareAndProcess(int localPet){
-      int seqIndMin = seqIndexInterval[localPet].min;
-      int seqIndMax = seqIndexInterval[localPet].max;
-      int seqIndCount = seqIndexInterval[localPet].count;
-      for (int j=0; j<localDeCount; j++){
-        int de = localDeToDeMap[j];  // global DE number
-        if (haloRimFlag){
-          // loop over the halo rim elements for localDe j
-          for (int k=0; k<array->getRimElementCount()[j]; k++){
-            const std::vector<std::vector<SeqIndex<IT> > > *rimSeqIndex;
-            array->getRimSeqIndex(&rimSeqIndex);
-            SeqIndex<IT> seqIndex = (*rimSeqIndex)[j][k];
-            if (seqIndex.valid()){
-              int seqInd = seqIndex.decompSeqIndex;//TODO: beware of typecast!!
-              if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-                int lookupIndex = seqInd - seqIndMin;
-                if (tensorMixFlag)
-                  lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-                if (seqIndexFactorLookup[lookupIndex].factorCount > 0){
-                  // element with factors -> fill in the DE
-                  seqIndexFactorLookup[lookupIndex].de.push_back(de);
-                  // this will lead to duplicate de entries for cases with
-                  // tensor elements but no tensor mixing
-                  // -> duplicates must be eliminated by the calling code
-                }
-              }
-            }
-          }
-        }else{
-          // loop over all elements in the exclusive region for localDe j
-          ArrayElement arrayElement(array, j);
-          while(arrayElement.isWithin()){
-            SeqIndex<IT> seqIndex;
-            int localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
-            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-              ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-            int seqInd = seqIndex.decompSeqIndex;//TODO: beware of typecast!!
-            if (seqInd >= seqIndMin && seqInd <= seqIndMax){
-              int lookupIndex = seqInd - seqIndMin;
-              if (tensorMixFlag)
-                lookupIndex += (seqIndex.tensorSeqIndex - 1) * seqIndCount;
-              if (seqIndexFactorLookup[lookupIndex].factorCount > 0){
-                // element with factors -> fill in the DE
-                seqIndexFactorLookup[lookupIndex].de.push_back(de);
-                // this will lead to duplicate de entries for cases with tensor
-                // elements but no tensor mixing
-                // -> duplicates must be eliminated by the calling code
-              }
-            }
-            arrayElement.next();
-          } // end while over all exclusive elements
-        }
-      }
-    }
-  };
-        
-  // -------------------------------------------------
-  // abstract parent class for DE info fill stage1 and stage2
-  template<typename IT> class SetupSeqIndexFactorLookup:public ComPat{
-   protected:
-    vector<SeqIndexFactorLookup<IT> > &seqIndexFactorLookup;
-    int localPet;
-    int petCount;
-    SparseMatrix<IT,IT> const *sparseMatrix;
-    vector<bool> const &factorPetFlag;
-    Interval<IT> const *seqIndexInterval;
-    vector<int> const &seqIntervFactorListCountToPet;
-    vector<vector<int> > const &seqIntervFactorListIndexToPet;
-    vector<vector<int> > const &seqIntervFactorListLookupIndexToPet;
-    vector<int> const &seqIntervFactorListCountFromPet;
-    bool tensorMixFlag;
-    bool dstSetupFlag;
-    ESMC_TypeKind_Flag typekindFactors;
-   public:
-    SetupSeqIndexFactorLookup(
-      vector<SeqIndexFactorLookup<IT> > &seqIndexFactorLookup_,
-      SparseMatrix<IT,IT> const *sparseMatrix_,
-      vector<bool> const &factorPetFlag_,
-      vector<int> const &seqIntervFactorListCountToPet_,
-      vector<vector<int> > const &seqIntervFactorListIndexToPet_,
-      vector<vector<int> > const &seqIntervFactorListLookupIndexToPet_,
-      vector<int> const &seqIntervFactorListCountFromPet_
-    ):
-      // members that need to be set on this level because of reference
-      seqIndexFactorLookup(seqIndexFactorLookup_),
-      sparseMatrix(sparseMatrix_),
-      factorPetFlag(factorPetFlag_),
-      seqIntervFactorListCountToPet(seqIntervFactorListCountToPet_),
-      seqIntervFactorListIndexToPet(seqIntervFactorListIndexToPet_),
-      seqIntervFactorListLookupIndexToPet(seqIntervFactorListLookupIndexToPet_),
-      seqIntervFactorListCountFromPet(seqIntervFactorListCountFromPet_)
-    {}
-  };
-
-  template<typename IT> class SetupSeqIndexFactorLookupStage2;
-
-  // -------------------------------------------------
-  // specialize SetupSeqIndexFactorLookup for info fill stage1
-  template<typename IT> class SetupSeqIndexFactorLookupStage1:
-    public SetupSeqIndexFactorLookup<IT>{
-   public:
-    SetupSeqIndexFactorLookupStage1(
-      vector<SeqIndexFactorLookup<IT> > &seqIndexFactorLookup_,
-      int localPet_,
-      int petCount_,
-      SparseMatrix<IT,IT> const *sparseMatrix_,
-      vector<bool> const &factorPetFlag_,
-      Interval<IT> const *seqIndexInterval_,
-      vector<int> const &seqIntervFactorListCountToPet_,
-      vector<vector<int> > const &seqIntervFactorListIndexToPet_,
-      vector<vector<int> > const &seqIntervFactorListLookupIndexToPet_,
-      vector<int> const &seqIntervFactorListCountFromPet_,
-      bool tensorMixFlag_,
-      bool dstSetupFlag_,
-      ESMC_TypeKind_Flag typekindFactors_
-    ):SetupSeqIndexFactorLookup<IT>(
-      seqIndexFactorLookup_,
-      sparseMatrix_,
-      factorPetFlag_,
-      seqIntervFactorListCountToPet_,
-      seqIntervFactorListIndexToPet_,
-      seqIntervFactorListLookupIndexToPet_,
-      seqIntervFactorListCountFromPet_
-    ){
-      SetupSeqIndexFactorLookup<IT>::localPet = localPet_;
-      SetupSeqIndexFactorLookup<IT>::petCount = petCount_;
-      SetupSeqIndexFactorLookup<IT>::seqIndexInterval = seqIndexInterval_;
-      SetupSeqIndexFactorLookup<IT>::tensorMixFlag = tensorMixFlag_;
-      SetupSeqIndexFactorLookup<IT>::dstSetupFlag = dstSetupFlag_;
-      SetupSeqIndexFactorLookup<IT>::typekindFactors = typekindFactors_;
-    }
-   private:
-    int messageSizeCount(int srcPet, int dstPet)const{
-      if (SetupSeqIndexFactorLookup<IT>::localPet == srcPet)
-        return SetupSeqIndexFactorLookup<IT>::
-          seqIntervFactorListCountToPet[dstPet];
-      else if (SetupSeqIndexFactorLookup<IT>::localPet == dstPet)
-        return SetupSeqIndexFactorLookup<IT>::
-          seqIntervFactorListCountFromPet[srcPet];
-      else
-        return 0; // provoke MPI errors
-    }
-    virtual int messageSize(int srcPet, int dstPet)const{
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "SetupSeqIndexFactorLookupStage1().messageSize(srcPet=" 
-      << srcPet << " ,dstPet=" << dstPet << "): " <<
-      sizeof(int) * messageSizeCount(srcPet, dstPet);
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-      return sizeof(int) * messageSizeCount(srcPet, dstPet);
-    }
-    virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const{
-      memcpy(buffer, &(SetupSeqIndexFactorLookup<IT>::
-        seqIntervFactorListLookupIndexToPet[dstPet].front()),
-        messageSizeCount(srcPet, dstPet)*sizeof(int));
-    }
-    virtual void messageProcess(int srcPet, int dstPet, char *buffer){
-      int *bufferInt = (int *)buffer;
-      for (int i=0; i<messageSizeCount(srcPet, dstPet); i++){
-        // loop over buffer entries
-        int lookupIndex = bufferInt[i];
-        // count this factor
-        ++(SetupSeqIndexFactorLookup<IT>::
-          seqIndexFactorLookup[lookupIndex].factorCount);
-      }
-    }
-    virtual void localPrepareAndProcess(int localPet){
-      for (int i=0; i<messageSizeCount(localPet, localPet); i++){
-        // loop over factorList entries in localPet's seqIndex interval
-        int lookupIndex = SetupSeqIndexFactorLookup<IT>::
-          seqIntervFactorListLookupIndexToPet[localPet][i];
-        // count this factor
-        ++(SetupSeqIndexFactorLookup<IT>::
-          seqIndexFactorLookup[lookupIndex].factorCount);
-      }
-    }
-    friend class SetupSeqIndexFactorLookupStage2<IT>;
-  };
-  
-  // -------------------------------------------------
-  // specialize SetupSeqIndexFactorLookup for info fill stage2
-  template<typename IT> class SetupSeqIndexFactorLookupStage2:
-    public SetupSeqIndexFactorLookup<IT>{
-   public:
-    SetupSeqIndexFactorLookupStage2(
-      SetupSeqIndexFactorLookupStage1<IT> const &s1)
-      :SetupSeqIndexFactorLookup<IT>(
-      s1.seqIndexFactorLookup,
-      s1.sparseMatrix,
-      s1.factorPetFlag,
-      s1.seqIntervFactorListCountToPet,
-      s1.seqIntervFactorListIndexToPet,
-      s1.seqIntervFactorListLookupIndexToPet,
-      s1.seqIntervFactorListCountFromPet
-    ){
-      SetupSeqIndexFactorLookup<IT>::localPet = s1.localPet;
-      SetupSeqIndexFactorLookup<IT>::petCount = s1.petCount;
-      SetupSeqIndexFactorLookup<IT>::seqIndexInterval = s1.seqIndexInterval;
-      SetupSeqIndexFactorLookup<IT>::tensorMixFlag = s1.tensorMixFlag;
-      SetupSeqIndexFactorLookup<IT>::dstSetupFlag = s1.dstSetupFlag;
-      SetupSeqIndexFactorLookup<IT>::typekindFactors = s1.typekindFactors;
-    }
-   private:
-    int messageSizeCount(int srcPet, int dstPet)const{
-      if (SetupSeqIndexFactorLookup<IT>::localPet == srcPet)
-        return SetupSeqIndexFactorLookup<IT>::
-          seqIntervFactorListCountToPet[dstPet];
-      else if (SetupSeqIndexFactorLookup<IT>::localPet == dstPet)
-        return SetupSeqIndexFactorLookup<IT>::
-          seqIntervFactorListCountFromPet[srcPet];
-      else{
-        return 0; // provoke MPI errors
-      }
-    }
-    virtual int messageSize(int srcPet, int dstPet)const{
-      int dataSizeFactors =
-        ESMC_TypeKind_FlagSize(SetupSeqIndexFactorLookup<IT>::typekindFactors);
-      //todo: reduce waste of bandwidth in case there are _not_ 4-comp ind.
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "SetupSeqIndexFactorLookupStage2().messageSize(srcPet=" 
-      << srcPet << " ,dstPet=" << dstPet << "): " <<
-      (4*sizeof(int)+dataSizeFactors) * messageSizeCount(srcPet, dstPet)
-      << " from dataSizeFactors=" << dataSizeFactors << " messageSizeCount="
-      << messageSizeCount(srcPet, dstPet);
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-      return (4*sizeof(int)+dataSizeFactors) * messageSizeCount(srcPet, dstPet);
-    }
-    virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const{
-      ESMC_TypeKind_Flag typekindFactors =
-        SetupSeqIndexFactorLookup<IT>::typekindFactors;
-      if (typekindFactors == ESMC_TYPEKIND_R4)
-        fillStream<ESMC_R4>(srcPet, dstPet, buffer);
-      else if (typekindFactors == ESMC_TYPEKIND_R8)
-        fillStream<ESMC_R8>(srcPet, dstPet, buffer);
-      else if (typekindFactors == ESMC_TYPEKIND_I4)
-        fillStream<ESMC_I4>(srcPet, dstPet, buffer);
-      else if (typekindFactors == ESMC_TYPEKIND_I8)
-        fillStream<ESMC_I8>(srcPet, dstPet, buffer);
-    }
-    virtual void messageProcess(int srcPet, int dstPet, char *buffer){
-      ESMC_TypeKind_Flag typekindFactors =
-        SetupSeqIndexFactorLookup<IT>::typekindFactors;
-      if (typekindFactors == ESMC_TYPEKIND_R4)
-        fillSeqIndexFactorLookupFromStream<ESMC_R4>(srcPet, dstPet, buffer);
-      else if (typekindFactors == ESMC_TYPEKIND_R8)
-        fillSeqIndexFactorLookupFromStream<ESMC_R8>(srcPet, dstPet, buffer);
-      else if (typekindFactors == ESMC_TYPEKIND_I4)
-        fillSeqIndexFactorLookupFromStream<ESMC_I4>(srcPet, dstPet, buffer);
-      else if (typekindFactors == ESMC_TYPEKIND_I8)
-        fillSeqIndexFactorLookupFromStream<ESMC_I8>(srcPet, dstPet, buffer);
-    }
-    virtual void localPrepareAndProcess(int localPet){
-      ESMC_TypeKind_Flag typekindFactors =
-        SetupSeqIndexFactorLookup<IT>::typekindFactors;
-      if (typekindFactors == ESMC_TYPEKIND_R4)
-        fillSeqIndexFactorLookupLocally<ESMC_R4>(localPet);
-      else if (typekindFactors == ESMC_TYPEKIND_R8)
-        fillSeqIndexFactorLookupLocally<ESMC_R8>(localPet);
-      else if (typekindFactors == ESMC_TYPEKIND_I4)
-        fillSeqIndexFactorLookupLocally<ESMC_I4>(localPet);
-      else if (typekindFactors == ESMC_TYPEKIND_I8)
-        fillSeqIndexFactorLookupLocally<ESMC_I8>(localPet);
-    }
-    template<typename T> void fillStream(int srcPet, int dstPet,
-      char *stream)const{
-      int *intStream;
-      T *factorStream = (T *)stream;
-      for (int i=0; i<messageSizeCount(srcPet, dstPet); i++){
-        // loop over factorList entries in dstPet's seqIndex interval
-        intStream = (int *)factorStream;
-        int lookupIndex = SetupSeqIndexFactorLookup<IT>::
-          seqIntervFactorListLookupIndexToPet[dstPet][i];
-        int j = SetupSeqIndexFactorLookup<IT>::
-          seqIntervFactorListIndexToPet[dstPet][i];
-        SeqInd<IT> seqInd;
-        if (SetupSeqIndexFactorLookup<IT>::dstSetupFlag)
-          seqInd = SetupSeqIndexFactorLookup<IT>::
-            sparseMatrix->getSrcSeqIndex(j);
-          // reverse to lookupIndex construction b/c src side picks dst and rev.
-        else
-          seqInd = SetupSeqIndexFactorLookup<IT>::
-            sparseMatrix->getDstSeqIndex(j);
-          // reverse to lookupIndex construction b/c src side picks dst and rev.
-        int seqIndex = seqInd.getIndex(0);
-        int tensorSeqIndex = -1;  // dummy tensorSeqIndex
-        if (SetupSeqIndexFactorLookup<IT>::tensorMixFlag)
-          tensorSeqIndex = seqInd.getIndex(1);  // set actual tensor seqIndex
-        *intStream++ = lookupIndex;     // index into distr. dir lookup table
-        *intStream++ = seqIndex;        // seqIndex
-        *intStream++ = tensorSeqIndex;  // dummy tensorSeqIndex
-        *intStream++ = 0;               // padding for 8-byte alignment
-        factorStream = (T *)intStream;
-        *factorStream++ = ((T *)SetupSeqIndexFactorLookup<IT>::
-          sparseMatrix->getFactorList())[j];  // factor
-      }
-    }
-    template<typename T> void fillSeqIndexFactorLookupFromStream(int srcPet,
-      int dstPet, char *stream){
-      int *intStream;
-      T *factorStream = (T *)stream;
-      for (int i=0; i<messageSizeCount(srcPet, dstPet); i++){
-        intStream = (int *)factorStream;
-        int lookupIndex = *intStream++;   // index into lookup table
-        FactorElement<IT> factorElement;
-        factorElement.partnerSeqIndex.decompSeqIndex = *intStream++;
-        factorElement.partnerSeqIndex.tensorSeqIndex = *intStream++;
-        intStream++;  // skip padding
-        factorStream = (T *)intStream;
-        *((T *)factorElement.factor) = *factorStream++;
-        SetupSeqIndexFactorLookup<IT>::
-          seqIndexFactorLookup[lookupIndex].factorList.push_back(factorElement);
-      }
-    }
-    template<typename T> void fillSeqIndexFactorLookupLocally(int localPet){
-      for (int i=0; i<messageSizeCount(localPet, localPet); i++){
-        // loop over factorList entries in localPet's seqIndex interval
-        int j = SetupSeqIndexFactorLookup<IT>::
-          seqIntervFactorListIndexToPet[localPet][i];
-        SeqInd<IT> seqInd;
-        if (SetupSeqIndexFactorLookup<IT>::dstSetupFlag)
-          seqInd = SetupSeqIndexFactorLookup<IT>::
-            sparseMatrix->getSrcSeqIndex(j);
-          // reverse b/c src side picks dst and rev.
-        else
-          seqInd = SetupSeqIndexFactorLookup<IT>::
-            sparseMatrix->getDstSeqIndex(j);
-          // reverse b/c src side picks dst and rev.
-        int seqIndex = seqInd.getIndex(0);
-        int tensorSeqIndex = -1;  // dummy tensorSeqIndex
-        if (SetupSeqIndexFactorLookup<IT>::tensorMixFlag)
-          tensorSeqIndex = seqInd.getIndex(1);  // set actual tensor seqIndex
-        int lookupIndex = SetupSeqIndexFactorLookup<IT>::
-          seqIntervFactorListLookupIndexToPet[localPet][i];
-        FactorElement<IT> factorElement;
-        factorElement.partnerSeqIndex.decompSeqIndex = seqIndex;
-        factorElement.partnerSeqIndex.tensorSeqIndex = tensorSeqIndex;
-        *((T *)factorElement.factor) = ((T *)SetupSeqIndexFactorLookup<IT>::
-          sparseMatrix->getFactorList())[j];
-        SetupSeqIndexFactorLookup<IT>::
-          seqIndexFactorLookup[lookupIndex].factorList.push_back(factorElement);
-      }
-    }
-  };
-  
-  // -------------------------------------------------
-  void sum(char *a, char *b, ESMC_TypeKind_Flag tk){
-    if (tk == ESMC_TYPEKIND_R4)
-      *((ESMC_R4 *)a) += *((ESMC_R4 *)b);
-    else if (tk == ESMC_TYPEKIND_R8)
-      *((ESMC_R8 *)a) += *((ESMC_R8 *)b);
-    else if (tk == ESMC_TYPEKIND_I4)
-      *((ESMC_I4 *)a) += *((ESMC_I4 *)b);
-    else if (tk == ESMC_TYPEKIND_I8)
-      *((ESMC_I8 *)a) += *((ESMC_I8 *)b);
-  }
-
-  // -------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::DD::setupSeqIndexFactorLookup()"
-  template<typename IT> int setupSeqIndexFactorLookup(VM *vm,
-    vector<SeqIndexFactorLookup<IT> > &seqIndexFactorLookup,
-    const int petCount, const int localPet, const int factorListCount,
-    const bool dstSetupFlag, vector<SparseMatrix<IT,IT> > const &sparseMatrix,
-    const bool tensorMixFlag, DD::Interval<IT> const *seqIndexInterval,
-    const int tensorElementCountEff, vector<bool> const &factorPetFlag,
-    const ESMC_TypeKind_Flag typekindFactors, const bool haloFlag,
-    const bool ignoreUnmatched, Array const *array, const int localDeCount, 
-    const int *localDeElementCount, int const *localDeToDeMap,
-    int const *localIntervalPerPetCount,
-    int const *localElementsPerIntervalCount
-    ){
-    
-    int localrc = ESMC_RC_NOT_IMPL;         // local return code
-    
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("setupSeqIndexFactorLookup1"));
-#endif
-
-    // set up seqIntervFactorListCountToPet and seqIntervFactorListIndexToPet
-    vector<int> seqIntervFactorListCountToPet(petCount);
-    for (int i=0; i<petCount; i++)
-      seqIntervFactorListCountToPet[i] = 0; // reset
-    vector<vector<int> > seqIntervFactorListIndexToPet(petCount);
-    vector<vector<int> > seqIntervFactorListLookupIndexToPet(petCount);
-    
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("setupSeqIndexFactorLookup2"));
-#endif
-
-    for (int j=0; j<factorListCount; j++){
-      // loop over all factorList entries, find matching interval via bisection
-      // and count factor towards those that need to be sent to that PET.
-      SeqInd<IT> seqInd;
-      if (dstSetupFlag)
-        seqInd = sparseMatrix[0].getDstSeqIndex(j);
-      else
-        seqInd = sparseMatrix[0].getSrcSeqIndex(j);
-#if 0
-seqInd.print();
-#endif
-      IT seqIndex = seqInd.getIndex(0);
-      IT tensorSeqIndex;
-      if (tensorMixFlag)
-        tensorSeqIndex = seqInd.getIndex(1);
-      else
-        tensorSeqIndex = 1;  // dummy
-      int iMin=0, iMax=petCount-1;
-      int i=petCount/2;
-      bool foundFlag=false;     // reset
-      do{
-#if 0
-cout << "dstSetupFlag=" << dstSetupFlag << " seqIndex=" << seqIndex << " i=" <<
-  i << " iMin=" << iMin << " iMax=" << iMax << " seqIndexInterval[].min=" << 
-  seqIndexInterval[i].min << " seqIndexInterval[].max=" << 
-  seqIndexInterval[i].max << "\n";
-cout << "dstSetupFlag=" << dstSetupFlag << " tensorSeqIndex=" <<
-  tensorSeqIndex << " tensorElementCountEff=" << tensorElementCountEff << "\n";
-#endif
-        if (seqIndex < seqIndexInterval[i].min){
-          iMax = i;
-          i = iMin + (iMax - iMin) / 2;
-          continue; 
-        }
-        if (seqIndex > seqIndexInterval[i].max){
-          iMin = i;
-          i = iMin + 1 + (iMax - iMin) / 2;
-          continue; 
-        }
-        // found interval -> check if tensorSeqIndex is within bounds
-        if (tensorSeqIndex < 1 || tensorSeqIndex > tensorElementCountEff){
-          // tensorSeqIndex outside Array bounds
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-            "factorIndexList contains tensorSeqIndex outside Array bounds",
-            ESMC_CONTEXT, &localrc);
-          return localrc;
-        }
-        foundFlag = true;  // set
-        ++seqIntervFactorListCountToPet[i]; // count this factor for this Pet
-        seqIntervFactorListIndexToPet[i].push_back(j); // store factorList ind.
-        // determine lookupIndex and store
-        int lookupIndex = seqIndex - seqIndexInterval[i].min;
-        if (tensorMixFlag)
-          lookupIndex += (tensorSeqIndex - 1) * seqIndexInterval[i].count;
-        seqIntervFactorListLookupIndexToPet[i].push_back(lookupIndex); // store
-        break;
-      }while (iMin != iMax);
-      if (!ignoreUnmatched && !foundFlag){
-        // seqIndex lies outside Array bounds
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "factorIndexList contains seqIndex outside Array bounds",
-          ESMC_CONTEXT, &localrc);
-        return localrc;
-      }
-    }
-
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("setupSeqIndexFactorLookup3"));
-#endif
-
-    // construct seqIntervFactorListCountFromPet
-    vector<int> seqIntervFactorListCountFromPet(petCount);
-    vm->alltoall(&(seqIntervFactorListCountToPet.front()), sizeof(int),
-      &(seqIntervFactorListCountFromPet.front()), sizeof(int), vmBYTE);
-    
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "setupSeqIndexFactorLookup() seqIntervFactorListCountToPet=";
-    for (int i=0; i<seqIntervFactorListCountToPet.size(); i++)
-      debugmsg << seqIntervFactorListCountToPet[i] << ", ";
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
-  {
-    std::stringstream debugmsg;
-    debugmsg << "setupSeqIndexFactorLookup() seqIntervFactorListCountFromPet=";
-    for (int i=0; i<seqIntervFactorListCountFromPet.size(); i++)
-      debugmsg << seqIntervFactorListCountFromPet[i] << ", ";
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("setupSeqIndexFactorLookup4"));
-#endif
-
-    DD::SetupSeqIndexFactorLookupStage1<IT> setupSeqIndexFactorLookupStage1(
-      seqIndexFactorLookup,
-      localPet,
-      petCount,
-      (sparseMatrix.size()==0) ? NULL : &(sparseMatrix[0]),
-      factorPetFlag,
-      seqIndexInterval,
-      seqIntervFactorListCountToPet,
-      seqIntervFactorListIndexToPet,
-      seqIntervFactorListLookupIndexToPet,
-      seqIntervFactorListCountFromPet,
-      tensorMixFlag,
-      dstSetupFlag,
-      typekindFactors);
-      
-#define WITH_RESERVE
-#ifdef WITH_RESERVE
-    // Determine factorCount in stage1 and use to reserve memory of vector
-    // before using it in stage2. Not sure this is really an improvement over
-    // just dealing with memory allocation hit, b/c it does require extra
-    // communication.
-    
-    setupSeqIndexFactorLookupStage1.totalExchange(vm);
-    
-    for (typename vector<SeqIndexFactorLookup<IT> >::iterator
-      i=seqIndexFactorLookup.begin(); i!=seqIndexFactorLookup.end(); ++i){
-      // obtain memory
-      i->factorList.reserve(i->factorCount);  
-    }
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("setupSeqIndexFactorLookup5"));
-#endif
-
-#endif
-    
-    DD::SetupSeqIndexFactorLookupStage2<IT>
-      setupSeqIndexFactorLookupStage2(setupSeqIndexFactorLookupStage1);
-
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("setupSeqIndexFactorLookup6"));
-#endif
-
-    setupSeqIndexFactorLookupStage2.totalExchange(vm);
-    
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("setupSeqIndexFactorLookup7"));
-#endif
-
-    // deal with duplicate sparse matrix entries in seqIndexFactorLookup
-    for (typename vector<SeqIndexFactorLookup<IT> >::iterator
-      i=seqIndexFactorLookup.begin(); i!=seqIndexFactorLookup.end(); ++i){
-#ifdef ASMM_STORE_LOG_on_disabled
-      fprintf(asmm_store_log_fp,
-        "befr duplicate elimination seqIndexFactorLookup[%d].factorCount=%d\n",
-        i-seqIndexFactorLookup.begin(), i->factorCount);
-#endif
-      sort(i->factorList.begin(), i->factorList.end());
-      if (!haloFlag){
-        // not halo: sum duplicate sparse matrix entries into the first occur.
-        for (int j=0; j<i->factorCount; j++){
-          int k;
-          for (k=j+1; k<i->factorCount; k++){
-            if (i->factorList[j] == i->factorList[k]){
-              sum(i->factorList[j].factor,
-                i->factorList[k].factor, typekindFactors);
-            }else
-              break;
-          }
-          j=k-1;  // skip over the duplicates
-        }
-      }
-      // eliminate duplicates in factorList, only leaving first occurrences
-      i->factorList.erase(
-        unique(i->factorList.begin(),
-        i->factorList.end()),
-        i->factorList.end());
-      i->factorCount = i->factorList.size();
-#ifdef ASMM_STORE_LOG_on_disabled
-      fprintf(asmm_store_log_fp,
-        "aftr duplicate elimination seqIndexFactorLookup[%d].factorCount=%d\n",
-        i-seqIndexFactorLookup.begin(), i->factorCount);
-#endif
-    }
-    
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("setupSeqIndexFactorLookup8"));
-#endif
-
-    // communicate between Pets to set up "de" member in seqIndexFactorLookup[]
-    {
-      DD::FillSelfDeInfo<IT> fillSelfDeInfo(
-        array,
-        localPet,
-        localDeCount,
-        localDeElementCount,
-        localDeToDeMap,
-        seqIndexInterval,
-        seqIndexFactorLookup,
-        tensorMixFlag,
-        localIntervalPerPetCount,
-        localElementsPerIntervalCount,
-        (dstSetupFlag & haloFlag));
-      
-      fillSelfDeInfo.totalExchange(vm);
-    }
-    
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("setupSeqIndexFactorLookup9"));
-#endif
-
-    // eliminate duplicate de entries in seqIndexFactorLookup
-    for (typename vector<SeqIndexFactorLookup<IT> >::iterator
-      i=seqIndexFactorLookup.begin(); i!=seqIndexFactorLookup.end(); ++i){
-      sort(i->de.begin(), i->de.end());
-      i->de.erase(unique(i->de.begin(),i->de.end()),i->de.end());
-    }
-  
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("setupSeqIndexFactorLookup10"));
-#endif
-
-    // return successfully
-    return ESMF_SUCCESS;
-  }
-  
-} // namespace DD
 
 
 //-----------------------------------------------------------------------------
@@ -8893,12 +7865,12 @@ template<typename SIT, typename DIT>
 //  The implementation consists of four main phases:
 //
 //  - Phase I:    Check input for consistency. The sparse matrix is provided in
-//                "input" distribution 
+//                "input" distribution
 //  - Phase II:   Construct two distributed directories of sparse matrix
 //                elements, one indexed by srcSeqIndex, one indexed by
 //                dstSeqIndex. This takes the matrix from "input" to "work"
 //                distribution.
-//  - Phase III:  Use the information in "work" distribution and take it into 
+//  - Phase III:  Use the information in "work" distribution and take it into
 //                "run" distribution, i.e. src and dst DEs have access to all
 //                the local data they may operate on.
 //  - Phase IV:   Use the information in "run" distribution to encode an
@@ -8926,7 +7898,7 @@ template<typename SIT, typename DIT>
   // determine indexTK for src and dst
   ESMC_TypeKind_Flag srcIndexTK = srcArray->getDistGrid()->getIndexTK();
   ESMC_TypeKind_Flag dstIndexTK = dstArray->getDistGrid()->getIndexTK();
-  
+
   if (srcIndexTK==ESMC_TYPEKIND_I4){
     if (sizeof(SIT)!=sizeof(ESMC_I4)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -8962,7 +7934,15 @@ template<typename SIT, typename DIT>
       "Type option not supported", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
+  //TODO: remove the SIT==DIT restriction in the future, but for now
+  //TODO: must bail, because sparseMatrix object does not support mixing types
+  if (srcIndexTK != dstIndexTK){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Mixed type option not supported", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
   // call into the actual store method
   localrc = tSparseMatMulStore<SIT,DIT>(
     srcArray, dstArray, routehandle, sparseMatrix,
@@ -8970,7 +7950,7 @@ template<typename SIT, typename DIT>
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
-  // fingerprint the src/dst Arrays in RH  
+  // fingerprint the src/dst Arrays in RH
   localrc = (*routehandle)->fingerprint(srcArray, dstArray);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
@@ -8982,23 +7962,86 @@ template<typename SIT, typename DIT>
 //-----------------------------------------------------------------------------
 
 
-template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(VM *vm, 
-  DELayout *srcDelayout, DELayout *dstDelayout, bool tensorMixFlag, 
+template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
+  VM *vm,                                 // in
+  DELayout *srcDelayout,                  // in
+  DELayout *dstDelayout,                  // in
+  bool tensorMixFlag,                     // in
+  int srcTensorContigLength,              // in
+  int dstTensorContigLength,              // in
+  ESMC_TypeKind_Flag typekindFactors,     // in
+  ESMC_TypeKind_Flag typekindSrc,         // in
+  ESMC_TypeKind_Flag typekindDst,         // in
+  const int *srcLocalDeElementCount,      // in
+  const int *dstLocalDeElementCount,      // in
+  vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect, // in - sparse mat "run dist."
+  vector<vector<AssociationElement<DIT,SIT> > >&dstLinSeqVect, // in - sparse mat "run dist."
+  RouteHandle **routehandle,              // inout
+#ifdef ASMM_STORE_TIMING_on
+  double *t8, double *t9, double *t10, double *t11,
+#endif
+  vector<ArrayHelper::SendnbElement<SIT,DIT> > &sendnbVector, // inout
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector  // inout
+  );
+
+
+template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(VM *vm,
+  DELayout *srcDelayout, DELayout *dstDelayout, bool tensorMixFlag,
   int srcTensorContigLength, int dstTensorContigLength,
   ESMC_TypeKind_Flag typekindFactors, ESMC_TypeKind_Flag typekindSrc,
   ESMC_TypeKind_Flag typekindDst,
-  const int *srcLocalDeElementCount, const int *dstLocalDeElementCount,
-  vector<DD::AssociationElement<SIT,DIT> > *srcLinSeqVect,
-  vector<DD::AssociationElement<DIT,SIT> > *dstLinSeqVect,
+  vector<ArrayHelper::SendnbElement<SIT,DIT> > &sendnbVector,
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector,
   const int *dstLocalDeTotalElementCount,
   char **rraList, int rraCount, RouteHandle **routehandle,
   bool undistributedDimsPresent,
 #ifdef ASMM_STORE_TIMING_on
-  double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
-  double *t14,
+  double *t12pre, double *t12, double *t13, double *t14,
 #endif
   int *srcTermProcessingArg = NULL,       // in (optional)
   int *pipelineDepthArg = NULL            // in (optional)
+  );
+
+
+template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
+  VM *vm,                                 // in
+  Array *srcArray, Array *dstArray,       // in
+  vector<SparseMatrix<SIT,DIT> >const &sparseMatrix,// in - sparse matrix vector
+  bool haloFlag,                          // in
+  bool ignoreUnmatched,                   // in
+  bool tensorMixFlag,                     // in
+  int const factorListCount,              // in
+  vector<bool> &factorPetFlag,            // in
+  ESMC_TypeKind_Flag typekindFactors,     // in
+  int const srcLocalDeCount,              // in
+  int const dstLocalDeCount,              // in
+  int srcElementCount,                    // in
+  int dstElementCount,                    // in
+  const int *srcLocalDeElementCount,      // in
+  const int *dstLocalDeElementCount,      // in
+  vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect, // inout
+  vector<vector<AssociationElement<DIT,SIT> > >&dstLinSeqVect  // inout
+  );
+
+
+template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
+  VM *vm,                                 // in
+  Array *srcArray, Array *dstArray,       // in
+  vector<SparseMatrix<SIT,DIT> >const &sparseMatrix,// in - sparse matrix vector
+  bool haloFlag,                          // in
+  bool ignoreUnmatched,                   // in
+  bool tensorMixFlag,                     // in
+  int const factorListCount,              // in
+  vector<bool> &factorPetFlag,            // in
+  ESMC_TypeKind_Flag typekindFactors,     // in
+  int const srcLocalDeCount,              // in
+  int const dstLocalDeCount,              // in
+  int srcElementCount,                    // in
+  int dstElementCount,                    // in
+  const int *srcLocalDeElementCount,      // in
+  const int *dstLocalDeElementCount,      // in
+  vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect, // inout
+  vector<vector<AssociationElement<DIT,SIT> > >&dstLinSeqVect  // inout
   );
 
 
@@ -9040,12 +8083,12 @@ template<typename SIT, typename DIT>
 //  The implementation consists of four main phases:
 //
 //  - Phase I:    Check input for consistency. The sparse matrix is provided in
-//                "input" distribution 
+//                "input" distribution
 //  - Phase II:   Construct two distributed directories of sparse matrix
 //                elements, one indexed by srcSeqIndex, one indexed by
 //                dstSeqIndex. This takes the matrix from "input" to "work"
 //                distribution.
-//  - Phase III:  Use the information in "work" distribution and take it into 
+//  - Phase III:  Use the information in "work" distribution and take it into
 //                "run" distribution, i.e. src and dst DEs have access to all
 //                the local data they may operate on.
 //  - Phase IV:   Use the information in "run" distribution to encode an
@@ -9057,31 +8100,31 @@ template<typename SIT, typename DIT>
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   try{
-  
+
   //---------------------------------------------------------------------------
   // Phase I
   //---------------------------------------------------------------------------
-  
+
   // get the current VM and VM releated information
   VM *vm = VM::getCurrent(&localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
-  
+
 #ifdef ASMM_STORE_TIMING_on
   double t0, t1, t2, t3, t4, t5, t6, t7;  //gjt - profile
-  double t8, t9, t10, t11, t12, t13, t14, t15; //gjt - profile
+  double t8, t9, t10, t11, t12pre, t12, t13, t14, t15; //gjt - profile
   double t4a, t4b;  //gjt - profile
-  double t4a1, t4a2, t4a3;  //gjt - profile  
+  double t4a1, t4a2, t4a3;  //gjt - profile
   double t4b1, t4b2, t4b3;  //gjt - profile
   double t5c, t5f;  //gjt - profile
   vm->barrier();      //synchronize start time across all PETs
   VMK::wtime(&t0);    //gjt - profile
 #endif
-  
+
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore1.0"));
 #endif
@@ -9097,7 +8140,7 @@ template<typename SIT, typename DIT>
       "Not a valid pointer to dstArray", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // srcArray and dstArray must not point to the identical Array object,
   // unless in halo mode
   if (!haloFlag && (srcArray == dstArray)){
@@ -9105,7 +8148,7 @@ template<typename SIT, typename DIT>
       "srcArray and dstArray must not be identical", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // check that sparseMatrix vector does not contain more than one element
   // TODO: this is a limitation of the current sparseMatMulStore() implement.
   if (sparseMatrix.size() > 1){
@@ -9114,7 +8157,7 @@ template<typename SIT, typename DIT>
       ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // check that only supported seqIndex component modes are present
   // TODO: this is a limitation of the current sparseMatMulStore() implement.
   if (sparseMatrix.size() == 1){
@@ -9131,11 +8174,11 @@ template<typename SIT, typename DIT>
       return rc;
     }
   }
-  
+
   // set factorListCount variable (may be different on each PET)
   int const factorListCount = (sparseMatrix.size()==0) ?
     0 : sparseMatrix[0].getFactorListCount();
-  
+
   // determine local tensorMixFlag and typekindFactors settings
   bool tensorMixFlag = false;                   // default
   ESMC_TypeKind_Flag typekindFactors = ESMF_NOKIND;  // default
@@ -9149,12 +8192,12 @@ template<typename SIT, typename DIT>
 
   // communicate typekindFactors across all Pets
   vector<ESMC_TypeKind_Flag> typekindList(petCount);
-  vm->allgather(&typekindFactors, &(typekindList[0]), 
+  vm->allgather(&typekindFactors, &(typekindList[0]),
     sizeof(ESMC_TypeKind_Flag));
   // communicate tensorMixFlag across all Pets
   bool *tensorMixFlagList = new bool[petCount]; // cannot use vector<bool> here
   vm->allgather(&tensorMixFlag, tensorMixFlagList, sizeof(bool));
-  
+
   // Check that all non-ESMF_NOKIND typekindList elements match,
   // set local typekindFactors accordingly and keep track of Pets that have
   // factors. At the same time check that tensorMixFlag matches across Pets
@@ -9197,7 +8240,7 @@ template<typename SIT, typename DIT>
   }
   // garbage collection
   delete [] tensorMixFlagList;
-  
+
   // check for the special case of no factors provided on any PET
   if (factorPetCount < 1){
     // it is consistent to treat the factorless case as a special situation
@@ -9217,10 +8260,10 @@ template<typename SIT, typename DIT>
     rc = ESMF_SUCCESS;
     return rc;
   }
-  
+
   // set dataSize for factors
   int dataSizeFactors = ESMC_TypeKind_FlagSize(typekindFactors);
-  
+
   // check that if tensorMixFlag is not set that the tensorElementCount matches
   if (!tensorMixFlag){
     if (srcArray->getTensorElementCount() != dstArray->getTensorElementCount()){
@@ -9230,7 +8273,7 @@ template<typename SIT, typename DIT>
       return rc;
     }
   }
-  
+
   // prepare tensorContigLength arguments
   bool contigFlag = true;
   int srcTensorContigLength = 1;  // init
@@ -9268,17 +8311,36 @@ template<typename SIT, typename DIT>
       ++j;
     }
   }
-  
+
 #ifdef DEBUGGING
   {
     std::stringstream debugmsg;
     debugmsg << "Array::tSparseMatMulStore(): workWithTempArrays check:"
-      << " tensorMixFlag=" << tensorMixFlag 
+      << " tensorMixFlag=" << tensorMixFlag
       << " srcTensorLength=" << srcTensorLength
       << " dstTensorLength=" << dstTensorLength
       << " srcDimCount=" << srcArray->getDistGrid()->getDimCount()
       << " dstDimCount=" << dstArray->getDistGrid()->getDimCount();
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
+#ifdef ASMM_STORE_DUMPSMM_on
+  if (!tensorMixFlag && typekindFactors == ESMC_TYPEKIND_R8){
+    // SCRIP weight file output only supported w/o tensor mixing and R8 factors
+    char const *fileName="asmmDumpSMM.nc";
+    double const *factorList = NULL;
+    int const *factorIndexList = NULL;
+    int count = 0;
+    if (sparseMatrix.size()>0){
+      factorList = (double const *)sparseMatrix[0].getFactorList();
+      factorIndexList = (int const *)sparseMatrix[0].getFactorIndexList();
+      count = sparseMatrix[0].getFactorListCount();
+    }
+    FTN_X(f_esmf_outputsimpleweightfile)(fileName, &count, factorList,
+      factorIndexList, &localrc, strlen(fileName));
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
   }
 #endif
 
@@ -9288,18 +8350,18 @@ template<typename SIT, typename DIT>
   // Currently this optimization does not completely work for halo case
   // because it is difficult to copy the masked rim into the temporary array.
   if (!tensorMixFlag && (srcTensorLength>1) &&
-    (srcTensorLength==dstTensorLength) && 
+    (srcTensorLength==dstTensorLength) &&
     (srcArray->getDistGrid()->getDimCount() <= 2) &&
     (dstArray->getDistGrid()->getDimCount() <= 2) &&
     (srcArray->rank > 1 && dstArray->rank > 1)){
     // Optimization of undistributed dimensions if there is no tensor mixing.
-    // This optimization requires that src and dst have the same number of 
-    // tensor elements (they can be across different number of dims). 
+    // This optimization requires that src and dst have the same number of
+    // tensor elements (they can be across different number of dims).
     // Currently super-vectorization is only supported for dimCount<=2 on
     // the execution side, therefore this optimization must be limited here.
     // The strategy in this case is to create temporary arrays without the
     // undistributed dimensions and precompute the routehandle for those. This
-    // is typically much faster, because of the general way in which 
+    // is typically much faster, because of the general way in which
     // undistributed elements are currently treated.
     // The resulting routehandle can be used for arrays with or without
     // undistributed dimensions.
@@ -9333,7 +8395,7 @@ template<typename SIT, typename DIT>
     dstTensorContigLength = 1;
   }
   }
-  
+
 #ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t1);   //gjt - profile
 #endif
@@ -9343,14 +8405,14 @@ template<typename SIT, typename DIT>
 //rc = ESMF_SUCCESS;
 //return rc;
 //---DEBUG-------------------
-    
-  //---------------------------------------------------------------------------
-  // Phase II
-  //---------------------------------------------------------------------------
 
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.0"));
+  VM::logMemInfo(std::string("ASMMStore1.1"));
 #endif
+
+  //---------------------------------------------------------------------------
+  // Phase II + III
+  //---------------------------------------------------------------------------
 
   // determine local srcElementCount
   const int srcLocalDeCount = srcArray->delayout->getLocalDeCount();
@@ -9363,15 +8425,6 @@ template<typename SIT, typename DIT>
       * srcArray->tensorElementCount;
     srcElementCount += srcLocalDeElementCount[i];
   }
-  // communicate srcElementCount across all Pets
-  // todo: use nb-allgather and wait right before needed below
-  int *srcElementCountList = new int[petCount];
-  vm->allgather(&srcElementCount, srcElementCountList, sizeof(int));
-
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.1"));
-#endif
-
   // determine local dstElementCount
   const int dstLocalDeCount = dstArray->delayout->getLocalDeCount();
   const int *dstLocalDeToDeMap = dstArray->delayout->getLocalDeToDeMap();
@@ -9397,1035 +8450,79 @@ template<typename SIT, typename DIT>
     }
     dstElementCount += dstLocalDeElementCount[i];
   }
-  // communicate dstElementCount across all Pets
-  // todo: use nb-allgather and wait right before needed below
-  int *dstElementCountList = new int[petCount];
-  vm->allgather(&dstElementCount, dstElementCountList, sizeof(int));
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.2"));
-#endif
 
-    // set the effective tensorElementCount for src and dst Arrays
-  int srcTensorElementCountEff = srcArray->tensorElementCount;  // default
-  int dstTensorElementCountEff = dstArray->tensorElementCount;  // default
-  if (!tensorMixFlag){
-    // if there is not tensor mixing then default into tensor for tensor mode
-    srcTensorElementCountEff = 1;
-    dstTensorElementCountEff = 1;
-  }    
+  // tansform into "run distribution"
+  vector<vector<AssociationElement<SIT,DIT> > >
+    srcLinSeqVect(srcLocalDeCount);
+  vector<vector<AssociationElement<DIT,SIT> > >
+    dstLinSeqVect(dstLocalDeCount);
 
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.3"));
+  VM::logMemInfo(std::string("ASMMStore2.0a"));
 #endif
 
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t2);   //gjt - profile
-#endif
-  
-//---DEBUG-------------------
-// return successfully
-//rc = ESMF_SUCCESS;
-//return rc;
-//---DEBUG-------------------
-  
-  // find local srcSeqIndex Min/Max
-  SIT srcSeqIndexMinMax[2]; // [0]=min, [1]=max
-  srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1] = -1; // visibly invalidate
-  bool firstMinMax = true;
-  for (int i=0; i<srcLocalDeCount; i++){
-    if (srcLocalDeElementCount[i]){
-      // there are elements for local DE i
-      ArrayElement arrayElement(srcArray, i);
-      // loop over all elements in exclusive region for local DE i
-      while(arrayElement.isWithin()){
-        // determine the sequentialized index for the current Array element
-        SeqIndex<SIT> seqIndex;
-        localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-        // record seqIndex min and max
-        if (firstMinMax){
-          srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1]
-            = seqIndex.decompSeqIndex; // initialize
-          firstMinMax = false;
-        }else{
-          if (seqIndex.decompSeqIndex < srcSeqIndexMinMax[0])
-            srcSeqIndexMinMax[0] = seqIndex.decompSeqIndex;
-          if (seqIndex.decompSeqIndex > srcSeqIndexMinMax[1])
-            srcSeqIndexMinMax[1] = seqIndex.decompSeqIndex;
-        }
-        arrayElement.next();
-      } // end while over all exclusive elements
-    }
-  }
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.4"));
-#endif
+  // Set OPTION!!!
+#define SMMSLSQV_OPTION 2
+  // OPTION 1 - Use sparseMatMulStoreLinSeqVect() for all cases
+  // OPTION 2 - Use sparseMatMulStoreLinSeqVect_new() for halo, old all other
+  // OPTION 3 - Use sparseMatMulStoreLinSeqVect_new() for all cases
 
-  // communicate srcSeqIndexMinMax across all Pets
-  // todo: use nb-allgather and wait right before needed below
-  SIT *srcSeqIndexMinMaxList = new SIT[2*petCount];
-  vm->allgather(srcSeqIndexMinMax, srcSeqIndexMinMaxList, 2*sizeof(SIT));  
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.5"));
-#endif
+#if (SMMSLSQV_OPTION==1)
 
-//---DEBUG-------------------
-//char msg[160];
-//sprintf(msg, "srcLocalDeCount=%d, srcLocalDeElementCount[0]=%d,"
-//  " sizeof(DD::AssociationElement)=%d", srcLocalDeCount,
-//  srcLocalDeElementCount[0], sizeof(DD::AssociationElement));
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-// return successfully
-//rc = ESMF_SUCCESS;
-//return rc;
-//---DEBUG-------------------
-
-#ifdef ASMM_STORE_LOG_on
-  {
-    std::stringstream msg;
-    msg << "ASMM_STORE_LOG: tensorMixFlag=" << tensorMixFlag
-    << " srcTensorElementCountEff=" << srcTensorElementCountEff
-    << " dstTensorElementCountEff=" << dstTensorElementCountEff;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-  }
-  {
-    std::stringstream msg;
-    msg << "ASMM_STORE_LOG: srcSeqIndexMinMax[(0/1)] = " <<
-      srcSeqIndexMinMax[0] <<"/"<< srcSeqIndexMinMax[1];
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-
-  // find local dstSeqIndex Min/Max
-  DIT dstSeqIndexMinMax[2]; // [0]=min, [1]=max
-  dstSeqIndexMinMax[0] = dstSeqIndexMinMax[1] = -1; // visibly invalidate
-  firstMinMax = true;
-  for (int i=0; i<dstLocalDeCount; i++){
-    if (dstLocalDeElementCount[i]){
-      // there are elements for local DE i
-      if (haloFlag){
-        // for halo the dst elements are in the rim of dstArray
-        const std::vector<std::vector<SeqIndex<DIT> > > *rimSeqIndex;
-        dstArray->getRimSeqIndex(&rimSeqIndex);
-        for (int k=0; k<dstArray->rimElementCount[i]; k++){
-          SeqIndex<DIT> seqIndex = (*rimSeqIndex)[i][k];
-          if (seqIndex.valid()){
-            // this rim element holds a valid seqIndex
-            // record seqIndex min and max
-            if (firstMinMax){
-              dstSeqIndexMinMax[0] = dstSeqIndexMinMax[1]
-                = seqIndex.decompSeqIndex; // initialize
-              firstMinMax = false;
-            }else{
-              if (seqIndex.decompSeqIndex < dstSeqIndexMinMax[0])
-                dstSeqIndexMinMax[0] = seqIndex.decompSeqIndex;
-              if (seqIndex.decompSeqIndex > dstSeqIndexMinMax[1])
-                dstSeqIndexMinMax[1] = seqIndex.decompSeqIndex;
-            }
-          }
-        }
-      }else{
-        ArrayElement arrayElement(dstArray, i);
-        // loop over all elements in exclusive region for local DE i
-        while(arrayElement.isWithin()){
-          // determine the sequentialized index for the current Array element
-          SeqIndex<DIT> seqIndex;
-          localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
-          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-          // record seqIndex min and max
-          if (firstMinMax){
-            dstSeqIndexMinMax[0] = dstSeqIndexMinMax[1]
-              = seqIndex.decompSeqIndex; // initialize
-            firstMinMax = false;
-          }else{
-            if (seqIndex.decompSeqIndex < dstSeqIndexMinMax[0])
-              dstSeqIndexMinMax[0] = seqIndex.decompSeqIndex;
-            if (seqIndex.decompSeqIndex > dstSeqIndexMinMax[1])
-              dstSeqIndexMinMax[1] = seqIndex.decompSeqIndex;
-          }
-          arrayElement.next();
-        } // end while over all exclusive elements
-      }
-    }
-  }
-
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.6"));
-#endif
-
-  // communicate dstSeqIndexMinMax across all Pets
-  // todo: use nb-allgather and wait right before needed below
-  DIT *dstSeqIndexMinMaxList = new DIT[2*petCount];
-  vm->allgather(dstSeqIndexMinMax, dstSeqIndexMinMaxList, 2*sizeof(DIT));
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.7"));
-#endif
-
-//---DEBUG-------------------
-//char msg[160];
-//sprintf(msg, "dstLocalDeCount=%d, dstLocalDeElementCount[0]=%d,"
-//  " sizeof(DD::AssociationElement)=%d", dstLocalDeCount,
-//  dstLocalDeElementCount[0], sizeof(DD::AssociationElement));
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-// return successfully
-//rc = ESMF_SUCCESS;
-//return rc;
-//---DEBUG-------------------
-
-#ifdef ASMM_STORE_LOG_on
-  for (int i=0; i<petCount; i++)
-  {
-    std::stringstream msg;
-    msg << "ASMM_STORE_LOG: dstSeqIndexMinMaxList[" << i << "(0/1)] = " <<
-      dstSeqIndexMinMaxList[i*2] <<"/"<< dstSeqIndexMinMaxList[i*2+1];
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t3);   //gjt - profile
-#endif
-
-//---DEBUG-------------------
-// return successfully
-//rc = ESMF_SUCCESS;
-//return rc;
-//---DEBUG-------------------
-
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.8"));
-#endif
-
-  // set up structure and intervals of src and dst distributed directories
-  
-  // determine the srcSeqIndexMinGlobal and MaxGlobal
-  // todo: for nb-allgather(srcSeqIndexMinMaxList) here insert commwait()
-  SIT srcSeqIndexMinGlobal, srcSeqIndexMaxGlobal;
-  bool pastInitFlag = false; // reset
-  for (int i=0; i<petCount; i++){
-    if (srcElementCountList[i]){
-      // Pet i holds elements in srcArray
-      if (pastInitFlag){
-        if (srcSeqIndexMinMaxList[2*i] < srcSeqIndexMinGlobal)
-          srcSeqIndexMinGlobal = srcSeqIndexMinMaxList[2*i];
-        if (srcSeqIndexMinMaxList[2*i+1] > srcSeqIndexMaxGlobal)
-          srcSeqIndexMaxGlobal = srcSeqIndexMinMaxList[2*i+1];
-      }else{
-        // initialization
-        srcSeqIndexMinGlobal = srcSeqIndexMinMaxList[2*i];
-        srcSeqIndexMaxGlobal = srcSeqIndexMinMaxList[2*i+1];
-        pastInitFlag = true; // set
-      }
-    }
-  }
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.9"));
-#endif
-  
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t4a1);   //gjt - profile
-#endif
-
-  // set up a distributed directory for srcArray seqIndex look-up
-  DD::Interval<SIT> *srcSeqIndexInterval = new DD::Interval<SIT>[petCount];
-  {
-    srcSeqIndexInterval[0].min = srcSeqIndexMinGlobal;  // start
-    SIT indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
-      / petCount;
-    SIT extraIndices = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
-      % petCount;
-    for (int i=0; i<petCount-1; i++){
-      srcSeqIndexInterval[i].max = srcSeqIndexInterval[i].min + indicesPerPet
-        - 1;
-      if (i<extraIndices)
-        ++srcSeqIndexInterval[i].max;   // distribute extra indices evenly
-      srcSeqIndexInterval[i].count = 
-        srcSeqIndexInterval[i].max - srcSeqIndexInterval[i].min + 1;
-      srcSeqIndexInterval[i+1].min = srcSeqIndexInterval[i].max + 1;
-    }
-    srcSeqIndexInterval[petCount-1].max = srcSeqIndexMaxGlobal;  // finish
-    srcSeqIndexInterval[petCount-1].count = 
-      srcSeqIndexInterval[petCount-1].max - srcSeqIndexInterval[petCount-1].min
-      + 1;
-  }
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.10"));
-#endif
-
-#ifdef ASMM_STORE_LOG_on
-  {
-    std::stringstream msg;
-    msg << "ASMM_STORE_LOG: srcElementCountList[localPet]=" << srcElementCountList[localPet] <<
-    " srcSeqIndexMinMax = " << srcSeqIndexMinMax[0] <<"/"<< srcSeqIndexMinMax[1] 
-    << " srcSeqIndexMinGlobal/MaxGlobal = " << srcSeqIndexMinGlobal <<"/"<<
-    srcSeqIndexMaxGlobal << " srcSeqIndexInterval[localPet].min/.max = " <<
-    srcSeqIndexInterval[localPet].min <<"/"<< srcSeqIndexInterval[localPet].max;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t4a2);   //gjt - profile
-#endif
-  
-  // It is more efficient to first sort and then count in a sorted list than
-  // it is to do the counting from an unsorted list.
-  int *srcLocalElementsPerIntervalCount = new int[petCount];
-  {
-    // prepare temporary seqIndexList for sorting
-    //TODO: this scales in memory as the srcArray size, does not consider sparse
-    vector<int> seqIndexList(srcElementCount);
-    int jj=0;
-    for (int j=0; j<srcLocalDeCount; j++){
-      // loop over all elements in the exclusive region for localDe j
-      ArrayElement arrayElement(srcArray, j);
-      while(arrayElement.isWithin()){
-        SeqIndex<SIT> seqIndex;
-        localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-        seqIndexList[jj] = seqIndex.decompSeqIndex;
-        ++jj;
-        arrayElement.next();
-      } // end while over all exclusive elements
-    }
-    sort(seqIndexList.begin(), seqIndexList.end());
-    jj=0;
-    for (int i=0; i<petCount; i++){
-      int seqIndexMax = srcSeqIndexInterval[i].max;
-      int count = 0; // reset
-      while (jj<srcElementCount && seqIndexList[jj]<=seqIndexMax){
-        ++count;  // increment counter
-        ++jj;
-      }
-      srcLocalElementsPerIntervalCount[i] = count;
-    }
-  }
-  
-  int *srcLocalIntervalPerPetCount = new int[petCount];
-  
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t4a3);   //gjt - profile
-#endif
-  
-  vm->alltoall(srcLocalElementsPerIntervalCount, sizeof(int),
-    srcLocalIntervalPerPetCount, sizeof(int), vmBYTE);
-  
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t4a);   //gjt - profile
-#endif
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.11"));
-#endif
-
-  // determine the dstSeqIndexMinGlobal and MaxGlobal
-  // todo: for nb-allgather(dstSeqIndexMinMaxList) here insert commwait()
-  DIT dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal;
-  pastInitFlag = false; // reset
-  for (int i=0; i<petCount; i++){
-    if (dstElementCountList[i]){
-      // Pet i holds elements in dstArray
-      if (pastInitFlag){
-        if (dstSeqIndexMinMaxList[2*i] < dstSeqIndexMinGlobal)
-          dstSeqIndexMinGlobal = dstSeqIndexMinMaxList[2*i];
-        if (dstSeqIndexMinMaxList[2*i+1] > dstSeqIndexMaxGlobal)
-          dstSeqIndexMaxGlobal = dstSeqIndexMinMaxList[2*i+1];
-      }else{
-        // initialization
-        dstSeqIndexMinGlobal = dstSeqIndexMinMaxList[2*i];
-        dstSeqIndexMaxGlobal = dstSeqIndexMinMaxList[2*i+1];
-        pastInitFlag = true; // set
-      }
-    }
-  }
-    
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.12"));
-#endif
-    
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t4b1);   //gjt - profile
-#endif
-  
-////gjt  
-//printf("srcMin/Max = %d/%d, dstMinMax = %d/%d\n", srcSeqIndexMinGlobal,
-//  srcSeqIndexMaxGlobal, dstSeqIndexMinGlobal, dstSeqIndexMaxGlobal);
-
-  // set up a distributed directory for dstArray seqIndex look-up
-  DD::Interval<DIT> *dstSeqIndexInterval = new DD::Interval<DIT>[petCount];
-  {
-    dstSeqIndexInterval[0].min = dstSeqIndexMinGlobal;  // start
-    DIT indicesPerPet = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1)
-      / petCount;
-    DIT extraIndices = (dstSeqIndexMaxGlobal - dstSeqIndexMinGlobal + 1)
-      % petCount;
-    for (int i=0; i<petCount-1; i++){
-      dstSeqIndexInterval[i].max = dstSeqIndexInterval[i].min + indicesPerPet
-        - 1;
-      if (i<extraIndices)
-        ++dstSeqIndexInterval[i].max;   // distribute extra indices evenly
-      dstSeqIndexInterval[i].count = 
-        dstSeqIndexInterval[i].max - dstSeqIndexInterval[i].min + 1;
-      dstSeqIndexInterval[i+1].min = dstSeqIndexInterval[i].max + 1;
-    }
-    dstSeqIndexInterval[petCount-1].max = dstSeqIndexMaxGlobal;  // finish
-    dstSeqIndexInterval[petCount-1].count = 
-      dstSeqIndexInterval[petCount-1].max - dstSeqIndexInterval[petCount-1].min
-      + 1;
-  }
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.13"));
-#endif
-
-#ifdef ASMM_STORE_LOG_on
-  {
-    std::stringstream msg;
-    msg << "ASMM_STORE_LOG: dstElementCountList[localPet]=" << dstElementCountList[localPet] <<
-    " dstSeqIndexMinMax = " << dstSeqIndexMinMax[0] <<"/"<< dstSeqIndexMinMax[1] 
-    << " dstSeqIndexMinGlobal/MaxGlobal = " << dstSeqIndexMinGlobal <<"/"<<
-    dstSeqIndexMaxGlobal << " dstSeqIndexInterval[localPet].min/.max = " <<
-    dstSeqIndexInterval[localPet].min <<"/"<< dstSeqIndexInterval[localPet].max;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t4b2);   //gjt - profile
-#endif
-
-  // It is more efficient to first sort and then count in a sorted list than
-  // it is to do the counting from an unsorted list.
-  int *dstLocalElementsPerIntervalCount = new int[petCount];
-  {
-    // prepare temporary seqIndexList for sorting
-    //TODO: this scales in memory as the dstArray size, does not consider sparse
-    vector<int> seqIndexList(dstElementCount);
-    int jj=0;
-    for (int j=0; j<dstLocalDeCount; j++){
-      if (haloFlag){
-        // loop over the halo rim elements for localDe j
-        const std::vector<std::vector<SeqIndex<DIT> > > *rimSeqIndex;
-        dstArray->getRimSeqIndex(&rimSeqIndex);
-        for (int k=0; k<dstArray->rimElementCount[j]; k++){
-          SeqIndex<DIT> seqIndex = (*rimSeqIndex)[j][k];
-          if (seqIndex.valid()){
-            seqIndexList[jj] = seqIndex.decompSeqIndex;
-            ++jj;
-          }
-        }
-      }else{
-        // loop over all elements in the exclusive region for localDe j
-        ArrayElement arrayElement(dstArray, j);
-        while(arrayElement.isWithin()){
-          SeqIndex<DIT> seqIndex;
-          localrc = arrayElement.getSequenceIndexExclusive(&seqIndex);
-          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-            ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
-          seqIndexList[jj] = seqIndex.decompSeqIndex;
-          ++jj;
-          arrayElement.next();
-        } // end while over all exclusive elements
-      }
-    }
-    sort(seqIndexList.begin(), seqIndexList.end());
-    jj=0;
-    for (int i=0; i<petCount; i++){
-      int seqIndexMax = dstSeqIndexInterval[i].max;
-      int count = 0; // reset
-      while (jj<dstElementCount && seqIndexList[jj]<=seqIndexMax){
-        ++count;  // increment counter
-        ++jj;
-      }
-      dstLocalElementsPerIntervalCount[i] = count;
-    }
-  }
-  
-  int *dstLocalIntervalPerPetCount = new int[petCount];
-  
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t4b3);   //gjt - profile
-#endif
-
-  vm->alltoall(dstLocalElementsPerIntervalCount, sizeof(int),
-    dstLocalIntervalPerPetCount, sizeof(int), vmBYTE);
-  
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t4b);   //gjt - profile
-#endif
-
-  // garbage collection  
-  delete [] srcElementCountList;
-  delete [] dstElementCountList;
-  delete [] srcSeqIndexMinMaxList;
-  delete [] dstSeqIndexMinMaxList;
-
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.14"));
-#endif
-
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t4);   //gjt - profile
-#endif
-  
-  // allocate local look-up map indexed by srcSeqIndex, i.e. distributed dir.
-  vector<DD::SeqIndexFactorLookup<SIT> >
-    srcSeqIndexFactorLookup(srcSeqIndexInterval[localPet].count
-    * srcTensorElementCountEff);
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.14.1"));
-#endif
-  localrc = DD::setupSeqIndexFactorLookup<SIT>(vm, 
-    srcSeqIndexFactorLookup,
-    petCount, localPet, factorListCount, 
-    false,  // dstSetupFlag
-    sparseMatrix, tensorMixFlag,
-    srcSeqIndexInterval, srcTensorElementCountEff, factorPetFlag,
-    typekindFactors, haloFlag, ignoreUnmatched, srcArray, srcLocalDeCount,
-    srcLocalDeElementCount, srcLocalDeToDeMap, srcLocalIntervalPerPetCount,
-    srcLocalElementsPerIntervalCount);
+//  localrc = sparseMatMulStoreLinSeqVect_new(vm,
+  localrc = sparseMatMulStoreLinSeqVect(vm,
+    srcArray, dstArray, sparseMatrix,
+    haloFlag, ignoreUnmatched, tensorMixFlag,
+    factorListCount, factorPetFlag, typekindFactors,
+    srcLocalDeCount, dstLocalDeCount, srcElementCount, dstElementCount,
+    srcLocalDeElementCount, dstLocalDeElementCount,
+    srcLinSeqVect, dstLinSeqVect
+  );
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
-//vm->barrier();  /// only for profiling tests
-      
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t5c);   //gjt - profile
-#endif
 
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.15"));
-#endif
+#elif (SMMSLSQV_OPTION==2)
 
-  // allocate local look-up map indexed by dstSeqIndex, i.e. distributed dir.
-  vector<DD::SeqIndexFactorLookup<DIT> >
-    dstSeqIndexFactorLookup(dstSeqIndexInterval[localPet].count
-    * dstTensorElementCountEff);
-  localrc = DD::setupSeqIndexFactorLookup<DIT>(vm, 
-    dstSeqIndexFactorLookup,
-    petCount, localPet, factorListCount, 
-    true,  // dstSetupFlag
-    sparseMatrix, tensorMixFlag,
-    dstSeqIndexInterval, dstTensorElementCountEff, factorPetFlag,
-    typekindFactors, haloFlag, ignoreUnmatched, dstArray, dstLocalDeCount,
-    dstLocalDeElementCount, dstLocalDeToDeMap, dstLocalIntervalPerPetCount,
-    dstLocalElementsPerIntervalCount);
+  if (haloFlag){
+    localrc = sparseMatMulStoreLinSeqVect_new(vm,
+      srcArray, dstArray, sparseMatrix,
+      haloFlag, ignoreUnmatched, tensorMixFlag,
+      factorListCount, factorPetFlag, typekindFactors,
+      srcLocalDeCount, dstLocalDeCount, srcElementCount, dstElementCount,
+      srcLocalDeElementCount, dstLocalDeElementCount,
+      srcLinSeqVect, dstLinSeqVect
+    );
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+  }else{
+    localrc = sparseMatMulStoreLinSeqVect(vm,
+      srcArray, dstArray, sparseMatrix,
+      haloFlag, ignoreUnmatched, tensorMixFlag,
+      factorListCount, factorPetFlag, typekindFactors,
+      srcLocalDeCount, dstLocalDeCount, srcElementCount, dstElementCount,
+      srcLocalDeElementCount, dstLocalDeElementCount,
+      srcLinSeqVect, dstLinSeqVect
+    );
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+  }
+
+#elif (SMMSLSQV_OPTION==3)
+
+  localrc = sparseMatMulStoreLinSeqVect_new(vm,
+    srcArray, dstArray, sparseMatrix,
+    haloFlag, ignoreUnmatched, tensorMixFlag,
+    factorListCount, factorPetFlag, typekindFactors,
+    srcLocalDeCount, dstLocalDeCount, srcElementCount, dstElementCount,
+    srcLocalDeElementCount, dstLocalDeElementCount,
+    srcLinSeqVect, dstLinSeqVect
+  );
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
-//vm->barrier();  /// only for profiling tests
-      
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t5f);   //gjt - profile
-#endif
-  
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t5);   //gjt - profile
-#endif
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.16"));
-#endif
-  
-  // prepare count arrays for src partner look-up in dstSeqIndexFactorLookup
-  int *srcLocalPartnerElementsPerIntervalCount = new int[petCount];
-  for (int i=0; i<petCount; i++){
-    // Pet "i" is the active srcSeqIndex interval
-    int seqIndexMin = dstSeqIndexInterval[i].min;
-    int seqIndexMax = dstSeqIndexInterval[i].max;
-    int count = 0; // reset
-    for (typename vector<DD::SeqIndexFactorLookup<SIT> >
-      ::const_iterator j=srcSeqIndexFactorLookup.begin(); 
-      j!=srcSeqIndexFactorLookup.end(); ++j){
-      for (int k=0; k<j->factorCount; k++){
-        int partnerSeqIndex = j->factorList[k]
-          .partnerSeqIndex.decompSeqIndex;
-        if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax)
-          ++count; // increment counter
-      }
-    }
-    srcLocalPartnerElementsPerIntervalCount[i] = count;
-  }
-  int *dstLocalPartnerIntervalPerPetCount = new int[petCount];
-  vm->alltoall(srcLocalPartnerElementsPerIntervalCount, sizeof(int),
-    dstLocalPartnerIntervalPerPetCount, sizeof(int), vmBYTE);
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.17"));
-#endif
 
-  // fill partnerDe in srcSeqIndexFactorLookup using dstSeqIndexFactorLookup
-  {
-    DD::FillPartnerDeInfo<DIT,SIT> *fillPartnerDeInfo =
-      new DD::FillPartnerDeInfo<DIT,SIT>
-        (dstSeqIndexFactorLookup, srcSeqIndexFactorLookup);
-      
-    fillPartnerDeInfo->localPet = localPet;
-    fillPartnerDeInfo->seqIndexIntervalIn = dstSeqIndexInterval;
-    fillPartnerDeInfo->seqIndexIntervalOut = srcSeqIndexInterval;
-    fillPartnerDeInfo->tensorMixFlag = tensorMixFlag;
-      
-    DD::accessLookup(vm, petCount, localPet, dstLocalPartnerIntervalPerPetCount,
-      srcLocalPartnerElementsPerIntervalCount, fillPartnerDeInfo);
-    delete fillPartnerDeInfo;
-  }
+#endif  // SMMSLSQV_OPTION
 
-  // garbage collection
-  delete [] srcLocalPartnerElementsPerIntervalCount;
-  delete [] dstLocalPartnerIntervalPerPetCount;
-      
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.18"));
-#endif
 
-  // prepare count arrays for dst partner look-up in srcSeqIndexFactorLookup
-  int *dstLocalPartnerElementsPerIntervalCount = new int[petCount];
-  for (int i=0; i<petCount; i++){
-    // Pet "i" is the active dstSeqIndex interval
-    int seqIndexMin = srcSeqIndexInterval[i].min;
-    int seqIndexMax = srcSeqIndexInterval[i].max;
-    int count = 0; // reset
-    for (typename vector<DD::SeqIndexFactorLookup<DIT> >
-      ::const_iterator j=dstSeqIndexFactorLookup.begin(); 
-      j!=dstSeqIndexFactorLookup.end(); ++j){
-      for (int k=0; k<j->factorCount; k++){
-        int partnerSeqIndex = j->factorList[k]
-          .partnerSeqIndex.decompSeqIndex;
-        if (partnerSeqIndex >= seqIndexMin && partnerSeqIndex <= seqIndexMax)
-          ++count; // increment counter
-      }
-    }
-    dstLocalPartnerElementsPerIntervalCount[i] = count;
-  }
-  int *srcLocalPartnerIntervalPerPetCount = new int[petCount];
-  vm->alltoall(dstLocalPartnerElementsPerIntervalCount, sizeof(int),
-    srcLocalPartnerIntervalPerPetCount, sizeof(int), vmBYTE);
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.19"));
-#endif
-
-  // fill partnerDe in dstSeqIndexFactorLookup using srcSeqIndexFactorLookup
-  {
-    DD::FillPartnerDeInfo<SIT,DIT> *fillPartnerDeInfo =
-      new DD::FillPartnerDeInfo<SIT,DIT>
-        (srcSeqIndexFactorLookup, dstSeqIndexFactorLookup);
-    fillPartnerDeInfo->localPet = localPet;
-    fillPartnerDeInfo->seqIndexIntervalIn = srcSeqIndexInterval;
-    fillPartnerDeInfo->seqIndexIntervalOut = dstSeqIndexInterval;
-    fillPartnerDeInfo->tensorMixFlag = tensorMixFlag;
-      
-    DD::accessLookup(vm, petCount, localPet, srcLocalPartnerIntervalPerPetCount,
-      dstLocalPartnerElementsPerIntervalCount, fillPartnerDeInfo);
-    delete fillPartnerDeInfo;
-  }
-
-  // garbage collection
-  delete [] dstLocalPartnerElementsPerIntervalCount;
-  delete [] srcLocalPartnerIntervalPerPetCount;
-
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore2.20"));
-#endif
-
-#ifdef ASMM_STORE_LOG_on_disabled
-  fprintf(asmm_store_log_fp, "\n========================================"
-    "========================================\n");
-  fprintf(asmm_store_log_fp, "========================================"
-    "========================================\n\n");
-  // some serious printing for src info
-  for (typename vector<DD::SeqIndexFactorLookup<SIT> >::const_iterator
-    i=srcSeqIndexFactorLookup.begin(); i!=srcSeqIndexFactorLookup.end(); ++i){
-    fprintf(asmm_store_log_fp, "gjt srcDistDir: localPet %d, srcSeqIndex = %d, "
-      "srcSeqIndexFactorLookup[%d].factorCount = %d\n -> .de: ",
-      localPet, (i-srcSeqIndexFactorLookup.begin())
-      +srcSeqIndexInterval[localPet].min, i-srcSeqIndexFactorLookup.begin(),
-      i->factorCount);
-    for (int j=0; j<i->de.size(); j++)
-      fprintf(asmm_store_log_fp, "%d, ", i->de[j]);
-    fprintf(asmm_store_log_fp, "\n");
-    for (int j=0; j<i->factorCount; j++){
-      fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
-        "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
-        "\t\t.partnerDe = ", j,
-        i->factorList[j].partnerSeqIndex
-        .decompSeqIndex);
-      for (int jj=0;
-        jj<i->factorList[j].partnerDe.size(); jj++)
-        fprintf(asmm_store_log_fp, "%d, ",
-          i->factorList[j].partnerDe[jj]);
-      fprintf(asmm_store_log_fp, "\n");
-      fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
-        *((int *)i->factorList[j].factor));
-    }
-  }
-#endif
-  
-#ifdef ASMM_STORE_LOG_on_disabled
-  // some serious printing for dst info
-  for (typename vector<DD::SeqIndexFactorLookup<DIT> >::const_iterator
-    i=dstSeqIndexFactorLookup.begin(); i!=dstSeqIndexFactorLookup.end(); ++i){
-    fprintf(asmm_store_log_fp, "gjt dstDistDir: localPet %d, dstSeqIndex = %d, "
-      "dstSeqIndexFactorLookup[%d].factorCount = %d\n -> .de: ",
-      localPet, (i-dstSeqIndexFactorLookup.begin())
-      +dstSeqIndexInterval[localPet].min, i-dstSeqIndexFactorLookup.begin(),
-      i->factorCount);
-    for (int j=0; j<i->de.size(); j++)
-      fprintf(asmm_store_log_fp, "%d, ", i->de[j]);
-    fprintf(asmm_store_log_fp, "\n");
-    for (int j=0; j<i->factorCount; j++){
-      fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
-        "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
-        "\t\t.partnerDe = ", j,
-        i->factorList[j].partnerSeqIndex
-        .decompSeqIndex);
-      for (int jj=0;
-        jj<i->factorList[j].partnerDe.size(); jj++)
-        fprintf(asmm_store_log_fp, "%d, ",
-          i->factorList[j].partnerDe[jj]);
-      fprintf(asmm_store_log_fp, "\n");
-      fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
-        *((int *)i->factorList[j].factor));
-    }
-  }
-#endif
-
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t6);   //gjt - profile
-#endif
-  
-//---DEBUG-------------------
-// return successfully
-//rc = ESMF_SUCCESS;
-//return rc;
-//---DEBUG-------------------
-  
-  //---------------------------------------------------------------------------
-  // Phase III -> represent sparse matrix in "run distribution"
-  //---------------------------------------------------------------------------
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStore3.0"));
-#endif
-
-  vector<DD::AssociationElement<SIT,DIT> > *srcLinSeqVect =
-    new vector<DD::AssociationElement<SIT,DIT> >
-      [srcLocalDeCount];
-  vector<DD::AssociationElement<DIT,SIT> > *dstLinSeqVect =
-    new vector<DD::AssociationElement<DIT,SIT> >
-      [dstLocalDeCount];
-
-  // access srcSeqIndexFactorLookup to construct srcLinSeqVect
-  {  
-    DD::FillLinSeqVectInfo<SIT,DIT> *fillLinSeqVectInfo =
-      new DD::FillLinSeqVectInfo<SIT,DIT>
-        (srcSeqIndexFactorLookup);
-    fillLinSeqVectInfo->array = srcArray;
-    fillLinSeqVectInfo->linSeqVect = srcLinSeqVect;
-    fillLinSeqVectInfo->localPet = localPet;
-    fillLinSeqVectInfo->localDeCount = srcLocalDeCount;
-    fillLinSeqVectInfo->localDeElementCount = srcLocalDeElementCount;
-    fillLinSeqVectInfo->seqIndexInterval = srcSeqIndexInterval;
-    fillLinSeqVectInfo->tensorMixFlag = tensorMixFlag;
-    fillLinSeqVectInfo->haloRimFlag = false;
-
-    DD::accessLookup(vm, petCount, localPet, srcLocalIntervalPerPetCount,
-      srcLocalElementsPerIntervalCount, fillLinSeqVectInfo);
-    delete fillLinSeqVectInfo;
-  }
-  
-  // access dstSeqIndexFactorLookup to construct dstLinSeqVect
-  {
-    DD::FillLinSeqVectInfo<DIT,SIT> *fillLinSeqVectInfo =
-      new DD::FillLinSeqVectInfo<DIT,SIT>
-        (dstSeqIndexFactorLookup);
-    fillLinSeqVectInfo->array = dstArray;
-    fillLinSeqVectInfo->linSeqVect = dstLinSeqVect;
-    fillLinSeqVectInfo->localPet = localPet;
-    fillLinSeqVectInfo->localDeCount = dstLocalDeCount;
-    fillLinSeqVectInfo->localDeElementCount = dstLocalDeElementCount;
-    fillLinSeqVectInfo->seqIndexInterval = dstSeqIndexInterval;
-    fillLinSeqVectInfo->tensorMixFlag = tensorMixFlag;
-    fillLinSeqVectInfo->haloRimFlag = haloFlag; // forward HALO
-
-    DD::accessLookup(vm, petCount, localPet, dstLocalIntervalPerPetCount,
-      dstLocalElementsPerIntervalCount, fillLinSeqVectInfo);
-    delete fillLinSeqVectInfo;
-  }
-
-  // garbage colletion
-  delete [] srcLocalElementsPerIntervalCount;
-  delete [] srcLocalIntervalPerPetCount;
-  delete [] dstLocalElementsPerIntervalCount;
-  delete [] dstLocalIntervalPerPetCount;
-  delete [] srcSeqIndexInterval;
-  delete [] dstSeqIndexInterval;
-  
-#ifdef GJT_DEBUG
-/////////////////////////  
-  for (vector<DD::SeqIndexFactorLookup>::const_iterator
-    i=srcSeqIndexFactorLookup.begin(); i!=srcSeqIndexFactorLookup.end(); ++i){
-    
-    fprintf(stderr, "src: lookupIndex=%d, factorCount=%d\n",
-      i-srcSeqIndexFactorLookup.begin(), i->factorCount);
-  }
-/////////////////////////  
-/////////////////////////  
-  for (vector<DD::SeqIndexFactorLookup>::const_iterator
-    i=dstSeqIndexFactorLookup.begin(); i!=dstSeqIndexFactorLookup.end(); ++i){
-    
-    fprintf(stderr, "dst: lookupIndex=%d, factorCount=%d\n",
-      i-dstSeqIndexFactorLookup.begin(), i->factorCount);
-  }
-/////////////////////////  
-#endif
-  
-#ifdef ASMM_STORE_LOG_on_disabled
-  fprintf(asmm_store_log_fp, "\n========================================"
-    "========================================\n");
-  fprintf(asmm_store_log_fp, "========================================"
-    "========================================\n\n");
-  // more serious printing
-  for (int j=0; j<srcLocalDeCount; j++){
-    for (int k=0; k<srcLinSeqVect[j].size(); k++){
-      fprintf(asmm_store_log_fp, "localPet: %d, "
-        "srcLinSeqVect[%d][%d].linIndex = %d, "
-        ".seqIndex = %d/%d, .factorCount = %d\n",
-        localPet, j, k, srcLinSeqVect[j][k].linIndex,
-        srcLinSeqVect[j][k].seqIndex.decompSeqIndex,
-        srcLinSeqVect[j][k].seqIndex.tensorSeqIndex,
-        srcLinSeqVect[j][k].factorCount);
-      for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
-        fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
-          "\t\t.partnerSeqIndex = %d/%d\n"
-          "\t\t.partnerDe = ", kk,
-          srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
-          srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
-        for (int jj=0;
-          jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmm_store_log_fp, "%d, ",
-            srcLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmm_store_log_fp, "\n");
-        fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
-          *((int *)srcLinSeqVect[j][k].factorList[kk].factor));
-      }
-    }
-  }
-    
-  // more serious printing
-  for (int j=0; j<dstLocalDeCount; j++){
-    for (int k=0; k<dstLinSeqVect[j].size(); k++){
-      fprintf(asmm_store_log_fp, "localPet: %d, "
-        "dstLinSeqVect[%d][%d].linIndex = %d, "
-        ".seqIndex = %d/%d, .factorCount = %d\n",
-        localPet, j, k, dstLinSeqVect[j][k].linIndex,
-        dstLinSeqVect[j][k].seqIndex.decompSeqIndex,
-        dstLinSeqVect[j][k].seqIndex.tensorSeqIndex,
-        dstLinSeqVect[j][k].factorCount);
-      for (int kk=0; kk<dstLinSeqVect[j][k].factorCount; kk++){
-        fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
-          "\t\t.partnerSeqIndex = %d/%d\n"
-          "\t\t.partnerDe = ", kk,
-          dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
-          dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
-        for (int jj=0;
-          jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmm_store_log_fp, "%d, ",
-            dstLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmm_store_log_fp, "\n");
-        fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
-          *((int *)dstLinSeqVect[j][k].factorList[kk].factor));
-      }
-    }
-  }
-#endif
-  
-  if (ignoreUnmatched){
-    // If there are unmatched src or dst elements in the sparse matrix, they
-    // will have lead to FactorElement entries with a partnerDe.size()==0 here.
-    // Leaving them like that will lead to issues down the code, so that if
-    // unmatched entries are to be supported, these FactorElements must be 
-    // removed here.
-    //
-    //TODO: This could have been done on the SeqIndexFactorLookup level further
-    //TODO: up ... probably a more efficient way.
-    //
-    // Doing this for the src side
-    for (int j=0; j<srcLocalDeCount; j++){
-      for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
-        for (typename vector<DD::FactorElement<DIT> >::iterator
-          fe=srcLinSeqVect[j][k].factorList.begin();
-          fe!=srcLinSeqVect[j][k].factorList.end();){
-          if (fe->partnerDe.size() == 0){
-            // eliminate this factorList entry
-            fe = srcLinSeqVect[j][k].factorList.erase(fe);
-            --srcLinSeqVect[j][k].factorCount;
-          }else{
-            ++fe;
-          }
-        }
-      }
-    }
-    // Doing this for the dst side
-    for (int j=0; j<dstLocalDeCount; j++){
-      for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
-        for (typename vector<DD::FactorElement<SIT> >::iterator
-          fe=dstLinSeqVect[j][k].factorList.begin();
-          fe!=dstLinSeqVect[j][k].factorList.end();){
-          if (fe->partnerDe.size() == 0){
-            // eliminate this factorList entry
-            fe = dstLinSeqVect[j][k].factorList.erase(fe);
-            --dstLinSeqVect[j][k].factorCount;
-          }else{
-            ++fe;
-          }
-        }
-      }
-    }
-  }
-
-  if (haloFlag||ignoreUnmatched){
-    // Phase IV below expects each FactorElement inside of srcLinSeqVect and
-    // dstLinSeqVect to only reference a single partnerDe (- only partnerDe[0]
-    // will be looked at!). Therefore transform FactorElements that have more
-    // than one partnerDe entry into multiple FactorElements where each only
-    // has a single partnerDe entry.
-    // This condition can arise either with halos, or when allowing more
-    // general redist conditions that ignore that src and dst are not perfectly
-    // matched wrt seqIndices.
-    // Doing this for the src side supports forward HALO:
-    for (int j=0; j<srcLocalDeCount; j++){
-      for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
-        for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
-          if (srcLinSeqVect[j][k].factorList[kk].partnerDe.size() > 1){
-            for (unsigned jj=1;
-              jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++){
-              // construct factorElement with one partnerDe entry
-              DD::FactorElement<DIT> factorElement =
-                srcLinSeqVect[j][k].factorList[kk];
-              factorElement.partnerDe.resize(1);
-              factorElement.partnerDe[0] =
-                srcLinSeqVect[j][k].factorList[kk].partnerDe[jj];
-              srcLinSeqVect[j][k].factorList.push_back(factorElement);
-            }
-            // erase all of the replicated partnerDe entries
-            srcLinSeqVect[j][k].factorList[kk].partnerDe.resize(1);
-          }
-        }
-        // set new factorCount
-        srcLinSeqVect[j][k].factorCount = srcLinSeqVect[j][k].factorList.size();
-      }
-    }
-    // Doing this for the dst side supports backward HALO:
-    for (int j=0; j<dstLocalDeCount; j++){
-      for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
-        for (int kk=0; kk<dstLinSeqVect[j][k].factorCount; kk++){
-          if (dstLinSeqVect[j][k].factorList[kk].partnerDe.size() > 1){
-            for (unsigned jj=1;
-              jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++){
-              // construct factorElement with one partnerDe entry
-              DD::FactorElement<SIT> factorElement =
-                dstLinSeqVect[j][k].factorList[kk];
-              factorElement.partnerDe.resize(1);
-              factorElement.partnerDe[0] =
-                dstLinSeqVect[j][k].factorList[kk].partnerDe[jj];
-              //TODO: It's certainly not correct to add up all the entries
-              //TODO: from all of the halo elements in a backward HALO,
-              //TODO: instead the average over all elements makes more sense.
-              //TODO: However, this would require communication here in order
-              //TODO: to set an adjusted factor for these elements also on the 
-              //TODO: src side.
-              dstLinSeqVect[j][k].factorList.push_back(factorElement);
-            }
-            // erase all of the replicated partnerDe entries
-            dstLinSeqVect[j][k].factorList[kk].partnerDe.resize(1);
-          }
-        }
-        // set new factorCount
-        dstLinSeqVect[j][k].factorCount = dstLinSeqVect[j][k].factorList.size();
-      }
-    }
-  }
-  
-#ifdef ASMM_STORE_LOG_on_disabled
-  fprintf(asmm_store_log_fp, "\n========================================"
-    "========================================\n");
-  fprintf(asmm_store_log_fp, "========================================"
-    "========================================\n\n");
-  // more serious printing
-  for (int j=0; j<srcLocalDeCount; j++){
-    for (int k=0; k<srcLinSeqVect[j].size(); k++){
-      fprintf(asmm_store_log_fp, "localPet: %d, "
-        "srcLinSeqVect[%d][%d].linIndex = %d, "
-        ".seqIndex = %d/%d, .factorCount = %d\n",
-        localPet, j, k, srcLinSeqVect[j][k].linIndex,
-        srcLinSeqVect[j][k].seqIndex.decompSeqIndex,
-        srcLinSeqVect[j][k].seqIndex.tensorSeqIndex,
-        srcLinSeqVect[j][k].factorCount);
-      for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
-        fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
-          "\t\t.partnerSeqIndex = %d/%d\n"
-          "\t\t.partnerDe = ", kk,
-          srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
-          srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
-        for (int jj=0;
-          jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmm_store_log_fp, "%d, ",
-            srcLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmm_store_log_fp, "\n");
-        fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
-          *((int *)srcLinSeqVect[j][k].factorList[kk].factor));
-      }
-    }
-  }
-    
-  // more serious printing
-  for (int j=0; j<dstLocalDeCount; j++){
-    for (int k=0; k<dstLinSeqVect[j].size(); k++){
-      fprintf(asmm_store_log_fp, "localPet: %d, "
-        "dstLinSeqVect[%d][%d].linIndex = %d, "
-        ".seqIndex = %d/%d, .factorCount = %d\n",
-        localPet, j, k, dstLinSeqVect[j][k].linIndex,
-        dstLinSeqVect[j][k].seqIndex.decompSeqIndex,
-        dstLinSeqVect[j][k].seqIndex.tensorSeqIndex,
-        dstLinSeqVect[j][k].factorCount);
-      for (int kk=0; kk<dstLinSeqVect[j][k].factorCount; kk++){
-        fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
-          "\t\t.partnerSeqIndex = %d/%d\n"
-          "\t\t.partnerDe = ", kk,
-          dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
-          dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
-        for (int jj=0;
-          jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-          fprintf(asmm_store_log_fp, "%d, ",
-            dstLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
-        fprintf(asmm_store_log_fp, "\n");
-        fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
-          *((int *)dstLinSeqVect[j][k].factorList[kk].factor));
-      }
-    }
-  }
-#endif
-
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(&t7);   //gjt - profile
-#endif
-  
-//---DEBUG-------------------
-// return successfully
-//rc = ESMF_SUCCESS;
-//return rc;
-//---DEBUG-------------------
-  
   //---------------------------------------------------------------------------
   // Phase IV
   //---------------------------------------------------------------------------
@@ -10448,30 +8545,85 @@ template<typename SIT, typename DIT>
   ESMC_TypeKind_Flag typekindSrc = srcArray->getTypekind();
   // obtain typekindDst
   ESMC_TypeKind_Flag typekindDst = dstArray->getTypekind();
-  
+
   // prepare dstLocalDeTotalElementCount
   int *dstLocalDeTotalElementCount = new int[dstLocalDeCount];
   for (int i=0; i<dstLocalDeCount; i++)
-    dstLocalDeTotalElementCount[i] = 
+    dstLocalDeTotalElementCount[i] =
       dstArray->totalElementCountPLocalDe[i] * dstArray->tensorElementCount;
-  
+
   // determine if there are undistributed dims present in either src or dst
   bool undistributedDimsPresent = false;
   if (srcArray->tensorCount) undistributedDimsPresent = true;
   if (dstArray->tensorCount) undistributedDimsPresent = true;
-  
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.1"));
+#endif
+
+  // create and initialize the RouteHandle
+  *routehandle = RouteHandle::create(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  localrc = (*routehandle)->setType(ESMC_ARRAYXXE);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  // allocate XXE and attach to RouteHandle
+  XXE *xxe;
+  try{
+    xxe = new XXE(vm, 1000, 10000, 1000);
+  }catch (...){
+    ESMC_LogDefault.AllocError(ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  localrc = (*routehandle)->setStorage(xxe);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.2"));
+#endif
+
+  // tansform "run distribution" into nb-vectors
+  vector<ArrayHelper::SendnbElement<SIT,DIT> > sendnbVector;
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > recvnbVector;
+  localrc = sparseMatMulStoreNbVectors(vm,
+    srcArray->delayout, dstArray->delayout,
+    tensorMixFlag, srcTensorContigLength, dstTensorContigLength,
+    typekindFactors, typekindSrc, typekindDst,
+    srcLocalDeElementCount, dstLocalDeElementCount,
+    srcLinSeqVect, dstLinSeqVect, routehandle,
+#ifdef ASMM_STORE_TIMING_on
+    &t8, &t9, &t10, &t11,
+#endif
+    sendnbVector, recvnbVector
+  );
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.3"));
+#endif
+
+  // force vectors out of scope by swapping with empty vector, to free memory
+  vector<vector<AssociationElement<SIT,DIT> > >().swap(srcLinSeqVect);
+  vector<vector<AssociationElement<DIT,SIT> > >().swap(dstLinSeqVect);
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.4"));
+#endif
+
   // encode sparseMatMul communication pattern into XXE stream
   localrc = sparseMatMulStoreEncodeXXE(vm,
     srcArray->delayout, dstArray->delayout,
     tensorMixFlag, srcTensorContigLength, dstTensorContigLength,
     typekindFactors, typekindSrc, typekindDst,
-    srcLocalDeElementCount, dstLocalDeElementCount,
-    srcLinSeqVect, dstLinSeqVect,
+    sendnbVector, recvnbVector,
     dstLocalDeTotalElementCount,
     rraList, rraCount, routehandle,
     undistributedDimsPresent,
 #ifdef ASMM_STORE_TIMING_on
-    &t8, &t9, &t10, &t11, &t12, &t13, &t14,
+    &t12pre, &t12, &t13, &t14,
 #endif
     srcTermProcessingArg,
     pipelineDepthArg
@@ -10479,13 +8631,22 @@ template<typename SIT, typename DIT>
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.5"));
+#endif
+
   // garbage collection
   delete [] rraList;
-  delete [] srcLinSeqVect;
-  delete [] srcLocalDeElementCount;
-  delete [] dstLinSeqVect;
-  delete [] dstLocalDeElementCount;
   delete [] dstLocalDeTotalElementCount;
+  delete [] srcLocalDeElementCount;
+  delete [] dstLocalDeElementCount;
+  // force vectors out of scope by swapping with empty vector, to free memory
+  vector<ArrayHelper::SendnbElement<SIT,DIT> >().swap(sendnbVector);
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> >().swap(recvnbVector);
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStore4.6"));
+#endif
 
 #ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t15);   //gjt - profile
@@ -10534,6 +8695,8 @@ template<typename SIT, typename DIT>
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     sprintf(msg, "ASMM_STORE_TIMING: t11  = %g", t11-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+    sprintf(msg, "ASMM_STORE_TIMING: t12pre  = %g", t12pre-t0);
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     sprintf(msg, "ASMM_STORE_TIMING: t12  = %g", t12-t0);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     sprintf(msg, "ASMM_STORE_TIMING: t13  = %g", t13-t0);
@@ -10545,14 +8708,14 @@ template<typename SIT, typename DIT>
     ESMC_LogDefault.Write("ASMM_STORE_TIMING: --- stop ----", ESMC_LOGMSG_INFO);
   }
 #endif
-  
+
   if (workWithTempArrays){
     // clean-up the temporary arrays
     Array::destroy(&srcArray, true);
     if (!haloFlag)
       Array::destroy(&dstArray, true);
   }
-  
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -10567,11 +8730,7 @@ template<typename SIT, typename DIT>
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
-#ifdef ASMM_STORE_LOG_on_disabled
-  fclose(asmm_store_log_fp);
-#endif
-  
+
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore5.0"));
 #endif
@@ -10583,10 +8742,888 @@ template<typename SIT, typename DIT>
 //-----------------------------------------------------------------------------
 
 
+#include "sparseMatMulStoreLinSeqVect_new.h"
+
+#include "sparseMatMulStoreLinSeqVect.h"
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::sparseMatMulStoreNbVectors()"
+//BOPI
+// !IROUTINE:  ESMCI::sparseMatMulStoreNbVectors
+//
+// !INTERFACE:
+template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  VM *vm,                                 // in
+  DELayout *srcDelayout,                  // in
+  DELayout *dstDelayout,                  // in
+  bool tensorMixFlag,                     // in
+  int srcTensorContigLength,              // in
+  int dstTensorContigLength,              // in
+  ESMC_TypeKind_Flag typekindFactors,     // in
+  ESMC_TypeKind_Flag typekindSrc,         // in
+  ESMC_TypeKind_Flag typekindDst,         // in
+  const int *srcLocalDeElementCount,      // in
+  const int *dstLocalDeElementCount,      // in
+  vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect, // in - sparse mat "run dist."
+  vector<vector<AssociationElement<DIT,SIT> > >&dstLinSeqVect, // in - sparse mat "run dist."
+  RouteHandle **routehandle,              // inout
+#ifdef ASMM_STORE_TIMING_on
+  double *t8, double *t9, double *t10, double *t11,
+#endif
+  vector<ArrayHelper::SendnbElement<SIT,DIT> > &sendnbVector, // inout
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector  // inout
+  ){
+//
+// !DESCRIPTION:
+//    Take the incoming sparse matrix information from "run distribution" and
+//    transform it into (srcDe, dstDe) pair specific SendnbElement and
+//    RecvnbElement objects:
+//
+//      srcLinSeqVect -> sendnbVector
+//      dstLinSeqVect -> recvnbVector
+//
+//    These two vectors contain as many objects as there are srcDe, dstDe on
+//    the localPet, respectively.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+#ifdef ASMM_STORE_LOG_on
+  {
+    std::stringstream msg;
+    // srcLinSeqVect
+    for (unsigned j=0; j<srcLinSeqVect.size(); j++){
+      for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
+        msg << "ASMM_STORE_LOG:" << __LINE__ <<
+          " srcLinSeqVect["<< j <<"]["<< k <<"].linIndex = "
+          << srcLinSeqVect[j][k].linIndex <<", "
+          ".seqIndex = "<< srcLinSeqVect[j][k].seqIndex.decompSeqIndex
+          <<"/"<< srcLinSeqVect[j][k].seqIndex.tensorSeqIndex <<
+          ", .factorList.size() = "<< srcLinSeqVect[j][k].factorList.size();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        msg.str("");  // clear
+        for (unsigned kk=0; kk<srcLinSeqVect[j][k].factorList.size(); kk++){
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerSeqIndex ="
+            << srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex
+            <<"/"
+            << srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDe =";
+          for (unsigned jj=0;
+            jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
+            msg << srcLinSeqVect[j][k].factorList[kk].partnerDe[jj] <<", ";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          switch (typekindFactors){
+          case ESMC_TYPEKIND_R4:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_R4 *)srcLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_R8:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_R8 *)srcLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_I4:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_I4 *)srcLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_I8:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_I8 *)srcLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          default:
+            break;
+          }
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+        }
+      }
+    }
+    // dstLinSeqVect
+    for (unsigned j=0; j<dstLinSeqVect.size(); j++){
+      for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
+        msg << "ASMM_STORE_LOG:" << __LINE__ <<
+          " dstLinSeqVect["<< j <<"]["<< k <<"].linIndex = "
+          << dstLinSeqVect[j][k].linIndex <<", "
+          ".seqIndex = "<< dstLinSeqVect[j][k].seqIndex.decompSeqIndex
+          <<"/"<< dstLinSeqVect[j][k].seqIndex.tensorSeqIndex <<
+          ", .factorList.size() = "<< dstLinSeqVect[j][k].factorList.size();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        msg.str("");  // clear
+        for (unsigned kk=0; kk<dstLinSeqVect[j][k].factorList.size(); kk++){
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \tfactorList["<< kk <<"]";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerSeqIndex ="
+            << dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex
+            <<"/"
+            << dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDe =";
+          for (unsigned jj=0;
+            jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
+            msg << dstLinSeqVect[j][k].factorList[kk].partnerDe[jj] <<", ";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+          switch (typekindFactors){
+          case ESMC_TYPEKIND_R4:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_R4 *)dstLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_R8:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_R8 *)dstLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_I4:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_I4 *)dstLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          case ESMC_TYPEKIND_I8:
+            msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.factor =" <<
+              *((ESMC_I8 *)dstLinSeqVect[j][k].factorList[kk].factor);
+            break;
+          default:
+            break;
+          }
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          msg.str("");  // clear
+        }
+      }
+    }
+  }
+#endif
+
+
+
+
+  try{
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors1.0"));
+#endif
+
+  // get a handle on the XXE stored in routehandle
+  XXE *xxe = (XXE *)(*routehandle)->getStorage();
+
+  // prepare other local variables
+  int dataSizeFactors = ESMC_TypeKind_FlagSize(typekindFactors);
+
+  int dataSizeSrc = ESMC_TypeKind_FlagSize(typekindSrc);
+  int srcLocalDeCount = srcDelayout->getLocalDeCount();
+  const int *srcLocalDeToDeMap = srcDelayout->getLocalDeToDeMap();
+
+  int dataSizeDst = ESMC_TypeKind_FlagSize(typekindDst);
+  int dstLocalDeCount = dstDelayout->getLocalDeCount();
+  const int *dstLocalDeToDeMap = dstDelayout->getLocalDeToDeMap();
+
+  int localPet = vm->getLocalPet();
+  int petCount = vm->getPetCount();
+
+  bool vectorFlag = !(tensorMixFlag ||
+    (srcTensorContigLength != dstTensorContigLength));
+
+#ifdef ASMM_STORE_TIMING_on
+  double t9a, t9b, t9d, t9e; //gjt - profile
+  double t9c1, t9c2; //gjt - profile
+  VMK::wtime(t8);   //gjt - profile
+#endif
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors2.0"));
+#endif
+
+  // determine recv pattern for all localDEs on dst side
+  for (int j=0; j<dstLocalDeCount; j++){
+    vector<int> index2Ref;
+    index2Ref.reserve(dstLocalDeElementCount[j]); // good guess for better perf
+    int localDeFactorCount = 0; // reset
+    int iCount = 0; // reset
+    for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
+      unsigned factorCount = dstLinSeqVect[j][k].factorList.size();
+      if (factorCount){
+        index2Ref.push_back(k);   // store element index
+        localDeFactorCount += factorCount;
+        ++iCount; // increment counter
+      }
+    }
+
+#ifdef ASMM_STORE_TIMING_on
+    VMK::wtime(&t9a);   //gjt - profile
+#endif
+
+#ifdef ASMM_STORE_LOG_on_disabled
+fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
+  localDeFactorCount);
+#endif
+    int *index2Ref2 = new int[localDeFactorCount];  // large enough
+    int *factorIndexRef = new int[localDeFactorCount];  // large enough
+    int *partnerDeRef = new int[localDeFactorCount];  // large enough
+    vector<int> recvnbPartnerDeList(localDeFactorCount);  // large enough
+    vector<int> recvnbPartnerDeCount(localDeFactorCount);  // large enough
+    int recvnbDiffPartnerDeCount = 0; // reset
+    int count = 0; // reset
+    for (int i=0; i<iCount; i++){
+      unsigned factorCount = dstLinSeqVect[j][index2Ref[i]].factorList.size();
+      for (unsigned k=0; k<factorCount; k++){
+        int partnerDe =
+          dstLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe[0];
+        int kk;
+        for (kk=0; kk<recvnbDiffPartnerDeCount; kk++)
+          if (recvnbPartnerDeList[kk]==partnerDe) break;
+        if (kk==recvnbDiffPartnerDeCount){
+          // new entry
+          recvnbPartnerDeList[kk] = partnerDe;
+          recvnbPartnerDeCount[kk] = 1; // initialize
+          ++recvnbDiffPartnerDeCount;
+        }else
+          ++recvnbPartnerDeCount[kk];   // increment
+        index2Ref2[count] = index2Ref[i];
+        factorIndexRef[count] = k;
+        partnerDeRef[count] = kk;
+        ++count;
+      }
+    }
+
+#ifdef ASMM_STORE_TIMING_on
+    VMK::wtime(&t9b);   //gjt - profile
+#endif
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors3.0"));
+#endif
+
+    // invert the look-up direction
+    vector<vector<ArrayHelper::DstInfo<DIT,SIT> > >
+      dstInfoTable(recvnbDiffPartnerDeCount);
+    vector<int> dstInfoTableInit(recvnbDiffPartnerDeCount);
+    for (int i=0; i<recvnbDiffPartnerDeCount; i++){
+      dstInfoTable[i].resize(recvnbPartnerDeCount[i]);
+      dstInfoTableInit[i] = 0;   // reset
+    }
+    // alignment char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
+    int qwords = (localDeFactorCount * dataSizeFactors) / 8;
+    if ((localDeFactorCount * dataSizeFactors) % 8)
+      ++qwords;
+    char *localDeFactorBuffer = (char *)(new double[qwords]);
+    localrc = xxe->storeData(localDeFactorBuffer, qwords*8); // XXE garbage
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+#ifdef ASMM_STORE_TIMING_on
+    VMK::wtime(&t9c1);   //gjt - profile
+#endif
+    for (int i=0; i<localDeFactorCount; i++){
+      int partnerDeListIndex = partnerDeRef[i];
+      int index2 = dstInfoTableInit[partnerDeListIndex]++;
+      dstInfoTable[partnerDeListIndex][index2].linIndex =
+        dstLinSeqVect[j][index2Ref2[i]].linIndex;
+      dstInfoTable[partnerDeListIndex][index2].vectorLength = 1;  // default
+      dstInfoTable[partnerDeListIndex][index2].seqIndex =
+        dstLinSeqVect[j][index2Ref2[i]].seqIndex;
+      dstInfoTable[partnerDeListIndex][index2].partnerSeqIndex
+        = dstLinSeqVect[j][index2Ref2[i]].factorList[factorIndexRef[i]]
+        .partnerSeqIndex;
+      if (!tensorMixFlag){
+        // default into tensor for tensor src/dst mode
+        dstInfoTable[partnerDeListIndex][index2].partnerSeqIndex
+          .tensorSeqIndex
+          = dstInfoTable[partnerDeListIndex][index2].seqIndex.tensorSeqIndex;
+      }
+      char *localDeFactorBufferEntry = localDeFactorBuffer + i*dataSizeFactors;
+      memcpy(localDeFactorBufferEntry,
+        dstLinSeqVect[j][index2Ref2[i]].factorList[factorIndexRef[i]]
+        .factor, dataSizeFactors);
+      dstInfoTable[partnerDeListIndex][index2].factor =
+        (void *)(localDeFactorBufferEntry);
+    }
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors4.0"));
+#endif
+
+      // garbage collection
+    delete [] index2Ref2;
+    delete [] factorIndexRef;
+    delete [] partnerDeRef;
+
+#ifdef ASMM_STORE_TIMING_on
+    VMK::wtime(&t9c2);   //gjt - profile
+#endif
+
+    // sort each "recvnbDiffPartnerDeCount group" (opposite of src)
+    if (!vectorFlag){
+      // no vectorization possible -> sort for scalar optimization
+      for (int i=0; i<recvnbDiffPartnerDeCount; i++)
+        sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
+          ArrayHelper::scalarOrderDstInfo<DIT,SIT>);
+    }else if (dstTensorContigLength == 1){
+      // support vectorization during execution, but nothing to deflate here
+      // sort for scalar optimization
+      for (int i=0; i<recvnbDiffPartnerDeCount; i++)
+        sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
+          ArrayHelper::scalarOrderDstInfo<DIT,SIT>);
+    }else{
+      // vectorization
+      // sort vector optimization
+      for (int i=0; i<recvnbDiffPartnerDeCount; i++){
+        sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
+          ArrayHelper::vectorOrderDstInfo<DIT,SIT>);
+#ifdef ASMM_STORE_LOG_on_disabled
+        for (int k=0; k<dstInfoTable[i].size(); k++)
+          fprintf(asmm_store_log_fp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
+            ".partnerSeqIndex = %d/%d, .factor = %p\n", i, k,
+            dstInfoTable[i][k].seqIndex.decompSeqIndex,
+            dstInfoTable[i][k].seqIndex.tensorSeqIndex,
+            dstInfoTable[i][k].partnerSeqIndex.decompSeqIndex,
+            dstInfoTable[i][k].partnerSeqIndex.tensorSeqIndex,
+            dstInfoTable[i][k].factor);
+#endif
+        // vectorize -> deflate dstInfoTable
+        typename vector<ArrayHelper::DstInfo<DIT,SIT> >::iterator rangeStart =
+          dstInfoTable[i].begin();
+        typename vector<ArrayHelper::DstInfo<DIT,SIT> >::iterator rangeStop =
+          rangeStart;
+        typename vector<ArrayHelper::DstInfo<DIT,SIT> >::iterator rangeWrite =
+          rangeStart;
+        while (rangeStart != dstInfoTable[i].end()){
+          int vectorLength = 1; // initialize
+          DIT decompSeqIndex = rangeStart->seqIndex.decompSeqIndex;
+          int linIndex = rangeStart->linIndex;
+          rangeStop++;
+          while((rangeStop != dstInfoTable[i].end())
+            && (rangeStop->seqIndex.decompSeqIndex == decompSeqIndex)
+            && (rangeStop->linIndex == (linIndex + 1))){
+            linIndex = rangeStop->linIndex;
+            ++vectorLength;
+            rangeStop++;
+          }
+#ifdef ASMM_STORE_LOG_on
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG:" << __LINE__ << " dstTensorContigLength: "
+      << dstTensorContigLength << " vectorLength: " << vectorLength <<
+      " decompSeqIndex: " << decompSeqIndex;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+          if ((rangeWrite != dstInfoTable[i].begin())
+            && ((rangeWrite-1)->vectorLength != vectorLength)){
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
+            "vectorization failed", ESMC_CONTEXT, &rc);
+            return rc;
+          }
+          if (vectorLength != dstTensorContigLength){
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
+            "vectorization failed", ESMC_CONTEXT, &rc);
+            return rc;
+          }
+          *rangeWrite = *rangeStart;  // copy table element
+          rangeWrite->vectorLength = vectorLength;
+          rangeWrite++;
+          rangeStart = rangeStop;
+        }
+        dstInfoTable[i].erase(rangeWrite, dstInfoTable[i].end());
+      }
+    }
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors5.0"));
+#endif
+
+#ifdef ASMM_STORE_LOG_on_disabled
+    // print:
+    fprintf(asmm_store_log_fp, "dstArray: %d, %d\n", j,
+      recvnbDiffPartnerDeCount);
+    for (int i=0; i<recvnbDiffPartnerDeCount; i++)
+      for (int k=0; k<dstInfoTable[i].size(); k++)
+        fprintf(asmm_store_log_fp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
+          ".partnerSeqIndex[][] = %d/%d\n", i, k,
+          dstInfoTable[i][k].seqIndex.decompSeqIndex,
+          dstInfoTable[i][k].seqIndex.tensorSeqIndex,
+          dstInfoTable[i][k].partnerSeqIndex.decompSeqIndex,
+          dstInfoTable[i][k].partnerSeqIndex.tensorSeqIndex);
+#endif
+
+#ifdef ASMM_STORE_TIMING_on
+    VMK::wtime(&t9d);   //gjt - profile
+#endif
+
+    // construct recv elements
+    for (int i=0; i<recvnbDiffPartnerDeCount; i++){
+      int vectorLength = dstInfoTable[i].begin()->vectorLength;
+      // initialize the bufferIndex member in the dstInfoTable
+#ifdef MSG_DEFLATE
+      // construct bufferIndex member in dstInfoTable according to deflation
+      vector<ArrayHelper::Deflator<SIT> > deflator(dstInfoTable[i].size());
+      for (unsigned k=0; k<dstInfoTable[i].size(); k++){
+        // fill
+        deflator[k].seqIndex = dstInfoTable[i][k].partnerSeqIndex;
+        deflator[k].index = k;
+      }
+      // sort by partnerSeqIndex
+      sort(deflator.begin(), deflator.end());
+      // record the buffer index in dstInfoTable
+      int kk = 0;
+      dstInfoTable[i][deflator[0].index].bufferIndex = kk;  // spin up
+      for (unsigned k=1; k<deflator.size(); k++){
+        if (deflator[k].seqIndex != deflator[k-1].seqIndex)
+          ++kk;
+        dstInfoTable[i][deflator[k].index].bufferIndex = kk;
+      }
+      ++kk;
+
+#ifdef MSG_DEFLATE_DEBUG
+char msg[160];
+      for (int k=0; k<kk; k++){
+
+sprintf(msg, "recv: deflator[%d]: index=%d, bufferIndex=%d, seqIndex=%d",
+  k, deflator[k].index, dstInfoTable[i][deflator[k].index].bufferIndex,
+deflator[k].seqIndex.decompSeqIndex);
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+
+      }
+#endif
+
+#else
+      //todo: remove this initialization once the deflator works right!!!!!!
+      for (int k=0; k<dstInfoTable[i].size(); k++)
+        dstInfoTable[i][k].bufferIndex = k;
+      int kk = dstInfoTable[i].size();
+#endif
+      // large contiguous 1st level receive buffer
+      int qwords = (recvnbPartnerDeCount[i] * dataSizeSrc) / 8;
+      if ((recvnbPartnerDeCount[i] * dataSizeSrc) % 8)
+        ++qwords;
+      char *buffer = (char *)(new double[qwords]);
+      // store buffer information in BufferInfo for XXE buffer control
+      localrc = xxe->storeBufferInfo(buffer,
+        recvnbPartnerDeCount[i] * dataSizeSrc,
+        recvnbPartnerDeCount[i] * dataSizeSrc / vectorLength);
+      if (ESMC_LogDefault.MsgFoundError(localrc,
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+      // prepare DE/PET info
+      int srcDe = recvnbPartnerDeList[i];
+      int srcPet;   //TODO: DE-based comms
+      srcDelayout->getDEMatchPET(srcDe, *vm, NULL, &srcPet, 1);
+      int dstDe = dstLocalDeToDeMap[j];
+      // fill values into recvnbVector
+      ArrayHelper::RecvnbElement<DIT,SIT> recvnbElement;
+      recvnbElement.srcPet = srcPet;
+      recvnbElement.srcDe = srcDe;
+      recvnbElement.srcLocalDe = i;
+      recvnbElement.dstDe = dstDe;
+      recvnbElement.dstLocalDe = j;
+      recvnbElement.bufferInfo = (char **)xxe->getBufferInfoPtr();
+      recvnbElement.partnerDeDataCount = kk;
+      recvnbElement.vectorFlag = vectorFlag;
+      recvnbElement.dstInfoTable = dstInfoTable[i];
+      recvnbElement.localPet = localPet;
+      recvnbElement.petCount = petCount;
+      recvnbVector.push_back(recvnbElement);
+#ifdef ASMM_STORE_LOG_on_disabled
+      fprintf(asmm_store_log_fp, "gjt: recvnbElement localPet %d, srcPet %d, "
+        "vectorLength=%d\n", localPet, srcPet, vectorLength);
+#endif
+    } // for i - recvnbDiffPartnerDeCount
+
+#ifdef ASMM_STORE_TIMING_on
+    VMK::wtime(&t9e);   //gjt - profile
+//    printf("gjt - profile for PET %d, j-loop %d:\n"
+//      " t9a=%g\n t9b=%g\n t9c1=%g\n t9c2=%g\n t9d=%g\n t9e=%g\n", localPet, j,
+//      t9a-*t8, t9b-*t8, t9c1-*t8, t9c2-*t8, t9d-*t8, t9e-*t8);
+#endif
+
+  } // for j - dstLocalDeCount
+
+#ifdef ASMM_STORE_TIMING_on
+  VMK::wtime(t9);   //gjt - profile
+#endif
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors6.0"));
+#endif
+
+  // determine send pattern for all localDEs on src side
+  for (int j=0; j<srcLocalDeCount; j++){
+    vector<int> index2Ref;
+    index2Ref.reserve(srcLocalDeElementCount[j]); // good guess for better perf
+    int localDeFactorCount = 0; // reset
+    int iCount = 0; // reset
+    for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
+      unsigned factorCount = srcLinSeqVect[j][k].factorList.size();
+      if (factorCount){
+        index2Ref.push_back(k);   // store element index
+        localDeFactorCount += factorCount;
+        ++iCount; // increment counter
+      }
+    }
+    int *index2Ref2 = new int[localDeFactorCount];  // large enough
+    int *factorIndexRef = new int[localDeFactorCount];  // large enough
+    int *partnerDeRef = new int[localDeFactorCount];  // large enough
+    int *sendnbPartnerDeList = new int[localDeFactorCount];  // large enough
+    int *sendnbPartnerDeCount = new int[localDeFactorCount];  // large enough
+    int sendnbDiffPartnerDeCount = 0; // reset
+    int count = 0; // reset
+    for (int i=0; i<iCount; i++){
+      unsigned factorCount = srcLinSeqVect[j][index2Ref[i]].factorList.size();
+      for (unsigned k=0; k<factorCount; k++){
+        int partnerDe =
+          srcLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe[0];
+        int kk;
+        for (kk=0; kk<sendnbDiffPartnerDeCount; kk++)
+          if (sendnbPartnerDeList[kk]==partnerDe) break;
+        if (kk==sendnbDiffPartnerDeCount){
+          // new entry
+          sendnbPartnerDeList[kk] = partnerDe;
+          sendnbPartnerDeCount[kk] = 1; // initialize
+          ++sendnbDiffPartnerDeCount;
+        }else
+          ++sendnbPartnerDeCount[kk];   // increment
+        index2Ref2[count] = index2Ref[i];
+        factorIndexRef[count] = k;
+        partnerDeRef[count] = kk;
+        ++count;
+      }
+    }
+    // invert the look-up direction
+    vector<vector<ArrayHelper::SrcInfo<SIT,DIT> > >
+      srcInfoTable(sendnbDiffPartnerDeCount);
+    vector<int> srcInfoTableInit(sendnbDiffPartnerDeCount);
+    for (int i=0; i<sendnbDiffPartnerDeCount; i++){
+      srcInfoTable[i].resize(sendnbPartnerDeCount[i]);
+      srcInfoTableInit[i] = 0;   // reset
+    }
+    // alignment char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
+    int qwords = (localDeFactorCount * dataSizeFactors) / 8;
+    if ((localDeFactorCount * dataSizeFactors) % 8)
+      ++qwords;
+    char *localDeFactorBuffer = (char *)(new double[qwords]);
+    localrc = xxe->storeData(localDeFactorBuffer, qwords*8); // XXE garbage
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+    for (int i=0; i<localDeFactorCount; i++){
+      int partnerDeListIndex = partnerDeRef[i];
+      int index2 = srcInfoTableInit[partnerDeListIndex]++;
+      srcInfoTable[partnerDeListIndex][index2].linIndex =
+        srcLinSeqVect[j][index2Ref2[i]].linIndex;
+      srcInfoTable[partnerDeListIndex][index2].vectorLength = 1;
+      srcInfoTable[partnerDeListIndex][index2].seqIndex =
+        srcLinSeqVect[j][index2Ref2[i]].seqIndex;
+      srcInfoTable[partnerDeListIndex][index2].partnerSeqIndex =
+        srcLinSeqVect[j][index2Ref2[i]].factorList[factorIndexRef[i]]
+        .partnerSeqIndex;
+      if (!tensorMixFlag){
+        // default into tensor for tensor src/dst mode
+        srcInfoTable[partnerDeListIndex][index2].partnerSeqIndex
+          .tensorSeqIndex =
+          srcInfoTable[partnerDeListIndex][index2].seqIndex.tensorSeqIndex;
+      }
+      char *localDeFactorBufferEntry = localDeFactorBuffer + i*dataSizeFactors;
+      memcpy(localDeFactorBufferEntry,
+        srcLinSeqVect[j][index2Ref2[i]].factorList[factorIndexRef[i]]
+        .factor, dataSizeFactors);
+      srcInfoTable[partnerDeListIndex][index2].factor =
+        (void *)(localDeFactorBufferEntry);
+    }
+
+    // garbage collection
+    delete [] index2Ref2;
+    delete [] factorIndexRef;
+    delete [] partnerDeRef;
+
+    // sort each "sendnbDiffPartnerDeCount group" (opposite of dst)
+    if (!vectorFlag){
+      // no vectorization possible -> sort for scalar optimization
+      for (int i=0; i<sendnbDiffPartnerDeCount; i++)
+        sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
+          ArrayHelper::scalarOrderSrcInfo<SIT,DIT>);
+    }else if (srcTensorContigLength == 1){
+      // support vectorization during execution, but nothing to deflate here
+      // sort for scalar optimization
+      for (int i=0; i<sendnbDiffPartnerDeCount; i++)
+        sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
+          ArrayHelper::scalarOrderSrcInfo<SIT,DIT>);
+    }else{
+      // vectorization
+      // sort vector optimization
+      for (int i=0; i<sendnbDiffPartnerDeCount; i++){
+        sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
+          ArrayHelper::vectorOrderSrcInfo<SIT,DIT>);
+        // vectorize -> deflate srcInfoTable
+        typename vector<ArrayHelper::SrcInfo<SIT,DIT> >::iterator rangeStart =
+          srcInfoTable[i].begin();
+        typename vector<ArrayHelper::SrcInfo<SIT,DIT> >::iterator rangeStop =
+          rangeStart;
+        typename vector<ArrayHelper::SrcInfo<SIT,DIT> >::iterator rangeWrite =
+          rangeStart;
+        while (rangeStart != srcInfoTable[i].end()){
+          int vectorLength = 1; // initialize
+          SIT decompSeqIndex = rangeStart->seqIndex.decompSeqIndex;
+          int linIndex = rangeStart->linIndex;
+          rangeStop++;
+          while((rangeStop != srcInfoTable[i].end())
+            && (rangeStop->seqIndex.decompSeqIndex == decompSeqIndex)
+            && (rangeStop->linIndex == (linIndex + 1))){
+            linIndex = rangeStop->linIndex;
+            ++vectorLength;
+            rangeStop++;
+          }
+          if ((rangeWrite != srcInfoTable[i].begin())
+            && ((rangeWrite-1)->vectorLength != vectorLength)){
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
+            "vectorization failed", ESMC_CONTEXT, &rc);
+            return rc;
+          }
+          if (vectorLength != srcTensorContigLength){
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
+            "vectorization failed", ESMC_CONTEXT, &rc);
+            return rc;
+          }
+          *rangeWrite = *rangeStart;  // copy table element
+          rangeWrite->vectorLength = vectorLength;
+          rangeWrite++;
+          rangeStart = rangeStop;
+        }
+        srcInfoTable[i].erase(rangeWrite, srcInfoTable[i].end());
+      }
+    }
+
+#ifdef ASMM_STORE_LOG_on_disabled
+    // print:
+    for (int i=0; i<sendnbDiffPartnerDeCount; i++)
+      for (int k=0; k<srcInfoTable[i].size(); k++)
+        fprintf(asmm_store_log_fp, "srcInfoTable[%d][%d].seqIndex = %d/%d, "
+          ".partnerSeqIndex[][] = %d/%d\n", i, k,
+          srcInfoTable[i][k].seqIndex.decompSeqIndex,
+          srcInfoTable[i][k].seqIndex.tensorSeqIndex,
+          srcInfoTable[i][k].partnerSeqIndex.decompSeqIndex,
+          srcInfoTable[i][k].partnerSeqIndex.tensorSeqIndex);
+#endif
+
+    // construct send elements
+    for (int i=0; i<sendnbDiffPartnerDeCount; i++){
+      int vectorLength = srcInfoTable[i].begin()->vectorLength;
+      // use a temporary vector to aide in deflating of the message to be sent
+      vector<ArrayHelper::Deflator<SIT> > deflator(srcInfoTable[i].size());
+      for (unsigned k=0; k<srcInfoTable[i].size(); k++){
+        // fill
+        deflator[k].seqIndex  = srcInfoTable[i][k].seqIndex;
+        deflator[k].index     = srcInfoTable[i][k].linIndex;
+      }
+#ifdef MSG_DEFLATE
+      // sort -> cut off duplic.
+      sort(deflator.begin(), deflator.end());
+      deflator.erase(unique(deflator.begin(),deflator.end()),deflator.end());
+
+#ifdef MSG_DEFLATE_DEBUG
+char msg[160];
+      for (int k=0; k<deflator.size(); k++){
+
+sprintf(msg, "send: deflator[%d]: index=%d, seqIndex=%d",
+  k, deflator[k].index,
+deflator[k].seqIndex.decompSeqIndex);
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+      }
+#endif
+
+#endif
+      // determine contiguous runs in linIndex to minimize memcpy overhead
+      vector<ArrayHelper::LinIndexContigBlock> linIndexContigBlockList;
+      // initialize linIndexContigBlockList[]
+      ArrayHelper::LinIndexContigBlock block;
+      block.linIndex = deflator[0].index;
+      block.linIndexCount = 1;
+      linIndexContigBlockList.push_back(block);
+      for (unsigned k=1; k<deflator.size(); k++){
+        if (deflator[k-1].index + vectorLength == deflator[k].index){
+          // contiguous step in linIndex
+          ++(linIndexContigBlockList.back().linIndexCount);
+        }else{
+          // discontiguous jump in linIndex
+          block.linIndex = deflator[k].index;
+          block.linIndexCount = 1;
+          linIndexContigBlockList.push_back(block);
+        }
+      }
+      // intermediate buffer (in case it is needed)
+      int qwords = (sendnbPartnerDeCount[i] * dataSizeSrc) / 8;
+      if ((sendnbPartnerDeCount[i] * dataSizeSrc) % 8)
+        ++qwords;
+      char *buffer = (char *)(new double[qwords]);
+      // store buffer information in BufferInfo for XXE buffer control
+      localrc = xxe->storeBufferInfo(buffer,
+        sendnbPartnerDeCount[i] * dataSizeSrc,
+        sendnbPartnerDeCount[i] * dataSizeSrc / vectorLength);
+      if (ESMC_LogDefault.MsgFoundError(localrc,
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+      // prepare DE/PET info
+      int srcDe = srcLocalDeToDeMap[j];
+      int dstDe = sendnbPartnerDeList[i];
+      int dstPet;   //TODO: DE-based comms
+      dstDelayout->getDEMatchPET(dstDe, *vm, NULL, &dstPet, 1);
+      // fill values into sendnbVector
+      ArrayHelper::SendnbElement<SIT,DIT> sendnbElement;
+      sendnbElement.dstPet = dstPet;
+      sendnbElement.dstDe = dstDe;
+      sendnbElement.dstLocalDe = i;
+      sendnbElement.srcDe = srcDe;
+      sendnbElement.srcLocalDe = j;
+      sendnbElement.partnerDeDataCount = deflator.size();
+      sendnbElement.vectorFlag = vectorFlag;
+      sendnbElement.srcInfoTable = srcInfoTable[i];
+      sendnbElement.linIndexContigBlockList = linIndexContigBlockList;
+      sendnbElement.bufferInfo = (char **)xxe->getBufferInfoPtr();
+      sendnbElement.localPet = localPet;
+      sendnbElement.petCount = petCount;
+      sendnbVector.push_back(sendnbElement);
+
+#ifdef MSG_DEFLATE_DEBUG
+// debug
+      for (int k=0; k<linIndexContigBlockList.size(); k++){
+        sprintf(msg, "linIndexContigBlockList[%d]: linIndex=%d, "
+          "linIndexCount=%d", k, linIndexContigBlockList[k].linIndex,
+          linIndexContigBlockList[k].linIndexCount);
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+
+      }
+#endif
+
+#ifdef ASMM_STORE_LOG_on_disabled
+      fprintf(asmm_store_log_fp, "gjt: sendnbElement localPet %d, dstPet %d, "
+        "vectorLength=%d\n", localPet, dstPet, vectorLength);
+      for (int k=0; k<linIndexContigBlockList.size(); k++){
+        fprintf(asmm_store_log_fp, "linIndexContigBlockList[%d]: linIndex=%d, "
+          "linIndexCount=%d\n", k, linIndexContigBlockList[k].linIndex,
+          linIndexContigBlockList[k].linIndexCount);
+      }
+#endif
+    } // for i - sendnbDiffPartnerDeCount
+    // garbage collection
+    delete [] sendnbPartnerDeList;
+    delete [] sendnbPartnerDeCount;
+  } // for j - srcLocalDeCount
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors7.0"));
+#endif
+
+#ifdef ASMM_STORE_TIMING_on
+  VMK::wtime(t10);   //gjt - profile
+#endif
+
+  // --------------------------------------------------------------
+  // recv and send patterns have been determined, ready to use them
+  // --------------------------------------------------------------
+
+  // sort recv and send vectors to lower communication contention
+  // sorting also ensures correct ordering of sendnb and recvnb calls w/o tags
+  sort(recvnbVector.begin(), recvnbVector.end());
+  sort(sendnbVector.begin(), sendnbVector.end());
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors7.1"));
+#endif
+
+#define FORCE_SHRINK_AFTER_SORT_on
+#ifdef FORCE_SHRINK_AFTER_SORT_on
+  // shrink size of recvnbVector to where it was before sort
+  // may come at a performance hit
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > recvnbV = recvnbVector;
+  recvnbV.swap(recvnbVector);
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > ().swap(recvnbV);
+  // shrink size of sendnbVector to where it was before sort
+  // may come at a performance hit
+  vector<ArrayHelper::SendnbElement<SIT,DIT> > sendnbV = sendnbVector;
+  sendnbV.swap(sendnbVector);
+  vector<ArrayHelper::SendnbElement<SIT,DIT> > ().swap(sendnbV);
+#endif
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors7.2"));
+#endif
+
+#ifdef ASMM_STORE_COMMMATRIX_on
+#if 0
+  {
+    std::stringstream msg;
+    msg << "Storing CommMatrix: sendnbVector.size()=" << sendnbVector.size()
+        << " recvnbVector.size()=" << recvnbVector.size();
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+  // store the communication matrix in compact (sparse) distributed fashion,
+  vector<int> *commMatrixDstPet        = new vector<int>(sendnbVector.size());
+  vector<int> *commMatrixDstDataCount  = new vector<int>(sendnbVector.size());
+  vector<int> *commMatrixSrcPet        = new vector<int>(recvnbVector.size());
+  vector<int> *commMatrixSrcDataCount  = new vector<int>(recvnbVector.size());
+  for (unsigned i=0; i<sendnbVector.size(); i++){
+    (*commMatrixDstPet)[i]       = sendnbVector[i].dstPet;
+    (*commMatrixDstDataCount)[i] = sendnbVector[i].partnerDeDataCount;
+  }
+  for (unsigned i=0; i<recvnbVector.size(); i++){
+    (*commMatrixSrcPet)[i]       = recvnbVector[i].srcPet;
+    (*commMatrixSrcDataCount)[i] = recvnbVector[i].partnerDeDataCount;
+  }
+  // attach the communication matrix to the routehandle
+  localrc = (*routehandle)->setStorage(commMatrixDstPet, 1);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  localrc = (*routehandle)->setStorage(commMatrixDstDataCount, 2);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  localrc = (*routehandle)->setStorage(commMatrixSrcPet, 3);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+  localrc = (*routehandle)->setStorage(commMatrixSrcDataCount, 4);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+#endif
+
+#ifdef ASMM_STORE_TIMING_on
+  VMK::wtime(t11);   //gjt - profile
+#endif
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors8.0"));
+#endif
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
+    return rc;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
 template<typename SIT, typename DIT>
   int sparseMatMulStoreEncodeXXEStream(VM *vm,
-  vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector,
   vector<ArrayHelper::SendnbElement<SIT,DIT> > &sendnbVector,
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector,
   int srcTermProcessing, int pipelineDepth, XXE::TKId elementTK,
   XXE::TKId valueTK, XXE::TKId factorTK,
   int dataSizeSrc, int dataSizeDst, int dataSizeFactors, int srcLocalDeCount,
@@ -10616,18 +9653,15 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   ESMC_TypeKind_Flag typekindFactors,     // in
   ESMC_TypeKind_Flag typekindSrc,         // in
   ESMC_TypeKind_Flag typekindDst,         // in
-  const int *srcLocalDeElementCount,      // in
-  const int *dstLocalDeElementCount,      // in
-  vector<DD::AssociationElement<SIT,DIT> > *srcLinSeqVect, // in - sparse mat "run dist."
-  vector<DD::AssociationElement<DIT,SIT> > *dstLinSeqVect, // in - sparse mat "run dist."
+  vector<ArrayHelper::SendnbElement<SIT,DIT> > &sendnbVector, // in
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector, // in
   const int *dstLocalDeTotalElementCount, // in
   char **rraList,                         // in
   int rraCount,                           // in
   RouteHandle **routehandle,              // inout - handle to precomputed comm
   bool undistributedDimsPresent,          // in
 #ifdef ASMM_STORE_TIMING_on
-  double *t8, double *t9, double *t10, double *t11, double *t12, double *t13,
-  double *t14,
+  double *t12pre, double *t12, double *t13, double *t14,
 #endif
   int *srcTermProcessingArg,    // inout (optional)
                                 // if (NULL) -> auto-tune, no pass back
@@ -10640,24 +9674,17 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   ){
 //
 // !DESCRIPTION:
-//    Take the incoming sparse matrix information in "run distribution" and
-//    use it to encode an XXE stream for the sparseMatMul. The generated XXE
-//    object is attached to a new routehandle object through which it is
-//    returned.
+//    The incoming sparse matrix information is provided in (srcDe, dstDe) pair
+//    specific SendnbElement and RecvnbElement objects. These elements are
+//    stored in the two incoming vectors:
 //
-//    The XXE stream is generated by a two step process. First 
-//    sparseMatMulStoreEncodeXXE() transforms the sparse matrix information from
-//    "run distribution" into (srcDe, dstDe) pair specific SendnbElement and
-//    RecvnbElement objects. These elements are stored in the two main local
-//    data objects of this routine:
-//
-//      srcLinSeqVect -> sendnbVector
-//      dstLinSeqVect -> recvnbVector
+//      sendnbVector
+//      recvnbVector
 //
 //    These two vectors contain as many objects as there are srcDe, dstDe on
 //    the localPet, respectively.
 //
-//    In the second step sendnbVector and recvnbVector are used to encode the
+//    In this method, sendnbVector and recvnbVector are used to encode the
 //    actual XXE stream by calling sparseMatMulStoreEncodeXXEStream(). This
 //    stream encode routine allows two stream parameters to be specified:
 //    srcTermProcessing and pipelineDepth. sparseMatMulStoreEncodeXXE() calls
@@ -10672,32 +9699,17 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   try{
-  // create and initialize the RouteHandle
-  *routehandle = RouteHandle::create(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-  localrc = (*routehandle)->setType(ESMC_ARRAYXXE);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE1.0"));
 #endif
 
-  // allocate XXE and attach to RouteHandle
-  XXE *xxe;
-  try{
-    xxe = new XXE(vm, 1000, 10000, 1000);
-  }catch (...){
-    ESMC_LogDefault.AllocError(ESMC_CONTEXT, &rc);
-    return rc;
-  }
-  localrc = (*routehandle)->setStorage(xxe);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-  // set typekind in xxe which is used to check Arrays before ASMM execution 
+  // get a handle on the XXE stored in routehandle
+  XXE *xxe = (XXE *)(*routehandle)->getStorage();
+
+  // set typekind in xxe which is used to check Arrays before ASMM execution
   xxe->typekind[0] = typekindFactors;
   xxe->typekind[1] = typekindSrc;
   xxe->typekind[2] = typekindDst;
@@ -10757,693 +9769,50 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   }
   // prepare other local variables
   int dataSizeFactors = ESMC_TypeKind_FlagSize(typekindFactors);
-  
+
   int dataSizeSrc = ESMC_TypeKind_FlagSize(typekindSrc);
   int srcLocalDeCount = srcDelayout->getLocalDeCount();
-  const int *srcLocalDeToDeMap = srcDelayout->getLocalDeToDeMap();
-  
+
   int dataSizeDst = ESMC_TypeKind_FlagSize(typekindDst);
   int dstLocalDeCount = dstDelayout->getLocalDeCount();
-  const int *dstLocalDeToDeMap = dstDelayout->getLocalDeToDeMap();
-  
+
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
-  
-  bool vectorFlag = !(tensorMixFlag || 
+
+  bool vectorFlag = !(tensorMixFlag ||
     (srcTensorContigLength != dstTensorContigLength));
 
 #ifdef ASMM_STORE_TIMING_on
-  double t9a, t9b, t9d, t9e; //gjt - profile
-  double t9c1, t9c2; //gjt - profile
-  VMK::wtime(t8);   //gjt - profile
+  VMK::wtime(t12pre);   //gjt - profile
 #endif
-    
+
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE2.0"));
 #endif
 
-  // determine recv pattern for all localDEs on dst side
-  vector<ArrayHelper::RecvnbElement<DIT,SIT> > recvnbVector;
-  for (int j=0; j<dstLocalDeCount; j++){
-    int *index2Ref = new int[dstLocalDeElementCount[j]];  // large enough
-    int localDeFactorCount = 0; // reset
-    int iCount = 0; // reset
-    for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
-      int factorCount = dstLinSeqVect[j][k].factorCount;
-      if (factorCount){
-        index2Ref[iCount] = k;   // store element index
-        localDeFactorCount += factorCount;
-        ++iCount; // increment counter
-      }
-    }
-
-#ifdef ASMM_STORE_TIMING_on
-    VMK::wtime(&t9a);   //gjt - profile
-#endif
-        
-#ifdef ASMM_STORE_LOG_on_disabled
-fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
-  localDeFactorCount);
-#endif
-    int *index2Ref2 = new int[localDeFactorCount];  // large enough
-    int *factorIndexRef = new int[localDeFactorCount];  // large enough
-    int *partnerDeRef = new int[localDeFactorCount];  // large enough
-    vector<int> recvnbPartnerDeList(localDeFactorCount);  // large enough
-    vector<int> recvnbPartnerDeCount(localDeFactorCount);  // large enough
-    int recvnbDiffPartnerDeCount = 0; // reset
-    int count = 0; // reset
-    for (int i=0; i<iCount; i++){
-      int factorCount = dstLinSeqVect[j][index2Ref[i]].factorCount;
-      for (int k=0; k<factorCount; k++){
-        int partnerDe =
-          dstLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe[0];
-        int kk;
-        for (kk=0; kk<recvnbDiffPartnerDeCount; kk++)
-          if (recvnbPartnerDeList[kk]==partnerDe) break;
-        if (kk==recvnbDiffPartnerDeCount){
-          // new entry
-          recvnbPartnerDeList[kk] = partnerDe;
-          recvnbPartnerDeCount[kk] = 1; // initialize
-          ++recvnbDiffPartnerDeCount;
-        }else
-          ++recvnbPartnerDeCount[kk];   // increment
-        index2Ref2[count] = index2Ref[i];
-        factorIndexRef[count] = k;
-        partnerDeRef[count] = kk;
-        ++count;
-      }
-    }
-    
-#ifdef ASMM_STORE_TIMING_on
-    VMK::wtime(&t9b);   //gjt - profile
-#endif
-        
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreEncodeXXE3.0"));
-#endif
-
-    // invert the look-up direction
-    vector<vector<ArrayHelper::DstInfo<DIT,SIT> > >
-      dstInfoTable(recvnbDiffPartnerDeCount);
-    vector<int> dstInfoTableInit(recvnbDiffPartnerDeCount);
-    for (int i=0; i<recvnbDiffPartnerDeCount; i++){
-      dstInfoTable[i].resize(recvnbPartnerDeCount[i]);
-      dstInfoTableInit[i] = 0;   // reset
-    }
-    char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
-    localrc = xxe->storeStorage(localDeFactorBuffer); // XXE garbage collec.
-    if (ESMC_LogDefault.MsgFoundError(localrc,
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-#ifdef ASMM_STORE_TIMING_on
-    VMK::wtime(&t9c1);   //gjt - profile
-#endif
-    for (int i=0; i<localDeFactorCount; i++){
-      int partnerDeListIndex = partnerDeRef[i];
-      int index2 = dstInfoTableInit[partnerDeListIndex]++;
-      dstInfoTable[partnerDeListIndex][index2].linIndex =
-        dstLinSeqVect[j][index2Ref2[i]].linIndex;
-      dstInfoTable[partnerDeListIndex][index2].vectorLength = 1;  // default
-      dstInfoTable[partnerDeListIndex][index2].seqIndex =
-        dstLinSeqVect[j][index2Ref2[i]].seqIndex;
-      dstInfoTable[partnerDeListIndex][index2].partnerSeqIndex
-        = dstLinSeqVect[j][index2Ref2[i]].factorList[factorIndexRef[i]]
-        .partnerSeqIndex;
-      if (!tensorMixFlag){
-        // default into tensor for tensor src/dst mode
-        dstInfoTable[partnerDeListIndex][index2].partnerSeqIndex
-          .tensorSeqIndex
-          = dstInfoTable[partnerDeListIndex][index2].seqIndex.tensorSeqIndex;
-      }
-      char *localDeFactorBufferEntry = localDeFactorBuffer + i*dataSizeFactors;
-      memcpy(localDeFactorBufferEntry,
-        dstLinSeqVect[j][index2Ref2[i]].factorList[factorIndexRef[i]]
-        .factor, dataSizeFactors);
-      dstInfoTable[partnerDeListIndex][index2].factor =
-        (void *)(localDeFactorBufferEntry);
-    }
-    
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreEncodeXXE4.0"));
-#endif
-
-      // garbage collection
-    delete [] index2Ref;
-    delete [] index2Ref2;
-    delete [] factorIndexRef;
-    delete [] partnerDeRef;
-    
-#ifdef ASMM_STORE_TIMING_on
-    VMK::wtime(&t9c2);   //gjt - profile
-#endif  
-       
-    // sort each "recvnbDiffPartnerDeCount group" (opposite of src)
-    if (!vectorFlag){
-      // no vectorization possible -> sort for scalar optimization
-      for (int i=0; i<recvnbDiffPartnerDeCount; i++)
-        sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
-          ArrayHelper::scalarOrderDstInfo<DIT,SIT>);
-    }else if (dstTensorContigLength == 1){
-      // support vectorization during execution, but nothing to deflate here
-      // sort for scalar optimization
-      for (int i=0; i<recvnbDiffPartnerDeCount; i++)
-        sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
-          ArrayHelper::scalarOrderDstInfo<DIT,SIT>);
-    }else{
-      // vectorization
-      // sort vector optimization
-      for (int i=0; i<recvnbDiffPartnerDeCount; i++){
-        sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
-          ArrayHelper::vectorOrderDstInfo<DIT,SIT>);
-#ifdef ASMM_STORE_LOG_on_disabled
-        for (int k=0; k<dstInfoTable[i].size(); k++)
-          fprintf(asmm_store_log_fp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
-            ".partnerSeqIndex = %d/%d, .factor = %p\n", i, k,
-            dstInfoTable[i][k].seqIndex.decompSeqIndex, 
-            dstInfoTable[i][k].seqIndex.tensorSeqIndex, 
-            dstInfoTable[i][k].partnerSeqIndex.decompSeqIndex, 
-            dstInfoTable[i][k].partnerSeqIndex.tensorSeqIndex,
-            dstInfoTable[i][k].factor);
-#endif
-        // vectorize -> deflate dstInfoTable 
-        typename vector<ArrayHelper::DstInfo<DIT,SIT> >::iterator rangeStart =
-          dstInfoTable[i].begin();
-        typename vector<ArrayHelper::DstInfo<DIT,SIT> >::iterator rangeStop = 
-          rangeStart;
-        typename vector<ArrayHelper::DstInfo<DIT,SIT> >::iterator rangeWrite = 
-          rangeStart;
-        while (rangeStart != dstInfoTable[i].end()){
-          int vectorLength = 1; // initialize
-          DIT decompSeqIndex = rangeStart->seqIndex.decompSeqIndex;
-          int linIndex = rangeStart->linIndex;
-          rangeStop++;
-          while((rangeStop != dstInfoTable[i].end())
-            && (rangeStop->seqIndex.decompSeqIndex == decompSeqIndex)
-            && (rangeStop->linIndex == (linIndex + 1))){
-            linIndex = rangeStop->linIndex;
-            ++vectorLength;
-            rangeStop++;
-          }
-#ifdef ASMM_STORE_LOG_on
-  {
-    std::stringstream msg;
-    msg << "ASMM_STORE_LOG: dstTensorContigLength: " << dstTensorContigLength <<
-  " vectorLength: " << vectorLength << " decompSeqIndex: " << decompSeqIndex;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-  }
-#endif
-          if ((rangeWrite != dstInfoTable[i].begin())
-            && ((rangeWrite-1)->vectorLength != vectorLength)){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
-            "vectorization failed", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-          if (vectorLength != dstTensorContigLength){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
-            "vectorization failed", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-          *rangeWrite = *rangeStart;  // copy table element
-          rangeWrite->vectorLength = vectorLength;
-          rangeWrite++;
-          rangeStart = rangeStop;
-        }
-        dstInfoTable[i].erase(rangeWrite, dstInfoTable[i].end());
-      }
-    }
-
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreEncodeXXE5.0"));
-#endif
-
-#ifdef ASMM_STORE_LOG_on_disabled
-    // print:
-    fprintf(asmm_store_log_fp, "dstArray: %d, %d\n", j,
-      recvnbDiffPartnerDeCount); 
-    for (int i=0; i<recvnbDiffPartnerDeCount; i++)
-      for (int k=0; k<dstInfoTable[i].size(); k++)
-        fprintf(asmm_store_log_fp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
-          ".partnerSeqIndex[][] = %d/%d\n", i, k,
-          dstInfoTable[i][k].seqIndex.decompSeqIndex, 
-          dstInfoTable[i][k].seqIndex.tensorSeqIndex, 
-          dstInfoTable[i][k].partnerSeqIndex.decompSeqIndex, 
-          dstInfoTable[i][k].partnerSeqIndex.tensorSeqIndex);
-#endif
-    
-#ifdef ASMM_STORE_TIMING_on
-    VMK::wtime(&t9d);   //gjt - profile
-#endif
-
-    // construct recv elements
-    for (int i=0; i<recvnbDiffPartnerDeCount; i++){
-      int vectorLength = dstInfoTable[i].begin()->vectorLength;
-      // initialize the bufferIndex member in the dstInfoTable
-#ifdef MSG_DEFLATE
-      // construct bufferIndex member in dstInfoTable according to deflation
-      vector<ArrayHelper::Deflator<SIT> > deflator(dstInfoTable[i].size());
-      for (unsigned k=0; k<dstInfoTable[i].size(); k++){
-        // fill
-        deflator[k].seqIndex = dstInfoTable[i][k].partnerSeqIndex;
-        deflator[k].index = k;
-      }
-      // sort by partnerSeqIndex
-      sort(deflator.begin(), deflator.end());
-      // record the buffer index in dstInfoTable
-      int kk = 0;
-      dstInfoTable[i][deflator[0].index].bufferIndex = kk;  // spin up
-      for (unsigned k=1; k<deflator.size(); k++){
-        if (deflator[k].seqIndex != deflator[k-1].seqIndex)
-          ++kk;
-        dstInfoTable[i][deflator[k].index].bufferIndex = kk;
-      }
-      ++kk;
-      
-#ifdef MSG_DEFLATE_DEBUG
-char msg[160];
-      for (int k=0; k<kk; k++){
-        
-sprintf(msg, "recv: deflator[%d]: index=%d, bufferIndex=%d, seqIndex=%d",
-  k, deflator[k].index, dstInfoTable[i][deflator[k].index].bufferIndex,
-deflator[k].seqIndex.decompSeqIndex);
-ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-
-      }
-#endif
-        
-#else
-      //todo: remove this initialization once the deflator works right!!!!!!
-      for (int k=0; k<dstInfoTable[i].size(); k++)
-        dstInfoTable[i][k].bufferIndex = k;
-      int kk = dstInfoTable[i].size();
-#endif
-      // large contiguous 1st level receive buffer
-//alignment      char *buffer = new char[recvnbPartnerDeCount[i] * dataSizeSrc];
-      int qwords = (recvnbPartnerDeCount[i] * dataSizeSrc) / 8;
-      if ((recvnbPartnerDeCount[i] * dataSizeSrc) % 8)
-        ++qwords;
-      char *buffer = (char *)(new double[qwords]);
-      localrc = xxe->storeStorage(buffer); // XXE garbage collec.
-      if (ESMC_LogDefault.MsgFoundError(localrc,
-        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-      // store buffer information in BufferInfo for XXE buffer control
-      localrc = xxe->storeBufferInfo(buffer,
-        recvnbPartnerDeCount[i] * dataSizeSrc,
-        recvnbPartnerDeCount[i] * dataSizeSrc / vectorLength);
-      if (ESMC_LogDefault.MsgFoundError(localrc,
-        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-      // prepare DE/PET info
-      int srcDe = recvnbPartnerDeList[i];
-      int srcPet;   //TODO: DE-based comms
-      srcDelayout->getDEMatchPET(srcDe, *vm, NULL, &srcPet, 1);
-      int dstDe = dstLocalDeToDeMap[j];
-      // fill values into recvnbVector
-      ArrayHelper::RecvnbElement<DIT,SIT> recvnbElement;
-      recvnbElement.srcPet = srcPet;
-      recvnbElement.srcDe = srcDe;
-      recvnbElement.srcLocalDe = i;
-      recvnbElement.dstDe = dstDe;
-      recvnbElement.dstLocalDe = j;
-      recvnbElement.bufferInfo = (char **)xxe->getBufferInfoPtr();
-      recvnbElement.partnerDeDataCount = kk;
-      recvnbElement.vectorFlag = vectorFlag;
-      recvnbElement.dstInfoTable = dstInfoTable[i];
-      recvnbElement.localPet = localPet;
-      recvnbElement.petCount = petCount;
-      recvnbVector.push_back(recvnbElement);
-#ifdef ASMM_STORE_LOG_on_disabled
-      fprintf(asmm_store_log_fp, "gjt: recvnbElement localPet %d, srcPet %d, "
-        "vectorLength=%d\n", localPet, srcPet, vectorLength);
-#endif
-    } // for i - recvnbDiffPartnerDeCount
-    
-#ifdef ASMM_STORE_TIMING_on
-    VMK::wtime(&t9e);   //gjt - profile
-//    printf("gjt - profile for PET %d, j-loop %d:\n"
-//      " t9a=%g\n t9b=%g\n t9c1=%g\n t9c2=%g\n t9d=%g\n t9e=%g\n", localPet, j,
-//      t9a-*t8, t9b-*t8, t9c1-*t8, t9c2-*t8, t9d-*t8, t9e-*t8);
-#endif
-    
-  } // for j - dstLocalDeCount
-    
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(t9);   //gjt - profile
-#endif
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreEncodeXXE6.0"));
-#endif
-
-  // determine send pattern for all localDEs on src side
-  vector<ArrayHelper::SendnbElement<SIT,DIT> > sendnbVector;
-  for (int j=0; j<srcLocalDeCount; j++){
-    int *index2Ref = new int[srcLocalDeElementCount[j]];  // large enough
-    int localDeFactorCount = 0; // reset
-    int iCount = 0; // reset
-    for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
-      int factorCount = srcLinSeqVect[j][k].factorCount;
-      if (factorCount){
-        index2Ref[iCount] = k;   // store element index
-        localDeFactorCount += factorCount;
-        ++iCount; // increment counter
-      }
-    }
-    int *index2Ref2 = new int[localDeFactorCount];  // large enough
-    int *factorIndexRef = new int[localDeFactorCount];  // large enough
-    int *partnerDeRef = new int[localDeFactorCount];  // large enough
-    int *sendnbPartnerDeList = new int[localDeFactorCount];  // large enough
-    int *sendnbPartnerDeCount = new int[localDeFactorCount];  // large enough
-    int sendnbDiffPartnerDeCount = 0; // reset
-    int count = 0; // reset
-    for (int i=0; i<iCount; i++){
-      int factorCount = srcLinSeqVect[j][index2Ref[i]].factorCount;
-      for (int k=0; k<factorCount; k++){
-        int partnerDe =
-          srcLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe[0];
-        int kk;
-        for (kk=0; kk<sendnbDiffPartnerDeCount; kk++)
-          if (sendnbPartnerDeList[kk]==partnerDe) break;
-        if (kk==sendnbDiffPartnerDeCount){
-          // new entry
-          sendnbPartnerDeList[kk] = partnerDe;
-          sendnbPartnerDeCount[kk] = 1; // initialize
-          ++sendnbDiffPartnerDeCount;
-        }else
-          ++sendnbPartnerDeCount[kk];   // increment
-        index2Ref2[count] = index2Ref[i];
-        factorIndexRef[count] = k;
-        partnerDeRef[count] = kk;
-        ++count;
-      }
-    }
-    // invert the look-up direction
-    vector<vector<ArrayHelper::SrcInfo<SIT,DIT> > >
-      srcInfoTable(sendnbDiffPartnerDeCount);
-    vector<int> srcInfoTableInit(sendnbDiffPartnerDeCount);
-    for (int i=0; i<sendnbDiffPartnerDeCount; i++){
-      srcInfoTable[i].resize(sendnbPartnerDeCount[i]);
-      srcInfoTableInit[i] = 0;   // reset
-    }
-    // alignment char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
-    int qwords = (localDeFactorCount * dataSizeFactors) / 8;
-    if ((localDeFactorCount * dataSizeFactors) % 8)
-      ++qwords;
-    char *localDeFactorBuffer = (char *)(new double[qwords]);
-    localrc = xxe->storeStorage(localDeFactorBuffer); // XXE garbage collec.
-    if (ESMC_LogDefault.MsgFoundError(localrc,
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-    for (int i=0; i<localDeFactorCount; i++){
-      int partnerDeListIndex = partnerDeRef[i];
-      int index2 = srcInfoTableInit[partnerDeListIndex]++;
-      srcInfoTable[partnerDeListIndex][index2].linIndex =
-        srcLinSeqVect[j][index2Ref2[i]].linIndex;
-      srcInfoTable[partnerDeListIndex][index2].vectorLength = 1;
-      srcInfoTable[partnerDeListIndex][index2].seqIndex =
-        srcLinSeqVect[j][index2Ref2[i]].seqIndex;
-      srcInfoTable[partnerDeListIndex][index2].partnerSeqIndex =
-        srcLinSeqVect[j][index2Ref2[i]].factorList[factorIndexRef[i]]
-        .partnerSeqIndex;
-      if (!tensorMixFlag){
-        // default into tensor for tensor src/dst mode
-        srcInfoTable[partnerDeListIndex][index2].partnerSeqIndex
-          .tensorSeqIndex =
-          srcInfoTable[partnerDeListIndex][index2].seqIndex.tensorSeqIndex;
-      }
-      char *localDeFactorBufferEntry = localDeFactorBuffer + i*dataSizeFactors;
-      memcpy(localDeFactorBufferEntry,
-        srcLinSeqVect[j][index2Ref2[i]].factorList[factorIndexRef[i]]
-        .factor, dataSizeFactors);
-      srcInfoTable[partnerDeListIndex][index2].factor =
-        (void *)(localDeFactorBufferEntry);
-    }
-    
-    // garbage collection
-    delete [] index2Ref;
-    delete [] index2Ref2;
-    delete [] factorIndexRef;
-    delete [] partnerDeRef;
-    
-    // sort each "sendnbDiffPartnerDeCount group" (opposite of dst)
-    if (!vectorFlag){
-      // no vectorization possible -> sort for scalar optimization
-      for (int i=0; i<sendnbDiffPartnerDeCount; i++)
-        sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
-          ArrayHelper::scalarOrderSrcInfo<SIT,DIT>);
-    }else if (srcTensorContigLength == 1){
-      // support vectorization during execution, but nothing to deflate here
-      // sort for scalar optimization
-      for (int i=0; i<sendnbDiffPartnerDeCount; i++)
-        sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
-          ArrayHelper::scalarOrderSrcInfo<SIT,DIT>);
-    }else{
-      // vectorization
-      // sort vector optimization
-      for (int i=0; i<sendnbDiffPartnerDeCount; i++){
-        sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
-          ArrayHelper::vectorOrderSrcInfo<SIT,DIT>);
-        // vectorize -> deflate srcInfoTable 
-        typename vector<ArrayHelper::SrcInfo<SIT,DIT> >::iterator rangeStart =
-          srcInfoTable[i].begin();
-        typename vector<ArrayHelper::SrcInfo<SIT,DIT> >::iterator rangeStop =
-          rangeStart;
-        typename vector<ArrayHelper::SrcInfo<SIT,DIT> >::iterator rangeWrite =
-          rangeStart;
-        while (rangeStart != srcInfoTable[i].end()){
-          int vectorLength = 1; // initialize
-          SIT decompSeqIndex = rangeStart->seqIndex.decompSeqIndex;
-          int linIndex = rangeStart->linIndex;
-          rangeStop++;
-          while((rangeStop != srcInfoTable[i].end())
-            && (rangeStop->seqIndex.decompSeqIndex == decompSeqIndex)
-            && (rangeStop->linIndex == (linIndex + 1))){
-            linIndex = rangeStop->linIndex;
-            ++vectorLength;
-            rangeStop++;
-          }
-          if ((rangeWrite != srcInfoTable[i].begin())
-            && ((rangeWrite-1)->vectorLength != vectorLength)){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
-            "vectorization failed", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-          if (vectorLength != srcTensorContigLength){
-            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_INCONS,
-            "vectorization failed", ESMC_CONTEXT, &rc);
-            return rc;
-          }
-          *rangeWrite = *rangeStart;  // copy table element
-          rangeWrite->vectorLength = vectorLength;
-          rangeWrite++;
-          rangeStart = rangeStop;
-        }
-        srcInfoTable[i].erase(rangeWrite, srcInfoTable[i].end());
-      }
-    }
-        
-#ifdef ASMM_STORE_LOG_on_disabled
-    // print:
-    for (int i=0; i<sendnbDiffPartnerDeCount; i++)
-      for (int k=0; k<srcInfoTable[i].size(); k++)
-        fprintf(asmm_store_log_fp, "srcInfoTable[%d][%d].seqIndex = %d/%d, "
-          ".partnerSeqIndex[][] = %d/%d\n", i, k,
-          srcInfoTable[i][k].seqIndex.decompSeqIndex, 
-          srcInfoTable[i][k].seqIndex.tensorSeqIndex, 
-          srcInfoTable[i][k].partnerSeqIndex.decompSeqIndex, 
-          srcInfoTable[i][k].partnerSeqIndex.tensorSeqIndex);
-#endif
-    
-    // construct send elements
-    for (int i=0; i<sendnbDiffPartnerDeCount; i++){
-      int vectorLength = srcInfoTable[i].begin()->vectorLength;
-      // use a temporary vector to aide in deflating of the message to be sent
-      vector<ArrayHelper::Deflator<SIT> > deflator(srcInfoTable[i].size());
-      for (unsigned k=0; k<srcInfoTable[i].size(); k++){
-        // fill
-        deflator[k].seqIndex  = srcInfoTable[i][k].seqIndex;
-        deflator[k].index     = srcInfoTable[i][k].linIndex;
-      }
-#ifdef MSG_DEFLATE
-      // sort -> cut off duplic.
-      sort(deflator.begin(), deflator.end());
-      deflator.erase(unique(deflator.begin(),deflator.end()),deflator.end());
-      
-#ifdef MSG_DEFLATE_DEBUG
-char msg[160];
-      for (int k=0; k<deflator.size(); k++){
-        
-sprintf(msg, "send: deflator[%d]: index=%d, seqIndex=%d",
-  k, deflator[k].index,
-deflator[k].seqIndex.decompSeqIndex);
-ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-      }
-#endif      
-      
-#endif
-      // determine contiguous runs in linIndex to minimize memcpy overhead
-      vector<ArrayHelper::LinIndexContigBlock> linIndexContigBlockList;
-      // initialize linIndexContigBlockList[]
-      ArrayHelper::LinIndexContigBlock block;
-      block.linIndex = deflator[0].index;
-      block.linIndexCount = 1;
-      linIndexContigBlockList.push_back(block);
-      for (unsigned k=1; k<deflator.size(); k++){
-        if (deflator[k-1].index + vectorLength == deflator[k].index){
-          // contiguous step in linIndex
-          ++(linIndexContigBlockList.back().linIndexCount);
-        }else{
-          // discontiguous jump in linIndex
-          block.linIndex = deflator[k].index;
-          block.linIndexCount = 1;
-          linIndexContigBlockList.push_back(block);
-        }
-      }
-      // intermediate buffer (in case it is needed)
-//alignment      char *buffer = new char[sendnbPartnerDeCount[i] * dataSizeSrc];
-      int qwords = (sendnbPartnerDeCount[i] * dataSizeSrc) / 8;
-      if ((sendnbPartnerDeCount[i] * dataSizeSrc) % 8)
-        ++qwords;
-      char *buffer = (char *)(new double[qwords]);
-      localrc = xxe->storeStorage(buffer); // XXE garbage collec.
-      if (ESMC_LogDefault.MsgFoundError(localrc,
-        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-      // store buffer information in BufferInfo for XXE buffer control
-      localrc = xxe->storeBufferInfo(buffer,
-        sendnbPartnerDeCount[i] * dataSizeSrc,
-        sendnbPartnerDeCount[i] * dataSizeSrc / vectorLength);
-      if (ESMC_LogDefault.MsgFoundError(localrc,
-        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-      // prepare DE/PET info
-      int srcDe = srcLocalDeToDeMap[j];
-      int dstDe = sendnbPartnerDeList[i];
-      int dstPet;   //TODO: DE-based comms
-      dstDelayout->getDEMatchPET(dstDe, *vm, NULL, &dstPet, 1);
-      // fill values into sendnbVector
-      ArrayHelper::SendnbElement<SIT,DIT> sendnbElement;
-      sendnbElement.dstPet = dstPet;
-      sendnbElement.dstDe = dstDe;
-      sendnbElement.dstLocalDe = i;
-      sendnbElement.srcDe = srcDe;
-      sendnbElement.srcLocalDe = j;
-      sendnbElement.partnerDeDataCount = deflator.size();
-      sendnbElement.vectorFlag = vectorFlag;
-      sendnbElement.srcInfoTable = srcInfoTable[i];
-      sendnbElement.linIndexContigBlockList = linIndexContigBlockList;
-      sendnbElement.bufferInfo = (char **)xxe->getBufferInfoPtr();
-      sendnbElement.localPet = localPet;
-      sendnbElement.petCount = petCount;
-      sendnbVector.push_back(sendnbElement);
-      
-#ifdef MSG_DEFLATE_DEBUG
-// debug      
-      for (int k=0; k<linIndexContigBlockList.size(); k++){
-        sprintf(msg, "linIndexContigBlockList[%d]: linIndex=%d, "
-          "linIndexCount=%d", k, linIndexContigBlockList[k].linIndex,
-          linIndexContigBlockList[k].linIndexCount);
-ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-        
-      }
-#endif
-      
-#ifdef ASMM_STORE_LOG_on_disabled
-      fprintf(asmm_store_log_fp, "gjt: sendnbElement localPet %d, dstPet %d, "
-        "vectorLength=%d\n", localPet, dstPet, vectorLength);
-      for (int k=0; k<linIndexContigBlockList.size(); k++){
-        fprintf(asmm_store_log_fp, "linIndexContigBlockList[%d]: linIndex=%d, "
-          "linIndexCount=%d\n", k, linIndexContigBlockList[k].linIndex,
-          linIndexContigBlockList[k].linIndexCount);
-      }
-#endif
-    } // for i - sendnbDiffPartnerDeCount
-    // garbage collection
-    delete [] sendnbPartnerDeList;
-    delete [] sendnbPartnerDeCount;
-  } // for j - srcLocalDeCount
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreEncodeXXE7.0"));
-#endif
-
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(t10);   //gjt - profile
-#endif
-  
-  // --------------------------------------------------------------
-  // recv and send patterns have been determined, ready to use them
-  // --------------------------------------------------------------
-  
-  // sort recv and send vectors to lower communication contention
-  // sorting also ensures correct ordering of sendnb and recvnb calls w/o tags
-  sort(recvnbVector.begin(), recvnbVector.end());
-  sort(sendnbVector.begin(), sendnbVector.end());
-  
-#ifdef ASMM_STORE_COMMMATRIX_on
-  // store the communication matrix in compact (sparse) distributed fashion,
-  vector<int> *commMatrixDstPet        = new vector<int>(sendnbVector.size());
-  vector<int> *commMatrixDstDataCount  = new vector<int>(sendnbVector.size());
-  vector<int> *commMatrixSrcPet        = new vector<int>(recvnbVector.size());
-  vector<int> *commMatrixSrcDataCount  = new vector<int>(recvnbVector.size());
-  for (int i=0; i<sendnbVector.size(); i++){
-    (*commMatrixDstPet)[i]       = sendnbVector[i].dstPet;
-    (*commMatrixDstDataCount)[i] = sendnbVector[i].partnerDeDataCount;
-  }
-  for (int i=0; i<recvnbVector.size(); i++){
-    (*commMatrixSrcPet)[i]       = recvnbVector[i].srcPet;
-    (*commMatrixSrcDataCount)[i] = recvnbVector[i].partnerDeDataCount;
-  }
-  // attach the communication matrix to the routehandle
-  localrc = (*routehandle)->setStorage(commMatrixDstPet, 1);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-  localrc = (*routehandle)->setStorage(commMatrixDstDataCount, 2);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-  localrc = (*routehandle)->setStorage(commMatrixSrcPet, 3);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-  localrc = (*routehandle)->setStorage(commMatrixSrcDataCount, 4);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
-#endif
-
-#ifdef ASMM_STORE_TIMING_on
-  VMK::wtime(t11);   //gjt - profile
-#endif
-
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreEncodeXXE8.0"));
-#endif
-  
   // store current XXE parameter in order to efficiently rewrite multiple times
   const int startCount = xxe->count;
-  const int startStorageCount = xxe->storageCount;
+  const int startDataCount = xxe->dataCount;
   const int startCommhandleCount = xxe->commhandleCount;
   const int startXxeSubCount = xxe->xxeSubCount;
   const int startBufferInfoListSize = xxe->bufferInfoList.size();
-  
+
   double dtMin;           // to find minimum time
-  
-#ifdef ASMM_STORE_OPT_PRINT_on
-  char asmm_store_opt_print_file[160];
-  sprintf(asmm_store_opt_print_file, "ASMM_STORE_OPT_PRINT_on.%05d", localPet);
-  FILE *asmm_store_opt_print_fp = fopen(asmm_store_opt_print_file, "a");
-  fprintf(asmm_store_opt_print_fp, "\n========================================"
-    "========================================\n");
-  fprintf(asmm_store_opt_print_fp, "========================================"
-    "========================================\n\n");
-#endif
-  
+
   // Need correct setting of vectorLength for the XXE exec() calls.
   int vectorLength = 0; // initialize
-  
+
   // For the case that vectorLength is relevant, i.e. vectorFlag is set to
   // true, and the XXE stream contains elements that are vectorized,
   // srcTensorContigLength and dstTensorContigLength must be equivalent, and
   // define the vectorLength.
   if (vectorFlag)
     vectorLength = srcTensorContigLength; // consistent vectorLength
-  
+
   //TODO: Implement a smarter optimization algorithm to optimize both
   //TODO: srcTermProcessing and pipelineDepth in a concurrent manner, rather
   //TODO: than the one-after-the-other approach below.
-  
+
   // Optimize srcTermProcessing, finding srcTermProcessingOpt:
   int srcTermProcessingOpt; // optimium src term processing ... to be determined
 
@@ -11455,7 +9824,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   else
     srcTermProcessingArg = &dummyVar; // ignore incoming value
 #endif
-  
+
   if (srcTermProcessingArg && *srcTermProcessingArg >= 0){
     // use the provided srcTermProcessing
 #ifdef SMMSTOREENCODEXXEINFO_on
@@ -11484,21 +9853,21 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     for (int srcTermProc=0; srcTermProc<srcTermProcMax; srcTermProc++){
       int srcTermProcessing=srcTermProcList[srcTermProc];
       // start writing a fresh XXE stream
-      xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
+      xxe->clearReset(startCount, startDataCount, startCommhandleCount,
         startXxeSubCount, startBufferInfoListSize);
-      localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
+      localrc = sparseMatMulStoreEncodeXXEStream(vm, sendnbVector, recvnbVector,
         srcTermProcessing, pipelineDepth, elementTK, valueTK, factorTK,
         dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
-        dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, 
+        dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount,
         vectorLength, xxe);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
-#if 0  
+#if 0
       // optimize the XXE entire stream
       localrc = xxe->optimize();
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
-#endif 
+#endif
       // get XXE ready for execution
       localrc = xxe->execReady();
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -11520,11 +9889,16 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
         dtAverage += dtEnd - dtStart;
       }
       dtAverage /= dtCount;
-#ifdef ASMM_STORE_OPT_PRINT_on
-      fprintf(asmm_store_opt_print_fp, "localPet: %d, srcTermProcessing=%d -> dtAverage=%gs\n", 
-        localPet, srcTermProcessing, dtAverage);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__
+        << " srcTermProcessing=" << srcTermProcessing
+        << " dtAverage=" << dtAverage;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
-      // determine optimum srcTermProcessing  
+      // determine optimum srcTermProcessing
       if (srcTermProcessing==0){
         // first time through -> initialize to find minimum
         dtMin = dtAverage;
@@ -11538,12 +9912,17 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
         }
       }
     } // srcTermProc
-  
-#ifdef ASMM_STORE_OPT_PRINT_on
-    fprintf(asmm_store_opt_print_fp, "localPet: %d, srcTermProcessingOpt=%d -> "
-      "dtMin=%gs (local)\n", localPet, srcTermProcessingOpt, dtMin);
+
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__
+        << " srcTermProcessingOpt=" << srcTermProcessingOpt
+        << " dtMin(local)=" << dtMin;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
-    
+
     // all PETs vote on srcTermProcessingOpt
     vector<int> srcTermProcessingOptList(petCount);
     vm->allgather(&srcTermProcessingOpt, &srcTermProcessingOptList[0],
@@ -11576,18 +9955,23 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     if (srcTermProcessingArg) *srcTermProcessingArg = srcTermProcessingOpt;
-  
+
   } // finished finding srcTermProcessingOpt
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.0"));
 #endif
-  
-#ifdef ASMM_STORE_OPT_PRINT_on
-  fprintf(asmm_store_opt_print_fp, "localPet: %d, srcTermProcessingOpt=%d "
-    "(majority vote)\n", localPet, srcTermProcessingOpt);
+
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__
+        << " srcTermProcessingOpt=" << srcTermProcessingOpt
+        << " (majority vote)";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
-    
+
 #ifdef ASMM_STORE_TIMING_on
   VMK::wtime(t12);   //gjt - profile
 #endif
@@ -11630,21 +10014,21 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     for (int pipelineDepth=1; pipelineDepth<=petCount; pipelineDepth*=2){
       // start writing a fresh XXE stream
-      xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
+      xxe->clearReset(startCount, startDataCount, startCommhandleCount,
         startXxeSubCount, startBufferInfoListSize);
-      localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
+      localrc = sparseMatMulStoreEncodeXXEStream(vm, sendnbVector, recvnbVector,
         srcTermProcessingOpt, pipelineDepth, elementTK, valueTK, factorTK,
         dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
-        dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount, 
+        dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount,
         vectorLength, xxe);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
-#if 0  
+#if 0
       // optimize the XXE entire stream
       localrc = xxe->optimize();
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
-#endif 
+#endif
       // get XXE ready for execution
       localrc = xxe->execReady();
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -11666,11 +10050,16 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
         dtAverage += dtEnd - dtStart;
       }
       dtAverage /= dtCount;
-#ifdef ASMM_STORE_OPT_PRINT_on
-      fprintf(asmm_store_opt_print_fp, "localPet: %d, pipelineDepth=%d -> "
-        "dtAverage=%gs\n", localPet, pipelineDepth, dtAverage);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__
+        << " pipelineDepth=" << pipelineDepth
+        << " dtAverage=" << dtAverage;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
-      // determine optimum pipelineDepth  
+      // determine optimum pipelineDepth
       if (pipelineDepth==1){
         // first time through -> initialize to find minimum
         dtMin = dtAverage;
@@ -11684,12 +10073,17 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
         }
       }
     } // pipelineDepth
-    
-#ifdef ASMM_STORE_OPT_PRINT_on
-    fprintf(asmm_store_opt_print_fp, "localPet: %d, pipelineDepthOpt=%d -> "
-      "dtMin=%gs (local)\n", localPet, pipelineDepthOpt, dtMin);
+
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__
+        << " pipelineDepthOpt=" << pipelineDepthOpt
+        << " dtMin(local)=" << dtMin;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
-      
+
     // all PETs vote on pipelineDepthOpt
     vector<int> pipelineDepthOptList(petCount);
     vm->allgather(&pipelineDepthOpt, &pipelineDepthOptList[0], sizeof(int));
@@ -11719,56 +10113,72 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     sprintf(msg, "... finished tuning, found pipelineDepthOpt = %d",
       pipelineDepthOpt);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-#endif  
+#endif
     if (pipelineDepthArg) *pipelineDepthArg = pipelineDepthOpt;
-  
+
   } // finished finding pipelineDepthOpt
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.0"));
 #endif
 
-#ifdef ASMM_STORE_OPT_PRINT_on
-  fprintf(asmm_store_opt_print_fp, "localPet: %d, pipelineDepthOpt=%d "
-    "(majority vote)\n", localPet, pipelineDepthOpt);
-  fclose(asmm_store_opt_print_fp);
+#ifdef ASMM_STORE_TUNELOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_TUNELOG:" << __LINE__
+        << " pipelineDepthOpt=" << pipelineDepthOpt
+        << " (majority vote)";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
-      
+
 #ifdef ASMM_STORE_TIMING_on
   VMK::wtime(t13);   //gjt - profile
 #endif
 
   // encode with the majority voted pipelineDepthOpt
-  xxe->clearReset(startCount, startStorageCount, startCommhandleCount,
+  xxe->clearReset(startCount, startDataCount, startCommhandleCount,
     startXxeSubCount, startBufferInfoListSize);
-  localrc = sparseMatMulStoreEncodeXXEStream(vm, recvnbVector, sendnbVector,
+  localrc = sparseMatMulStoreEncodeXXEStream(vm, sendnbVector, recvnbVector,
     srcTermProcessingOpt, pipelineDepthOpt, elementTK, valueTK, factorTK,
     dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
     dstLocalDeCount, dstLocalDeTotalElementCount, rraList, rraCount,
     vectorLength, xxe);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
-#if 0  
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.1"));
+#endif
+
+#if 0
   // optimize the XXE entire stream
   localrc = xxe->optimize();
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-#endif 
-    
+#endif
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.2"));
+#endif
+
   // get XXE ready for execution
   localrc = xxe->execReady();
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.3"));
+#endif
+
   // execute final XXE stream for consistent profile data
   vm->barrier();  // ensure all PETs are present before profile run
-  localrc = xxe->exec(rraCount, rraList, &vectorLength, 
+  localrc = xxe->exec(rraCount, rraList, &vectorLength,
     0x0|XXE::filterBitRegionTotalZero|XXE::filterBitNbTestFinish
     |XXE::filterBitCancel|XXE::filterBitNbWaitFinishSingleSum);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE11.0"));
 #endif
@@ -11795,7 +10205,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -11818,8 +10228,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
 // !ARGUMENTS:
 //
   VM *vm,                                 // in
-  vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector, // in - exchange pattern
   vector<ArrayHelper::SendnbElement<SIT,DIT> > &sendnbVector, // in - exchange pattern
+  vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector, // in - exchange pattern
   int srcTermProcessing,                  // in
   int pipelineDepth,                      // in
   XXE::TKId elementTK,                    // in
@@ -11847,10 +10257,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
-    
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream1.0"));
+#endif
+
   try{
 
 #ifdef ASMM_EXEC_PROFILE_on
@@ -11858,7 +10272,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #endif
-  
+
     // use pipeline approach
     typename vector<ArrayHelper::RecvnbElement<DIT,SIT> >::iterator pRecv =
       recvnbVector.begin();
@@ -11868,9 +10282,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
       sendnbVector.begin();
     typename vector<ArrayHelper::SendnbElement<SIT,DIT> >::iterator pSendWait =
       sendnbVector.begin();
-    
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream2.0"));
+#endif
+
 #define SMM_NONBLOCKINGSTYLE_on
-    
+
 #ifdef SMM_NONBLOCKINGSTYLE_on
     // prepare pipeline
 #ifdef OLDSTYLEPIPELINEPREPARE
@@ -11933,7 +10351,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
     }
 #endif
 #endif
-    
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream3.0"));
+#endif
+
     // append predicated zero operations for the total region
 #ifdef ASMM_EXEC_PROFILE_on
     localrc = xxe->appendWtimer(
@@ -11953,7 +10375,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
       localrc = xxe->appendZeroMemsetRRA(
         XXE::filterBitRegionTotalZero|XXE::filterBitNbStart,
         byteCount, srcLocalDeCount + i, vectorFlag);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
+      if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     }
 #ifdef ASMM_EXEC_PROFILE_on
@@ -11963,7 +10385,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #endif
-  
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream4.0"));
+#endif
+
     // append predicated zero operations for targeted dst elements
     for(typename vector<ArrayHelper::RecvnbElement<DIT,SIT> >::iterator pzero =
       recvnbVector.begin(); pzero != recvnbVector.end(); ++pzero){
@@ -11973,7 +10399,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
       if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
     }
-    
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream5.0"));
+#endif
+
 #ifdef SMM_NONBLOCKINGSTYLE_on
     // fill pipeline
     bool recvnbOK = true; // initialize
@@ -12076,7 +10506,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
           sendnbOK = false; // not o.k. to post next sendnb call next iteration
       }
     }
-    
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream6.0"));
+#endif
+
     // drain pipeline
     while ((pRecvWait!=recvnbVector.end()) || (pSendWait!=sendnbVector.end())){
       if (pRecvWait != recvnbVector.end()){
@@ -12147,11 +10581,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
     // alternatively could post all XXE::waitOnAllSendnb at the end
     // -> not sure what gives better performance.
     //  localrc = xxe->appendWaitOnAllSendnb(0x0);
-    //  if (ESMC_LogDefault.MsgFoundError(localrc, 
+    //  if (ESMC_LogDefault.MsgFoundError(localrc,
     //    ESMCI_ERR_PASSTHRU, &rc)) return rc;
-    
-    // append a single productSum operation that considers _all_ of the 
-    // incoming elements and orders them according the strict canonical 
+
+    // append a single productSum operation that considers _all_ of the
+    // incoming elements and orders them according the strict canonical
     // TERMORDER_SRCSEQ order
     localrc = ArrayHelper::RecvnbElement<DIT,SIT>::appendSingleProductSum(xxe,
       0x0|XXE::filterBitNbWaitFinishSingleSum, srcTermProcessing,
@@ -12159,17 +10593,17 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
       dataSizeSrc, dataSizeFactors, rraList, rraCount, recvnbVector);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-    
+
 #else
-    
+
     // use BLOCKING comms instead!!!!!!!!
-    // note that this will produce a routehandle that cannot be executed 
+    // note that this will produce a routehandle that cannot be executed
     // in non-blocking style.
-    // TODO: the BLOCKING option should really be added with a special 
+    // TODO: the BLOCKING option should really be added with a special
     // TODO: pedication bit set so it can be executed for blocking user calls,
     // TODO: of course only if it has been determined as being faster by the
     // TODO: tuning phase over the non-blocking counter part implementation.
-    
+
     while ((pRecv != recvnbVector.end()) || (pSend != sendnbVector.end())){
       int recvStage = -1; // invalidate
       if (pRecv != recvnbVector.end()){
@@ -12203,7 +10637,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
           rraCount, k);
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-        ++pSend;        
+        ++pSend;
       }
       if (recvStage < sendStage){
         int k = pRecv - recvnbVector.begin();
@@ -12211,12 +10645,12 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
           srcTermProcessing, dataSizeSrc, k);
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
-        ++pRecv;        
+        ++pRecv;
       }
     }
-    
+
     // here all blk. comms are done ... -> simple ProductSum() elements follow.
-    
+
     while (pRecvWait!=recvnbVector.end()){
       localrc = pRecvWait->appendProductSum(xxe,
         0x0, srcTermProcessing, srcLocalDeCount,
@@ -12226,21 +10660,25 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       ++pRecvWait;
     }
-        
+
 #endif
-          
+
 #ifdef ASMM_EXEC_PROFILE_on
     localrc = xxe->appendWtimer(0x0, "Wtimer End", xxe->count, xxe->count);
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #endif
-      
+
 #ifdef ASMM_EXEC_PROFILE_on
     localrc = xxe->appendWtimer(0x0, "Wtimer End2", xxe->count, xxe->count);
     if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #endif
-    
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream7.0"));
+#endif
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -12251,7 +10689,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream8.0"));
+#endif
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -12304,20 +10746,20 @@ int Array::sparseMatMul(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   try{
 
 #ifdef ASMM_EXEC_TIMING_on
     double t0, t1, t2, t3, t4, t5, t6, t7;            //gjt - profile
     VMK::wtime(&t0);      //gjt - profile
-#endif    
+#endif
 
   // basic input checking
   bool srcArrayFlag = false;
   if (srcArray != ESMC_NULL_POINTER) srcArrayFlag = true;
   bool dstArrayFlag = false;
   if (dstArray != ESMC_NULL_POINTER) dstArrayFlag = true;
-  
+
   // srcArray and dstArray must not point to the identical Array object
   if (!haloFlag && (srcArrayFlag && dstArrayFlag)){
     if (srcArray == dstArray){
@@ -12326,11 +10768,11 @@ int Array::sparseMatMul(
       return rc;
     }
   }
-  
+
 #ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t1);      //gjt - profile
 #endif
-  
+
   // get a handle on the XXE stored in routehandle
   XXE *xxe = (XXE *)(*routehandle)->getStorage();
 
@@ -12340,6 +10782,9 @@ int Array::sparseMatMul(
     rc = ESMF_SUCCESS;
     return rc;
   }
+
+  // point back to the routehandle inside of xxe
+  xxe->setRouteHandle(*routehandle);
 
   // conditionally perform full input checks
   if (checkflag){
@@ -12361,20 +10806,20 @@ int Array::sparseMatMul(
     //      between argument Array pair and Array pair used during XXE precomp.
     // use Array::match() method to perform this check. This however, would
     // require that a reference is kept inside the routehandle to the Array
-    // pair used during store(). not sure how good an idea that is. The 
+    // pair used during store(). not sure how good an idea that is. The
     // alternative is to keep a "fingerprint" of the Arrays that's just enough
     // info to perform the congurence check here.
   }
-  
+
   // deal with finishedflag argument which can be NULL, but is also needed
   // locally -> therefore ensure that finishedflag locally is always valid
   bool finishedflagLocal;
   if (!finishedflag) finishedflag = &finishedflagLocal;
-  
+
 #ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t2);      //gjt - profile
 #endif
-  
+
   // prepare for relative run-time addressing (RRA)
   int rraCount = 0; // init
   if (srcArrayFlag)
@@ -12395,38 +10840,64 @@ int Array::sparseMatMul(
 #ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t3);      //gjt - profile
 #endif
-  
-  // set filterBitField  
+
+  // set filterBitField
   int filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
-  
+
+  // set filters according to commflag and termorderflag
   if (commflag==ESMF_COMM_BLOCKING){
     // blocking mode
     if (termorderflag == ESMC_TERMORDER_SRCSEQ){
-      filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
-      filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
-      filterBitField |= XXE::filterBitCancel;       // set Cancel filter
+      // strict order of terms in single sum, not partial sums
+      filterBitField |= XXE::filterBitNbWaitFinish; // no NbWaitFinish ops
+      filterBitField |= XXE::filterBitNbTestFinish; // no NbTestFinish ops
+      filterBitField |= XXE::filterBitCancel;       // no Cancel ops
+      // -> this leaves SingleSum ops enabled
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_SRCSEQ",
         ESMC_LOGMSG_INFO);
 #endif
     }else if (termorderflag == ESMC_TERMORDER_SRCPET){
-      filterBitField |= XXE::filterBitNbTestFinish; // set NbTestFinish filter
-      filterBitField |= XXE::filterBitCancel;       // set Cancel filter
-      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+      // order of terms by src PET, allow partial sums of terms from same PET
+      filterBitField |= XXE::filterBitNbTestFinish; // no NbTestFinish ops
+      filterBitField |= XXE::filterBitCancel;       // no Cancel ops
+      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // no SingleSum ops
+      // -> this leaves NbWaitFinish ops enabled
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_SRCPET",
         ESMC_LOGMSG_INFO);
 #endif
     }else if (termorderflag == ESMC_TERMORDER_FREE){
-      filterBitField |= XXE::filterBitNbWaitFinish; // set NbWaitFinish filter
-      filterBitField |= XXE::filterBitCancel;       // set Cancel filter    
-      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // SingleSum filter
+      // completely free order of terms, allow any partial sums
+#ifdef ENSURE_TO_LIMIT_OUTSTANDING_NBCOMMS
+//TODO: This branch ensures that there are never more than pipelineDepth
+//TODO: outstanding non-blocking comms held by this PET. This is basically
+//TODO: makes this the same as ESMC_TERMORDER_SRCPET for now. We have had
+//TODO: issues with the original ESMC_TERMORDER_FREE, for problems where
+//TODO: some PETs send/recv a lot of messages, and there are enough delays
+//TODO: so that first time the CommTest comes to check, the messages are not
+//TODO: yet complete. CommWait will wait for this, and then clear out from
+//TODO: MPI layer.
+//TODO: In the long run want to implement a pipelineDepthProgressor operation
+//TODO: into the XXE stream, as to limit outstanding non-blocking comms,
+//TODO: in a dynamic fashion, without doing a blocking Wait. This is work in
+//TODO: progress. Until then, if need be, turn on
+//TODO:       ENSURE_TO_LIMIT_OUTSTANDING_NBCOMMS
+//TODO: By default this is NOT turned on, but keep using the
+//TODO: exsiting ESMC_TERMORDER_FREE implementations with risking too many
+//TODO: outstanding nb-comms, under just the right conditions!
+      filterBitField |= XXE::filterBitNbTestFinish; // no NbTestFinish ops
+#else
+      filterBitField |= XXE::filterBitNbWaitFinish; // no NbWaitFinish ops
+#endif
+      filterBitField |= XXE::filterBitCancel;       // no Cancel ops
+      filterBitField |= XXE::filterBitNbWaitFinishSingleSum; // no SingleSum ops
 #ifdef ASMM_EXEC_INFO_on
       ESMC_LogDefault.Write("SMM exec: COMM_BLOCKING, TERMORDER_FREE",
         ESMC_LOGMSG_INFO);
 #endif
     }else{
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "termorderflag choice not supported under COMM_BLOCKING",
         ESMC_CONTEXT, &rc);
       return rc;  // bail out
@@ -12454,7 +10925,7 @@ int Array::sparseMatMul(
         ESMC_LOGMSG_INFO);
 #endif
     }else{
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "termorderflag choice not supported under COMM_NBTESTFINISH",
         ESMC_CONTEXT, &rc);
       return rc;  // bail out
@@ -12472,7 +10943,7 @@ int Array::sparseMatMul(
         ESMC_LOGMSG_INFO);
 #endif
     }else{
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "termorderflag choice not supported under COMM_NBWAITFINISH",
         ESMC_CONTEXT, &rc);
       return rc;  // bail out
@@ -12488,23 +10959,24 @@ int Array::sparseMatMul(
       ESMC_LOGMSG_INFO);
 #endif
   }
-  
+
+  // set filters according to zeroflag
   if (zeroflag!=ESMC_REGION_TOTAL)
     filterBitField |= XXE::filterBitRegionTotalZero;  // filter reg. total zero
   if (zeroflag!=ESMC_REGION_SELECT)
     filterBitField |= XXE::filterBitRegionSelectZero; // filter reg. select zero
-  
+
 #ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t4);      //gjt - profile
 #endif
-  
+
   // set vectorLength
   int vectorLength = 0; // initialize
-  
+
   // The vectorLength argument passed into xxe->exec() provides support
   // for flexible choice of vectorLength during execution time of the XXE
   // stream. Vectorization in the XXE stream is handled on a per operation
-  // basis, i.e. it depends on each individual operation whether, and how the 
+  // basis, i.e. it depends on each individual operation whether, and how the
   // vectorLength argument is used.
   // On those PETs that don't call in with srcArray nor dstArray (unusual case,
   // but possible and supported!), the vectorLenght will be left at 0. In the
@@ -12534,7 +11006,7 @@ int Array::sparseMatMul(
   srcSuperVecSizeDis[1] = &srcdist_j[0];
   superVecParam(srcArray, srcLocalDeCount, xxe->superVectorOkay,
     srcSuperVecSizeUnd, srcSuperVecSizeDis, vectorLength);
-  
+
   // dst-side super vectorization
   int dstLocalDeCount = 0;
   if (dstArrayFlag)
@@ -12547,7 +11019,7 @@ int Array::sparseMatMul(
   dstSuperVecSizeDis[1] = &dstdist_j[0];
   superVecParam(dstArray, dstLocalDeCount, xxe->superVectorOkay,
     dstSuperVecSizeUnd, dstSuperVecSizeDis, vectorLength);
-  
+
   // load super vectorization parameters into SuperVectP data structure
   XXE::SuperVectP superVectP;
   superVectP.srcSuperVecSize_r = srcSuperVecSizeUnd[0];
@@ -12560,11 +11032,11 @@ int Array::sparseMatMul(
   superVectP.dstSuperVecSize_t = dstSuperVecSizeUnd[2];
   superVectP.dstSuperVecSize_i = dstSuperVecSizeDis[0];
   superVectP.dstSuperVecSize_j = dstSuperVecSizeDis[1];
-  
+
 #ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t5);      //gjt - profile
 #endif
-  
+
   // execute XXE stream
   localrc = xxe->exec(rraCount, rraList, &vectorLength, filterBitField,
     finishedflag, cancelledflag,
@@ -12574,7 +11046,7 @@ int Array::sparseMatMul(
     &srcLocalDeCount, &superVectP);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
-  
+
 #ifdef ASMMXXEPRINT
   // print XXE stream
   VM *vm = VM::getCurrent(&localrc);
@@ -12609,10 +11081,19 @@ int Array::sparseMatMul(
   fclose(fp);
 #endif
 
+#ifdef ASMM_EXEC_INFO_on
+  {
+    std::stringstream msg;
+    msg << "SMM exec: finishedflag=" << *finishedflag;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
+  int finishLoopCount=0;
   while (commflag==ESMF_COMM_BLOCKING && !(*finishedflag)){
     // must be a blocking call with TERMORDER_FREE -> free-order while
-#ifdef ASMM_EXEC_INFO_on
-    ESMC_LogDefault.Write("...within free-order while",
+#ifdef ASMM_EXEC_INFO_LOOP_on
+    ESMC_LogDefault.Write("SMM exec: ...within free-order while",
       ESMC_LOGMSG_INFO);
 #endif
     filterBitField = 0x0; // init. to execute _all_ operations in XXE stream
@@ -12631,15 +11112,23 @@ int Array::sparseMatMul(
       &srcLocalDeCount, &superVectP);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
+    ++finishLoopCount;
   }
-  
+#ifdef ASMM_EXEC_INFO_on
+  {
+    std::stringstream msg;
+    msg << "SMM exec: finishLoopCount=" << finishLoopCount;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
 #ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t6);      //gjt - profile
 #endif
-  
+
   // garbage collection
   delete [] rraList;
-  
+
 #ifdef ASMM_EXEC_TIMING_on
   VMK::wtime(&t7);      //gjt - profile
   VM *vm = VM::getCurrent(&localrc);
@@ -12664,7 +11153,7 @@ int Array::sparseMatMul(
     localPet, t1-t0, t2-t0, t3-t0, t4-t0, t5-t0, t6-t0, t7-t0);
   fclose(fp);
 #endif
-  
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -12675,7 +11164,7 @@ int Array::sparseMatMul(
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -12710,7 +11199,7 @@ int Array::sparseMatMulRelease(
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
   try{
-  
+
     // get XXE from routehandle
     XXE *xxe = (XXE *)routehandle->getStorage();
 
@@ -12720,9 +11209,9 @@ int Array::sparseMatMulRelease(
       rc = ESMF_SUCCESS;
       return rc;
     }
-      
+
 #define XXEPROFILEPRINT___disable
-    
+
 #ifdef XXEPROFILEPRINT
 #ifdef ASMM_EXEC_PROFILE_on
     // print XXE stream profile
@@ -12750,7 +11239,15 @@ int Array::sparseMatMulRelease(
     fclose(fp);
 #endif
 #endif
-  
+
+#ifdef DEBUGGING
+    {
+      std::stringstream debugmsg;
+      debugmsg << ESMC_METHOD": delete xxe: " << xxe;
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+
     // delete xxe
     delete xxe;
 
@@ -12758,7 +11255,7 @@ int Array::sparseMatMulRelease(
     localrc = routehandle->setStorage(NULL);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
-  
+
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -12769,7 +11266,7 @@ int Array::sparseMatMulRelease(
       "Caught exception", ESMC_CONTEXT, &rc);
     return rc;
   }
-  
+
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
@@ -12815,7 +11312,7 @@ void Array::superVecParam(
     superVecSizeDis[0][j]=1;
     superVecSizeDis[1][j]=1;
   }
-  
+
   if (arrayFlag && array->sizeSuperUndist){
     // use array to determine vectorLength
     vectorLength = 1; // init
@@ -12849,7 +11346,7 @@ void Array::superVecParam(
   }
 #endif
       for (int j=0; j<localDeCount; j++)
-        superVecSizeDis[i][j] = 
+        superVecSizeDis[i][j] =
           array->sizeDist[j*(array->rank - array->tensorCount)+i];
     }
     superVecSizeUnd[i] = array->sizeSuperUndist[i];
@@ -12888,8 +11385,11 @@ ArrayElement::ArrayElement(
 //
 // !ARGUMENTS:
 //
-  Array const *arrayArg,
-  int localDeArg
+  Array const *arrayArg,      // in - the Array in which ArrayElement iterates
+  int localDeArg,             // in - localDe index, starting with 0
+  bool seqIndexEnabled,       // in - enable seqIndex lookup during iteration
+  bool seqIndexRecursive,     // in - recursive or not seqIndex lookup
+  bool seqIndexCanonical      // in - canonical or not seqIndex lookup
   ){
 //
 // !DESCRIPTION:
@@ -12901,20 +11401,20 @@ ArrayElement::ArrayElement(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input arguments
   if (arrayArg == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "arrayArg must not be NULL", ESMC_CONTEXT, &rc);
     throw rc;  // bail out with exception
   }
-  if (localDeArg < 0 || 
+  if (localDeArg < 0 ||
     localDeArg >= arrayArg->getDELayout()->getLocalDeCount()){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
       "localDeArg out of range", ESMC_CONTEXT, &rc);
     throw rc;  // bail out with exception
   }
-  
+
   // set members
   array = arrayArg;
   localDe = localDeArg;
@@ -12927,7 +11427,7 @@ ArrayElement::ArrayElement(
   indexTupleBlockEnd.resize(rank);
   indexTupleWatchStart.resize(rank);
   indexTupleWatchEnd.resize(rank);
-  
+
   // initialize tuple variables for iteration through Array elements within
   // exclusive region, with origin of exclusive region at tuple (0,0,..)
   int redDimCount = array->getRank() - array->getTensorCount();
@@ -12949,7 +11449,51 @@ ArrayElement::ArrayElement(
       indexTupleEnd[i] = array->getUndistUBound()[iTensor]
         - array->getUndistLBound()[iTensor] + 1;
       ++iTensor;
-    }   
+    }
+  }
+
+  // set some more member
+  seqIndex = NULL;
+  blockActiveFlag = false;  // no block active for exclusive only
+  indexTK = array->getDistGrid()->getIndexTK();
+  firstDimDecompFlag = false;  // init
+  if (array->getArrayToDistGridMap()[0]) firstDimDecompFlag = true; // set
+  firstDimFirstDecomp = false;  // default
+  if (array->getArrayToDistGridMap()[0]==1) firstDimFirstDecomp = true; // set
+  arbSeqIndexFlag = false;  // init
+  if (array->getDistGrid()->getArbSeqIndexList(localDe,1))
+    arbSeqIndexFlag = true; // set
+  seqIndexRecursiveFlag = seqIndexRecursive;
+  seqIndexCanonicalFlag = seqIndexCanonical;
+  // flag condition that will prevent optimization of seqIndex lookup
+  cannotOptimizeLookup = !firstDimFirstDecomp | arbSeqIndexFlag |
+    seqIndexRecursiveFlag;
+  lastSeqIndexInvalid = true;
+
+  // early return if not within range
+  if (!isWithin()) return;
+
+  // set the linIndex member
+  linIndex = array->getLinearIndexExclusive(localDe, &indexTuple[0]);
+
+  // deal with seqIndex support
+  if (seqIndexEnabled){
+    // prepare seqIndex member for iteration
+    if (indexTK==ESMC_TYPEKIND_I4){
+      seqIndex = (void *) new SeqIndex<ESMC_I4>;
+      localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0],
+        (SeqIndex<ESMC_I4>*)seqIndex, seqIndexRecursiveFlag,
+        seqIndexCanonicalFlag);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+    }else if (indexTK==ESMC_TYPEKIND_I8){
+      seqIndex = (void *) new SeqIndex<ESMC_I8>;
+      localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0],
+        (SeqIndex<ESMC_I8>*)seqIndex, seqIndexRecursiveFlag,
+        seqIndexCanonicalFlag);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+    }
   }
 }
 //-----------------------------------------------------------------------------
@@ -12969,9 +11513,12 @@ ArrayElement::ArrayElement(
 //
 // !ARGUMENTS:
 //
-  Array const *arrayArg,
-  int localDeArg,
-  bool blockExclusiveFlag   // in - block exclusive region if set to true
+  Array const *arrayArg,      // in - the Array in which ArrayElement iterates
+  int localDeArg,             // in - localDe index, starting with 0
+  bool blockExclusiveFlag,    // in - block the exclusive region if set to true
+  bool seqIndexEnabled,       // in - enable seqIndex lookup during iteration
+  bool seqIndexRecursive,     // in - recursive or not seqIndex lookup
+  bool seqIndexCanonical      // in - canonical or not seqIndex lookup
   ){
 //
 // !DESCRIPTION:
@@ -12983,20 +11530,20 @@ ArrayElement::ArrayElement(
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
+
   // check input arguments
   if (arrayArg == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "arrayArg must not be NULL", ESMC_CONTEXT, &rc);
     throw rc;  // bail out with exception
   }
-  if (localDeArg < 0 || 
+  if (localDeArg < 0 ||
     localDeArg >= arrayArg->getDELayout()->getLocalDeCount()){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
       "localDeArg out of range", ESMC_CONTEXT, &rc);
     throw rc;  // bail out with exception
   }
-  
+
   // set members
   array = arrayArg;
   localDe = localDeArg;
@@ -13006,10 +11553,11 @@ ArrayElement::ArrayElement(
   indexTuple.resize(rank);
   skipDim.resize(rank);
   indexTupleBlockStart.resize(rank);
-  indexTupleBlockEnd.resize(rank);
+  vector<int> indexTupleBlockEndArg;
+  indexTupleBlockEndArg.resize(rank);
   indexTupleWatchStart.resize(rank);
   indexTupleWatchEnd.resize(rank);
-  
+
   // initialize tuple variables for iteration through Array elements within
   // total region, with origin of exclusive region at tuple (0,0,..)
   int redDimCount = array->getRank() - array->getTensorCount();
@@ -13018,7 +11566,7 @@ ArrayElement::ArrayElement(
   int iTensor = 0;    // reset
   for (int i=0; i<rank; i++){
     skipDim[i] = false;                       // reset
-    indexTupleBlockStart[i] = indexTupleBlockEnd[i] = 0;  // reset
+    indexTupleBlockStart[i] = indexTupleBlockEndArg[i] = 0;  // reset
     indexTupleWatchStart[i] = indexTupleWatchEnd[i] = 0;  // reset
     if (array->getArrayToDistGridMap()[i]){
       // decomposed dimension
@@ -13040,10 +11588,59 @@ ArrayElement::ArrayElement(
       ++iTensor;
     }
     if (blockExclusiveFlag)
-      indexTupleBlockEnd[i] =  indexTupleWatchEnd[i];
+      indexTupleBlockEndArg[i] =  indexTupleWatchEnd[i];
+    // for consistent internal setup, must call method to set BlockEnd
+    setBlockEnd(indexTupleBlockEndArg);
   }
   first();  // point indexTuple to the first element that is not blocked
-  
+
+  // set some more members
+  seqIndex = NULL;
+  blockActiveFlag = blockExclusiveFlag;
+  indexTK = array->getDistGrid()->getIndexTK();
+  firstDimDecompFlag = false;  // default
+  if (array->getArrayToDistGridMap()[0]) firstDimDecompFlag = true; // set
+  firstDimFirstDecomp = false;  // default
+  if (array->getArrayToDistGridMap()[0]==1) firstDimFirstDecomp = true; // set
+  arbSeqIndexFlag = false;  // init
+  if (array->getDistGrid()->getArbSeqIndexList(localDe,1))
+    arbSeqIndexFlag = true; // set
+  seqIndexRecursiveFlag = seqIndexRecursive;
+  seqIndexCanonicalFlag = seqIndexCanonical;
+  // flag condition that will prevent optimization of seqIndex lookup
+  cannotOptimizeLookup = !firstDimFirstDecomp | arbSeqIndexFlag |
+    seqIndexRecursiveFlag;
+  lastSeqIndexInvalid = true;
+
+  // early return if not within range
+  if (!isWithin()) return;
+
+  // set the linIndex member
+  linIndex = array->getLinearIndexExclusive(localDe, &indexTuple[0]);
+
+  // deal with seqIndex support
+  if (seqIndexEnabled){
+    // prepare seqIndex member for iteration
+    if (indexTK==ESMC_TYPEKIND_I4){
+      seqIndex = (void *) new SeqIndex<ESMC_I4>;
+      if (!blockExclusiveFlag || hasValidSeqIndex()){
+        localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0],
+          (SeqIndex<ESMC_I4>*)seqIndex, seqIndexRecursiveFlag,
+          seqIndexCanonicalFlag);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+      }
+    }else if (indexTK==ESMC_TYPEKIND_I8){
+      seqIndex = (void *) new SeqIndex<ESMC_I8>;
+      if (!blockExclusiveFlag || hasValidSeqIndex()){
+        localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0],
+          (SeqIndex<ESMC_I8>*)seqIndex, seqIndexRecursiveFlag,
+          seqIndexCanonicalFlag);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+      }
+    }
+  }
 }
 //-----------------------------------------------------------------------------
 
@@ -13062,7 +11659,7 @@ bool ArrayElement::hasValidSeqIndex(
 //
 // !ARGUMENTS:
 //
-  )const{    
+  )const{
 //
 // !DESCRIPTION:
 //    Indicate whether the ArrayElement is valid. Invalid elements are
@@ -13094,80 +11691,6 @@ bool ArrayElement::hasValidSeqIndex(
   return true;  // all dimensions are in valid range
 }
 //-----------------------------------------------------------------------------
-    
-    
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::ArrayElement::getLinearIndexExclusive()"
-//BOPI
-// !IROUTINE:  ESMCI::ArrayElement::getLinearIndexExclusive
-//
-// !INTERFACE:
-int ArrayElement::getLinearIndexExclusive(
-//
-// !RETURN VALUE:
-//    linear index
-//
-// !ARGUMENTS:
-//
-  )const{    
-//
-// !DESCRIPTION:
-//    Obtain linear index for ArrayElement
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  
-  int linIndex = array->getLinearIndexExclusive(localDe, &indexTuple[0],
-    &localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    NULL)) throw localrc;  // bail out with exception
-  return linIndex;
-}
-//-----------------------------------------------------------------------------
-    
-    
-//-----------------------------------------------------------------------------
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::ArrayElement::getSequenceIndexExclusive()"
-//BOPI
-// !IROUTINE:  ESMCI::ArrayElement::getSequenceIndexExclusive
-//
-// !INTERFACE:
-template<typename T> int ArrayElement::getSequenceIndexExclusive(
-//
-// !RETURN VALUE:
-//    sequence index
-//
-// !ARGUMENTS:
-//
-    SeqIndex<T> *seqIndex    // out - sequence index
-  )const{    
-//
-// !DESCRIPTION:
-//    Obtain sequence index for ArrayElement
-//
-//EOPI
-//-----------------------------------------------------------------------------
-  // initialize return code; assume routine not implemented
-  int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  int rc = ESMC_RC_NOT_IMPL;              // final return code
-  
-  // check seqIndex argument
-  if (seqIndex==NULL){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-      "The seqIndex argument must not be a NULL pointer", ESMC_CONTEXT, &rc);
-    return rc;
-  }
-
-  localrc = array->getSequenceIndexExclusive(localDe, &indexTuple[0], seqIndex);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;    // bail out
-  return ESMF_SUCCESS;  // return successfully
-}
-//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
@@ -13184,7 +11707,7 @@ int ArrayElement::getTensorSequenceIndex(
 //
 // !ARGUMENTS:
 //
-  )const{    
+  )const{
 //
 // !DESCRIPTION:
 //    Obtain linear index for ArrayElement
@@ -13193,15 +11716,15 @@ int ArrayElement::getTensorSequenceIndex(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  
+
   int tensorSeqIndex = array->getTensorSequenceIndex(&indexTuple[0], &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     NULL)) throw localrc;  // bail out with exception
   return tensorSeqIndex;
 }
 //-----------------------------------------------------------------------------
-    
-    
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ArrayElement::getArbSequenceIndexOffset()"
@@ -13216,7 +11739,7 @@ int ArrayElement::getArbSequenceIndexOffset(
 //
 // !ARGUMENTS:
 //
-  )const{    
+  )const{
 //
 // !DESCRIPTION:
 //    Obtain linear index for ArrayElement
@@ -13225,7 +11748,7 @@ int ArrayElement::getArbSequenceIndexOffset(
 //-----------------------------------------------------------------------------
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
-  
+
   int arbSeqIndexOffset = array->getArbSequenceIndexOffset(&indexTuple[0],
     &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -13233,8 +11756,8 @@ int ArrayElement::getArbSequenceIndexOffset(
   return arbSeqIndexOffset;
 }
 //-----------------------------------------------------------------------------
-    
-    
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ArrayElement::print()"
@@ -13246,7 +11769,7 @@ void ArrayElement::print(
 //
 // !ARGUMENTS:
 //
-  )const{    
+  )const{
 //
 // !DESCRIPTION:
 //    Print internal information..
@@ -13257,8 +11780,8 @@ void ArrayElement::print(
   MultiDimIndexLoop::print();
 }
 //-----------------------------------------------------------------------------
-    
-    
+
+
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::SparseMatrix::SparseMatrix()"
@@ -13456,7 +11979,7 @@ int ESMC_newArray::ESMC_newArrayConstruct(
       arrayPreChunk[i][j][0] = deCoordMin[i] + j;
     }
   }
-  
+
   int k=0;
   for (int i=0; i<laRank; i++){
     if (haloWidth[i]>=0){
@@ -13473,7 +11996,7 @@ int ESMC_newArray::ESMC_newArrayConstruct(
       ++k;
     }
   }
-  
+
   // fill in the newArray's meta info about the data bounds for each DE
   globalDataLBound = new int*[deCount];
   globalDataUBound = new int*[deCount];
@@ -13531,7 +12054,7 @@ int ESMC_newArray::ESMC_newArrayConstruct(
       globalFullUBound[de][i] += laLbound[i];  // shift into global frame
     }
   }
-  
+
   // now the LocalArrays for all the DEs on this PET must be created
   if (localPet == rootPET){
     kind = larray->ESMC_LocalArrayGetTypeKind();
@@ -13584,7 +12107,7 @@ int ESMC_newArray::ESMC_newArrayConstruct(
   }
   // scatter the larray across the newly constructed narray
   localrc = ESMC_newArrayScatter(larray, rootPET, vm);
-  
+
   // garbage collection
   delete [] temp_counts;
   for (int i=0; i<decompRank; i++){
@@ -13593,7 +12116,7 @@ int ESMC_newArray::ESMC_newArrayConstruct(
     delete [] arrayPreChunk[i];
   }
   delete [] arrayPreChunk;
-  delete [] deCoordLength;  
+  delete [] deCoordLength;
   delete [] temp_deCoordMin;
   delete [] temp_deCoordMax;
   delete [] deCoordMin;
@@ -13663,26 +12186,26 @@ int ESMC_newArray::ESMC_newArrayScatter(
   if (vm==NULL)
     vm = ESMCI::VM::getCurrent(&localrc);  // get current VM context
   int localPet = vm->getLocalPet();
-  // check that there is a valid larray on rootPET 
+  // check that there is a valid larray on rootPET
   if (localPet == rootPET){
     if (larray == ESMC_NULL_POINTER){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "must supply a valid 'larray' argument on rootPET.", ESMC_CONTEXT,
         &localrc);
       return localrc;
     }
-  }    
+  }
   // check that t/k/r matches
   if (localPet == rootPET){
     int laRank = larray->ESMC_LocalArrayGetRank();
     if (laRank != rank){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "ranks don't match", ESMC_CONTEXT, &localrc);
       return localrc;
     }
     ESMC_TypeKind_Flag laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
     if (laTypeKind != kind){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "kinds don't match", ESMC_CONTEXT, &localrc);
       return localrc;
     }
@@ -13747,19 +12270,19 @@ int ESMC_newArray::ESMC_newArrayScatter(
         for (ii=1; ii<rank; ii++){
 #if (VERBOSITY > 1)
           printf("gjt in ESMC_newArrayScatter: ide=%d, blockGlobalIndex=%d\n"
-            "globalXXX: %d, %d, %d, %d\n", ide, 
+            "globalXXX: %d, %d, %d, %d\n", ide,
             blockGlobalIndex[ii], globalFullLBound[de][ii],
             globalDataLBound[de][ii], globalDataUBound[de][ii],
             globalFullUBound[de][ii]);
-#endif    
+#endif
           // check intersection with dataBox
           if (blockGlobalIndex[ii] >= globalDataLBound[de][ii] &&
             blockGlobalIndex[ii] <= globalDataUBound[de][ii]){
 #if (VERBOSITY > 1)
             printf("gjt in ESMC_newArrayScatter: intersect dataBox\n");
-#endif    
+#endif
             // found intersection with dataBox
-            blockLocalIndex[ii] = blockGlobalIndex[ii] 
+            blockLocalIndex[ii] = blockGlobalIndex[ii]
               - globalDataLBound[de][ii]
               + dataOffset[de][ii];
             continue;
@@ -13772,9 +12295,9 @@ int ESMC_newArray::ESMC_newArrayScatter(
 #if (VERBOSITY > 1)
               printf("gjt in ESMC_newArrayScatter: intersect regular lower"
                 " halo\n");
-#endif    
+#endif
               // found intersection with regular lower halo region
-              blockLocalIndex[ii] = blockGlobalIndex[ii] 
+              blockLocalIndex[ii] = blockGlobalIndex[ii]
                 - globalFullLBound[de][ii];
               continue;
             }
@@ -13786,9 +12309,9 @@ int ESMC_newArray::ESMC_newArrayScatter(
 #if (VERBOSITY > 1)
               printf("gjt in ESMC_newArrayScatter: intersect periodic lower"
                 " halo\n");
-#endif    
+#endif
               // found intersection with periodic lower halo region
-              blockLocalIndex[ii] = blockGlobalIndex[ii] 
+              blockLocalIndex[ii] = blockGlobalIndex[ii]
                 - globalFullLBound[de][ii];
               continue;
             }
@@ -13801,25 +12324,25 @@ int ESMC_newArray::ESMC_newArrayScatter(
 #if (VERBOSITY > 1)
               printf("gjt in ESMC_newArrayScatter: intersect regular upper"
                 " halo\n");
-#endif    
+#endif
               // found intersection with regular upper halo region
-              blockLocalIndex[ii] = blockGlobalIndex[ii] 
+              blockLocalIndex[ii] = blockGlobalIndex[ii]
                 - globalDataLBound[de][ii] + dataOffset[de][ii];
               continue;
             }
           }else{
             // this is a periodic upper halo region from the other end
-            int upperDataOffset = 
+            int upperDataOffset =
               localFullUBound[de][ii] - localFullLBound[de][ii]
               - dataOffset[de][ii]
               - (globalDataUBound[de][ii] - globalDataLBound[de][ii]);
-            if (blockGlobalIndex[ii] >= 
+            if (blockGlobalIndex[ii] >=
               (globalFullUBound[de][ii] - upperDataOffset) &&
               blockGlobalIndex[ii] <= globalFullUBound[de][ii]){
 #if (VERBOSITY > 1)
               printf("gjt in ESMC_newArrayScatter: intersect periodic upper"
                 " halo\n");
-#endif    
+#endif
               // found intersection with periodic upper halo region
               blockLocalIndex[ii] = blockGlobalIndex[ii]
                 - (globalFullUBound[de][ii] - upperDataOffset);
@@ -13827,7 +12350,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
             }
           }
           break;
-        }        
+        }
 #if (VERBOSITY > 1)
         if (ii==rank)
           printf("gjt in ESMC_newArrayScatter: block inside fullBox\n");
@@ -13842,7 +12365,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
           int elementCount = 0;
           for (int i=rank-1; i>0; i--){
             elementCount += blockLocalIndex[i];
-            elementCount *= (localFullUBound[de][i-1] 
+            elementCount *= (localFullUBound[de][i-1]
               - localFullLBound[de][i-1] + 1);
           }
           base += elementCount * elementSize;
@@ -13854,7 +12377,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
           char *baseOverlap = base;
           char *blockOverlap = buffer;
           int overlapCount;
-          int fullBoxCount = localFullUBound[de][0] - localFullLBound[de][0] 
+          int fullBoxCount = localFullUBound[de][0] - localFullLBound[de][0]
             + 1;
           if (blockLocalIndex[0] < 0){
             blockOverlap += (-blockLocalIndex[0]) * elementSize;
@@ -13867,7 +12390,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
             if (laLength[0] < overlapCount)
               overlapCount = laLength[0];
           }
-          if (overlapCount < 0) 
+          if (overlapCount < 0)
             overlapCount = 0;
 #if (VERBOSITY > 1)
           printf("gjt in ESMC_newArrayScatter: overlapCount = %d, blockOverlap"
@@ -13891,7 +12414,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
     if (localPet == rootPET)
       buffer += laLength[0] * elementSize;
   }
-  
+
   // garbage collection
   delete [] blockGlobalIndex;
   delete [] blockLocalIndex;
@@ -13900,7 +12423,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
     delete [] buffer;
   delete [] laLength;
   delete [] localDeArrayBase;
-    
+
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -13945,14 +12468,14 @@ int ESMC_newArray::ESMC_newArrayScatter(
   // check that the commhandle is clean, if not then exit with error
   int *cc = &(commh->commhandleCount); // to simplyfy usage during this method
   if (*cc != 0){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
-      "commhandle still holds outstanding communication handles.", 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "commhandle still holds outstanding communication handles.",
       ESMC_CONTEXT, &localrc);
     return localrc;
   }
-  // check that there is a valid larray on rootPET 
+  // check that there is a valid larray on rootPET
   if (larray == ESMC_NULL_POINTER){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
       "must supply a valid 'larray' argument on rootPET.", ESMC_CONTEXT,
       &localrc);
     return localrc;
@@ -13960,13 +12483,13 @@ int ESMC_newArray::ESMC_newArrayScatter(
   // check that t/k/r matches
   int laRank = larray->ESMC_LocalArrayGetRank();
   if (laRank != rank){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
       "ranks don't match", ESMC_CONTEXT, &localrc);
     return localrc;
   }
   ESMC_TypeKind_Flag laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
   if (laTypeKind != kind){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
       "kinds don't match", ESMC_CONTEXT, &localrc);
     return localrc;
   }
@@ -14008,7 +12531,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
       &(commh->vmk_commh[(*cc)++]), de+3000);
     commh->vmk_commh[*cc] = NULL; // mark as invalid element
     vm->send(laLbound, rank * sizeof(int), deVASList[de],
-      &(commh->vmk_commh[(*cc)++]), de+3000);  
+      &(commh->vmk_commh[(*cc)++]), de+3000);
 #if (VERBOSITY > 9)
     printf("gjt in ESMC_newArrayScatter(ROOT): done sending info to de = %d\n",
       de);
@@ -14041,8 +12564,8 @@ int ESMC_newArray::ESMC_newArrayScatter(
 #endif
 
 //  blockGlobalIndex[0] = laLbound[0];
-  
-  
+
+
 #if (VERBOSITY > 9)
   fprintf(stderr, "gjt in ESMC_newArrayScatter(ROOT): start blk loop\n");
 #endif
@@ -14072,7 +12595,7 @@ int ESMC_newArray::ESMC_newArrayScatter(
     // shift the buffer start to the next column in larray
     buffer += laLength[0] * elementSize;
   }
-  
+
   // garbage collection
   delete [] blockGlobalIndex;
   delete [] blockLocalIndex;
@@ -14118,26 +12641,26 @@ int ESMC_newArray::ESMC_newArrayScatter(
   if (vm==NULL)
     vm = ESMCI::VM::getCurrent(&localrc);  // get current VM context
   int localPet = vm->getLocalPet();
-  // check that there is a valid larray on rootPET 
+  // check that there is a valid larray on rootPET
   if (localPet == rootPET){
     if (larray == ESMC_NULL_POINTER){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "must supply a valid 'larray' argument on rootPET.", ESMC_CONTEXT,
         &localrc);
       return localrc;
     }
-  }    
+  }
   // check that t/k/r matches
   if (localPet == rootPET){
     int laRank = larray->ESMC_LocalArrayGetRank();
     if (laRank != rank){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "ranks don't match", ESMC_CONTEXT, &localrc);
       return localrc;
     }
     ESMC_TypeKind_Flag laTypeKind = larray->ESMC_LocalArrayGetTypeKind();
     if (laTypeKind != kind){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "kinds don't match", ESMC_CONTEXT, &localrc);
       return localrc;
     }
@@ -14154,11 +12677,11 @@ int ESMC_newArray::ESMC_newArrayScatter(
   // create the ScatterThread for this DE
   pthread_t *pthid =
     &(commhArray[localDe].pthid[(commhArray[localDe].pthidCount)++]);
-// took the following call out so the rest would compile: 
+// took the following call out so the rest would compile:
 // mpCC on AIX has trouble with friend func namespaces
 //  pthread_create(pthid, NULL, ESMC_newArrayScatterThread,
 //    &(thargArray[localDe]));
-    
+
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -14195,18 +12718,18 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   if (vm==NULL)
     vm = ESMCI::VM::getCurrent(&localrc);  // get current VM context
   int localPet = vm->getLocalPet();
-  // check that there is a valid result argument on rootPET 
+  // check that there is a valid result argument on rootPET
   if (localPet == rootPET){
     if (result == ESMC_NULL_POINTER){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "must supply a valid 'result' argument on rootPET.", ESMC_CONTEXT,
         &localrc);
       return localrc;
     }
-  }    
+  }
   // check that t/k matches (on all PETs!)
   if (dtk != kind){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
       "kinds don't match", &localrc);
     return localrc;
   }
@@ -14223,7 +12746,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
     localResult = new ESMC_R8;
     break;
   default:
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
       "data type kind is unknown to VM", &localrc);
     return localrc;
   }
@@ -14283,7 +12806,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
             blockID[i] = 0;
             ++blockID[i+1];
           }
-        if (skipFlag) continue; 
+        if (skipFlag) continue;
         char *base = (char *)localDeArrayBase;
         base += (elementCount + dataOffset[de][0]) * elementSize;
         int itemCount = globalDataUBound[de][0] - globalDataLBound[de][0] + 1;
@@ -14382,7 +12905,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
           break;
         }
         primeFlag = 0;  // priming of result has been accomplished
-      }      
+      }
       // DE-local garbage collection
       delete [] laLength;
       delete [] blockID;
@@ -14402,16 +12925,16 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
     vmt = vmR8;
     break;
   default:
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
       "data type kind is unknown to VM", &localrc);
     return localrc;
   }
   // reduce localResult across entire VM and put output into result on rootPET
   vm->reduce(localResult, result, 1, vmt, (vmOp)op, rootPET);
-  
+
   // garbage collection
   // need to typcast back before: delete localResult;
-  
+
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -14452,17 +12975,17 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   if (vm==NULL)
     vm = ESMCI::VM::getCurrent(&localrc);  // get current VM context
   int localPet = vm->getLocalPet();
-  // check that there is a valid result argument on rootPET 
+  // check that there is a valid result argument on rootPET
   if (localPet == rootPET){
     if (result == ESMC_NULL_POINTER){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "must supply a valid 'result' argument on rootPET.", &localrc);
       return localrc;
     }
-  }    
+  }
   // check that t/k matches (on all PETs!)
   if (dtk != kind){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
       "kinds don't match", &localrc);
     return localrc;
   }
@@ -14473,13 +12996,13 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   thargESMC_BaseGetRoot()->result = result;
   thargESMC_BaseGetRoot()->dtk = dtk;
   thargESMC_BaseGetRoot()->op = op;
-  
+
   // create the ScalarReduceThread for rootPET
   pthread_t *pthid = &(commh->pthid[(commh->pthidCount)++]);
-// took the following call out so the rest would compile: 
+// took the following call out so the rest would compile:
 // mpCC on AIX has trouble with friend func namespaces
 //  pthread_create(pthid, NULL, ESMC_newArrayScalarReduceThread, &thargRoot);
-    
+
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -14527,7 +13050,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
   int rootVAS = vm->getVas(rootPET);
   // check that t/k matches (on all PETs!)
   if (dtk != kind){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
       "kinds don't match", &localrc);
     return localrc;
   }
@@ -14548,7 +13071,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
     size = 8;
     break;
   default:
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
       "data type kind is unknown", &localrc);
     return localrc;
   }
@@ -14603,7 +13126,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
         blockID[i] = 0;
         ++blockID[i+1];
       }
-    if (skipFlag) continue; 
+    if (skipFlag) continue;
     char *base = (char *)localDeArrayBase;
     base += (elementCount + dataOffset[de][0]) * elementSize;
     int itemCount = globalDataUBound[de][0] - globalDataLBound[de][0] + 1;
@@ -14702,7 +13225,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
       break;
     }
     primeFlag = 0;  // priming of result has been accomplished
-  }      
+  }
   // DE-local garbage collection
   delete [] laLength;
   delete [] blockID;
@@ -14727,7 +13250,7 @@ int ESMC_newArray::ESMC_newArrayScalarReduce(
 
 
 
-// ---- Wait methods ---  
+// ---- Wait methods ---
 
 
 //-----------------------------------------------------------------------------
@@ -14749,7 +13272,7 @@ int ESMC_newArray::ESMC_newArrayWait(
   ESMCI::VM *vm){             // optional VM argument to speed up things
 //
 // !DESCRIPTION:
-//    Wait for a non-blocking newArray communication to be done with data 
+//    Wait for a non-blocking newArray communication to be done with data
 //    object on rootPET.
 //
 //EOPI
@@ -14787,7 +13310,7 @@ int ESMC_newArray::ESMC_newArrayWait(
 #if (VERBOSITY > 9)
   printf("gjt in ESMC_newArrayWait(ROOT): all commhandles are complete and deleted\n");
 #endif
-  
+
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -14854,9 +13377,9 @@ int ESMC_newArray::ESMC_newArrayWait(
   // destroy the buffer
   if (commhArray[localDe].buffer){
     delete commhArray[localDe].buffer;
-    commhArray[localDe].buffer = NULL;  // mark invalid for next time... 
+    commhArray[localDe].buffer = NULL;  // mark invalid for next time...
   }
-  
+
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -14990,7 +13513,7 @@ ESMC_newArray *ESMC_newArrayCreate(
   int *rc){                 // return code
 //
 // !DESCRIPTION:
-//    This Create method generates a DELayout following a very simple 
+//    This Create method generates a DELayout following a very simple
 //    algorithm that assumes:
 //      1. that the DE vertex weight is proportional to the number of logical
 //         grid points of the associated array domain - thus it is best to
@@ -15007,14 +13530,14 @@ ESMC_newArray *ESMC_newArrayCreate(
   ESMCI::VM *vm = ESMCI::VM::getCurrent(&localrc);  // get current VM context
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
-  // check that there is a valid larray on rootPET 
+  // check that there is a valid larray on rootPET
   if (localPet == rootPET){
     if (larray == ESMC_NULL_POINTER){
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD, 
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "must supply a valid 'larray' argument on rootPET.", rc);
       return(ESMC_NULL_POINTER);
     }
-  }    
+  }
   // allocate and initialize a newArray object via native constructor
   try {
     array = new ESMC_newArray;
@@ -15049,7 +13572,7 @@ ESMC_newArray *ESMC_newArrayCreate(
       for (int i=0; i<laRank; i++)
         haloWidth[i] = 0;
     }
-  }    
+  }
   // broadcast rootPET's haloWidth array
   vm->broadcast(&haloWidth, sizeof(int *), rootPET);
   // don't worry, it is o.k. to overwrite local variables!
@@ -15058,7 +13581,7 @@ ESMC_newArray *ESMC_newArrayCreate(
       haloWidth = new int[laRank];
     vm->broadcast(haloWidth, laRank * sizeof(int), rootPET);
   }
-  
+
   // determine the decomposition rank
   int decompRank = 0;
   if (haloWidth != NULL){
@@ -15067,9 +13590,9 @@ ESMC_newArray *ESMC_newArrayCreate(
       if (haloWidth[i]>=0) ++decompRank;
   }else{
     // haloWidth array does not exist, by default all are decomp. dimensions
-    decompRank = laRank;  // 
+    decompRank = laRank;  //
   }
-  
+
   // find the haloVolume for all decomposition dimensions
   int *haloVolume = new int[decompRank];
   int *decompMap = new int[decompRank];
@@ -15111,7 +13634,7 @@ ESMC_newArray *ESMC_newArrayCreate(
   // DEs is smaller or equal the length of the dimension with the smallest
   // haloVolume. A more complete implementation would go through a factorization
   // of the deCount with as many factors as there are decompRank and pick the
-  // decomposition with overall smallest sum of haloVolumes. 
+  // decomposition with overall smallest sum of haloVolumes.
   int *deLength = new int[decompRank];    // number of DEs along this dimension
   for (int i=0; i<decompRank; i++)
     deLength[i] = 1;        // reset to length one
@@ -15126,7 +13649,7 @@ ESMC_newArray *ESMC_newArrayCreate(
 #if (VERBOSITY > 9)
   printf("gjt in ESMC_newArrayCreate: decompRank=%d\n", decompRank);
   for (int i=0; i<decompRank; i++)
-    printf("gjt in ESMC_newArrayCreate: %d, deLength=%d, decompMap=%d\n", i,    
+    printf("gjt in ESMC_newArrayCreate: %d, deLength=%d, decompMap=%d\n", i,
       deLength[i], decompMap[i]);
 #endif
   // now there is enough information to create a DELayout
@@ -15135,7 +13658,7 @@ ESMC_newArray *ESMC_newArrayCreate(
 #if (VERBOSITY > 9)
   delayout->ESMC_DELayoutPrint();
 #endif
-  
+
   // finally construct the newArray according to the DELayout
   localrc = array->ESMC_newArrayConstruct(larray, haloWidth, delayout, rootPET);
 
@@ -15149,10 +13672,10 @@ ESMC_newArray *ESMC_newArrayCreate(
   delete [] decompMap;
   delete [] deLength;
 #if (VERBOSITY > 9)
-  printf("gjt in ESMC_newArrayCreate, array: %p, %d, %d\n", array, localPet, 
+  printf("gjt in ESMC_newArrayCreate, array: %p, %d, %d\n", array, localPet,
     petCount);
 #endif
-  
+
   // error handling via LogErr
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, rc))
     return ESMC_NULL_POINTER;
@@ -15194,7 +13717,7 @@ localrc = ESMC_RC_NOT_IMPL;
     *array = ESMC_NULL_POINTER;
     return(ESMF_SUCCESS);
   }else{
-    ESMC_LogDefault.Write("Cannot delete bad newArray object.", 
+    ESMC_LogDefault.Write("Cannot delete bad newArray object.",
       ESMC_LOGMSG_ERROR);
     return(ESMC_RC_PTR_NULL);
   }
@@ -15308,11 +13831,11 @@ void *ESMC_newArrayScatterThread(
   VMK::commhandle *ch_buffer = NULL; // mark as invalid
   int **globalDataLBound = array->globalDataLBound;
   int **globalDataUBound = array->globalDataUBound;
-  int **localFullLBound = array->localFullLBound; 
-  int **localFullUBound = array->localFullUBound; 
+  int **localFullLBound = array->localFullLBound;
+  int **localFullUBound = array->localFullUBound;
   int **globalFullLBound = array->globalFullLBound;
   int **globalFullUBound = array->globalFullUBound;
-  int **dataOffset = array->dataOffset;      
+  int **dataOffset = array->dataOffset;
   // now loop over all blocks
   for (int blk=0; blk<blockCount; blk++){
     for (int i=1; i<rank; i++)
@@ -15332,19 +13855,19 @@ void *ESMC_newArrayScatterThread(
     for (ii=1; ii<rank; ii++){
 #if (VERBOSITY > 9)
       printf("gjt in ESMC_newArrayScatter(THREAD): ide=%d,"
-        " blockGlobalIndex=%d\n globalXXX: %d, %d, %d, %d\n", ide, 
+        " blockGlobalIndex=%d\n globalXXX: %d, %d, %d, %d\n", ide,
         blockGlobalIndex[ii], globalFullLBound[de][ii],
         globalDataLBound[de][ii], globalDataUBound[de][ii],
         globalFullUBound[de][ii]);
-#endif    
+#endif
       // check intersection with dataBox
       if (blockGlobalIndex[ii] >= globalDataLBound[de][ii] &&
         blockGlobalIndex[ii] <= globalDataUBound[de][ii]){
 #if (VERBOSITY > 9)
         printf("gjt in ESMC_newArrayScatter(THREAD): intersect dataBox\n");
-#endif    
+#endif
         // found intersection with dataBox
-        blockLocalIndex[ii] = blockGlobalIndex[ii] 
+        blockLocalIndex[ii] = blockGlobalIndex[ii]
           - globalDataLBound[de][ii]
           + dataOffset[de][ii];
         continue;
@@ -15357,9 +13880,9 @@ void *ESMC_newArrayScatterThread(
 #if (VERBOSITY > 9)
           printf("gjt in ESMC_newArrayScatter(THREAD): intersect regular lower"
                 " halo\n");
-#endif    
+#endif
           // found intersection with regular lower halo region
-          blockLocalIndex[ii] = blockGlobalIndex[ii] 
+          blockLocalIndex[ii] = blockGlobalIndex[ii]
             - globalFullLBound[de][ii];
           continue;
         }
@@ -15371,9 +13894,9 @@ void *ESMC_newArrayScatterThread(
 #if (VERBOSITY > 9)
           printf("gjt in ESMC_newArrayScatter(THREAD): intersect periodic lower"
             " halo\n");
-#endif    
+#endif
           // found intersection with periodic lower halo region
-          blockLocalIndex[ii] = blockGlobalIndex[ii] 
+          blockLocalIndex[ii] = blockGlobalIndex[ii]
             - globalFullLBound[de][ii];
           continue;
         }
@@ -15386,25 +13909,25 @@ void *ESMC_newArrayScatterThread(
 #if (VERBOSITY > 9)
           printf("gjt in ESMC_newArrayScatter(THREAD): intersect regular upper"
             " halo\n");
-#endif    
+#endif
           // found intersection with regular upper halo region
-          blockLocalIndex[ii] = blockGlobalIndex[ii] 
+          blockLocalIndex[ii] = blockGlobalIndex[ii]
             - globalDataLBound[de][ii] + dataOffset[de][ii];
           continue;
         }
       }else{
         // this is a periodic upper halo region from the other end
-        int upperDataOffset = 
+        int upperDataOffset =
           localFullUBound[de][ii] - localFullLBound[de][ii]
           - dataOffset[de][ii]
           - (globalDataUBound[de][ii] - globalDataLBound[de][ii]);
-        if (blockGlobalIndex[ii] >= 
+        if (blockGlobalIndex[ii] >=
           (globalFullUBound[de][ii] - upperDataOffset) &&
           blockGlobalIndex[ii] <= globalFullUBound[de][ii]){
 #if (VERBOSITY > 9)
           printf("gjt in ESMC_newArrayScatter(THREAD): intersect periodic upper"
             " halo\n");
-#endif    
+#endif
           // found intersection with periodic upper halo region
           blockLocalIndex[ii] = blockGlobalIndex[ii]
             - (globalFullUBound[de][ii] - upperDataOffset);
@@ -15412,7 +13935,7 @@ void *ESMC_newArrayScatterThread(
         }
       }
       break;
-    }        
+    }
 #if (VERBOSITY > 9)
     if (ii==rank)
       printf("gjt in ESMC_newArrayScatter(THREAD): block inside fullBox\n");
@@ -15427,7 +13950,7 @@ void *ESMC_newArrayScatterThread(
       int elementCount = 0;
       for (int i=rank-1; i>0; i--){
         elementCount += blockLocalIndex[i];
-        elementCount *= (localFullUBound[de][i-1] 
+        elementCount *= (localFullUBound[de][i-1]
           - localFullLBound[de][i-1] + 1);
       }
       base += elementCount * elementSize;
@@ -15439,7 +13962,7 @@ void *ESMC_newArrayScatterThread(
       char *baseOverlap = base;
       char *blockOverlap = buffer;
       int overlapCount;
-      int fullBoxCount = localFullUBound[de][0] - localFullLBound[de][0] 
+      int fullBoxCount = localFullUBound[de][0] - localFullLBound[de][0]
         + 1;
       if (blockLocalIndex[0] < 0){
         blockOverlap += (-blockLocalIndex[0]) * elementSize;
@@ -15452,7 +13975,7 @@ void *ESMC_newArrayScatterThread(
         if (laLength[0] < overlapCount)
           overlapCount = laLength[0];
       }
-      if (overlapCount < 0) 
+      if (overlapCount < 0)
         overlapCount = 0;
 #if (VERBOSITY > 9)
       printf("gjt in ESMC_newArrayScatter(THREAD): overlapCount = %d,"
@@ -15494,7 +14017,7 @@ void *ESMC_newArrayScatterThread(
 #if (VERBOSITY > 9)
       printf("gjt in ESMC_newArrayScatter(THREAD): returning\n");
 #endif
-    
+
   return NULL;
 }
 //-----------------------------------------------------------------------------
@@ -15553,7 +14076,7 @@ void *ESMC_newArrayScalarReduceThread(
     size = 8;
     break;
   default:
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, 
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
       "data type kind is unknown to VM", &localrc);
     return NULL;
   }
@@ -15565,13 +14088,13 @@ void *ESMC_newArrayScalarReduceThread(
     vmk_commh[de] = NULL;    // mark as invalid
     vm->recv(localResultChar, size, deVASList[de], &(vmk_commh[de]),
       de+5000);
-    
+
 #if (VERBOSITY > 9)
   printf("gjt in ESMC_newArrayScalarReduce(THREAD): issued receive for de=%d"
     " in deVAS: %d, and obtained handle %p\n", de, deVASList[de],
         vmk_commh[de]);
 #endif
-  
+
     localResultChar += size;
   }
   // reduce to final result
@@ -15673,7 +14196,7 @@ void *ESMC_newArrayScalarReduceThread(
 
   // garbage collection
   delete [] localResult;
-  
+
   return NULL;
 }
 //-----------------------------------------------------------------------------

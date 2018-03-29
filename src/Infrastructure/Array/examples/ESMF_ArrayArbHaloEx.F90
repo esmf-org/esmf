@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -113,6 +113,8 @@ program ESMF_ArrayArbHaloEx
   distgrid = ESMF_DistGridCreate(arbSeqIndexList=seqIndexList, rc=rc)
 !EOC  
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_DistGridPrint(distgrid, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
 ! The resulting DistGrid is one-dimensional, although the user code may
 ! interpret the sequence indices as a 1D map into a problem of higher
@@ -123,6 +125,10 @@ program ESMF_ArrayArbHaloEx
 ! different PETs is supported and would result in different number of
 ! exclusive elements on each PET.
 !
+! \paragraph{Halo for a 1D Array from existing memory allocation, created on
+! the 1D arbitrary DistGrid.}
+! \mbox{} \\
+! 
 ! Creating an ESMF Array on top of a DistGrid with arbitrary sequence indices
 ! is in principle no different from creating an Array on a regular DistGrid. 
 ! However, while an Array that was created on a regular DistGrid automatically
@@ -300,6 +306,10 @@ program ESMF_ArrayArbHaloEx
 ! ------------------------------------------------------------------------------
 
 !BOE
+! \paragraph{Halo for a 1D Array with ESMF managed memory allocation, created on
+! the 1D arbitrary DistGrid.}
+! \mbox{} \\
+! 
 ! Alternatively the exact same Array can be created where ESMF does the
 ! memory allocation and deallocation. In this case the {\tt typekind} of the 
 ! Array must be specified explicitly.
@@ -327,7 +337,7 @@ program ESMF_ArrayArbHaloEx
   endif
 !EOC
 !BOE
-! Use ArrayGet() to gain access to the local memory allocation.
+! Use {\tt ESMF\_ArrayGet()} to gain access to the local memory allocation.
 !EOE
 !BOC
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr1d, rc=rc)
@@ -339,7 +349,7 @@ program ESMF_ArrayArbHaloEx
 !EOE
 !BOC
   do i=1, 5
-    farrayPtr1d(i) = seqIndexList(i) / 10.
+    farrayPtr1d(i) = real(seqIndexList(i),ESMF_KIND_R8) / 10.d0
   enddo
 !EOC
 !call ESMF_ArrayPrint(array)
@@ -371,6 +381,10 @@ program ESMF_ArrayArbHaloEx
 ! ------------------------------------------------------------------------------
 
 !BOE
+! \paragraph{Halo for an Array with undistributed dimensions, created on
+! the 1D arbitrary DistGrid, with default Array to DistGrid dimension mapping.}
+! \mbox{} \\
+!
 ! A current limitation of the Array implementation restricts DistGrids that
 ! contain user-specified, arbitrary sequence indices to be exactly 1D
 ! when used to create Arrays. See section \ref{Array:rest} for a list of 
@@ -416,7 +430,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   do j=1, 3
     do i=1, 5
-      farrayPtr2d(i,j) = seqIndexList(i) / 10. + 100.*j
+      farrayPtr2d(i,j) = real(seqIndexList(i),ESMF_KIND_R8) / 10.d0 + 100.d0*j
     enddo
   enddo
 !EOC
@@ -450,45 +464,32 @@ program ESMF_ArrayArbHaloEx
 ! ------------------------------------------------------------------------------
 
 !BOE
+! \paragraph{Halo for an Array with undistributed dimensions, created on
+! the 1D arbitrary DistGrid, mapping the undistributed dimension first.}
+! \mbox{} \\
+!
 ! In some situations it is more convenient to associate some or all of
 ! the undistributed dimensions with the first Array dimensions. This can be
 ! done easily by explicitly mapping the DistGrid dimension to an Array dimension
-! other than the first one by using the {\tt distgridToArrayMap} argument. The
-! following code creates essentially the same Array as before, but with swapped
-! dimension order.
+! other than the first one. The {\tt distgridToArrayMap} argument is used to
+! provide this information. The following code creates essentially the same
+! Array as before, but with swapped dimension order -- now the first Array
+! dimension is the undistributed one.
 !EOE
 !BOC
   if (localPet==0) then
-#ifdef TEST_I8RANGE_on
-    haloList(:)=(/1099511627777_ESMF_KIND_I8/)
-#else
-    haloList(:)=(/1/)
-#endif
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==1) then
-#ifdef TEST_I8RANGE_on
-    haloList(:)=(/1099511627777_ESMF_KIND_I8,&
-                  1099511627778_ESMF_KIND_I8/)
-#else
-    haloList(:)=(/1,2/)
-#endif
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   endif
   if (localPet==2) then
-#ifdef TEST_I8RANGE_on
-    haloList(:)=(/1099511627777_ESMF_KIND_I8,&
-                  1099511627778_ESMF_KIND_I8,&
-                  1099511627779_ESMF_KIND_I8/)
-#else
-    haloList(:)=(/1,2,3/)
-#endif
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
       undistLBound=(/1/), undistUBound=(/3/), rc=rc)
@@ -497,11 +498,11 @@ program ESMF_ArrayArbHaloEx
   if (localPet==3) then
 #ifdef TEST_I8RANGE_on
     haloList(:)=(/1099511627777_ESMF_KIND_I8,&
-                  1099511627778_ESMF_KIND_I8,&
+                  1099511627780_ESMF_KIND_I8,&
                   1099511627779_ESMF_KIND_I8,&
-                  1099511627780_ESMF_KIND_I8/)
+                  1099511627778_ESMF_KIND_I8/)
 #else
-    haloList(:)=(/1,2,3,4/)
+    haloList(:)=(/1,3,5,4/)
 #endif
     array = ESMF_ArrayCreate(distgrid=distgrid, typekind=ESMF_TYPEKIND_R8, &
       distgridToArrayMap=(/2/), haloSeqIndexList=haloList, &
@@ -510,8 +511,18 @@ program ESMF_ArrayArbHaloEx
   endif
 !EOC
 !BOE
-! The swapped dimension order results in a swapping of {\tt i} and {\tt j} when
-! accessing Array elements in the loop.
+! Notice that the {\tt haloList} constructed on PET 3 is different from the
+! previous examples. All other PETs reuse the same {\tt haloList} as before.
+! In the previous examples the list loaded into PET 3's
+! {\tt haloSeqIndexList} argument contained a duplicate sequence index.
+! However, now that the undistributed dimension is placed first, the 
+! {\tt ESMF\_ArrayHaloStore()} call will try to optimize the data exchange by
+! vectorizing it. Duplicate sequence indices are currently {\em not} supported
+! during vectorization.
+!
+! When accessing the Array elements, the swapped dimension order results in 
+! a swapping of {\tt i} and {\tt j}. This can be seen in the following
+! initialization loop.
 !EOE
 !BOC  
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr2d, rc=rc)
@@ -520,12 +531,12 @@ program ESMF_ArrayArbHaloEx
 !BOC
   do j=1, 3
     do i=1, 5
-      farrayPtr2d(j,i) = seqIndexList(i) / 10. + 100.*j
+      farrayPtr2d(j,i) = real(seqIndexList(i),ESMF_KIND_R8) / 10.d0 + 100.d0*j
     enddo
   enddo
 !EOC
 !BOE
-! Again there is no difference in how the the halo operations are applied.
+! Once set up, there is no difference in how the the halo operations are applied.
 !EOE
 !BOC
   call ESMF_ArrayHaloStore(array, routehandle=haloHandle, rc=rc)
@@ -546,6 +557,10 @@ program ESMF_ArrayArbHaloEx
 ! ------------------------------------------------------------------------------
 
 !BOE
+! \paragraph{Halo for an Array with undistributed dimensions, created on
+! the 1D arbitrary DistGrid, re-using the RouteHandle.}
+! \mbox{} \\
+!
 ! One of the benefits of mapping the undistributed dimension(s) to the 
 ! "left side" of the Array dimensions is that Arrays that only differ 
 ! in the size of the undistributed dimension(s) are weakly congruent in this
@@ -594,7 +609,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   do j=1, 6
     do i=1, 5
-      farrayPtr2d(j,i) = seqIndexList(i) / 10. + 100.*j
+      farrayPtr2d(j,i) = real(seqIndexList(i),ESMF_KIND_R8) / 10.d0 + 100.d0*j
     enddo
   enddo
 !EOC

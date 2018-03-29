@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -143,6 +143,14 @@ program ESMF_GridCreateUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "Print Grid info"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_GridPrint(grid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Destroy test Grid for IsCreated"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridDestroy(grid, rc=rc)
@@ -260,7 +268,7 @@ program ESMF_GridCreateUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   grid=ESMF_GridCreate('data/T42_grid.nc',ESMF_FILEFORMAT_SCRIP, &
-  			regDecomp=(/2,2/), rc=localrc)
+    regDecomp=(/2,2/), rc=localrc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
@@ -1941,8 +1949,8 @@ program ESMF_GridCreateUTest
   grid=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/5/),  & 
                               countsPerDeDim3=(/3,4/),  &
-	                      gridEdgeLWidth=(/1,2,3/), &
-	                      gridEdgeUWidth=(/4,5,6/), &
+                              gridEdgeLWidth=(/1,2,3/), &
+                              gridEdgeUWidth=(/4,5,6/), &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -2000,8 +2008,8 @@ program ESMF_GridCreateUTest
 
   ! create grid
   grid=ESMF_GridCreate(distgrid=distgrid, &
-	               gridEdgeLWidth=(/1,2/), &
-	               gridEdgeUWidth=(/3,4/), &
+                       gridEdgeLWidth=(/1,2/), &
+                       gridEdgeUWidth=(/3,4/), &
                        distgridToGridMap=(/2,1/), &
                        rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -2111,8 +2119,8 @@ program ESMF_GridCreateUTest
   grid=ESMF_GridCreateNoPeriDim(countsPerDEDim1=(/1,2/), &
                               countsPerDeDim2=(/5/),  & 
                               countsPerDeDim3=(/3,4/),  &
-	                      gridEdgeLWidth=(/1,2,3/), &
-	                      gridEdgeUWidth=(/4,5,6/), &
+                              gridEdgeLWidth=(/1,2,3/), &
+                              gridEdgeUWidth=(/4,5,6/), &
                               indexflag=ESMF_INDEX_GLOBAL, &
                               rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -2170,8 +2178,8 @@ program ESMF_GridCreateUTest
 
   ! create grid
   grid=ESMF_GridCreate(distgrid=distgrid, &
-	               gridEdgeLWidth=(/1,2/), &
-	               gridEdgeUWidth=(/3,4/), &
+                       gridEdgeLWidth=(/1,2/), &
+                       gridEdgeUWidth=(/3,4/), &
                        distgridToGridMap=(/2,1/), &
                        rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
@@ -2607,6 +2615,7 @@ program ESMF_GridCreateUTest
   grid=ESMF_GridCreateCubedSphere(15, regDecompPTile=regDecompPTile, &
                                   !decompFlagPTile=decompFlagPTile, &
                                   !deLabelList=deLabelList, &
+                                  staggerLocList = (/ESMF_STAGGERLOC_CENTER/), &
                                   rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 

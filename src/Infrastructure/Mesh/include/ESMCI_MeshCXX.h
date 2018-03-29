@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
@@ -27,8 +27,8 @@ namespace ESMCI {
     ~MeshCXX();
 
     static MeshCXX* create(int, int, ESMC_CoordSys_Flag, int *);
-    static MeshCXX* createFromFile(const char *, int, int *, int *, 
-				   const char *, int *, const char *, int *);
+    static MeshCXX* createFromFile(const char *, int, int *, int *,
+                                   const char *, int *, const char *, int *);
     void getLocalCoords(double *, int *, int *, int *);
     void getLocalElemCoords(double *, int *, int *, int *);
     void getConnectivity(double *, int *, int *);
@@ -46,9 +46,9 @@ namespace ESMCI {
     friend int MeshVTKBody(const char*, int*, double*, int*, int*, int*, int*);
 
     private:
-    enum MeshCXXLevel {MeshCXXLevel_Empty=0, 
-                      MeshCXXLevel_Created, 
-                      MeshCXXLevel_NodesAdded, 
+    enum MeshCXXLevel {MeshCXXLevel_Empty=0,
+                      MeshCXXLevel_Created,
+                      MeshCXXLevel_NodesAdded,
                       MeshCXXLevel_Finished};
 
     Mesh* meshPointer;
@@ -65,7 +65,7 @@ namespace ESMCI {
     // Dimensions of mesh seen by user (may differ from internal mesh because
     // of different coordinate system)
     int spatialDim;
-    int parametricDim; 
+    int parametricDim;
 
     // Coordinate System
     ESMC_CoordSys_Flag coordSys;
@@ -80,6 +80,6 @@ namespace ESMCI {
     int getNumOwnedElements() {return numOwnedElements;}
   };
 
-} // namespace 
+} // namespace
 
 #endif

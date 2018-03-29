@@ -1,7 +1,7 @@
 //$1.10 2007/04/26 16:13:59 rosalind Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -143,17 +143,45 @@ void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   int *regridPoleNPnts,
   ESMC_LineType_Flag *linetype,
   ESMC_NormType_Flag *normtype,
+  ESMC_ExtrapMethod_Flag *extrapMethod,
+  int *extrapNumSrcPnts,
+  float *extrapDistExponent,
   ESMC_UnmappedAction_Flag *unmappedaction,
   ESMC_Logical *ignoreDegenerate,
   ESMCI::Field *srcfracfieldp,
   ESMCI::Field *dstfracfieldp,
   int *rc);
 
+void FTN_X(f_esmf_regridstorefile)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
+  const char *fileName,
+  int *srcMaskValues, int *len1,
+  int *dstMaskValues, int *len2,
+  ESMCI::RouteHandle **routehandlep,
+  ESMC_RegridMethod_Flag *regridmethod,
+  ESMC_PoleMethod_Flag *polemethod,
+  int *regridPoleNPnts,
+  ESMC_LineType_Flag *linetype,
+  ESMC_NormType_Flag *normtype,
+  ESMC_UnmappedAction_Flag *unmappedaction,
+  ESMC_Logical *ignoreDegenerate,
+  ESMC_Logical *create_rh,
+  ESMCI::Field *srcfracfieldp,
+  ESMCI::Field *dstfracfieldp,
+  int *rc,
+  ESMCI_FortranStrLenArg flen
+);
+
 void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   ESMCI::RouteHandle **routehandlep, ESMC_Region_Flag *zeroregion, int *zr_present,
   int *rc);
 
 void FTN_X(f_esmf_regridrelease)(ESMCI::RouteHandle **routehandlep, int *rc);
+
+void FTN_X(f_esmf_smmstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
+  const char *filename, ESMCI::RouteHandle **routehandlep,
+  ESMC_Logical *ignoreUnmatchedIndices,
+  int *srcTermProcessing, int *pipeLineDepth,
+  int *rc, ESMCI_FortranStrLenArg nlen);
 
 void FTN_X(f_esmf_fieldwrite)(ESMCI::Field *fieldp, const char *file,
   const char *variablename,
@@ -1337,6 +1365,9 @@ namespace ESMCI {
     int *regridPoleNPnts,
     ESMC_LineType_Flag *lineType,
     ESMC_NormType_Flag *normType,
+    ESMC_ExtrapMethod_Flag *extrapMethod,
+    int *extrapNumSrcPnts,
+    float *extrapDistExponent,
     ESMC_UnmappedAction_Flag *unmappedAction,
     ESMC_Logical *ignoreDegenerate,
     Field *srcFracField, 
@@ -1357,7 +1388,6 @@ namespace ESMCI {
     ESMCI::Field *sff, *dff;
     int *srcMaskArray,*dstMaskArray;
     int srcMaskLen,dstMaskLen;
-
 
     smv = (ESMCI::InterArray<int> *)srcMaskValues;
     if (present(smv)) {
@@ -1406,11 +1436,130 @@ namespace ESMCI {
                               regridPoleNPnts,
                               lineType,
                               normType,
+                              extrapMethod,
+                              extrapNumSrcPnts,
+                              extrapDistExponent,
                               unmappedAction,
                               ignoreDegenerate,
                               srcFracField,
                               dstFracField,
                               &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) {
+      if (sff_created) delete sff;
+      if (dff_created) delete dff;
+      return rc;
+    }
+    if (sff_created) delete sff;
+    if (dff_created) delete dff;
+
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::regridstorefile()"
+//BOP
+// !IROUTINE:  ESMCI::Field::regridstorefile - precompute a regriddding operation
+//
+// !INTERFACE:
+  int Field::regridstorefile(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+    Field *fieldpsrc,
+    Field *fieldpdst,
+    const char *filename,
+    ESMC_InterArrayInt *srcMaskValues,
+    ESMC_InterArrayInt *dstMaskValues,
+    RouteHandle **routehandlep,
+    ESMC_RegridMethod_Flag *regridMethod,
+    ESMC_PoleMethod_Flag *polemethod,
+    int *regridPoleNPnts,
+    ESMC_LineType_Flag *lineType,
+    ESMC_NormType_Flag *normType,
+    ESMC_UnmappedAction_Flag *unmappedAction,
+    ESMC_Logical *ignoreDegenerate,
+    ESMC_Logical *create_rh,
+    Field *srcFracField,
+    Field *dstFracField) {
+//
+// !DESCRIPTION:
+//
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    bool sff_created, dff_created;
+    sff_created = false;
+    dff_created = false;
+    ESMCI::InterArray<int> *smv, *dmv;
+    ESMCI::Field *sff, *dff;
+    int *srcMaskArray,*dstMaskArray;
+    int srcMaskLen,dstMaskLen;
+
+
+    smv = (ESMCI::InterArray<int> *)srcMaskValues;
+    if (present(smv)) {
+      if(smv->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- srcMaskValues array must be of rank 1", ESMC_CONTEXT, &rc);
+         return ESMC_NULL_POINTER;
+      }
+      srcMaskArray=smv->array;
+      srcMaskLen=smv->extent[0];
+    } else {
+      srcMaskArray=NULL;
+      srcMaskLen=0;
+    }
+
+    dmv = (ESMCI::InterArray<int> *)dstMaskValues;
+    if (present(dmv)) {
+      if(dmv->dimCount != 1){
+         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+           "- dstMaskValues array must be of rank 1", ESMC_CONTEXT, &rc);
+         return ESMC_NULL_POINTER;
+      }
+      dstMaskArray=dmv->array;
+      dstMaskLen=dmv->extent[0];
+    } else {
+      dstMaskArray=NULL;
+      dstMaskLen=0;
+    }
+
+    if (srcFracField == NULL) {
+      sff = new ESMCI::Field();
+      sff_created = true;
+    }
+
+    if (dstFracField == NULL) {
+      dff = new ESMCI::Field();
+      dff_created = true;
+    }
+
+    std::string filename_local = filename;
+    FTN_X(f_esmf_regridstorefile)(fieldpsrc, fieldpdst, filename,
+                              srcMaskArray, &srcMaskLen,
+                              dstMaskArray, &dstMaskLen,
+                              routehandlep,
+                              regridMethod,
+                              polemethod,
+                              regridPoleNPnts,
+                              lineType,
+                              normType,
+                              unmappedAction,
+                              ignoreDegenerate,
+                              create_rh,
+                              srcFracField,
+                              dstFracField,
+                              &localrc,
+                              filename_local.size());
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
       if (sff_created) delete sff;
@@ -1500,6 +1649,64 @@ namespace ESMCI {
     return rc;
   }
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::smmstore()"
+//BOP
+// !IROUTINE:  ESMCI::Field::smmstore - precompute a regriddding operation
+//
+// !INTERFACE:
+  int Field::smmstore(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+    Field *fieldpsrc,
+    Field *fieldpdst,
+    const char *filename,
+    RouteHandle **routehandlep,
+    ESMC_Logical *ignoreUnmatchedIndices,
+    int *srcTermProcessing,
+    int *pipeLineDepth) {
+//
+// !DESCRIPTION:
+//
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    char * fName = NULL;
+    int slen = 0;
+    if(filename != NULL){
+      slen = strlen(filename);
+      fName = new char[slen];
+      localrc = ESMC_CtoF90string(filename, fName, slen);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        &rc)) {
+        delete[] fName;
+        return ESMC_NULL_POINTER;
+      }
+    }
+
+    FTN_X(f_esmf_smmstore)(fieldpsrc, fieldpdst,
+                              fName, routehandlep,
+                              ignoreUnmatchedIndices,
+                              srcTermProcessing, pipeLineDepth,
+                              &localrc, slen);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) {
+      return rc;
+    }
+
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

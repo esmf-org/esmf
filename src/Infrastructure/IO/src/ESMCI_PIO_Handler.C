@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -613,9 +613,11 @@ void PIO_Handler::arrayRead(
       ESMC_CONTEXT, rc)) return;
 
   vardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
-  if (!vardesc)
-    if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio variable desc",
-        ESMC_CONTEXT, rc)) return;
+  if (!vardesc){
+    ESMC_LogDefault.MsgAllocError(" failed to allocate pio variable desc",
+      ESMC_CONTEXT, rc);
+    return;
+  }
 
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
@@ -836,9 +838,11 @@ void PIO_Handler::arrayWrite(
   }
 
   vardesc = (pio_var_desc_t)calloc(PIO_SIZE_VAR_DESC, 1);
-  if (!vardesc)
-    if (ESMC_LogDefault.MsgAllocError("failed to allocate pio variable desc",
-        ESMC_CONTEXT, rc)) return;
+  if (!vardesc){
+    ESMC_LogDefault.MsgAllocError("failed to allocate pio variable desc",
+      ESMC_CONTEXT, rc);
+    return;
+  }
 
   // Get a pointer to the array data
   // Still have the one DE restriction so use localDE = 0
@@ -1456,9 +1460,11 @@ void PIO_Handler::open(
 
   // Allocate a file descriptor
   pioFileDesc = (pio_file_desc_t)calloc(PIO_SIZE_FILE_DESC, 1);
-  if (!pioFileDesc)
-    if (ESMC_LogDefault.MsgAllocError(" failed to allocate pio file desc",
-        ESMC_CONTEXT, rc)) return;
+  if (!pioFileDesc){
+    ESMC_LogDefault.MsgAllocError(" failed to allocate pio file desc",
+      ESMC_CONTEXT, rc);
+    return;
+  }
   PRINTMSG(" allocated pio file desc, addr = " << (void *)pioFileDesc);
 
   if (okToCreate) {
@@ -1872,8 +1878,8 @@ bool PIO_Handler::CheckPIOError(
     *rc = ESMF_RC_NOT_IMPL;               // final return code
   }
 
+  std::stringstream errmsg;
   if (pioRetCode != PIO_noerr) {
-    std::stringstream errmsg;
 #if defined(ESMF_PNETCDF)
     // Log the error, assuming the error code was passed through PIO from PNetCDF
     if (!fmtStr.empty()) {
@@ -1895,31 +1901,41 @@ bool PIO_Handler::CheckPIOError(
       errmsg << " (PIO error = " << pioRetCode << ")";
     }
 #endif
-    if (warn) {
-      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN, line, file, method);
-    } else {
-      ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_ERROR, line, file, method);
-    }
-    PRINTMSG("PIO ERROR: " << errmsg.str());
     // Attempt to find a corresponding ESMC error code
     switch(pioRetCode) {
 #if defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
     case NC_EEXIST:
       localrc = ESMF_RC_FILE_CREATE;
       break;
+    case NC_ENOMEM:
+      localrc = ESMF_RC_MEM_ALLOCATE;
+      break;
     case NC_EPERM:
       localrc = ESMF_RC_FILE_OPEN;
       break;
-#endif // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
     default:
-      localrc = rc_code;
+      localrc = ESMF_RC_NETCDF_ERROR;
       break;
+#else // defined(ESMF_NETCDF) || defined(ESMF_PNETCDF)
+    default:
+      localrc = ESMF_RC_FILE_UNEXPECTED;
+      break;
+#endif
     }
+  } else
+    localrc = ESMF_SUCCESS;
+
+  if ((localrc != ESMF_SUCCESS) && warn) {
+    ESMC_LogDefault.Write(errmsg, ESMC_LOGMSG_WARN,
+        line, file, method);
+    // run through MsgFoundError in case Log tracing is enabled
+    ESMC_LogDefault.MsgFoundError(ESMF_SUCCESS, errmsg,
+        line, file, method, rc);
+  } else {
+    ESMC_LogDefault.MsgFoundError(localrc, errmsg,
+        line, file, method, rc);
   }
-  // Set the return code
-  if (rc != NULL) {
-    *rc = localrc;
-  }
+
   return (pioRetCode == PIO_noerr);
 } // PIO_Handler::CheckPIOError()
 //-----------------------------------------------------------------------------

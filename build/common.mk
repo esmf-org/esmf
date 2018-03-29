@@ -200,6 +200,10 @@ ifndef ESMF_TESTEXHAUSTIVE
 export ESMF_TESTEXHAUSTIVE = default
 endif
 
+ifndef ESMF_TESTCOMPTUNNEL
+export ESMF_TESTCOMPTUNNEL = default
+endif
+
 ifndef ESMF_TESTWITHTHREADS
 export ESMF_TESTWITHTHREADS = default
 endif
@@ -397,6 +401,10 @@ ifneq ($(ESMF_SHARED_LIB_BUILD),OFF)
 export ESMF_SHARED_LIB_BUILD = ON
 endif
 
+ifneq ($(ESMF_TESTCOMPTUNNEL),OFF)
+export ESMF_TESTCOMPTUNNEL = ON
+endif
+
 ifneq ($(ESMF_TESTWITHTHREADS),ON)
 export ESMF_TESTWITHTHREADS = OFF
 endif
@@ -424,12 +432,6 @@ endif
 
 ifeq ($(ESMF_MOAB),default)
 export ESMF_MOAB = internal
-endif
-ifeq ($(ESMF_OS),MinGW)
-export ESMF_MOAB = OFF
-endif
-ifeq ($(ESMF_OS),Cygwin)
-export ESMF_MOAB = OFF
 endif
 
 #-------------------------------------------------------------------------------
@@ -1214,11 +1216,34 @@ endif
 #-------------------------------------------------------------------------------
 # NETCDF
 #-------------------------------------------------------------------------------
+
+# Check if ESMF_NETCDF may be pointing to nc-config with absolute path.
+# For situations where PATH is not to be trusted for nc-config location.
+pathtype := ""
+ifdef ESMF_NETCDF
+pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_NETCDF))
+endif
+ifeq ($(pathtype),abs)
+# use the $(ESMF_NETCDF) contents as nc-config
+# but must check if there is also nf-config available
+ESMF_NCCONFIG = $(ESMF_NETCDF)
+ESMF_NFCONFIG = $(shell $(ESMF_NETCDF) --prefix)/bin/nf-config
+ifneq ($(shell $(ESMF_DIR)/scripts/exists $(ESMF_NFCONFIG)),$(ESMF_NFCONFIG))
+ESMF_NFCONFIG := 
+endif
+ESMF_NETCDF_INCLUDE = $(shell $(ESMF_NCCONFIG) --includedir)
+ifdef ESMF_NFCONFIG
+ESMF_NETCDF_LIBS    = $(shell $(ESMF_NFCONFIG) --flibs)
+else
+ESMF_NETCDF_LIBS    = $(shell $(ESMF_NCCONFIG) --flibs)
+endif
+ESMF_NETCDF_LIBS   += $(shell $(ESMF_NCCONFIG) --libs)
+endif
+
 ifeq ($(ESMF_NETCDF),nc-config)
 ESMF_NETCDF_CPATH = $(shell nc-config --prefix)
 ESMF_NETCDF_INCLUDE = $(ESMF_NETCDF_CPATH)/include
 ESMF_NETCDF_LIBPATH = $(ESMF_NETCDF_CPATH)/lib
-
 # Fortran API library might be in a different directory than the main C library.
 ESMF_NETCDF_FPATH = $(shell nf-config --prefix 2>/dev/null)
 ifeq ($(ESMF_NETCDF_FPATH),"")
@@ -1275,6 +1300,12 @@ endif
 #-------------------------------------------------------------------------------
 # PNETCDF
 #-------------------------------------------------------------------------------
+ifeq ($(ESMF_PNETCDF),pnetcdf-config)
+ESMF_PNETCDF_INCLUDE = $(shell pnetcdf-config --includedir)
+ESMF_PNETCDF_LIBPATH = $(shell pnetcdf-config --libdir)
+ESMF_PNETCDF_LIBS = -lpnetcdf
+endif
+
 ifeq ($(ESMF_PNETCDF),standard)
 ifneq ($(origin ESMF_NETCDF_LIBS), environment)
 ESMF_PNETCDF_LIBS = -lpnetcdf
@@ -1509,6 +1540,14 @@ endif
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_TESTEXHAUSTIVE),ON) 
 ESMF_CPPFLAGS       += -DESMF_TESTEXHAUSTIVE 
+endif
+
+#-------------------------------------------------------------------------------
+# ESMF_TESTCOMPTUNNEL is passed (by CPP) into test programs to control the
+# dependency on ESMF-threading.
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_TESTCOMPTUNNEL),ON)
+ESMF_CPPFLAGS       += -DESMF_TESTCOMPTUNNEL
 endif
 
 #-------------------------------------------------------------------------------

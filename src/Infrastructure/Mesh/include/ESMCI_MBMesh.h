@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -12,18 +12,18 @@
 #ifndef ESMCI_MBMesh_h
 #define ESMCI_MBMesh_h
 
-// Take out if MOAB isn't being used
-#ifdef ESMF_MOAB
 
+#if defined ESMF_MOAB
 #include "moab/Core.hpp"
 using namespace moab;
+#endif
 
 #include <map>
 
 namespace ESMCI {
 
   class MBMesh {
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB
 
   public:
     int sdim, pdim; // dimensions MAYBE I SHOULD NAME THESE MORE SIMILAR TO WHAT IN OTHER MESH
@@ -78,5 +78,4 @@ namespace ESMCI {
 
 } // namespace 
 
-#endif // ESMF_MOAB
 #endif

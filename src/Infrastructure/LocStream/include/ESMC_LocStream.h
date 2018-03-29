@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //-----------------------------------------------------------------------------
@@ -56,10 +56,10 @@ typedef struct{
 //
 // !INTERFACE:
 ESMC_LocStream ESMC_LocStreamCreateLocal(
-				    int ls_size,
-				    enum ESMC_IndexFlag *indexflag,
-				    enum ESMC_CoordSys_Flag *coordSys,
-				    int *rc
+                                    int ls_size,
+                                    enum ESMC_IndexFlag *indexflag,
+                                    enum ESMC_CoordSys_Flag *coordSys,
+                                    int *rc
 );
 
 // !RETURN VALUE:
@@ -130,7 +130,7 @@ int ESMC_LocStreamGetBounds(
 int ESMC_LocStreamAddKeyAlloc(
   ESMC_LocStream locstream,      // in
   const char *keyName,
-  ESMC_TypeKind_Flag *keyTypeKind
+  enum ESMC_TypeKind_Flag *keyTypeKind
 );
 
 // !RETURN VALUE:
@@ -189,12 +189,12 @@ void *ESMC_LocStreamGetKeyPtr(
 //BOP
 // !IROUTINE: ESMC_LocStreamGetKeyArray - Get the internal Array stored in the LocStream
 //
-// !INTERFACE: 
+// !INTERFACE:
   ESMC_Array ESMC_LocStreamGetKeyArray(
-				ESMC_LocStream locstream,     // in
+                                ESMC_LocStream locstream,     // in
                                 const char *keyName,          // in
-				int *rc                       // out
-				);
+                                int *rc                       // out
+                                );
 
 // !RETURN VALUE:
 //  The ESMC_Array object stored in the ESMC_LocStream.

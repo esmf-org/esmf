@@ -257,6 +257,7 @@ program ESMF_WebServComponentUTest
     character(ESMF_MAXSTR) :: cname
     character(ESMF_MAXSTR) :: cdesc
     type(ESMF_GridComp)    :: comp1
+    type(ESMF_CplComp)     :: cplComp
     integer                :: portNum
     character(ESMF_MAXSTR) :: clientId
     character(ESMF_MAXSTR) :: argBuffer
@@ -298,6 +299,20 @@ program ESMF_WebServComponentUTest
           userRoutine=ESMF_WebServUserModelRegister, rc=rc)
 
     print *
+
+    !------------------------------------------------------------------------
+    !NEX_disable_UTest
+    ! This test added to provide a placeholder when revisiting web services
+    ! testing.
+    rc = ESMF_SUCCESS
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "ESMF_WebServicesCplCompLoop Unit Test"
+
+    call ESMF_WebServicesCplCompLoop(cplComp, rc=rc)
+
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    print *
+    !------------------------------------------------------------------------
 
     !------------------------------------------------------------------------
     !NEX_disable_UTest

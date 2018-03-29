@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -106,8 +106,8 @@ contains
 ! !IROUTINE: ESMF_InterArrayCreateTrg - Create InterArray
 
 ! !INTERFACE:
-  function ESMF_InterArrayCreateTrg(farray1D, farray2D, farray3D, &
-    farray1DI8, farray2DI8, farray3DI8, rc)
+  recursive function ESMF_InterArrayCreateTrg(farray1D, farray2D, farray3D, &
+    farray1DI8, farray2DI8, farray3DI8, rc) result (InterArrayCreateTrg)
 !
 ! !ARGUMENTS:
     integer, target,               intent(in),  optional :: farray1D(:)
@@ -119,7 +119,7 @@ contains
     integer,                       intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_InterArray) :: ESMF_InterArrayCreateTrg
+    type(ESMF_InterArray) :: InterArrayCreateTrg
 !
 ! !DESCRIPTION:
 !   Create an {\tt ESMF\_InterArray} from Fortran array.
@@ -157,6 +157,12 @@ contains
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! mark this InterArray as invalid
+    call c_ESMC_InterArraySetInvalid(array, localrc)
+    InterArrayCreateTrg = array
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    
     ! initialize
     nullify(farray1DPtr)
     nullify(farray2DPtr)
@@ -181,7 +187,7 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! set return value
-    ESMF_InterArrayCreateTrg = array
+    InterArrayCreateTrg = array
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -197,8 +203,9 @@ contains
 ! !IROUTINE: ESMF_InterArrayCreatePtr - Create InterArray
 
 ! !INTERFACE:
-  function ESMF_InterArrayCreatePtr(farray1D, farray2D, farray3D, &
-    farray1DI8, farray2DI8, farray3DI8, transferOwnership, rc)
+  recursive function ESMF_InterArrayCreatePtr(farray1D, farray2D, farray3D, &
+    farray1DI8, farray2DI8, farray3DI8, transferOwnership, rc) &
+    result (InterArrayCreatePtr)
 !
 ! !ARGUMENTS:
     integer, pointer,                   optional :: farray1D(:)
@@ -211,7 +218,7 @@ contains
     integer,               intent(out), optional :: rc
 !         
 ! !RETURN VALUE:
-    type(ESMF_InterArray) :: ESMF_InterArrayCreatePtr
+    type(ESMF_InterArray) :: InterArrayCreatePtr
 !
 ! !DESCRIPTION:
 !   Create an {\tt ESMF\_InterArray} from Fortran array. The 
@@ -253,6 +260,7 @@ contains
     
     ! mark this InterArray as invalid
     call c_ESMC_InterArraySetInvalid(array, localrc)
+    InterArrayCreatePtr = array
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     
@@ -404,7 +412,7 @@ contains
     endif
     
     ! set return value
-    ESMF_InterArrayCreatePtr = array
+    InterArrayCreatePtr = array
  
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -420,7 +428,7 @@ contains
 ! !IROUTINE: ESMF_InterArrayGet - Get array pointer out of InterArray
 
 ! !INTERFACE:
-  subroutine ESMF_InterArrayGet(array, farray1D, farray2D, farray3D, &
+  recursive subroutine ESMF_InterArrayGet(array, farray1D, farray2D, farray3D, &
     farray1DI8, farray2DI8, farray3DI8, rc)
 !
 ! !ARGUMENTS:
@@ -487,7 +495,7 @@ contains
 ! !IROUTINE: ESMF_InterArrayDestroy - Destroy InterArray
 
 ! !INTERFACE:
-  subroutine ESMF_InterArrayDestroy(array, rc)
+  recursive subroutine ESMF_InterArrayDestroy(array, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_InterArray), intent(inout)         :: array

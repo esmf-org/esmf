@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -36,22 +36,22 @@ using namespace std;
 //
 // This class provides access to a job scheduler using the Globus GRAM
 // interface.
-// 
+//
 //EOPI
 //-------------------------------------------------------------------------
 
 namespace ESMCI
 {
 
-  class ESMCI_WebServCompSvrMgr 
+  class ESMCI_WebServCompSvrMgr
   {
   public:
 
      // constructor and desructor
-	  ESMCI_WebServCompSvrMgr(string  hostName, 
+          ESMCI_WebServCompSvrMgr(string  hostName,
                              string  scriptDir,
                              string  scriptName);
-	  ~ESMCI_WebServCompSvrMgr();
+          ~ESMCI_WebServCompSvrMgr();
 
      virtual string  submitJob(int     portNum,
                                string  registrarHost,
@@ -62,11 +62,11 @@ namespace ESMCI
 
   protected:
 
-     string		theHostName;
-     string		theScriptDir;
-     string		theScriptName;
+     string             theHostName;
+     string             theScriptDir;
+     string             theScriptName;
   };
 
 } // end namespace
 
-#endif 	// ESMCI_WebServCompSvrMgr_H
+#endif          // ESMCI_WebServCompSvrMgr_H

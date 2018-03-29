@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -83,8 +83,8 @@ namespace ESMCI{
     void endElement(
         const XMLCh* const uri,
         const XMLCh* const localname,
-        const XMLCh* const qname	 
-    ); 
+        const XMLCh* const qname        
+    );
 
     SAX2ReadHandler(ESMCI::Attribute *attr);
  };

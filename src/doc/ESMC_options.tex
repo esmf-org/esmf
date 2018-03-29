@@ -33,6 +33,36 @@ The valid values are:
       Divide elements over DEs. Assign the rest of this division to the last DE.
 \end{description}
 
+{\tt type(ESMC\_ExtrapMethod\_Flag)}
+\label{opt:cextrapmethod}
+
+{\sf DESCRIPTION:\\}
+Specify which extrapolation method to use on unmapped destination points after 
+regridding.
+
+The type of this flag is:
+
+{\tt type(ESMC\_ExtrapMethod\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMC\_EXTRAPMETHOD\_NONE]
+      Indicates that no extrapolation should be done. 
+\item [ESMC\_EXTRAPMETHOD\_NEAREST\_STOD]
+      Inverse distance weighted average. 
+      Here the value of a destination point is the weighted average of the 
+      closest N source points. The weight is the reciprocal of the distance of 
+      the source point from the destination point raised to a power P. All the
+      weights contributing to one destination point are normalized so that they 
+      sum to 1.0. The user can choose N and P when using this method, but 
+      defaults are also provided.  
+\item [ESMC\_EXTRAPMETHOD\_NEAREST\_IDAVG]
+      Nearest source to destination. 
+      Here each destination point is mapped to the closest source point. A given 
+      source point may go to multiple destination points, but no destination 
+      point will receive input from more than one source point. 
+\end{description}
+
 \subsection{ESMC\_FILEFORMAT}
 This flag is documented in section \ref{const:cfileformat}.
 
@@ -43,13 +73,15 @@ This flag is documented in section \ref{const:cgriditem}.
 This flag is documented in section \ref{const:cgridstatus}.
 
 \subsection{ESMC\_INDEX}
+\label{const:indexflag}
+
 {\sf DESCRIPTION:\\}
 Indicates whether index is local (per DE) or global (per object).
 
 The type of this flag is:
 
 {\tt type(ESMC\_IndexFlag)}
-\label{const:indexflag}
+
 The valid values are:
 \begin{description}
 \item [ESMC\_INDEX\_DELOCAL]
@@ -64,8 +96,10 @@ The valid values are:
 \subsection{ESMC\_LINETYPE}
 \label{opt:lineType}
 
-{\sf DESCRIPTION:\\}  This argument allows the user to select the path of the line which connects two points on the surface of a sphere.
-This in turn controls the path along which distances are calculated and the shape of the edges that make up a cell.
+{\sf DESCRIPTION:\\}  This argument allows the user to select the path of the 
+line which connects two points on the surface of a sphere.
+This in turn controls the path along which distances are calculated and the 
+shape of the edges that make up a cell.
 
 The type of this flag is:
 
@@ -74,14 +108,21 @@ The type of this flag is:
 The valid values are:
 \begin{description}
 \item [ESMC\_LINETYPE\_CART]
-   Cartesian line. When this option is specified distances are calculated in a straight line through the 3D Cartesian space
-   in which the sphere is embedded. Cells are approximated by 3D planes bounded by 3D Cartesian lines between their corner vertices.
-   When calculating regrid weights, this line type is currently the default for the following regrid methods: ESMC\_REGRIDMETHOD\_BILINEAR,
-   ESMC\_REGRIDMETHOD\_PATCH, ESMC\_REGRIDMETHOD\_NEAREST\_STOD, and  ESMC\_REGRIDMETHOD\_NEAREST\_DTOS.
+    Cartesian line. When this option is specified distances are calculated in a 
+    straight line through the 3D Cartesian space in which the sphere is 
+    embedded. Cells are approximated by 3D planes bounded by 3D Cartesian lines 
+    between their corner vertices.
+    When calculating regrid weights, this line type is currently the default for 
+    the following regrid methods: ESMC\_REGRIDMETHOD\_BILINEAR,
+    ESMC\_REGRIDMETHOD\_PATCH, ESMC\_REGRIDMETHOD\_NEAREST\_STOD, and 
+    ESMC\_REGRIDMETHOD\_NEAREST\_DTOS.
 \item [ESMC\_LINETYPE\_GREAT\_CIRCLE]
-   Great circle line. When this option is specified distances are calculated along a great circle path (the shortest distance
-   between two points on a sphere surface). Cells are bounded by great circle paths between their corner vertices. When calculating regrid
-   weights, this line type is currently the default for the following regrid method: ESMC\_REGRIDMETHOD\_CONSERVE.
+    Great circle line. When this option is specified distances are calculated 
+    along a great circle path (the shortest distance between two points on a 
+    sphere surface). Cells are bounded by great circle paths between their 
+    corner vertices. When calculating regrid weights, this line type is 
+    currently the default for the following regrid method: 
+    ESMC\_REGRIDMETHOD\_CONSERVE.
 \end{description}
 
 
@@ -120,6 +161,25 @@ The valid values are:
 
 \subsection{ESMC\_POLEKIND}
 This flag is documented in section \ref{const:cpolekind}.
+
+\subsection{ESMC\_REDUCE}
+\label{const:creduce}
+{\sf DESCRIPTION:\\}
+Indicates reduce operation.
+
+The type of this flag is:
+
+{\tt type(ESMC\_Reduce\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMC\_REDUCE\_SUM]
+      Use arithmetic sum to add all data elements.
+\item [ESMC\_REDUCE\_MIN]
+      Determine the minimum of all data elements.
+\item [ESMC\_REDUCE\_MAX]
+      Determine the maximum of all data elements.
+\end{description}
 
 \subsection{ESMC\_REGION}
 \label{const:cregion}
@@ -162,9 +222,13 @@ The type of these named constants is:
 The named constants are:
 \begin{description}
 \item [ESMC\_TYPEKIND\_I1]
-      Indicates 1 byte integer.
+      Indicates 1 byte integer. \newline 
+      (Only available if ESMF was built with 
+      {\tt ESMF\_NO\_INTEGER\_1\_BYTE = FALSE}. This is {\em not} the default.)
 \item [ESMC\_TYPEKIND\_I2]
-      Indicates 2 byte integer.
+      Indicates 2 byte integer. \newline
+      (Only available if ESMF was built with 
+      {\tt ESMF\_NO\_INTEGER\_2\_BYTE = FALSE}. This is {\em not} the default.)
 \item [ESMC\_TYPEKIND\_I4]
       Indicates 4 byte integer.
 \item [ESMC\_TYPEKIND\_I8]

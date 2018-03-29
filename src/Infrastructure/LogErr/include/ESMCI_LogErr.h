@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
@@ -48,7 +48,7 @@ private:
                                 // for C++ I/O
     ESMC_Logical FileIsOpen;
 
-    ESMC_Logical verbose;       // If set to ESMC_TF_TRUE, log messages written 
+    ESMC_Logical verbose;       // If set to ESMC_TF_TRUE, log messages written
                                 // out.
 
     ESMC_Logical flush;         // If true, all output is flushed
@@ -64,32 +64,38 @@ private:
     int stream;
 
     int max_elements;
-    
+
     int *pet_number;
-		
+                
     ESMC_Logical fileI0;        // If true, output written to files
 
-    int stdOutUnitNumber;       // Unit number corresponding to standard 
+    int stdOutUnitNumber;       // Unit number corresponding to standard
                                 // out
-    
+
   public:
-      
+
 // !PUBLIC MEMBER FUNCTIONS:
-    bool AllocError(
+    void AllocError(
         int LINE, const std::string &FILE, const std::string &method,
         int *rcToReturn);
-    bool DeallocError(
+    void DeallocError(
         int LINE, const std::string &FILE, const std::string &method,
         int *rcToReturn);
     void Close();
     bool FoundError(int rcToCheck,
+        int LINE, const char FILE[], const char method[],
+        int *rcToReturn);
+    bool FoundError(int rcToCheck,
         int LINE, const std::string &FILE, const std::string &method,
         int *rcToReturn);
-    bool MsgAllocError(const std::string& msg,
+    void MsgAllocError(const std::string& msg,
         int LINE, const std::string &FILE, const std::string &method,
         int *rcToReturn);
-    bool MsgDeallocError(const std::string& msg,
+    void MsgDeallocError(const std::string& msg,
         int LINE, const std::string &FILE, const std::string &method,
+        int *rcToReturn);
+    bool MsgFoundError(int rcToCheck, const char msg[],
+        int LINE, const char FILE[], const char method[],
         int *rcToReturn);
     bool MsgFoundError(int rcToCheck, const std::string &msg,
         int LINE, const std::string &FILE, const std::string &method,
@@ -112,8 +118,8 @@ private:
         int LINE, const std::string &FILE, const std::string &method) {
       return Write(msg.str(), msgtype, LINE, FILE, method);
     }
-    
-// !PUBLIC Variables:          
+
+// !PUBLIC Variables:
     std::FILE *ESMC_LogFile;
     std::string nameLogErrFile;
     int *pet_num;
@@ -124,7 +130,7 @@ private:
 
   private:
 // !PRIVATE MEMBER FUNCIONS:
-    
+
 };
 
 } //namespace ESMCI
@@ -137,7 +143,7 @@ extern "C" {
  void FTN_X(f_esmf_logwrite1)(const char *msg, int *msgtype,
                             int *line, const char *file, const char *method, int *rc,
                             ESMCI_FortranStrLenArg mlen, ESMCI_FortranStrLenArg flen,
-			    ESMCI_FortranStrLenArg mdlen);
+                            ESMCI_FortranStrLenArg mdlen);
 }
 
 //EOP

@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -25,8 +25,8 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
 
   !-------------------------------------------------------------------------
 !   !  The SetVM Register routines for Gridcomp1
- 
-  subroutine userm1_setvm(comp, rc) 
+
+  subroutine userm1_setvm(comp, rc)
     type(ESMF_GridComp)  :: comp
     integer, intent(out) :: rc
 
@@ -40,11 +40,11 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
-    
+
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetGlobal(vm, rc=rc)
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
@@ -90,9 +90,9 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -140,9 +140,9 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
 
 #ifdef ESMF_TESTWITHTHREADS
     ! The following call will turn on ESMF-threading (single threaded)
-    ! for this component. If you are using this file as a template for 
-    ! your own code development you probably don't want to include the 
-    ! following call unless you are interested in exploring ESMF's 
+    ! for this component. If you are using this file as a template for
+    ! your own code development you probably don't want to include the
+    ! following call unless you are interested in exploring ESMF's
     ! threading features.
 
     ! First test whether ESMF-threading is supported on this machine
@@ -183,7 +183,7 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_AttPack)        :: attpack   
+    type(ESMF_AttPack)        :: attpack
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name1,name2,name3,name4,value1,value2, &
@@ -348,7 +348,7 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     type(ESMF_Clock) :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_AttPack)        :: attpack, attpack_nested  
+    type(ESMF_AttPack)        :: attpack, attpack_nested
     type(ESMF_VM)               :: vm
     integer                     :: petCount, status, myPet
     character(ESMF_MAXSTR)      :: name2,value2,convESMF,purpGen,purp2,name3
@@ -630,7 +630,7 @@ module ESMF_AttributeUpdateClosedLoopTreesUTestMod
     rc = ESMF_SUCCESS
 
   end subroutine usercpl_final
- 
+
 end module
 
 program ESMF_AttributeUpdateClosedLoopTreesUTest
@@ -681,7 +681,7 @@ program ESMF_AttributeUpdateClosedLoopTreesUTest
       type(ESMF_CplComp)      :: cplcomp
       character(ESMF_MAXSTR)  :: convESMF,purpGen
 
-	type(ESMF_AttPack)        :: attpack
+        type(ESMF_AttPack)        :: attpack
     type(ESMF_Field)          :: field1, field12, field2
     type(ESMF_FieldBundle)    :: fieldbundle
     type(ESMF_Grid)           :: grid_from_field1, grid_from_field12, &
@@ -707,7 +707,7 @@ program ESMF_AttributeUpdateClosedLoopTreesUTest
     !-----------------------------------------------------------------------------
 
 #ifdef ESMF_TESTEXHAUSTIVE
-    call ESMF_VMGetCurrent(vm, rc=rc) 
+    call ESMF_VMGetCurrent(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=rc)
@@ -791,7 +791,7 @@ program ESMF_AttributeUpdateClosedLoopTreesUTest
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
     !EX_UTest_Multi_Proc_Only
-	call ESMF_AttributeGetAttPack(field1, convention=convESMF, purpose=purpGen, &
+        call ESMF_AttributeGetAttPack(field1, convention=convESMF, purpose=purpGen, &
         attpack=attpack, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_AttributeGet(field1, name2, value=outVal, attpack=attpack, rc=rc)
@@ -803,7 +803,7 @@ program ESMF_AttributeUpdateClosedLoopTreesUTest
                     name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest_Multi_Proc_Only
-	call ESMF_AttributeGetAttPack(field1, convention=convESMF, purpose=purp2, &
+        call ESMF_AttributeGetAttPack(field1, convention=convESMF, purpose=purp2, &
         attpack=attpack, rc=rc)
     if (rc .ne. ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
     call ESMF_AttributeGet(field1, attrList(1), value=outVal, &
@@ -841,22 +841,22 @@ program ESMF_AttributeUpdateClosedLoopTreesUTest
     ! 306 - grid_from_fb
     ! 206 - grid_from_field2
 
-    !  all of the grids above come from 2 original grids, grid1 and grid2, 
-    !  which were created in the userm1_init function.  field1 and field12 were 
-    !  created from grid1 and field2 was created from grid2.  grid1 was also 
-    !  added to the fieldbundle.  An Attribute package containing two 
-    !  Attributes, (one is called RegDecompX) was added to both Grids on PET 0 
-    !  and 1 and then ESMF_StateReconcile() was called in the coupler, which 
+    !  all of the grids above come from 2 original grids, grid1 and grid2,
+    !  which were created in the userm1_init function.  field1 and field12 were
+    !  created from grid1 and field2 was created from grid2.  grid1 was also
+    !  added to the fieldbundle.  An Attribute package containing two
+    !  Attributes, (one is called RegDecompX) was added to both Grids on PET 0
+    !  and 1 and then ESMF_StateReconcile() was called in the coupler, which
     !  runs on PETs 0,1,2,3.
 
-    !  After the ESMF_StateReconcile() call there should be 4 separate grids 
-    !  on PET 2,3, one for each Field and FieldBundle, and only the two 
-    !  original grids on PET 0,1.  In the userm1_run routine we then modify the 
-    !  RegDecompX Attribute of each Grid to a different value (this happens on 
-    !  PET 0 and 1).  Then ESMF_AttributeUpdate()/ESMF_AttributeCopy() is 
-    !  called in the coupler running on PET 0,1,2,3.  The first Grid receives 
+    !  After the ESMF_StateReconcile() call there should be 4 separate grids
+    !  on PET 2,3, one for each Field and FieldBundle, and only the two
+    !  original grids on PET 0,1.  In the userm1_run routine we then modify the
+    !  RegDecompX Attribute of each Grid to a different value (this happens on
+    !  PET 0 and 1).  Then ESMF_AttributeUpdate()/ESMF_AttributeCopy() is
+    !  called in the coupler running on PET 0,1,2,3.  The first Grid receives
     !  the values from the last call to it (fieldbundle), so on PET 2,3 we
-    !  expect to see those values on all 3 Grids related to the original.  The 
+    !  expect to see those values on all 3 Grids related to the original.  The
     !  second Grid should have the value that was set in userm1_run.
 
     expectedOut(1) = 96

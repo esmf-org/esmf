@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -3280,9 +3280,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:esmf_fieldbundleregridstore}
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, &
-    srcMaskValues, dstMaskValues, regridmethod, polemethod, regridPoleNPnts, &
-    lineType, normType, unmappedaction,  ignoreDegenerate, srcTermProcessing, &
-    pipelineDepth, routehandle, rc)
+       srcMaskValues, dstMaskValues, regridmethod, polemethod, regridPoleNPnts, &
+       lineType, normType, extrapMethod, extrapNumSrcPnts, extrapDistExponent, &
+       unmappedaction,  ignoreDegenerate, srcTermProcessing, &
+       pipelineDepth, routehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),        intent(in)              :: srcFieldBundle
@@ -3294,6 +3295,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in),    optional :: regridPoleNPnts
     type(ESMF_LineType_Flag),      intent(in),    optional :: lineType
     type(ESMF_NormType_Flag),      intent(in),    optional :: normType
+    type(ESMF_ExtrapMethod_Flag),   intent(in),   optional :: extrapMethod
+    integer,                        intent(in),   optional :: extrapNumSrcPnts
+    real,                           intent(in),   optional :: extrapDistExponent
     type(ESMF_UnmappedAction_Flag),intent(in),    optional :: unmappedaction
     logical,                       intent(in),    optional :: ignoreDegenerate 
     integer,                       intent(inout), optional :: srcTermProcessing
@@ -3315,11 +3319,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              of distances and the shape of cells during regrid weight calculation on 
 !              a sphere. The argument {\tt normType} allows the user to 
 !              control the type of normalization done during conservative weight generation. 
-! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
 !              Added argument {\tt pipelineDepth}.
 !              The new arguments provide access to the tuning parameters
 !              affecting the performance and bit-for-bit behavior when applying
 !              the regridding weights.
+!
+!              Added arguments {\tt extrapMethod}, {\tt extrapNumSrcPnts}, and
+!              {\tt extrapDistExponent}. These three new extrapolation arguments allow the 
+!              user to extrapolate destination points not mapped by the regrid method. 
+!              {\tt extrapMethod} allows the user to choose the extrapolation method.
+!              {\tt extrapNumSrcPnts} and {\tt extrapDistExponent} are parameters that
+!              allow the user to tune the behavior of the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} 
+!              method.
+! 
 ! \end{description}
 ! \end{itemize}
 !
@@ -3389,6 +3402,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. Please see 
 !           Section~\ref{opt:normType} for a 
 !           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!  \item [{[extrapMethod]}]
+!           The type of extrapolation. Please see Section~\ref{opt:extrapmethod} 
+!           for a list of valid options. If not specified, defaults to 
+!           {\tt ESMF\_EXTRAPMETHOD\_NONE}.
+!  \item [{[extrapNumSrcPnts]}] 
+!           The number of source points to use for the extrapolation methods that use more than one source point 
+!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}). If not specified, defaults to 8.
+!  \item [{[extrapDistExponent]}] 
+!           The exponent to raise the distance to when calculating weights for 
+!           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
+!           of more distant points. If not specified, defaults to 2.0.
 !  \item [{[unmappedaction]}]
 !    Specifies what should happen if there are destination points that
 !    can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
@@ -3738,6 +3762,10 @@ call ESMF_LogWrite("must precompute full regridding!", &
             srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
             regridmethod=regridmethod, &
             polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
+            lineType=lineType, normType=normType, &
+            extrapMethod=extrapMethod, &
+            extrapNumSrcPnts=extrapNumSrcPnts, &
+            extrapDistExponent=extrapDistExponent, &
             unmappedaction=unmappedaction, &
             srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
             routehandle=rhh, &
@@ -4645,7 +4673,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise
 !              reproducibility.
@@ -5106,7 +5134,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise
 !              reproducibility.
@@ -5429,9 +5457,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   when the ESMF library is built. Please see the section on 
 !   Data I/O,~\ref{io:dataio}.
 !
+!   When {\tt convention} and {\tt purpose} arguments are specified, NetCDF dimension
+!   labels and variable attributes are written from each Field in the FieldBundle
+!   from the corresponding Attribute package. Additionally, Attributes may be
+!   set on the FieldBundle level under the same Attribute package.  This allows
+!   the specification of global attributes within the file.
+!   As with individual Fields, the value associated with each name may be either
+!   a scalar character string, or a scalar or array of type integer, real, or
+!   double precision.
+!
 !   Limitations:
 !   \begin{itemize}
-!     \item Only single tile Arrays within Fields are supported.
+!     \item Only single tile Fields are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -5442,14 +5479,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   \item[fileName]
 !     The name of the output file to which field bundle data is written.
 !   \item[{[convention]}]
-!     Specifies an Attribute package associated with the Array, used to create NetCDF
-!     attributes for the variable in the file.  When this argument is present,
-!     the [{[purpose]}] argument must also be present.  Use this argument only with a NetCDF
+!     Specifies an Attribute package associated with the FieldBundle, and the
+!     contained Fields, used to create NetCDF dimension labels and attributes
+!     in the file.  When this argument is present, the {\tt purpose} 
+!     argument must also be present.  Use this argument only with a NetCDF
 !     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[purpose]}]
-!     Specifies an Attribute package associated with the Array, used to create NetCDF
-!     attributes for the variable in the file.  When this argument is present,
-!     the [{[convention]}] argument must also be present.  Use this argument only with a NetCDF
+!     Specifies an Attribute package associated with the FieldBundle, and the
+!     contained Fields, used to create NetCDF dimension labels and attributes
+!     in the file.  When this argument is present, the {\tt convention} 
+!     argument must also be present.  Use this argument only with a NetCDF
 !     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[singleFile]}]
 !     A logical flag, the default is .true., i.e., all fields in the bundle 

@@ -1,6 +1,6 @@
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -9,12 +9,18 @@
 //
 //==============================================================================
 
+// Take out if MOAB isn't being used
+#if defined ESMF_MOAB
+
 #include <Mesh/include/ESMCI_Exception.h>
+#include <Mesh/include/ESMCI_MBMesh_Mapping.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
 
-namespace ESMCI {
+using namespace ESMCI;
 
-bool tri_is_in(const double pcoord[], double *dist) {
+//TODO: make tolerance parameters global
+
+bool MBElemMap::tri_is_in(const double pcoord[], double *dist) {
   const double in_tol = 1e-10;
   bool in=true;
 
@@ -47,21 +53,21 @@ bool tri_is_in(const double pcoord[], double *dist) {
   return in;
 }
 
-bool quad_is_in(const double pcoord[], double *dist) {
+bool MBElemMap::quad_is_in(const double pcoord[], double *dist) {
   const double in_tol = 1e-10;
   bool in=true;
   double max_out[2]={0.0,0.0};
 
-  if (pcoord[0] < -1.0-in_tol) {
-    max_out[0]=-1.0 - pcoord[0];
+  if (pcoord[0] < -1.0*in_tol) {
+    max_out[0]=-1.0*pcoord[0];
     in= false;
   } else if (pcoord[0] > 1.0+in_tol) {
     max_out[0]=pcoord[0] - 1.0;
     in= false;
   }
 
-  if (pcoord[1] < -1.0-in_tol) {
-    max_out[1]=-1.0 - pcoord[1];
+  if (pcoord[1] < -1.0*in_tol) {
+    max_out[1]=-1.0*pcoord[1];
     in= false;
   } else if (pcoord[1] > 1.0+in_tol) {
     max_out[1]=pcoord[1] - 1.0;
@@ -74,7 +80,7 @@ bool quad_is_in(const double pcoord[], double *dist) {
 }
 
 
-bool spherical_eval(const double *mdata,
+bool MBElemMap::spherical_eval(const double *mdata,
                     const double *point,
                     int num_pnts,
                     double *pcoord,
@@ -118,14 +124,14 @@ bool spherical_eval(const double *mdata,
   } else if (num_pnts==4) {
     // Corner 0
     if ((mdata[0] == point[0]) && (mdata[1] == point[1]) && (mdata[2] == point[2])) {
-      pcoord[0]=-1.0; pcoord[1]=-1.0;
+      pcoord[0]=0.0; pcoord[1]=0.0;
       if (dist) *dist = 0.0;
       return true;
     }
 
     // Corner 1
     if ((mdata[3] == point[0]) && (mdata[4] == point[1]) && (mdata[5] == point[2])) {
-      pcoord[0]=1.0; pcoord[1]=-1.0;
+      pcoord[0]=1.0; pcoord[1]=0.0;
       if (dist) *dist = 0.0;
       return true;
     }
@@ -139,7 +145,7 @@ bool spherical_eval(const double *mdata,
 
     // Corner 3
     if ((mdata[9] == point[0]) && (mdata[10] == point[1]) && (mdata[11] == point[2])) {
-      pcoord[0]=-1.0; pcoord[1]=1.0;
+      pcoord[0]=0.0; pcoord[1]=1.0;
       if (dist) *dist = 0.0;
       return true;
     }
@@ -148,7 +154,7 @@ bool spherical_eval(const double *mdata,
   }
 
   // translate into polygon
-  // Copy into new memory, so it can be changed without altering orig. 
+  // Copy into new memory, so it can be changed without altering orig.
   double pnts[3*PM_MAX_PNTS_IN_POLY];
   if (num_pnts==3) {
     num_pnts=3;
@@ -169,9 +175,8 @@ bool spherical_eval(const double *mdata,
   if (dist) *dist = std::numeric_limits<double>::max();
   pcoord[0]=0.0; pcoord[1]=0.0;
 
-  double p1,p2;
+  double p1,p2;  // Get rid of degenerate edges
 
-  // Get rid of degenerate edges
   int first_removed_ind=-1;
   remove_0len_edges3D(&num_pnts, pnts, &first_removed_ind);
 
@@ -208,9 +213,8 @@ bool spherical_eval(const double *mdata,
       return false;
     }
 
-    // Transform quad parametric coords from [0,1] to [-1,1] for consistancy
-    pcoord[0]=2*p1-1.0;
-    pcoord[1]=2*p2-1.0;
+    pcoord[0] = p1;
+    pcoord[1] = p2;
 
     // do is in
     double sdist;
@@ -231,4 +235,97 @@ bool spherical_eval(const double *mdata,
   return false;
 }
 
-} //ESMCI
+/*
+bool MBElemMap::cartesian_eval(const double *mdata, const double *point, double *pcoord, double *dist) const
+{
+  // Init output
+  if (dist) *dist = std::numeric_limits<double>::max();
+
+  // Newton's method
+  const double ctol = 1e-10;
+  const int max_iter = 15;
+
+  int pdim=2, sdim=2, ndof=2;
+
+  POLY_Mapping mpstd, jacobian_invert;
+
+  double s[pdim];
+  double delta_s[pdim];
+  double res[pdim];
+  double jac[sdim][sdim];
+  double jac_inv[sdim][sdim];
+  double sgrads[SFUNC_TYPE::ndofs][sdim];
+  double dnorm = 0.0, rnorm = 0.0;
+  int niters = 0;
+
+  for (unsigned int i = 0; i < pdim; i++) {
+    s[i] = delta_s[i] = res[i] = 0.0;
+  }
+
+  POLY_Mapping<SFUNC_TYPE,MPTraits<>,SPATIAL_DIM,PARAMETRIC_DIM> *mpstd =
+    trade<MPTraits<> >();
+  bool converged = false;
+  do {
+    SFUNC_TYPE::shape_grads(1, s, &sgrads[0][0]);
+    // Calculate residual.  Also use loop to start jacobian
+    mpstd->forward(1, mdata, s, res); // F($)
+    rnorm = 0.0;
+    for (unsigned int i = 0; i < sdim; i++) {
+      res[i] = point[i] - res[i];  // x - F(x) = -R(x)
+      rnorm += res[i]*res[i];
+      // Load forward jacobian
+      for (unsigned int j = 0; j < sdim; j++) {
+        jac[i][j] = 0.0;
+        for (unsigned int k = 0; k < SFUNC_TYPE::ndofs; k++) {
+          jac[i][j] += sgrads[k][j]*mdata[k*sdim+i];
+        }
+      }
+    } // for sdim
+
+    //  rnorm is small even when very bad.
+//    if (rnorm < ctol) {
+//      converged = true;
+//      break;
+//    }
+
+
+    // So now res holds -F(x) and jac has jacobian.  We must invert the jacobian
+    POLY_Mapping_jacobian_invert<sdim>(&jac[0][0], &jac_inv[0][0]);
+
+    // delta_s = jac_inv*res
+    dnorm = 0;
+    for (unsigned int i = 0; i < sdim; i++) {
+      delta_s[i] = 0.0;
+      for (unsigned int j = 0; j < sdim; j++) {
+        delta_s[i] += jac_inv[i][j]*res[j];
+      }
+
+      // snew = sold+delta
+      s[i] = s[i] + delta_s[i];
+      dnorm += delta_s[i]*delta_s[i];
+    } // i
+
+    if (dnorm <= ctol) converged = true;
+    niters++;
+
+    if (niters >= max_iter) break; // stop loop uncoverged.
+  } while(!converged);
+
+  for (unsigned int i = 0; i < sdim; i++)
+    pcoord[i] = s[i];
+
+  if (dist) *dist = 0.0;
+
+  if (!converged) {
+    if (dist) *dist = std::numeric_limits<double>::max();
+    return false;
+  }
+
+  // check parametric bounds.
+  double sdist=0.0;
+  bool resu = SFUNC_TYPE::is_in(pcoord, &sdist);
+  if(dist) *dist = sdist;
+  return resu;
+}*/
+
+#endif

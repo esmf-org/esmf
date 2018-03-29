@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -350,14 +350,14 @@ int main(void){
                              &i_maskValues, NULL,
                              &routehandle,
                              &regridmethod, NULL, NULL, NULL,
-                             &normtype, &unmappedaction, NULL,
+                             &normtype, NULL, NULL, NULL, &unmappedaction, NULL,
                              &srcFracField, &dstFracField);
 #else
   rc = ESMC_FieldRegridStore(srcfield, dstfield, 
                              NULL, NULL,
                              &routehandle,
                              &regridmethod, NULL, NULL, NULL,
-                             &normtype, NULL, NULL,
+                             &normtype, NULL, NULL, NULL, NULL, NULL,
                              &srcFracField, &dstFracField);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);

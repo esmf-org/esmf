@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -58,7 +58,7 @@ int main(void)
   strcpy(name, "Create ESMCI_IO_NetCDF object");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
   nctestIO = ESMCI_IO_NetCDFCreate(dummy_nc_filename,
-				   ESMC_NULL_POINTER, &rc);
+                                   ESMC_NULL_POINTER, &rc);
   Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
@@ -108,7 +108,7 @@ int main(void)
   Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
-  
+
   //----------------------------------------------------------------------------
   TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

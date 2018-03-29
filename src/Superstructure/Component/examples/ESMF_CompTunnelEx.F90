@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, GEOEhysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -166,6 +166,12 @@ program ESMF_CompTunnelEx
     finalrc = ESMF_FAILURE
     goto 10
   endif
+!-------------------------------------------------------------------------
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+#ifdef ESMF_TESTCOMPTUNNEL
+!-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
 !-----------------------------------------------------------------------------
@@ -531,7 +537,10 @@ program ESMF_CompTunnelEx
   call ESMF_GridCompDestroy(actualComp, rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
+  
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+#endif
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 10 continue

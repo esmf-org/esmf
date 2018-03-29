@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -390,10 +390,13 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                             ESMC_InterArrayInt *dstMaskValues,
                             ESMC_RouteHandle *routehandle, 
                             enum ESMC_RegridMethod_Flag *regridmethod, 
-			                enum ESMC_PoleMethod_Flag *polemethod,
-			                int *regridPoleNPnts,
-			                enum ESMC_LineType_Flag *lineType,
-			                enum ESMC_NormType_Flag *normType,
+                            enum ESMC_PoleMethod_Flag *polemethod,
+                            int *regridPoleNPnts,
+                            enum ESMC_LineType_Flag *lineType,
+                            enum ESMC_NormType_Flag *normType,
+                            enum ESMC_ExtrapMethod_Flag *extrapMethod,
+                            int *extrapNumSrcPnts,
+                            float *extrapDistExponent,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
                             ESMC_Logical *ignoreDegenerate,
                             ESMC_Field *srcFracField,
@@ -419,7 +422,8 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     // Invoke the C++ interface
     localrc = ESMCI::Field::regridstore(fieldpsrc, fieldpdst, 
       srcMaskValues, dstMaskValues, &rhPtr, regridmethod, 
-      polemethod, regridPoleNPnts, lineType, normType, unmappedaction, ignoreDegenerate,
+      polemethod, regridPoleNPnts, lineType, normType, extrapMethod,
+      extrapNumSrcPnts, extrapDistExponent, unmappedaction, ignoreDegenerate,
       srcfracp, dstfracp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
@@ -427,7 +431,67 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     // return rhPtr in routehandle argument
     routehandle->ptr = NULL;
     routehandle->ptr = (void *)rhPtr;
-    
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//--------------------------------------------------------------------------
+
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldRegridStoreFile()"
+  int ESMC_FieldRegridStoreFile(ESMC_Field srcField, ESMC_Field dstField,
+                            const char *filename,
+                            ESMC_InterArrayInt *srcMaskValues,
+                            ESMC_InterArrayInt *dstMaskValues,
+                            ESMC_RouteHandle *routehandle,
+                            enum ESMC_RegridMethod_Flag *regridmethod,
+                            enum ESMC_PoleMethod_Flag *polemethod,
+                            int *regridPoleNPnts,
+                            enum ESMC_LineType_Flag *lineType,
+                            enum ESMC_NormType_Flag *normType,
+                            enum ESMC_UnmappedAction_Flag *unmappedaction,
+                            enum ESMC_Logical *ignoreDegenerate,
+                            enum ESMC_Logical *create_rh,
+                            ESMC_Field *srcFracField,
+                            ESMC_Field *dstFracField){
+
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    ESMCI::Field *srcfracp = NULL;
+    ESMCI::Field *dstfracp = NULL;
+    // typecase into ESMCI type
+    ESMCI::Field *fieldpsrc = reinterpret_cast<ESMCI::Field *>(srcField.ptr);
+    ESMCI::Field *fieldpdst = reinterpret_cast<ESMCI::Field *>(dstField.ptr);
+    if (srcFracField != NULL)
+      srcfracp = reinterpret_cast<ESMCI::Field *>(srcFracField->ptr);
+    if (dstFracField != NULL)
+      dstfracp = reinterpret_cast<ESMCI::Field *>(dstFracField->ptr);
+    ESMCI::RouteHandle *rhPtr;
+    rhPtr=NULL;
+
+    // Invoke the C++ interface
+    localrc = ESMCI::Field::regridstorefile(fieldpsrc, fieldpdst, filename,
+      srcMaskValues, dstMaskValues, &rhPtr, regridmethod,
+      polemethod, regridPoleNPnts, lineType, normType, unmappedaction, 
+      ignoreDegenerate, create_rh, srcfracp, dstfracp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;  // bail out
+
+    // return rhPtr in routehandle argument
+    if (create_rh == NULL) {
+      routehandle->ptr = NULL;
+      routehandle->ptr = (void *)rhPtr;
+    }
+    else if (*create_rh == ESMF_TRUE) {
+      routehandle->ptr = NULL;
+      routehandle->ptr = (void *)rhPtr;
+    }
+
     // return successfully
     rc = ESMF_SUCCESS;
     return rc;
@@ -476,7 +540,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 
     // typecase into ESMCI type
     ESMCI::RouteHandle *routehandlep = reinterpret_cast<ESMCI::RouteHandle *>(routehandle->ptr);
-
+    
     // Invoke the C++ interface
     localrc = ESMCI::Field::regridrelease(routehandlep);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
@@ -491,6 +555,49 @@ int ESMC_FieldGetBounds(ESMC_Field field,
   }
 //--------------------------------------------------------------------------
   
+
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldSMMStore()"
+  int ESMC_FieldSMMStore(ESMC_Field srcField, ESMC_Field dstField,
+                         const char *filename, ESMC_RouteHandle *routehandle,
+                         ESMC_Logical *ignoreUnmatchedIndices,
+                         int *srcTermProcessing, int *pipeLineDepth){
+
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    // typecast Fields into ESMCI type
+    ESMCI::Field *fieldpsrc = reinterpret_cast<ESMCI::Field *>(srcField.ptr);
+    ESMCI::Field *fieldpdst = reinterpret_cast<ESMCI::Field *>(dstField.ptr);
+
+    // ensure routehandle object is present    
+    if (routehandle==NULL){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+        "Not a valid pointer to routehandle argument", ESMC_CONTEXT, &rc);
+      return rc;  // bail out
+    }
+    ESMCI::RouteHandle **routehandlep = (ESMCI::RouteHandle **) &(routehandle->ptr);
+
+    //RLO: removed transposeRoutehandle until user request
+    /*// deal with fact that transposeRoutehandle may be absent
+    ESMCI::RouteHandle **troutehandlep = NULL;   // default: not present 
+    if (transposeRoutehandle != NULL)
+      troutehandlep = (ESMCI::RouteHandle **) &(transposeRoutehandle->ptr);*/
+
+    // Invoke the C++ interface
+    localrc = ESMCI::Field::smmstore(fieldpsrc, fieldpdst, filename, routehandlep,
+        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;  // bail out
+
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//--------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

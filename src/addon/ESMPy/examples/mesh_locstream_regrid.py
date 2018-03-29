@@ -3,6 +3,9 @@
 import ESMF
 import numpy
 
+import ESMF.util.helpers as helpers
+import ESMF.api.constants as constants
+
 # This call enables debug logging
 # ESMF.Manager(debug=True)
 
@@ -41,16 +44,13 @@ dstfield.data[...] = 1e20
 
 # create an object to regrid data from the source to the destination field
 # TODO: this example seems to fail occasionally with UnmappedAction.ERROR, probably due to a tolerance issue - ask Bob
-regrid = ESMF.Regrid(srcfield, dstfield,
-                     regrid_method=ESMF.RegridMethod.BILINEAR,
+regrid = ESMF.Regrid(srcfield=srcfield, dstfield=dstfield, regrid_method=ESMF.RegridMethod.BILINEAR,
                      unmapped_action=ESMF.UnmappedAction.IGNORE)
 
 # do the regridding from source to destination field
 dstfield = regrid(srcfield, dstfield)
 
-
 # compute the mean relative error
-from operator import mul
 num_nodes = numpy.prod(xctfield.data.shape[:])
 relerr = 0
 meanrelerr = 0
@@ -61,13 +61,8 @@ if num_nodes is not 0:
 
 # handle the parallel case
 if ESMF.pet_count() > 1:
-    try:
-        from mpi4py import MPI
-    except:
-        raise ImportError
-    comm = MPI.COMM_WORLD
-    relerr = comm.reduce(relerr, op=MPI.SUM)
-    num_nodes = comm.reduce(num_nodes, op=MPI.SUM)
+    relerr = helpers.reduce_val(relerr, op=constants.Reduce.SUM)
+    num_nodes = helpers.reduce_val(num_nodes, op=constants.Reduce.SUM)
 
 # output the results from one processor only
 if ESMF.local_pet() is 0:

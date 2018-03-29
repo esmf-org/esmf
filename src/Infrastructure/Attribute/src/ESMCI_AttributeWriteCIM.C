@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2257,7 +2257,7 @@ int Attribute::AttributeWriteCIMcitation(
       if (attpack->AttPackGetAttribute("SpatialRegriddingMethod", ESMC_ATTNEST_ON)->isSet() ||
           attpack->AttPackGetAttribute("SpatialRegriddingDimension", ESMC_ATTNEST_ON)->isSet()) {
 
-    	attr = attpack->AttPackGetAttribute("Frequency", ESMC_ATTNEST_ON);
+        attr = attpack->AttPackGetAttribute("Frequency", ESMC_ATTNEST_ON);
         if (attr->isSet()) {
           localrc = attr->get(&valuevector);
           if (valuevector.size() > 1) {
@@ -2886,7 +2886,7 @@ int Attribute::AttributeWriteCIMinput(
 
   int ordinal=1;
   attpack = AttPackGet(convention, MODEL_COMP_PURP, "comp", &ordinal,
-		               ESMC_ATTNEST_ON);
+                               ESMC_ATTNEST_ON);
   while (attpack != NULL) {
     localrc = attpack->AttributeWriteCIMbuffer(io_xml, cimDocType);
     if (localrc != ESMF_SUCCESS) {
@@ -2899,7 +2899,7 @@ int Attribute::AttributeWriteCIMinput(
     // get next occurence of this attpack, if any, on this component
     ordinal++;
     attpack = AttPackGet(convention, MODEL_COMP_PURP, "comp", &ordinal,
-		                 ESMC_ATTNEST_ON);
+                                 ESMC_ATTNEST_ON);
   }
 
   // recurse across all linked ESMF objects (e.g. child components, states,

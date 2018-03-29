@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -119,13 +119,23 @@ int main(void){
   rc = ESMC_InterArrayIntSet(&i_ll, deLabelList, 6);
   */
 
+  // Set up staggerLocList for each tile (column major Fortran style)
+  int extent2 = 2;
+  int *staggerLocList;
+  staggerLocList = (int *)malloc(2*sizeof(int));
+  staggerLocList[0] = ESMC_STAGGERLOC_CENTER;
+  staggerLocList[1] = ESMC_STAGGERLOC_CORNER;
+
+  ESMC_InterArrayInt i_sl;
+  rc = ESMC_InterArrayIntNDSet(&i_sl, staggerLocList, 1, &extent2);
+
   int tilesize = 45;
   char namecs[18] = "cubed sphere grid";
 
   //NEX_UTest
   strcpy(name, "GridCreateCubedSphere");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  grid_cs = ESMC_GridCreateCubedSphere(&tilesize, &i_rd, namecs, &rc);
+  grid_cs = ESMC_GridCreateCubedSphere(&tilesize, &i_rd, &i_sl, namecs, &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   free(regDecompPTile);
   // free(decompFlagPTile);
@@ -168,6 +178,12 @@ int main(void){
   }
   */
 
+  //NEX_UTest
+  strcpy(name, "GridDestroy(cubedsphere)");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+  rc = ESMC_GridDestroy(&grid_cs);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+      
 //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------

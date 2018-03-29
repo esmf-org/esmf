@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -157,6 +157,7 @@ ESMC_Grid ESMC_GridCreateCubedSphere(
   //ESMC_InterArrayInt *decompFlagPTile,  // in
   //ESMC_InterArrayInt *deLabelList,    // in
   //ESMC_DELayout *delayout,            // in
+  ESMC_InterArrayInt *staggerLocList,   // in
   const char *name,                   // in
   int *rc);                           // out
 // !RETURN VALUE:
@@ -186,6 +187,9 @@ ESMC_Grid ESMC_GridCreateCubedSphere(
 //      will be 12 with each tile decomposed into 1x2 blocks. The 12 DEs are mapped
 //      to the first 12 PETs and the remaining 4 PETs have no DEs locally, unless
 //      an optional {\tt delayout} is provided.
+//  \item[staggerLocList]
+//      The list of stagger locations to fill with coordinates. Only {\tt ESMF\_STAGGERLOC\_CENTER} and
+//      {\tt ESMF\_STAGGERLOC\_CORNER} are supported. If not present, no coordinates will be added or filled.
 //  \item[name]
 //      The name of the {\tt ESMC\_Grid}.
 //  \item[rc]

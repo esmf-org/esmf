@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -51,7 +51,7 @@ program ESMF_ArrayLarrayEx
   type(ESMF_DistGrid)         :: distgrid       ! DistGrid object
   type(ESMF_Array)            :: array          ! Array object
   integer                     :: rc, i, j, de
-  real                        :: localSum
+  real(ESMF_KIND_R8)          :: localSum
   type(ESMF_LocalArray), allocatable :: larrayList(:) ! LocalArray object list
   type(ESMF_LocalArray), allocatable :: larrayRefList(:)!LocalArray obj. list
   

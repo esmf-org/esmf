@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -13,7 +13,7 @@
 #define ESMCI_MBMesh_BBox_h
 
 // Take out if MOAB isn't being used
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB
 
 #include <Mesh/include/ESMCI_MBMesh.h>
 
@@ -35,7 +35,7 @@ MBMesh_BBox() {}
 MBMesh_BBox(int _dim) : isempty(true), dim(_dim) {}
 MBMesh_BBox(int dim, const double min[], const double max[]); 
 
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB
 // Construct a box around an element.  If the object is a shell, the box
 // will be expanded in the normal direction by normexp*diameter of object
  MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp = 0.0);

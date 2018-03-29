@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -37,9 +37,9 @@ using namespace std;
 // This class provides access to a CAM output file.  It reads the relevant
 // data variables when constructed and provides access methods to retrieve
 // the values based on time, latitude, and longitude.
-// 
+//
 // (KDS: This code is very specific to the CCSM/CAM prototype that only
-//       had to fetch a few specific values.  I don't think this is a 
+//       had to fetch a few specific values.  I don't think this is a
 //       class we're going to want to keep in the ESMF baseline.)
 //
 //EOPI
@@ -48,39 +48,39 @@ using namespace std;
 namespace ESMCI
 {
 
-  class ESMCI_WebServDataContent 
+  class ESMCI_WebServDataContent
   {
   public:
 
      // constructor and desructor
-	  ESMCI_WebServDataContent(int  numLatValues, 
+          ESMCI_WebServDataContent(int  numLatValues,
                               int  numLonValues);
-	  ~ESMCI_WebServDataContent();
+          ~ESMCI_WebServDataContent();
 
      // methods to set data values
-	  void   setTimeStamp(double  timestamp);
-     void	addDataValues(string   varName,
+          void   setTimeStamp(double  timestamp);
+     void       addDataValues(string   varName,
                           double*  dataValues);
 
      // methods to fetch data values
-	  double   getTimeStamp()	{ return theTimeStamp; }
-	  double*  getDataValues(string  varName);
-	  double   getDataValue(string  varName,
-                           int     latValueIdx, 
+          double   getTimeStamp()       { return theTimeStamp; }
+          double*  getDataValues(string  varName);
+          double   getDataValue(string  varName,
+                           int     latValueIdx,
                            int     lonValueIdx);
-  
+
      // print method for debug purposes
-	  void  print();
+          void  print();
 
   private:
 
-     int							theNumLatValues;
-     int							theNumLonValues;
-     double						theTimeStamp;
-	  map<string, double*>	theDataValues;	// the output data values... one 
-	                                       // entry in the map for each variable
+     int                                                        theNumLatValues;
+     int                                                        theNumLonValues;
+     double                                             theTimeStamp;
+          map<string, double*>  theDataValues;  // the output data values... one
+                                               // entry in the map for each variable
   };
 
 } // end namespace
 
-#endif 	// ESMCI_WebServDataContent_H
+#endif          // ESMCI_WebServDataContent_H

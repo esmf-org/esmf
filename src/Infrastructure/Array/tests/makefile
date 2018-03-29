@@ -16,6 +16,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayCreateGetUTest \
                 $(ESMF_TESTDIR)/ESMF_ArraySMMFromFileUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayArbIdxSMMUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayRedistUTest \
+                $(ESMF_TESTDIR)/ESMF_ArrayRedistPerfUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayHaloUTest \
                 $(ESMF_TESTDIR)/ESMC_ArrayUTest 
 
@@ -28,6 +29,7 @@ TESTS_RUN     = RUN_ESMF_ArrayCreateGetUTest \
                 RUN_ESMF_ArraySMMFromFileUTest \
                 RUN_ESMF_ArrayArbIdxSMMUTest \
                 RUN_ESMF_ArrayRedistUTest \
+                RUN_ESMF_ArrayRedistPerfUTest \
                 RUN_ESMF_ArrayHaloUTest \
                 RUN_ESMC_ArrayUTest 
 
@@ -117,6 +119,11 @@ RUN_ESMF_ArrayArbIdxSMMUTest:
 
 RUN_ESMF_ArrayRedistUTest:
 	$(MAKE) TNAME=ArrayRedist NP=6 ftest
+
+# ---
+
+RUN_ESMF_ArrayRedistPerfUTest:
+	$(MAKE) TNAME=ArrayRedistPerf NP=6 ftest
 
 # ---
 

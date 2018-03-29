@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -125,6 +125,7 @@ module ESMF_BaseMod
       public ESMF_SetName
       public ESMF_GetName
       public ESMF_GetVM
+      public ESMF_IsProxy
 
 !
 
@@ -709,7 +710,7 @@ module ESMF_BaseMod
 ! !IROUTINE:  ESMF_BaseGetStatus - get the status
 !
 ! !INTERFACE:
-  subroutine ESMF_BaseGetStatus(base, status, rc)
+  recursive subroutine ESMF_BaseGetStatus(base, status, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Base),    intent(in)            :: base
@@ -781,7 +782,8 @@ module ESMF_BaseMod
 !
 !
 !EOPI
-    integer                     :: localrc, ignorerc
+    integer                     :: localrc
+    integer                     :: ignore_iostat
     character(len=ESMF_MAXSTR)  :: opts
     type(ESMF_Logical)          :: tofile
 
@@ -800,8 +802,8 @@ module ESMF_BaseMod
 
     tofile = present (filename)
 
-    call ESMF_UtilIOUnitFlush (unit=ESMF_UtilIOstdout, rc=ignorerc)
-    ! Ignore localrc, because sometimes stdout is not open at this point
+    call ESMF_UtilIOUnitFlush (unit=ESMF_UtilIOstdout, rc=ignore_iostat)
+    ! Ignore iostat, because sometimes stdout is not open at this point
     ! and some compilers FLUSH statements will complain.
 
     call c_ESMC_BasePrint(base, 0, opts, tofile, filename, ESMF_TRUE, localrc)
@@ -1122,6 +1124,62 @@ module ESMF_BaseMod
     rc = ESMF_SUCCESS
 
   end subroutine ESMF_BaseDeserializeIDVMId
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_IsProxy"
+!BOPI
+! !IROUTINE: ESMF_IsProxy - Internal access routine to determine whether proxy
+!
+! !INTERFACE:
+  function ESMF_IsProxy(base, rc) 
+!
+! !RETURN VALUE:
+    logical :: ESMF_IsProxy   
+!
+! !ARGUMENTS:
+    type(ESMF_Base), intent(in),  optional :: base
+    integer,         intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Access proxyflag and return true/false accordingly
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [{[base]}]
+!           Base object.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+    integer             :: localrc
+    type(ESMF_Logical)  :: isProxy
+
+    ! Initialize
+    localrc = ESMF_RC_NOT_IMPL
+    rc = ESMF_RC_NOT_IMPL
+
+    ESMF_IsProxy = .false. ! initialize
+    
+    if (.not.present(base)) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
+        msg="Base object must be present.", &
+        ESMF_CONTEXT, rcToReturn=rc)
+      return
+    else
+      call c_ESMC_IsProxy(base, isProxy, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_IsProxy = isProxy
+    endif
+
+    ! Return successfully
+    rc = ESMF_SUCCESS
+
+  end function ESMF_IsProxy
 !------------------------------------------------------------------------------
 
 

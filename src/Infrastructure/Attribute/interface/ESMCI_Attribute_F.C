@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2110,7 +2110,18 @@ extern "C" {
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
   }
   else if (*attcopyflag == ESMF_ATTCOPY_REFERENCE) {
+      ESMCI::Attribute *attrdel = (*destination)->ESMC_BaseGetRoot();
       (*destination)->ESMC_BaseSetRoot((*source)->ESMC_BaseGetRoot());
+
+#if 0 
+//TODO: taking out the delete again causes memory leaks under some circumstances
+//TODO: however, leaving the delete in causes SEGV in those cases where the
+//TODO: root was actually a reference from another Attribute. 
+//TODO: long term must have a flag to know if this was a value copy or reference
+      if (attrdel && (attrdel != (*source)->ESMC_BaseGetRoot()))
+        delete attrdel;
+#endif
+      
       status = ESMF_SUCCESS;
       if (rc) *rc = status;
   }

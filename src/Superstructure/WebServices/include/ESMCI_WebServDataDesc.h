@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -37,45 +37,45 @@ using namespace std;
 namespace ESMCI
 {
 
-  class ESMCI_WebServDataDesc 
+  class ESMCI_WebServDataDesc
   {
   public:
 
      // constructor and desructor
-	  ESMCI_WebServDataDesc(int      numVars,
+          ESMCI_WebServDataDesc(int      numVars,
                            string*  varNames,
                            int      numLatValues,
                            double*  latValues,
                            int      numLonValues,
                            double*  lonValues);
-	  ~ESMCI_WebServDataDesc();
+          ~ESMCI_WebServDataDesc();
 
      // methods to fetch data values
-	  int       getNumVars()			{ return theNumVars; }
-     string*	getVarNames()			{ return theVarNames; }
-	  int       getNumLatValues()		{ return theNumLatValues; }
-	  double*   getLatValues()			{ return theLatValues; }
-	  int       getNumLonValues()		{ return theNumLonValues; }
-	  double*   getLonValues()			{ return theLonValues; }
+          int       getNumVars()                        { return theNumVars; }
+     string*    getVarNames()                   { return theVarNames; }
+          int       getNumLatValues()           { return theNumLatValues; }
+          double*   getLatValues()                      { return theLatValues; }
+          int       getNumLonValues()           { return theNumLonValues; }
+          double*   getLonValues()                      { return theLonValues; }
 
      // methods to lookup index values for specific data arrays
-	  int  getVarIndex(string  varName);
-	  int  getLatIndex(double  latValue);
-	  int  getLonIndex(double  lonValue);
-  
+          int  getVarIndex(string  varName);
+          int  getLatIndex(double  latValue);
+          int  getLonIndex(double  lonValue);
+
      // print method for debug purposes
-	  void  print();
+          void  print();
 
   private:
 
-	  int			theNumVars;			// the number of data variables
-	  string*	theVarNames;		// array of data variable names
-	  int			theNumLatValues;	// the number of latitude values
-	  double*	theLatValues;		// array of latitude values
-	  int			theNumLonValues;	// the number longitude values
-	  double*	theLonValues;		// array of longitude values
+          int                   theNumVars;                     // the number of data variables
+          string*       theVarNames;            // array of data variable names
+          int                   theNumLatValues;        // the number of latitude values
+          double*       theLatValues;           // array of latitude values
+          int                   theNumLonValues;        // the number longitude values
+          double*       theLonValues;           // array of longitude values
   };
 
 } // end namespace
 
-#endif 	// ESMCI_WebServDataDesc_H
+#endif          // ESMCI_WebServDataDesc_H

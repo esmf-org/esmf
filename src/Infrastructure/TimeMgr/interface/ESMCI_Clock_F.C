@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -50,7 +50,7 @@ extern "C" {
                                        int *status,
                                        ESMCI_FortranStrLenArg name_l) {
           *ptr = ESMCI_ClockCreate(
-                                           *nameLen,   // always present 
+                                           *nameLen,   // always present
                                                        //   internal argument.
                     ESMC_NOT_PRESENT_FILTER(name),
                                             timeStep,   // required
@@ -91,7 +91,7 @@ extern "C" {
                                  ESMCI_FortranStrLenArg name_l) {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->Clock::set(
-                                           *nameLen,   // always present 
+                                           *nameLen,   // always present
                                                        //   internal argument.
                     ESMC_NOT_PRESENT_FILTER(name),
                     ESMC_NOT_PRESENT_FILTER(timeStep),
@@ -120,8 +120,8 @@ extern "C" {
                                  Time *prevTime,
                                  TimeInterval *currSimTime,
                                  TimeInterval *prevSimTime,
-                                 Calendar **calendar, 
-                                 ESMC_CalKind_Flag *calkindflag, 
+                                 Calendar **calendar,
+                                 ESMC_CalKind_Flag *calkindflag,
                                  int *timeZone,
                                  ESMC_I8 *advanceCount,
                                  int *alarmCount,
@@ -130,7 +130,7 @@ extern "C" {
                                  ESMCI_FortranStrLenArg tempName_l) {
           ESMF_CHECK_POINTER(*ptr, status)
           int rc = (*ptr)->Clock::get(
-			                  // always present internal arguments.
+                                          // always present internal arguments.
                                            *nameLen,
                                             tempNameLen,
                                             tempName,
@@ -195,7 +195,7 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       // for ringingAlarmList() size == 0 (missing) 
+       // for ringingAlarmList() size == 0 (missing)
        void FTN_X(c_esmc_clockadvance0)(Clock **ptr,
                                    TimeInterval *timeStep,
                                    int *sizeofRingingAlarmList,
@@ -212,7 +212,7 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN_X(c_esmc_clockisstoptime)(Clock **ptr, 
+       void FTN_X(c_esmc_clockisstoptime)(Clock **ptr,
                                       int *esmf_clockIsStopTime, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           *esmf_clockIsStopTime = (int) (*ptr)->Clock::isStopTime(
@@ -233,7 +233,7 @@ extern "C" {
           if (ESMC_PRESENT(status)) *status = rc;
        }
 
-       void FTN_X(c_esmc_clockisstoptimeenabled)(Clock **ptr, 
+       void FTN_X(c_esmc_clockisstoptimeenabled)(Clock **ptr,
                                int *esmf_clockIsStopTimeEnabled, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           *esmf_clockIsStopTimeEnabled =
@@ -241,14 +241,14 @@ extern "C" {
                                              ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN_X(c_esmc_clockisdone)(Clock **ptr, 
+       void FTN_X(c_esmc_clockisdone)(Clock **ptr,
                                     int *esmf_clockIsDone, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           *esmf_clockIsDone = (int) (*ptr)->Clock::isDone(
                                             ESMC_NOT_PRESENT_FILTER(status) );
        }
 
-       void FTN_X(c_esmc_clockisreverse)(Clock **ptr, 
+       void FTN_X(c_esmc_clockisreverse)(Clock **ptr,
                                     int *esmf_clockIsReverse, int *status) {
           ESMF_CHECK_POINTER(*ptr, status)
           *esmf_clockIsReverse = (int) (*ptr)->Clock::isReverse(
@@ -354,7 +354,7 @@ extern "C" {
        void FTN_X(c_esmc_clockreadrestart)(Clock **ptr, int *nameLen,
                                          const char *name,
                                          int *status,
-                                         ESMCI_FortranStrLenArg name_l) {    
+                                         ESMCI_FortranStrLenArg name_l) {
           *ptr = ESMCI_ClockReadRestart(
                                            *nameLen,  // always present
                                                       //   internal argument.

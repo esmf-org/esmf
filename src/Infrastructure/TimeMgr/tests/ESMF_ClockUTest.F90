@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2017, University Corporation for Atmospheric Research,
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -790,7 +790,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
-
+call ESMF_LogSet (flush=.true.)
       !EX_UTest
       ! Test fix for bug #755445
       ! ClockPrint with an unallocated clock
@@ -811,7 +811,17 @@
                                stopTime=stopTime, name="Clock 1", rc=rc)
       call ESMF_Test((rc.eq.ESMF_RC_OBJ_INIT), &
                       name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_ClockDestroy(clock, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+
+      !EXxxx_UTest
+      ! Destroy clock with uninitialized Start Time
+!      write(failMsg, *) " Did not return ESMF_RC_OBJ_NOT_CREATED"
+!      write(name, *) "Destroy uninitialized clock test"
+!call ESMF_LogSet (trace=.true.)
+!      call ESMF_ClockDestroy(clock, rc=rc)
+!      call ESMF_Test(rc == ESMF_RC_OBJ_NOT_CREATED, &
+!                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
@@ -824,6 +834,7 @@
                                    calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+!call ESMF_LogSet (trace=.false.)
 
       ! ----------------------------------------------------------------------------
  

@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research,
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -45,13 +45,13 @@ namespace ESMCI
   public:
 
      // constructor and destructor
-	  ESMCI_WebServServerSocket();
-	  ~ESMCI_WebServServerSocket();
+          ESMCI_WebServServerSocket();
+          ~ESMCI_WebServServerSocket();
 
      // setting up a server
-	  int  connect(int  port);
+          int  connect(int  port);
   };
 
 } // end namespace
 
-#endif 	// ESMCI_WebServServerSocket_H
+#endif          // ESMCI_WebServServerSocket_H

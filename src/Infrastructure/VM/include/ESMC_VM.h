@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -24,7 +24,7 @@
 #define ESMC_VM_H
 
 //-----------------------------------------------------------------------------
-// ESMC_VM - Public C interface to the ESMF VM class
+// ESMC_VM - Public C interface to the ESMC VM class
 //
 // The code in this file defines the public C VM class and declares method
 // signatures (prototypes).  The companion file {\tt ESMC\_VM.C} contains
@@ -37,6 +37,8 @@
 
 #include <mpi.h>
 
+#include "ESMC_Util.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,6 +49,76 @@ typedef struct{
 }ESMC_VM;
 
 // Class API
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_VMBarrier - block calling PETs until all PETS called
+//
+// !INTERFACE:
+int ESMC_VMBarrier(
+  ESMC_VM vm                   // in
+);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Collective {\tt ESMC\_VM} communication call that blocks calling PET until 
+//  all PETs of the VM context have issued the call.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[vm] 
+//    Queried {\tt ESMC\_VM} object.
+//  \item[{[rc]}]
+//    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_VMBroadcast - Broadcast data across the VM
+//
+// !INTERFACE:
+int ESMC_VMBroadcast(ESMC_VM vm,
+                  void *bcstData,
+                  int count,
+                  enum ESMC_TypeKind_Flag *typekind,
+                  int rootPet);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//  Collective {\tt ESMC\_VM} communication call that broadcasts a contiguous 
+//  data array from {\tt rootPet} to all other PETs of the {\tt ESMC\_VM}
+//  object.
+//
+//  This method is overloaded for:
+//  {\tt ESMC\_TYPEKIND\_I4}, {\tt ESMC\_TYPEKIND\_I8},
+//  {\tt ESMC\_TYPEKIND\_R4}, {\tt ESMC\_TYPEKIND\_R8}, 
+//  {\tt ESMC\_TYPEKIND\_LOGICAL}.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[vm] 
+//    {\tt ESMC\_VM} object.
+//  \item[bcstData]
+//    Contiguous data array. On {\tt rootPet} {\tt bcstData} holds data that
+//    is to be broadcasted to all other PETs. On all other PETs 
+//    {\tt bcstData} is used to receive the broadcasted data.
+//  \item[count] 
+//    Number of elements in {\tt bcstData}. Must be the same on all PETs.
+//  \item[typekind]
+//    The typekind of the data to be reduced. See section 
+//    \ref{const:ctypekind} for a list of valid typekind options.
+//  \item[rootPet] 
+//    PET that holds data that is being broadcast.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -86,7 +158,7 @@ int ESMC_VMGet(
 //    specified {\tt ESMC\_VM} object. This communicator may be used for
 //    user-level MPI communications. It is recommended that the user
 //    duplicates the communicator via {\tt MPI\_Comm\_Dup()} in order to
-//    prevent any interference with ESMF communications.
+//    prevent any interference with ESMC communications.
 //  \item[{[pthreadsEnabledFlag]}]
 //    A return value of '1' indicates that the ESMF library was compiled with
 //    Pthreads enabled. A return value of '0' indicates that Pthreads are
@@ -117,7 +189,7 @@ ESMC_VM ESMC_VMGetCurrent(
 //
 // \begin{sloppypar}
 //  Get the {\tt ESMC\_VM} object of the current execution context. Calling
-//  {\tt ESMC\_VMGetCurrent()} within an ESMF Component, will return the
+//  {\tt ESMC\_VMGetCurrent()} within an ESMC Component, will return the
 //  same VM object as {\tt ESMC\_GridCompGet(..., vm=vm, ...)} or
 //  {\tt ESMC\_CplCompGet(..., vm=vm, ...)}. 
 // \end{sloppypar}
@@ -208,6 +280,57 @@ int ESMC_VMPrint(
 //  \begin{description}
 //  \item[vm] 
 //    {\tt ESMC\_VM} object to be printed.
+//  \end{description}
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_VMReduce - Reduce data from across the VM
+//
+// !INTERFACE:
+int ESMC_VMReduce(ESMC_VM vm,
+                  void *sendData,
+                  void *recvData,
+                  int count,
+                  enum ESMC_TypeKind_Flag *typekind,
+                  enum ESMC_Reduce_Flag *reduceflag,
+                  int rootPet);
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Collective {\tt ESMC\_VM} communication call that reduces a contiguous data 
+//  array across the {\tt ESMC\_VM} object into a contiguous data array of 
+//  the same <type><kind>. The result array is returned on {\tt rootPet}. 
+//  Different reduction operations can be specified.
+//
+//  This method is overloaded for:
+//  {\tt ESMC\_TYPEKIND\_I4}, {\tt ESMC\_TYPEKIND\_I8},
+//  {\tt ESMC\_TYPEKIND\_R4}, {\tt ESMC\_TYPEKIND\_R8}.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[vm] 
+//    {\tt ESMC\_VM} object.
+//  \item[sendData]
+//    Contiguous data array holding data to be sent. All PETs must specify a
+//    valid source array.
+//  \item[recvData] 
+//    Contiguous data array for data to be received. Only the {\tt recvData}
+//    array specified by the {\tt rootPet} will be used by this method.
+//  \item[count] 
+//    Number of elements in sendData and recvData. Must be the same on all PETs.
+//  \item[typekind]
+//    The typekind of the data to be reduced. See section 
+//    \ref{const:ctypekind} for a list of valid typekind options.
+//  \item[reduceflag] 
+//    Reduction operation. See section \ref{const:creduce} for a list of 
+//    valid reduce operations.
+//  \item[rootPet] 
+//    PET on which reduced data is returned.
 //  \end{description}
 //
 //EOP

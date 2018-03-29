@@ -1,17 +1,17 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
 
 // Take out if MOAB isn't being used
-#ifdef ESMF_MOAB
+#if defined ESMF_MOAB
 
 #include <Mesh/include/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_MBMesh_Util.h>
@@ -38,7 +38,7 @@
 // into the object file for tracking purposes.
  static const char *const version = "$Id$";
 //-----------------------------------------------------------------------------
-          
+
 using namespace ESMCI;
 
 double geom_tol=1.0E-6;
@@ -46,7 +46,7 @@ double geom_tol=1.0E-6;
 struct ZData {
   // Could maybe store this more efficiently using a range. However,
   // since we are comparing with Mesh and that does it this way, and could
-  // also do it more efficiently by using iterators, do it this way for now. 
+  // also do it more efficiently by using iterators, do it this way for now.
   std::vector<EntityHandle> dst_elems;
   std::vector<EntityHandle> src_elems;
 
@@ -66,9 +66,9 @@ static int GetNumAssignedObj(void *user, int *err) {
 
   return num;
 }
- 
+
 static void GetObjList(void *user, int numGlobalIds, int numLids, ZOLTAN_ID_PTR gids, ZOLTAN_ID_PTR lids,
-          int wgt_dim, float *obj_wghts, int *err) 
+          int wgt_dim, float *obj_wghts, int *err)
 {
   ZData &udata = *(static_cast<ZData *>(user));
   std::vector<EntityHandle>::iterator ni,ne;
@@ -76,7 +76,7 @@ static void GetObjList(void *user, int numGlobalIds, int numLids, ZOLTAN_ID_PTR 
 
   // Put src into lists
   ni = udata.src_elems.begin();
-  ne = udata.src_elems.end();    
+  ne = udata.src_elems.end();
   for (; ni != ne; ++ni) {
     int elem_gid;
     MBMesh_get_gid(udata.srcmesh, *ni, &elem_gid);
@@ -88,7 +88,7 @@ static void GetObjList(void *user, int numGlobalIds, int numLids, ZOLTAN_ID_PTR 
 
   // Put dst into lists
   ni = udata.dst_elems.begin();
-  ne = udata.dst_elems.end();    
+  ne = udata.dst_elems.end();
   for (; ni != ne; ++ni) {
     int elem_gid;
     MBMesh_get_gid(udata.dstmesh, *ni, &elem_gid);
@@ -111,7 +111,7 @@ static int GetNumGeom(void *user, int *err) {
 
 
 static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
-  ZOLTAN_ID_PTR gids, ZOLTAN_ID_PTR lids, int numDim, double *pts, int *err) 
+  ZOLTAN_ID_PTR gids, ZOLTAN_ID_PTR lids, int numDim, double *pts, int *err)
 {
   ZData &udata = *(static_cast<ZData*>(user));
 
@@ -119,7 +119,7 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
   UInt list1_size;
   list1_size = udata.src_elems.size();
 
-  // Loop through 
+  // Loop through
   for (UInt i = 0; i < (UInt) numObjs; i++) {
     UInt src_or_dst = gids[2*i]; // 0 = src, 1 = dst
     UInt idx = lids[i];
@@ -129,9 +129,9 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
 
     // Get centroid depending on source or destination
     if (src_or_dst == 0) {
- 	EntityHandle src_eh = udata.src_elems[idx];
+        EntityHandle src_eh = udata.src_elems[idx];
         MBMesh_get_elem_centroid(udata.srcmesh, src_eh, &ndata[0]);
-	c = &ndata[0];
+        c = &ndata[0];
     } else if (src_or_dst == 1) {
       UInt sidx = idx - list1_size; // local indices start from first list, continue into second
       EntityHandle dst_eh= udata.dst_elems[sidx];
@@ -209,7 +209,7 @@ void get_vector_of_elems(MBMesh *mesh, std::vector<EntityHandle> *elems) {
   if (merr != MB_SUCCESS) {
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-   }     
+   }
 
   // Put into vector
   for(Range::iterator it=all_elem.begin(); it !=all_elem.end(); it++) {
@@ -234,12 +234,12 @@ void get_vector_of_elems_that_overlap_box(MBMesh *mesh, MBMesh_BBox &bbox, std::
   if (merr != MB_SUCCESS) {
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-   }     
+   }
 
   // Put elems that overlap into box
   for(Range::iterator it=all_elem.begin(); it !=all_elem.end(); it++) {
     const EntityHandle eh=*it;
-    
+
     // Get bbox of element
     MBMesh_BBox elem_bbox(mesh, eh, 0.25);
 
@@ -251,7 +251,7 @@ void get_vector_of_elems_that_overlap_box(MBMesh *mesh, MBMesh_BBox &bbox, std::
 
 
 
-void calc_rendez_comm_pattern(MBMesh *srcmesh, MBMesh *dstmesh, 
+void calc_rendez_comm_pattern(MBMesh *srcmesh, MBMesh *dstmesh,
                               std::vector<EH_Comm_Pair> *src_elem_to_proc_list, std::vector<EH_Comm_Pair> *dst_elem_to_proc_list) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "calc_rendez_comm_pattern()"
@@ -413,7 +413,7 @@ void create_rendez_mbmesh_elem(MBMesh *srcmesh, MBMesh *dstmesh, MBMesh **_srcme
 
   // Need to copy src Mesh here, maybe?
 
-  // migrate src Mesh    
+  // migrate src Mesh
   // COULD DO THIS WHEN MESH IS CREATED, BUT WHAT IF DOING COUPLING
   // BETWEEN DIFFERENT VMs??
   ParallelComm *pcomm= new ParallelComm(srcmesh_moab, mpi_comm);
@@ -428,12 +428,12 @@ void create_rendez_mbmesh_elem(MBMesh *srcmesh, MBMesh *dstmesh, MBMesh **_srcme
   if (merr != MB_SUCCESS) {
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }     
+  }
 
   // Print out data premigrate
   for(Range::iterator it=src_orig_vert.begin(); it !=src_orig_vert.end(); it++) {
     const EntityHandle *vertp=(&*it);
-    
+
 
     // Get gid
     int gid;
@@ -441,14 +441,14 @@ void create_rendez_mbmesh_elem(MBMesh *srcmesh, MBMesh *dstmesh, MBMesh **_srcme
     if (merr != MB_SUCCESS) {
        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }     
+    }
 
     int moab_gid;
     merr=srcmesh_moab->tag_get_data(srcmesh->moab_gid_tag, vertp, 1, &moab_gid);
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }     
+    }
   }
 
 
@@ -458,7 +458,7 @@ void create_rendez_mbmesh_elem(MBMesh *srcmesh, MBMesh *dstmesh, MBMesh **_srcme
   if (merr != MB_SUCCESS) {
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }     
+  }
 
   // Setup global id tag
   Tag src_to_proc_tag;
@@ -467,24 +467,24 @@ void create_rendez_mbmesh_elem(MBMesh *srcmesh, MBMesh *dstmesh, MBMesh **_srcme
   if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                      moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-   }     
+   }
 
   // Print out data premigrate
   for(Range::iterator it=src_orig_elem.begin(); it !=src_orig_elem.end(); it++) {
     const EntityHandle *elemp=(&*it);
-    
+
     // Set destination
     int dest;
     // THIS ONE WORKS!
     dest=petCount-localPet-1;
- 
+
     // THIS ONE DOES NOT WORK
     // dest=1;
     merr=srcmesh_moab->tag_set_data(src_to_proc_tag, elemp, 1, &dest);
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }     
+    }
 
 
     // Get gid
@@ -493,14 +493,14 @@ void create_rendez_mbmesh_elem(MBMesh *srcmesh, MBMesh *dstmesh, MBMesh **_srcme
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }     
+    }
 
     int moab_gid;
     merr=srcmesh_moab->tag_get_data(srcmesh->moab_gid_tag, elemp, 1, &moab_gid);
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }     
+    }
 
 
     // Get to proc
@@ -509,36 +509,36 @@ void create_rendez_mbmesh_elem(MBMesh *srcmesh, MBMesh *dstmesh, MBMesh **_srcme
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
             moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }     
+    }
   }
 
-  
+
    std::vector<EntityHandle> src_migrated_elem;
   merr=pcomm->migrate_entities(src_orig_elem, src_to_proc_tag, src_migrated_elem, true);
   if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
             moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }     
+    }
 
 #if 0
   // Print out migrated element ids
   for (int i=0; i<src_migrated_elem.size(); i++) {
     EntityHandle eh=src_migrated_elem[i];
- 
+
     // Get gid
     int gid;
     merr=srcmesh_moab->tag_get_data(srcmesh->gid_tag, &eh, 1, &gid);
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }     
+    }
 
     int moab_gid;
     merr=srcmesh_moab->tag_get_data(srcmesh->moab_gid_tag, &eh, 1, &moab_gid);
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }     
+    }
 
     int dim=srcmesh_moab->dimension_from_handle(eh);
 
@@ -547,7 +547,7 @@ void create_rendez_mbmesh_elem(MBMesh *srcmesh, MBMesh *dstmesh, MBMesh **_srcme
 
   }
 #endif
-  
+
 
   // Get a range containing all elements
   Range src_new_elem;
@@ -555,27 +555,27 @@ void create_rendez_mbmesh_elem(MBMesh *srcmesh, MBMesh *dstmesh, MBMesh **_srcme
   if (merr != MB_SUCCESS) {
     if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-   }     
+   }
 
 
   // Print out data after migrate
   for(Range::iterator it=src_new_elem.begin(); it !=src_new_elem.end(); it++) {
     const EntityHandle *elemp=(&*it);
-    
+
     // Get gid
     int gid;
     merr=srcmesh_moab->tag_get_data(srcmesh->gid_tag, elemp, 1, &gid);
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }     
+    }
 
     int moab_gid;
     merr=srcmesh_moab->tag_get_data(srcmesh->moab_gid_tag, elemp, 1, &moab_gid);
      if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }     
+    }
 
      int num_nodes;
      double coords[10*3];

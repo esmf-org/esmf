@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2017, University Corporation for Atmospheric Research, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -100,17 +100,38 @@ namespace ESMCI{
                            ESMC_InterArrayInt *srcMaskValues, 
                            ESMC_InterArrayInt *dstMaskValues,
                            RouteHandle **routehandle,
-			   ESMC_RegridMethod_Flag *regridMethod,
-			   ESMC_PoleMethod_Flag *polemethod,
-			   int *regridPoleNPnts,
-			   ESMC_LineType_Flag *lineType,
-			   ESMC_NormType_Flag *normType,
+                           ESMC_RegridMethod_Flag *regridMethod,
+                           ESMC_PoleMethod_Flag *polemethod,
+                           int *regridPoleNPnts,
+                           ESMC_LineType_Flag *lineType,
+                           ESMC_NormType_Flag *normType,
+                           ESMC_ExtrapMethod_Flag *extrapMethod,
+                           int *extrapNumSrcPnts,
+                           float *extrapDistExponent,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
                            Field *srcFracField, Field *dstFracField);
-    static int regrid(Field *fieldsrc, Field *fielddst, 
+    static int regridstorefile(Field *fieldsrc, Field *fielddst,
+                           const char *filename,
+                           ESMC_InterArrayInt *srcMaskValues,
+                           ESMC_InterArrayInt *dstMaskValues,
+                           RouteHandle **routehandle,
+                           ESMC_RegridMethod_Flag *regridMethod,
+                           ESMC_PoleMethod_Flag *polemethod,
+                           int *regridPoleNPnts,
+                           ESMC_LineType_Flag *lineType,
+                           ESMC_NormType_Flag *normType,
+                           ESMC_UnmappedAction_Flag *unmappedAction,
+                           ESMC_Logical *ignoreDegenerate,
+                           ESMC_Logical *create_rh,
+                           Field *srcFracField, Field *dstFracField);
+    static int regrid(Field *fieldsrc, Field *fielddst,
                       RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion);
     static int regridrelease(RouteHandle *routehandle);
+    static int smmstore(Field *fieldsrc, Field *fielddst,
+                        const char *filename, RouteHandle **routehandle,
+                        ESMC_Logical *ignoreUnmatchedIndices,
+                        int *srcTermProcessing, int *pipeLineDepth);
     int write(const char *file,
       const char* variableName,
       int overwrite,
