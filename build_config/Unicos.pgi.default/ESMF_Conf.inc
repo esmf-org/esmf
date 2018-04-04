@@ -61,8 +61,8 @@ to have them by letting us write conditional code.
 
 #if 0
 Older PGI compilers had a bug which prevents forward pointer references from
-working if also using the sequence keyword.  for PGI only, dont sequence
-the State derived types.
+working if also using the sequence keyword. Don't sequence some select derived
+types to avoid issues.
 #endif
 
 #if (ESMF_PGIVERSION_MAJOR < 8)
