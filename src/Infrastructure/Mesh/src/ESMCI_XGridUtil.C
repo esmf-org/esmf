@@ -691,6 +691,8 @@ void add_polygon_to_vector(int sdim, const polygon & nodal_poly, std::vector<pol
 int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, double *q, 
   std::vector<polygon> & difference){
 
+  static unsigned int count = 0;
+
   // return if the subject polygon is empty
   if(num_p < 3) return 0;
 
@@ -714,7 +716,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     return 0;
   }
 
-  if(false){ // Check if the two polygons are the same
+  if(true){ // Check if the two polygons are the same
     // The number of p and q points have to be the same
     if(num_p == num_q ) {
       // 1. Find the two points on p and q with smallest arc length distance
@@ -736,7 +738,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
 
       // 2. pi, qj contains the indices of the two points with the smallest distance
       //    check if all vertices pair wise identical
-      double identical = true;
+      bool identical = true;
       double identical_threshold = 1.e-13;
       for(int i = pi; i < pi+num_p; i ++){
         xpoint p0 = xpoint(pnodes[i%num_p].c, sdim);
@@ -749,10 +751,10 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
 
       if(identical){
         difference.push_back(polygon(pnodes));
-        //if(count ++ < 10) {
-        //  dump_polygon(polygon(pnodes), true);
-        //  dump_polygon(polygon(qnodes), true);
-        //}
+        if(count ++ < 10) {
+          dump_polygon(polygon(pnodes), true);
+          dump_polygon(polygon(qnodes), true);
+        }
         return 0;
       }
     }

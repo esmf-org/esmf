@@ -218,6 +218,21 @@ void MeshMerge(Mesh &srcmesh, Mesh &dstmesh, Mesh **meshpp) {
 
 }
 
+bool subject_is_offplane(unsigned int sdim, unsigned int subject_num_nodes, double *cd){
+
+  bool result = false;
+  unsigned int num_components = 0;
+  // check if one of the vertex is at origin
+  for (unsigned int i = 0; i < subject_num_nodes; i ++){
+    unsigned int num_components = 0;
+    for (unsigned int j = 0; j < sdim ; j ++)
+      if(std::abs(cd[i*sdim+j]) < 1.e-200) num_components ++;
+    // if all (sdim=3) components are essentially 0, it's not a polygon on the surface of the sphere
+    if(num_components == sdim) result = true;
+  }
+  return result;
+}
+
 void dump_elem(const MeshObj & elem, int sdim, const MEField<> & coord, bool check_local){
 
   int rc;
@@ -740,6 +755,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
 
             if(subject_num_nodes < 3) continue;
           
+            double subject_area = 0.;
             double *cd_sph, *clip_cd_sph;
             if(sdim == 2) weiler_clip_difference(pdim, sdim, subject_num_nodes, cd, clip_num_nodes, clip_cd, diff);
             if(sdim == 3){
@@ -760,8 +776,9 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
               if(right_turn)
                 reverse_coord(sdim, clip_num_nodes, clip_cd);
 
-              double subject_area = great_circle_area(subject_num_nodes, cd);
-              if(subject_area <= 0.) { delete[] cd; continue; }
+              subject_area = great_circle_area(subject_num_nodes, cd);
+              if(subject_area <= 1.e-11) { delete[] cd; continue; }
+              if(subject_is_offplane(sdim, subject_num_nodes, cd)) {delete[] cd; continue; }
               weiler_clip_difference(pdim, sdim, subject_num_nodes, cd, clip_num_nodes, clip_cd, diff);
               //std::vector<polygon> diff_sph;
               //cart2sph(diff, diff_sph);
@@ -797,9 +814,12 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
                          " - can't triangulate a polygon with less than 3 sides", 
                                                       ESMC_CONTEXT, &rc)) throw rc;
                   } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
-                    //dump_elem(elem, sdim, coord, false);
-                    //dump_elem(clip_elem, sdim, clip_coord, false);
-                    if(false){
+                    dump_elem(elem, sdim, coord, true);
+                    dump_elem(clip_elem, sdim, clip_coord, true);
+                    if(true){
+                      std::cout << "area = " << subject_area << std::endl;
+                      dump_polygon(*diff_it, true);
+                      dump_polygon(*dstpoly_it, true);
                       std::cout << "dstpoly_it->subject_cd:" << std::endl;
                       for(int npt=0; npt<subject_num_nodes; npt++) std::cout << cd[npt*3] << "," << cd[npt*3+1] << "," << cd[npt*3+2] << std::endl; 
                       cd_sph = new double[subject_num_nodes*2];   cart2sph(subject_num_nodes, cd, cd_sph); 
