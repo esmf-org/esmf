@@ -978,9 +978,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global index space tuple of the lower corner of the tile.
+!          Index space tuple of the lower corner of the single tile.
 !     \item[maxIndex]
-!          Global index space tuple of the upper corner of the tile.
+!          Index space tuple of the upper corner of the single tile.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The total {\tt deCount} is
 !          determined as the product of {\tt regDecomp} elements.
@@ -1207,10 +1207,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndexPTile]
-!          The first index provides the global index space tuple of the lower 
+!          The first index provides the index space tuple of the lower 
 !          corner of a tile. The second index indicates the tile number.
 !     \item[maxIndexPTile]
-!          The first index provides the global index space tuple of the upper
+!          The first index provides the index space tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[{[regDecompPTile]}]
 !          List of DE counts for each dimension. The second index steps through
@@ -1262,11 +1262,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          sequence is given by the column major order of the {\tt regDecompPTile}
 !          elements in the sequence as they appear following the tile index.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are forming a global
-!          index space or not. This does {\em not} affect the indices held
-!          by the DistGrid object, which are always identical to what was
-!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          Indicates whether the indices provided by the {\tt minIndexPTile} and
+!          {\tt maxIndexPTile} arguments are forming a global index space or 
+!          not. This does {\em not} affect the indices held by the DistGrid 
+!          object, which are always identical to what was specified by 
+!          {\tt minIndexPTile} and {\tt maxIndexPTile}, regardless of the
 !          {\tt indexflag} setting. However, it does affect whether an
 !          {\tt ESMF\_Array} object created on the DistGrid can choose global
 !          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
@@ -1441,9 +1441,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global index space tuple of the lower corner of the tile.
+!          Index space tuple of the lower corner of the single tile.
 !     \item[maxIndex]
-!          Global index space tuple of the upper corner of the tile.
+!          Index space tuple of the upper corner of the single tile.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The default decomposition will
 !          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
@@ -1622,15 +1622,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRDTF(minIndex, maxIndex, regDecomp, decompflag, &
-    deLabelList, indexflag, connectionList, fastAxis, vm, rc)
+  function ESMF_DistGridCreateRDTF(minIndexPTile, maxIndexPTile, regDecomp, &
+    decompflag, deLabelList, indexflag, connectionList, fastAxis, vm, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDTF
 !
 ! !ARGUMENTS:
-    integer,                       intent(in)            :: minIndex(:,:)
-    integer,                       intent(in)            :: maxIndex(:,:)
+    integer,                       intent(in)            :: minIndexPTile(:,:)
+    integer,                       intent(in)            :: maxIndexPTile(:,:)
     integer,                       intent(in),  optional :: regDecomp(:,:)
     type(ESMF_Decomp_Flag),target, intent(in),  optional :: decompflag(:,:)
     integer,                       intent(in),  optional :: deLabelList(:)
@@ -1652,11 +1652,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minIndex]
-!          The first index provides the global index space tuple of the lower 
+!     \item[minIndexPTile]
+!          The first index provides the index space tuple of the lower 
 !          corner of a tile. The second index indicates the tile number.
-!     \item[maxIndex]
-!          The first index provides the global index space tuple of the upper
+!     \item[maxIndexPTile]
+!          The first index provides the index space tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The second 
@@ -1718,11 +1718,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(minIndex) == size(minIndex)) continue
+    if (size(minIndexPTile) == size(minIndexPTile)) continue
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(maxIndex) == size(maxIndex)) continue
+    if (size(maxIndexPTile) == size(maxIndexPTile)) continue
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
@@ -1815,9 +1815,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global index space tuple of the lower corner of the tile.
+!          Index space tuple of the lower corner of the single tile.
 !     \item[maxIndex]
-!          Global index space tuple of the upper corner of the tile.
+!          Index space tuple of the upper corner of the single tile.
 !     \item[deBlockList]
 !          List of DE-local blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements (i.e. deCount), which are defined
@@ -1965,17 +1965,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBT(minIndex, maxIndex, deBlockList, deToTileMap,&
-    deLabelList, indexflag, connectionList, delayout, vm, rc)
+  function ESMF_DistGridCreateDBT(minIndexPTile, maxIndexPTile, deBlockList, &
+    deToTileMap, keywordEnforcer, deLabelList, indexflag, connectionList, &
+    delayout, vm, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBT
 !
 ! !ARGUMENTS:
-    integer,                       intent(in)            :: minIndex(:,:)
-    integer,                       intent(in)            :: maxIndex(:,:)
+    integer,                       intent(in)            :: minIndexPTile(:,:)
+    integer,                       intent(in)            :: maxIndexPTile(:,:)
     integer,                       intent(in)            :: deBlockList(:,:,:)
     integer,                       intent(in)            :: deToTileMap(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in),  optional :: deLabelList(:)
     type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
@@ -1989,11 +1991,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minIndex]
-!          The first index provides the global index space tuple of the lower 
+!     \item[minIndexPTile]
+!          The first index provides the index space tuple of the lower 
 !          corner of a tile. The second index indicates the tile number.
-!     \item[maxIndex]
-!          The first index provides the global index space tuple of the upper
+!     \item[maxIndexPTile]
+!          The first index provides the index space tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[deBlockList]
 !          List of DE-local blocks. The third index of {\tt deBlockList}
@@ -2022,11 +2024,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          sequence is given by the order of DEs in the {\tt deBlockList} 
 !          argument.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are forming a global
-!          index space or not. This does {\em not} affect the indices held
-!          by the DistGrid object, which are always identical to what was
-!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          Indicates whether the indices provided by the {\tt minIndexPTile} and
+!          {\tt maxIndexPTile} arguments are forming a global index space or 
+!          not. This does {\em not} affect the indices held by the DistGrid 
+!          object, which are always identical to what was specified by 
+!          {\tt minIndexPTile} and {\tt maxIndexPTile}, regardless of the
 !          {\tt indexflag} setting. However, it does affect whether an
 !          {\tt ESMF\_Array} object created on the DistGrid can choose global
 !          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
@@ -2067,11 +2069,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(minIndex) == size(minIndex)) continue
+    if (size(minIndexPTile) == size(minIndexPTile)) continue
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(maxIndex) == size(maxIndex)) continue
+    if (size(maxIndexPTile) == size(maxIndexPTile)) continue
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
@@ -2142,9 +2144,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global index space tuple of the lower corner of the tile.
+!          Index space tuple of the lower corner of the single tile.
 !     \item[maxIndex]
-!          Global index space tuple of the upper corner of the tile.
+!          Index space tuple of the upper corner of the single tile.
 !     \item[deBlockList]
 !          List of DE-local blocks. The third index of {\tt deBlockList}
 !          steps through the deBlock elements (i.e. deCount), which are defined
@@ -2264,15 +2266,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBTF(minIndex, maxIndex, deBlockList, &
+  function ESMF_DistGridCreateDBTF(minIndexPTile, maxIndexPTile, deBlockList, &
     deLabelList, indexflag, connectionList, fastAxis, vm, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBTF
 !
 ! !ARGUMENTS:
-    integer,                       intent(in)            :: minIndex(:,:)
-    integer,                       intent(in)            :: maxIndex(:,:)
+    integer,                       intent(in)            :: minIndexPTile(:,:)
+    integer,                       intent(in)            :: maxIndexPTile(:,:)
     integer,                       intent(in)            :: deBlockList(:,:,:)
     integer,                       intent(in),  optional :: deLabelList(:)
     type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
@@ -2287,11 +2289,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minIndex]
-!          The first index provides the global index space tuple of the lower 
+!     \item[minIndexPTile]
+!          The first index provides the index space tuple of the lower 
 !          corner of a tile. The second index indicates the tile number.
-!     \item[maxIndex]
-!          The first index provides the global index space tuple of the upper
+!     \item[maxIndexPTile]
+!          The first index provides the index space tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[deBlockList]
 !          List of DE-local blocks. The third index of {\tt deBlockList}
@@ -2316,11 +2318,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          sequence is given by the order of DEs in the {\tt deBlockList} 
 !          argument.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are forming a global
-!          index space or not. This does {\em not} affect the indices held
-!          by the DistGrid object, which are always identical to what was
-!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          Indicates whether the indices provided by the {\tt minIndexPTile} and
+!          {\tt maxIndexPTile} arguments are forming a global index space or 
+!          not. This does {\em not} affect the indices held by the DistGrid 
+!          object, which are always identical to what was specified by 
+!          {\tt minIndexPTile} and {\tt maxIndexPTile}, regardless of the
 !          {\tt indexflag} setting. However, it does affect whether an
 !          {\tt ESMF\_Array} object created on the DistGrid can choose global
 !          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
@@ -2358,11 +2360,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(minIndex) == size(minIndex)) continue
+    if (size(minIndexPTile) == size(minIndexPTile)) continue
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(maxIndex) == size(maxIndex)) continue
+    if (size(maxIndexPTile) == size(maxIndexPTile)) continue
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
@@ -2882,10 +2884,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[arbDim]
 !          Dimension of the arbitrary distribution.
 !     \item[minIndexPTile]
-!          Global index space tuple of the lower corner of the tile. The 
+!          Index space tuple of the lower corner of the tile. The 
 !          arbitrary dimension is {\em not} included in this tile
 !     \item[maxIndexPTile]
-!          Global index space tuple of the upper corner of the tile. The
+!          Index space tuple of the upper corner of the tile. The
 !          arbitrary dimension is {\em not} included in this tile
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3993,9 +3995,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[minIndex]
-!        index space tuple of the lower corner of the tile.
+!        Index space tuple of the lower corner of the single tile.
 !   \item[maxIndex]
-!        index space tuple of the upper corner of the tile.
+!        Index space tuple of the upper corner of the single tile.
 !   \item[index]
 !        index space tuple of the index point to be converted into the 
 !        sequence index.
