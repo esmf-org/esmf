@@ -978,9 +978,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the tile.
+!          Global index space tuple of the lower corner of the tile.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the tile.
+!          Global index space tuple of the upper corner of the tile.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The total {\tt deCount} is
 !          determined as the product of {\tt regDecomp} elements.
@@ -1207,10 +1207,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndexPTile]
-!          The first index provides the global coordinate tuple of the lower 
+!          The first index provides the global index space tuple of the lower 
 !          corner of a tile. The second index indicates the tile number.
 !     \item[maxIndexPTile]
-!          The first index provides the global coordinate tuple of the upper
+!          The first index provides the global index space tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[{[regDecompPTile]}]
 !          List of DE counts for each dimension. The second index steps through
@@ -1441,9 +1441,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the tile.
+!          Global index space tuple of the lower corner of the tile.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the tile.
+!          Global index space tuple of the upper corner of the tile.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The default decomposition will
 !          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
@@ -1653,10 +1653,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          The first index provides the global coordinate tuple of the lower 
+!          The first index provides the global index space tuple of the lower 
 !          corner of a tile. The second index indicates the tile number.
 !     \item[maxIndex]
-!          The first index provides the global coordinate tuple of the upper
+!          The first index provides the global index space tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The second 
@@ -1815,14 +1815,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the tile.
+!          Global index space tuple of the lower corner of the tile.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the tile.
+!          Global index space tuple of the upper corner of the tile.
 !     \item[deBlockList]
 !          List of DE-local blocks. The third index of {\tt deBlockList}
-!          steps through the deBlock elements, which are defined by the first
-!          two indices. The first index must be of size {\tt dimCount} and the 
-!          second index must be of size 2. Each 2D element of {\tt deBlockList}
+!          steps through the deBlock elements (i.e. deCount), which are defined
+!          by the first two indices. 
+!          The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 2. Each element of {\tt deBlockList}
 !          defined by the first two indices hold the following information.
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
@@ -1959,13 +1960,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBT()"
-!BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with regular decomposition
+!BOP
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with with DE blocks
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBT(minIndex, maxIndex, deBlockList, deLabelList,&
-    indexflag, connectionList, delayout, vm, rc)
+  function ESMF_DistGridCreateDBT(minIndex, maxIndex, deBlockList, deToTileMap,&
+    deLabelList, indexflag, connectionList, delayout, vm, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBT
@@ -1974,6 +1975,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in)            :: minIndex(:,:)
     integer,                       intent(in)            :: maxIndex(:,:)
     integer,                       intent(in)            :: deBlockList(:,:,:)
+    integer,                       intent(in)            :: deToTileMap(:)
     integer,                       intent(in),  optional :: deLabelList(:)
     type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
@@ -1983,39 +1985,38 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} on multiple logically 
-!     rectangular tiles with regular decomposition. A regular
-!     decomposition is of the same rank as the tile and decomposes
-!     each dimension into a fixed number of DEs. A regular decomposition of a
-!     multi-tile DistGrid is expressed by a list of DE count vectors, one
-!     vector for each tile. Each vector contained in the 
-!     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
-!     erroneous to provide more tiles than there are DEs.
+!     rectangular tiles with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          The first index provides the global coordinate tuple of the lower 
+!          The first index provides the global index space tuple of the lower 
 !          corner of a tile. The second index indicates the tile number.
 !     \item[maxIndex]
-!          The first index provides the global coordinate tuple of the upper
+!          The first index provides the global index space tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[deBlockList]
 !          List of DE-local blocks. The third index of {\tt deBlockList}
-!          steps through the deBlock elements, which are defined by the first
-!          two indices. The first index must be of size {\tt dimCount} and the 
-!          second index must be of size 3. Each 2D element of {\tt deBlockList}
+!          steps through the deBlock elements (i.e. deCount), which are defined
+!          by the first two indices. 
+!          The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 2. Each element of {\tt deBlockList}
 !          defined by the first two indices hold the following information.
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
-!                   |    1               2              3
-!                   | 1  minIndex(1)    maxIndex(1)   tileID
-!                   | 2  minIndex(2)    maxIndex(2)   (not used)
-!                   | .  minIndex(.)    maxIndex(.)   (not used)
+!                   |    1               2           
+!                   | 1  minIndex(1)    maxIndex(1)
+!                   | 2  minIndex(2)    maxIndex(2)
+!                   | .  minIndex(.)    maxIndex(.)
 !                   | .
 !                   v
 !                  1st index
 !          \end{verbatim}
 !          It is required that there be no overlap between the DE blocks.
+!     \item[deToTileMap]
+!          List assigning each DE to a specific tile. The size of 
+!          {\tt deToTileMap} must be of {\tt deCount}. The order of DEs in
+!          {\tt deToTileMap} is determined by {\tt deBlockList}.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the order of DEs in the {\tt deBlockList} 
@@ -2047,7 +2048,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
     type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
@@ -2141,21 +2142,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the tile.
+!          Global index space tuple of the lower corner of the tile.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the tile.
+!          Global index space tuple of the upper corner of the tile.
 !     \item[deBlockList]
 !          List of DE-local blocks. The third index of {\tt deBlockList}
-!          steps through the deBlock elements, which are defined by the first
-!          two indices. The first index must be of size {\tt dimCount} and the 
-!          second index must be of size 3. Each 2D element of {\tt deBlockList}
+!          steps through the deBlock elements (i.e. deCount), which are defined
+!          by the first two indices. 
+!          The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 2. Each element of {\tt deBlockList}
 !          defined by the first two indices hold the following information.
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
-!                   |    1               2              3
-!                   | 1  minIndex(1)    maxIndex(1)   tileID
-!                   | 2  minIndex(2)    maxIndex(2)   (not used)
-!                   | .  minIndex(.)    maxIndex(.)   (not used)
+!                   |    1               2           
+!                   | 1  minIndex(1)    maxIndex(1)
+!                   | 2  minIndex(2)    maxIndex(2)
+!                   | .  minIndex(.)    maxIndex(.)
 !                   | .
 !                   v
 !                  1st index
@@ -2286,23 +2288,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          The first index provides the global coordinate tuple of the lower 
+!          The first index provides the global index space tuple of the lower 
 !          corner of a tile. The second index indicates the tile number.
 !     \item[maxIndex]
-!          The first index provides the global coordinate tuple of the upper
+!          The first index provides the global index space tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[deBlockList]
 !          List of DE-local blocks. The third index of {\tt deBlockList}
-!          steps through the deBlock elements, which are defined by the first
-!          two indices. The first index must be of size {\tt dimCount} and the 
-!          second index must be of size 3. Each 2D element of {\tt deBlockList}
+!          steps through the deBlock elements (i.e. deCount), which are defined
+!          by the first two indices. 
+!          The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 2. Each element of {\tt deBlockList}
 !          defined by the first two indices hold the following information.
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
-!                   |    1               2              3
-!                   | 1  minIndex(1)    maxIndex(1)   tileID
-!                   | 2  minIndex(2)    maxIndex(2)   (not used)
-!                   | .  minIndex(.)    maxIndex(.)   (not used)
+!                   |    1               2           
+!                   | 1  minIndex(1)    maxIndex(1)
+!                   | 2  minIndex(2)    maxIndex(2)
+!                   | .  minIndex(.)    maxIndex(.)
 !                   | .
 !                   v
 !                  1st index
@@ -2879,10 +2882,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[arbDim]
 !          Dimension of the arbitrary distribution.
 !     \item[minIndexPTile]
-!          Global coordinate tuple of the lower corner of the tile. The 
+!          Global index space tuple of the lower corner of the tile. The 
 !          arbitrary dimension is {\em not} included in this tile
 !     \item[maxIndexPTile]
-!          Global coordinate tuple of the upper corner of the tile. The
+!          Global index space tuple of the upper corner of the tile. The
 !          arbitrary dimension is {\em not} included in this tile
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -3389,7 +3392,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[de]
 !     DE for which information is requested. {\tt \[0,..,deCount-1\]}
 !   \item[{[regDecompDeCoord]}]
-!     For regular decompositions upon return this array holds the coordinate
+!     For regular decompositions upon return this array holds the index space
 !     tuple of the specified DE with respect to the local tile. For other
 !     decompositions a run-time warning will be issued if
 !     {\tt regDecompDeCoord} is requested.
@@ -3990,11 +3993,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[minIndex]
-!        Coordinate tuple of the lower corner of the tile.
+!        index space tuple of the lower corner of the tile.
 !   \item[maxIndex]
-!        Coordinate tuple of the upper corner of the tile.
+!        index space tuple of the upper corner of the tile.
 !   \item[index]
-!        Coordinate tuple of the index point to be converted into the 
+!        index space tuple of the index point to be converted into the 
 !        sequence index.
 !   \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
