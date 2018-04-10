@@ -1110,7 +1110,7 @@ DistGrid *DistGrid::create(
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (deLabelList->extent[0] < deCount){
+  if (deLabelList->extent[0] != deCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
       "deLabelList array must provide deCount DE labels", ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1497,14 +1497,14 @@ DistGrid *DistGrid::create(
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (deBlockList->extent[0] < dimCount){
+  if (deBlockList->extent[0] != dimCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
       "deBlockList array must provide dimCount elements in first dimension",
       ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (deBlockList->extent[1] < 2){
+  if (deBlockList->extent[1] != 2){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
       "deBlockList array must provide 2 elements in second dimension",
       ESMC_CONTEXT, rc);
@@ -1549,7 +1549,7 @@ DistGrid *DistGrid::create(
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (deLabelList->extent[0] < deCount){
+  if (deLabelList->extent[0] != deCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
       "deLabelList array must provide deCount DE labels", ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1961,7 +1961,7 @@ DistGrid *DistGrid::create(
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (deLabelList->extent[0] < deCount){
+  if (deLabelList->extent[0] != deCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
       "deLabelList array must provide deCount DE labels", ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
