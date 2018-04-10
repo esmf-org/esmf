@@ -220,11 +220,15 @@ static int found_func(void *c, void *y) {
   double pcoords[3];
 
   if (nd == 2) {
-    ElemEvaluator ee = ElemEvaluator(si->mesh->mesh, sr->src_elem);
-    ee.reverse_eval(si->coords, 1e-8, 1e-6, pcoords, &is_inside);
+    // ElemEvaluator ee = ElemEvaluator(si->mesh->mesh, sr->src_elem);
+    // ee.reverse_eval(si->coords, 1e-8, 1e-6, pcoords, &is_inside);
+
+    MBElemMap map = MBElemMap();
+    bool inside = map.cartesian_eval(coords, si->coords, num_nodes, pcoords, NULL);
+    is_inside = static_cast<int> (inside);
 
 #ifdef DEBUG_PCOORDS
-    printf("Cartesian parametric coordinates via MOAB\n");
+    printf("Cartesian parametric coordinates via ESMF\n");
     printf("  Node %d params = [%f,%f,%f]\n", si->snr.dst_gid, pcoords[0], pcoords[1], pcoords[2]);
 #endif
     // translate pcoords from [-1,1] to [0,1]
