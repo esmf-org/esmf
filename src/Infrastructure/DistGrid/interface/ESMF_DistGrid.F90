@@ -1967,7 +1967,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDBT(minIndexPTile, maxIndexPTile, deBlockList, &
     deToTileMap, keywordEnforcer, deLabelList, indexflag, connectionList, &
-    delayout, vm, rc)
+    delayout, vm, indexTK, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBT
@@ -1983,6 +1983,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
     type(ESMF_DELayout),           intent(in),  optional :: delayout
     type(ESMF_VM),                 intent(in),  optional :: vm
+    type(ESMF_TypeKind_Flag),      intent(in),  optional :: indexTK
     integer,                       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2046,14 +2047,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[vm]}]
 !          Optional {\tt ESMF\_VM} object of the current context. Providing the
 !          VM of the current context will lower the method's overhead.
+!     \item[{[indexTK]}]
+!          Typekind used for global sequence indexing. See section 
+!          \ref{const:typekind} for a list of typekind options. Only integer
+!          types are supported. The default is to have ESMF automatically choose
+!          between {\tt ESMF\_TYPEKIND\_I4} and {\tt ESMF\_TYPEKIND\_I8},
+!          depending on whether the global number of elements held by the
+!          DistGrid is below or above the 32-bit limit, respectively.
+!          Because of the use of signed integers for sequence indices, 
+!          element counts of $ > 2^{31}-1 = 2,147,483,647$ will switch to 64-bit 
+!          indexing.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    integer               :: localrc      ! local return code
+    type(ESMF_DistGrid)   :: distgrid     ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterArray) :: minIndexAux        ! helper variable
+    type(ESMF_InterArray) :: maxIndexAux        ! helper variable
+    type(ESMF_InterArray) :: deBlockListAux     ! helper variable
+    type(ESMF_InterArray) :: deToTileMapAux     ! helper variable
+    type(ESMF_InterArray) :: deLabelListAux     ! helper variable
+    type(ESMF_InterArray) :: connectionListAux  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -2067,36 +2084,53 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(minIndexPTile) == size(minIndexPTile)) continue
+    ! Deal with (optional) array arguments
+    minIndexAux = ESMF_InterArrayCreate(farray2D=minIndexPTile, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    maxIndexAux = ESMF_InterArrayCreate(farray2D=maxIndexPTile, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deBlockListAux = ESMF_InterArrayCreate(farray3D=deBlockList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deToTileMapAux = ESMF_InterArrayCreate(deToTileMap, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deLabelListAux = ESMF_InterArrayCreate(deLabelList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionListAux = ESMF_InterArrayCreateDGConn(connectionList, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_DistGridCreateDBT(distgrid, minIndexAux, maxIndexAux, &
+      deBlockListAux, deToTileMapAux, deLabelListAux, indexflag, &
+      connectionListAux, delayout, vm, indexTK, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(maxIndexPTile) == size(maxIndexPTile)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(deBlockList) == size(deBlockList)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (present(deLabelList)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (present(indexflag)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (present(connectionList)) continue
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DistGridCreateRDF(distgrid, minIndexAux, maxIndexAux, &
-!      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
-!      connectionListAux, fastAxis, vm, localrc)
-!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! garbage collection
+    call ESMF_InterArrayDestroy(minIndexAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(maxIndexAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(deBlockListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(deToTileMapAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(deLabelListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(connectionListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set return value
     ESMF_DistGridCreateDBT = distgrid 
@@ -2105,7 +2139,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBT)
  
     ! return successfully
-    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateDBT
 !------------------------------------------------------------------------------
