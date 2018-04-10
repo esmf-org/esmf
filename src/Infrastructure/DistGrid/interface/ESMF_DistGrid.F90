@@ -1961,7 +1961,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBT()"
 !BOP
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with with DE blocks
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with DE blocks (multi-tile version)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
@@ -2018,8 +2018,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          It is required that there be no overlap between the DE blocks.
 !     \item[deToTileMap]
 !          List assigning each DE to a specific tile. The size of 
-!          {\tt deToTileMap} must be of {\tt deCount}. The order of DEs in
-!          {\tt deToTileMap} is determined by {\tt deBlockList}.
+!          {\tt deToTileMap} must be equal to {\tt deCount}.
+!          The order of DEs is the same as in {\tt deBlockList}.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the order of DEs in the {\tt deBlockList} 
