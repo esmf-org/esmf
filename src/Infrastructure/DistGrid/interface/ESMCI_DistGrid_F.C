@@ -240,13 +240,11 @@ extern "C" {
       opt_indexTK = ESMF_NOKIND;
     else opt_indexTK = *indexTK;
     // call into C++
-#ifdef IMPLEMENTED
     *ptr = ESMCI::DistGrid::create(minIndex, maxIndex, deBlockList,
-      deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
+      deToTileMap, deLabelList, ESMC_NOT_PRESENT_FILTER(indexflag),
       connectionList, opt_delayout, opt_vm, &localrc, opt_indexTK);
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
-#endif
   }
   
   void FTN_X(c_esmc_distgriddestroy)(ESMCI::DistGrid **ptr, 
