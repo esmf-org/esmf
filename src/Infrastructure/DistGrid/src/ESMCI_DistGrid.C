@@ -1012,7 +1012,7 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }
-  int petCount = vm->getNpets();
+  int petCount = vm->getPetCount();
   int deCount=1;  // reset
   if (present(regDecomp)){
     if (regDecomp->dimCount != 1){
@@ -1484,7 +1484,7 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }
-  int petCount = vm->getNpets();
+  int petCount = vm->getPetCount();
   if (!present(deBlockList)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "Not a valid pointer to deBlockList array", ESMC_CONTEXT, rc);
@@ -1819,7 +1819,7 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }
-  int petCount = vm->getNpets();
+  int petCount = vm->getPetCount();
   int deCount=0;  // reset
   int *deCountPTile;
   if (present(regDecomp)){
