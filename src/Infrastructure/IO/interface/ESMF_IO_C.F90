@@ -94,7 +94,7 @@
       piofmt = "bin"
       if (present(variableName)) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
-        msg="The input argument variableName cannot be sepcified in ESMF_IOFMT_BIN mode", &
+        msg="The input argument variableName cannot be specified in ESMF_IOFMT_BIN mode", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
