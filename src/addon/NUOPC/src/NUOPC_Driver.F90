@@ -4030,6 +4030,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             slotStack(level)=slot
             slot = slotHWM + 1
             slotHWM = slotHWM + 1
+            if (slot>1) then
+              ! Insert the link to a new slot
+              call NUOPC_DriverAddRunElement(driver, slot=slotStack(level), &
+                linkSlot=slot, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
             if (index(trim(tokenList(1)),"*") == 2) then
               ! a wildcard indicating that the time will be set explicitly
             else
@@ -4050,10 +4057,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   return  ! bail out
               else
                 ! Insert the link to a new slot, and set the timeStep
-                call NUOPC_DriverAddRunElement(driver, slot=slotStack(level), &
-                  linkSlot=slot, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
                 subClock = ESMF_ClockCreate(internalClock, rc=rc)  ! make a copy first
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
