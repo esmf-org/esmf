@@ -144,6 +144,13 @@ namespace ESMCI {
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL,
       ESMC_TypeKind_Flag indexTK=ESMF_NOKIND);
     static DistGrid *create(InterArray<int> *minIndex,
+      InterArray<int> *maxIndex, InterArray<int> *deBlockList,
+      InterArray<int> *deToTileMap,
+      InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag,
+      InterArray<int> *connectionList,
+      DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL,
+      ESMC_TypeKind_Flag indexTK=ESMF_NOKIND);
+    static DistGrid *create(InterArray<int> *minIndex,
       InterArray<int> *maxIndex, InterArray<int> *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount,
       InterArray<int> *regDecompFirstExtra,

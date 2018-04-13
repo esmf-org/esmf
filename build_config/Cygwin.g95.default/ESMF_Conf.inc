@@ -18,10 +18,8 @@ The g95 compiler does not support Fortran 2003 allocatable character string leng
 
 #if 0
 The g95 compiler has a bug which prevents forward pointer references from
-working if also using the sequence keyword.  for PGI and g95 only, do not sequence
-the State derived types.
+working if also using the sequence keyword. Don't sequence some select derived
+types to avoid issues.
 #endif
 
-#define ESMF_SEQUENCE_BUG 0
-
-
+#define ESMF_SEQUENCE_BUG 1

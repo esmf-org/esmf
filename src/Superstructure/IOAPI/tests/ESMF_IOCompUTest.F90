@@ -127,14 +127,24 @@ program ESMF_IOCompUTest
   write(name, *) "Write through ESMFIO Component Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMFIO_Write(IOComp, 'restart.nc', (/field/), filePath='./', rc=rc)
+#ifdef ESMF_NETCDF
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc.eq.ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Read through ESMFIO Component Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMFIO_Read(IOComp, 'restart.nc', (/fieldIn/), filePath='./', rc=rc)
+#ifdef ESMF_NETCDF
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc.eq.ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest

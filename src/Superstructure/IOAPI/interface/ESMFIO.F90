@@ -51,8 +51,10 @@ module ESMFIOMod
   implicit none
 
   type ESMFIOLayout
+#ifndef ESMF_SEQUENCE_BUG
 #ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
 #endif
     logical :: localIOflag
     integer :: tile
@@ -61,14 +63,15 @@ module ESMFIOMod
   end type ESMFIOLayout
 
   type ioData
+#ifndef ESMF_SEQUENCE_BUG
 #ifndef ESMF_NO_SEQUENCE
     sequence
+#endif
 #endif
     type(ESMFIOLayout), pointer :: IOLayout(:) => null()
   end type ioData
 
   type ioWrapper
-    sequence
     type(ioData), pointer :: IO => null()
   end type ioWrapper
 
