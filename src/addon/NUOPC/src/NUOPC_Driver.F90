@@ -3842,6 +3842,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{verbatim}
 ! Time loops can be nested.
 !
+! Each time loop has its own associated clock object. NUOPC manages these clock
+! objects, i.e. their creation and destruction, as well as {\tt startTime}, 
+! {\tt endTime}, {\tt timeStep} adjustments during the execution. The outer 
+! most time loop of the run sequence is a special case. It uses the driver 
+! clock itself. Therefore startTime and endTime of the driver clock determine
+! the absolute start and end of the run sequence.
+!
+! The wildcard syntax "@*" at the start of a time loop, allows the timestep
+! to be omitted. This means that the timestep for a specific time loop must
+! be explicitly set in the associated clock object. For the outermost time
+! loop this is easily accomplished by setting the {\tt timeStep} of the 
+! driver clock.
+!
 ! The lines between the time loop markers define the sequence in which the
 ! run methods of the components are called. Note that components will execute 
 ! concurrently as long as this is not prevented by data-dependencies or
