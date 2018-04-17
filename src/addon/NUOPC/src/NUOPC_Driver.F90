@@ -3842,6 +3842,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{verbatim}
 ! Time loops can be nested.
 !
+! Each time loop has its own associated clock object. NUOPC manages these clock
+! objects, i.e. their creation and destruction, as well as {\tt startTime}, 
+! {\tt endTime}, {\tt timeStep} adjustments during the execution. The outer 
+! most time loop of the run sequence is a special case. It uses the driver 
+! clock itself. Therefore startTime and endTime of the driver clock determine
+! the absolute start and end of the run sequence.
+!
+! The wildcard syntax "@*" at the start of a time loop, allows the timestep
+! to be omitted. This means that the timestep for a specific time loop must
+! be explicitly set in the associated clock object. For the outermost time
+! loop this is easily accomplished by setting the {\tt timeStep} of the 
+! driver clock.
+!
 ! The lines between the time loop markers define the sequence in which the
 ! run methods of the components are called. Note that components will execute 
 ! concurrently as long as this is not prevented by data-dependencies or
@@ -3977,7 +3990,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
       deallocate(tokenList)
     enddo
-    slotCount = (slotCount+1) / 2
+    slotCount = slotCount / 2     ! divide by two because double counted "@"
     slotCount = max(slotCount, 1) ! at least one slot
 
     allocate(slotStack(slotCount))
@@ -4030,36 +4043,44 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             slotStack(level)=slot
             slot = slotHWM + 1
             slotHWM = slotHWM + 1
-            read(tempString(2:len(tempString)), *) seconds
-            print *, "found time step indicator: ", seconds
-            call ESMF_TimeIntervalSet(timeStep, s_r8=seconds, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, &
-              file=trim(name)//":"//FILENAME)) &
-              return  ! bail out
-            if (slot==1) then
-              ! Set the timeStep of the internalClock
-              call ESMF_ClockSet(internalClock, timeStep=timeStep, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
-                file=trim(name)//":"//FILENAME)) &
-                return  ! bail out
-            else
-              ! Insert the link to a new slot, and set the timeStep
+            if (slot>1) then
+              ! Insert the link to a new slot
               call NUOPC_DriverAddRunElement(driver, slot=slotStack(level), &
                 linkSlot=slot, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              subClock = ESMF_ClockCreate(internalClock, rc=rc)  ! make a copy first
+            endif
+            if (index(trim(tokenList(1)),"*") == 2) then
+              ! a wildcard indicating that the time will be set explicitly
+            else
+              ! assume that what follows the "@' is actually a number
+              read(tempString(2:len(tempString)), *) seconds
+              print *, "found time step indicator: ", seconds
+              call ESMF_TimeIntervalSet(timeStep, s_r8=seconds, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              call ESMF_ClockSet(subClock, timeStep=timeStep, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              call NUOPC_DriverSetRunSequence(driver, slot=slot, &
-                clock=subClock, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                line=__LINE__, &
+                file=trim(name)//":"//FILENAME)) &
+                return  ! bail out
+              if (slot==1) then
+                ! Set the timeStep of the internalClock
+                call ESMF_ClockSet(internalClock, timeStep=timeStep, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, &
+                  file=trim(name)//":"//FILENAME)) &
+                  return  ! bail out
+              else
+                ! Insert the link to a new slot, and set the timeStep
+                subClock = ESMF_ClockCreate(internalClock, rc=rc)  ! make a copy first
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                call ESMF_ClockSet(subClock, timeStep=timeStep, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                call NUOPC_DriverSetRunSequence(driver, slot=slot, &
+                  clock=subClock, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
             endif
           else
             ! exiting time loop level

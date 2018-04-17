@@ -32,60 +32,6 @@ Interface).
 Instructions on how to download the ESMPy code can be found at the `ESMPy Download page
 <http://www.earthsystemcog.org/projects/esmpy/releases>`_.
 
-----------------
-Installing ESMPy
-----------------
-
-Installation of ESMPy requires a pointer to a file named esmf.mk inside of an
-ESMF installation.  This file resides in a directory which looks like:
-
-.. code::
-
-    <ESMF_INSTALL_DIR>/lib/lib<g<or>O>/<platform>/esmf.mk
-
-If the ``ESMFMKFILE`` flag is set when building ESMPy then it will not need to be
-referenced again.  If not, an environment variable of the same name must be set
-with the path to the esmf.mk file *every* time that a new shell is initiated.
-
-The ESMPy build can be installed in a custom location using the
-``--prefix``, ``--home``, or ``--install-base`` flags to the install command.  If this
-is done, then this location needs to be added to the ``PYTHONPATH`` environment
-variable in the user's shell *every* time that a new shell is initiated.  If a
-customized install location is not specified, ESMPy will be installed in the
-standard Python package installation directory on that particular machine.
-
-.. Note:: 
-
-    The ESMPy build does not have to be installed to be used.  The
-    ``PYTHONPATH`` environment variable can simply be pointed to the directory
-    containing the ESMF module (esmf/src/addon/ESMPy/src from a default git clone)
-    after the build command.
-
-As usual, any command followed by ``--help`` should print out some information
-on what options are available.
-
-An installation of ESMPy in the default location for Python packages can be done
-with the following command issued from the top level ESMPy directory:
-
-- default Python package installation:
-
-.. code::
-
-    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk> install
-
-- custom install location:
-
-.. code::
-
-    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk>
-
-    python setup.py install --prefix=<custom_install_location>
-
-    setenv PYTHONPATH <custom_install_location>/lib/\*/site_packages
-
-Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
-
-
 ~~~~~~~~~~~~~~~~~
 Anaconda Packages
 ~~~~~~~~~~~~~~~~~
@@ -94,14 +40,54 @@ ESMPy conda packages are available through the NESII channel:
 
 .. code::
 
-    conda install -c nesii esmpy
+    conda install -n esmpy -c nesii -c conda-forge esmpy
 
-There are Python3 compatible development versions available through the
-conda-forge channel:
+Specific versions of the conda package can be installed like this:
 
 .. code::
 
-    conda install -c nesii/label/dev-esmf -c conda-forge esmpy
+conda create -n esmpy -c nesii -c conda-forge esmpy=7.1.0r
+
+----------------------------
+Installing ESMPy from Source
+----------------------------
+
+When installing from source, ESMPy requires a pointer to a file named esmf.mk 
+that is generated during an ESMF installation.  The path of this file is:
+
+.. code::
+
+    <ESMF_INSTALL_DIR>/lib/lib<g<or>O>/<platform>/esmf.mk
+
+If the ``ESMFMKFILE`` flag is set when building ESMPy then it will not need to be
+referenced again.  If not, an environment variable of the same name must be set
+with the path to the esmf.mk file every time a new shell is initiated.
+
+ESMPy can be installed in a custom location using the
+``--prefix``, ``--home``, or ``--install-base`` flags to the install command.  If this
+is done, then this location needs to be added to the ``PYTHONPATH`` environment
+variable every time a new shell is initiated.  If a
+custom install location is not specified, ESMPy will be installed in the
+standard Python package installation directory on that particular machine.
+
+An installation of ESMPy in the default location for Python packages can be done
+with the following command issued from the top level ESMPy directory:
+
+.. code::
+
+    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk>/esmf.mk install
+
+- custom install location:
+
+.. code::
+
+    python setup.py build --ESMFMKFILE=<DIR_TO_esmf.mk>/esmf.mk
+
+    python setup.py install --prefix=<custom_install_location>
+
+    setenv PYTHONPATH <custom_install_location>/lib/\*/site_packages
+
+Please contact esmf_support@list.woc.noaa.gov with any questions.
 
 ---------------
 Importing ESMPy
@@ -170,7 +156,9 @@ to ESMF offline and integrated regridding capabilities.
 - Multi-tile :class:`~ESMF.api.grid.Grid` support is limited to cubed-sphere 
   grids created on 6 processors. A cubed-sphere grid can be created on any
   number of processors, but only when it is created on 6 processors will the
-  coordinates be retrievable for the entire object.
+  coordinates be retrievable for the entire object. A 
+  :class:`~ESMF.api.field.Field` created from a cubed-sphere 
+  :class:`~ESMF.api.grid.Grid` cannot be written to file in parallel.
 - There is no ``FieldBundle`` class, only single :class:`Fields <ESMF.api.field.Field>`.
 
 Testing related:

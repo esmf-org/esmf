@@ -47,7 +47,6 @@ program ESMF_LogErrPerfUTest
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
   character(ESMF_MAXSTR) :: name
-  character(ESMF_MAXSTR) :: msg
   
   ! other variables
   real(ESMF_KIND_R8)     :: dt, dtTest
@@ -91,7 +90,11 @@ program ESMF_LogErrPerfUTest
   !NEX_UTest
   write(name, *) "Threshold check for ESMF_LogFoundError() 1000000x Test"
   write(failMsg, *) "ESMF_LogFoundError() performance problem"
-  dtTest = 1.d-7  ! 100ns is expected to pass even in debug mode
+#ifdef ESMF_BOPT_g
+  dtTest = 2.d-7  ! 200ns is expected to pass in debug mode
+#else
+  dtTest = 2.d-8  ! 10ns is expected to pass in optimized mode
+#endif
   call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
@@ -120,7 +123,7 @@ program ESMF_LogErrPerfUTest
     enddo
     call ESMF_VMWtime(t1, rc=rc)
     dt = (t1-t0)/real(n)
-    write(msgString,*) "perfLogFoundError: ", n, "iterations took", t1-t0, &
+    write(msgString,*) "perfLogFoundError: ", n, " iterations took", t1-t0, &
       " seconds. => ", dt, " per iteration."
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

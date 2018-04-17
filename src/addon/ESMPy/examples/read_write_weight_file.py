@@ -13,6 +13,9 @@
 import ESMF
 import numpy
 
+import ESMF.util.helpers as helpers
+import ESMF.api.constants as constants
+
 # This call enables debug logging
 mg = ESMF.Manager(debug=True)
 
@@ -86,24 +89,21 @@ xctfield.data[:,:] = 2.0 + numpy.cos(numpy.radians(dstGridCoordLat)[...])**2 * \
 dstfield.data[:] = 1e20
 
 # write regridding weights to file
-if ESMF.pet_count() > 1:
-    regrid = ESMF.Regrid(srcfield, dstfield,
-                         regrid_method=ESMF.RegridMethod.BILINEAR,
-                         unmapped_action=ESMF.UnmappedAction.IGNORE)
-else:
+filename = "esmpy_example_weight_file.nc"
+if ESMF.local_pet() == 0:
     import os
     if os.path.isfile(
-            os.path.join(os.getcwd(), "esmpy_example_weight_file.nc")):
-        os.remove(os.path.join(os.getcwd(), "esmpy_example_weight_file.nc"))
+        os.path.join(os.getcwd(), filename)):
+        os.remove(os.path.join(os.getcwd(), filename))
 
-    mg.barrier()
-    regrid = ESMF.Regrid(srcfield, dstfield, filename="esmpy_example_weight_file.nc",
-            regrid_method=ESMF.RegridMethod.BILINEAR,
-            unmapped_action=ESMF.UnmappedAction.IGNORE)
+mg.barrier()
+regrid = ESMF.Regrid(srcfield, dstfield, filename=filename,
+                     regrid_method=ESMF.RegridMethod.BILINEAR,
+                     unmapped_action=ESMF.UnmappedAction.IGNORE)
 
 
 # # create a regrid object from file
-regrid = ESMF.RegridFromFile(srcfield, dstfield, "esmpy_example_weight_file.nc")
+regrid = ESMF.RegridFromFile(srcfield, dstfield, filename)
 
 # calculate the regridding from source to destination field
 dstfield = regrid(srcfield, dstfield)
@@ -119,9 +119,8 @@ if num_nodes is not 0:
 
 # handle the parallel case
 if ESMF.pet_count() > 1:
-    from ESMF.util.helpers import reduce_val
-    relerr = reduce_val(relerr, op=MPI.SUM)
-    num_nodes = reduce_val(num_nodes, op=MPI.SUM)
+    relerr = helpers.reduce_val(relerr, op=constants.Reduce.SUM)
+    num_nodes = helpers.reduce_val(num_nodes, op=constants.Reduce.SUM)
 
 # output the results from one processor only
 if ESMF.local_pet() is 0:
