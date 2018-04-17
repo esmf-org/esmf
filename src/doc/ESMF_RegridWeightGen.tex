@@ -928,11 +928,17 @@ The UGRID file format is a proposed extension to the CF metadata conventions for
 In the UGRID proposal, a 1D, 2D, or 3D mesh topology can be defined for an unstructured grid.  Currently, ESMF
 supports two types of meshes: (1) the 2D flexible mesh topology where each cell (a.k.a. "face" as defined in the UGRID document) in the mesh is either a triangle or a quadrilateral, and (2) the fully 3D unstructured mesh topology where each cell (a.k.a. "volume" as defined in the UGRID document) in the mesh
 is either a tetrahedron or a hexahedron.  Pyramids and wedges are not currently supported in ESMF, but they
-can be defined as degenerate hexahedrons.   
+can be defined as degenerate hexahedrons.   ESMF\_RegridWeightGen also
+supports UGRID 1D network mesh topology in a limited way:  A 1D mesh in UGRID
+can be used as the source grid for nearest neighbor regridding, and as the
+destination grid for non-conservative regridding.  
 
 The main addition of the UGRID extension is a dummy variable that defines the mesh
-topology.  This additional variable has a required attribute {\tt cf\_role} with value {\tt "mesh\_topology"}.  In addition, it has two more required attributes: {\tt topology\_dimension}
-and {\tt node\_coordinates}.  If it is a 2D mesh (i.e., {\tt topology\_dimension} equals to 2), an additional attribute
+topology.  This additional variable has a required attribute {\tt cf\_role}
+with value {\tt "mesh\_topology"}.  In addition, it has two more required attributes: {\tt topology\_dimension}
+and {\tt node\_coordinates}.  If it is a 1D mesh, {\tt topology\_dimension} is
+set to 1.  
+If it is a 2D mesh (i.e., {\tt topology\_dimension} equals to 2), an additional attribute
 {\tt face\_node\_connectivity} is required.  If it is a 3D mesh (i.e., {\tt topology\_dimension} equals to 3), two additional attributes {\tt volume\_node\_connectivity} and {\tt volume\_shape\_type} are required.
 The value of attribute {\tt node\_coordinates} is a list of the names of the node longitude and latitude variables,
 plus the elevation variable if it is a 3D mesh.
