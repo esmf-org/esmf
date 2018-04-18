@@ -223,7 +223,12 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
     end if
 
     if (present(elementCount) .or. present(maxNodePElement) .or. present(fillvalue)) then
-      if (meshDim == 2) then
+      if (meshDim == 1) then
+          errmsg = "- 1D network topology does not have elements" 
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg=errmsg, ESMF_CONTEXT, rcToReturn=rc) 
+	  return	 
+      elseif (meshDim == 2) then
         varname = "face_node_connectivity"
       else
         varname = "volume_node_connectivity"
