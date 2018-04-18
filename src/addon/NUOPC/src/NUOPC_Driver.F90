@@ -2284,6 +2284,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     character(ESMF_MAXSTR)    :: name
     type(ESMF_GridComp), pointer  :: compList(:)
     type(ESMF_CplComp), pointer   :: connectorList(:)
+    type(type_petList), pointer   :: petLists(:)
     
     rc = ESMF_SUCCESS
 
@@ -2358,7 +2359,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-    ! destroy components in the componentMap and their import and export States + connectorComps
+    ! destroy components in the compList and their import and export States,
     ! and also petLists that were set by the user (and ownership transferred)
     nullify(compList)
     call NUOPC_DriverGetComp(gcomp, compList, rc=rc)    
@@ -2387,9 +2388,11 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     enddo
     deallocate(compList)
     
-    ! destroy components in the componentMap and their import and export States + connectorComps
+    ! destroy components in the connectorList 
+    ! and also petLists for which ownership was transferred
     nullify(connectorList)
-    call NUOPC_DriverGetComp(gcomp, connectorList, rc)    
+    nullify(petLists)
+    call NUOPC_DriverGetComp(gcomp, connectorList, petLists, rc=rc)    
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     do i=1, size(connectorList)
@@ -2397,7 +2400,15 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+      if (associated(petLists(i)%petList)) then
+        deallocate(petLists(i)%petList, stat=stat)
+        if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
+          msg="Deallocation of transferred connector petList failed.", &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
     enddo
+    deallocate(petLists)
     deallocate(connectorList)
     
     ! destroy componentMap
@@ -3734,10 +3745,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverGetComp()
-  recursive subroutine NUOPC_DriverGetAllCplComp(driver, compList, rc)
+  recursive subroutine NUOPC_DriverGetAllCplComp(driver, compList, petLists, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     type(ESMF_CplComp),  pointer               :: compList(:)
+    type(type_petList),  pointer, optional     :: petLists(:)
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -3790,7 +3802,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! fill the compList
+    ! allocate memory for the petLists
+    if (present(petLists)) then
+      allocate(petLists(mapCount), stat=stat)
+      if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+        msg="Allocation of petLists failed.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! fill the compList and optionally petLists
     do i=1, mapCount
       call ESMF_ContainerGetUDTByIndex(is%wrap%connectorMap, i, &
         cmEntry, ESMF_ITEMORDER_ADDORDER, rc)
@@ -3798,6 +3819,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       compList(i) = cmEntry%wrap%connector
+      if (present(petLists)) petLists(i)%petList => cmEntry%wrap%petList
     enddo
     
   end subroutine
