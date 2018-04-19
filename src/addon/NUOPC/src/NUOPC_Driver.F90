@@ -34,9 +34,6 @@ module NUOPC_Driver
     routine_Run
 
   public &
-    type_PetList
-    
-  public &
     label_ModifyInitializePhaseMap, &
     label_ModifyCplLists, &
     label_SetModelServices, &
@@ -64,9 +61,9 @@ module NUOPC_Driver
     ! - static references to child components
     type(ESMF_GridComp), pointer      :: modelComp(:)
     type(ESMF_State),    pointer      :: modelIS(:), modelES(:)
-    type(type_PetList),  pointer      :: modelPetLists(:)
+    type(ESMF_PtrInt1D), pointer      :: modelPetLists(:)
     type(ESMF_CplComp),  pointer      :: connectorComp(:,:)
-    type(type_PetList),  pointer      :: connectorPetLists(:,:)
+    type(ESMF_PtrInt1D), pointer      :: connectorPetLists(:,:)
     ! - dynamic references to child components
     type(ESMF_Container)              :: componentMap
     type(ESMF_Container)              :: connectorMap
@@ -86,10 +83,6 @@ module NUOPC_Driver
 
   type type_InternalState
     type(type_InternalStateStruct), pointer :: wrap
-  end type
-  
-  type type_PetList
-    integer, pointer :: petList(:)  ! lists that are set here transfer ownership
   end type
   
   type type_PhaseMapParser
@@ -363,7 +356,7 @@ module NUOPC_Driver
     type(ESMF_CplComp)        :: connector
     character(len=80)         :: srcCompLabel
     character(len=80)         :: dstCompLabel
-    type(type_PetList), pointer :: petLists(:)
+    type(ESMF_PtrInt1D), pointer :: petLists(:)
     integer, pointer          :: petList(:)
 
     rc = ESMF_SUCCESS
@@ -455,9 +448,9 @@ module NUOPC_Driver
       
     ! nullify all of the petLists
     do i=0, is%wrap%modelCount
-      nullify(is%wrap%modelPetLists(i)%petList)
+      nullify(is%wrap%modelPetLists(i)%ptr)
       do j=0, is%wrap%modelCount
-        nullify(is%wrap%connectorPetLists(i,j)%petList)
+        nullify(is%wrap%connectorPetLists(i,j)%ptr)
       enddo
     enddo
     
@@ -488,8 +481,8 @@ module NUOPC_Driver
         
       else if (i>0) then
       
-        is%wrap%modelPetLists(i)%petList => petLists(i)%petList
-        i_petList => is%wrap%modelPetLists(i)%petList
+        is%wrap%modelPetLists(i)%ptr => petLists(i)%ptr
+        i_petList => is%wrap%modelPetLists(i)%ptr
 
         ! for now put a component alias into the legacy data structure until all
         ! dependencies have been removed
@@ -615,7 +608,7 @@ module NUOPC_Driver
         endif
         
         is%wrap%connectorComp(i,j) = connector ! set the alias
-        is%wrap%connectorPetLists(i,j)%petList => petList
+        is%wrap%connectorPetLists(i,j)%ptr => petList
         
         ! initialize the connectorPhaseMap pointer members
         nullify(is%wrap%connectorPhaseMap(i,j)%phaseValue)
@@ -951,9 +944,9 @@ module NUOPC_Driver
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
             ! need to update the Component attributes across all PETs
-            if (associated(is%wrap%modelPetLists(i)%petList)) then
+            if (associated(is%wrap%modelPetLists(i)%ptr)) then
               call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
-                rootList=is%wrap%modelPetLists(i)%petList, reconcile=.true., &
+                rootList=is%wrap%modelPetLists(i)%ptr, reconcile=.true., &
                 rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1024,9 +1017,9 @@ module NUOPC_Driver
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
               ! need to update the Component attributes across all PETs
-              if (associated(is%wrap%connectorPetLists(i,j)%petList)) then
+              if (associated(is%wrap%connectorPetLists(i,j)%ptr)) then
                 call ESMF_AttributeUpdate(is%wrap%connectorComp(i,j), vm, &
-                  rootList=is%wrap%connectorPetLists(i,j)%petList, &
+                  rootList=is%wrap%connectorPetLists(i,j)%ptr, &
                   reconcile=.true., rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
@@ -2284,7 +2277,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     character(ESMF_MAXSTR)    :: name
     type(ESMF_GridComp), pointer  :: compList(:)
     type(ESMF_CplComp), pointer   :: connectorList(:)
-    type(type_petList), pointer   :: petLists(:)
+    type(ESMF_PtrInt1D), pointer  :: petLists(:)
     
     rc = ESMF_SUCCESS
 
@@ -2378,8 +2371,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      if (associated(is%wrap%modelPetLists(i)%petList)) then
-        deallocate(is%wrap%modelPetLists(i)%petList, stat=stat)
+      if (associated(is%wrap%modelPetLists(i)%ptr)) then
+        deallocate(is%wrap%modelPetLists(i)%ptr, stat=stat)
         if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
           msg="Deallocation of transferred model petList failed.", &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2400,8 +2393,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      if (associated(petLists(i)%petList)) then
-        deallocate(petLists(i)%petList, stat=stat)
+      if (associated(petLists(i)%ptr)) then
+        deallocate(petLists(i)%ptr, stat=stat)
         if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
           msg="Deallocation of transferred connector petList failed.", &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -3040,7 +3033,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       endif
       ! also add the new connector component to the legacy data structures:
       is%wrap%connectorComp(src,dst) = cmEntry%wrap%connector ! set the alias
-      is%wrap%connectorPetLists(src,dst)%petList => cmEntry%wrap%petList
+      is%wrap%connectorPetLists(src,dst)%ptr => cmEntry%wrap%petList
     endif
 
     ! add standard NUOPC CplComp Attribute Package to the connectorComp
@@ -3076,9 +3069,9 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      if (associated(is%wrap%connectorPetLists(src,dst)%petList)) then
+      if (associated(is%wrap%connectorPetLists(src,dst)%ptr)) then
         call ESMF_AttributeUpdate(is%wrap%connectorComp(src,dst), vm, &
-          rootList=is%wrap%connectorPetLists(src,dst)%petList, &
+          rootList=is%wrap%connectorPetLists(src,dst)%ptr, &
           reconcile=.true., rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
@@ -3659,7 +3652,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     type(ESMF_GridComp), pointer, optional     :: compList(:)
-    type(type_petList),  pointer, optional     :: petLists(:)
+    type(ESMF_PtrInt1D), pointer, optional     :: petLists(:)
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -3732,7 +3725,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
         if (present(compList)) compList(i) = cmEntry%wrap%component
-        if (present(petLists)) petLists(i)%petList => cmEntry%wrap%petList
+        if (present(petLists)) petLists(i)%ptr => cmEntry%wrap%petList
       enddo
     endif
     
@@ -3749,7 +3742,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     type(ESMF_CplComp),  pointer               :: compList(:)
-    type(type_petList),  pointer, optional     :: petLists(:)
+    type(ESMF_PtrInt1D), pointer, optional     :: petLists(:)
     integer,             intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -3819,7 +3812,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       compList(i) = cmEntry%wrap%connector
-      if (present(petLists)) petLists(i)%petList => cmEntry%wrap%petList
+      if (present(petLists)) petLists(i)%ptr => cmEntry%wrap%petList
     enddo
     
   end subroutine
