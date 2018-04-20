@@ -231,7 +231,6 @@ program ESMF_ArrayRedistPerfUTest
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Check ArrayRedistStore() performance - Test"
-  write(failMsg, *) "Performance problem detected!" 
   dt = t1_store - t0_store
   write(msgString,*) "ArrayRedistStore() performance: ", dt, " seconds."
   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -240,12 +239,12 @@ program ESMF_ArrayRedistPerfUTest
 #else
   dtTest = 1.   ! 1s is expected to pass in optimized mode
 #endif
+  write(failMsg, *) "ArrayRedist() performance problem! ", dt, ">", dtTest
   call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Check ArrayRedist() performance - Test"
-  write(failMsg, *) "Performance problem detected!" 
   dt = t1 - t0
   write(msgString,*) "ArrayRedist() performance: ", dt, " seconds."
   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
@@ -254,6 +253,7 @@ program ESMF_ArrayRedistPerfUTest
 #else
   dtTest = 0.01   ! 0.01s is expected to pass in optimized mode
 #endif
+  write(failMsg, *) "ArrayRedist() performance problem! ", dt, ">", dtTest
   call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
