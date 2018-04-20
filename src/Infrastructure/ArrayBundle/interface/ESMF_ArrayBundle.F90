@@ -1358,17 +1358,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   available for the halo operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleHalo()} on any ArrayBundle that is weakly congruent
-!   and typekind conform to {\tt arraybundle}. Congruency for ArrayBundles is
-!   given by the congruency of its constituents.
-!   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Arrays for
-!   every DE. For weakly congruent
-!   Arrays the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Arrays that differ in the number of elements in the left most
-!   undistributed dimensions.
+!   {\tt ESMF\_ArrayBundleHalo()} on any pair of ArrayBundles that matches 
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em distributed} dimensions. However, the size, 
+!   number, and index order of {\em undistributed} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
 !  
 !   This call is {\em collective} across the current VM.  
 !
@@ -1871,17 +1866,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the definition of the Array based operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleRedist()} on any pair of ArrayBundles that 
-!   are weakly congruent and typekind conform with the Arrays contained in
-!   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
-!   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Arrays for
-!   every DE. For weakly congruent
-!   Arrays the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Arrays that differ in the number of elements in the left most
-!   undistributed dimensions.
+!   {\tt ESMF\_ArrayBundleRedist()} on any pair of ArrayBundles that matches 
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em distributed} dimensions. However, the size, 
+!   number, and index order of {\em undistributed} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
 !
 !   This method is overloaded for:\newline
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -2209,19 +2199,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the definition of the Array based operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleRedist()} on any pair of ArrayBundles that 
-!   are weakly congruent and typekind conform with the Arrays contained in
-!   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
-!   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Arrays for
-!   every DE. For weakly congruent
-!   Arrays the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Arrays that differ in the number of elements in the left most
-!   undistributed dimensions.
-!   \newline
-!
+!   {\tt ESMF\_ArrayBundleRedist()} on any pair of ArrayBundles that matches 
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em distributed} dimensions. However, the size, 
+!   number, and index order of {\em undistributed} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
+!  
 !   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
@@ -2745,18 +2729,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the definition of the Array based operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that 
-!   are weakly congruent and typekind conform with the Arrays contained in
-!   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
-!   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Arrays for
-!   every DE. For weakly congruent
-!   Arrays the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Arrays that differ in the number of elements in the left most
-!   undistributed dimensions.
-!
+!   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that matches 
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em distributed} dimensions. However, the size, 
+!   number, and index order of {\em undistributed} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
+!  
 !   This method is overloaded for:\newline
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
@@ -3180,19 +3159,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the definition of the Array based operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that 
-!   are weakly congruent and typekind conform with the Arrays contained in
-!   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
-!   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Arrays for
-!   every DE. For weakly congruent
-!   Arrays the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Arrays that differ in the number of elements in the left most
-!   undistributed dimensions.
-!   \newline
-!
+!   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that matches 
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em distributed} dimensions. However, the size, 
+!   number, and index order of {\em undistributed} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
+!  
 !   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
