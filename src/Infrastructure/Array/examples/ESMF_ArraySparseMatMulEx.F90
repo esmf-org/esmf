@@ -322,14 +322,13 @@ program ESMF_ArraySparseMatMulEx
 ! \end{verbatim}
 !
 ! The {\tt ESMF\_RouteHandle} object returned by {\tt ESMF\_ArraySMMStore()}
-! can be applied to any src/dst Array pairs that are weakly congruent to the
-! Array pair used during precomputation. Arrays are congruent if they are
-! defined on matching DistGrids and the shape of local array allocations match
-! for all DEs. For weakly congruent Arrays the sizes of the undistributed
-! dimensions, that vary faster with memory than the first distributed
-! dimension, are permitted to be different. See section \ref{Array:Redist}
-! for an example of this feature demonstrated for the Redist case. The exact
-! same principle applies to the SMM case.
+! can be applied to any src/dst Array pairs that is compatible with the
+! Array pair used during precomputation, i.e. any pair of Arrays that matches 
+! {\tt srcArray} and {\tt dstArray} in {\em type}, {\em kind}, and 
+! memory layout of the {\em distributed} dimensions. However, the size, number, 
+! and index order of {\em undistributed} dimensions may be different.
+! See section \ref{RH:Reusability} for a more detailed discussion of
+! RouteHandle reusability.
 !
 ! The resources held by {\tt sparseMatMulHandle} need to be deallocated by the
 ! user code before the handle becomes inaccessible.

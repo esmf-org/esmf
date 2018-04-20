@@ -3085,8 +3085,9 @@ bool Array::match(
   int *rc                                 // (out) return code
   ){
 //
-//TODO: 1) rename this method to congruent()
-//TODO: 2) consider weakly and strongly congruent case
+//TODO: 1) rename this method to compatible()
+//TODO: 2) consider compatible: distributed dims match,
+//TODO:    and strictly compatible: distributed and undistributed dims match.
 //
 // !DESCRIPTION:
 //    Determine if array1 and array2 match.

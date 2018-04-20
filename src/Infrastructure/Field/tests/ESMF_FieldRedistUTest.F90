@@ -75,7 +75,7 @@ program ESMF_FieldRedistUTest
         !EX_UTest_Multi_Proc_Only
         call test_redist_1dweak(rc)
         write(failMsg, *) ""
-        write(name, *) "FieldRedist basic test with weakly congruent fields"
+        write(name, *) "FieldRedist basic test with compliant fields"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
         !------------------------------------------------------------------------
