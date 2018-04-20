@@ -76,8 +76,7 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{RHandle_usage}
-% -> transferability to weakly congruent objects
-% -> non-blocking options
+%TODO: document non-blocking options
 \input{ESMF_RHandleBitForBitEx_fapi}
 \input{ESMF_RHandleFromRHandleEx_fapi}
 \input{ESMF_RHandleReusabilityEx_fapi}

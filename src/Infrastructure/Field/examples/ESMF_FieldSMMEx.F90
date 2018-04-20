@@ -195,9 +195,12 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! Field sparse matrix multiplication can also be performed between weakly congruent Fields.
-! In this case, source and destination Fields can have ungridded dimensions
-! with size different from the Field pair used to compute the routehandle.
+! Field sparse matrix multiplication can also be applied between Fields 
+! that matche the original Fields in {\em type}, {\em kind}, and 
+! memory layout of the {\em gridded} dimensions. However, the size, number, 
+! and index order of {\em ungridded} dimensions may be different. See section
+! \ref{RH:Reusability} for a more detailed discussion of RouteHandle 
+! reusability
 !EOE
 !BOC
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=2, rc=rc)
@@ -219,8 +222,8 @@
 !EOC
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Using the previously computed routehandle, weakly congruent Fields can perform
-! sparse matrix multiplication.
+! Using the previously computed routehandle, the sparse matrix multiplication
+! can be performed between the Fields.
 !EOE
 !BOC
     call ESMF_FieldSMM(srcfieldA, dstFieldA, routehandle, rc=rc)

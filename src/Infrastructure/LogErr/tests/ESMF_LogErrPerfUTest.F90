@@ -89,12 +89,13 @@ program ESMF_LogErrPerfUTest
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Threshold check for ESMF_LogFoundError() 1000000x Test"
-  write(failMsg, *) "ESMF_LogFoundError() performance problem"
 #ifdef ESMF_BOPT_g
   dtTest = 2.d-7  ! 200ns is expected to pass in debug mode
 #else
-  dtTest = 2.d-8  ! 10ns is expected to pass in optimized mode
+  dtTest = 2.d-8  ! 20ns is expected to pass in optimized mode
 #endif
+  write(failMsg, *) "ESMF_LogFoundError() performance problem! ", &
+    dt, ">", dtTest
   call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

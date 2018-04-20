@@ -154,16 +154,19 @@ program ESMF_RHandleReusabilityEx
 !BOE
 ! Reusability of a RouteHandle object extends beyond re-applying it to the same
 ! source/destination object pair that was used during {\tt Store()}. The same
-! RouteHandle can be applied to a different object pair, as long these two
+! RouteHandle can be applied to a different object pair, as long as these
 ! criterial are met:
 ! \begin{itemize}
 ! \item The new pair matches the original pair with respect to {\em type}, 
 !   and {\em kind}.
-! \item The memory layout of the {\em distributed} (i.e. gridded) dimensions
-!   of the new pair is congruent with the original pair.
+! \item The memory layout of the {\em distributed} (i.e. {\em gridded}) 
+!   dimensions of the new pair is congruent with the original pair. This means
+!   the {\em DistGrid}s must match, as well as any extra padding on the 
+!   distributed/gridded dimensions.
+! \item Size, number, and position (i.e. index order) of potentially present
+!   {\em undistributed} (i.e. {\em ungridded}) dimensions does not affect the
+!   reusability of a RouteHandle.
 ! \end{itemize}
-! However, the size, number, and position of potentially present
-! {\em undistributed} (i.e. ungridded) dimensions is irrelevant.
 ! The following examples will discuss in detail what this means in practice.
 !
 ! First consider the case where a second pair of source and destination Fields

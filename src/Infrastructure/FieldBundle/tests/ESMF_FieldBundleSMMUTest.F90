@@ -142,7 +142,7 @@ program ESMF_FieldBundleSMMUTest
         !EX_UTest_Multi_Proc_Only
         call test_smm_1dbweak(rc)
         write(failMsg, *) ""
-        write(name, *) "FieldBundleSMM test using lpe for both src and dst, with halos weakly congruent"
+        write(name, *) "FieldBundleSMM test using lpe for both src and dst, with halos compatible"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)

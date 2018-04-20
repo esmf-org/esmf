@@ -173,9 +173,11 @@
     call ESMF_FieldDestroy(dstField, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOE
-! Field redistribution can also be performed between weakly congruent Fields.
-! In this case, source and destination Fields can have ungridded dimensions
-! with size different from the Field pair used to compute the routehandle. 
+! Field redistribution can also be performed between different Field pairs that
+! match the original Fields in {\em type}, {\em kind}, and memory layout of the
+! {\em gridded} dimensions. However, the size, number, and index order of 
+! {\em ungridded} dimensions may be different. See section \ref{RH:Reusability}
+! for a more detailed discussion of RouteHandle reusability.
 !EOE
 !BOC
     call ESMF_ArraySpecSet(arrayspec, typekind=ESMF_TYPEKIND_I4, rank=2, rc=rc)
@@ -198,8 +200,7 @@
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
 !BOE
-! Using the previously computed routehandle, weakly congruent Fields can be
-! redistributed.
+! Using the previously computed routehandle, the Fields can be redistributed.
 !EOE
 !BOC
     call ESMF_FieldRedist(srcfieldA, dstFieldA, routehandle, rc=rc)
