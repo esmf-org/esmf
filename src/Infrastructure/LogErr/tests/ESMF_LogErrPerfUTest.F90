@@ -92,7 +92,7 @@ program ESMF_LogErrPerfUTest
 #ifdef ESMF_BOPT_g
   dtTest = 2.d-7  ! 200ns is expected to pass in debug mode
 #else
-  dtTest = 2.d-8  ! 20ns is expected to pass in optimized mode
+  dtTest = 2.5d-8 ! 25ns is expected to pass in optimized mode
 #endif
   write(failMsg, *) "ESMF_LogFoundError() performance problem! ", &
     dt, ">", dtTest
