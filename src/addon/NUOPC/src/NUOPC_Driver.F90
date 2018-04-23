@@ -96,6 +96,7 @@ module NUOPC_Driver
   public NUOPC_DriverAddComp
   public NUOPC_DriverAddRunElement
   public NUOPC_DriverEgestRunSequence
+  public NUOPC_DriverGet
   public NUOPC_DriverGetComp
   public NUOPC_DriverIngestRunSequence
   public NUOPC_DriverNewRunSequence
@@ -3285,6 +3286,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! check if slot index is valid
+    if (slot<=0 .or. slot>size(is%wrap%runSeq)) then
+      ! bail out with error
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Slot index is out of bounds.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+
     ! Figuring out the index into the modelComp array.
     !TODO: This is a pretty involved look-up, and future implementation will
     !TODO: fully eliminate the static arrays modelComp and connectorComp, 
@@ -3412,6 +3422,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! check if slot index is valid
+    if (slot<=0 .or. slot>size(is%wrap%runSeq)) then
+      ! bail out with error
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Slot index is out of bounds.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+
     ! Actually add the RunElement for the identified component
     call NUOPC_RunElementAddLink(is%wrap%runSeq(slot), slot=linkSlot, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3460,6 +3479,48 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_DriverGet - Get info from a Driver
+!
+! !INTERFACE:
+  ! Private name; call using NUOPC_DriverGet()
+  recursive subroutine NUOPC_DriverGet(driver, slotCount, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                        :: driver
+    integer,             intent(out), optional :: slotCount
+    integer,             intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!   Access Driver information.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name
+    type(type_InternalState)        :: is
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! query the Component for info
+    call ESMF_GridCompGet(driver, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! slotCount
+    if (present(slotCount)) then
+      slotCount = size(is%wrap%runSeq)
+    endif
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -4340,6 +4401,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! check if slot index is valid
+    if (slot<=0 .or. slot>size(is%wrap%runSeq)) then
+      ! bail out with error
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="Slot index is out of bounds.", &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+
     ! Set clock of the selected RunSequence slot
     call NUOPC_RunSequenceSet(is%wrap%runSeq(slot), clock=clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
