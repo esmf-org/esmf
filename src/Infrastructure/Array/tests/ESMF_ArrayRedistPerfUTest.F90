@@ -235,9 +235,9 @@ program ESMF_ArrayRedistPerfUTest
   write(msgString,*) "ArrayRedistStore() performance: ", dt, " seconds."
   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 #ifdef ESMF_BOPT_g
-  dtTest = 10.  ! 10s is expected to pass in debug mode
+  dtTest = 10.d0  ! 10s is expected to pass in debug mode
 #else
-  dtTest = 1.5  ! 1.5s is expected to pass in optimized mode
+  dtTest = 2.d0   ! 2s is expected to pass in optimized mode
 #endif
   write(failMsg, *) "ArrayRedist() performance problem! ", dt, ">", dtTest
   call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
@@ -249,9 +249,9 @@ program ESMF_ArrayRedistPerfUTest
   write(msgString,*) "ArrayRedist() performance: ", dt, " seconds."
   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 #ifdef ESMF_BOPT_g
-  dtTest = 0.1    ! 0.1s is expected to pass in debug mode
+  dtTest = 0.1d0    ! 0.1s is expected to pass in debug mode
 #else
-  dtTest = 0.01   ! 0.01s is expected to pass in optimized mode
+  dtTest = 0.01d0   ! 0.01s is expected to pass in optimized mode
 #endif
   write(failMsg, *) "ArrayRedist() performance problem! ", dt, ">", dtTest
   call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
