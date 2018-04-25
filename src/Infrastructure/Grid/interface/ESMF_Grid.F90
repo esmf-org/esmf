@@ -13555,11 +13555,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !-------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateCubedSphere()"
+#define ESMF_METHOD "ESMF_GridCreateCubedSphereReg()"
 !BOP
 ! !IROUTINE: ESMF_GridCreateCubedSphere - Create a multi-tile cubed sphere Grid with regular decomposition
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_GridCreateCubedSphere()
   function ESMF_GridCreateCubedSphereReg(tileSize,keywordEnforcer, &
         regDecompPTile, decompflagPTile,                        &
         coordSys, coordTypeKind,                                &
@@ -14014,15 +14015,16 @@ end function ESMF_GridCreateCubedSphereReg
 
 !-------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateCubedSphere()"
+#define ESMF_METHOD "ESMF_GridCreateCubedSphereIReg()"
 !BOP
 ! !IROUTINE: ESMF_GridCreateCubedSphere - Create a multi-tile cubed sphere Grid with irregular decomposition
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_GridCreateCubedSphere()
   function ESMF_GridCreateCubedSphereIReg(tileSize,             &
-        countsPerDEDim1PTile, countsPerDEDim2PTile,               &
+        countsPerDEDim1PTile, countsPerDEDim2PTile,             &
         keywordEnforcer,                                        &        
-	coordSys, coordTypeKind,                                &
+        coordSys, coordTypeKind,                                &
         deLabelList, staggerLocList,                            &
         delayout, indexflag, name, rc)
 !
@@ -14174,7 +14176,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       totalelmt = countsPerDEDim1PTile(i,j)+totalelmt
       if (countsPerDEDim1PTile(i,j)==0) then
          DeDim1(j)=i-1
-	 exit
+         exit
       endif
     enddo
     if (totalelmt /= tilesize) then
@@ -14296,7 +14298,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             deBlockList(2,2,k)=minIndy+countsPerDEDim2PTile(j,t)-1
             deToTileMap(k)=t
             k=k+1
-	 enddo
+         enddo
        enddo
     enddo
 
