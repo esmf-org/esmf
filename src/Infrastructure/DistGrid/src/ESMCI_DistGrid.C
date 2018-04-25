@@ -461,59 +461,78 @@ DistGrid *DistGrid::create(
       ESMC_LogDefault.Write("DGfromDG: incoming DG identified as deBlock", 
         ESMC_LOGMSG_INFO);
 #endif
-      if (dg->tileCount==1){
-        // single tile
-        // prepare deBlockList
-        int deCount = dg->delayout->getDeCount();
-        int dimCount = dg->dimCount;
-        int *deBlockListAlloc = new int[dimCount*2*deCount];
-        int *deBlockListDims = new int[3];
-        deBlockListDims[0] = dimCount;
-        deBlockListDims[1] = 2;
-        deBlockListDims[2] = deCount;
-        InterArray<int> *deBlockList =
-          new InterArray<int>(deBlockListAlloc, 3, deBlockListDims);
-        delete [] deBlockListDims;
-        // fill deBlockListAlloc with correct info
-        for (int i=0; i<deCount; i++){
-          for (int k=0; k<dimCount; k++){
-            deBlockListAlloc[i*2*dimCount+k] =
-              dg->minIndexPDimPDe[i*dimCount+k];
-            if (present(firstExtra)){
-              if (deBlockListAlloc[i*2*dimCount+k]
-                == dg->minIndexPDimPTile[k]){
-                // found edge DE on single tile DistGrid
-                deBlockListAlloc[i*2*dimCount+k] -=
-                  firstExtra->array[k];
-              }
+      // prepare deBlockList
+      int deCount = dg->delayout->getDeCount();
+      int dimCount = dg->dimCount;
+      int *deBlockListAlloc = new int[dimCount*2*deCount];
+      int *deBlockListDims = new int[3];
+      deBlockListDims[0] = dimCount;
+      deBlockListDims[1] = 2;
+      deBlockListDims[2] = deCount;
+      InterArray<int> *deBlockList =
+        new InterArray<int>(deBlockListAlloc, 3, deBlockListDims);
+      delete [] deBlockListDims;
+      // fill deBlockListAlloc with correct info
+      for (int i=0; i<deCount; i++){
+        for (int k=0; k<dimCount; k++){
+          int kk = k; // default working for single tile
+          if (dg->tileCount>1){
+            // multi tile
+            kk += dg->tileListPDe[i] * dimCount;  // shift to correct tile
+          }
+          // minIndex
+          deBlockListAlloc[i*2*dimCount+k] =
+            dg->minIndexPDimPDe[i*dimCount+k];
+          if (present(firstExtra)){
+            if (deBlockListAlloc[i*2*dimCount+k]
+              == dg->minIndexPDimPTile[kk]){
+              // found edge DE -> adjust bounds
+              deBlockListAlloc[i*2*dimCount+k] -=
+                firstExtra->array[k];
             }
-            deBlockListAlloc[i*2*dimCount+dimCount+k] =
-              dg->maxIndexPDimPDe[i*dimCount+k];
-            if (present(lastExtra)){
-              if (deBlockListAlloc[i*2*dimCount+dimCount+k] ==
-                dg->maxIndexPDimPTile[k]){
-                // found edge DE on single tile DistGrid
-                deBlockListAlloc[i*2*dimCount+dimCount+k] +=
-                  lastExtra->array[k];
-              }
+          }
+          // maxIndex
+          deBlockListAlloc[i*2*dimCount+dimCount+k] =
+            dg->maxIndexPDimPDe[i*dimCount+k];
+          if (present(lastExtra)){
+            if (deBlockListAlloc[i*2*dimCount+dimCount+k] ==
+              dg->maxIndexPDimPTile[kk]){
+              // found edge DE -> adjust bounds
+              deBlockListAlloc[i*2*dimCount+dimCount+k] +=
+                lastExtra->array[k];
             }
           }
         }
+      }
+      if (dg->tileCount==1){
+        // single tile
+#if 0
+      ESMC_LogDefault.Write("DGfromDG: single-tile deBlock branch", 
+        ESMC_LOGMSG_INFO);
+#endif
         // create DistGrid
         distgrid = DistGrid::create(minIndex, maxIndex, deBlockList,
           NULL, indexflagOpt, connectionList, delayout, vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
-        delete deBlockList;
-        delete [] deBlockListAlloc;
       }else{
         // multi tile
-        //TODO: implement this branch once deBlockList multi-tile is implemented
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-          "Currently no support for multi-tile deBlock DistGrid branch.",
-          ESMC_CONTEXT, rc);
-        return ESMC_NULL_POINTER;
+#if 0
+      ESMC_LogDefault.Write("DGfromDG: multi-tile deBlock branch", 
+        ESMC_LOGMSG_INFO);
+#endif
+        InterArray<int> *deToTileMap =
+          new InterArray<int>(dg->tileListPDe, 1, &deCount);
+        // create DistGrid
+        distgrid = DistGrid::create(minIndex, maxIndex, deBlockList,
+          deToTileMap,
+          NULL, indexflagOpt, connectionList, delayout, vm, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+        delete deToTileMap;
       }
+      delete deBlockList;
+      delete [] deBlockListAlloc;
     }
     // garbage collection
     delete [] dimCountInterArray;
