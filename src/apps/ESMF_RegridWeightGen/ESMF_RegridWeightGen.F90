@@ -661,7 +661,7 @@ program ESMF_RegridWeightGenApp
     if (srcFileType == ESMF_FILEFORMAT_UGRID) then
        call ESMF_UGridInq(srcfile, nodeCoordDim = meshdim, rc=rc) 
        if (meshdim == 1) then
-         if (method /= 'neareststod' .or. method /= 'nearestdtod') then
+         if (method /= 'neareststod' .and. method /= 'nearestdtos') then
             write(*,*)
             print *, 'ERROR: only nearest neighbor regridding is supported for'
             print *, '1D source grid in UGRID format.'
@@ -673,12 +673,6 @@ program ESMF_RegridWeightGenApp
             print *, 'Use --src_loc corner to specify it'
             call ESMF_Finalize(endflag=ESMF_END_ABORT)
          endif
-	 if (.not. weightOnlyFlag) then	
-            write(*,*)
-            print *, 'ERROR: Only weight only weight file is supported for 1D source grid.'
-            print *, 'Use --weight_only to specify it'
-            call ESMF_Finalize(endflag=ESMF_END_ABORT)
-	 endif
        endif
     endif
     if (dstFileType == ESMF_FILEFORMAT_UGRID) then
@@ -695,12 +689,6 @@ program ESMF_RegridWeightGenApp
             print *, 'Use --dst_loc corner to specify it'
             call ESMF_Finalize(endflag=ESMF_END_ABORT)
          endif
-	 if (.not. weightOnlyFlag) then	
-            write(*,*)
-            print *, 'ERROR: Only weight only weight file is supported for 1D destination grid.'
-            print *, 'Use --weight_only to specify it'
-            call ESMF_Finalize(endflag=ESMF_END_ABORT)
-	 endif
        endif
     endif
 
