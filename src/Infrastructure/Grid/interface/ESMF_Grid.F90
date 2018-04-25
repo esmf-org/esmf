@@ -14319,6 +14319,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       indexflag=localIndexFlag, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(staggerLocList)) then
+
+      do s=1, size(staggerLocList)
+         if (staggerLocList(s) == ESMF_STAGGERLOC_EDGE1 .or. &
+             staggerLocList(s) == ESMF_STAGGERLOC_EDGE2) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                 msg="- only ESMF_STAGGERLOC_CENTER and ESMF_STAGGERLOC_CORNER are supported", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+            return
+         elseif (staggerLocList(s) == ESMF_STAGGERLOC_CENTER) then
+            docenter = .TRUE.
+         elseif (staggerLocList(s) == ESMF_STAGGERLOC_CORNER) then
+            docorner = .TRUE.
+         endif
+         call ESMF_GridAddCoord(grid, staggerloc=staggerLocList(s), rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      enddo
     
       ! calculate the actual cubed sphere coordiantes for each DE
       do i = 1,localdecount
@@ -14435,8 +14454,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       !print *, 'Create CS size ', tileSize, 'in', (endtime-starttime)*1000.0, ' msecs'
       end do
+    endif 
 
-      ESMF_GridCreateCubedSphereIReg = grid
+    ESMF_GridCreateCubedSphereIReg = grid
 
     ! - deallocate connectionList
     deallocate(minIndexPTile, maxIndexPTile)
