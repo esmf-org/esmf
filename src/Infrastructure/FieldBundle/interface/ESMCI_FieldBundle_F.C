@@ -7,7 +7,7 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
+#define ESMC_FILENAME "ESMCI_FieldBundle_F.C"
 // ESMC interface routines
 
 //-----------------------------------------------------------------------------
@@ -54,12 +54,14 @@ void FTN_X(c_esmc_fieldbundleserialize)(
     int *ip;
 
     // TODO: verify length > need, and if not, make room.
-    int fixedpart = 8 * sizeof(int *);
+    int fixedpart = 8 * sizeof(int *);  // enough for the FB values + potential pointer alignment
     if (*inquireflag != ESMF_INQUIREONLY) {
       if ((*length - *offset) < fixedpart) {
-         
+         std::stringstream msg;
+         msg << "Buffer too short to add a FieldBundle object, length = "
+             << (*length - *offset) << " bytes";
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Buffer too short to add a FieldBundle object", ESMC_CONTEXT,
+          msg, ESMC_CONTEXT,
           localrc);
          return;
  
@@ -75,7 +77,7 @@ void FTN_X(c_esmc_fieldbundleserialize)(
       *ip++ = *status;
       *ip++ = *field_count; 
     } else
-      ip += 2;
+      ip += 8;  // matches fixedpart
 
     *offset = (char *)ip - buffer;
 
