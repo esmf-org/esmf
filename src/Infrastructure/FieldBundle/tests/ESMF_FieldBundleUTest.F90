@@ -74,6 +74,10 @@
       integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
       integer :: numNodes, numElems
       character(len=ESMF_MAXSTR) :: fnames(10), fnames5(10)
+
+      character(1), pointer :: buffer(:)
+      integer :: buffer_len
+      integer :: offset, offset_inq
 #endif
 
 
@@ -2270,6 +2274,41 @@
       write(name, *) "Comparing two modes of BundleGet"
       call ESMF_Test((n_match .eq. 1), name, failMsg, result, ESMF_SRCLINE)
 
+
+      ! Serialization and deserialization - these are internal methods that are
+      ! NOT part of the ESMF API.
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Serialization test, inquire only
+      allocate (buffer(1))
+      buffer_len = 1
+      offset_inq = 0
+      call ESMF_FieldBundleSerialize (bundle5,  &
+          buffer, buffer_len, offset_inq,  &
+          ESMF_ATTRECONCILE_ON, ESMF_INQUIREONLY,  &
+          rc=rc)
+      write(name, *) "Test serialization, inquire only"
+      write(failMsg, *) "Serialization inquiry failed"
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Serialization test
+      deallocate (buffer)
+      allocate (buffer(offset_inq))
+      buffer_len = offset_inq
+      offset = 0
+      call ESMF_FieldBundleSerialize (bundle5,  &
+          buffer, buffer_len, offset,  &
+          ESMF_ATTRECONCILE_ON, ESMF_NOINQUIRE,  &
+          rc=rc)
+      write(name, *) "Test serialization for real"
+      write(failMsg, *) "Serialization failed"
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      print *, 'offset_inq, offset =', offset_inq, offset
+
       !------------------------------------------------------------------------
       !EX_UTest
       Call ESMF_FieldDestroy(ft, rc=rc)
@@ -2278,7 +2317,6 @@
       write(failMsg, *) "Destroy FieldBundle"
       write(name, *) "Destroy FieldBundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 #endif
 
       call ESMF_TestEnd(ESMF_SRCLINE)
