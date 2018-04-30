@@ -239,7 +239,7 @@ program ESMF_ArrayRedistPerfUTest
 #else
   dtTest = 2.d0   ! 2s is expected to pass in optimized mode
 #endif
-  write(failMsg, *) "ArrayRedist() performance problem! ", dt, ">", dtTest
+  write(failMsg, *) "ArrayRedistStore() performance problem! ", dt, ">", dtTest
   call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
