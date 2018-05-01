@@ -4397,7 +4397,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     if (ncStatus == nf90_noerror) then
       if (startIndex == 0) then
          do i=1,totalConn
-           if (elementConn(i) /= ESMF_MESH_POLYBREAK) then
+           if (elementConn(i) >= 0) then
               elementConn(i)=elementConn(i)+1
            endif
          enddo
