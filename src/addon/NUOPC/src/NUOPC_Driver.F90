@@ -3994,7 +3994,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)                          :: name
+    character(ESMF_MAXSTR)                          :: name, verbosityString
     type(type_InternalState)                        :: is
     integer                                         :: i, lineCount, tokenCount
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
@@ -4018,6 +4018,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(driver, name="Verbosity", &
+      value=verbosityString, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! query Component for the internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
@@ -4073,6 +4079,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
+          ! automatically created components inherit verbosity setting
+          call NUOPC_CompAttributeSet(conn, name="Verbosity", &
+            value=verbosityString, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+          ! optionally additional options
           if (tokenCount == 4) then
             ! there are additional connection options specified
             ! -> set as Attribute for now on the connector object
