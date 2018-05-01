@@ -2,6 +2,7 @@
 #define ESMCI_Poly_H
 
 #include <vector>
+#include <algorithm>
 #include <iostream>
 #include <initializer_list>
 #include <cassert>
@@ -101,6 +102,89 @@ namespace ESMCI{
       return ostr;
     }
 
+    template<typename CType>
+    UVIDPoly<CType> operator+(const UVIDPoly<CType> &lhs, const UVIDPoly<CType> &rhs)
+    {
+      std::vector<CType> res_coeffs;
+      std::vector<CType> lhs_coeffs = lhs.get_coeffs();
+      std::vector<CType> rhs_coeffs = rhs.get_coeffs();
+
+      typename std::vector<CType>::const_reverse_iterator criter_lhs =
+          lhs_coeffs.crbegin();
+      typename std::vector<CType>::const_reverse_iterator criter_rhs =
+          rhs_coeffs.crbegin();
+      for(;(criter_lhs != lhs_coeffs.crend()) && (criter_rhs != rhs_coeffs.crend());
+          ++criter_lhs, ++criter_rhs){
+        res_coeffs.push_back(*criter_lhs + *criter_rhs);
+      }
+
+      for(;(criter_lhs != lhs_coeffs.crend()); ++criter_lhs){
+        res_coeffs.push_back(*criter_lhs);
+      }
+      for(;(criter_rhs != rhs_coeffs.crend()); ++criter_rhs){
+        res_coeffs.push_back(*criter_rhs);
+      }
+      std::reverse(res_coeffs.begin(), res_coeffs.end());
+      UVIDPoly<CType> res(res_coeffs);
+
+      return res;
+    }
+
+    template<typename CType>
+    UVIDPoly<CType> operator-(const UVIDPoly<CType> &lhs, const UVIDPoly<CType> &rhs)
+    {
+      std::vector<CType> res_coeffs;
+      std::vector<CType> lhs_coeffs = lhs.get_coeffs();
+      std::vector<CType> rhs_coeffs = rhs.get_coeffs();
+
+      typename std::vector<CType>::const_reverse_iterator criter_lhs =
+        lhs_coeffs.crbegin();
+      typename std::vector<CType>::const_reverse_iterator criter_rhs =
+        rhs_coeffs.crbegin();
+      for(;(criter_lhs != lhs_coeffs.crend()) && (criter_rhs != rhs_coeffs.crend());
+          ++criter_lhs, ++criter_rhs){
+        res_coeffs.push_back(*criter_lhs - *criter_rhs);
+      }
+
+      for(;(criter_lhs != lhs_coeffs.crend()); ++criter_lhs){
+        res_coeffs.push_back(*criter_lhs);
+      }
+      for(;(criter_rhs != rhs_coeffs.crend()); ++criter_rhs){
+        res_coeffs.push_back(-1 * *criter_rhs);
+      }
+      std::reverse(res_coeffs.begin(), res_coeffs.end());
+      UVIDPoly<CType> res(res_coeffs);
+
+      return res;
+    }
+
+    template<typename CType>
+    UVIDPoly<CType> operator*(const UVIDPoly<CType> &lhs, const UVIDPoly<CType> &rhs)
+    {
+      UVIDPoly<CType> res;
+      std::vector<CType> lhs_coeffs = lhs.get_coeffs();
+      std::vector<CType> rhs_coeffs = rhs.get_coeffs();
+
+      int cur_deg_coeff_shift = 0;
+      for(typename std::vector<CType>::const_reverse_iterator criter_rhs =
+          rhs_coeffs.crbegin();
+          criter_rhs != rhs_coeffs.crend(); ++criter_rhs){
+        std::vector<CType> tmp_res_coeffs;
+        for(typename std::vector<CType>::const_iterator citer_lhs = lhs_coeffs.cbegin();
+          citer_lhs != lhs_coeffs.cend(); ++citer_lhs){
+          tmp_res_coeffs.push_back((*citer_lhs) * (*criter_rhs));
+        }
+
+        for(int i=0; i<cur_deg_coeff_shift; i++){
+          tmp_res_coeffs.push_back(0);
+        }
+        cur_deg_coeff_shift++;
+
+        UVIDPoly<CType> tmp_res(tmp_res_coeffs);
+        res = res + tmp_res;
+      }
+      return res;
+    }
   } // namespace MapperUtil
 } // namespace ESMCI
 

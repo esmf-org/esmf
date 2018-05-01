@@ -35,5 +35,15 @@ int main(int argc, char *argv[])
 
   std::cout << "Poly : " << p4 << ", DPoly : " << dp4 << std::endl;
 
+  ESMCI::MapperUtil::UVIDPoly<float> p5 = p1 + p3;
+  std::cout << "(" << p1 << ") + (" << p3 << ") = " << p5 << std::endl;
+
+  ESMCI::MapperUtil::UVIDPoly<float> p6 = {1.0, 1.0};
+  ESMCI::MapperUtil::UVIDPoly<float> p7 = p1 - p6;
+  std::cout << "(" << p1 << ") - (" << p6 << ") = " << p7 << std::endl;
+
+  ESMCI::MapperUtil::UVIDPoly<float> p8 = p1 * p6;
+  std::cout << "(" << p1 << ") * (" << p6 << ") = " << p8 << std::endl;
+
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }
