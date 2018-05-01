@@ -47,6 +47,7 @@ namespace ESMCI{
       public:
         UVIDPoly() = default;
         virtual ~UVIDPoly() = default;
+        UVIDPoly(const CType &coeff);
         UVIDPoly(const std::vector<CType>& coeffs);
         UVIDPoly(std::initializer_list<CType> coeffs);
         void set_coeffs(const std::vector<CType>& coeffs); 
@@ -55,6 +56,12 @@ namespace ESMCI{
       private:
         std::vector<CType> coeffs_;
     }; // class UVIDPoly
+
+    template<typename CType>
+    inline UVIDPoly<CType>::UVIDPoly(const CType &coeff)
+    {
+      coeffs_.push_back(coeff);
+    }
 
     template<typename CType>
     inline UVIDPoly<CType>::UVIDPoly(const std::vector<CType>& coeffs):coeffs_(coeffs)
@@ -130,6 +137,13 @@ namespace ESMCI{
       return res;
     }
 
+    template<typename CLType, typename CRType>
+    UVIDPoly<CRType> operator+(const CLType &lhs, const UVIDPoly<CRType> &rhs)
+    {
+      UVIDPoly<CRType> plhs(static_cast<CRType>(lhs));
+      return plhs + rhs;
+    }
+
     template<typename CType>
     UVIDPoly<CType> operator-(const UVIDPoly<CType> &lhs, const UVIDPoly<CType> &rhs)
     {
@@ -156,6 +170,13 @@ namespace ESMCI{
       UVIDPoly<CType> res(res_coeffs);
 
       return res;
+    }
+
+    template<typename CLType, typename CRType>
+    UVIDPoly<CRType> operator-(const CLType &lhs, const UVIDPoly<CRType> &rhs)
+    {
+      UVIDPoly<CRType> plhs(static_cast<CRType>(lhs));
+      return plhs - rhs;
     }
 
     template<typename CType>
@@ -185,6 +206,14 @@ namespace ESMCI{
       }
       return res;
     }
+
+    template<typename CLType, typename CRType>
+    UVIDPoly<CRType> operator*(const CLType &lhs, const UVIDPoly<CRType> &rhs)
+    {
+      UVIDPoly<CRType> plhs(static_cast<CRType>(lhs));
+      return plhs * rhs;
+    }
+
   } // namespace MapperUtil
 } // namespace ESMCI
 

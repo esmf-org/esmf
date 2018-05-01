@@ -45,5 +45,8 @@ int main(int argc, char *argv[])
   ESMCI::MapperUtil::UVIDPoly<float> p8 = p1 * p6;
   std::cout << "(" << p1 << ") * (" << p6 << ") = " << p8 << std::endl;
 
+  ESMCI::MapperUtil::UVIDPoly<float> p9 = 2.0 * p6;
+  std::cout << "2.0 * (" << p6 << ") = " << p9 << std::endl;
+
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }
