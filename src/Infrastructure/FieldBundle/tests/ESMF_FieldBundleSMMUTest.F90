@@ -730,7 +730,7 @@ subroutine test_field_bundle_smm_source_term_processing(srcTermProcessing, rc)
 
   integer, parameter :: fieldCount = 2
   integer, parameter :: dstMaxIndex(2) = (/10, 20/)
-  real(ESMF_KIND_R8), parameter :: tol = 1E-4
+  real(ESMF_KIND_R8), parameter :: tol = 1.D-4
   real(ESMF_KIND_R8)            :: absDiff
 
   integer, intent(inout) :: srcTermProcessing(:), rc
