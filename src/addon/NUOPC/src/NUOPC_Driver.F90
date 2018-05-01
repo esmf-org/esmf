@@ -273,9 +273,70 @@ module NUOPC_Driver
     type(ESMF_Clock)      :: clock
     integer, intent(out)  :: rc
     
+    ! local variables
+    character(*), parameter   :: rName="InitializeP0"
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
+
     rc = ESMF_SUCCESS
 
+    ! query the Component for info
+    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
+
     ! NOOP, because only single IPD version entry points set.
+
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
 
   end subroutine
   
@@ -288,7 +349,9 @@ module NUOPC_Driver
     integer, intent(out)  :: rc
     
     ! local variables
-    character(ESMF_MAXSTR)    :: name
+    character(*), parameter   :: rName="InitializeP1"
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
     type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
@@ -297,6 +360,37 @@ module NUOPC_Driver
     call ESMF_GridCompGet(gcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
 
     ! call the actual initialize routines
     call InitializeIPDv02p1(gcomp, importState, exportState, clock, rc=rc)
@@ -326,6 +420,26 @@ module NUOPC_Driver
       return  ! bail out
     endif
 
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -338,6 +452,7 @@ module NUOPC_Driver
     integer, intent(out) :: rc
     
     ! local variables
+    character(*), parameter   :: rName="InitializeIPDv02p1"
     integer                   :: localrc, stat
     type(type_InternalState)  :: is
     logical                   :: clockIsPresent
@@ -350,7 +465,8 @@ module NUOPC_Driver
     logical                   :: existflag
     integer                   :: rootPet, rootVas
     type(ESMF_VM)             :: vm
-    character(ESMF_MAXSTR)    :: name, verbosityString
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
     character(len=160)        :: namespace  ! long engough for component label
     type(ComponentMapEntry)   :: cmEntry
     type(ESMF_GridComp), pointer :: compList(:)
@@ -368,10 +484,35 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine verbosity
-    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=verbosityString,&
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
 
     ! allocate memory for the internal state and set it in the Component
     allocate(is%wrap, stat=stat)
@@ -601,7 +742,7 @@ module NUOPC_Driver
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
               ! automatically created components inherit verbosity setting
               call NUOPC_CompAttributeSet(connector, name="Verbosity", &
-                value=verbosityString, rc=rc)
+                value=valueString, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
             endif
@@ -896,6 +1037,26 @@ module NUOPC_Driver
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
 
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
     contains !----------------------------------------------------------------
     
       recursive subroutine loopModelComps(phase, rc)
@@ -1137,10 +1298,12 @@ module NUOPC_Driver
     integer, intent(out) :: rc
     
     ! local variables
+    character(*), parameter   :: rName="InitializeIPDv02p3"
     type(type_InternalState)  :: is
     integer                   :: i, j
     type(ESMF_VM)             :: vm
-    character(ESMF_MAXSTR)    :: name
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
 
     rc = ESMF_SUCCESS
 
@@ -1148,6 +1311,38 @@ module NUOPC_Driver
     call ESMF_GridCompGet(gcomp, name=name, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
+
     ! query Component for the internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
@@ -1310,6 +1505,26 @@ module NUOPC_Driver
     ! connectorComps
     ! nothing to do
 
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -1322,10 +1537,12 @@ module NUOPC_Driver
     integer, intent(out) :: rc
     
     ! local variables
+    character(*), parameter   :: rName="InitializeIPDv02p5Data"
     type(type_InternalState)  :: is
     integer                   :: i, j
     type(ESMF_VM)             :: vm
-    character(ESMF_MAXSTR)    :: name, value
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
     logical                   :: execFlag, execFlagCollect
     integer                   :: execFlagIntReduced, execFlagInt
 
@@ -1337,6 +1554,38 @@ module NUOPC_Driver
     call ESMF_GridCompGet(gcomp, name=name, vm=vm, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
+
     ! query Component for the internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
@@ -1418,11 +1667,11 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     endif
     
     ! set the InitializeDataComplete attribute
-    value="false"
-    if (is%wrap%dataDepAllComplete) value="true"
+    valueString="false"
+    if (is%wrap%dataDepAllComplete) valueString="true"
     
     call NUOPC_CompAttributeSet(gcomp, &
-      name="InitializeDataComplete", value=value, rc=rc)
+      name="InitializeDataComplete", value=valueString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=__FILE__)) &
@@ -1440,6 +1689,26 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 call ESMF_LogWrite(trim(name)//": Exiting InitializeIPDv02p5Data", &
   ESMF_LOGMSG_INFO)
 #endif
+
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
 
   end subroutine
 
@@ -1829,6 +2098,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     integer, intent(out) :: rc
 
     ! local variables
+    character(*), parameter         :: rName="Run"
     integer                         :: localrc
     type(type_InternalState)        :: is
     type(ESMF_Clock)                :: internalClock
@@ -1860,6 +2130,37 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
+    
     ! determine profiling
     call NUOPC_CompAttributeGet(gcomp, name="Profiling", value=valueString, &
       rc=rc)
@@ -1871,17 +2172,6 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! determine verbosity
-    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
     ! query Component for its Clock
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1895,8 +2185,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-    ! conditionally output diagnostic to Log file
-    if (btest(verbosity,0)) then
+    ! conditionally output info to Log file
+    if (btest(verbosity,9)) then
       call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_RUN, &
         phaseIndex=phase, phaseLabel=pLabel, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2100,8 +2390,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     enddo
     
-    ! conditionally output diagnostic to Log file
-    if (btest(verbosity,0)) then
+    ! conditionally output info to Log file
+    if (btest(verbosity,9)) then
       call ESMF_ClockPrint(internalClock, options="currTime", &
         preString="<<<"//trim(name)//&
         " - leaving Run with current time: ", unit=msgString, rc=rc)
@@ -2141,6 +2431,26 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       enddo
+    endif
+
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
 
 #ifdef NUOPC_DRIVER_TRACE
@@ -2287,6 +2597,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     integer, intent(out) :: rc
 
     ! local variables
+    character(*), parameter   :: rName="Finalize"
     integer                   :: localrc, stat
     type(type_InternalState)  :: is
     type(ESMF_Clock)          :: internalClock
@@ -2295,7 +2606,8 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     type(ConnectorMapEntry)   :: cnEntry
     character(ESMF_MAXSTR)    :: iString, jString
     logical                   :: existflag
-    character(ESMF_MAXSTR)    :: name
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
     type(ESMF_GridComp), pointer  :: compList(:)
     type(ESMF_CplComp), pointer   :: connectorList(:)
     type(ESMF_PtrInt1D), pointer  :: petLists(:)
@@ -2307,6 +2619,37 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
+
     ! query Component for its Clock
     call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2518,6 +2861,26 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
       
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -3994,7 +4357,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)                          :: name, verbosityString
+    character(ESMF_MAXSTR)                          :: name, valueString
     type(type_InternalState)                        :: is
     integer                                         :: i, lineCount, tokenCount
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
@@ -4020,7 +4383,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! determine verbosity
     call NUOPC_CompAttributeGet(driver, name="Verbosity", &
-      value=verbosityString, rc=rc)
+      value=valueString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -4081,7 +4444,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return  ! bail out
           ! automatically created components inherit verbosity setting
           call NUOPC_CompAttributeSet(conn, name="Verbosity", &
-            value=verbosityString, rc=rc)
+            value=valueString, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
           ! optionally additional options
@@ -4460,7 +4823,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR)        :: name
+    character(*), parameter   :: rName="IInitAdvertize"
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
 
     rc = ESMF_SUCCESS
     
@@ -4468,6 +4833,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_GridCompGet(driver, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(driver, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
 
     if (ESMF_StateIsCreated(importState, rc=rc)) then
       ! request that connectors transfer all fields into the importState
@@ -4485,6 +4881,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
 
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -4497,14 +4913,47 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR)        :: name
+    character(*), parameter   :: rName="IInitAdvertizeFinish"
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
 
     rc = ESMF_SUCCESS
-
+    
     ! query the Component for info
     call ESMF_GridCompGet(driver, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(driver, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
 
     if (ESMF_StateIsCreated(importState, rc=rc)) then
       ! reset FieldTransferPolicy to prevent interaction w upper hierarchy layer
@@ -4522,6 +4971,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
 
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -4534,12 +5003,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR)          :: name
-    integer                         :: localrc
-    logical                         :: existflag
-    type(ESMF_CplComp)              :: connector
-    integer                         :: i
-    type(type_InternalState)        :: is
+    character(*), parameter   :: rName="IInitModifyCplLists"
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
+    integer                   :: localrc
+    logical                   :: existflag
+    type(ESMF_CplComp)        :: connector
+    integer                   :: i
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -4548,6 +5019,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(driver, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
+
     ! query Component for the internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
@@ -4587,6 +5089,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
       
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
   contains
   
     recursive subroutine addCplListOption(connector, rc)
@@ -4633,7 +5155,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR)        :: name
+    character(*), parameter   :: rName="IInitCheck"
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
 
     rc = ESMF_SUCCESS
 
@@ -4641,6 +5165,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_GridCompGet(driver, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(driver, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
 
     if (ESMF_StateIsCreated(importState, rc=rc)) then
       ! - check that all connected fields in importState have producer
@@ -4656,6 +5211,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
   
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
   contains
   
     !---------------------------------------------------------------------------
@@ -4796,7 +5371,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR)        :: name
+    character(*), parameter   :: rName="IInitRealize"
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
 
     rc = ESMF_SUCCESS
 
@@ -4804,6 +5381,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_GridCompGet(driver, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(driver, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
 
     if (ESMF_StateIsCreated(importState, rc=rc)) then
       ! - complete all the fields in the importState
@@ -4815,6 +5423,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_StateIsCreated(exportState, rc=rc)) then
       ! - complete all the fields in the exportState
       call completeAllFields(exportState, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -4959,7 +5587,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) :: rc
     
     ! local variables
-    character(ESMF_MAXSTR)        :: name
+    character(*), parameter       :: rName="InternalInitializeComplete"
+    character(ESMF_MAXSTR)        :: name, valueString
+    integer                       :: verbosity
     type(ESMF_Clock)              :: internalClock
     type(ESMF_Time)               :: time
     type(ESMF_Field), allocatable :: fieldList(:)
@@ -4973,6 +5603,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(driver, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
+    
 #ifdef DEBUG
 call ESMF_LogWrite(trim(name)//": Entering InternalInitializeComplete", &
   ESMF_LOGMSG_INFO)
@@ -5019,6 +5680,26 @@ call ESMF_LogWrite(trim(name)//": Entering InternalInitializeComplete", &
         return  ! bail out
     endif
     
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
 #ifdef DEBUG
 call ESMF_LogWrite(trim(name)//": Exiting InternalInitializeComplete", &
   ESMF_LOGMSG_INFO)
@@ -5037,12 +5718,15 @@ call ESMF_LogWrite(trim(name)//": Exiting InternalInitializeComplete", &
     integer, intent(out)  :: rc
     
     ! local variables
-    integer               :: localrc
-    type(ESMF_Clock)      :: internalClock
-    logical               :: existflag
-    character(ESMF_MAXSTR):: name, oldDataComplete, newDataComplete
-    integer               :: oldUpdatedCount, newUpdatedCount
-    logical               :: allUpdated
+    character(*), parameter   :: rName="InitializeIPDv02p5Data"
+    integer                   :: localrc
+    type(ESMF_Clock)          :: internalClock
+    logical                   :: existflag
+    character(ESMF_MAXSTR)    :: oldDataComplete, newDataComplete
+    integer                   :: oldUpdatedCount, newUpdatedCount
+    logical                   :: allUpdated
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
 
     rc = ESMF_SUCCESS
 
@@ -5050,6 +5734,37 @@ call ESMF_LogWrite(trim(name)//": Exiting InternalInitializeComplete", &
     call ESMF_GridCompGet(gcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
 
 ! For a Driver may be called without valid states
 if (ESMF_StateIsCreated(importState).and.ESMF_StateIsCreated(exportState)) then
@@ -5152,6 +5867,27 @@ if (ESMF_StateIsCreated(importState).and.ESMF_StateIsCreated(exportState)) then
         return  ! bail out
     endif
 endif
+
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
   end subroutine
 
   !-----------------------------------------------------------------------------
