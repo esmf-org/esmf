@@ -4406,7 +4406,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
 
     ! Check for negative index values that is not defiend as ESMF_MESH_POLYBREAK
     do i=1,totalConn
-       if (elementConn(i) < 0 .and. elementConn(i) /= PolyBreakFound) then
+       if (elementConn(i) < 0 .and. elementConn(i) /= ESMF_MESH_POLYBREAK) then
            call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
                 msg="- negative index found in elementConn table", &
                 ESMF_CONTEXT, rcToReturn=rc)
