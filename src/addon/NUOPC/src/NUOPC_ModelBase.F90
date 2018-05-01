@@ -532,11 +532,15 @@ module NUOPC_ModelBase
     ! currentTime + timeStep.
     
     ! local variables
-    type(ESMF_Clock)        :: clock
-    type(ESMF_Time)         :: time
-    type(ESMF_State)        :: importState
-    logical                 :: allCurrent
-    character(ESMF_MAXSTR):: name
+    type(ESMF_Clock)              :: clock
+    type(ESMF_Time)               :: time
+    type(ESMF_State)              :: importState
+    logical                       :: allCurrent
+    type(ESMF_Field), allocatable :: fieldList(:)
+    integer                       :: i
+    character(ESMF_MAXSTR)        :: fieldName
+    character(ESMF_MAXSTR)        :: name
+    character(ESMF_MAXSTR)        :: valueString
 
     rc = ESMF_SUCCESS
 
@@ -558,13 +562,28 @@ module NUOPC_ModelBase
       return  ! bail out
     
     ! check that Fields in the importState show correct timestamp
-    allCurrent = NUOPC_IsAtTime(importState, time, rc=rc)
+    allCurrent = NUOPC_IsAtTime(importState, time, fieldList=fieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
       
     if (.not.allCurrent) then
       !TODO: introduce and use INCOMPATIBILITY return codes!!!!
+      do i=1, size(fieldList)
+        call ESMF_FieldGet(fieldList(i), name=fieldName, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        call NUOPC_GetAttribute(fieldList(i), name="StandardName", &
+          value=valueString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        call ESMF_LogWrite(trim(name)//": Field '"//trim(fieldName)//&
+          "' in the importState is not at the expected time. StandardName: "&
+          //trim(valueString), ESMF_LOGMSG_WARNING)
+      enddo
+      deallocate(fieldList)
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="NUOPC INCOMPATIBILITY DETECTED: Import Fields not at current time", &
         line=__LINE__, file=trim(name)//":"//FILENAME, &
