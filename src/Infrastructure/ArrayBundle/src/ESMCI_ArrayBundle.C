@@ -648,7 +648,7 @@ int ArrayBundle::haloStore(
     for (int i=0; i<arrayCount; i++){
       matchList[i] = i; // initialize
       Array *array = arrayVector[i];
-      // search if there was an earlier entry that is weakly congruent
+      // search if there was an earlier entry that is compatible
       for (int j=i-1; j>=0; j--){
         bool match = Array::match(array, arrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -915,7 +915,7 @@ int ArrayBundle::redistStore(
       matchList[i] = i; // initialize
       Array *srcArray = srcArrayVector[i];
       Array *dstArray = dstArrayVector[i];
-      // search if there was an earlier entry that is weakly congruent
+      // search if there was an earlier entry that is compatible
       for (int j=i-1; j>=0; j--){
         bool srcMatch = Array::match(srcArray, srcArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -1231,7 +1231,7 @@ int ArrayBundle::sparseMatMulStore(
       matchList[i] = i; // initialize
       Array *srcArray = srcArrayVector[i];
       Array *dstArray = dstArrayVector[i];
-      // search if there was an earlier entry that is weakly congruent
+      // search if there was an earlier entry that is compatible
       for (int j=i-1; j>=0; j--){
         bool srcMatch = Array::match(srcArray, srcArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,

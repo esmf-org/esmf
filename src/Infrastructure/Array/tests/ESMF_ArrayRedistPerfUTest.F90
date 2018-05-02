@@ -55,7 +55,7 @@ program ESMF_ArrayRedistPerfUTest
   real(ESMF_KIND_R8), pointer :: dstPtr(:,:), tstPtr(:,:)
   integer                     :: lrc, i, j
   logical                     :: mismatch
-  real(ESMF_KIND_R8)          :: t0, t1, t0_store, t1_store, dt
+  real(ESMF_KIND_R8)          :: t0, t1, t0_store, t1_store, dt, dtTest
 #endif
 
   ! cumulative result: count failures; no failures equals "all pass"
@@ -231,20 +231,30 @@ program ESMF_ArrayRedistPerfUTest
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Check ArrayRedistStore() performance - Test"
-  write(failMsg, *) "Performance problem detected!" 
   dt = t1_store - t0_store
   write(msgString,*) "ArrayRedistStore() performance: ", dt, " seconds."
   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-  call ESMF_Test((dt<10.), name, failMsg, result, ESMF_SRCLINE)
+#ifdef ESMF_BOPT_g
+  dtTest = 10.d0  ! 10s is expected to pass in debug mode
+#else
+  dtTest = 2.d0   ! 2s is expected to pass in optimized mode
+#endif
+  write(failMsg, *) "ArrayRedistStore() performance problem! ", dt, ">", dtTest
+  call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
 
 !------------------------------------------------------------------------
   !EX_UTest_Multi_Proc_Only
   write(name, *) "Check ArrayRedist() performance - Test"
-  write(failMsg, *) "Performance problem detected!" 
   dt = t1 - t0
   write(msgString,*) "ArrayRedist() performance: ", dt, " seconds."
   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-  call ESMF_Test((dt<0.1), name, failMsg, result, ESMF_SRCLINE)
+#ifdef ESMF_BOPT_g
+  dtTest = 0.1d0    ! 0.1s is expected to pass in debug mode
+#else
+  dtTest = 0.01d0   ! 0.01s is expected to pass in optimized mode
+#endif
+  write(failMsg, *) "ArrayRedist() performance problem! ", dt, ">", dtTest
+  call ESMF_Test((dt<dtTest), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 

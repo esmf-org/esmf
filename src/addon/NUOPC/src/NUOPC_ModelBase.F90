@@ -166,7 +166,9 @@ module NUOPC_ModelBase
     integer, intent(out)  :: rc
     
     ! local variables
-    character(ESMF_MAXSTR)    :: name
+    character(*), parameter   :: rName="InitializeP0"
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
     type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
@@ -176,6 +178,37 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
+
     ! filter all other entries but those of type IPDv00
     call NUOPC_CompFilterPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
       acceptStringList=(/"IPDv00p"/), rc=rc)
@@ -192,6 +225,26 @@ module NUOPC_ModelBase
     ! store the incoming clock as driverClock in internal state
     is%wrap%driverClock = clock
     
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -203,12 +256,13 @@ module NUOPC_ModelBase
     integer, intent(out) :: rc
     
     ! local variables
+    character(*), parameter   :: rName="Run"
     integer                   :: localrc
     type(type_InternalState)  :: is
     type(ESMF_Clock)          :: internalClock
     logical                   :: allCurrent
     logical                   :: existflag
-    character(ESMF_MAXSTR)    :: modelName, msgString, valueString, pLabel
+    character(ESMF_MAXSTR)    :: msgString, valueString, pLabel
     integer                   :: phase
     integer                   :: verbosity
     character(ESMF_MAXSTR)    :: name
@@ -231,13 +285,33 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     verbosity = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
     
-    ! get the modelName and currentPhase
-    call ESMF_GridCompGet(gcomp, name=modelName, currentPhase=phase, rc=rc)
+    ! get the currentPhase
+    call ESMF_GridCompGet(gcomp, currentPhase=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -288,15 +362,15 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
-    ! conditionally output diagnostic to Log file
-    if (btest(verbosity,0)) then
+    ! conditionally output info to Log file
+    if (btest(verbosity,9)) then
       call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_RUN, &
         phaseIndex=phase, phaseLabel=pLabel, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_ClockPrint(internalClock, options="currTime", &
-        preString=">>>"//trim(modelName)//&
-        " entered Run (phase="//trim(adjustl(pLabel))// &
+        preString=">>>"//trim(name)//&
+        ": entered Run (phase="//trim(adjustl(pLabel))// &
         ") with current time: ", unit=msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -341,6 +415,19 @@ module NUOPC_ModelBase
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
+      ! conditionally output time-loop info to Log file
+      if (btest(verbosity,11)) then
+        call ESMF_ClockPrint(internalClock, options="currTime", &
+          preString=trim(name)//": time step-loop starting, current time: ", &
+          unit=msgString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+
       ! by default update the timestamp on Fields in exportState to the 
       ! currTime. This timestamp can then be overridded in Advance() or 
       ! in TimestampExport() after the timestepping loop.
@@ -415,10 +502,10 @@ module NUOPC_ModelBase
      call ESMF_TraceRegionExit("NUOPC_ModelBase:AdvanceClock")
 #endif
     
-      ! conditionally output diagnostic to Log file
-      if (btest(verbosity,0)) then
+      ! conditionally output time-loop info to Log file
+      if (btest(verbosity,11)) then
         call ESMF_ClockPrint(internalClock, options="currTime", &
-          preString=trim(modelName)//" time stepping loop, current time: ", &
+          preString=trim(name)//": time step-loop ending,   current time: ", &
           unit=msgString, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -463,11 +550,11 @@ module NUOPC_ModelBase
    call ESMF_TraceRegionExit("NUOPC_ModelBase:TimestampExport")
 #endif
 
-    ! conditionally output diagnostic to Log file
-    if (btest(verbosity,0)) then
+    ! conditionally output info to Log file
+    if (btest(verbosity,9)) then
       call ESMF_ClockPrint(internalClock, options="currTime", &
-        preString="<<<"//trim(modelName)//&
-        " leaving Run (phase="//trim(adjustl(pLabel))// &
+        preString="<<<"//trim(name)//&
+        ": leaving Run (phase="//trim(adjustl(pLabel))// &
         ") with current time: ", unit=msgString, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -475,6 +562,26 @@ module NUOPC_ModelBase
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+    endif
+
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
 
 #ifdef NUOPC_MODELBASE_TRACE
@@ -532,11 +639,15 @@ module NUOPC_ModelBase
     ! currentTime + timeStep.
     
     ! local variables
-    type(ESMF_Clock)        :: clock
-    type(ESMF_Time)         :: time
-    type(ESMF_State)        :: importState
-    logical                 :: allCurrent
-    character(ESMF_MAXSTR):: name
+    type(ESMF_Clock)              :: clock
+    type(ESMF_Time)               :: time
+    type(ESMF_State)              :: importState
+    logical                       :: allCurrent
+    type(ESMF_Field), allocatable :: fieldList(:)
+    integer                       :: i
+    character(ESMF_MAXSTR)        :: fieldName
+    character(ESMF_MAXSTR)        :: name
+    character(ESMF_MAXSTR)        :: valueString
 
     rc = ESMF_SUCCESS
 
@@ -558,13 +669,28 @@ module NUOPC_ModelBase
       return  ! bail out
     
     ! check that Fields in the importState show correct timestamp
-    allCurrent = NUOPC_IsAtTime(importState, time, rc=rc)
+    allCurrent = NUOPC_IsAtTime(importState, time, fieldList=fieldList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
       
     if (.not.allCurrent) then
       !TODO: introduce and use INCOMPATIBILITY return codes!!!!
+      do i=1, size(fieldList)
+        call ESMF_FieldGet(fieldList(i), name=fieldName, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        call NUOPC_GetAttribute(fieldList(i), name="StandardName", &
+          value=valueString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        call ESMF_LogWrite(trim(name)//": Field '"//trim(fieldName)//&
+          "' in the importState is not at the expected time. StandardName: "&
+          //trim(valueString), ESMF_LOGMSG_WARNING)
+      enddo
+      deallocate(fieldList)
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="NUOPC INCOMPATIBILITY DETECTED: Import Fields not at current time", &
         line=__LINE__, file=trim(name)//":"//FILENAME, &
@@ -583,9 +709,11 @@ module NUOPC_ModelBase
     integer, intent(out) :: rc
 
     ! local variables
+    character(*), parameter   :: rName="Finalize"
     integer                   :: localrc, stat
     logical                   :: existflag
-    character(ESMF_MAXSTR)    :: name
+    character(ESMF_MAXSTR)    :: name, valueString
+    integer                   :: verbosity
     type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
@@ -595,6 +723,37 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! determine verbosity
+    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! intro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    !--- intro done ---
+
     ! SPECIALIZE by calling into optional attached method
     call ESMF_MethodExecute(gcomp, label=label_Finalize, existflag=existflag, &
       userRc=localrc, rc=rc)
@@ -618,6 +777,26 @@ module NUOPC_ModelBase
       msg="Deallocation of internal state memory failed.", &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+
+    !--- extro start ---
+    ! extro
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
 
   end subroutine
   !-----------------------------------------------------------------------------

@@ -113,21 +113,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !DESCRIPTION:
 !   \begin{sloppypar}
 !   Execute a precomputed Field sparse matrix multiplication from {\tt srcField} to
-!   {\tt dstField}. Both {\tt srcField} and {\tt dstField} must be
-!   congruent and typekind conform with the respective Fields used during 
-!   {\tt ESMF\_FieldSMMStore()}. Congruent Fields possess matching DistGrids 
-!   and the shape of the local array tiles, i.e. the memory allocation, matches 
-!   between the Fields for every DE. For weakly congruent
-!   Fields the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Fields that differ in the number of elements in the left most
-!   undistributed dimensions. Because Grid dimensions are mapped to Field in a
-!   sequence order, it's necessary to map the ungridded dimensions to the first
-!   set of dimensions in order to use the weakly congruent Field SMM feature.
-!   Not providing a non-default gridToFieldMap during Field creation and then
-!   using such Fields in a weakly congruent manner in Field communication methods
-!   leads to undefined behavior.
+!   {\tt dstField}. 
+!   Both {\tt srcField} and {\tt dstField} must match the respective Fields
+!   used during {\tt ESMF\_FieldSMMStore()} in {\em type}, {\em kind}, and 
+!   memory layout of the {\em gridded} dimensions. However, the size, number, 
+!   and index order of {\em ungridded} dimensions may be different. See section
+!   \ref{RH:Reusability} for a more detailed discussion of RouteHandle 
+!   reusability.
 !   \end{sloppypar}
 !
 !   The {\tt srcField} and {\tt dstField} arguments are optional in support of
@@ -363,21 +355,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! arguments.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_FieldSMM()} on any pair of Fields that are weakly congruent
-!   and typekind conform with the {\tt srcField}, {\tt dstField} pair. 
-!   Congruent Fields possess matching DistGrids, and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Fields for 
-!   every DE. For weakly congruent
-!   Fields the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Fields that differ in the number of elements in the left most
-!   undistributed dimensions. Because Grid dimensions are mapped to Field in a
-!   sequence order, it's necessary to map the ungridded dimensions to the first
-!   set of dimensions in order to use the weakly congruent Field SMM feature.
-!   Not providing a non-default gridToFieldMap during Field creation and then
-!   using such Fields in a weakly congruent manner in Field communication methods
-!   leads to undefined behavior.
+!   {\tt ESMF\_FieldSMM()} on any pair of Fields that matches 
+!   {\tt srcField} and {\tt dstField} in {\em type}, {\em kind}, and 
+!   memory layout of the {\em gridded} dimensions. However, the size, number, 
+!   and index order of {\em ungridded} dimensions may be different. See section
+!   \ref{RH:Reusability} for a more detailed discussion of RouteHandle 
+!   reusability.
 !  
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -832,21 +815,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! arguments.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_FieldSMM()} on any pair of Fields that are weakly congruent
-!   and typekind conform with the {\tt srcField}, {\tt dstField} pair. 
-!   Congruent Fields possess matching DistGrids, and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Fields for 
-!   every DE. For weakly congruent
-!   Fields the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Fields that differ in the number of elements in the left most
-!   undistributed dimensions. Because Grid dimensions are mapped to Field in a
-!   sequence order, it's necessary to map the ungridded dimensions to the first
-!   set of dimensions in order to use the weakly congruent Field SMM feature.
-!   Not providing a non-default gridToFieldMap during Field creation and then
-!   using such Fields in a weakly congruent manner in Field communication methods
-!   leads to undefined behavior.
+!   {\tt ESMF\_FieldSMM()} on any pair of Fields that matches 
+!   {\tt srcField} and {\tt dstField} in {\em type}, {\em kind}, and 
+!   memory layout of the {\em gridded} dimensions. However, the size, number, 
+!   and index order of {\em ungridded} dimensions may be different. See section
+!   \ref{RH:Reusability} for a more detailed discussion of RouteHandle 
+!   reusability.
 !  
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -1329,21 +1303,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! arguments. 
 !  
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_FieldSMM()} on any pair of Fields that are weakly congruent
-!   and typekind conform with the {\tt srcField}, {\tt dstField} pair. 
-!   Congruent Fields possess matching DistGrids and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Fields for
-!   every DE. For weakly congruent
-!   Fields the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Fields that differ in the number of elements in the left most
-!   undistributed dimensions. Because Grid dimensions are mapped to Field in a
-!   sequence order, it's necessary to map the ungridded dimensions to the first
-!   set of dimensions in order to use the weakly congruent Field SMM feature.
-!   Not providing a non-default gridToFieldMap during Field creation and then
-!   using such Fields in a weakly congruent manner in Field communication methods
-!   leads to undefined behavior.
+!   {\tt ESMF\_FieldSMM()} on any pair of Fields that matches 
+!   {\tt srcField} and {\tt dstField} in {\em type}, {\em kind}, and 
+!   memory layout of the {\em gridded} dimensions. However, the size, number, 
+!   and index order of {\em ungridded} dimensions may be different. See section
+!   \ref{RH:Reusability} for a more detailed discussion of RouteHandle 
+!   reusability.
 !  
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -1534,21 +1499,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! arguments. 
 !  
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_FieldSMM()} on any pair of Fields that are weakly congruent
-!   and typekind conform with the {\tt srcField}, {\tt dstField} pair. 
-!   Congruent Fields possess matching DistGrids and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Fields for
-!   every DE. For weakly congruent
-!   Fields the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Fields that differ in the number of elements in the left most
-!   undistributed dimensions. Because Grid dimensions are mapped to Field in a
-!   sequence order, it's necessary to map the ungridded dimensions to the first
-!   set of dimensions in order to use the weakly congruent Field SMM feature.
-!   Not providing a non-default gridToFieldMap during Field creation and then
-!   using such Fields in a weakly congruent manner in Field communication methods
-!   leads to undefined behavior.
+!   {\tt ESMF\_FieldSMM()} on any pair of Fields that matches 
+!   {\tt srcField} and {\tt dstField} in {\em type}, {\em kind}, and 
+!   memory layout of the {\em gridded} dimensions. However, the size, number, 
+!   and index order of {\em ungridded} dimensions may be different. See section
+!   \ref{RH:Reusability} for a more detailed discussion of RouteHandle 
+!   reusability.
 !  
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 

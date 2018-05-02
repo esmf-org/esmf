@@ -1543,6 +1543,12 @@ ESMF_CPPFLAGS       += -DESMF_TESTEXHAUSTIVE
 endif
 
 #-------------------------------------------------------------------------------
+# ESMF_BOPT is passed (by CPP) into test programs to control any differences
+# between the different BOPT modes.
+#-------------------------------------------------------------------------------
+ESMF_CPPFLAGS       += -DESMF_BOPT_$(ESMF_BOPT)
+
+#-------------------------------------------------------------------------------
 # ESMF_TESTCOMPTUNNEL is passed (by CPP) into test programs to control the
 # dependency on ESMF-threading.
 #-------------------------------------------------------------------------------

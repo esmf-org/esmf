@@ -461,59 +461,78 @@ DistGrid *DistGrid::create(
       ESMC_LogDefault.Write("DGfromDG: incoming DG identified as deBlock", 
         ESMC_LOGMSG_INFO);
 #endif
-      if (dg->tileCount==1){
-        // single tile
-        // prepare deBlockList
-        int deCount = dg->delayout->getDeCount();
-        int dimCount = dg->dimCount;
-        int *deBlockListAlloc = new int[dimCount*2*deCount];
-        int *deBlockListDims = new int[3];
-        deBlockListDims[0] = dimCount;
-        deBlockListDims[1] = 2;
-        deBlockListDims[2] = deCount;
-        InterArray<int> *deBlockList =
-          new InterArray<int>(deBlockListAlloc, 3, deBlockListDims);
-        delete [] deBlockListDims;
-        // fill deBlockListAlloc with correct info
-        for (int i=0; i<deCount; i++){
-          for (int k=0; k<dimCount; k++){
-            deBlockListAlloc[i*2*dimCount+k] =
-              dg->minIndexPDimPDe[i*dimCount+k];
-            if (present(firstExtra)){
-              if (deBlockListAlloc[i*2*dimCount+k]
-                == dg->minIndexPDimPTile[k]){
-                // found edge DE on single tile DistGrid
-                deBlockListAlloc[i*2*dimCount+k] -=
-                  firstExtra->array[k];
-              }
+      // prepare deBlockList
+      int deCount = dg->delayout->getDeCount();
+      int dimCount = dg->dimCount;
+      int *deBlockListAlloc = new int[dimCount*2*deCount];
+      int *deBlockListDims = new int[3];
+      deBlockListDims[0] = dimCount;
+      deBlockListDims[1] = 2;
+      deBlockListDims[2] = deCount;
+      InterArray<int> *deBlockList =
+        new InterArray<int>(deBlockListAlloc, 3, deBlockListDims);
+      delete [] deBlockListDims;
+      // fill deBlockListAlloc with correct info
+      for (int i=0; i<deCount; i++){
+        for (int k=0; k<dimCount; k++){
+          int kk = k; // default working for single tile
+          if (dg->tileCount>1){
+            // multi tile
+            kk += dg->tileListPDe[i] * dimCount;  // shift to correct tile
+          }
+          // minIndex
+          deBlockListAlloc[i*2*dimCount+k] =
+            dg->minIndexPDimPDe[i*dimCount+k];
+          if (present(firstExtra)){
+            if (deBlockListAlloc[i*2*dimCount+k]
+              == dg->minIndexPDimPTile[kk]){
+              // found edge DE -> adjust bounds
+              deBlockListAlloc[i*2*dimCount+k] -=
+                firstExtra->array[k];
             }
-            deBlockListAlloc[i*2*dimCount+dimCount+k] =
-              dg->maxIndexPDimPDe[i*dimCount+k];
-            if (present(lastExtra)){
-              if (deBlockListAlloc[i*2*dimCount+dimCount+k] ==
-                dg->maxIndexPDimPTile[k]){
-                // found edge DE on single tile DistGrid
-                deBlockListAlloc[i*2*dimCount+dimCount+k] +=
-                  lastExtra->array[k];
-              }
+          }
+          // maxIndex
+          deBlockListAlloc[i*2*dimCount+dimCount+k] =
+            dg->maxIndexPDimPDe[i*dimCount+k];
+          if (present(lastExtra)){
+            if (deBlockListAlloc[i*2*dimCount+dimCount+k] ==
+              dg->maxIndexPDimPTile[kk]){
+              // found edge DE -> adjust bounds
+              deBlockListAlloc[i*2*dimCount+dimCount+k] +=
+                lastExtra->array[k];
             }
           }
         }
+      }
+      if (dg->tileCount==1){
+        // single tile
+#if 0
+      ESMC_LogDefault.Write("DGfromDG: single-tile deBlock branch", 
+        ESMC_LOGMSG_INFO);
+#endif
         // create DistGrid
         distgrid = DistGrid::create(minIndex, maxIndex, deBlockList,
           NULL, indexflagOpt, connectionList, delayout, vm, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
-        delete deBlockList;
-        delete [] deBlockListAlloc;
       }else{
         // multi tile
-        //TODO: implement this branch once deBlockList multi-tile is implemented
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-          "Currently no support for multi-tile deBlock DistGrid branch.",
-          ESMC_CONTEXT, rc);
-        return ESMC_NULL_POINTER;
+#if 0
+      ESMC_LogDefault.Write("DGfromDG: multi-tile deBlock branch", 
+        ESMC_LOGMSG_INFO);
+#endif
+        InterArray<int> *deToTileMap =
+          new InterArray<int>(dg->tileListPDe, 1, &deCount);
+        // create DistGrid
+        distgrid = DistGrid::create(minIndex, maxIndex, deBlockList,
+          deToTileMap,
+          NULL, indexflagOpt, connectionList, delayout, vm, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+        delete deToTileMap;
       }
+      delete deBlockList;
+      delete [] deBlockListAlloc;
     }
     // garbage collection
     delete [] dimCountInterArray;
@@ -1012,7 +1031,7 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }
-  int petCount = vm->getNpets();
+  int petCount = vm->getPetCount();
   int deCount=1;  // reset
   if (present(regDecomp)){
     if (regDecomp->dimCount != 1){
@@ -1110,7 +1129,7 @@ DistGrid *DistGrid::create(
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (deLabelList->extent[0] < deCount){
+  if (deLabelList->extent[0] != deCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
       "deLabelList array must provide deCount DE labels", ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1348,7 +1367,7 @@ DistGrid *DistGrid::create(
   // set up tileListPDe
   int *tileListPDe = new int[deCount];
   for (int i=0; i<deCount; i++)
-    tileListPDe[i] = 1;
+    tileListPDe[i] = 1; // tiles are base 1
 
   
   // call into construct()
@@ -1484,7 +1503,7 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }
-  int petCount = vm->getNpets();
+  int petCount = vm->getPetCount();
   if (!present(deBlockList)){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "Not a valid pointer to deBlockList array", ESMC_CONTEXT, rc);
@@ -1497,14 +1516,14 @@ DistGrid *DistGrid::create(
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (deBlockList->extent[0] < dimCount){
+  if (deBlockList->extent[0] != dimCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
       "deBlockList array must provide dimCount elements in first dimension",
       ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (deBlockList->extent[1] < 2){
+  if (deBlockList->extent[1] != 2){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
       "deBlockList array must provide 2 elements in second dimension",
       ESMC_CONTEXT, rc);
@@ -1549,7 +1568,7 @@ DistGrid *DistGrid::create(
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (deLabelList->extent[0] < deCount){
+  if (deLabelList->extent[0] != deCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
       "deLabelList array must provide deCount DE labels", ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -1610,9 +1629,9 @@ DistGrid *DistGrid::create(
           - minIndexPDimPDe[extentIndex] + 1;
       }
       // fill indexListPDimPLocalDe
-      if (deList[j] > -1){
+      if (deList[de] > -1){
         // de is local
-        int localExtentIndex = deList[j]*dimCount+i;
+        int localExtentIndex = deList[de]*dimCount+i;
         indexListPDimPLocalDe[localExtentIndex] =
           new int[indexCountPDimPDe[extentIndex]];
         for (int k=0; k<indexCountPDimPDe[extentIndex]; k++)
@@ -1626,7 +1645,7 @@ DistGrid *DistGrid::create(
   // set up tileListPDe
   int *tileListPDe = new int[deCount];
   for (int i=0; i<deCount; i++)
-    tileListPDe[i] = 1;
+    tileListPDe[i] = 1; // tiles are base 1
 
   // todo: check for overlapping deBlocks!!
   // call into construct()
@@ -1654,6 +1673,301 @@ DistGrid *DistGrid::create(
     delete deLabelList;
   }
   delete [] tileListPDe;
+  
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return distgrid;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::create()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::create
+//
+// !INTERFACE:
+DistGrid *DistGrid::create(
+//
+// !RETURN VALUE:
+//    DistGrid * to newly allocated DistGrid
+//
+// !ARGUMENTS:
+//
+  InterArray<int> *minIndex,            // (in)
+  InterArray<int> *maxIndex,            // (in)
+  InterArray<int> *deBlockList,         // (in)
+  InterArray<int> *deToTileMap,         // (in)
+  InterArray<int> *deLabelList,         // (in)
+  ESMC_IndexFlag *indexflag,            // (in)
+  InterArray<int> *connectionList,      // (in)
+  DELayout *delayout,                   // (in)
+  VM *vm,                               // (in)
+  int *rc,                              // (out) return code
+  ESMC_TypeKind_Flag indexTK            // (in) - default auto selection
+  ){
+//
+// !DESCRIPTION:
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  // allocate the new DistGrid object
+  DistGrid *distgrid;
+  try{
+    distgrid = new DistGrid(vm);  // specific VM, or default if vm==NULL
+  }catch(...){
+     // allocation error
+     ESMC_LogDefault.MsgAllocError("for new ESMCI::DistGrid.", ESMC_CONTEXT,rc);
+     return ESMC_NULL_POINTER;
+  }
+
+  // check the input and get the information together to call construct()
+  if (!present(minIndex)){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to minIndex array", ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  if (!present(maxIndex)){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to maxIndex array", ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  if (minIndex->dimCount != 2){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+      "minIndex array must be of rank 2", ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  if (maxIndex->dimCount != 2){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+      "maxIndex array must be of rank 2", ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  int dimCount = minIndex->extent[0];
+  if (maxIndex->extent[0] != dimCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+      "minIndex and maxIndex array mismatch in dimCount", ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  int tileCount = minIndex->extent[1];
+  if (maxIndex->extent[1] != tileCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+      "minIndex and maxIndex array mismatch in tileCount", ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  if (vm == ESMC_NULL_POINTER){
+    // vm was not provided -> get the current VM
+    vm = VM::getCurrent(&localrc);  // get current VM for default
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)){
+      distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+      return ESMC_NULL_POINTER;
+    }
+  }
+  int petCount = vm->getPetCount();
+  if (!present(deBlockList)){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to deBlockList array", ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  if (deBlockList->dimCount != 3){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+      "deBlockList array must be of rank 3", ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  if (deBlockList->extent[0] != dimCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+      "deBlockList array must provide dimCount elements in first dimension",
+      ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  if (deBlockList->extent[1] != 2){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+      "deBlockList array must provide 2 elements in second dimension",
+      ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  int deCount = deBlockList->extent[2]; // the 3rd dimension runs through DEs
+  bool delayoutCreator = true; // default assume delayout will be created here
+  if (delayout == ESMC_NULL_POINTER){
+    // delayout was not provided -> create default DELayout with deCount DEs
+    delayout = DELayout::create(&deCount, NULL, NULL, NULL, vm, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)){
+      distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+      return ESMC_NULL_POINTER;
+    }
+  }else{
+    // delayout was provided -> get deCount
+    delayoutCreator = false;  // indicate that delayout was not created here
+    if (deCount != delayout->getDeCount()){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+        "deBlockList must provide deCount elements in third dimension",
+        ESMC_CONTEXT, rc);
+      distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+      return ESMC_NULL_POINTER;
+    }
+  }
+  // make sure that there are at least as many DEs available as there are tiles
+  if (deCount < tileCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "there needs to be at least one DE per tile!",
+      ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  int *dummy;
+  bool deLabelListDeleteFlag = false;  // reset
+  if (!present(deLabelList)){
+    // deLabelList was not provided -> create a temporary default deLabelList
+    deLabelListDeleteFlag = true;  // set
+    dummy = new int[deCount];
+    // set default sequence
+    for (int i=0; i<deCount; i++)
+      dummy[i] = i;
+    deLabelList = new InterArray<int>(dummy, 1, &deCount);
+  }
+  if (deLabelList->dimCount != 1){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+      "deLabelList array must be of rank 1", ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  if (deLabelList->extent[0] != deCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+      "deLabelList array must provide deCount DE labels", ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  for (int i=0; i<deCount; i++){
+    if (deLabelList->array[i] < 0 || deLabelList->array[i] >= deCount){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+        "deLabelList array contains invalid DE labels", ESMC_CONTEXT, rc);
+      distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+      return ESMC_NULL_POINTER;
+    }
+  }
+  if (deToTileMap->dimCount != 1){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+      "deToTileMap array must be of rank 1", ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  if (deToTileMap->extent[0] != deCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+      "deToTileMap array must provide deCount many elements", ESMC_CONTEXT, rc);
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+  for (int i=0; i<deCount; i++){
+    if (deToTileMap->array[i] < 1 || deToTileMap->array[i] > tileCount){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+        "deToTileMap array contains invalid tile indices", ESMC_CONTEXT, rc);
+      distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+      return ESMC_NULL_POINTER;
+    }
+  }
+  
+  // setup temporary indexCountPDimPDe, indexListPDimPLocalDe and dimCongtigFlag
+  // arrays for construct()
+  int localDeCount = delayout->getLocalDeCount();
+  const int *deList = delayout->getDeList();
+  int *indexCountPDimPDe = new int[dimCount*deCount];
+  int **indexListPDimPLocalDe = new int*[dimCount*localDeCount];
+  int *contigFlagPDimPDe = new int[dimCount*deCount];
+  int *minIndexPDimPDe = new int[dimCount*deCount];
+  int *maxIndexPDimPDe = new int[dimCount*deCount];
+  for (int i=0; i<dimCount; i++){
+    int de, extentIndex, deBlockIndexMin, deBlockIndexMax;
+    for (int j=0; j<deCount; j++){
+      de = deLabelList->array[j];
+      extentIndex = de*dimCount+i;  // index into temp. arrays
+      deBlockIndexMin = j*deBlockList->extent[0]*deBlockList->extent[1] + i;
+      deBlockIndexMax = deBlockIndexMin + deBlockList->extent[0];
+      // determine min and max
+      minIndexPDimPDe[extentIndex] = deBlockList->array[deBlockIndexMin];
+      maxIndexPDimPDe[extentIndex] = deBlockList->array[deBlockIndexMax];
+      // check min and max
+      if (maxIndexPDimPDe[extentIndex] < minIndexPDimPDe[extentIndex]){
+        // zero elements case -> skip bounds checks
+        indexCountPDimPDe[extentIndex] = 0;
+      }else{
+        // normal case -> do normal bounds checks
+        int tile = deToTileMap->array[j]; // tiles are base 1
+        int min = minIndex->array[(tile-1)*dimCount + i];
+        int max = maxIndex->array[(tile-1)*dimCount + i];
+        if (minIndexPDimPDe[extentIndex] < min ||
+          minIndexPDimPDe[extentIndex] > max){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "deBlockList contains out-of-bounds elements", ESMC_CONTEXT, rc);
+          distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+          return ESMC_NULL_POINTER;
+        }
+        if (maxIndexPDimPDe[extentIndex] < min ||
+          maxIndexPDimPDe[extentIndex] > max){
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "deBlockList contains out-of-bounds elements", ESMC_CONTEXT, rc);
+          distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+          return ESMC_NULL_POINTER;
+        }
+        // determine count
+        indexCountPDimPDe[extentIndex] = maxIndexPDimPDe[extentIndex]
+          - minIndexPDimPDe[extentIndex] + 1;
+      }
+      // fill indexListPDimPLocalDe
+      if (deList[de] > -1){
+        // de is local
+        int localExtentIndex = deList[de]*dimCount+i;
+        indexListPDimPLocalDe[localExtentIndex] =
+          new int[indexCountPDimPDe[extentIndex]];
+        for (int k=0; k<indexCountPDimPDe[extentIndex]; k++)
+          indexListPDimPLocalDe[localExtentIndex][k] =
+            deBlockList->array[deBlockIndexMin] + k;
+      }
+      // flag contiguous dimension
+      contigFlagPDimPDe[extentIndex] = 1;
+    }
+  }
+
+  // todo: check for overlapping deBlocks!!
+  // call into construct()
+  localrc = distgrid->construct(dimCount, tileCount, deToTileMap->array, 
+    minIndex->array, maxIndex->array, minIndexPDimPDe, maxIndexPDimPDe,
+    contigFlagPDimPDe, indexCountPDimPDe, indexListPDimPLocalDe, NULL,
+    connectionList, NULL, indexflag,
+    delayout, delayoutCreator, vm, indexTK);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_CONTEXT, rc)){
+    distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return ESMC_NULL_POINTER;
+  }
+    
+  // garbage collection
+  delete [] contigFlagPDimPDe;
+  delete [] minIndexPDimPDe;
+  delete [] maxIndexPDimPDe;
+  delete [] indexCountPDimPDe;
+  for (int i=0; i<dimCount*localDeCount; i++)
+    delete [] indexListPDimPLocalDe[i];
+  delete [] indexListPDimPLocalDe;
+  if (deLabelListDeleteFlag){
+    delete [] deLabelList->array;
+    delete deLabelList;
+  }
   
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -1819,7 +2133,7 @@ DistGrid *DistGrid::create(
       return ESMC_NULL_POINTER;
     }
   }
-  int petCount = vm->getNpets();
+  int petCount = vm->getPetCount();
   int deCount=0;  // reset
   int *deCountPTile;
   if (present(regDecomp)){
@@ -1961,7 +2275,7 @@ DistGrid *DistGrid::create(
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return ESMC_NULL_POINTER;
   }
-  if (deLabelList->extent[0] < deCount){
+  if (deLabelList->extent[0] != deCount){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
       "deLabelList array must provide deCount DE labels", ESMC_CONTEXT, rc);
     distgrid->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -2239,7 +2553,7 @@ DistGrid *DistGrid::create(
     for (int jj=0; jj<deCountPTile[tile]; jj++){
       int j = deTileStart + jj;
       int de = deLabelList->array[j];
-      tileListPDe[de] = tile + 1;  // tile ids are basis 1
+      tileListPDe[de] = tile + 1;  // tiles are base 1
     }
     deTileStart += deCountPTile[tile];
   }
@@ -2506,7 +2820,7 @@ int DistGrid::construct(
     for (int j=0; j<dimCount; j++)
       elementCountPDe[i] *= indexCountPDimPDe[i*dimCount+j];
     // mark in tileListPDe DEs that have no elements as not being on any tile
-    if (elementCountPDe[i]==0) tileListPDe[i]=0;
+    if (elementCountPDe[i]==0) tileListPDe[i]=0;  // tiles are base 1
   }
   // see if indexTK requires auto selection of typekind
   if (indexTK == ESMF_NOKIND){

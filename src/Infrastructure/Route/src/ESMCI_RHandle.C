@@ -876,8 +876,8 @@ bool RouteHandle::isCompatible(
   //TODO: persistent Array finger prints.
   //TODO: The other thing that needs to be considered when implementing real
   //TODO: fingerprinting here is that RHs also function for a large class of
-  //TODO: weakly congruent Arrays, especially now that super-vectorization is
-  //TODO: implemented!
+  //TODO: compatible Arrays. This is especially true now that 
+  //TODO: super-vectorization is implemented!
   bool srcMatch = Array::match(srcArrayArg, srcArray, &localrc);
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
 

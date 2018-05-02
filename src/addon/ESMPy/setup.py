@@ -62,7 +62,7 @@ class AbstractESMFNoseCommand(AbstractESMFCommand):
             sys.path.append('src')
 
             from ESMF.api import constants
-            mpirun_prefix = [constants._ESMF_MPIRUN, '-np', str(constants._ESMF_MPIRUN_NP)]
+            mpirun_prefix = [constants._ESMF_MPIRUN, '-n', str(constants._ESMF_MPIRUN_NP)]
             ret = mpirun_prefix + ret
 
         if cls._nose_flags is not None:
@@ -240,7 +240,7 @@ for dirpath, dirnames, filenames in os.walk(src_path):
 # TODO: build doc command
 # TODO: remove duplicated metadata: here and src/ESMF/__init__.py
 setup(name="ESMPy",
-      version="7.1.0.dev",
+      version="8.0.0 beta",
       description="ESMF Python interface",
       author="University Corporation for Atmospheric Research, \
               Massachusetts Institute of Technology, \

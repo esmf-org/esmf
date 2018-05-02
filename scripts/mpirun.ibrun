@@ -1,0 +1,31 @@
+#!/bin/bash
+################################################################################
+# This script abides to the ESMF script rules for executing the bundled test 
+# and example applications.
+#
+# 1) <this_script> -np N prog
+#    runs N copies of executable "prog" in parallel. The script must hide all
+#    of the system specific details, such as going through a queueing system
+#    and/or calling a system specific mpirun script with modified arguments.
+#
+# 2) The output of the application must arrive at the calling shell via 
+#    stdout and stderr.
+#
+# To access this script set environment variable ESMF_MPIRUN=<this_script> in
+# your shell before executing any of the ESMF run targets or targets that 
+# call run targets indirectly, such as the all_tests.
+################################################################################
+
+if [ "$1" != "-np" ] 
+then
+        echo "Usage: mpirun -np # prog"
+        exit 1
+fi
+
+num_procs=$2
+shift 2
+prog=$*
+
+ibrun $ESMF_MPILAUNCHOPTIONS -n $num_procs $prog
+
+

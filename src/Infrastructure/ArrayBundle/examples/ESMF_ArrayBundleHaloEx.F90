@@ -121,8 +121,8 @@ program ESMF_ArrayBundleHaloEx
     
 !BOE
 ! The halo exchange pattern stored in {\tt haloHandle} can now be applied to
-! the {\tt arraybundle} object, or any other ArrayBundle that is weakly
-! congruent to the one used during the {\tt ESMF\_ArrayBundleHaloStore()} call.
+! the {\tt arraybundle} object, or any other ArrayBundle that is compatible
+! to the one used during the {\tt ESMF\_ArrayBundleHaloStore()} call.
 !EOE
     
 !BOC
