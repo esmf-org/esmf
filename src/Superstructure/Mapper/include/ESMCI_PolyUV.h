@@ -40,6 +40,7 @@ namespace ESMCI{
         UVIDPoly(const CType &coeff);
         UVIDPoly(const std::vector<CType>& coeffs);
         UVIDPoly(std::initializer_list<CType> coeffs);
+        int get_max_deg(void ) const;
         void set_coeffs(const std::vector<CType>& coeffs); 
         void set_coeffs(std::initializer_list<CType> coeffs);
         std::vector<CType> get_coeffs(void ) const;
@@ -60,6 +61,12 @@ namespace ESMCI{
     template<typename CType>
     inline UVIDPoly<CType>::UVIDPoly(std::initializer_list<CType> coeffs):coeffs_(coeffs.begin(), coeffs.end())
     {}
+
+    template<typename CType>
+    inline int UVIDPoly<CType>::get_max_deg(void ) const
+    {
+      return coeffs_.size() - 1;
+    }
 
     template<typename CType>
     inline void UVIDPoly<CType>::set_coeffs(const std::vector<CType>& coeffs)
