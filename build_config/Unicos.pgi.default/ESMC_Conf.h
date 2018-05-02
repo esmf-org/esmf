@@ -27,7 +27,7 @@ Licensed under the University of Illinois-NCSA License.
 #if (ESMF_PGIVERSION_MAJOR < 12)
 typedef int ESMCI_FortranStrLenArg;
 #else
-#include <stdlib.h>
+#include <cstddef>
 typedef size_t ESMCI_FortranStrLenArg;
 #endif
 #endif
