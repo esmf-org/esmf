@@ -33,6 +33,9 @@ int main(int argc, char *argv[])
   ESMCI::MapperUtil::Matrix<float> m7 = m1 - m5;
   std::cout << m7 << std::endl;
 
+  ESMCI::MapperUtil::Matrix<float> m8 = {{2, 1}, {5, 6}};
+  ESMCI::MapperUtil::Matrix<float> m9 = m1 * m8;
+  std::cout << m9 << std::endl;
 
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }

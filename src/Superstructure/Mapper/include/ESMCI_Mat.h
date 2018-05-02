@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <functional>
 #include <initializer_list>
+#include <complex.h>
+#include <cblas.h>
 
 namespace ESMCI{
   namespace MapperUtil{
@@ -18,6 +20,7 @@ namespace ESMCI{
         Matrix(const std::vector<int> &dims, const T &val);
         
         std::vector<int> get_dims(void ) const;
+        const T *get_data_by_ref(void ) const;
         T *get_data_by_ref(void );
         std::vector<T> get_data(void ) const;
 
@@ -59,6 +62,12 @@ namespace ESMCI{
     }
 
     template<typename T>
+    const T *Matrix<T>::get_data_by_ref(void ) const
+    {
+      return ((data_.size() > 0 ) ? (&(data_[0])) : NULL);
+    }
+
+    template<typename T>
     T *Matrix<T>::get_data_by_ref(void )
     {
       return ((data_.size() > 0 ) ? (&(data_[0])) : NULL);
@@ -92,9 +101,57 @@ namespace ESMCI{
       return res;
     }
 
+    inline int BLAS_Mmult(int m, int n, int k, int alpha,
+                          const float *A, int lda, const float *B, int ldb,
+                          int beta, float *C, int ldc)
+    {
+      cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+                  m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+      return 0;
+    }
+
     template<typename T>
     Matrix<T> operator*(const Matrix<T> &lhs, const Matrix<T> &rhs)
     {
+      assert((lhs.dims_.size() > 0) && (rhs.dims_.size() > 0));
+      // No tensor products for now
+      assert((lhs.dims_.size() <= 2) && (rhs.dims_.size() <= 2));
+      assert(lhs.dims_[lhs.dims_.size()-1] == rhs.dims_[0]);
+      int m, n, k, alpha, lda, ldb, beta, ldc;
+      alpha = 1;
+      beta = 1;
+
+      std::vector<int> res_dims;
+      if(lhs.dims_.size() == 1){
+        res_dims.push_back(lhs.dims_[0]);
+        m = 1;
+        k = 1;
+        n = 1;
+        lda = 1;
+        ldb = 1;
+        ldc = 1;
+      }
+      else{
+        assert(lhs.dims_.size() == 2);
+        res_dims.push_back(lhs.dims_[0]);
+        res_dims.push_back(rhs.dims_[rhs.dims_.size()-1]);
+        m = lhs.dims_[0];
+        k = lhs.dims_[lhs.dims_.size() - 1];
+        n = rhs.dims_[rhs.dims_.size() - 1];
+        lda = k;
+        ldb = n;
+        ldc = n;
+      }
+
+      Matrix<T> res(res_dims, 0);
+      const T *A = lhs.get_data_by_ref();
+      const T *B = rhs.get_data_by_ref();
+      T *C = res.get_data_by_ref();
+
+      int ret = BLAS_Mmult(m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+      assert(ret == 0);
+
+      return res;
     }
 
     template<typename T>
