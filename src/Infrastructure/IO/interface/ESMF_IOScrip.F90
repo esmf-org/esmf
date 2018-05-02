@@ -4397,13 +4397,22 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     if (ncStatus == nf90_noerror) then
       if (startIndex == 0) then
          do i=1,totalConn
-           if (elementConn(i) /= ESMF_MESH_POLYBREAK) then
+           if (elementConn(i) >= 0) then
               elementConn(i)=elementConn(i)+1
            endif
          enddo
       endif
     endif
 
+    ! Check for negative index values that is not defiend as ESMF_MESH_POLYBREAK
+    do i=1,totalConn
+       if (elementConn(i) < 0 .and. elementConn(i) /= ESMF_MESH_POLYBREAK) then
+           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                msg="- negative index found in elementConn table", &
+                ESMF_CONTEXT, rcToReturn=rc)
+           return
+       endif
+    enddo          
     if (present(elementMask)) then
        allocate(elementMask(localcount), stat=memstat)
        if (ESMF_LogFoundAllocError(memstat,  &
