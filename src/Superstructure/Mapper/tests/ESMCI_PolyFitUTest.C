@@ -1,5 +1,6 @@
 #include <iostream>
 #include "ESMCI_Poly.h"
+#include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyFit.h"
 #include "ESMC_Test.h"
 

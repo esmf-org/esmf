@@ -8,6 +8,7 @@
 #include <complex.h>
 #include "lapacke.h"
 #include "ESMCI_Poly.h"
+#include "ESMCI_PolyUV.h"
 
 namespace ESMCI{
   namespace MapperUtil{

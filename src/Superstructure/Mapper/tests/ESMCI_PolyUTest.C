@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include "ESMCI_Poly.h"
+#include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyDer.h"
 #include "ESMC_Test.h"
 
