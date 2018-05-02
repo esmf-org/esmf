@@ -233,7 +233,7 @@ program ESMF_FieldIOUTest
 ! Set values of fortran array
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
-    Farray_w(i,j) = sin(dble(i)/5.0)*tan(dble(j)/5.0)
+    Farray_w(i,j) = sin(i/5.0d0)*tan(j/5.0d0)
   enddo
   enddo
 
@@ -309,7 +309,7 @@ program ESMF_FieldIOUTest
     Farray_tw = 0.02  ! halo points will have value 0.02
     do j=exclusiveLBound(2),exclusiveUBound(2)
     do i=exclusiveLBound(1),exclusiveUBound(1)
-      Farray_tw(i,j) = dble(t)*(sin(dble(i)/5.0)*tan(dble(j)/5.0))
+      Farray_tw(i,j) = dble(t)*(sin(i/5.0d0)*tan(j/5.0d0))
     enddo
     enddo
 !------------------------------------------------------------------------
@@ -405,6 +405,20 @@ program ESMF_FieldIOUTest
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  ! Read data to Object Field_r with non-existant file.
+  write(failMsg, *) ""
+  write(name, *) "Read data to object field_r with non-existant file"
+  call ESMF_FieldRead(field_r, fileName="xyzzy_field.nc", rc=rc)
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   ! Read data to Object Field_r
   write(failMsg, *) ""
   write(name, *) "Read data to object field_r"
@@ -439,7 +453,7 @@ program ESMF_FieldIOUTest
   enddo
   enddo
 #else
-  Maxvalue = 1.0
+  Maxvalue = 1.0d0
 #endif
 
   write(name, *) "Compare readin data to the existing data"
@@ -468,10 +482,10 @@ program ESMF_FieldIOUTest
 #endif
   ! Note that in exclusive region, Farray_tw and Farray_sw are identical.
   ! So for comparison purpose, just recall Farray_tw is enough.
-  Farray_tw = 0.02  ! halo points will have value 0.02
+  Farray_tw = 0.02d0  ! halo points will have value 0.02
   do j=exclusiveLBound(2),exclusiveUBound(2)
   do i=exclusiveLBound(1),exclusiveUBound(1)
-    Farray_tw(i,j) = dble(t)*(sin(dble(i)/5.0)*tan(dble(j)/5.0))
+    Farray_tw(i,j) = dble(t)*(sin(i/5.0d0)*tan(j/5.0d0))
   enddo
   enddo
 
@@ -521,7 +535,7 @@ program ESMF_FieldIOUTest
   enddo
   enddo
 #else
-  Maxvalue = 1.0
+  Maxvalue = 1.0d0
 #endif
 
   write(name, *) "Compare readin data to the existing data"
@@ -581,7 +595,7 @@ program ESMF_FieldIOUTest
   enddo
   enddo
 #else
-  Maxvalue = 1.0
+  Maxvalue = 1.0d0
 #endif
 
   write(name, *) "Compare readin data to the existing data"
@@ -764,7 +778,7 @@ program ESMF_FieldIOUTest
   !NEX_UTest_Multi_Proc_Only
   ! Compare read-in data with expected
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray_r == localPet))
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (abs (Farray_r - real (localPet)) < 0.001d0))
 #else
   rc = ESMF_FAILURE
 #endif
@@ -845,7 +859,7 @@ program ESMF_FieldIOUTest
       exclusiveUBound=exclusiveUBound, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Get and fill Farray_w from field DE 0"
-  Farray_DE0_w = 0.1
+  Farray_DE0_w = 0.1d0
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
@@ -857,7 +871,7 @@ program ESMF_FieldIOUTest
       exclusiveUBound=exclusiveUBound, rc=rc)
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   write(name, *) "Get and fill Farray_w from field DE 1"
-  Farray_DE1_w = 1.1
+  Farray_DE1_w = 1.1d0
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !------------------------------------------------------------------------
 
@@ -933,7 +947,7 @@ program ESMF_FieldIOUTest
   !NEX_UTest_Multi_Proc_Only
   ! DE 0 Array comparison test
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray_DE0_r == 0.1))
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (abs (Farray_DE0_r - 0.1d0) < 0.0001d0))
 #else
   rc = ESMF_SUCCESS
 #endif
@@ -957,7 +971,7 @@ program ESMF_FieldIOUTest
   !NEX_UTest_Multi_Proc_Only
   ! DE 1 Array comparison test
 #if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
-  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray_DE1_r == 1.1))
+  rc = merge (ESMF_SUCCESS, ESMF_FAILURE, all (Farray_DE1_r == 1.1d0))
 #else
   rc = ESMF_SUCCESS
 #endif
@@ -1197,7 +1211,7 @@ program ESMF_FieldIOUTest
   if (rc == ESMF_SUCCESS) then
     do, j=tlb3(2), tub3(2)
       do, i=tlb3(1), tub3(1)
-        t_ptr(i,j,:) = j*100 + i
+        t_ptr(i,j,:) = real (j*100 + i)
       end do
     end do
   end if
@@ -1262,7 +1276,7 @@ program ESMF_FieldIOUTest
   failed = .false.
   do, j=tlb4(2), tub4(2)
     do, i=tlb4(1), tub4(1)
-      if (any (t_ptr2(i,j,:) /= j*100 + i)) then
+      if (any (t_ptr2(i,j,:) /= real (j*100 + i))) then
         failed = .true.
         exit
       end if
