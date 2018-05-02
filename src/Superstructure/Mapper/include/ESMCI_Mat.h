@@ -8,6 +8,7 @@
 #include <initializer_list>
 #include <complex.h>
 #include <cblas.h>
+#include <lapacke.h>
 
 namespace ESMCI{
   namespace MapperUtil{
@@ -23,6 +24,8 @@ namespace ESMCI{
         const T *get_data_by_ref(void ) const;
         T *get_data_by_ref(void );
         std::vector<T> get_data(void ) const;
+
+        Matrix<T> inv(void ) const;
 
         template<typename U>
         friend Matrix<U> operator+(const Matrix<U> &lhs, const Matrix<U> &rhs);
@@ -77,6 +80,38 @@ namespace ESMCI{
     std::vector<T> Matrix<T>::get_data(void ) const
     {
       return data_;
+    }
+
+    inline int LAPACK_Minv(int m, float *A)
+    {
+      lapack_int n = static_cast<lapack_int>(m);
+      lapack_int *ipiv = (lapack_int *)calloc(n+1, sizeof(lapack_int));
+      lapack_int info;
+      info = LAPACKE_sgetrf(LAPACK_ROW_MAJOR, n, n, A, n, ipiv);
+      assert(info == 0);
+      info = LAPACKE_sgetri(LAPACK_ROW_MAJOR, n, A, n, ipiv);
+      assert(info == 0);
+      free(ipiv);
+
+      return 0;
+    }
+
+    template<typename T>
+    Matrix<T> Matrix<T>::inv(void ) const
+    {
+      Matrix<T> res = *this;
+      if(dims_.size() == 1){
+        return res;
+      }
+
+      // We are only concerned about 2d matrices for now
+      assert(dims_.size() == 2);
+      assert(std::adjacent_find(dims_.cbegin(), dims_.cend(), std::not_equal_to<T>()) == dims_.cend());
+
+      int ret = LAPACK_Minv(res.dims_[0], res.get_data_by_ref());
+      assert(ret == 0);
+
+      return res;
     }
 
     template<typename T>
@@ -186,6 +221,7 @@ namespace ESMCI{
       }
       return ostr;
     }
+
   } // namespace MapperUtil
 } // namespace ESMCI
 
