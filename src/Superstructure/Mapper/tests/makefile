@@ -9,13 +9,15 @@ LOCDIR	  = src/Superstructure/Mapper/tests
 .NOTPARALLEL:
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMCI_PolyUTest \
                 $(ESMF_TESTDIR)/ESMCI_MatUTest \
-                $(ESMF_TESTDIR)/ESMCI_PolyFitUTest
+                $(ESMF_TESTDIR)/ESMCI_PolyFitUTest \
+                $(ESMF_TESTDIR)/ESMCI_SolverUTest
 
 TESTS_RUN     =
 
 TESTS_RUN_UNI =	RUN_ESMCI_PolyUTestUNI \
                 RUN_ESMCI_MatUTestUNI \
-                RUN_ESMCI_PolyFitUTestUNI
+                RUN_ESMCI_PolyFitUTestUNI \
+                RUN_ESMCI_SolverUTestUNI
 
 
 include $(ESMF_DIR)/makefile
@@ -43,4 +45,7 @@ RUN_ESMCI_MatUTestUNI:
 
 RUN_ESMCI_PolyFitUTestUNI:
 	$(MAKE) TNAME=FitPoly NP=1 ctest
+
+RUN_ESMCI_SolverUTestUNI:
+	$(MAKE) TNAME=Solver NP=1 ctest
 
