@@ -57,43 +57,72 @@ namespace ESMCI{
     template<typename CType>
     class TwoVIDPoly : public TwoVPoly<CType, int>{
       public:
-        TwoVIDPoly() = default;
+        TwoVIDPoly();
         virtual ~TwoVIDPoly() = default;
         TwoVIDPoly(const CType &coeff);
         TwoVIDPoly(const std::vector<CType>& coeffs);
         TwoVIDPoly(std::initializer_list<CType> coeffs);
         int get_max_deg(void ) const;
+        void set_vnames(const std::vector<std::string>& vnames); 
+        std::vector<std::string> get_vnames(void ) const; 
         void set_coeffs(const std::vector<CType>& coeffs); 
         void set_coeffs(std::initializer_list<CType> coeffs);
         std::vector<CType> get_coeffs(void ) const;
       private:
         int max_deg_;
         std::vector<CType> coeffs_;
+        std::vector<std::string> vnames_;
     }; // class TwoVIDPoly
+
+    template<typename CType>
+    inline TwoVIDPoly<CType>::TwoVIDPoly()
+    {
+      vnames_.push_back("x");
+      vnames_.push_back("y");
+    }
 
     template<typename CType>
     inline TwoVIDPoly<CType>::TwoVIDPoly(const CType &coeff)
     {
       coeffs_.push_back(coeff);
       max_deg_ = TwoVIDPolyUtil::get_max_deg(coeffs_.size());
+      vnames_.push_back("x");
+      vnames_.push_back("y");
     }
 
     template<typename CType>
     inline TwoVIDPoly<CType>::TwoVIDPoly(const std::vector<CType>& coeffs):coeffs_(coeffs)
     {
       max_deg_ = TwoVIDPolyUtil::get_max_deg(coeffs_.size());
+      vnames_.push_back("x");
+      vnames_.push_back("y");
     }
 
     template<typename CType>
     inline TwoVIDPoly<CType>::TwoVIDPoly(std::initializer_list<CType> coeffs):coeffs_(coeffs.begin(), coeffs.end())
     {
       max_deg_ = TwoVIDPolyUtil::get_max_deg(coeffs_.size());
+      vnames_.push_back("x");
+      vnames_.push_back("y");
     }
 
     template<typename CType>
     int TwoVIDPoly<CType>::get_max_deg(void ) const
     {
       return max_deg_;
+    }
+
+    template<typename CType>
+    inline void TwoVIDPoly<CType>::set_vnames(const std::vector<std::string>& vnames)
+    {
+      assert(vnames.size() == 2);
+      vnames_ = vnames;
+    }
+
+    template<typename CType>
+    inline std::vector<std::string> TwoVIDPoly<CType>::get_vnames(void ) const
+    {
+      return vnames_;
     }
 
     template<typename CType>
@@ -124,6 +153,8 @@ namespace ESMCI{
       int cur_xdeg = cur_deg;
       int cur_ydeg = 0;
       int ncoeffs_in_cur_deg=cur_deg+1;
+      std::vector<std::string> vnames = p.get_vnames();
+      assert(vnames.size() == 2);
       for(typename std::vector<CType>::iterator iter = coeffs.begin();
             iter != coeffs.end(); ++iter){
         CType val = *iter;
@@ -132,16 +163,16 @@ namespace ESMCI{
         }
         if(val != 0){
           if(cur_xdeg > 1){
-            ostr << "x^" << cur_xdeg;
+            ostr << vnames[0].c_str() << "^" << cur_xdeg;
           }
           else if(cur_xdeg == 1){
-            ostr << "x";
+            ostr << vnames[0].c_str();
           }
           if(cur_ydeg > 1){
-            ostr << "y^" << cur_ydeg;
+            ostr << vnames[1].c_str() << "^" << cur_ydeg;
           }
           else if(cur_ydeg == 1){
-            ostr << "y";
+            ostr << vnames[1].c_str();
           }
 
           if(cur_deg > 0){

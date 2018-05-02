@@ -35,37 +35,64 @@ namespace ESMCI{
     template<typename CType>
     class UVIDPoly : public UniVPoly<CType, int>{
       public:
-        UVIDPoly() = default;
+        UVIDPoly();
         virtual ~UVIDPoly() = default;
         UVIDPoly(const CType &coeff);
         UVIDPoly(const std::vector<CType>& coeffs);
         UVIDPoly(std::initializer_list<CType> coeffs);
         int get_max_deg(void ) const;
+        void set_vnames(const std::vector<std::string> &vnames);
+        std::vector<std::string> get_vnames(void ) const;
         void set_coeffs(const std::vector<CType>& coeffs); 
         void set_coeffs(std::initializer_list<CType> coeffs);
         std::vector<CType> get_coeffs(void ) const;
       private:
         std::vector<CType> coeffs_;
+        std::vector<std::string> vnames_;
     }; // class UVIDPoly
+
+    template<typename CType>
+    inline UVIDPoly<CType>::UVIDPoly()
+    {
+      vnames_.push_back("x");
+    }
 
     template<typename CType>
     inline UVIDPoly<CType>::UVIDPoly(const CType &coeff)
     {
       coeffs_.push_back(coeff);
+      vnames_.push_back("x");
     }
 
     template<typename CType>
     inline UVIDPoly<CType>::UVIDPoly(const std::vector<CType>& coeffs):coeffs_(coeffs)
-    {}
+    {
+      vnames_.push_back("x");
+    }
 
     template<typename CType>
     inline UVIDPoly<CType>::UVIDPoly(std::initializer_list<CType> coeffs):coeffs_(coeffs.begin(), coeffs.end())
-    {}
+    {
+      vnames_.push_back("x");
+    }
 
     template<typename CType>
     inline int UVIDPoly<CType>::get_max_deg(void ) const
     {
       return coeffs_.size() - 1;
+    }
+
+    template<typename CType>
+    inline void UVIDPoly<CType>::set_vnames(const std::vector<std::string>& vnames)
+    {
+      assert(vnames.size() == 1);
+      vnames_ = vnames;
+    }
+
+    template<typename CType>
+    inline std::vector<std::string> UVIDPoly<CType>::get_vnames(void ) const
+    {
+      return vnames_;
     }
 
     template<typename CType>
@@ -90,13 +117,15 @@ namespace ESMCI{
     std::ostream& operator<<(std::ostream &ostr, const UVIDPoly<CType>& p)
     {
       std::vector<CType> coeffs(p.get_coeffs());
+      std::vector<std::string> vnames = p.get_vnames();
+      assert(vnames.size() == 1);
       std::size_t cur_deg = coeffs.size()-1;
       for(typename std::vector<CType>::iterator iter = coeffs.begin();
             iter != coeffs.end(); ++iter){
         if(cur_deg > 1){
-          ostr << *iter << " x^" << cur_deg-- << " + ";
+          ostr << *iter << " " << vnames[0].c_str() << "^" << cur_deg-- << " + ";
         }else if(cur_deg == 1){
-          ostr << *iter << " x" << " + ";
+          ostr << *iter << " " << vnames[0].c_str() << " + ";
           cur_deg--;
         }
         else{
