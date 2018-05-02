@@ -31,5 +31,10 @@ int main(int argc, char *argv[])
   std::cout << p5 << std::endl;
 
 
+  ESMCI::MapperUtil::TwoVIDPoly<float> p6;
+  int ret = ESMCI::MapperUtil::FindPDerivative(p1, true, p6);
+  assert(ret == 0);
+  std::cout << p6 << std::endl;
+
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }

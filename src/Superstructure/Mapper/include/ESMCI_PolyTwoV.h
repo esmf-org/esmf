@@ -261,7 +261,7 @@ namespace ESMCI{
 
         coeff_idx += v2deg;
 
-        std::cout << "(" << v1deg << "," << v2deg << ") = " << coeff_idx << "\n";
+        //std::cout << "(" << v1deg << "," << v2deg << ") = " << coeff_idx << "\n";
 
         return coeff_idx;
       }
