@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include "ESMCI_Poly.h"
+#include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyTwoV.h"
 #include "ESMCI_PolyDer.h"
 #include "ESMC_Test.h"
@@ -49,6 +50,11 @@ int main(int argc, char *argv[])
 
   std::vector<float> vvals = {2.0, 3.0};
   std::cout << p2.eval(vvals) << std::endl;
+
+  // 2 x^2 + 3x + 4
+  ESMCI::MapperUtil::UVIDPoly<float> uvpoly1 = {2.0, 3.0, 4.0};
+  ESMCI::MapperUtil::TwoVIDPoly<float> p9(uvpoly1);
+  std::cout << uvpoly1 << " == " << p9 << std::endl;
 
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }

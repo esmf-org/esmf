@@ -7,6 +7,7 @@
 #include <initializer_list>
 #include <cassert>
 #include "ESMCI_Poly.h"
+#include "ESMCI_PolyUV.h"
 
 namespace ESMCI{
   namespace MapperUtil{
@@ -62,6 +63,7 @@ namespace ESMCI{
         TwoVIDPoly(const CType &coeff);
         TwoVIDPoly(const std::vector<CType>& coeffs);
         TwoVIDPoly(std::initializer_list<CType> coeffs);
+        TwoVIDPoly(const UVIDPoly<CType> &uvpoly);
         int get_max_deg(void ) const;
         void set_vnames(const std::vector<std::string>& vnames); 
         std::vector<std::string> get_vnames(void ) const; 
@@ -103,6 +105,34 @@ namespace ESMCI{
     inline TwoVIDPoly<CType>::TwoVIDPoly(std::initializer_list<CType> coeffs):coeffs_(coeffs.begin(), coeffs.end())
     {
       max_deg_ = TwoVIDPolyUtil::get_max_deg(coeffs_.size());
+      vnames_.push_back("x");
+      vnames_.push_back("y");
+    }
+
+    template<typename CType>
+    inline TwoVIDPoly<CType>::TwoVIDPoly(const UVIDPoly<CType> &uvpoly)
+    {
+      max_deg_ = uvpoly.get_max_deg();
+
+      int cur_deg = max_deg_;
+      int ncoeffs_in_cur_deg=cur_deg+1;
+
+      std::vector<CType> uvpoly_coeffs = uvpoly.get_coeffs();
+
+      for(typename std::vector<CType>::const_iterator citer = uvpoly_coeffs.cbegin();
+          citer != uvpoly_coeffs.cend(); ++citer){
+
+        coeffs_.push_back(*citer);
+        
+        ncoeffs_in_cur_deg--;
+        while(ncoeffs_in_cur_deg != 0){
+          coeffs_.push_back(0);
+          ncoeffs_in_cur_deg--;
+        }
+        cur_deg--;
+        ncoeffs_in_cur_deg = cur_deg+1;
+      }
+      
       vnames_.push_back("x");
       vnames_.push_back("y");
     }
