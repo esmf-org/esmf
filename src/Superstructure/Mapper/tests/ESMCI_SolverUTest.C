@@ -18,11 +18,18 @@ int main(int argc, char *argv[])
   ESMC_TestStart(__FILE__, __LINE__, 0);
 
   std::vector<float> init_vals = {2.0, 4.0, 6.0};
-  ESMCI::MapperUtil::TwoVIDPoly<float> p1 = {1,0, 2.0, 3.0};
-  ESMCI::MapperUtil::TwoVIDPoly<float> p2 = {4,0, 5.0, 6.0};
-  ESMCI::MapperUtil::TwoVIDPoly<float> p3 = {7,0, 8.0, 9.0};
+  std::vector<std::string> vnames = {"x", "y", "z"};
+  ESMCI::MapperUtil::TwoVIDPoly<float> p1 = {1.0, 2.0, 3.0};
+  std::vector<std::string> p1_vnames = {"x", "y"};
+  p1.set_vnames(p1_vnames);
+  ESMCI::MapperUtil::TwoVIDPoly<float> p2 = {4.0, 5.0, 6.0};
+  std::vector<std::string> p2_vnames = {"y", "z"};
+  p2.set_vnames(p2_vnames);
+  ESMCI::MapperUtil::TwoVIDPoly<float> p3 = {7.0, 8.0, 9.0};
+  std::vector<std::string> p3_vnames = {"x", "z"};
+  p3.set_vnames(p3_vnames);
   std::vector<ESMCI::MapperUtil::TwoVIDPoly<float> > funcs = {p1, p2, p3};
-  ESMCI::MapperUtil::SESolver<float> solver(init_vals, funcs);
+  ESMCI::MapperUtil::SESolver<float> solver(vnames, init_vals, funcs);
   std::vector<float> sol_vals = solver.minimize();
 
   for(std::vector<float>::const_iterator citer = sol_vals.cbegin();
