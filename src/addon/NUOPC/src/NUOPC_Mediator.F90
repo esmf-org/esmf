@@ -133,7 +133,7 @@ module NUOPC_Mediator
     
     ! local variables
     character(*), parameter   :: rName="InitializeP3"
-    character(ESMF_MAXSTR)    :: name, valueString
+    character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     logical                   :: allConnected
     integer                   :: i
@@ -153,35 +153,13 @@ module NUOPC_Mediator
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! determine verbosity
-    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), &
-      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
-      rc=rc)
+    call NUOPC_CompGetVerbosity(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
-    if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,1)) then
-      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,2)) then
-      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    !--- intro done ---
+    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! set the internal clock to the parent clock
     call NUOPC_CompSetClock(gcomp, clock, rc=rc)
@@ -221,25 +199,10 @@ module NUOPC_Mediator
     if (associated(impItemNameList)) deallocate(impItemNameList)
     if (associated(impConnectedList)) deallocate(impConnectedList)
     
-    !--- extro start ---
     ! extro
-    if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,1)) then
-      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,2)) then
-      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
+    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
   end subroutine
   
@@ -256,7 +219,7 @@ module NUOPC_Mediator
     integer                   :: localrc
     type(ESMF_Clock)          :: internalClock
     logical                   :: existflag
-    character(ESMF_MAXSTR)    :: name, valueString
+    character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
 
     rc = ESMF_SUCCESS
@@ -267,35 +230,13 @@ module NUOPC_Mediator
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine verbosity
-    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), &
-      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
-      rc=rc)
+    call NUOPC_CompGetVerbosity(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
-    if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,1)) then
-      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,2)) then
-      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    !--- intro done ---
+    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! fill all export Fields with valid initial data for current time
     ! note that only connected Fields reside in exportState at this time
@@ -320,25 +261,10 @@ module NUOPC_Mediator
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     
-    !--- extro start ---
     ! extro
-    if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,1)) then
-      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,2)) then
-      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
+    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
   end subroutine
   
@@ -358,7 +284,7 @@ module NUOPC_Mediator
     character(ESMF_MAXSTR)    :: oldDataComplete, newDataComplete
     integer                   :: oldUpdatedCount, newUpdatedCount
     logical                   :: allUpdated
-    character(ESMF_MAXSTR)    :: name, valueString
+    character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
 
     rc = ESMF_SUCCESS
@@ -369,35 +295,13 @@ module NUOPC_Mediator
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine verbosity
-    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), &
-      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
-      rc=rc)
+    call NUOPC_CompGetVerbosity(gcomp, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
-    if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,1)) then
-      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,2)) then
-      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    !--- intro done ---
+    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! check how many Fields in the exportState have the "Updated" Attribute set
     ! to "true" BEFORE calling the DataInitialize
@@ -486,25 +390,10 @@ module NUOPC_Mediator
         return  ! bail out
     endif
     
-    !--- extro start ---
     ! extro
-    if (btest(verbosity,0)) then
-      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,1)) then
-      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
-    if (btest(verbosity,2)) then
-      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    endif
+    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
   end subroutine
   

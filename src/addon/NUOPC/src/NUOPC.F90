@@ -63,6 +63,7 @@ module NUOPC
   public NUOPC_CompAttributeSet           ! method
   public NUOPC_CompCheckSetClock          ! method
   public NUOPC_CompDerive                 ! method
+  public NUOPC_CompGetVerbosity           ! method
   public NUOPC_CompFilterPhaseMap         ! method
   public NUOPC_CompSearchPhaseMap         ! method
   public NUOPC_CompSearchRevPhaseMap      ! method
@@ -84,6 +85,8 @@ module NUOPC
   public NUOPC_IsAtTime                   ! method
   public NUOPC_IsConnected                ! method
   public NUOPC_IsUpdated                  ! method
+  public NUOPC_LogIntro                   ! method, internal use only
+  public NUOPC_LogExtro                   ! method, internal use only
   public NUOPC_NoOp                       ! method
   public NUOPC_Realize                    ! method
   public NUOPC_Reconcile                  ! method, internal use only 

@@ -33,6 +33,7 @@ module NUOPC_Comp
   public NUOPC_CompCheckSetClock
   public NUOPC_CompDerive
   public NUOPC_CompFilterPhaseMap
+  public NUOPC_CompGetVerbosity
   public NUOPC_CompSearchPhaseMap
   public NUOPC_CompSearchRevPhaseMap
   public NUOPC_CompSetClock
@@ -99,6 +100,11 @@ module NUOPC_Comp
   interface NUOPC_CompFilterPhaseMap
     module procedure NUOPC_GridCompFilterPhaseMap
     module procedure NUOPC_CplCompFilterPhaseMap
+  end interface
+  !---------------------------------------------
+  interface NUOPC_CompGetVerbosity
+    module procedure NUOPC_GridCompGetVerbosity
+    module procedure NUOPC_CplCompGetVerbosity
   end interface
   !---------------------------------------------
   interface NUOPC_CompSearchPhaseMap
@@ -1792,6 +1798,96 @@ module NUOPC_Comp
       msg="Deallocation of phases, newPhases.", &
       line=__LINE__, &
       file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompGetVerbosity - Access the Verbosity setting of a component
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompGetVerbosity()
+  subroutine NUOPC_GridCompGetVerbosity(comp, verbosity, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                       :: comp
+    integer,            intent(out)           :: verbosity
+    integer,            intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Access the Verbosity attribute of the component and return it as an integer
+! value.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name, valueString
+
+    ! initialize the verbosity output value
+    verbosity = 0
+
+    ! query the component for its name
+    call ESMF_GridCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query the component for Verbosity
+    call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! return successfully
+    rc = ESMF_SUCCESS
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompGetVerbosity - Access the Verbosity setting of a component
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompGetVerbosity()
+  subroutine NUOPC_CplCompGetVerbosity(comp, verbosity, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp)                        :: comp
+    integer,            intent(out)           :: verbosity
+    integer,            intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Access the Verbosity attribute of the component and return it as an integer
+! value.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: name, valueString
+
+    ! initialize the verbosity output value
+    verbosity = 0
+
+    ! query the component for its name
+    call ESMF_CplCompGet(comp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! query the component for Verbosity
+    call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    verbosity = ESMF_UtilString2Int(valueString, &
+      specialStringList=(/"high", "max "/), &
+      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! return successfully
+    rc = ESMF_SUCCESS
     
   end subroutine
   !-----------------------------------------------------------------------------
