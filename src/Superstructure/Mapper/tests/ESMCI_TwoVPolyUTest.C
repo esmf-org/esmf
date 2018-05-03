@@ -36,5 +36,16 @@ int main(int argc, char *argv[])
   assert(ret == 0);
   std::cout << p6 << std::endl;
 
+  ESMCI::MapperUtil::TwoVIDPoly<float> p7, p8;
+  std::vector<std::string> p1_vnames = {"p", "q"};
+  p1.set_vnames(p1_vnames);
+  std::cout << p1 << std::endl;
+  rc = ESMCI::MapperUtil::FindPDerivative(p1, std::string("p"), p7);
+  assert(rc == 0);
+  std::cout << p7 << std::endl;
+  rc = ESMCI::MapperUtil::FindPDerivative(p1, std::string("q"), p8);
+  assert(rc == 0);
+  std::cout << p8 << std::endl;
+
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }

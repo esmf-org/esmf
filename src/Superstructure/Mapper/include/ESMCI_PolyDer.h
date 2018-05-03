@@ -40,6 +40,10 @@ namespace ESMCI{
       int cur_xdeg = cur_deg;
       int cur_ydeg = 0;
       int nrem_coeffs_in_deg = cur_deg + 1;
+      std::vector<std::string> vnames = poly.get_vnames();
+      assert(vnames.size() == 2);
+
+      dpoly.set_vnames(vnames);
 
       for(typename std::vector<CType>::const_iterator citer = poly_coeffs.cbegin();
             (citer != poly_coeffs.cend()) && (cur_deg > 0); ++citer){
@@ -71,6 +75,37 @@ namespace ESMCI{
       return 0;
     }
 
+    template<typename CType>
+    inline int FindPDerivative(const TwoVIDPoly<CType>& poly, const std::string &vname,
+                  TwoVIDPoly<CType>& dpoly)
+    {
+      int ret = 0;
+      std::vector<CType> poly_coeffs = poly.get_coeffs();
+      int max_deg = poly.get_max_deg();
+      int max_deg_dpoly = max_deg - 1;
+      int dpoly_ncoeffs = TwoVIDPolyUtil::get_ncoeffs(max_deg_dpoly);
+      std::vector<CType> dpoly_coeffs(dpoly_ncoeffs, 0);
+      int cur_deg = max_deg;
+      int cur_xdeg = cur_deg;
+      int cur_ydeg = 0;
+      int nrem_coeffs_in_deg = cur_deg + 1;
+      std::vector<std::string> vnames = poly.get_vnames();
+      assert(vnames.size() == 2);
+
+      if(vname == vnames[0]){
+        ret = FindPDerivative(poly, true, dpoly);
+      }
+      else if(vname == vnames[1]){
+        ret = FindPDerivative(poly, false, dpoly);
+      }
+      else{
+        dpoly.set_vnames(vnames);
+        dpoly.set_coeffs(dpoly_coeffs);
+        ret = 0;
+      }
+
+      return ret;
+    }
   } // namespace MapperUtil
 } //namespace ESMCI
 
