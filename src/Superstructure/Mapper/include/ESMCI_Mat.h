@@ -88,9 +88,9 @@ namespace ESMCI{
       lapack_int *ipiv = (lapack_int *)calloc(n+1, sizeof(lapack_int));
       lapack_int info;
       info = LAPACKE_sgetrf(LAPACK_ROW_MAJOR, n, n, A, n, ipiv);
-      assert(info == 0);
+      assert(info >= 0);
       info = LAPACKE_sgetri(LAPACK_ROW_MAJOR, n, A, n, ipiv);
-      assert(info == 0);
+      assert(info >= 0);
       free(ipiv);
 
       return 0;

@@ -172,16 +172,39 @@ namespace ESMCI{
       std::vector<T> Xj_init_vals(vnames_.size(), 0);
       Matrix<T> Xj(Xi_dims, Xj_init_vals);
 
+      T C = std::accumulate(init_vals_.cbegin(), init_vals_.cend(), 0);
+
       std::vector<std::vector<TwoVIDPoly<T> > > JF =
         SESolverUtils::calc_jacobian(vnames_,funcs_);
 
       for(int i=0; i<niters_; i++){
         Matrix<T> J = SESolverUtils::eval_jacobian(JF, vnames_, Xi.get_data());
-        Matrix<T> Jinv = J.inv();
+        int ncols = vnames_.size();
+        std::vector<T> J_data = J.get_data();
+        std::vector<int> J_dims = J.get_dims();
+        J_dims[0] += 1;
+        for(int i=0; i<ncols; i++){
+          J_data.push_back(1);
+        }
+
+        Matrix<T> J_with_last_rones(J_dims, J_data); 
+        std::cout << "vnames sz = " << vnames_.size() << "\n";
+        for(int i=0; i<J_dims.size(); i++){
+          std::cout << J_dims[i] << ", ";
+        }
+        std::cout << "\n";
+        Matrix<T> Jinv = J_with_last_rones.inv();
 
         Matrix<T> Feval = SESolverUtils::eval_funcs(funcs_, vnames_, Xi.get_data());
+        std::vector<T> Feval_data = Feval.get_data();
+        std::vector<int> Feval_dims = Feval.get_dims();
+        Feval_dims[0] += 1;
+        std::vector<T> Xi_data = Xi.get_data();
+        T Ci = std::accumulate(Xi_data.cbegin(), Xi_data.cend(), 0);
+        Feval_data.push_back(Ci - C);
+        Matrix<T> Feval_with_last_row(Feval_dims, Feval_data);
 
-        Xj = Xi - Jinv * Feval;
+        Xj = Xi - Jinv * Feval_with_last_row;
         Xi = Xj;
       }
 

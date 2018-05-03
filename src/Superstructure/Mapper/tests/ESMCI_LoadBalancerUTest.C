@@ -18,22 +18,12 @@ int main(int argc, char *argv[])
 
   ESMC_TestStart(__FILE__, __LINE__, 0);
 
-  std::vector<float> init_vals = {2.0, 4.0, 6.0};
-  std::vector<std::string> vnames = {"x", "y", "z"};
-  ESMCI::MapperUtil::TwoVIDPoly<float> p1 = {1.0, 2.0, 3.0};
-  std::vector<std::string> p1_vnames = {"x", "y"};
-  p1.set_vnames(p1_vnames);
-  ESMCI::MapperUtil::TwoVIDPoly<float> p2 = {4.0, 5.0, 6.0};
-  std::vector<std::string> p2_vnames = {"y", "z"};
-  p2.set_vnames(p2_vnames);
-  ESMCI::MapperUtil::TwoVIDPoly<float> p3 = {7.0, 8.0, 9.0};
-  std::vector<std::string> p3_vnames = {"x", "z"};
-  p3.set_vnames(p3_vnames);
-
-  int ncomps = 2;
-  std::vector<float> serial_exec_times = {3.0, 5.0, 9.0};
-  std::vector<int> npets = {1, 2, 3};
-  ESMCI::MapperUtil::LoadBalancer<float> lb(ncomps, serial_exec_times, npets);
+  int ncomps = 3;
+  std::vector<float> parallel_exec_times = {100.0, 200.0, 300.0};
+  std::vector<float> serial_exec_times = {3000.0, 5000.0, 9000.0};
+  std::vector<int> npets = {128, 256, 512};
+  ESMCI::MapperUtil::LoadBalancer<float> lb(ncomps, parallel_exec_times,
+    serial_exec_times, npets);
   std::vector<int> opt_npets = lb.optimize();
 
   for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
