@@ -23,6 +23,7 @@ namespace ESMCI{
         virtual int get_max_deg(void ) const = 0;
         virtual std::vector<CType> get_coeffs(void ) const = 0;
         virtual std::vector<std::vector<DType> > get_degs(void ) const = 0;
+        virtual CType eval(const std::vector<CType> &vvals) const = 0;
     }; // class GenPoly
 
 

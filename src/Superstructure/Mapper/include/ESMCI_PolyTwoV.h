@@ -68,6 +68,7 @@ namespace ESMCI{
         void set_coeffs(const std::vector<CType>& coeffs); 
         void set_coeffs(std::initializer_list<CType> coeffs);
         std::vector<CType> get_coeffs(void ) const;
+        CType eval(const std::vector<CType> &vvals) const;
       private:
         int max_deg_;
         std::vector<CType> coeffs_;
@@ -143,6 +144,37 @@ namespace ESMCI{
     inline std::vector<CType> TwoVIDPoly<CType>::get_coeffs(void ) const
     {
       return coeffs_;
+    }
+
+    template<typename CType>
+    inline CType TwoVIDPoly<CType>::eval(const std::vector<CType> &vvals) const
+    {
+      CType res = 0;
+      int cur_deg = max_deg_;
+      int cur_xdeg = cur_deg;
+      int cur_ydeg = 0;
+      int ncoeffs_in_cur_deg=cur_deg+1;
+
+      assert(vvals.size() == 2);
+      for(typename std::vector<CType>::const_iterator citer = coeffs_.cbegin();
+          citer != coeffs_.cend(); ++citer){
+
+        res += (*citer) * pow(vvals[0], cur_xdeg) * pow(vvals[1], cur_ydeg);
+
+        ncoeffs_in_cur_deg--;
+        if(ncoeffs_in_cur_deg == 0){
+          cur_deg--;
+          ncoeffs_in_cur_deg = cur_deg+1;
+          cur_xdeg = cur_deg;
+          cur_ydeg = 0;
+        }
+        else{
+          cur_xdeg--;
+          cur_ydeg++;
+        }
+      }
+
+      return res;
     }
 
     template<typename CType>

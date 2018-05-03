@@ -47,5 +47,8 @@ int main(int argc, char *argv[])
   assert(rc == 0);
   std::cout << p8 << std::endl;
 
+  std::vector<float> vvals = {2.0, 3.0};
+  std::cout << p2.eval(vvals) << std::endl;
+
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }

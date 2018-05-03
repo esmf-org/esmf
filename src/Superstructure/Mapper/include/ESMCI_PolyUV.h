@@ -6,6 +6,7 @@
 #include <iostream>
 #include <initializer_list>
 #include <cassert>
+#include <cmath>
 #include "ESMCI_Poly.h"
 
 namespace ESMCI{
@@ -46,6 +47,7 @@ namespace ESMCI{
         void set_coeffs(const std::vector<CType>& coeffs); 
         void set_coeffs(std::initializer_list<CType> coeffs);
         std::vector<CType> get_coeffs(void ) const;
+        CType eval(const std::vector<CType> &vvals) const;
       private:
         std::vector<CType> coeffs_;
         std::vector<std::string> vnames_;
@@ -111,6 +113,22 @@ namespace ESMCI{
     inline std::vector<CType> UVIDPoly<CType>::get_coeffs(void ) const
     {
       return coeffs_;
+    }
+
+    template<typename CType>
+    inline CType UVIDPoly<CType>::eval(const std::vector<CType> &vvals) const
+    {
+      assert(vvals.size() == 1);
+
+      CType res = 0;
+      std::size_t cur_deg = coeffs_.size() - 1;
+      for(typename std::vector<CType>::const_iterator citer = coeffs_.cbegin();
+          citer != coeffs_.cend(); ++citer){
+        res += (*citer) * pow(vvals[0], cur_deg);
+        cur_deg--;
+      }
+
+      return res;
     }
 
     template<typename CType>
