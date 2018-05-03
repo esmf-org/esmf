@@ -1593,11 +1593,6 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-#ifdef DEBUG
-call ESMF_LogWrite(trim(name)//": Entering InitializeIPDv02p5Data", &
-  ESMF_LOGMSG_INFO)
-#endif
-
     ! modelComps
     if (is%wrap%firstTimeDataInit) then
       ! IPDv < 02 data initialize phase only called once
@@ -1676,19 +1671,6 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-
-#define DEBUGPRINT____disable
-#ifdef DEBUGPRINT
-    ! print the entire runSeq structure
-    call NUOPC_RunSequencePrint(is%wrap%runSeq, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#endif
-
-#ifdef DEBUG
-call ESMF_LogWrite(trim(name)//": Exiting InitializeIPDv02p5Data", &
-  ESMF_LOGMSG_INFO)
-#endif
 
     !--- extro start ---
     ! extro
@@ -2273,7 +2255,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
         return  ! bail out
       
       ! now interpret and act on the current runElement
-#ifdef DEBUGPRINT
+#ifdef DEBUG
       print *, runElement%i, runElement%j, runElement%phase
       call NUOPC_ClockPrintCurrTime(runElement%runSeq%clock, &
         "NUOPC_Driver.Run() RunSequence iterator loop at current time: ", rc=rc)
@@ -5634,11 +5616,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     !--- intro done ---
     
-#ifdef DEBUG
-call ESMF_LogWrite(trim(name)//": Entering InternalInitializeComplete", &
-  ESMF_LOGMSG_INFO)
-#endif
-
     ! conditionally handle how InitializeDataComplete is set
     if (ESMF_StateIsCreated(exportState, rc=rc)) then
       call ESMF_GridCompGet(driver, clock=internalClock, rc=rc)
@@ -5699,11 +5676,6 @@ call ESMF_LogWrite(trim(name)//": Entering InternalInitializeComplete", &
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
-
-#ifdef DEBUG
-call ESMF_LogWrite(trim(name)//": Exiting InternalInitializeComplete", &
-  ESMF_LOGMSG_INFO)
-#endif
 
   end subroutine
 
