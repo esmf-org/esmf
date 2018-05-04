@@ -21,6 +21,9 @@
 
 // insert any higher level, 3rd party or system includes here
 #include "ESMCI_Macros.h"
+#include "ESMCI_LogErr.h"
+#include "ESMCI_Util.h"
+
 #include <cstring>
 
 //-----------------------------------------------------------------------------
@@ -40,22 +43,59 @@ extern "C" {
 //
 //
 
-// non-method functions
+// Tricky macros to get a macro value into a string
+#define XSTR(X) STR(X)
+#define STR(X) #X
+
+// non-method function
+void FTN_X(c_esmc_initget_build_datetime) (
+    char *esmf_date_str,       // out - build date
+    char *esmf_time_str,       // out - build time
+    int *rc,                   // out - return code
+    ESMCI_FortranStrLenArg esmf_date_str_l,
+    ESMCI_FortranStrLenArg esmf_time_str_l) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_initget_esmf_build_datetime()"
+
+  const char* esmf_date = XSTR(__DATE__);
+  int localrc = ESMC_CtoF90string (esmf_date, esmf_date_str, esmf_date_str_l);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+
+  const char* esmf_time = XSTR(__TIME__);
+  localrc = ESMC_CtoF90string (esmf_time, esmf_time_str, esmf_time_str_l);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+}
+
+// non-method function
 void FTN_X(c_esmc_initget_esmf_comm) (
-                           char *esmf_comm_str,
-                           ESMCI_FortranStrLenArg esmf_comm_str_l) {
+    char *esmf_comm_str,       // out - value of macro ESMF_COMM
+    int *rc,                   // out - return code
+    ESMCI_FortranStrLenArg esmf_comm_str_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_initget_esmf_comm()"
 
+  const char* esmf_comm = XSTR(ESMF_COMM);
+  int localrc = ESMC_CtoF90string (esmf_comm, esmf_comm_str, esmf_comm_str_l);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
+}
+
+// non-method function
+void FTN_X(c_esmc_initget_esmf_dir) (
+    char *esmf_dir_str,       // out - value of macro ESMF_DIR
+    int *rc,                  // out - return code
+    ESMCI_FortranStrLenArg esmf_dir_str_l) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_initget_esmf_dir()"
+
 #define XSTR(X) STR(X)
 #define STR(X) #X
-  const char* esmf_comm = XSTR(ESMF_COMM);
-  int esmf_comm_l = strlen (esmf_comm);
-  if (esmf_comm_l <= esmf_comm_str_l) {
-    memcpy (esmf_comm_str, esmf_comm, esmf_comm_l);
-    memset (esmf_comm_str+esmf_comm_l, ' ', esmf_comm_str_l - esmf_comm_l);
-  } else
-    memcpy (esmf_comm_str, esmf_comm, esmf_comm_str_l);
+  const char* esmf_dir = XSTR(ESMF_DIR);
+  int localrc = ESMC_CtoF90string (esmf_dir, esmf_dir_str, esmf_dir_str_l);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) return;
 }
 
 

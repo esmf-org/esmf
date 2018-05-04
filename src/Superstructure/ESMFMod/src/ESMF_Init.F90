@@ -322,6 +322,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: localPet
 
       character(ESMF_MAXPATHLEN) :: build_detail
+      character(16) :: build_date, build_time
       integer :: detail_loc
 
       ! Initialize return code
@@ -423,28 +424,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          return
       endif
 
+      call c_esmc_initget_build_datetime (build_date, build_time, localrc)
       call ESMF_LogWrite(&
-           "ESMF library build date/time: " // __DATE__ // ' ' // __TIME__,  &
+           "ESMF library build date/time: " // trim (build_date) // ' ' // build_time,  &
            ESMF_LOGMSG_INFO, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
          return
       endif
 
-      build_detail = __FILE__
-      detail_loc = index (build_detail, '/src/Superstructure/ESMFMod/src') - 1
-      if (detail_loc < 0) detail_loc = len_trim (build_detail)
+      call c_esmc_initget_esmf_dir (build_detail, localrc)
       call ESMF_LogWrite(&
-           "ESMF library build location : " // build_detail(:detail_loc),  &
+           "ESMF library build location : " // build_detail,  &
            ESMF_LOGMSG_INFO, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
          return
       endif
 
-      call c_esmc_initget_esmf_comm (build_detail)
+      call c_esmc_initget_esmf_comm (build_detail, localrc)
       call ESMF_LogWrite(&
-           "ESMF_MPI                    : " // build_detail,  &
+           "ESMF_COMM                   : " // build_detail,  &
            ESMF_LOGMSG_INFO, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
