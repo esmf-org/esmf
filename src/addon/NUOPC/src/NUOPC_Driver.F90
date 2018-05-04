@@ -1379,7 +1379,6 @@ module NUOPC_Driver
 
   recursive subroutine InitializeIPDv02p5(gcomp, importState, exportState, &
     clock, rc)
-    ! direct copy of the InitializeP5 routine in NUOPC_Model!!!!
     type(ESMF_GridComp)   :: gcomp
     type(ESMF_State)      :: importState, exportState
     type(ESMF_Clock)      :: clock
@@ -1408,107 +1407,94 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-! For a Driver may be called without valid states
-if (ESMF_StateIsCreated(importState).and.ESMF_StateIsCreated(exportState)) then
-    ! check how many Fields in the exportState have the "Updated" Attribute set
-    ! to "true" BEFORE calling the DataInitialize
-    allUpdated = NUOPC_IsUpdated(exportState, count=oldUpdatedCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! a driver may be called without valid states
+    if (ESMF_StateIsCreated(importState).and.ESMF_StateIsCreated(exportState)) &
+      then
+      ! check how many Fields in the exportState have "Updated" set
+      ! to "true" BEFORE calling the DataInitialize
+      allUpdated = NUOPC_IsUpdated(exportState, count=oldUpdatedCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! get the value of the "InitializeDataComplete" Attribute
-    call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
-      value=oldDataComplete, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-endif
+      ! get the value of the "InitializeDataComplete" attribute
+      call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
+        value=oldDataComplete, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+    endif
 
-#if 0
-    ! Initialize component data structures, including its export Fields,
-    ! only connected Fields reside in exportState at this time.
-    ! Expect the component to set "InitializeDataComplete" Attribute when done.
-    ! SPECIALIZE by calling into attached method to fill initial data
-    call ESMF_MethodExecute(gcomp, label=label_DataInitialize, &
-      existflag=existflag, userRc=localrc, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, &
-      rcToReturn=rc)) &
-      return  ! bail out
-#else
-! It could be implemented via DataInitialize (as for NUOPC_Model), but for now
-! I just use a direct call into subroutine...
+    ! calling into the DataInitialize could be implemented via MethodExecute,
+    ! as for NUOPC_Model, but currently there seems to be no reason for this.
+    ! -> call directly into the subroutine
     call InitializeIPDv02p5Data(gcomp, importState, exportState, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
-#endif
 
-! For a Driver may be called without valid states
-if (ESMF_StateIsCreated(importState).and.ESMF_StateIsCreated(exportState)) then
-    ! re-set the "InitializeDataProgress" Attribute to "false"
-    call NUOPC_CompAttributeSet(gcomp, &
-      name="InitializeDataProgress", value="false", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+    ! a driver may be called without valid states
+    if (ESMF_StateIsCreated(importState).and.ESMF_StateIsCreated(exportState)) &
+      then
+      ! re-set the "InitializeDataProgress" attribute to "false"
+      call NUOPC_CompAttributeSet(gcomp, &
+        name="InitializeDataProgress", value="false", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
 
-    ! check how many Fields in the exportState have the "Updated" Attribute set
-    ! to "true" AFTER calling the DataInitialize
-    allUpdated = NUOPC_IsUpdated(exportState, count=newUpdatedCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! check how many Fields in the exportState have "Updated" set
+      ! to "true" AFTER calling the DataInitialize
+      allUpdated = NUOPC_IsUpdated(exportState, count=newUpdatedCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-    ! see if number of updated export fields went up
-    if (newUpdatedCount > oldUpdatedCount) then
-      ! there are more Fields now that have their "Updated" Attribute set "true"
-      ! -> set "InitializeDataProgress" Attribute "true"
-      call NUOPC_CompAttributeSet(gcomp, &
-        name="InitializeDataProgress", value="true", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-    endif
+      ! see if number of updated export fields went up
+      if (newUpdatedCount > oldUpdatedCount) then
+        ! there are more Fields now that have "Updated" set "true"
+        ! -> set "InitializeDataProgress" attribute "true"
+        call NUOPC_CompAttributeSet(gcomp, &
+          name="InitializeDataProgress", value="true", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      endif
     
-    ! get the value of the "InitializeDataComplete" Attribute
-    call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
-      value=newDataComplete, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    
-    ! see if the "InitializeDataComplete" Attribute has changed
-    if (trim(newDataComplete) /= trim(oldDataComplete)) then
-      ! there was a change in the "InitializeDataComplete" Attribute setting
-      ! -> set "InitializeDataProgress" Attribute "true"
-      call NUOPC_CompAttributeSet(gcomp, &
-        name="InitializeDataProgress", value="true", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-    endif
-    
-    ! correct setting of timestamps
-    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    if (allUpdated) then
-      ! update timestamp on all the export Fields
-      call NUOPC_UpdateTimestamp(exportState, internalClock, rc=rc)
+      ! get the value of the "InitializeDataComplete" attribute
+      call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
+        value=newDataComplete, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
-    else
-      ! update timestamp on only those export Fields that have the 
-      ! "Updated" Attribute set to "true"
-      call NUOPC_UpdateTimestamp(exportState, internalClock, &
-        selective=.true., rc=rc)
+    
+      ! see if the "InitializeDataComplete" attribute has changed
+      if (trim(newDataComplete) /= trim(oldDataComplete)) then
+        ! there was a change in the "InitializeDataComplete" attribute setting
+        ! -> set "InitializeDataProgress" attribute "true"
+        call NUOPC_CompAttributeSet(gcomp, &
+          name="InitializeDataProgress", value="true", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      endif
+    
+      ! correct setting of timestamps
+      call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
+      if (allUpdated) then
+        ! update timestamp on all the export Fields
+        call NUOPC_UpdateTimestamp(exportState, internalClock, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+      else
+        ! update timestamp on only those export Fields that have the 
+        ! "Updated" attribute set to "true"
+        call NUOPC_UpdateTimestamp(exportState, internalClock, &
+          selective=.true., rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+      endif
     endif
-endif
 
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)

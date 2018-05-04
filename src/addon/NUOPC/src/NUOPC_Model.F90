@@ -313,13 +313,13 @@ module NUOPC_Model
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! check how many Fields in the exportState have the "Updated" Attribute set
+    ! check how many Fields in the exportState have "Updated" set
     ! to "true" BEFORE calling the DataInitialize
     allUpdated = NUOPC_IsUpdated(exportState, count=oldUpdatedCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! get the value of the "InitializeDataComplete" Attribute
+    ! get the value of the "InitializeDataComplete" attribute
     call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
       value=oldDataComplete, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -328,7 +328,7 @@ module NUOPC_Model
     
     ! Initialize component data structures, including its export Fields,
     ! only connected Fields reside in exportState at this time.
-    ! Expect the component to set "InitializeDataComplete" Attribute when done.
+    ! Expect the component to set "InitializeDataComplete" attribute when done.
     ! SPECIALIZE by calling into attached method to fill initial data
     call ESMF_MethodExecute(gcomp, label=label_DataInitialize, &
       existflag=existflag, userRc=localrc, rc=rc)
@@ -340,13 +340,13 @@ module NUOPC_Model
       rcToReturn=rc)) &
       return  ! bail out
     
-    ! re-set the "InitializeDataProgress" Attribute to "false"
+    ! re-set the "InitializeDataProgress" attribute to "false"
     call NUOPC_CompAttributeSet(gcomp, &
       name="InitializeDataProgress", value="false", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 
-    ! check how many Fields in the exportState have the "Updated" Attribute set
+    ! check how many Fields in the exportState have "Updated" set
     ! to "true" AFTER calling the DataInitialize
     allUpdated = NUOPC_IsUpdated(exportState, count=newUpdatedCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -354,25 +354,25 @@ module NUOPC_Model
       
     ! see if number of updated export fields went up
     if (newUpdatedCount > oldUpdatedCount) then
-      ! there are more Fields now that have their "Updated" Attribute set "true"
-      ! -> set "InitializeDataProgress" Attribute "true"
+      ! there are more Fields now that have "Updated" set "true"
+      ! -> set "InitializeDataProgress" attribute "true"
       call NUOPC_CompAttributeSet(gcomp, &
         name="InitializeDataProgress", value="true", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
     endif
     
-    ! get the value of the "InitializeDataComplete" Attribute
+    ! get the value of the "InitializeDataComplete" attribute
     call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
       value=newDataComplete, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     
-    ! see if the "InitializeDataComplete" Attribute has changed
+    ! see if the "InitializeDataComplete" attribute has changed
     if (trim(newDataComplete) /= trim(oldDataComplete)) then
-      ! there was a change in the "InitializeDataComplete" Attribute setting
-      ! -> set "InitializeDataProgress" Attribute "true"
+      ! there was a change in the "InitializeDataComplete" attribute setting
+      ! -> set "InitializeDataProgress" attribute "true"
       call NUOPC_CompAttributeSet(gcomp, &
         name="InitializeDataProgress", value="true", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -392,7 +392,7 @@ module NUOPC_Model
         return  ! bail out
     else
       ! update timestamp on only those export Fields that have the 
-      ! "Updated" Attribute set to "true"
+      ! "Updated" attribute set to "true"
       call NUOPC_UpdateTimestamp(exportState, internalClock, &
         selective=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
