@@ -2215,16 +2215,16 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    integer :: spacePad
+    integer :: indentCount
     if (btest(verbosity,0)) then
       call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogGet(spacePad=spacePad, rc=rc)
+      call ESMF_LogGet(indentCount=indentCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogSet(spacePad=spacePad+2, rc=rc)
+      call ESMF_LogSet(indentCount=indentCount+2, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -2273,7 +2273,7 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    integer :: spacePad
+    integer :: indentCount
     if (btest(verbosity,2)) then
       call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
         rc=rc)
@@ -2286,10 +2286,10 @@ module NUOPC_Base
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     if (btest(verbosity,0)) then
-      call ESMF_LogGet(spacePad=spacePad, rc=rc)
+      call ESMF_LogGet(indentCount=indentCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogSet(spacePad=spacePad-2, rc=rc)
+      call ESMF_LogSet(indentCount=indentCount-2, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &

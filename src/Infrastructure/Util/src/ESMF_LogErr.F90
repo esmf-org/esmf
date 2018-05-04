@@ -135,7 +135,7 @@ type ESMF_LogEntry
 #endif
     real(ESMF_KIND_R8)  ::  highResTimestamp
     logical             ::  highResTimestampFlag
-    integer             ::  spacePad
+    integer             ::  indentCount
     integer             ::  h,m,s,ms
     integer             ::  line
     logical             ::  methodflag,lineflag,fileflag
@@ -185,7 +185,7 @@ type ESMF_LogPrivate
     logical                                         ::  traceFlag = .false.
     logical                                         ::  highResTimestampFlag = .false.
     logical                                         ::  appendFlag = .true.
-    integer                                         ::  spacePad = 0
+    integer                                         ::  indentCount = 0
     logical                                         ::  deferredOpenFlag = .false.
 #else
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY
@@ -196,7 +196,7 @@ type ESMF_LogPrivate
     type(ESMF_LogMsg_Flag), pointer                 ::  logmsgAbort(:)
     logical                                         ::  traceFlag
     logical                                         ::  highResTimestampFlag
-    integer                                         ::  spacePad
+    integer                                         ::  indentCount
     logical                                         ::  appendflag
     logical                                         ::  deferredOpenFlag
 #endif
@@ -1521,7 +1521,7 @@ end function ESMF_LogFoundNetCDFError
                              flush,    &
                              logmsgAbort, logkindflag, &
                              maxElements, trace, fileName,  &
-                             highResTimestampFlag, spacePad, rc)
+                             highResTimestampFlag, indentCount, rc)
 !
 ! !ARGUMENTS:
 !
@@ -1534,7 +1534,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                 intent(out), optional :: trace
       character(*),            intent(out), optional :: fileName
       logical,                 intent(out), optional :: highResTimestampFlag
-      integer,                 intent(out), optional :: spacePad
+      integer,                 intent(out), optional :: indentCount
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1566,7 +1566,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            prefix.
 !      \item [{[highResTimestampFlag]}]
 !            Current setting of the extended elapsed timestamp flag.
-!      \item [{[spacePad]}]
+!      \item [{[indentCount]}]
 !            Current setting of the leading white space padding.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1624,8 +1624,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present (highResTimestampFlag)) then
           highResTimestampFlag = alog%highResTimestampFlag
         endif
-        if (present (spacePad)) then
-          spacePad = alog%spacePad
+        if (present (indentCount)) then
+          indentCount = alog%indentCount
         endif
 
       ! Return an array with the current values.  If the user has not
@@ -1840,7 +1840,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     alog%traceFlag = .false.
     alog%highResTimestampFlag = .false.
-    alog%spacePad = 0
+    alog%indentCount = 0
 
   if(alog%logkindflag /= ESMF_LOGKIND_NONE) then
 
@@ -2090,7 +2090,7 @@ end subroutine ESMF_LogRc2Msg
     subroutine ESMF_LogSet(log, keywordEnforcer,  &
         flush,  &
         logmsgAbort, maxElements, logmsgList,  &
-        errorMask, trace, highResTimestampFlag, spacePad, rc)
+        errorMask, trace, highResTimestampFlag, indentCount, rc)
 !
 ! !ARGUMENTS:
 !
@@ -2103,7 +2103,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,                intent(in),    optional :: errorMask(:)
       logical,                intent(in),    optional :: trace
       logical,                intent(in),    optional :: highResTimestampFlag
-      integer,                intent(in),    optional :: spacePad
+      integer,                intent(in),    optional :: indentCount
       integer,                intent(out),   optional :: rc
 
 !
@@ -2155,7 +2155,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            Sets the extended elapsed timestamp flag.  If set to {\tt .true.}, a timestamp
 !            from {\tt ESMF\_VMWtime} will be included in each log message.  Default is
 !            to not add the additional timestamps.
-!      \item [{[spacePad]}]
+!      \item [{[indentCount]}]
 !            Number of leading white spaces.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2279,8 +2279,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         alog%highResTimestampFlag = highResTimestampFlag
       end if
 
-      if (present (spacePad)) then
-        alog%spacePad = spacePad
+      if (present (indentCount)) then
+        alog%indentCount = indentCount
       end if
 
       if (present(rc)) then
@@ -2493,7 +2493,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: i
     integer                         :: localrc
     integer                         :: memstat
-    integer                         :: rc2, index, lenTotal, spacePad
+    integer                         :: rc2, index, lenTotal, indentCount
     type(ESMF_LogPrivate), pointer  :: alog
 
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
@@ -2597,7 +2597,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           end if
         end if
         alog%LOG_ENTRY(index)%highResTimestampFlag = alog%highResTimestampFlag
-        alog%LOG_ENTRY(index)%spacePad = alog%spacePad
+        alog%LOG_ENTRY(index)%indentCount = alog%indentCount
         alog%LOG_ENTRY(index)%methodflag = .FALSE.
         alog%LOG_ENTRY(index)%lineflag = .FALSE.
         alog%LOG_ENTRY(index)%fileflag = .FALSE.
@@ -2627,14 +2627,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         alog%LOG_ENTRY(alog%fIndex)%m  = timevals(6)
         alog%LOG_ENTRY(alog%fIndex)%s  = timevals(7)
         alog%LOG_ENTRY(alog%fIndex)%ms = timevals(8)
-        spacePad = alog%LOG_ENTRY(index)%spacePad
-        lenTotal = len_trim(msg) + spacePad
+        indentCount = alog%LOG_ENTRY(index)%indentCount
+        lenTotal = len_trim(msg) + indentCount
         allocate (alog%LOG_ENTRY(alog%fIndex)%msg(lenTotal), stat=memstat)
-        if (spacePad > 0) then
+        if (indentCount > 0) then
           ! insert leading white spaces
-          alog%LOG_ENTRY(alog%fIndex)%msg(1:spacePad) = " "
+          alog%LOG_ENTRY(alog%fIndex)%msg(1:indentCount) = " "
         endif
-        alog%LOG_ENTRY(alog%fIndex)%msg(1+spacePad:) = &
+        alog%LOG_ENTRY(alog%fIndex)%msg(1+indentCount:) = &
           ESMF_UtilString2Array(trim(msg))
         alog%flushed = ESMF_FALSE
 
