@@ -68,8 +68,8 @@ module NUOPC_Mediator
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -148,14 +148,10 @@ module NUOPC_Mediator
     nullify(impConnectedList)
 
     ! get the Component name
-    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(gcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -224,15 +220,11 @@ module NUOPC_Mediator
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(gcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -289,15 +281,11 @@ module NUOPC_Mediator
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(gcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -426,8 +414,8 @@ module NUOPC_Mediator
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_GridCompGet(mediator, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(mediator, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     

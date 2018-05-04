@@ -88,8 +88,8 @@ module NUOPC_Connector
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(connector, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(connector, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -203,15 +203,11 @@ module NUOPC_Connector
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -242,28 +238,18 @@ module NUOPC_Connector
     character(*), parameter               :: rName="InitializeIPDv05p1"
     character(ESMF_MAXSTR)                :: name
     character(ESMF_MAXSTR)                :: importXferPolicy, exportXferPolicy
-    integer                               :: profiling
-    integer                               :: verbosity
+    integer                               :: verbosity, profiling
 
     rc = ESMF_SUCCESS
 
-
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+      profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-    ! determine profiling
-    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -437,28 +423,19 @@ module NUOPC_Connector
     character(ESMF_MAXSTR), pointer       :: exportNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: importCplSetList(:)
     character(ESMF_MAXSTR), pointer       :: exportCplSetList(:)
-    integer                               :: profiling
     logical                               :: match
-    integer                               :: verbosity
+    integer                               :: verbosity, profiling
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+      profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-    ! determine profiling
-    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -621,33 +598,24 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     character(ESMF_MAXSTR), pointer       :: cplList(:)
     character(ESMF_MAXSTR), pointer       :: cplSetList(:)
     character(len=160)                    :: msgString
-    integer                               :: verbosity
-    integer                               :: profiling
+    integer                               :: verbosity, profiling
     logical                               :: match
     type(ESMF_StateIntent_Flag)           :: importStateIntent
     character(ESMF_MAXSTR)                :: fieldName
     
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+      profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-    ! determine profiling
-    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
     ! reconcile the States including Attributes
     if (btest(profiling,1)) then    ! PROFILE
       call ESMF_VMLogMemInfo("befP1b Reconcile")
@@ -914,15 +882,11 @@ print *, "current bondLevel=", bondLevel
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -991,31 +955,22 @@ print *, "current bondLevel=", bondLevel
     character(len=160)              :: msgString
     character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
     character(ESMF_MAXSTR)          :: iSharePolicy, eSharePolicy
-    integer                         :: profiling
     logical                         :: matchE, matchI, acceptFlag
-    integer                         :: verbosity
+    integer                         :: verbosity, profiling
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+      profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-    ! determine profiling
-    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
     ! prepare local pointer variables
     nullify(cplList)
     nullify(cplSetList)
@@ -1566,11 +1521,10 @@ print *, "current bondLevel=", bondLevel
     character(ESMF_MAXSTR)          :: geomobjname, fieldName
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     character(ESMF_MAXSTR)          :: iShareStatus, eShareStatus
-    integer                         :: verbosity
+    integer                         :: verbosity, profiling
     integer(ESMF_KIND_I4), pointer  :: ungriddedLBound(:), ungriddedUBound(:)
     integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
     integer                         :: fieldDimCount, gridDimCount, arbDimCount
-    integer                         :: profiling
     logical                         :: matchE, matchI
     integer                         :: dimCount
     integer, allocatable            :: minIndex(:), maxIndex(:)
@@ -1579,22 +1533,14 @@ print *, "current bondLevel=", bondLevel
     
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+      profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-    ! determine profiling
-    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2261,28 +2207,19 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     character(len=160)              :: msgString
     character(ESMF_MAXSTR)          :: geomobjname
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
-    integer                         :: verbosity
-    integer                         :: profiling
+    integer                         :: verbosity, profiling
     logical                         :: matchE, matchI
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+      profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-    ! determine profiling
-    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2621,30 +2558,21 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     ! local variables
     character(*), parameter         :: rName="InitializeIPDv05p6a"
     character(ESMF_MAXSTR)          :: name
-    integer                         :: profiling
-    integer                         :: verbosity
+    integer                         :: verbosity, profiling
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+      profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! determine profiling
-    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
     if (btest(profiling,1)) then    ! PROFILE
@@ -2717,15 +2645,11 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3111,15 +3035,11 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3156,15 +3076,11 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3200,8 +3116,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     character(ESMF_MAXSTR)    :: compName, pLabel
     character(len=160)        :: msgString
     integer                   :: phase
-    integer                   :: verbosity
-    integer                   :: profiling
+    integer                   :: verbosity, profiling
     character(ESMF_MAXSTR)    :: name
     integer                   :: i
 
@@ -3213,22 +3128,14 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     call ESMF_VMWtime(timeBase)
     time0=timeBase
 
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+      profiling=profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-    ! determine profiling
-    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -3463,15 +3370,11 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(cplcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(cplcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4655,8 +4558,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(connector, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(connector, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -4744,8 +4647,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_CplCompGet(connector, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(connector, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     

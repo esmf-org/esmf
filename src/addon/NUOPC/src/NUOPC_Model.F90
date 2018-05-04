@@ -70,8 +70,8 @@ module NUOPC_Model
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -154,21 +154,21 @@ module NUOPC_Model
     nullify(impItemNameList)
     nullify(impConnectedList)
     
-    ! test whether internal Clock has already been set in the Component
-    call ESMF_GridCompGet(gcomp, name=name, clockIsPresent=clockIsPresent, &
-      rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(gcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! test whether internal Clock has already been set in the Component
+    call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
     if (.not.clockIsPresent .and. ESMF_ClockIsCreated(clock)) then
       ! set the internal Clock as a copy of the incoming Clock by a default
       call NUOPC_CompSetClock(gcomp, clock, rc=rc)
@@ -242,15 +242,11 @@ module NUOPC_Model
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(gcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -307,15 +303,11 @@ module NUOPC_Model
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! determine verbosity
-    call NUOPC_CompGetVerbosity(gcomp, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -428,9 +420,14 @@ module NUOPC_Model
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_GridCompGet(gcomp, name=name, clock=clock, &
-      exportState=exportState, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+
+    ! get to the clock and exportState
+    call ESMF_GridCompGet(gcomp, clock=clock, exportState=exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -472,8 +469,8 @@ module NUOPC_Model
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_GridCompGet(model, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(model, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     

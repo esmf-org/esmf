@@ -33,8 +33,7 @@ module NUOPC_Comp
   public NUOPC_CompCheckSetClock
   public NUOPC_CompDerive
   public NUOPC_CompFilterPhaseMap
-  public NUOPC_CompGetProfiling
-  public NUOPC_CompGetVerbosity
+  public NUOPC_CompGet
   public NUOPC_CompSearchPhaseMap
   public NUOPC_CompSearchRevPhaseMap
   public NUOPC_CompSetClock
@@ -103,14 +102,9 @@ module NUOPC_Comp
     module procedure NUOPC_CplCompFilterPhaseMap
   end interface
   !---------------------------------------------
-  interface NUOPC_CompGetProfiling
-    module procedure NUOPC_GridCompGetProfiling
-    module procedure NUOPC_CplCompGetProfiling
-  end interface
-  !---------------------------------------------
-  interface NUOPC_CompGetVerbosity
-    module procedure NUOPC_GridCompGetVerbosity
-    module procedure NUOPC_CplCompGetVerbosity
+  interface NUOPC_CompGet
+    module procedure NUOPC_GridCompGet
+    module procedure NUOPC_CplCompGet
   end interface
   !---------------------------------------------
   interface NUOPC_CompSearchPhaseMap
@@ -1810,42 +1804,67 @@ module NUOPC_Comp
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompGetProfiling - Access the Profiling setting of a component
+! !IROUTINE: NUOPC_CompGet - Access info from GridComp
 ! !INTERFACE:
-  ! Private name; call using NUOPC_CompGetProfiling()
-  subroutine NUOPC_GridCompGetProfiling(comp, profiling, rc)
+  ! Private name; call using NUOPC_CompGet()
+  subroutine NUOPC_GridCompGet(comp, name, verbosity, profiling, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                       :: comp
-    integer,            intent(out)           :: profiling
+    character(len=*),   intent(out), optional :: name
+    integer,            intent(out), optional :: verbosity
+    integer,            intent(out), optional :: profiling
     integer,            intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Access the Profiling attribute of the component and return it as an integer
+! Access information from a GridComp.
 ! value.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)          :: name, valueString
-
-    ! initialize the profiling output value
-    profiling = 0
-
-    ! query the component for its name
-    call ESMF_GridCompGet(comp, name=name, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    character(ESMF_MAXSTR)          :: lName, valueString
     
-    ! query the component for Profiling
-    call NUOPC_CompAttributeGet(comp, name="Profiling", value=valueString, &
-      rc=rc)
+    ! query the component for its name
+    call ESMF_GridCompGet(comp, name=lName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), &
-      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+      
+    if (present(name)) then
+      call ESMF_GridCompGet(comp, name=name, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+    endif
+
+    if (present(verbosity)) then
+      ! initialize the output value
+      verbosity = 0
+      ! query the component for Verbosity
+      call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+      verbosity = ESMF_UtilString2Int(valueString, &
+        specialStringList=(/"high", "max "/), &
+        specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+    endif
+    
+    if (present(profiling)) then
+      ! initialize the output value
+      profiling = 0
+      ! query the component for Profiling
+      call NUOPC_CompAttributeGet(comp, name="Profiling", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+      profiling = ESMF_UtilString2Int(valueString, &
+        specialStringList=(/"high", "max "/), &
+        specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+    endif
     
     ! return successfully
     rc = ESMF_SUCCESS
@@ -1855,132 +1874,67 @@ module NUOPC_Comp
 
   !-----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: NUOPC_CompGetProfiling - Access the Profiling setting of a component
+! !IROUTINE: NUOPC_CompGet - Access info from CplComp
 ! !INTERFACE:
-  ! Private name; call using NUOPC_CompGetProfiling()
-  subroutine NUOPC_CplCompGetProfiling(comp, profiling, rc)
+  ! Private name; call using NUOPC_CompGet()
+  subroutine NUOPC_CplCompGet(comp, name, verbosity, profiling, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp)                        :: comp
-    integer,            intent(out)           :: profiling
+    character(len=*),   intent(out), optional :: name
+    integer,            intent(out), optional :: verbosity
+    integer,            intent(out), optional :: profiling
     integer,            intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Access the Profiling attribute of the component and return it as an integer
+! Access information from a CplComp.
 ! value.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)          :: name, valueString
-
-    ! initialize the profiling output value
-    profiling = 0
-
+    character(ESMF_MAXSTR)          :: lName, valueString
+    
     ! query the component for its name
-    call ESMF_CplCompGet(comp, name=name, rc=rc)
+    call ESMF_CplCompGet(comp, name=lName, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    ! query the component for Profiling
-    call NUOPC_CompAttributeGet(comp, name="Profiling", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), &
-      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    ! return successfully
-    rc = ESMF_SUCCESS
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
+      line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
 
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_CompGetVerbosity - Access the Verbosity setting of a component
-! !INTERFACE:
-  ! Private name; call using NUOPC_CompGetVerbosity()
-  subroutine NUOPC_GridCompGetVerbosity(comp, verbosity, rc)
-! !ARGUMENTS:
-    type(ESMF_GridComp)                       :: comp
-    integer,            intent(out)           :: verbosity
-    integer,            intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-! Access the Verbosity attribute of the component and return it as an integer
-! value.
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    character(ESMF_MAXSTR)          :: name, valueString
+    if (present(name)) then
+      call ESMF_CplCompGet(comp, name=name, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+    endif
 
-    ! initialize the verbosity output value
-    verbosity = 0
-
-    ! query the component for its name
-    call ESMF_GridCompGet(comp, name=name, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (present(verbosity)) then
+      ! initialize the output value
+      verbosity = 0
+      ! query the component for Verbosity
+      call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+      verbosity = ESMF_UtilString2Int(valueString, &
+        specialStringList=(/"high", "max "/), &
+        specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+    endif
     
-    ! query the component for Verbosity
-    call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), &
-      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    ! return successfully
-    rc = ESMF_SUCCESS
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_CompGetVerbosity - Access the Verbosity setting of a component
-! !INTERFACE:
-  ! Private name; call using NUOPC_CompGetVerbosity()
-  subroutine NUOPC_CplCompGetVerbosity(comp, verbosity, rc)
-! !ARGUMENTS:
-    type(ESMF_CplComp)                        :: comp
-    integer,            intent(out)           :: verbosity
-    integer,            intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-! Access the Verbosity attribute of the component and return it as an integer
-! value.
-!EOP
-  !-----------------------------------------------------------------------------
-    ! local variables
-    character(ESMF_MAXSTR)          :: name, valueString
-
-    ! initialize the verbosity output value
-    verbosity = 0
-
-    ! query the component for its name
-    call ESMF_CplCompGet(comp, name=name, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    ! query the component for Verbosity
-    call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    verbosity = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), &
-      specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (present(profiling)) then
+      ! initialize the output value
+      profiling = 0
+      ! query the component for Profiling
+      call NUOPC_CompAttributeGet(comp, name="Profiling", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+      profiling = ESMF_UtilString2Int(valueString, &
+        specialStringList=(/"high", "max "/), &
+        specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+    endif
     
     ! return successfully
     rc = ESMF_SUCCESS

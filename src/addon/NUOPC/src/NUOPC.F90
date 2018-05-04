@@ -63,8 +63,7 @@ module NUOPC
   public NUOPC_CompAttributeSet           ! method
   public NUOPC_CompCheckSetClock          ! method
   public NUOPC_CompDerive                 ! method
-  public NUOPC_CompGetProfiling           ! method
-  public NUOPC_CompGetVerbosity           ! method
+  public NUOPC_CompGet                    ! method
   public NUOPC_CompFilterPhaseMap         ! method
   public NUOPC_CompSearchPhaseMap         ! method
   public NUOPC_CompSearchRevPhaseMap      ! method
