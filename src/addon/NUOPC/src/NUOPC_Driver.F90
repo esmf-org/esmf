@@ -5215,7 +5215,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out)  :: rc
     
     ! local variables
-    character(*), parameter   :: rName="InitializeIPDv02p5Data"
+    character(*), parameter   :: rName="InitializeIPDv02p5"
     integer                   :: localrc
     type(ESMF_Clock)          :: internalClock
     logical                   :: existflag
