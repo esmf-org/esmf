@@ -2,7 +2,7 @@
 
 ALL: build_here 
 
-SOURCEC	  = ESMCI_Init.C ESMC_Init.C
+SOURCEC	  = ESMCI_Init.C ESMC_Init.C ESMCI_Init_F.C
 SOURCEF	  = ESMF_Init_C.F90
 SOURCEH	  = 
 

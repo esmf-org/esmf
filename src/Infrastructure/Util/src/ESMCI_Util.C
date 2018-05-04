@@ -395,7 +395,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
     }
 
     // move bytes, then pad rest of string to spaces
-    strncpy(dst, src, clen);
+    memcpy(dst, src, clen);
     memset (&dst[clen], ' ', dlen-clen);
 
     // return ok.
@@ -508,7 +508,7 @@ extern "C" {
     }
 
     // move bytes, then pad rest of string to spaces
-    strncpy(dst, src, clen);
+    memcpy(dst, src, clen);
     memset (&dst[clen], ' ', dlen-clen);
 
     // return ok.  caller has passed us in dst buffer so it is up to them
