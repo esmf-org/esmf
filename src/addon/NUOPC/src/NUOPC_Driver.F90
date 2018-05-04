@@ -1908,7 +1908,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     logical                         :: existflag
     integer                         :: i, j, phase, runPhase, runSeqIndex
     character(ESMF_MAXSTR)          :: iString, jString, pLabel
-    character(ESMF_MAXSTR)          :: msgString, valueString
+    character(ESMF_MAXSTR)          :: msgString
     type(NUOPC_RunElement), pointer :: runElement
     type(ESMF_State)                :: imState, exState
     character(ESMF_MAXSTR)          :: name, compName, profileString
@@ -1943,13 +1943,7 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! determine profiling
-    call NUOPC_CompAttributeGet(gcomp, name="Profiling", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/255, 255/), &
-      rc=rc)
+    call NUOPC_CompGetProfiling(gcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 

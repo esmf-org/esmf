@@ -240,7 +240,7 @@ module NUOPC_Connector
 
     ! local variables
     character(*), parameter               :: rName="InitializeIPDv05p1"
-    character(ESMF_MAXSTR)                :: name, valueString
+    character(ESMF_MAXSTR)                :: name
     character(ESMF_MAXSTR)                :: importXferPolicy, exportXferPolicy
     integer                               :: profiling
     integer                               :: verbosity
@@ -263,13 +263,7 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! determine profiling
-    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
-      rc=rc)
+    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -432,7 +426,7 @@ module NUOPC_Connector
     character(*), parameter               :: rName="InitializeIPDv05p2a"
     integer                               :: i, j
     integer                               :: bondLevel, bondLevelMax
-    character(ESMF_MAXSTR)                :: name, valueString
+    character(ESMF_MAXSTR)                :: name
     character(ESMF_MAXSTR), pointer       :: importStandardNameList(:)
     character(ESMF_MAXSTR), pointer       :: exportStandardNameList(:)
     type(ESMF_Field),       pointer       :: importFieldList(:)
@@ -464,13 +458,7 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! determine profiling
-    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
-      rc=rc)
+    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -625,7 +613,7 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     type(ESMF_Field),       pointer       :: importFieldList(:)
     type(ESMF_Field),       pointer       :: exportFieldList(:)
     type(ESMF_Field)                      :: field
-    character(ESMF_MAXSTR)                :: connectionString, valueString
+    character(ESMF_MAXSTR)                :: connectionString
     character(ESMF_MAXSTR), pointer       :: importNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: exportNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: importCplSetList(:)
@@ -656,13 +644,7 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
     ! determine profiling
-    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
-      rc=rc)
+    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1005,7 +987,7 @@ print *, "current bondLevel=", bondLevel
     type(type_InternalState)        :: is
     logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: connectionString
-    character(ESMF_MAXSTR)          :: name, valueString
+    character(ESMF_MAXSTR)          :: name
     character(len=160)              :: msgString
     character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
     character(ESMF_MAXSTR)          :: iSharePolicy, eSharePolicy
@@ -1030,13 +1012,7 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
     ! determine profiling
-    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
-      rc=rc)
+    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1585,7 +1561,7 @@ print *, "current bondLevel=", bondLevel
     type(type_InternalState)        :: is
     logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: connectionString
-    character(ESMF_MAXSTR)          :: name, valueString
+    character(ESMF_MAXSTR)          :: name
     character(len=160)              :: msgString
     character(ESMF_MAXSTR)          :: geomobjname, fieldName
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
@@ -1618,13 +1594,7 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! determine profiling
-    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
-      rc=rc)
+    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2287,7 +2257,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     type(type_InternalState)        :: is
     logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: connectionString
-    character(ESMF_MAXSTR)          :: name, valueString
+    character(ESMF_MAXSTR)          :: name
     character(len=160)              :: msgString
     character(ESMF_MAXSTR)          :: geomobjname
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
@@ -2312,13 +2282,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! determine profiling
-    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
-      rc=rc)
+    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2656,7 +2620,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     
     ! local variables
     character(*), parameter         :: rName="InitializeIPDv05p6a"
-    character(ESMF_MAXSTR)          :: name, valueString
+    character(ESMF_MAXSTR)          :: name
     integer                         :: profiling
     integer                         :: verbosity
 
@@ -2677,13 +2641,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! determine profiling
-    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
-      rc=rc)
+    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -3239,7 +3197,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     integer                   :: localrc
     logical                   :: existflag
     integer                   :: rootPet, rootVas, vas, petCount
-    character(ESMF_MAXSTR)    :: compName, valueString, pLabel
+    character(ESMF_MAXSTR)    :: compName, pLabel
     character(len=160)        :: msgString
     integer                   :: phase
     integer                   :: verbosity
@@ -3270,13 +3228,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! determine profiling
-    call NUOPC_CompAttributeGet(cplcomp, name="Profiling", value=valueString, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    profiling = ESMF_UtilString2Int(valueString, &
-      specialStringList=(/"high", "max "/), specialValueList=(/65535, 65535/), &
-      rc=rc)
+    call NUOPC_CompGetProfiling(cplcomp, profiling, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
