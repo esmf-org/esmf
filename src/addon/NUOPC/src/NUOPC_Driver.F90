@@ -383,8 +383,9 @@ module NUOPC_Driver
     logical                   :: existflag
     integer                   :: rootPet, rootVas
     type(ESMF_VM)             :: vm
-    character(ESMF_MAXSTR)    :: name, valueString
-    integer                   :: verbosity
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: verbosity, vInherit
+    character(len=10)         :: vString
     character(len=160)        :: namespace  ! long engough for component label
     type(ComponentMapEntry)   :: cmEntry
     type(ESMF_GridComp), pointer :: compList(:)
@@ -403,12 +404,6 @@ module NUOPC_Driver
     
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
-    ! access the Verbosity attribute so it can be passed to potential children
-    call NUOPC_CompAttributeGet(gcomp, name="Verbosity", &
-      value=valueString, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -638,10 +633,12 @@ module NUOPC_Driver
                 comp=connector, petList=petList, relaxedflag=.true., rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
-              ! automatically created connectors inherit verbosity setting
-              !TODO: should only inherit lower 8-bits from parent
+              ! automatically created connectors inherit lower 8-bit
+              ! of parent's verbosity setting
+              vInherit = ibits(verbosity,1,8)
+              write(vString,"(I10)") vInherit
               call NUOPC_CompAttributeSet(connector, name="Verbosity", &
-                value=valueString, rc=rc)
+                value=vString, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
             endif
@@ -4266,7 +4263,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)                          :: name, valueString
+    character(ESMF_MAXSTR)                          :: name
     type(type_InternalState)                        :: is
     integer                                         :: i, lineCount, tokenCount
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
@@ -4279,6 +4276,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     real(ESMF_KIND_R8)                              :: seconds
     logical                                         :: optAutoAddConnectors
     type(ESMF_CplComp)                              :: conn
+    integer                                         :: verbosity, vInherit
+    character(len=10)                               :: vString
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -4286,16 +4285,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(autoAddConnectors)) optAutoAddConnectors = autoAddConnectors
 
     ! query the component for info
-    call NUOPC_CompGet(driver, name=name, rc=rc)
+    call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    ! access the Verbosity attribute so it can be passed to potential children
-    call NUOPC_CompAttributeGet(driver, name="Verbosity", &
-      value=valueString, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-
     ! query Component for the internal State
     nullify(is%wrap)
     call ESMF_UserCompGetInternalState(driver, label_InternalState, is, rc)
@@ -4351,10 +4344,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          ! automatically created connectors inherit verbosity setting
-          !TODO: should only inherit lower 8-bits from parent
+          ! automatically created connectors inherit lower 8-bit
+          ! of parent's verbosity setting
+          vInherit = ibits(verbosity,1,8)
+          write(vString,"(I10)") vInherit
           call NUOPC_CompAttributeSet(conn, name="Verbosity", &
-            value=valueString, rc=rc)
+            value=vString, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
           ! optionally additional options
