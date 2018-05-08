@@ -115,6 +115,7 @@
 \input{ESMF_FieldRedist_fapi}
 \input{ESMF_FieldRegrid_fapi}
 \input{ESMF_FieldScatter_fapi}
+\input{ESMF_FieldSet_fapi}
 \input{ESMF_FieldSMM_fapi}
 \input{ESMF_Field_fapi}
 \input{ESMF_FieldWr_fapi}
@@ -128,6 +129,7 @@
 \input{../Infrastructure/Field/doc/ESMF_FieldRedist_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldRegrid_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldScatter_fapi}
+\input{../Infrastructure/Field/doc/ESMF_FieldSet_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldSMM_fapi}
 \input{../Infrastructure/Field/doc/ESMF_Field_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldWr_fapi}

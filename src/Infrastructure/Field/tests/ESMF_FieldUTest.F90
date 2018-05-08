@@ -31,6 +31,7 @@
       use ESMF_TestMod     ! test methods
       use ESMF
       use ESMF_FieldGetMod
+      use ESMF_FieldSetMod
 
       implicit none
 

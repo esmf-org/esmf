@@ -63,6 +63,7 @@ module ESMF_FieldHaloMod
   public ESMF_FieldHalo
   public ESMF_FieldHaloRelease
   public ESMF_FieldHaloStore
+  public ESMF_FieldIsCreated          ! Check if a Field object is created
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -364,6 +365,45 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_FieldHaloStore
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldIsCreated()"
+!BOP
+! !IROUTINE: ESMF_FieldIsCreated - Check whether a Field object has been created
+
+! !INTERFACE:
+  function ESMF_FieldIsCreated(field, keywordEnforcer, rc)
+! !RETURN VALUE:
+    logical :: ESMF_FieldIsCreated
+!
+! !ARGUMENTS:
+    type(ESMF_Field), intent(in)            :: field
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,             intent(out), optional :: rc
+
+! !DESCRIPTION:
+!   Return {\tt .true.} if the {\tt field} has been created. Otherwise return 
+!   {\tt .false.}. If an error occurs, i.e. {\tt rc /= ESMF\_SUCCESS} is 
+!   returned, the return value of the function will also be {\tt .false.}.
+!
+! The arguments are:
+!   \begin{description}
+!   \item[field]
+!     {\tt ESMF\_Field} queried.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------    
+    ESMF_FieldIsCreated = .false.   ! initialize
+    if (present(rc)) rc = ESMF_SUCCESS
+    if (ESMF_FieldGetInit(field)==ESMF_INIT_CREATED) &
+      ESMF_FieldIsCreated = .true.
+  end function
 !------------------------------------------------------------------------------
 
 end module ESMF_FieldHaloMod

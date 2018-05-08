@@ -77,6 +77,7 @@ module ESMF
     use ESMF_FieldCreateMod
     use ESMF_FieldEmptyMod
     use ESMF_FieldRegridMod
+    use ESMF_FieldSetMod
     use ESMF_RegridMod
 
     use ESMF_FieldGatherMod
