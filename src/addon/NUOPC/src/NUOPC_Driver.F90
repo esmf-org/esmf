@@ -638,7 +638,8 @@ module NUOPC_Driver
                 comp=connector, petList=petList, relaxedflag=.true., rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
-              ! automatically created components inherit verbosity setting
+              ! automatically created connectors inherit verbosity setting
+              !TODO: should only inherit lower 8-bits from parent
               call NUOPC_CompAttributeSet(connector, name="Verbosity", &
                 value=valueString, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1394,6 +1395,7 @@ module NUOPC_Driver
     logical                   :: allUpdated
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
+    character(len=160)        :: msgString
 
     rc = ESMF_SUCCESS
 
@@ -1407,21 +1409,38 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! a driver may be called without valid states
-    if (ESMF_StateIsCreated(importState).and.ESMF_StateIsCreated(exportState)) &
-      then
+    ! see if this driver was called with a valid exportState
+    if (ESMF_StateIsCreated(exportState)) then
       ! check how many Fields in the exportState have "Updated" set
       ! to "true" BEFORE calling the DataInitialize
       allUpdated = NUOPC_IsUpdated(exportState, count=oldUpdatedCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
       ! get the value of the "InitializeDataComplete" attribute
       call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
         value=oldDataComplete, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
+      ! optionally log info
+      if (btest(verbosity,11)) then
+        write(msgString, "(A,l,A,I4)") trim(name)//&
+          ": InitializeDataComplete='"//trim(oldDataComplete)//&
+          "', allUpdated=", allUpdated, ", updatedCount=", oldUpdatedCount
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+    else
+      ! no valid exportState -> top level driver
+      if (btest(verbosity,11)) then
+        call ESMF_LogWrite(trim(name)//&
+          ": this is a top level driver, "// &
+          "no 'Updated' and 'InitializeDataComplete' info on this level.", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
     endif
 
     ! calling into the DataInitialize could be implemented via MethodExecute,
@@ -1432,21 +1451,18 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
-    ! a driver may be called without valid states
-    if (ESMF_StateIsCreated(importState).and.ESMF_StateIsCreated(exportState)) &
-      then
+    ! see if this driver was called with a valid exportState
+    if (ESMF_StateIsCreated(exportState)) then
       ! re-set the "InitializeDataProgress" attribute to "false"
       call NUOPC_CompAttributeSet(gcomp, &
         name="InitializeDataProgress", value="false", rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
-
       ! check how many Fields in the exportState have "Updated" set
       ! to "true" AFTER calling the DataInitialize
       allUpdated = NUOPC_IsUpdated(exportState, count=newUpdatedCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
       ! see if number of updated export fields went up
       if (newUpdatedCount > oldUpdatedCount) then
         ! there are more Fields now that have "Updated" set "true"
@@ -1456,14 +1472,12 @@ module NUOPC_Driver
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
       endif
-    
       ! get the value of the "InitializeDataComplete" attribute
       call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
         value=newDataComplete, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
-    
       ! see if the "InitializeDataComplete" attribute has changed
       if (trim(newDataComplete) /= trim(oldDataComplete)) then
         ! there was a change in the "InitializeDataComplete" attribute setting
@@ -1474,6 +1488,16 @@ module NUOPC_Driver
           line=__LINE__, file=FILENAME)) return  ! bail out
       endif
     
+      ! optionally log info
+      if (btest(verbosity,11)) then
+        write(msgString, "(A,l,A,I4)") trim(name)//&
+          ": InitializeDataComplete='"//trim(newDataComplete)//&
+          "', allUpdated=", allUpdated, ", updatedCount=", newUpdatedCount
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+
       ! correct setting of timestamps
       call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1521,8 +1545,7 @@ module NUOPC_Driver
     integer                   :: verbosity
     logical                   :: execFlag, execFlagCollect
     integer                   :: execFlagIntReduced, execFlagInt
-
-    character(ESMF_MAXSTR)    :: msgString
+    character(len=160)        :: msgString
 
     rc = ESMF_SUCCESS
 
@@ -1588,7 +1611,7 @@ module NUOPC_Driver
       return  ! bail out
     execFlagCollect = execFlagCollect.or.execFlag
 
-    ! deal with the fact that the IPDv02p5 component may not be across all PETs
+    ! deal with the fact that the executing component may not be across all PETs
     execFlagInt = 0
     if (execFlagCollect) execFlagInt = 1
 
@@ -1604,17 +1627,27 @@ module NUOPC_Driver
     if (execFlag) then
       ! there were model components with IPDv02p5, IPDv03p7, IPDv04p7, 
       ! or IPDv05p8 -->> resolve data dependencies by entering loop
+      if (btest(verbosity,11)) then
+        call ESMF_LogWrite(trim(name)//&
+          ": components present that trigger loopDataDependentInitialize().", &
+          ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
+      
       call loopDataDependentInitialize(gcomp, is%wrap%dataDepAllComplete, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
 
-#ifdef DEBUG
-write(msgString,*) trim(name)//": finished loopDataDependentInitialize(): ", &
-  is%wrap%dataDepAllComplete
-call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
-
+      if (btest(verbosity,11)) then
+        write(msgString, "(A,l)") trim(name)//&
+          ": loopDataDependentInitialize() returned with dataDepAllComplete: ",&
+          is%wrap%dataDepAllComplete
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
     endif
     
     ! set the InitializeDataComplete attribute
@@ -1807,16 +1840,17 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 
   !-----------------------------------------------------------------------------
 
-  recursive subroutine loopDataDependentInitialize(gcomp, dataDepAllCompete, rc)
+  recursive subroutine loopDataDependentInitialize(gcomp, dataDepAllComplete, rc)
     ! resolve data dependencies
     type(ESMF_GridComp)             :: gcomp
-    logical, optional, intent(out)  :: dataDepAllCompete
+    logical, optional, intent(out)  :: dataDepAllComplete
     integer, intent(out)            :: rc
+    
     ! local variables
+    character(*), parameter         :: rName="loopDataDependentInitialize"
     integer                         :: phase, i, j, k, cphase, localrc
     character(ESMF_MAXSTR)          :: iString, jString, pString, valueString
     character(ESMF_MAXSTR)          :: cpString
-    character(len=*), parameter     :: phaseString = "IPDv02p5"
     type(ESMF_State)                :: imState, exState
     logical                         :: allComplete, someProgress
     integer                         :: petCount
@@ -1825,14 +1859,19 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     character(ESMF_MAXSTR)          :: name, compName
     type(ESMF_Clock)                :: internalClock
     type(ESMF_VM)                   :: vm
-
-    character(800)          :: msgString
+    integer                         :: verbosity
+    character(len=160)              :: msgString
 
     ! initialize out arguments
     rc = ESMF_SUCCESS
     
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, rc=rc)
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! intro
+    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1860,6 +1899,11 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
         write (iString, *) i
         if (NUOPC_CompAreServicesSet(is%wrap%modelComp(i))) then
           
+          call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+
           ! translate NUOPC logical phase to ESMF actual phase
           phase = 0 ! zero is reserved, use it here to see if need to skip
           do k=1, is%wrap%modelPhaseMap(i)%phaseCount
@@ -1888,11 +1932,14 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
           
-#ifdef DEBUG
-write(msgString,*) trim(name)//": inside loopDataDependentInitialize(): ", &
-  "component: ", i,", dataComplete: ", trim(valueString)
-call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
-#endif
+          if (btest(verbosity,11)) then
+            write(msgString, "(A,I4,A)") &
+              trim(name)//": component ", i, "="//trim(compName)//&
+              ", dataComplete: "//trim(valueString)
+            call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
 
           ! preconditioned input variables considering petList of component
           helperIn = 1  ! initialize
@@ -1954,10 +2001,6 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
           enddo
           
           ! attempt to make the actual call to initialize for model i
-          call ESMF_GridCompGet(is%wrap%modelComp(i), name=compName, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-            return  ! bail out
           call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
             importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
             clock=internalClock, phase=phase, userRc=localrc, rc=rc)
@@ -1994,13 +2037,42 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
         endif
       enddo
       
-      if (present(dataDepAllCompete)) dataDepAllCompete=allComplete
+      if (present(dataDepAllComplete)) dataDepAllComplete=allComplete
+
+      if (btest(verbosity,11)) then
+        write(msgString, "(A,l,A,l,A,l)") &
+          trim(name)//": someProgress=", someProgress, ", allComplete=", &
+          allComplete, ", present(dataDepAllComplete)=", &
+          present(dataDepAllComplete)
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
 
       ! check if all Components with IPDv02p5 are InitializeDataComplete
-      if (allComplete) exit ! break out of data-dependency resolution loop
+      if (allComplete) then
+        if (btest(verbosity,11)) then
+          call ESMF_LogWrite(trim(name)//&
+            ": finished resolving initialize data dependencies on this level.",&
+            ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
+        exit ! break out of data-dependency resolution loop
+      endif
       
       if (.not.someProgress) then
-        if (present(dataDepAllCompete)) exit ! break out of loop
+        if (present(dataDepAllComplete)) then
+          if (btest(verbosity,11)) then
+            call ESMF_LogWrite(trim(name)//&
+              ": not finished resolving initialize data dependencies on "//&
+              "this level, must return to upper level, and come back.",&
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
+          exit ! break out of loop
+        endif
         ! else, dead-lock situation identified
         call ESMF_LogSetError(ESMF_RC_INTNRL_BAD, &
           msg="Initialize data-dependency resolution loop "// &
@@ -2011,6 +2083,11 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
       
     enddo
     
+    ! extro
+    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
   end subroutine
 
   !-----------------------------------------------------------------------------
@@ -4274,7 +4351,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          ! automatically created components inherit verbosity setting
+          ! automatically created connectors inherit verbosity setting
+          !TODO: should only inherit lower 8-bits from parent
           call NUOPC_CompAttributeSet(conn, name="Verbosity", &
             value=valueString, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -5226,7 +5304,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! local variables
     character(*), parameter       :: rName="InternalInitializeComplete"
-    character(ESMF_MAXSTR)        :: name
+    character(ESMF_MAXSTR)        :: name, valueString
     integer                       :: verbosity
     type(ESMF_Clock)              :: internalClock
     type(ESMF_Time)               :: time
@@ -5264,18 +5342,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
-#ifdef DEBUG
-      else
-        do i=1, size(fieldList)
-          call ESMF_FieldGet(fieldList(i), name=fieldName, rc=rc)
+        if (btest(verbosity,11)) then
+          call ESMF_LogWrite(trim(name)//&
+            ": all fields in exportState at expected time.", &
+            ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) &
-            return  ! bail out
-          call ESMF_LogWrite(trim(name)//": Field not at expected time: "&
-            //trim(fieldName), ESMF_LOGMSG_WARNING)
-        enddo
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        endif
+      else
+        if (btest(verbosity,11)) then
+          do i=1, size(fieldList)
+            call ESMF_FieldGet(fieldList(i), name=fieldName, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) &
+              return  ! bail out
+            call ESMF_LogWrite(trim(name)//&
+              ": field in exportState not at expected time: "&
+              //trim(fieldName), ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) &
+              return  ! bail out
+          enddo
+        endif
         deallocate(fieldList)
-#endif
       endif
     else
       ! indicate that data initialization is complete 
@@ -5287,6 +5376,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return  ! bail out
     endif
     
+    if (btest(verbosity,11)) then
+      call NUOPC_CompAttributeGet(driver, name="InitializeDataComplete", &
+        value=valueString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      call ESMF_LogWrite(trim(name)//": InitializeDataComplete='"// &
+        trim(valueString)//"'", ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
