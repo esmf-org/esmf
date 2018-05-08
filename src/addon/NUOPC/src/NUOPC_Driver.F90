@@ -635,7 +635,7 @@ module NUOPC_Driver
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
               ! automatically created connectors inherit lower 8-bit
               ! of parent's verbosity setting
-              vInherit = ibits(verbosity,1,8)
+              vInherit = ibits(verbosity,0,8)
               write(vString,"(I10)") vInherit
               call NUOPC_CompAttributeSet(connector, name="Verbosity", &
                 value=vString, rc=rc)
@@ -4346,7 +4346,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return  ! bail out
           ! automatically created connectors inherit lower 8-bit
           ! of parent's verbosity setting
-          vInherit = ibits(verbosity,1,8)
+          vInherit = ibits(verbosity,0,8)
           write(vString,"(I10)") vInherit
           call NUOPC_CompAttributeSet(conn, name="Verbosity", &
             value=vString, rc=rc)
