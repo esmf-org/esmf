@@ -41,5 +41,14 @@ int main(int argc, char *argv[])
   ESMCI::MapperUtil::Matrix<float> m11 = m10.inv();
   std::cout << m11 << std::endl;
 
+  ESMCI::MapperUtil::Matrix<float> m12 = {{3, 3}, {7, 2, 1, 0, 3, -1, -3, 4, -2}};
+  ESMCI::MapperUtil::Matrix<float> m13 = m12.inv();
+  std::cout << m13 << std::endl;
+
+  // Singular matrix
+  // ESMCI::MapperUtil::Matrix<float> m14 = {{2, 2}, {3, 4, 6, 8}};
+  // ESMCI::MapperUtil::Matrix<float> m15 = m14.inv();
+  // std::cout << m15 << std::endl;
+
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }

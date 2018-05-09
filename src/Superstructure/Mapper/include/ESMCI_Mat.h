@@ -88,9 +88,33 @@ namespace ESMCI{
       lapack_int *ipiv = (lapack_int *)calloc(n+1, sizeof(lapack_int));
       lapack_int info;
       info = LAPACKE_sgetrf(LAPACK_ROW_MAJOR, n, n, A, n, ipiv);
-      assert(info >= 0);
+      /* info == 0 => success */
+      if(info < 0){
+        std::cout << "LAPACKE_sgetrf failed, the "
+          << -info << "th arg in input array, A[" << -info << "] = "
+          << A[-info] << " is invalid\n";
+        return 1;
+      }
+      else if(info > 0){
+        std::cout << "LAPACKE_sgetrf failed, the U["
+          << info << "," << info << "] = 0, U is singular and div by zero can occur"
+          << " if used to solve a system of equations\n";
+        return 1;
+      }
       info = LAPACKE_sgetri(LAPACK_ROW_MAJOR, n, A, n, ipiv);
-      assert(info >= 0);
+      /* info == 0 => success */
+      if(info < 0){
+        std::cout << "LAPACKE_sgetri failed, the "
+          << -info << "th arg in input array, A[" << -info << "] = "
+          << A[-info] << " is invalid\n";
+        return 1;
+      }
+      else if(info > 0){
+        std::cout << "LAPACKE_sgetri failed, the U["
+          << info << "," << info << "] = 0, the matrix is singular and its inverse "
+          << "cannot be computed\n";
+        return 1;
+      }
       free(ipiv);
 
       return 0;
