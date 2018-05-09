@@ -47,6 +47,19 @@ namespace ESMCI{
       }
 
       info = LAPACKE_sgels(LAPACK_ROW_MAJOR, 'N', m, n, nrhs, A, lda, B, ldb);
+      /* info == 0 is success */
+      if(info < 0){
+        std::cout << "LAPACKE_sgels failed, the " << -info
+          << "th arg in the input array, A[" << -info << "] ="
+          << A[-info] << " is invalid\n";
+        return 1;
+      }
+      else if(info > 0){
+        std::cout << "LAPACKE_sgels failed, the " << info
+          << "th diagonal element of the triangular factor of input array, A == 0, "
+          << "so A has no full rank and LES solution cannot be computed\n";
+        return 1;
+      }
 
       coeffs.resize(MAX_DEG_POLY + 1);
       for(int i=0; i<MAX_DEG_POLY+1; i++)

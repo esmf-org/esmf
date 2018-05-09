@@ -27,5 +27,13 @@ int main(int argc, char *argv[])
   p3.set_coeffs({1.0, 2.0, 3.0});
   std::cout << p3 << std::endl;
 
+  // The fit below will fail since two yvals for same xval
+  //std::vector<float> xvals_p4 = { 0.0, 0.0};
+  //std::vector<float> yvals_p4 = { 6.0, 3.0};
+  //ESMCI::MapperUtil::UVIDPoly<float> p4;
+  //rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_2D_LS_LAPACK,
+  //      xvals_p4, yvals_p4, p4);
+  //std::cout << p4 << std::endl;
+
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }
