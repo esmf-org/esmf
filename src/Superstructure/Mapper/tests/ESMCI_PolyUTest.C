@@ -24,11 +24,23 @@ int main(int argc, char *argv[])
   ESMCI::MapperUtil::UVIDPoly<float> p3;
   p3.set_coeffs({1.0, 2.0, 3.0});
   std::cout << p3 << std::endl;
+  if(p1 == p3){
+    std::cout << "\"" << p1 << "\" == \"" << p2 << "\"\n";
+  }
+  else{
+    std::cout << "\"" << p1 << "\" != \"" << p2 << "\"\n";
+  }
 
   strncpy(name, "Polynomial Derivative UTest", ESMF_MAX_STRLEN);
   strncpy(failMsg, "Polynomial Derivative test failed", ESMF_MAX_STRLEN);
   // 2 * x^2 + 3 * x + 4
   ESMCI::MapperUtil::UVIDPoly<float> p4 = {2.0, 3.0, 4};
+  if(p1 == p4){
+    std::cout << "\"" << p1 << "\" == \"" << p4 << "\"\n";
+  }
+  else{
+    std::cout << "\"" << p1 << "\" != \"" << p4 << "\"\n";
+  }
   // Derivative of p4
   ESMCI::MapperUtil::UVIDPoly<float> dp4;
   rc = FindDerivative(p4, dp4);
@@ -51,6 +63,14 @@ int main(int argc, char *argv[])
 
   std::vector<float> vvals = { 3.0 };
   std::cout << p1.eval(vvals) << std::endl;
+
+  ESMCI::MapperUtil::UVIDPoly<float> p10 = {2.0, 2.0, 2.0};
+  if(p10 == static_cast<float>(2)){
+    std::cout << "\"" << p10 << "\" == 2.0\n";
+  }
+  else{
+    std::cout << "\"" << p10 << "\" != 2.0\n";
+  }
 
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }
