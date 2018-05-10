@@ -48,12 +48,15 @@ namespace ESMCI{
       for(typename std::vector<CType>::const_iterator citer = poly_coeffs.cbegin();
             (citer != poly_coeffs.cend()) && (cur_deg > 0); ++citer){
 
+        //std::cout << "Processing coeff : " << *citer << "\n";
         int has_coeff = (by_x) ? (cur_xdeg > 0) : (cur_ydeg > 0);
         if(has_coeff){
           CType coeff = ((by_x) ? (cur_xdeg) : (cur_ydeg)) * (*citer);
-          if(coeff > 0){
+          //std::cout << "coeff : " << coeff << "\n";
+          if(coeff != 0){
             int coeff_idx = TwoVIDPolyUtil::get_coeff_idx(max_deg_dpoly, (by_x) ? (cur_xdeg - 1) : cur_xdeg, (by_x) ? (cur_ydeg) : (cur_ydeg - 1));
             assert((coeff_idx >= 0) && (coeff_idx < dpoly_ncoeffs));
+            //std::cout << "dpoly_coeffs[" << coeff_idx << "] = " << coeff << "\n";
             dpoly_coeffs[coeff_idx] = coeff; 
           }
         }
