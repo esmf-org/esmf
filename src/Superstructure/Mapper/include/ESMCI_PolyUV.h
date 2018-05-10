@@ -48,6 +48,7 @@ namespace ESMCI{
         void set_coeffs(std::initializer_list<CType> coeffs);
         std::vector<CType> get_coeffs(void ) const;
         CType eval(const std::vector<CType> &vvals) const;
+        CType eval(const CType &vval) const;
       private:
         std::vector<CType> coeffs_;
         std::vector<std::string> vnames_;
@@ -129,6 +130,13 @@ namespace ESMCI{
       }
 
       return res;
+    }
+
+    template<typename CType>
+    inline CType UVIDPoly<CType>::eval(const CType &vval) const
+    {
+      std::vector<CType> vvals(1, vval);
+      return eval(vvals);
     }
 
     template<typename CType>

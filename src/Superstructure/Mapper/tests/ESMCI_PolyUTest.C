@@ -63,6 +63,8 @@ int main(int argc, char *argv[])
 
   std::vector<float> vvals = { 3.0 };
   std::cout << p1.eval(vvals) << std::endl;
+  float vval = 3.0;
+  std::cout << p1.eval(vval) << std::endl;
 
   ESMCI::MapperUtil::UVIDPoly<float> p10 = {2.0, 2.0, 2.0};
   if(p10 == static_cast<float>(2)){

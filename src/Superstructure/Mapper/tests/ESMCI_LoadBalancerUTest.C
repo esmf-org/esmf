@@ -38,13 +38,14 @@ int main(int argc, char *argv[])
   assert(rc == 0);
   
   std::vector<int> npets = {128, 256, 512};
-  std::vector<float> parallel_exec_times = {pcomp1.eval(std::vector<float>(1,npets[0])), pcomp2.eval(std::vector<float>(1,npets[1])), pcomp3.eval(std::vector<float>(1,npets[2]))};
+  std::vector<float> parallel_exec_times = {pcomp1.eval(npets[0]), pcomp2.eval(npets[1]), pcomp3.eval(npets[2])};
   std::vector<float> serial_exec_times = {npets[0]*parallel_exec_times[0], npets[1] * parallel_exec_times[1], npets[2] * parallel_exec_times[2]};
   ESMCI::MapperUtil::LoadBalancer<float> lb(ncomps, parallel_exec_times, serial_exec_times, npets);
 
   for(int i=0; i<MAX_ITER; i++){
+    std::cout << "Load Balancer iter : " << i << "\n";
     std::vector<int> opt_npets = lb.optimize();
-    parallel_exec_times = {pcomp1.eval(std::vector<float>(1,opt_npets[0])), pcomp2.eval(std::vector<float>(1,opt_npets[1])), pcomp3.eval(std::vector<float>(1,opt_npets[2]))};
+    parallel_exec_times = {pcomp1.eval(opt_npets[0]), pcomp2.eval(opt_npets[1]), pcomp3.eval(opt_npets[2])};
     serial_exec_times = {opt_npets[0]*parallel_exec_times[0], opt_npets[1] * parallel_exec_times[1], opt_npets[2] * parallel_exec_times[2]};
     lb.set_lb_info(parallel_exec_times, serial_exec_times, opt_npets);
 
