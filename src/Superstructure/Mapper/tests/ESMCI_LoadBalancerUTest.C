@@ -33,12 +33,20 @@ int main(int argc, char *argv[])
   int max_deg = 2;
   rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, pcomp1_xvals, pcomp1_yvals, pcomp1);
   assert(rc == 0);
+  std::cout << "pcomp1 = " << pcomp1 << "\n";
+  for(std::vector<float>::const_iterator citer1 = pcomp1_xvals.cbegin(),
+      citer2 = pcomp1_yvals.cbegin();
+      (citer1 != pcomp1_xvals.cend()) && (citer2 != pcomp1_yvals.cend());
+      ++citer1, ++citer2){
+    std::cout << "pcomp1(" << *citer1 << ") = "
+              << pcomp1.eval(*citer1) << " : " << *citer2 << "\n";
+  }
   rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, pcomp2_xvals, pcomp2_yvals, pcomp2);
   assert(rc == 0);
   rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, pcomp3_xvals, pcomp3_yvals, pcomp3);
   assert(rc == 0);
   
-  std::vector<int> npets = {128, 256, 512};
+  std::vector<int> npets = {2048, 4096, 8192};
   std::vector<float> parallel_exec_times = {pcomp1.eval(npets[0]), pcomp2.eval(npets[1]), pcomp3.eval(npets[2])};
   std::vector<float> serial_exec_times = {npets[0]*parallel_exec_times[0], npets[1] * parallel_exec_times[1], npets[2] * parallel_exec_times[2]};
   ESMCI::MapperUtil::LoadBalancer<float> lb(ncomps, parallel_exec_times, serial_exec_times, npets);
@@ -46,15 +54,16 @@ int main(int argc, char *argv[])
   for(int i=0; i<MAX_ITER; i++){
     std::cout << "Load Balancer iter : " << i << "\n";
     std::vector<int> opt_npets = lb.optimize();
-    parallel_exec_times = {pcomp1.eval(opt_npets[0]), pcomp2.eval(opt_npets[1]), pcomp3.eval(opt_npets[2])};
-    serial_exec_times = {opt_npets[0]*parallel_exec_times[0], opt_npets[1] * parallel_exec_times[1], opt_npets[2] * parallel_exec_times[2]};
-    lb.set_lb_info(parallel_exec_times, serial_exec_times, opt_npets);
-
+    std::cout << "Optimized pet list : ";
     for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
         citer != opt_npets.cend(); ++citer){
       std::cout << *citer << ", ";
     }
     std::cout << "\n";
+    parallel_exec_times = {pcomp1.eval(opt_npets[0]), pcomp2.eval(opt_npets[1]), pcomp3.eval(opt_npets[2])};
+    serial_exec_times = {opt_npets[0]*parallel_exec_times[0], opt_npets[1] * parallel_exec_times[1], opt_npets[2] * parallel_exec_times[2]};
+    lb.set_lb_info(parallel_exec_times, serial_exec_times, opt_npets);
+
   }
 
   ESMC_TestEnd(__FILE__, __LINE__, 0);
