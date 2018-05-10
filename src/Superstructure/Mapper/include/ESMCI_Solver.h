@@ -182,29 +182,41 @@ namespace ESMCI{
         int ncols = vnames_.size();
         std::vector<T> J_data = J.get_data();
         std::vector<int> J_dims = J.get_dims();
-        J_dims[0] += 1;
-        for(int i=0; i<ncols; i++){
-          J_data.push_back(1);
-        }
+        Matrix<T> Jinv = J;
+        bool needs_last_row = (vnames_.size() > static_cast<size_t>(J_dims[0])) ?
+                              true : false;
+        if(needs_last_row){
+          assert(vnames_.size() == static_cast<size_t>(J_dims[0]) + 1);
+          J_dims[0] += 1;
+          for(int i=0; i<ncols; i++){
+            J_data.push_back(1);
+          }
 
-        Matrix<T> J_with_last_rones(J_dims, J_data); 
-        std::cout << "vnames sz = " << vnames_.size() << "\n";
-        for(int i=0; i<J_dims.size(); i++){
-          std::cout << J_dims[i] << ", ";
+          Matrix<T> J_with_last_rones(J_dims, J_data); 
+          std::cout << "vnames sz = " << vnames_.size() << "\n";
+          for(int i=0; i<J_dims.size(); i++){
+            std::cout << J_dims[i] << ", ";
+          }
+          std::cout << "\n";
+          Jinv = J_with_last_rones.inv();
         }
-        std::cout << "\n";
-        Matrix<T> Jinv = J_with_last_rones.inv();
+        else{
+          Jinv = J.inv();
+        }
 
         Matrix<T> Feval = SESolverUtils::eval_funcs(funcs_, vnames_, Xi.get_data());
-        std::vector<T> Feval_data = Feval.get_data();
-        std::vector<int> Feval_dims = Feval.get_dims();
-        Feval_dims[0] += 1;
-        std::vector<T> Xi_data = Xi.get_data();
-        T Ci = std::accumulate(Xi_data.cbegin(), Xi_data.cend(), 0);
-        Feval_data.push_back(Ci - C);
-        Matrix<T> Feval_with_last_row(Feval_dims, Feval_data);
+        if(needs_last_row){
+          std::vector<T> Feval_data = Feval.get_data();
+          std::vector<int> Feval_dims = Feval.get_dims();
+          Feval_dims[0] += 1;
+          std::vector<T> Xi_data = Xi.get_data();
+          T Ci = std::accumulate(Xi_data.cbegin(), Xi_data.cend(), 0);
+          Feval_data.push_back(Ci - C);
+          Matrix<T> Feval_with_last_row(Feval_dims, Feval_data);
+          Feval = Feval_with_last_row;
+        }
 
-        Xj = Xi - Jinv * Feval_with_last_row;
+        Xj = Xi - Jinv * Feval;
         Xi = Xj;
       }
 
