@@ -307,6 +307,11 @@ namespace ESMCI{
     template<typename CType>
     TwoVIDPoly<CType> operator+(const TwoVIDPoly<CType> &lhs, const TwoVIDPoly<CType> &rhs)
     {
+      std::vector<std::string> lhs_vnames = lhs.get_vnames();
+      std::vector<std::string> rhs_vnames = rhs.get_vnames();
+
+      assert(lhs_vnames == rhs_vnames);
+
       std::vector<CType> res_coeffs;
       std::vector<CType> lhs_coeffs = lhs.get_coeffs();
       std::vector<CType> rhs_coeffs = rhs.get_coeffs();
@@ -329,6 +334,8 @@ namespace ESMCI{
       std::reverse(res_coeffs.begin(), res_coeffs.end());
       TwoVIDPoly<CType> res(res_coeffs);
 
+      res.set_vnames(lhs_vnames);
+
       return res;
     }
 
@@ -342,6 +349,11 @@ namespace ESMCI{
     template<typename CType>
     TwoVIDPoly<CType> operator-(const TwoVIDPoly<CType> &lhs, const TwoVIDPoly<CType> &rhs)
     {
+      std::vector<std::string> lhs_vnames = lhs.get_vnames();
+      std::vector<std::string> rhs_vnames = rhs.get_vnames();
+
+      assert(lhs_vnames == rhs_vnames);
+
       std::vector<CType> res_coeffs;
       std::vector<CType> lhs_coeffs = lhs.get_coeffs();
       std::vector<CType> rhs_coeffs = rhs.get_coeffs();
@@ -363,6 +375,8 @@ namespace ESMCI{
       }
       std::reverse(res_coeffs.begin(), res_coeffs.end());
       TwoVIDPoly<CType> res(res_coeffs);
+
+      res.set_vnames(lhs_vnames);
 
       return res;
     }
@@ -411,6 +425,11 @@ namespace ESMCI{
     template<typename CType>
     TwoVIDPoly<CType> operator*(const TwoVIDPoly<CType> &lhs, const TwoVIDPoly<CType> &rhs)
     {
+      std::vector<std::string> lhs_vnames = lhs.get_vnames();
+      std::vector<std::string> rhs_vnames = rhs.get_vnames();
+
+      assert(lhs_vnames == rhs_vnames);
+
       std::vector<CType> lhs_coeffs = lhs.get_coeffs();
       std::vector<CType> rhs_coeffs = rhs.get_coeffs();
       int lhs_max_deg = lhs.get_max_deg();
@@ -472,6 +491,8 @@ namespace ESMCI{
         nrem_coeffs_in_deg_lhs = cur_deg_lhs + 1;
       }
       TwoVIDPoly<CType> res(res_coeffs);
+
+      res.set_vnames(lhs_vnames);
       return res;
     }
 
