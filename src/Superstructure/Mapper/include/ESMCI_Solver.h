@@ -86,6 +86,8 @@ namespace ESMCI{
             TwoVIDPoly<T> df;
             int ret = FindPDerivative(funcs[i], vnames[j], df);
             assert(ret == 0);
+            std::cout << "d(" << funcs[i] << ")/d" << vnames[j].c_str()
+                      << " = " << df << "\n";
             JFrow.push_back(df);
           }
           JF.push_back(JFrow);
@@ -198,6 +200,7 @@ namespace ESMCI{
             std::cout << J_dims[i] << ", ";
           }
           std::cout << "\n";
+          std::cout << " Jacobian : \n" << J_with_last_rones << "\n";
           Jinv = J_with_last_rones.inv();
         }
         else{

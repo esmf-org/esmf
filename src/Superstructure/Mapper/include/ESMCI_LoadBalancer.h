@@ -105,16 +105,8 @@ namespace ESMCI{
         }
       }
       else{
-        std::vector<TwoVIDPoly<T> > sfuncs;
+        std::vector<UVIDPoly<T> > sfuncs;
         std::vector<T> npets(npets_.begin(), npets_.end());
-        for(int i=0; i<ncomps_; i++){
-          UVIDPoly<T> p;
-          int max_deg = 2;
-          std::vector<T> past_comp_npets(past_npets_[i].cbegin(), past_npets_[i].cend());
-          int ret = PolyFit(POLY_FIT_LS_LAPACK, max_deg, past_comp_npets, past_wexec_times_[i], p);
-          assert(ret == 0);
-          sfuncs.push_back(p);
-        }
 
         std::vector<std::string> vnames;
         for(int i=0; i<ncomps_; i++){
@@ -124,13 +116,28 @@ namespace ESMCI{
           vnames.push_back(ostr.str());
         }
 
+        for(int i=0; i<ncomps_; i++){
+          UVIDPoly<T> p;
+          int max_deg = 2;
+          std::vector<T> past_comp_npets(past_npets_[i].cbegin(), past_npets_[i].cend());
+          int ret = PolyFit(POLY_FIT_LS_LAPACK, max_deg, past_comp_npets, past_wexec_times_[i], p);
+          assert(ret == 0);
+          std::vector<std::string> tmp_vnames(1, vnames[i]);
+          p.set_vnames(tmp_vnames);
+          std::cout << "uvidp" << i << " = " << p << "\n";
+          sfuncs.push_back(p);
+        }
+
         std::vector<TwoVIDPoly<T> > ifuncs;
         for(int i=1; i<ncomps_; i++){
-          TwoVIDPoly<T> p = sfuncs[0] - sfuncs[i];
+          TwoVIDPoly<T> p;
           std::vector<std::string> tmp_vnames;
           tmp_vnames.push_back(vnames[0]);
           tmp_vnames.push_back(vnames[i]);
           p.set_vnames(tmp_vnames);
+          TwoVIDPoly<T> p1(sfuncs[0], tmp_vnames);
+          TwoVIDPoly<T> p2(sfuncs[i], tmp_vnames);
+          p = p1 - p2;
           ifuncs.push_back(p);
         }
         /*
