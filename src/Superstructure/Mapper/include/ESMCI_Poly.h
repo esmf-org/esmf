@@ -7,6 +7,8 @@
 #include <iostream>
 #include <initializer_list>
 #include <cassert>
+//#include <cstdlib>
+#include <cmath>
 
 namespace ESMCI{
   namespace MapperUtil{
@@ -24,7 +26,43 @@ namespace ESMCI{
         virtual std::vector<CType> get_coeffs(void ) const = 0;
         virtual std::vector<std::vector<DType> > get_degs(void ) const = 0;
         virtual CType eval(const std::vector<CType> &vvals) const = 0;
+        bool equals(const GenPoly<CType, DType> &poly, double tol) const;
     }; // class GenPoly
+
+    template<typename CType, typename DType>
+    bool GenPoly<CType,DType>::equals(const GenPoly<CType, DType> &poly,
+                                      double tol) const
+    {
+      if(this->get_max_deg() != poly.get_max_deg()){
+        return false;
+      }
+      std::vector<std::string> vnames = this->get_vnames();
+      std::vector<std::string> vnames_poly = poly.get_vnames();
+      if(vnames.size() != vnames_poly.size()){
+        return false;
+      }
+
+      if(vnames != vnames_poly){
+        return false;
+      }
+
+      std::vector<CType> coeffs = this->get_coeffs();
+      std::vector<CType> coeffs_poly = poly.get_coeffs();
+      if(coeffs.size() != coeffs_poly.size()){
+        return false;
+      }
+
+      for(typename std::vector<CType>::const_iterator citer1 = coeffs.cbegin(),
+          citer2 = coeffs_poly.cbegin();
+          (citer1 != coeffs.cend()) && (citer2 != coeffs_poly.cend());
+          ++citer1, ++citer2){
+        if(fabs(*citer1 - *citer2) > tol){
+          return false;
+        }
+      }
+
+      return true;
+    }
 
     template<typename CType, typename DType>
     bool operator==(const GenPoly<CType, DType> &poly1,

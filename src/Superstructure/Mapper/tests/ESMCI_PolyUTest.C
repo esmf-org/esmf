@@ -72,5 +72,29 @@ int main(int argc, char *argv[])
     std::cout << "\"" << p10 << "\" != 2.0\n";
   }
 
+  ESMCI::MapperUtil::UVIDPoly<float> p11 = {1.01, 2.009, 3.009999};
+  ESMCI::MapperUtil::UVIDPoly<float> p12 = {1, 2, 3};
+  double tol = 0.1;
+  if(p11.equals(p12, tol)){
+    std::cout << "\"" << p11 << "\" == " << "\"" << p12 << "\" (tol=" << tol << ")\n";
+  }
+  else{
+    std::cout << "\"" << p11 << "\" != " << "\"" << p12 << "\" (tol=" << tol << ")\n";
+  }
+  tol = 0.01;
+  if(p11.equals(p12, tol)){
+    std::cout << "\"" << p11 << "\" == " << "\"" << p12 << "\" (tol=" << tol << ")\n";
+  }
+  else{
+    std::cout << "\"" << p11 << "\" != " << "\"" << p12 << "\" (tol=" << tol << ")\n";
+  }
+  tol = 0.001;
+  if(p11.equals(p12, tol)){
+    std::cout << "\"" << p11 << "\" == " << "\"" << p12 << "\" (tol=" << tol << ")\n";
+  }
+  else{
+    std::cout << "\"" << p11 << "\" != " << "\"" << p12 << "\" (tol=" << tol << ")\n";
+  }
+
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }
