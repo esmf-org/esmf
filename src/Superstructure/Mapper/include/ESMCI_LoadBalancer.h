@@ -90,7 +90,9 @@ namespace ESMCI{
       T total_time = std::accumulate(serial_exec_times_.cbegin(),
                       serial_exec_times_.cend(), 0);
 
-      if(past_wexec_times_.size() < 3){
+      const int MIN_VALS_REQD_FOR_POLY_FIT = 3;
+      if((past_wexec_times_.size() > 0)
+          && (past_wexec_times_[0].size() < MIN_VALS_REQD_FOR_POLY_FIT)){
         // Use weighted average for the solution
         /*
         std::transform(serial_exec_times_.cbegin(), serial_exec_times_.cend(),
