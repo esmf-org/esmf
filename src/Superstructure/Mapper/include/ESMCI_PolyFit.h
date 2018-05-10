@@ -64,7 +64,7 @@ namespace ESMCI{
       coeffs.resize(max_deg + 1);
       for(int i=0; i<max_deg+1; i++)
       {
-        coeffs[i] = B[i];
+        coeffs[i] = B[max_deg - i];
       }
       return 0;
     }
