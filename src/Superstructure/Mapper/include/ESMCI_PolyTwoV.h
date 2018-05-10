@@ -64,6 +64,7 @@ namespace ESMCI{
         TwoVIDPoly(const std::vector<CType>& coeffs);
         TwoVIDPoly(std::initializer_list<CType> coeffs);
         TwoVIDPoly(const UVIDPoly<CType> &uvpoly);
+        TwoVIDPoly(const UVIDPoly<CType> &uvpoly, const std::vector<std::string> &vnames);
         int get_max_deg(void ) const;
         void set_vnames(const std::vector<std::string>& vnames); 
         std::vector<std::string> get_vnames(void ) const; 
@@ -135,6 +136,53 @@ namespace ESMCI{
       
       vnames_.push_back("x");
       vnames_.push_back("y");
+    }
+
+    template<typename CType>
+    inline TwoVIDPoly<CType>::TwoVIDPoly(const UVIDPoly<CType> &uvpoly,
+              const std::vector<std::string> &vnames):vnames_(vnames)
+    {
+      max_deg_ = uvpoly.get_max_deg();
+
+      std::vector<std::string> uvpoly_vnames = uvpoly.get_vnames();
+      assert(uvpoly_vnames.size() == 1);
+
+      bool is_x_var = (uvpoly_vnames[0] == vnames_[0]) ? true : false;
+      int cur_deg = max_deg_;
+      int ncoeffs_in_cur_deg=cur_deg+1;
+
+      std::vector<CType> uvpoly_coeffs = uvpoly.get_coeffs();
+
+      if(is_x_var){
+        for(typename std::vector<CType>::const_iterator citer = uvpoly_coeffs.cbegin();
+            citer != uvpoly_coeffs.cend(); ++citer){
+
+          coeffs_.push_back(*citer);
+          
+          ncoeffs_in_cur_deg--;
+          while(ncoeffs_in_cur_deg != 0){
+            coeffs_.push_back(0);
+            ncoeffs_in_cur_deg--;
+          }
+          cur_deg--;
+          ncoeffs_in_cur_deg = cur_deg+1;
+        }
+      }
+      else{
+        for(typename std::vector<CType>::const_iterator citer = uvpoly_coeffs.cbegin();
+            citer != uvpoly_coeffs.cend(); ++citer){
+
+          ncoeffs_in_cur_deg--;
+          while(ncoeffs_in_cur_deg != 0){
+            coeffs_.push_back(0);
+            ncoeffs_in_cur_deg--;
+          }
+          coeffs_.push_back(*citer);
+          
+          cur_deg--;
+          ncoeffs_in_cur_deg = cur_deg+1;
+        }
+      }
     }
 
     template<typename CType>

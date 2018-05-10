@@ -56,5 +56,22 @@ int main(int argc, char *argv[])
   ESMCI::MapperUtil::TwoVIDPoly<float> p9(uvpoly1);
   std::cout << uvpoly1 << " == " << p9 << std::endl;
 
+  std::vector<std::string> uvpoly1_vnames1 = {"p"};
+  uvpoly1.set_vnames(uvpoly1_vnames1);
+  std::vector<std::string> p10_vnames = {"p", "q"};
+  ESMCI::MapperUtil::TwoVIDPoly<float> p10(uvpoly1, p10_vnames);
+  std::cout << "p10 = " << p10 << "\n";
+
+  std::vector<std::string> uvpoly1_vnames2 = {"q"};
+  uvpoly1.set_vnames(uvpoly1_vnames2);
+  std::vector<std::string> p11_vnames = {"p", "q"};
+  ESMCI::MapperUtil::TwoVIDPoly<float> p11(uvpoly1, p11_vnames);
+  std::cout << "p11 = " << p11 << "\n";
+
+  ESMCI::MapperUtil::TwoVIDPoly<float> p12;
+  std::vector<std::string> p12_vnames = {"p", "q"};
+  p12.set_vnames(p12_vnames);
+  p12 = p11 - p10;
+  std::cout << "\"" << p11 << "\" - \"" << p10 << "\" = " << p12 << "\n";
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }
