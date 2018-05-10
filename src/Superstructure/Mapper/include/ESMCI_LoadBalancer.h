@@ -154,7 +154,7 @@ namespace ESMCI{
         SESolver<T> solver(vnames, npets, ifuncs);
         std::vector<T> new_pets = solver.minimize();
         for(int i=0; i<ncomps_; i++){
-          res.push_back(static_cast<int>(new_pets[i]));
+          res[i] = static_cast<int>(new_pets[i]);
         }
       }
 
