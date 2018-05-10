@@ -13,18 +13,18 @@
 namespace ESMCI{
   namespace MapperUtil{
     typedef enum{
-      POLY_FIT_2D_LS_LAPACK
+      POLY_FIT_LS_LAPACK
     } PolyFitAlg;
 
-    inline int LAPACK_2D_Solver(const std::vector<float>& xvals, const std::vector<float> &yvals, std::vector<float> &coeffs)
+    inline int LAPACK_2D_Solver(int max_deg, const std::vector<float>& xvals, const std::vector<float> &yvals, std::vector<float> &coeffs)
     {
-      const int MAX_DEG_POLY = 2;
+      //const int MAX_DEG_POLY = 2;
       if(xvals.size() == 0) return 0;
       assert(xvals.size() == yvals.size());
       // Using LAPACK to solve minimize || Ax - B ||
       int num_obs = xvals.size();
       int NUM_ROWS_IN_A = num_obs;
-      const int NUM_COLS_IN_A = MAX_DEG_POLY + 1;
+      const int NUM_COLS_IN_A = max_deg + 1;
       int NUM_ROWS_IN_B = num_obs;
       const int NUM_COLS_IN_B = 1;
 
@@ -61,8 +61,8 @@ namespace ESMCI{
         return 1;
       }
 
-      coeffs.resize(MAX_DEG_POLY + 1);
-      for(int i=0; i<MAX_DEG_POLY+1; i++)
+      coeffs.resize(max_deg + 1);
+      for(int i=0; i<max_deg+1; i++)
       {
         coeffs[i] = B[i];
       }
@@ -70,12 +70,12 @@ namespace ESMCI{
     }
 
     template<typename CType, typename VType>
-    int PolyFit(PolyFitAlg alg, const std::vector<VType>& xvals, const std::vector<VType>& yvals, UVIDPoly<CType> &poly)
+    int PolyFit(PolyFitAlg alg, int max_deg, const std::vector<VType>& xvals, const std::vector<VType>& yvals, UVIDPoly<CType> &poly)
     {
       std::vector<CType> coeffs;
-      assert(alg == POLY_FIT_2D_LS_LAPACK);
+      assert(alg == POLY_FIT_LS_LAPACK);
 
-      int ret = LAPACK_2D_Solver(xvals, yvals, coeffs);
+      int ret = LAPACK_2D_Solver(max_deg, xvals, yvals, coeffs);
       assert(ret == 0);
 
       poly.set_coeffs(coeffs); 

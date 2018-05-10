@@ -30,11 +30,12 @@ int main(int argc, char *argv[])
   std::vector<float> pcomp3_xvals = {1600, 4096, 8192, 9600};
   std::vector<float> pcomp3_yvals = {756.506, 399.585, 270.775, 227.472};
 
-  rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_2D_LS_LAPACK, pcomp1_xvals, pcomp1_yvals, pcomp1);
+  int max_deg = 2;
+  rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, pcomp1_xvals, pcomp1_yvals, pcomp1);
   assert(rc == 0);
-  rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_2D_LS_LAPACK, pcomp2_xvals, pcomp2_yvals, pcomp2);
+  rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, pcomp2_xvals, pcomp2_yvals, pcomp2);
   assert(rc == 0);
-  rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_2D_LS_LAPACK, pcomp3_xvals, pcomp3_yvals, pcomp3);
+  rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, pcomp3_xvals, pcomp3_yvals, pcomp3);
   assert(rc == 0);
   
   std::vector<int> npets = {128, 256, 512};

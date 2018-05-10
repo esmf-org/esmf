@@ -107,8 +107,9 @@ namespace ESMCI{
         std::vector<T> npets(npets_.begin(), npets_.end());
         for(int i=0; i<ncomps_; i++){
           UVIDPoly<T> p;
+          int max_deg = 2;
           std::vector<T> past_comp_npets(past_npets_[i].cbegin(), past_npets_[i].cend());
-          int ret = PolyFit(POLY_FIT_2D_LS_LAPACK, past_comp_npets, past_wexec_times_[i], p);
+          int ret = PolyFit(POLY_FIT_LS_LAPACK, max_deg, past_comp_npets, past_wexec_times_[i], p);
           assert(ret == 0);
           sfuncs.push_back(p);
         }
