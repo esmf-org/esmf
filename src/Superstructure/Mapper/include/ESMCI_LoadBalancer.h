@@ -138,7 +138,8 @@ namespace ESMCI{
           TwoVIDPoly<T> p1(sfuncs[0], tmp_vnames);
           TwoVIDPoly<T> p2(sfuncs[i], tmp_vnames);
           p = p1 - p2;
-          ifuncs.push_back(p);
+          TwoVIDPoly<T> psq = p * p;
+          ifuncs.push_back(psq);
         }
         /*
         std::vector<T> last_ifunc_vals(vnames.size(), 1);
