@@ -761,6 +761,14 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "NUOPC_GetTimestamp() for Field Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  flag = NUOPC_GetTimestamp(field, stopTime, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "NUOPC_IsAtTime() for Field Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   flag = NUOPC_IsAtTime(field, startTime, rc=rc)

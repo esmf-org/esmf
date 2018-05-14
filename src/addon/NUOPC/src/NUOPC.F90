@@ -81,6 +81,7 @@ module NUOPC
   public NUOPC_CheckSetClock              ! method
   public NUOPC_GetAttribute               ! method
   public NUOPC_GetStateMemberLists        ! method
+  public NUOPC_GetTimestamp               ! method
   public NUOPC_InitAttributes             ! method, internal use only
   public NUOPC_IsAtTime                   ! method
   public NUOPC_IsConnected                ! method
