@@ -1,6 +1,7 @@
 #ifndef ESMCI_PolyFit_H
 #define ESMCI_PolyFit_H
 
+#include "ESMCI_Macros.h"
 #include <iostream>
 #include <vector>
 #include <cassert>
@@ -59,13 +60,13 @@ namespace ESMCI{
         std::cout << "LAPACKE_sgels failed, the " << -info
           << "th arg in the input array, A[" << -info << "] ="
           << A[-info] << " is invalid\n";
-        return 1;
+        return ESMF_FAILURE;
       }
       else if(info > 0){
         std::cout << "LAPACKE_sgels failed, the " << info
           << "th diagonal element of the triangular factor of input array, A == 0, "
           << "so A has no full rank and LES solution cannot be computed\n";
-        return 1;
+        return ESMF_FAILURE;
       }
 
       coeffs.resize(max_deg + 1);
@@ -73,7 +74,7 @@ namespace ESMCI{
       {
         coeffs[i] = B[max_deg - i];
       }
-      return 0;
+      return ESMF_SUCCESS;
     }
 
     /* Fit a polynomial of degree, max_deg, on a 2D user data set with xvalues
@@ -87,10 +88,10 @@ namespace ESMCI{
       assert(alg == POLY_FIT_LS_LAPACK);
 
       int ret = LAPACK_2D_Solver(max_deg, xvals, yvals, coeffs);
-      assert(ret == 0);
+      assert(ret == ESMF_SUCCESS);
 
       poly.set_coeffs(coeffs); 
-      return 0;
+      return ESMF_SUCCESS;
     }
 
   } //namespace MapperUtil

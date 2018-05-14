@@ -1,6 +1,7 @@
 #ifndef ESMCI_Mat_H
 #define ESMCI_Mat_H
 
+#include "ESMCI_Macros.h"
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -98,13 +99,13 @@ namespace ESMCI{
         std::cout << "LAPACKE_sgetrf failed, the "
           << -info << "th arg in input array, A[" << -info << "] = "
           << A[-info] << " is invalid\n";
-        return 1;
+        return ESMF_FAILURE;
       }
       else if(info > 0){
         std::cout << "LAPACKE_sgetrf failed, the U["
           << info << "," << info << "] = 0, U is singular and div by zero can occur"
           << " if used to solve a system of equations\n";
-        return 1;
+        return ESMF_FAILURE;
       }
       /* Calculate the inverse of the matrix */
       info = LAPACKE_sgetri(LAPACK_ROW_MAJOR, n, A, n, ipiv);
@@ -113,17 +114,17 @@ namespace ESMCI{
         std::cout << "LAPACKE_sgetri failed, the "
           << -info << "th arg in input array, A[" << -info << "] = "
           << A[-info] << " is invalid\n";
-        return 1;
+        return ESMF_FAILURE;
       }
       else if(info > 0){
         std::cout << "LAPACKE_sgetri failed, the U["
           << info << "," << info << "] = 0, the matrix is singular and its inverse "
           << "cannot be computed\n";
-        return 1;
+        return ESMF_FAILURE;
       }
       free(ipiv);
 
-      return 0;
+      return ESMF_SUCCESS;
     }
 
     /* Calculate the inverse of the matrix */
@@ -140,7 +141,7 @@ namespace ESMCI{
       assert(std::adjacent_find(dims_.cbegin(), dims_.cend(), std::not_equal_to<T>()) == dims_.cend());
 
       int ret = LAPACK_Minv(res.dims_[0], res.get_data_by_ref());
-      assert(ret == 0);
+      assert(ret == ESMF_SUCCESS);
 
       return res;
     }
@@ -173,9 +174,10 @@ namespace ESMCI{
                           const float *A, int lda, const float *B, int ldb,
                           int beta, float *C, int ldc)
     {
+      /* cblas_sgemm has no return code ! */
       cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
                   m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
-      return 0;
+      return ESMF_SUCCESS;
     }
 
     /* Multiply two matrices, currently uses BLAS routines for matrix
@@ -224,7 +226,7 @@ namespace ESMCI{
 
       /* Use BLAS for multiplying the two matrices */
       int ret = BLAS_Mmult(m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
-      assert(ret == 0);
+      assert(ret == ESMF_SUCCESS);
 
       return res;
     }

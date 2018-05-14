@@ -1,6 +1,7 @@
 #ifndef ESMCI_PolyDer_H
 #define ESMCI_PolyDer_H
 
+#include "ESMCI_Macros.h"
 #include <vector>
 #include "ESMCI_Poly.h"
 #include "ESMCI_PolyUV.h"
@@ -27,7 +28,7 @@ namespace ESMCI{
       }
 
       dpoly.set_coeffs(dpoly_coeffs);
-      return 0;
+      return ESMF_SUCCESS;
     }
 
     /* Find the partial derivative of a polynomial with two variables
@@ -89,7 +90,7 @@ namespace ESMCI{
       }
 
       dpoly.set_coeffs(dpoly_coeffs);
-      return 0;
+      return ESMF_SUCCESS;
     }
 
     /* Find the partial derivative of a polynomial with two variables
@@ -101,7 +102,7 @@ namespace ESMCI{
     inline int FindPDerivative(const TwoVIDPoly<CType>& poly, const std::string &vname,
                   TwoVIDPoly<CType>& dpoly)
     {
-      int ret = 0;
+      int ret = ESMF_SUCCESS;
       std::vector<CType> poly_coeffs = poly.get_coeffs();
       int max_deg = poly.get_max_deg();
       int max_deg_dpoly = max_deg - 1;
@@ -123,7 +124,7 @@ namespace ESMCI{
       else{
         dpoly.set_vnames(vnames);
         dpoly.set_coeffs(dpoly_coeffs);
-        ret = 0;
+        ret = ESMF_SUCCESS;
       }
 
       return ret;
