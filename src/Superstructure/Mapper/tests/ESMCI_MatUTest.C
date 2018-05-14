@@ -17,6 +17,18 @@ int main(int argc, char *argv[])
   ESMCI::MapperUtil::Matrix<float> m1 = {{1, 2}, {5, 6}};
   std::cout << m1 << std::endl;
 
+  ESMCI::MapperUtil::Matrix<float> m1_1 = {{1, 2}, {5, 6}};
+  std::cout << m1_1 << std::endl;
+
+  strncpy(name, "Matrix comparison (==) Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Matrix comparison (==) test failed", ESMF_MAX_STRLEN);
+  ESMC_Test((m1 == m1_1), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  double tol = 0.00000001;
+  strncpy(name, "Matrix comparison (equals) Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Matrix comparison (equals) test failed", ESMF_MAX_STRLEN);
+  ESMC_Test((m1.equals(m1_1, tol)), name, failMsg, &result, __FILE__, __LINE__, 0);
+
   ESMCI::MapperUtil::Matrix<float> m2 = {{2, 3}, {5, 6, 7, 8, 9, 10}};
   std::cout << m2 << std::endl;
 

@@ -31,6 +31,14 @@ namespace ESMCI{
 
         Matrix<T> inv(void ) const;
 
+        bool equals(const Matrix<T> &m, double tol) const;
+
+        template<typename U>
+        friend bool operator==(const Matrix<U> &lhs, const Matrix<U> &rhs);
+        template<typename U>
+        friend bool operator==(const Matrix<U> &m, const U &val);
+        template<typename U>
+        friend bool operator==(const U &val, const Matrix<U> &m);
         template<typename U>
         friend Matrix<U> operator+(const Matrix<U> &lhs, const Matrix<U> &rhs);
         template<typename U>
@@ -144,6 +152,62 @@ namespace ESMCI{
       assert(ret == ESMF_SUCCESS);
 
       return res;
+    }
+
+    template<typename T>
+    bool Matrix<T>::equals(const Matrix<T> &m, double tol) const
+    {
+      std::vector<int> m_dims = m.get_dims();
+      std::vector<T> m_data = m.get_data();
+
+      if(m_dims != dims_){
+        return false;
+      }
+
+      if(m_data.size() != data_.size()){
+        return false;
+      }
+
+      for(typename std::vector<T>::const_iterator citer1 = m_data.cbegin(),
+          citer2 = data_.cbegin();
+          (citer1 != m_data.cend()) && (citer2 != data_.cend());
+          ++citer1, ++citer2){
+        if(fabs(*citer1 - *citer2) > tol){
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    template<typename T>
+    bool operator==(const Matrix<T> &lhs, const Matrix<T> &rhs)
+    {
+      if(lhs.dims_ != rhs.dims_){
+        return false; 
+      }
+      if(lhs.data_ != rhs.data_){
+        return false;
+      }
+      return true;
+    }
+
+    template<typename T>
+    bool operator==(const Matrix<T> &m, const T& val)
+    {
+      for(typename std::vector<T>::const_iterator citer = m.data_.cbegin();
+          citer != m.data_.cend(); ++citer){
+        if(*citer != val){
+          return false;
+        }
+      }
+      return true;
+    }
+
+    template<typename T>
+    bool operator==(const T &val, const Matrix<T> &m)
+    {
+      return (m == val);
     }
 
     template<typename T>
