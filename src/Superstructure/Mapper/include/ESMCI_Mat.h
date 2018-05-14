@@ -13,6 +13,9 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* A Matrix class
+     * The matrix class is used to create an n-dimensional matrix of values
+     */
     template<typename T>
     class Matrix{
       public:
@@ -82,11 +85,13 @@ namespace ESMCI{
       return data_;
     }
 
+    /* Calculate the inverse of the matrix using LAPACK */
     inline int LAPACK_Minv(int m, float *A)
     {
       lapack_int n = static_cast<lapack_int>(m);
       lapack_int *ipiv = (lapack_int *)calloc(n+1, sizeof(lapack_int));
       lapack_int info;
+      /* Calculate LU decomposition of the matrix */
       info = LAPACKE_sgetrf(LAPACK_ROW_MAJOR, n, n, A, n, ipiv);
       /* info == 0 => success */
       if(info < 0){
@@ -101,6 +106,7 @@ namespace ESMCI{
           << " if used to solve a system of equations\n";
         return 1;
       }
+      /* Calculate the inverse of the matrix */
       info = LAPACKE_sgetri(LAPACK_ROW_MAJOR, n, A, n, ipiv);
       /* info == 0 => success */
       if(info < 0){
@@ -120,6 +126,7 @@ namespace ESMCI{
       return 0;
     }
 
+    /* Calculate the inverse of the matrix */
     template<typename T>
     Matrix<T> Matrix<T>::inv(void ) const
     {
@@ -160,6 +167,8 @@ namespace ESMCI{
       return res;
     }
 
+    /* Multiply two matrices using BLAS
+     */
     inline int BLAS_Mmult(int m, int n, int k, int alpha,
                           const float *A, int lda, const float *B, int ldb,
                           int beta, float *C, int ldc)
@@ -169,6 +178,9 @@ namespace ESMCI{
       return 0;
     }
 
+    /* Multiply two matrices, currently uses BLAS routines for matrix
+     * multiplication
+     */
     template<typename T>
     Matrix<T> operator*(const Matrix<T> &lhs, const Matrix<T> &rhs)
     {
@@ -176,6 +188,9 @@ namespace ESMCI{
       // No tensor products for now
       assert((lhs.dims_.size() <= 2) && (rhs.dims_.size() <= 2));
       assert(lhs.dims_[lhs.dims_.size()-1] == rhs.dims_[0]);
+      /* Determine inputs to the BLAS routine to perform
+       * matrix multiplication
+       */
       int m, n, k, alpha, lda, ldb, beta, ldc;
       alpha = 1;
       beta = 1;
@@ -207,6 +222,7 @@ namespace ESMCI{
       const T *B = rhs.get_data_by_ref();
       T *C = res.get_data_by_ref();
 
+      /* Use BLAS for multiplying the two matrices */
       int ret = BLAS_Mmult(m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
       assert(ret == 0);
 

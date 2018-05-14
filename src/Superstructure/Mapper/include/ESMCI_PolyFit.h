@@ -16,9 +16,14 @@ namespace ESMCI{
       POLY_FIT_LS_LAPACK
     } PolyFitAlg;
 
+    /* Use LAPACK to minimize Least square errors and fit a polynomial (of maximum
+     * degree, max_deg) on a 2D user data set. The 2D user data is specified via
+     * xvals (x values for the user data) and yvals (y values for the user data),
+     * and the resulting fit polynomial coefficients are stored (returned via) in
+     * coeffs
+     */
     inline int LAPACK_2D_Solver(int max_deg, const std::vector<float>& xvals, const std::vector<float> &yvals, std::vector<float> &coeffs)
     {
-      //const int MAX_DEG_POLY = 2;
       if(xvals.size() == 0) return 0;
       assert(xvals.size() == yvals.size());
       // Using LAPACK to solve minimize || Ax - B ||
@@ -39,6 +44,8 @@ namespace ESMCI{
       float *B = (float *)calloc(NUM_ROWS_IN_B * NUM_COLS_IN_B, sizeof(float));
       assert(A && B);
 
+      /*
+       */ 
       for(int i=0; i<num_obs; i++){
         for(int j=0; j<NUM_COLS_IN_A; j++){
           A[i * NUM_COLS_IN_A + j] = powf(xvals[i], j);
@@ -69,6 +76,10 @@ namespace ESMCI{
       return 0;
     }
 
+    /* Fit a polynomial of degree, max_deg, on a 2D user data set with xvalues
+     * specified via xvals and y values specified via yvals. The resulting fit
+     * polynomial is returned in poly
+     */
     template<typename CType, typename VType>
     int PolyFit(PolyFitAlg alg, int max_deg, const std::vector<VType>& xvals, const std::vector<VType>& yvals, UVIDPoly<CType> &poly)
     {

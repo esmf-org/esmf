@@ -13,6 +13,10 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* Solver class
+     * The solver class is used to minimize a set of input values
+     * wrt user specified constaint functions
+     */
     template<typename T>
     class SESolver{
       public:
@@ -54,29 +58,21 @@ namespace ESMCI{
       niters_ = niters;
     }
 
+    /* Some utils used by the solver is included in a separate 
+     * namespace
+     */
     namespace SESolverUtils{
+      /* Calculate the Jacobian for the user constraints 
+       * specified via funcs wrt the variables specified in vnames
+       * Each row, i, in the Jacobian is the partial derivative
+       * of funcs[i] wrt each of the variables in vnames
+       * J[i][j] = d(funcs[i])/d(vnames[j])
+       */  
       template<typename T>
       std::vector<std::vector<TwoVIDPoly<T> > > calc_jacobian(
           const std::vector<std::string> &vnames,
           const std::vector<TwoVIDPoly<T> > &funcs)
       {
-        /*
-        std::vector<std::string> vnames;
-        for(typename std::vector<TwoVIDPoly<T> >::const_iterator citer = funcs.cbegin();
-            citer != funcs.cend(); ++citer){
-          std::vector<std::string> tmp_vnames = (*citer).get_vnames();
-          for(std::vector<std::string>::const_iterator
-                tmp_vnames_citer = tmp_vnames.cbegin();
-              tmp_vnames_citer != tmp_vnames.cend(); ++tmp_vnames_citer){
-            vnames.push_back(*tmp_vnames_citer);
-          }
-        }
-        std::sort(vnames.begin(), vnames.end());
-        std::vector<std::string>::iterator new_end_iter =
-          std::unique(vnames.begin(), vnames.end());
-        vnames.resize(std::distance(vnames.begin(), new_end_iter));
-        */
-
         int nrows = funcs.size();
         int ncols = vnames.size();
         std::vector<std::vector<TwoVIDPoly<T> > > JF;
@@ -95,6 +91,14 @@ namespace ESMCI{
         return JF;
       }
 
+      /* Evaluate the Jacobian, j, using values of variables
+       * provided in vvals (& corresponding to vnames)
+       * Each value in index i of vvals is the value of the variable
+       * with name vnames[i].
+       * Note that a function/polynomial, j[i][j], in j need
+       * not contain all the variables in vnames/vvals vectors.
+       * Returns a 2D matrix (mxn) of values of type T
+       */
       template<typename T>
       Matrix<T> eval_jacobian(
         const std::vector<std::vector<TwoVIDPoly<T> > > &j,
@@ -133,6 +137,14 @@ namespace ESMCI{
         return res;
       }
 
+      /* Evaluate a vector of functions, funcs, using values of
+       * variables provided in vvals (& corresponding to vnames)
+       * Each value in index i of vvals is the value of the variable
+       * with name vnames[i].
+       * Note that a function/polynomial, funcs[k], in funcs need
+       * not contain all the variables in vnames/vvals vectors.
+       * Returns a 1D matrix (mx1) of values of type T
+       */
       template<typename T>
       Matrix<T> eval_funcs(const std::vector<TwoVIDPoly<T> >& funcs,
         const std::vector<std::string> &vnames,
@@ -142,6 +154,7 @@ namespace ESMCI{
         int ncols = 1;
         std::vector<T> res_data;
 
+        assert(vnames.size() == vvals.size());
         for(typename std::vector<TwoVIDPoly<T> >::const_iterator
               cfiter = funcs.cbegin(); cfiter != funcs.cend(); ++cfiter){
           TwoVIDPoly<T> p = *cfiter;
@@ -174,17 +187,33 @@ namespace ESMCI{
       std::vector<T> Xj_init_vals(vnames_.size(), 0);
       Matrix<T> Xj(Xi_dims, Xj_init_vals);
 
+      /* C = Sum of all input variables */
       T C = std::accumulate(init_vals_.cbegin(), init_vals_.cend(), 0);
 
+      /* Calculate the Jacobian matrix for the user constraint functions */
       std::vector<std::vector<TwoVIDPoly<T> > > JF =
         SESolverUtils::calc_jacobian(vnames_,funcs_);
 
+      /* Solve for new values of Xi such that we minimize the user 
+       * specified constraints (specified via funcs_ )
+       * A basic Newton Raphson solver solving the eqn:
+       * Xj = Xi - Jinv * Feval; where
+       * Xi => Vector with current values of the input vars
+       * Feval => Vector that contains funcs_, user specified constraints
+       *          evaluated for Xi
+       * Jinv => Inverse of the Jacobian of user specified constraint funcs
+       * Xj => The next (after one iteration) value of Xi
+       */
       for(int i=0; i<niters_; i++){
         Matrix<T> J = SESolverUtils::eval_jacobian(JF, vnames_, Xi.get_data());
         int ncols = vnames_.size();
         std::vector<T> J_data = J.get_data();
         std::vector<int> J_dims = J.get_dims();
         Matrix<T> Jinv = J;
+        /* If there are more variables than functions we add a last row of ones
+         * in the Jacobian. This row corresponds to a constraint that all of
+         * the input variables need to add up to a constant
+         */
         bool needs_last_row = (vnames_.size() > static_cast<size_t>(J_dims[0])) ?
                               true : false;
         if(needs_last_row){
@@ -208,6 +237,11 @@ namespace ESMCI{
         }
 
         Matrix<T> Feval = SESolverUtils::eval_funcs(funcs_, vnames_, Xi.get_data());
+        /* If there are more variables than functions we add a last row.
+         * The last row corresponds to a constraint that the sum of the input
+         * variables need to remain constant (see variable C above,
+         * i.e., Sum (Xi) - C = 0)
+         */
         if(needs_last_row){
           std::vector<T> Feval_data = Feval.get_data();
           std::vector<int> Feval_dims = Feval.get_dims();
@@ -220,6 +254,7 @@ namespace ESMCI{
         }
 
         Xj = Xi - Jinv * Feval;
+        std::cout << "Xj = \n" << Xj << "\n";
         Xi = Xj;
       }
 

@@ -13,6 +13,10 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* The generic polynomial class
+     * This class is abstract and is extended to implement
+     * univariable/ 2 variable polynomials
+     */
     template<typename CType, typename DType>
     class GenPoly{
       public:
@@ -29,6 +33,9 @@ namespace ESMCI{
         bool equals(const GenPoly<CType, DType> &poly, double tol) const;
     }; // class GenPoly
 
+    /* Compare two polynomials using a user-specified tolerance, tol.
+     * The tolerance is used to compare the polynomial coefficients
+     */
     template<typename CType, typename DType>
     bool GenPoly<CType,DType>::equals(const GenPoly<CType, DType> &poly,
                                       double tol) const
@@ -64,6 +71,7 @@ namespace ESMCI{
       return true;
     }
 
+    /* Check if two polynomials are equal */
     template<typename CType, typename DType>
     bool operator==(const GenPoly<CType, DType> &poly1,
                     const GenPoly<CType, DType> &poly2)
@@ -92,6 +100,7 @@ namespace ESMCI{
       return true;
     }
 
+    /* Check if all coefficients of a polynomial is equal to val */
     template<typename CType, typename DType>
     bool operator==(const GenPoly<CType, DType> &poly, const CType &val)
     {
@@ -106,6 +115,7 @@ namespace ESMCI{
       return true;
     }
 
+    /* Check if all coefficients of a polynomial is equal to val */
     template<typename CType, typename DType>
     bool operator==(const CType &val, const GenPoly<CType, DType> &poly)
     {

@@ -12,6 +12,9 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* A polynomial with 2 variables
+     * This abstract class extends from the generic polynomial class
+     */
     template<typename CType, typename DType>
     class TwoVPoly : public GenPoly<CType, DType>{
       public:
@@ -33,7 +36,9 @@ namespace ESMCI{
       assert(0);
     }
 
+    /* A namespace for utils used with two variable polynomials */
     namespace TwoVIDPolyUtil{
+      /* Get the max degree of a polynomial with two variables */
       inline static int get_max_deg(int ncoeffs)
       {
         int coeffs_sz = ncoeffs;
@@ -55,6 +60,9 @@ namespace ESMCI{
       }
     } // namespace TwoVIDPolyUtil
 
+    /* A polynomial with 2 variables and integer degrees
+     * This concrete class extends from the two variable polynomial class
+     */
     template<typename CType>
     class TwoVIDPoly : public TwoVPoly<CType, int>{
       public:
@@ -110,6 +118,7 @@ namespace ESMCI{
       vnames_.push_back("y");
     }
 
+    /* Create a two variable polynomial from a univariate polynomial */
     template<typename CType>
     inline TwoVIDPoly<CType>::TwoVIDPoly(const UVIDPoly<CType> &uvpoly)
     {
@@ -138,6 +147,12 @@ namespace ESMCI{
       vnames_.push_back("y");
     }
 
+    /* Create a two variable polynomial from a univariate polynomial
+     * The user also provides the variable names to be used in the 
+     * two variable polynomial.
+     * Note that the variable name in the univariate polynomial needs
+     * to be one of the variable names provided via vnames.
+     */
     template<typename CType>
     inline TwoVIDPoly<CType>::TwoVIDPoly(const UVIDPoly<CType> &uvpoly,
               const std::vector<std::string> &vnames):vnames_(vnames)
@@ -224,6 +239,7 @@ namespace ESMCI{
       return coeffs_;
     }
 
+    /* Evaluate a polynomial */
     template<typename CType>
     inline CType TwoVIDPoly<CType>::eval(const std::vector<CType> &vvals) const
     {
@@ -388,7 +404,11 @@ namespace ESMCI{
       return plhs - rhs;
     }
 
+    /* Namespace for utils used by two variable polynomial with integer degs */
     namespace TwoVIDPolyUtil{
+      /* Calculate the number of coefficients in a two variable polynomial
+       * with max degree, max_deg
+       */
       static inline int get_ncoeffs(int max_deg)
       {
         int ncoeffs = 1;
@@ -401,6 +421,11 @@ namespace ESMCI{
         return ncoeffs;
       }
 
+      /* Calculate the index of the coefficient, in the polynomial 
+       * representation of a two variable polynomial, with maximum
+       * degree, max_deg and the individual variable degrees, v1deg
+       * and v2deg
+       */
       static inline int get_coeff_idx(int max_deg, int v1deg, int v2deg)
       {
         int deg = v1deg + v2deg;

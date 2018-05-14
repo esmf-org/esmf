@@ -12,6 +12,9 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* Univariate (1 variable) polynomial class
+     * This class is abstract and derives from the general polynomial class
+     */
     template<typename CType, typename DType>
     class UniVPoly : public GenPoly<CType, DType>{
       public:
@@ -33,6 +36,9 @@ namespace ESMCI{
       assert(0);
     }
 
+    /* Univariate polynomial with integer degrees
+     * This concrete class derives from the univariate polynomial class
+     */
     template<typename CType>
     class UVIDPoly : public UniVPoly<CType, int>{
       public:
@@ -115,7 +121,8 @@ namespace ESMCI{
     {
       return coeffs_;
     }
-
+ 
+    /* Evaluate the polynomial */
     template<typename CType>
     inline CType UVIDPoly<CType>::eval(const std::vector<CType> &vvals) const
     {
