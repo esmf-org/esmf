@@ -130,17 +130,16 @@ program ESMF_DistGridCreateGetUTest
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Testing DistGrid IsCreated for created object"
-  write(failMsg, *) "Did not return .true."
-  isCreated = ESMF_DistGridIsCreated(distgrid)
-  call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_DistGridIsCreated(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Testing DistGrid IsCreated for created object"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  isCreated = ESMF_DistGridIsCreated(distgrid, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  write(name, *) "Testing DistGrid IsCreated return value for created object"
+  write(failMsg, *) "Did not return .true."
+  call ESMF_Test((isCreated .eqv. .true.), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -154,17 +153,16 @@ program ESMF_DistGridCreateGetUTest
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Testing DistGrid IsCreated for destroyed object"
-  write(failMsg, *) "Did not return .false."
-  isCreated = ESMF_DistGridIsCreated(distgrid)
-  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_DistGridIsCreated(distgrid, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Testing DistGrid IsCreated for destroyed object"
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  isCreated = ESMF_DistGridIsCreated(distgrid, rc=rc)
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  write(name, *) "Testing DistGrid IsCreated return value for destroyed object"
+  write(failMsg, *) "Did not return .false."
+  call ESMF_Test((isCreated .eqv. .false.), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
