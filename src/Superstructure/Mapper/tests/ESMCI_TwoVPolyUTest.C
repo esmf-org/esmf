@@ -32,21 +32,27 @@ int main(int argc, char *argv[])
   std::cout << p5 << std::endl;
 
 
+  strncpy(name, "Polynomial derivative (2 deg) Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial derivative (2 deg) Utest failed", ESMF_MAX_STRLEN);
   ESMCI::MapperUtil::TwoVIDPoly<float> p6;
-  int ret = ESMCI::MapperUtil::FindPDerivative(p1, true, p6);
-  assert(ret == 0);
+  rc = ESMCI::MapperUtil::FindPDerivative(p1, true, p6);
   std::cout << p6 << std::endl;
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   ESMCI::MapperUtil::TwoVIDPoly<float> p7, p8;
   std::vector<std::string> p1_vnames = {"p", "q"};
   p1.set_vnames(p1_vnames);
   std::cout << p1 << std::endl;
+  strncpy(name, "Polynomial derivative (2 deg) wrt p Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial derivative (2 deg) wrt p Utest failed", ESMF_MAX_STRLEN);
   rc = ESMCI::MapperUtil::FindPDerivative(p1, std::string("p"), p7);
-  assert(rc == 0);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   std::cout << p7 << std::endl;
+  strncpy(name, "Polynomial derivative (2 deg) wrt q Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial derivative (2 deg) wrt q Utest failed", ESMF_MAX_STRLEN);
   rc = ESMCI::MapperUtil::FindPDerivative(p1, std::string("q"), p8);
-  assert(rc == 0);
   std::cout << p8 << std::endl;
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   std::vector<float> vvals = {2.0, 3.0};
   std::cout << p2.eval(vvals) << std::endl;

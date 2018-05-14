@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 #include "ESMCI_Poly.h"
 #include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyFit.h"
@@ -6,12 +7,18 @@
 
 int main(int argc, char *argv[])
 {
-  int rc = 0;
+  const int ESMF_MAX_STRLEN = 128;
+  char name[ESMF_MAX_STRLEN];
+  char failMsg[ESMF_MAX_STRLEN];
+  int rc = 0, result = 0;
 
   ESMC_TestStart(__FILE__, __LINE__, 0);
 
   std::vector<float> xvals = {1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0};
   std::vector<float> yvals = {1.1, 1.3, 1.6, 2.0, 2.7, 3.4, 4.1};
+
+  strncpy(name, "2 Degree Polynomial fit Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "2 Degree Polynomial fit Utest failed", ESMF_MAX_STRLEN);
   ESMCI::MapperUtil::UVIDPoly<float> p0;
   int max_deg = 2;
   rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, xvals, yvals, p0);
@@ -22,7 +29,11 @@ int main(int argc, char *argv[])
     std::cout << "p0(" << *citer1 << ") = " << p0.eval(*citer1)
               << " : " << *citer2 << "\n"; 
   }
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  
 
+  strncpy(name, "3 Degree Polynomial fit Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "3 Degree Polynomial fit Utest failed", ESMF_MAX_STRLEN);
   ESMCI::MapperUtil::UVIDPoly<float> p1;
   max_deg = 3;
   rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, xvals, yvals, p1);
@@ -34,7 +45,10 @@ int main(int argc, char *argv[])
               << " : " << *citer2 << "\n"; 
   }
 
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
+  strncpy(name, "4 Degree Polynomial fit Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "4 Degree Polynomial fit Utest failed", ESMF_MAX_STRLEN);
   ESMCI::MapperUtil::UVIDPoly<float> p2;
   max_deg = 4;
   rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, xvals, yvals, p2);
@@ -45,6 +59,7 @@ int main(int argc, char *argv[])
     std::cout << "p2(" << *citer1 << ") = " << p2.eval(*citer1)
               << " : " << *citer2 << "\n"; 
   }
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
 
   // The fit below will fail since two yvals for same xval
