@@ -100,6 +100,14 @@ namespace ESMCI{
       return true;
     }
 
+    /* Check if two polynomials are equal */
+    template<typename CType, typename DType>
+    bool operator!=(const GenPoly<CType, DType> &poly1,
+                    const GenPoly<CType, DType> &poly2)
+    {
+      return (!(poly1 == poly2));
+    }
+
     /* Check if all coefficients of a polynomial is equal to val */
     template<typename CType, typename DType>
     bool operator==(const GenPoly<CType, DType> &poly, const CType &val)
@@ -115,11 +123,23 @@ namespace ESMCI{
       return true;
     }
 
+    template<typename CType, typename DType>
+    bool operator!=(const GenPoly<CType, DType> &poly, const CType &val)
+    {
+      return (!(poly == val));
+    }
+
     /* Check if all coefficients of a polynomial is equal to val */
     template<typename CType, typename DType>
     bool operator==(const CType &val, const GenPoly<CType, DType> &poly)
     {
       return (poly == val);
+    }
+
+    template<typename CType, typename DType>
+    bool operator!=(const CType &val, const GenPoly<CType, DType> &poly)
+    {
+      return(!(val == poly));
     }
   } // namespace MapperUtil
 } // namespace ESMCI
