@@ -89,6 +89,15 @@ namespace ESMCI{
         }
       }
 
+      /* Find the first non zero coefficient in the result */
+      typename std::vector<CType>::const_iterator citer_first_nz_val = dpoly_coeffs.cbegin();
+      while((citer_first_nz_val != dpoly_coeffs.cend()) && (*citer_first_nz_val == 0)){
+        ++citer_first_nz_val;
+      }
+      if(citer_first_nz_val != dpoly_coeffs.cend()){
+        dpoly_coeffs.erase(dpoly_coeffs.begin(), citer_first_nz_val);
+      }
+
       dpoly.set_coeffs(dpoly_coeffs);
       return ESMF_SUCCESS;
     }
