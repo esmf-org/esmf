@@ -1204,8 +1204,6 @@ program ESMF_DistGridCreateGetUTest
     maxIndexPTile=maxIndexPTile, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
  
-  deallocate(minIndexPTile, maxIndexPTile)
-  
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "DistGridGet() - elementCount"
