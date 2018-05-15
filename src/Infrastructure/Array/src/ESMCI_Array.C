@@ -3780,6 +3780,10 @@ int Array::deserialize(
     &rc)) return rc;
   // Deserialize the DistGrid
   distgrid = DistGrid::deserialize(buffer, offset);
+  if (!distgrid)
+     if (ESMC_LogDefault.MsgFoundError(ESMF_RC_INTNRL_BAD,
+         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+         &rc)) return rc;
   distgridCreator = true;  // deserialize creates a local object
   // Pull DELayout out of DistGrid
   delayout = distgrid->getDELayout();

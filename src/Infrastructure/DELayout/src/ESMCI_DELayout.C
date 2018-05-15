@@ -1601,12 +1601,12 @@ int DELayout::serialize(
 DELayout *DELayout::deserialize(
 //
 // !RETURN VALUE:
-//    int return code
+//    Pointer to DELayout, NULL on failure.
 //
 // !ARGUMENTS:
   char *buffer,          // in - byte stream to read
   int *offset) {         // inout - original offset, updated to point
-                         //  to first free byte after current obj info
+                         // to first free byte after current obj info
 //
 // !DESCRIPTION:
 //    Turn a stream of bytes into an object.

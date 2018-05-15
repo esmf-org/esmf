@@ -158,7 +158,7 @@ void FTN_X(c_esmc_fieldserialize)(
                 int * totalLWidth,
                 int * totalUWidth,
                 char *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *localrc,
+                ESMC_InquireFlag *inquireflag, int *rc,
                 ESMCI_FortranStrLenArg buf_l){
 
 #undef  ESMC_METHOD
@@ -167,7 +167,7 @@ void FTN_X(c_esmc_fieldserialize)(
     int i;
 
     // Initialize return code; assume routine not implemented
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
     // either put the code here, or call into a real C++ function
     ESMC_Status *sp;
 
@@ -176,7 +176,7 @@ void FTN_X(c_esmc_fieldserialize)(
     if ((*inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < fixedpart) {
 
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Buffer too short to add a Field object", ESMC_CONTEXT, localrc);
+          "Buffer too short to add a Field object", ESMC_CONTEXT, rc);
          return;
 
         //buffer = (char *)realloc((void *)buffer,
@@ -219,7 +219,7 @@ void FTN_X(c_esmc_fieldserialize)(
 
     *offset = ptr - buffer;
 
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 }
@@ -228,13 +228,15 @@ void FTN_X(c_esmc_fieldserialize)(
 void FTN_X(c_esmc_fielddeserialize)(
                 ESMC_Status *status,
                 ESMC_Status *iostatus,
-                int * dimCount,
-                int * gridToFieldMap,
-                int * ungriddedLBound,
-                int * ungriddedUBound,
-                int * totalLWidth,
-                int * totalUWidth,
-                char *buffer, int *offset, int *localrc,
+                const int * dimCount,
+                const int * gridToFieldMap,
+                const int * ungriddedLBound,
+                const int * ungriddedUBound,
+                const int * totalLWidth,
+                const int * totalUWidth,
+                const char *buffer,
+                int *offset,
+                int *rc,
                 ESMCI_FortranStrLenArg buffer_l){
 
 #undef  ESMC_METHOD
@@ -242,7 +244,8 @@ void FTN_X(c_esmc_fielddeserialize)(
     int i;
 
     // Initialize return code; assume routine not implemented
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
     // either put the code here, or call into a real C++ function
     ESMC_Status *sp;
 
@@ -266,7 +269,7 @@ void FTN_X(c_esmc_fielddeserialize)(
 
     *offset = ptr - buffer;
 
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 }

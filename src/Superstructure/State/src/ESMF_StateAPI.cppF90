@@ -1914,10 +1914,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        case ("long")
          longflag  = .true.
        case default
-         write (ESMF_UtilIOStderr,*) "ESMF_StatePrint: Illegal options arg: ", &
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Illegal options argument: ", &
              trim (localopts)
-         if (present (rc)) rc = ESMF_RC_ARG_BAD
-         return
+         if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+             msg="Illegal options argument: " // trim (localopts), &
+             ESMF_CONTEXT, rcToReturn=rc)) return
        end select
 
        if (.not.associated(state%statep)) then
@@ -1944,7 +1945,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        write (mypet_string,'(i8)') mypet
        mypet_string = adjustl (mypet_string)
        write (ESMF_UtilIOStdout,*)  &
-           "StatePrint (pet ", trim (mypet_string), "):"
+           ESMF_METHOD, ": (pet ", trim (mypet_string), "):"
 
        call statePrintWorker (state%statep, level=0, rc1=rc)
 
