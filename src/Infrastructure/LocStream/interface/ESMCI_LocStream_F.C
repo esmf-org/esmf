@@ -296,7 +296,8 @@ void FTN_X(c_esmc_locstreamgeteubnd)(ESMCI::DistGrid **_distgrid,
 void FTN_X(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag,
                 int *keyCount,
                 char *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *localrc,
+                ESMC_InquireFlag *inquireflag,
+                int *rc,
                 ESMCI_FortranStrLenArg buffer_l){
 
     ESMC_IndexFlag *ifp;
@@ -304,14 +305,14 @@ void FTN_X(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag,
 
 
     // Initialize return code; assume routine not implemented
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // TODO: verify length > vars.
     int size = sizeof(ESMC_IndexFlag) + sizeof(int);
     if (*inquireflag != ESMF_INQUIREONLY) {
       if ((*length - *offset) < size) {
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Buffer too short to add a LocStream object", ESMC_CONTEXT, localrc);
+          "Buffer too short to add a LocStream object", ESMC_CONTEXT, rc);
          return;
       }
     }
@@ -331,21 +332,23 @@ void FTN_X(c_esmc_locstreamserialize)(ESMC_IndexFlag *indexflag,
     *offset += sizeof(ESMC_IndexFlag) + sizeof(int);
 
     // return success
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 }
 
 
 void FTN_X(c_esmc_locstreamdeserialize)(ESMC_IndexFlag *indexflag,
-                int *keyCount, char *buffer, int *offset, int *localrc,
+                int *keyCount, char *buffer,
+                int *offset,
+                int *rc,
                 ESMCI_FortranStrLenArg buffer_l){
 
     ESMC_IndexFlag *ifp;
     int *ip;
 
     // Initialize return code; assume routine not implemented
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // Get indexflag
     ifp = (ESMC_IndexFlag *)(buffer + *offset);
@@ -359,7 +362,7 @@ void FTN_X(c_esmc_locstreamdeserialize)(ESMC_IndexFlag *indexflag,
     *offset += sizeof(ESMC_IndexFlag) + sizeof(int);
 
     // return success
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 }
@@ -370,7 +373,8 @@ void FTN_X(c_esmc_locstreamkeyserialize)(
                                        int *unitsLen, char *units,
                                        int *longNameLen, char *longName,
                 char *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *localrc,
+                ESMC_InquireFlag *inquireflag,
+                int *rc,
                 ESMCI_FortranStrLenArg keyName_l,
                 ESMCI_FortranStrLenArg units_l,
                 ESMCI_FortranStrLenArg longName_l,
@@ -382,14 +386,14 @@ void FTN_X(c_esmc_locstreamkeyserialize)(
   int r;
 
   // Initialize return code; assume routine not implemented
-  if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   // TODO: verify length > vars.
   int size = *keyNameLen + *unitsLen + *longNameLen;
   if (*inquireflag != ESMF_INQUIREONLY) {
     if ((*length - *offset) < size) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-         "Buffer too short to add a LocStream object", ESMC_CONTEXT, localrc);
+         "Buffer too short to add a LocStream object", ESMC_CONTEXT, rc);
       return;
     }
   }
@@ -430,7 +434,7 @@ void FTN_X(c_esmc_locstreamkeyserialize)(
   if (r!=0) *offset += 8-r;
 
   // return success
-  if (localrc) *localrc = ESMF_SUCCESS;
+  if (rc) *rc = ESMF_SUCCESS;
 
   return;
 }
@@ -440,7 +444,9 @@ void FTN_X(c_esmc_locstreamkeydeserialize)(
                                          char *keyName,
                                          char *units,
                                          char *longName,
-                                         char *buffer, int *offset, int *localrc,
+                                         char *buffer,
+                                         int *offset,
+                                         int *rc,
                                          ESMCI_FortranStrLenArg keyName_l,
                                          ESMCI_FortranStrLenArg units_l,
                                          ESMCI_FortranStrLenArg longName_l,
@@ -451,7 +457,7 @@ void FTN_X(c_esmc_locstreamkeydeserialize)(
   int r, keyNameLen, unitsLen, longNameLen;
 
   // Initialize return code; assume routine not implemented
-  if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+  if (rc) *rc = ESMC_RC_NOT_IMPL;
 
   // Get pointer to memory
   ip = (int *)(buffer + *offset);
@@ -490,7 +496,7 @@ void FTN_X(c_esmc_locstreamkeydeserialize)(
   if (r!=0) *offset += 8-r;
 
   // return success
-  if (localrc) *localrc = ESMF_SUCCESS;
+  if (rc) *rc = ESMF_SUCCESS;
 
   return;
 }

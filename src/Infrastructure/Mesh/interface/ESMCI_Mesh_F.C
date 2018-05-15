@@ -215,27 +215,28 @@ extern "C" void FTN_X(c_esmc_meshcreateelemdistgrid)(MeshCap **meshpp, int *egri
 extern "C" void FTN_X(c_esmc_meshinfoserialize)(int *intMeshFreed,
                 int *spatialDim, int *parametricDim,
                 char *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *localrc,
+                ESMC_InquireFlag *inquireflag, int *rc,
                 ESMCI_FortranStrLenArg buffer_l){
 
   MeshCap::meshinfoserialize(intMeshFreed,
                              spatialDim, parametricDim,
                              buffer, length, offset,
-                             inquireflag, localrc,
+                             inquireflag, rc,
                              buffer_l);
 
 }
 
 
 extern "C" void FTN_X(c_esmc_meshinfodeserialize)(int *intMeshFreed,
-                                 int *spatialDim, int *parametricDim,
-                                 char *buffer, int *offset, int *localrc,
-                                 ESMCI_FortranStrLenArg buffer_l){
+                             int *spatialDim, int *parametricDim,
+                             char *buffer, int *offset,
+                             int *rc,
+                             ESMCI_FortranStrLenArg buffer_l){
 
   MeshCap::meshinfodeserialize(intMeshFreed,
-                               spatialDim, parametricDim,
-                               buffer, offset, localrc,
-                               buffer_l);
+                             spatialDim, parametricDim,
+                             buffer, offset, rc,
+                             buffer_l);
 }
 
 
@@ -252,8 +253,9 @@ extern "C" void FTN_X(c_esmc_meshserialize)(MeshCap **meshpp,
 
 
 extern "C" void FTN_X(c_esmc_meshdeserialize)(MeshCap **meshpp,
-                                 char *buffer, int *offset, int *rc,
-                                 ESMCI_FortranStrLenArg buffer_l){
+                             char *buffer, int *offset,
+                             int *rc,
+                             ESMCI_FortranStrLenArg buffer_l){
 
   *meshpp=MeshCap::meshdeserialize(buffer, offset, rc,
                              buffer_l);

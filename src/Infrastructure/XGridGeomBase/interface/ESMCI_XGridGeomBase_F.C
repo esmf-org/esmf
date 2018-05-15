@@ -46,21 +46,21 @@ extern "C" {
   void FTN_X(c_esmc_xgridgeombaseserialize)(int *geomtype, int * staggerloc,
                                      int *meshloc,
                                      char *buffer, int *length, int *offset,
-                                     ESMC_InquireFlag *inquireflag, int *localrc,
+                                     ESMC_InquireFlag *inquireflag, int *rc,
                                      ESMCI_FortranStrLenArg buffer_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_xgridgeombaseserialize()"
     int *ip;
 
     // Initialize return code; assume routine not implemented
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // TODO: verify length > 4 status vars, and if not, make room.
     int fixedpart = 5 * sizeof(int);
     if (*inquireflag != ESMF_INQUIREONLY) {
       if ((*length - *offset) < fixedpart) {
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-           "Buffer too short to add a GeomBase object", ESMC_CONTEXT, localrc);
+           "Buffer too short to add a GeomBase object", ESMC_CONTEXT, rc);
          return;
       }
     }
@@ -78,7 +78,7 @@ extern "C" {
     *offset += 5 * sizeof(int);
 
     // return success
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 }
@@ -86,13 +86,16 @@ extern "C" {
 
   void FTN_X(c_esmc_xgridgeombasedeserialize)(int *geomtype, int * staggerloc,
                                        int *meshloc,
-                                       char *buffer, int *offset, int *localrc,
+                                       char *buffer, int *offset,
+                                       int *rc,
                                        ESMCI_FortranStrLenArg buffer_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_xgridgeombasedeserialize()"
 
     int *ip;
 
     // Initialize return code; assume routine not implemented
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     // Get data out
     ip = (int *)(buffer + *offset);
@@ -103,7 +106,7 @@ extern "C" {
     // Adjust offset
     *offset += 5 * sizeof(int);
 
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 }
