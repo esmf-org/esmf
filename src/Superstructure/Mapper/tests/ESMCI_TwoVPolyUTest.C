@@ -17,67 +17,104 @@ int main(int argc, char *argv[])
 
   // x^2+2xy+3y^2+4x+5y+6
   ESMCI::MapperUtil::TwoVIDPoly<float> p1 = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
-  std::cout << p1 << std::endl;
+  //std::cout << p1 << std::endl;
 
   // x^2+2xy+5y+6
   ESMCI::MapperUtil::TwoVIDPoly<float> p2 = {1.0, 2.0, 0.0, 0.0, 5.0, 6.0};
-  std::cout << p2 << std::endl;
+  //std::cout << p2 << std::endl;
 
+  strncpy(name, "Polynomial Addition Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial Addition Utest failed", ESMF_MAX_STRLEN);
   ESMCI::MapperUtil::TwoVIDPoly<float> p3 = p1+p2;
-  std::cout << p3 << std::endl;
+  //std::cout << p3 << std::endl;
+  // p1 = x^2+2xy+3y^2+4x+5y+6; p2 = x^2+2xy+5y+6
+  ESMCI::MapperUtil::TwoVIDPoly<float> ep3 = { 2, 4, 3, 4, 10, 12};
+  ESMC_Test((p3 == ep3), name, failMsg, &result, __FILE__, __LINE__, 0);
 
+  strncpy(name, "Polynomial Multiplication Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial Multiplication Utest failed", ESMF_MAX_STRLEN);
   // x + 2
   ESMCI::MapperUtil::TwoVIDPoly<float> p4 = {1.0, 0.0, 2.0};
   ESMCI::MapperUtil::TwoVIDPoly<float> p5 = p1 * p4;
-  std::cout << p5 << std::endl;
+  //std::cout << p5 << std::endl;
+  ESMCI::MapperUtil::TwoVIDPoly<float> ep5 = {1, 2, 3, 0, 6, 9, 6, 14, 10, 12};
+  ESMC_Test((p5 == ep5), name, failMsg, &result, __FILE__, __LINE__, 0);
 
 
   strncpy(name, "Polynomial derivative (2 deg) Utest", ESMF_MAX_STRLEN);
   strncpy(failMsg, "Polynomial derivative (2 deg) Utest failed", ESMF_MAX_STRLEN);
   ESMCI::MapperUtil::TwoVIDPoly<float> p6;
   rc = ESMCI::MapperUtil::FindPDerivative(p1, true, p6);
-  std::cout << p6 << std::endl;
+  //std::cout << p6 << std::endl;
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  strncpy(name, "Polynomial derivative (2 deg) Correctness Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial derivative (2 deg) Correctness Utest failed", ESMF_MAX_STRLEN);
+  ESMCI::MapperUtil::TwoVIDPoly<float> ep6 = {2, 2, 4};
+  ESMC_Test((p6 == ep6), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   ESMCI::MapperUtil::TwoVIDPoly<float> p7, p8;
   std::vector<std::string> p1_vnames = {"p", "q"};
   p1.set_vnames(p1_vnames);
-  std::cout << p1 << std::endl;
+  //std::cout << p1 << std::endl;
   strncpy(name, "Polynomial derivative (2 deg) wrt p Utest", ESMF_MAX_STRLEN);
   strncpy(failMsg, "Polynomial derivative (2 deg) wrt p Utest failed", ESMF_MAX_STRLEN);
   rc = ESMCI::MapperUtil::FindPDerivative(p1, std::string("p"), p7);
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-  std::cout << p7 << std::endl;
+  //std::cout << p7 << std::endl;
+  strncpy(name, "Polynomial derivative (2 deg) wrt p Correctness Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial derivative (2 deg) wrt p Correctness Utest failed", ESMF_MAX_STRLEN);
+  ESMCI::MapperUtil::TwoVIDPoly<float> ep7 = {2, 2, 4};
+  ep7.set_vnames(p1_vnames);
+  ESMC_Test((p7 == ep7), name, failMsg, &result, __FILE__, __LINE__, 0);
   strncpy(name, "Polynomial derivative (2 deg) wrt q Utest", ESMF_MAX_STRLEN);
   strncpy(failMsg, "Polynomial derivative (2 deg) wrt q Utest failed", ESMF_MAX_STRLEN);
   rc = ESMCI::MapperUtil::FindPDerivative(p1, std::string("q"), p8);
-  std::cout << p8 << std::endl;
+  //std::cout << p8 << std::endl;
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  strncpy(name, "Polynomial derivative (2 deg) wrt q Correctness Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial derivative (2 deg) wrt q Correctness Utest failed", ESMF_MAX_STRLEN);
+  ESMCI::MapperUtil::TwoVIDPoly<float> ep8 = {2, 6, 5};
+  ep8.set_vnames(p1_vnames);
+  ESMC_Test((p8 == ep8), name, failMsg, &result, __FILE__, __LINE__, 0);
 
+  strncpy(name, "Polynomial evaluation Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial evaluation Utest", ESMF_MAX_STRLEN);
   std::vector<float> vvals = {2.0, 3.0};
-  std::cout << p2.eval(vvals) << std::endl;
+  float ep2_eval = 37;
+  //std::cout << p2.eval(vvals) << std::endl;
+  ESMC_Test((p2.eval(vvals) == ep2_eval), name, failMsg, &result, __FILE__, __LINE__, 0);
 
+  strncpy(name, "Polynomial create two v poly from univ poly Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial create two v poly from univ poly Utest failed", ESMF_MAX_STRLEN);
   // 2 x^2 + 3x + 4
   ESMCI::MapperUtil::UVIDPoly<float> uvpoly1 = {2.0, 3.0, 4.0};
   ESMCI::MapperUtil::TwoVIDPoly<float> p9(uvpoly1);
-  std::cout << uvpoly1 << " == " << p9 << std::endl;
+  //std::cout << uvpoly1 << " == " << p9 << std::endl;
+  ESMCI::MapperUtil::TwoVIDPoly<float> ep9 = {2, 0, 0, 3, 0, 4};
+  ESMC_Test((p9 == ep9), name, failMsg, &result, __FILE__, __LINE__, 0);
 
+  strncpy(name, "Polynomial subtraction Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial subtraction Utest failed", ESMF_MAX_STRLEN);
   std::vector<std::string> uvpoly1_vnames1 = {"p"};
   uvpoly1.set_vnames(uvpoly1_vnames1);
   std::vector<std::string> p10_vnames = {"p", "q"};
   ESMCI::MapperUtil::TwoVIDPoly<float> p10(uvpoly1, p10_vnames);
-  std::cout << "p10 = " << p10 << "\n";
+  //std::cout << "p10 = " << p10 << "\n";
 
   std::vector<std::string> uvpoly1_vnames2 = {"q"};
   uvpoly1.set_vnames(uvpoly1_vnames2);
   std::vector<std::string> p11_vnames = {"p", "q"};
   ESMCI::MapperUtil::TwoVIDPoly<float> p11(uvpoly1, p11_vnames);
-  std::cout << "p11 = " << p11 << "\n";
+  //std::cout << "p11 = " << p11 << "\n";
 
   ESMCI::MapperUtil::TwoVIDPoly<float> p12;
   std::vector<std::string> p12_vnames = {"p", "q"};
   p12.set_vnames(p12_vnames);
   p12 = p11 - p10;
-  std::cout << "\"" << p11 << "\" - \"" << p10 << "\" = " << p12 << "\n";
+  //std::cout << "\"" << p11 << "\" - \"" << p10 << "\" = " << p12 << "\n";
+  ESMCI::MapperUtil::TwoVIDPoly<float> ep12 = {-2, 0, 2, -3, 3, 0};
+  ep12.set_vnames(p12_vnames);
+  ESMC_Test((p12 == ep12), name, failMsg, &result, __FILE__, __LINE__, 0);
+
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }
