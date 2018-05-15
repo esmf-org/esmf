@@ -31,6 +31,11 @@ The valid values are:
       DE.
 \item [ESMC\_DECOMP\_RESTLAST]
       Divide elements over DEs. Assign the rest of this division to the last DE.
+\item [ESMC\_DECOMP\_SYMMEDGEMAX]
+      Decompose elements across the DEs in a symmetric fashion. Start with the
+      maximum number of elements at the two edge DEs, and assign a decending
+      number of elements to the DEs as the center of the decomposition is 
+      approached from both sides.
 \end{description}
 
 {\tt type(ESMC\_ExtrapMethod\_Flag)}

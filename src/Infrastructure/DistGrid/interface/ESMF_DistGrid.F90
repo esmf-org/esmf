@@ -82,7 +82,8 @@ module ESMF_DistGridMod
     ESMF_DECOMP_BALANCED    = ESMF_Decomp_Flag(1), &
     ESMF_DECOMP_RESTFIRST   = ESMF_Decomp_Flag(2), &
     ESMF_DECOMP_RESTLAST    = ESMF_Decomp_Flag(3), &
-    ESMF_DECOMP_CYCLIC      = ESMF_Decomp_Flag(4)
+    ESMF_DECOMP_CYCLIC      = ESMF_Decomp_Flag(4), &
+    ESMF_DECOMP_SYMMEDGEMAX = ESMF_Decomp_Flag(5)
     
 !------------------------------------------------------------------------------
 
@@ -107,8 +108,8 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_DistGrid
-  public ESMF_Decomp_Flag, ESMF_DECOMP_BALANCED, &
-  ESMF_DECOMP_RESTFIRST, ESMF_DECOMP_RESTLAST, ESMF_DECOMP_CYCLIC
+  public ESMF_Decomp_Flag, ESMF_DECOMP_BALANCED, ESMF_DECOMP_RESTFIRST, &
+    ESMF_DECOMP_RESTLAST, ESMF_DECOMP_CYCLIC, ESMF_DECOMP_SYMMEDGEMAX
   public ESMF_DistGridMatch_Flag, ESMF_DISTGRIDMATCH_INVALID, &
     ESMF_DISTGRIDMATCH_NONE, ESMF_DISTGRIDMATCH_EXACT, ESMF_DISTGRIDMATCH_ALIAS
   public ESMF_DistGridConnection  ! implemented in ESMF_DistGridConnectionMod
