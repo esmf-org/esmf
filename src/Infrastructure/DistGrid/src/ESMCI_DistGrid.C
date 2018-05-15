@@ -1213,6 +1213,92 @@ DistGrid *DistGrid::create(
     const int chunkRest = dimLength%regDecomp->array[i];    // left over points
     int de, decompChunk, extentIndex;
     switch (decompflag[i]){
+      case DECOMP_SYMMEDGEMAX:
+        {
+          // symmetric decomposition with maximum elements at the edges
+          // use the same algorithm as GFDL's FV3 to decompose dimLength along i
+          int is, ie, imax, ndmax, ndmirror;
+          int ndivs=regDecomp->array[i];
+          vector<int> ibegin(ndivs);
+          vector<int> iend(ndivs);
+          bool symmetrize = ((ndivs%2==0)&&(dimLength%2==0)) ||
+            ((ndivs%2!=0) && (dimLength%2!=0)) ||
+            ((ndivs%2!=0) && (dimLength%2==0) && (ndivs<dimLength/2));
+//printf("symmetrize: %d\n", symmetrize);
+          for (int ndiv=0; ndiv<ndivs; ndiv++){
+            if (ndiv==0){
+              // first DE along this dimension
+              is = 1;
+              imax = dimLength;
+              ndmax = ndivs;
+            }
+            if (ndiv < (ndivs-1)/2 + 1){
+//printf("branch 1\n");
+              // domain is sized by dividing remaining points by remaining 
+              // domains
+              ie = is + (int)ceil((imax-is+1)/(double)(ndmax-ndiv)) - 1;
+//printf("branch 1, ie=%d\n", ie);
+              ndmirror = (ndivs-1) - ndiv; // mirror domain
+              if (ndmirror > ndiv && symmetrize ){
+                // only for domains over the midpoint
+                // mirror extents, the max(,) is to eliminate overlaps
+                ibegin[ndmirror] = iend[ndmirror] = ie+1;
+                if (dimLength+1-ie > ibegin[ndmirror]) 
+                  ibegin[ndmirror] = dimLength+1-ie;
+                if (dimLength+1-is > iend[ndmirror])
+                  iend[ndmirror] = dimLength+1-is;
+                imax = ibegin[ndmirror] - 1;
+                ndmax = ndmax - 1;
+              }
+            }else{
+//printf("branch 2\n");
+              if (symmetrize){
+                // do top half of decomposition by retrieving saved values
+                is = ibegin[ndiv];
+                ie = iend[ndiv];
+              }else{
+                ie = is + (int)ceil((imax-is+1)/(double)(ndmax-ndiv)) - 1;
+              }
+            }
+//printf("ndiv=%d, %d, %d, count=%d\n", ndiv, is, ie, ie-is+1);
+            ibegin[ndiv] = is;
+            iend[ndiv] = ie;
+            is = ie+1;
+          }
+//printf("firstExtra=%d\n", firstExtra);
+          for (int j=0; j<deCount; j++){
+            de = deLabelList->array[j];
+            extentIndex = de*dimCount+i;  // index into temp. arrays
+            decompChunk = (j/deDivider)%regDecomp->array[i];
+            indexCountPDimPDe[extentIndex] =
+              iend[decompChunk] - ibegin[decompChunk] + 1;
+            if (decompChunk == 0)
+              indexCountPDimPDe[extentIndex] += firstExtra;
+            if (decompChunk == regDecomp->array[i]-1)
+              indexCountPDimPDe[extentIndex] += lastExtra;
+            // determine min and max
+            int indexStart = minIndex->array[i] + ibegin[decompChunk] - 1;
+            if (decompChunk > 0) indexStart += firstExtra;
+            minIndexPDimPDe[extentIndex] = indexStart;
+            maxIndexPDimPDe[extentIndex] = indexStart
+              + indexCountPDimPDe[extentIndex] - 1;
+            // fill indexListPDimPLocalDe
+            if (deList[de] > -1){
+              // de is local
+              int localExtentIndex = deList[de]*dimCount+i;
+              indexListPDimPLocalDe[localExtentIndex] =
+                new int[indexCountPDimPDe[extentIndex]];
+              // fill the indexListPDimPLocalDe for this dimension and local DE
+              for (int k=0; k<indexCountPDimPDe[extentIndex]; k++){
+                // block structure
+                indexListPDimPLocalDe[localExtentIndex][k] = indexStart + k;
+              }
+            }
+            // flag contiguous dimension
+            contigFlagPDimPDe[extentIndex] = 1;
+          }
+        }
+        break;
       case DECOMP_BALANCED:
         for (int j=0; j<deCount; j++){
           de = deLabelList->array[j];
