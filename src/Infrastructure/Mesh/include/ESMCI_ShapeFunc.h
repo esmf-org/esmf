@@ -12,7 +12,7 @@
 #ifndef ESMCI_ShapeFunc_h
 #define ESMCI_ShapeFunc_h
 
-#include <Mesh/include/ESMCI_MeshTypes.h>
+#include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
 
 #include <string>
 

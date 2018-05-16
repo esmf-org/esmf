@@ -16,8 +16,7 @@
 #if defined ESMF_MOAB
 
 #include <Mesh/include/ESMCI_MBMesh.h>
-
-#include "ESMCI_BBox.h"
+#include "Mesh/include/Legacy/ESMCI_BBox.h"
 
 #include <iostream>
 

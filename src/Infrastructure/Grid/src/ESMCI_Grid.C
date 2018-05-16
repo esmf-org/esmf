@@ -38,7 +38,7 @@
 #include "ESMCI_GridToMesh.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/ESMCI_Mesh.h"
-#include "Mesh/include/ESMCI_MeshRead.h"
+#include "Mesh/include/Legacy/ESMCI_MeshRead.h"
 
 
 // Some xlf compilers don't define this

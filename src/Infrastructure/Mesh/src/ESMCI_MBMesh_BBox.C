@@ -16,7 +16,7 @@
 #include <Mesh/include/ESMCI_MBMesh_BBox.h>
 #include <Mesh/include/ESMCI_MBMesh_Util.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
-#include <Mesh/include/ESMCI_Exception.h>
+#include <Mesh/include/Legacy/ESMCI_Exception.h>
 
 #include <limits>
 #include <vector>

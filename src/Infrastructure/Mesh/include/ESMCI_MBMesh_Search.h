@@ -16,7 +16,7 @@
 #if defined ESMF_MOAB
 
 #include <Mesh/include/ESMCI_OTree.h>
-#include <Mesh/include/ESMCI_SearchFlags.h>
+#include <Mesh/include/Regridding/ESMCI_SearchFlags.h>
 #include <Mesh/include/ESMCI_MBMesh.h>
 
 

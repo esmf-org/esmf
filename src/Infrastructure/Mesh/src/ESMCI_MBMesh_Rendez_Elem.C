@@ -13,11 +13,11 @@
 // Take out if MOAB isn't being used
 #if defined ESMF_MOAB
 
-#include <Mesh/include/ESMCI_Exception.h>
+#include <Mesh/include/Legacy/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_MBMesh_Util.h>
 #include <Mesh/include/ESMCI_MBMesh.h>
 #include <Mesh/src/Zoltan/zoltan.h>
-#include <Mesh/include/ESMCI_ParEnv.h>
+#include <Mesh/include/Legacy/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_MBMesh_BBox.h>
 #include <Mesh/include/ESMCI_MBMesh_Redist.h>
 

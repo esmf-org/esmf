@@ -30,10 +30,10 @@ using namespace std;
 #include "ESMCI_Array.h"
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
-#include "Mesh/include/ESMCI_Exception.h"
+#include "Mesh/include/Legacy/ESMCI_Exception.h"
 //#include "Mesh/include/ESMCI_XGridUtil.h"
-//#include "Mesh/include/ESMCI_MeshRegrid.h"
-#include "Mesh/include/ESMCI_MeshMerge.h"
+//#include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
+#include "Mesh/include/Legacy/ESMCI_MeshMerge.h"
 #include "ESMCI_GridToMesh.h"
 #include "ESMCI_Grid.h"
 

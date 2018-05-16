@@ -32,7 +32,7 @@
 #include "ESMCI_CoordSys.h"
 
 #include "Mesh/include/ESMCI_MathUtil.h"
-#include "Mesh/include/ESMCI_MeshRegrid.h"
+#include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
 
 #include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_MBMesh_Util.h"

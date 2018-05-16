@@ -25,7 +25,7 @@
 #if defined ESMF_MOAB
 
 #include "Mesh/include/ESMCI_MBMesh.h"
-#include "Mesh/include/ESMCI_WMat.h"
+#include "Mesh/include/Regridding/ESMCI_WMat.h"
 
 
 //-----------------------------------------------------------------------------

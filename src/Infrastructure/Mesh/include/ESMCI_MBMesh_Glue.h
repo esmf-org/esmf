@@ -33,7 +33,8 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
-#include "ESMCI_FindPnts.h"
+
+#include "Mesh/include/Legacy/ESMCI_FindPnts.h"
 #include "Mesh/include/ESMCI_XGridUtil.h"
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string

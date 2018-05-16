@@ -24,8 +24,8 @@
 // Take out if MOAB isn't being used
 #if defined ESMF_MOAB
 
-#include "Mesh/include/ESMCI_MBMesh.h"
-#include "Mesh/include/ESMCI_MeshTypes.h"
+#include <Mesh/include/ESMCI_MBMesh.h>
+#include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
 #include "ESMCI_PointList.h"
 
 #include <vector>
