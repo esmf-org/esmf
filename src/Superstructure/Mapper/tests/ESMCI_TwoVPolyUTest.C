@@ -116,5 +116,23 @@ int main(int argc, char *argv[])
   ep12.set_vnames(p12_vnames);
   ESMC_Test((p12 == ep12), name, failMsg, &result, __FILE__, __LINE__, 0);
 
+  strncpy(name, "Polynomial square (2 deg) Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial square (2 deg) Utest failed", ESMF_MAX_STRLEN);
+  ESMCI::MapperUtil::TwoVIDPoly<float> p13 = {1, 0, -4, 2, -5, -3};
+  ESMCI::MapperUtil::TwoVIDPoly<float> p13_sq = p13 * p13;
+  //std::cout << p13_sq << std::endl;
+  ESMCI::MapperUtil::TwoVIDPoly<float> ep13_sq = {1, 0, -8, 0, 16, 4, -10, -16, 40, -2, -20, 49, -12, 30, 9};
+  ESMC_Test((p13_sq == ep13_sq), name, failMsg, &result, __FILE__, __LINE__, 0);
+  
+  strncpy(name, "Polynomial multiplication (1 deg x 1 deg) Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial multiplication (1 deg x 1 deg) Utest failed", ESMF_MAX_STRLEN);
+  ESMCI::MapperUtil::TwoVIDPoly<float> p14 = {2, 3, -4};
+  ESMCI::MapperUtil::TwoVIDPoly<float> p15 = {1, -2, 3};
+  ESMCI::MapperUtil::TwoVIDPoly<float> prod_p14_p15 = p14 * p15;
+  ESMCI::MapperUtil::TwoVIDPoly<float> eprod_p14_p15 = {2, -1, -6, 2, 17, -12};
+  //std::cout << prod_p14_p15 << std::endl;
+  ESMC_Test((prod_p14_p15 == eprod_p14_p15), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }
