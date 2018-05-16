@@ -479,7 +479,7 @@ namespace ESMCI{
           lhs_coeffs.cbegin();
           citer_lhs != lhs_coeffs.cend(); ++citer_lhs){
           CType val = (*citer_rhs) * (*citer_lhs);
-          if(val > 0){
+          if(val != 0){
             int coeff_idx = TwoVIDPolyUtil::get_coeff_idx(res_max_deg, cur_xdeg_lhs + cur_xdeg_rhs, cur_ydeg_lhs + cur_ydeg_rhs);
             assert((coeff_idx >= 0) && (coeff_idx < res_ncoeffs));
             res_coeffs[coeff_idx] += val;
