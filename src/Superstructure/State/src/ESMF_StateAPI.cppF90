@@ -1917,7 +1917,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Illegal options argument: ", &
              trim (localopts)
          if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
-             msg="Illegal options argument: " // trim (localopts), &
+             msg=ESMF_StringConcat ("Illegal options argument: ", trim (localopts)), &
              ESMF_CONTEXT, rcToReturn=rc)) return
        end select
 
