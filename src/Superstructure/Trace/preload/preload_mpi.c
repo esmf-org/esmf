@@ -64,5 +64,45 @@ extern "C" {
   int MPI_Wait(MPI_Request *request, MPI_Status *status) {
     return __wrap_MPI_Wait(request, status);
   }
+
+
+  /* MPI_Allreduce */
+  static int (*__real_ptr_MPI_Allreduce)(const void *sendbuf, void *recvbuf, int count,
+                                         MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) = NULL;
+
+  int __real_MPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
+                           MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
+    if (__real_ptr_MPI_Allreduce == NULL) {
+      __real_ptr_MPI_Allreduce = (int (*)(const void *sendbuf, void *recvbuf, int count,
+                                          MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Allreduce");
+    }
+    return __real_ptr_MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
+  }
+  
+  int MPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
+                    MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
+    return __wrap_MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
+  }
+
+
+  // A question is whether we actually need to wrap the Fortran
+  // calls or if all MPI implementations are going to end up in the
+  // C calls anyway.
+  
+  /* MPI_Allreduce - Fortran */
+
+  /*
+  extern void FTN_X(__real_mpi_allreduce)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, 
+					  MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr);
+  
+  void FTN_X(__wrap_mpi_allreduce)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, 
+				   MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
+                                   
+
+  void FTN_X(mpi_allreduce)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, 
+                            MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
     
+  }
+  */
+                                   
 }

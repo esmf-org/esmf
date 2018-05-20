@@ -830,6 +830,20 @@ namespace ESMCI {
     mpiWaitStartTimestamp = -1;
   }  
 
+  /*
+   * This function used only in tests.
+   */
+  void TraceTest_GetMPIWaitStats(int *count, long long *time) {
+    if (!traceActive) return;
+    if (count != NULL) {
+      *count = (int) mpiWaitCount.back();
+    }
+    if (time != NULL) {
+      *time = (long long) mpiWaitTime.back();
+    }
+  }
+
+  
   static void PushMPIStats() {
     mpiBarrierCount.push_back(0);
     mpiBarrierTime.push_back(0);

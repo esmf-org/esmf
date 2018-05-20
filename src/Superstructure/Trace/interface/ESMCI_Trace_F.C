@@ -119,4 +119,11 @@ extern "C" {
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
+  /* These functions exposed only for use in unit tests. */
+  void FTN_X(c_esmftracetest_getmpiwaitstats)(int *count, long long *time) {
+    ESMCI::TraceTest_GetMPIWaitStats(count, time);
+  }
+
+
+  
 } // extern "C"

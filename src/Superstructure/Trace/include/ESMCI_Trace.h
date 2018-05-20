@@ -71,6 +71,9 @@ namespace ESMCI {
   void TraceMPIBarrierEnd();
   void TraceMPIWaitStart();
   void TraceMPIWaitEnd();
+
+  //These used only for testing
+  void TraceTest_GetMPIWaitStats(int *count, long long *time);
   //////////////////////////////
     
   
