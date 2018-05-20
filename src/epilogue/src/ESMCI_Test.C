@@ -81,7 +81,7 @@ int Test(
 //
 //EOP
 //-----------------------------------------------------------------------------
-  char msgbuf[ESMF_MAXSTR];
+  char msgbuf[160];
   ESMCI::LogErr *whichLog;
 
   // TODO: this should be settable by the user
@@ -138,7 +138,7 @@ int TestEnd(
 //EOP
 //-----------------------------------------------------------------------------
   int rc;
-  char msgbuf[ESMF_MAXSTR];
+  char msgbuf[160];
   ESMCI::LogErr *whichLog;
   timeval  end_time;
   double  elapsed_time;
@@ -211,7 +211,7 @@ bool TestMaxPETs(
 //-----------------------------------------------------------------------------
   int rc;
   ESMCI::VM *globalVM;
-  char msgbuf[ESMF_MAXSTR], failMsg[ESMF_MAXSTR];
+  char msgbuf[160], failMsg[160];
   int numPETs;
   ESMCI::LogErr *whichLog;
 
@@ -283,7 +283,7 @@ bool TestMinPETs(
 //-----------------------------------------------------------------------------
   int rc;
   ESMCI::VM *globalVM;
-  char msgbuf[ESMF_MAXSTR], failMsg[ESMF_MAXSTR];
+  char msgbuf[160], failMsg[160];
   int numPETs;
   ESMCI::LogErr *whichLog;
 
@@ -355,7 +355,7 @@ bool TestNumPETs(
 //-----------------------------------------------------------------------------
   int rc;
   ESMCI::VM *globalVM;
-  char msgbuf[ESMF_MAXSTR], failMsg[ESMF_MAXSTR];
+  char msgbuf[160], failMsg[160];
   int numPETs;
   ESMCI::LogErr *whichLog;
 
@@ -427,7 +427,7 @@ int TestStart(
 //-----------------------------------------------------------------------------
   int rc, rc2;
   ESMCI::VM *globalVM;
-  char msgbuf[ESMF_MAXSTR], failMsg[ESMF_MAXSTR];
+  char msgbuf[160], failMsg[160];
   int numPETs;
   ESMCI::LogErr *whichLog;
 

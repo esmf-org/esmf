@@ -13,7 +13,7 @@
       program ESMF_ArraySpecEx
 
 !------------------------------------------------------------------------------
-!ESMF_EXAMPLE	String used by test script to count examples.
+!ESMF_EXAMPLE   String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_ArraySpecEx - ArraySpec manipulation examples
@@ -29,7 +29,7 @@
       use ESMF_TestMod
       implicit none
 
-      ! local variables 
+      ! local variables
       type(ESMF_ArraySpec) :: arrayDS
       integer :: myrank
       type(ESMF_TypeKind_Flag) :: mytypekind

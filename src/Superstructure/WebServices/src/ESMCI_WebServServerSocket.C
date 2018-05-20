@@ -20,7 +20,7 @@
 //
 // The code in this file implements the C++ ServerSocket methods declared
 // in the companion file ESMCI_WebServServerSocket.h.  This code
-// provides provides a higher-level interface for creating a socket 
+// provides provides a higher-level interface for creating a socket
 // services to listen for, and respond to, client requests.
 //
 //-----------------------------------------------------------------------------
@@ -92,7 +92,7 @@ ESMCI_WebServServerSocket::~ESMCI_WebServServerSocket(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	disconnect();
+        disconnect();
 }
 
 
@@ -119,9 +119,9 @@ int  ESMCI_WebServServerSocket::connect(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	//printf("ESMCI_WebServServerSocket::connect()\n");
+        //printf("ESMCI_WebServServerSocket::connect()\n");
 
-	return serverConnect(port);
+        return serverConnect(port);
 }
 
 

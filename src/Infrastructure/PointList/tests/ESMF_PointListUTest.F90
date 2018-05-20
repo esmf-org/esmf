@@ -267,14 +267,14 @@ contains
        print*,'ERROR:  trouble creating pointlist'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     call ESMF_PointListGet(pointlist, dims=mydims, numpts=mypts, maxpts=maxpts, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR:  trouble accessing pointlist data with get routine'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     if (maxpts .ne. 7 .or. mypts .ne. 0 .or. mydims .ne. 3) then
        print*,'ERROR:  unexpected values for newly created pointlist:'
@@ -283,39 +283,39 @@ contains
        print*,'dims should be: 3  got: ',mydims
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     call ESMF_PointListAdd(pointlist=pointlist,id=123,loc_coords=mycoords1,rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR:  trouble adding point to pointlist'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
     call ESMF_PointListAdd(pointlist=pointlist,id=234,loc_coords=mycoords2,rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR:  trouble adding point to pointlist'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
     call ESMF_PointListAdd(pointlist=pointlist,id=345,loc_coords=mycoords3,rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR:  trouble adding point to pointlist'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
     call ESMF_PointListAdd(pointlist=pointlist,id=456,loc_coords=mycoords4,rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR:  trouble adding point to pointlist'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     call ESMF_PointListGet(pointlist, dims=mydims, numpts=mypts, maxpts=maxpts, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR:  trouble accessing pointlist data with get routine'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     if (maxpts .ne. 7 .or. mypts .ne. 4 .or. mydims .ne. 3) then
        print*,'ERROR:  unexpected values for newly created pointlist:'
@@ -324,42 +324,42 @@ contains
        print*,'dims should be: 3  got: ',mydims
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
 !    call ESMF_PointListPrint(pointlist)
 !    if (localrc /= ESMF_SUCCESS) then
 !       rc=ESMF_FAILURE
 !       return
-!    endif	
+!    endif      
 
 !    call ESMF_PointListWriteVTK(pointlist,"TestPointList")
 !    if (localrc /= ESMF_SUCCESS) then
 !       rc=ESMF_FAILURE
 !       return
-!    endif	
+!    endif      
 
-    
+
     !locations values are zero based
     call ESMF_PointListGetForLoc(pointlist,2,id=myid,rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR:  trouble accessing pointlist data with get for location routine'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     if (myid .ne. 345) then
        print*,'ERROR:  unexpected values for newly created pointlist:'
        print*,'id should be: 345  got: ',myid
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     call ESMF_PointListDestroy(pointlist,rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR:  trouble destroying pointlist'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     rc=ESMF_SUCCESS
 
@@ -401,15 +401,15 @@ contains
     ! Create Grid with globalXCountxglobalYCount cells
     myGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/10,20/), &
                                     coordSys=ESMF_COORDSYS_CART, &
-                            	    coordDep1 = (/1/), &
-				    coordDep2 = (/2/), &
+                                    coordDep1 = (/1/), &
+                                    coordDep2 = (/2/), &
                                     indexflag=ESMF_INDEX_GLOBAL,         &
                                     rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR:  trouble creating grid'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     ! Get number of local DEs
     call ESMF_GridGet(myGrid, localDECount=localDECount, rc=localrc)
@@ -417,7 +417,7 @@ contains
        print*,'ERROR:  trouble accessing localDECount from grid'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     ! Allocate Center (e.g. Center) stagger
     call ESMF_GridAddCoord(myGrid, staggerloc=ESMF_STAGGERLOC_CENTER, rc=localrc)
@@ -425,45 +425,45 @@ contains
        print*,'ERROR:  trouble adding coordinates to grid'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     ! Loop through DEs and set Centers as the average of the corners
     do lDE=0,localDECount-1
 
       ! get and fill first coord array
       call ESMF_GridGetCoord(myGrid, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, &
-     	                     coordDim=1, &
+                             coordDim=1, &
                              computationalLBound=clbnd, computationalUBound=cubnd, &
-			     farrayPtr=coordX, &
+                             farrayPtr=coordX, &
                              rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
          print*,'ERROR:  trouble accessing coordinates from grid'
-      	 rc=ESMF_FAILURE
-       	 return
-      endif	
+         rc=ESMF_FAILURE
+                 return
+      endif     
 
       do i1=clbnd(1),cubnd(1)
-     	coordX(i1) = i1*10.0
-      enddo	
+        coordX(i1) = i1*10.0
+      enddo     
       local_pts=(cubnd(1)-clbnd(1)+1)
       test_coordx=coordX(clbnd(1))
 
 
       ! get and fill second coord array
       call ESMF_GridGetCoord(myGrid, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER, &
-    	                     coordDim=2, &
+                             coordDim=2, &
                              computationalLBound=clbnd, computationalUBound=cubnd, &
                              farrayPtr=coordY, &
-			     rc=localrc)
+                             rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
          print*,'ERROR:  trouble accessing coordinates from grid'
-      	 rc=ESMF_FAILURE
-       	 return
-      endif	
+         rc=ESMF_FAILURE
+                 return
+      endif     
 
       do i2=clbnd(1),cubnd(1)
-     	coordY(i2) = i2*10.0
-      enddo	
+        coordY(i2) = i2*10.0
+      enddo     
       local_pts=local_pts*(cubnd(1)-clbnd(1)+1)
       test_coordy=coordY(clbnd(1))
 
@@ -479,14 +479,14 @@ contains
       print*,'ERROR:  trouble creating pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
     call ESMF_PointListGet(pointlist, dims=mydims, numpts=mypts, maxpts=maxpts, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR:  trouble accessing pointlist data with get routine'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     if (maxpts .ne. local_pts .or. mypts .ne. local_pts .or. mydims .ne. 2) then
        print*,'ERROR:  unexpected values for newly created pointlist:'
@@ -495,24 +495,24 @@ contains
        print*,'dims should be: 2  got: ',mydims
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
 !    call ESMF_PointListPrint(pointlist)
 !    if (localrc /= ESMF_SUCCESS) then
 !       rc=ESMF_FAILURE
 !       return
-!    endif	
-    
+!    endif      
+
     !locations values are zero based
     call ESMF_PointListGetForLoc(pointlist,0,loc_coords=test_coords,rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR:  trouble accessing pointlist data with get for location routine'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
-    my_err1 = abs(test_coordx - test_coords(1)) 
-    my_err2 = abs(test_coordy - test_coords(2)) 
+    my_err1 = abs(test_coordx - test_coords(1))
+    my_err2 = abs(test_coordy - test_coords(2))
     if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
       print*,'ERROR:  unexpected coordinates for queried pointlist location:'
       print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),')'
@@ -532,7 +532,7 @@ contains
        print*,'ERROR:  trouble destroying pointlist'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     rc=ESMF_SUCCESS
   end subroutine test_pointlist_from_grid_nomask
@@ -578,15 +578,15 @@ contains
     ! Create Grid with globalXCountxglobalYCount cells
     myGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/10,20/), &
                                     coordSys=ESMF_COORDSYS_CART, &
-                            	    coordDep1 = (/1/), &
-				    coordDep2 = (/2/), &
+                                    coordDep1 = (/1/), &
+                                    coordDep2 = (/2/), &
                                     indexflag=ESMF_INDEX_GLOBAL,         &
                                     rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR:  trouble creating grid'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     ! Get number of local DEs
     call ESMF_GridGet(myGrid, localDECount=localDECount, rc=localrc)
@@ -594,7 +594,7 @@ contains
        print*,'ERROR:  trouble accessing localDECount from grid'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
 
     ! Allocate Center (e.g. Center) stagger
@@ -603,11 +603,11 @@ contains
        print*,'ERROR:  trouble adding coordinates to grid'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     ! Allocate Masks
     call ESMF_GridAddItem(myGrid, staggerloc=ESMF_STAGGERLOC_CENTER, &
-    	      itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
+              itemflag=ESMF_GRIDITEM_MASK, rc=localrc)
     if (localrc /=ESMF_SUCCESS) then
        print*,'ERROR:  trouble allocating mask info in grid'
        rc=ESMF_FAILURE
@@ -620,35 +620,35 @@ contains
 
       ! get and fill first coord array
       call ESMF_GridGetCoord(myGrid, localDE=lDE,  staggerloc=ESMF_STAGGERLOC_CENTER, &
-     	                     coordDim=1, &
+                             coordDim=1, &
                              computationalLBound=clbndx, computationalUBound=cubndx, &
-			     farrayPtr=coordX, &
+                             farrayPtr=coordX, &
                              rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
          print*,'ERROR:  trouble accessing coordinates from grid'
-      	 rc=ESMF_FAILURE
-       	 return
-      endif	
+         rc=ESMF_FAILURE
+                 return
+      endif     
 
       do i1=clbndx(1),cubndx(1)
-     	coordX(i1) = i1*10.0
-      enddo	
+        coordX(i1) = i1*10.0
+      enddo     
 
       ! get and fill second coord array
       call ESMF_GridGetCoord(myGrid, localDE=lDE, staggerloc=ESMF_STAGGERLOC_CENTER, &
-    	                     coordDim=2, &
+                             coordDim=2, &
                              computationalLBound=clbndy, computationalUBound=cubndy, &
                              farrayPtr=coordY, &
-			     rc=localrc)
+                             rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
          print*,'ERROR:  trouble accessing coordinates from grid'
-      	 rc=ESMF_FAILURE
-       	 return
-      endif	
+         rc=ESMF_FAILURE
+                 return
+      endif     
 
       do i2=clbndy(1),cubndy(1)
-     	coordY(i2) = i2*10.0
-      enddo	
+        coordY(i2) = i2*10.0
+      enddo     
 
       call ESMF_GridGetItem(myGrid, localDE=lDE, staggerLoc=ESMF_STAGGERLOC_CENTER, &
                             itemflag=ESMF_GRIDITEM_MASK, farrayPtr=gMask, rc=localrc)
@@ -661,10 +661,10 @@ contains
       local_pts=0
       do i1=clbndx(1),cubndx(1)
       do i2=clbndy(1),cubndy(1)
-      	 if (i1 == i2) then
-	    gMask(i1,i2) = 2
-         else	    
-	    gMask(i1,i2) = 0
+         if (i1 == i2) then
+            gMask(i1,i2) = 2
+         else   
+            gMask(i1,i2) = 0
             local_pts=local_pts+1
             test_coordx=coordX(i1)
             test_coordy=coordY(i2)
@@ -689,14 +689,14 @@ contains
       print*,'ERROR: trouble creating pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
     call ESMF_PointListGet(pointlist, dims=mydims, numpts=mypts, maxpts=maxpts, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR:  trouble accessing pointlist data with get routine'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     if (maxpts .ne. local_pts .or. mypts .ne. local_pts .or. mydims .ne. 2) then
        print*,'ERROR:  unexpected values for newly created pointlist:'
@@ -705,7 +705,7 @@ contains
        print*,'dims should be: 2  got: ',mydims
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     !locations values are zero based
     call ESMF_PointListGetForLoc(pointlist,mypts-1,loc_coords=test_coords,rc=localrc)
@@ -713,10 +713,10 @@ contains
        print*,'ERROR:  trouble accessing pointlist data with get for location routine'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
-    my_err1 = abs(test_coordx - test_coords(1)) 
-    my_err2 = abs(test_coordy - test_coords(2)) 
+    my_err1 = abs(test_coordx - test_coords(1))
+    my_err2 = abs(test_coordy - test_coords(2))
     if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
       print*,'ERROR:  unexpected coordinates for queried pointlist location:'
       print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),')'
@@ -729,8 +729,8 @@ contains
 !    if (localrc /= ESMF_SUCCESS) then
 !       rc=ESMF_FAILURE
 !       return
-!    endif	
-    
+!    endif      
+
     call ESMF_GridDestroy(myGrid, rc=localrc)
     if (localrc /=ESMF_SUCCESS) then
        print*,'ERROR:  trouble destroying grid'
@@ -743,7 +743,7 @@ contains
        print*,'ERROR:  trouble destroying pointlist'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
 
     rc=ESMF_SUCCESS
@@ -799,7 +799,7 @@ contains
       ! Allocate and fill the node id array.
       allocate(nodeIds(numNodes))
 
-      nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+      nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
       ! Allocate and fill node coordinate array.
       ! Since this is a 2D Mesh the size is 2x the
@@ -829,7 +829,7 @@ contains
 
       ! Allocate and fill the element id array.
       allocate(elemIds(numTotElems))
-      elemIds=(/1,2,3,4,5/) 
+      elemIds=(/1,2,3,4,5/)
 
       ! Allocate and fill the element topology type array.
       allocate(elemTypes(numTotElems))
@@ -841,17 +841,17 @@ contains
 
 
       ! Allocate and fill the element connection type array.
-      ! Note that entries in this array refer to the 
+      ! Note that entries in this array refer to the
       ! positions in the nodeIds, etc. arrays and that
       ! the order and number of entries for each element
-      ! reflects that given in the Mesh options 
+      ! reflects that given in the Mesh options
       ! section for the corresponding entry
-      ! in the elemTypes array. The number of 
+      ! in the elemTypes array. The number of
       ! entries in this elemConn array is the
-      ! number of nodes in a quad. (4) times the 
+      ! number of nodes in a quad. (4) times the
       ! number of quad. elements plus the number
       ! of nodes in a triangle (3) times the number
-      ! of triangle elements. 
+      ! of triangle elements.
       allocate(elemConn(4*numQuadElems+3*numTriElems))
       elemConn=(/1,2,5,4, &  ! elem id 1
                  2,3,5,   &  ! elem id 2
@@ -986,11 +986,11 @@ contains
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
-	numTotElems=numQuadElems+numTriElems
+        numTotElems=numQuadElems+numTriElems
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-	elemIds=(/4/)
+        elemIds=(/4/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -1031,11 +1031,11 @@ contains
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
-	numTotElems=numQuadElems+numTriElems
+        numTotElems=numQuadElems+numTriElems
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-	elemIds=(/5/)
+        elemIds=(/5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -1053,8 +1053,8 @@ contains
          coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, &
-	 elementIds=elemIds, elementTypes=elemTypes, &
-	 elementConn=elemConn, rc=localrc)
+         elementIds=elemIds, elementTypes=elemTypes, &
+         elementConn=elemConn, rc=localrc)
 
     if (localrc /=ESMF_SUCCESS) then
       print*,'ERROR: trouble creating mesh'
@@ -1082,14 +1082,14 @@ contains
       print*,'ERROR: trouble creating pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
     call ESMF_PointListGet(pointlist, dims=mydims, numpts=mypts, maxpts=maxpts, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR: trouble accessing pointlist data with get routine'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     if (maxpts .ne. local_pts .or. mypts .ne. local_pts .or. mydims .ne. 2) then
        print*,'ERROR:  unexpected values for newly created pointlist:'
@@ -1098,13 +1098,13 @@ contains
        print*,'dims should be: 2  got: ',mydims
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
 !    call ESMF_PointListPrint(pointlist)
 !    if (localrc /= ESMF_SUCCESS) then
 !       rc=ESMF_FAILURE
 !       return
-!    endif	
+!    endif      
 
     !locations values are zero based
     call ESMF_PointListGetForLoc(pointlist,0,loc_coords=test_coords,rc=localrc)
@@ -1114,8 +1114,8 @@ contains
        return
     endif
 
-    my_err1 = abs(test_coordx - test_coords(1)) 
-    my_err2 = abs(test_coordy - test_coords(2)) 
+    my_err1 = abs(test_coordx - test_coords(1))
+    my_err2 = abs(test_coordy - test_coords(2))
     if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
       print*,'ERROR:  unexpected coordinates for queried pointlist location:'
       print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),')'
@@ -1128,7 +1128,7 @@ contains
        print*,'ERROR: trouble destroying pointlist'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     call ESMF_MeshDestroy(myMesh, rc=localrc)
     if (localrc /=ESMF_SUCCESS) then
@@ -1191,7 +1191,7 @@ contains
       ! Allocate and fill the node id array.
       allocate(nodeIds(numNodes))
 
-      nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+      nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
       ! Allocate and fill node coordinate array.
       ! Since this is a 2D Mesh the size is 2x the
@@ -1227,7 +1227,7 @@ contains
 
       ! Allocate and fill the element id array.
       allocate(elemIds(numTotElems))
-      elemIds=(/1,2,3,4,5/) 
+      elemIds=(/1,2,3,4,5/)
 
       ! Allocate and fill the element topology type array.
       allocate(elemTypes(numTotElems))
@@ -1239,17 +1239,17 @@ contains
 
 
       ! Allocate and fill the element connection type array.
-      ! Note that entries in this array refer to the 
+      ! Note that entries in this array refer to the
       ! positions in the nodeIds, etc. arrays and that
       ! the order and number of entries for each element
-      ! reflects that given in the Mesh options 
+      ! reflects that given in the Mesh options
       ! section for the corresponding entry
-      ! in the elemTypes array. The number of 
+      ! in the elemTypes array. The number of
       ! entries in this elemConn array is the
-      ! number of nodes in a quad. (4) times the 
+      ! number of nodes in a quad. (4) times the
       ! number of quad. elements plus the number
       ! of nodes in a triangle (3) times the number
-      ! of triangle elements. 
+      ! of triangle elements.
       allocate(elemConn(4*numQuadElems+3*numTriElems))
       elemConn=(/1,2,5,4, &  ! elem id 1
                  2,3,5,   &  ! elem id 2
@@ -1345,7 +1345,7 @@ contains
                    3/)  ! node id 6
 
         local_pts=1
-	test_coordx=2.0
+        test_coordx=2.0
         test_coordy=0.0
 
         ! Set the number of each type of element, plus the total number.
@@ -1401,7 +1401,7 @@ contains
 
         local_pts=2
         test_coordx=0.0
-	test_coordy=2.0
+        test_coordy=2.0
 
         ! Set the number of each type of element, plus the total number.
         numQuadElems=1
@@ -1480,8 +1480,8 @@ contains
                            coordSys=ESMF_COORDSYS_CART, &
                            nodeIds=nodeIds, nodeCoords=nodeCoords, &
                            nodeOwners=nodeOwners, nodeMask=nodeMask, &
-	                   elementIds=elemIds, elementTypes=elemTypes, &
-	                   elementConn=elemConn, rc=localrc)
+                           elementIds=elemIds, elementTypes=elemTypes, &
+                           elementConn=elemConn, rc=localrc)
 
     if (localrc /=ESMF_SUCCESS) then
       print*,'ERROR:  trouble creating mesh'
@@ -1513,14 +1513,14 @@ contains
       print*,'ERROR:  trouble creating pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
     call ESMF_PointListGet(pointlist, dims=mydims, numpts=mypts, maxpts=maxpts, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR: trouble accessing pointlist data with get routine'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     if (maxpts .ne. local_pts .or. mypts .ne. local_pts .or. mydims .ne. 2) then
        print*,'ERROR:  unexpected values for newly created pointlist:'
@@ -1529,7 +1529,7 @@ contains
        print*,'dims should be: 2  got: ',mydims
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
 
 
@@ -1537,7 +1537,7 @@ contains
 !    if (localrc /= ESMF_SUCCESS) then
 !       rc=ESMF_FAILURE
 !       return
-!    endif	
+!    endif      
 
 
     !locations values are zero based
@@ -1548,21 +1548,21 @@ contains
        return
     endif
 
-    my_err1 = abs(test_coordx - test_coords(1)) 
-    my_err2 = abs(test_coordy - test_coords(2)) 
+    my_err1 = abs(test_coordx - test_coords(1))
+    my_err2 = abs(test_coordy - test_coords(2))
     if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
       print*,'ERROR:  unexpected coordinates for queried pointlist location:'
       print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),')'
       rc=ESMF_FAILURE
       return
     endif
-    
+
     call ESMF_PointListDestroy(pointlist,rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
       print*,'ERROR:  trouble destorying pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
     call ESMF_MeshDestroy(myMesh, rc=localrc)
     if (localrc /=ESMF_SUCCESS) then
@@ -1625,7 +1625,7 @@ contains
       ! Allocate and fill the node id array.
       allocate(nodeIds(numNodes))
 
-      nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+      nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
       ! Allocate and fill node coordinate array.
       ! Since this is a 2D Mesh the size is 2x the
@@ -1652,7 +1652,7 @@ contains
 
       ! Allocate and fill the element id array.
       allocate(elemIds(numTotElems))
-      elemIds=(/1,2,3,4,5/) 
+      elemIds=(/1,2,3,4,5/)
 
 
       ! Allocate and fill the element topology type array.
@@ -1665,17 +1665,17 @@ contains
 
 
       ! Allocate and fill the element connection type array.
-      ! Note that entries in this array refer to the 
+      ! Note that entries in this array refer to the
       ! positions in the nodeIds, etc. arrays and that
       ! the order and number of entries for each element
-      ! reflects that given in the Mesh options 
+      ! reflects that given in the Mesh options
       ! section for the corresponding entry
-      ! in the elemTypes array. The number of 
+      ! in the elemTypes array. The number of
       ! entries in this elemConn array is the
-      ! number of nodes in a quad. (4) times the 
+      ! number of nodes in a quad. (4) times the
       ! number of quad. elements plus the number
       ! of nodes in a triangle (3) times the number
-      ! of triangle elements. 
+      ! of triangle elements.
       allocate(elemConn(4*numQuadElems+3*numTriElems))
       elemConn=(/1,2,5,4, &  ! elem id 1
                  2,3,5,   &  ! elem id 2
@@ -1796,7 +1796,7 @@ contains
                      1.9,0.9/)  ! 3
 
         local_pts=2
-	test_coordx=1.1
+        test_coordx=1.1
         test_coordy=0.1
 
      else if (localPET .eq. 2) then !!! This part only for PET 2
@@ -1847,7 +1847,7 @@ contains
 
         local_pts=1
         test_coordx=0.5
-	test_coordy=1.5
+        test_coordy=1.5
 
       else if (localPET .eq. 3) then !!! This part only for PET 3
         ! Set number of nodes
@@ -1908,7 +1908,7 @@ contains
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, &
          elementCoords=elemCoords, &
-	 rc=localrc)
+         rc=localrc)
 
     if (localrc /=ESMF_SUCCESS) then
       print*,'ERROR:  trouble creating mesh'
@@ -1936,7 +1936,7 @@ contains
       print*,'ERROR:  trouble creating pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
     call ESMF_PointListGet(pointlist, dims=mydims, numpts=mypts, maxpts=maxpts, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
@@ -1962,8 +1962,8 @@ contains
        return
     endif
 
-    my_err1 = abs(test_coordx - test_coords(1)) 
-    my_err2 = abs(test_coordy - test_coords(2)) 
+    my_err1 = abs(test_coordx - test_coords(1))
+    my_err2 = abs(test_coordy - test_coords(2))
     if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
       print*,'ERROR:  unexpected coordinates for queried pointlist location:'
       print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),')'
@@ -1975,14 +1975,14 @@ contains
 !    if (localrc /= ESMF_SUCCESS) then
 !       rc=ESMF_FAILURE
 !       return
-!    endif	
-    
+!    endif      
+
     call ESMF_PointListDestroy(pointlist,rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
       print*,'ERROR:  trouble destroying pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
     call ESMF_MeshDestroy(myMesh, rc=localrc)
     if (localrc /=ESMF_SUCCESS) then
@@ -2045,7 +2045,7 @@ contains
       ! Allocate and fill the node id array.
       allocate(nodeIds(numNodes))
 
-      nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+      nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
       ! Allocate and fill node coordinate array.
       ! Since this is a 2D Mesh the size is 2x the
@@ -2072,7 +2072,7 @@ contains
 
       ! Allocate and fill the element id array.
       allocate(elemIds(numTotElems))
-      elemIds=(/1,2,3,4,5/) 
+      elemIds=(/1,2,3,4,5/)
 
       ! Allocate and fill the element mask array.
       ! set masks on elements 1,3,5
@@ -2089,17 +2089,17 @@ contains
 
 
       ! Allocate and fill the element connection type array.
-      ! Note that entries in this array refer to the 
+      ! Note that entries in this array refer to the
       ! positions in the nodeIds, etc. arrays and that
       ! the order and number of entries for each element
-      ! reflects that given in the Mesh options 
+      ! reflects that given in the Mesh options
       ! section for the corresponding entry
-      ! in the elemTypes array. The number of 
+      ! in the elemTypes array. The number of
       ! entries in this elemConn array is the
-      ! number of nodes in a quad. (4) times the 
+      ! number of nodes in a quad. (4) times the
       ! number of quad. elements plus the number
       ! of nodes in a triangle (3) times the number
-      ! of triangle elements. 
+      ! of triangle elements.
       allocate(elemConn(4*numQuadElems+3*numTriElems))
       elemConn=(/1,2,5,4, &  ! elem id 1
                  2,3,5,   &  ! elem id 2
@@ -2127,7 +2127,7 @@ contains
 
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
-	nodeIds=(/1,2,4,5/)
+        nodeIds=(/1,2,4,5/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -2201,7 +2201,7 @@ contains
                      1/)  ! node id 6
 
         ! Set the number of each type of element, plus the total number.
-	numQuadElems=0
+        numQuadElems=0
         numTriElems=2
         numTotElems=numQuadElems+numTriElems
 
@@ -2258,7 +2258,7 @@ contains
                      2, & ! node id 7
                      2/)  ! node id 8
 
-		     ! Set the number of each type of element, plus the total number.
+                     ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
         numTotElems=numQuadElems+numTriElems
@@ -2312,7 +2312,7 @@ contains
                      2, & ! node id 8
                      3/)  ! node id 9
 
-		     ! Set the number of each type of element, plus the total number.
+                     ! Set the number of each type of element, plus the total number.
         numQuadElems=1
         numTriElems=0
         numTotElems=numQuadElems+numTriElems
@@ -2338,7 +2338,7 @@ contains
         allocate(elemCoords(2*numTotElems))
         elemCoords=(/1.5,1.5/)  ! 5
 
-	local_pts=1
+        local_pts=1
         test_coordx=1.5
         test_coordy=1.5
 
@@ -2354,7 +2354,7 @@ contains
          nodeOwners=nodeOwners, elementIds=elemIds,&
          elementTypes=elemTypes, elementConn=elemConn, &
          elementMask=elemMask, elementCoords=elemCoords, &
-	 rc=localrc)
+         rc=localrc)
 
     if (localrc /=ESMF_SUCCESS) then
       print*,'ERROR:  trouble creating mesh'
@@ -2387,7 +2387,7 @@ contains
       print*,'ERROR:  trouble creating pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
     call ESMF_PointListGet(pointlist, dims=mydims, numpts=mypts, maxpts=maxpts, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
@@ -2422,8 +2422,8 @@ contains
         return
       endif
 
-      my_err1 = abs(test_coordx - test_coords(1)) 
-      my_err2 = abs(test_coordy - test_coords(2)) 
+      my_err1 = abs(test_coordx - test_coords(1))
+      my_err2 = abs(test_coordy - test_coords(2))
       if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001) then
         print*,'ERROR:  unexpected coordinates for queried pointlist location:'
         print*,'expected ( ',test_coordx,' , ',test_coordy,' )  got  (',test_coords(1),',',test_coords(2),')'
@@ -2439,7 +2439,7 @@ contains
       print*,'ERROR:  trouble destroying pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
     call ESMF_MeshDestroy(myMesh, rc=localrc)
     if (localrc /=ESMF_SUCCESS) then
@@ -2516,8 +2516,8 @@ contains
     enddo
 
     !-------------------------------------------------------------------
-    ! Create the LocStream:  Allocate space for the LocStream object, 
-    ! define the number and distribution of the locations. 
+    ! Create the LocStream:  Allocate space for the LocStream object,
+    ! define the number and distribution of the locations.
     !-------------------------------------------------------------------
     myLocStream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
                                    localCount=local_pts, &
@@ -2558,10 +2558,10 @@ contains
 
 
     !-------------------------------------------------------------------
-    ! Create a Field on the Location Stream. In this case the 
+    ! Create a Field on the Location Stream. In this case the
     ! Field is created from a user array, but any of the other
     ! Field create methods (e.g. from ArraySpec) would also apply.
-    !-------------------------------------------------------------------    
+    !-------------------------------------------------------------------
     field_temperature=ESMF_FieldCreate(myLocStream,   &
                                        temperature, &
                                        name="temperature", &
@@ -2578,7 +2578,7 @@ contains
       print*,'ERROR:  trouble creating pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
     call ESMF_PointListGet(pointlist, dims=mydims, numpts=mypts, maxpts=maxpts, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
@@ -2591,7 +2591,7 @@ contains
 !    if (localrc /= ESMF_SUCCESS) then
 !       rc=ESMF_FAILURE
 !       return
-!    endif	
+!    endif      
 
 
     if (maxpts .ne. local_pts .or. mypts .ne. local_pts .or. mydims .ne. 3) then
@@ -2614,9 +2614,9 @@ contains
         return
       endif
 
-      my_err1 = abs(test_coords(1) - 0.5) 
-      my_err2 = abs(test_coords(2) - 0.866) 
-      my_err3 = abs(test_coords(3) - 0.0) 
+      my_err1 = abs(test_coords(1) - 0.5)
+      my_err2 = abs(test_coords(2) - 0.866)
+      my_err3 = abs(test_coords(3) - 0.0)
       if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001 .or. my_err3 .gt. .0001) then
         print*,'ERROR:  unexpected coordinates for queried pointlist location:'
         print*,'expected ( 0.5 , 0.866 , 0 )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
@@ -2634,7 +2634,7 @@ contains
       print*,'ERROR:  trouble destroying pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
     call ESMF_LocStreamDestroy(myLocStream, rc=localrc)
     if (localrc /=ESMF_SUCCESS) then
@@ -2707,8 +2707,8 @@ contains
 
 
     !-------------------------------------------------------------------
-    ! Create the LocStream:  Allocate space for the LocStream object, 
-    ! define the number and distribution of the locations. 
+    ! Create the LocStream:  Allocate space for the LocStream object,
+    ! define the number and distribution of the locations.
     !-------------------------------------------------------------------
     myLocStream=ESMF_LocStreamCreate(name="Equatorial Measurements", &
                                    localCount=local_pts, &
@@ -2755,7 +2755,7 @@ contains
       return
     endif
     !-------------------------------------------------------------------
-    ! Get key data.   
+    ! Get key data.
     !-------------------------------------------------------------------
     call ESMF_LocStreamGetKey(myLocStream,                  &
                               localDE=0,                    &
@@ -2788,7 +2788,7 @@ contains
       return
     endif
     !-------------------------------------------------------------------
-    ! Set key data. 
+    ! Set key data.
     !-------------------------------------------------------------------
     do i=1,local_pts
        lon(i)=(i-1)*360.0/local_pts
@@ -2803,10 +2803,10 @@ contains
     maskArray(6)=0
 
     !-------------------------------------------------------------------
-    ! Create a Field on the Location Stream. In this case the 
+    ! Create a Field on the Location Stream. In this case the
     ! Field is created from a user array, but any of the other
     ! Field create methods (e.g. from ArraySpec) would also apply.
-    !-------------------------------------------------------------------    
+    !-------------------------------------------------------------------
     field_temperature=ESMF_FieldCreate(myLocStream,   &
                                        temperature, &
                                        name="temperature", &
@@ -2823,7 +2823,7 @@ contains
       print*,'ERROR:  trouble creating pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
     call ESMF_PointListGet(pointlist, dims=mydims, numpts=mypts, maxpts=maxpts, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
@@ -2845,7 +2845,7 @@ contains
 !    if (localrc /= ESMF_SUCCESS) then
 !       rc=ESMF_FAILURE
 !       return
-!    endif	
+!    endif      
 
 
     if (local_pts .gt. 0) then
@@ -2858,9 +2858,9 @@ contains
         return
       endif
 
-      my_err1 = abs(test_coords(1) - (-0.5)) 
-      my_err2 = abs(test_coords(2) - (-0.866)) 
-      my_err3 = abs(test_coords(3) - (-0.0)) 
+      my_err1 = abs(test_coords(1) - (-0.5))
+      my_err2 = abs(test_coords(2) - (-0.866))
+      my_err3 = abs(test_coords(3) - (-0.0))
       if (my_err1 .gt. .0001 .or. my_err2 .gt. .0001 .or. my_err3 .gt. .0001) then
         print*,'ERROR:  unexpected coordinates for queried pointlist location:'
         print*,'expected ( 0.5 , 0.866 , 0 )  got  (',test_coords(1),',',test_coords(2),',',test_coords(3),')'
@@ -2877,7 +2877,7 @@ contains
       print*,'ERROR:  trouble destroying pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
 
     call ESMF_LocStreamDestroy(myLocStream, rc=localrc)
@@ -2936,7 +2936,7 @@ contains
       ! Allocate and fill the node id array.
       allocate(nodeIds(numNodes))
 
-      nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+      nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
       ! Allocate and fill node coordinate array.
       ! Since this is a 2D Mesh the size is 2x the
@@ -2966,7 +2966,7 @@ contains
 
       ! Allocate and fill the element id array.
       allocate(elemIds(numTotElems))
-      elemIds=(/1,2,3,4,5/) 
+      elemIds=(/1,2,3,4,5/)
 
       ! Allocate and fill the element topology type array.
       allocate(elemTypes(numTotElems))
@@ -2978,17 +2978,17 @@ contains
 
 
       ! Allocate and fill the element connection type array.
-      ! Note that entries in this array refer to the 
+      ! Note that entries in this array refer to the
       ! positions in the nodeIds, etc. arrays and that
       ! the order and number of entries for each element
-      ! reflects that given in the Mesh options 
+      ! reflects that given in the Mesh options
       ! section for the corresponding entry
-      ! in the elemTypes array. The number of 
+      ! in the elemTypes array. The number of
       ! entries in this elemConn array is the
-      ! number of nodes in a quad. (4) times the 
+      ! number of nodes in a quad. (4) times the
       ! number of quad. elements plus the number
       ! of nodes in a triangle (3) times the number
-      ! of triangle elements. 
+      ! of triangle elements.
       allocate(elemConn(4*numQuadElems+3*numTriElems))
       elemConn=(/1,2,5,4, &  ! elem id 1
                  2,3,5,   &  ! elem id 2
@@ -3006,7 +3006,7 @@ contains
         ! Allocate and fill the node id array.
         allocate(nodeIds(numNodes))
 
-        nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+        nodeIds=(/1,2,3,4,5,6,7,8,9/)
 
         ! Allocate and fill node coordinate array.
         ! Since this is a 2D Mesh the size is 2x the
@@ -3036,7 +3036,7 @@ contains
 
         ! Allocate and fill the element id array.
         allocate(elemIds(numTotElems))
-        elemIds=(/1,2,3,4,5/) 
+        elemIds=(/1,2,3,4,5/)
 
         ! Allocate and fill the element topology type array.
         allocate(elemTypes(numTotElems))
@@ -3048,17 +3048,17 @@ contains
 
 
         ! Allocate and fill the element connection type array.
-        ! Note that entries in this array refer to the 
+        ! Note that entries in this array refer to the
         ! positions in the nodeIds, etc. arrays and that
         ! the order and number of entries for each element
-        ! reflects that given in the Mesh options 
+        ! reflects that given in the Mesh options
         ! section for the corresponding entry
-        ! in the elemTypes array. The number of 
+        ! in the elemTypes array. The number of
         ! entries in this elemConn array is the
-        ! number of nodes in a quad. (4) times the 
+        ! number of nodes in a quad. (4) times the
         ! number of quad. elements plus the number
         ! of nodes in a triangle (3) times the number
-        ! of triangle elements. 
+        ! of triangle elements.
         allocate(elemConn(4*numQuadElems+3*numTriElems))
         elemConn=(/1,2,5,4, &  ! elem id 1
                    2,3,5,   &  ! elem id 2
@@ -3067,7 +3067,7 @@ contains
                    5,6,9,8/)   ! elem id 5
 
 
-      else if (localPET .gt. 0) then 
+      else if (localPET .gt. 0) then
 
 
         ! Set number of nodes
@@ -3108,8 +3108,8 @@ contains
          coordSys=ESMF_COORDSYS_CART, &
          nodeIds=nodeIds, nodeCoords=nodeCoords, &
          nodeOwners=nodeOwners, &
-	 elementIds=elemIds, elementTypes=elemTypes, &
-	 elementConn=elemConn, rc=localrc)
+         elementIds=elemIds, elementTypes=elemTypes, &
+         elementConn=elemConn, rc=localrc)
 
 
     if (localrc /=ESMF_SUCCESS) then
@@ -3137,14 +3137,14 @@ contains
       print*,'ERROR: trouble creating pointlist'
       rc=ESMF_FAILURE
       return
-    endif	
+    endif       
 
     call ESMF_PointListGet(pointlist, dims=mydims, numpts=mypts, maxpts=maxpts, rc=localrc)
     if (localrc /= ESMF_SUCCESS) then
        print*,'ERROR: trouble accessing pointlist data with get routine'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     if (maxpts .ne. local_pts .or. mypts .ne. local_pts .or. mydims .ne. 2) then
        print*,'ERROR:  unexpected values for newly created pointlist:'
@@ -3153,13 +3153,13 @@ contains
        print*,'dims should be: 2  got: ',mydims
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
 !    call ESMF_PointListPrint(pointlist)
 !    if (localrc /= ESMF_SUCCESS) then
 !       rc=ESMF_FAILURE
 !       return
-!    endif	
+!    endif      
 
 
     call ESMF_PointListDestroy(pointlist,rc=localrc)
@@ -3167,7 +3167,7 @@ contains
        print*,'ERROR: trouble destroying pointlist'
        rc=ESMF_FAILURE
        return
-    endif	
+    endif       
 
     call ESMF_MeshDestroy(myMesh, rc=localrc)
     if (localrc /=ESMF_SUCCESS) then

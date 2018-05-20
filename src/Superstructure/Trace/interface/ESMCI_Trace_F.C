@@ -17,20 +17,20 @@ static const char *const version = "$Id$";
 extern "C" {
 
   void FTN_X(c_esmftrace_open)
-     (				   
-      const char *trace_dir,           
-      int *rc,                        
-      ESMCI_FortranStrLenArg nlen)  //strlen for trace_dir 
-  {      
+     (                          
+      const char *trace_dir,
+      int *rc,
+      ESMCI_FortranStrLenArg nlen)  //strlen for trace_dir
+  {
     string dirname = string(trace_dir, ESMC_F90lentrim(trace_dir, nlen));
     ESMCI::TraceOpen(dirname, rc);
-  } 
+  }
 
-  void FTN_X(c_esmftrace_close)(int *rc) 
+  void FTN_X(c_esmftrace_close)(int *rc)
   {
     ESMCI::TraceClose(rc);
   }
-  
+
   void FTN_X(c_esmftrace_mapvmid)(ESMCI::VMId **vmid, int *mappedId, int *rc)
   {
 #undef  ESMC_METHOD
@@ -40,7 +40,7 @@ extern "C" {
     }
     else {
       ESMC_LogDefault.MsgFoundError(
-        ESMF_RC_ARG_BAD, "Null pointer for mappedId", ESMC_CONTEXT, rc);      
+        ESMF_RC_ARG_BAD, "Null pointer for mappedId", ESMC_CONTEXT, rc);
     }
   }
 
@@ -81,18 +81,18 @@ extern "C" {
   }
 
   void FTN_X(c_esmftrace_component_info)(ESMCI::Comp *comp, int *vmid, int *baseid, const char *name,
-					 const char *attributeKeys, const char *attributeVals, int *rc,
-					 ESMCI_FortranStrLenArg nlen,  //name
-					 ESMCI_FortranStrLenArg aklen,  //attributeKeys
-					 ESMCI_FortranStrLenArg avlen)  //attributeValues
+                                         const char *attributeKeys, const char *attributeVals, int *rc,
+                                         ESMCI_FortranStrLenArg nlen,  //name
+                                         ESMCI_FortranStrLenArg aklen,  //attributeKeys
+                                         ESMCI_FortranStrLenArg avlen)  //attributeValues
   {
     string cname = string(name, ESMC_F90lentrim (name, nlen));
     string aKeys = string(attributeKeys, ESMC_F90lentrim (attributeKeys, aklen));
     string aVals = string(attributeVals, ESMC_F90lentrim (attributeVals, avlen));
-    
+
     ESMCI::TraceEventComponentInfo(comp, vmid, baseid, cname.c_str(), aKeys, aVals);
     if (rc != NULL) *rc = ESMF_SUCCESS;
-    
+
   }
 
   void FTN_X(c_esmftrace_region_enter)(const char *name, int *rc, ESMCI_FortranStrLenArg nlen) {

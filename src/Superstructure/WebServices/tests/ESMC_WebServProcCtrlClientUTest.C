@@ -61,7 +61,7 @@ const char*  getDateAndTime(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-   static char 	datestr[1024];
+   static char          datestr[1024];
    time_t         ttime;
    struct tm*     tm;
 
@@ -88,38 +88,38 @@ const char*  getDateAndTime(
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int main(int    argc, 
+int main(int    argc,
          char*  argv[])
 {
-  	printf("hello from ESMCI_WebServCompSvrClientUTest\n");
+        printf("hello from ESMCI_WebServCompSvrClientUTest\n");
 
-   int	rc;
-	int	result = 0;
+   int  rc;
+        int     result = 0;
    char  name[80];
    char  failMsg[80];
-	int	portNum = 27070;
-	int	clientId = 1001;
-	char	host[512] = { "" };
+        int     portNum = 27070;
+        int     clientId = 1001;
+        char    host[512] = { "" };
 
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-//	strcpy(runDir, argv[2]);
-	gethostname(host, sizeof(host) - 1);
+//      strcpy(runDir, argv[2]);
+        gethostname(host, sizeof(host) - 1);
 
    //---------------------------------------------------------------------------
    //NEX_disable_UTest
    strcpy(name, "Instantiate Process Control Client");
    strcpy(failMsg, "Instantiation Failed");
 
-	ESMCI::ESMCI_WebServProcCtrlClient		client(host, 
-                                                 portNum, 
-                                                 "ksaint", 
+        ESMCI::ESMCI_WebServProcCtrlClient              client(host,
+                                                 portNum,
+                                                 "ksaint",
                                                  "mickey");
 
-   ESMC_Test((client.getClientId() > 0), 
+   ESMC_Test((client.getClientId() > 0),
              name, failMsg, &result, __FILE__, __LINE__, 0);
    //---------------------------------------------------------------------------
 
@@ -133,11 +133,11 @@ int main(int    argc,
    printf("-----------------------------------------------------\n");
    printf("\n");
 
-	//***
-	// Sleep for a few just to give the server a chance to startup
-	//***
-	printf("\n... Don't panic!  We're sleeping for 5 seconds...\n");
-	sleep(5);
+        //***
+        // Sleep for a few just to give the server a chance to startup
+        //***
+        printf("\n... Don't panic!  We're sleeping for 5 seconds...\n");
+        sleep(5);
 
    //---------------------------------------------------------------------------
    //NEX_disable_UTest
@@ -148,8 +148,8 @@ int main(int    argc,
 printf("Current State: %d\n", currentState);
 printf("Current State: %s\n", client.getStateStr(currentState));
 
-   ESMC_Test((currentState != ESMF_FAILURE), 
-		name, failMsg, &result, __FILE__, __LINE__, 0);
+   ESMC_Test((currentState != ESMF_FAILURE),
+                name, failMsg, &result, __FILE__, __LINE__, 0);
    //---------------------------------------------------------------------------
 
 
@@ -158,7 +158,7 @@ printf("Current State: %s\n", client.getStateStr(currentState));
    strcpy(name, "Call Component Initialize");
    strcpy(failMsg, "Returned ESMF_FAILURE");
 
-	printf("Executing initialize...\n");
+        printf("Executing initialize...\n");
    rc = client.init();
 printf("Current State: %d\n", rc);
 printf("Current State: %s\n", client.getStateStr(rc));
@@ -169,21 +169,21 @@ printf("Current State: %s\n", client.getStateStr(rc));
    currentState = client.state();
    int   waitCount = 0;
 
-	printf("Waiting for initialize...\n");
+        printf("Waiting for initialize...\n");
    while (currentState == NET_ESMF_STAT_INITIALIZING)
    {
       sleep(1);
       ++waitCount;
       currentState = client.state();
    }
-	printf("Done Waiting... waited for %d seconds\n", waitCount);
+        printf("Done Waiting... waited for %d seconds\n", waitCount);
 
    //---------------------------------------------------------------------------
    //NEX_disable_UTest
    strcpy(name, "Call Component Run");
    strcpy(failMsg, "Returned ESMF_FAILURE");
 
-	printf("Executing run...\n");
+        printf("Executing run...\n");
    rc = client.run();
 printf("Current State: %d\n", rc);
 printf("Current State: %s\n", client.getStateStr(rc));
@@ -194,14 +194,14 @@ printf("Current State: %s\n", client.getStateStr(rc));
    currentState = client.state();
    waitCount = 0;
 
-	printf("Waiting for run...\n");
+        printf("Waiting for run...\n");
    while (currentState == NET_ESMF_STAT_RUNNING)
    {
       sleep(1);
       ++waitCount;
       currentState = client.state();
    }
-	printf("Done Waiting... waited for %d seconds\n", waitCount);
+        printf("Done Waiting... waited for %d seconds\n", waitCount);
 
 /*
    //---------------------------------------------------------------------------
@@ -212,7 +212,7 @@ printf("Current State: %s\n", client.getStateStr(rc));
    ESMC_Test((rc!=ESMF_FAILURE), name, failMsg, &result, __FILE__, __LINE__, 0);
    //---------------------------------------------------------------------------
 
-	printf("Waiting for finalize...\n");
+        printf("Waiting for finalize...\n");
    currentState = client.state();
    waitCount = 0;
 
@@ -222,7 +222,7 @@ printf("Current State: %s\n", client.getStateStr(rc));
       ++waitCount;
       currentState = client.state();
    }
-	printf("Done Waiting... waited for %d seconds\n", waitCount);
+        printf("Done Waiting... waited for %d seconds\n", waitCount);
 */
 
 /*
@@ -230,9 +230,9 @@ printf("Current State: %s\n", client.getStateStr(rc));
    //NEX_disable_UTest
    strcpy(name, "Call Component Files");
    strcpy(failMsg, "No files returned");
-	vector<string>	retFiles = client.files();
-   ESMC_Test((retFiles.size()==0), 
-		name, failMsg, &result, __FILE__, __LINE__, 0);
+        vector<string>  retFiles = client.files();
+   ESMC_Test((retFiles.size()==0),
+                name, failMsg, &result, __FILE__, __LINE__, 0);
    //---------------------------------------------------------------------------
 */
 
@@ -256,5 +256,5 @@ printf("Current State: %s\n", client.getStateStr(rc));
    printf("\n-----------------------------------------------------\n");
    fflush(stdout);
 
-  	return 0;
+        return 0;
 }

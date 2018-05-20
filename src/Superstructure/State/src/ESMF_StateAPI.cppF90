@@ -1,10 +1,10 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright 2002-2018, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the University of Illinois-NCSA License.
 !==============================================================================
@@ -29,7 +29,7 @@ module ESMF_StateAPIMod
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the Fortran function and subroutine 
+! The code in this file implements the Fortran function and subroutine
 !  interfaces to the {\tt State} class and associated data structures.
 !
 !
@@ -57,13 +57,13 @@ module ESMF_StateAPIMod
       use ESMF_IOUtilMod
       use ESMF_UtilMod
       use ESMF_UtilStringMod
-      
+
       implicit none
-      
+
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
-      
+
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_State               ! implemented in ESMF_StateTypesMod
@@ -76,7 +76,7 @@ module ESMF_StateAPIMod
       public operator(/=)
 
       public ESMF_StateCreate, ESMF_StateDestroy
-      
+
       public ESMF_StateDestruct    ! for ESMF garbage collection
 
       public ESMF_StateAdd, ESMF_StateAddReplace
@@ -94,7 +94,7 @@ module ESMF_StateAPIMod
       public ESMF_StateSerialize, ESMF_StateDeserialize
 
       public ESMF_StateClassFindData
-      
+
 !EOPI
 
 !------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ module ESMF_StateAPIMod
       '$Id$'
 
 !==============================================================================
-! 
+!
 ! INTERFACE BLOCKS
 !
 !==============================================================================
@@ -141,11 +141,11 @@ module ESMF_StateAPIMod
     module procedure ESMF_StateAddStateList
 
 
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-! types of {\tt ESMF\_StateAdd} functions.   
-!  
-!EOPI 
+! !DESCRIPTION:
+! This interface provides a single entry point for the various
+! types of {\tt ESMF\_StateAdd} functions.
+!
+!EOPI
   end interface
 
 !------------------------------------------------------------------------------
@@ -165,11 +165,11 @@ module ESMF_StateAPIMod
     module procedure ESMF_StateAddRpStateList
 
 
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-! types of {\tt ESMF\_StateAdd} functions.   
-!  
-!EOPI 
+! !DESCRIPTION:
+! This interface provides a single entry point for the various
+! types of {\tt ESMF\_StateAdd} functions.
+!
+!EOPI
   end interface
 
 !------------------------------------------------------------------------------
@@ -191,11 +191,11 @@ module ESMF_StateAPIMod
       module procedure ESMF_StateGetItemInfo
 
 
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-! types of {\tt ESMF\_StateGet} functions.   
-!  
-!EOPI 
+! !DESCRIPTION:
+! This interface provides a single entry point for the various
+! types of {\tt ESMF\_StateGet} functions.
+!
+!EOPI
   end interface
 
 !===============================================================================
@@ -344,7 +344,7 @@ contains
 !
 ! !INTERFACE:
   function ESMF_StateEQ(state1, state2)
-! 
+!
 ! !RETURN VALUE:
     logical :: ESMF_StateEQ
 
@@ -353,7 +353,7 @@ contains
     type(ESMF_State), intent(in) :: state2
 
 ! !DESCRIPTION:
-!   Test if both {\tt state1} and {\tt state2} alias the same ESMF State 
+!   Test if both {\tt state1} and {\tt state2} alias the same ESMF State
 !   object.
 !
 !EOPI
@@ -361,7 +361,7 @@ contains
 
     ESMF_INIT_TYPE sinit1, sinit2
 
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
     ! deleted).
@@ -393,7 +393,7 @@ contains
 !
 ! !INTERFACE:
   function ESMF_StateNE(state1, state2)
-! 
+!
 ! !RETURN VALUE:
     logical :: ESMF_StateNE
 
@@ -402,17 +402,17 @@ contains
     type(ESMF_State), intent(in) :: state2
 
 ! !DESCRIPTION:
-!   Test if both {\tt state1} and {\tt state2} alias the same ESMF State 
+!   Test if both {\tt state1} and {\tt state2} alias the same ESMF State
 !   object.
 !
 !EOPI
 !-------------------------------------------------------------------------------
 
-    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain 
+    ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
     ! init checks on both args, and in the case where both are uninitialized,
     ! to distinguish equality based on uninitialized type (uncreated,
     ! deleted).
-    
+
     ESMF_StateNE = .not.ESMF_StateEQ(state1, state2)
 
   end function ESMF_StateNE
@@ -433,14 +433,14 @@ contains
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    logical,          intent(in),   optional :: relaxedflag
 !    integer,          intent(out),  optional :: rc
-!     
+!
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!      Add a reference to a single <item> to an existing 
+!      Add a reference to a single <item> to an existing
 !      {\tt state}.  The name of the <item> must be unique within
 !      the {\tt state}.
 !
@@ -461,7 +461,7 @@ contains
 ! \item[<item>]
 !      The <item> to be added.  This is a reference only; when
 !      the {\tt state} is destroyed the <item>s contained in it will
-!      not be destroyed.   Also, the <item> cannot be safely 
+!      not be destroyed.   Also, the <item> cannot be safely
 !      destroyed before the {\tt state} is destroyed.
 !      Since <item>s can be added to multiple containers, it remains
 !      the responsibility of the user to manage their
@@ -627,11 +627,11 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 !  subroutine ESMF_StateAdd(state, <itemList>, relaxedFlag, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_State), intent(inout)          :: state 
+!    type(ESMF_State), intent(inout)          :: state
 !    <itemList>, see below for supported values
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    logical,          intent(in),   optional :: relaxedFlag
-!    integer,          intent(out),  optional :: rc     
+!    integer,          intent(out),  optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -641,8 +641,8 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 ! !DESCRIPTION:
 ! Add a list of items to a {\tt ESMF\_State}. It is an error if any item in
 ! <itemlist> already matches, by name, an item already contained in {\tt state}.
-!    
-!    Supported values for <itemList> are:   
+!
+!    Supported values for <itemList> are:
 !    \begin{description}
 !    \item type(ESMF\_Array), intent(in)             :: arrayList(:)
 !    \item type(ESMF\_ArrayBundle), intent(in)       :: arraybundleList(:)
@@ -660,7 +660,7 @@ StateAddMacro(ESMF_State,OneState,nestedState,state,nestedState%statep%base)
 !     The list of items to be added.
 !     This is a reference only; when
 !     the {\tt ESMF\_State} is destroyed the <itemList> items contained within it will
-!     not be destroyed.   Also, the items in the <itemList> cannot be safely 
+!     not be destroyed.   Also, the items in the <itemList> cannot be safely
 !     destroyed before the {\tt ESMF\_State} is destroyed.
 !     Since <itemList> items can be added to multiple containers, it remains
 !     the responsibility of the user to manage their
@@ -787,10 +787,10 @@ StateAddListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%stat
 !  subroutine ESMF_StateAddReplace(state, <itemList>, rc)
 !
 ! !ARGUMENTS:
-!    type(ESMF_State), intent(inout)          :: state 
+!    type(ESMF_State), intent(inout)          :: state
 !    <itemList>, see below for supported values
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!    integer,          intent(out),  optional :: rc     
+!    integer,          intent(out),  optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -802,8 +802,8 @@ StateAddListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%stat
 ! <itemList> does not match any items already present in {\tt state}, it is
 ! added.  Items with names already present in the {\tt state} replace the
 ! existing item.
-!    
-!    Supported values for <itemList> are:   
+!
+!    Supported values for <itemList> are:
 !    \begin{description}
 !    \item type(ESMF\_Array), intent(in)             :: arrayList(:)
 !    \item type(ESMF\_ArrayBundle), intent(in)       :: arraybundleList(:)
@@ -821,7 +821,7 @@ StateAddListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%stat
 !     The list of items to be added or replaced.
 !     This is a reference only; when
 !     the {\tt ESMF\_State} is destroyed the <itemList> items contained within it will
-!     not be destroyed.   Also, the items in the <itemList> cannot be safely 
+!     not be destroyed.   Also, the items in the <itemList> cannot be safely
 !     destroyed before the {\tt ESMF\_State} is destroyed.
 !     Since <itemList> items can be added to multiple containers, it remains
 !     the responsibility of the user to manage their
@@ -951,8 +951,8 @@ StateAddRepListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%s
       type(ESMF_FieldBundle), intent(in),  optional :: fieldbundleList(:)
       type(ESMF_State),       intent(in),  optional :: nestedStateList(:)
       type(ESMF_RouteHandle), intent(in),  optional :: routehandleList(:)
-      character(len=*),       intent(in),  optional :: name 
-      integer,                intent(out), optional :: rc 
+      character(len=*),       intent(in),  optional :: name
+      integer,                intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -962,13 +962,13 @@ StateAddRepListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%s
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_State}, set default characteristics for
 !   objects added to it, and optionally add initial objects to it.
-!    
+!
 !  The arguments are:
 !  \begin{description}
 !   \item[{[stateintent]}]
-!    Import or Export {\tt ESMF\_State}.  Valid values are 
-!    {\tt ESMF\_STATEINTENT\_IMPORT}, {\tt ESMF\_STATEINTENT\_EXPORT}, 
-!    or {\tt ESMF\_STATEINTENT\_UNSPECIFIED} The default 
+!    Import or Export {\tt ESMF\_State}.  Valid values are
+!    {\tt ESMF\_STATEINTENT\_IMPORT}, {\tt ESMF\_STATEINTENT\_EXPORT},
+!    or {\tt ESMF\_STATEINTENT\_UNSPECIFIED} The default
 !    is {\tt ESMF\_STATEINTENT\_UNSPECIFIED}.
 !   \item[{[arrayList]}]
 !    A list (Fortran array) of {\tt ESMF\_Array}s.
@@ -979,7 +979,7 @@ StateAddRepListMacro(ESMF_State,State,nestedStateList,state,nestedStateList(i)%s
 !   \item[{[fieldbundleList]}]
 !    A list (Fortran array) of {\tt ESMF\_FieldBundle}s.
 !   \item[{[nestedStateList]}]
-!    A list (Fortran array) of {\tt ESMF\_State}s to be nested 
+!    A list (Fortran array) of {\tt ESMF\_State}s to be nested
 !    inside the outer {\tt ESMF\_State}.
 !   \item[{[routehandleList]}]
 !    A list (Fortran array) of {\tt ESMF\_RouteHandle}s.
@@ -1041,7 +1041,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
         allocate(stypep, stat=memstat)
         if (ESMF_LogFoundAllocError(memstat, msg="State type", &
                  ESMF_CONTEXT, rcToReturn=rc)) return
-        
+
         call ESMF_StateConstruct(stypep,  &
                  statename=name, stateintent=stateintent, &
                  arrays=arrayList, arraybundles=arraybundleList, &
@@ -1050,7 +1050,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
                  routehandles=routehandleList, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) then 
+            ESMF_CONTEXT, rcToReturn=rc)) then
             deallocate(stypep, stat=memstat)
             return
         endif
@@ -1060,10 +1060,10 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 
         ! Add reference to this object into ESMF garbage collection table
         call c_ESMC_VMAddFObject(ESMF_StateCreate, ESMF_ID_STATE%objectID)
-      
+
         ! validate created state
         ESMF_INIT_SET_CREATED(ESMF_StateCreate)
- 
+
         if (present(rc)) rc = ESMF_SUCCESS
 
         end function ESMF_StateCreate
@@ -1113,12 +1113,12 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
         ! check input variables
         ESMF_INIT_CHECK_DEEP(ESMF_StateGetInit,state,rc)
 
-        if (.not.associated(state%statep)) then 
+        if (.not.associated(state%statep)) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_BAD, &
             msg="Uninitialized or already destroyed State: statep unassociated", &
             ESMF_CONTEXT, rcToReturn=rc)
           return
-        endif 
+        endif
 
         ! Call Destruct to release resources
         call ESMF_StateDestruct(state%statep, localrc)
@@ -1148,7 +1148,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 ! !IROUTINE: ESMF_StateGet - Get object-wide information from a State
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateGet()   
+      ! Private name; call using ESMF_StateGet()
       subroutine ESMF_StateGetInfo(state,  &
             keywordEnforcer, itemSearch, itemorderflag, nestedFlag,  &
             stateintent, itemCount, itemNameList, itemTypeList, name, rc)
@@ -1164,7 +1164,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       character (len=*),         intent(out), optional :: itemNameList(:)
       type(ESMF_StateItem_Flag), intent(out), optional :: itemTypeList(:)
       character (len=*),         intent(out), optional :: name
-      integer,                   intent(out), optional :: rc             
+      integer,                   intent(out), optional :: rc
 
 !
 ! !STATUS:
@@ -1192,7 +1192,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !     values.
 !
 !     The arguments are:
-!     \begin{description}     
+!     \begin{description}
 !     \item[state]
 !       An {\tt ESMF\_State} object to be queried.
 !     \item[{[itemSearch]}]
@@ -1224,7 +1224,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !       States.  When using {\tt itemSearch}, it will return the names of
 !       items matching the specified name.  {\tt itemNameList} must be at least
 !       {\tt itemCount} long.
-!     \item[{[itemTypeList]}]  
+!     \item[{[itemTypeList]}]
 !       Array of possible item object types in this {\tt ESMF\_State}.
 !       When the {\tt nestedFlag} option is
 !       set to {\tt .true.}, the list will include items present in nested
@@ -1257,10 +1257,10 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       if (present (nestedFlag)) then
         localnestedflag = nestedFlag
       end if
-    
+
       itemorderflagArg = ESMF_ITEMORDER_ABC ! default
       if (present(itemorderflag)) &
-	itemorderflagArg = itemorderflag
+        itemorderflagArg = itemorderflag
 
       stypep => state%statep
 
@@ -1270,7 +1270,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       localitemcount = infoCountWorker (stypep)
 
       if (present(itemCount))  &
-        itemCount = localitemcount 
+        itemCount = localitemcount
 
       if (present(itemNameList)) then
         ilpos = 1
@@ -1285,7 +1285,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       if (present(rc)) rc = localrc
 
     contains
-      
+
         recursive function infoCountWorker (sp) result (icount)
           type(ESMF_StateClass), pointer :: sp
           integer :: icount
@@ -1297,15 +1297,15 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 
           icount = 0
 
-	  call ESMF_ContainerGet (sp%stateContainer, itemCount=sipcount, rc=localrc)
-	  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-	      ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_ContainerGet (sp%stateContainer, itemCount=sipcount, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
           siwrap => null ()
           if (present (itemSearch) .or. localnestedflag) then
-	    call ESMF_ContainerGet (sp%stateContainer, itemList=siwrap, rc=localrc)
-	    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-	        ESMF_CONTEXT, rcToReturn=rc)) return
+            call ESMF_ContainerGet (sp%stateContainer, itemList=siwrap, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
           end if
 
           if (.not. present (itemSearch)) then
@@ -1314,7 +1314,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
             icount = 0
             do, i1 = 1, sipcount
               if (siwrap(i1)%si%namep == itemSearch) then
-        	icount = icount + 1
+                icount = icount + 1
               end if
             end do
           end if
@@ -1331,7 +1331,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
             deallocate (siwrap, stat=memstat1)
 
         end function infoCountWorker
-      
+
         recursive subroutine itemNameWorker (sp, prefix)
           type(ESMF_StateClass), pointer :: sp
           character(*), intent(in) :: prefix
@@ -1345,13 +1345,13 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
           integer :: memstat1
 
           siwrap => null ()
-	  call ESMF_ContainerGet (sp%stateContainer,  &
+          call ESMF_ContainerGet (sp%stateContainer,  &
               itemorderflag=itemorderflagArg,  &
               itemCount=sipcount,  &
               itemList=siwrap,  &
               rc=localrc)
-	  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-	      ESMF_CONTEXT, rcToReturn=rc)) return
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
           do, i1 = 1, sipcount
             if (ilpos > size (itemNameList)) then
@@ -1382,7 +1382,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
             deallocate (siwrap, stat=memstat1)
 
         end subroutine itemNameWorker
-      
+
         recursive subroutine itemTypeWorker (sp)
           type(ESMF_StateClass), pointer :: sp
 
@@ -1395,13 +1395,13 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
           integer :: memstat1
 
           siwrap => null ()
-	  call ESMF_ContainerGet (sp%stateContainer,  &
+          call ESMF_ContainerGet (sp%stateContainer,  &
               itemorderflag=itemorderflagArg,  &
               itemCount=sipcount,  &
               itemList=siwrap,  &
               rc=localrc)
-	  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-	      ESMF_CONTEXT, rcToReturn=rc)) return
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
           do, i1 = 1, sipcount
             if (ilpos > size (itemtypeList)) then
@@ -1441,7 +1441,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 ! !IROUTINE: ESMF_StateGet - Get information about an item in a State by item name
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_StateGet()   
+      ! Private name; call using ESMF_StateGet()
       subroutine ESMF_StateGetItemInfo(state, itemName, itemType, keywordEnforcer, rc)
 !
 ! !ARGUMENTS:
@@ -1449,7 +1449,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
       character (len=*),        intent(in)  :: itemName
       type(ESMF_StateItem_Flag), intent(out) :: itemType
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer,                  intent(out), optional :: rc             
+      integer,                  intent(out), optional :: rc
 
 !
 ! !STATUS:
@@ -1462,19 +1462,19 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !     {\tt name} in this {\tt ESMF\_State}.  If no item with this name
 !     exists, the value {\tt ESMF\_STATEITEM\_NOTFOUND} will be returned
 !     and the error code will not be set to an error.  Thus this routine
-!     can be used to safely query for the existence of items by name 
+!     can be used to safely query for the existence of items by name
 !     whether or not they are expected to be there.   The error code will
 !     be set in case of other errors, for example if the {\tt ESMF\_State}
 !     itself is invalid.
 !
 !     The arguments are:
-!     \begin{description}     
+!     \begin{description}
 !     \item[state]
 !        {\tt ESMF\_State} to be queried.
 !      \item[itemName]
 !        Name of the item to return information about.
 !      \item[itemType]
-!        Returned item types for the item with the given name, including 
+!        Returned item types for the item with the given name, including
 !        placeholder names.  Options are
 !        listed in Section~\ref{const:stateitem}.  If no item with the
 !        given name is found, {\tt ESMF\_STATEITEM\_NOTFOUND} will be returned
@@ -1511,9 +1511,9 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
           ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (foundflag) then
-	call ESMF_ContainerGet (scp, itemName=itemName,  &
+        call ESMF_ContainerGet (scp, itemName=itemName,  &
             item=siwrap, rc=localrc)
-	if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         itemtype = siwrap%si%otype
@@ -1537,7 +1537,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !      character (len=*),     intent(in)            :: itemName
 !      <item>, see below for supported values
 !    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-!      integer,               intent(out), optional :: rc             
+!      integer,               intent(out), optional :: rc
 !
 !
 ! !STATUS:
@@ -1547,7 +1547,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !
 ! !DESCRIPTION:
 !      \begin{sloppypar}
-!      Returns an <item> from an {\tt ESMF\_State} by item name.  
+!      Returns an <item> from an {\tt ESMF\_State} by item name.
 !      If the {\tt ESMF\_State} contains the <item> directly, only
 !      {\tt itemName} is required.
 !      \end{sloppypar}
@@ -1570,7 +1570,7 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
 !      \end{description}
 !
 !     The arguments are:
-!     \begin{description}     
+!     \begin{description}
 !     \item[state]
 !     State to query for an <item> named {\tt itemName}.
 !     \item[itemName]
@@ -1597,9 +1597,9 @@ ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandleList(i),rc)
           keywordEnforcer, rc) @\
 ! @\
 ! !ARGUMENTS: @\
-      type(ESMF_State),  intent(in)	       :: state @\
-      character (len=*), intent(in)	       :: itemName @\
-      type(mtype),       intent(out)	       :: mname @\
+      type(ESMF_State),  intent(in)            :: state @\
+      character (len=*), intent(in)            :: itemName @\
+      type(mtype),       intent(out)           :: mname @\
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below @\
       integer,           intent(out), optional :: rc @\
  @\
@@ -1731,7 +1731,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   determine whether other PETs in the VM may need to be reconciled.
 !
 !   The arguments are:
-!   \begin{description}     
+!   \begin{description}
 !   \item[state]
 !     {\tt ESMF\_State} to query.
 !   \item[{[collectiveflag]}]
@@ -1843,13 +1843,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_StatePrint - Print State information
 !
 ! !INTERFACE:
-      subroutine ESMF_StatePrint(state, options, nestedFlag, filename, rc)
+      subroutine ESMF_StatePrint(state, options, nestedFlag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
       character(len=*), intent(in),  optional :: options
       logical,          intent(in),  optional :: nestedFlag
-      character(len=*), intent(in),  optional :: filename
       integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1868,8 +1867,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       State level only (default),
 !       When set to {\tt .true.}, additionally prints information from
 !       nested States
-!     \item[{[filename]}]
-!       The filename to which to write the Attribute info.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -1885,7 +1882,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_VM) :: localvm
        integer :: mypet
        character(8) :: mypet_string
-       
+
        ! Initialize return code; assume failure until success is certain
        if (present(rc)) rc = ESMF_RC_NOT_IMPL
        localrc = ESMF_RC_NOT_IMPL
@@ -1899,7 +1896,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (present (nestedFlag)) then
          localnestedflag = nestedFlag
        end if
-       
+
        localopts = "brief"
        if (present (options)) then
          if (options /= " ")  &
@@ -1912,26 +1909,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        select case (localopts)
        case ("brief")
        case ("debug")
-	 debugflag = .true.
-	 longflag  = .true.
+         debugflag = .true.
+         longflag  = .true.
        case ("long")
          longflag  = .true.
        case default
-	 write (ESMF_UtilIOStderr,*) "ESMF_StatePrint: Illegal options arg: ", &
-	     trim (localopts)
-	 if (present (rc)) rc = ESMF_RC_ARG_BAD
-	 return
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Illegal options argument: ", &
+             trim (localopts)
+         if (ESMF_LogFoundError(ESMF_RC_ARG_BAD, &
+             msg=ESMF_StringConcat ("Illegal options argument: ", trim (localopts)), &
+             ESMF_CONTEXT, rcToReturn=rc)) return
        end select
 
-       if (.not.associated(state%statep)) then 
-	 write (ESMF_UtilIOStdout,*) "Uninitialized or already destroyed State"
-	 if (present (rc)) rc = ESMF_SUCCESS
-	 return
+       if (.not.associated(state%statep)) then
+         write (ESMF_UtilIOStdout,*) "Uninitialized or already destroyed State"
+         if (present (rc)) rc = ESMF_SUCCESS
+         return
        end if
        if (state%statep%st .eq. ESMF_STATEINTENT_INVALID) then
-	 write (ESMF_UtilIOStdout,*) "Uninitialized or already destroyed State"
-	 if (present (rc)) rc = ESMF_SUCCESS
-	 return
+         write (ESMF_UtilIOStdout,*) "Uninitialized or already destroyed State"
+         if (present (rc)) rc = ESMF_SUCCESS
+         return
        end if
 
        call ESMF_VMGetCurrent(vm=localvm, rc=localrc)
@@ -1947,16 +1945,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        write (mypet_string,'(i8)') mypet
        mypet_string = adjustl (mypet_string)
        write (ESMF_UtilIOStdout,*)  &
-           "StatePrint (pet ", trim (mypet_string), "):"
+           ESMF_METHOD, ": (pet ", trim (mypet_string), "):"
 
-       call statePrintWorker (state%statep, level=0, filename=filename, rc1=rc)
+       call statePrintWorker (state%statep, level=0, rc1=rc)
 
    contains
 
-     recursive subroutine statePrintWorker (sp1, level, filename, rc1)
+     recursive subroutine statePrintWorker (sp1, level, rc1)
        type(ESMF_StateClass), pointer :: sp1
        integer, intent(in) :: level
-       character(*), intent(in), optional :: filename
        integer, intent(out), optional :: rc1
 
        type(ESMF_StateItemWrap), pointer :: siwrap(:)
@@ -2020,7 +2017,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        write (ESMF_UtilIOStdout,'(1x,2a,L1)') nestr,  &
            "   reconcile needed: ", sp1%reconcileneededflag
 
-       ! Prints Attributes associated with the State 
+       ! Prints Attributes associated with the State
        call ESMF_UtilIOUnitFlush (unit=ESMF_UtilIOstdout, rc=localrc1)
        if (ESMF_LogFoundError(localrc1, &
             ESMF_ERR_PASSTHRU, &
@@ -2037,7 +2034,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (ESMF_LogFoundError(localrc1, &
            ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc1)) return
-         call c_ESMC_BasePrint(sp1%base, level, "debug", ESMF_TRUE, filename, &
+         call c_ESMC_BasePrint(sp1%base, level, "debug", ESMF_FALSE, "", &
                                ESMF_FALSE, localrc1)
          if (ESMF_LogFoundError(localrc1, &
            ESMF_ERR_PASSTHRU, &
@@ -2050,11 +2047,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          call ESMF_StateItemPrint (sip,  &
              header=trim (outbuf),  &
              prefixstr=nestr,  &
-             longflag=longflag, debugflag=debugflag, filename=filename)
+             longflag=longflag, debugflag=debugflag)
 
          if (localnestedflag .and. sip%otype%ot == ESMF_STATEITEM_STATE%ot) then
            call statePrintWorker (sip%datap%spp, level=level+1, rc1=localrc1)
-	   if (ESMF_LogFoundError(localrc1, &
+           if (ESMF_LogFoundError(localrc1, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc1)) then
              if (associated (siwrap)) deallocate (siwrap, stat=memstat1)
@@ -2084,9 +2081,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       subroutine ESMF_StateRead(state, fileName, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_State),  intent(inout)         :: state 
+      type(ESMF_State),  intent(inout)         :: state
       character (len=*), intent(in)            :: fileName
-      integer,           intent(out), optional :: rc 
+      integer,           intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Currently limited to read in all Arrays from a NetCDF file and add them
@@ -2135,7 +2132,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ESMF_CONTEXT, rcToReturn=rc)) return
         end if
 
-        ! invoke C to C++ entry point 
+        ! invoke C to C++ entry point
         call c_ESMC_StateRead(state, state%statep%base, trim (fileName), localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -2158,8 +2155,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name              
-      integer,  intent(out), optional :: rc               
+      character (len = *), intent(in) :: name
+      integer,  intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Used to reinitialize all data associated with an
@@ -2178,16 +2175,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! TODO: code goes here
 !
-        type (ESMF_State) :: a 
+        type (ESMF_State) :: a
 
 !       this is just to shut the compiler up
-        type (ESMF_StateClass), target :: b 
+        type (ESMF_StateClass), target :: b
         a%statep => b
         nullify(a%statep)
 
-        ESMF_StateReadRestart = a 
+        ESMF_StateReadRestart = a
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
- 
+
         end function ESMF_StateReadRestart
 
 end module ESMF_StateAPIMod

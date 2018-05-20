@@ -143,6 +143,9 @@ void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   int *regridPoleNPnts,
   ESMC_LineType_Flag *linetype,
   ESMC_NormType_Flag *normtype,
+  ESMC_ExtrapMethod_Flag *extrapMethod,
+  int *extrapNumSrcPnts,
+  float *extrapDistExponent,
   ESMC_UnmappedAction_Flag *unmappedaction,
   ESMC_Logical *ignoreDegenerate,
   ESMCI::Field *srcfracfieldp,
@@ -161,6 +164,7 @@ void FTN_X(f_esmf_regridstorefile)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldp
   ESMC_NormType_Flag *normtype,
   ESMC_UnmappedAction_Flag *unmappedaction,
   ESMC_Logical *ignoreDegenerate,
+  ESMC_Logical *create_rh,
   ESMCI::Field *srcfracfieldp,
   ESMCI::Field *dstfracfieldp,
   int *rc,
@@ -177,7 +181,6 @@ void FTN_X(f_esmf_smmstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   const char *filename, ESMCI::RouteHandle **routehandlep,
   ESMC_Logical *ignoreUnmatchedIndices,
   int *srcTermProcessing, int *pipeLineDepth,
-  ESMCI::RouteHandle **transposeRoutehandlep,
   int *rc, ESMCI_FortranStrLenArg nlen);
 
 void FTN_X(f_esmf_fieldwrite)(ESMCI::Field *fieldp, const char *file,
@@ -1362,6 +1365,9 @@ namespace ESMCI {
     int *regridPoleNPnts,
     ESMC_LineType_Flag *lineType,
     ESMC_NormType_Flag *normType,
+    ESMC_ExtrapMethod_Flag *extrapMethod,
+    int *extrapNumSrcPnts,
+    float *extrapDistExponent,
     ESMC_UnmappedAction_Flag *unmappedAction,
     ESMC_Logical *ignoreDegenerate,
     Field *srcFracField, 
@@ -1430,6 +1436,9 @@ namespace ESMCI {
                               regridPoleNPnts,
                               lineType,
                               normType,
+                              extrapMethod,
+                              extrapNumSrcPnts,
+                              extrapDistExponent,
                               unmappedAction,
                               ignoreDegenerate,
                               srcFracField,
@@ -1475,6 +1484,7 @@ namespace ESMCI {
     ESMC_NormType_Flag *normType,
     ESMC_UnmappedAction_Flag *unmappedAction,
     ESMC_Logical *ignoreDegenerate,
+    ESMC_Logical *create_rh,
     Field *srcFracField,
     Field *dstFracField) {
 //
@@ -1545,6 +1555,7 @@ namespace ESMCI {
                               normType,
                               unmappedAction,
                               ignoreDegenerate,
+                              create_rh,
                               srcFracField,
                               dstFracField,
                               &localrc,
@@ -1658,8 +1669,7 @@ namespace ESMCI {
     RouteHandle **routehandlep,
     ESMC_Logical *ignoreUnmatchedIndices,
     int *srcTermProcessing,
-    int *pipeLineDepth,
-    RouteHandle **transposeRoutehandlep) {
+    int *pipeLineDepth) {
 //
 // !DESCRIPTION:
 //
@@ -1686,7 +1696,6 @@ namespace ESMCI {
                               fName, routehandlep,
                               ignoreUnmatchedIndices,
                               srcTermProcessing, pipeLineDepth,
-                              transposeRoutehandlep,
                               &localrc, slen);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {

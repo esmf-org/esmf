@@ -44,7 +44,7 @@ namespace ESMCI {
   // constants and enums
 
   enum Decomp_Flag {DECOMP_INVALID=0, DECOMP_BALANCED,
-    DECOMP_RESTFIRST, DECOMP_RESTLAST, DECOMP_CYCLIC};
+    DECOMP_RESTFIRST, DECOMP_RESTLAST, DECOMP_CYCLIC, DECOMP_SYMMEDGEMAX};
 
   enum DistGridMatch_Flag {DISTGRIDMATCH_INVALID=0, DISTGRIDMATCH_NONE,
     DISTGRIDMATCH_EXACT, DISTGRIDMATCH_ALIAS};
@@ -140,6 +140,13 @@ namespace ESMCI {
     static DistGrid *create(InterArray<int> *minIndex,
       InterArray<int> *maxIndex, InterArray<int> *deBlockList, 
       InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag, 
+      InterArray<int> *connectionList,
+      DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL,
+      ESMC_TypeKind_Flag indexTK=ESMF_NOKIND);
+    static DistGrid *create(InterArray<int> *minIndex,
+      InterArray<int> *maxIndex, InterArray<int> *deBlockList,
+      InterArray<int> *deToTileMap,
+      InterArray<int> *deLabelList, ESMC_IndexFlag *indexflag,
       InterArray<int> *connectionList,
       DELayout *delayout=NULL, VM *vm=NULL, int *rc=NULL,
       ESMC_TypeKind_Flag indexTK=ESMF_NOKIND);

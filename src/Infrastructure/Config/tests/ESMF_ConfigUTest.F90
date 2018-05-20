@@ -85,6 +85,8 @@ module config_subrs
         character(ESMF_MAXSTR) :: failMsg
         character(ESMF_MAXSTR) :: name
         integer :: result = 0
+        character(ESMF_MAXSTR) :: msg
+        integer :: msg_l
         rc = 0
 
         
@@ -153,9 +155,10 @@ module config_subrs
         if (rc == ESMF_RC_MEM) then 
            print *,' ESMF_ConfigLoadFile: Out of memory: exceeded NBUF_MAX'
         endif
-        if ( rc /= ESMF_RC_DUP_NAME ) then      
-           print *,' ESMF_ConfigLoadFile:  loaded file ', trim (fname), &
-                ' catastrophic error, rc = ', rc
+        if ( rc /= ESMF_RC_DUP_NAME ) then
+           call ESMF_LogRc2Msg (rc, msg=msg, msglen=msg_l)
+           print *,' ESMF_ConfigLoadFile:  loading file ', trim (fname), &
+                ' catastrophic error, rc = ', msg(:msg_l)
            return
         else
            counter_total =counter_total + 1
@@ -179,6 +182,7 @@ module config_subrs
       logical, parameter     :: optimize_0 = .false.
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
+      character(8) :: restart_file_tooshort
       integer :: result = 0
 
       rc = 0
@@ -310,6 +314,24 @@ module config_subrs
 
      !------------------------------------------------------------------------
      !EX_UTest
+     ! Config Get Attribute String too short Test
+     write(failMsg, *) "Did not return ESMF_SUCCESS"
+     write(name, *) "Config Get Attribute String too short Test"
+     call ESMF_ConfigGetAttribute( cf, restart_file_tooshort ,label='restart_file_name:', &
+           rc = rc )
+     call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute String too short w/default Test
+     write(failMsg, *) "Did not return ESMF_SUCCESS"
+     write(name, *) "Config Get Attribute String too short w/default Test"
+     call ESMF_ConfigGetAttribute( cf, restart_file_tooshort ,label='restart_file_name:', &
+           default='restart_file_001.dat', rc = rc )
+     call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+     !EX_UTest
      ! Config Get Attribute String Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Get Attribute String Test"
@@ -422,6 +444,7 @@ module config_subrs
       real(ESMF_KIND_R4), dimension(nu_0), parameter :: sigU_0 = &
            (/ 2.0, 2.0, 2.2, 2.3, 2.7, 3.2 /)
       character(len=10) :: directions(8)
+      character(len=2)  :: directions_tooshort(8)
  
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
@@ -550,8 +573,25 @@ module config_subrs
      !EX_UTest
      ! Config Get Attribute Quoted String Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
+     write(name, *) "Config Get Quoted String Array too short Test"
+     call ESMF_ConfigGetAttribute( cf, directions_tooshort, label='directions:', rc =rc )  ! first token
+     call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute Quoted String Test
+     write(failMsg, *) "Did not return ESMF_SUCCESS"
+     write(name, *) "Config Get Quoted String Array too short default Test"
+     call ESMF_ConfigGetAttribute( cf, directions, label='directions:',  &
+         default='no direction', rc =rc )  ! first token
+     call ESMF_Test((rc /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+     !------------------------------------------------------------------------
+     !EX_UTest
+     ! Config Get Attribute Quoted String Test
+     write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Get Quoted String Array Test"
-     call ESMF_ConfigGetAttribute( cf, directions, label='directions:', rc =rc )  ! first token   
+     call ESMF_ConfigGetAttribute( cf, directions, label='directions:', rc =rc )  ! first token
      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
      !------------------------------------------------------------------------

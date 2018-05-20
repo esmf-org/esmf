@@ -1,10 +1,10 @@
 // $Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -17,7 +17,7 @@
 #include <Mesh/include/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/ESMCI_MeshUtils.h>
-#include "Mesh/include/ESMCI_DDir.h" 
+#include "Mesh/include/ESMCI_DDir.h"
 #include <Mesh/include/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_CommReg.h>
 
@@ -32,7 +32,7 @@
 
 #include <limits>
 #include <vector>
- 
+
 #include <cstdio>
 
 //-----------------------------------------------------------------------------
@@ -51,7 +51,7 @@ namespace ESMCI {
                     Mesh *output_mesh,  CommReg *_elemComm);
 
 
-  void redist_nohome_nodes(Mesh *src_mesh, int num_node_gids, int *node_gids, 
+  void redist_nohome_nodes(Mesh *src_mesh, int num_node_gids, int *node_gids,
                            Mesh *output_mesh, CommReg *_nhComm);
 
   void register_fields(Mesh *src_mesh, Mesh *output_mesh);
@@ -78,7 +78,7 @@ namespace ESMCI {
   struct MRN_Search {
   public:
     MRN_Search() : gid(0), proc(0), elem(NULL) {}
-    MRN_Search(int _gid, int _proc, MeshObj *_elem) : 
+    MRN_Search(int _gid, int _proc, MeshObj *_elem) :
       gid(_gid), proc(_proc), elem(_elem) {}
 
     bool operator<(const MRN_Search &rhs) const
@@ -90,7 +90,7 @@ namespace ESMCI {
   };
 
 
-  void add_other_split_elems(Mesh *mesh, int gid, int proc, 
+  void add_other_split_elems(Mesh *mesh, int gid, int proc,
                              std::multimap<UInt,MeshObj *> orig_id_to_split_elem,
                              std::set<MRN_Search> *to_snd);
 
@@ -98,20 +98,20 @@ namespace ESMCI {
                              Mesh *output_mesh,  CommReg *_elemComm);
 
 
-  // Redist Mesh with specific destinations for just elements 
-  void MeshRedistNode(Mesh *src_mesh, int num_node_gids, int *node_gids, 
+  // Redist Mesh with specific destinations for just elements
+  void MeshRedistNode(Mesh *src_mesh, int num_node_gids, int *node_gids,
                   Mesh **_output_mesh) {
 
     Trace __trace("MeshRedistNode()");
 
 
-    // Create a distributed directory to figure out where 
+    // Create a distributed directory to figure out where
     // the nodes should go.
     DDir<> ndir;
-  
+
     std::vector<UInt> n_lids(num_node_gids, 0);
     std::vector<UInt> n_gids(num_node_gids, 0);
-   
+
     for (int i=0; i<num_node_gids; i++) {
       n_lids[i]=i;
       if (node_gids[i]>=0) {
@@ -127,12 +127,12 @@ namespace ESMCI {
       ndir.Create(0, (UInt*) NULL, (UInt *)NULL);
     }
 
-    // Make a node id to proc map    
+    // Make a node id to proc map
     // Build map of node id to proc destination
     std::map<int,int> src_node_id_to_proc;
     {// beg. of block to get rid of memory for search vectors (e.g. src_gids)
 
-      // Get a list of the Mesh nodes with gids 
+      // Get a list of the Mesh nodes with gids
       MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
       std::vector<UInt> src_gids;
       src_gids.reserve(src_mesh->num_nodes());
@@ -140,33 +140,33 @@ namespace ESMCI {
       src_nodes.reserve(src_mesh->num_nodes());
       for (; ni != ne; ++ni) {
         MeshObj &node=*ni;
-        
+
         // DO ALL NODES, BECAUSE NEEDED LATER FOR UNUSED ELEM MOVEMENT
         // If not local, then go on to next node
         // if (!GetAttr(node).is_locally_owned()) continue;
-        
+
         // Add info to lists
         src_gids.push_back(node.get_id());
         src_nodes.push_back(&node);
       }
-      
+
       // Allocate arrays for search
       UInt num_src_gids=src_gids.size();
       std::vector<UInt> src_gids_proc(num_src_gids, 0);
       std::vector<UInt> src_gids_lids(num_src_gids, 0);
-      
+
       // Get where each nodes is to go
       if (num_src_gids) {
         ndir.RemoteGID(num_src_gids, &src_gids[0], &src_gids_proc[0], &src_gids_lids[0]);
       } else {
         ndir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
       }
-      
+
       for (int i=0; i< num_src_gids; i++) {
         // Get node
         MeshObj *node=src_nodes[i];
         int proc=src_gids_proc[i];
-        
+
         src_node_id_to_proc[node->get_id()]=proc;
       }
     } // end. of block to get rid of memory for search vectors (e.g. src_gids)
@@ -206,10 +206,10 @@ namespace ESMCI {
     MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
     for (; ni != ne; ++ni) {
       MeshObj &node=*ni;
-      
+
       // If not local, then go on to next node
       if (!GetAttr(node).is_locally_owned()) continue;
-      
+
       // Get proc that node is going to
       std::map<int,int>::iterator sni = src_node_id_to_proc.find(node.get_id());
       if (sni == src_node_id_to_proc.end()) {
@@ -219,7 +219,7 @@ namespace ESMCI {
 
 
       // Loop through all elements attached to the node
-      MRN_Search to_use; 
+      MRN_Search to_use;
       bool found=false;
       MeshObjRelationList::const_iterator el = MeshObjConn::find_relation(node, MeshObj::ELEMENT);
       while (el != node.Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
@@ -228,7 +228,7 @@ namespace ESMCI {
         // Build search struct
         MRN_Search curr(elem.get_id(), proc, &elem);
 
-        // See if this element is already going to the proc, if so 
+        // See if this element is already going to the proc, if so
         // go to next node
         if (to_snd.find(curr) != to_snd.end()) {
           found=true;
@@ -237,7 +237,7 @@ namespace ESMCI {
 
         // Save to use
         to_use=curr;
-        
+
         // Next element
         ++el;
       }
@@ -248,8 +248,8 @@ namespace ESMCI {
 
         // If split mesh then add others
         if (src_mesh->is_split) {
-          add_other_split_elems(src_mesh, 
-                                to_use.gid, to_use.proc, 
+          add_other_split_elems(src_mesh,
+                                to_use.gid, to_use.proc,
                                 orig_id_to_split_elem,
                                 &to_snd);
         }
@@ -279,9 +279,9 @@ namespace ESMCI {
       }
 
 
-      // If elem not being sent anyplace yet, then send it 
+      // If elem not being sent anyplace yet, then send it
       if (!elem_in_to_snd) {
- 
+
         // Get a node in the element
         MeshObj *node;
         MeshObjRelationList::const_iterator nr = MeshObjConn::find_relation(elem, MeshObj::NODE);
@@ -304,8 +304,8 @@ namespace ESMCI {
 
         // If split mesh then add others
         if (src_mesh->is_split) {
-          add_other_split_elems(src_mesh, 
-                                curr.gid, curr.proc, 
+          add_other_split_elems(src_mesh,
+                                curr.gid, curr.proc,
                                 orig_id_to_split_elem,
                                 &to_snd);
         }
@@ -320,21 +320,21 @@ namespace ESMCI {
       MRN_Search mnr=*si;
 
       printf("%d# elem=%d going to proc=%d\n",Par::Rank(),mnr.gid,mnr.proc);
-      
+
     }
       }
 #endif
 
     // Create Output Mesh
     Mesh *output_mesh=new Mesh();
- 
+
     // Set Mesh dimensions
     output_mesh->set_spatial_dimension(src_mesh->spatial_dim());
     output_mesh->set_parametric_dimension(src_mesh->parametric_dim());
 
 
     // Send elements from src_mesh to output_mesh
-    CommReg elemComm; 
+    CommReg elemComm;
     redist_elems_from_set(src_mesh, to_snd,
                           output_mesh,  &elemComm);
 
@@ -342,7 +342,7 @@ namespace ESMCI {
     // Set the split information in output_mesh
     // NOTE: that this is done outside the MeshRedist function
     //       in other MeshRedist cases, but it was more efficient
-    //       to do it here because it's needed to assign elem owners. 
+    //       to do it here because it's needed to assign elem owners.
     output_mesh->is_split=src_mesh->is_split;
     if (output_mesh->is_split) {
       set_split_orig_id_map(src_mesh, output_mesh);
@@ -353,7 +353,7 @@ namespace ESMCI {
 
     // Assign element data indices
     set_elem_data_indices_wo_list(output_mesh);
- 
+
     // Assign node owners
     set_node_owners(output_mesh, ndir);
 
@@ -362,23 +362,23 @@ namespace ESMCI {
 
     // Assume Contexts
     output_mesh->AssumeContexts(*src_mesh);
-  
+
     // Register fields
     register_fields(src_mesh, output_mesh);
 
     // Commit Mesh
     output_mesh->Commit();
-  
+
     // Send mesh fields (coords, etc) between src_mesh and output_mesh using elemComm
     send_mesh_fields(src_mesh, output_mesh, elemComm);
 
 #if 0
   {
-     // Get a list of the Mesh nodes with gids 
+     // Get a list of the Mesh nodes with gids
     MeshDB::iterator ni = output_mesh->node_begin(), ne = output_mesh->node_end();
     for (; ni != ne; ++ni) {
       MeshObj &node=*ni;
-     
+
       printf("#%d ON node id=%d owner=%d is_local=%d data_index=%d \n",Par::Rank(),node.get_id(),node.get_owner(),GetAttr(node).is_locally_owned(),node.get_data_index());
     }
 
@@ -391,11 +391,11 @@ namespace ESMCI {
 
 
   {
-     // Get a list of the Mesh elems with gids 
+     // Get a list of the Mesh elems with gids
     MeshDB::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem=*ei;
-     
+
       printf("#%d SE elem id=%d owner=%d is_local=%d data_index=%d\n",Par::Rank(),elem.get_id(),elem.get_owner(),GetAttr(elem).is_locally_owned(),elem.get_data_index());
     }
 
@@ -405,18 +405,18 @@ namespace ESMCI {
 
 #if 0
   {
-     // Get a list of the Mesh elems with gids 
+     // Get a list of the Mesh elems with gids
     MeshDB::iterator ei = output_mesh->elem_begin(), ee = output_mesh->elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem=*ei;
-     
+
       printf("#%d OE elem id=%d owner=%d is_local=%d data_index=%d\n",Par::Rank(),elem.get_id(),elem.get_owner(),GetAttr(elem).is_locally_owned(),elem.get_data_index());
     }
 
   }
 #endif
 
-    // Output 
+    // Output
     *_output_mesh=output_mesh;
 
     }
@@ -424,8 +424,8 @@ namespace ESMCI {
 
 
   // Redist Mesh with specific destinations for elements and nodes
-  void MeshRedist(Mesh *src_mesh, int num_node_gids, int *node_gids, 
-                                  int num_elem_gids, int *elem_gids, 
+  void MeshRedist(Mesh *src_mesh, int num_node_gids, int *node_gids,
+                                  int num_elem_gids, int *elem_gids,
                   Mesh **_output_mesh) {
 
   Trace __trace("MeshRedist(const Mesh &src_mesh, int num_node_gids, int *node_gids, Mesh **output_mesh)");
@@ -453,10 +453,10 @@ namespace ESMCI {
 
   // Create a distributed directory to figure out where the elems should go.
   DDir<> edir;
-  
+
   std::vector<UInt> e_lids(num_elem_gids, 0);
   std::vector<UInt> e_gids(num_elem_gids, 0);
-   
+
   for (int i=0; i<num_elem_gids; i++) {
     e_lids[i]=i;
     if (elem_gids[i]>=0) {
@@ -471,17 +471,17 @@ namespace ESMCI {
   } else {
     edir.Create(0, (UInt*) NULL, (UInt *)NULL);
  }
- 
+
 
  // Redist elems based on distributed directory edir
- CommReg elemComm; 
+ CommReg elemComm;
  redist_elems(src_mesh, edir, output_mesh, &elemComm);
- 
 
- // Redist nodes from node list (node_gids) which haven't been moved yet 
+
+ // Redist nodes from node list (node_gids) which haven't been moved yet
  // from src_mesh to output_mesh
- CommReg nhComm; 
- redist_nohome_nodes(src_mesh, num_node_gids, node_gids, 
+ CommReg nhComm;
+ redist_nohome_nodes(src_mesh, num_node_gids, node_gids,
                      output_mesh, &nhComm);
 
  // Assign elem owners
@@ -493,10 +493,10 @@ namespace ESMCI {
 
  // Create a distributed directory to figure out where each node should go.
  DDir<> ndir;
- 
+
  std::vector<UInt> n_lids(num_node_gids, 0);
  std::vector<UInt> n_gids(num_node_gids, 0);
- 
+
  for (int i=0; i<num_node_gids; i++) {
    n_lids[i]=i;
    if (node_gids[i]>=0) {
@@ -505,17 +505,17 @@ namespace ESMCI {
      n_gids[i]=0;
    }
  }
- 
+
  if (num_node_gids) {
    ndir.Create(num_node_gids, &n_gids[0], &n_lids[0]);
  } else {
    ndir.Create(0, (UInt*) NULL, (UInt *)NULL);
  }
 
- 
+
  // Assign node owners
  set_node_owners(output_mesh, ndir);
- 
+
 
   // Set node data indexes
  set_node_data_indices(output_mesh, num_node_gids, node_gids);
@@ -523,13 +523,13 @@ namespace ESMCI {
 
   // Assume Contexts
   output_mesh->AssumeContexts(*src_mesh);
-  
+
   // Register fields
   register_fields(src_mesh, output_mesh);
 
    // Commit Mesh
   output_mesh->Commit();
-  
+
   // Send mesh fields (coords, etc) between src_mesh and output_mesh using elemComm
   send_mesh_fields(src_mesh, output_mesh, elemComm);
 
@@ -539,11 +539,11 @@ namespace ESMCI {
 
 #if 0
   {
-     // Get a list of the Mesh nodes with gids 
+     // Get a list of the Mesh nodes with gids
     MeshDB::iterator ni = output_mesh->node_begin(), ne = output_mesh->node_end();
     for (; ni != ne; ++ni) {
       MeshObj &node=*ni;
-     
+
       printf("#%d E node id=%d owner=%d is_local=%d data_index=%d \n",Par::Rank(),node.get_id(),node.get_owner(),GetAttr(node).is_locally_owned(),node.get_data_index());
     }
 
@@ -551,11 +551,11 @@ namespace ESMCI {
 
 
   {
-     // Get a list of the Mesh nodes with gids 
+     // Get a list of the Mesh nodes with gids
     MeshDB::iterator ei = output_mesh->elem_begin(), ee = output_mesh->elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem=*ei;
-     
+
       printf("#%d E elem id=%d owner=%d is_local=%d data_index=%d\n",Par::Rank(),elem.get_id(),elem.get_owner(),GetAttr(elem).is_locally_owned(),elem.get_data_index());
     }
 
@@ -564,13 +564,13 @@ namespace ESMCI {
 
 
 
-  // Output 
+  // Output
   *_output_mesh=output_mesh;
 }
 
 
-  // Redist Mesh with specific destinations for just elements 
-  void MeshRedistElem(Mesh *src_mesh, int num_elem_gids, int *elem_gids, 
+  // Redist Mesh with specific destinations for just elements
+  void MeshRedistElem(Mesh *src_mesh, int num_elem_gids, int *elem_gids,
                   Mesh **_output_mesh) {
 
   Trace __trace("MeshRedistElem()");
@@ -592,10 +592,10 @@ namespace ESMCI {
 
   // Create a distributed directory to figure out where the elems should go.
   DDir<> edir;
-  
+
   std::vector<UInt> e_lids(num_elem_gids, 0);
   std::vector<UInt> e_gids(num_elem_gids, 0);
-   
+
   for (int i=0; i<num_elem_gids; i++) {
     e_lids[i]=i;
     if (elem_gids[i]>=0) {
@@ -610,12 +610,12 @@ namespace ESMCI {
   } else {
     edir.Create(0, (UInt*) NULL, (UInt *)NULL);
  }
- 
+
 
  // Redist elems based on distributed directory edir
- CommReg elemComm; 
+ CommReg elemComm;
  redist_elems(src_mesh, edir, output_mesh, &elemComm);
- 
+
  // Assign elem owners
  set_elem_owners(output_mesh, edir);
 
@@ -630,21 +630,21 @@ namespace ESMCI {
 
   // Assume Contexts
   output_mesh->AssumeContexts(*src_mesh);
-  
+
   // Register fields
   register_fields(src_mesh, output_mesh);
 
 
    // Commit Mesh
   output_mesh->Commit();
-  
+
 
   // Send mesh fields (coords, etc) between src_mesh and output_mesh using elemComm
   send_mesh_fields(src_mesh, output_mesh, elemComm);
 
 
 #if 0
-  /// DO I NEED TO DO THIS???? 
+  /// DO I NEED TO DO THIS????
   /// (I DON'T THINK SO, BUT JUST IN CASE LEAVE FOR NOW)
 
   // Send mesh fields (coords, etc) between src_mesh and output_mesh using nhComm
@@ -654,11 +654,11 @@ namespace ESMCI {
 
 #if 0
   {
-     // Get a list of the Mesh nodes with gids 
+     // Get a list of the Mesh nodes with gids
     MeshDB::iterator ni = output_mesh->node_begin(), ne = output_mesh->node_end();
     for (; ni != ne; ++ni) {
       MeshObj &node=*ni;
-     
+
       printf("#%d E node id=%d owner=%d is_local=%d data_index=%d \n",Par::Rank(),node.get_id(),node.get_owner(),GetAttr(node).is_locally_owned(),node.get_data_index());
     }
 
@@ -670,11 +670,11 @@ namespace ESMCI {
 
 
   {
-     // Get a list of the Mesh elems with gids 
+     // Get a list of the Mesh elems with gids
     MeshDB::iterator ei = output_mesh->elem_begin(), ee = output_mesh->elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem=*ei;
-     
+
       printf("#%d E elem id=%d owner=%d is_local=%d data_index=%d\n",Par::Rank(),elem.get_id(),elem.get_owner(),GetAttr(elem).is_locally_owned(),elem.get_data_index());
     }
 
@@ -682,7 +682,7 @@ namespace ESMCI {
 #endif
 
 
-  // Output 
+  // Output
   *_output_mesh=output_mesh;
 }
 
@@ -692,22 +692,22 @@ namespace ESMCI {
 
     Trace __trace("set_node_data_indices()");
 
-    
+
     // Set to -1 to mark which ones aren't set next
     MeshDB::iterator ni = output_mesh->node_begin(), ne = output_mesh->node_end();
     for (; ni != ne; ++ni) {
       MeshObj &node=*ni;
-      
+
       *(node.get_data_index_ptr())=-1;
-    }    
-    
+    }
+
     for (int i=0; i<num_node_gids; i++) {
       Mesh::MeshObjIDMap::iterator mi =  output_mesh->map_find(MeshObj::NODE, node_gids[i]);
       if (mi != output_mesh->map_end(MeshObj::NODE)) {
-        
+
         // Get the node
-        MeshObj &node = *mi; 
-        
+        MeshObj &node = *mi;
+
         // Set it to it's position in the list
         *(node.get_data_index_ptr())=i;
       }
@@ -718,12 +718,12 @@ namespace ESMCI {
     ni = output_mesh->node_begin();
     for (; ni != ne; ++ni) {
       MeshObj &node=*ni;
-      
+
       if (node.get_data_index()==-1) {
         *(node.get_data_index_ptr())=index;
         index++;
       }
-    }    
+    }
   }
 
 
@@ -731,142 +731,142 @@ namespace ESMCI {
   void set_node_data_indices_wo_list(Mesh *output_mesh) {
 
     Trace __trace("set_node_data_indices_wo_list()");
-   
+
     // Set to -1 to mark which ones aren't set next
     MeshDB::iterator ni = output_mesh->node_begin(), ne = output_mesh->node_end();
     int index=0;
     for (; ni != ne; ++ni) {
       MeshObj &node=*ni;
-      
+
       *(node.get_data_index_ptr())=index;
       index++;
-    }    
+    }
   }
 
 
   // Set elem indices based on elem_gids list
   void set_elem_data_indices(Mesh *output_mesh, int num_elem_gids, int *elem_gids) {
-    
+
     Trace __trace("set_elem_data_indices()");
-    
+
     // Set to -1 to mark which ones aren't set next
     MeshDB::iterator ei = output_mesh->elem_begin(), ee = output_mesh->elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem=*ei;
-      
+
       *(elem.get_data_index_ptr())=-1;
-    }    
-    
+    }
+
     for (int i=0; i<num_elem_gids; i++) {
       Mesh::MeshObjIDMap::iterator mi =  output_mesh->map_find(MeshObj::ELEMENT, elem_gids[i]);
       if (mi != output_mesh->map_end(MeshObj::ELEMENT)) {
-        
+
         // Get the elem
-        MeshObj &elem = *mi; 
-        
+        MeshObj &elem = *mi;
+
         // Set it to it's position in the list
         *(elem.get_data_index_ptr())=i;
       }
     }
-    
+
 
     // Set non-local to after local
     int index=num_elem_gids;
     ei = output_mesh->elem_begin();
     for (; ei != ee; ++ei) {
       MeshObj &elem=*ei;
-      
+
       if (elem.get_data_index()==-1) {
         *(elem.get_data_index_ptr())=index;
         index++;
       }
-    }    
+    }
   }
-  
+
 
 
   // Set Elem indices without list
   void set_elem_data_indices_wo_list(Mesh *output_mesh) {
 
     Trace __trace("set_elem_data_indices_wo_list()");
-   
+
     // Set data indices
     MeshDB::iterator ei = output_mesh->elem_begin(), ee = output_mesh->elem_end();
     int index=0;
     for (; ei != ee; ++ei) {
       MeshObj &elem=*ei;
-      
+
       *(elem.get_data_index_ptr())=index;
       index++;
-    }    
+    }
   }
 
-  
+
   // Assign node owners in output_mesh using ndir
   void set_node_owners(Mesh *output_mesh,   DDir<> ndir) {
     Trace __trace("set_node_owners()");
-    
-    
-    // Get a list of the Mesh nodes with gids 
+
+
+    // Get a list of the Mesh nodes with gids
     MeshDB::iterator ni = output_mesh->node_begin(), ne = output_mesh->node_end();
-    
+
     std::vector<UInt> gids;
     gids.reserve(output_mesh->num_nodes());
     std::vector<MeshObj *> nodes;
     nodes.reserve(output_mesh->num_nodes());
-    
+
     for (; ni != ne; ++ni) {
       MeshObj &node=*ni;
-      
+
       gids.push_back(node.get_id());
       nodes.push_back(&node);
     }
-    
+
     // Get number of gids
     UInt num_src_gids=gids.size();
     std::vector<UInt> src_gids_proc(num_src_gids, 0);
     std::vector<UInt> src_gids_lids(num_src_gids, 0);
-    
+
     // Get where each element is to go
     if (num_src_gids) {
       ndir.RemoteGID(num_src_gids, &gids[0], &src_gids_proc[0], &src_gids_lids[0]);
     } else {
       ndir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
     }
-    
+
     // Loop setting owner and OWNER_ID
-    for (int i=0; i<num_src_gids; i++) {    
+    for (int i=0; i<num_src_gids; i++) {
       MeshObj &node=*(nodes[i]);
-      
+
       // Set owner
       node.set_owner(src_gids_proc[i]);
-      
+
       // Setup for changing attribute
       const Context &ctxt = GetMeshObjContext(node);
       Context newctxt(ctxt);
-      
+
       // Set OWNED_ID appropriately
       if (src_gids_proc[i]==Par::Rank()) {
         newctxt.set(Attr::OWNED_ID);
       } else {
         newctxt.clear(Attr::OWNED_ID);
       }
-      
+
       // If attribute has changed change in node
       if (newctxt != ctxt) {
         Attr attr(GetAttr(node), newctxt);
         output_mesh->update_obj(&node, attr);
       }
-    } 
+    }
   }
 
   // Assign node owners in output_mesh using ndir
   void set_node_owners_wo_list(Mesh *output_mesh) {
     Trace __trace("set_node_owners_wo_list()");
 
-    // Get a list of the Mesh nodes with gids 
+    // Get a list of the Mesh nodes with gids
     MeshDB::iterator ni = output_mesh->node_begin(), ne = output_mesh->node_end();
-    
+
     std::vector<UInt> gids;
     gids.resize(output_mesh->num_nodes(),0);
     std::vector<UInt> lids; // Actually the number of associated elements
@@ -879,10 +879,10 @@ namespace ESMCI {
     int i=0;
     for (; ni != ne; ++ni) {
       MeshObj &node=*ni;
-      
+
       // Set GID
       gids[i]=node.get_id();
-      
+
       // Set node
       nodes[i]=&node;
 
@@ -900,10 +900,10 @@ namespace ESMCI {
       // Next thing in list
       i++;
     }
-     
+
     // Create a distributed directory with the above information
     DDir<> dir;
-    
+
     if (gids.size ()) {
       dir.Create(gids.size(), &gids[0], &lids[0]);
     } else {
@@ -919,7 +919,7 @@ namespace ESMCI {
        dir.RemoteGID(0, (UInt *) NULL, lookups);
 
 
-     // Loop through the results. 
+     // Loop through the results.
      int curr_pos=0;
      UInt curr_gid=0;
      UInt curr_lid_best=0;
@@ -929,7 +929,7 @@ namespace ESMCI {
      for (; ri != re; ++ri) {
        DDir<>::dentry &dent = *ri;
 
-       // Get info for this entry gid 
+       // Get info for this entry gid
        UInt gid=dent.gid;
        UInt lid=dent.origin_lid;
        UInt proc=dent.origin_proc;
@@ -992,7 +992,7 @@ namespace ESMCI {
 
 
      // Set owner of last gid before moving on
-     // (could use gids.size() in if here also, but 
+     // (could use gids.size() in if here also, but
      //  owner.size seemed clearer...)
      if (owner.size()) {
        owner[curr_pos]=curr_proc_best;
@@ -1002,29 +1002,29 @@ namespace ESMCI {
 
 
     // Loop setting owner and OWNER_ID
-     for (int i=0; i<gids.size(); i++) {    
+     for (int i=0; i<gids.size(); i++) {
       MeshObj &node=*(nodes[i]);
-      
+
       // Set owner
       node.set_owner(owner[i]);
-      
+
       // Setup for changing attribute
       const Context &ctxt = GetMeshObjContext(node);
       Context newctxt(ctxt);
-      
+
       // Set OWNED_ID appropriately
       if (owner[i]==Par::Rank()) {
         newctxt.set(Attr::OWNED_ID);
       } else {
         newctxt.clear(Attr::OWNED_ID);
       }
-      
+
       // If attribute has changed change in node
       if (newctxt != ctxt) {
         Attr attr(GetAttr(node), newctxt);
         output_mesh->update_obj(&node, attr);
       }
-    } 
+    }
 
   }
 
@@ -1032,52 +1032,52 @@ namespace ESMCI {
   // Assign element owners in output_mesh using edir
   void set_elem_owners(Mesh *output_mesh,   DDir<> edir) {
     Trace __trace("set_elem_owners()");
-    
-    // Get a list of the Mesh elem with gids 
+
+    // Get a list of the Mesh elem with gids
     MeshDB::iterator ei = output_mesh->elem_begin(), ee = output_mesh->elem_end();
-    
+
     std::vector<UInt> gids;
     gids.reserve(output_mesh->num_elems());
     std::vector<MeshObj *> elems;
     elems.reserve(output_mesh->num_elems());
     for (; ei != ee; ++ei) {
       MeshObj &elem=*ei;
-      
+
       gids.push_back(elem.get_id());
       elems.push_back(&elem);
     }
-    
-    
+
+
     // Get number of gids
     UInt num_src_gids=gids.size();
     std::vector<UInt> src_gids_proc(num_src_gids, 0);
     std::vector<UInt> src_gids_lids(num_src_gids, 0);
-    
+
     // Get where each element is to go
     if (num_src_gids) {
       edir.RemoteGID(num_src_gids, &gids[0], &src_gids_proc[0], &src_gids_lids[0]);
     } else {
       edir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
     }
-    
+
     // Loop setting owner and OWNER_ID
-    for (int i=0; i<num_src_gids; i++) {    
+    for (int i=0; i<num_src_gids; i++) {
       MeshObj &elem=*(elems[i]);
-      
+
       // Set owner
       elem.set_owner(src_gids_proc[i]);
-      
+
       // Setup for changing attribute
       const Context &ctxt = GetMeshObjContext(elem);
       Context newctxt(ctxt);
-      
+
       // Set OWNED_ID appropriately
       if (src_gids_proc[i]==Par::Rank()) {
         newctxt.set(Attr::OWNED_ID);
       } else {
         newctxt.clear(Attr::OWNED_ID);
       }
-      
+
       // If attribute has changed change in elem
       if (newctxt != ctxt) {
         Attr attr(GetAttr(elem), newctxt);
@@ -1115,7 +1115,7 @@ namespace ESMCI {
       output_mesh->RegisterField("node_mask_val", smask_val->GetMEFamily(),
                                  MeshObj::ELEMENT, smask_val->GetContext(), smask_val->dim());
     }
-       
+
     MEField<> *src_elem_mask = src_mesh->GetField("elem_mask");
     if (src_elem_mask != NULL) {
       output_mesh->RegisterField("elem_mask", src_elem_mask->GetMEFamily(),
@@ -1127,7 +1127,7 @@ namespace ESMCI {
       output_mesh->RegisterField("elem_mask_val", src_elem_mask_val->GetMEFamily(),
                                 MeshObj::ELEMENT, src_elem_mask_val->GetContext(), src_elem_mask_val->dim());
     }
-    
+
     MEField<> *src_elem_area = src_mesh->GetField("elem_area");
     if (src_elem_area != NULL) {
       output_mesh->RegisterField("elem_area", src_elem_area->GetMEFamily(),
@@ -1161,17 +1161,17 @@ namespace ESMCI {
 
 
   // Redist nodes from a list of nodes (node_gids) which haven't been moved yet from src_mesh to output_mesh
-  void redist_nohome_nodes(Mesh *src_mesh, int num_node_gids, int *node_gids, 
+  void redist_nohome_nodes(Mesh *src_mesh, int num_node_gids, int *node_gids,
                            Mesh *output_mesh, CommReg *_nhComm) {
 
-  
+
   // Get list of nodes that don't have homes yet
   // Get number of gids
   std::vector<UInt> nohome_node_gids; nohome_node_gids.reserve(num_node_gids);
   std::vector<UInt> nohome_node_lids; nohome_node_lids.reserve(num_node_gids);
   for (int i=0; i<num_node_gids; i++) {
 
-    // Put in node gid  
+    // Put in node gid
     nohome_node_gids.push_back(node_gids[i]);
 
     // Mark lid based on presence
@@ -1183,7 +1183,7 @@ namespace ESMCI {
     } else {
         nohome_node_lids.push_back(0);
     }
-  }  
+  }
 
 #if 0
   // output list
@@ -1201,8 +1201,8 @@ namespace ESMCI {
   } else {
     nhdir.Create(0, (UInt*) NULL, (UInt *)NULL);
   }
-    
-  // Get a list of the Mesh nodes with gids 
+
+  // Get a list of the Mesh nodes with gids
   MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
   std::vector<UInt> sn_gids;
   sn_gids.reserve(src_mesh->num_nodes());
@@ -1214,12 +1214,12 @@ namespace ESMCI {
     sn_gids.push_back(node.get_id());
     sn_ptrs.push_back(&node);
   }
-  
+
   // Get number of gids
   UInt num_sn_gids=sn_gids.size();
   std::vector<UInt> sn_gids_proc(num_sn_gids, 0);
   std::vector<UInt> sn_gids_lids(num_sn_gids, 0);
-  
+
 
   // Get where each element is to go
   if (num_sn_gids) {
@@ -1242,12 +1242,12 @@ namespace ESMCI {
 
     // Setup list of mig nodes and destinations
     std::vector<CommRel::CommNode> nhmignode;
-    
+
     // Get list of destinations
     for (int i=0; i<num_sn_gids; i++) {
       if (sn_gids_lids[i]) {
         MeshObj &node=*sn_ptrs[i];
-        
+
         // Get one of the elements off this node
         MeshObj *elem;
         MeshObjRelationList::const_iterator er = MeshObjConn::find_relation(node, MeshObj::ELEMENT);
@@ -1264,15 +1264,15 @@ namespace ESMCI {
 
     // Build Comm
     CommReg nhComm;
-    CommRel &nhmigration = nhComm.GetCommRel(MeshObj::ELEMENT); 
+    CommRel &nhmigration = nhComm.GetCommRel(MeshObj::ELEMENT);
     nhmigration.Init("migration", *src_mesh, *output_mesh, false);
-    nhmigration.add_domain(nhmignode); 
-    
+    nhmigration.add_domain(nhmignode);
+
     // Now flush out the comm with lower hierarchy
-    nhmigration.dependants(nhComm.GetCommRel(MeshObj::NODE), MeshObj::NODE); 
+    nhmigration.dependants(nhComm.GetCommRel(MeshObj::NODE), MeshObj::NODE);
     nhmigration.dependants(nhComm.GetCommRel(MeshObj::EDGE), MeshObj::EDGE);
     nhmigration.dependants(nhComm.GetCommRel(MeshObj::FACE), MeshObj::FACE);
-    
+
     // And now the destination
     nhComm.GetCommRel(MeshObj::NODE).build_range();
     nhComm.GetCommRel(MeshObj::EDGE).build_range();
@@ -1290,9 +1290,9 @@ namespace ESMCI {
   void redist_elems(Mesh *src_mesh, DDir<> edir,
                     Mesh *output_mesh,  CommReg *_elemComm) {
 
-  // Get a list of the Mesh elem with gids 
+  // Get a list of the Mesh elem with gids
   MeshDB::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
-  
+
   std::vector<UInt> gids;
   gids.reserve(src_mesh->num_elems());
   std::vector<MeshObj *> elems;
@@ -1300,17 +1300,17 @@ namespace ESMCI {
 
   for (; ei != ee; ++ei) {
     MeshObj &elem=*ei;
-    
+
     gids.push_back(elem.get_id());
     elems.push_back(&elem);
   }
 
-  
+
   // Figure out where each element should go
   UInt num_src_gids=gids.size();
   std::vector<UInt> src_gids_proc(num_src_gids, 0);
   std::vector<UInt> src_gids_lids(num_src_gids, 0);
-  
+
   // Get where each element is to go
   if (num_src_gids) {
     edir.RemoteGID(num_src_gids, &gids[0], &src_gids_proc[0], &src_gids_lids[0]);
@@ -1321,20 +1321,20 @@ namespace ESMCI {
 
   // Setup migration pattern for elems
   std::vector<CommRel::CommNode> mignode;
-  for (int i=0; i<num_src_gids; i++) {    
+  for (int i=0; i<num_src_gids; i++) {
     CommRel::CommNode cn(elems[i],src_gids_proc[i]);
     mignode.push_back(cn);
   }
-  
-  
+
+
   // Build Comm
   CommReg elemComm;
-  CommRel &migration = elemComm.GetCommRel(MeshObj::ELEMENT); 
+  CommRel &migration = elemComm.GetCommRel(MeshObj::ELEMENT);
   migration.Init("migration", *src_mesh, *output_mesh, false);
-  migration.add_domain(mignode); 
+  migration.add_domain(mignode);
 
   // Now flush out the comm with lower hierarchy
-  migration.dependants(elemComm.GetCommRel(MeshObj::NODE), MeshObj::NODE); 
+  migration.dependants(elemComm.GetCommRel(MeshObj::NODE), MeshObj::NODE);
   migration.dependants(elemComm.GetCommRel(MeshObj::EDGE), MeshObj::EDGE);
   migration.dependants(elemComm.GetCommRel(MeshObj::FACE), MeshObj::FACE);
 
@@ -1365,7 +1365,7 @@ namespace ESMCI {
     // load coordinate fields
     snd[num_snd]=dc;
     rcv[num_snd]=dc_r;
-    num_snd++;            
+    num_snd++;
 
     // Do original coordinates if necessary
     MEField<> *doc = src_mesh->GetField("orig_coordinates");
@@ -1375,7 +1375,7 @@ namespace ESMCI {
       // load coord fields
       snd[num_snd]=doc;
       rcv[num_snd]=doc_r;
-      num_snd++;            
+      num_snd++;
     }
 
     // Do masks if necessary
@@ -1386,7 +1386,7 @@ namespace ESMCI {
       // load mask fields
       snd[num_snd]=dm;
       rcv[num_snd]=dm_r;
-      num_snd++;            
+      num_snd++;
     }
 
     MEField<> *dnmv = src_mesh->GetField("node_mask_val");
@@ -1396,7 +1396,7 @@ namespace ESMCI {
       // load mask fields
       snd[num_snd]=dnmv;
       rcv[num_snd]=dnmv_r;
-      num_snd++;            
+      num_snd++;
     }
 
     // Do elem masks if necessary
@@ -1407,7 +1407,7 @@ namespace ESMCI {
       // load mask fields
       snd[num_snd]=dem;
       rcv[num_snd]=dem_r;
-      num_snd++;            
+      num_snd++;
     }
 
     // Do elem masks if necessary
@@ -1418,7 +1418,7 @@ namespace ESMCI {
       // load mask fields
       snd[num_snd]=demv;
       rcv[num_snd]=demv_r;
-      num_snd++;            
+      num_snd++;
     }
 
 
@@ -1430,7 +1430,7 @@ namespace ESMCI {
       // load mask fields
       snd[num_snd]=dea;
       rcv[num_snd]=dea_r;
-      num_snd++;            
+      num_snd++;
     }
 
     // Do elem creeped frac if necessary
@@ -1441,7 +1441,7 @@ namespace ESMCI {
       // load mask fields
       snd[num_snd]=def;
       rcv[num_snd]=def_r;
-      num_snd++;            
+      num_snd++;
     }
 
     // Do elem original coordinates if necessary
@@ -1452,7 +1452,7 @@ namespace ESMCI {
       // load coord fields
       snd[num_snd]=dec;
       rcv[num_snd]=dec_r;
-      num_snd++;            
+      num_snd++;
     }
 
     // Do elem original coordinates if necessary
@@ -1463,12 +1463,12 @@ namespace ESMCI {
       // load coord fields
       snd[num_snd]=doec;
       rcv[num_snd]=doec_r;
-      num_snd++;            
+      num_snd++;
     }
 
     // Actually communicate fields
      stod_comm.SendFields(num_snd, snd, rcv);
-  } 
+  }
 
 
 
@@ -1481,35 +1481,35 @@ namespace ESMCI {
     // Setup migration pattern for elems
     std::vector<CommRel::CommNode> mignode;
     mignode.reserve(to_snd.size());
-    
+
     // print out what is going where for debugging
     std::set<MRN_Search>::iterator si=to_snd.begin(), se=to_snd.end();
     for (; si != se; ++si) {
       MRN_Search mnr=*si;
-      
+
       CommRel::CommNode cn(mnr.elem,mnr.proc);
       mignode.push_back(cn);
     }
 
-  
+
     // Build Comm
     CommReg elemComm;
-    CommRel &migration = elemComm.GetCommRel(MeshObj::ELEMENT); 
+    CommRel &migration = elemComm.GetCommRel(MeshObj::ELEMENT);
     migration.Init("migration", *src_mesh, *output_mesh, false);
-    migration.add_domain(mignode); 
-    
+    migration.add_domain(mignode);
+
     // Now flush out the comm with lower hierarchy
-    migration.dependants(elemComm.GetCommRel(MeshObj::NODE), MeshObj::NODE); 
+    migration.dependants(elemComm.GetCommRel(MeshObj::NODE), MeshObj::NODE);
     migration.dependants(elemComm.GetCommRel(MeshObj::EDGE), MeshObj::EDGE);
     migration.dependants(elemComm.GetCommRel(MeshObj::FACE), MeshObj::FACE);
-    
-    
+
+
     // And now the destination
     elemComm.GetCommRel(MeshObj::NODE).build_range();
     elemComm.GetCommRel(MeshObj::EDGE).build_range();
     elemComm.GetCommRel(MeshObj::FACE).build_range();
     elemComm.GetCommRel(MeshObj::ELEMENT).build_range();
-    
+
     // Output elemComm
     *_elemComm=elemComm;
   }
@@ -1519,7 +1519,7 @@ namespace ESMCI {
 
   // Assign elem owners in output_mesh
   // WARNING: needs is_split set in output_mesh, and if is_split==true then needs
-  //          split_to_orig_id map to be correct in output_mesh.  
+  //          split_to_orig_id map to be correct in output_mesh.
   void set_elem_owners_wo_list(Mesh *output_mesh) {
     Trace __trace("set_elem_owners_wo_list()");
 
@@ -1530,7 +1530,7 @@ namespace ESMCI {
       MeshDB::iterator ei = output_mesh->elem_begin(), ee = output_mesh->elem_end();
       for (; ei != ee; ++ei) {
         MeshObj &elem=*ei;
-        
+
         // If this is an elem created as the result of a split, then skip
         std::map<UInt,UInt>::iterator soi = output_mesh->split_to_orig_id.find(elem.get_id());
         if (soi == output_mesh->split_to_orig_id.end()) {
@@ -1544,7 +1544,7 @@ namespace ESMCI {
     }
 
 
-    // Get a list of the Mesh nodes with gids 
+    // Get a list of the Mesh nodes with gids
     std::vector<UInt> gids;
     gids.resize(num_non_split,0);
     std::vector<UInt> lids; // Actually the number of associated elements
@@ -1566,7 +1566,7 @@ namespace ESMCI {
           continue;
         }
       }
-   
+
       // Set GID
       gids[i]=elem.get_id();
 
@@ -1577,9 +1577,9 @@ namespace ESMCI {
       int num_loc_nodes=0;
       MeshObjRelationList::const_iterator nl = MeshObjConn::find_relation(elem, MeshObj::NODE);
       while (nl != elem.Relations.end() && nl->obj->get_type() == MeshObj::NODE){
-	MeshObj &node = *(nl->obj);
+        MeshObj &node = *(nl->obj);
         if (GetAttr(node).is_locally_owned()) num_loc_nodes++;
-	++nl;
+        ++nl;
       }
 
 
@@ -1589,10 +1589,10 @@ namespace ESMCI {
       // Next thing in list
       i++;
     }
-     
+
     // Create a distributed directory with the above information
     DDir<> dir;
-    
+
     if (gids.size ()) {
       dir.Create(gids.size(), &gids[0], &lids[0]);
     } else {
@@ -1608,7 +1608,7 @@ namespace ESMCI {
       dir.RemoteGID(0, (UInt *) NULL, lookups);
 
 
-     // Loop through the results. 
+     // Loop through the results.
      int curr_pos=0;
      UInt curr_gid=0;
      UInt curr_lid_best=0;
@@ -1618,7 +1618,7 @@ namespace ESMCI {
      for (; ri != re; ++ri) {
        DDir<>::dentry &dent = *ri;
 
-       // Get info for this entry gid 
+       // Get info for this entry gid
        UInt gid=dent.gid;
        UInt lid=dent.origin_lid;
        UInt proc=dent.origin_proc;
@@ -1681,7 +1681,7 @@ namespace ESMCI {
 
 
      // Set owner of last gid before moving on
-     // (could use gids.size() in if here also, but 
+     // (could use gids.size() in if here also, but
      //  owner.size seemed clearer...)
      if (owner.size()) {
        owner[curr_pos]=curr_proc_best;
@@ -1691,97 +1691,97 @@ namespace ESMCI {
 
 
     // Loop setting owner and OWNER_ID
-     for (int i=0; i<gids.size(); i++) {    
+     for (int i=0; i<gids.size(); i++) {
       MeshObj &elem=*(elems[i]);
-      
+
       // Set owner
       elem.set_owner(owner[i]);
-      
+
       // Setup for changing attribute
       const Context &ctxt = GetMeshObjContext(elem);
       Context newctxt(ctxt);
-      
+
       // Set OWNED_ID appropriately
       if (owner[i]==Par::Rank()) {
         newctxt.set(Attr::OWNED_ID);
       } else {
         newctxt.clear(Attr::OWNED_ID);
       }
-      
+
       // If attribute has changed change in node
       if (newctxt != ctxt) {
         Attr attr(GetAttr(elem), newctxt);
         output_mesh->update_obj(&elem, attr);
       }
-    } 
+    }
 
 
      // Do split elems
      if (output_mesh->is_split) {
        // Create list of split elems
        std::vector<MeshObj *> split_elems;
-       split_elems.resize(num_split);       
-       
+       split_elems.resize(num_split);
+
        // Fill list of split elems
        int pos=0;
        ei = output_mesh->elem_begin();
        for (; ei != ee; ++ei) {
          MeshObj &elem=*ei;
-         
+
          // If this is an elem created as the result of a split, then skip
          std::map<UInt,UInt>::iterator soi = output_mesh->split_to_orig_id.find(elem.get_id());
          if (soi == output_mesh->split_to_orig_id.end()) {
            continue;
          }
-   
+
          // Set elem
          split_elems[pos]=&elem;
-         
+
          // Next in list
          pos++;
        }
 
        // Loop setting owner and OWNER_ID
-       for (int i=0; i<split_elems.size(); i++) {    
+       for (int i=0; i<split_elems.size(); i++) {
          MeshObj &elem=*(split_elems[i]);
-         
+
          // Get orig id
          std::map<UInt,UInt>::iterator soi = output_mesh->split_to_orig_id.find(elem.get_id());
          if (soi == output_mesh->split_to_orig_id.end()) {
            Throw() << " split element not found in split_to_orig_id map";
          }
          int orig_id=soi->second;
-         
+
          // Get original element
          Mesh::MeshObjIDMap::iterator mi=output_mesh->map_find(MeshObj::ELEMENT, orig_id);
          if (mi == output_mesh->map_end(MeshObj::ELEMENT)) {
            Throw() << " elem id not found in element map";
          }
          MeshObj &orig_elem=*mi;
-         
+
          // Split element owner is original elements owner
          int owner=orig_elem.get_owner();
-         
+
          // Set owner
          elem.set_owner(owner);
-       
+
          // Setup for changing attribute
          const Context &ctxt = GetMeshObjContext(elem);
          Context newctxt(ctxt);
-         
+
          // Set OWNED_ID appropriately
          if (owner==Par::Rank()) {
            newctxt.set(Attr::OWNED_ID);
          } else {
            newctxt.clear(Attr::OWNED_ID);
          }
-         
+
          // If attribute has changed change in node
          if (newctxt != ctxt) {
            Attr attr(GetAttr(elem), newctxt);
            output_mesh->update_obj(&elem, attr);
          }
-       } 
+       }
      }
   }
 
@@ -1793,7 +1793,7 @@ namespace ESMCI {
   void set_elem_owners_wo_list(Mesh *output_mesh) {
     Trace __trace("set_elem_owners_wo_list()");
 
-    // Get a list of the Mesh nodes with gids 
+    // Get a list of the Mesh nodes with gids
     std::vector<UInt> gids;
     gids.resize(output_mesh->num_elems(),0);
     std::vector<UInt> lids; // Actually the number of associated elements
@@ -1807,10 +1807,10 @@ namespace ESMCI {
     MeshDB::iterator ei = output_mesh->elem_begin(), ee = output_mesh->elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem=*ei;
-      
+
       // Set GID
       gids[i]=elem.get_id();
-      
+
       // Set node
       elems[i]=&elem;
 
@@ -1818,9 +1818,9 @@ namespace ESMCI {
       int num_loc_nodes=0;
       MeshObjRelationList::const_iterator nl = MeshObjConn::find_relation(elem, MeshObj::NODE);
       while (nl != elem.Relations.end() && nl->obj->get_type() == MeshObj::NODE){
-	MeshObj &node = *(nl->obj);
+        MeshObj &node = *(nl->obj);
         if (GetAttr(node).is_locally_owned()) num_loc_nodes++;
-	++nl;
+        ++nl;
       }
 
 
@@ -1830,10 +1830,10 @@ namespace ESMCI {
       // Next thing in list
       i++;
     }
-     
+
     // Create a distributed directory with the above information
     DDir<> dir;
-    
+
     if (gids.size ()) {
       dir.Create(gids.size(), &gids[0], &lids[0]);
     } else {
@@ -1849,7 +1849,7 @@ namespace ESMCI {
       dir.RemoteGID(0, (UInt *) NULL, lookups);
 
 
-     // Loop through the results. 
+     // Loop through the results.
      int curr_pos=0;
      UInt curr_gid=0;
      UInt curr_lid_best=0;
@@ -1859,7 +1859,7 @@ namespace ESMCI {
      for (; ri != re; ++ri) {
        DDir<>::dentry &dent = *ri;
 
-       // Get info for this entry gid 
+       // Get info for this entry gid
        UInt gid=dent.gid;
        UInt lid=dent.origin_lid;
        UInt proc=dent.origin_proc;
@@ -1922,7 +1922,7 @@ namespace ESMCI {
 
 
      // Set owner of last gid before moving on
-     // (could use gids.size() in if here also, but 
+     // (could use gids.size() in if here also, but
      //  owner.size seemed clearer...)
      if (owner.size()) {
        owner[curr_pos]=curr_proc_best;
@@ -1932,34 +1932,34 @@ namespace ESMCI {
 
 
     // Loop setting owner and OWNER_ID
-     for (int i=0; i<gids.size(); i++) {    
+     for (int i=0; i<gids.size(); i++) {
       MeshObj &elem=*(elems[i]);
-      
+
       // Set owner
       elem.set_owner(owner[i]);
-      
+
       // Setup for changing attribute
       const Context &ctxt = GetMeshObjContext(elem);
       Context newctxt(ctxt);
-      
+
       // Set OWNED_ID appropriately
       if (owner[i]==Par::Rank()) {
         newctxt.set(Attr::OWNED_ID);
       } else {
         newctxt.clear(Attr::OWNED_ID);
       }
-      
+
       // If attribute has changed change in node
       if (newctxt != ctxt) {
         Attr attr(GetAttr(elem), newctxt);
         output_mesh->update_obj(&elem, attr);
       }
-    } 
+    }
   }
 #endif
 
   // For a split mesh add the other parts of a split element
- void add_other_split_elems(Mesh *mesh, int gid, int proc, 
+ void add_other_split_elems(Mesh *mesh, int gid, int proc,
                         std::multimap<UInt,MeshObj *> orig_id_to_split_elem,
                         std::set<MRN_Search> *to_snd) {
     // If this is a split element
@@ -1973,14 +1973,14 @@ namespace ESMCI {
       } else {
         orig_id=soi->second;
       }
-     
+
       // Loop through and add other elements from original
       std::pair <std::multimap<UInt,MeshObj *>::iterator, std::multimap<UInt,MeshObj *>::iterator> ret;
       ret=orig_id_to_split_elem.equal_range(orig_id);
       for (std::multimap<UInt,MeshObj *>::iterator it=ret.first; it!=ret.second; ++it) {
         // Split elem
-        MeshObj *split_elem=it->second;   
-        
+        MeshObj *split_elem=it->second;
+
         // Only add if not the one that's been added before
         if (split_elem->get_id() != gid) {
 
@@ -1989,7 +1989,7 @@ namespace ESMCI {
           to_snd->insert(curr);
         }
       }
-    }        
+    }
   }
 
   // Set the split_orig_id_map in a redisted mesh from the src mesh
@@ -2006,13 +2006,13 @@ namespace ESMCI {
     // Allocate space
     gids_split= new UInt[num_gids];
     gids_orig= new UInt[num_gids];
-    
+
     // Loop through list putting into arrays
      int pos=0;
     Mesh::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem = *ei;
- 
+
       // Only do local
       if (!GetAttr(elem).is_locally_owned()) continue;
 
@@ -2042,15 +2042,15 @@ namespace ESMCI {
   // Put into a DDir
   DDir<> id_map_dir;
   id_map_dir.Create(num_gids,gids_orig,gids_split);
- 
-  // Clean up 
+
+  // Clean up
   if (num_gids>0) {
     if (gids_split!= NULL) delete [] gids_split;
     if (gids_orig != NULL) delete [] gids_orig;
   }
 
 
-  // STOPPED HERE 
+  // STOPPED HERE
   // LOOK UP OUTPUT_MESH ELEMS HERE PUT INTO elem_gids_u
   int num_elem_gids=output_mesh->num_elems();
 
@@ -2064,7 +2064,7 @@ namespace ESMCI {
   int om_pos=0;
   Mesh::iterator om_ei = output_mesh->elem_begin(), om_ee = output_mesh->elem_end();
   for (; om_ei != om_ee; ++om_ei) {
-    MeshObj &elem = *om_ei;  
+    MeshObj &elem = *om_ei;
 
     elem_gids_u[om_pos]=elem.get_id();
     om_pos++;
@@ -2075,20 +2075,20 @@ namespace ESMCI {
   std::vector<DDir<>::dentry> lookups;
   id_map_dir.RemoteGID(num_elem_gids, elem_gids_u, lookups);
 
-  // Don't need anymore so clean up 
+  // Don't need anymore so clean up
    if (num_elem_gids>0) {
     if (elem_gids_u != NULL) delete [] elem_gids_u;
   }
 
   // Loop through lookups and generate new list
     for (int i=0; i<lookups.size(); i++) {
-      
+
       // If split put into map
       if (lookups[i].gid != lookups[i].origin_lid) {
         output_mesh->split_to_orig_id[lookups[i].origin_lid]=lookups[i].gid;
       }
     }
-    
+
   }
-  
+
 } // namespace

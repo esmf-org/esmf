@@ -63,6 +63,7 @@ SOURCEC	  = \
            ESMCI_RefineTopo.C \
            ESMCI_Search.C \
            ESMCI_SearchNearest.C \
+           ESMCI_SearchNearestNPnts.C \
            ESMCI_SearchNearestDToS.C \
            ESMCI_SFuncAdaptor.C \
            ESMCI_ShapeFunc.C \
@@ -75,6 +76,7 @@ SOURCEC	  = \
            ESMCI_SpaceDir.C \
            ESMCI_FindPnts.C \
            ESMCI_Phedra.C \
+           ESMCI_SM.C \
            ESMCI_ConserveInterp.C \
            ESMCI_Conserve2ndInterp.C \
            ESMCI_MeshRedist.C \

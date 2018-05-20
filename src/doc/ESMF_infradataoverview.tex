@@ -266,7 +266,7 @@ ESMF\_RegridWeightGen & Application & Grid files & yes  & no & Sec.~\ref{sec:ESM
 
 \smallskip
 
- In 3D, ESMF supports second-order conservative regridding between any combination of the following:
+ In 3D, ESMF supports patch regridding between any combination of the following:
  \begin{itemize}
  \item NONE
  \end{itemize}
@@ -350,7 +350,7 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  must contain coordinates. 
 
 \subsubsection{Interpolation methods: first-order conservative}\label{sec:interpolation:conserve}
- The main purpose of this method is to preserve the integral of the field across the interpolation from source to destination.  
+ The goal of this method is to preserve the integral of the field across the interpolation from source to destination.  
  (For a more in-depth description of what this preservation of the integral (i.e. conservation) means please see section~\ref{sec:interpolation:conservation}.)  In this method the value across each source cell is treated as a constant, so it will typically have a larger 
  interpolation error than the bilinear or patch methods.  The first-order method used here is similar to that described in the following paper~\cite{ConservativeOrder1}.
 
@@ -393,7 +393,7 @@ In nearest destination to source interpolation ({\tt ESMF\_REGRIDMETHOD\_NEAREST
  For Grids, the corner stagger location ({\tt ESMF\_STAGGERLOC\_CORNER} in 2D or {\tt ESMF\_STAGGERLOC\_CORNER\_VFACE} in 3D) must contain coordinates describing the outer perimeter of the Grid cells. 
 
 \subsubsection{Interpolation methods: second-order conservative}\label{sec:interpolation:conserve_2ndorder}
- Like the first-order conservative method, this method's main purpose is to preserve the integral of the field across the interpolation from source to destination.  
+ Like the first-order conservative method, this method's goal is to preserve the integral of the field across the interpolation from source to destination.  
  (For a more in-depth description of what this preservation of the integral (i.e. conservation) means please see section~\ref{sec:interpolation:conservation}.)  The difference between the first and second-order conservative methods is that the second-order takes the source gradient into account, so
  it yields a smoother destination field that typically better matches the source field. This difference between the first and second-order methods 
  is particularly apparent when going from a coarse source grid to a finer destination grid. The implementation of this method is based on the one 
@@ -651,8 +651,8 @@ problems with periodicity and with the pole singularity. This library
  pole region is covered by connecting points across the top and bottom row of the source Grid into triangles. As 
  this makes the top and bottom of the source sphere flat, for a big enough difference between the size of
  the source and destination pole regions, this can still result in unmapped destination points.  
- Only pole option {\tt ESMF\_POLEMETHOD\_NONE} is currently supported with the conservative interpolation method 
- ({\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}) and with the nearest neighbor interpolation options ({\tt regridmethod=ESMF\_REGRIDMETHOD\_NEAREST\_STOD} and {\tt regridmethod=ESMF\_REGRIDMETHOD\_NEAREST\_DTOS}).
+ Only pole option {\tt ESMF\_POLEMETHOD\_NONE} is currently supported with the conservative interpolation methods 
+ (e.g. {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}) and with the nearest neighbor interpolation options (e.g. {\tt regridmethod=ESMF\_REGRIDMETHOD\_NEAREST\_STOD}).
 
 
 \begin{table}[ht]
@@ -672,6 +672,8 @@ Regrid Method & \multicolumn{2}{|c|}{Line Type} \\
  ESMF\_REGRIDMETHOD\_NEAREST\_DTOS & Y* & N \\
 \hline
  ESMF\_REGRIDMETHOD\_CONSERVE & N/A & Y* \\
+\hline
+ ESMF\_REGRIDMETHOD\_CONSERVE\_2ND & N/A & Y* \\
 \hline
 \end{tabular}
 \label{line_type_support}
@@ -799,6 +801,5 @@ in our regrid weight calculation. The parts of the internal FEM code that are us
 \subsection{Restrictions and Future Work}
 \begin{enumerate}
 
-\item {\bf 32-bit sequence index limitation:} Currently all ESMF interfaces that handle sequence indices for sparse matrix multiplication (SMM) are implemented with default Fortran integer variables, corresponding to a 32-bit signed integer number on all modern architectures. This limits the global data (across PETs) stored in Fields and Arrays, and accessible to SMM, to $2^{31}-1$ elements. This limitation will be removed in future versions of ESMF by allowing 64-bit sequence indices.
-
+\item {\bf 32-bit index limitation:} Currently all index space dimensions in an ESMF object are represented by signed 32-bit integers. This limits the number of elements in one-dimensional objects to the 32-bit limit. This limit can be crossed by higher dimensional objects, where the product space is only limited by the 64-bit sequence index representation.
 \end{enumerate}

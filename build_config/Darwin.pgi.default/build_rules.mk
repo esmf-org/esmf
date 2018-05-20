@@ -7,18 +7,13 @@
 # Default compiler setting.
 #
 ESMF_F90DEFAULT         = pgf90
-# In PGI 15.x, prefer the newer pgc++ front end.  From 16.x onward
-# the pgCC front end is no longer available.
-ifeq ($(shell $(ESMF_DIR)/scripts/available pgCC),pgCC)
-ESMF_CXXMAJORVERSION    = $(shell $(ESMF_DIR)/scripts/version.pgi 1 pgCC -V)
-ifeq ($(ESMF_CXXMAJORVERSION),15)
+# Use pgc++ if available, otherwise fall back to older pgCC front-end
+ifeq ($(shell $(ESMF_DIR)/scripts/available pgc++),pgc++)
 ESMF_CXXDEFAULT         = pgc++
 else
 ESMF_CXXDEFAULT         = pgCC
 endif
-else
-ESMF_CXXDEFAULT         = pgc++
-endif
+
 
 ############################################################
 # Default MPI setting.
@@ -123,12 +118,15 @@ ESMF_CXXCOMPILER_VERSION    = $(ESMF_DIR)/scripts/version.pgCC $(ESMF_CXXCOMPILE
 #
 ESMF_PGIVERSION_MAJOR = $(shell $(ESMF_DIR)/scripts/version.pgi 1 $(ESMF_F90COMPILER_VERSION))
 ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_MAJOR=$(ESMF_PGIVERSION_MAJOR)
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_PGIVERSION_MAJOR=$(ESMF_PGIVERSION_MAJOR)
 
 ESMF_PGIVERSION_MINOR = $(shell $(ESMF_DIR)/scripts/version.pgi 2 $(ESMF_F90COMPILER_VERSION))
 ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_MINOR=$(ESMF_PGIVERSION_MINOR)
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_PGIVERSION_MINOR=$(ESMF_PGIVERSION_MINOR)
 
 ESMF_PGIVERSION_PATCH = $(shell $(ESMF_DIR)/scripts/version.pgi 3 $(ESMF_F90COMPILER_VERSION))
 ESMF_F90COMPILECPPFLAGS += -DESMF_PGIVERSION_PATCH=$(ESMF_PGIVERSION_PATCH)
+ESMF_CXXCOMPILECPPFLAGS += -DESMF_PGIVERSION_PATCH=$(ESMF_PGIVERSION_PATCH)
 
 ############################################################
 # Construct the ABISTRING

@@ -49,7 +49,7 @@ program ESMF_SCompEx
       ! Local variables  
       integer                 :: rc, finalrc, petCount, localPet, result
       type(ESMF_VM)           :: vm
-	    type(ESMF_AttPack)      :: attpack
+      type(ESMF_AttPack)      :: attpack
 
       type(ESMF_CplComp)      :: cplcomp
       type(ESMF_GridComp)     :: atmcomp, ocncomp

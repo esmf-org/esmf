@@ -224,6 +224,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
+    ! ensure connection is valid
+ESMF_INIT_CHECK_SHALLOW_SHORT(ESMF_DistGridConnectionGetInit, connection, rc)
+
     ! check if connection contains any elements
     localdimCount = (connection % elementCount - 2)/2
 
@@ -492,6 +495,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! set initAux
     initAux = .true.  ! default
     if (present(initFlag)) initAux = initFlag
+    
+    ! mark this InterArray as invalid
+    call c_ESMC_InterArraySetInvalid(array, localrc)
+    ESMF_InterArrayCreateDGConn = array
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! construction
     connectionListSize = 0

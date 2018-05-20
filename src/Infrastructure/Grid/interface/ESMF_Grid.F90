@@ -532,6 +532,25 @@ end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
+! !IROUTINE: ESMF_GridCreateCubedSphere -- Generic interface
+
+! !INTERFACE:
+interface ESMF_GridCreateCubedSphere
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_GridCreateCubedSphereReg
+      module procedure ESMF_GridCreateCubedSphereIReg
+
+
+! !DESCRIPTION:
+! This interface provides a single entry point for the various
+!  types of {\tt ESMF\_GridCreateCubedSphere} functions.
+!EOPI
+end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
 ! !IROUTINE: ESMF_GridGet -- Get information from a Grid
 
 ! !INTERFACE:
@@ -2067,8 +2086,9 @@ end subroutine ESMF_GridConvertIndex
 !     of predefined stagger locations. If not present, defaults to
 !      ESMF\_STAGGERLOC\_CENTER.
 ! \item[{[typekind]}]
-!     The type/kind of the newly created array data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the newly created array data. For a full list of 
+!     options, please see section~\ref{const:typekind}.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 !\item[{[gridToArrayMap]}]
 !     Indicates where each grid dimension goes in the newly created Array.
 !     {\tt The array gridToArrayMap} should be at least of size equal to the grid's dimCount.
@@ -2722,6 +2742,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added argument {\tt copyAttributes} to support attribute
+!               propagation from the existing to the newly created grid object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2740,8 +2765,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      for the Grid.
 ! \item[{[copyAttributes]}]
 !      A flag to indicate whether to copy the attributes of the existing grid
-!      to the new grid.  The default value is FALSE
-!      for the Grid.
+!      to the new grid.  The default value is .false..
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3298,6 +3322,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added argument {\tt copyAttributes} to support attribute
+!               propagation from the existing to the newly created grid object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3329,8 +3358,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      created for the Grid.
 ! \item[{[copyAttributes]}]
 !      A flag to indicate whether to copy the attributes of the existing grid
-!      to the new grid.  The default value is FALSE
-!      for the Grid.
+!      to the new grid.  The default value is .false..
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -3690,8 +3718,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -3983,8 +4012,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -4267,8 +4297,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     The size of the array specifies the number of dimensions of the
 !     first coordinate component array. The values specify which
@@ -4485,8 +4516,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDimCount]}]
 !      List that has dimCount elements.
 !      Gives the dimension of each component (e.g. x) array. This is
@@ -4779,8 +4811,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDimCount]}]
 !      List that has dimCount elements.
 !      Gives the dimension of each component (e.g. x) array. This is
@@ -5719,8 +5752,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[filename]
 !     The NetCDF Grid filename.
 ! \item[fileformat]
-!     The Grid file format, please see section~\ref{const:grid:fileformat}
-!         for a list of valid options.
+!     The file format.  The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP} and {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
+!     If it is the SCRIP format, the dimension {\tt grid\_rank} in the file has to be equal to 2.
+!      Please see section~\ref{const:fileformatflag} for a detailed description of the options.
 ! \item[distGrid]
 !      A distGrid defines how the grid is distributed
 ! \item[{[isSphere]}]
@@ -5961,8 +5995,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[filename]
 !     The NetCDF Grid filename.
 ! \item[fileformat]
-!     The Grid file format, please see section~\ref{const:grid:fileformat}
-!         for a list of valid options.
+!     The file format.  The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP} and {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
+!     If it is the SCRIP format, the dimension {\tt grid\_rank} in the file has to be equal to 2.
+!      Please see section~\ref{const:fileformatflag} for a detailed description of the options.
 ! \item[{[regDecomp]}]
 !      A 2 element array specifying how the grid is decomposed.
 !      Each entry is the number of decounts for that dimension.
@@ -7262,11 +7297,25 @@ end function ESMF_GridCreateFrmScrip
 end function ESMF_GridCreateFrmGridspec
 
 !------------------------------------------------------------------------------
+! Begin of draft interfaces
+!------------------------------------------------------------------------------
+! Below are three private draft interfaces to help create a 3D Grid with both
+! constant and variable layer heights for each 2D grid location:
+!
+! 1. ESMF_GridCreateFrmGrid      - Adds one undistributed vertical dimension to
+!                                  a 2D Grid.
+!
+! 2. ESMF_GridCreateFrmGridCoord - Adds one undistributed, constant  vertical
+!                                  coordinate (1D Fortran array) to a 2D Grid.
+!
+! 3. ESMF_GridCreateFrmField     - Create a 3D Grid from a Field defined on a
+!                                  2D Grid with an ungridded dimension.
+!                                  (depends on ESMF_GeomBaseMod, ESMF_FieldMod)
+!------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmGrid"
-!BOP
-! !IROUTINE: ESMF_GridCreateFrmGrid - Create a 3D Grid from a 2D Grid by adding
-! an undistributed vertical dimension
+!BOPI
+! !IROUTINE: ESMF_GridCreateFrmGrid - Create a 3D Grid by adding an undistributed vertical dimension to a 2D Grid
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate() ?
@@ -7276,6 +7325,7 @@ end function ESMF_GridCreateFrmGridspec
     type(ESMF_Grid) :: ESMF_GridCreateFrmGrid
 !
 ! !ARGUMENTS:
+
     type(ESMF_Grid), intent(in)            :: grid
     integer,         intent(in),  optional :: minIndex
     integer,         intent(in)            :: maxIndex
@@ -7303,7 +7353,7 @@ end function ESMF_GridCreateFrmGridspec
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
     ! local variables
     integer :: localrc
@@ -7542,9 +7592,8 @@ end function ESMF_GridCreateFrmGrid
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmGridCoord"
-!BOP
-! !IROUTINE: ESMF_GridCreateFrmGridCoord - Create a 3D Grid from a 2D Grid and a
-! Fortran array as undistributed vertical coordinate
+!BOPI
+! !IROUTINE: ESMF_GridCreateFrmGridCoord - Create a 3D Grid from a 2D Grid and a 1D Fortran array as undistributed vertical coordinate
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate() ?
@@ -7593,7 +7642,7 @@ end function ESMF_GridCreateFrmGrid
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
     ! local variables
     logical :: isPresent
@@ -7671,9 +7720,8 @@ end function ESMF_GridCreateFrmGridCoord
 #if 0
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreateFrmField"
-!BOP
-! !IROUTINE: ESMF_GridCreateFrmField - Create a 3D Grid from a Field defined on
-! a 2D Grid with an ungridded dimension
+!BOPI
+! !IROUTINE: ESMF_GridCreateFrmField - Create a 3D Grid from a Field defined on a 2D Grid with an ungridded dimension
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate() ?
@@ -7720,7 +7768,7 @@ end function ESMF_GridCreateFrmGridCoord
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
 !
-!EOP
+!EOPI
 
     ! local variables
     integer :: localrc
@@ -7829,7 +7877,8 @@ end function ESMF_GridCreateFrmGridCoord
 
 end function ESMF_GridCreateFrmField
 #endif
-
+!------------------------------------------------------------------------------
+! End of draft interfaces
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCreate1PeriDimI"
@@ -7922,8 +7971,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -8202,8 +8252,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -8471,8 +8522,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     The size of the array specifies the number of dimensions of the
 !     first coordinate component array. The values specify which
@@ -8706,8 +8758,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -8973,8 +9026,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -9225,10 +9279,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[coordSys]}]
 !     The coordinate system of the grid coordinate data.
 !     For a full list of options, please see Section~\ref{const:coordsys}.
- !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
+!     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     The size of the array specifies the number of dimensions of the
 !     first coordinate component array. The values specify which
@@ -9460,8 +9515,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -9717,8 +9773,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -9963,8 +10020,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
- !     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     The size of the array specifies the number of dimensions of the
 !     first coordinate component array. The values specify which
@@ -10995,8 +11053,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[minIndex]}]
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
@@ -12016,8 +12075,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[regDecomp]}]
 !      List that has the same number of elements as {\tt maxIndex}.
 !      Each entry is the number of decounts for that dimension.
@@ -12933,8 +12993,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The arguments are:
 ! \begin{description}
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[minIndex]}]
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
@@ -13494,22 +13555,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !-------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateCubedSphere()"
+#define ESMF_METHOD "ESMF_GridCreateCubedSphereReg()"
 !BOP
 ! !IROUTINE: ESMF_GridCreateCubedSphere - Create a multi-tile cubed sphere Grid with regular decomposition
 
 ! !INTERFACE:
-  function ESMF_GridCreateCubedSphere(tileSize,keywordEnforcer, regDecompPTile, decompflagPTile, &
-        deLabelList, staggerLocList, delayout, indexflag, name, rc)
+  ! Private name; call using ESMF_GridCreateCubedSphere()
+  function ESMF_GridCreateCubedSphereReg(tileSize,keywordEnforcer, &
+        regDecompPTile, decompflagPTile,                        &
+        coordSys, coordTypeKind,                                &
+        deLabelList, staggerLocList,                            &
+        delayout, indexflag, name, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_Grid) :: ESMF_GridCreateCubedSphere
+    type(ESMF_Grid) :: ESMF_GridCreateCubedSphereReg
 !
 ! !ARGUMENTS:
     integer,                        intent(in)            :: tilesize
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                        intent(in),  optional :: regDecompPTile(:,:)
     type(ESMF_Decomp_Flag), target, intent(in),  optional :: decompflagPTile(:,:)
+    type(ESMF_CoordSys_Flag),       intent(in),  optional :: coordSys
+    type(ESMF_TypeKind_Flag),       intent(in),  optional :: coordTypeKind
     integer,                        intent(in),  optional :: deLabelList(:)
     type(ESMF_StaggerLoc),          intent(in),  optional :: staggerLocList(:)
     type(ESMF_DELayout),            intent(in),  optional :: delayout
@@ -13554,6 +13621,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The list of stagger locations to fill with coordinates. Only {\tt ESMF\_STAGGERLOC\_CENTER}
 !          and {\tt ESMF\_STAGGERLOC\_CORNER} are supported.  If not present, no coordinates
 !          will be added or filled.
+!     \item[{[coordSys]}]
+!          The coordinate system of the grid coordinate data.
+!          Only ESMF\_COORDSYS\_SPH\_DEG and ESMF\_COORDSYS\_SPH\_RAD are supported. 
+!          If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
+!     \item[{[coordTypeKind]}]
+!          The type/kind of the grid coordinate data. Only ESMF\_TYPEKIND\_R4
+!          and ESMF\_TYPEKIND\_R8 are supported.
+!          If not specified then defaults to ESMF\_TYPEKIND\_R8.
 !     \item[{[delayout]}]
 !          Optional {\tt ESMF\_DELayout} object to be used. By default a new
 !          DELayout object will be created with as many DEs as there are PETs,
@@ -13576,28 +13651,31 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     type(ESMF_VM)                               :: vm
     integer                                     :: PetNo, PetCnt
-    integer                                     :: totalDE, nxy, nx, ny, bigFac
     type(ESMF_DELayout)                         :: defaultDELayout
     type(ESMF_Grid)                             :: grid, newgrid
     type(ESMF_DistGrid)                         :: distgrid, newdistgrid
     integer                                     :: localrc
-    type(ESMF_DistGridConnection), allocatable :: connectionList(:)
-    integer                                    :: i, j, conn
+    integer                                    :: i, j
+    integer                                    :: nx, ny, nxy, bigFac, totalDE
     integer                                    :: localDeCount, localDe, DeNo, tile
+    integer, pointer                           :: minIndexPTile(:,:)
+    integer, pointer                           :: maxIndexPTile(:,:)
+    type(ESMF_DistGridConnection), pointer     :: connectionList(:)
     real(kind=ESMF_KIND_R8),  pointer          :: lonPtr(:,:), latPtr(:,:)
     real(kind=ESMF_KIND_R8),  pointer          :: lonCornerPtr(:,:), latCornerPtr(:,:)
+    real(kind=ESMF_KIND_R4),  pointer          :: lonPtrR4(:,:), latPtrR4(:,:)
+    real(kind=ESMF_KIND_R4),  pointer          :: lonCornerPtrR4(:,:), latCornerPtrR4(:,:)
     integer                                    :: tileCount
-    integer                                    :: connectionCount
-    integer                                    :: centerCount
     integer                                    :: starti, startj, sizei, sizej
     integer                                    :: ind, rem, rem1, rem2
     integer                                    :: start(2), count(2)
-    integer, allocatable                       :: minIndexPTile(:,:)
-    integer, allocatable                       :: maxIndexPTile(:,:)
+    integer                                    :: shapLon(2), shapLat(2)
     integer, allocatable                       :: regDecomp(:,:)
     integer, allocatable                       :: demap(:)
     integer                                    :: decount
     type(ESMF_Index_Flag)                      :: localIndexFlag
+    type(ESMF_CoordSys_Flag)                   :: coordSysLocal
+    type(ESMF_TypeKind_Flag)                   :: coordTypeKindLocal
     integer                                    :: s
     logical                                    :: docenter, docorner
     !real(ESMF_KIND_R8)                        :: starttime, endtime
@@ -13617,16 +13695,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-  if (present(indexflag)) then
-     localIndexFlag = indexflag
-  else
-     localIndexFlag = ESMF_INDEX_DELOCAL
-  endif
-
-  ! set defaults
-  docenter = .false.
-  docorner = .false.
 
   !------------------------------------------------------------------------
   ! default decomposition. The number of DEs has to be multiple of 6.
@@ -13660,28 +13728,774 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   ny = nxy / nx
 #endif
 
-  defaultDELayout = ESMF_DELayoutCreate(deCount = totalDE, rc=localrc)
+    defaultDELayout = ESMF_DELayoutCreate(deCount = totalDE, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+
+  if (present(indexflag)) then
+     localIndexFlag = indexflag
+  else
+     localIndexFlag = ESMF_INDEX_DELOCAL
+  endif
+
+  ! Set Default coordSys
+  if (present(coordSys)) then
+     if (coordSys .eq. ESMF_COORDSYS_CART) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- only ESMF_TYPEKIND_CART is not supported", &
+           ESMF_CONTEXT, rcToReturn=rc)
+        return
+     endif      
+     coordSysLocal=coordSys
+  else
+     coordSysLocal=ESMF_COORDSYS_SPH_DEG
+  endif
+
+  ! Set Default coordTypeKind
+  if (present(coordTypeKind)) then
+     if (coordTypeKind .ne. ESMF_TYPEKIND_R4 .and. &
+         coordTypeKind .ne. ESMF_TYPEKIND_R8) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- only ESMF_TYPEKIND_R4 and ESMF_TYPEKIND_R8 are allowed", &
+           ESMF_CONTEXT, rcToReturn=rc)
+        return
+     endif      
+     coordTypeKindLocal=coordTypeKind
+  else
+     coordTypeKindLocal=ESMF_TYPEKIND_R8
+  endif
+
+  ! set defaults
+  docenter = .false.
+  docorner = .false.
+
+    tileCount = 6
+    allocate(minIndexPTile(2,tileCount))
+    allocate(maxIndexPTile(2,tileCount))
+    allocate(connectionList(12))
+
+    call CalculateConnection(tilesize, minIndexPTile, maxIndexPTile, connectionList, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate(regDecomp(2,6))
+    regDecomp(1,:)=nx
+    regDecomp(2,:)=ny
+    !-------------------------------------------
+    ! - create DistGrid with default decomposition
+    ! must create with ESMF_INDEX_GLOBAL because of how connections were defined
+    distgrid = ESMF_DistGridCreate(&
+      minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
+      regDecompPTile=regDecomp, &
+      indexflag=ESMF_INDEX_GLOBAL, connectionList=connectionList, &
+      delayout = defaultDelayout, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! - create Grid
+    grid = ESMF_GridCreate(distgrid, coordSys=coordSysLocal, &
+      coordTypeKind=coordTypeKindLocal, &
+      indexflag=localIndexFlag, name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(staggerLocList)) then
+
+      call ESMF_DELayoutGet(defaultDElayout, localDeCount = decount, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      if (decount > 0) then
+          allocate(demap(0:decount-1))
+          call ESMF_DELayoutGet(defaultDElayout, localDeToDeMap = demap, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      do s=1, size(staggerLocList)
+         if (staggerLocList(s) == ESMF_STAGGERLOC_EDGE1 .or. &
+             staggerLocList(s) == ESMF_STAGGERLOC_EDGE2) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                 msg="- only ESMF_STAGGERLOC_CENTER and ESMF_STAGGERLOC_CORNER are supported", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+            return
+         elseif (staggerLocList(s) == ESMF_STAGGERLOC_CENTER) then
+            docenter = .TRUE.
+         elseif (staggerLocList(s) == ESMF_STAGGERLOC_CORNER) then
+            docorner = .TRUE.
+         endif
+         call ESMF_GridAddCoord(grid, staggerloc=staggerLocList(s), rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      enddo
+
+      ! calculate the actual cubed sphere coordiantes for each DE
+      do localDe = 0,decount-1
+         DeNo = demap(localDe)
+         tile = DeNo/(nx*ny)+1
+         rem = mod(DeNo,nx*ny)
+         sizei = tileSize/nx
+         sizej = tileSize/ny
+         rem1 = mod(tileSize, nx)
+         rem2 = mod(tileSize, ny)
+         ind = mod(rem,nx)
+         if (rem1 > 0) then
+           if (ind < rem1) then
+             sizei=sizei+1
+             starti=sizei*ind+1
+           else
+             starti=sizei*ind+rem1+1
+           endif
+         else
+           starti = sizei*ind+1
+         endif
+         ind = rem/nx
+         if (rem2 > 0) then
+           if (ind < rem2) then
+             sizej=sizej+1
+             startj=sizej*ind+1
+           else
+             startj=sizej*ind+rem2+1
+           endif
+         else
+           startj = sizej*ind+1
+         endif
+         !print *, DeNo, 'block:', starti, startj, sizei, sizej, tile
+
+         start(1)=starti
+         start(2)=startj
+         count(1)=sizei
+         count(2)=sizej
+
+         if (coordTypeKindLocal .eq. ESMF_TYPEKIND_R8) then
+           if (docenter) then
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                farrayPtr=lonPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                farrayPtr=latPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+             allocate(lonPtrR4(count(1), count(2)), latPtrR4(count(1), count(2)))
+           endif
+           if (docorner) then
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             shapLon=shape(lonCornerPtr)  ! make sure lhs and rhs is same shape
+             shapLat=shape(latCornerPtr)  ! make sure lhs and rhs is same shape
+             allocate(lonCornerPtrR4(shapLon(1), shapLon(2)), &
+                latCornerPtrR4(shapLat(1),shapLat(2)))
+           endif
+         else ! ESMF_TYPEKIND_R4
+           if (docenter) then
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                farrayPtr=lonPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                farrayPtr=latPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+           if (docorner) then
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+         endif  
+         !call ESMF_VMWtime(starttime, rc=localrc)
+         ! Generate glocal edge coordinates and local center coordinates
+
+         if (docenter .and. docorner) then
+            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
+               latEdge=latCornerPtrR4, start=start, count=count, &
+               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4)
+         elseif (docorner) then
+            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
+              latEdge=latCornerPtrR4, start=start, count=count, tile=tile)
+         else
+            call ESMF_UtilCreateCSCoordsPar(tileSize, &
+               start=start, count=count, &
+               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4)
+         endif
+
+         !call ESMF_VMWtime(endtime, rc=localrc)
+
+         if (coordTypeKindLocal .eq. ESMF_TYPEKIND_R8) then
+           if (docenter) then
+             if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
+               lonPtr = lonPtrR4 * ESMF_COORDSYS_RAD2DEG
+               latPtr = latPtrR4 * ESMF_COORDSYS_RAD2DEG
+             else
+               ! extra copy, can be optimized
+               lonPtr = lonPtrR4
+               latPtr = latPtrR4
+             endif
+             deallocate(lonPtrR4, latPtrR4)
+           endif
+           if (docorner) then
+             if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
+              lonCornerPtr = lonCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
+              latCornerPtr = latCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
+             else
+              lonCornerPtr = lonCornerPtrR4
+              latCornerPtr = latCornerPtrR4
+             endif
+             deallocate(lonCornerPtrR4, latCornerPtrR4)
+           endif  
+         else ! ESMF_TYPE_KIND_R4
+           if (docenter) then
+             if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
+               lonPtrR4 = lonPtrR4 * todeg
+               latPtrR4 = latPtrR4 * todeg
+             endif
+           endif      
+           if (docorner) then
+             if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
+               lonCornerPtrR4 = lonCornerPtrR4 * todeg
+               latCornerPtrR4 = latCornerPtrR4 * todeg
+             endif
+           endif
+         endif
+
+      !print *, 'Create CS size ', tileSize, 'in', (endtime-starttime)*1000.0, ' msecs'
+      end do
+    endif
+
+    ! Create another distgrid with user specified decomposition
+    if (present(decompflagPTile) .or. present(regDecompPTile) .or. &
+         present(delabelList) .or. present(delayout)) then
+      newdistgrid = ESMF_DistGridCreate(&
+            minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
+            regDecompPTile=regDecompPTile, &
+            decompflagPTile=decompflagPTile, &
+            delabelList = delabelList, &
+            indexflag=ESMF_INDEX_GLOBAL, connectionList=connectionList, &
+            delayout = delayout, &
+            rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      !Redist the grid with the new distgrid
+      newgrid = ESMF_GridCreate(grid, newdistgrid, name=name, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Destroy old grid
+      call ESMF_GridDestroy(grid, noGarbage=.true., rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Destroy old distgrid
+      call ESMF_DistGridDestroy(distgrid, noGarbage=.true., rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ESMF_GridCreateCubedSphereReg = newgrid
+    else
+      ESMF_GridCreateCubedSphereReg = grid
+    endif
+
+    ! - deallocate connectionList
+    deallocate(minIndexPTile, maxIndexPTile)
+    deallocate(connectionList)
+    return
+
+end function ESMF_GridCreateCubedSphereReg
+
+!-------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateCubedSphereIReg()"
+!BOP
+! !IROUTINE: ESMF_GridCreateCubedSphere - Create a multi-tile cubed sphere Grid with irregular decomposition
+
+! !INTERFACE:
+  ! Private name; call using ESMF_GridCreateCubedSphere()
+  function ESMF_GridCreateCubedSphereIReg(tileSize,             &
+        countsPerDEDim1PTile, countsPerDEDim2PTile,             &
+        keywordEnforcer,                                        &        
+        coordSys, coordTypeKind,                                &
+        deLabelList, staggerLocList,                            &
+        delayout, indexflag, name, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Grid) :: ESMF_GridCreateCubedSphereIReg
+!
+! !ARGUMENTS:
+    integer,                        intent(in)            :: tilesize
+    integer,                        intent(in)            :: countsPerDEDim1PTile(:,:)
+    integer,                        intent(in)            :: countsPerDEDim2PTile(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_CoordSys_Flag),       intent(in),  optional :: coordSys
+    type(ESMF_TypeKind_Flag),       intent(in),  optional :: coordTypeKind
+    integer,                        intent(in),  optional :: deLabelList(:)
+    type(ESMF_StaggerLoc),          intent(in),  optional :: staggerLocList(:)
+    type(ESMF_DELayout),            intent(in),  optional :: delayout
+    type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
+    character(len=*),               intent(in),  optional :: name
+    integer,                        intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!   Create a six-tile {\tt ESMF\_Grid} for a Cubed Sphere grid using irregular decomposition.  Each tile can
+!   have different decomposition.  The grid coordinates are generated based on the algorithm used by GEOS-5,
+!   The tile resolution is defined by tileSize.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[tilesize]
+!          The number of elements on each side of the tile of the Cubed Sphere grid.
+!     \item[countsPerDEDim1PTile]
+!          This array specifies the number of cells per DE for index dimension 1 for the
+!          center stagger location. The second index steps through the tiles. If each tile is 
+!          decomposed into different number of DEs, the first dimension is the maximal DEs of 
+!          all the tiles.  
+!     \item[countsPerDEDim2PTile]
+!          This array specifies the number of cells per DE for index dimension 2 for the
+!          center stagger location. The second index steps through the tiles. If each tile is 
+!          decomposed into different number of DEs, the first dimension is the maximal DEs of 
+!          all the tiles.  
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the column major order in the sequence as they appear
+!          in {\tt countsPerDEDim1PTile}, followed by {\tt countsPerDEDim2PTile}, then the 
+!          tile index.
+!     \item[{[staggerLocList]}]
+!          The list of stagger locations to fill with coordinates. Only {\tt ESMF\_STAGGERLOC\_CENTER}
+!          and {\tt ESMF\_STAGGERLOC\_CORNER} are supported.  If not present, no coordinates
+!          will be added or filled.
+!     \item[{[coordSys]}]
+!          The coordinate system of the grid coordinate data.
+!          Only ESMF\_COORDSYS\_SPH\_DEG and ESMF\_COORDSYS\_SPH\_RAD are supported. 
+!          If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
+!     \item[{[coordTypeKind]}]
+!          The type/kind of the grid coordinate data. Only ESMF\_TYPEKIND\_R4
+!          and ESMF\_TYPEKIND\_R8 are supported.
+!          If not specified then defaults to ESMF\_TYPEKIND\_R8.
+!     \item[{[delayout]}]
+!          Optional ESMF\_DELayout object to be used. If a delayout object is specified,
+!          the number of DEs must match with the total DEs defined in {\tt countsPerDEDim1PTile}
+!          and {\tt countsPerDEDim2PTile}.
+!     \item[{[indexflag]}]
+!          Indicates the indexing scheme to be used in the new Grid. Please see
+!          Section~\ref{const:indexflag} for the list of options. If not present,
+!          defaults to ESMF\_INDEX\_DELOCAL.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+    type(ESMF_VM)                               :: vm
+    integer                                     :: PetNo, PetCnt
+    type(ESMF_DELayout)                         :: defaultDELayout
+    type(ESMF_Grid)                             :: grid, newgrid
+    type(ESMF_DistGrid)                         :: distgrid, newdistgrid
+    integer                                     :: localrc
+    integer                                    :: i, j
+    integer                                    :: nx, ny, nxy, bigFac, totalDE
+    integer                                    :: localDeCount, localDe, DeNo, tile
+    integer, pointer                           :: minIndexPTile(:,:)
+    integer, pointer                           :: maxIndexPTile(:,:)
+    type(ESMF_DistGridConnection), pointer     :: connectionList(:)
+    real(kind=ESMF_KIND_R8),  pointer          :: lonPtr(:,:), latPtr(:,:)
+    real(kind=ESMF_KIND_R8),  pointer          :: lonCornerPtr(:,:), latCornerPtr(:,:)
+    real(kind=ESMF_KIND_R4),  pointer          :: lonPtrR4(:,:), latPtrR4(:,:)
+    real(kind=ESMF_KIND_R4),  pointer          :: lonCornerPtrR4(:,:), latCornerPtrR4(:,:)
+    integer                                    :: tileCount
+    integer                                    :: start(2), count(2)
+    integer                                    :: shapLon(2), shapLat(2)
+    integer                                    :: decount
+    type(ESMF_Index_Flag)                      :: localIndexFlag
+    type(ESMF_CoordSys_Flag)                   :: coordSysLocal
+    type(ESMF_TypeKind_Flag)                   :: coordTypeKindLocal
+    integer                                    :: s
+    logical                                    :: docenter, docorner
+    integer, pointer                           :: deBlockList(:,:,:), deToTileMap(:)
+    integer, pointer                           :: DeDim1(:), DeDim2(:), demap(:)
+    integer                                    :: k,t, minIndx, minIndy
+    integer                                    :: myde, startde, endde
+    integer                                    :: tiles, totalelmt
+    !real(ESMF_KIND_R8)                        :: starttime, endtime
+
+    real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
+    real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
+
+    if (present(rc)) rc=ESMF_SUCCESS
+  !------------------------------------------------------------------------
+  ! get global vm information
+  !
+  call ESMF_VMGetCurrent(vm, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) return
 
-  call ESMF_DELayoutGet(defaultDElayout, localDeCount = decount, rc=localrc)
+  ! set up local pet info
+  call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) return
-  if (decount > 0) then
-     allocate(demap(0:decount-1))
-     call ESMF_DELayoutGet(defaultDElayout, localDeToDeMap = demap, rc=localrc)
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  !------------------------------------------------------------------------
+  ! default decomposition. The number of DEs has to be multiple of 6.
+  ! If the total PET count is less than 6, some PETs will get more than one DE.
+  ! Otherwise, total DEs is always less than or equal to total PETs.
+
+  ! calculate totalDE based on the decomposition
+  tiles=size(countsPerDEDim1PTile,2)
+  if (tiles /= 6) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- the second dimension of countsPerDEDim1PTile is not equal to 6", &
+           ESMF_CONTEXT, rcToReturn=rc)
+      return
+  endif      
+  if (size(countsPerDEDim2PTile,2) /= 6) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- the second dimension of countsPerDEDim2PTile is not equal to 6", &
+           ESMF_CONTEXT, rcToReturn=rc)
+      return
+  endif  
+  allocate(DeDim1(tiles), DeDim2(tiles))
+  do j=1,tiles
+    totalelmt = 0
+    DeDim1(j)=size(countsPerDEDim1Ptile,1)
+    DeDim2(j)=size(countsPerDEDim2Ptile,1)
+    do i=1,size(countsPerDEDim1PTile,1)
+      ! check the total elements counts in dimension 1 is equal to tilesize
+      ! count how many DEs for this tile
+      totalelmt = countsPerDEDim1PTile(i,j)+totalelmt
+      if (countsPerDEDim1PTile(i,j)==0) then
+         DeDim1(j)=i-1
+         exit
+      endif
+    enddo
+    if (totalelmt /= tilesize) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- the total number of elements in dimension 1 does not add up to tilesize", &
+           ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+    totalelmt = 0
+    do i=1,size(countsPerDEDim2PTile,1)
+      ! check the total elements counts in dimension 1 is equal to tilesize
+      ! count how many DEs for this tile
+      totalelmt = countsPerDEDim2PTile(i,j)+totalelmt
+      if (countsPerDEDim2PTile(i,j)==0) then
+         DeDim2(j)=i-1
+         exit
+      endif
+    enddo
+    if (totalelmt /= tilesize) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- the total number of elements in dimension 2 does not add up to tilesize", &
+           ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+  enddo
+  !if (PetNo == 0) then
+  !   print *, 'DeDim: ', DeDim1(:), DeDim2(:)
+  !endif
+  ! calculate totalDE
+  totalDE=0
+  do j=1,tiles
+     totalDE = totalDE+DeDim1(j)*DeDim2(j)
+  enddo
+
+  if (present(delayout)) then
+     !Check if delayout has the same number of DEs
+     call ESMF_DELayoutGet(delayout, deCount=deCount, rc=localrc)
+     if (deCount /= totalDE) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="- the total number of DEs specified in delayout is inconsistent with the decomposition arguments", &
+             ESMF_CONTEXT, rcToReturn=rc)
+      return
+     endif
+     defaultDELayout = delayout 
+  else
+     defaultDELayout = ESMF_DELayoutCreate(deCount = totalDE, rc=localrc)
      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
+         ESMF_CONTEXT, rcToReturn=rc)) return
   endif
-    centerCount=tilesize
+
+  if (present(indexflag)) then
+     localIndexFlag = indexflag
+  else
+     localIndexFlag = ESMF_INDEX_DELOCAL
+  endif
+
+  ! Set Default coordSys
+  if (present(coordSys)) then
+     if (coordSys .eq. ESMF_COORDSYS_CART) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- only ESMF_TYPEKIND_CART is not supported", &
+           ESMF_CONTEXT, rcToReturn=rc)
+        return
+     endif      
+     coordSysLocal=coordSys
+  else
+     coordSysLocal=ESMF_COORDSYS_SPH_DEG
+  endif
+
+  ! Set Default coordTypeKind
+  if (present(coordTypeKind)) then
+     if (coordTypeKind .ne. ESMF_TYPEKIND_R4 .and. &
+         coordTypeKind .ne. ESMF_TYPEKIND_R8) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- only ESMF_TYPEKIND_R4 and ESMF_TYPEKIND_R8 are allowed", &
+           ESMF_CONTEXT, rcToReturn=rc)
+        return
+     endif      
+     coordTypeKindLocal=coordTypeKind
+  else
+     coordTypeKindLocal=ESMF_TYPEKIND_R8
+  endif
+
+  ! set defaults
+  docenter = .false.
+  docorner = .false.
+
+    tileCount = 6
+    allocate(minIndexPTile(2,tileCount))
+    allocate(maxIndexPTile(2,tileCount))
+    allocate(connectionList(12))
+
+    call CalculateConnection(tilesize, minIndexPTile, maxIndexPTile, connectionList, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_DELayoutGet(defaultDelayout, DeCount = decount, localDeCount=localDeCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    allocate(demap(localdecount))
+    call ESMF_DELayoutGet(defaultDelayout, localDeToDeMap = demap, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! deBlockList and deToTileMap contains all the blocks for all the DEs (not
+    ! just the localDEs
+    allocate(deBlockList(2,2,decount),deToTileMap(decount))
+    !print *, PetNo, 'total DE count ', decount
+    ! minIndexPTile and maxIndexPTile are in ESMF_INDEX_GLOBAL, therefore, need
+    ! to use global index in deBlockList as well
+    k=1
+    do t=1,tiles
+       do j=1,DeDim2(t)
+         do i=1,DeDim1(t)
+            minIndx = sum(countsPerDEDim1PTile(1:i-1,t))+minIndexPTile(1,t)
+            minIndy = sum(countsPerDEDim2PTile(1:j-1,t))+minIndexPTile(2,t)
+            deBlockList(1,1,k)=minIndx
+            deBlockList(2,1,k)=minIndy
+            deBlockList(1,2,k)=minIndx+countsPerDEDim1PTile(i,t)-1
+            deBlockList(2,2,k)=minIndy+countsPerDEDim2PTile(j,t)-1
+            deToTileMap(k)=t
+            k=k+1
+         enddo
+       enddo
+    enddo
+
+    ! need to constrcut deBlockList and deToTileMap
+    distgrid = ESMF_DistGridCreate(&
+      minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
+      deBlockList = deBlockList, deToTileMap = deToTileMap, &
+      indexflag=ESMF_INDEX_GLOBAL, connectionList=connectionList, &
+      deLabelList = deLabelList, &
+      delayout = defaultDelayout, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! - create Grid
+    grid = ESMF_GridCreate(distgrid, coordSys=coordSysLocal, &
+      coordTypeKind=coordTypeKindLocal, &
+      indexflag=localIndexFlag, name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(staggerLocList)) then
+
+      do s=1, size(staggerLocList)
+         if (staggerLocList(s) == ESMF_STAGGERLOC_EDGE1 .or. &
+             staggerLocList(s) == ESMF_STAGGERLOC_EDGE2) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+                 msg="- only ESMF_STAGGERLOC_CENTER and ESMF_STAGGERLOC_CORNER are supported", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+            return
+         elseif (staggerLocList(s) == ESMF_STAGGERLOC_CENTER) then
+            docenter = .TRUE.
+         elseif (staggerLocList(s) == ESMF_STAGGERLOC_CORNER) then
+            docorner = .TRUE.
+         endif
+         call ESMF_GridAddCoord(grid, staggerloc=staggerLocList(s), rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      enddo
+    
+      ! calculate the actual cubed sphere coordiantes for each DE
+      do i = 1,localdecount
+         j = demap(i)+1
+         localDe = i-1
+         start(1)=deBlockList(1,1,j)-minIndexPTile(1,deToTileMap(j))+1
+         start(2)=deBlockList(2,1,j)-minIndexPTile(2,deToTileMap(j))+1
+         count(1)=deBlockList(1,2,j)-deBlockList(1,1,j)+1
+         count(2)=deBlockList(2,2,j)-deBlockList(2,1,j)+1
+         tile = deToTileMap(j)  
+
+         if (coordTypeKindLocal .eq. ESMF_TYPEKIND_R8) then
+           if (docenter) then
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                farrayPtr=lonPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                farrayPtr=latPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+             allocate(lonPtrR4(count(1), count(2)), latPtrR4(count(1), count(2)))
+           endif
+           if (docorner) then
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             shapLon=shape(lonCornerPtr)  ! make sure lhs and rhs is same shape
+             shapLat=shape(latCornerPtr)  ! make sure lhs and rhs is same shape
+             allocate(lonCornerPtrR4(shapLon(1), shapLon(2)), &
+                latCornerPtrR4(shapLat(1),shapLat(2)))
+           endif
+         else ! ESMF_TYPEKIND_R4
+           if (docenter) then
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                farrayPtr=lonPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                farrayPtr=latPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+           if (docorner) then
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+         endif  
+         !call ESMF_VMWtime(starttime, rc=localrc)
+         ! Generate glocal edge coordinates and local center coordinates
+
+         if (docenter .and. docorner) then
+            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
+               latEdge=latCornerPtrR4, start=start, count=count, &
+               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4)
+         elseif (docorner) then
+            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtrR4, &
+              latEdge=latCornerPtrR4, start=start, count=count, tile=tile)
+         else
+            call ESMF_UtilCreateCSCoordsPar(tileSize, &
+               start=start, count=count, &
+               tile=tile, lonCenter=lonPtrR4, latCenter=latPtrR4)
+         endif
+
+         !call ESMF_VMWtime(endtime, rc=localrc)
+
+         if (coordTypeKindLocal .eq. ESMF_TYPEKIND_R8) then
+           if (docenter) then
+             if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
+               lonPtr = lonPtrR4 * ESMF_COORDSYS_RAD2DEG
+               latPtr = latPtrR4 * ESMF_COORDSYS_RAD2DEG
+             else
+               ! extra copy, can be optimized
+               lonPtr = lonPtrR4
+               latPtr = latPtrR4
+             endif
+             deallocate(lonPtrR4, latPtrR4)
+           endif
+           if (docorner) then
+             if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
+              lonCornerPtr = lonCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
+              latCornerPtr = latCornerPtrR4 * ESMF_COORDSYS_RAD2DEG
+             else
+              lonCornerPtr = lonCornerPtrR4
+              latCornerPtr = latCornerPtrR4
+             endif
+             deallocate(lonCornerPtrR4, latCornerPtrR4)
+           endif  
+         else ! ESMF_TYPE_KIND_R4
+           if (docenter) then
+             if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
+               lonPtrR4 = lonPtrR4 * todeg
+               latPtrR4 = latPtrR4 * todeg
+             endif
+           endif      
+           if (docorner) then
+             if (coordSysLocal .eq. ESMF_COORDSYS_SPH_DEG) then
+               lonCornerPtrR4 = lonCornerPtrR4 * todeg
+               latCornerPtrR4 = latCornerPtrR4 * todeg
+             endif
+           endif
+         endif
+
+      !print *, 'Create CS size ', tileSize, 'in', (endtime-starttime)*1000.0, ' msecs'
+      end do
+    endif 
+
+    ESMF_GridCreateCubedSphereIReg = grid
+
+    ! - deallocate connectionList
+    deallocate(minIndexPTile, maxIndexPTile)
+    deallocate(connectionList)
+    deallocate(deBlockList,deToTileMap)
+    deallocate(DeDim1, DeDim2, demap)
+    return
+
+end function ESMF_GridCreateCubedSphereIReg
+
+!-------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "CalculateConnection()"
+!IBOP
+! !IROUTINE: CalculateConnection - internal subroutine called by ESMF_GridCreateCubedSphere
+subroutine CalculateConnection(centerCount, minIndexPTile, &
+                    maxIndexPTile, connectionList, rc)
+
+! !ARGUMENTS:
+    integer,             intent(in)            :: centerCount
+    integer, pointer                           :: minIndexPTile(:,:)
+    integer, pointer                           :: maxIndexPTile(:,:)
+    type(ESMF_DistGridConnection), pointer     :: connectionList(:)
+    integer,            intent(out)            :: rc
+!IEOP
+
+    integer                                    :: i, j, conn
+    integer                                    :: tileCount, tile
+    integer                                    :: connectionCount
+    integer                                    :: localrc
+
+    rc=ESMF_SUCCESS
+
     tileCount = 6
 
     ! - initialize Min/Max
     ! The full cubed sphere has 6 tiles. For testing, tiles can be
     ! turned on incrementally from 1 all the way to 6. Anything greater than
     ! 6 is incorrect.
-    allocate(minIndexPTile(2,tileCount))
-    allocate(maxIndexPTile(2,tileCount))
     tile=0
     if (tile==tileCount) goto 10
     !- tile 1
@@ -13734,7 +14548,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! turned on incrementally from 0 all the way to 12. Anything greater than
     ! 12 is incorrect.
     connectionCount = 12  ! between 0 ... and ... 12.
-    allocate(connectionList(connectionCount))
 
     ! Connections are either defined on the basis of centers or corners, they
     ! are NOT the same! Our current strategy is to define connections for
@@ -13855,172 +14668,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 20  continue
 
-    allocate(regDecomp(2,6))
-    regDecomp(1,:)=nx
-    regDecomp(2,:)=ny
-    !-------------------------------------------
-    ! - create DistGrid with default decomposition
-    ! must create with ESMF_INDEX_GLOBAL because of how connections were defined
-    distgrid = ESMF_DistGridCreate(&
-      minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
-      regDecompPTile=regDecomp, &
-      indexflag=ESMF_INDEX_GLOBAL, connectionList=connectionList, &
-      delayout = defaultDelayout, &
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! - create Grid
-    ! must create with ESMF_INDEX_DELOCAL because of how tiles get their
-    ! coordinates from the cubedSphereTileCreate() routine
-    grid = ESMF_GridCreate(distgrid, coordSys=ESMF_COORDSYS_SPH_DEG, &
-      indexflag=localIndexFlag, name=name, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    if (present(staggerLocList)) then
-      do s=1, size(staggerLocList)
-         if (staggerLocList(s) == ESMF_STAGGERLOC_EDGE1 .or. &
-             staggerLocList(s) == ESMF_STAGGERLOC_EDGE2) then
-            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-                 msg="- only ESMF_STAGGERLOC_CENTER and ESMF_STAGGERLOC_CORNER are supported", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-            return
-         elseif (staggerLocList(s) == ESMF_STAGGERLOC_CENTER) then
-            docenter = .TRUE.
-         elseif (staggerLocList(s) == ESMF_STAGGERLOC_CORNER) then
-            docorner = .TRUE.
-         endif
-         call ESMF_GridAddCoord(grid, staggerloc=staggerLocList(s), rc=localrc)
-         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-      enddo
-
-      ! calculate the actual cubed sphere coordiantes for each DE
-      do localDe = 0,decount-1
-         DeNo = demap(localDe)
-         tile = DeNo/(nx*ny)+1
-         rem = mod(DeNo,nx*ny)
-         sizei = tileSize/nx
-         sizej = tileSize/ny
-         rem1 = mod(tileSize, nx)
-         rem2 = mod(tileSize, ny)
-         ind = mod(rem,nx)
-         if (rem1 > 0) then
-           if (ind < rem1) then
-             sizei=sizei+1
-             starti=sizei*ind+1
-           else
-             starti=sizei*ind+rem1+1
-           endif
-         else
-           starti = sizei*ind+1
-         endif
-         ind = rem/nx
-         if (rem2 > 0) then
-           if (ind < rem2) then
-             sizej=sizej+1
-             startj=sizej*ind+1
-           else
-             startj=sizej*ind+rem2+1
-           endif
-         else
-           startj = sizej*ind+1
-         endif
-         !print *, DeNo, 'block:', starti, startj, sizei, sizej, tile
-
-         start(1)=starti
-         start(2)=startj
-         count(1)=sizei
-         count(2)=sizej
-
-         if (docenter) then
-           call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
-              farrayPtr=lonPtr, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-           call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
-              farrayPtr=latPtr, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-         endif
-         if (docorner) then
-           call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
-              staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=lonCornerPtr, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-           call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
-              staggerloc=ESMF_STAGGERLOC_CORNER, farrayPtr=latCornerPtr, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-         endif
-         !call ESMF_VMWtime(starttime, rc=localrc)
-         ! Generate glocal edge coordinates and local center coordinates
-
-         if (docenter .and. docorner) then
-            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtr, &
-               latEdge=latCornerPtr, start=start, count=count, &
-               tile=tile, lonCenter=lonPtr, latCenter=latPtr)
-         elseif (docorner) then
-            call ESMF_UtilCreateCSCoordsPar(tileSize, lonEdge=lonCornerPtr, &
-              latEdge=latCornerPtr, start=start, count=count, tile=tile)
-         else
-            call ESMF_UtilCreateCSCoordsPar(tileSize, &
-               start=start, count=count, &
-               tile=tile, lonCenter=lonPtr, latCenter=latPtr)
-         endif
-
-         !call ESMF_VMWtime(endtime, rc=localrc)
-
-         if (docenter) then
-           lonPtr = lonPtr * todeg
-           latPtr = latPtr * todeg
-         endif
-         if (docorner) then
-           lonCornerPtr = lonCornerPtr * todeg
-           latCornerPtr = latCornerPtr * todeg
-         endif
-      !print *, 'Create CS size ', tileSize, 'in', (endtime-starttime)*1000.0, ' msecs'
-      end do
-    endif
-
-    ! Create another distgrid with user specified decomposition
-    if (present(decompflagPTile) .or. present(regDecompPTile) .or. &
-         present(delabelList) .or. present(delayout)) then
-      newdistgrid = ESMF_DistGridCreate(&
-            minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
-            regDecompPTile=regDecompPTile, &
-            decompflagPTile=decompflagPTile, &
-            delabelList = delabelList, &
-            indexflag=ESMF_INDEX_GLOBAL, connectionList=connectionList, &
-            delayout = delayout, &
-            rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-      !Redist the grid with the new distgrid
-      newgrid = ESMF_GridCreate(grid, newdistgrid, name=name, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-      ! Destroy old grid
-      call ESMF_GridDestroy(grid, noGarbage=.true., rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Destroy old distgrid
-      call ESMF_DistGridDestroy(distgrid, noGarbage=.true., rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ESMF_GridCreateCubedSphere = newgrid
-    else
-      ESMF_GridCreateCubedSphere = grid
-    endif
-
-    ! - deallocate connectionList
-    deallocate(connectionList)
     return
 
-end function ESMF_GridCreateCubedSphere
+end subroutine CalculateConnection
+
 
 !-------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -14487,6 +15138,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_GridCreateMosaic = grid
     deallocate(minIndexPDe, maxIndexPDe)
   endif
+
+  ! Get rid of mosaic info
+  call ESMF_MosaicDestroy(mosaic, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return 
+
   return
 
 end function ESMF_GridCreateMosaic
@@ -14828,8 +15485,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -15133,8 +15791,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     This array specifies the dependence of the first
 !     coordinate component on the three index dimensions
@@ -15428,8 +16087,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[coordDep1]}]
 !     The size of the array specifies the number of dimensions of the
 !     first coordinate component array. The values specify which
@@ -15610,6 +16270,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added argument {\tt vm} to support object creation on a
+!               different VM than that of the current context.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -15682,7 +16347,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer,       target,     intent(out), optional :: coordDimCount(:)
       integer,       target,     intent(out), optional :: coordDimMap(:,:)
       integer,                   intent(out), optional :: arbDim
-        integer,                   intent(out), optional :: rank
+      integer,                   intent(out), optional :: rank
       integer,                   intent(out), optional :: arbDimCount
       integer,       target,     intent(out), optional :: gridEdgeLWidth(:)
       integer,       target,     intent(out), optional :: gridEdgeUWidth(:)
@@ -15705,8 +16370,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !\item[grid]
 !   Grid to get the information from.
 !\item[{[coordTypeKind]}]
-!   The type/kind of the grid coordinate data.
-!   If not specified then the type/kind will be 8 byte reals.
+!   The type/kind of the grid coordinate data. All {\em numerical} types
+!   listed under section~\ref{const:typekind} are supported.
 !\item[{[dimCount]}]
 !   DimCount of the Grid object.
 !\item[{[tileCount]}]
@@ -15904,7 +16569,7 @@ end subroutine ESMF_GridGetDefault
 
 !
 ! !Arguments:
-    type(ESMF_Grid),  intent(in)            :: grid
+        type(ESMF_Grid),  intent(in)            :: grid
         integer,          intent(in),  optional :: tileNo
         integer,target,   intent(out), optional :: minIndex(:)
         integer,target,   intent(out)           :: maxIndex(:)
@@ -16017,6 +16682,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added argument {\tt tile}. This new argument allows the user to 
+!               query the tile within which the localDE is contained. 
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -16347,6 +17017,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added arguments {\tt staggerEdgeLWidth}, {\tt staggerEdgeUWidth},
+!               {\tt staggerAlign}, and {\tt staggerLBound}. These new arguments 
+!                allow the user to get width, alignment, and bound information for
+!                the given stagger location. 
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -22300,29 +22977,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !ARGUMENTS:
-       type(ESMF_Grid),       intent(inout)           :: grid
+       type(ESMF_Grid),          intent(inout)           :: grid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-       type(ESMF_DistGrid),   intent(in),   optional  :: distgrid
-       integer,               intent(in),   optional  :: distgridToGridMap(:)
-       integer,               intent(in),   optional  :: distDim(:)
-       type(ESMF_CoordSys_Flag),   intent(in),   optional  :: coordSys
-       type(ESMF_TypeKind_Flag),   intent(in),   optional  :: coordTypeKind
-       integer,               intent(in),   optional  :: coordDimCount(:)
-       integer,               intent(in),   optional  :: coordDimMap(:,:)
-       integer,               intent(in),   optional  :: minIndex(:)
-       integer,               intent(in),   optional  :: maxIndex(:)
-       integer,               intent(in),   optional  :: localArbIndexCount
-       integer,               intent(in),   optional  :: localArbIndex(:,:)
-       integer,               intent(in),   optional  :: gridEdgeLWidth(:)
-       integer,               intent(in),   optional  :: gridEdgeUWidth(:)
-       integer,               intent(in),   optional  :: gridAlign(:)
-       integer,               intent(in),   optional  :: gridMemLBound(:)
-       type(ESMF_Index_Flag), intent(in),   optional  :: indexflag
-       logical,               intent(in),   optional  :: destroyDistgrid
-       logical,               intent(in),   optional  :: destroyDELayout
-       character (len=*),     intent(in),   optional  :: name
-       type(ESMF_VM),         intent(in),   optional  :: vm
-       integer,               intent(out),  optional  :: rc
+       type(ESMF_DistGrid),      intent(in),   optional  :: distgrid
+       integer,                  intent(in),   optional  :: distgridToGridMap(:)
+       integer,                  intent(in),   optional  :: distDim(:)
+       type(ESMF_CoordSys_Flag), intent(in),   optional  :: coordSys
+       type(ESMF_TypeKind_Flag), intent(in),   optional  :: coordTypeKind
+       integer,                  intent(in),   optional  :: coordDimCount(:)
+       integer,                  intent(in),   optional  :: coordDimMap(:,:)
+       integer,                  intent(in),   optional  :: minIndex(:)
+       integer,                  intent(in),   optional  :: maxIndex(:)
+       integer,                  intent(in),   optional  :: localArbIndexCount
+       integer,                  intent(in),   optional  :: localArbIndex(:,:)
+       integer,                  intent(in),   optional  :: gridEdgeLWidth(:)
+       integer,                  intent(in),   optional  :: gridEdgeUWidth(:)
+       integer,                  intent(in),   optional  :: gridAlign(:)
+       integer,                  intent(in),   optional  :: gridMemLBound(:)
+       type(ESMF_Index_Flag),    intent(in),   optional  :: indexflag
+       logical,                  intent(in),   optional  :: destroyDistgrid
+       logical,                  intent(in),   optional  :: destroyDELayout
+       character (len=*),        intent(in),   optional  :: name
+       type(ESMF_VM),            intent(in),   optional  :: vm
+       integer,                  intent(out),  optional  :: rc
 !
 ! !DESCRIPTION:
 !  Set values in a grid in preparation for committing and creating a grid. This method
@@ -22348,8 +23025,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     For a full list of options, please see Section~\ref{const:coordsys}.
 !     If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[minIndex]}]
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
@@ -22728,8 +23406,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[minIndex]}]
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.
@@ -23744,8 +24423,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{grid}]
 !     {\tt ESMF\_Grid} to set information into and then commit.
 ! \item[{[coordTypeKind]}]
-!      The type/kind of the grid coordinate data.
-!      If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[regDecomp]}]
 !      List that has the same number of elements as {\tt maxIndex}.
 !      Each entry is the number of decounts for that dimension.
@@ -24650,8 +25330,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 ! \item[{[coordTypeKind]}]
-!     The type/kind of the grid coordinate data.
-!     If not specified then the type/kind will be 8 byte reals.
+!     The type/kind of the grid coordinate data. All {\em numerical} types
+!     listed under section~\ref{const:typekind} are supported.
+!     If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[minIndex]}]
 !      Tuple to start the index ranges at. If not present, defaults
 !      to /1,1,1,.../.

@@ -45,7 +45,7 @@ using namespace std;
 // ESMF Component service implemented with the ESMCI_WebServComponentSvr class.
 // This class is intended to be used only by a PassThruSvr service which
 // is the intermediary between the client (web service) and the component
-// service.  
+// service.
 //
 //EOPI
 //-------------------------------------------------------------------------
@@ -58,37 +58,37 @@ namespace ESMCI
   public:
 
      // constructor and destructor
-	  ESMCI_WebServCompSvrClient(const char*  host,
+          ESMCI_WebServCompSvrClient(const char*  host,
                                 int          port,
                                 int          clientId);
-	  ~ESMCI_WebServCompSvrClient();
+          ~ESMCI_WebServCompSvrClient();
 
      // methods to setup the connection parameters
-	  void setClientId(int  clientId);
+          void setClientId(int  clientId);
 
      // methods to send client requests to the server
-     int                     		init();
-     int                     		run();
-     int                     		timestep(int  numTimesteps);
-     int                     		final();
-     int                     		state();
-     ESMCI_WebServDataDesc*  		dataDesc();
-     ESMCI_WebServDataContent*	outputData(double      timestamp,
+     int                                init();
+     int                                run();
+     int                                timestep(int  numTimesteps);
+     int                                final();
+     int                                state();
+     ESMCI_WebServDataDesc*             dataDesc();
+     ESMCI_WebServDataContent*  outputData(double      timestamp,
                                             int*        retNumVars,
                                             string**    retVarNames,
                                             int*        retNumLats,
                                             int*        retNumLons);
-     vector<string>          		files();
-     int                     		end();
-     int                     		killServer();
-   
+     vector<string>                     files();
+     int                                end();
+     int                                killServer();
+
 
   private:
 
-	  int								theClientId;			// id of the client 
-     ESMCI_WebServDataDesc*	theOutputDataDesc;	// description of the data
+          int                                                           theClientId;                    // id of the client
+     ESMCI_WebServDataDesc*     theOutputDataDesc;      // description of the data
   };
 
 } // end namespace
 
-#endif 	// ESMCI_WebServCompSvrClient_H
+#endif          // ESMCI_WebServCompSvrClient_H

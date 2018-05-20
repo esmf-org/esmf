@@ -12,7 +12,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the Fortran callable 
+// The code in this file implements the Fortran callable
 // interfaces to the C++ methods.
 //
 //-----------------------------------------------------------------------------
@@ -60,15 +60,15 @@ extern "C" {
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
-// 
+//
 // !ARGUMENTS:
       int *rc){                 // out - return code
-// 
+//
 // !DESCRIPTION:
 //     Finalize C++ version of LogErr.
 //
 //EOP
-// !REQUIREMENTS: 
+// !REQUIREMENTS:
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
@@ -91,19 +91,19 @@ extern "C" {
 //
 // !RETURN VALUE:
 //    none.
-// 
+//
 // !ARGUMENTS:
-                
-      int *rc,        		// in - return code          
-      char *msg,		// out - message associated with code
-      int *msglen,  		// out - length of msg excluding trailing blanks
+
+      int *rc,                  // in - return code
+      char *msg,                // out - message associated with code
+      int *msglen,              // out - length of msg excluding trailing blanks
       ESMCI_FortranStrLenArg msg_l) { // hidden/in - msg length
-// 
+//
 // !DESCRIPTION:
 //     Given an ESMF rc, return a Fortran string containing the error message.
 //
 //EOP
-// !REQUIREMENTS: 
+// !REQUIREMENTS:
 
   const char *msg_local = ESMC_LogGetErrMsg(*rc);
 
@@ -131,19 +131,19 @@ extern "C" {
 //
 // !RETURN VALUE:
 //    none.  return code is passed thru the parameter list
-// 
+//
 // !ARGUMENTS:
       const char *filename,           // in - F90 filename, non-null terminated string
       int *petnum,
       ESMC_LogKind_Flag *logtype,
       int *rc,                        // out - return code
       ESMCI_FortranStrLenArg nlen){   // hidden/in - strlen count for filename
-// 
+//
 // !DESCRIPTION:
 //     Initialize C++ version of LogErr.
 //
 //EOP
-// !REQUIREMENTS: 
+// !REQUIREMENTS:
 
   *rc = ESMC_RC_NOT_IMPL;
 
@@ -180,7 +180,7 @@ extern "C" {
 //     Set values in C++ version of global default LogErr.
 //
 //EOP
-// !REQUIREMENTS: 
+// !REQUIREMENTS:
 
   *rc = ESMC_RC_NOT_IMPL;
   if (ESMC_LogDefault.errorMaskCount > 0)
@@ -214,7 +214,7 @@ extern "C" {
 //     Set values in C++ version of global default LogErr.
 //
 //EOP
-// !REQUIREMENTS: 
+// !REQUIREMENTS:
 
   *rc = ESMC_RC_NOT_IMPL;
   bool trace = *traceflag == ESMF_TRUE;
@@ -235,19 +235,19 @@ extern "C" {
 //
 // !RETURN VALUE:
 //    none.  timestamp is passed thru the parameter list
-// 
+//
 // !RETURN VALUE:
 //  none
 //
 // !ARGUMENTS:
-    int *y,    			// out - year
-    int *mn,			// out - month
-    int *d,			// out - day
-    int *h,			// out - hour
-    int *m,			// out - minute
-    int *s,			// out - second
-    int *ms			// out - microsecond
-      
+    int *y,                             // out - year
+    int *mn,                    // out - month
+    int *d,                     // out - day
+    int *h,                     // out - hour
+    int *m,                     // out - minute
+    int *s,                     // out - second
+    int *ms                     // out - microsecond
+
     )
 // !DESCRIPTION:
 // TimeStamp
@@ -256,7 +256,7 @@ extern "C" {
     time_t tm;
     struct tm ti;
 #if !defined (ESMF_OS_MinGW)
-    struct timeval tv;	
+    struct timeval tv;  
     gettimeofday(&tv,NULL);
     ti=*localtime((const time_t*)&tv.tv_sec);
 #else

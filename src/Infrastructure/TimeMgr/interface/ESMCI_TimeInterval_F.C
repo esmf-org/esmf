@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -80,8 +80,8 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(sD),
                        ESMC_NOT_PRESENT_FILTER(sD_i8),
                        ESMC_NULL_POINTER,
-                       ESMC_NULL_POINTER, 
-                       ESMC_NULL_POINTER, 
+                       ESMC_NULL_POINTER,
+                       ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER );
           if (ESMC_PRESENT(status)) *status = rc;
        }
@@ -281,18 +281,18 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(sD_i8),
                        ESMC_NOT_PRESENT_FILTER(startTime),
                        ESMC_NULL_POINTER,
-                       ESMC_NOT_PRESENT_FILTER(calendar), 
-                       ESMC_NOT_PRESENT_FILTER(calkindflag), 
+                       ESMC_NOT_PRESENT_FILTER(calendar),
+                       ESMC_NOT_PRESENT_FILTER(calkindflag),
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                                           // always present internal arguments
                                               *timeStringLen,
-	                                       tempTimeStringLen,
+                                               tempTimeStringLen,
                                                tempTimeString,
                                               *timeStringLenISOFrac,
-	                                       tempTimeStringLenISOFrac,
+                                               tempTimeStringLenISOFrac,
                                                tempTimeStringISOFrac);
           if (ESMC_PRESENT(status)) *status = rc;
        }
@@ -312,8 +312,8 @@ extern "C" {
                                  ESMC_I4 *sN, ESMC_I8 *sN_i8,
                                  ESMC_I4 *sD, ESMC_I8 *sD_i8,
                                  Time *startTime,
-                                 Calendar **calendar, 
-                                 ESMC_CalKind_Flag *calkindflag, 
+                                 Calendar **calendar,
+                                 ESMC_CalKind_Flag *calkindflag,
                                  Time *startTimeIn,
                                  int *timeStringLen, int *tempTimeStringLen,
                                  char *tempTimeString,
@@ -349,18 +349,18 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(sD_i8),
                        ESMC_NOT_PRESENT_FILTER(startTime),
                        ESMC_NULL_POINTER,
-                       ESMC_NOT_PRESENT_FILTER(calendar), 
-                       ESMC_NOT_PRESENT_FILTER(calkindflag), 
+                       ESMC_NOT_PRESENT_FILTER(calendar),
+                       ESMC_NOT_PRESENT_FILTER(calkindflag),
                        ESMC_NOT_PRESENT_FILTER(startTimeIn),
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                                           // always present internal arguments
                                               *timeStringLen,
-	                                       tempTimeStringLen,
+                                               tempTimeStringLen,
                                                tempTimeString,
                                               *timeStringLenISOFrac,
-	                                       tempTimeStringLenISOFrac,
+                                               tempTimeStringLenISOFrac,
                                                tempTimeStringISOFrac);
           if (ESMC_PRESENT(status)) *status = rc;
        }
@@ -380,9 +380,9 @@ extern "C" {
                                  ESMC_I4 *sN, ESMC_I8 *sN_i8,
                                  ESMC_I4 *sD, ESMC_I8 *sD_i8,
                                  Time *startTime,
-                                 Calendar **calendar, 
-                                 ESMC_CalKind_Flag *calkindflag, 
-                                 Calendar **calendarIn, 
+                                 Calendar **calendar,
+                                 ESMC_CalKind_Flag *calkindflag,
+                                 Calendar **calendarIn,
                                  int *timeStringLen, int *tempTimeStringLen,
                                  char *tempTimeString,
                                  int *timeStringLenISOFrac,
@@ -417,18 +417,18 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(sD_i8),
                        ESMC_NOT_PRESENT_FILTER(startTime),
                        ESMC_NULL_POINTER,
-                       ESMC_NOT_PRESENT_FILTER(calendar), 
-                       ESMC_NOT_PRESENT_FILTER(calkindflag), 
+                       ESMC_NOT_PRESENT_FILTER(calendar),
+                       ESMC_NOT_PRESENT_FILTER(calkindflag),
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                        ESMC_NOT_PRESENT_FILTER(calendarIn),
                        ESMC_NULL_POINTER,
                                           // always present internal arguments
                                               *timeStringLen,
-	                                       tempTimeStringLen,
+                                               tempTimeStringLen,
                                                tempTimeString,
                                               *timeStringLenISOFrac,
-	                                       tempTimeStringLenISOFrac,
+                                               tempTimeStringLenISOFrac,
                                                tempTimeStringISOFrac);
           if (ESMC_PRESENT(status)) *status = rc;
        }
@@ -448,9 +448,9 @@ extern "C" {
                                  ESMC_I4 *sN, ESMC_I8 *sN_i8,
                                  ESMC_I4 *sD, ESMC_I8 *sD_i8,
                                  Time *startTime,
-                                 Calendar **calendar, 
-                                 ESMC_CalKind_Flag *calkindflag, 
-                                 ESMC_CalKind_Flag *calkindflagIn, 
+                                 Calendar **calendar,
+                                 ESMC_CalKind_Flag *calkindflag,
+                                 ESMC_CalKind_Flag *calkindflagIn,
                                  int *timeStringLen, int *tempTimeStringLen,
                                  char *tempTimeString,
                                  int *timeStringLenISOFrac,
@@ -485,18 +485,18 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(sD_i8),
                        ESMC_NOT_PRESENT_FILTER(startTime),
                        ESMC_NULL_POINTER,
-                       ESMC_NOT_PRESENT_FILTER(calendar), 
-                       ESMC_NOT_PRESENT_FILTER(calkindflag), 
+                       ESMC_NOT_PRESENT_FILTER(calendar),
+                       ESMC_NOT_PRESENT_FILTER(calkindflag),
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                        ESMC_NULL_POINTER,
                        ESMC_NOT_PRESENT_FILTER(calkindflagIn),
                                           // always present internal arguments
                                               *timeStringLen,
-	                                       tempTimeStringLen,
+                                               tempTimeStringLen,
                                                tempTimeString,
                                               *timeStringLenISOFrac,
-	                                       tempTimeStringLenISOFrac,
+                                               tempTimeStringLenISOFrac,
                                                tempTimeStringISOFrac);
           if (ESMC_PRESENT(status)) *status = rc;
        }
@@ -532,7 +532,7 @@ extern "C" {
        void FTN_X(c_esmc_timeintervalfquot)(TimeInterval *timeinterval1,
                                           TimeInterval *timeinterval2,
                                           Fraction *timeintervalFQuot) {
-           *timeintervalFQuot = 
+           *timeintervalFQuot =
                         timeinterval1->TimeInterval::div(*timeinterval2);
        }
 

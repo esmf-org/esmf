@@ -92,7 +92,8 @@ sub run_benchmark {
         } else {
                 $BM_ave = 0;
         }
-	if ( $BM_ave >= $threshold ) {
+	# Compare the test elapsed time to threshold
+	if ( $ET_ave >= $threshold ) {
 		$th = 0;
 	} else {
 		$th = 1;  

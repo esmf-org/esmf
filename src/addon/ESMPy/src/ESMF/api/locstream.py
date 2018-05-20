@@ -16,16 +16,16 @@ from ESMF.util.slicing import get_formatted_slice
 
 class LocStream(dict):
     """
-    The ``LocStream`` class is a Python wrapper object for the ESMF LocStream.
-    ``LocStream`` is a derived type of a Python dictionary.
-
+    The :class:`~ESMF.api.locstream.LocStream` class is a Python wrapper object for the ESMF LocStream.
+    :class:`~ESMF.api.locstream.LocStream` is a derived type of a Python dictionary.
+    
     The individual values of all key arrays are referenced to those of the
     underlying Fortran ESMF object.
-
-    A location stream (``LocStream``) is used to represent the locations of a
+    
+    A :class:`~ESMF.api.locstream.LocStream` is used to represent the locations of a
     set of data points. The values of the data points are stored within a
-    :class:`~ESMF.api.field.Field` created using the ``LocStream``.
-
+    :class:`~ESMF.api.field.Field` created using the :class:`~ESMF.api.locstream.LocStream`.
+    
     In the data assimilation world, location streams can be thought of as a set
     of observations. Their locations are generally described using Cartesian
     ``(x, y, z)``, or ``(lat, lon, height)`` coordinates. There is no assumption
@@ -33,30 +33,34 @@ class LocStream(dict):
     general, the locations for each data point are represented using a construct
     called keys. Keys can include other descriptors besides location, including
     a second set of coordinates.
-
-    For more information about the ESMF ``LocStream`` class, please see the
-    `ESMF LocStream documentation <http://www.earthsystemmodeling.org/esmf_releases/public/last/ESMF_refdoc/node5.html#SECTION05090000000000000000>`_.
-
-    ``LocStream`` follows standard dictionary syntax. For example:
-
+    
+    For more information about the ESMF LocStream class, please see the
+    `ESMF LocStream documentation <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node5.html#SECTION05090000000000000000>`_.
+    
+    :class:`~ESMF.api.locstream.LocStream` follows standard dictionary syntax. For example:
+    
     >>> locstream["ESMF:X"] = [1, 2, 3]
     >>> x = locstream["ESMF:X"]
     >>> locstream["ESMF:Y"] = [1, 2, 3]
     >>> y = locstream["ESMF:Y"]
     >>> locstream["ESMF:Mask"] = [0, 1, 0]
     >>> mask = locstream["ESMF:Mask"]
-
-    .. note:: Setting keys of lists of mixed types can result in errors due to
-    type mismatches from the ESMF library.
-
-    .. note:: Mask must be of type :attr:`~ESMF.api.constants.TypeKind.I4`,
-    and coordinates must by of type :attr:`~ESMF.api.constants.TypeKind.R8`.
-
-    For ESMF to be able to recognize coordinates specified in a LocStream key
+    
+    .. note::
+        
+        Setting keys of lists of mixed types can result in errors due to
+        type mismatches from the ESMF library.
+    
+    .. note::
+    
+        Mask must be of type :attr:`~ESMF.api.constants.TypeKind.I4`,
+        and coordinates must by of type :attr:`~ESMF.api.constants.TypeKind.R8`.
+    
+    For ESMF to be able to recognize coordinates specified in a :class:`~ESMF.api.locstream.LocStream` key
     they need to be named with the appropriate identifiers. The particular
     identifiers depend on the coordinate system (i.e. ``coord_sys`` argument)
-    used to create the ``LocStream``.
-
+    used to create the :class:`~ESMF.api.locstream.LocStream`.
+    
     The valid values are:
 
     ============================================  ===========  ===========  ===========

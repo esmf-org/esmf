@@ -1728,9 +1728,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
-!   Execute a precomputed FieldBundle halo operation for the Fields in FieldBundle.
-!   See {\tt ESMF\_FieldBundleStore()} on how to compute routehandle.
+!   Execute a precomputed halo operation for the Fields in {\tt fieldbundle}.
+!   The FieldBundle must match the respective FieldBundle used during 
+!   {\tt ESMF\_FieldBundleHaloStore()} in {\em type}, {\em kind}, and
+!   memory layout of the {\em gridded} dimensions. However, the size, number, 
+!   and index order of {\em ungridded} dimensions may be different. See section
+!   \ref{RH:Reusability} for a more detailed discussion of RouteHandle 
+!   reusability.
 !   \end{sloppypar}
+!
+!   See {\tt ESMF\_FieldBundleHaloStore()} on how to precompute 
+!   {\tt routehandle}.
 !
 !   \begin{description}
 !   \item [fieldbundle]
@@ -1897,18 +1905,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   remain unchanged under halo.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_FieldBundleHalo()} on any FieldBundle that is weakly congruent
-!   and typekind conform to {\tt fieldbundle}. Congruency for FieldBundles is
-!   given by the congruency of its constituents.
-!   Congruent Fields possess matching DistGrids and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Fields for
-!   every DE. For weakly congruent
-!   Fields the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Fields that differ in the number of elements in the left most
-!   undistributed dimensions.
-!  
+!   {\tt ESMF\_FieldBundleHalo()} on any pair of FieldBundles that matches 
+!   {\tt srcFieldBundle} and {\tt dstFieldBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em gridded} dimensions. However, the size, 
+!   number, and index order of {\em ungridded} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
+!
 !   This call is {\em collective} across the current VM.  
 !
 !   \begin{description}
@@ -2305,18 +2308,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
-!   Execute a precomputed FieldBundle redistribution from {\tt srcFieldBundle} to
-!   {\tt dstFieldBundle}. Both {\tt srcFieldBundle} and {\tt dstFieldBundle} must be
-!   weakly congruent and typekind conform with the respective FieldBundles used during 
-!   {\tt ESMF\_FieldBundleRedistStore()}. Congruency for FieldBundles is
-!   given by the congruency of its constituents.
-!   Congruent Fields possess matching DistGrids and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Fields for
-!   every DE. For weakly congruent Fields the sizes of the 
-!   undistributed dimensions, that vary faster with memory than the first distributed 
-!   dimension, are permitted to be different. This means that the same {\tt routehandle} 
-!   can be applied to a large class of similar Fields that differ in the number of 
-!   elements in the left most undistributed dimensions. 
+!   Execute a precomputed redistribution from {\tt srcFieldBundle}
+!   to {\tt dstFieldBundle}. 
+!   Both {\tt srcFieldBundle} and {\tt dstFieldBundle} must match the
+!   respective FieldBundles used during {\tt ESMF\_FieldBundleRedistStore()}
+!   in {\em type}, {\em kind}, and memory layout of the {\em gridded}
+!   dimensions. However, the size, number, 
+!   and index order of {\em ungridded} dimensions may be different. See section
+!   \ref{RH:Reusability} for a more detailed discussion of RouteHandle 
+!   reusability.
 !   \end{sloppypar}
 !
 !   The {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments are optional in support of
@@ -2537,18 +2537,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! It is erroneous to specify the identical FieldBundle object for srcFieldBundle 
 ! and dstFieldBundle arguments. 
 !  
-! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-! {\tt ESMF\_FieldBundleRedist()} on any pair of FieldBundles that are congruent and typekind 
-! conform with the srcFieldBundle, dstFieldBundle pair. 
-! Congruency for FieldBundles is given by the congruency of its constituents.
-! Congruent Fields possess matching DistGrids and the shape of the local
-! array tiles, i.e. the memory allocation, matches between the Fields for
-! every DE. For weakly congruent Fields the sizes of the 
-! undistributed dimensions, that vary faster with memory than the first distributed 
-! dimension, are permitted to be different. This means that the same {\tt routehandle} 
-! can be applied to a large class of similar Fields that differ in the number of 
-! elements in the left most undistributed dimensions. 
-
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_FieldBundleRedist()} on any pair of FieldBundles that matches 
+!   {\tt srcFieldBundle} and {\tt dstFieldBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em gridded} dimensions. However, the size, 
+!   number, and index order of {\em ungridded} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
 !
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -2954,17 +2949,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! It is erroneous to specify the identical FieldBundle object for srcFieldBundle and dstFieldBundle 
 ! arguments. 
 !  
-! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-! {\tt ESMF\_FieldBundleRedist()} on any pair of Fields that are congruent and typekind 
-! conform with the srcFieldBundle, dstFieldBundle pair. 
-! Congruent Fields possess matching DistGrids and the shape of the local
-! array tiles, i.e. the memory allocation, matches between the Fields for
-! every DE. For weakly congruent Fields the sizes of the 
-!   undistributed dimensions, that vary faster with memory than the first distributed 
-!   dimension, are permitted to be different. This means that the same {\tt routehandle} 
-!   can be applied to a large class of similar Fields that differ in the number of 
-!   elements in the left most undistributed dimensions. 
-
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_FieldBundleRedist()} on any pair of FieldBundles that matches 
+!   {\tt srcFieldBundle} and {\tt dstFieldBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em gridded} dimensions. However, the size, 
+!   number, and index order of {\em ungridded} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
 !  
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -3119,18 +3110,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   \begin{sloppypar}
-!   Execute a precomputed FieldBundle regrid from {\tt srcFieldBundle} to
-!   {\tt dstFieldBundle}. Both {\tt srcFieldBundle} and {\tt dstFieldBundle} must be
-!   congruent and typekind conform with the respective FieldBundles used during 
-!   {\tt ESMF\_FieldBundleRegridStore()}. Congruency for FieldBundles is
-!   given by the congruency of its constituents.
-!   Congruent Fields possess matching DistGrids and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Fields for
-!   every DE. For weakly congruent Fields the sizes of the 
-!   undistributed dimensions, that vary faster with memory than the first distributed 
-!   dimension, are permitted to be different. This means that the same {\tt routehandle} 
-!   can be applied to a large class of similar Fields that differ in the number of 
-!   elements in the left most undistributed dimensions. 
+!   Execute a precomputed regrid from {\tt srcFieldBundle}
+!   to {\tt dstFieldBundle}. 
+!   Both {\tt srcFieldBundle} and {\tt dstFieldBundle} must match the
+!   respective FieldBundles used during {\tt ESMF\_FieldBundleRedistStore()}
+!   in {\em type}, {\em kind}, and memory layout of the {\em gridded}
+!   dimensions. However, the size, number, 
+!   and index order of {\em ungridded} dimensions may be different. See section
+!   \ref{RH:Reusability} for a more detailed discussion of RouteHandle 
+!   reusability.
 !   \end{sloppypar}
 !
 !   The {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments are optional in support of
@@ -3280,9 +3268,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \label{api:esmf_fieldbundleregridstore}
 ! !INTERFACE:
   subroutine ESMF_FieldBundleRegridStore(srcFieldBundle, dstFieldBundle, &
-    srcMaskValues, dstMaskValues, regridmethod, polemethod, regridPoleNPnts, &
-    lineType, normType, unmappedaction,  ignoreDegenerate, srcTermProcessing, &
-    pipelineDepth, routehandle, rc)
+       srcMaskValues, dstMaskValues, regridmethod, polemethod, regridPoleNPnts, &
+       lineType, normType, extrapMethod, extrapNumSrcPnts, extrapDistExponent, &
+       unmappedaction,  ignoreDegenerate, srcTermProcessing, &
+       pipelineDepth, routehandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_FieldBundle),        intent(in)              :: srcFieldBundle
@@ -3294,6 +3283,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in),    optional :: regridPoleNPnts
     type(ESMF_LineType_Flag),      intent(in),    optional :: lineType
     type(ESMF_NormType_Flag),      intent(in),    optional :: normType
+    type(ESMF_ExtrapMethod_Flag),   intent(in),   optional :: extrapMethod
+    integer,                        intent(in),   optional :: extrapNumSrcPnts
+    real,                           intent(in),   optional :: extrapDistExponent
     type(ESMF_UnmappedAction_Flag),intent(in),    optional :: unmappedaction
     logical,                       intent(in),    optional :: ignoreDegenerate 
     integer,                       intent(inout), optional :: srcTermProcessing
@@ -3315,32 +3307,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !              of distances and the shape of cells during regrid weight calculation on 
 !              a sphere. The argument {\tt normType} allows the user to 
 !              control the type of normalization done during conservative weight generation. 
-! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
 !              Added argument {\tt pipelineDepth}.
 !              The new arguments provide access to the tuning parameters
 !              affecting the performance and bit-for-bit behavior when applying
 !              the regridding weights.
+!
+!              Added arguments {\tt extrapMethod}, {\tt extrapNumSrcPnts}, and
+!              {\tt extrapDistExponent}. These three new extrapolation arguments allow the 
+!              user to extrapolate destination points not mapped by the regrid method. 
+!              {\tt extrapMethod} allows the user to choose the extrapolation method.
+!              {\tt extrapNumSrcPnts} and {\tt extrapDistExponent} are parameters that
+!              allow the user to tune the behavior of the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} 
+!              method.
+! 
 ! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
 !   Store a FieldBundle regrid operation over the data in {\tt srcFieldBundle} and
 !   {\tt dstFieldBundle} pair. 
-!
+!  
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_FieldBundleRegrid()} on any FieldBundle pairs that are weakly congruent
-!   and typekind conform to the FieldBundle pair used here.
-!   Congruency for FieldBundles is
-!   given by the congruency of its constituents.
-!   Congruent Fields possess matching DistGrids, and the shape of the local
-!   array tiles matches between the Fields for every DE. For weakly congruent
-!   Fields the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Fields that differ in the number of elements in the left most
-!   undistributed dimensions.
-!   Note {\tt ESMF\_FieldBundleRegridStore()} assumes the coordinates used in the Grids 
-!   upon which the FieldBundles are built are in degrees.  
+!   {\tt ESMF\_FieldBundleRegrid()} on any pair of FieldBundles that matches 
+!   {\tt srcFieldBundle} and {\tt dstFieldBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em gridded} dimensions. However, the size, 
+!   number, and index order of {\em ungridded} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
 !  
 !   This call is {\em collective} across the current VM.  
 !
@@ -3389,6 +3383,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE}. Please see 
 !           Section~\ref{opt:normType} for a 
 !           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!  \item [{[extrapMethod]}]
+!           The type of extrapolation. Please see Section~\ref{opt:extrapmethod} 
+!           for a list of valid options. If not specified, defaults to 
+!           {\tt ESMF\_EXTRAPMETHOD\_NONE}.
+!  \item [{[extrapNumSrcPnts]}] 
+!           The number of source points to use for the extrapolation methods that use more than one source point 
+!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}). If not specified, defaults to 8.
+!  \item [{[extrapDistExponent]}] 
+!           The exponent to raise the distance to when calculating weights for 
+!           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
+!           of more distant points. If not specified, defaults to 2.0.
 !  \item [{[unmappedaction]}]
 !    Specifies what should happen if there are destination points that
 !    can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
@@ -3738,6 +3743,10 @@ call ESMF_LogWrite("must precompute full regridding!", &
             srcMaskValues=srcMaskValues, dstMaskValues=dstMaskValues, &
             regridmethod=regridmethod, &
             polemethod=polemethod, regridPoleNPnts=regridPoleNPnts, &
+            lineType=lineType, normType=normType, &
+            extrapMethod=extrapMethod, &
+            extrapNumSrcPnts=extrapNumSrcPnts, &
+            extrapDistExponent=extrapDistExponent, &
             unmappedaction=unmappedaction, &
             srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
             routehandle=rhh, &
@@ -4404,16 +4413,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{itemize}
 !
 ! !DESCRIPTION:
-!   Execute a precomputed FieldBundle sparse matrix multiplication from {\tt srcFieldBundle} to
-!   {\tt dstFieldBundle}. Both {\tt srcFieldBundle} and {\tt dstFieldBundle} must be
-!   congruent and typekind conform with the respective FieldBundles used during 
-!   {\tt ESMF\_FieldBundleSMMStore()}. Congruent FieldBundles possess
-!   matching DistGrids and the shape of the local array tiles matches between
-!   the FieldBundles for every DE. For weakly congruent Fields the sizes of the 
-!   undistributed dimensions, that vary faster with memory than the first distributed 
-!   dimension, are permitted to be different. This means that the same {\tt routehandle} 
-!   can be applied to a large class of similar Fields that differ in the number of 
-!   elements in the left most undistributed dimensions. 
+!   Execute a precomputed sparse matrix multiplication from {\tt srcFieldBundle}
+!   to {\tt dstFieldBundle}.
+!   Both {\tt srcFieldBundle} and {\tt dstFieldBundle} must match the
+!   respective FieldBundles used during {\tt ESMF\_FieldBundleRedistStore()}
+!   in {\em type}, {\em kind}, and memory layout of the {\em gridded}
+!   dimensions. However, the size, number, 
+!   and index order of {\em ungridded} dimensions may be different. See section
+!   \ref{RH:Reusability} for a more detailed discussion of RouteHandle 
+!   reusability.
 !
 !   The {\tt srcFieldBundle} and {\tt dstFieldBundle} arguments are optional in support of
 !   the situation where {\tt srcFieldBundle} and/or {\tt dstFieldBundle} are not defined on
@@ -4645,7 +4653,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise
 !              reproducibility.
@@ -4681,16 +4689,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !  
 ! It is erroneous to specify the identical FieldBundle object for srcFieldBundle 
 ! and dstFieldBundle arguments. 
-!
-! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-! {\tt ESMF\_FieldBundleSMM()} on any pair of FieldBundles that are congruent and typekind 
-! conform with the srcFieldBundle, dstFieldBundle pair. Congruent FieldBundles possess matching 
-! DistGrids and the shape of the local array tiles matches between the FieldBundles for 
-! every DE. For weakly congruent Fields the sizes of the 
-!   undistributed dimensions, that vary faster with memory than the first distributed 
-!   dimension, are permitted to be different. This means that the same {\tt routehandle} 
-!   can be applied to a large class of similar Fields that differ in the number of 
-!   elements in the left most undistributed dimensions. 
+!  
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_FieldBundleSMM()} on any pair of FieldBundles that matches 
+!   {\tt srcFieldBundle} and {\tt dstFieldBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em gridded} dimensions. However, the size, 
+!   number, and index order of {\em ungridded} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
 !  
 ! This method is overloaded for:\newline
 ! {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -5106,7 +5112,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise
 !              reproducibility.
@@ -5142,15 +5148,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! It is erroneous to specify the identical FieldBundle object for srcFieldBundle and dstFieldBundle 
 ! arguments. 
 !  
-! The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-! {\tt ESMF\_FieldBundleSMM()} on any pair of FieldBundles that are congruent and typekind 
-! conform with the srcFieldBundle, dstFieldBundle pair. Congruent FieldBundles possess matching 
-! DistGrids and the shape of the local array tiles matches between the FieldBundles for 
-! every DE. For weakly congruent Fields the sizes of the 
-!   undistributed dimensions, that vary faster with memory than the first distributed 
-!   dimension, are permitted to be different. This means that the same {\tt routehandle} 
-!   can be applied to a large class of similar Fields that differ in the number of 
-!   elements in the left most undistributed dimensions. 
+!   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
+!   {\tt ESMF\_FieldBundleSMM()} on any pair of FieldBundles that matches 
+!   {\tt srcFieldBundle} and {\tt dstFieldBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em gridded} dimensions. However, the size, 
+!   number, and index order of {\em ungridded} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
 !  
 ! \begin{sloppypar}
 ! This method is overloaded for
@@ -5429,9 +5433,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   when the ESMF library is built. Please see the section on 
 !   Data I/O,~\ref{io:dataio}.
 !
+!   When {\tt convention} and {\tt purpose} arguments are specified, NetCDF dimension
+!   labels and variable attributes are written from each Field in the FieldBundle
+!   from the corresponding Attribute package. Additionally, Attributes may be
+!   set on the FieldBundle level under the same Attribute package.  This allows
+!   the specification of global attributes within the file.
+!   As with individual Fields, the value associated with each name may be either
+!   a scalar character string, or a scalar or array of type integer, real, or
+!   double precision.
+!
 !   Limitations:
 !   \begin{itemize}
-!     \item Only single tile Arrays within Fields are supported.
+!     \item Only single tile Fields are supported.
 !     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
 !   \end{itemize}
 !
@@ -5442,14 +5455,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords for t
 !   \item[fileName]
 !     The name of the output file to which field bundle data is written.
 !   \item[{[convention]}]
-!     Specifies an Attribute package associated with the Array, used to create NetCDF
-!     attributes for the variable in the file.  When this argument is present,
-!     the [{[purpose]}] argument must also be present.  Use this argument only with a NetCDF
+!     Specifies an Attribute package associated with the FieldBundle, and the
+!     contained Fields, used to create NetCDF dimension labels and attributes
+!     in the file.  When this argument is present, the {\tt purpose} 
+!     argument must also be present.  Use this argument only with a NetCDF
 !     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[purpose]}]
-!     Specifies an Attribute package associated with the Array, used to create NetCDF
-!     attributes for the variable in the file.  When this argument is present,
-!     the [{[convention]}] argument must also be present.  Use this argument only with a NetCDF
+!     Specifies an Attribute package associated with the FieldBundle, and the
+!     contained Fields, used to create NetCDF dimension labels and attributes
+!     in the file.  When this argument is present, the {\tt convention} 
+!     argument must also be present.  Use this argument only with a NetCDF
 !     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[singleFile]}]
 !     A logical flag, the default is .true., i.e., all fields in the bundle 
@@ -5841,7 +5856,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
 !           updated by this routine and return pointing to the next
 !           unread byte in the buffer.
 !     \item[{[attreconflag]}]
-!           Flag to tell if Attribute serialization is to be done
+!           Flag to tell if Attribute deserialization is to be done
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

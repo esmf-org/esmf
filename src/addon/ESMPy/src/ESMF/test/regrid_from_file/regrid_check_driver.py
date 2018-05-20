@@ -26,7 +26,7 @@ from ESMF.test.regrid_from_file.read_test_cases_from_control_file import read_co
 # read from a control file.    Retrieve data files for each test from a remote
 # server if they do not exist locally.
 # Start up ESMF.
-esmp = ESMF.Manager(debug=True)
+mg = ESMF.Manager(debug=True)
 
 parallel = False
 if ESMF.pet_count() > 1:
@@ -44,7 +44,7 @@ if (ESMF.local_pet() == 0):
 # For each test case line from the control file parse the line and call
 # the test subroutine.
 for ctr, test_case in enumerate(test_cases, start=1):
-    print('Running {} of {} regrid_from_file test cases...'.format(ctr, len(test_cases)))
+    print('Running {0} of {1} regrid_from_file test cases...'.format(ctr, len(test_cases)))
     (src_fname, dst_fname, regrid_method, options, 
      itrp_mean_err, itrp_max_err, csrv_err) = test_case
     test_str = 'Regrid %s to %s as %s with %s itrp_mean_err=%f, itrp_max_err=%f, and csrv_err=%f' % (src_fname, dst_fname, regrid_method, options, itrp_mean_err, itrp_max_err, csrv_err)
@@ -53,10 +53,8 @@ for ctr, test_case in enumerate(test_cases, start=1):
     dst_fname_full = os.path.join(DATA_SUBDIR, dst_fname)
 
     if parallel:
-        # use mpi4py to set a barrier to wait for files to be downloaded
-        from mpi4py import MPI
-        comm = MPI.COMM_WORLD
-        comm.Barrier()
+        # set a barrier to wait for files to be downloaded
+        mg.barrier()
 
     # run the data file retrieval and regridding through try/except
     correct = False

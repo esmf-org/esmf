@@ -32,11 +32,11 @@
 // Prototypes of the C->Fortran interface functions.
 extern "C" {
   void FTN_X(f_esmf_gridspec_inq)(const char *filename, int *ndims, int *grid_dims, int *rc,
-				  ESMCI_FortranStrLenArg len_filename);
+                                  ESMCI_FortranStrLenArg len_filename);
 }
 //-------------------------------------------------------------------------
 
-using namespace std; 
+using namespace std;
 
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -77,7 +77,7 @@ namespace ESMCI
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::IO_Gridspec() native constructor"
-    
+
  : ESMC_Base(-1) {  // invoke ESMC_Base constructor with id=(-1); prevents
                     // Base id increment for non-distributed,
                     // non-reconcilable objects such as IO.
@@ -103,9 +103,9 @@ namespace ESMCI
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
-    
+
   } // end destruct()
-  
+
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  IO_Gridspec::inq -- Reads rank and dimensions from a GRIDSPEC NetCDF file.
@@ -127,10 +127,10 @@ namespace ESMCI
 //      Reads rank and dimensions from a GRIDSPEC NetCDF file.
 //
 //EOP
-  
+
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI_IO_Gridspec::inq()"
-    
+
     FTN_X(f_esmf_gridspec_inq)(filename, ndims, grid_dims, rc, strlen(filename));
   }
 }  // end namespace ESMCI

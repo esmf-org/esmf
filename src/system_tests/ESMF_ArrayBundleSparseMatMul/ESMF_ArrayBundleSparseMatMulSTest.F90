@@ -94,7 +94,7 @@ program ESMF_ArrayBundleSparseMMSTest
 !
   ! Initialize framework and get back default global VM
   call ESMF_Initialize(vm=vm, &
-		defaultlogfilename="ArrayBundleSparseMatMulSTest.Log", &
+                defaultlogfilename="ArrayBundleSparseMatMulSTest.Log", &
                 logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &

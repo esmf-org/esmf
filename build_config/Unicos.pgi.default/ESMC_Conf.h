@@ -27,7 +27,7 @@ Licensed under the University of Illinois-NCSA License.
 #if (ESMF_PGIVERSION_MAJOR < 12)
 typedef int ESMCI_FortranStrLenArg;
 #else
-#include <stdlib.h>
+#include <cstddef>
 typedef size_t ESMCI_FortranStrLenArg;
 #endif
 #endif
@@ -48,7 +48,7 @@ extern char pghpf_0_[];
 extern char pghpf_0c_;
 #define ESMC_PRESENT(arg) ( ! ( ( (char*)(arg) >=  pghpf_0_ && \
                                   (char*)(arg) <= &pghpf_0_[12] ) || \
-		                  (char*)(arg) == &pghpf_0c_ ) )
+                                  (char*)(arg) == &pghpf_0c_ ) )
 #endif
 
 #ifdef S32
@@ -56,6 +56,16 @@ extern char pghpf_0c_;
 #endif
 #ifdef S64
 #define ESMC_POINTER_SIZE 8
+#endif
+
+#if 0
+PGI before 17.9 could not handle the dynamic masking interfaces for different
+typekinds
+#endif
+#if defined (ESMF_PGIVERSION_MAJOR)
+#if (ESMF_PGIVERSION_MAJOR < 17) || ((ESMF_PGIVERSION_MAJOR == 17) && (ESMF_PGIVERSION_MINOR < 9))
+#define ESMF_NO_DYNMASKOVERLOAD
+#endif
 #endif
 
 #endif

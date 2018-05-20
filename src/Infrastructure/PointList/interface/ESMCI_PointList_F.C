@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2014, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2014, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -54,7 +54,7 @@ extern "C" {
       // call into C++
       ESMCI::GridToPointList(**gptr, *staggerLoc, maskValuesArg, plptr, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-					ESMC_NOT_PRESENT_FILTER(rc))) throw localrc;
+                                        ESMC_NOT_PRESENT_FILTER(rc))) throw localrc;
     } catch (std::exception &x) {
       // catch Grid exception return code
       if (x.what()) {
@@ -92,7 +92,7 @@ extern "C" {
       (*mptr)->MeshCap_to_PointList(*meshLoc, maskValuesArg, plptr, &localrc);
       //      *plptr = (*mptr)->MeshToPointList(*meshLoc, maskValuesArg, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-					ESMC_NOT_PRESENT_FILTER(rc))) throw localrc;
+                                        ESMC_NOT_PRESENT_FILTER(rc))) throw localrc;
 
     } catch (std::exception &x) {
       // catch Mesh exception return code
@@ -119,24 +119,24 @@ extern "C" {
   }
 
 
-  void FTN_X(c_esmc_pointlistcreatefrminput)(int *maxpts, int *numdims, 
-					     ESMCI::PointList **plptr, 
-					     int *rc){
+  void FTN_X(c_esmc_pointlistcreatefrminput)(int *maxpts, int *numdims,
+                                             ESMCI::PointList **plptr,
+                                             int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_pointlistcreatefrminput()"
 
     try {
       if (*maxpts < 0) {
-	int localrc;
-	if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-	  "- size of Point List object must be greater than zero",
-	  ESMC_CONTEXT, &localrc)) throw localrc;
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          "- size of Point List object must be greater than zero",
+          ESMC_CONTEXT, &localrc)) throw localrc;
       }
       if (*numdims < 1) {
-	int localrc;
-	if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-	  "- number of dimensions for points in Point List must be greater than zero",
-	  ESMC_CONTEXT, &localrc)) throw localrc;
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+          "- number of dimensions for points in Point List must be greater than zero",
+          ESMC_CONTEXT, &localrc)) throw localrc;
       }
 
       int localrc = ESMC_RC_NOT_IMPL;
@@ -145,11 +145,11 @@ extern "C" {
     } catch(std::exception &x) {
       // catch Mesh exception return code
       if (x.what()) {
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				      x.what(), ESMC_CONTEXT,rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                      x.what(), ESMC_CONTEXT,rc);
       } else {
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				      "UNKNOWN", ESMC_CONTEXT,rc);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                      "UNKNOWN", ESMC_CONTEXT,rc);
       }
 
       return;
@@ -161,7 +161,7 @@ extern "C" {
 
     } catch(...){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-				    "- Caught unknown exception", ESMC_CONTEXT, rc);
+                                    "- Caught unknown exception", ESMC_CONTEXT, rc);
       return;
     }
     // return successfully
@@ -184,7 +184,7 @@ extern "C" {
       }
       return;
     } catch(int localrc) {
-      // catch standard ESMF return code                                                          
+      // catch standard ESMF return code
       ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,rc);
       return;
     } catch(...){
@@ -272,7 +272,7 @@ extern "C" {
       // call into C++
       localrc = (*ptr)->add(*id,_coords);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-					ESMC_NOT_PRESENT_FILTER(rc))) throw localrc;
+                                        ESMC_NOT_PRESENT_FILTER(rc))) throw localrc;
     } catch (std::exception &x) {
       // catch Grid exception return code
       if (x.what()) {
@@ -352,7 +352,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_pointlistsph2cartcoord)(ESMC_CoordSys_Flag *coordSys, int *in_dim, 
+  void FTN_X(c_esmc_pointlistsph2cartcoord)(ESMC_CoordSys_Flag *coordSys, int *in_dim,
                                            double *in_coord, double *cart_coord, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_pointlistsph2cartcoord()"
@@ -371,7 +371,7 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_pointlistcalccartdim)(ESMC_CoordSys_Flag *coordSys, int *in_dim, 
+  void FTN_X(c_esmc_pointlistcalccartdim)(ESMC_CoordSys_Flag *coordSys, int *in_dim,
                                           int *cart_dim, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_pointlistcalccartdim()"

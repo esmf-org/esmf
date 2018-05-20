@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -47,21 +47,24 @@
 
 using namespace ESMCI;
 
- 
+
 void ESMCI_regrid_create(Mesh **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
-			 Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
-			 int *regridMethod, 
-			 int *map_type,
-			 int *norm_type,
-			 int *regridPoleType, int *regridPoleNPnts,  
-			 int *regridScheme, 
-			 int *unmappedaction, int *_ignoreDegenerate,
-			 int *srcTermProcessing, int *pipelineDepth, 
-			 ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-			 int *nentries, ESMCI::TempWeights **tweights,
-			 int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
+                         Mesh **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
+                         int *regridMethod,
+                         int *map_type,
+                         int *norm_type,
+                         int *regridPoleType, int *regridPoleNPnts,
+                         int *regridScheme,
+                         int *extrapMethod,
+                         int *extrapNumSrcPnts,
+                         ESMC_R8 *extrapDistExponent,
+                         int *unmappedaction, int *_ignoreDegenerate,
+                         int *srcTermProcessing, int *pipelineDepth,
+                         ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
+                         int *nentries, ESMCI::TempWeights **tweights,
+                         int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
                          int *has_statusArray, ESMCI::Array **statusArray,
-			 int*rc);
+                         int*rc);
 
 void ESMCI_regrid_getiwts(Grid **gridpp,
                    Mesh **meshpp, ESMCI::Array **arraypp, int *staggerLoc,
@@ -76,7 +79,7 @@ void ESMCI_regrid_getfrac(Grid **gridpp,
                      int *rc);
 
 
-void ESMCI_meshsetfraction(Mesh **meshpp, double * fraction, 
+void ESMCI_meshsetfraction(Mesh **meshpp, double * fraction,
                            int*rc);
 
 void ESMCI_xgrid_getfrac(Grid **gridpp,

@@ -394,6 +394,9 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                             int *regridPoleNPnts,
                             enum ESMC_LineType_Flag *lineType,
                             enum ESMC_NormType_Flag *normType,
+                            enum ESMC_ExtrapMethod_Flag *extrapMethod,
+                            int *extrapNumSrcPnts,
+                            float *extrapDistExponent,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
                             ESMC_Logical *ignoreDegenerate,
                             ESMC_Field *srcFracField,
@@ -419,7 +422,8 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     // Invoke the C++ interface
     localrc = ESMCI::Field::regridstore(fieldpsrc, fieldpdst, 
       srcMaskValues, dstMaskValues, &rhPtr, regridmethod, 
-      polemethod, regridPoleNPnts, lineType, normType, unmappedaction, ignoreDegenerate,
+      polemethod, regridPoleNPnts, lineType, normType, extrapMethod,
+      extrapNumSrcPnts, extrapDistExponent, unmappedaction, ignoreDegenerate,
       srcfracp, dstfracp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
@@ -449,7 +453,8 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                             enum ESMC_LineType_Flag *lineType,
                             enum ESMC_NormType_Flag *normType,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
-                            ESMC_Logical *ignoreDegenerate,
+                            enum ESMC_Logical *ignoreDegenerate,
+                            enum ESMC_Logical *create_rh,
                             ESMC_Field *srcFracField,
                             ESMC_Field *dstFracField){
 
@@ -469,18 +474,23 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     ESMCI::RouteHandle *rhPtr;
     rhPtr=NULL;
 
-
     // Invoke the C++ interface
     localrc = ESMCI::Field::regridstorefile(fieldpsrc, fieldpdst, filename,
       srcMaskValues, dstMaskValues, &rhPtr, regridmethod,
-      polemethod, regridPoleNPnts, lineType, normType, unmappedaction, ignoreDegenerate,
-      srcfracp, dstfracp);
+      polemethod, regridPoleNPnts, lineType, normType, unmappedaction, 
+      ignoreDegenerate, create_rh, srcfracp, dstfracp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
 
     // return rhPtr in routehandle argument
-    routehandle->ptr = NULL;
-    routehandle->ptr = (void *)rhPtr;
+    if (create_rh == NULL) {
+      routehandle->ptr = NULL;
+      routehandle->ptr = (void *)rhPtr;
+    }
+    else if (*create_rh == ESMF_TRUE) {
+      routehandle->ptr = NULL;
+      routehandle->ptr = (void *)rhPtr;
+    }
 
     // return successfully
     rc = ESMF_SUCCESS;
@@ -552,8 +562,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
   int ESMC_FieldSMMStore(ESMC_Field srcField, ESMC_Field dstField,
                          const char *filename, ESMC_RouteHandle *routehandle,
                          ESMC_Logical *ignoreUnmatchedIndices,
-                         int *srcTermProcessing, int *pipeLineDepth,
-                         ESMC_RouteHandle *transposeRoutehandle){
+                         int *srcTermProcessing, int *pipeLineDepth){
 
     // Initialize return code. Assume routine not implemented
     int rc = ESMF_RC_NOT_IMPL;
@@ -571,14 +580,15 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     }
     ESMCI::RouteHandle **routehandlep = (ESMCI::RouteHandle **) &(routehandle->ptr);
 
-    // deal with fact that transposeRoutehandle may be absent
+    //RLO: removed transposeRoutehandle until user request
+    /*// deal with fact that transposeRoutehandle may be absent
     ESMCI::RouteHandle **troutehandlep = NULL;   // default: not present 
     if (transposeRoutehandle != NULL)
-      troutehandlep = (ESMCI::RouteHandle **) &(transposeRoutehandle->ptr);
+      troutehandlep = (ESMCI::RouteHandle **) &(transposeRoutehandle->ptr);*/
 
     // Invoke the C++ interface
     localrc = ESMCI::Field::smmstore(fieldpsrc, fieldpdst, filename, routehandlep,
-        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth, troutehandlep);
+        ignoreUnmatchedIndices, srcTermProcessing, pipeLineDepth);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;  // bail out
 

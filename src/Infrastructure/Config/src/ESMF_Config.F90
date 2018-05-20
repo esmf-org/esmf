@@ -612,6 +612,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
  
 ! Initialization
       allocate(config_local, stat=memstat)
+      ESMF_ConfigCreate%cptr => config_local
       if (ESMF_LogFoundAllocError(memstat, msg="Allocating config class", &
                                         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -631,7 +632,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       config_local%attr_used => attr_used_local
 
-      ESMF_ConfigCreate%cptr => config_local
       if (present( rc ))  rc = ESMF_SUCCESS
 
       ESMF_INIT_SET_CREATED(ESMF_ConfigCreate)
@@ -984,6 +984,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         eolFlag = .false.
       end if
 
+      if (present (default)) then
+        if (len (value) < len (default)) then
+          if (ESMF_LogFoundError (ESMF_RC_ARG_BAD,  &
+            msg='default length too long for value string',  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
+      end if
+
 ! Processing
       if(present( label )) then
          call ESMF_ConfigFindLabel( config, label=label,  &
@@ -1034,10 +1042,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else
          ! Get the string, and shift the rest of %this_line to
          ! the left
-         
          value = config%cptr%this_line(ib:ie) 
          config%cptr%this_line = config%cptr%this_line(ie+2:)
-         localrc = ESMF_SUCCESS
+         if (len (value) >= ie-ib+1) then
+           localrc = ESMF_SUCCESS
+         else
+           localrc = ESMF_RC_ARG_SIZE
+         end if
       end if
 
       if ( present (rc)) then
@@ -1117,6 +1128,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            localcount = count
         end if
       endif
+
+      if (present (default)) then
+        if (len (valueList) < len (default)) then
+          if (ESMF_LogFoundError (ESMF_RC_ARG_BAD,  &
+            msg='default length too long for valueList array',  &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        end if
+      end if
 
 ! Default setting
       if( present( default ) ) then 

@@ -69,7 +69,7 @@ int main(void){
 
 
   //              Source Mesh
-  // 
+  //
   //
   //  2.0   7 ------- 8 -------- 9
   //        |         |          |
@@ -81,14 +81,14 @@ int main(void){
   //        |         |          |
   //  0.0   1 ------- 2 -------- 3
   //
-  //       0.0       1.0        2.0 
+  //       0.0       1.0        2.0
   //
   //      Node Ids at corners
    //      Element Ids in centers
   //
   //
-  //      ( Everything owned by PET 0) 
-  // 
+  //      ( Everything owned by PET 0)
+  //
 
   // set Mesh parameters
   num_elem = 4;
@@ -96,11 +96,11 @@ int main(void){
 
   int nodeId_s [] ={1,2,3,4,5,6,7,8,9};
   double nodeCoord_s [] ={0.0,0.0, 1.0,0.0, 2.0,0.0,
-               0.0,1.0, 1.0,1.0, 2.0,1.0,
-               0.0,2.0, 1.0,2.0, 2.0,2.0};
+                          0.0,1.0, 1.0,1.0, 2.0,1.0,
+                          0.0,2.0, 1.0,2.0, 2.0,2.0};
   int nodeOwner_s [] ={0,0,0,0,0,0,0,0,0};
   int elemId_s [] ={1,2,3,4};
-  // ESMF_MESHELEMTYPE_QUAD 
+  // ESMF_MESHELEMTYPE_QUAD
   int elemType_s [] ={ESMC_MESHELEMTYPE_QUAD,
                       ESMC_MESHELEMTYPE_QUAD,
                       ESMC_MESHELEMTYPE_QUAD,
@@ -108,9 +108,9 @@ int main(void){
   int elemMask_s [] ={1,1,1,1};
   double elemArea_s [] ={1.0,2.0,3.0,4.0}; // Wrong area, but just to test
   int elemConn_s [] ={1,2,5,4,
-              2,3,6,5,
-              4,5,8,7,
-              5,6,9,8};
+                      2,3,6,5,
+                      4,5,8,7,
+                      5,6,9,8};
   double elemCoord_s [] ={0.5,0.5,0.5,1.5,1.5,0.5,1.5,1.5};
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -133,7 +133,7 @@ int main(void){
   //NEX_UTest
   strcpy(name, "MeshAddElements");
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
-  rc = ESMC_MeshAddElements(mesh, num_elem, elemId_s, elemType_s, elemConn_s, 
+  rc = ESMC_MeshAddElements(mesh, num_elem, elemId_s, elemType_s, elemConn_s,
                             elemMask_s, elemArea_s, elemCoord_s);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
@@ -175,8 +175,8 @@ int main(void){
   //NEX_UTest
   strcpy(name, "MeshGetOwnedNodeCount_OutputCorrect");
   strcpy(failMsg, "Returned wrong owned node count");
-  ESMC_Test((num_node==num_node_owned_out), 
-	    name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((num_node==num_node_owned_out),
+            name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -204,6 +204,30 @@ int main(void){
   for (int i=0; i< num_nodes; i++) {
     printf("%.1lf %.1lf\n", coords[i*2], coords[i*2+1]);
   }*/
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "MeshGetConnectivity");
+  strcpy(failMsg, "Did not return ESMF_SUCCESS");
+
+  int nodes_per_elem[num_elem];
+  // int *nodes_per_elem = (int *) malloc (num_elem * sizeof(int));
+  int total = 0;
+  for(int i = 0; i < num_elem; ++i) {
+    nodes_per_elem[i] = static_cast<int> (elemType_s[i]);
+    total += nodes_per_elem[i];
+    // printf("nodes_per_elem = %d\n", nodes_per_elem[i]);
+  }
+  // printf("total = %d\n", total);
+
+  double connectivity[total*pdim];
+  ESMC_MeshGetConnectivity(mesh, connectivity, nodes_per_elem, &rc);
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  //----------------------------------------------------------------------------
+  // for (int i=0; i< total*pdim; i++) {
+  //   printf("%f\n", connectivity[i]);
+  // }
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "MeshVerifyCoord");
@@ -217,8 +241,8 @@ int main(void){
       correct=false;
     }
   }
-  ESMC_Test(correct, 
-	    name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(correct,
+            name, failMsg, &result, __FILE__, __LINE__, 0);
   free(coords);
 
   //----------------------------------------------------------------------------
@@ -254,8 +278,8 @@ int main(void){
       correct=false;
     }
   }
-  ESMC_Test(correct, 
-	    name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(correct,
+            name, failMsg, &result, __FILE__, __LINE__, 0);
   free(elem_coords);
 
   //----------------------------------------------------------------------------
@@ -293,7 +317,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef ESMF_NETCDF
   mesh = ESMC_MeshCreateFromFile("data/ne4np4-pentagons.nc", ESMC_FILEFORMAT_SCRIP,
-				 NULL, NULL, "", NULL, "", &rc);
+                                 NULL, NULL, "", NULL, "", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
   rc = ESMC_MeshDestroy(&mesh);
@@ -308,7 +332,7 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #ifdef ESMF_NETCDF
   mesh = ESMC_MeshCreateFromFile("data/ne4np4-esmf.nc", ESMC_FILEFORMAT_ESMFMESH,
-				 NULL, NULL, "", NULL, "", &rc);
+                                 NULL, NULL, "", NULL, "", &rc);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
    rc = ESMC_MeshDestroy(&mesh);

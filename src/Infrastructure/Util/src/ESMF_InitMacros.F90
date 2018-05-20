@@ -49,10 +49,10 @@ contains
 ! !IROUTINE: ESMF_InitCheckDeep - Translate isInit value to return code
 
 ! !INTERFACE:
-        function ESMF_InitCheckDeep(isInit)
+recursive function ESMF_InitCheckDeep(isInit) result (InitCheckDeep)
 !
 ! !RETURN VALUE:
-        integer                                         :: ESMF_InitCheckDeep
+        integer                                 :: InitCheckDeep
 ! !ARGUMENTS:
 !       
         ESMF_INIT_TYPE, intent(in)              :: isInit
@@ -72,11 +72,11 @@ contains
         
     ! base return code on isInit value
     if (isInit .eq. ESMF_INIT_CREATED) then
-        ESMF_InitCheckDeep=ESMF_SUCCESS
+        InitCheckDeep=ESMF_SUCCESS
     else if (isInit .eq. ESMF_INIT_DELETED) then
-        ESMF_InitCheckDeep=ESMF_RC_OBJ_DELETED
+        InitCheckDeep=ESMF_RC_OBJ_DELETED
     else
-        ESMF_InitCheckDeep=ESMF_RC_OBJ_NOT_CREATED
+        InitCheckDeep=ESMF_RC_OBJ_NOT_CREATED
     endif       
 
 end function ESMF_InitCheckDeep
@@ -88,11 +88,10 @@ end function ESMF_InitCheckDeep
 ! !IROUTINE: ESMF_IMErr - Init Macros Error Handling for Deep classes
 
 ! !INTERFACE:
-        function ESMF_IMErr(isInit, line, file, method, &
-                                       rc)
+recursive function ESMF_IMErr(isInit, line, file, method, rc) result (IMErr)
 !
 ! !RETURN VALUE:
-        logical                                         ::ESMF_IMErr
+        logical                                         :: IMErr
 ! !ARGUMENTS:
 !       
         ESMF_INIT_TYPE, intent(in)              :: isInit
@@ -135,7 +134,7 @@ end function ESMF_InitCheckDeep
     ! Initialize return code; assume routine not imlemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_IMErr=ESMF_LogFoundError(ESMF_InitCheckDeep(isInit), &
+    IMErr=ESMF_LogFoundError(ESMF_InitCheckDeep(isInit), &
                                      msg="Bad Object", &
                                      line=line, file=file, method=method, &
                                      rcToReturn=rc)
@@ -152,10 +151,10 @@ end function ESMF_IMErr
 ! !IROUTINE: ESMF_InitCheckShallow - Translate isInit value to return code
 
 ! !INTERFACE:
-        function ESMF_InitCheckShallow(isInit)
+recursive function ESMF_InitCheckShallow(isInit) result (InitCheckShallow)
 !
 ! !RETURN VALUE:
-        integer                                         :: ESMF_InitCheckShallow
+        integer                                 :: InitCheckShallow
 ! !ARGUMENTS:
 !       
         ESMF_INIT_TYPE, intent(in)              :: isInit
@@ -175,9 +174,9 @@ end function ESMF_IMErr
         
     ! base return code on isInit value
     if (isInit .eq. ESMF_INIT_DEFINED) then
-        ESMF_InitCheckShallow=ESMF_SUCCESS
+        InitCheckShallow=ESMF_SUCCESS
     else
-        ESMF_InitCheckShallow=ESMF_RC_OBJ_INIT
+        InitCheckShallow=ESMF_RC_OBJ_INIT
     endif       
 
 end function ESMF_InitCheckShallow
@@ -189,11 +188,10 @@ end function ESMF_InitCheckShallow
 ! !IROUTINE: ESMF_IMErr - Init Macros Error Handling for shallow classes
 
 ! !INTERFACE:
-        function ESMF_IMErrS(isInit, line, file, method, &
-                                       rc)
+recursive function ESMF_IMErrS(isInit, line, file, method, rc) result (IMErrS)
 !
 ! !RETURN VALUE:
-        logical                                         ::ESMF_IMErrS
+        logical                                         :: IMErrS
 ! !ARGUMENTS:
 !       
         ESMF_INIT_TYPE, intent(in)              :: isInit
@@ -236,7 +234,7 @@ end function ESMF_InitCheckShallow
     ! Initialize return code; assume routine not imlemented
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
-    ESMF_IMErrS=ESMF_LogFoundError(ESMF_InitCheckShallow(isInit), &
+    IMErrS=ESMF_LogFoundError(ESMF_InitCheckShallow(isInit), &
                                      msg="Object not Initialized", &
                                      line=line, file=file, method=method, &
                                      rcToReturn=rc)

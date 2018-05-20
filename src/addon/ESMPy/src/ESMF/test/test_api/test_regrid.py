@@ -84,6 +84,7 @@ class TestRegrid(TestBase):
                     line_type=LineType.CART)
         _ = rh(srcfield, dstfield)
 
+    @attr('parallel')
     def test_field_regrid_file1(self):
         mgr = Manager()
 
@@ -133,37 +134,62 @@ class TestRegrid(TestBase):
             self.assertWeightFileIsRational(filename, 480, 480)
         mgr.barrier()
 
-    @attr('serial')
+    @attr('parallel')
     def test_field_regrid_file2(self):
         mgr = Manager()
         filename = 'esmpy_test_field_regrid_file2.nc'
-        path = os.path.join(os.getcwd(), filename)
-        if os.path.isfile(path):
-            os.remove(path)
+        if local_pet() == 0:
+            path = os.path.join(os.getcwd(), filename)
+            if os.path.isfile(path):
+                os.remove(path)
         mgr.barrier()
+        
+        srcgrid = ESMF.Grid(np.array([20, 20]),
+                            staggerloc=ESMF.StaggerLoc.CENTER,
+                            coord_sys=ESMF.CoordSys.SPH_DEG)
 
-        sourcegrid = ESMF.Grid(np.array([20, 20]),
-                               staggerloc=ESMF.StaggerLoc.CENTER,
-                               coord_sys=ESMF.CoordSys.SPH_DEG)
+        # Get and set the source grid coordinates.
+        srcGridCoordLon = srcgrid.get_coords(0)
+        srcGridCoordLat = srcgrid.get_coords(1)
 
-        source_lon = sourcegrid.get_coords(0)
-        source_lat = sourcegrid.get_coords(1)
-        source_lon[...], source_lat[...] = np.meshgrid(np.linspace(-120, 120, 20),
-                                                       np.linspace(-60, 60, 20))
+        lons = np.linspace(-120, 120, 20)
+        lats = np.linspace(-60, 60, 20)
+        
+        # parallel coordinates
+        slons_par = lons[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
+        slats_par = lats[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
+        
+        # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
+        lonm, latm = np.meshgrid(slons_par, slats_par, indexing='ij')
+        
+        srcGridCoordLon[:] = lonm
+        srcGridCoordLat[:] = latm
 
-        destgrid = ESMF.Grid(np.array([10, 10]),
+        dstgrid = ESMF.Grid(np.array([10, 10]),
                              staggerloc=ESMF.StaggerLoc.CENTER,
                              coord_sys=ESMF.CoordSys.SPH_DEG)
 
-        dest_lon = destgrid.get_coords(0)
-        dest_lat = destgrid.get_coords(1)
-        dest_lon[...], dest_lat[...] = np.meshgrid(np.linspace(-120, 120, 10),
-                                                   np.linspace(-60, 60, 10))
+        # Get and set the source grid coordinates.
+        dstGridCoordLon = dstgrid.get_coords(0)
+        dstGridCoordLat = dstgrid.get_coords(1)
+        
+        lons = np.linspace(-120, 120, 10)
+        lats = np.linspace(-60, 60, 10)
 
-        sourcefield = ESMF.Field(sourcegrid)
-        destfield = ESMF.Field(destgrid)
+        # parallel coordinates
+        dlons_par = lons[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
+        dlats_par = lats[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
+        
+        # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
+        lonm, latm = np.meshgrid(dlons_par, dlats_par, indexing='ij')
+        
+        dstGridCoordLon[:] = lonm
+        dstGridCoordLat[:] = latm
 
-        _ = ESMF.Regrid(sourcefield, destfield, filename=filename,
+        srcfield = ESMF.Field(srcgrid)
+        dstfield = ESMF.Field(dstgrid)
+
+        _ = ESMF.Regrid(srcfield, dstfield, filename=filename,
                         regrid_method=ESMF.RegridMethod.BILINEAR,
                         unmapped_action=ESMF.UnmappedAction.IGNORE)
         mgr.barrier()
@@ -175,65 +201,94 @@ class TestRegrid(TestBase):
         self.assertWeightFileIsRational(filename, src_size, dst_size)
         mgr.barrier()
 
-    @attr('serial')
+    @attr('parallel')
     def test_field_regrid_from_file(self):
         mgr = Manager()
         filename = 'esmpy_test_field_from_file.nc'
         path = os.path.join(os.getcwd(), filename)
-        if os.path.isfile(path):
-            os.remove(path)
+        if local_pet() == 0:
+            path = os.path.join(os.getcwd(), filename)
+            if os.path.isfile(path):
+                os.remove(path)
         mgr.barrier()
 
-        sourcegrid = ESMF.Grid(np.array([20, 20]),
-                               staggerloc=ESMF.StaggerLoc.CENTER,
-                               coord_sys=ESMF.CoordSys.CART)
+        srcgrid = ESMF.Grid(np.array([20, 20]),
+                            staggerloc=ESMF.StaggerLoc.CENTER,
+                            coord_sys=ESMF.CoordSys.CART)
 
-        source_lon = sourcegrid.get_coords(0)
-        source_lat = sourcegrid.get_coords(1)
-        source_lon[...], source_lat[...] = np.meshgrid(np.linspace(-120, 120, 20),
-                                                       np.linspace(-60, 60, 20), indexing='ij')
+        # Get and set the source grid coordinates.
+        srcGridCoordLon = srcgrid.get_coords(0)
+        srcGridCoordLat = srcgrid.get_coords(1)
 
-        destgrid = ESMF.Grid(np.array([10, 10]),
+        lons = np.linspace(-120, 120, 20)
+        lats = np.linspace(-60, 60, 20)
+        
+        # parallel coordinates
+        slons_par = lons[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
+        slats_par = lats[srcgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:srcgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
+        
+        # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
+        lonm, latm = np.meshgrid(slons_par, slats_par, indexing='ij')
+        
+        srcGridCoordLon[:] = lonm
+        srcGridCoordLat[:] = latm
+
+        dstgrid = ESMF.Grid(np.array([10, 10]),
                              staggerloc=ESMF.StaggerLoc.CENTER,
                              coord_sys=ESMF.CoordSys.CART)
 
-        dest_lon = destgrid.get_coords(0)
-        dest_lat = destgrid.get_coords(1)
-        dest_lon[...], dest_lat[...] = np.meshgrid(np.linspace(-120, 120, 10),
-                                                   np.linspace(-60, 60, 10), indexing='ij')
+        # Get and set the source grid coordinates.
+        dstGridCoordLon = dstgrid.get_coords(0)
+        dstGridCoordLat = dstgrid.get_coords(1)
+        
+        lons = np.linspace(-120, 120, 10)
+        lats = np.linspace(-60, 60, 10)
+        
+        # parallel coordinates
+        dlons_par = lons[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][0]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][0]]
+        dlats_par = lats[dstgrid.lower_bounds[ESMF.StaggerLoc.CENTER][1]:dstgrid.upper_bounds[ESMF.StaggerLoc.CENTER][1]]
+        
+        # make sure to use indexing='ij' as ESMPy backend uses matrix indexing (not Cartesian)
+        lonm, latm = np.meshgrid(dlons_par, dlats_par, indexing='ij')
+        
+        dstGridCoordLon[:] = lonm
+        dstGridCoordLat[:] = latm
 
-        sourcefield = ESMF.Field(sourcegrid)
-        destfield = ESMF.Field(destgrid)
-        xctfield = ESMF.Field(destgrid)
 
-        sourcefield.data[:,:] = 24
+        srcfield = ESMF.Field(srcgrid)
+        dstfield = ESMF.Field(dstgrid)
+        xctfield = ESMF.Field(dstgrid)
+
+        srcfield.data[:,:] = 24
         xctfield.data[:,:] = 24
-        destfield.data[:,:] = 0
+        dstfield.data[:,:] = 0
 
-        self.assertTrue(np.all(sourcefield.data[:,:] == 24))
-        self.assertTrue(np.all(destfield.data[:,:] == 0))
+        self.assertTrue(np.all(srcfield.data[:,:] == 24))
+        self.assertTrue(np.all(dstfield.data[:,:] == 0))
 
-        regridS2D = ESMF.Regrid(sourcefield, destfield, filename=filename,
+        regridS2D = ESMF.Regrid(srcfield, dstfield, filename=filename,
                         regrid_method=ESMF.RegridMethod.BILINEAR,
-                        unmapped_action=ESMF.UnmappedAction.ERROR)
+                        unmapped_action=ESMF.UnmappedAction.ERROR,
+                        create_rh=True,
+                        ignore_degenerate=False)
         mgr.barrier()
 
         self.assertTrue(os.path.exists(filename))
 
-        self.assertTrue(np.all(sourcefield.data[:,:] == 24))
-        self.assertNumpyAllClose(xctfield.data, destfield.data)
+        self.assertTrue(np.all(srcfield.data[:,:] == 24))
+        self.assertNumpyAllClose(xctfield.data, dstfield.data)
 
-        regridS2D = ESMF.RegridFromFile(sourcefield, destfield, filename)
+        regridS2D = ESMF.RegridFromFile(srcfield, dstfield, filename)
         mgr.barrier()
 
-        self.assertTrue(np.all(sourcefield.data[:,:] == 24))
-        self.assertNumpyAllClose(xctfield.data, destfield.data)
+        self.assertTrue(np.all(srcfield.data[:,:] == 24))
+        self.assertNumpyAllClose(xctfield.data, dstfield.data)
 
-        destfield = regridS2D(sourcefield, destfield)
+        destfield = regridS2D(srcfield, dstfield)
 
         self.assertWeightFileIsRational(filename, 20*20, 10*10)
-        self.assertTrue(np.all(sourcefield.data[:,:] == 24))
-        self.assertNumpyAllClose(xctfield.data, destfield.data)
+        self.assertTrue(np.all(srcfield.data[:,:] == 24))
+        self.assertNumpyAllClose(xctfield.data, dstfield.data)
         mgr.barrier()
 
 
@@ -367,7 +422,6 @@ class TestRegrid(TestBase):
             if (dstarea.data[i] != 0.25):
                 assert (dstarea.data[i] == 0.125)
 
-    @attr('mpi4py')
     @attr('parallel')
     def test_field_regrid_periodic(self):
         parallel = False
@@ -416,7 +470,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0016447124122954575)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('mpi4py')
     @attr('parallel')
     def test_grid_grid_3d_bilinear_cartesian(self):
         if ESMF.pet_count() > 1:
@@ -449,7 +502,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.00215601743167)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('mpi4py')
     @attr('parallel')
     def test_grid_grid_3d_bilinear_spherical(self):
         if ESMF.pet_count() > 1:
@@ -482,8 +534,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.00061587737764545617)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-
-    @attr('mpi4py')
     @attr('parallel')
     def test_grid_grid_regrid_csrv_mask_3D(self):
         if ESMF.pet_count() > 1:
@@ -527,7 +577,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0021560174316746865)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('mpi4py')
     @attr('parallel')
     def test_grid_grid_regrid_csrv_mask(self):
         if ESMF.pet_count() > 1:
@@ -572,7 +621,50 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('mpi4py')
+    @attr('parallel')
+    def test_grid_grid_regrid_csrv_2nd_mask(self):
+        if ESMF.pet_count() > 1:
+            if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+
+        # create two unique Grid objects
+        srcgrid = grid_create_from_bounds([0, 21], [0, 21], 21, 21, corners=True, domask=True)
+        dstgrid = grid_create_from_bounds([0.5, 19.5], [0.5, 19.5], 19, 19, corners=True)
+
+        # create Field objects on the Meshes
+        srcfield = ESMF.Field(srcgrid, name='srcfield')
+        srcfracfield = ESMF.Field(srcgrid, name='srcfracfield')
+        dstfield = ESMF.Field(dstgrid, name='dstfield')
+        dstfracfield = ESMF.Field(dstgrid, name='dstfracfield')
+        exactfield = ESMF.Field(dstgrid, name='exactfield')
+
+        # initialize the Fields to an analytic function
+        srcfield = initialize_field_grid(srcfield)
+        dstfield2 = initialize_field_grid(exactfield)
+
+        # run the ESMF regridding
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    src_mask_values=np.array([0]),
+                                    regrid_method=ESMF.RegridMethod.CONSERVE_2ND,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR,
+                                    src_frac_field=srcfracfield,
+                                    dst_frac_field=dstfracfield)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        # compute the mass
+        srcmass = compute_mass_grid(srcfield,
+                                    dofrac=True, fracfield=srcfracfield)
+        dstmass = compute_mass_grid(dstfield)
+
+        # compare results and output PASS or FAIL
+        meanrel, csrvrel, correct = compare_fields(dstfield, dstfield2, 
+                                                   10E-2, 10E-2, 10E-16,
+                                                   dstfracfield=dstfracfield,
+                                                   mass1=srcmass, mass2=dstmass)
+
+        self.assertAlmostEqual(meanrel, 0.0020296891000258252)
+        self.assertAlmostEqual(csrvrel, 0.0)
+
     @attr('parallel')
     def test_grid_grid_regrid_srcmask_types(self):
         # NOTE: this tests an old issue where the items of a grid were not properly set when
@@ -620,7 +712,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0024803189848013785)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('mpi4py')
     @attr('parallel')
     def test_grid_mesh_regrid_csrv_mask(self):
         parallel = False
@@ -677,7 +768,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.038806630051265847)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('mpi4py')
     @attr('parallel')
     def test_grid_mesh_regrid_csrv(self):
         parallel = False
@@ -732,7 +822,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.037733241800767432)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('mpi4py')
     @attr('parallel')
     def test_grid_mesh_regrid_mask(self):
         parallel = False
@@ -776,7 +865,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.0)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('mpi4py')
     @attr('parallel')
     def test_grid_mesh_regrid(self):
         parallel = False
@@ -820,7 +908,51 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(csrvrel, 0.0)
 
     @attr('parallel')
-    @attr('mpi4py')
+    def test_field_regrid_extrapolation(self):
+        parallel = False
+        if ESMF.pet_count() > 1:
+            if ESMF.pet_count() != 4:
+                raise NameError('MPI rank must be 4 in parallel mode!')
+            parallel = True
+
+        # create a grid
+        grid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=True)
+
+        # create a Mesh
+        if parallel:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn = \
+                mesh_create_50_parallel()
+        else:
+            mesh, nodeCoord, nodeOwner, elemType, elemConn, _ = \
+                mesh_create_50()
+
+        # create Field objects
+        srcfield = ESMF.Field(grid, name='srcfield')
+        dstfield = ESMF.Field(mesh, name='dstfield')
+        exactfield = ESMF.Field(mesh, name='exactfield')
+
+        # initialize the Fields to an analytic function
+        srcfield = initialize_field_grid(srcfield)
+        exactfield = initialize_field_mesh(exactfield, nodeCoord, nodeOwner, elemType, elemConn)
+
+        # run the ESMF regridding
+        regridSrc2Dst = ESMF.Regrid(srcfield, dstfield,
+                                    regrid_method=ESMF.RegridMethod.BILINEAR,
+                                    extrap_method=ESMF.ExtrapMethod.NEAREST_IDAVG,
+                                    extrap_num_src_pnts=10,
+                                    extrap_dist_exponent=1.2,
+                                    unmapped_action=ESMF.UnmappedAction.ERROR)
+        dstfield = regridSrc2Dst(srcfield, dstfield)
+
+        # compare results and output PASS or FAIL
+        meanrel, csrvrel, correct = compare_fields(dstfield, exactfield, 
+                                                   40E-2, 40E-2, 10E-16, 
+                                                   regrid_method=ESMF.RegridMethod.BILINEAR)
+
+        self.assertAlmostEqual(meanrel, 0.0)
+        self.assertAlmostEqual(csrvrel, 0.0)
+
+    @attr('parallel')
     def test_mesh_mesh_regrid(self):
         parallel = False
         if ESMF.pet_count() > 1:
@@ -878,7 +1010,6 @@ class TestRegrid(TestBase):
         self.assertAlmostEqual(meanrel, 0.037109375)
         self.assertAlmostEqual(csrvrel, 0.0)
 
-    @attr('mpi4py')
     @attr('parallel')
     def est_grid_mesh_pentatri_regrid_csrv(self):
         parallel = False
@@ -937,7 +1068,6 @@ class TestRegrid(TestBase):
         assert (csrvrel < 10E-14)
 
     # TODO: this test is disable, I don't remember why
-    @attr('mpi4py')
     def est_grid_mesh_pentatri_regrid_csrv_simple(self):
         if ESMF.pet_count() > 1:
             raise NameError('This test can only be run in serial!')
@@ -987,7 +1117,6 @@ class TestRegrid(TestBase):
         assert (meanrel < 10E-2)
         assert (csrvrel < 10E-14)
 
-    @attr('mpi4py')
     @attr('parallel')
     def test_grid_mesh_pentatri_regrid_bilinear(self):
         parallel = False

@@ -265,17 +265,49 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_routehandlesetdynmask)(ESMCI::RouteHandle **ptr, 
-    void *dynamicSrcMaskValue, void *dynamicDstMaskValue, int *rc){
+  void FTN_X(c_esmc_routehandlesetdynsrcmask)(ESMCI::RouteHandle **ptr, 
+    void *dynamicSrcMaskValue, int *rc){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_routehandlesetdynmask()"
+#define ESMC_METHOD "c_esmc_routehandlesetdynsrcmask()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
     // call into C++
-    localrc = (*ptr)->setDynMaskValues(
-      ESMC_NOT_PRESENT_FILTER(dynamicSrcMaskValue),
+    localrc = (*ptr)->setDynSrcMaskValue(
+      ESMC_NOT_PRESENT_FILTER(dynamicSrcMaskValue));
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_routehandlesetdyndstmask)(ESMCI::RouteHandle **ptr, 
+    void *dynamicDstMaskValue, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlesetdyndstmask()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    localrc = (*ptr)->setDynDstMaskValue(
       ESMC_NOT_PRESENT_FILTER(dynamicDstMaskValue));
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_routehandlesethandleall)(ESMCI::RouteHandle **ptr, 
+    ESMC_Logical *handleAll, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlesetdyndstmask()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    bool handleAllElements = false; // default
+    if (*handleAll == ESMF_TRUE) handleAllElements = true;
+    localrc = (*ptr)->setHandleAllElements(handleAllElements);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully

@@ -61,7 +61,7 @@ const char*  getDateAndTime(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-   static char 	datestr[1024];
+   static char          datestr[1024];
    time_t         ttime;
    struct tm*     tm;
 
@@ -88,30 +88,30 @@ const char*  getDateAndTime(
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int main(int    argc, 
+int main(int    argc,
          char*  argv[])
 {
-  	printf("hello from ESMCI_WebServCompSvrClientUTest\n");
+        printf("hello from ESMCI_WebServCompSvrClientUTest\n");
 
-   int	rc;
-	int	result = 0;
+   int  rc;
+        int     result = 0;
    char  name[80];
    char  failMsg[80];
 
-	int	portNum = 27060;
-	int	clientId = 1001;
-	char	host[512] = { "" };
+        int     portNum = 27060;
+        int     clientId = 1001;
+        char    host[512] = { "" };
 
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-//	strcpy(runDir, argv[2]);
-	gethostname(host, sizeof(host) - 1);
+//      strcpy(runDir, argv[2]);
+        gethostname(host, sizeof(host) - 1);
 
-	ESMCI::ESMCI_WebServForkClient*	client = 
-		new ESMCI::ESMCI_WebServForkClient("localhost", 
+        ESMCI::ESMCI_WebServForkClient*         client =
+                new ESMCI::ESMCI_WebServForkClient("localhost",
                                          "/home/ksaint",
                                          "testshell.sh");
 
@@ -130,15 +130,15 @@ int main(int    argc,
    strcpy(name, "Call Submit Job");
    strcpy(failMsg, "Returned ESMF_FAILURE");
 
-   string	jobId = client->submitJob(clientId, "localhost", portNum);
+   string       jobId = client->submitJob(clientId, "localhost", portNum);
    printf(" Job ID: %s\n", jobId.c_str());
 
    ESMC_Test((!jobId.empty()), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
+        printf("\n");
    //---------------------------------------------------------------------------
 
-	printf("Sleeping for 10 seconds...\n");
-	sleep(10);
+        printf("Sleeping for 10 seconds...\n");
+        sleep(10);
 
    //---------------------------------------------------------------------------
    //NEX_disable_UTest
@@ -148,7 +148,7 @@ int main(int    argc,
    rc = client->cancelJob(jobId);
 
    ESMC_Test((rc == 0), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
+        printf("\n");
    //---------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -158,5 +158,5 @@ int main(int    argc,
    printf("\n-----------------------------------------------------\n");
    fflush(stdout);
 
-  	return 0;
+        return 0;
 }

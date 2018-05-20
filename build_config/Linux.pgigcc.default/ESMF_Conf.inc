@@ -61,8 +61,8 @@ to have them by letting us write conditional code.
 
 #if 0
 Older PGI compilers had a bug which prevents forward pointer references from
-working if also using the sequence keyword.  for PGI only, dont sequence
-the State derived types.
+working if also using the sequence keyword. Don't sequence some select derived
+types to avoid issues.
 #endif
 
 #if (ESMF_PGIVERSION_MAJOR < 8)
@@ -82,3 +82,12 @@ PGI fixed this in 10.1.
 #endif
 #endif
 
+#if 0
+PGI before 17.9 could not handle the dynamic masking interfaces for different
+typekinds
+#endif
+#if defined (ESMF_PGIVERSION_MAJOR)
+#if (ESMF_PGIVERSION_MAJOR < 17) || ((ESMF_PGIVERSION_MAJOR == 17) && (ESMF_PGIVERSION_MINOR < 9))
+#define ESMF_NO_DYNMASKOVERLOAD
+#endif
+#endif

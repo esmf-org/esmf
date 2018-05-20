@@ -1,0 +1,8 @@
+#!/bin/sh
+# This script returns the input argument if it refers to an existing file, a
+# blank line otherwise.
+if ([ $1 ] && [ -e $1 ]); then
+echo $1
+else
+echo ""
+fi

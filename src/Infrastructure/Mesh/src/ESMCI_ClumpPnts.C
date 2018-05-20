@@ -10,7 +10,7 @@
 //
 //==============================================================================
 //------------------------------------------------------------------------------
-// INCLUDES    
+// INCLUDES
 //------------------------------------------------------------------------------
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
@@ -36,7 +36,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::ClumpPnts()"
 
 ////
-// More ESMF-y version of call with log error and return code 
+// More ESMF-y version of call with log error and return code
 //
 // Inputs:
 //   num_pnt - the number of input points
@@ -66,7 +66,7 @@ void ClumpPnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *p
      clump_pnts(num_pnt, pnt_lon, pnt_lat, tol, pnt_cl_ind, num_cl, cl_lon, cl_lat, max_size_cl);
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                     x.what(), ESMC_CONTEXT, rc);
@@ -74,7 +74,7 @@ void ClumpPnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *p
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                     "UNKNOWN", ESMC_CONTEXT, rc);
     }
-    
+
     return;
   }catch(int localrc){
     // catch standard ESMF return code
@@ -86,7 +86,7 @@ void ClumpPnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *p
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
@@ -105,7 +105,7 @@ struct PNT_DATA {
 
 int intersect_func(void *_pd, void *_sd) {
 
-  // Dereference 
+  // Dereference
   SEARCH_DATA *sd=(SEARCH_DATA *)_sd;
   PNT_DATA *pd=(PNT_DATA *)_pd;
 
@@ -125,7 +125,7 @@ int intersect_func(void *_pd, void *_sd) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::clump_pnts()"
- 
+
 // Inputs:
 //   num_pnt - the number of input points
 //   pnt_lon - the longitudes in deg of each point (array is of size num_pnt)
@@ -153,8 +153,11 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
   // Create Tree
   OTree *tree= new OTree(num_pnt);
 
+  // Commit empty tree, more points will be add committed later
+  tree->commit();
+
   // Create list of point structures
-  PNT_DATA *pd_list=new PNT_DATA[num_pnt];  
+  PNT_DATA *pd_list=new PNT_DATA[num_pnt];
 
   // Loop and create point list
   for (int i=0; i<num_pnt; i++) {
@@ -166,7 +169,7 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
 
     // Convert to 3D
     double cart_coord[3];
-    ESMCI_CoordSys_ConvertToCart(ESMC_COORDSYS_SPH_DEG, 2, 
+    ESMCI_CoordSys_ConvertToCart(ESMC_COORDSYS_SPH_DEG, 2,
                                  sph_coord, cart_coord);
     // Get point structure
     PNT_DATA *pd=pd_list+i;
@@ -180,10 +183,9 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
   }
 
   // Scramble to reduce chance of degenerate trees
-  std::random_shuffle(pd_list,pd_list+num_pnt);  
+  std::random_shuffle(pd_list,pd_list+num_pnt);
 
   // Loop and clump points
-  bool first_time=true;
   for (int i=0; i<num_pnt; i++) {
 
     // Get point structure
@@ -199,28 +201,24 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
 
     // Expand to min-max box using tol
     double min[3],max[3];
-    
+
     min[0]=pd->pnt[0]-tol;
     min[1]=pd->pnt[1]-tol;
     min[2]=pd->pnt[2]-tol;
 
     max[0]=pd->pnt[0]+tol;
     max[1]=pd->pnt[1]+tol;
-    max[2]=pd->pnt[2]+tol;    
+    max[2]=pd->pnt[2]+tol;
 
 
     // See if point should be clumped with any in the tree
-    if (!first_time) {
-      tree->runon(min, max, intersect_func, (void *)(&sd));
-    } else {
-      tree->add_commit(min, max, (void *)pd);    
-      first_time=false;
-    }
+    // (First time through tree will be empty, but then runon()
+    //  will just return and be a no-op.)
+    tree->runon(min, max, intersect_func, (void *)(&sd));
 
     // If not clumped, then add to tree
-    // TODO: ADD add_commit to OTree
     if (sd.closest_index==-1) {
-      tree->add_commit(min, max, (void *)pd);    
+      tree->add_commit(min, max, (void *)pd);
       pd->clump_index=pd->orig_index;
     } else {
       pd->clump_index=sd.closest_index;
@@ -234,7 +232,7 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
 
   // Calc min index in each clump
   for (int i=0; i<num_pnt; i++) {
-    PNT_DATA *pd=pd_list+i;    
+    PNT_DATA *pd=pd_list+i;
     if (pd->orig_index < pnt_cl_ind[pd->clump_index]) pnt_cl_ind[pd->clump_index]=pd->orig_index;
   }
 
@@ -242,8 +240,8 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
   // This is so output is closer to old way
   // of clumping points when creating from SCRIP grids
   for (int i=0; i<num_pnt; i++) {
-    PNT_DATA *pd=pd_list+i;    
-    pd->clump_index=pnt_cl_ind[pd->clump_index]; 
+    PNT_DATA *pd=pd_list+i;
+    pd->clump_index=pnt_cl_ind[pd->clump_index];
   }
 
   //// Compress points down to just those needed ////
@@ -258,7 +256,7 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
   // + Counting the number of points in each clump
   //   in prep. to calculate the max clump size
   for (int i=0; i<num_pnt; i++) {
-    PNT_DATA *pd=pd_list+i;    
+    PNT_DATA *pd=pd_list+i;
 
     pnt_cl_ind[pd->clump_index]=pnt_cl_ind[pd->clump_index]+1;
   }
@@ -302,14 +300,14 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
 
   // Switch to indices into collapsed clumps
   for (int i=0; i<num_pnt; i++) {
-    PNT_DATA *pd=pd_list+i;    
+    PNT_DATA *pd=pd_list+i;
     pd->clump_index=pnt_cl_ind[pd->clump_index];
   }
 
-  // Finally load clump indices into collapsed 
-  // point lists 
+  // Finally load clump indices into collapsed
+  // point lists
   for (int i=0; i<num_pnt; i++) {
-    PNT_DATA *pd=pd_list+i;    
+    PNT_DATA *pd=pd_list+i;
     pnt_cl_ind[pd->orig_index]=pd->clump_index;
   }
 
@@ -334,7 +332,7 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
 #define ESMC_METHOD "ESMCI::ClumpPntsLL()"
 
 ////
-// More ESMF-y version of call with log error and return code 
+// More ESMF-y version of call with log error and return code
 //
 // Inputs:
 //   num_pnt - the number of input points
@@ -352,8 +350,8 @@ void clump_pnts(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *
 //
 /////
 void ClumpPntsLL(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *pnt_cl_ind,
-		 int *num_cl, double **cl_lon, double **cl_lat, int *max_size_cl, double start_lat, 
-		 double end_lat, int *rc) {
+                 int *num_cl, double **cl_lon, double **cl_lat, int *max_size_cl, double start_lat,
+                 double end_lat, int *rc) {
 
   // Initialize return code; assume routine not implemented
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
@@ -365,7 +363,7 @@ void ClumpPntsLL(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int 
     clump_pnts_ll(num_pnt, pnt_lon, pnt_lat, tol, pnt_cl_ind, num_cl, cl_lon, cl_lat, max_size_cl,start_lat,end_lat);
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                     x.what(), ESMC_CONTEXT, rc);
@@ -373,7 +371,7 @@ void ClumpPntsLL(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int 
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                     "UNKNOWN", ESMC_CONTEXT, rc);
     }
-    
+
     return;
   }catch(int localrc){
     // catch standard ESMF return code
@@ -385,7 +383,7 @@ void ClumpPntsLL(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int 
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
@@ -406,7 +404,7 @@ struct PNT_DATA_LL {
 
 int intersect_func_ll(void *_pd, void *_sd) {
 
-  // Dereference 
+  // Dereference
   SEARCH_DATA_LL *sd=(SEARCH_DATA_LL *)_sd;
   PNT_DATA_LL *pd=(PNT_DATA_LL *)_pd;
 
@@ -422,10 +420,10 @@ int intersect_func_ll(void *_pd, void *_sd) {
   }
 
   // The furthest apart two points can be
-  // in longitude is 180. If bigger than 
+  // in longitude is 180. If bigger than
   // than then measure the shorter way around
   if (dist_lon > 180.0) {
-    dist_lon=360.0-dist_lon; 
+    dist_lon=360.0-dist_lon;
   }
 
   // See how close the points are
@@ -454,7 +452,7 @@ int intersect_func_ll(void *_pd, void *_sd) {
 //   _cl_lat       - the latitudes in deg of each point (array is of size num_cl)
 //   _max_size_cl  - the maximum number of a points in a clump
 void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, int *_pnt_cl_ind,
-		   int *_num_cl, double **_cl_lon, double **_cl_lat, int *_max_size_cl, double start_lat, double end_lat) {
+                   int *_num_cl, double **_cl_lon, double **_cl_lat, int *_max_size_cl, double start_lat, double end_lat) {
 
   // Init outputs
   *_cl_lon=NULL;
@@ -466,12 +464,12 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
   if (num_pnt <= 0) return;
 
   // Convert tolerence in degrees to one in distance on a radius 1.0 sphere
-  // (using distance at the equator, this will be an overestimate for other places) 
+  // (using distance at the equator, this will be an overestimate for other places)
   const double ESMC_CoordSys_Deg2Rad= 0.01745329251994329547437;
   double tol_3D=tol*ESMC_CoordSys_Deg2Rad;
 
   // Create list of point structures
-  PNT_DATA_LL *pd_list1=new PNT_DATA_LL[num_pnt];  
+  PNT_DATA_LL *pd_list1=new PNT_DATA_LL[num_pnt];
 
   // Loop and create point list
   int ii=0;
@@ -508,11 +506,13 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
   // Create Tree
   ESMCI::OTree *tree= new ESMCI::OTree(num_pnt);
 
+  // Commit empty tree, more points will be add committed later
+  tree->commit();
+
   // Scramble to reduce chance of degenerate trees
-  std::random_shuffle(pd_list,pd_list+num_pnt);  
+  std::random_shuffle(pd_list,pd_list+num_pnt);
 
   // Loop and clump points
-  bool first_time=true;
   for (int i=0; i<num_pnt; i++) {
 
     // Get point structure
@@ -532,18 +532,18 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
     double phi   = (ninety-lat)*ESMC_CoordSys_Deg2Rad;
     pnt_3D[0] = std::cos(theta)*std::sin(phi);
     pnt_3D[1] = std::sin(theta)*std::sin(phi);
-    pnt_3D[2] = std::cos(phi);    
+    pnt_3D[2] = std::cos(phi);
 
     // Expand to min-max box using tol
     double min[3],max[3];
-    
+
     min[0]=pnt_3D[0]-tol_3D;
     min[1]=pnt_3D[1]-tol_3D;
     min[2]=pnt_3D[2]-tol_3D;
 
     max[0]=pnt_3D[0]+tol_3D;
     max[1]=pnt_3D[1]+tol_3D;
-    max[2]=pnt_3D[2]+tol_3D;    
+    max[2]=pnt_3D[2]+tol_3D;
 
 
     // Set user data for seach
@@ -553,19 +553,14 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
     sd.closest_index=-1;
     sd.closest_dist2=tol*tol;
 
-
     // See if point should be clumped with any in the tree
-    if (!first_time) {
-      tree->runon(min, max, intersect_func_ll, (void *)(&sd));
-    } else {
-      tree->add_commit(min, max, (void *)pd);    
-      first_time=false;
-    }
+    // (First time through tree will be empty, but then runon()
+    //  will just return and be a no-op.)
+    tree->runon(min, max, intersect_func_ll, (void *)(&sd));
 
     // If not clumped, then add to tree
-    // TODO: ADD add_commit to OTree
     if (sd.closest_index==-1) {
-      tree->add_commit(min, max, (void *)pd);    
+      tree->add_commit(min, max, (void *)pd);
       pd->clump_index=pd->orig_index;
     } else {
       pd->clump_index=sd.closest_index;
@@ -580,7 +575,7 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
 
   // Calc min index in each clump
   for (int i=0; i<num_pnt; i++) {
-    PNT_DATA_LL *pd=pd_list+i;    
+    PNT_DATA_LL *pd=pd_list+i;
     if (pd->orig_index < pnt_cl_ind[pd->clump_index]) pnt_cl_ind[pd->clump_index]=pd->orig_index;
   }
 
@@ -588,8 +583,8 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
   // This is so output is closer to old way
   // of clumping points when creating from SCRIP grids
   for (int i=0; i<num_pnt; i++) {
-    PNT_DATA_LL *pd=pd_list+i;    
-    pd->clump_index=pnt_cl_ind[pd->clump_index]; 
+    PNT_DATA_LL *pd=pd_list+i;
+    pd->clump_index=pnt_cl_ind[pd->clump_index];
   }
 
   //// Compress points down to just those needed ////
@@ -604,7 +599,7 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
   // + Counting the number of points in each clump
   //   in prep. to calculate the max clump size
   for (int i=0; i<num_pnt; i++) {
-    PNT_DATA_LL *pd=pd_list+i;    
+    PNT_DATA_LL *pd=pd_list+i;
 
     pnt_cl_ind[pd->clump_index]=pnt_cl_ind[pd->clump_index]+1;
   }
@@ -647,14 +642,14 @@ void clump_pnts_ll(int num_pnt, double *pnt_lon, double *pnt_lat, double tol, in
 
   // Switch to indices into collapsed clumps
   for (int i=0; i<num_pnt; i++) {
-    PNT_DATA_LL *pd=pd_list+i;    
+    PNT_DATA_LL *pd=pd_list+i;
     pd->clump_index=pnt_cl_ind[pd->clump_index];
   }
 
-  // Finally load clump indices into collapsed 
-  // point lists 
+  // Finally load clump indices into collapsed
+  // point lists
   for (int i=0; i<num_pnt; i++) {
-    PNT_DATA_LL *pd=pd_list+i;    
+    PNT_DATA_LL *pd=pd_list+i;
     pnt_cl_ind[pd->orig_index]=pd->clump_index;
   }
   if (num_pnt_total > num_pnt) {

@@ -51,10 +51,13 @@ module NUOPC_Base
   public NUOPC_CheckSetClock              ! method
   public NUOPC_GetAttribute               ! method
   public NUOPC_GetStateMemberLists        ! method
+  public NUOPC_GetTimestamp               ! method
   public NUOPC_InitAttributes             ! method
   public NUOPC_IsAtTime                   ! method
   public NUOPC_IsConnected                ! method
   public NUOPC_IsUpdated                  ! method
+  public NUOPC_LogIntro                   ! method
+  public NUOPC_LogExtro                   ! method
   public NUOPC_NoOp                       ! method
   public NUOPC_Realize                    ! method
   public NUOPC_Reconcile                  ! method
@@ -1307,6 +1310,77 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_GetTimestamp - Get the timestamp of a Field
+! !INTERFACE:
+  function NUOPC_GetTimestamp(field, time, rc)
+! !RETURN VALUE:
+    logical :: NUOPC_GetTimestamp
+! !ARGUMENTS:
+    type(ESMF_Field), intent(in)            :: field
+    type(ESMF_Time),  intent(out)           :: time
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Access the timestamp on {\tt field} in form af an {\tt ESMF\_Time} object.
+!   Return {\tt .true.} if the Field holds a valid timestamp, {\tt .false.}
+!   otherwise.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field]
+!     The {\tt ESMF\_Field} object to be checked.
+!   \item[time]
+!     The timestamp as {\tt ESMF\_Time} object.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_Time)         :: fieldTime
+    integer                 :: valueList(9)
+#ifdef DEBUG
+    character(ESMF_MAXSTR)  :: msgString
+#endif
+
+    NUOPC_GetTimestamp = .false. ! initialize
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_AttributeGet(field, &
+      name="TimeStamp", valueList=valueList, &
+      convention="NUOPC", purpose="Instance", &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    if (ValueList(2)==0) then
+      ! month value of 0 is indicative of an uninitialized timestamp
+#ifdef DEBUG
+      write (msgString,*) "NUOPC_IsAtTimeField() uninitialized time detected: "
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
+      write (msgString,*) "field time:  ", valueList
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
+#endif
+    else
+      NUOPC_GetTimestamp = .true.
+      call ESMF_TimeSet(time, &
+        yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
+         h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
+        ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
+
+  end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: NUOPC_InitAttributes - Initialize the NUOPC Field Attributes
 ! !INTERFACE:
@@ -1698,51 +1772,22 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     type(ESMF_Time)         :: fieldTime
-    integer                 :: i, valueList(9)
-    type(ESMF_CalKind_Flag) :: calkindflag
 #ifdef DEBUG
     character(ESMF_MAXSTR)  :: msgString
 #endif
 
+    NUOPC_IsAtTimeField = .false. ! initialize
+    
     if (present(rc)) rc = ESMF_SUCCESS
     
-    NUOPC_IsAtTimeField = .true. ! initialize
-    
-    call ESMF_TimeGet(time, calkindflag=calkindflag, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call ESMF_AttributeGet(field, &
-      name="TimeStamp", valueList=valueList, &
-      convention="NUOPC", purpose="Instance", &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    if (ValueList(2)==0) then
-      ! month value of 0 is indicative of an uninitialized timestamp
-      NUOPC_IsAtTimeField = .false.
-#ifdef DEBUG
-      write (msgString,*) "NUOPC_IsAtTimeField() uninitialized time detected: "
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
-      write (msgString,*) "field time:  ", valueList
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
-#endif
-      return
-    else
-      call ESMF_TimeSet(fieldTime, &
-        yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
-         h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
-        ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
-        calkindflag=calkindflag, rc=rc)
+    if (NUOPC_GetTimestamp(field, fieldTime, rc=rc)) then
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
+      ! valid timestamp
       if (fieldTime /= time) then
+        ! times do not match
         NUOPC_IsAtTimeField = .false.
 #ifdef DEBUG
         write (msgString,*) "NUOPC_IsAtTimeField() time mismatch detected: "
@@ -1761,8 +1806,17 @@ module NUOPC_Base
         write (msgString,*) "target time: ", valueList
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
 #endif
-        return
+      else
+        ! times do match
+        NUOPC_IsAtTimeField = .true.
       endif
+    else
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      ! invalid timestamp
+      NUOPC_IsAtTimeField = .false.
     endif
 
   end function
@@ -2182,6 +2236,122 @@ module NUOPC_Base
     endif
     
   end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_LogIntro - Log entering a method
+! !INTERFACE:
+  subroutine NUOPC_LogIntro(name, rName, verbosity, rc)
+! !ARGUMENTS:
+    character(len=*), intent(in)   :: name
+    character(len=*), intent(in)   :: rName
+    integer,          intent(in)   :: verbosity
+    integer,          intent(out)  :: rc
+! !DESCRIPTION:
+!   Write information into Log on entering a method, according to the verbosity
+!   aspects.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[name]
+!     Component name.
+!   \item[rName]
+!     Routine name.
+!   \item[verbosity]
+!     Bit field corresponding to verbosity aspects.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer :: indentCount
+    if (btest(verbosity,0)) then
+      call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogGet(indentCount=indentCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogSet(indentCount=indentCount+2, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" intro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_LogExtro - Log exiting a method
+! !INTERFACE:
+  subroutine NUOPC_LogExtro(name, rName, verbosity, rc)
+! !ARGUMENTS:
+    character(len=*), intent(in)   :: name
+    character(len=*), intent(in)   :: rName
+    integer,          intent(in)   :: verbosity
+    integer,          intent(out)  :: rc
+! !DESCRIPTION:
+!   Write information into Log on exiting a method, according to the verbosity
+!   aspects.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[name]
+!     Component name.
+!   \item[rName]
+!     Routine name.
+!   \item[verbosity]
+!     Bit field corresponding to verbosity aspects.
+!   \item[rc]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer :: indentCount
+    if (btest(verbosity,2)) then
+      call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" extro: ", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,1)) then
+      call ESMF_VMLogMemInfo(trim(name)//": "//rName//" extro: ", rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,0)) then
+      call ESMF_LogGet(indentCount=indentCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogSet(indentCount=indentCount-2, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_LogWrite(trim(name)//": "//rName//" extro.", ESMF_LOGMSG_INFO, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------

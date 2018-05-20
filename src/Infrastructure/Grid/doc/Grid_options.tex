@@ -60,6 +60,15 @@ Item Label & {\bf Type Restriction}  & {\bf Type Default} & {\bf ESMF Uses} & {\
 \hline
 \end{tabular}
 
+\medskip
+
+ {\bf NOTE:} One important thing to consider when setting areas in the Grid using {\tt ESMF\_GRIDITEM\_AREA},
+  ESMF doesn't currently do unit conversion on areas. If these areas are going to be used
+ in a process that also involves the areas of another Grid or Mesh (e.g. conservative regridding), then
+ it is the user's responsibility to make sure that the area units are consistent between the two sides.
+ If ESMF calculates an area on the surface of a sphere, then it is in units of square radians. If 
+ it calculates the area for a Cartesian grid, then it is in the same units as the coordinates, but squared. 
+
 
 \subsubsection{ESMF\_GRIDMATCH}
 \label{const:gridmatch}
@@ -187,23 +196,5 @@ The 3D predefined stagger locations (illustrated in figure~\ref{fig:gridstaggerl
 \item [ESMF\_STAGGERLOC\_EDGE1\_VFACE:] The center of the edges of the 3D cell parallel offset from the center in the 1st dimension.
 \item [ESMF\_STAGGERLOC\_EDGE2\_VFACE:] The center of the edges of the 3D cell parallel offset from the center in the 2nd dimension.
 \item [ESMF\_STAGGERLOC\_CENTER\_VFACE:] The center of the top and bottom face. The face bounded by the 1st and 2nd dimensions. 
-\end{description}
-
-\subsubsection{ESMF\_FILEFORMAT}
-\label{const:grid:fileformat}
-
-{\sf DESCRIPTION:\\}
-This option is used by {\tt ESMF\_GridCreate} to specify the type of the input grid file.  See 
-sections~\ref{sec:fileformat:scrip} and \ref{sec:fileformat:gridspec} for more detailed description of the supported file formats.
-
-The type of this flag is:
-
-{\tt type(ESMF\_FileFormat\_Flag)}
-
-The valid values are:
-\begin{description}
-\item [ESMF\_FILEFORMAT\_SCRIP] SCRIP format grid file. The SCRIP format is the format accepted by the SCRIP regridding tool~\cite{ref:SCRIP}.   For Grid creation, files of this type only work when the {\tt grid\_rank} in the file is equal to 2.
-
-\item [ESMF\_FILEFORMAT\_GRIDSPEC] a single tile grid file comforming with the proposed CF-GRIDSPEC conventions.
 \end{description}
 

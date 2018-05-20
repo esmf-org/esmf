@@ -69,11 +69,77 @@
   public ESMF_EsmfInqUnits
   public ESMF_EsmfGetCoords
 
+  public ESMF_SparseMatrixWrite     !TODO: move this into SparseMatrix class
+                                    !TODO: once implemented
+
 !==============================================================================
 
       contains
 
 !==============================================================================
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_SparseMatrixWrite"
+!BOP
+! !IROUTINE: ESMF_SparseMatrixWrite - Write a sparse matrix to file
+! \label{api:SparseMatrixWrite}
+!
+! !INTERFACE:
+  subroutine ESMF_SparseMatrixWrite(factorList, factorIndexList, fileName, &
+    keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    real(ESMF_KIND_R8),    intent(in)            :: factorList(:)
+    integer(ESMF_KIND_I4), intent(in)            :: factorIndexList(:,:)
+    character(*),          intent(in)            :: fileName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,               intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Write the {\tt factorList} and {\tt factorIndexList} into a NetCDF file.
+!   The data is stored in SCRIP format documented under section 
+!   ~(\ref{sec:weightfileformat}).
+!
+!   Limitations:
+!   \begin{itemize}
+!     \item Only {\tt real(ESMF\_KIND\_R8) factorList} and 
+!           {\tt integer(ESMF\_KIND\_I4) factorIndexList} supported.
+!     \item Not supported in {\tt ESMF\_COMM=mpiuni} mode.
+!   \end{itemize}
+!
+!  The arguments are:
+!  \begin{description}
+!   \item[factorList]
+!    The sparse matrix factors to be written.
+!   \item[factorIndexList]
+!    The sparse matrix sequence indices to be written.
+!   \item[fileName]
+!    The name of the output file to be written.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    ! Local vars
+    integer                    :: localrc           ! local return code
+
+    ! Initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call into lower level implementation
+    call ESMF_OutputWeightFile(weightFile=fileName, factorList=factorList, &
+      factorIndexList=factorIndexList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_SparseMatrixWrite
+!------------------------------------------------------------------------------
 
 ! -------------------------- ESMF-public method -------------------------------
 !------------------------------------------------------------------------------
@@ -91,23 +157,23 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     character(len=*), intent(in) :: weightFile
     real(ESMF_KIND_R8), intent(in) :: factorList(:)
     integer(ESMF_KIND_I4), intent(in) :: factorIndexList(:,:)
-    integer, intent(out), optional :: rc
+    integer, intent(inout), optional :: rc
 
     type(ESMF_DistGrid) :: distgridFL
     type(ESMF_Array) :: arrayFL, arrayFIL1, arrayFIL2
 
     type(ESMF_AttPack) :: attpack
     integer :: lens(3), lens2(1), nfactors, ii, localPet, petCount, startIndex, &
-               stopIndex, localrc
+               stopIndex, localrc, memstat, hasFactors, nLivePETs(1), offset
     character(len=22), parameter :: specString = "distgridnetcdfmetadata"
     character(len=23), parameter :: name = "ESMF:gridded_dim_labels"
     character(len=3), parameter :: value = "n_s"
+    character(len=70), parameter :: noFactorsMsg = '"factorList" has size 0 and PET count is 1. There is nothing to write.'
     integer(ESMF_KIND_I4), allocatable, dimension(:) :: col, row
     type(ESMF_VM) :: vm
     integer(ESMF_KIND_I4), dimension(1) :: sendData, recvData
     integer(ESMF_KIND_I4), dimension(2) :: bcstData
     integer(ESMF_KIND_I4), allocatable, dimension(:,:,:) :: deBlockList
-    integer :: memstat
     
     ! ==============================================================================
     
@@ -116,6 +182,13 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     else
       localrc = ESMF_RC_NOT_IMPL
     endif
+    
+#if (!defined ESMF_PIO || (!defined ESMF_NETCDF && !defined ESMF_PNETCDF))
+    ! Writing weights requires netCDF and the subroutine should not continue if
+    ! the netCDF library is not available.
+    if (ESMF_LogFoundError(ESMF_RC_LIB_NOT_PRESENT, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
     
     call ESMF_VMGetGlobal(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -132,6 +205,23 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     ! Number of local factors.
     nfactors = size(factorList, 1)
     
+    ! Bail out if there are no factors and this is a single process.
+    if ((nfactors .eq. 0) .and. (petCount .eq. 1)) then
+      if (ESMF_LogFoundError(ESMF_RC_NOT_IMPL, msg=noFactorsMsg, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+    
+    ! Determine if we need a redistribution. A redistribution is needed if one of
+    ! the PETs does not have any factors.
+    if (nfactors .eq. 0) then
+      hasFactors = 0
+    else
+      hasFactors = 1
+    endif
+    call ESMF_VMAllReduce(vm, (/hasFactors/), nLivePETs, 1, ESMF_REDUCE_SUM, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+    
     ! Chain start and stop index calculation.
     if (localPet .ne. 0) then
       call ESMF_VMRecv(vm, recvData, 1, localPet-1, rc=localrc)
@@ -139,15 +229,42 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
     else
       startIndex = 1
     endif
-    stopIndex = startIndex + nfactors - 1
-    if ((localPet .ne. petCount-1) .and. (petCount > 1)) then
-      call ESMF_VMSend(vm, (/stopIndex+1/), 1, localPet+1, rc=localrc)
-      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+    if (nfactors .eq. 0) then
+      stopIndex = startIndex
+    else
+      stopIndex = startIndex + nfactors - 1
     endif
+    if ((localPet .ne. petCount-1) .and. (petCount > 1)) then
+      if (nfactors == 0) then
+        offset = 0
+      else
+        offset = 1
+      endif
+      call ESMF_VMSend(vm, (/stopIndex+offset/), 1, localPet+1, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    ! Some PETs do not have data. We need to gather and scatter to ensure the
+    ! asynchronous write has data for each proc - or - we can use the simple weight
+    ! file write implementation that can handle zero-length factor lists.
     
-    ! Remember ragged factor counts may require a non-regular decomposition. This
-    ! requires a custom block definition per DE.
+    ! TODO (bekozi): Array should be able to handle empty data and the write should
+    !  correspondingly work.
+
+    if (nLivePETs(1) .ne. petCount) then
+      ! This streams everything to a single PET for writing avoiding the need for an
+      ! asynchronous write.
+      call ESMF_OutputSimpleWeightFile(weightFile, factorList, factorIndexList, &
+                                       rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT, &
+        rcToReturn=rc)) return
+      return
+    endif
+    !-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+    
+    ! Ragged factor counts may require a non-regular decomposition. This requires a 
+    ! custom block definition per DE.
     allocate(deBlockList(1, 2, petCount), stat=memstat)
     if (ESMF_LogFoundAllocError(memstat,  &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -159,7 +276,7 @@ subroutine ESMF_OutputWeightFile (weightFile, factorList, factorIndexList, rc)
         bcstData = (/0, 0/)
       endif
       call ESMF_VMBroadcast(vm, bcstData, 2, ii-1, rc=localrc)
-      if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
       deBlockList(1, :, ii) = bcstData
     enddo
@@ -883,6 +1000,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       integer            :: totalsize, totallen
       integer            :: meshId
       integer            :: memstat
+      integer            :: dim
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -1174,8 +1292,13 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod)) then
             call ESMF_UGridInq(srcFile, srcmeshname, nodeCount=srcDim,  &
-                elementCount=srcNodeDim, units=srcunits, rc=status)
-                src_grid_corner =3
+                nodeCoordDim=dim, units=srcunits, rc=status)
+            ! If it is 1D network topology, there is no corner coordinates
+            if (dim==1) then 
+	      src_grid_corner = 0
+            else
+              src_grid_corner =3
+            endif
           else
             call ESMF_UGridInq(srcFile, srcmeshname, elementCount=srcDim, &
                 maxNodePElement=src_grid_corner, units=srcunits, &
@@ -1265,8 +1388,12 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod)) then
             call ESMF_UGridInq(dstFile, dstmeshname, nodeCount=dstDim,  &
-                elementCount=dstNodeDim, units=dstunits, rc=status)
-                dst_grid_corner =3
+                nodeCoordDim=dim, units=dstunits, rc=status)
+            if (dim==1) then 
+	      dst_grid_corner = 0
+            else
+              dst_grid_corner = 3
+            endif
           else
             call ESMF_UGridInq(dstFile, dstmeshname, elementCount=dstDim, &
                 maxNodePElement=dst_grid_corner, units=dstunits, &
@@ -2123,7 +2250,6 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,trim(srcFile),&
              rc)) return
         else if (srcFileTypeLocal == ESMF_FILEFORMAT_UGRID) then
-           ! ESMF unstructured grid
            call ESMF_UGridInq(srcfile, srcmeshname, meshId=meshId, faceCoordFlag=faceCoordFlag)
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4217,7 +4343,6 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
       if (ESMF_LogFoundDeallocError(memstat,  &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-      print *, PetNo, ' read block ', startConn, totalConn
       ncStatus = nf90_get_var(ncid, VarNo, elementConn, start=(/startConn/), &
                               count=(/totalConn/))
       if (CDFCheckError (ncStatus, &
@@ -4272,13 +4397,22 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     if (ncStatus == nf90_noerror) then
       if (startIndex == 0) then
          do i=1,totalConn
-           if (elementConn(i) /= ESMF_MESH_POLYBREAK) then
+           if (elementConn(i) >= 0) then
               elementConn(i)=elementConn(i)+1
            endif
          enddo
       endif
     endif
 
+    ! Check for negative index values that is not defiend as ESMF_MESH_POLYBREAK
+    do i=1,totalConn
+       if (elementConn(i) < 0 .and. elementConn(i) /= ESMF_MESH_POLYBREAK) then
+           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                msg="- negative index found in elementConn table", &
+                ESMF_CONTEXT, rcToReturn=rc)
+           return
+       endif
+    enddo          
     if (present(elementMask)) then
        allocate(elementMask(localcount), stat=memstat)
        if (ESMF_LogFoundAllocError(memstat,  &

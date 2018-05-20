@@ -62,7 +62,7 @@ class AbstractESMFNoseCommand(AbstractESMFCommand):
             sys.path.append('src')
 
             from ESMF.api import constants
-            mpirun_prefix = [constants._ESMF_MPIRUN, '-np', str(constants._ESMF_MPIRUN_NP)]
+            mpirun_prefix = [constants._ESMF_MPIRUN, '-n', str(constants._ESMF_MPIRUN_NP)]
             ret = mpirun_prefix + ret
 
         if cls._nose_flags is not None:
@@ -144,23 +144,6 @@ class TestParallelCommand(AbstractESMFNoseCommand):
     _nose_attrs = ['!serial']
     _nose_parallel = True
 
-class TestParallelAllCommand(AbstractESMFNoseCommand):
-    description = "run all parallel tests"
-    _nose_attrs = ['!serial,!mpi4py']
-    _nose_parallel = True
-
-
-class TestAllCommand(AbstractESMFCommand):
-    description = "run serial, parallel, and example tests"
-
-    @download_test_data
-    def run(self):
-        self._validate_()
-        to_run = [TestCommand, TestParallelAllCommand, TestExamplesCommand, TestExamplesParallelAllCommand]
-        for t in to_run:
-            cmd = t.nosetests_command()
-            subprocess.check_call(cmd)
-
 
 class TestRegridCommand(AbstractESMFNoseCommand):
     description = "run test_regrid.py"
@@ -170,11 +153,6 @@ class TestRegridCommand(AbstractESMFNoseCommand):
 class TestRegridParallelCommand(TestRegridCommand):
     description = "test regrid parallel"
     _nose_attrs = ['!serial']
-    _nose_parallel = True
-
-class TestRegridParallelAllCommand(TestRegridCommand):
-    description = "test regrid parallel"
-    _nose_attrs = ['!serial,!mpi4py']
     _nose_parallel = True
 
 class TestExamplesCommand(AbstractESMFNoseCommand):
@@ -192,11 +170,6 @@ class TestExamplesParallelCommand(TestExamplesCommand):
     _nose_attrs = ['!serial']
     _nose_parallel = True
 
-class TestExamplesParallelAllCommand(TestExamplesCommand):
-    description = "run all examples in parallel"
-    _nose_attrs = ['!serial,!mpi4py']
-    _nose_parallel = True
-
 class TestExamplesDryrunCommand(TestExamplesCommand):
     description = "collect example tests only and download data"
     _nose_flags = '--collect-only'
@@ -210,7 +183,7 @@ class TestRegridFromFileCommand(AbstractESMFCommand):
     def run(self):
         original_pp = os.environ.get('PYTHONPATH', '')
         path = os.path.join(os.getcwd(), 'src')
-        os.environ['PYTHONPATH'] = '{}:{}'.format(path, original_pp)
+        os.environ['PYTHONPATH'] = '{0}:{1}'.format(path, original_pp)
         self._validate_()
         target = os.path.join('src', 'ESMF', 'test', 'regrid_from_file', self._filename)
         cmd = [sys.executable, target]
@@ -230,12 +203,18 @@ class TestRegridFromFileParallelCommand(TestRegridFromFileCommand):
     _flags = '--parallel'
 
     def run(self):
-        try:
-            import mpi4py
-        except ImportError:
-            raise ImportError("mpi4py is required for parallel regrid from file testing!")
         TestRegridFromFileCommand.run(self)
 
+class TestAllCommand(AbstractESMFCommand):
+    description = "run serial, parallel, and example tests"
+
+    @download_test_data
+    def run(self):
+        self._validate_()
+        to_run = [TestCommand, TestParallelCommand, TestExamplesCommand, TestExamplesParallelCommand]
+        for t in to_run:
+            cmd = t.nosetests_command()
+            subprocess.check_call(cmd)
 
 # Get package structure
 def _get_dot_(path, root='src'):
@@ -261,7 +240,7 @@ for dirpath, dirnames, filenames in os.walk(src_path):
 # TODO: build doc command
 # TODO: remove duplicated metadata: here and src/ESMF/__init__.py
 setup(name="ESMPy",
-      version="7.1.0.dev",
+      version="8.0.0 beta",
       description="ESMF Python interface",
       author="University Corporation for Atmospheric Research, \
               Massachusetts Institute of Technology, \
@@ -282,15 +261,12 @@ setup(name="ESMPy",
                 'test': TestCommand,
                 'test_all': TestAllCommand,
                 'test_parallel': TestParallelCommand,
-                'test_parallel_all': TestParallelAllCommand,
                 'test_examples': TestExamplesCommand,
                 'test_examples_dryrun': TestExamplesDryrunCommand,
                 'test_examples_parallel': TestExamplesParallelCommand,
-                'test_examples_parallel_all': TestExamplesParallelAllCommand,
                 'test_regrid': TestRegridCommand,
                 'test_regrid': TestRegridCommand,
                 'test_regrid_from_file': TestRegridFromFileCommand,
                 'test_regrid_from_file_dryrun': TestRegridFromFileDryrunCommand,
                 'test_regrid_parallel': TestRegridParallelCommand,
-                'test_regrid_parallel_all': TestRegridParallelAllCommand,
                 'test_regrid_from_file_parallel': TestRegridFromFileParallelCommand})

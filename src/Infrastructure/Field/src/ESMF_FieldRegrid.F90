@@ -28,6 +28,7 @@ module ESMF_FieldRegridMod
   use ESMF_UtilTypesMod
   use ESMF_VMMod
   use ESMF_LogErrMod
+  use ESMF_DynamicMaskMod
   use ESMF_ArrayMod
   use ESMF_DistGridMod
   use ESMF_GridMod
@@ -39,6 +40,7 @@ module ESMF_FieldRegridMod
   use ESMF_XGridGeomBaseMod
   use ESMF_RegridMod
   use ESMF_FieldMod
+  use ESMF_FieldCreateMod
   use ESMF_FieldGetMod
   use ESMF_FieldSMMMod
   use ESMF_XGridMod
@@ -57,7 +59,6 @@ module ESMF_FieldRegridMod
 ! - ESMF-public methods:
    public ESMF_FieldRegridStore        ! Store a regrid matrix
    public ESMF_FieldRegrid             ! apply a regrid operator
-   public ESMF_FieldRegridR4R8R4       ! apply a regrid operator
    public ESMF_FieldRegridRelease      ! apply a regrid operator
    public ESMF_FieldRegridGetIwts      ! get integration weights
    public ESMF_FieldRegridGetArea      ! get area
@@ -79,13 +80,11 @@ module ESMF_FieldRegridMod
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-    module procedure ESMF_FieldRegridStoreFile
     module procedure ESMF_FieldRegridStoreNX
     module procedure ESMF_FieldRegridStoreX
 !EOPI
 
   end interface
-
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
@@ -109,23 +108,19 @@ contains
 ! !IROUTINE: ESMF_FieldRegrid - Compute a regridding operation
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldRegrid(srcField, dstField, &
-                   routehandle, keywordEnforcer, zeroregion, &
-                   termorderflag, checkflag, dynamicSrcMaskValue, &
-                   dynamicDstMaskValue, dynamicMaskRoutine, rc)
+  subroutine ESMF_FieldRegrid(srcField, dstField, routehandle, keywordEnforcer, &
+    zeroregion, termorderflag, checkflag, dynamicMask, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field),          intent(in),    optional :: srcField
-      type(ESMF_Field),          intent(inout), optional :: dstField
-      type(ESMF_RouteHandle),    intent(inout)           :: routehandle
+      type(ESMF_Field),               intent(in),    optional :: srcField
+      type(ESMF_Field),               intent(inout), optional :: dstField
+      type(ESMF_RouteHandle),         intent(inout)           :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_Region_Flag),    intent(in),    optional :: zeroregion
-      type(ESMF_TermOrder_Flag), intent(in),    optional :: termorderflag
-      logical,                   intent(in),    optional :: checkflag
-      real(ESMF_KIND_R8),        intent(in),    optional :: dynamicSrcMaskValue
-      real(ESMF_KIND_R8),        intent(in),    optional :: dynamicDstMaskValue
-      procedure(ESMF_DynamicMaskRoutineR8R8R8), optional :: dynamicMaskRoutine
-      integer,                   intent(out),   optional :: rc 
+      type(ESMF_Region_Flag),         intent(in),    optional :: zeroregion
+      type(ESMF_TermOrder_Flag),      intent(in),    optional :: termorderflag
+      logical,                        intent(in),    optional :: checkflag
+      type(ESMF_DynamicMask), target, intent(in),    optional :: dynamicMask
+      integer,                        intent(out),   optional :: rc 
 !
 ! !STATUS:
 ! \begin{itemize}
@@ -135,9 +130,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.1.0] Added argument {\tt termorderflag}.
 !              The new argument gives the user control over the order in which
 !              the src terms are summed up.
-! \item[7.1.0] Added arguments {\tt dynamicSrcMaskValue}, 
-!              {\tt dynamicDstMaskValue}, and {\tt dynamicMaskRoutine}.
-!              The new arguments support the dynamic masking feature.
+! \item[7.1.0r] Added argument {\tt dynamicMask}.
+!              The new argument supports the dynamic masking feature.
 ! \end{description}
 ! \end{itemize}
 !
@@ -147,23 +141,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   precompute the {\tt routehandle}. 
 !  
 !   \begin{sloppypar}
-!   Both {\tt srcField} and {\tt dstField} must be
-!   weakly congruent with the respective Fields used during 
-!   {\tt ESMF\_FieldRegridStore()}. Congruent Fields possess matching DistGrids and the shape of the 
-!   local array tiles matches between the Fields for every DE. For weakly congruent Fields the sizes 
-!   of the undistributed dimensions, that vary faster with memory than the first distributed dimension,
-!   are permitted to be different. This means that the same routehandle can be applied to a large class 
-!   of similar Fields that differ in the number of elements in the left most undistributed dimensions.
-!   You can apply the routehandle between any set of Fields weakly congruent to the original Fields used
-!   to create the routehandle without incurring an error. However, if you want                                     
-!   the routehandle to be the same interpolation between the grid objects upon which the Fields are build as was calculated
-!   with the original {\tt ESMF\_FieldRegridStore()} call, then there
-!   are additional constraints on the grid objects. To be the same interpolation, the grid objects upon which the 
-!   Fields are build must contain the same coordinates at the stagger locations involved in the regridding as 
-!   the original source and destination Fields used in the {\tt ESMF\_FieldRegridStore()} call.  
-!   The routehandle represents the interpolation between the grid objects as they were during the {\tt ESMF\_FieldRegridStore()} call.  
-!   So if the coordinates at the stagger location in the grid objects change, a new call to {\tt ESMF\_FieldRegridStore()} 
-!   is necessary to compute the interpolation between that new set of coordinates.
+!   Both {\tt srcField} and {\tt dstField} must match the respective Fields
+!   used during {\tt ESMF\_FieldRegridStore()} in {\em type}, {\em kind}, and 
+!   memory layout of the {\em gridded} dimensions. However, the size, number, 
+!   and index order of {\em ungridded} dimensions may be different. See section
+!   \ref{RH:Reusability} for a more detailed discussion of RouteHandle 
+!   reusability.
 !   \end{sloppypar}
 !
 !   The {\tt srcField} and {\tt dstField} arguments are optional in support of
@@ -205,34 +188,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     in-depth discussion of {\em all} bit-for-bit reproducibility
 !     aspects related to route-based communication methods.
 !     See \ref{const:termorderflag} for a full list of options.
-!     The default is {\tt ESMF\_TERMORDER\_FREE}, allowing maximum flexibility
-!     in the order of terms for optimum performance.
+!     The default setting depends on whether the {\tt dynamicMask} argument
+!     is present or not. With {\tt dynamicMask} argument present, the default
+!     of {\tt termorderflag} is {\tt ESMF\_TERMORDER\_SRCSEQ}. This ensures
+!     that {\tt all} source terms are present on the destination side, and 
+!     the interpolation can be calculated as a single sum. When 
+!     {\tt dynamicMask} is absent, the default of {\tt termorderflag} is
+!     {\tt ESMF\_TERMORDER\_FREE}, allowing maximum flexibility and partial 
+!     sums for optimum performance.
 !   \item [{[checkflag]}]
 !     If set to {\tt .TRUE.} the input Array pair will be checked for
 !     consistency with the precomputed operation provided by {\tt routehandle}.
 !     If set to {\tt .FALSE.} {\em (default)} only a very basic input check
 !     will be performed, leaving many inconsistencies undetected. Set
 !     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
-!   \item [{[dynamicSrcMaskValue]}]
-!     If provided, turns on the dynamic masking feature. Any element in the
-!     {\tt srcField} with a value equal to {\tt dynamicSrcMaskValue} is counted
-!     as a dynamically masked source element. Elements affected will be passed
-!     to the routine specified in {\tt dynamicMaskRoutine} for handling.
-!     The default is to not assume any source elements as dynamically masked.
-!   \item [{[dynamicDstMaskValue]}]
-!     If provided, turns on the dynamic masking feature. Any element in the
-!     {\tt dstField} with a value equal to {\tt dynamicDstMaskValue} is counted
-!     as a dynamically masked destination element. Elements affected will be
-!     passed to the routine specified in {\tt dynamicMaskRoutine} for handling.
-!     The default is to not assume any destination elements as dynamically
-!     masked.
-!   \item [{[dynamicMaskRoutine]}]
-!     The routine responsible for handling dynamically masked source and 
-!     destination elements. Must be provided if {\tt dynamicSrcMaskValue} or
-!     {\tt dynamicDstMaskValue} are provided.
-!     See section \ref{RH:DynMask} for a discussion of dynamic masking, and for
-!     the precise definition of the {\tt dynamicMaskRoutine} procedure 
-!     interface.
+!   \item [{[dynamicMask]}]
+!     Object holding dynamic masking information.
+!     See section \ref{RH:DynMask} for a discussion of dynamic masking.
 !   \item [{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -263,29 +235,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_ArraySMM(srcArray=srcArray, dstArray=dstArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
-                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
-                 dynamicDstMaskValue=dynamicDstMaskValue, &
-                 dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
-                else if (present(srcField) .and. .not. present(dstField)) then
+                 dynamicMask=dynamicMask, rc=localrc)
+        else if (present(srcField) .and. .not. present(dstField)) then
           call ESMF_ArraySMM(srcArray=srcArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
-                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
-                 dynamicDstMaskValue=dynamicDstMaskValue, &
-                 dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
-                else if (.not. present(srcField) .and. present(dstField)) then
+                 dynamicMask=dynamicMask, rc=localrc)
+        else if (.not. present(srcField) .and. present(dstField)) then
           call ESMF_ArraySMM(dstArray=dstArray, &
                  routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
-                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
-                 dynamicDstMaskValue=dynamicDstMaskValue, &
-                 dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
+                 dynamicMask=dynamicMask, rc=localrc)
         else if (.not. present(srcField) .and. .not. present(dstField)) then
           call ESMF_ArraySMM(routehandle=routehandle, zeroregion=zeroregion, &
                  termorderflag=termorderflag, checkflag=checkflag, &
-                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
-                 dynamicDstMaskValue=dynamicDstMaskValue, &
-                 dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
+                 dynamicMask=dynamicMask, rc=localrc)
         else
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
             msg="Supplied combination of optional Fields not supported", &
@@ -311,218 +275,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_FieldRegrid
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldRegridR4R8R4"
-
-!BOPI
-! !IROUTINE: ESMF_FieldRegridR4R8R4 - Compute a regridding operation
-!
-! !INTERFACE:
-      subroutine ESMF_FieldRegridR4R8R4(srcField, dstField, &
-                   routehandle, keywordEnforcer, zeroregion, &
-                   termorderflag, checkflag, dynamicSrcMaskValue, &
-                   dynamicDstMaskValue, dynamicMaskRoutine, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field),          intent(in),    optional :: srcField
-      type(ESMF_Field),          intent(inout), optional :: dstField
-      type(ESMF_RouteHandle),    intent(inout)           :: routehandle
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_Region_Flag),    intent(in),    optional :: zeroregion
-      type(ESMF_TermOrder_Flag), intent(in),    optional :: termorderflag
-      logical,                   intent(in),    optional :: checkflag
-      real(ESMF_KIND_R4),        intent(in),    optional :: dynamicSrcMaskValue
-      real(ESMF_KIND_R4),        intent(in),    optional :: dynamicDstMaskValue
-      procedure(ESMF_DynamicMaskRoutineR4R8R4), optional :: dynamicMaskRoutine
-      integer,                   intent(out),   optional :: rc 
-!
-! !STATUS:
-! \begin{itemize}
-! \item\apiStatusCompatibleVersion{5.2.0r}
-! \item\apiStatusModifiedSinceVersion{5.2.0r}
-! \begin{description}
-! \item[6.1.0] Added argument {\tt termorderflag}.
-!              The new argument gives the user control over the order in which
-!              the src terms are summed up.
-! \item[7.1.0] Added arguments {\tt dynamicSrcMaskValue}, 
-!              {\tt dynamicDstMaskValue}, and {\tt dynamicMaskRoutine}.
-!              The new arguments support the dynamic masking feature.
-! \end{description}
-! \end{itemize}
-!
-! !DESCRIPTION:
-!   Execute the precomputed regrid operation stored in {\tt routehandle} to 
-!   interpolate from {\tt srcField} to {\tt dstField}.  See {\tt ESMF\_FieldRegridStore()} on how to 
-!   precompute the {\tt routehandle}. 
-!  
-!   \begin{sloppypar}
-!   Both {\tt srcField} and {\tt dstField} must be
-!   weakly congruent with the respective Fields used during 
-!   {\tt ESMF\_FieldRegridStore()}. Congruent Fields possess matching DistGrids and the shape of the 
-!   local array tiles matches between the Fields for every DE. For weakly congruent Fields the sizes 
-!   of the undistributed dimensions, that vary faster with memory than the first distributed dimension,
-!   are permitted to be different. This means that the same routehandle can be applied to a large class 
-!   of similar Fields that differ in the number of elements in the left most undistributed dimensions.
-!   You can apply the routehandle between any set of Fields weakly congruent to the original Fields used
-!   to create the routehandle without incurring an error. However, if you want                                     
-!   the routehandle to be the same interpolation between the grid objects upon which the Fields are build as was calculated
-!   with the original {\tt ESMF\_FieldRegridStore()} call, then there
-!   are additional constraints on the grid objects. To be the same interpolation, the grid objects upon which the 
-!   Fields are build must contain the same coordinates at the stagger locations involved in the regridding as 
-!   the original source and destination Fields used in the {\tt ESMF\_FieldRegridStore()} call.  
-!   The routehandle represents the interpolation between the grid objects as they were during the {\tt ESMF\_FieldRegridStore()} call.  
-!   So if the coordinates at the stagger location in the grid objects change, a new call to {\tt ESMF\_FieldRegridStore()} 
-!   is necessary to compute the interpolation between that new set of coordinates.
-!   \end{sloppypar}
-!
-!   The {\tt srcField} and {\tt dstField} arguments are optional in support of
-!   the situation where {\tt srcField} and/or {\tt dstField} are not defined on
-!   all PETs. The {\tt srcField} and {\tt dstField} must be specified on those
-!   PETs that hold source or destination DEs, respectively, but may be omitted
-!   on all other PETs. PETs that hold neither source nor destination DEs may
-!   omit both arguments.
-!
-!   It is erroneous to specify the identical Field object for {\tt srcField} and
-!   {\tt dstField} arguments.
-!
-!   This call is {\em collective} across the current VM.
-!
-!   \begin{description}
-!   \item [{[srcField]}]
-!     {\tt ESMF\_Field} with source data.
-!   \item [{[dstField]}]
-!     {\tt ESMF\_Field} with destination data.
-!   \item [routehandle]
-!     Handle to the precomputed Route.
-!   \item [{[zeroregion]}]
-!     \begin{sloppypar}
-!     If set to {\tt ESMF\_REGION\_TOTAL} {\em (default)} the total regions of
-!     all DEs in {\tt dstField} will be initialized to zero before updating the 
-!     elements with the results of the sparse matrix multiplication. If set to
-!     {\tt ESMF\_REGION\_EMPTY} the elements in {\tt dstField} will not be
-!     modified prior to the sparse matrix multiplication and results will be
-!     added to the incoming element values. Setting {\tt zeroregion} to 
-!     {\tt ESMF\_REGION\_SELECT} will only zero out those elements in the 
-!     destination Array that will be updated by the sparse matrix
-!     multiplication. See section \ref{const:region} for a complete list of
-!     valid settings.
-!     \end{sloppypar}
-!   \item [{[termorderflag]}]
-!     Specifies the order of the source side terms in all of the destination
-!     sums. The {\tt termorderflag} only affects the order of terms during 
-!     the execution of the RouteHandle. See the \ref{RH:bfb} section for an
-!     in-depth discussion of {\em all} bit-for-bit reproducibility
-!     aspects related to route-based communication methods.
-!     See \ref{const:termorderflag} for a full list of options.
-!     The default is {\tt ESMF\_TERMORDER\_FREE}, allowing maximum flexibility
-!     in the order of terms for optimum performance.
-!   \item [{[checkflag]}]
-!     If set to {\tt .TRUE.} the input Array pair will be checked for
-!     consistency with the precomputed operation provided by {\tt routehandle}.
-!     If set to {\tt .FALSE.} {\em (default)} only a very basic input check
-!     will be performed, leaving many inconsistencies undetected. Set
-!     {\tt checkflag} to {\tt .FALSE.} to achieve highest performance.
-!   \item [{[dynamicSrcMaskValue]}]
-!     If provided, turns on the dynamic masking feature. Any element in the
-!     {\tt srcField} with a value equal to {\tt dynamicSrcMaskValue} is counted
-!     as a dynamically masked source element. Elements affected will be passed
-!     to the routine specified in {\tt dynamicMaskRoutine} for handling.
-!     The default is to not assume any source elements as dynamically masked.
-!   \item [{[dynamicDstMaskValue]}]
-!     If provided, turns on the dynamic masking feature. Any element in the
-!     {\tt dstField} with a value equal to {\tt dynamicDstMaskValue} is counted
-!     as a dynamically masked destination element. Elements affected will be
-!     passed to the routine specified in {\tt dynamicMaskRoutine} for handling.
-!     The default is to not assume any destination elements as dynamically
-!     masked.
-!   \item [{[dynamicMaskRoutine]}]
-!     The routine responsible for handling dynamically masked source and 
-!     destination elements. Must be provided if {\tt dynamicSrcMaskValue} or
-!     {\tt dynamicDstMaskValue} are provided.
-!     See section \ref{RH:DynMask} for a discussion of dynamic masking, and for
-!     the precise definition of the {\tt dynamicMaskRoutine} procedure 
-!     interface.
-!   \item [{[rc]}]
-!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!EOPI
-        integer :: localrc
-        type(ESMF_Array)     :: srcArray
-        type(ESMF_Array)     :: dstArray
-
-        ! Initialize return code; assume failure until success is certain
-        localrc = ESMF_SUCCESS
-        if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-        ! Now we go through the painful process of extracting the data members
-        ! that we need, if present.
-        if (present(srcField)) then
-          call ESMF_FieldGet(srcField, array=srcArray, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
-
-        if (present(dstField)) then
-          call ESMF_FieldGet(dstField, array=dstArray, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
-
-        if (present(srcField) .and. present(dstField)) then
-          call ESMF_ArraySMMR4R8R4(srcArray=srcArray, dstArray=dstArray, &
-                 routehandle=routehandle, zeroregion=zeroregion, &
-                 termorderflag=termorderflag, checkflag=checkflag, &
-                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
-                 dynamicDstMaskValue=dynamicDstMaskValue, &
-                 dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
-                else if (present(srcField) .and. .not. present(dstField)) then
-          call ESMF_ArraySMMR4R8R4(srcArray=srcArray, &
-                 routehandle=routehandle, zeroregion=zeroregion, &
-                 termorderflag=termorderflag, checkflag=checkflag, &
-                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
-                 dynamicDstMaskValue=dynamicDstMaskValue, &
-                 dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
-                else if (.not. present(srcField) .and. present(dstField)) then
-          call ESMF_ArraySMMR4R8R4(dstArray=dstArray, &
-                 routehandle=routehandle, zeroregion=zeroregion, &
-                 termorderflag=termorderflag, checkflag=checkflag, &
-                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
-                 dynamicDstMaskValue=dynamicDstMaskValue, &
-                 dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
-        else if (.not. present(srcField) .and. .not. present(dstField)) then
-          call ESMF_ArraySMMR4R8R4(routehandle=routehandle, zeroregion=zeroregion, &
-                 termorderflag=termorderflag, checkflag=checkflag, &
-                 dynamicSrcMaskValue=dynamicSrcMaskValue, &
-                 dynamicDstMaskValue=dynamicDstMaskValue, &
-                 dynamicMaskRoutine=dynamicMaskRoutine, rc=localrc)
-        else
-          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
-            msg="Supplied combination of optional Fields not supported", &
-            ESMF_CONTEXT, rcToReturn=rc)
-          return
-        endif
-
-        if (ESMF_LogFoundError(localrc, &
-          ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-        ! Once the compilation order is sorted out, 
-        ! Should be able to call into Field SMM directly.
-        !call ESMF_FieldSMM(srcField=srcField, dstField=dstField, &
-        !           routehandle=routehandle, zeroregion=zeroregion, &
-        !           checkflag=checkflag, rc=localrc)
-
-        !if (ESMF_LogFoundError(localrc, &
-        !                             ESMF_ERR_PASSTHRU, &
-        !                             ESMF_CONTEXT, rcToReturn=rc)) return
-
-        if(present(rc)) rc = ESMF_SUCCESS
-
-    end subroutine ESMF_FieldRegridR4R8R4
+    
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldRegridRelease"
-
 !BOP
 ! !IROUTINE: ESMF_FieldRegridRelease - Free resources used by a regridding operation
 !
@@ -561,301 +317,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     end subroutine ESMF_FieldRegridRelease
 !------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_FieldRegridStoreFile"
-
-!BOP
-! !IROUTINE: ESMF_FieldRegridStoreFile - Precompute a Field regridding operation and write a file
-! !INTERFACE:
-  !   Private name; call using ESMF_FieldRegridStoreFile()
-      subroutine ESMF_FieldRegridStoreFile(srcField, dstField, fileName, &
-                    keywordEnforcer, &
-                    srcMaskValues, dstMaskValues, &
-                    regridmethod, &
-                    polemethod, regridPoleNPnts, &
-                    lineType, &
-                    normType, &
-                    unmappedaction, ignoreDegenerate, &
-                    srcTermProcessing, &
-                    pipeLineDepth, &
-                    routehandle, &
-                    factorList, factorIndexList, &
-                    srcFracField, dstFracField, &
-                    dstStatusField, &
-                    unmappedDstList, &
-                    rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field),               intent(in)              :: srcField
-      type(ESMF_Field),               intent(inout)           :: dstField
-      character(len=*),               intent(in)              :: fileName
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      integer(ESMF_KIND_I4),          intent(in),    optional :: srcMaskValues(:)
-      integer(ESMF_KIND_I4),          intent(in),    optional :: dstMaskValues(:)
-      type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
-      type(ESMF_PoleMethod_Flag),     intent(in),    optional :: polemethod
-      integer,                        intent(in),    optional :: regridPoleNPnts
-      type(ESMF_LineType_Flag),       intent(in),    optional :: lineType
-      type(ESMF_NormType_Flag),       intent(in),    optional :: normType
-      type(ESMF_UnmappedAction_Flag), intent(in),    optional :: unmappedaction
-      logical,                        intent(in),    optional :: ignoreDegenerate
-      integer,                        intent(inout), optional :: srcTermProcessing
-      integer,                        intent(inout), optional :: pipeLineDepth
-      type(ESMF_RouteHandle),         intent(inout), optional :: routehandle
-      real(ESMF_KIND_R8),             pointer,       optional :: factorList(:)
-      integer(ESMF_KIND_I4),          pointer,       optional :: factorIndexList(:,:)
-      type(ESMF_Field),               intent(inout), optional :: srcFracField
-      type(ESMF_Field),               intent(inout), optional :: dstFracField
-      type(ESMF_Field),               intent(inout), optional :: dstStatusField
-      integer(ESMF_KIND_I4),          pointer,       optional :: unmappedDstList(:)
-      integer,                        intent(out),   optional :: rc
-!
-! !STATUS:
-!
-! !DESCRIPTION:
-!       \begin{sloppypar}
-!       Creates a sparse matrix operation (stored in {\tt routehandle}) that
-!       contains the calculations and communications necessary to interpolate
-!       from {\tt srcField} to {\tt dstField}. The routehandle can then be
-!       used in the call {\tt ESMF\_FieldRegrid()} to interpolate between the
-!       Fields. The user may also get the interpolation matrix in sparse
-!       matrix form via the optional arguments {\tt factorList} and {\tt factorIndexList}.
-!       \end{sloppypar}
-!
-!       The routehandle generated by this call is based just on the
-!       coordinates in the Grids or Meshes contained in the Fields.  If those
-!       coordinates don't change the routehandle can
-!       be used repeatedly to interpolate from the source Field to the
-!       destination Field.  This is true even if the data in the Fields
-!       changes. The routehandle may also be used to interpolate between any
-!       source and destination Field which are created on the same location
-!       in the same Grid, LocStream, or Mesh as the original Fields.
-!
-!       When it's no longer needed the routehandle should be destroyed by
-!       using {\tt ESMF\_FieldRegridRelease()} to free the memory it's using.
-!
-!       Note, as a side effect, that this call may change the data in {\tt dstField}. If
-!       this is undesirable, then an easy work around is to create a second temporary field
-!       with the same structure as {\tt dstField} and pass that in instead.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [srcField]
-!           Source Field.
-!     \item [dstField]
-!           Destination Field. The data in this Field may be overwritten by this call.
-!     \item [{[srcMaskValues]}]
-!           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask})
-!           upon which the {\tt srcField} is built. The {\tt srcMaskValues} argument specifies the values in that
-!           mask information which indicate a source point should be masked out. In other words, a locati on is masked if and only if the
-!           value for that location in the mask information matches one of the values listed in {\tt srcMaskValues}.
-!           If {\tt srcMaskValues} is not specified, no masking will occur.
-!     \item [{[dstMaskValues]}]
-!           Mask information can be set in the Grid (see~\ref{sec:usage:items}) or Mesh (see~\ref{sec:mesh:mask})
-!           upon which the {\tt dstField} is built. The {\tt dstMaskValues} argument specifies the values in that
-!           mask information which indicate a destination point should be masked out. In other words, a location is masked if and only if the
-!           value for that location in the mask information matches one of the values listed in {\tt dstMaskValues}.
-!           If {\tt dstMaskValues} is not specified, no masking will occur.
-!     \item [{[regridmethod]}]
-!           The type of interpolation. Please see Section~\ref{opt:regridmethod}
-!           for a list of valid options. If not specified, defaults to
-!           {\tt ESMF\_REGRIDMETHOD\_BILINEAR}.
-!     \item [{[polemethod]}]
-!           Specifies the type of pole
-!           to construct on the source Grid during regridding. Please see
-!           Section~\ref{const:polemethod} for a list of
-!           valid options. If not specified, defaults to {\tt ESMF\_POLEMETHOD\_ALLAVG} for non-conservative regrid methods,
-!           and {\tt ESMF\_POLEMETHOD\_NONE} for conservative methods.
-!     \item [{[regridPoleNPnts]}]
-!           If {\tt polemethod} is {\tt ESMF\_POLEMETHOD\_NPNTAVG},
-!           then this parameter indicates the number of points over which to average.
-!           If {\tt polemethod} is not {ESMF\_POLEMETHOD\_NPNTAVG} and {\tt regridPoleNPnts} is specified,
-!           then it will be ignored.
-!           This subroutine will return an error if {\tt polemethod} is {ESMF\_POLEMETHOD\_NPNTAVG} and
-!           {\tt regridPoleNPnts} is not specified.
-!     \item [{[lineType]}]
-!           This argument controls the path of the line which connects two points on a sphere surface. This in
-!           turn controls the path along which distances are calculated and the shape of the edges that make
-!           up a cell. Both of these quantities can influence how interpolation weights are calculated.
-!           As would be expected, this argument is only applicable when {\tt srcField} and {\tt dstField} are
-!           built on grids which lie on the surface of a sphere. Section~\ref{opt:lineType} shows a
-!           list of valid options for this argument. If not specified, the default depends on the
-!           regrid method. Section~\ref{opt:lineType} has the defaults by line type. Figure~\ref{line_type_support} shows
-!           which line types are supported for each regrid method as well as showing the default line type by regrid method.
-!     \item [{[normType]}]
-!           This argument controls the type of normalization used when generating conservative weights. This option
-!           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE} or 
-!           {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE\_2ND}. Please see Section~\ref{opt:normType} for a
-!           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}.
-!     \item [{[unmappedaction]}]
-!           Specifies what should happen if there are destination points that
-!           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a
-!           list of valid options. If not specified, {\tt unmappedaction} defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}.
-!     \item [{[ignoreDegenerate]}]
-!           Ignore degenerate cells when checking the input Grids or Meshes for errors. If this is set to true, then the
-!           regridding proceeds, but degenerate cells will be skipped. If set to false, a degenerate cell produces an error.
-!           If not specified, {\tt ignoreDegenerate} defaults to false.
-!     \item [{[srcTermProcessing]}]
-!           The {\tt srcTermProcessing} parameter controls how many source terms,
-!           located on the same PET and summing into the same destination element,
-!           are summed into partial sums on the source PET before being transferred
-!           to the destination PET. A value of 0 indicates that the entire arithmetic
-!           is done on the destination PET; source elements are neither multiplied
-!           by their factors nor added into partial sums before being sent off by the
-!           source PET. A value of 1 indicates that source elements are multiplied
-!           by their factors on the source side before being sent to the destination
-!           PET. Larger values of {\tt srcTermProcessing} indicate the maximum number
-!           of terms in the partial sums on the source side.
-!
-!     Note that partial sums may lead to bit-for-bit differences in the results.
-!     See section \ref{RH:bfb} for an in-depth discussion of {\em all}
-!     bit-for-bit reproducibility aspects related to route-based communication
-!     methods.
-!
-!     \begin{sloppypar}
-!     The {\tt ESMF\_FieldRegridStore()} method implements an auto-tuning scheme
-!     for the {\tt srcTermProcessing} parameter. The intent on the
-!     {\tt srcTermProcessing} argument is "{\tt inout}" in order to
-!     support both overriding and accessing the auto-tuning parameter.
-!     If an argument $>= 0$ is specified, it is used for the
-!     {\tt srcTermProcessing} parameter, and the auto-tuning phase is skipped.
-!     In this case the {\tt srcTermProcessing} argument is not modified on
-!     return. If the provided argument is $< 0$, the {\tt srcTermProcessing}
-!     parameter is determined internally using the auto-tuning scheme. In this
-!     case the {\tt srcTermProcessing} argument is re-set to the internally
-!     determined value on return. Auto-tuning is also used if the optional
-!     {\tt srcTermProcessing} argument is omitted.
-!     \end{sloppypar}
-!
-!   \item [{[pipelineDepth]}]
-!     The {\tt pipelineDepth} parameter controls how many messages a PET
-!     may have outstanding during a sparse matrix exchange. Larger values
-!     of {\tt pipelineDepth} typically lead to better performance. However,
-!     on some systems too large a value may lead to performance degradation,
-!     or runtime errors.
-!
-!     Note that the pipeline depth has no affect on the bit-for-bit
-!     reproducibility of the results. However, it may affect the performance
-!     reproducibility of the exchange.
-!
-!     The {\tt ESMF\_FieldRegridStore()} method implements an auto-tuning scheme
-!     for the {\tt pipelineDepth} parameter. The intent on the
-!     {\tt pipelineDepth} argument is "{\tt inout}" in order to
-!     support both overriding and accessing the auto-tuning parameter.
-!     If an argument $>= 0$ is specified, it is used for the
-!     {\tt pipelineDepth} parameter, and the auto-tuning phase is skipped.
-!     In this case the {\tt pipelineDepth} argument is not modified on
-!     return. If the provided argument is $< 0$, the {\tt pipelineDepth}
-!     parameter is determined internally using the auto-tuning scheme. In this
-!     case the {\tt pipelineDepth} argument is re-set to the internally
-!     determined value on return. Auto-tuning is also used if the optional
-!     {\tt pipelineDepth} argument is omitted.
-!     \item [{[routehandle]}]
-!           The communication handle that implements the regrid operation and that can be used later in
-!           the {\tt ESMF\_FieldRegrid()} call. The {\tt routehandle} is optional so that if the
-!           user doesn't need it, then they can indicate that by not requesting it.
-!           The time to compute the {\tt routehandle} can be a significant fraction of the time
-!           taken by this method, so if it's not needed then not requesting it is worthwhile.
-!     \item [{[factorList]}]
-!           The list of coefficients for a sparse matrix which interpolates from {\tt srcField} to
-!           {\tt dstField}. The array coming out of this variable is in the appropriate format to be used
-!           in other ESMF sparse matrix multiply calls, for example {\tt ESMF\_FieldSMMStore()}.
-!           The {\tt factorList} array is allocated by the method and the user is responsible for
-!           deallocating it.
-!     \item [{[factorIndexList]}]
-!           The indices for a sparse matrix which interpolates from {\tt srcField} to
-!           {\tt dstField}. This argument is a 2D array containing pairs of source and destination
-!           sequence indices corresponding to the coefficients in the {\tt factorList} argument.
-!           The first dimension of {\tt factorIndexList} is of size 2. {\tt factorIndexList(1,:)} specifies
-!           the sequence index of the source element in the {\tt srcField}. {\tt factorIndexList(2,:)} specifies
-!           the sequence index of the destination element in the {\tt dstField}. The se cond dimension of
-!           {\tt factorIndexList} steps through the list of pairs, i.e. {\tt size(factorIndexList,2)==size(factorList)}.
-!           The array coming out of this variable is in the appropriate format to be used
-!           in other ESMF sparse matrix multiply calls, for example {\tt ESMF\_FieldSMMStore()}.
-!           The {\tt factorIndexList} array is allocated by the method and the user is responsible for deallocating it.
-!     \item [{[srcFracField]}]         
-!           The fraction of each source cell participating in the regridding. Only
-!           valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE} or  {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE\_2ND}.
-!           This Field needs to be created on the same location (e.g staggerloc)
-!           as the srcField.
-!     \item [{[dstFracField]}]
-!           The fraction of each destination cell participating in the regridding. Only
-!           valid when regridmethod is {\tt ESMF\_REGRIDMETHOD\_CONSERVE} or  {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE\_2ND}.
-!           This Field needs to be created on the same location (e.g staggerloc)
-!           as the dstField. It is important to note that the current implementation
-!           of conservative regridding doesn't normalize the interpolation weights by the destination fraction. This   means that for a destination
-!           grid which only partially overlaps the source grid the destination field which is output from the
-!           regrid operation should be divided by the corresponding destination fraction to yield the
-!           true interpolated values for cells which are only partially covered by the  source grid.
-!     \item [{[dstStatusField]}]
-!           An ESMF Field which outputs a regrid status value for each destination location.
-!           Section~\ref{opt:regridstatus} indicates the meaning of each value. The Field needs to
-!           be built on the same grid-location (e.g. staggerloc) in the same Grid, Mesh, or LocStream as the {\tt dstField} argument.
-!           The Field also needs to be of typekind {\tt ESMF\_TYPEKIND\_I4}.  This option currently doesn't work with
-!           the {\tt ESMF\_REGRIDMETHOD\_NEAREST\_DTOS} regrid method.
-!     \item [{[unmappedDstList]}]
-!           The list of the sequence indices for locations in {\tt dstField} which couldn't be mapped the {\tt srcField}.
-!           The list on each PET only contains the unmapped locations for the piece of the {\tt dstField} on that PET.
-!           If a destination point is masked, it won't be put in this list. This option currently doesn't work with
-!           the {\tt ESMF\_REGRIDMETHOD\_NEAREST\_DTOS} regrid method.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-      integer :: localrc
-
-      real(ESMF_KIND_R8), pointer :: localFactorList(:)
-      integer(ESMF_KIND_I4), pointer :: localFactorIndexList(:,:)
-
-      ! Initialize return code; assume failure until success is certain
-      localrc = ESMF_SUCCESS
-      if (present(rc)) rc = ESMF_RC_NOT_IMPL
-
-      call ESMF_FieldRegridStore(srcField, dstField, &
-          srcMaskValues=srcMaskValues, &
-          dstMaskValues=dstMaskValues, &
-          regridmethod=regridmethod, &
-          polemethod=polemethod, &
-          regridPoleNPnts=regridPoleNPnts, &
-          lineType=lineType, &
-          normType=normType, &
-          unmappedaction=unmappedaction, &
-          ignoreDegenerate=ignoreDegenerate, &
-          srcTermProcessing=srcTermProcessing, &
-          pipeLineDepth=pipeLineDepth, &
-          routehandle=routehandle, &
-          factorList=localFactorList, &
-          factorIndexList=localFactorIndexList, &
-          srcFracField=srcFracField, &
-          dstFracField=dstFracField, &
-          dstStatusField=dstStatusField, &
-          unmappedDstList=unmappedDstList, &
-          rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! call OutputWeightsFile
-      call ESMF_OutputWeightFile(fileName, localFactorList, &
-                                 localFactorIndexList, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-        ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Handle optional arguments
-      if (present(factorList)) then
-        factorList=localFactorList
-      endif
-
-      if (present(factorIndexList)) then
-        factorIndexList = localFactorIndexList
-      endif
-
-      if(present(rc)) rc = ESMF_SUCCESS
-
-    end subroutine ESMF_FieldRegridStoreFile
-
-!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -872,6 +333,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     polemethod, regridPoleNPnts, & 
                     lineType, &
                     normType, &
+                    extrapMethod, &
+                    extrapNumSrcPnts, &
+                    extrapDistExponent, &
                     unmappedaction, ignoreDegenerate, &
                     srcTermProcessing, & 
                     pipeLineDepth, &
@@ -888,12 +352,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_Field),               intent(inout)           :: dstField
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer(ESMF_KIND_I4),          intent(in),    optional :: srcMaskValues(:)
-       integer(ESMF_KIND_I4),         intent(in),    optional :: dstMaskValues(:)
+      integer(ESMF_KIND_I4),         intent(in),    optional :: dstMaskValues(:)
       type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
       type(ESMF_PoleMethod_Flag),     intent(in),    optional :: polemethod
       integer,                        intent(in),    optional :: regridPoleNPnts
       type(ESMF_LineType_Flag),       intent(in),    optional :: lineType
       type(ESMF_NormType_Flag),       intent(in),    optional :: normType
+      type(ESMF_ExtrapMethod_Flag),   intent(in),    optional :: extrapMethod
+      integer,                        intent(in),    optional :: extrapNumSrcPnts
+      real(ESMF_KIND_R4),             intent(in),    optional :: extrapDistExponent
       type(ESMF_UnmappedAction_Flag), intent(in),    optional :: unmappedaction
       logical,                        intent(in),    optional :: ignoreDegenerate
       integer,                        intent(inout), optional :: srcTermProcessing
@@ -934,9 +401,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !               a sphere.
 ! \item[6.3.0rp1] Added argument {\tt normType}. This argument allows the user to
 !               control the type of normalization done during conservative weight generation.
-! \item[7.1.0] Added argument {\tt dstStatusField}. This argument allows the user to
+! \item[7.1.0r] Added argument {\tt dstStatusField}. This argument allows the user to
 !              receive information about what happened to each location in the destination
 !              Field during regridding.
+!
+!              Added arguments {\tt extrapMethod}, {\tt extrapNumSrcPnts}, and
+!              {\tt extrapDistExponent}. These three new extrapolation arguments allow the 
+!              user to extrapolate destination points not mapped by the regrid method. 
+!              {\tt extrapMethod} allows the user to choose the extrapolation method.
+!              {\tt extrapNumSrcPnts} and {\tt extrapDistExponent} are parameters that
+!              allow the user to tune the behavior of the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} 
+!              method.
 ! \end{description}
 ! \end{itemize}
 !
@@ -1015,6 +490,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           only applies to weights generated with {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE} or  {\tt regridmethod=ESMF\_REGRIDMETHOD\_CONSERVE\_2ND}
 !           Please see  Section~\ref{opt:normType} for a 
 !           list of valid options. If not specified {\tt normType} defaults to {\tt ESMF\_NORMTYPE\_DSTAREA}. 
+!     \item [{[extrapMethod]}]
+!           The type of extrapolation. Please see Section~\ref{opt:extrapmethod} 
+!           for a list of valid options. If not specified, defaults to 
+!           {\tt ESMF\_EXTRAPMETHOD\_NONE}.
+!     \item [{[extrapNumSrcPnts]}] 
+!           The number of source points to use for the extrapolation methods that use more than one source point 
+!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG}). If not specified, defaults to 8.
+!     \item [{[extrapDistExponent]}] 
+!           The exponent to raise the distance to when calculating weights for 
+!           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
+!           of more distant points. If not specified, defaults to 2.0.
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
@@ -1163,6 +649,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         logical :: localIgnoreDegenerate
         type(ESMF_LineType_Flag):: localLineType
         type(ESMF_NormType_Flag):: localNormType
+        type(ESMF_ExtrapMethod_Flag):: localExtrapMethod
         logical :: srcDual, src_pl_used, dst_pl_used
         type(ESMF_PointList) :: dstPointList, srcPointList
         type(ESMF_LocStream) :: dstLocStream, srcLocStream
@@ -1170,6 +657,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array) :: statusArray
         type(ESMF_TypeKind_Flag) :: typekind
         integer :: tileCount
+        integer :: localExtrapNumSrcPnts
+        real(ESMF_KIND_R8) :: localExtrapDistExponent
 
 !        real(ESMF_KIND_R8) :: beg_time, end_time
 !        call ESMF_VMWtime(beg_time)
@@ -1261,6 +750,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            lregridmethod=ESMF_REGRIDMETHOD_BILINEAR
         endif
 
+        ! Handle optional extrap method argument
+        if (present(extrapMethod)) then
+           localExtrapMethod=extrapMethod
+        else     
+           localExtrapMethod=ESMF_EXTRAPMETHOD_NONE
+        endif
+
+
+        ! Handle optional extrapDistExponent
+        if (present(extrapDistExponent)) then
+           localExtrapDistExponent=REAL(extrapDistExponent,ESMF_KIND_R8)
+        else     
+           localExtrapDistExponent=2.0_ESMF_KIND_R8
+        endif
+
         ! TODO: If lineType is present then do error checking here
 
         ! Handle optional lineType argument
@@ -1299,6 +803,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            else    
               localpolemethod=ESMF_POLEMETHOD_ALLAVG
            endif
+        endif
+
+        ! Handle default for extrapNumSrcPnts
+        if (present(extrapNumSrcPnts)) then
+           localExtrapNumSrcPnts=extrapNumSrcPnts
+        else 
+           localExtrapNumSrcPnts=8
         endif
         
         if (localpolemethod .eq. ESMF_POLEMETHOD_NPNTAVG) then
@@ -1753,6 +1264,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localpolemethod, localRegridPoleNPnts, &
                                   lregridScheme, &
                                   hasStatusArray, statusArray, &
+                                  localExtrapMethod, &
+                                  localExtrapNumSrcPnts, &
+                                  localExtrapDistExponent, &
                                   unmappedaction, &
                                   localIgnoreDegenerate, &
                                   srcTermProcessing, &
@@ -1785,6 +1299,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localpolemethod, localRegridPoleNPnts, &
                                   lregridScheme, &
                                   hasStatusArray, statusArray, &
+                                  localExtrapMethod, &
+                                  localExtrapNumSrcPnts, &
+                                  localExtrapDistExponent, &
                                   unmappedaction, &
                                   localIgnoreDegenerate, &
                                   srcTermProcessing, &
@@ -1988,14 +1505,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   !   Private name; call using ESMF_FieldRegridStore()
       subroutine ESMF_FieldRegridStoreX(xgrid, srcField, dstField, &
-                    keywordEnforcer, routehandle, srcFracField, dstFracField, &
+                    keywordEnforcer, regridmethod, routehandle, &
+                    srcFracField, dstFracField, &
                     srcMergeFracField, dstMergeFracField, rc)
 !      
 ! !ARGUMENTS:
       type(ESMF_XGrid),       intent(in)              :: xgrid
-      type(ESMF_Field),       intent(inout)           :: srcField
+      type(ESMF_Field),       intent(in)              :: srcField
       type(ESMF_Field),       intent(inout)           :: dstField
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      type(ESMF_RegridMethod_Flag),   intent(in),    optional :: regridmethod
       type(ESMF_RouteHandle), intent(inout), optional :: routehandle
       type(ESMF_Field),       intent(inout), optional :: srcFracField
       type(ESMF_Field),       intent(inout), optional :: dstFracField
@@ -2010,6 +1529,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[5.3.0] Added arguments {\tt srcFracField}, {\tt dstFracField}, {\tt srcMergeFracField}, and {\tt dstMergeFracField}.
 ! These fraction Fields allow a user to calculate correct flux regridded through {\tt ESMF\_XGrid}.
+! \item[7.1.0r] Added argument {\tt regridmethod}. This new argument allows the user to choose the regrid method
+!               to apply when computing the routehandle. 
 ! \end{description}
 ! \end{itemize}
 !
@@ -2048,6 +1569,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           Source Field.
 !     \item [dstField]
 !           Destination Field. The data in this Field may be overwritten by this call. 
+!     \item [{[regridmethod]}]
+!           The type of interpolation. For this method only 
+!           {\tt ESMF\_REGRIDMETHOD\_CONSERVE} and {\tt ESMF\_REGRIDMETHOD\_CONSERVE\_2ND} are
+!           supported. If not specified, defaults to {\tt ESMF\_REGRIDMETHOD\_CONSERVE}.
 !     \item [{[routehandle]}]
 !           The handle that implements the regrid and that can be used in later 
 !           {\tt ESMF\_FieldRegrid}.
@@ -2090,10 +1615,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_STAGGERLOC):: interpFieldStaggerloc, fracFieldStaggerloc
         type(ESMF_MESHLOC)   :: interpFieldMeshloc, fracFieldMeshloc
         integer              :: srcTermProcessingVal
-    
+        type(ESMF_RegridMethod_Flag) :: lregridmethod
+        type(ESMF_Mesh)      :: superMesh
+        type(ESMF_Field)     :: tmpSrcField, tmpDstField
+        type(ESMF_Typekind_Flag) :: fieldTypeKind
+
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
         if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+        ! Set optional method argument
+        if (present(regridmethod)) then
+           lregridmethod=regridmethod
+        else     
+           lregridmethod=ESMF_REGRIDMETHOD_CONSERVE
+        endif
+
+        ! Only conservative methods supported for now
+        if ((lregridmethod .ne. ESMF_REGRIDMETHOD_CONSERVE) .and. &
+             (lregridmethod .ne. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                msg="- Only conservative regrid methods supported through XGrid", & 
+                ESMF_CONTEXT, rcToReturn=rc) 
+           return
+        endif
 
         ! look for the correct Grid to use
         ! first Get necessary information from XGrid and Fields
@@ -2545,20 +2090,108 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-        ! retrieve the correct sparseMat structure
-        call ESMF_XGridGet(xgrid, srcSide, srcIdx, &
-            dstSide, dstIdx, sparseMat=sparseMat, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
-        
-        ! call FieldSMMStore
-        srcTermProcessingVal = 0
-        call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
-            sparseMat%factorList, sparseMat%factorIndexList, &
-            srcTermProcessing=srcTermProcessingVal, &
-            rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-          ESMF_CONTEXT, rcToReturn=rc)) return
+        ! Create routehandle based on regrid method
+        if (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) then
+
+           ! retrieve the correct sparseMat structure
+           call ESMF_XGridGet(xgrid, srcSide, srcIdx, &
+                dstSide, dstIdx, sparseMat=sparseMat, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           
+           ! call FieldSMMStore
+           srcTermProcessingVal = 0
+           call ESMF_FieldSMMStore(srcField, dstField, routehandle, &
+                sparseMat%factorList, sparseMat%factorIndexList, &
+                srcTermProcessing=srcTermProcessingVal, &
+                rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+        else
+
+           ! Set temporary field for source
+           if (srcSide == ESMF_XGRIDSIDE_BALANCED) then
+
+              ! Get Field typekind
+              call ESMF_FieldGet(srcField, typekind=fieldTypeKind, &
+                   rc=localrc) 
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+              ! Get Super Mesh
+              call ESMF_XGridGet(xgrid, mesh=superMesh, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+              ! Create temporary field
+              tmpSrcField=ESMF_FieldCreate(superMesh, &
+                   typekind=fieldTypeKind, &
+                   meshloc=ESMF_MESHLOC_ELEMENT, &
+                   rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           else 
+              tmpSrcField=srcField
+           endif
+
+           ! Set temporary field for dst
+           if (dstSide == ESMF_XGRIDSIDE_BALANCED) then
+
+              ! Get Field typekind
+              call ESMF_FieldGet(dstField, typekind=fieldTypeKind, &
+                   rc=localrc) 
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+              ! Get Super Mesh
+              call ESMF_XGridGet(xgrid, mesh=superMesh, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+              ! Create temporary field
+              tmpDstField=ESMF_FieldCreate(superMesh, &
+                   typekind=fieldTypeKind, &
+                   meshloc=ESMF_MESHLOC_ELEMENT, &
+                   rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           else 
+              tmpDstField=dstField
+           endif
+
+           ! Generate routehandle other that 1st order conserve
+           srcTermProcessingVal = 1 ! multiply on src, but all adding on dst
+           call ESMF_FieldRegridStoreNX(&
+                srcField=tmpSrcField, &
+                dstField=tmpDstField, &
+! ??            srcMaskValues, dstMaskValues, &
+                regridmethod=lregridmethod, &
+                srcTermProcessing=srcTermProcessingVal, &
+                routehandle=routehandle, &
+                srcFracField=srcFracField, &
+                dstFracField=dstFracField, &
+                rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+           ! Get rid of temporary source Field if necessary
+           if (srcSide == ESMF_XGRIDSIDE_BALANCED) then
+
+              call ESMF_FieldDestroy(tmpSrcField, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+
+           ! Get rid of temporary destination Field if necessary
+           if (dstSide == ESMF_XGRIDSIDE_BALANCED) then
+
+              call ESMF_FieldDestroy(tmpDstField, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+
+        endif
+
 
         if(present(rc)) rc = ESMF_SUCCESS
 
@@ -2589,6 +2222,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     be built on the {\tt ESMF\_STAGGERLOC\_CENTER} stagger location. 
 !     If created on a 3D Grid, it must be built on the {\tt ESMF\_STAGGERLOC\_CENTER\_VCENTER} stagger 
 !     location. If created on a Mesh, it must be built on the {\tt ESMF\_MESHLOC\_ELEMENT} mesh location. 
+!
+!     If the user has set the area in the Grid or Mesh under {\tt areaField}, then that's the area that's
+!     returned in the units that the user set it in. If the user hasn't set the area, then the area is 
+!     calculated and returned. If the Grid or Mesh is on the surface of a sphere, then the calculated area is in
+!     units of square radians. If the Grid or Mesh is 
+!     Cartesian, then the calculated area is in square units of whatever unit the coordinates are in. 
 !
 !     The arguments are:
 !     \begin{description}

@@ -154,6 +154,9 @@ end function my_xor
                  regridScheme, &
                  hasStatusArray, &
                  statusArray, &
+                 extrapMethod, &
+                 extrapNumSrcPnts, &
+                 extrapDistExponent, &
                  unmappedaction, &
                  ignoreDegenerate, &
                  srcTermProcessing, &
@@ -178,6 +181,9 @@ end function my_xor
       type(ESMF_PoleMethod_Flag), intent(in)      :: polemethod
       integer, intent(in)                    :: regridPoleNPnts
       integer, intent(in)                    :: regridScheme
+      type(ESMF_ExtrapMethod_Flag),   intent(in) :: extrapMethod
+      integer, intent(in)                    :: extrapNumSrcPnts
+      real(ESMF_KIND_R8)                     :: extrapDistExponent
       type(ESMF_UnmappedAction_Flag), intent(in), optional :: unmappedaction
       logical, intent(in)                              :: ignoreDegenerate
       integer,                       intent(inout), optional :: srcTermProcessing
@@ -337,7 +343,11 @@ end function my_xor
                    lineType, &
                    normType, &
                    polemethod, regridPoleNPnts, &    
-                   regridScheme, localunmappedaction%unmappedaction, &
+                   regridScheme, &
+                   extrapMethod, &
+                   extrapNumSrcPnts, &
+                   extrapDistExponent, &
+                   localunmappedaction%unmappedaction, &
                    localIgnoreDegenerate, &
                    srcTermProcessing, pipelineDepth, &
                    routehandle, has_rh, has_iw, &

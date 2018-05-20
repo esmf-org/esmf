@@ -71,6 +71,10 @@ void SearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int
 
 void ParSearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status);
 
+void SearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status);
+
+void ParSearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts,  int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status);
+
 void SearchNearestDstToSrc(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);
 
 void ParSearchNearestDstToSrc(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result);

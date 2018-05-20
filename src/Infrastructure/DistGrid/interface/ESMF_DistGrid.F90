@@ -82,7 +82,8 @@ module ESMF_DistGridMod
     ESMF_DECOMP_BALANCED    = ESMF_Decomp_Flag(1), &
     ESMF_DECOMP_RESTFIRST   = ESMF_Decomp_Flag(2), &
     ESMF_DECOMP_RESTLAST    = ESMF_Decomp_Flag(3), &
-    ESMF_DECOMP_CYCLIC      = ESMF_Decomp_Flag(4)
+    ESMF_DECOMP_CYCLIC      = ESMF_Decomp_Flag(4), &
+    ESMF_DECOMP_SYMMEDGEMAX = ESMF_Decomp_Flag(5)
     
 !------------------------------------------------------------------------------
 
@@ -107,8 +108,8 @@ module ESMF_DistGridMod
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
   public ESMF_DistGrid
-  public ESMF_Decomp_Flag, ESMF_DECOMP_BALANCED, &
-  ESMF_DECOMP_RESTFIRST, ESMF_DECOMP_RESTLAST, ESMF_DECOMP_CYCLIC
+  public ESMF_Decomp_Flag, ESMF_DECOMP_BALANCED, ESMF_DECOMP_RESTFIRST, &
+    ESMF_DECOMP_RESTLAST, ESMF_DECOMP_CYCLIC, ESMF_DECOMP_SYMMEDGEMAX
   public ESMF_DistGridMatch_Flag, ESMF_DISTGRIDMATCH_INVALID, &
     ESMF_DISTGRIDMATCH_NONE, ESMF_DISTGRIDMATCH_EXACT, ESMF_DISTGRIDMATCH_ALIAS
   public ESMF_DistGridConnection  ! implemented in ESMF_DistGridConnectionMod
@@ -736,6 +737,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value    
+    dg%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDG = dg 
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
@@ -877,6 +882,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value    
+    dg%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDGT = dg 
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
     
@@ -970,9 +979,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the tile.
+!          Index space tuple of the lower corner of the single tile.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the tile.
+!          Index space tuple of the upper corner of the single tile.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The total {\tt deCount} is
 !          determined as the product of {\tt regDecomp} elements.
@@ -1063,6 +1072,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateRD = distgrid 
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1195,10 +1208,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndexPTile]
-!          The first index provides the global coordinate tuple of the lower 
+!          The first index provides the index space tuple of the lower 
 !          corner of a tile. The second index indicates the tile number.
 !     \item[maxIndexPTile]
-!          The first index provides the global coordinate tuple of the upper
+!          The first index provides the index space tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[{[regDecompPTile]}]
 !          List of DE counts for each dimension. The second index steps through
@@ -1250,11 +1263,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          sequence is given by the column major order of the {\tt regDecompPTile}
 !          elements in the sequence as they appear following the tile index.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are forming a global
-!          index space or not. This does {\em not} affect the indices held
-!          by the DistGrid object, which are always identical to what was
-!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          Indicates whether the indices provided by the {\tt minIndexPTile} and
+!          {\tt maxIndexPTile} arguments are forming a global index space or 
+!          not. This does {\em not} affect the indices held by the DistGrid 
+!          object, which are always identical to what was specified by 
+!          {\tt minIndexPTile} and {\tt maxIndexPTile}, regardless of the
 !          {\tt indexflag} setting. However, it does affect whether an
 !          {\tt ESMF\_Array} object created on the DistGrid can choose global
 !          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
@@ -1298,6 +1311,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateRDT = distgrid 
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
@@ -1425,9 +1442,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the tile.
+!          Index space tuple of the lower corner of the single tile.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the tile.
+!          Index space tuple of the upper corner of the single tile.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The default decomposition will
 !          be {\tt deCount}$ \times 1 \times ... \times 1$. The value of
@@ -1512,6 +1529,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateRDF = distgrid 
     
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
@@ -1602,15 +1623,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateRDTF(minIndex, maxIndex, regDecomp, decompflag, &
-    deLabelList, indexflag, connectionList, fastAxis, vm, rc)
+  function ESMF_DistGridCreateRDTF(minIndexPTile, maxIndexPTile, regDecomp, &
+    decompflag, deLabelList, indexflag, connectionList, fastAxis, vm, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateRDTF
 !
 ! !ARGUMENTS:
-    integer,                       intent(in)            :: minIndex(:,:)
-    integer,                       intent(in)            :: maxIndex(:,:)
+    integer,                       intent(in)            :: minIndexPTile(:,:)
+    integer,                       intent(in)            :: maxIndexPTile(:,:)
     integer,                       intent(in),  optional :: regDecomp(:,:)
     type(ESMF_Decomp_Flag),target, intent(in),  optional :: decompflag(:,:)
     integer,                       intent(in),  optional :: deLabelList(:)
@@ -1632,11 +1653,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minIndex]
-!          The first index provides the global coordinate tuple of the lower 
+!     \item[minIndexPTile]
+!          The first index provides the index space tuple of the lower 
 !          corner of a tile. The second index indicates the tile number.
-!     \item[maxIndex]
-!          The first index provides the global coordinate tuple of the upper
+!     \item[maxIndexPTile]
+!          The first index provides the index space tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[{[regDecomp]}]
 !          List of DE counts for each dimension. The second 
@@ -1689,19 +1710,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateRDTF = distgrid
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
-    ! Initialize the pointer to NULL
-    distgrid%this = ESMF_NULL_POINTER
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(minIndexPTile) == size(minIndexPTile)) continue
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(minIndex) == size(minIndex)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(maxIndex) == size(maxIndex)) continue
+    if (size(maxIndexPTile) == size(maxIndexPTile)) continue
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
@@ -1778,6 +1800,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.1.0r] Added argument {\tt indexTK} to support selecting between
+!               32-bit and 64-bit sequence indices.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -1789,14 +1816,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the tile.
+!          Index space tuple of the lower corner of the single tile.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the tile.
+!          Index space tuple of the upper corner of the single tile.
 !     \item[deBlockList]
 !          List of DE-local blocks. The third index of {\tt deBlockList}
-!          steps through the deBlock elements, which are defined by the first
-!          two indices. The first index must be of size {\tt dimCount} and the 
-!          second index must be of size 2. Each 2D element of {\tt deBlockList}
+!          steps through the deBlock elements (i.e. deCount), which are defined
+!          by the first two indices. 
+!          The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 2. Each element of {\tt deBlockList}
 !          defined by the first two indices hold the following information.
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
@@ -1864,6 +1892,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDB = distgrid 
+    
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
@@ -1929,73 +1961,76 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateDBT()"
-!BOPI
-! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object on multiple tiles with regular decomposition
+!BOP
+! !IROUTINE: ESMF_DistGridCreate - Create DistGrid object with DE blocks (multi-tile version)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBT(minIndex, maxIndex, deBlockList, deLabelList,&
-    indexflag, connectionList, delayout, vm, rc)
+  function ESMF_DistGridCreateDBT(minIndexPTile, maxIndexPTile, deBlockList, &
+    deToTileMap, keywordEnforcer, deLabelList, indexflag, connectionList, &
+    delayout, vm, indexTK, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBT
 !
 ! !ARGUMENTS:
-    integer,                       intent(in)            :: minIndex(:,:)
-    integer,                       intent(in)            :: maxIndex(:,:)
+    integer,                       intent(in)            :: minIndexPTile(:,:)
+    integer,                       intent(in)            :: maxIndexPTile(:,:)
     integer,                       intent(in)            :: deBlockList(:,:,:)
+    integer,                       intent(in)            :: deToTileMap(:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                       intent(in),  optional :: deLabelList(:)
     type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
     type(ESMF_DELayout),           intent(in),  optional :: delayout
     type(ESMF_VM),                 intent(in),  optional :: vm
+    type(ESMF_TypeKind_Flag),      intent(in),  optional :: indexTK
     integer,                       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Create an {\tt ESMF\_DistGrid} on multiple logically 
-!     rectangular tiles with regular decomposition. A regular
-!     decomposition is of the same rank as the tile and decomposes
-!     each dimension into a fixed number of DEs. A regular decomposition of a
-!     multi-tile DistGrid is expressed by a list of DE count vectors, one
-!     vector for each tile. Each vector contained in the 
-!     {\tt regDecomp} argument ascribes DE counts for each dimension. It is 
-!     erroneous to provide more tiles than there are DEs.
+!     rectangular tiles with decomposition specified by {\tt deBlockList}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minIndex]
-!          The first index provides the global coordinate tuple of the lower 
+!     \item[minIndexPTile]
+!          The first index provides the index space tuple of the lower 
 !          corner of a tile. The second index indicates the tile number.
-!     \item[maxIndex]
-!          The first index provides the global coordinate tuple of the upper
+!     \item[maxIndexPTile]
+!          The first index provides the index space tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[deBlockList]
 !          List of DE-local blocks. The third index of {\tt deBlockList}
-!          steps through the deBlock elements, which are defined by the first
-!          two indices. The first index must be of size {\tt dimCount} and the 
-!          second index must be of size 3. Each 2D element of {\tt deBlockList}
+!          steps through the deBlock elements (i.e. deCount), which are defined
+!          by the first two indices. 
+!          The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 2. Each element of {\tt deBlockList}
 !          defined by the first two indices hold the following information.
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
-!                   |    1               2              3
-!                   | 1  minIndex(1)    maxIndex(1)   tileID
-!                   | 2  minIndex(2)    maxIndex(2)   (not used)
-!                   | .  minIndex(.)    maxIndex(.)   (not used)
+!                   |    1               2           
+!                   | 1  minIndex(1)    maxIndex(1)
+!                   | 2  minIndex(2)    maxIndex(2)
+!                   | .  minIndex(.)    maxIndex(.)
 !                   | .
 !                   v
 !                  1st index
 !          \end{verbatim}
 !          It is required that there be no overlap between the DE blocks.
+!     \item[deToTileMap]
+!          List assigning each DE to a specific tile. The size of 
+!          {\tt deToTileMap} must be equal to {\tt deCount}.
+!          The order of DEs is the same as in {\tt deBlockList}.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the order of DEs in the {\tt deBlockList} 
 !          argument.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are forming a global
-!          index space or not. This does {\em not} affect the indices held
-!          by the DistGrid object, which are always identical to what was
-!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          Indicates whether the indices provided by the {\tt minIndexPTile} and
+!          {\tt maxIndexPTile} arguments are forming a global index space or 
+!          not. This does {\em not} affect the indices held by the DistGrid 
+!          object, which are always identical to what was specified by 
+!          {\tt minIndexPTile} and {\tt maxIndexPTile}, regardless of the
 !          {\tt indexflag} setting. However, it does affect whether an
 !          {\tt ESMF\_Array} object created on the DistGrid can choose global
 !          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
@@ -2013,56 +2048,90 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[vm]}]
 !          Optional {\tt ESMF\_VM} object of the current context. Providing the
 !          VM of the current context will lower the method's overhead.
+!     \item[{[indexTK]}]
+!          Typekind used for global sequence indexing. See section 
+!          \ref{const:typekind} for a list of typekind options. Only integer
+!          types are supported. The default is to have ESMF automatically choose
+!          between {\tt ESMF\_TYPEKIND\_I4} and {\tt ESMF\_TYPEKIND\_I8},
+!          depending on whether the global number of elements held by the
+!          DistGrid is below or above the 32-bit limit, respectively.
+!          Because of the use of signed integers for sequence indices, 
+!          element counts of $ > 2^{31}-1 = 2,147,483,647$ will switch to 64-bit 
+!          indexing.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
-    integer                 :: localrc      ! local return code
-    type(ESMF_DistGrid)     :: distgrid     ! opaque pointer to new C++ DistGrid
+    integer               :: localrc      ! local return code
+    type(ESMF_DistGrid)   :: distgrid     ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterArray) :: minIndexAux        ! helper variable
+    type(ESMF_InterArray) :: maxIndexAux        ! helper variable
+    type(ESMF_InterArray) :: deBlockListAux     ! helper variable
+    type(ESMF_InterArray) :: deToTileMapAux     ! helper variable
+    type(ESMF_InterArray) :: deLabelListAux     ! helper variable
+    type(ESMF_InterArray) :: connectionListAux  ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBT = distgrid
+    
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DELayoutGetInit, delayout, rc)
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
-    ! Initialize the pointer to NULL
-    distgrid%this = ESMF_NULL_POINTER
+    ! Deal with (optional) array arguments
+    minIndexAux = ESMF_InterArrayCreate(farray2D=minIndexPTile, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    maxIndexAux = ESMF_InterArrayCreate(farray2D=maxIndexPTile, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deBlockListAux = ESMF_InterArrayCreate(farray3D=deBlockList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deToTileMapAux = ESMF_InterArrayCreate(deToTileMap, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    deLabelListAux = ESMF_InterArrayCreate(deLabelList, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    connectionListAux = ESMF_InterArrayCreateDGConn(connectionList, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+      
+    ! call into the C++ interface, which will sort out optional arguments
+    call c_ESMC_DistGridCreateDBT(distgrid, minIndexAux, maxIndexAux, &
+      deBlockListAux, deToTileMapAux, deLabelListAux, indexflag, &
+      connectionListAux, delayout, vm, indexTK, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(minIndex) == size(minIndex)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(maxIndex) == size(maxIndex)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(deBlockList) == size(deBlockList)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (present(deLabelList)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (present(indexflag)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (present(connectionList)) continue
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-!    call c_ESMC_DistGridCreateRDF(distgrid, minIndexAux, maxIndexAux, &
-!      regDecompAux, opt_decompflag, len_decompflag, deLabelListAux, indexflag, &
-!      connectionListAux, fastAxis, vm, localrc)
-!    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! garbage collection
+    call ESMF_InterArrayDestroy(minIndexAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(maxIndexAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(deBlockListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(deToTileMapAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(deLabelListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_InterArrayDestroy(connectionListAux, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Set return value
     ESMF_DistGridCreateDBT = distgrid 
@@ -2071,7 +2140,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_SET_CREATED(ESMF_DistGridCreateDBT)
  
     ! return successfully
-    !if (present(rc)) rc = ESMF_SUCCESS   TODO: enable once implemented
+    if (present(rc)) rc = ESMF_SUCCESS
  
   end function ESMF_DistGridCreateDBT
 !------------------------------------------------------------------------------
@@ -2110,21 +2179,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The arguments are:
 !     \begin{description}
 !     \item[minIndex]
-!          Global coordinate tuple of the lower corner of the tile.
+!          Index space tuple of the lower corner of the single tile.
 !     \item[maxIndex]
-!          Global coordinate tuple of the upper corner of the tile.
+!          Index space tuple of the upper corner of the single tile.
 !     \item[deBlockList]
 !          List of DE-local blocks. The third index of {\tt deBlockList}
-!          steps through the deBlock elements, which are defined by the first
-!          two indices. The first index must be of size {\tt dimCount} and the 
-!          second index must be of size 3. Each 2D element of {\tt deBlockList}
+!          steps through the deBlock elements (i.e. deCount), which are defined
+!          by the first two indices. 
+!          The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 2. Each element of {\tt deBlockList}
 !          defined by the first two indices hold the following information.
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
-!                   |    1               2              3
-!                   | 1  minIndex(1)    maxIndex(1)   tileID
-!                   | 2  minIndex(2)    maxIndex(2)   (not used)
-!                   | .  minIndex(.)    maxIndex(.)   (not used)
+!                   |    1               2           
+!                   | 1  minIndex(1)    maxIndex(1)
+!                   | 2  minIndex(2)    maxIndex(2)
+!                   | .  minIndex(.)    maxIndex(.)
 !                   | .
 !                   v
 !                  1st index
@@ -2168,12 +2238,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBF = distgrid
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
-    ! Initialize the pointer to NULL
-    distgrid%this = ESMF_NULL_POINTER
-
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
     if (size(minIndex) == size(minIndex)) continue
@@ -2230,15 +2301,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
-  function ESMF_DistGridCreateDBTF(minIndex, maxIndex, deBlockList, &
+  function ESMF_DistGridCreateDBTF(minIndexPTile, maxIndexPTile, deBlockList, &
     deLabelList, indexflag, connectionList, fastAxis, vm, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDBTF
 !
 ! !ARGUMENTS:
-    integer,                       intent(in)            :: minIndex(:,:)
-    integer,                       intent(in)            :: maxIndex(:,:)
+    integer,                       intent(in)            :: minIndexPTile(:,:)
+    integer,                       intent(in)            :: maxIndexPTile(:,:)
     integer,                       intent(in)            :: deBlockList(:,:,:)
     integer,                       intent(in),  optional :: deLabelList(:)
     type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
@@ -2253,24 +2324,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[minIndex]
-!          The first index provides the global coordinate tuple of the lower 
+!     \item[minIndexPTile]
+!          The first index provides the index space tuple of the lower 
 !          corner of a tile. The second index indicates the tile number.
-!     \item[maxIndex]
-!          The first index provides the global coordinate tuple of the upper
+!     \item[maxIndexPTile]
+!          The first index provides the index space tuple of the upper
 !          corner of a tile. The second index indicates the tile number.
 !     \item[deBlockList]
 !          List of DE-local blocks. The third index of {\tt deBlockList}
-!          steps through the deBlock elements, which are defined by the first
-!          two indices. The first index must be of size {\tt dimCount} and the 
-!          second index must be of size 3. Each 2D element of {\tt deBlockList}
+!          steps through the deBlock elements (i.e. deCount), which are defined
+!          by the first two indices. 
+!          The first index must be of size {\tt dimCount} and the 
+!          second index must be of size 2. Each element of {\tt deBlockList}
 !          defined by the first two indices hold the following information.
 !          \begin{verbatim}
 !                   +---------------------------------------> 2nd index
-!                   |    1               2              3
-!                   | 1  minIndex(1)    maxIndex(1)   tileID
-!                   | 2  minIndex(2)    maxIndex(2)   (not used)
-!                   | .  minIndex(.)    maxIndex(.)   (not used)
+!                   |    1               2           
+!                   | 1  minIndex(1)    maxIndex(1)
+!                   | 2  minIndex(2)    maxIndex(2)
+!                   | .  minIndex(.)    maxIndex(.)
 !                   | .
 !                   v
 !                  1st index
@@ -2281,11 +2353,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          sequence is given by the order of DEs in the {\tt deBlockList} 
 !          argument.
 !     \item[{[indexflag]}]
-!          Indicates whether the indices provided by the {\tt minIndex} and
-!          {\tt maxIndex} arguments are forming a global
-!          index space or not. This does {\em not} affect the indices held
-!          by the DistGrid object, which are always identical to what was
-!          specified by {\tt minIndex} and {\tt maxIndex}, regardless of the
+!          Indicates whether the indices provided by the {\tt minIndexPTile} and
+!          {\tt maxIndexPTile} arguments are forming a global index space or 
+!          not. This does {\em not} affect the indices held by the DistGrid 
+!          object, which are always identical to what was specified by 
+!          {\tt minIndexPTile} and {\tt maxIndexPTile}, regardless of the
 !          {\tt indexflag} setting. However, it does affect whether an
 !          {\tt ESMF\_Array} object created on the DistGrid can choose global
 !          indexing or not. The default is {\tt ESMF\_INDEX\_DELOCAL}.
@@ -2314,19 +2386,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     
+    ! Initialize the pointer to NULL
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBTF = distgrid
+
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     
-    ! Initialize the pointer to NULL
-    distgrid%this = ESMF_NULL_POINTER
+    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
+    !TODO: Remove the following dummy test when dummy argument actually used
+    if (size(minIndexPTile) == size(minIndexPTile)) continue
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(minIndex) == size(minIndex)) continue
-
-    !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
-    !TODO: Remove the following dummy test when dummy argument actually used
-    if (size(maxIndex) == size(maxIndex)) continue
+    if (size(maxIndexPTile) == size(maxIndexPTile)) continue
 
     !DUMMY TEST TO QUIET DOWN COMPILER WARNINGS
     !TODO: Remove the following dummy test when dummy argument actually used
@@ -2423,6 +2496,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBAI1D1DE = distgrid 
     
     call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2544,6 +2621,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBAI1D1DEI8 = distgrid 
     
     call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2669,6 +2750,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBAI1D = distgrid 
     
     call ESMF_VMGetCurrent(vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2834,10 +2919,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[arbDim]
 !          Dimension of the arbitrary distribution.
 !     \item[minIndexPTile]
-!          Global coordinate tuple of the lower corner of the tile. The 
+!          Index space tuple of the lower corner of the tile. The 
 !          arbitrary dimension is {\em not} included in this tile
 !     \item[maxIndexPTile]
-!          Global coordinate tuple of the upper corner of the tile. The
+!          Index space tuple of the upper corner of the tile. The
 !          arbitrary dimension is {\em not} included in this tile
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2861,6 +2946,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! invalidate return value    
+    distgrid%this = ESMF_NULL_POINTER
+    ESMF_DistGridCreateDBAI = distgrid 
     
     ! check input
     dimCount = size(minIndexPTile)
@@ -3340,7 +3429,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[de]
 !     DE for which information is requested. {\tt \[0,..,deCount-1\]}
 !   \item[{[regDecompDeCoord]}]
-!     For regular decompositions upon return this array holds the coordinate
+!     For regular decompositions upon return this array holds the index space
 !     tuple of the specified DE with respect to the local tile. For other
 !     decompositions a run-time warning will be issued if
 !     {\tt regDecompDeCoord} is requested.
@@ -3941,11 +4030,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The arguments are:
 !   \begin{description}
 !   \item[minIndex]
-!        Coordinate tuple of the lower corner of the tile.
+!        Index space tuple of the lower corner of the single tile.
 !   \item[maxIndex]
-!        Coordinate tuple of the upper corner of the tile.
+!        Index space tuple of the upper corner of the single tile.
 !   \item[index]
-!        Coordinate tuple of the index point to be converted into the 
+!        index space tuple of the index point to be converted into the 
 !        sequence index.
 !   \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.

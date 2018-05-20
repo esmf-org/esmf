@@ -83,8 +83,8 @@ namespace ESMCI{
     void endElement(
         const XMLCh* const uri,
         const XMLCh* const localname,
-        const XMLCh* const qname	 
-    ); 
+        const XMLCh* const qname        
+    );
 
     SAX2ReadHandler(ESMCI::Attribute *attr);
  };

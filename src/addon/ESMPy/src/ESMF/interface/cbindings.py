@@ -115,8 +115,34 @@ class OptionalBool(object):
             if param is None:
                 return None
             else:
-                ptr = ct.POINTER(ct.c_bool)
-                paramptr = ptr(ct.c_bool(param))
+                ptr = ct.POINTER(ct.c_int)
+                paramptr = ptr(ct.c_int(1))
+                if param == True:
+                    paramptr = ptr(ct.c_int(1))
+                elif param == False:
+                    paramptr = ptr(ct.c_int(2))
+                return paramptr
+
+# this class allows optional arguments to be passed in place of ints
+class OptionalInt(object):
+        @classmethod
+        def from_param(cls, param):
+            if param is None:
+                return None
+            else:
+                ptr = ct.POINTER(ct.c_int)
+                paramptr = ptr(ct.c_int(param))
+                return paramptr
+
+# this class allows optional arguments to be passed in place of float
+class OptionalFloat(object):
+        @classmethod
+        def from_param(cls, param):
+            if param is None:
+                return None
+            else:
+                ptr = ct.POINTER(ct.c_float)
+                paramptr = ptr(ct.c_float(param))
                 return paramptr
 
 class Py3Char(object):
@@ -252,6 +278,33 @@ _ESMF.ESMC_VMGet.argtypes = [ct.c_void_p, ct.POINTER(ct.c_int),
                              ct.c_void_p, ct.POINTER(ct.c_int),
                              ct.POINTER(ct.c_int)]
 
+_ESMF.ESMC_VMBroadcast.restype = ct.c_int
+_ESMF.ESMC_VMBroadcast.argtypes = [ct.c_void_p,
+                                np.ctypeslib.ndpointer(dtype=np.float64),
+                                ct.c_int,
+                                OptionalNamedConstant,
+                                ct.c_int]
+
+def ESMP_VMBroadcast(vm, bcstBuf, count, rootPet):
+    """
+    Preconditions: An ESMP_VM object has been retrieved.\n
+    Postconditions: The values in bcstBuf have been broadcast across the VM.\n
+    Arguments:\n
+        ESMP_VM :: vm\n
+        Numpy.array(dtype=float64) :: bcstBuf\n
+        int :: count\n
+        int :: rootPet\n
+    """
+    cc = ct.c_int(count)
+    crp = ct.c_int(rootPet)
+    if (bcstBuf.dtype != np.float64):
+        raise TypeError('bcstBuf must have dtype=float64')
+
+    rc = _ESMF.ESMC_VMBroadcast(vm, bcstBuf, cc, constants.TypeKind.R8, crp)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_VMBroadcast() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
 def ESMP_VMGet(vm):
     """
     Preconditions: An ESMP_VM object has been retrieved.\n
@@ -310,6 +363,45 @@ def ESMP_VMPrint(vm):
     rc = _ESMF.ESMC_VMPrint(vm)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_VMPrint() failed with rc = '+str(rc)+'.    '+
+                        constants._errmsg)
+
+_ESMF.ESMC_VMReduce.restype = ct.c_int
+_ESMF.ESMC_VMReduce.argtypes = [ct.c_void_p,
+                                np.ctypeslib.ndpointer(dtype=np.float64),
+                                np.ctypeslib.ndpointer(dtype=np.float64),
+                                ct.c_int,
+                                OptionalNamedConstant,
+                                OptionalNamedConstant,
+                                ct.c_int]
+
+def ESMP_VMReduce(vm, sendBuf, recvBuf, count, reduceflag, rootPet):
+    """
+    Preconditions: An ESMP_VM object has been retrieved.\n
+    Postconditions: The values in sendBuf have been reduced to recvBuf.\n
+    Arguments:\n
+        ESMP_VM :: vm\n
+        Numpy.array(dtype=float64) :: sendBuf\n
+        Numpy.array(dtype=float64) :: recvBuf\n
+        int :: count\n
+        Reduce :: reduceflag\n
+            Argument Values:\n
+                Reduce.SUM\n
+                Reduce.MIN\n
+                Reduce.MAX\n
+        int :: rootPet\n
+    """
+    cc = ct.c_int(count)
+    crp = ct.c_int(rootPet)
+    if (sendBuf.dtype != np.float64):
+        raise TypeError('sendBuf must have dtype=float64')
+
+    if (recvBuf.dtype != np.float64):
+        raise TypeError('sendBuf must have dtype=float64')
+
+    rc = _ESMF.ESMC_VMReduce(vm, sendBuf, recvBuf, cc, constants.TypeKind.R8, 
+                             reduceflag, crp)
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_VMReduce() failed with rc = '+str(rc)+'.    '+
                         constants._errmsg)
 
 #### LOG ######################################################################
@@ -1812,6 +1904,9 @@ _ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
                                         OptionalNamedConstant,
                                         OptionalNamedConstant,
                                         OptionalNamedConstant,
+                                        OptionalInt,
+                                        OptionalFloat,
+                                        OptionalNamedConstant,
                                         OptionalBool,
                                         OptionalField,
                                         OptionalField]
@@ -1820,8 +1915,11 @@ def ESMP_FieldRegridStore(srcField, dstField,
                           srcMaskValues=None, dstMaskValues=None,
                           regridmethod=None,
                           polemethod=None, regridPoleNPnts=None,
-                          lineType=None, normType=None, unmappedaction=None,
-                          ignoreDegenerate=None,
+                          lineType=None, normType=None,
+                          extrapMethod=None, 
+                          extrapNumSrcPnts=None, extrapDistExponent=None,
+                          unmappedaction=None,
+                          ignoreDegenerate=None, 
                           srcFracField=None, dstFracField=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
@@ -1829,8 +1927,8 @@ def ESMP_FieldRegridStore(srcField, dstField,
                    place.  'srcMaskValues' and 'dstMaskValues' are
                    Numpy arrays which hold the values of a field which
                    represent a masked cell.\n
-    Postconditions: A handle to the regridding operation has been
-                    returned into 'routehandle' and Fields containing
+    Postconditions: A handle to the regridding operation 
+                    has been returned into 'routehandle' and Fields containing
                     the fractions of the source and destination cells
                     participating in the regridding operation are
                     optionally returned into 'srcFracField' and
@@ -1862,15 +1960,22 @@ def ESMP_FieldRegridStore(srcField, dstField,
             Argument values:\n
                 (default) NormType.DSTAREA \n
                 NormType.DSTFRAC \n
+        extrapMethod (optional)             :: extrapMethod \n
+            Argument values:\n
+                (default) ExtrapMethod.NONE \n
+                ExtrapMethod.NEAREST_STOD \n
+                ExtrapMethod.NEAREST_IDAVG \n
+        integer (optional)                  :: extrapNumSrcPnts\n
+        float (optional)                    :: extrapDistExponent\n
         unmappedAction (optional)           :: unmappedaction\n
             Argument values:\n
                 (default) UnmappedAction.ERROR\n
                 UnmappedAction.IGNORE\n
-        boolean (option)                    :: ignoreDegenerate\n
+        boolean (optional)                  :: ignoreDegenerate\n
         ESMP_Field (optional)               :: srcFracField\n
         ESMP_Field (optional)               :: dstFracField\n
     """
-    routehandle = ct.c_void_p(0)
+    routehandle = ct.c_void_p(1)
     if regridPoleNPnts:
         regridPoleNPnts_ct = ct.byref(ct.c_void_p(regridPoleNPnts))
     else:
@@ -1900,6 +2005,8 @@ def ESMP_FieldRegridStore(srcField, dstField,
                                      regridPoleNPnts_ct,
                                      lineType,
                                      normType,
+                                     extrapMethod, 
+                                     extrapNumSrcPnts, extrapDistExponent,
                                      unmappedaction,
                                      ignoreDegenerate,
                                      srcFracField,
@@ -1907,6 +2014,7 @@ def ESMP_FieldRegridStore(srcField, dstField,
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldRegridStore() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
+
     return routehandle
 
 _ESMF.ESMC_FieldRegridStoreFile.restype = ct.c_int
@@ -1922,6 +2030,7 @@ _ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
                                             OptionalNamedConstant,
                                             OptionalNamedConstant,
                                             OptionalBool,
+                                            OptionalBool,
                                             OptionalField,
                                             OptionalField]
 @deprecated
@@ -1930,7 +2039,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                           regridmethod=None,
                           polemethod=None, regridPoleNPnts=None,
                           lineType=None, normType=None, unmappedaction=None,
-                          ignoreDegenerate=None,
+                          ignoreDegenerate=None, createRH=None,
                           srcFracField=None, dstFracField=None):
     """
     Preconditions: Two ESMP_Fields have been created and initialized
@@ -1938,7 +2047,8 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                    place.  'srcMaskValues' and 'dstMaskValues' are
                    Numpy arrays which hold the values of a field which
                    represent a masked cell.\n
-    Postconditions: A handle to the regridding operation has been
+    Postconditions: If createRH is not False, a handle to the regridding 
+                    operation has been
                     returned into 'routehandle' and Fields containing
                     the fractions of the source and destination cells
                     participating in the regridding operation are
@@ -1976,7 +2086,8 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
             Argument values:\n
                 (default) UnmappedAction.ERROR\n
                 UnmappedAction.IGNORE\n
-        boolean (option)                    :: ignoreDegenerate\n
+        boolean (optional)                  :: ignoreDegenerate\n
+        boolean (optional)                  :: createRH\n
         ESMP_Field (optional)               :: srcFracField\n
         ESMP_Field (optional)               :: dstFracField\n
     """
@@ -2004,6 +2115,18 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
     b_filename = filename.encode('utf-8')
     b_filename = ct.create_string_buffer(b_filename)
 
+    # liD = None
+    # if ignoreDegenerate == True:
+    #     liD = ct.POINTER(ct.c_int(1))
+    # elif ignoreDegenerate == False:
+    #     liD = ct.POINTER(ct.c_int(2))
+    # 
+    # crh = None
+    # if create_rh == True:
+    #     crh = ct.POINTER(ct.c_int(1))
+    # elif create_rh == False:
+    #     crh = ct.POINTER(ct.c_int(2))
+
     rc = _ESMF.ESMC_FieldRegridStoreFile(srcField.struct.ptr,
                                      dstField.struct.ptr,
                                      b_filename,
@@ -2017,6 +2140,7 @@ def ESMP_FieldRegridStoreFile(srcField, dstField, filename,
                                      normType,
                                      unmappedaction,
                                      ignoreDegenerate,
+                                     createRH,
                                      srcFracField,
                                      dstFracField)
     if rc != constants._ESMP_SUCCESS:
@@ -2048,8 +2172,7 @@ def ESMP_FieldRegrid(srcField, dstField, routehandle, zeroregion=None):
 _ESMF.ESMC_FieldSMMStore.restype = ct.c_int
 _ESMF.ESMC_FieldSMMStore.argtypes = [ct.c_void_p, ct.c_void_p, ct.c_char_p,
                                      ct.c_void_p, ct.c_bool,
-                                     ct.POINTER(ct.c_int), ct.POINTER(ct.c_int),
-                                     ct.c_void_p]
+                                     ct.POINTER(ct.c_int), ct.POINTER(ct.c_int)]
 @deprecated
 def ESMP_FieldSMMStore(srcField, dstField, filename,
                        ignoreUnmatchedIndices=None):
@@ -2076,8 +2199,7 @@ def ESMP_FieldSMMStore(srcField, dstField, filename,
                                   b_filename,
                                   ct.byref(routehandle),
                                   ignoreUnmatchedIndices,
-                                  None, None,
-                                  None)
+                                  None, None)
     if rc != constants._ESMP_SUCCESS:
         raise ValueError('ESMC_FieldSMMStore() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)

@@ -53,7 +53,7 @@ const char*  getDateAndTime(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-   static char 	datestr[1024];
+   static char          datestr[1024];
    time_t         ttime;
    struct tm*     tm;
 
@@ -80,17 +80,17 @@ const char*  getDateAndTime(
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int main(int    argc, 
+int main(int    argc,
          char*  argv[])
 {
-  	printf("hello from ESMCI_WebServSecureClientSocketUTest\n");
+        printf("hello from ESMCI_WebServSecureClientSocketUTest\n");
 
-   int	rc;
-	int	result = 0;
+   int  rc;
+        int     result = 0;
    char  name[80];
    char  failMsg[80];
-	int	portNum = 27060;
-	char	host[512] = { "" };
+        int     portNum = 27060;
+        char    host[512] = { "" };
 
 
 
@@ -98,10 +98,10 @@ int main(int    argc,
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-	gethostname(host, sizeof(host) - 1);
+        gethostname(host, sizeof(host) - 1);
 
-	ESMCI::ESMCI_WebServSecureClientSocket*	
-		client = new ESMCI::ESMCI_WebServSecureClientSocket();
+        ESMCI::ESMCI_WebServSecureClientSocket*         
+                client = new ESMCI::ESMCI_WebServSecureClientSocket();
 
    printf("\n");
    printf("ESMF_WebServSecureClientSocketUTest\n");
@@ -161,5 +161,5 @@ int main(int    argc,
    printf("\n-----------------------------------------------------\n");
    fflush(stdout);
 
-  	return 0;
+        return 0;
 }

@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -62,7 +62,7 @@ void FTN_X(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp,
                              ESMCI_FortranStrLenArg nlen
                              ) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshio()" 
+#define ESMC_METHOD "c_esmc_meshio()"
   ESMCI::VM *vm = *vmpp;
   ESMCI::Grid &grid = **gridpp;
 
@@ -92,16 +92,16 @@ void FTN_X(c_esmc_meshio)(ESMCI::VM **vmpp, ESMCI::Grid **gridpp,
   // Convert Grid to Mesh
   int regridConserve = 0; //ESMC_REGRID_CONSERVE_OFF;
   int localrc;
-  MeshCap *meshp=MeshCap::GridToMesh(grid, *staggerLoc, 
+  MeshCap *meshp=MeshCap::GridToMesh(grid, *staggerLoc,
                                      arrays,
                                      NULL,
                                      &regridConserve, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-  
+
   meshp->meshwrite(name, &localrc, nlen);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
-  // Get rid of Mesh  
+  // Get rid of Mesh
   delete meshp;
 
   // Return success
@@ -120,9 +120,9 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
                              ESMCI::Array **arraypp6,
                              int *spherical, int *islatlondeg,
                              ESMCI_FortranStrLenArg nlen
-			  ) {
+                          ) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridio()" 
+#define ESMC_METHOD "c_esmc_gridio()"
   ESMCI::Grid &grid = **gridpp;
   int localrc;
 
@@ -162,16 +162,16 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
 
   // Convert Grid to Mesh
   int regridConserve = 0; // ESMC_REGRID_CONSERVE_OFF;
-  MeshCap *meshp=MeshCap::GridToMesh(grid, *staggerLoc, 
+  MeshCap *meshp=MeshCap::GridToMesh(grid, *staggerLoc,
                                      arrays,
                                      NULL,
                                      &regridConserve, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-  
+
   meshp->meshwrite(name, &localrc, nlen);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
-  // Get rid of Mesh  
+  // Get rid of Mesh
   delete meshp;
 
   // Return success
@@ -180,61 +180,106 @@ void FTN_X(c_esmc_gridio)(ESMCI::Grid **gridpp, int *staggerLoc,
 
 
 
+  void FTN_X(c_esmc_gridcellio)(ESMCI::Grid **gridpp,
+                                int *num_arrays, char*name, int *rc,
+                                ESMCI::Array **arraypp1,
+                                ESMCI::Array **arraypp2,
+                                ESMCI::Array **arraypp3,
+                                ESMCI::Array **arraypp4,
+                                ESMCI::Array **arraypp5,
+                                ESMCI::Array **arraypp6,
+                                ESMCI_FortranStrLenArg nlen
+                                ) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_gridcellio()"
+  ESMCI::Grid &grid = **gridpp;
+  int localrc;
+
+  // How to do this?? Any way I can think of is ugly:
+  ESMCI::Array **ar[] = {
+    arraypp1,
+    arraypp2,
+    arraypp3,
+    arraypp4,
+    arraypp5,
+    arraypp6
+  };
+
+  // Make list of arrays
+  std::vector<ESMCI::Array*> arrays;
+  for (UInt i = 0; i < *num_arrays; ++i)
+    arrays.push_back(*ar[i]);
+
+  // Convert Grid to Mesh
+  MeshCap *meshp=MeshCap::GridToMeshCell(grid, arrays, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+
+  meshp->meshwrite(name, &localrc, nlen);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+
+  // Get rid of Mesh
+  delete meshp;
+
+  // Return success
+  if (rc) *rc = ESMF_SUCCESS;
+}
+
+
   void FTN_X(c_esmc_gridtomesh)(ESMCI::Grid **gridpp, int *staggerLoc,
                                 int *isSphere, int *islatlondeg, MeshCap **meshpp,
                                 ESMCI::InterArray<int> *maskValuesArg, int *regridConserve, int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridtomesh()" 
-    
+#define ESMC_METHOD "c_esmc_gridtomesh()"
+
     ESMCI::Grid &grid = **gridpp;
-    
+
 
     // Don't do the below. It should come from the grid CoordSys
 #if 0
     // Make grid spherical if requested
     bool prevIsSphere=grid.isSphere();
     if (*isSphere != 0) grid.setSphere();
-    
+
     // Map coords to surface of a sphere if reqeusted
     ESMC_CoordSys_Flag prevCoordSys=grid.getCoordSys();
     if (*islatlondeg != 0) grid.setCoordSys(ESMC_COORDSYS_SPH_DEG);
-#endif    
+#endif
 
     // Temp vector
     std::vector<ESMCI::Array*> arrays;
-    
+
     // Convert Grid to Mesh
     int localrc;
-    *meshpp=MeshCap::GridToMesh(grid, *staggerLoc, 
+    *meshpp=MeshCap::GridToMesh(grid, *staggerLoc,
                                 arrays,
                                 maskValuesArg,
                                 regridConserve, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
-    
-    // Set return code 
+
+    // Set return code
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
-  
+
 
   void FTN_X(c_esmc_gridtomeshcell)(ESMCI::Grid **gridpp, MeshCap **meshpp, int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_gridtomeshcell()" 
-    
+#define ESMC_METHOD "c_esmc_gridtomeshcell()"
+
     ESMCI::Grid &grid = **gridpp;
-    
+
     // Temp vector
     std::vector<ESMCI::Array*> arrays;
-    
+
     // Convert Grid to Mesh
     int localrc;
     *meshpp=MeshCap::GridToMeshCell(grid, arrays, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
-    
-    // Set return code 
+
+    // Set return code
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
-  
+
 #undef  ESMC_METHOD
 }

@@ -47,6 +47,7 @@ module ESMF
     use ESMF_VMMod 
     use ESMF_DELayoutMod
     use ESMF_DistGridMod
+    use ESMF_DynamicMaskMod
     use ESMF_ArrayMod
     use ESMF_ArrayBundleMod
 
@@ -76,6 +77,7 @@ module ESMF
     use ESMF_FieldCreateMod
     use ESMF_FieldEmptyMod
     use ESMF_FieldRegridMod
+    use ESMF_FieldSetMod
     use ESMF_RegridMod
 
     use ESMF_FieldGatherMod
@@ -105,5 +107,9 @@ module ESMF
     use ESMF_ContainerMod
     
     use ESMF_InitMod
+
+    use ESMFIOMod
+    
+    use ESMF_IOScripMod, only: ESMF_SparseMatrixWrite
 
 end module ESMF

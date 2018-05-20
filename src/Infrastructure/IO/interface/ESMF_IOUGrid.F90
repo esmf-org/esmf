@@ -223,7 +223,12 @@ subroutine ESMF_UGridInq(filename, meshname, nodeCount, elementCount, &
     end if
 
     if (present(elementCount) .or. present(maxNodePElement) .or. present(fillvalue)) then
-      if (meshDim == 2) then
+      if (meshDim == 1) then
+          errmsg = "- 1D network topology does not have elements" 
+          call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                 msg=errmsg, ESMF_CONTEXT, rcToReturn=rc) 
+	  return	 
+      elseif (meshDim == 2) then
         varname = "face_node_connectivity"
       else
         varname = "volume_node_connectivity"
@@ -1729,7 +1734,7 @@ subroutine ESMF_GetElemFromUGridFile (filename, meshname, elmtConn, &
     remain = mod (elmtCount,PetCnt)
     startElmt = localCount*PetNo +1
     if (PetNo==PetCnt-1) localCount=localCount+remain
-    print *, PetNo, 'Before allocating elmtConn', localCount
+    ! print *, PetNo, 'Before allocating elmtConn', localCount
     allocate(elmtConnT(MaxNodePerElmt,localCount) )
     allocate( elmtNums(localCount) )
     ! Get element connectivity... transposed

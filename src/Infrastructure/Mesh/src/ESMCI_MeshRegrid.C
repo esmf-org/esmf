@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -67,7 +67,7 @@ int print_debug_info(IWeights &wts) {
 //    std::cout<<std::endl;
     for (UInt c = 0; c < _col.size(); ++c) {
       double value = _col[c].value;
-      
+
     }
   }
 
@@ -84,7 +84,7 @@ int print_debug_info(IWeights &wts) {
   return 1;
 }
 
-int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts, 
+int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
                                   Mesh &dstmesh, MEField<> *dst_neg_wts)
 {
   IWeights::WeightMap::const_iterator wi = wts.begin_row(), we = wts.end_row();
@@ -113,13 +113,17 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
 #endif
 
 // Meshes are already committed
-  int online_regrid(Mesh *srcmesh, PointList *srcpointlist, 
-		    Mesh *dstmesh, PointList *dstpointlist, 
-		    IWeights &wts,
-		    int *regridConserve, int *regridMethod, 
-		    int *regridPoleType, int *regridPoleNPnts, 
-		    int *regridScheme, 
-		    int *map_type, int *unmappedaction, 
+  int online_regrid(Mesh *srcmesh, PointList *srcpointlist,
+                    Mesh *dstmesh, PointList *dstpointlist,
+                    IWeights &wts,
+                    int *regridConserve, int *regridMethod,
+                    int *regridPoleType, int *regridPoleNPnts,
+                    int *regridScheme,
+                    int *map_type,
+                    int *extrapMethod,
+                    int *extrapNumSrcPnts,
+                    ESMC_R8 *extrapDistExponent,
+                    int *unmappedaction,
                     bool set_dst_status, WMat &dst_status) {
 
 
@@ -135,7 +139,7 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
       if (!dst_iwts) Throw() << "Integration weights needed for conservative regridding."
                              <<std::endl;
 
-      if (!csrv(*srcmesh, *dstmesh, wts, src_iwts, dst_iwts, regridMethod, regridScheme, 
+      if (!csrv(*srcmesh, *dstmesh, wts, src_iwts, dst_iwts, regridMethod, regridScheme,
                 regridPoleType, regridPoleNPnts, unmappedaction))
         Throw() << "Conservative regridding error" << std::endl;
 
@@ -143,9 +147,13 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
     // NON Conservative regridding
     case (ESMC_REGRID_CONSERVE_OFF): {
 
-      if (!regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, NULL, 
-		  wts, regridMethod, regridScheme, 
-                  regridPoleType, regridPoleNPnts, map_type, unmappedaction,
+      if (!regrid(srcmesh, srcpointlist, dstmesh, dstpointlist, NULL,
+                  wts, regridMethod, regridScheme,
+                  regridPoleType, regridPoleNPnts, map_type,
+                  extrapMethod,
+                  extrapNumSrcPnts,
+                  extrapDistExponent,
+                  unmappedaction,
                   set_dst_status, dst_status)) {
         Throw() << "Regridding error" << std::endl;
       }
@@ -178,13 +186,13 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
 // Mesh are not committed yet
 #ifdef REGRIDTIMING
 int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
-             int *regridConserve, int *regridMethod, 
+             int *regridConserve, int *regridMethod,
              int *regridPoleType, int *regridPoleNPnts,
              char *srcGridFile, char *dstGridFile, char *wghtFile,
              regridTimer &rt) {
 #else
 int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
-             int *regridConserve, int *regridMethod, 
+             int *regridConserve, int *regridMethod,
              int *regridPoleType, int *regridPoleNPnts,
              char *srcGridFile, char *dstGridFile, char *wghtFile) {
 #endif
@@ -220,7 +228,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
         MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
       // generate integration weights on the copy
-      // TODO: remove this (and the dstcpy mesh passed in) when the 
+      // TODO: remove this (and the dstcpy mesh passed in) when the
       //       write bug with pole assimilation is fixed.
       dst_iwtscpy = dstmeshcpy.RegisterField("iwts",
         MEFamilyStd::instance(), MeshObj::ELEMENT, ctxt, 1, true);
@@ -254,10 +262,16 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 
       bool tmp_set_dst_status=false;
       WMat tmp_dst_status;
-
+      int tmpExtrapNumSrcPnts=1;
       int map_type=0;
+      int tmpExtrapMethod=0;
+      ESMC_R8 tmpDistExponent=2.0;
       if (!regrid(&srcmesh, NULL, &dstmesh, NULL, NULL, wts, regridMethod, &regridScheme,
-                  regridPoleType, regridPoleNPnts, &map_type,  &unmappedaction, 
+                  regridPoleType, regridPoleNPnts, &map_type,
+                  &tmpExtrapMethod,
+                  &tmpExtrapNumSrcPnts,
+                  &tmpDistExponent,
+                  &unmappedaction,
                   tmp_set_dst_status, tmp_dst_status))
 
         Throw() << "Regridding error" << std::endl;
@@ -299,21 +313,357 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 
 }
 
- int regrid(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist, 
-	    Mesh *midmesh, IWeights &wts,
-	    int *regridMethod, int *regridScheme, 
-	    int *regridPoleType, int *regridPoleNPnts, 
-	    int *map_type, int *unmappedaction,
+
+
+// This method converts unmasked Mesh nodes to a PointList
+ static void _create_pointlist_from_mesh_nodes(Mesh *mesh, UInt pole_constraint_id,PointList **_pointlist) {
+
+   // Coord Pointer
+   MEField<> *coord_ptr = mesh->GetCoordField();
+
+   // Mask Pointer
+   MEField<> *mask_ptr = mesh->GetField("mask");
+
+   // Loop through counting local unmasked nodes
+   int num_points=0;
+   MeshDB::iterator ni = mesh->node_begin(), ne = mesh->node_end();
+   for (; ni != ne; ++ni) {
+     MeshObj &node=*ni;
+
+     // If not local, then go on to next node
+     if (!GetAttr(node).is_locally_owned()) continue;
+
+     // If this node is a newly added pole, then skip, because
+     // it's not a point in the original grid
+     if (GetMeshObjContext(node).is_set(pole_constraint_id)) {
+       continue;
+     }
+
+     // If masked, then go on to next
+     if (mask_ptr) {
+       double *msk=mask_ptr->data(node);
+       if (*msk > 0.5) continue;
+     }
+
+     // Count point
+     num_points++;
+   }
+
+   // Create PointList
+   PointList *pointlist = new ESMCI::PointList(num_points, mesh->spatial_dim());
+
+   // Loop through filling PointList
+   ni = mesh->node_begin();
+   for (; ni != ne; ++ni) {
+     MeshObj &node=*ni;
+
+     // If not local, then go on to next node
+     if (!GetAttr(node).is_locally_owned()) continue;
+
+     // If this node is a newly added pole, then skip, because
+     // it's not a point in the original grid
+     if (GetMeshObjContext(node).is_set(pole_constraint_id)) {
+       continue;
+     }
+
+     // If masked, then go on to next
+     if (mask_ptr) {
+       double *msk=mask_ptr->data(node);
+       if (*msk > 0.5) continue;
+     }
+
+     // Get pointer to coords of this node
+     double *coords=coord_ptr->data(node);
+
+     // Add point
+     pointlist->add(node.get_id(), coords);
+   }
+
+
+  // Output
+  *_pointlist=pointlist;
+
+}
+
+#if 0
+ // This hasn't been tested yet, but I left it in in case I need it later.
+static void _create_pointlist_of_mesh_elems_not_in_wmat(Mesh *mesh, WMat &wts, PointList **_missing_points) {
+
+  // Get element coordinate Field
+  MEField<> *cptr = mesh->GetField("elem_coordinates");
+
+  // If there aren't element coordinates we can't make a pointlist
+  if (!cptr) {
+    Throw() << " Can't extrapolate to cell/elem centers there are no coordinates there.";
+  }
+
+  // Get mask Field
+  MEField<> *mptr = mesh->GetField("elem_mask");
+
+  // Get weight iterators
+  WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
+
+  // Get mesh node iterator that goes through in order of id
+  Mesh::MeshObjIDMap::const_iterator ei=mesh->map_begin(MeshObj::ELEMENT), ee=mesh->map_end(MeshObj::ELEMENT);
+
+  // Count all points that don't have weights
+  int num_missing=0;
+  for (; ei != ee; ++ei) {
+    const MeshObj &elem=*ei;
+
+    // Skip non local nodes
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Skip masked elements
+    if (mptr != NULL) {
+      double *m=mptr->data(elem);
+      if (*m > 0.5) continue;
+    }
+
+    // get node id
+    int elem_id=elem.get_id();
+
+    // get weight id
+    int wt_id=wi->first.id;
+
+    // Advance weights until not less than elem id
+    while ((wi != we) && (wi->first.id <elem_id)) {
+      wi++;
+    }
+
+    // If teh current weight is not equal to the node id, then we must have passed it,
+    // so count it.
+    if (wi->first.id != elem_id) {
+      num_missing++;
+    }
+  }
+
+  // Create Pointlist
+  PointList *missing_points = new ESMCI::PointList(num_missing, mesh->spatial_dim());
+
+  // Get weight iterators
+  wi =wts.begin_row();
+
+  // Get mesh elem iterator that goes through in order of id
+  ei=mesh->map_begin(MeshObj::ELEMENT);
+
+  // Count all points that don't have weights
+  for (; ei != ee; ++ei) {
+    const MeshObj &elem=*ei;
+
+    // Skip non local nodes
+    if (!GetAttr(elem).is_locally_owned()) continue;
+
+    // Skip masked elements
+    if (mptr != NULL) {
+      double *m=mptr->data(elem);
+      if (*m > 0.5) continue;
+    }
+
+    // get node id
+    int elem_id=elem.get_id();
+
+    // get weight id
+    int wt_id=wi->first.id;
+
+    // Advance weights until not less than elem id
+    while ((wi != we) && (wi->first.id <elem_id)) {
+      wi++;
+    }
+
+    // If the current weight is not equal to the elem id, then we must have passed it, so add it to the list
+    if (wi->first.id != elem_id) {
+      double *elem_coord=cptr->data(elem);
+      missing_points->add(elem_id, elem_coord);
+    }
+  }
+
+  // Output
+  *_missing_points=missing_points;
+}
+#endif
+
+// Get the list of ids in the mesh, but not in the wts
+// (i.e. if mesh is the dest. mesh, the unmapped points)
+static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &wts, PointList **_missing_points) {
+
+  // Get weight iterators
+  WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
+
+  // Count number of missing points
+  int num_missing=0;
+  int curr_num_pts = pointlist->get_curr_num_pts();
+  for (int i=0; i<curr_num_pts; i++) {
+
+    // get node id
+    int id = pointlist->get_id(i);
+
+    // get weight id
+    int wt_id=wi->first.id;
+
+    // Advance weights until not less than node id
+    while ((wi != we) && (wi->first.id < id)) {
+      wi++;
+    }
+
+    // If the current weight is not equal to the node id, then we must have passed it, so add it to the list
+    if (wi->first.id != id) {
+      num_missing++;
+    }
+  }
+
+  // Create Pointlist
+  PointList *missing_points = new ESMCI::PointList(num_missing, pointlist->get_coord_dim());
+
+  // Add missing points to PointList
+  wi =wts.begin_row();
+  for (int i=0; i<curr_num_pts; i++) {
+
+    // get node id
+    int id = pointlist->get_id(i);
+
+    // get weight id
+    int wt_id=wi->first.id;
+
+    // Advance weights until not less than node id
+    while ((wi != we) && (wi->first.id < id)) {
+      wi++;
+    }
+
+    // If teh current weight is not equal to the node id, then we must have passed it, so add it to the list
+    if (wi->first.id != id) {
+      missing_points->add(id, pointlist->get_coord_ptr(i));
+    }
+  }
+
+  // Output
+  *_missing_points=missing_points;
+}
+
+ void _replace_mapped_with_mapped_extrap(WMat &status) {
+
+   WMat::WeightMap::iterator wi = status.begin_row(), we = status.end_row();
+   for (; wi != we; ++wi) {
+
+     // Get row and column info
+     const WMat::Entry &row = wi->first;
+     std::vector<WMat::Entry> &col = wi->second;
+
+     // Loop column
+     for (int i = 0; i < col.size(); ++i) {
+       WMat::Entry &entry = col[i];
+
+       if (entry.id == ESMC_REGRID_STATUS_MAPPED) entry.id=ESMC_REGRID_STATUS_EXTRAP_MAPPED;
+     }
+   }
+ }
+
+ // Do extrapolation. The wts structure which comes out will have the new weights for the extrapolation merged in
+ // TODO: move to another file
+ void extrap(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist,
+             IWeights &wts,
+             MAP_TYPE mtype,
+             UInt pole_constraint_id, // Only valid when srcmesh exists
+             int extrapMethod,
+             int extrapNumSrcPnts,
+             ESMC_R8 extrapDistExponent,
+             bool set_dst_status, WMat &dst_status) {
+
+
+   //  printf("BOB: in extrap() extrapMethod=%d\n",extrapMethod);
+
+   // Construct pointlist for srcmesh
+   // We need a pointlist to be able to use nearest neighbor
+   // TODO: Change nearest neighor weight calc method, so it can
+   //       optionally run on a mesh to avoid this step and make things more efficient
+   PointList *srcpointlist_extrap=NULL;
+   PointList *srcpointlist_from_mesh=NULL;
+   if (srcmesh != NULL) {
+     _create_pointlist_from_mesh_nodes(srcmesh, pole_constraint_id, &srcpointlist_from_mesh);
+     srcpointlist_extrap=srcpointlist_from_mesh;
+   } else if (srcpointlist != NULL) {
+     srcpointlist_extrap=srcpointlist;
+   } else {
+     Throw() << "No destination geometry object.";
+   }
+
+   // DEBUG
+   //srcpointlist_extrap->WriteVTK("src_pl");
+
+   // Construct a new point list which just contains destination points not in the weight matrix
+   PointList *missing_points=NULL;
+   if (dstmesh != NULL) {
+     Throw() << "Conservative methods not supported in extrapolation, because extrapolation would cause the methods to no longer be conservative.";
+   } else if (dstpointlist != NULL) {
+     _create_pointlist_of_points_not_in_wmat(dstpointlist, wts, &missing_points);
+   } else {
+     Throw() << "No destination geometry object.";
+   }
+
+   // DEBUG
+   //missing_points->WriteVTK("missing_pl");
+
+   // Translate extrap method to regrid method
+   int regridMethod;
+   if (extrapMethod == ESMC_EXTRAPMETHOD_NEAREST_STOD) {
+     regridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
+   } else if (extrapMethod == ESMC_EXTRAPMETHOD_NEAREST_IDAVG) {
+     regridMethod=ESMC_REGRID_METHOD_NEAREST_IDAVG;
+   } else {
+     Throw() << "unrecognized extrapolation method";
+   }
+
+   // Set info for calling into interp
+   IWeights extrap_wts;
+   WMat extrap_dst_status;
+
+   // Build the rendezvous grids
+   Interp interp((Mesh *)NULL, srcpointlist_extrap,(Mesh *)NULL, missing_points,
+                 (Mesh *)NULL, false, regridMethod,
+                 set_dst_status, extrap_dst_status,
+                 mtype, ESMCI_UNMAPPEDACTION_IGNORE, extrapNumSrcPnts,
+                 extrapDistExponent);
+
+   // Create the weight matrix
+   interp(0, extrap_wts, set_dst_status, extrap_dst_status);
+
+   // Merge extrap weights into regridding matrix
+   wts.MergeDisjoint(extrap_wts);
+
+   // If status was requested merge that too
+   if (set_dst_status) {
+     // Change from ...MAPPED to ...MAPPED_EXTRAP
+     _replace_mapped_with_mapped_extrap(extrap_dst_status);
+
+     // Replace old status with extrap ones
+     dst_status.MergeReplace(extrap_dst_status);
+   }
+
+   // Cleanup
+   if (srcpointlist_from_mesh != NULL) delete srcpointlist_from_mesh;
+   if (missing_points != NULL) delete missing_points;
+ }
+
+
+ int regrid(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist,
+            Mesh *midmesh, IWeights &wts,
+            int *regridMethod, int *regridScheme,
+            int *regridPoleType, int *regridPoleNPnts,
+            int *map_type,
+            int *extrapMethod,
+            int *extrapNumSrcPnts,
+            ESMC_R8 *extrapDistExponent,
+            int *unmappedaction,
             bool set_dst_status, WMat &dst_status) {
 
 
    // See if it could have a pole
    bool maybe_pole=false;
-   if ((*regridMethod == ESMC_REGRID_METHOD_BILINEAR || 
-	*regridMethod == ESMC_REGRID_METHOD_PATCH) &&
-       (srcmesh->parametric_dim()==2) && 
-       (srcmesh->spatial_dim()==3)) maybe_pole=true; 
-  
+   if ((*regridMethod == ESMC_REGRID_METHOD_BILINEAR ||
+        *regridMethod == ESMC_REGRID_METHOD_PATCH) &&
+       (srcmesh->parametric_dim()==2) &&
+       (srcmesh->spatial_dim()==3)) maybe_pole=true;
+
     // Output Mesh without poles for Debugging
 #ifdef ESMF_REGRID_DEBUG_WRITE_MESH_WO_POLE
     if (srcmesh != NULL) WriteMesh(*srcmesh, "src_rgd_mesh_wo_p");
@@ -321,20 +671,24 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
     // No pole is added to dst mesh
 #endif
 
+    // If a srcMesh exists add Pole constraints to it
+    UInt pole_constraint_id;
+    if (srcmesh != NULL) {
+      pole_constraint_id = srcmesh->DefineContext("pole_constraints");
+    }
 
+    // Add Pole
     IWeights pole_constraints, stw;
      if (maybe_pole) {
-      // Pole constraints
-      UInt constraint_id = srcmesh->DefineContext("pole_constraints");
       if (*regridPoleType == ESMC_REGRID_POLETYPE_ALL) {
         for (UInt i = 1; i <= 7; ++i)
-          MeshAddPole(*srcmesh, i, constraint_id, pole_constraints);
+          MeshAddPole(*srcmesh, i, pole_constraint_id, pole_constraints);
       } else if (*regridPoleType == ESMC_REGRID_POLETYPE_NPNT) {
         for (UInt i = 1; i <= 7; ++i)
-          MeshAddPoleNPnts(*srcmesh, *regridPoleNPnts, i, constraint_id, pole_constraints);
+          MeshAddPoleNPnts(*srcmesh, *regridPoleNPnts, i, pole_constraint_id, pole_constraints);
       } else if (*regridPoleType == ESMC_REGRID_POLETYPE_TEETH) {
         for (UInt i = 1; i <= 7; ++i)
-          MeshAddPoleTeeth(*srcmesh, i, constraint_id, pole_constraints);
+          MeshAddPoleTeeth(*srcmesh, i, pole_constraint_id, pole_constraints);
       }
     }
 
@@ -362,7 +716,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       snd[num_snd]=psc;
       rcv[num_snd]=psc;
       num_snd++;
- 
+
       // Load mask field
       MEField<> *psm = srcmesh->GetField("mask");
       if (psm != NULL) {
@@ -382,14 +736,14 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       MEField<> &scoord = *srcmesh->GetCoordField();
 
       int num_snd=0;
-      MEField<> *snd[3],*rcv[3];
+      MEField<> *snd[4],*rcv[4];
 
       // Load coord field
       MEField<> *psc = &scoord;
       snd[num_snd]=psc;
       rcv[num_snd]=psc;
       num_snd++;
- 
+
       // Load mask field
       MEField<> *psm = srcmesh->GetField("elem_mask");
       if (psm != NULL) {
@@ -406,6 +760,14 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
         num_snd++;
       }
 
+      // Load frac2 field
+      MEField<> *psf = srcmesh->GetField("elem_frac2");
+      if (psf != NULL) {
+        snd[num_snd]=psf;
+        rcv[num_snd]=psf;
+        num_snd++;
+      }
+
       srcmesh->CreateGhost();
       srcmesh->GhostComm().SendFields(num_snd, snd, rcv);
 
@@ -415,7 +777,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
         MeshDB::const_iterator ei = srcmesh->elem_begin_all(), ee = srcmesh->elem_end_all();
         for (; ei != ee; ++ei) {
           const MeshObj &elem=*ei;
-          
+
           if (!GetAttr(elem).GetContext().is_set(Attr::ACTIVE_ID)) {
             printf("AFTER GHOST id=%d not active\n",elem.get_id());
           }
@@ -425,25 +787,32 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
 
     }
 
+
+
     // Convert to map type
     MAP_TYPE mtype;
     if (*map_type==0) mtype=MAP_TYPE_CART_APPROX;
     else if (*map_type==1) mtype=MAP_TYPE_GREAT_CIRCLE;
     else Throw() << "Unrecognized map type";
 
+    // Put interp in a block so that it and the rendezvous meshes are
+    // destroyed before we do other things like the extrapolation below
+    {
 
-    // Build the rendezvous grids
-    Interp interp(srcmesh, srcpointlist, dstmesh, dstpointlist, 
-		  midmesh, false, *regridMethod, 
-                  set_dst_status, dst_status,
-                  mtype, *unmappedaction);
-                  
-    
-     // Create the weight matrix
-    interp(0, wts, set_dst_status, dst_status);
+      // Build the rendezvous grids
+      Interp interp(srcmesh, srcpointlist, dstmesh, dstpointlist,
+                    midmesh, false, *regridMethod,
+                    set_dst_status, dst_status,
+                    mtype, *unmappedaction);
 
-     // Release the Zoltan struct if we used it for the mid mesh
-     if(midmesh) interp.release_zz();
+
+      // Create the weight matrix
+      interp(0, wts, set_dst_status, dst_status);
+
+      // Release the Zoltan struct if we used it for the mid mesh
+      if(midmesh) interp.release_zz();
+
+    } // block which contains inter object existance
 
      // Factor out poles if they exist
      if (maybe_pole) {
@@ -456,6 +825,14 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
        }
      }
 
+     // Do extrapolation if the user has requested it
+     if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
+       extrap(srcmesh, srcpointlist, dstmesh, dstpointlist,
+              wts, mtype, pole_constraint_id,
+              *extrapMethod, *extrapNumSrcPnts, *extrapDistExponent,
+              set_dst_status, dst_status);
+     }
+
     return 1;
   }
 
@@ -463,12 +840,12 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
   // csrv - Args are NON-COMMITTED meshes
   int csrv(Mesh &srcmesh, Mesh &dstmesh, IWeights &wts,
            MEField<> *src_iwts, MEField<> *dst_iwts,
-           int *regridMethod, int *regridScheme, 
-           int *regridPoleType, int *regridPoleNPnts, 
+           int *regridMethod, int *regridScheme,
+           int *regridPoleType, int *regridPoleNPnts,
            int *unmappedaction) {
 
 
-    // generate integration weights before pole, so 
+    // generate integration weights before pole, so
     // they are distributed across non-pole nodes
     // (the node is factored out in the end)
     Integrate sig(srcmesh), dig(dstmesh);
@@ -487,7 +864,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
         dig.AddPoleWeights(dstmesh,i,dst_iwts);
       }
     }
-    
+
     // Add in other none-pole weights
     // (and do cross processor sum)
     sig.intWeights(src_iwts);
@@ -503,7 +880,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
     double *Sdata = src_iwts->data(*sni);
     ssum += *Sdata;
   }
-  
+
   double dsum=0.0;
  for (; dni != dne; ++dni) {
     double *Ddata = dst_iwts->data(*dni);
@@ -574,8 +951,8 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
     WMat tmp_dst_status;
 
     // Build the rendezvous grids
-    Interp interp(&dstmesh, NULL, &srcmesh, NULL, NULL, false, *regridMethod, 
-                  tmp_set_dst_status, tmp_dst_status, 
+    Interp interp(&dstmesh, NULL, &srcmesh, NULL, NULL, false, *regridMethod,
+                  tmp_set_dst_status, tmp_dst_status,
                   MAP_TYPE_CART_APPROX, *unmappedaction);
 
     // Generate the backwards interpolation matrix
@@ -594,7 +971,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
         stw.AssimilateConstraintsNPnts(pole_constraints);
       }
     }
-    
+
     // L2 projection conservative interpolation
     interp.interpL2csrvM(stw, &wts, src_iwts, dst_iwts);
 
@@ -623,7 +1000,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
   return 1;
   }
 
-  // to generate the iwts again, and return to Fortran 
+  // to generate the iwts again, and return to Fortran
   int get_iwts(Mesh &mesh, MEField<> *iwts, int *regridScheme) {
 
     // generate integration weights
@@ -640,7 +1017,7 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       for (UInt i = 1; i <= 7; ++i)
         ig.AddPoleWeights(mesh,i,iwts);
     }
-    
+
     // Add in other none-pole weights
     // (and do cross processor sum)
     ig.intWeights(iwts);

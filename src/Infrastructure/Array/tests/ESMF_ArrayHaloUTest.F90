@@ -2460,7 +2460,7 @@ program ESMF_ArrayHaloUTest
 !------------------------------------------------------------------------
 !------------------------------------------------------------------------
 ! Test-6: 2D decomposition, overlapping halo regions, asymmetric haloDepth,
-!         Array with undistributed dimension (last dim, not weakly congruent)
+!         Array with undistributed dimension (last dim, not compatible)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -2916,7 +2916,7 @@ program ESMF_ArrayHaloUTest
 !------------------------------------------------------------------------
 !------------------------------------------------------------------------
 ! Test-7: 2D decomposition, overlapping halo regions, asymmetric haloDepth,
-!         Array with undistributed dimension (first dim, weakly congruent)
+!         Array with undistributed dimension (first dim, compatible)
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -3353,7 +3353,7 @@ program ESMF_ArrayHaloUTest
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "Array Create weakly congruent Test-7b"
+  write(name, *) "Array Create compatible Test-7b"
   write(failMsg, *) "Did not return ESMF_SUCCESS" 
   array = ESMF_ArrayCreate(arrayspec=arrayspec, distgrid=distgrid, &
     distgridToArrayMap=(/2,3/), &
@@ -3391,7 +3391,7 @@ program ESMF_ArrayHaloUTest
   
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "ArrayHalo weakly congruent Test-7b"
+  write(name, *) "ArrayHalo compatible Test-7b"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayHalo(array=array, routehandle=routehandle, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -19,7 +19,7 @@
 #include <Mesh/include/ESMCI_OTree.h>
 #include <Mesh/include/ESMCI_Mask.h>
 #include <Mesh/include/ESMCI_ParEnv.h>
- 
+
 #include <iostream>
 #include <fstream>
 #include <algorithm>
@@ -53,7 +53,7 @@ struct SearchData {
   double src_pnt[3];
 
   const MeshObj *closest_dst_node;
-  double closest_dist2;  // closest distance squared  
+  double closest_dist2;  // closest distance squared
   _field *dst_coord;
 };
 
@@ -61,9 +61,9 @@ struct SearchData {
   MeshObj *dst_node = static_cast<MeshObj*>(n);
   SearchData *sd = static_cast<SearchData*>(y);
 
- 
+
   // Get dst node coords
-  double *c=sd->dst_coord->data(*dst_node);  
+  double *c=sd->dst_coord->data(*dst_node);
 
   // Convert to 3D point
   double dst_pnt[3];
@@ -94,20 +94,20 @@ struct SearchData {
     max[2]=sd->src_pnt[2]+dist;
   } else if (dist2 == sd->closest_dist2) {
     // In ParSearchNearest, this can happen when sd->closest_dst_node is NULL
-    // so check for that first. 
+    // so check for that first.
     if (sd->closest_dst_node != NULL) {
       // If exactly the same distance chose the point with the smallest id
       // (To make things consistent when running on different numbers of procs)
       if (dst_node->get_id() < sd->closest_dst_node->get_id()) {
         sd->closest_dst_node=dst_node;
       }
-    } else { // If there is no closest yet, then just use the one you found. 
+    } else { // If there is no closest yet, then just use the one you found.
       sd->closest_dst_node=dst_node;
     }
 
-    // Don't need to change the closest_dist2  because at exactly the same dist 
-    
-    // Don't need to adjust the min-max box because at exactly the same dist 
+    // Don't need to change the closest_dist2  because at exactly the same dist
+
+    // Don't need to adjust the min-max box because at exactly the same dist
 
   }
 
@@ -126,7 +126,7 @@ struct SearchData {
 
   MEField<> *src_mask = src.GetField("mask");
 
-  
+
   // Get dst fields
   // NOTE: these are only _field, not an MEField, since there are no master elements.
   _field *dst_coord = dst.Getfield("coordinates_1");
@@ -138,7 +138,7 @@ struct SearchData {
   if (sdim != dst.spatial_dim()) {
     Throw() << "Meshes must have same spatial dim for search";
   }
-  
+
 
   // Count unmasked src nodes
   int num_nodes_to_search=0;
@@ -149,7 +149,7 @@ struct SearchData {
     for (; ni != ne; ++ni) {
       // Get mask value
       double *m=dst_mask->data(*ni);
-      
+
       // Only put objects in if they're not masked
       if (!IS_MASKED(*m)) {
         num_nodes_to_search++;
@@ -157,9 +157,9 @@ struct SearchData {
     }
   }
 
- 
+
   // Create search tree
-  OTree *tree=new OTree(num_nodes_to_search); 
+  OTree *tree=new OTree(num_nodes_to_search);
 
   // Add unmasked nodes to search tree
   double pnt[3];
@@ -170,7 +170,7 @@ struct SearchData {
 
       // Get coord value
       double *c=dst_coord->data(node);
-      
+
       // Set coord value in 3D point
       pnt[0] = c[0];
       pnt[1] = c[1];
@@ -186,18 +186,18 @@ struct SearchData {
 
       // Get mask value
       double *m=dst_mask->data(node);
-      
+
       // Only put objects in if they're not masked
       if (!IS_MASKED(*m)) {
 
         // Get coord value
         double *c=dst_coord->data(node);
-        
+
         // Set coord value in 3D point
         pnt[0] = c[0];
         pnt[1] = c[1];
         pnt[2] = sdim == 3 ? c[2] : 0.0;
-        
+
         // Add node to search tree
         tree->add(pnt, pnt, (void*)&node);
       }
@@ -224,7 +224,7 @@ struct SearchData {
 
       // Get mask value
       double *m=src_mask->data(node);
-      
+
       // Only put objects in if they're not masked
       if (!IS_MASKED(*m)) {
         src_nlist.push_back(&node);
@@ -248,19 +248,19 @@ struct SearchData {
   pmin[0] = min;
   pmin[1] = min;
   pmin[2] = min;
-  
+
   pmax[0] = max;
   pmax[1] = max;
   pmax[2] = max;
-   
+
   // Loop the destination points, find hosts.
   for (UInt p = 0; p < src_nlist.size(); ++p) {
-    
+
    const MeshObj &src_node = *src_nlist[p];
 
     // Get destination node coords
     double *c = src_coord->data(src_node);
-    
+
     // Setup search structure
     SearchData sd;
     sd.sdim=sdim;
@@ -273,10 +273,10 @@ struct SearchData {
 
     // Find closest source node to this destination node
     tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
-    
+
     // If we've found a nearest source point, then add to the search results list...
     if (sd.closest_dst_node != NULL) {
-      Search_result *sr=new Search_result();       
+      Search_result *sr=new Search_result();
       sr->src_gid=src_node.get_id();
       sr->dst_gid=sd.closest_dst_node->get_id();
       result.push_back(sr);
@@ -290,9 +290,9 @@ struct SearchData {
         Throw() << " Unknown unmappedaction option";
       }
     }
-     
+
   } // for src nodes
-  
+
 
   // Get rid of tree
   if (tree) delete tree;
@@ -307,7 +307,7 @@ struct CommData {
 };
 
 
-  
+
 
 // The main routine
   void ParSearchNearestDstToSrc(const Mesh &src, const Mesh &dst, int unmappedaction, SearchResult &result) {
@@ -326,7 +326,7 @@ struct CommData {
 
   MEField<> *src_mask = src.GetField("mask");
 
-  
+
   // Get dst fields
   // NOTE: these are only _field, not an MEField, since there are no master elements.
   _field *dst_coord = dst.Getfield("coordinates_1");
@@ -338,7 +338,7 @@ struct CommData {
   if (sdim != src.spatial_dim()) {
     Throw() << "Meshes must have same spatial dim for search";
   }
-  
+
 
   // Count unmasked source nodes
   int num_nodes_to_search=0;
@@ -349,7 +349,7 @@ struct CommData {
     for (; ni != ne; ++ni) {
       // Get mask value
       double *m=dst_mask->data(*ni);
-      
+
       // Only put objects in if they're not masked
       if (!IS_MASKED(*m)) {
         num_nodes_to_search++;
@@ -357,9 +357,9 @@ struct CommData {
     }
   }
 
- 
+
   // Create search tree
-  OTree *tree=new OTree(num_nodes_to_search); 
+  OTree *tree=new OTree(num_nodes_to_search);
 
 
   // Get universal min-max
@@ -389,7 +389,7 @@ struct CommData {
 
       // Get coord value
       double *c=dst_coord->data(node);
-      
+
       // Set coord value in 3D point
       pnt[0] = c[0];
       pnt[1] = c[1];
@@ -402,7 +402,7 @@ struct CommData {
       if (pnt[0] < proc_min[0]) proc_min[0]=pnt[0];
       if (pnt[1] < proc_min[1]) proc_min[1]=pnt[1];
       if (pnt[2] < proc_min[2]) proc_min[2]=pnt[2];
-      
+
       if (pnt[0] > proc_max[0]) proc_max[0]=pnt[0];
       if (pnt[1] > proc_max[1]) proc_max[1]=pnt[1];
       if (pnt[2] > proc_max[2]) proc_max[2]=pnt[2];
@@ -414,18 +414,18 @@ struct CommData {
 
       // Get mask value
       double *m=dst_mask->data(node);
-      
+
       // Only put objects in if they're not masked
       if (!IS_MASKED(*m)) {
 
         // Get coord value
         double *c=dst_coord->data(node);
-        
+
         // Set coord value in 3D point
         pnt[0] = c[0];
         pnt[1] = c[1];
         pnt[2] = sdim == 3 ? c[2] : 0.0;
-        
+
         // Add node to search tree
         tree->add(pnt, pnt, (void*)&node);
 
@@ -433,7 +433,7 @@ struct CommData {
         if (pnt[0] < proc_min[0]) proc_min[0]=pnt[0];
         if (pnt[1] < proc_min[1]) proc_min[1]=pnt[1];
         if (pnt[2] < proc_min[2]) proc_min[2]=pnt[2];
-        
+
         if (pnt[0] > proc_max[0]) proc_max[0]=pnt[0];
         if (pnt[1] > proc_max[1]) proc_max[1]=pnt[1];
         if (pnt[2] > proc_max[2]) proc_max[2]=pnt[2];
@@ -465,14 +465,14 @@ struct CommData {
 
       // Get mask value
       double *m=src_mask->data(node);
-      
+
       // Only put objects in if they're not masked
       if (!IS_MASKED(*m)) {
         src_nlist.push_back(&node);
       }
     }
   }
-  
+
 
   //// Find the closest point locally ////
 
@@ -480,18 +480,18 @@ struct CommData {
   double pmin[3], pmax[3];
   pmin[0] = min;  pmin[1] = min;  pmin[2] = min;
   pmax[0] = max;  pmax[1] = max;  pmax[2] = max;
-   
+
   // Allocate space to hold closest gids, dist
   vector<int> closest_dst_gid(src_nlist.size(),-1);
   vector<double> closest_dist(src_nlist.size(),std::numeric_limits<double>::max());
   // Loop the destination points, find hosts.
   for (UInt p = 0; p < src_nlist.size(); ++p) {
-    
+
    const MeshObj &node = *src_nlist[p];
 
     // Get destination node coords
     double *c = src_coord->data(node);
-    
+
     // Setup search structure
     SearchData sd;
     sd.sdim=sdim;
@@ -504,7 +504,7 @@ struct CommData {
 
     // Find closest source node to this destination node
     tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
-    
+
     // If we've found a nearest source point, then add to the search results list...
     if (sd.closest_dst_node != NULL) {
       closest_dst_gid[p]=sd.closest_dst_node->get_id();
@@ -512,7 +512,7 @@ struct CommData {
     }
   }
 
-  
+
   // Get list of procs where a point can be located
   vector< vector<int> > proc_lists;  // List of procs
   proc_lists.resize(src_nlist.size());
@@ -528,7 +528,7 @@ struct CommData {
 
     //// Point min max we expand the point by the
     double pnt_min[3], pnt_max[3];
-    
+
     pnt_min[0] = pnt[0]-dist;
     pnt_min[1] = pnt[1]-dist;
     pnt_min[2] = (sdim == 3) ? pnt[2]-dist : 0.0;
@@ -557,50 +557,50 @@ struct CommData {
 
   // Figure out which procs we're sending to
   int num_snd_procs;
-  vector<int> snd_pets;       
-  vector< vector<int> > snd_inds; 
+  vector<int> snd_pets;
+  vector< vector<int> > snd_inds;
   // {
-    vector< vector<int> > tmp_snd_inds; 
+    vector< vector<int> > tmp_snd_inds;
     tmp_snd_inds.resize(num_procs);
     for (int i=0; i<src_nlist.size(); i++) {
       for (int j=0; j<proc_lists[i].size(); j++) {
-	tmp_snd_inds[proc_lists[i][j]].push_back(i);
+        tmp_snd_inds[proc_lists[i][j]].push_back(i);
       }
     }
-    
+
     // Collapse lists to just processors with non-empty lists
     num_snd_procs=0;
     for (int i=0; i<num_procs; i++) {
       if (!tmp_snd_inds[i].empty()) num_snd_procs++;
     }
-    
+
     // reserve space in lists
     snd_pets.resize(num_snd_procs,-1);
     snd_inds.resize(num_snd_procs);
-    
+
     int k=0;
     for (int i=0; i<num_procs; i++) {
       if (!tmp_snd_inds[i].empty()) {
-	snd_pets[k]=i;
-	snd_inds[k].reserve(tmp_snd_inds[i].size());
-	snd_inds[k]=tmp_snd_inds[i];
-	k++;
-      } 
+        snd_pets[k]=i;
+        snd_inds[k].reserve(tmp_snd_inds[i].size());
+        snd_inds[k]=tmp_snd_inds[i];
+        k++;
+      }
     }
     //  } // Get rid of tmp_snd_inds
-  
+
 
     // send size: point+dist
     int snd_size=(sdim+1)*sizeof(double);
 
 
     // Calculate send sizes
-    vector<int> snd_sizes;       
+    vector<int> snd_sizes;
     snd_sizes.resize(num_snd_procs,0); // resize and init to 0
     for (int i=0; i< num_snd_procs; i++) {
       snd_sizes[i]=snd_size*snd_inds[i].size();
     }
-  
+
 
 #if 0
   // Debug output
@@ -663,15 +663,15 @@ struct CommData {
 
 
   // Unpack point info and call function
-  vector<int> rcv_pets;       
-  vector< vector<CommData> > rcv_results; 
+  vector<int> rcv_pets;
+  vector< vector<CommData> > rcv_results;
   for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
     UInt proc = *p;
     SparseMsg::buffer *b = comm.getRecvBuffer(proc);
 
     // Add proc
     rcv_pets.push_back(proc);
-    
+
     //    printf("%d # From %d pnts=",Par::Rank(),proc);
 
     // Figure out how many messages we have
@@ -680,7 +680,7 @@ struct CommData {
     // build temporary vector
     vector<CommData> tmp;
     tmp.reserve(num_msgs); // reserve to save allocation time
-   
+
     // Unpack everything from this processor
     while (!b->empty()) {
       double buf[4]; // 4 is biggest this should be (i.e. 3D+dist)
@@ -703,15 +703,15 @@ struct CommData {
 
       //// Point min max we expand the point by the distance to the closest point
       double pmin[3], pmax[3];
-      
+
       pmin[0] = pnt[0]-dist;
       pmin[1] = pnt[1]-dist;
       pmin[2] = (sdim == 3) ? pnt[2]-dist : 0.0;
-      
+
       pmax[0] = pnt[0]+dist;
       pmax[1] = pnt[1]+dist;
       pmax[2] = (sdim == 3) ? pnt[2]+dist : 0.0;
-      
+
 
       // Setup search structure
       SearchData sd;
@@ -725,7 +725,7 @@ struct CommData {
 
       // Find closest source node to this destination node
       tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
-      
+
       // Fill in structure to be sent
       CommData cd;
       if (sd.closest_dst_node != NULL) {
@@ -736,7 +736,7 @@ struct CommData {
         cd.closest_dst_gid=-1;
       }
       cd.proc=Par::Rank();
-      
+
       // Put into temporary list
       tmp.push_back(cd);
     }
@@ -747,7 +747,7 @@ struct CommData {
   }
 
   // Calculate size to send back to pnt's home proc
-  vector<int> rcv_sizes;       
+  vector<int> rcv_sizes;
   rcv_sizes.resize(rcv_pets.size(),0); // resize and init to 0
   for (int i=0; i< rcv_pets.size(); i++) {
     rcv_sizes[i]=sizeof(CommData)*rcv_results[i].size();
@@ -782,7 +782,7 @@ struct CommData {
 
 
   // Unpack CommData and generate results
-  vector<CommData> pnt_results;  
+  vector<CommData> pnt_results;
   CommData init_cd;
   init_cd.closest_dist = std::numeric_limits<double>::max();
   init_cd.closest_dst_gid=-2;
@@ -794,7 +794,7 @@ struct CommData {
 
     // Figure out how many messages we have
     int num_msgs=b->msg_size()/snd_size; // ??? IS THIS RIGHT ???
-   
+
     // Unpack everything from this processor
     int j=0;
     while (!b->empty()) {
@@ -806,7 +806,7 @@ struct CommData {
       // Get loc of point
       //// Can't use snd_inds because first index isn't necesarily in same order
       //// between send and receive
-      int pnt_ind=tmp_snd_inds[proc][j]; 
+      int pnt_ind=tmp_snd_inds[proc][j];
 
       // Compare and set
       if (cd.closest_dst_gid > -1) {
@@ -840,23 +840,23 @@ struct CommData {
       //      printf("#%d src id=%d %d closest dst id=%d \n",Par::Rank(),src_node.get_id(),GetAttr(src_node).is_locally_owned(),closest_dst_gid[i]);
 
       // We've found a nearest source point, so add to results list
-      Search_result *sr=new Search_result();       
+      Search_result *sr=new Search_result();
 
       sr->src_gid=src_node.get_id();
       sr->dst_gid=closest_dst_gid[i];
 
       result.push_back(sr);
 
-    } else {  
+    } else {
 
       //// check possible error condition
       if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
         Throw() << " Some destination points cannot be mapped to source grid";
       } else if (unmappedaction == ESMCI_UNMAPPEDACTION_IGNORE) {
-	// don't do anything
+        // don't do anything
       } else {
         Throw() << " Unknown unmappedaction option";
-      }      
+      }
     }
   }
 

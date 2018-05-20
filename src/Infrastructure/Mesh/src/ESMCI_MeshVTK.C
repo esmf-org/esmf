@@ -242,8 +242,6 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
   // Now element variables
   {
      FieldReg::MEField_const_iterator nv = mesh.Field_begin(), ne = mesh.Field_end();
-
-     std::vector<double> data(num_elem, 0);
      for (; nv != ne; ++nv) {
        const MEField<> &mf = *nv;
        if (mf.Output() && mf.is_elemental()) {
@@ -287,8 +285,6 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
   // Now node variables
   {
      FieldReg::MEField_const_iterator nv = mesh.Field_begin(), ne = mesh.Field_end();
-
-     std::vector<double> data(num_nodes, 0);
      for (; nv != ne; ++nv) {
        const MEField<> &mf = *nv;
        if (mf.Output() && mf.is_nodal()) {
@@ -299,10 +295,7 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
            std::string vname = mf.name() + (mf.dim() == 1? "" : std::string(buf));
 
            const _field &llf = mf();
-           write_data(mesh.elem_begin(), mesh.elem_end(), llf, vname, d, out);
-           
-           for (UInt e = 0; e < (UInt) num_nodes; e++)
-             out << data[e] << " ";
+           write_data(mesh.node_begin(), mesh.node_end(), llf, vname, d, out);
 
            out << std::endl;
 

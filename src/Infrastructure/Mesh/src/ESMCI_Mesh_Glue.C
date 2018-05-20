@@ -1,10 +1,10 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
@@ -51,9 +51,9 @@
 
 using namespace ESMCI;
 
- 
+
 void ESMCI_meshcreate(Mesh **meshpp,
-                      int *pdim, int *sdim, 
+                      int *pdim, int *sdim,
                       ESMC_CoordSys_Flag *coordSys, int *rc)
 {
 #undef  ESMC_METHOD
@@ -100,8 +100,8 @@ void ESMCI_meshcreate(Mesh **meshpp,
     int localrc;
     localrc=ESMCI_CoordSys_CalcCartDim(*coordSys, *sdim, &cart_sdim);
     if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-      throw localrc;  // bail out with exception    
- 
+      throw localrc;  // bail out with exception
+
     // Set dimensions
     (*meshpp)->set_parametric_dimension(*pdim);
     (*meshpp)->set_spatial_dimension(cart_sdim);
@@ -110,13 +110,13 @@ void ESMCI_meshcreate(Mesh **meshpp,
     (*meshpp)->orig_spatial_dim=*sdim;
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT,rc);
+                                          x.what(), ESMC_CONTEXT,rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT,rc);
+                                          "UNKNOWN", ESMC_CONTEXT,rc);
     }
 
     return;
@@ -129,16 +129,16 @@ void ESMCI_meshcreate(Mesh **meshpp,
       "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
- 
-  // Set return code 
+
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 } // meshcreate
 
-void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId, 
+void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
                                            double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                                            ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
-                                           int *rc) 
+                                           int *rc)
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshaddnodes()"
 {
@@ -189,7 +189,7 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
 
     // Register the nodal coordinate field.
     IOField<NodalField> *node_coord = mesh.RegisterNodalField(mesh, "coordinates", sdim);
-     
+
     // Need this for split elements, put on Mesh for now
     mesh.node_coord=node_coord;
 
@@ -217,16 +217,16 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
                                        "- nodeMask array must be the same size as the nodeIds array ", ESMC_CONTEXT, &localrc)) throw localrc;
     }
-    
+
     // Register mask fields on mesh
     node_mask_val = mesh.RegisterNodalField(mesh, "node_mask_val", 1);
     node_mask = mesh.RegisterNodalField(mesh, "mask", 1);
 
 
     // Record the fact that it has masks
-    has_node_mask=true;   
-  } 
-    
+    has_node_mask=true;
+  }
+
 
 #if 0
     // Loop and add coords and mask
@@ -234,14 +234,14 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
       int *maskArray=(nodeMaskII)->array;
       int nm=0;
       for (UInt nc = 0; ni != ne; ++ni) {
-        
+
         MeshObj &node = *ni;
-      
+
         // Coords
         double *coord = node_coord->data(node);
         for (UInt c = 0; c < sdim; ++c)
           coord[c] = nodeCoord[nc+c];
-        nc += sdim;   
+        nc += sdim;
 
         // Mask
         double *mask = node_mask_val->data(node);
@@ -251,14 +251,14 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
       }
     } else {
       for (UInt nc = 0; ni != ne; ++ni) {
-        
+
         MeshObj &node = *ni;
-        
+
         double *coord = node_coord->data(node);
         for (UInt c = 0; c < sdim; ++c)
-          coord[c] = nodeCoord[nc+c];        
-        nc += sdim;   
-      }      
+          coord[c] = nodeCoord[nc+c];
+        nc += sdim;
+      }
     }
 #endif
 
@@ -267,30 +267,30 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
       Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
 
       int nc=0;
-      for (; ni != ne; ++ni) {        
+      for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
-        
+
         double *coord = node_coord->data(node);
         for (UInt c = 0; c < sdim; ++c)
-          coord[c] = nodeCoord[nc+c];        
-        nc += sdim;   
-      }      
+          coord[c] = nodeCoord[nc+c];
+        nc += sdim;
+      }
     } else {
       Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
 
       int nc=0;
-      for (; ni != ne; ++ni) {        
+      for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
 
-        // Save original coordinates        
+        // Save original coordinates
         double *orig_coord = node_orig_coord->data(node);
         for (UInt c = 0; c<orig_sdim; ++c)
-          orig_coord[c] = nodeCoord[nc+c];        
+          orig_coord[c] = nodeCoord[nc+c];
         nc += orig_sdim;
 
         // Convert and save Cartesian coordinates
         double *coord = node_coord->data(node);
-        ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim, 
+        ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim,
                                      orig_coord, coord);
       }
     }
@@ -298,28 +298,28 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
 
     // Loop and add mask
     if (has_node_mask) {
-      int *maskArray=(nodeMaskII)->array;    
+      int *maskArray=(nodeMaskII)->array;
       Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
 
       int nm=0;
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
-        
+
         // Mask
         double *mask = node_mask_val->data(node);
         *mask=maskArray[nm];
-        nm++; 
+        nm++;
       }
     }
-    
+
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -333,10 +333,10 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-} 
+}
 
 void ESMCI_meshwrite(Mesh **meshpp, char *fname, int *rc,
     ESMCI_FortranStrLenArg nlen) {
@@ -362,13 +362,13 @@ void ESMCI_meshwrite(Mesh **meshpp, char *fname, int *rc,
     delete [] filename;
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT,rc);
+                                          x.what(), ESMC_CONTEXT,rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -382,7 +382,7 @@ void ESMCI_meshwrite(Mesh **meshpp, char *fname, int *rc,
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 
@@ -450,13 +450,13 @@ static int ElemType2NumNodes(int pdim, int sdim, int etype) {
 // ti    = temporary integer buffer size = num_p
 // tri_ind = output array  size = 3*(nump-2)
 // tri_frac = fraction each triangle is of whole poly size=(num_p-2)
-static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
+static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind,
                  double *tri_frac) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "triangulate()"
 
           int localrc;
-          
+
 
           // Call into triagulation routines
           int ret;
@@ -464,7 +464,7 @@ static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int
             ret=triangulate_poly<GEOM_CART2D>(num_p, p, td,
                                               ti, tri_ind);
           } else if (sdim==3) {
-            ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td, 
+            ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td,
                                                ti, tri_ind);
           } else {
             if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -476,7 +476,7 @@ static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int
           if (ret != ESMCI_TP_SUCCESS) {
             if (ret == ESMCI_TP_DEGENERATE_POLY) {
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                   " - can't triangulate a polygon with less than 3 sides", 
+                   " - can't triangulate a polygon with less than 3 sides",
                                                 ESMC_CONTEXT, &localrc)) throw localrc;
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -513,7 +513,7 @@ static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int
 
             // Save areas to use for computing fractions
             tri_frac[i]=tri_area;
-            
+
             // compute total
             tot_area += tri_area;
 
@@ -542,20 +542,20 @@ static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int
 // tri_ind = output array  size = 3*(nump-2)
 // tri_area = area of each sub-triangle is of whole poly size=(num_p-2)
 static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
-                              double *td, int *ti, int *tri_ind, 
+                              double *td, int *ti, int *tri_ind,
                               double *tri_area) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "triangulate_warea()"
 
           int localrc;
-          
+
           // Call into triagulation routines
           int ret;
           if (sdim==2) {
             ret=triangulate_poly<GEOM_CART2D>(num_p, p, td,
                                               ti, tri_ind);
           } else if (sdim==3) {
-            ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td, 
+            ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td,
                                                ti, tri_ind);
           } else {
             if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
@@ -567,11 +567,11 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
           if (ret != ESMCI_TP_SUCCESS) {
             if (ret == ESMCI_TP_DEGENERATE_POLY) {
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                   " - can't triangulate a polygon with less than 3 sides", 
+                   " - can't triangulate a polygon with less than 3 sides",
                                                 ESMC_CONTEXT, &localrc)) throw localrc;
             } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
               char msg[1024];
-              sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element with id=%d ",oeid); 
+              sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element with id=%d ",oeid);
               if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
                                               ESMC_CONTEXT, &localrc)) throw localrc;
             } else {
@@ -604,7 +604,7 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
 
             // Save areas to use for computing fractions
             tri_area[i]=area;
-           
+
             // Advance to next triangle
             ti_pos +=3;
           }
@@ -614,13 +614,13 @@ static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
 
 
 
-void ESMCI_meshaddelements(Mesh **meshpp, 
+void ESMCI_meshaddelements(Mesh **meshpp,
                                               int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
-                                              int *_areaPresent, double *elemArea, 
-                                              int *_elemCoordsPresent, double *elemCoords, 
-                                              int *_num_elemConn, int *elemConn, int *regridConserve, 
+                                              int *_areaPresent, double *elemArea,
+                                              int *_elemCoordsPresent, double *elemCoords,
+                                              int *_num_elemConn, int *elemConn, int *regridConserve,
                                               ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
-                                              int *rc) 
+                                              int *rc)
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshaddelements()"
 
@@ -648,7 +648,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     int num_elems=*_num_elems;
 
     int num_elemConn=*_num_elemConn;
- 
+
     InterArray<int> *elemMaskII=_elemMaskII;
 
     int areaPresent=*_areaPresent;
@@ -663,7 +663,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
     // Error check input
     //// Check element type
-    ////(DON'T NEED TO CHECK PDIM==2, BECAUSE WE NOW SUPPORT 
+    ////(DON'T NEED TO CHECK PDIM==2, BECAUSE WE NOW SUPPORT
     //// ANY NUMBER OF CORNERS WITH PDIM=2)
     if (parametric_dim==3) {
       for (int i=0; i< num_elems; i++) {
@@ -685,31 +685,31 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       }
     } else if (parametric_dim==3) {
       for (int i=0; i< num_elems; i++) {
-        if (elemType[i]==10) expected_conn_size += 4;   
-        else if (elemType[i]==12) expected_conn_size += 8;   
+        if (elemType[i]==10) expected_conn_size += 4;
+        else if (elemType[i]==12) expected_conn_size += 8;
        }
     }
-      
+
     if (expected_conn_size != num_elemConn) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
         "- element connectivity list doesn't contain the right number of entries ",
                                        ESMC_CONTEXT, &localrc)) throw localrc;
     }
- 
+
 
     // Error check size of elements
     if (parametric_dim==2) {
       int conn_pos=0;
       for (int e = 0; e < num_elems; ++e) {
-        
-        // Loop here through each set of connection looking for polybreaks to 
+
+        // Loop here through each set of connection looking for polybreaks to
         // figure out the size of each sub-elem
         int elem_size=0;
         for (int i=0; i<elemType[e]; i++) {
-          
+
           // Advance size of element, or start a new one
-          if (elemConn[conn_pos] != MESH_POLYBREAK_IND) { 
+          if (elemConn[conn_pos] != MESH_POLYBREAK_IND) {
             elem_size++;
           } else {
             // Complain if element is less than a triangle
@@ -721,8 +721,8 @@ void ESMCI_meshaddelements(Mesh **meshpp,
             }
             elem_size=0;
           }
-          
-          // next connection     
+
+          // next connection
           conn_pos++;
         }
 
@@ -747,32 +747,32 @@ void ESMCI_meshaddelements(Mesh **meshpp,
      if (parametric_dim==2) {
       int conn_pos=0;
       for (int e = 0; e < num_elems; ++e) {
-        
+
         // Only count split elements
         if (elemType[e] > 4) {
 
-          // Loop here through each set of connection looking for polybreaks to 
+          // Loop here through each set of connection looking for polybreaks to
           // figure out the size of each sub-elem
           int subelem_size=0;
           int num_elemtris=0;
           for (int i=0; i<elemType[e]; i++) {
-            
+
             // Advance size of element, or start a new one
-            if (elemConn[conn_pos] != MESH_POLYBREAK_IND) { 
+            if (elemConn[conn_pos] != MESH_POLYBREAK_IND) {
               subelem_size++;
             } else {
               // record this elem
-              num_extra_elem += (subelem_size-2); // num tri = # sides-2 
-              num_elemtris += (subelem_size-2); // num tri = # sides-2 
+              num_extra_elem += (subelem_size-2); // num tri = # sides-2
+              num_elemtris += (subelem_size-2); // num tri = # sides-2
               if (subelem_size > max_num_conn) max_num_conn=subelem_size;
               subelem_size=0;
             }
 
-            // next connection     
+            // next connection
             conn_pos++;
           }
 
-          // record this elem         
+          // record this elem
           num_extra_elem += (subelem_size-3); // num tri = # sides-2 - 1 (for orig elem)
           num_elemtris += (subelem_size-2); // num tri = # sides-2 (count orig elem)
           if (num_elemtris > max_num_elemtris) max_num_elemtris=num_elemtris;
@@ -800,8 +800,8 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
     // Compute the extra element ranges
     int beg_extra_ids=0;
-    if (mesh.is_split) {      
-      // get maximum local elem id      
+    if (mesh.is_split) {
+      // get maximum local elem id
       int max_id=0;
       for (int e = 0; e < num_elems; ++e) {
         if (elemId[e] > max_id) {
@@ -812,7 +812,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       // Calc global max id
       int global_max_id=0;
       MPI_Allreduce(&max_id,&global_max_id,1,MPI_INT,MPI_MAX,Par::Comm());
-      
+
       // Set maximum of non-split ids
       mesh.max_non_split_id=global_max_id;
 
@@ -850,11 +850,11 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     int c = 0;
     for (int e = 0; e < num_elems; ++e) {
       int nnodes = ElemType2NumNodes(mesh.parametric_dim(),
-                                     mesh.spatial_dim(), 
+                                     mesh.spatial_dim(),
                                      elemType[e]);
 
       for (int n = 0; n < nnodes; ++n) {
-      
+
         // Get 0-based node index
         int node_index=elemConn[c]-1;
 
@@ -866,18 +866,18 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
         // Check elemConn
         if (node_index < 0) {
-	  int localrc;
-	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-	   "- elemConn entries should not be less than 1 ",
+          int localrc;
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- elemConn entries should not be less than 1 ",
            ESMC_CONTEXT, &localrc)) throw localrc;
-	}
+        }
 
         if (node_index > num_nodes-1) {
-	  int localrc;
- 	  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-	   "- elemConn entries should not be greater than number of nodes on processor ",
+          int localrc;
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+           "- elemConn entries should not be greater than number of nodes on processor ",
            ESMC_CONTEXT, &localrc)) throw localrc;
-	}
+        }
 
         // Mark as used
         node_used[node_index]=1;
@@ -895,7 +895,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         break;
       }
     }
-    
+
     if (!every_node_used) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
@@ -903,7 +903,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
           ESMC_CONTEXT, &localrc)) throw localrc;
      }
 
-    // If they exist, error check mask 
+    // If they exist, error check mask
     if (present(elemMaskII)) { // if masks exist
       // Error checking
       if (elemMaskII->dimCount !=1) {
@@ -911,7 +911,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
           "- elementMask array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
        }
-      
+
       if (elemMaskII->extent[0] != num_elems) {
         int localrc;
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -919,7 +919,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       }
     }
 
- 
+
     // Before setting up connectivity store all nodes in a flat array since elemConn
     // will index into this array.
     std::vector<MeshObj*> all_nodes;
@@ -933,12 +933,12 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       int seq = ni->get_data_index();
 
       if (seq >= num_nodes){
-	int localrc;
-	if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-            "- node index is larger or equal to num_nodes", 
+        int localrc;
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+            "- node index is larger or equal to num_nodes",
             ESMC_CONTEXT, &localrc))  throw localrc;
          }
-        
+
       all_nodes[seq] = &*ni;
     }
 
@@ -969,7 +969,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
       //// Setup for split mask
       int *elemMaskIIArray=NULL;
-      if (present(elemMaskII)) { 
+      if (present(elemMaskII)) {
 
         // Get mask value array
         elemMaskIIArray=elemMaskII->array;
@@ -995,14 +995,14 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       int curr_extra_id=beg_extra_ids;
 
       // Get some useful information
-      int sdim = mesh.spatial_dim(); 
+      int sdim = mesh.spatial_dim();
 
       // Loop through elems generating split elems if necessary
       int conn_pos = 0;
       int split_conn_pos = 0;
       int split_elem_pos = 0;
       for (int e = 0; e < num_elems; ++e) {
-         
+
         // More than 4 sides, split
         if (elemType[e]>4) {
 
@@ -1026,27 +1026,27 @@ void ESMCI_meshaddelements(Mesh **meshpp,
             }
 
             //   printf("id=%d subelem_size=%d\n",elemId[e],subelem_size);
- 
+
 
           // Get coordinates
           int crd_pos=0;
           for (int i=0; i<subelem_size; i++) {
             MeshObj *node=all_nodes[elemConn[conn_pos+i]-1];
             double *crd=mesh.node_coord->data(*node);
-            
+
             for (int j=0; j<sdim; j++) {
               subelem_coords[crd_pos]=crd[j];
               crd_pos++;
              }
-  
+
             // printf("id=%d coord=%f %f \n",elemId[e],subelem_coords[crd_pos-2],subelem_coords[crd_pos-1]);
           }
 
           // Triangulate polygon
           triangulate_warea(sdim, subelem_size, subelem_coords, elemId[e],
-                            subelem_dbl_buf, subelem_int_buf, 
-                            subelem_tri_ind, subelem_tri_area); 
-          
+                            subelem_dbl_buf, subelem_int_buf,
+                            subelem_tri_ind, subelem_tri_area);
+
           // Create split element list
           int tI_pos=0;
            for (int i=0; i<subelem_size-2; i++) {
@@ -1061,11 +1061,11 @@ void ESMCI_meshaddelements(Mesh **meshpp,
              }
 
             // Type is triangle
-            elemType_wsplit[split_elem_pos]=3; 
+            elemType_wsplit[split_elem_pos]=3;
 
             // Set mask (if it exists)
              if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
- 
+
              // Set element coords. (if it exists)
              if (elemCoordsPresent==1) {
                double *elem_pnt=elemCoords+orig_sdim*e;
@@ -1082,19 +1082,19 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
             // Acumulate over sub-elems in one element
             elemtris_split_elem_pos[num_elemtris]=split_elem_pos;
-            elemtris_area[num_elemtris]=subelem_tri_area[i];  
-            tot_elemtris_area += elemtris_area[num_elemtris];  
+            elemtris_area[num_elemtris]=subelem_tri_area[i];
+            tot_elemtris_area += elemtris_area[num_elemtris];
             num_elemtris++;
 
             // printf("%d eid=%d seid=%d %d %d %d %f\n",i,elemId[e],elemId_wsplit[split_elem_pos-1],elemConn_wsplit[split_conn_pos],elemConn_wsplit[split_conn_pos+1],elemConn_wsplit[split_conn_pos+2],triFrac[i]);
- 
+
             // Advance
             split_elem_pos++;
             split_conn_pos +=3;
-            tI_pos +=3;           
+            tI_pos +=3;
            }
 
-           // Advance to next elemConn position 
+           // Advance to next elemConn position
           conn_pos +=subelem_size;
 
            } // end of loop through sub elems
@@ -1107,7 +1107,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
                // Add frac to mesh split information
                mesh.split_id_to_frac[elemId_wsplit[sep]]=frac;
-                 
+
                // Set area to fraction of original area
                if (areaPresent==1) elemArea_wsplit[sep]=elemArea[e]*frac;
              }
@@ -1118,7 +1118,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
                // Add frac to mesh split information
                mesh.split_id_to_frac[elemId_wsplit[sep]]=0.0;
-                 
+
                // Set area to fraction of original area
                if (areaPresent==1) elemArea_wsplit[sep]=0.0;
              }
@@ -1144,7 +1144,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
           }
         }
       }
-      
+
       // Allocate some temporary variables for splitting
       delete [] subelem_coords;
       delete [] subelem_dbl_buf;
@@ -1162,7 +1162,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       if (areaPresent==1) elemArea=elemArea_wsplit;
       if (elemCoordsPresent==1) elemCoords=elemCoords_wsplit;
 
-      if (present(elemMaskII)) { 
+      if (present(elemMaskII)) {
         elemMaskII=elemMaskII_wsplit;
       }
     }
@@ -1174,7 +1174,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
       // Get/deduce the element topology
       const MeshObjTopo *topo = ElemType2Topo(mesh.parametric_dim(),
-                                              mesh.spatial_dim(), 
+                                              mesh.spatial_dim(),
                                               elemType[e]);
 
     int nnodes = topo->num_nodes;
@@ -1186,7 +1186,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       MeshObj *elem = new MeshObj(MeshObj::ELEMENT, eid, e);
 
       for (int n = 0; n < nnodes; ++n) {
-      
+
         // Get 0-based node index
         int node_index=elemConn[cur_conn]-1;
 
@@ -1203,7 +1203,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       mesh.add_element(elem, nconnect, topo->number, topo);
 
     } // for e
- 
+
 
   // Register the frac field
   if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
@@ -1232,8 +1232,8 @@ void ESMCI_meshaddelements(Mesh **meshpp,
                          MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
     // Record the fact that it has masks
-    has_elem_mask=true;   
-  } 
+    has_elem_mask=true;
+  }
 
 
   // Handle element area
@@ -1248,8 +1248,8 @@ void ESMCI_meshaddelements(Mesh **meshpp,
                          MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
 
     // Record the fact that it has masks
-    has_elem_area=true;   
-  } 
+    has_elem_area=true;
+  }
 
 
    // Handle element coords
@@ -1271,8 +1271,8 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
 
     // Record the fact that it has masks
-    has_elem_coords=true;   
-  } 
+    has_elem_coords=true;
+  }
 
 
   // Perhaps commit will be a separate call, but for now commit the mesh here.
@@ -1299,9 +1299,9 @@ void ESMCI_meshaddelements(Mesh **meshpp,
   // Set Mask values
   if (has_elem_mask) {
     // Get Fields
-    MEField<> *elem_mask_val=mesh.GetField("elem_mask_val"); 
-    MEField<> *elem_mask=mesh.GetField("elem_mask"); 
-    
+    MEField<> *elem_mask_val=mesh.GetField("elem_mask_val");
+    MEField<> *elem_mask=mesh.GetField("elem_mask");
+
     // Get mask value array
     int *elemMask=elemMaskII->array;
 
@@ -1320,7 +1320,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
         // Init mask to 0.0
       double *m=elem_mask->data(elem);
-      *m=0.0;      
+      *m=0.0;
     }
   }
 
@@ -1329,8 +1329,8 @@ void ESMCI_meshaddelements(Mesh **meshpp,
   if (has_elem_area) {
 
     // Get Fields
-    MEField<> *elem_area=mesh.GetField("elem_area"); 
-    
+    MEField<> *elem_area=mesh.GetField("elem_area");
+
     // Loop through elements setting values
     // Here we depend on the fact that data index for elements
     // is set as the position in the local array above
@@ -1352,11 +1352,11 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
     if (coordSys == ESMC_COORDSYS_CART) {
       // Get Field
-       MEField<> *elem_coords=mesh.GetField("elem_coordinates"); 
-      
+       MEField<> *elem_coords=mesh.GetField("elem_coordinates");
+
       // Get some useful information
-      int sdim = mesh.spatial_dim(); 
-      
+      int sdim = mesh.spatial_dim();
+
       // Loop through elements setting values
       // Here we depend on the fact that data index for elements
       // is set as the position in the local array above
@@ -1364,25 +1364,25 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       for (; ei != ee; ++ei) {
          MeshObj &elem = *ei;
         if (!GetAttr(elem).is_locally_owned()) continue;
-        
+
         // Set coordinate value to input array
         double *coords=elem_coords->data(elem);
         int data_index = sdim*elem.get_data_index();
         for (int i = 0; i < sdim; ++i) {
-          coords[i] = elemCoords[data_index+i];    
+          coords[i] = elemCoords[data_index+i];
           // printf("AE %d %f \n",elem.get_id(),coords[i]);
 
-        }    
+        }
         // printf("eid=%d coords=%f %f %f %f ind=%d\n",elem.get_id(),coords[0],coords[1],elemCoords[data_index+0],elemCoords[data_index+1],data_index);
       }
     } else {
       // Get Fields
-      MEField<> *elem_coords=mesh.GetField("elem_coordinates"); 
-      MEField<> *elem_orig_coords=mesh.GetField("elem_orig_coordinates"); 
-      
+      MEField<> *elem_coords=mesh.GetField("elem_coordinates");
+      MEField<> *elem_orig_coords=mesh.GetField("elem_orig_coordinates");
+
       // Get some useful information
-      int sdim = mesh.spatial_dim(); 
-      
+      int sdim = mesh.spatial_dim();
+
       // Loop through elements setting values
       // Here we depend on the fact that data index for elements
       // is set as the position in the local array above
@@ -1390,17 +1390,17 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
         if (!GetAttr(elem).is_locally_owned()) continue;
-        
+
         // Save original coordinates
         double *orig_coords=elem_orig_coords->data(elem);
         int data_index = orig_sdim*elem.get_data_index();
         for (int i = 0; i < orig_sdim; ++i) {
-          orig_coords[i] = elemCoords[data_index+i];    
-        }    
+          orig_coords[i] = elemCoords[data_index+i];
+        }
 
         // Convert and save Cartesian coordinates
         double *coords = elem_coords->data(elem);
-        ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim, 
+        ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim,
                                       orig_coords, coords);
 
         // printf("eid=%d coords=%f %f %f %f ind=%d\n",elem.get_id(),coords[0],coords[1],elemCoords[data_index+0],elemCoords[data_index+1],data_index);
@@ -1422,7 +1422,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     }
 
     //// Setup for split mask
-    if (present(elemMaskII)) { 
+    if (present(elemMaskII)) {
       if (elemMaskIIArray_wsplit != NULL) delete [] elemMaskIIArray_wsplit;
       if (elemMaskII_wsplit != NULL) delete elemMaskII_wsplit;
     }
@@ -1436,7 +1436,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
     Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
-      
+
     }
 
     double end_tm=MPI_Wtime();
@@ -1448,13 +1448,13 @@ void ESMCI_meshaddelements(Mesh **meshpp,
 
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -1468,10 +1468,10 @@ void ESMCI_meshaddelements(Mesh **meshpp,
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-} 
+}
 
 
 /**
@@ -1485,7 +1485,7 @@ void ESMCI_meshvtkheader(char *filename, int *num_elem, int *num_node, int *conn
 
 
   try {
- 
+
 {
  int localrc;
  int rc;
@@ -1518,13 +1518,13 @@ void ESMCI_meshvtkheader(char *filename, int *num_elem, int *num_node, int *conn
     delete [] fname;
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -1538,7 +1538,7 @@ void ESMCI_meshvtkheader(char *filename, int *num_elem, int *num_node, int *conn
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
@@ -1585,13 +1585,13 @@ void ESMCI_meshvtkbody(char *filename, int *nodeId, double *nodeCoord,
     delete [] fname;
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -1605,7 +1605,7 @@ void ESMCI_meshvtkbody(char *filename, int *nodeId, double *nodeCoord,
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
@@ -1626,17 +1626,17 @@ void ESMCI_meshdestroy(Mesh **meshpp, int *rc) {
     }
 
     Mesh *meshp = *meshpp;
-    
+
     delete meshp;
-    
+
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -1650,7 +1650,7 @@ void ESMCI_meshdestroy(Mesh **meshpp, int *rc) {
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
@@ -1679,13 +1679,13 @@ void ESMCI_meshfreememory(Mesh **meshpp, int *rc) {
     *meshpp=NULL;
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
      } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -1699,7 +1699,7 @@ void ESMCI_meshfreememory(Mesh **meshpp, int *rc) {
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
@@ -1765,7 +1765,7 @@ void getElemGIDS(Mesh &mesh, std::vector<int> &egid) {
     if (!GetAttr(elem).is_locally_owned()) continue;
 
     // Don't do split elements
-    if (mesh.is_split && elem.get_id() > mesh.max_non_split_id) continue; 
+    if (mesh.is_split && elem.get_id() > mesh.max_non_split_id) continue;
 
     int idx = elem.get_data_index();
 
@@ -1801,18 +1801,18 @@ void ESMCI_meshget(Mesh **meshpp, int *num_nodes, int *num_elements, int *rc){
 
     if(rc != NULL) *rc = ESMF_SUCCESS;
 }
-    
+
 
 
 void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_meshcreatenodedistgrid()" 
+#define ESMC_METHOD "ESMCI_meshcreatenodedistgrid()"
 
 
   // Declare id vectors
-  std::vector<int> ngids; 
-  
- 
+  std::vector<int> ngids;
+
+
   try {
 
   // Initialize the parallel environment for mesh (if not already done)
@@ -1825,20 +1825,20 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, in
     }
 
     Mesh *meshp = *meshpp;
-    
+
     // Get the set of owned node ids
     {
-      getNodeGIDS(*meshp, ngids); 
+      getNodeGIDS(*meshp, ngids);
     }
-    
+
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -1857,17 +1857,17 @@ void ESMCI_meshcreatenodedistgrid(Mesh **meshpp, int *ngrid, int *num_lnodes, in
   {
     int nsize = *num_lnodes = ngids.size();
     int rc1;
-    
+
     int *indices = (nsize==0)?NULL:&ngids[0];
 
      FTN_X(f_esmf_getmeshdistgrid)(ngrid, &nsize, indices, &rc1);
 
     if (ESMC_LogDefault.MsgFoundError(rc1,
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
@@ -1878,8 +1878,8 @@ void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, in
 #define ESMC_METHOD "ESMCI_meshcreateelemdistgrid()"
 
   // Declare id vectors
-  std::vector<int> egids; 
-   
+  std::vector<int> egids;
+
   try {
 
   // Initialize the parallel environment for mesh (if not already done)
@@ -1892,21 +1892,21 @@ void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, in
     }
 
     Mesh *meshp = *meshpp;
-    
+
     // Get the set of owned elem ids
     {
       getElemGIDS(*meshp, egids);
     }
-    
-    
+
+
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -1923,25 +1923,25 @@ void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, in
   {
     int esize = *num_lelems = egids.size();
     int rc1;
-    
+
     int *indices = (esize==0)?NULL:&egids[0];
 
 
     FTN_X(f_esmf_getmeshdistgrid)(egrid, &esize, indices, &rc1);
 
     if(ESMC_LogDefault.MsgFoundError(rc1,
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, 
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
 
 
 void ESMCI_meshinfoserialize(int *intMeshFreed,
-                             int *spatialDim, int *parametricDim, 
+                             int *spatialDim, int *parametricDim,
                              char *buffer, int *length, int *offset,
                              ESMC_InquireFlag *inquireflag, int *localrc,
                              ESMCI_FortranStrLenArg buffer_l){
@@ -1957,7 +1957,7 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
     // TODO: verify length > vars.
     int size = 3*sizeof(int);
     if (*inquireflag != ESMF_INQUIREONLY) {
-      if ((*length - *offset) < size) {         
+      if ((*length - *offset) < size) {
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "Buffer too short to add a Mesh object", ESMC_CONTEXT, localrc);
          return;
@@ -1979,11 +1979,11 @@ void ESMCI_meshinfoserialize(int *intMeshFreed,
     if (localrc) *localrc = ESMF_SUCCESS;
 
     return;
-} 
+}
 
 
-void ESMCI_meshinfodeserialize(int *intMeshFreed, 
-                               int *spatialDim, int *parametricDim, 
+void ESMCI_meshinfodeserialize(int *intMeshFreed,
+                               int *spatialDim, int *parametricDim,
                                char *buffer, int *offset, int *localrc,
                                ESMCI_FortranStrLenArg buffer_l){
 
@@ -2010,11 +2010,11 @@ void ESMCI_meshinfodeserialize(int *intMeshFreed,
     if (localrc) *localrc = ESMF_SUCCESS;
 
     return;
-} 
+}
 
 
 void ESMCI_meshserialize(Mesh **meshpp,
-	        char *buffer, int *length, int *offset,
+                char *buffer, int *length, int *offset,
                 ESMC_InquireFlag *inquireflag, int *rc,
                 ESMCI_FortranStrLenArg buffer_l){
 
@@ -2030,7 +2030,7 @@ void ESMCI_meshserialize(Mesh **meshpp,
  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
    throw localrc;  // bail out with exception
      }
- 
+
     Mesh *meshp = *meshpp;
     ThrowRequire(meshp);
     Mesh &mesh = *meshp;
@@ -2044,7 +2044,7 @@ void ESMCI_meshserialize(Mesh **meshpp,
     int numSets;
     UInt *nvalSetSizes;
     UInt *nvalSetVals;
-    UInt *nvalSetObjSizes; 
+    UInt *nvalSetObjSizes;
     UInt *nvalSetObjVals;
 
     mesh.GetImprints(&numSets, &nvalSetSizes, &nvalSetVals, &nvalSetObjSizes, &nvalSetObjVals);
@@ -2052,24 +2052,24 @@ void ESMCI_meshserialize(Mesh **meshpp,
     // Record which Fields are present
 #define ESMF_RECONCILE_MESH_NUM_FIELDS 11
     int fields_present[ESMF_RECONCILE_MESH_NUM_FIELDS];
-    
+
     // zero out fields present list
     for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
       fields_present[i]=0;
     }
-    
+
     // Record list
     if (mesh.GetCoordField() != NULL) fields_present[0]=1;
     if (mesh.GetField("mask") != NULL) fields_present[1]=1;
-    if (mesh.GetField("node_mask_val") != NULL) fields_present[2]=1;       
-    if (mesh.GetField("elem_mask") != NULL) fields_present[3]=1;       
-    if (mesh.GetField("elem_mask_val") != NULL) fields_present[4]=1;       
-    if (mesh.GetField("elem_area") != NULL) fields_present[5]=1;       
-    if (mesh.GetField("elem_frac2") != NULL) fields_present[6]=1;       
-    if (mesh.GetField("elem_frac") != NULL) fields_present[7]=1;       
-    if (mesh.GetField("orig_coordinates") != NULL) fields_present[8]=1;       
-    if (mesh.GetField("elem_coordinates") != NULL) fields_present[9]=1; 
-    if (mesh.GetField("elem_orig_coordinates") != NULL) fields_present[10]=1; 
+    if (mesh.GetField("node_mask_val") != NULL) fields_present[2]=1;
+    if (mesh.GetField("elem_mask") != NULL) fields_present[3]=1;
+    if (mesh.GetField("elem_mask_val") != NULL) fields_present[4]=1;
+    if (mesh.GetField("elem_area") != NULL) fields_present[5]=1;
+    if (mesh.GetField("elem_frac2") != NULL) fields_present[6]=1;
+    if (mesh.GetField("elem_frac") != NULL) fields_present[7]=1;
+    if (mesh.GetField("orig_coordinates") != NULL) fields_present[8]=1;
+    if (mesh.GetField("elem_coordinates") != NULL) fields_present[9]=1;
+    if (mesh.GetField("elem_orig_coordinates") != NULL) fields_present[10]=1;
 
 
     // DEBUG OUTPUT
@@ -2086,17 +2086,17 @@ void ESMCI_meshserialize(Mesh **meshpp,
 
     if (nvalSetSizes != NULL)
       for (int i=0; i<numSets; i++) {
- 	size +=nvalSetSizes[i]*sizeof(UInt);
+        size +=nvalSetSizes[i]*sizeof(UInt);
       }
 
     if (nvalSetObjSizes != NULL)
       for (int i=0; i<numSets; i++) {
-	size +=nvalSetObjSizes[i]*sizeof(UInt);
+        size +=nvalSetObjSizes[i]*sizeof(UInt);
       }
 
     // TODO: verify length > vars.
     if (*inquireflag != ESMF_INQUIREONLY) {
-      if ((*length - *offset) < size) {         
+      if ((*length - *offset) < size) {
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
           "Buffer too short to add Mesh object", ESMC_CONTEXT, rc);
          return;
@@ -2113,7 +2113,7 @@ void ESMCI_meshserialize(Mesh **meshpp,
 
       for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
         *ip++=fields_present[i];
-      }      
+      }
 
       if (mesh.is_split) *ip++ = 1;
       else *ip++ = 0;
@@ -2126,35 +2126,37 @@ void ESMCI_meshserialize(Mesh **meshpp,
     if (*inquireflag != ESMF_INQUIREONLY) {
 
       // Save set sizes and values
-      if (nvalSetSizes != NULL)
+      if (nvalSetSizes != NULL) {
         for (int i=0; i<numSets; i++) {
-	  *uip++=nvalSetSizes[i];
+          *uip++=nvalSetSizes[i];
         }
+      }
 
       if (nvalSetVals != 0) {
         int k=0;
         for (int i=0; i<numSets; i++) {
-	  for (int j=0; j<nvalSetSizes[i]; j++) {
-	    *uip++=nvalSetVals[k];
-	    k++;
-	  }
+          for (int j=0; j<nvalSetSizes[i]; j++) {
+            *uip++=nvalSetVals[k];
+            k++;
+          }
         }
       }
 
       // Save set obj sizes and values
-      if (nvalSetObjSizes != NULL)
+      if (nvalSetObjSizes != NULL) {
         for (int i=0; i<numSets; i++) {
-	  *uip++=nvalSetObjSizes[i];
+          *uip++=nvalSetObjSizes[i];
         }
+      }
 
       if (nvalSetObjVals != NULL) {
         int k=0;
         for (int i=0; i<numSets; i++) {
-	  for (int j=0; j<nvalSetObjSizes[i]; j++) {
-	    *uip++=nvalSetObjVals[k];
-	    k++;
+          for (int j=0; j<nvalSetObjSizes[i]; j++) {
+            *uip++=nvalSetObjVals[k];
+            k++;
           }
-	}
+        }
       }
 
     }
@@ -2163,13 +2165,13 @@ void ESMCI_meshserialize(Mesh **meshpp,
     *offset += size;
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -2183,14 +2185,14 @@ void ESMCI_meshserialize(Mesh **meshpp,
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
     return;
-} 
+}
 
 
-void ESMCI_meshdeserialize(Mesh **meshpp, 
+void ESMCI_meshdeserialize(Mesh **meshpp,
                                  char *buffer, int *offset, int *rc,
                                  ESMCI_FortranStrLenArg buffer_l){
 
@@ -2226,21 +2228,21 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     int numSets;
     std::vector<UInt> nvalSetSizes;
     std::vector<UInt> nvalSetVals;
-    std::vector<UInt> nvalSetObjSizes; 
+    std::vector<UInt> nvalSetObjSizes;
     std::vector<UInt> nvalSetObjVals;
 
-    numSets=*ip++; 
+    numSets=*ip++;
 
     // Decode which Fields are present
     int fields_present[ESMF_RECONCILE_MESH_NUM_FIELDS]; // ESMF_RECONCILE_MESH_NUM_FIELDS DEFINED ABOVE
-    
+
     for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
       fields_present[i]=*ip++;
-    }      
+    }
 
     // Stuff for split meshes
     int is_split=*ip++;
-    int max_non_split_id=*ip++; 
+    int max_non_split_id=*ip++;
 
 
     // convert pointer
@@ -2249,35 +2251,43 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
       // Retrieve sizes and values
       nvalSetSizes.resize(numSets,0);
       for (int i=0; i<numSets; i++) {
-	nvalSetSizes[i]=*uip++;
+        //      nvalSetSizes[i]=*uip++; THIS SEEMS TO CONFUSE PGI OPTIMIZER ?
+        nvalSetSizes[i]=*uip;
+        uip++;
       }
 
       int k=0;
       for (int i=0; i<numSets; i++) {
-	nvalSetVals.resize(k+nvalSetSizes[i],0);
-	for (int j=0; j<nvalSetSizes[i]; j++) {
-	  nvalSetVals[k]=*uip++;
-	  k++;
-	}
+        nvalSetVals.resize(k+nvalSetSizes[i],0);
+        for (int j=0; j<nvalSetSizes[i]; j++) {
+          //      nvalSetVals[k]=*uip++; THIS SEEMS TO CONFUSE PGI OPTIMIZER ?
+          nvalSetVals[k]=*uip;
+          uip++;
+          k++;
+        }
       }
 
       // Save set obj sizes and value
       nvalSetObjSizes.resize(numSets,0);
       for (int i=0; i<numSets; i++) {
-	nvalSetObjSizes[i]=*uip++;
+        //      nvalSetObjSizes[i]=*uip++; THIS SEEMS TO CONFUSE PGI OPTIMIZER ?
+        nvalSetObjSizes[i]=*uip;
+        uip++;
       }
 
       k=0;
       for (int i=0; i<numSets; i++) {
-	nvalSetObjVals.resize(k+nvalSetObjSizes[i],0);
-	for (int j=0; j<nvalSetObjSizes[i]; j++) {
-	  nvalSetObjVals[k]=*uip++;
-	  k++;
-	}
+        nvalSetObjVals.resize(k+nvalSetObjSizes[i],0);
+        for (int j=0; j<nvalSetObjSizes[i]; j++) {
+          // nvalSetObjVals[k]=*uip++; THIS SEEMS TO CONFUSE PGI OPTIMIZER ?
+          nvalSetObjVals[k]=*uip;
+          uip++;
+          k++;
+        }
       }
 
     // Adjust offset
-      *offset += 6*sizeof(int)+ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+    
+      *offset += 6*sizeof(int)+ESMF_RECONCILE_MESH_NUM_FIELDS*sizeof(int)+
       nvalSetSizes.size()*sizeof(UInt)+nvalSetVals.size()*sizeof(UInt)+
       nvalSetObjSizes.size()*sizeof(UInt)+nvalSetObjVals.size()*sizeof(UInt);
 
@@ -2294,10 +2304,10 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     if (is_split==1) meshp->is_split=true;
     else  meshp->is_split=false;
 
-    meshp->max_non_split_id=max_non_split_id; 
+    meshp->max_non_split_id=max_non_split_id;
 
     //  printf(" is_split=%d mnsi=%d\n",meshp->is_split,meshp->max_non_split_id);
-    
+
 
     // Register fields
     Context ctxt; ctxt.flip(); // Needed below for element registration
@@ -2317,25 +2327,25 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     // for (int i=0; i<ESMF_RECONCILE_MESH_NUM_FIELDS; i++) {
     //  printf("%d# D: %d fields_present=%d\n",Par::Rank(),i,fields_present[i]);
     //}
-#undef ESMF_RECONCILE_MESH_NUM_FIELDS    
+#undef ESMF_RECONCILE_MESH_NUM_FIELDS
 
 
     // Setup the Mesh
     //    meshp->build_sym_comm_rel(MeshObj::NODE);
     meshp->ProxyCommit(numSets,
-		       nvalSetSizes, nvalSetVals,
-		       nvalSetObjSizes, nvalSetObjVals);
+                       nvalSetSizes, nvalSetVals,
+                       nvalSetObjSizes, nvalSetObjVals);
     // Output mesh
     *meshpp=meshp;
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -2349,21 +2359,21 @@ void ESMCI_meshdeserialize(Mesh **meshpp,
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
     return;
-} 
+}
 
 
-void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *numPnts, 
-					double *pnts, int *pets, int *rc){
+void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *numPnts,
+                                        double *pnts, int *pets, int *rc){
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshfindpnt()"
 
    try {
- 
+
   // Initialize the parallel environment for mesh (if not already done)
     {
  int localrc;
@@ -2390,19 +2400,19 @@ void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *nu
          return;
       } else {
          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-	     	  " - unknown error in findpnt", ESMC_CONTEXT, rc);
+                  " - unknown error in findpnt", ESMC_CONTEXT, rc);
          return;
       }
     }
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
 
@@ -2417,11 +2427,11 @@ void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *nu
     return;
    }
 
-  // Set return code 
+  // Set return code
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
-void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, int *rc) 
+void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, int *rc)
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_getlocalelemcoords()"
 
@@ -2460,7 +2470,7 @@ void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, i
            if (!GetAttr(elem).is_locally_owned()) continue;
 
            // If it's a split element, then skip
-           if (mesh.is_split && elem.get_id() > mesh.max_non_split_id) continue; 
+           if (mesh.is_split && elem.get_id() > mesh.max_non_split_id) continue;
 
             int idx = elem.get_data_index();
             index_to_elem.push_back(std::make_pair(idx,&elem));
@@ -2519,9 +2529,9 @@ void ESMCI_getlocalelemcoords(Mesh **meshpp, double *ecoords, int *_orig_sdim, i
     }
     // Set return code
     if (rc!=NULL) *rc = ESMF_SUCCESS;
-} 
+}
 
-void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int *rc) 
+void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_getlocalcoords()"
@@ -2576,20 +2586,20 @@ void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int
             // Copy coords into output array
             double *c = coords->data(node);
             for (int j=0; j<sdim; j++) {
-	            nodeCoord[nodeCoordPos]=c[j];
-	            nodeCoordPos++;
+                    nodeCoord[nodeCoordPos]=c[j];
+                    nodeCoordPos++;
             }
         }
-    
+
 
     } catch(std::exception &x) {
         // catch Mesh exception return code
         if (x.what()) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   			    x.what(), ESMC_CONTEXT, rc);
+                            x.what(), ESMC_CONTEXT, rc);
         } else {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-    			    "UNKNOWN", ESMC_CONTEXT, rc);
+                            "UNKNOWN", ESMC_CONTEXT, rc);
         }
 
         return;
@@ -2606,13 +2616,13 @@ void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int
     // Set return code
     if (rc!=NULL) *rc = ESMF_SUCCESS;
 
-} 
+}
 
 ////////////////
 
 
 void ESMCI_getconnectivity(Mesh **meshpp, double *connCoord, int *nodesPerElem,
-		                   int *_orig_sdim, int *rc)
+                                   int *_orig_sdim, int *rc)
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_getlconnectivity()"
 {
@@ -2668,35 +2678,35 @@ void ESMCI_getconnectivity(Mesh **meshpp, double *connCoord, int *nodesPerElem,
             const ESMCI::MeshObjTopo *topo = ESMCI::GetMeshObjTopo(elem);
 
             // iterate through local nodes collecting coordinates and counting
-			for (ESMCI::UInt s = 0; s < topo->num_nodes; ++s){
+                        for (ESMCI::UInt s = 0; s < topo->num_nodes; ++s){
 
-				const MeshObj &node = *(elem.Relations[s].obj);
+                                const MeshObj &node = *(elem.Relations[s].obj);
 
-				// NOTE: we are iterating all nodes on this element to put
-				//       together a connectivity list of node coordinates
-				//if (!GetAttr(node).is_locally_owned()) continue;
+                                // NOTE: we are iterating all nodes on this element to put
+                                //       together a connectivity list of node coordinates
+                                //if (!GetAttr(node).is_locally_owned()) continue;
 
-				double *c=coords->data(node);
+                                double *c=coords->data(node);
                 for (int j = 0; j < sdim; ++j)
-                	connCoord[cpPos++] = c[j];
+                        connCoord[cpPos++] = c[j];
 
-    			// NOTE: must implement sort if we want IDs
+                        // NOTE: must implement sort if we want IDs
                 //nodeIDs[s]=node.get_id();
-			}
-			// NOTE: must implement sort if we want IDs
-			//elemIDs[npePos] = elem.get_id();
+                        }
+                        // NOTE: must implement sort if we want IDs
+                        //elemIDs[npePos] = elem.get_id();
 
-			nodesPerElem[npePos++] = topo->num_nodes;
+                        nodesPerElem[npePos++] = topo->num_nodes;
         }
 
     } catch(std::exception &x) {
         // catch Mesh exception return code
         if (x.what()) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   			    x.what(), ESMC_CONTEXT, rc);
+                            x.what(), ESMC_CONTEXT, rc);
         } else {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   			    "UNKNOWN", ESMC_CONTEXT, rc);
+                            "UNKNOWN", ESMC_CONTEXT, rc);
         }
 
         return;
@@ -2721,7 +2731,7 @@ void ESMCI_getconnectivity(Mesh **meshpp, double *connCoord, int *nodesPerElem,
 void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshgetarea()"
-  
+
   // Declare polygon information
 #define  MAX_NUM_POLY_COORDS  60
 #define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
@@ -2729,8 +2739,8 @@ void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc
   int num_poly_nodes;
   double poly_coords[MAX_NUM_POLY_COORDS];
   double tmp_coords[MAX_NUM_POLY_COORDS];
-  
-  
+
+
   try {
 
     // Initialize the parallel environment for mesh (if not already done)
@@ -2738,21 +2748,21 @@ void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-	throw localrc;  // bail out with exception
+        throw localrc;  // bail out with exception
     }
-    
+
     // Get Mesh pointer
     Mesh *meshp = *meshpp;
-    
+
     // Get Mesh reference
     Mesh &mesh = *meshp;
-    
+
 
     // Declare id vector
-    std::vector<int> egids; 
-    
-    // get elem ids    
-    // TODO: IN FUTURE MAYBE JUST USE DATA INDEX DIRECTY, ALTHOUGH THEN HAVE TO STICK 
+    std::vector<int> egids;
+
+    // get elem ids
+    // TODO: IN FUTURE MAYBE JUST USE DATA INDEX DIRECTY, ALTHOUGH THEN HAVE TO STICK
     //       SPLIT ELEMENTS AT END
     getElemGIDS(*meshp, egids);
 
@@ -2767,33 +2777,33 @@ void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc
     if (*num_elem != egids.size()) {
       Throw() << "Number of elements doesn't match size of input array for areas";
     }
-    
-    
+
+
 
     // If an area field exists use that instead
     MEField<> *area_field = mesh.GetField("elem_area");
     if (area_field) {
-      
+
       // Loop through elements and put areas into array
       for (int i=0; i<egids.size(); i++) {
         // Get element gid
         int elem_gid=egids[i];
-        
+
         //  Find the corresponding Mesh element
         Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, elem_gid);
         if (mi == mesh.map_end(MeshObj::ELEMENT)) {
           Throw() << "Element not in mesh";
         }
-        
+
         // Get the element
-        const MeshObj &elem = *mi; 
-        
+        const MeshObj &elem = *mi;
+
         // Only put it in if it's locally owned
         if (!GetAttr(elem).is_locally_owned()) continue;
-        
+
         // Get area from field
         double *area=area_field->data(elem);
-        
+
         // Put area into area array
         elem_areas[i]=*area;
       }
@@ -2809,7 +2819,7 @@ void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc
         Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
         for (; ei != ee; ++ei) {
           MeshObj &elem = *ei;
-        
+
           // Don't do non-local elements
           if (!GetAttr(elem).is_locally_owned()) continue;
 
@@ -2817,11 +2827,11 @@ void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc
           int eid=elem.get_id();
 
           // Skip non-split elements
-          if (!(eid > mesh.max_non_split_id)) continue; 
+          if (!(eid > mesh.max_non_split_id)) continue;
 
           // Get area from field
           double *area=area_field->data(elem);
-      
+
           // Get original id
           int orig_id=mesh.split_to_orig_id[eid];
 
@@ -2834,13 +2844,13 @@ void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc
       }
 
       // Return success
-      if (rc!=NULL) *rc = ESMF_SUCCESS;      
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
       return;
       }
 
- /* XMRKX */    
+ /* XMRKX */
 
-    ////// Otherwise calculate areas..... 
+    ////// Otherwise calculate areas.....
 
 
     // Get coord field
@@ -2854,42 +2864,42 @@ void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc
     for (int i=0; i<egids.size(); i++) {
       // Get element gid
       int elem_gid=egids[i];
-      
+
       //  Find the corresponding Mesh element
       Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, elem_gid);
       if (mi == mesh.map_end(MeshObj::ELEMENT)) {
-	Throw() << "Element not in mesh";
+        Throw() << "Element not in mesh";
       }
-      
+
       // Get the element
-      const MeshObj &elem = *mi; 
-      
+      const MeshObj &elem = *mi;
+
       // Only put it in if it's locally owned
       if (!GetAttr(elem).is_locally_owned()) continue;
 
       // Compute area depending on dimensions
       double area;
       if (pdim==2) {
-	if (sdim==2) {
+        if (sdim==2) {
           // get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
           get_elem_coords_2D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_2D, tmp_coords, &num_poly_nodes, poly_coords);
-	  remove_0len_edges2D(&num_poly_nodes, poly_coords);
+          remove_0len_edges2D(&num_poly_nodes, poly_coords);
           area=area_of_flat_2D_polygon(num_poly_nodes, poly_coords);
-	} else if (sdim==3) {
-	  //get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
+        } else if (sdim==3) {
+          //get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
           get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
-	  remove_0len_edges3D(&num_poly_nodes, poly_coords);
-	  area=great_circle_area(num_poly_nodes, poly_coords);
-	}
+          remove_0len_edges3D(&num_poly_nodes, poly_coords);
+          area=great_circle_area(num_poly_nodes, poly_coords);
+        }
       } else if (pdim==3) {
-	if (sdim==3) {
+        if (sdim==3) {
           Phedra tmp_phedra=create_phedra_from_elem(&elem, cfield);
-          area=tmp_phedra.calc_volume(); 
+          area=tmp_phedra.calc_volume();
         } else {
           Throw() << "Meshes with parametric dimension == 3, but spatial dim != 3 not supported for computing areas";
         }
       } else {
-	Throw() << "Meshes with parametric dimension != 2 or 3 not supported for computing areas";
+        Throw() << "Meshes with parametric dimension != 2 or 3 not supported for computing areas";
       }
 
       // Put area into area array
@@ -2904,21 +2914,21 @@ void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc
       for (int i=0; i<egids.size(); i++) {
         id_to_index[egids[i]]=i;
       }
-      
+
       // Iterate through split elements adding in area
       Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
-        
+
         // Don't do non-local elements
         if (!GetAttr(elem).is_locally_owned()) continue;
-        
+
         // Get the element id
         int eid=elem.get_id();
-        
+
         // Skip non-split elements
-        if (!(eid > mesh.max_non_split_id)) continue; 
-        
+        if (!(eid > mesh.max_non_split_id)) continue;
+
         // Compute area depending on dimensions
         double area;
         if (pdim==2) {
@@ -2934,7 +2944,7 @@ void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc
         } else if (pdim==3) {
           if (sdim==3) {
             Phedra tmp_phedra=create_phedra_from_elem(&elem, cfield);
-            area=tmp_phedra.calc_volume(); 
+            area=tmp_phedra.calc_volume();
           } else {
             Throw() << "Meshes with parametric dimension == 3, but spatial dim != 3 not supported for computing areas";
           }
@@ -2944,24 +2954,24 @@ void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc
 
         // Get original id
         int orig_id=mesh.split_to_orig_id[eid];
-        
+
         // Get index
         int index=id_to_index[orig_id];
-        
+
         // Add area to what's already there
         elem_areas[index] += area;
       }
     }
 
-      
+
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -2975,12 +2985,12 @@ void ESMCI_meshgetarea(Mesh **meshpp, int *num_elem, double *elem_areas, int *rc
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 
   // Declare polygon information
-#undef  MAX_NUM_POLY_COORDS  
+#undef  MAX_NUM_POLY_COORDS
 #undef  MAX_NUM_POLY_NODES_2D
 #undef  MAX_NUM_POLY_NODES_3D
 }
@@ -2995,10 +3005,10 @@ void ESMCI_meshgetdimensions(Mesh **meshpp, int *sdim, int *pdim, int *rc) {
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
         throw localrc;  // bail out with exception
     }
-    
+
     // Get Mesh pointer
     Mesh *meshp = *meshpp;
-    
+
     // Get Mesh reference
     Mesh &mesh = *meshp;
 
@@ -3006,13 +3016,13 @@ void ESMCI_meshgetdimensions(Mesh **meshpp, int *sdim, int *pdim, int *rc) {
     if(sdim) *sdim=mesh.spatial_dim();
     if(pdim) *pdim=mesh.parametric_dim();
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -3026,14 +3036,14 @@ void ESMCI_meshgetdimensions(Mesh **meshpp, int *sdim, int *pdim, int *rc) {
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
 void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshgetcentroid()"
-  
+
   // Declare polygon information
 #define  MAX_NUM_POLY_COORDS  60
 #define  MAX_NUM_POLY_NODES_2D  30  // MAX_NUM_POLY_COORDS/2
@@ -3041,8 +3051,8 @@ void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, 
   int num_poly_nodes;
   double poly_coords[MAX_NUM_POLY_COORDS];
   double tmp_coords[MAX_NUM_POLY_COORDS];
-  
-  
+
+
   try {
 
     // Initialize the parallel environment for mesh (if not already done)
@@ -3050,26 +3060,26 @@ void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, 
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-	throw localrc;  // bail out with exception
+        throw localrc;  // bail out with exception
     }
-    
+
     // Get Mesh pointer
     Mesh *meshp = *meshpp;
-    
+
     // Get Mesh reference
     Mesh &mesh = *meshp;
 
     // Get dimensions
     int sdim=mesh.spatial_dim();
     int pdim=mesh.parametric_dim();
-    
+
 
     // Declare id vector
-    std::vector<int> egids; 
-    
+    std::vector<int> egids;
+
     // get elem ids
     getElemGIDS(*meshp, egids);
-    
+
     // If there are no elements then leave
     if (egids.empty()) {
       if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -3080,42 +3090,42 @@ void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, 
     if (*num_elem != egids.size()) {
       Throw() << "Number of elements doesn't match size of input array for centroid";
     }
-    
-    
+
+
     // If an centroid field exists use that instead
     MEField<> *centroid_field = mesh.GetField("elem_centroid");
     if (centroid_field) {
-      
+
       // Loop through elements and put centroids into array
       for (int i=0; i<egids.size(); i++) {
         // Get element gid
         int elem_gid=egids[i];
-        
+
         //  Find the corresponding Mesh element
         Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, elem_gid);
         if (mi == mesh.map_end(MeshObj::ELEMENT)) {
           Throw() << "Element not in mesh";
         }
-        
+
         // Get the element
-        const MeshObj &elem = *mi; 
-        
+        const MeshObj &elem = *mi;
+
         // Only put it in if it's locally owned
         if (!GetAttr(elem).is_locally_owned()) continue;
-        
+
         // Get centroid from field
         double *centroid=centroid_field->data(elem);
-        
+
         // Put centroid into centroid array
         std::memcpy(elem_centroid+i*sdim, centroid, sdim*sizeof(double));
       }
 
-      if (rc!=NULL) *rc = ESMF_SUCCESS;      
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
       return;
     }
-    
 
-    ////// Otherwise calculate centroids..... 
+
+    ////// Otherwise calculate centroids.....
 
 
     // Get coord field
@@ -3125,58 +3135,58 @@ void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, 
     for (int i=0; i<egids.size(); i++) {
       // Get element gid
       int elem_gid=egids[i];
-      
+
       //  Find the corresponding Mesh element
       Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, elem_gid);
       if (mi == mesh.map_end(MeshObj::ELEMENT)) {
-	Throw() << "Element not in mesh";
+        Throw() << "Element not in mesh";
       }
-      
+
       // Get the element
-      const MeshObj &elem = *mi; 
-      
+      const MeshObj &elem = *mi;
+
       // Only put it in if it's locally owned
       if (!GetAttr(elem).is_locally_owned()) continue;
 
       // Compute centroid depending on dimensions
       double *centroid;
       if (pdim==2) {
-	if (sdim==2) {
+        if (sdim==2) {
           // get_elem_coords(&elem, cfield, 2, MAX_NUM_POLY_NODES_2D, &num_poly_nodes, poly_coords);
           get_elem_coords_2D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_2D, tmp_coords, &num_poly_nodes, poly_coords);
           remove_0len_edges2D(&num_poly_nodes, poly_coords);
           polygon res_poly;
           coords_to_polygon(num_poly_nodes, poly_coords, sdim, res_poly);
-          std::memcpy(elem_centroid+i*sdim, res_poly.centroid(sdim).c, sdim*sizeof(double)); 
-	} else if (sdim==3) {
-	  //get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
+          std::memcpy(elem_centroid+i*sdim, res_poly.centroid(sdim).c, sdim*sizeof(double));
+        } else if (sdim==3) {
+          //get_elem_coords(&elem, cfield, 3, MAX_NUM_POLY_NODES_3D, &num_poly_nodes, poly_coords);
           get_elem_coords_3D_ccw(&elem, cfield, MAX_NUM_POLY_NODES_3D, tmp_coords, &num_poly_nodes, poly_coords);
           remove_0len_edges3D(&num_poly_nodes, poly_coords);
           polygon res_poly;
           coords_to_polygon(num_poly_nodes, poly_coords, sdim, res_poly);
-          std::memcpy(elem_centroid+i*sdim, res_poly.centroid(sdim).c, sdim*sizeof(double)); 
-	}
+          std::memcpy(elem_centroid+i*sdim, res_poly.centroid(sdim).c, sdim*sizeof(double));
+        }
       } else if (pdim==3) {
-	if (sdim==3) {
+        if (sdim==3) {
           Phedra tmp_phedra=create_phedra_from_elem(&elem, cfield);
           Throw() << "Meshes with parametric dimension == 3, spatial dim = 3 not supported for computing centroid yet";
         } else {
           Throw() << "Meshes with parametric dimension == 3, but spatial dim != 3 not supported for computing centroid";
         }
       } else {
-	Throw() << "Meshes with parametric dimension != 2 or 3 not supported for computing centroid";
+        Throw() << "Meshes with parametric dimension != 2 or 3 not supported for computing centroid";
       }
 
     }
-        
+
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -3190,14 +3200,14 @@ void ESMCI_meshgetcentroid(Mesh **meshpp, int *num_elem, double *elem_centroid, 
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
 
 void ESMCI_meshgetfrac(Mesh **meshpp, int *_num_elem, double *elem_fracs, int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_meshgetfrac()"  
+#define ESMC_METHOD "ESMCI_meshgetfrac()"
   try {
 
     // Initialize the parallel environment for mesh (if not already done)
@@ -3205,24 +3215,24 @@ void ESMCI_meshgetfrac(Mesh **meshpp, int *_num_elem, double *elem_fracs, int *r
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-	throw localrc;  // bail out with exception
+        throw localrc;  // bail out with exception
     }
-    
+
     // Get Mesh pointer
     Mesh *meshp = *meshpp;
-    
+
     // Get Mesh reference
     Mesh &mesh = *meshp;
-    
+
     // Dereference number of elements
     int num_elem=*_num_elem;
 
     // Declare id vector
-    std::vector<int> egids; 
-    
+    std::vector<int> egids;
+
     // get elem ids
     getElemGIDS(*meshp, egids);
-    
+
     // If there are no elements then leave
     if (egids.empty()) {
       if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -3243,22 +3253,22 @@ void ESMCI_meshgetfrac(Mesh **meshpp, int *_num_elem, double *elem_fracs, int *r
       for (int i=0; i<egids.size(); i++) {
         // Get element gid
         int elem_gid=egids[i];
-        
+
         //  Find the corresponding Mesh element
         Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, elem_gid);
         if (mi == mesh.map_end(MeshObj::ELEMENT)) {
           Throw() << "Element not in mesh";
         }
-        
+
         // Get the element
-        const MeshObj &elem = *mi; 
-        
+        const MeshObj &elem = *mi;
+
         // Get frac data
         double *f=elem_frac->data(elem);
-        
+
         // Only put it in if it's locally owned
         if (!GetAttr(elem).is_locally_owned()) continue;
-        
+
         // Put frac into frac array
         elem_fracs[i]=*f;
       }
@@ -3273,33 +3283,33 @@ void ESMCI_meshgetfrac(Mesh **meshpp, int *_num_elem, double *elem_fracs, int *r
       for (int i=0; i<num_elem; i++) {
         elem_fracs[i]=0.0;
       }
-      
+
       // Iterate through split elements adding in frac
       Mesh::iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
-        
+
         // Don't do non-local elements
         if (!GetAttr(elem).is_locally_owned()) continue;
-        
+
         // Get the element id
         UInt eid=elem.get_id();
-        
+
         // Get frac data
         double *f=elem_frac->data(elem);
         double frac=*f;
 
         // See if the element is part of a larger polygon
         std::map<UInt,double>::iterator mi =  mesh.split_id_to_frac.find(eid);
-        
+
         // Not part of something larger, so just stick in array
         if (mi == mesh.split_id_to_frac.end()) {
           int index=id_to_index[eid];
           elem_fracs[index] = frac;
           continue;
-        } 
-        
-        // It is part of original poly, so modify by fraction 
+        }
+
+        // It is part of original poly, so modify by fraction
         frac *= mi->second;
 
         // Translate id if necessary
@@ -3310,24 +3320,24 @@ void ESMCI_meshgetfrac(Mesh **meshpp, int *_num_elem, double *elem_fracs, int *r
         } else {
           orig_id=soi->second;
         }
-        
+
         // Get index
         int index=id_to_index[orig_id];
-        
+
         // Add modified frac to what's already there
         elem_fracs[index] += frac;
       }
     }
 
-        
+
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -3341,14 +3351,14 @@ void ESMCI_meshgetfrac(Mesh **meshpp, int *_num_elem, double *elem_fracs, int *r
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
 
 void ESMCI_meshgetfrac2(Mesh **meshpp, int *num_elem, double *elem_fracs, int *rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_meshgetfrac2()"  
+#define ESMC_METHOD "ESMCI_meshgetfrac2()"
   try {
 
     // Initialize the parallel environment for mesh (if not already done)
@@ -3356,21 +3366,21 @@ void ESMCI_meshgetfrac2(Mesh **meshpp, int *num_elem, double *elem_fracs, int *r
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-	throw localrc;  // bail out with exception
+        throw localrc;  // bail out with exception
     }
-    
+
     // Get Mesh pointer
     Mesh *meshp = *meshpp;
-    
+
     // Get Mesh reference
     Mesh &mesh = *meshp;
-    
+
     // Declare id vector
-    std::vector<int> egids; 
-    
+    std::vector<int> egids;
+
     // get elem ids
     getElemGIDS(*meshp, egids);
-    
+
     // If there are no elements then leave
     if (egids.empty()) {
       if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -3390,34 +3400,34 @@ void ESMCI_meshgetfrac2(Mesh **meshpp, int *num_elem, double *elem_fracs, int *r
     for (int i=0; i<egids.size(); i++) {
       // Get element gid
       int elem_gid=egids[i];
-      
+
       //  Find the corresponding Mesh element
       Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::ELEMENT, elem_gid);
       if (mi == mesh.map_end(MeshObj::ELEMENT)) {
-	Throw() << "Element not in mesh";
+        Throw() << "Element not in mesh";
       }
-      
+
       // Get the element
-      const MeshObj &elem = *mi; 
+      const MeshObj &elem = *mi;
 
       // Get frac data
       double *f=elem_frac->data(elem);
-      
+
       // Only put it in if it's locally owned
       if (!GetAttr(elem).is_locally_owned()) continue;
 
       // Put frac into frac array
       elem_fracs[i]=*f;
     }
-        
+
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
     return;
@@ -3431,7 +3441,7 @@ void ESMCI_meshgetfrac2(Mesh **meshpp, int *num_elem, double *elem_fracs, int *r
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
@@ -3440,11 +3450,11 @@ void ESMCI_meshgetfrac2(Mesh **meshpp, int *num_elem, double *elem_fracs, int *r
 // Input is: pnts (the polygon of size numPnts*sdim
 //           td a temporary buffer of the same size as pnts
 //           ti a temporary buffer of size numPnts
-// Output is: tri_ind, which are the 0-based indices of the triangles 
+// Output is: tri_ind, which are the 0-based indices of the triangles
 //             making up the triangulization. tri_ind should be of size 3*(numPnts-2).
-// 
-void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts, 
-					double *pnts, double *td, int *ti, int *triInd, int *rc){
+//
+void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts,
+                                        double *pnts, double *td, int *ti, int *triInd, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_triangulate()"
    try {
@@ -3457,7 +3467,7 @@ void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts,
    return;  // bail out with exception
     }
 
-  
+
     // do triangulation based on the dimensions of polygon
     int ret;
     if (*pdim==2) {
@@ -3482,7 +3492,7 @@ void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts,
     if (ret != ESMCI_TP_SUCCESS) {
       if (ret == ESMCI_TP_DEGENERATE_POLY) {
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-          " - can't triangulate a polygon with less than 3 sides", 
+          " - can't triangulate a polygon with less than 3 sides",
           ESMC_CONTEXT, rc);
          return;
       } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
@@ -3492,19 +3502,19 @@ void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts,
          return;
       } else {
          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   	    " - unknown error in triangulation", ESMC_CONTEXT, rc);
+            " - unknown error in triangulation", ESMC_CONTEXT, rc);
          return;
       }
     }
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
 
@@ -3519,7 +3529,7 @@ void ESMCI_triangulate(int *pdim, int *sdim, int *numPnts,
     return;
   }
 
-  // Set return code 
+  // Set return code
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
@@ -3535,31 +3545,31 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-	throw localrc;  // bail out with exception
+        throw localrc;  // bail out with exception
     }
-    
-    
+
+
     // Get Mesh pointer
     Mesh *meshp = *meshpp;
-    
+
     // Get Mesh reference
     Mesh &mesh = *meshp;
-    
+
 
     // If no mask values then leave
     if (!present(maskValuesArg)) {
-      // Set return code 
+      // Set return code
       if (rc!=NULL) *rc = ESMF_SUCCESS;
-      
+
       // Leave
       return;
     }
 
     // If no mask values then leave
     if (!present(maskValuesArg)) {
-      // Set return code 
+      // Set return code
       if (rc!=NULL) *rc = ESMF_SUCCESS;
-      
+
       // Leave
       return;
     }
@@ -3571,13 +3581,13 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
 
     // Set Mask values
     // Get Fields
-    MEField<> *elem_mask_val=mesh.GetField("elem_mask_val"); 
-    MEField<> *elem_mask=mesh.GetField("elem_mask"); 
-      
+    MEField<> *elem_mask_val=mesh.GetField("elem_mask_val");
+    MEField<> *elem_mask=mesh.GetField("elem_mask");
 
-    if ((elem_mask_val!=NULL) && 
+
+    if ((elem_mask_val!=NULL) &&
         (elem_mask    !=NULL)) {
-         
+
       // Loop through elements setting values
       // Here we depend on the fact that data index for elements
       // is set as the position in the local array above
@@ -3585,14 +3595,14 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
 
-        // Don't just do local, because masking needs to be symmetrical 
+        // Don't just do local, because masking needs to be symmetrical
         // between local and not otherwise results change as the number
         // of PETs changes
         // if (!GetAttr(elem).is_locally_owned()) continue;
 
         // Set mask value to input array
         double *mv=elem_mask_val->data(elem);
-        
+
         // Round value to nearest integer
         int mi=(int)((*mv)+0.5);
 
@@ -3605,22 +3615,22 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
             break;
           }
         }
-        
+
         // Set mask
         double *m=elem_mask->data(elem);
-        
+
         // Set Mask based on grid mask value
         if (mask) {
           *m=1.0;
         } else {
           *m=0.0;
         }
-        
+
       }
     }
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                             x.what(), ESMC_CONTEXT, rc);
@@ -3640,7 +3650,7 @@ void ESMCI_meshturnoncellmask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
@@ -3657,26 +3667,26 @@ void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-	throw localrc;  // bail out with exception
+        throw localrc;  // bail out with exception
     }
-    
-    
+
+
     // Get Mesh pointer
     Mesh *meshp = *meshpp;
-    
+
     // Get Mesh reference
     Mesh &mesh = *meshp;
-    
+
 
     // Set Mask values
     // Get Fields
-    MEField<> *elem_mask_val=mesh.GetField("elem_mask_val"); 
-    MEField<> *elem_mask=mesh.GetField("elem_mask"); 
-    
-    
-    if ((elem_mask_val!=NULL) && 
+    MEField<> *elem_mask_val=mesh.GetField("elem_mask_val");
+    MEField<> *elem_mask=mesh.GetField("elem_mask");
+
+
+    if ((elem_mask_val!=NULL) &&
         (elem_mask    !=NULL)) {
-      
+
       // Loop through elements setting values
       // Here we depend on the fact that data index for elements
       // is set as the position in the local array above
@@ -3684,21 +3694,21 @@ void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
       for (; ei != ee; ++ei) {
         MeshObj &elem = *ei;
 
-        // Don't just do local, because masking needs to be symmetrical 
+        // Don't just do local, because masking needs to be symmetrical
         // between local and not otherwise results change as the number
         // of PETs changes
         //if (!GetAttr(elem).is_locally_owned()) continue;
-        
+
         // Get mask
         double *m=elem_mask->data(elem);
-        
+
         // Init mask to 0
         *m=0.0;
       }
     }
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                             x.what(), ESMC_CONTEXT, rc);
@@ -3718,7 +3728,7 @@ void ESMCI_meshturnoffcellmask(Mesh **meshpp, int *rc) {
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
@@ -3734,31 +3744,31 @@ void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-	throw localrc;  // bail out with exception
+        throw localrc;  // bail out with exception
     }
-    
-    
+
+
     // Get Mesh pointer
     Mesh *meshp = *meshpp;
-    
+
     // Get Mesh reference
     Mesh &mesh = *meshp;
-    
+
 
     // If no mask values then leave
     if (!present(maskValuesArg)) {
-      // Set return code 
+      // Set return code
       if (rc!=NULL) *rc = ESMF_SUCCESS;
-      
+
       // Leave
       return;
     }
 
     // If no mask values then leave
     if (!present(maskValuesArg)) {
-      // Set return code 
+      // Set return code
       if (rc!=NULL) *rc = ESMF_SUCCESS;
-      
+
       // Leave
       return;
     }
@@ -3770,26 +3780,26 @@ void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
 
     // Set Mask values
     // Get Fields
-    MEField<> *node_mask_val=mesh.GetField("node_mask_val"); 
-    MEField<> *node_mask=mesh.GetField("mask"); 
-      
+    MEField<> *node_mask_val=mesh.GetField("node_mask_val");
+    MEField<> *node_mask=mesh.GetField("mask");
 
-    if ((node_mask_val!=NULL) && 
+
+    if ((node_mask_val!=NULL) &&
         (node_mask    !=NULL)) {
-         
+
       // Loop through nodes setting values
       Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
 
-        // Don't just do local, because masking needs to be symmetrical 
+        // Don't just do local, because masking needs to be symmetrical
         // between local and not otherwise results change as the number
         // of PETs changes
         //if (!GetAttr(node).is_locally_owned()) continue;
 
         // Set mask value to input array
         double *mv=node_mask_val->data(node);
-        
+
         // Round value to nearest integer
         int mi=(int)((*mv)+0.5);
 
@@ -3802,22 +3812,22 @@ void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
             break;
           }
         }
-        
+
         // Set mask
         double *m=node_mask->data(node);
-        
+
         // Set Mask based on grid mask value
         if (mask) {
           *m=1.0;
         } else {
           *m=0.0;
         }
-        
+
       }
     }
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                             x.what(), ESMC_CONTEXT, rc);
@@ -3837,7 +3847,7 @@ void ESMCI_meshturnonnodemask(Mesh **meshpp, ESMCI::InterArray<int> *maskValuesA
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
@@ -3853,25 +3863,25 @@ void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
       int localrc;
       ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-	throw localrc;  // bail out with exception
+        throw localrc;  // bail out with exception
     }
-    
-    
+
+
     // Get Mesh pointer
     Mesh *meshp = *meshpp;
-    
+
     // Get Mesh reference
     Mesh &mesh = *meshp;
-    
+
 
     // Set Mask values
     // Get Fields
-    MEField<> *node_mask_val=mesh.GetField("node_mask_val"); 
-    MEField<> *node_mask=mesh.GetField("mask"); 
-    
-    if ((node_mask_val!=NULL) && 
+    MEField<> *node_mask_val=mesh.GetField("node_mask_val");
+    MEField<> *node_mask=mesh.GetField("mask");
+
+    if ((node_mask_val!=NULL) &&
         (node_mask    !=NULL)) {
-      
+
       // Loop through elements setting values
       // Here we depend on the fact that data index for elements
       // is set as the position in the local array above
@@ -3879,21 +3889,21 @@ void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
       for (; ni != ne; ++ni) {
         MeshObj &node = *ni;
 
-        // Don't just do local, because masking needs to be symmetrical 
+        // Don't just do local, because masking needs to be symmetrical
         // between local and not otherwise results change as the number
         // of PETs changes
         //if (!GetAttr(node).is_locally_owned()) continue;
-        
+
         // Get mask
         double *m=node_mask->data(node);
-        
+
         // Init mask to 0
         *m=0.0;
       }
     }
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                             x.what(), ESMC_CONTEXT, rc);
@@ -3913,15 +3923,15 @@ void ESMCI_meshturnoffnodemask(Mesh **meshpp, int *rc) {
     return;
   }
 
-  // Set return code 
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 }
 
-//////////// 
+////////////
 
-void ESMCI_get_polygon_area(int *spatialdim, int *nedges, 
-						 double *points, double *area, int *rc) {
+void ESMCI_get_polygon_area(int *spatialdim, int *nedges,
+                                                 double *points, double *area, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_get_polygon_area()"
 
@@ -3940,7 +3950,7 @@ void ESMCI_get_polygon_area(int *spatialdim, int *nedges,
 
 ////////////////
 
-void ESMCI_meshcreatefrommeshes(Mesh **meshapp, Mesh **meshbpp, Mesh **meshpp, 
+void ESMCI_meshcreatefrommeshes(Mesh **meshapp, Mesh **meshbpp, Mesh **meshpp,
 ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
 
 #undef  ESMC_METHOD
@@ -3962,7 +3972,7 @@ ESMC_MeshOp_Flag * meshop, double * threshold, int *rc) {
     MeshCreateDiff(meshb, mesha, meshpp, *threshold);
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                             x.what(), ESMC_CONTEXT, rc);
@@ -3992,7 +4002,7 @@ void expand_split_elem_ids(Mesh *mesh, int num_elem_gids, int *elem_gids, int *_
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "expand_split_elem_ids()"
-  
+
   // Copy input array to UInt
   UInt *elem_gids_u=NULL;
   if (num_elem_gids>0) {
@@ -4015,13 +4025,13 @@ void expand_split_elem_ids(Mesh *mesh, int num_elem_gids, int *elem_gids, int *_
     // Allocate space
     gids_split= new UInt[num_gids];
     gids_orig= new UInt[num_gids];
-    
+
     // Loop through list putting into arrays
     int pos=0;
     Mesh::iterator ei = mesh->elem_begin(), ee = mesh->elem_end();
     for (; ei != ee; ++ei) {
       MeshObj &elem = *ei;
- 
+
       // Only do local
       if (!GetAttr(elem).is_locally_owned()) continue;
 
@@ -4052,7 +4062,7 @@ void expand_split_elem_ids(Mesh *mesh, int num_elem_gids, int *elem_gids, int *_
   DDir<> id_map_dir;
   id_map_dir.Create(num_gids,gids_orig,gids_split);
 
-  // Clean up 
+  // Clean up
   if (num_gids>0) {
     if (gids_split!= NULL) delete [] gids_split;
     if (gids_orig != NULL) delete [] gids_orig;
@@ -4062,7 +4072,7 @@ void expand_split_elem_ids(Mesh *mesh, int num_elem_gids, int *elem_gids, int *_
   std::vector<DDir<>::dentry> lookups;
   id_map_dir.RemoteGID(num_elem_gids, elem_gids_u, lookups);
 
-  // Don't need anymore so clean up 
+  // Don't need anymore so clean up
   if (num_elem_gids>0) {
     if (elem_gids_u != NULL) delete [] elem_gids_u;
   }
@@ -4075,7 +4085,7 @@ void expand_split_elem_ids(Mesh *mesh, int num_elem_gids, int *elem_gids, int *_
 
     for (int i=0; i<lookups.size(); i++) {
       elem_gids_ws[i]=lookups[i].origin_lid;
-      
+
       // If split put into map
       if (lookups[i].gid != lookups[i].origin_lid) {
         split_to_orig_id[lookups[i].origin_lid]=lookups[i].gid;
@@ -4083,7 +4093,7 @@ void expand_split_elem_ids(Mesh *mesh, int num_elem_gids, int *elem_gids, int *_
     }
   }
 
-  // Output 
+  // Output
   *_num_elem_gids_ws=num_elem_gids_ws;
   *_elem_gids_ws=elem_gids_ws;
 }
@@ -4151,11 +4161,11 @@ void calc_split_id_to_frac(Mesh *mesh) {
     Mesh::MeshObjIDMap::iterator ei = mesh->map_find(MeshObj::ELEMENT, s_id);
     if (ei == mesh->map_end(MeshObj::ELEMENT)) {
       Throw() << "Element not in mesh";
-    }    
+    }
 
     // Get the element
-    const MeshObj &elem = *ei; 
-     
+    const MeshObj &elem = *ei;
+
     // Compute area depending on dimensions
     double area;
     if (sdim==2) {
@@ -4172,12 +4182,12 @@ void calc_split_id_to_frac(Mesh *mesh) {
     mesh->split_id_to_frac[s_id]=area;
 
     // Sum to original polygon area
-    //  Find the corresponding orig id 
+    //  Find the corresponding orig id
     std::map<UInt,double>::iterator oi = orig_id_to_area.find(o_id);
     // If not in map yet then complain
     if (oi == orig_id_to_area.end()) {
       Throw() << "orig id no in map!!! \n";
-    } 
+    }
 
     // Add to original polygon total
     oi->second += area;
@@ -4197,7 +4207,7 @@ void calc_split_id_to_frac(Mesh *mesh) {
     std::map<UInt,double>::iterator oi = orig_id_to_area.find(o_id);
     if (oi == orig_id_to_area.end()) {
       Throw() << "Origianl id not found in map! \n";
-    } 
+    }
     double total_area=oi->second;
 
 
@@ -4205,7 +4215,7 @@ void calc_split_id_to_frac(Mesh *mesh) {
     std::map<UInt,double>::iterator si = mesh->split_id_to_frac.find(s_id);
     if (si == mesh->split_id_to_frac.end()) {
       Throw() << "Split id not found in map! \n";
-    } 
+    }
 
     // Divide to get fraction
     si->second=si->second/total_area;
@@ -4213,13 +4223,13 @@ void calc_split_id_to_frac(Mesh *mesh) {
   }
  /* XMRKX */
 
-#undef  MAX_NUM_POLY_COORDS  
-#undef  MAX_NUM_POLY_NODES_2D 
-#undef  MAX_NUM_POLY_NODES_3D 
+#undef  MAX_NUM_POLY_COORDS
+#undef  MAX_NUM_POLY_NODES_2D
+#undef  MAX_NUM_POLY_NODES_3D
 }
 
 
-void ESMCI_meshcreateredistelems(Mesh **src_meshpp, int *num_elem_gids, int *elem_gids, 
+void ESMCI_meshcreateredistelems(Mesh **src_meshpp, int *num_elem_gids, int *elem_gids,
                                                     Mesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreateredistelems()"
@@ -4246,7 +4256,7 @@ void ESMCI_meshcreateredistelems(Mesh **src_meshpp, int *num_elem_gids, int *ele
       int *elem_gids_ws=NULL;
       std::map<UInt,UInt> split_to_orig_id;
       expand_split_elem_ids(src_mesh,*num_elem_gids,elem_gids,&num_elem_gids_ws,&elem_gids_ws,split_to_orig_id);
-      
+
       // Call into redist with expanded ids
       MeshRedistElem(src_mesh, num_elem_gids_ws, elem_gids_ws, output_meshpp);
 
@@ -4259,14 +4269,14 @@ void ESMCI_meshcreateredistelems(Mesh **src_meshpp, int *num_elem_gids, int *ele
       output_mesh->split_to_orig_id=split_to_orig_id;
 
       // calculate split_id_to_frac map from other info
-      calc_split_id_to_frac(output_mesh); 
+      calc_split_id_to_frac(output_mesh);
 
 #if 0
       // DEBUG OUTPUT
     // Loop and get split-orig id pairs
     std::map<UInt,UInt>::iterator mi=output_mesh->split_to_orig_id.begin();
     std::map<UInt,UInt>::iterator me=output_mesh->split_to_orig_id.end();
-    
+
     for ( ; mi != me; mi++) {
       printf("%d# split=%d orig=%d\n",Par::Rank(),mi->first,mi->second);
     }
@@ -4280,7 +4290,7 @@ void ESMCI_meshcreateredistelems(Mesh **src_meshpp, int *num_elem_gids, int *ele
     // Loop and get split-frac id pairs
     std::map<UInt,double>::iterator si=src_mesh->split_id_to_frac.begin();
     std::map<UInt,double>::iterator se=src_mesh->split_id_to_frac.end();
-    
+
     for ( ; si != se; si++) {
       printf("%d# S: split=%d frac=%f\n",Par::Rank(),si->first,si->second);
     }
@@ -4291,7 +4301,7 @@ void ESMCI_meshcreateredistelems(Mesh **src_meshpp, int *num_elem_gids, int *ele
     // Loop and get split-frac id pairs
     std::map<UInt,double>::iterator si=output_mesh->split_id_to_frac.begin();
     std::map<UInt,double>::iterator se=output_mesh->split_id_to_frac.end();
-    
+
     for ( ; si != se; si++) {
       printf("%d# O: split=%d frac=%f\n",Par::Rank(),si->first,si->second);
     }
@@ -4305,7 +4315,7 @@ void ESMCI_meshcreateredistelems(Mesh **src_meshpp, int *num_elem_gids, int *ele
 
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                             x.what(), ESMC_CONTEXT, rc);
@@ -4331,7 +4341,7 @@ void ESMCI_meshcreateredistelems(Mesh **src_meshpp, int *num_elem_gids, int *ele
 
 
 
-void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
+void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *node_gids,
                                                     Mesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreateredistelems()"
@@ -4368,14 +4378,14 @@ void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *nod
       // output_mesh->split_to_orig_id=split_to_orig_id; // SET INSIDE MeshRedistNode()
 
       // calculate split_id_to_frac map from other info
-      calc_split_id_to_frac(output_mesh); 
+      calc_split_id_to_frac(output_mesh);
 
 #if 0
       // DEBUG OUTPUT
     // Loop and get split-orig id pairs
     std::map<UInt,UInt>::iterator mi=output_mesh->split_to_orig_id.begin();
     std::map<UInt,UInt>::iterator me=output_mesh->split_to_orig_id.end();
-    
+
     for ( ; mi != me; mi++) {
       printf("%d# split=%d orig=%d\n",Par::Rank(),mi->first,mi->second);
     }
@@ -4389,7 +4399,7 @@ void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *nod
     // Loop and get split-frac id pairs
     std::map<UInt,double>::iterator si=src_mesh->split_id_to_frac.begin();
     std::map<UInt,double>::iterator se=src_mesh->split_id_to_frac.end();
-    
+
     for ( ; si != se; si++) {
       printf("%d# S: split=%d frac=%f\n",Par::Rank(),si->first,si->second);
     }
@@ -4400,7 +4410,7 @@ void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *nod
     // Loop and get split-frac id pairs
     std::map<UInt,double>::iterator si=output_mesh->split_id_to_frac.begin();
     std::map<UInt,double>::iterator se=output_mesh->split_id_to_frac.end();
-    
+
     for ( ; si != se; si++) {
       printf("%d# O: split=%d frac=%f\n",Par::Rank(),si->first,si->second);
     }
@@ -4411,7 +4421,7 @@ void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *nod
 
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                             x.what(), ESMC_CONTEXT, rc);
@@ -4437,7 +4447,7 @@ void ESMCI_meshcreateredistnodes(Mesh **src_meshpp, int *num_node_gids, int *nod
 
 
 
-void ESMCI_meshcreateredist(Mesh **src_meshpp, int *num_node_gids, int *node_gids, 
+void ESMCI_meshcreateredist(Mesh **src_meshpp, int *num_node_gids, int *node_gids,
                                                int *num_elem_gids, int *elem_gids,  Mesh **output_meshpp, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreateredist()"
@@ -4465,7 +4475,7 @@ void ESMCI_meshcreateredist(Mesh **src_meshpp, int *num_node_gids, int *node_gid
       int *elem_gids_ws=NULL;
       std::map<UInt,UInt> split_to_orig_id;
       expand_split_elem_ids(src_mesh,*num_elem_gids,elem_gids,&num_elem_gids_ws,&elem_gids_ws,split_to_orig_id);
-      
+
       // Call into redist with expanded ids
       MeshRedist(src_mesh, *num_node_gids, node_gids, num_elem_gids_ws, elem_gids_ws, output_meshpp);
 
@@ -4478,14 +4488,14 @@ void ESMCI_meshcreateredist(Mesh **src_meshpp, int *num_node_gids, int *node_gid
       output_mesh->split_to_orig_id=split_to_orig_id;
 
       // calculate split_id_to_frac map from other info
-      calc_split_id_to_frac(output_mesh); 
+      calc_split_id_to_frac(output_mesh);
 
       // Free split gids
       if (elem_gids_ws !=NULL) delete [] elem_gids_ws;
     }
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                             x.what(), ESMC_CONTEXT, rc);
@@ -4512,10 +4522,10 @@ void ESMCI_meshcreateredist(Mesh **src_meshpp, int *num_node_gids, int *node_gid
 
 
 // This method verifies that nodes in node_gids array are the same as the local nodes in meshpp, otherwise
-// it returns an error (used to test MeshRedist()). 
+// it returns an error (used to test MeshRedist()).
 // To do this check make sure the number of nodes in both cases are the same and that every
 // entry in node_gids is contained in meshpp
-void ESMCI_meshchecknodelist(Mesh **meshpp, int *_num_node_gids, int *node_gids, 
+void ESMCI_meshchecknodelist(Mesh **meshpp, int *_num_node_gids, int *node_gids,
                                              int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshchecknodelist()"
@@ -4532,9 +4542,9 @@ void ESMCI_meshchecknodelist(Mesh **meshpp, int *_num_node_gids, int *node_gids,
 
  /* XMRKX */
 
-    // For convenience deref mesh 
+    // For convenience deref mesh
     Mesh *meshp = *meshpp;
-    
+
     // For convenience deref number
     int num_node_gids=*_num_node_gids;
 
@@ -4544,7 +4554,7 @@ void ESMCI_meshchecknodelist(Mesh **meshpp, int *_num_node_gids, int *node_gids,
     Mesh::iterator ni = meshp->node_begin(), ne = meshp->node_end();
     for (;ni != ne; ++ni) {
       const MeshObj &node = *ni;
- 
+
       if (GetAttr(node).is_locally_owned()) {
         num_local_nodes++;
       }
@@ -4565,10 +4575,10 @@ void ESMCI_meshchecknodelist(Mesh **meshpp, int *_num_node_gids, int *node_gids,
         if (mi == meshp->map_end(MeshObj::NODE)) {
           Throw() << "Node "<<node_gids[i]<<" not found in Mesh.";
         }
-        
+
         // Get the element
-        const MeshObj &node = *mi; 
-        
+        const MeshObj &node = *mi;
+
         // Check if it's locally owned
         if (!GetAttr(node).is_locally_owned()) {
           Throw() << "Node "<<node_gids[i]<<" in Mesh, but not local.";
@@ -4577,7 +4587,7 @@ void ESMCI_meshchecknodelist(Mesh **meshpp, int *_num_node_gids, int *node_gids,
     }
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                             x.what(), ESMC_CONTEXT, rc);
@@ -4603,10 +4613,10 @@ void ESMCI_meshchecknodelist(Mesh **meshpp, int *_num_node_gids, int *node_gids,
 
 
 // This method verifies that elems in elem_gids array are the same as the local elems in meshpp, otherwise
-// it returns an error (used to test MeshRedist()). 
+// it returns an error (used to test MeshRedist()).
 // To do this check make sure the number of elems in both cases are the same and that every
 // entry in elem_gids is contained in meshpp
-void ESMCI_meshcheckelemlist(Mesh **meshpp, int *_num_elem_gids, int *elem_gids, 
+void ESMCI_meshcheckelemlist(Mesh **meshpp, int *_num_elem_gids, int *elem_gids,
                                              int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcheckelemlist()"
@@ -4622,9 +4632,9 @@ void ESMCI_meshcheckelemlist(Mesh **meshpp, int *_num_elem_gids, int *elem_gids,
     }
 
 
-    // For convenience deref mesh 
+    // For convenience deref mesh
     Mesh *meshp = *meshpp;
-    
+
     // For convenience deref number
     int num_elem_gids=*_num_elem_gids;
 
@@ -4634,9 +4644,9 @@ void ESMCI_meshcheckelemlist(Mesh **meshpp, int *_num_elem_gids, int *elem_gids,
     Mesh::iterator ni = meshp->elem_begin(), ne = meshp->elem_end();
     for (;ni != ne; ++ni) {
       const MeshObj &elem = *ni;
- 
+
       // Don't do split elements
-      if (meshp->is_split && (elem.get_id() > meshp->max_non_split_id)) continue; 
+      if (meshp->is_split && (elem.get_id() > meshp->max_non_split_id)) continue;
 
       if (GetAttr(elem).is_locally_owned()) {
         num_local_elems++;
@@ -4658,10 +4668,10 @@ void ESMCI_meshcheckelemlist(Mesh **meshpp, int *_num_elem_gids, int *elem_gids,
         if (mi == meshp->map_end(MeshObj::ELEMENT)) {
           Throw() << "Elem "<<elem_gids[i]<<" not found in Mesh.";
         }
-        
+
         // Get the element
-        const MeshObj &elem = *mi; 
-        
+        const MeshObj &elem = *mi;
+
         // Check if it's locally owned
         if (!GetAttr(elem).is_locally_owned()) {
           Throw() << "Elem "<<elem_gids[i]<<" in Mesh, but not local.";
@@ -4670,7 +4680,7 @@ void ESMCI_meshcheckelemlist(Mesh **meshpp, int *_num_elem_gids, int *elem_gids,
     }
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                             x.what(), ESMC_CONTEXT, rc);
@@ -4697,7 +4707,7 @@ void ESMCI_meshcheckelemlist(Mesh **meshpp, int *_num_elem_gids, int *elem_gids,
 // Interface to internal code to convert coords from spherical in degrees to Cartesian
 // Input is: lon, lat - spherical coordinates in degrees
 // Output is: x,y,z - Cartesian coordinates
-// 
+//
 void ESMCI_sphdeg_to_cart(double *lon, double *lat,
                                              double *x, double *y, double *z, int *rc){
 #undef  ESMC_METHOD
@@ -4724,7 +4734,7 @@ void ESMCI_sphdeg_to_cart(double *lon, double *lat,
     sph_coords[1]=*lat;
 
     // Convert coords using standard function
-    ESMCI_CoordSys_ConvertToCart(ESMC_COORDSYS_SPH_DEG, 2, 
+    ESMCI_CoordSys_ConvertToCart(ESMC_COORDSYS_SPH_DEG, 2,
                                  sph_coords, cart_coords);
 
     // Get cart coords from temporary array
@@ -4733,13 +4743,13 @@ void ESMCI_sphdeg_to_cart(double *lon, double *lat,
    *z=cart_coords[2];
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      					  x.what(), ESMC_CONTEXT, rc);
+                                          x.what(), ESMC_CONTEXT, rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT, rc);
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
     }
 
 
@@ -4754,12 +4764,12 @@ void ESMCI_sphdeg_to_cart(double *lon, double *lat,
     return;
   }
 
-  // Set return code 
+  // Set return code
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
 
 
-// This method sets the pole values so a 2D Mesh from a SCRIP grid can still be used in regrid with poles 
+// This method sets the pole values so a 2D Mesh from a SCRIP grid can still be used in regrid with poles
 void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
                                              int *rc) {
 #undef  ESMC_METHOD
@@ -4775,9 +4785,9 @@ void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_val, int *_min_pole_gid, int *
       throw localrc;  // bail out with exception
     }
 
-    // For convenience deref mesh 
+    // For convenience deref mesh
     Mesh *meshp = *meshpp;
-    
+
     // For convenience deref numbers
     int pole_val=*_pole_val;
     int min_pole_gid=*_min_pole_gid;
@@ -4793,20 +4803,20 @@ void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_val, int *_min_pole_gid, int *
 
       // If not in the local mesh, then loop to next
       if (mi == meshp->map_end(MeshObj::NODE)) continue;
-   
+
       // Get the element
-      MeshObj &node = *mi; 
-        
+      MeshObj &node = *mi;
+
       // Create new attr with the old type, new nodeset, and old context
       const Context &old_ctxt = GetMeshObjContext(node);
-      Attr attr(MeshObj::NODE, pole_val, old_ctxt, 
+      Attr attr(MeshObj::NODE, pole_val, old_ctxt,
                 old_ctxt.is_set(Attr::SHARED_ID),old_ctxt.is_set(Attr::OWNED_ID),
-                old_ctxt.is_set(Attr::ACTIVE_ID),old_ctxt.is_set(Attr::GENESIS_ID));  
-      meshp->update_obj(&node, attr);      
+                old_ctxt.is_set(Attr::ACTIVE_ID),old_ctxt.is_set(Attr::GENESIS_ID));
+      meshp->update_obj(&node, attr);
 
     }
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                             x.what(), ESMC_CONTEXT, rc);
@@ -4849,7 +4859,7 @@ void ESMCI_meshcreatedual(Mesh **src_meshpp, Mesh **output_meshpp, int *rc) {
     MeshDual(*src_meshpp, output_meshpp);
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                             x.what(), ESMC_CONTEXT, rc);
@@ -4931,7 +4941,7 @@ void ESMCI_MeshFitOnVM(Mesh **meshpp,
      MeshDB::iterator ni = mesh->node_begin_all(), ne = mesh->node_end_all();
      for (; ni != ne; ++ni) {
        MeshObj &node=*ni;
-       
+
        // Get original owner
        UInt orig_owner=node.get_owner();
 
@@ -4961,7 +4971,7 @@ void ESMCI_MeshFitOnVM(Mesh **meshpp,
      MeshDB::iterator ei = mesh->elem_begin_all(), ee = mesh->elem_end_all();
      for (; ei != ee; ++ei) {
        MeshObj &elem=*ei;
-       
+
        // Get original owner
        UInt orig_owner=elem.get_owner();
 
@@ -5000,30 +5010,30 @@ void ESMCI_MeshFitOnVM(Mesh **meshpp,
       "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
- 
-  // Set return code 
+
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 } // meshcreate
 
 
 void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
-                                 int *pdim_ptr, int *sdim_ptr, 
-                                 int *num_elems_ptr, 
+                                 int *pdim_ptr, int *sdim_ptr,
+                                 int *num_elems_ptr,
                                  InterArray<int> *elemIdsII,
-                                 int *elemTypes, 
+                                 int *elemTypes,
                                  InterArray<int> *elemMaskII,
-                                 int *num_elemCorners_ptr, 
-                                 double *elemCornerCoords, 
-                                 int *has_elemArea, 
-                                 double *elemArea, 
-                                 int *has_elemCoords, 
-                                 double *elemCoords, 
+                                 int *num_elemCorners_ptr,
+                                 double *elemCornerCoords,
+                                 int *has_elemArea,
+                                 double *elemArea,
+                                 int *has_elemCoords,
+                                 double *elemCoords,
                                  ESMC_CoordSys_Flag *coordSys, int *rc)
 {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshcreate_easy_elems()"
-  
+
   int localrc;
 
    try {
@@ -5031,7 +5041,7 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
        throw localrc;  // bail out with exception
-     
+
      // Setup some useful variables
      int pdim=*pdim_ptr;
      int sdim=*sdim_ptr;
@@ -5041,7 +5051,7 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
 
      // Create Mesh using internal mesh create method
      ESMCI_meshcreate(meshpp,
-                      pdim_ptr, sdim_ptr, 
+                      pdim_ptr, sdim_ptr,
                       coordSys, &localrc);
      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
        throw localrc;  // bail out with exception
@@ -5053,7 +5063,7 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
      int num_nodes=num_elemCorners; // one node per corner
 
      // Allocate node id array
-     int *node_ids=NULL; 
+     int *node_ids=NULL;
      if (num_nodes > 0) {
        node_ids=new int[num_nodes];
      }
@@ -5083,28 +5093,28 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
      for (int i=0; i<num_nodes; i++) {
 
        // Start ids at 1, then number sequentially
-       node_ids[i]=beg_node_ids+i; 
+       node_ids[i]=beg_node_ids+i;
 
        // Set all owners to the current processor
-       node_owners[i]=Par::Rank(); 
+       node_owners[i]=Par::Rank();
      }
 
      // Create nodes using internal mesh add nodes method
-     ESMCI_meshaddnodes(meshpp, &num_nodes, node_ids, 
+     ESMCI_meshaddnodes(meshpp, &num_nodes, node_ids,
                         node_coords, node_owners, NULL,
                         coordSys, &sdim, &localrc);
      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-       throw localrc;  // bail out with exception 
+       throw localrc;  // bail out with exception
 
      // Deallocate node info
      if (node_ids != NULL) delete [] node_ids;
      if (node_owners != NULL) delete [] node_owners;
 
-     
+
      ////// Create elements //////
 
      // Allocate element id array
-     int *elem_ids=NULL; 
+     int *elem_ids=NULL;
      if (num_elems > 0) {
        elem_ids=new int[num_elems];
      }
@@ -5119,7 +5129,7 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
        if (elemIdsII->dimCount !=1) {
          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
               " elemIds array must be 1D ", ESMC_CONTEXT,  &localrc)) throw localrc;
-       }       
+       }
        if (elemIdsII->extent[0] != num_elems) {
          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
          "- elementIds array must be the same size as the elementTypes array ", ESMC_CONTEXT, &localrc)) throw localrc;
@@ -5128,7 +5138,7 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
        // fill from array from passed in values
        for (int i=0; i<num_elems; i++) {
          elem_ids[i]=elemIdsII->array[i];
-       }      
+       }
      } else {
        // Set elems ids internally //
 
@@ -5154,14 +5164,14 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
      int num_elem_conns=num_elemCorners;
 
      // Allocate element connection array
-     int *elem_conns=NULL; 
+     int *elem_conns=NULL;
      if (num_elem_conns > 0) {
        elem_conns=new int[num_elem_conns];
      }
 
      // Fill element connection array
      for (int i=0; i<num_elem_conns; i++) {
-       // Since each corner has it's own node, the connection array is just 
+       // Since each corner has it's own node, the connection array is just
        // in sequence starting with 1 (connection array is 1-based)
        elem_conns[i]=i+1;
      }
@@ -5170,28 +5180,28 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
      int regridConserve = ESMC_REGRID_CONSERVE_ON;
 
      // Create elements using internal mesh add elements method
-     ESMCI_meshaddelements(meshpp, 
+     ESMCI_meshaddelements(meshpp,
                            &num_elems, elem_ids, elemTypes, elemMaskII ,
-                           has_elemArea, elemArea, 
-                           has_elemCoords, elemCoords, 
-                           &num_elem_conns, elem_conns, &regridConserve, 
+                           has_elemArea, elemArea,
+                           has_elemCoords, elemCoords,
+                           &num_elem_conns, elem_conns, &regridConserve,
                            coordSys, &sdim,
                            &localrc);
      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-       throw localrc;  // bail out with exception 
+       throw localrc;  // bail out with exception
 
      // Deallocate element info
      if (elem_ids != NULL) delete [] elem_ids;
      if (elem_conns != NULL) delete [] elem_conns;
 
   } catch(std::exception &x) {
-    // catch Mesh exception return code 
+    // catch Mesh exception return code
     if (x.what()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  x.what(), ESMC_CONTEXT,rc);
+                                          x.what(), ESMC_CONTEXT,rc);
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-   					  "UNKNOWN", ESMC_CONTEXT,rc);
+                                          "UNKNOWN", ESMC_CONTEXT,rc);
     }
 
     return;
@@ -5204,8 +5214,8 @@ void ESMCI_meshcreate_easy_elems(Mesh **meshpp,
       "- Caught unknown exception", ESMC_CONTEXT, rc);
     return;
   }
- 
-  // Set return code 
+
+  // Set return code
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 
 } // meshcreate_easy_elems

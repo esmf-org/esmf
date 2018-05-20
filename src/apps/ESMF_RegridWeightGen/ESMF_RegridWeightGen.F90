@@ -36,14 +36,20 @@ program ESMF_RegridWeightGenApp
   character(ESMF_MAXPATHLEN) :: cwd
   character(ESMF_MAXPATHLEN) :: tilePath
   character(len=40)  :: method, flag, lineTypeStr
+  character(len=MAXNAMELEN)  :: extrapMethodStr
+  character(len=MAXNAMELEN)  :: extrapNumSrcPntsStr
+  integer :: extrap_num_src_pnts
+  character(len=MAXNAMELEN)  :: extrapDistExponentStr
+  real :: extrap_dist_exponent
   type(ESMF_LineType_Flag) :: lineType
   type(ESMF_PoleMethod_Flag) :: pole
    integer            :: poleptrs
   type(ESMF_FileFormat_Flag) :: srcFileType, dstFileType
   type(ESMF_RegridMethod_Flag) :: methodflag
+  type(ESMF_ExtrapMethod_Flag) :: extrapMethodFlag
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(4)
-  character(len=MAXNAMELEN)  :: commandbuf3(8)
-  integer            :: commandbuf2(21)
+  character(len=MAXNAMELEN)  :: commandbuf3(9)
+  integer            :: commandbuf2(23)
   integer            :: ind, pos
   logical            :: largeFileFlag
   logical            :: netcdf4FileFlag
@@ -66,6 +72,7 @@ program ESMF_RegridWeightGenApp
   type(ESMF_NormType_Flag) :: normType
   logical            :: useSrcCorner, useDstCorner
   logical            :: useTilePathFlag
+  integer            :: meshdim
   
   terminateProg = .false.
   
@@ -216,6 +223,42 @@ program ESMF_RegridWeightGenApp
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
       endif    
     endif
+
+   ! Get extrap method
+    call ESMF_UtilGetArgIndex('--extrap_method', argindex=ind, rc=rc)
+    if (ind == -1) then
+       extrapMethodStr = 'none'
+    else
+      call ESMF_UtilGetArg(ind+1, argvalue=extrapMethodStr)
+      if ((trim(extrapMethodStr) .ne. 'none') .and. &
+           (trim(extrapMethodStr) .ne. 'nearestidavg') .and. &
+           (trim(extrapMethodStr) .ne. 'neareststod')) then
+        write(*,*)
+        print *, 'ERROR: The extrap. method "', trim(extrapMethodStr), '" is not supported'
+        print *, "Use the --help argument to see an explanation of usage."
+        call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      endif    
+    endif
+
+
+   ! Get extrap num src points
+    call ESMF_UtilGetArgIndex('--extrap_num_src_pnts', argindex=ind, rc=rc)
+    if (ind == -1) then
+       extrap_num_src_pnts=8
+    else
+      call ESMF_UtilGetArg(ind+1, argvalue=extrapNumSrcPntsStr)
+      read(extrapNumSrcPntsStr,'(i4)') extrap_num_src_pnts
+    endif
+
+
+   ! Get extrap dist exponent
+    call ESMF_UtilGetArgIndex('--extrap_dist_exponent', argindex=ind, rc=rc)
+    if (ind == -1) then
+       extrapDistExponentStr='2.0'
+    else
+      call ESMF_UtilGetArg(ind+1, argvalue=extrapDistExponentStr)
+    endif
+
 
     poleptrs = -1
     call ESMF_UtilGetArgIndex('-p', argindex=ind, rc=rc)
@@ -611,6 +654,44 @@ program ESMF_RegridWeightGenApp
       useTilePathFlag = .false.
     endif
 
+    ! -- if src or dst grid is a 1D UGRID file, there are many restrictions: 
+    !    1. if it is dst grid, no conservative regridding, if it is src grid,
+    !    only nearest neighbor regridding allowed. 2. only allow regridding on
+    !    the corner, 3. only allow weight_only file.
+    if (srcFileType == ESMF_FILEFORMAT_UGRID) then
+       call ESMF_UGridInq(srcfile, nodeCoordDim = meshdim, rc=rc) 
+       if (meshdim == 1) then
+         if (method /= 'neareststod' .and. method /= 'nearestdtos') then
+            write(*,*)
+            print *, 'ERROR: only nearest neighbor regridding is supported for'
+            print *, '1D source grid in UGRID format.'
+            call ESMF_Finalize(endflag=ESMF_END_ABORT)
+         endif
+         if (.not. useSrcCorner) then
+            write(*,*)
+            print *, 'ERROR: Only allow regridding on the corner for 1D source grid.'
+            print *, 'Use --src_loc corner to specify it'
+            call ESMF_Finalize(endflag=ESMF_END_ABORT)
+         endif
+       endif
+    endif
+    if (dstFileType == ESMF_FILEFORMAT_UGRID) then
+       call ESMF_UGridInq(dstfile, nodeCoordDim = meshdim, rc=rc) 
+       if (meshdim == 1) then
+         if (method == 'conserve' .or. method == 'conserve2nd') then
+            write(*,*)
+            print *, 'ERROR: conservative regridding is not supported for 1D destination grid.'
+            call ESMF_Finalize(endflag=ESMF_END_ABORT)
+         endif
+         if (.not. useDstCorner) then
+            write(*,*)
+            print *, 'ERROR: Only allow regridding on the corner for 1D destination grid.'
+            print *, 'Use --dst_loc corner to specify it'
+            call ESMF_Finalize(endflag=ESMF_END_ABORT)
+         endif
+       endif
+    endif
+
     checkFlag = .false.
     call ESMF_UtilGetArgIndex('--check', argindex=ind, rc=rc)
     if (ind /= -1) checkFlag = .true.
@@ -653,6 +734,10 @@ program ESMF_RegridWeightGenApp
       if (trim(lineTypeStr) .eq. 'cartesian') commandbuf2(20) = 1
       if (trim(lineTypeStr) .eq. 'greatcircle') commandbuf2(20) = 2
       if (weightOnlyFlag) commandbuf2(21) = 1
+      if (extrapMethodStr .eq. 'none') commandbuf2(22)=1
+      if (extrapMethodStr .eq. 'neareststod') commandbuf2(22)=2
+      if (extrapMethodStr .eq. 'nearestidavg') commandbuf2(22)=3
+      commandbuf2(23)=extrap_num_src_pnts
     endif 
 
 
@@ -676,6 +761,7 @@ program ESMF_RegridWeightGenApp
     commandbuf3(6)=srcCoordNames(2)
     commandbuf3(7)=dstCoordNames(1)
     commandbuf3(8)=dstCoordNames(2)
+    commandbuf3(9)=extrapDistExponentStr
 
     ! Broadcast the command line arguments to all the PETs
     call ESMF_VMBroadcast(vm, commandbuf1, len(commandbuf1)*size(commandbuf1), 0, rc=rc)
@@ -797,6 +883,19 @@ program ESMF_RegridWeightGenApp
       weightOnlyFlag=.false.
     endif
 
+    if (commandbuf2(22)==0) then
+      extrapMethodStr = 'none'
+    else if (commandbuf2(22)==1) then
+      extrapMethodStr = 'none'
+    else if (commandbuf2(22)==2) then
+      extrapMethodStr = 'neareststod'
+    else if (commandbuf2(22)==3) then
+      extrapMethodStr = 'nearestidavg'
+    else
+      method = 'none'
+    endif
+
+    extrap_num_src_pnts=commandbuf2(23)
 
     call ESMF_VMBroadcast(vm, commandbuf1, len(commandbuf1)*size(commandbuf1), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -819,7 +918,7 @@ program ESMF_RegridWeightGenApp
     srcCoordNames(2) = commandbuf3(6)
     dstCoordNames(1) = commandbuf3(7)
     dstCoordNames(2) = commandbuf3(8)
-    
+    extrapDistExponentStr=commandbuf3(9)
   endif
 
   if (trim(method) .eq. 'bilinear') then
@@ -849,6 +948,26 @@ program ESMF_RegridWeightGenApp
      lineType=ESMF_LINETYPE_GREAT_CIRCLE
   endif
 
+  ! Set extrap method
+  if (trim(extrapMethodStr) .eq. 'none') then 
+     extrapMethodFlag=ESMF_EXTRAPMETHOD_NONE
+  else if (trim(extrapMethodStr) .eq. 'neareststod') then
+     extrapMethodFlag=ESMF_EXTRAPMETHOD_NEAREST_STOD
+  else if (trim(extrapMethodStr) .eq. 'nearestidavg') then
+     extrapMethodFlag=ESMF_EXTRAPMETHOD_NEAREST_IDAVG
+  else 
+     extrapMethodFlag=ESMF_EXTRAPMETHOD_NONE
+  endif
+
+  ! Set extrap distance exponent
+  read(extrapDistExponentStr,*) extrap_dist_exponent 
+
+#if 0
+  write(*,*) "extrapmethod=",extrapMethodflag%extrapmethod
+  write(*,*) "extrap_num_src_pnts=",extrap_num_src_pnts
+  write(*,*) "extrap_dist_exponent=",extrap_dist_exponent
+#endif
+
   if (useTilePathFlag) then
       call ESMF_RegridWeightGen(srcfile, dstfile, wgtfile, regridmethod=methodflag, &
                             polemethod = pole, regridPoleNPnts = poleptrs, unmappedaction = unmappedaction, &
@@ -856,6 +975,9 @@ program ESMF_RegridWeightGenApp
                             ignoreDegenerate = ignoreDegenerate, &
                             lineType=lineType, &
                             normType=normType, &
+                            extrapMethod=extrapMethodFlag, &
+                            extrapNumSrcPnts=extrap_num_src_pnts, &
+                            extrapDistExponent=extrap_dist_exponent, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
                             srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
                             srcMissingvalueFlag = srcMissingValue, srcMissingvalueVar = srcVarName, &
@@ -876,6 +998,9 @@ program ESMF_RegridWeightGenApp
                             ignoreDegenerate = ignoreDegenerate, &
                             lineType=lineType, &
                             normType=normType, &
+                            extrapMethod=extrapMethodFlag, &
+                            extrapNumSrcPnts=extrap_num_src_pnts, &
+                            extrapDistExponent=extrap_dist_exponent, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
                             srcMeshname = srcMeshname, dstMeshname = dstMeshname, &
                             srcMissingvalueFlag = srcMissingValue, srcMissingvalueVar = srcVarName, &
@@ -934,6 +1059,9 @@ contains
     print *, "                      [--pole|-p all|none|teeth|<N>]"
     print *, "                      [--line_type|-l cartesian|greatcircle]"
     print *, "                      [--norm_type dstarea|fracarea]"
+    print *, "                      [--extrap_method none|neareststod|nearestidavg]"
+    print *, "                      [--extrap_num_src_pnts <N>]"
+    print *, "                      [--extrap_dist_exponent <P>]"
     print *, "                      [--ignore_unmapped|-i]"
     print *, "                      [--ignore_degenerate]"
     print *, "                      [-r]"
@@ -973,6 +1101,12 @@ contains
     print *, "                    cartesian. For conservative methods the default is greatcircle." 
     print *, "--norm_type - an optional argument indicating the type of normalization to"
     print *, "              do when generating conserative weights. The default value is dstarea."
+    print *, "--extrap_method - an optional argument specifying which extrapolation method is"
+    print *, "                 used.  The default method is none."
+    print *, "--extrap_num_src_pnts - an optional argument specifying how many source points should"
+    print *, "                be used when the extrapolation method is nearestidavg. The default is 8."
+    print *, "--extrap_dist_exponent - an optional argument specifying the exponent that the distance should"
+    print *, "                be raised to when the extrapolation method is nearestidavg. The default is 2.0."
     print *, "--ignore_unmapped or -i - ignore unmapped destination points. If not specified,"
     print *, "                          the default is to stop with an error."
     print *, "--ignore_degenerate - ignore degenerate cells in the input grids. If not specified,"

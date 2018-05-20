@@ -664,6 +664,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
     
+    ! invalidate return value
+    arraybundle%this = ESMF_NULL_POINTER
+    ESMF_ArrayBundleCreate = arraybundle
+
     ! Determine the number of ArrayList elements
     if (present(arrayList)) then
       arrayCount = size(arrayList)
@@ -698,9 +702,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     enddo
     
-    ! Mark this ArrayBundle object as invalid
-    arraybundle%this = ESMF_NULL_POINTER
-
     ! Call into the C++ interface, which will sort out optional arguments
     ! Optional name argument requires separate calls into C++
     if (present(name)) then
@@ -1357,17 +1358,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   available for the halo operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleHalo()} on any ArrayBundle that is weakly congruent
-!   and typekind conform to {\tt arraybundle}. Congruency for ArrayBundles is
-!   given by the congruency of its constituents.
-!   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Arrays for
-!   every DE. For weakly congruent
-!   Arrays the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Arrays that differ in the number of elements in the left most
-!   undistributed dimensions.
+!   {\tt ESMF\_ArrayBundleHalo()} on any pair of ArrayBundles that matches 
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em distributed} dimensions. However, the size, 
+!   number, and index order of {\em undistributed} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
 !  
 !   This call is {\em collective} across the current VM.  
 !
@@ -1870,17 +1866,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the definition of the Array based operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleRedist()} on any pair of ArrayBundles that 
-!   are weakly congruent and typekind conform with the Arrays contained in
-!   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
-!   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Arrays for
-!   every DE. For weakly congruent
-!   Arrays the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Arrays that differ in the number of elements in the left most
-!   undistributed dimensions.
+!   {\tt ESMF\_ArrayBundleRedist()} on any pair of ArrayBundles that matches 
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em distributed} dimensions. However, the size, 
+!   number, and index order of {\em undistributed} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
 !
 !   This method is overloaded for:\newline
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
@@ -2208,19 +2199,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the definition of the Array based operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleRedist()} on any pair of ArrayBundles that 
-!   are weakly congruent and typekind conform with the Arrays contained in
-!   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
-!   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Arrays for
-!   every DE. For weakly congruent
-!   Arrays the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Arrays that differ in the number of elements in the left most
-!   undistributed dimensions.
-!   \newline
-!
+!   {\tt ESMF\_ArrayBundleRedist()} on any pair of ArrayBundles that matches 
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em distributed} dimensions. However, the size, 
+!   number, and index order of {\em undistributed} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
+!  
 !   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
@@ -2712,7 +2697,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise 
 !              reproducibility.
@@ -2744,18 +2729,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the definition of the Array based operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that 
-!   are weakly congruent and typekind conform with the Arrays contained in
-!   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
-!   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Arrays for
-!   every DE. For weakly congruent
-!   Arrays the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Arrays that differ in the number of elements in the left most
-!   undistributed dimensions.
-!
+!   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that matches 
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em distributed} dimensions. However, the size, 
+!   number, and index order of {\em undistributed} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
+!  
 !   This method is overloaded for:\newline
 !   {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},\newline 
 !   {\tt ESMF\_TYPEKIND\_R4}, {\tt ESMF\_TYPEKIND\_R8}.
@@ -3147,7 +3127,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.1.0] Added argument {\tt srcTermProcessing}.
+! \item[7.1.0r] Added argument {\tt srcTermProcessing}.
 !              The new argument gives the user access to the tuning parameter
 !              affecting the sparse matrix execution and bit-wise 
 !              reproducibility.
@@ -3179,19 +3159,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   the definition of the Array based operation.
 !
 !   The routine returns an {\tt ESMF\_RouteHandle} that can be used to call 
-!   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that 
-!   are weakly congruent and typekind conform with the Arrays contained in
-!   {\tt srcArrayBundle} and {\tt dstArrayBundle}. 
-!   Congruent Arrays possess matching DistGrids, and the shape of the local
-!   array tiles, i.e. the memory allocation, matches between the Arrays for
-!   every DE. For weakly congruent
-!   Arrays the sizes of the undistributed dimensions, that vary faster with
-!   memory than the first distributed dimension, are permitted to be different.
-!   This means that the same {\tt routehandle} can be applied to a large class
-!   of similar Arrays that differ in the number of elements in the left most
-!   undistributed dimensions.
-!   \newline
-!
+!   {\tt ESMF\_ArrayBundleSMM()} on any pair of ArrayBundles that matches 
+!   {\tt srcArrayBundle} and {\tt dstArrayBundle} in {\em type}, {\em kind},
+!   and memory layout of the {\em distributed} dimensions. However, the size, 
+!   number, and index order of {\em undistributed} dimensions may be different.
+!   See section \ref{RH:Reusability} for a more detailed discussion of
+!   RouteHandle reusability.
+!  
 !   This call is {\em collective} across the current VM.
 !
 !   \begin{description}
@@ -3333,6 +3307,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   when the ESMF library is built. Please see the section on 
 !   Data I/O,~\ref{io:dataio}.
 !
+!   When {\tt convention} and {\tt purpose} arguments are specified, NetCDF dimension
+!   labels and variable attributes are written from each Array in the ArrayBundle
+!   from the corresponding Attribute package. Additionally, Attributes may be
+!   set on the ArrayBundle level under the same Attribute package.  This allows
+!   the specification of global attributes within the file.
+!   As with individual Arrays, the value associated with each name may be either
+!   a scalar character string, or a scalar or array of type integer, real, or
+!   double precision.
+!
 !   Limitations:
 !   \begin{itemize}
 !     \item Only single tile Arrays are supported.
@@ -3346,14 +3329,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[fileName]
 !     The name of the output file to which array bundle data is written.
 !   \item[{[convention]}]
-!     Specifies an Attribute package associated with the Array, used to create NetCDF
-!     attributes for the variable in the file.  When this argument is present,
-!     the [{[purpose]}] argument must also be present.  Use this argument only with a NetCDF
+!     Specifies an Attribute package associated with the ArrayBundle, and the
+!     contained Arrays, used to create NetCDF dimension labels and attributes
+!     in the file.  When this argument is present, the {\tt purpose} 
+!     argument must also be present.  Use this argument only with a NetCDF
 !     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[purpose]}]
-!     Specifies an Attribute package associated with the Array, used to create NetCDF
-!     attributes for the variable in the file.  When this argument is present,
-!     the [{[convention]}] argument must also be present.  Use this argument only with a NetCDF
+!     Specifies an Attribute package associated with the ArrayBundle, and the
+!     contained Arrays, used to create NetCDF dimension labels and attributes
+!     in the file.  When this argument is present, the {\tt convention} 
+!     argument must also be present.  Use this argument only with a NetCDF
 !     I/O format. If binary format is used, ESMF will return an error code.
 !   \item[{[singleFile]}]
 !     A logical flag, the default is .true., i.e., all arrays in the bundle 

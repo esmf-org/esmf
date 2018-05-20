@@ -231,6 +231,57 @@ module compBmod
 
 end module compBmod
 
+!-------------------------------------------------------------------------------
+
+#ifndef ESMF_NO_DYNMASKOVERLOAD
+
+module dynMaskmod
+  use ESMF
+  implicit none
+  private
+  public dynMaskR4R4R4
+  public dynMaskR4R4R4V
+  public dynMaskR4R8R4V
+  
+ contains
+ 
+  subroutine dynMaskR4R4R4(dynamicMaskList, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
+    type(ESMF_DynamicMaskElementR4R4R4), pointer        :: dynamicMaskList(:)
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicDstMaskValue
+    integer,                       intent(out)          :: rc
+    ! dummy routine for unit test that does nothing
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+
+  subroutine dynMaskR4R4R4V(dynamicMaskList, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
+    type(ESMF_DynamicMaskElementR4R4R4V), pointer       :: dynamicMaskList(:)
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicDstMaskValue
+    integer,                       intent(out)          :: rc
+    ! dummy routine for unit test that does nothing
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+ 
+  subroutine dynMaskR4R8R4V(dynamicMaskList, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
+    type(ESMF_DynamicMaskElementR4R8R4V), pointer       :: dynamicMaskList(:)
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicDstMaskValue
+    integer,                       intent(out)          :: rc
+    ! dummy routine for unit test that does nothing
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+ 
+end module dynMaskmod
+
+#endif
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -258,6 +309,9 @@ program ESMF_RouteHandleUTest
 
   use compAmod, only: ssA => SetServices
   use compBmod, only: ssB => SetServices
+#ifndef ESMF_NO_DYNMASKOVERLOAD  
+  use dynMaskmod
+#endif
 
   implicit none
 
@@ -281,6 +335,8 @@ program ESMF_RouteHandleUTest
   type(ESMF_GridComp)     :: compA, compB1, compB2
   type(ESMF_Field)        :: fieldA, fieldB1, fieldB2
   type(ESMF_RouteHandle)  :: rh1, rh2
+  logical                 :: isCreated
+  type(ESMF_DynamicMask)  :: dynamicMask
 
   ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
@@ -454,7 +510,31 @@ program ESMF_RouteHandleUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
-  ! Create RH from RH
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleIsCreated()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_RouteHandleIsCreated(rh1, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleIsCreated() return value"
+  write(failMsg, *) "Incorrect return value"
+  isCreated = ESMF_RouteHandleIsCreated(rh1, rc=rc)
+  call ESMF_Test((isCreated), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleGet()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_RouteHandleGet(rh1, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  ! Prepare to test create RH from RH
   ! construct originPetList
   allocate(originPetList(size(petListA)+size(petListB1)))
   originPetList(1:size(petListA)) = petListA(:)
@@ -498,7 +578,7 @@ program ESMF_RouteHandleUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
-  write(name, *) "RouteHandleDestroy"
+  write(name, *) "Test RouteHandleDestroy()"
   write(failMsg, *) "RouteHandleDestroy failed"
   call ESMF_RouteHandleDestroy(rh1, noGarbage=.true., rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -574,6 +654,44 @@ program ESMF_RouteHandleUTest
   deallocate(petListB1)
   deallocate(petListB2)
 
+#ifndef ESMF_NO_DYNMASKOVERLOAD
+
+ !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test ESMF_DynamicMaskSetR4R4R4()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DynamicMaskSetR4R4R4(dynamicMask, &
+    dynamicMaskRoutine=dynMaskR4R4R4, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+ !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test ESMF_DynamicMaskSetR4R4R4V()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DynamicMaskSetR4R4R4V(dynamicMask, &
+    dynamicMaskRoutine=dynMaskR4R4R4V, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+ !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test ESMF_DynamicMaskSetR4R8R4V()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DynamicMaskSetR4R8R4V(dynamicMask, &
+    dynamicMaskRoutine=dynMaskR4R8R4V, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+#else
+
+  write(name, *) "Dummy test to satisfy scripts for ESMF_NO_DYNMASKOVERLOAD"
+  write(failMsg, *) "Did not succeed" 
+  do i=1,3
+    call ESMF_Test((.true.), name, failMsg, result, ESMF_SRCLINE)
+  enddo
+
+#endif
 
   !------------------------------------------------------------------------
 10 continue

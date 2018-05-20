@@ -892,7 +892,7 @@ int Calendar::count=0;
 
     // TODO: use inherited methods from ESMC_Base
     if (nameLen > 0) {
-      if (strlen(this->name) < nameLen) {
+      if ((int)strlen(this->name) < nameLen) {
         // copy all of it
         strcpy(tempName, this->name);
       } else {
@@ -2911,7 +2911,7 @@ int Calendar::count=0;
       // make options case insensitive
       // TODO: put this into function to share
       char opts[ESMF_MAXSTR];
-      int i;
+      unsigned i;
       for(i=0; i<strlen(options) && i<ESMF_MAXSTR-1; i++) {
         opts[i] = tolower(options[i]);
       }

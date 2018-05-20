@@ -200,6 +200,10 @@ ifndef ESMF_TESTEXHAUSTIVE
 export ESMF_TESTEXHAUSTIVE = default
 endif
 
+ifndef ESMF_TESTCOMPTUNNEL
+export ESMF_TESTCOMPTUNNEL = default
+endif
+
 ifndef ESMF_TESTWITHTHREADS
 export ESMF_TESTWITHTHREADS = default
 endif
@@ -395,6 +399,10 @@ endif
 
 ifneq ($(ESMF_SHARED_LIB_BUILD),OFF)
 export ESMF_SHARED_LIB_BUILD = ON
+endif
+
+ifneq ($(ESMF_TESTCOMPTUNNEL),OFF)
+export ESMF_TESTCOMPTUNNEL = ON
 endif
 
 ifneq ($(ESMF_TESTWITHTHREADS),ON)
@@ -1208,11 +1216,34 @@ endif
 #-------------------------------------------------------------------------------
 # NETCDF
 #-------------------------------------------------------------------------------
+
+# Check if ESMF_NETCDF may be pointing to nc-config with absolute path.
+# For situations where PATH is not to be trusted for nc-config location.
+pathtype := ""
+ifdef ESMF_NETCDF
+pathtype := $(shell $(ESMF_DIR)/scripts/pathtype $(ESMF_NETCDF))
+endif
+ifeq ($(pathtype),abs)
+# use the $(ESMF_NETCDF) contents as nc-config
+# but must check if there is also nf-config available
+ESMF_NCCONFIG = $(ESMF_NETCDF)
+ESMF_NFCONFIG = $(shell $(ESMF_NETCDF) --prefix)/bin/nf-config
+ifneq ($(shell $(ESMF_DIR)/scripts/exists $(ESMF_NFCONFIG)),$(ESMF_NFCONFIG))
+ESMF_NFCONFIG := 
+endif
+ESMF_NETCDF_INCLUDE = $(shell $(ESMF_NCCONFIG) --includedir)
+ifdef ESMF_NFCONFIG
+ESMF_NETCDF_LIBS    = $(shell $(ESMF_NFCONFIG) --flibs)
+else
+ESMF_NETCDF_LIBS    = $(shell $(ESMF_NCCONFIG) --flibs)
+endif
+ESMF_NETCDF_LIBS   += $(shell $(ESMF_NCCONFIG) --libs)
+endif
+
 ifeq ($(ESMF_NETCDF),nc-config)
 ESMF_NETCDF_CPATH = $(shell nc-config --prefix)
 ESMF_NETCDF_INCLUDE = $(ESMF_NETCDF_CPATH)/include
 ESMF_NETCDF_LIBPATH = $(ESMF_NETCDF_CPATH)/lib
-
 # Fortran API library might be in a different directory than the main C library.
 ESMF_NETCDF_FPATH = $(shell nf-config --prefix 2>/dev/null)
 ifeq ($(ESMF_NETCDF_FPATH),"")
@@ -1512,6 +1543,20 @@ ESMF_CPPFLAGS       += -DESMF_TESTEXHAUSTIVE
 endif
 
 #-------------------------------------------------------------------------------
+# ESMF_BOPT is passed (by CPP) into test programs to control any differences
+# between the different BOPT modes.
+#-------------------------------------------------------------------------------
+ESMF_CPPFLAGS       += -DESMF_BOPT_$(ESMF_BOPT)
+
+#-------------------------------------------------------------------------------
+# ESMF_TESTCOMPTUNNEL is passed (by CPP) into test programs to control the
+# dependency on ESMF-threading.
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_TESTCOMPTUNNEL),ON)
+ESMF_CPPFLAGS       += -DESMF_TESTCOMPTUNNEL
+endif
+
+#-------------------------------------------------------------------------------
 # ESMF_TESTWITHTHREADS is passed (by CPP) into test programs to control the
 # dependency on ESMF-threading.
 #-------------------------------------------------------------------------------
@@ -1530,6 +1575,18 @@ ESMF_CPPFLAGS        +=-DS$(ESMF_ABISTRING)=1
 #-------------------------------------------------------------------------------
 
 ESMF_CPPFLAGS        +=-DESMF_OS_$(ESMF_OS)=1
+
+#-------------------------------------------------------------------------------
+# Add ESMF_COMM to preprocessor flags
+#-------------------------------------------------------------------------------
+
+ESMF_CPPFLAGS        +=-DESMF_COMM=$(ESMF_COMM)
+
+#-------------------------------------------------------------------------------
+# Add ESMF_DIR to preprocessor flags
+#-------------------------------------------------------------------------------
+
+ESMF_CPPFLAGS        +=-DESMF_DIR=$(ESMF_DIR)
 
 #-------------------------------------------------------------------------------
 # construct precompiler flags to be used on Fortran sources

@@ -13,7 +13,7 @@
       program ESMF_TimeEx
 
 !------------------------------------------------------------------------------
-!ESMF_EXAMPLE	String used by test script to count examples.
+!ESMF_EXAMPLE   String used by test script to count examples.
 !==============================================================================
 !BOC
 ! !PROGRAM: ESMF_TimeEx - Time initialization and manipulation examples

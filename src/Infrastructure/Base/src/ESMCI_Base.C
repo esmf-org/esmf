@@ -226,6 +226,13 @@ static const char *const version = "$Id$";
 //EOPI
   int localrc;
   
+  // first deal with old vmID if this is the creator  
+  if (vmIDCreator){
+    // responsible for vmID deallocation
+    localrc = this->vmID->destroy();
+    delete this->vmID;
+  }
+  // now create the new vmID
   this->vmID = new ESMCI::VMId;       // allocate space for this VMId
   localrc = this->vmID->create();     // allocate internal VMId memory
   ESMCI::VMIdCopy(this->vmID, vmID);  // copy content of vmID to this->vmID.
@@ -1284,11 +1291,12 @@ static const char *const version = "$Id$";
     // Base object is responsible for vmID deallocation
     rc = vmID->destroy();
     delete vmID;
+  }
 
-    if (vmID_remote) {
-      rc = vmID_remote->destroy();
-      delete vmID_remote;
-    }
+  if (vmID_remote) {
+    // Base object is responsible for vmID_remote deallocation
+    rc = vmID_remote->destroy();
+    delete vmID_remote;
   }
 
   baseStatus  = ESMF_STATUS_INVALID;

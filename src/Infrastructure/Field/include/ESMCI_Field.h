@@ -105,6 +105,9 @@ namespace ESMCI{
                            int *regridPoleNPnts,
                            ESMC_LineType_Flag *lineType,
                            ESMC_NormType_Flag *normType,
+                           ESMC_ExtrapMethod_Flag *extrapMethod,
+                           int *extrapNumSrcPnts,
+                           float *extrapDistExponent,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
                            Field *srcFracField, Field *dstFracField);
@@ -120,6 +123,7 @@ namespace ESMCI{
                            ESMC_NormType_Flag *normType,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
+                           ESMC_Logical *create_rh,
                            Field *srcFracField, Field *dstFracField);
     static int regrid(Field *fieldsrc, Field *fielddst,
                       RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion);
@@ -127,8 +131,7 @@ namespace ESMCI{
     static int smmstore(Field *fieldsrc, Field *fielddst,
                         const char *filename, RouteHandle **routehandle,
                         ESMC_Logical *ignoreUnmatchedIndices,
-                        int *srcTermProcessing, int *pipeLineDepth,
-                        RouteHandle **transposeRoutehandle);
+                        int *srcTermProcessing, int *pipeLineDepth);
     int write(const char *file,
       const char* variableName,
       int overwrite,

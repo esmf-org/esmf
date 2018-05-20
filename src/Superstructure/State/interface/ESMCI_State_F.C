@@ -51,7 +51,7 @@ void FTN_X(c_esmc_stateserialize)(
                            int *st, 
                            int *datacount, 
                            char *buffer, int *length, int *offset,
-                           ESMC_InquireFlag *inquireflag, int *localrc,
+                           ESMC_InquireFlag *inquireflag, int *rc,
                            ESMCI_FortranStrLenArg buffer_l){
 
 #undef  ESMC_METHOD
@@ -59,13 +59,13 @@ void FTN_X(c_esmc_stateserialize)(
 
     int *ip;
 
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     int fixedpart = 2 * sizeof (int *);
     if ((*inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-           "Buffer too short to serialize a State object", ESMC_CONTEXT, localrc);
+           "Buffer too short to serialize a State object", ESMC_CONTEXT, rc);
          return;
     }
 
@@ -79,7 +79,7 @@ void FTN_X(c_esmc_stateserialize)(
 
     *offset = (char *)ip - buffer;
 
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 } 
@@ -88,7 +88,8 @@ void FTN_X(c_esmc_stateserialize)(
 void FTN_X(c_esmc_statedeserialize)(
                              int *st, 
                              int *datacount, 
-                             char *buffer, int *offset, int *localrc,
+                             char *buffer, int *offset,
+                             int *rc,
                              ESMCI_FortranStrLenArg buffer_l){
 
 #undef  ESMC_METHOD
@@ -96,7 +97,7 @@ void FTN_X(c_esmc_statedeserialize)(
 
     int *ip;
 
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     ip = (int *)(buffer + *offset);
     *st = *ip++; 
@@ -104,7 +105,7 @@ void FTN_X(c_esmc_statedeserialize)(
 
     *offset = (char *)ip - buffer;
 
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 } 
@@ -131,21 +132,21 @@ void FTN_X(c_esmc_statedeserialize)(
 void FTN_X(c_esmc_stateitemserialize)(int *otype, 
                                char *namep, 
                                char *buffer, int *length, int *offset,
-                               ESMC_InquireFlag *inquireflag, int *localrc,
+                               ESMC_InquireFlag *inquireflag, int *rc,
                                ESMCI_FortranStrLenArg clen,
                                ESMCI_FortranStrLenArg buffer_l) {
 
     int *ip;
     char *cp;
 
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
 
     int fixedpart = sizeof (int *) + clen;
     if ((*inquireflag != ESMF_INQUIREONLY) && (*length - *offset) < fixedpart) {
          
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-           "Buffer too short to serialize a State item", ESMC_CONTEXT, localrc);
+           "Buffer too short to serialize a State item", ESMC_CONTEXT, rc);
          return;
     }
 
@@ -161,7 +162,7 @@ void FTN_X(c_esmc_stateitemserialize)(int *otype,
 
     *offset = cp - buffer;
 
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 } 
@@ -169,7 +170,8 @@ void FTN_X(c_esmc_stateitemserialize)(int *otype,
 
 void FTN_X(c_esmc_stateitemdeserialize)(int *otype, 
                                char *namep, 
-                               char *buffer, int *offset, int *localrc,
+                               char *buffer, int *offset,
+                               int *rc,
                                ESMCI_FortranStrLenArg clen,
                                ESMCI_FortranStrLenArg buffer_l) {
 
@@ -179,7 +181,7 @@ void FTN_X(c_esmc_stateitemdeserialize)(int *otype,
     int *ip;
     char *cp;
 
-    if (localrc) *localrc = ESMC_RC_NOT_IMPL;
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
 
     ip = (int *)(buffer + *offset);
     *otype = *ip++;
@@ -190,7 +192,7 @@ void FTN_X(c_esmc_stateitemdeserialize)(int *otype,
 
     *offset = cp - buffer;
 
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
 
     return;
 } 

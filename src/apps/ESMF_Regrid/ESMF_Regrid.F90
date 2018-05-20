@@ -37,7 +37,7 @@ program ESMF_RegridApp
   character(len=ESMF_MAXPATHLEN) :: commandbuf1(4)
   integer            :: commandbuf2(7)
   integer            :: ind, pos
-  logical 	     :: ignoreUnmapped, userAreaFlag
+  logical            :: ignoreUnmapped, userAreaFlag
   logical            :: ignoreDegenerate
   type(ESMF_UnmappedAction_Flag) :: unmappedaction
   logical            :: srcIsRegional, dstIsRegional, typeSetFlag
@@ -48,9 +48,9 @@ program ESMF_RegridApp
   type(ESMF_LogKind_Flag) :: logflag
   character(len=ESMF_MAXPATHLEN)  :: argvalue
   integer            :: count, i
-  
+
   terminateProg = .false.
-  
+
   ! Check if --no_log is given, if so, call ESMF_Initialize() with ESMF_LOGKIND_NONE flag
 #ifndef ESMF_MPIUNI
   call MPI_Init(rc)
@@ -58,7 +58,7 @@ program ESMF_RegridApp
       write(*,*) "ERROR: ESMF_Regrid initialization error."
       stop 1
   endif
-  call MPI_Comm_rank(MPI_COMM_WORLD, PetNo, rc) 
+  call MPI_Comm_rank(MPI_COMM_WORLD, PetNo, rc)
   if (rc /= MPI_SUCCESS) then
       write(*,*) "ERROR: ESMF_Regrid initialization error."
       call MPI_Finalize(rc)
@@ -72,7 +72,7 @@ program ESMF_RegridApp
       logflag = ESMF_LOGKIND_MULTI
       call ESMF_UtilGetArgIndex ('--no_log', argindex=ind)
       if (ind > 0) then
-        logflag = ESMF_LOGKIND_NONE 
+        logflag = ESMF_LOGKIND_NONE
       end if
       msgbuf(1) = logflag
    endif
@@ -81,15 +81,15 @@ program ESMF_RegridApp
    ! broadcast to all other PETs
    call MPI_Bcast(msgbuf, 1, MPI_INTEGER, 0, MPI_COMM_WORLD,rc)
    if (PetNo /= 0)  logflag = msgbuf(1)
-#endif 
+#endif
   !------------------------------------------------------------------------
   ! Initialize ESMF
   !
   call ESMF_Initialize (defaultCalKind=ESMF_CALKIND_GREGORIAN, &
-	defaultlogfilename="Regrid.Log", &
-                	logkindflag=logflag, rc=rc)
+        defaultlogfilename="Regrid.Log", &
+                        logkindflag=logflag, rc=rc)
   if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(-1)
-  
+
   !------------------------------------------------------------------------
   ! get global vm information
   !
@@ -107,7 +107,7 @@ program ESMF_RegridApp
   if (PetNo == 0) then
     call ESMF_UtilGetArgIndex('--help', argindex=ind)
     if (ind /= -1) then
-	    call PrintUsage()
+            call PrintUsage()
       terminateProg=.true.
     endif
     call ESMF_UtilGetArgIndex('--version', argindex=ind)
@@ -131,7 +131,7 @@ program ESMF_RegridApp
     else
       call ESMF_UtilGetArg(ind+1, argvalue=srcfile)
     endif
-    
+
     call ESMF_UtilGetArgIndex('-d', argindex=ind, rc=rc)
     if (ind == -1) call ESMF_UtilGetArgIndex('--destination', argindex=ind, rc=rc)
     if (ind == -1) then
@@ -142,14 +142,14 @@ program ESMF_RegridApp
     else
       call ESMF_UtilGetArg(ind+1, argvalue=dstfile)
     endif
-     
+
     call ESMF_UtilGetArgIndex('--src_var', argindex=ind, rc=rc)
     if (ind == -1) then
       write(*,*)
       print *, "ERROR: The required argument --src_var is missing."
       print *, "Use the --help argument to see an explanation of usage."
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    else	
+    else        
       call ESMF_UtilGetArg(ind+1, argvalue=srcvarname)
     endif
 
@@ -159,7 +159,7 @@ program ESMF_RegridApp
       print *, "ERROR: The required argument --dst_var is missing."
       print *, "Use the --help argument to see an explanation of usage."
       call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    else	
+    else        
       call ESMF_UtilGetArg(ind+1, argvalue=dstvarname)
     endif
 
@@ -170,24 +170,25 @@ program ESMF_RegridApp
       method = 'bilinear'
     else
       call ESMF_UtilGetArg(ind+1, argvalue=method)
-	    if ((trim(method) .ne. 'bilinear') .and. &
+            if ((trim(method) .ne. 'bilinear') .and. &
           (trim(method) .ne. 'conserve') .and. &
-	        (trim(method) .ne. 'patch')    .and. &
+                (trim(method) .ne. 'patch')    .and. &
           (trim(method) .ne. 'nearestdtos')   .and. &
           (trim(method) .ne. 'neareststod')) then
         write(*,*)
         print *, 'ERROR: The interpolation method "', trim(method), '" is not supported'
-        print *, '  The supported methods are "bilinear", "patch", and "conserve"'
+        print *, '  The supported methods are "bilinear", "patch", "conserve", "neareststod"'
+        print *, '  and "nearestdtos"'
         print *, "Use the --help argument to see an explanation of usage."
         call ESMF_Finalize(endflag=ESMF_END_ABORT)
-      endif    
+      endif
     endif
 
     poleptrs = -1
     call ESMF_UtilGetArgIndex('-p', argindex=ind, rc=rc)
     if (ind == -1) call ESMF_UtilGetArgIndex('--pole', argindex=ind, rc=rc)
     if (ind == -1) then
-      if ((trim(method) .eq. 'conserve') .or.    & 
+      if ((trim(method) .eq. 'conserve') .or.    &
           (trim(method) .eq. 'nearestdtos') .or. &
           (trim(method) .eq. 'neareststod')) then
         ! print *, 'Use default pole: None'
@@ -207,7 +208,7 @@ program ESMF_RegridApp
       else if (trim(flag) .eq. 'teeth') then
         pole = ESMF_POLEMETHOD_TEETH
         poleptrs = -2
-      else 
+      else
         read(flag,'(i4)') poleptrs
         pole = ESMF_POLEMETHOD_NPNTAVG
       endif
@@ -264,7 +265,7 @@ program ESMF_RegridApp
     else
       userAreaFlag = .false.
     endif
-   
+
     ! user area only needed for conservative regridding
     if (userAreaFlag .and. (method .ne. 'conserve')) then
       write(*,*)
@@ -273,10 +274,10 @@ program ESMF_RegridApp
       userAreaFlag = .false.
     endif
 
-1110 continue 
+1110 continue
     commandbuf2(:)=0
     if (terminateProg) then
-      commandbuf2(1)=-9999            
+      commandbuf2(1)=-9999
     else
       if (method .eq. 'patch') commandbuf2(1)=1
       if (method .eq. 'conserve') commandbuf2(1)=2
@@ -288,7 +289,7 @@ program ESMF_RegridApp
       if (ignoreUnmapped) commandbuf2(5) = 1
       if (userAreaFlag)   commandbuf2(6) = 1
       if (ignoreDegenerate) commandbuf2(7) = 1
-    endif 
+    endif
 
     call ESMF_VMBroadcast(vm, commandbuf2, size (commandbuf2), 0, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
@@ -312,7 +313,7 @@ program ESMF_RegridApp
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
 
     if (commandbuf2(1) == -9999) then
-      goto 1111	  
+      goto 1111         
     endif
 
     if (commandbuf2(1)==0) then
@@ -327,14 +328,14 @@ program ESMF_RegridApp
       method = 'nearestdtos'
     endif
     poleptrs = commandbuf2(2)
-    if (poleptrs == -1) then 
+    if (poleptrs == -1) then
       pole=ESMF_POLEMETHOD_ALLAVG
-    else if (poleptrs == -2) then 
+    else if (poleptrs == -2) then
       pole=ESMF_POLEMETHOD_TEETH
     else if (poleptrs ==  0) then
       pole=ESMF_POLEMETHOD_NONE
     else
-      pole=ESMF_POLEMETHOD_NPNTAVG 
+      pole=ESMF_POLEMETHOD_NPNTAVG
     endif
     if (commandbuf2(3)==1) then
       srcIsRegional = .true.
@@ -382,7 +383,7 @@ program ESMF_RegridApp
     methodflag = ESMF_REGRIDMETHOD_NEAREST_STOD
   else if (trim(method) .eq. 'nearestdtos') then
     methodflag = ESMF_REGRIDMETHOD_NEAREST_DTOS
-  endif	 
+  endif         
 
   if (ignoreunmapped) then
     unmappedaction = ESMF_UNMAPPEDACTION_IGNORE
@@ -391,10 +392,10 @@ program ESMF_RegridApp
   endif
 
   call ESMF_FileRegrid(srcfile, dstfile, srcvarname, dstvarname, &
-       		            regridmethod=methodflag, &
+                                    regridmethod=methodflag, &
                             polemethod = pole, regridPoleNPnts = poleptrs, &
-			    unmappedaction = unmappedaction, &
-			    ignoreDegenerate = ignoreDegenerate, &
+                            unmappedaction = unmappedaction, &
+                            ignoreDegenerate = ignoreDegenerate, &
                             srcRegionalFlag = srcIsRegional, dstRegionalFlag = dstIsRegional, &
 ! BOB: Not in interface??   useUserAreaFlag = userAreaFlag, &
                             verboseFlag = .true., rc = rc)
@@ -405,7 +406,7 @@ program ESMF_RegridApp
   if (PetNo==0) then
     write(*,*) "Completed file regrid successfully."
     !write(*,*) "Completed file regrid in ", (endtime-starttime)*1000, "msecs"
-    write(*,*) 
+    write(*,*)
   endif
 
 1111  continue
@@ -415,21 +416,21 @@ contains
 
   subroutine ErrorMsgAndAbort(localPet)
     integer ::  localPet
-  
+
     if (localPet >= 0) then
       write(*,*) "ERROR: Problem on processor ",localPet,". Please see the PET*.Regrid.Log files for a traceback."
     else
       write(*,*) "ERROR: Please see the PET*.Regrid.Log files for a traceback."
     endif
-  
+
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
+
   end subroutine ErrorMsgAndAbort
 
   subroutine PrintUsage()
     print *, "Usage: ESMF_Regrid"
-    print *, "                      --source|-s src_grid_filename" 
-    print *, "                	--destination|-d dst_grid_filename"
+    print *, "                      --source|-s src_grid_filename"
+    print *, "                  --destination|-d dst_grid_filename"
     print *, "                      --src_var src_varname"
     print *, "                      --dst_var  dst_varname"
     print *, "                      [--method|-m bilinear|patch|neareststod|nearestdtos|conserve]"

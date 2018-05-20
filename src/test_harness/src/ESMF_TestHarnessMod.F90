@@ -16,7 +16,7 @@
 !
 !===============================================================================
 !
-! This file contains parameters, global data types, and parser 
+! This file contains parameters, global data types, and parser
 ! functions/subroutines for the Testing Harness.
 ! These methods are used by the test harness driver ESMF_TestHarnessUTest.F90.
 !
@@ -30,7 +30,7 @@
 ! !DESCRIPTION:
 !
 ! The code in this file contains data types and basic functions for the
-! {\tt ESMF\_TestHarness}.  
+! {\tt ESMF\_TestHarness}.
 !  Expand on the type of routines included here
 !
 !-------------------------------------------------------------------------------
@@ -58,7 +58,7 @@
 ! debug trace switch
 logical                       :: checkpoint = .FALSE.
 
-  contains 
+  contains
 
 !===============================================================================
 
@@ -74,7 +74,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   ! arguments
   type(problem_descriptor_strings), intent(inout) :: PDS
-  character(THARN_MAXSTR), intent(in   ) :: reportType 
+  character(THARN_MAXSTR), intent(in   ) :: reportType
   type(ESMF_VM), intent(in   ) :: VM
   integer, intent(inout) :: test_failure
   integer, intent(  out) :: rc
@@ -99,11 +99,11 @@ logical                       :: checkpoint = .FALSE.
 
   ! debug
   ! real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)
-  ! integer ::de, localDeCount, dimCount 
+  ! integer ::de, localDeCount, dimCount
   ! integer :: i1, i2
   ! integer, allocatable ::  localDeToDeMap(:)
   ! type(ESMF_LocalArray), allocatable :: larrayList(:)
-  ! integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  ! integer, allocatable :: LBnd(:,:), UBnd(:,:)
   ! type(ESMF_Index_Flag) :: indexflag
 
   ! initialize return flag
@@ -129,7 +129,7 @@ logical                       :: checkpoint = .FALSE.
     do iGfile=1,PDS%nGfiles       ! grid specifier files
       do iD=1, PDS%Dfiles(iDfile)%nDspecs   ! entries in distribution specifier
         do iG=1, PDS%Gfiles(iGfile)%nGspecs ! entries in grid specifier file
-          write(liG,"(i5)") iG 
+          write(liG,"(i5)") iG
           write(liD,"(i5)") iD
 
           if (localPet == 0) then
@@ -202,8 +202,8 @@ logical                       :: checkpoint = .FALSE.
           !---------------------------------------------------------------------
           call create_distribution(PDS%DstMem, PDS%Dfiles(iDfile)%dst_dist(iD),&
                     PDS%Gfiles(iGfile)%dst_grid(iG), dst_distgrid, VM, localrc)
-          write(liG,"(i5)") iG 
-          write(liD,"(i5)") iD 
+          write(liG,"(i5)") iG
+          write(liD,"(i5)") iD
           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source distgrid "  &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
@@ -291,7 +291,7 @@ logical                       :: checkpoint = .FALSE.
           !---------------------------------------------------------------------
           ! compare source array values with the return array values
           !---------------------------------------------------------------------
-          call compare_redist_array(test_status,                               & 
+          call compare_redist_array(test_status,                               &
                   src_array, return_array, src_distgrid, src_distgrid,         &
                   PDS%SrcMem, PDS%Gfiles(iGfile)%src_grid(iG), localrc)
           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"redistribution array " //         &
@@ -302,7 +302,7 @@ logical                       :: checkpoint = .FALSE.
 
           PDS%test_record(iDfile,iGfile)%test_status(iD,iG) = test_status
 
-          if( test_status == HarnessTest_FAILURE ) then 
+          if( test_status == HarnessTest_FAILURE ) then
              test_failure = test_failure + 1
           endif
 
@@ -325,7 +325,7 @@ logical                       :: checkpoint = .FALSE.
           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"unable to destroy return_array",  &
              rcToReturn=rc)) return
 
-          call ESMF_ArrayDestroy(dst_array, rc=localrc) ! redistribution 
+          call ESMF_ArrayDestroy(dst_array, rc=localrc) ! redistribution
           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"unable to destroy dst_array   ",  &
              rcToReturn=rc)) return
 
@@ -350,7 +350,7 @@ logical                       :: checkpoint = .FALSE.
   ! if I've gotten this far without an error, then the routine has succeeded.
   !-----------------------------------------------------------------------------
   rc = ESMF_SUCCESS
-  
+
   if (localPet == 0) then
       print*,'Array Redist Completed'
   end if
@@ -368,7 +368,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   ! arguments
   type(problem_descriptor_strings), intent(inout) :: PDS
-  character(THARN_MAXSTR), intent(in   ) :: reportType 
+  character(THARN_MAXSTR), intent(in   ) :: reportType
   type(ESMF_VM), intent(in   ) :: VM
   integer, intent(inout) :: test_failure
   integer, intent(  out) :: rc
@@ -398,10 +398,10 @@ logical                       :: checkpoint = .FALSE.
 
   ! debug
   ! real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)
-  ! integer :: i1, i2, de, localDeCount, dimCount 
+  ! integer :: i1, i2, de, localDeCount, dimCount
   ! integer, allocatable ::  localDeToDeMap(:)
   ! type(ESMF_LocalArray), allocatable :: larrayList(:)
-  ! integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  ! integer, allocatable :: LBnd(:,:), UBnd(:,:)
   ! type(ESMF_Index_Flag) :: indexflag
 
   ! initialize return flag
@@ -427,8 +427,8 @@ logical                       :: checkpoint = .FALSE.
     do iGfile=1,PDS%nGfiles       ! grid specifier files
       do iD=1, PDS%Dfiles(iDfile)%nDspecs   ! entries in distribution specifier
         do iG=1, PDS%Gfiles(iGfile)%nGspecs ! entries in grid specifier file
-          write(liG,"(i5)") iG 
-          write(liD,"(i5)") iD 
+          write(liG,"(i5)") iG
+          write(liD,"(i5)") iD
 
           if (localPet == 0) then
             print '(A)', "field regrid"  &
@@ -471,7 +471,7 @@ logical                       :: checkpoint = .FALSE.
           ! create array spec
           !---------------------------------------------------------------------
           !---------------------------------------------------------------------
-          ! set the dimensionality of actual data storage to the memory size 
+          ! set the dimensionality of actual data storage to the memory size
           ! specified by the problem descriptor string
           !---------------------------------------------------------------------
           call ESMF_ArraySpecSet(SrcArraySpec, typekind=ESMF_TYPEKIND_R8,      &
@@ -505,8 +505,8 @@ logical                       :: checkpoint = .FALSE.
           !---------------------------------------------------------------------
           call create_distribution(PDS%DstMem, PDS%Dfiles(iDfile)%dst_dist(iD),&
                     PDS%Gfiles(iGfile)%dst_grid(iG), dst_distgrid, VM, localrc)
-          write(liG,"(i5)") iG 
-          write(liD,"(i5)") iD 
+          write(liG,"(i5)") iG
+          write(liD,"(i5)") iD
           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source distgrid "  &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
@@ -554,14 +554,14 @@ logical                       :: checkpoint = .FALSE.
   !!!!!! NEED TO FIX THIS WHEN GRID AND MESH RECOGNIZE UNITS !!!!!!!
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
-  ! check that the grid units agree. If they don't log an error. Eventually the 
+  ! check that the grid units agree. If they don't log an error. Eventually the
   ! mesh class should be able to reconcile different units.
   !-----------------------------------------------------------------------------
          do ix=1, PDS%Gfiles(iGfile)%src_grid(iG)%grank
            if( trim(PDS%Gfiles(iGfile)%src_grid(iG)%gunits(ix)%string) .ne.    &
                trim(PDS%Gfiles(iGfile)%dst_grid(iG)%gunits(ix)%string) ) then
 
-               print*,'ERROR: source and destination grid units do not agree' 
+               print*,'ERROR: source and destination grid units do not agree'
                print*,'Source units are: ',                                    &
                  trim(PDS%Gfiles(iGfile)%src_grid(iG)%gunits(ix)%string),      &
                  ' while destination units are: ',                             &
@@ -577,7 +577,7 @@ logical                       :: checkpoint = .FALSE.
   ! Now conduct the interpolation
   !
   ! the test consists of interpolating an analytical test function evaluated
-  ! on a source grid onto a destination grid, and checking that the result 
+  ! on a source grid onto a destination grid, and checking that the result
   ! agrees with the analytical solution to within a set tolerance.
   !-----------------------------------------------------------------------------
           !print*,'field regrid store'
@@ -595,7 +595,7 @@ logical                       :: checkpoint = .FALSE.
                 libflag = 0  ! flag to catch if framework built w/ LAPACK and BLAS libs
 
 #ifdef ESMF_LAPACK
-                libflag = 1  ! 
+                libflag = 1  !
                 call ESMF_FieldRegridStore(srcField, dstField=dstField, routeHandle=routeHandle,    &
                         regridmethod=ESMF_REGRIDMETHOD_PATCH, rc=localrc)
                 if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"Field Patch Regrid " // &
@@ -640,7 +640,7 @@ logical                       :: checkpoint = .FALSE.
                   " forward failed ", rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
-  ! Check regrid     
+  ! Check regrid
   !-----------------------------------------------------------------------------
           !print*,'check field regrid'
           !---------------------------------------------------------------------
@@ -648,13 +648,13 @@ logical                       :: checkpoint = .FALSE.
           !---------------------------------------------------------------------
           call check_field(test_status, dstField, gridDst,                     &
                            PDS%Gfiles(iGfile)%dst_grid(iG),                    &
-                           PDS%Gfiles(iGfile)%testfunction(iG), localrc) 
+                           PDS%Gfiles(iGfile)%testfunction(iG), localrc)
           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"redistribution array " //         &
                   " comparison failed ", rcToReturn=rc)) return
 
           PDS%test_record(iDfile,iGfile)%test_status(iD,iG) = test_status
 
-          if( test_status == HarnessTest_FAILURE ) then 
+          if( test_status == HarnessTest_FAILURE ) then
              test_failure = test_failure + 1
           endif
 
@@ -717,7 +717,7 @@ logical                       :: checkpoint = .FALSE.
   ! if I've gotten this far without an error, then the routine has succeeded.
   !-----------------------------------------------------------------------------
   rc = ESMF_SUCCESS
-  
+
   if (localPet == 0) then
       print*,'Regrid Completed'
   end if
@@ -731,12 +731,12 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   subroutine field_redist_test(PDS, test_failure, reportType, VM, rc)
   !-----------------------------------------------------------------------------
-  ! routine conducts the field redist test by redistributing from a source 
+  ! routine conducts the field redist test by redistributing from a source
   ! field to a destination and back again to the return field
   !-----------------------------------------------------------------------------
   ! arguments
   type(problem_descriptor_strings), intent(inout) :: PDS
-  character(THARN_MAXSTR), intent(in   ) :: reportType 
+  character(THARN_MAXSTR), intent(in   ) :: reportType
   type(ESMF_VM), intent(in   ) :: VM
   integer, intent(inout) :: test_failure
   integer, intent(  out) :: rc
@@ -769,10 +769,10 @@ logical                       :: checkpoint = .FALSE.
 
   ! debug
   ! real(ESMF_KIND_R8), pointer :: farrayPtr2(:,:)
-  ! integer :: i1, i2, de, localDeCount, dimCount 
+  ! integer :: i1, i2, de, localDeCount, dimCount
   ! integer, allocatable ::  localDeToDeMap(:)
   ! type(ESMF_LocalArray), allocatable :: larrayList(:)
-  ! integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  ! integer, allocatable :: LBnd(:,:), UBnd(:,:)
   ! type(ESMF_Index_Flag) :: indexflag
 
   ! initialize return flag
@@ -800,8 +800,8 @@ logical                       :: checkpoint = .FALSE.
           !---------------------------------------------------------------------
           call create_distribution(PDS%SrcMem, PDS%Dfiles(iDfile)%src_dist(iD),&
                     PDS%Gfiles(iGfile)%src_grid(iG), src_distgrid, VM, localrc)
-          write(liG,"(i5)") iG 
-          write(liD,"(i5)") iD 
+          write(liG,"(i5)") iG
+          write(liD,"(i5)") iD
           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source distgrid "  &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
@@ -828,7 +828,7 @@ logical                       :: checkpoint = .FALSE.
           ! create array spec
           !---------------------------------------------------------------------
           !---------------------------------------------------------------------
-          ! set the dimensionality of actual data storage to the memory size 
+          ! set the dimensionality of actual data storage to the memory size
           ! specified by the problem descriptor string
           !---------------------------------------------------------------------
           call ESMF_ArraySpecSet(SrcArraySpec, typekind=ESMF_TYPEKIND_R8,      &
@@ -865,8 +865,8 @@ logical                       :: checkpoint = .FALSE.
           !---------------------------------------------------------------------
           call create_distribution(PDS%DstMem, PDS%Dfiles(iDfile)%dst_dist(iD),&
                     PDS%Gfiles(iGfile)%dst_grid(iG), dst_distgrid, VM, localrc)
-          write(liG,"(i5)") iG 
-          write(liD,"(i5)") iD 
+          write(liG,"(i5)") iG
+          write(liD,"(i5)") iD
           if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error creating source distgrid "  &
              // " with string "  // trim(adjustL(PDS%pds)) //                  &
              " with entry "  // trim(adjustL(liD)) // " of file " //           &
@@ -947,12 +947,12 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
           !---------------------------------------------------------------------
           !---------------------------------------------------------------------
-!!!!! to do: check the redist - should be similar to the array redist check 
-!!!!! except that you need to extract the values from a field rather than an array 
+!!!!! to do: check the redist - should be similar to the array redist check
+!!!!! except that you need to extract the values from a field rather than an array
 
           PDS%test_record(iDfile,iGfile)%test_status(iD,iG) = test_status
 
-          if( test_status == HarnessTest_FAILURE ) then 
+          if( test_status == HarnessTest_FAILURE ) then
              test_failure = test_failure + 1
           endif
 
@@ -1027,7 +1027,7 @@ logical                       :: checkpoint = .FALSE.
   ! if I've gotten this far without an error, then the routine has succeeded.
   !-----------------------------------------------------------------------------
   rc = ESMF_SUCCESS
-  
+
   print*,'Field Redist Completed'
   !-----------------------------------------------------------------------------
   end subroutine field_redist_test
@@ -1112,7 +1112,7 @@ logical                       :: checkpoint = .FALSE.
 
 ! print*,' memory rank ',Memory%memRank
 ! print*,' grid rank',Memory%GridRank
-  ! fill the array with gridRank number of elements 
+  ! fill the array with gridRank number of elements
   do k=1,Memory%GridRank
     BIndx(k)   = 1
     EIndx(k) = GridRecord%gsize( Memory%GridOrder(k) )
@@ -1161,7 +1161,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   if( nconnect == 1 ) then
     ! singlely periodic domain
-    noconnections = .FALSE. 
+    noconnections = .FALSE.
     ! workspace
     allocate( positionVector(Memory%memRank), stat=allocRcToTest )
     if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//        &
@@ -1183,11 +1183,11 @@ logical                       :: checkpoint = .FALSE.
     enddo
   elseif( nconnect > 1 ) then
     ! multiply periodic domain
-    noconnections = .FALSE. 
+    noconnections = .FALSE.
       ! multiply connected domains are not currently supported
   else
     ! no tile connections specified
-    noconnections = .TRUE.  
+    noconnections = .TRUE.
 
   endif
 
@@ -1243,7 +1243,7 @@ logical                       :: checkpoint = .FALSE.
   deallocate( connectionList )
 
   !-----------------------------------------------------------------------------
-  rc = ESMF_SUCCESS     
+  rc = ESMF_SUCCESS
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
@@ -1264,7 +1264,7 @@ logical                       :: checkpoint = .FALSE.
   type(memory_config), intent(in   ) :: Memory
   type(grid_specification_record), intent(in   ) :: Grid
   integer, intent(inout) :: rc
- 
+
   ! local ESMF types
   type(ESMF_ArraySpec) :: ArraySpec
 
@@ -1308,7 +1308,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   ! determine if halo is present
   !-----------------------------------------------------------------------------
-  nohaloflag = .true.  
+  nohaloflag = .true.
   do irank=1, Memory%GridRank
      if( Memory%HaloL(irank) /= 0 ) nohaloflag = .false.
      if( Memory%HaloR(irank) /= 0 ) nohaloflag = .false.
@@ -1325,7 +1325,7 @@ logical                       :: checkpoint = .FALSE.
      ! the same rank.
      !
      ! next if the MemoryRank = GridRank, there are no tensor dimensions (i.e.
-     ! dimensions both not distributed nor associated with a grid), thus the 
+     ! dimensions both not distributed nor associated with a grid), thus the
      ! undistLBound and undistUBound arguments need not be specified.
      !--------------------------------------------------------------------------
      if( Memory%memRank ==  Memory%GridRank ) then
@@ -1407,7 +1407,7 @@ logical                       :: checkpoint = .FALSE.
      ! the same rank.
      !
      ! next if the MemoryRank = GridRank, there are no tensor dimensions (i.e.
-     ! dimensions both not distributed nor associated with a grid), thus the 
+     ! dimensions both not distributed nor associated with a grid), thus the
      ! undistLBound and undistUBound arguments need not be specified.
      !--------------------------------------------------------------------------
      if( Memory%memRank ==  Memory%GridRank ) then
@@ -1471,7 +1471,7 @@ logical                       :: checkpoint = .FALSE.
   endif
 
   !-----------------------------------------------------------------------------
-  rc = ESMF_SUCCESS     
+  rc = ESMF_SUCCESS
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
@@ -1493,7 +1493,7 @@ logical                       :: checkpoint = .FALSE.
   type(grid_specification_record), intent(in   ) :: Grid_info
   type(dist_specification_record), intent(in   ) :: Dist_info
   integer, intent(inout) :: rc
- 
+
   ! local ESMF types
 
   ! local integer variables
@@ -1527,7 +1527,7 @@ logical                       :: checkpoint = .FALSE.
   enddo   ! k
 
   !-----------------------------------------------------------------------------
-  ! Create the Grid object from an existing distribution 
+  ! Create the Grid object from an existing distribution
   !-----------------------------------------------------------------------------
   select case(Grid_info%grank)
     case(2)
@@ -1759,7 +1759,7 @@ logical                       :: checkpoint = .FALSE.
   deallocate( decompOrder )
 
   !-----------------------------------------------------------------------------
-  rc = ESMF_SUCCESS     
+  rc = ESMF_SUCCESS
   !-----------------------------------------------------------------------------
   !-----------------------------------------------------------------------------
   end subroutine create_grid_from_distgrid
@@ -1779,7 +1779,7 @@ logical                       :: checkpoint = .FALSE.
   type(grid_specification_record), intent(in   ) :: Grid_info
   type(test_function_record), intent(in   ) :: TestFunction
   integer, intent(inout) :: rc
- 
+
   ! local ESMF types
 
   ! local integer variables
@@ -1823,7 +1823,7 @@ logical                       :: checkpoint = .FALSE.
   allocate( lbnd(GridRank) )
   allocate( ubnd(GridRank) )
 
-  
+
   !-----------------------------------------------------------------------------
   ! populate Field
   !-----------------------------------------------------------------------------
@@ -1874,21 +1874,21 @@ logical                       :: checkpoint = .FALSE.
                exp2D(i,j) = TestFunction%param(1)
 
              case("COORDINATEX")
-               exp2D(i,j) =  TestFunction%param(1)*coordX2D(i,j) 
+               exp2D(i,j) =  TestFunction%param(1)*coordX2D(i,j)
 
              case("COORDINATEY")
-               exp2D(i,j) =  TestFunction%param(1)*coordY2D(i,j) 
+               exp2D(i,j) =  TestFunction%param(1)*coordY2D(i,j)
 
              case("SPHERICAL_HARMONIC")
               ! (a+b) + acos(k*2pi*x/Lx) + b*sin(l*2pi*y/Ly)
-	      a = TestFunction%param(1) 
+              a = TestFunction%param(1)
               kx = TestFunction%param(2)
               b = TestFunction%param(3)
               lY = TestFunction%param(4)
               lenk = Grid_info%grange(1,2) - Grid_info%grange(1,1)
               lenl = Grid_info%grange(2,2) - Grid_info%grange(2,1)
                exp2D(i,j) =  abs(a+b) +a*cos(pi2*kx*coordX2D(i,j)/lenk) +        &
-                             b*sin(pi2*ly*coordY2D(i,j)/lenl) 
+                             b*sin(pi2*ly*coordY2D(i,j)/lenl)
 
              !case("PEAK_VALLEY")
              ! (1.-x*y)*sin(k*pi*x/Lx)*cos(l*pi*y)+2.
@@ -1946,13 +1946,13 @@ logical                       :: checkpoint = .FALSE.
                exp3D(i,j,k) = TestFunction%param(1)
 
              case("COORDINATEX")
-               exp3D(i,j,k) =  TestFunction%param(1)*coordX3D(i,j,k) 
+               exp3D(i,j,k) =  TestFunction%param(1)*coordX3D(i,j,k)
 
              case("COORDINATEY")
-               exp3D(i,j,k) =  TestFunction%param(1)*coordY3D(i,j,k) 
+               exp3D(i,j,k) =  TestFunction%param(1)*coordY3D(i,j,k)
 
              case("COORDINATEZ")
-               exp3D(i,j,k) =  TestFunction%param(1)*coordZ3D(i,j,k) 
+               exp3D(i,j,k) =  TestFunction%param(1)*coordZ3D(i,j,k)
 
              case default
                ! error
@@ -1961,7 +1961,7 @@ logical                       :: checkpoint = .FALSE.
                 return
            end select
            !-------------------------------------------------------------------
-            ! coordX3D(i,j,k) 
+            ! coordX3D(i,j,k)
             ! coordY3D(i,j,k)
             ! coordZ3D(i,j,k)
             enddo    ! i loop
@@ -2023,7 +2023,7 @@ logical                       :: checkpoint = .FALSE.
   deallocate( lbnd, ubnd)
 
   !-----------------------------------------------------------------------------
-  rc = ESMF_SUCCESS     
+  rc = ESMF_SUCCESS
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
@@ -2035,7 +2035,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   subroutine check_field(test_status, Field, Grid, Grid_info, TestFunction, rc)
   !-----------------------------------------------------------------------------
-  ! routine checks destination field against analytical solution evaluated at 
+  ! routine checks destination field against analytical solution evaluated at
   ! the destination grid points
   !-----------------------------------------------------------------------------
   ! arguments
@@ -2045,7 +2045,7 @@ logical                       :: checkpoint = .FALSE.
   type(grid_specification_record), intent(in   ) :: Grid_info
   type(test_function_record), intent(in   ) :: TestFunction
   integer, intent(inout) :: rc
- 
+
   ! local ESMF types
 
   ! local integer variables
@@ -2090,7 +2090,7 @@ logical                       :: checkpoint = .FALSE.
   allocate( lbnd(GridRank) )
   allocate( ubnd(GridRank) )
 
-  
+
   !-----------------------------------------------------------------------------
   ! check Field
   !-----------------------------------------------------------------------------
@@ -2169,7 +2169,7 @@ logical                       :: checkpoint = .FALSE.
               lenk = Grid_info%grange(1,2) - Grid_info%grange(1,1)
               lenl = Grid_info%grange(2,2) - Grid_info%grange(2,1)
               exact = abs(a+b) +a*cos(pi2*kx*coordX2D(i,j)/lenk) +        &
-                             b*sin(pi2*ly*coordY2D(i,j)/lenl) 
+                             b*sin(pi2*ly*coordY2D(i,j)/lenl)
 
               if (.not. check_value (exact, interp2D(i,j), TestFunction%param(5))) then
                  test_status = HarnessTest_FAILURE
@@ -2325,7 +2325,7 @@ logical                       :: checkpoint = .FALSE.
   deallocate( lbnd, ubnd)
 
   !-----------------------------------------------------------------------------
-  rc = ESMF_SUCCESS     
+  rc = ESMF_SUCCESS
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
@@ -2337,7 +2337,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   subroutine populate_redist_array(Array, DistGrid, Memory, Grid, rc)
   !-----------------------------------------------------------------------------
-  ! routine populates an esmf array to the values used for a redist test. These 
+  ! routine populates an esmf array to the values used for a redist test. These
   ! values are dependent on the global coordinates and the local DE number. For
   ! a rank 2 array the values are set to Value = localDE + 1000*i1 + 1/1000 *i2
   !
@@ -2348,7 +2348,7 @@ logical                       :: checkpoint = .FALSE.
   type(memory_config), intent(in   ) :: Memory
   type(grid_specification_record), intent(in   ) :: Grid
   integer, intent(inout) :: rc
- 
+
   ! local ESMF types
   type(ESMF_LocalArray), allocatable :: larrayList(:)
   type(ESMF_Index_Flag) :: indexflag
@@ -2357,9 +2357,9 @@ logical                       :: checkpoint = .FALSE.
   integer :: localrc ! local error status
 
   ! local integer variables
-  integer :: de, localDeCount, dimCount 
+  integer :: de, localDeCount, dimCount
   integer, allocatable ::  localDeToDeMap(:)
-  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  integer, allocatable :: LBnd(:,:), UBnd(:,:)
   integer :: i1, i2, i3, i4, i5, i6, i7
   ! integer :: irank, k, tensorsize, fsize(7)
   ! integer, allocatable :: haloL(:), haloR(:)
@@ -2407,12 +2407,12 @@ logical                       :: checkpoint = .FALSE.
   call ESMF_DistGridGet(DistGrid, dimCount=dimCount, rc=localrc)
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting dimCount from distGrid",    &
           rcToReturn=rc)) return
-  
+
   allocate(UBnd(dimCount, localDeCount), stat=allocRcToTest )
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//          &
      " UBnd in populate_redist_array", rcToReturn=rc)) then
   endif
-  allocate(LBnd(dimCount, localDeCount), stat=allocRcToTest )  
+  allocate(LBnd(dimCount, localDeCount), stat=allocRcToTest )
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable "//          &
      " LBnd in populate_redist_array", rcToReturn=rc)) then
   endif
@@ -2438,7 +2438,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr1, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2452,7 +2452,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr2, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2468,7 +2468,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr3, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2487,7 +2487,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr4, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2496,7 +2496,7 @@ logical                       :: checkpoint = .FALSE.
                  do i3=LBnd(3,de), UBnd(3,de)
                     do i4=LBnd(4,de), UBnd(4,de)
                        farrayPtr4(i1,i2,i3,i4) = localDeToDeMap(de) + 1.0d4*i1         &
-                             + 1.0d2*i2 + 1.0d-2*i3 + 1.0d-4*i4 
+                             + 1.0d2*i2 + 1.0d-2*i3 + 1.0d-4*i4
                     enddo   !   i4
                  enddo   !   i3
               enddo   !   i2
@@ -2509,7 +2509,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr5, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2532,7 +2532,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr6, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2558,7 +2558,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr7, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2611,11 +2611,11 @@ logical                       :: checkpoint = .FALSE.
   deallocate(larrayList)
 
   !-----------------------------------------------------------------------------
-  rc = ESMF_SUCCESS     
+  rc = ESMF_SUCCESS
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  end subroutine populate_redist_array 
+  end subroutine populate_redist_array
   !-----------------------------------------------------------------------------
 
 !-----------------------------------------------------------------------------
@@ -2623,7 +2623,7 @@ logical                       :: checkpoint = .FALSE.
   !-----------------------------------------------------------------------------
   subroutine populate_array_value(Array, value, DistGrid, Memory, Grid, rc)
   !-----------------------------------------------------------------------------
-  ! routie populates an esmf array to a constant value. Typically used for 
+  ! routie populates an esmf array to a constant value. Typically used for
   ! initialization.
   !
   !-----------------------------------------------------------------------------
@@ -2634,15 +2634,15 @@ logical                       :: checkpoint = .FALSE.
   type(memory_config), intent(in   ) :: Memory
   type(grid_specification_record), intent(in   ) :: Grid
   integer, intent(inout) :: rc
- 
+
   ! local ESMF types
   type(ESMF_LocalArray), allocatable :: larrayList(:)
   type(ESMF_Index_Flag) :: indexflag
 
   ! local integer variables
-  integer :: de, localDeCount, dimCount 
+  integer :: de, localDeCount, dimCount
   integer, allocatable ::  localDeToDeMap(:)
-  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
+  integer, allocatable :: LBnd(:,:), UBnd(:,:)
   integer :: i1, i2, i3, i4, i5, i6, i7
   ! integer :: irank, k, tensorsize, fsize(7)
   ! integer, allocatable :: haloL(:), haloR(:)
@@ -2691,12 +2691,12 @@ logical                       :: checkpoint = .FALSE.
   call ESMF_DistGridGet(DistGrid, dimCount=dimCount, rc=localrc)
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting dimCount from distGrid",    &
           rcToReturn=rc)) return
-  
+
   allocate(UBnd(dimCount, localDeCount), stat=allocRcToTest)
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " UBnd in populate_array_value", rcToReturn=rc)) then
   endif
-  allocate(LBnd(dimCount, localDeCount), stat=allocRcToTest)  
+  allocate(LBnd(dimCount, localDeCount), stat=allocRcToTest)
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " LBnd in populate_array_value", rcToReturn=rc)) then
   endif
@@ -2722,7 +2722,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr1, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2736,7 +2736,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr2, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2752,7 +2752,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr3, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2770,7 +2770,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr4, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2791,7 +2791,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr5, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2813,7 +2813,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr6, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2837,7 +2837,7 @@ logical                       :: checkpoint = .FALSE.
      !--------------------------------------------------------------------------
         do de=1, localDeCount
            call ESMF_LocalArrayGet(larrayList(de), farrayPtr=farrayPtr7, &
-                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc) 
+                                   datacopyflag=ESMF_DATACOPY_REFERENCE, rc=localrc)
            if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error connecting pointer to " // &
                    "array list", rcToReturn=rc)) return
 
@@ -2883,11 +2883,11 @@ logical                       :: checkpoint = .FALSE.
   deallocate(larrayList)
 
   !-----------------------------------------------------------------------------
-  rc = ESMF_SUCCESS     
+  rc = ESMF_SUCCESS
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  end subroutine populate_array_value 
+  end subroutine populate_array_value
   !-----------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------------
@@ -2906,7 +2906,7 @@ logical                       :: checkpoint = .FALSE.
   type(memory_config), intent(in   ) :: Memory
   type(grid_specification_record), intent(in   ) :: Grid
   integer, intent(inout) :: rc
- 
+
   ! local ESMF types
   type(ESMF_LocalArray), allocatable :: larrayList1(:)
   type(ESMF_LocalArray), allocatable :: larrayList2(:)
@@ -2916,8 +2916,8 @@ logical                       :: checkpoint = .FALSE.
   integer :: de, i1, i2, i3, i4, i5, i6, i7, k
   integer :: localDeCount1, dimCount1, localDeCount2, dimCount2
   integer, allocatable ::  localDeToDeMap1(:), localDeToDeMap2(:)
-  integer, allocatable :: LBnd(:,:), UBnd(:,:) 
-  integer, allocatable :: LBnd2(:,:), UBnd2(:,:) 
+  integer, allocatable :: LBnd(:,:), UBnd(:,:)
+  integer, allocatable :: LBnd2(:,:), UBnd2(:,:)
   ! integer :: irank, tensorsize, fsize(7)
   ! integer, allocatable :: haloL(:), haloR(:)
   ! integer, allocatable :: top(:), bottom(:)
@@ -3022,12 +3022,12 @@ logical                       :: checkpoint = .FALSE.
           rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
-  ! compare dimcounts for both arrays 
+  ! compare dimcounts for both arrays
   !-----------------------------------------------------------------------------
   call ESMF_DistGridGet(DistGrid2, dimCount=dimCount2, rc=localrc)
   if (CheckError(checkpoint, __LINE__, __FILE__, localrc,"error getting dimCount from distGrid",    &
           rcToReturn=rc)) return
-  
+
   ! check localDeCount for agreement
   if( dimCount1 /= dimCount2 ) then
      localrc = ESMF_FAILURE
@@ -3043,7 +3043,7 @@ logical                       :: checkpoint = .FALSE.
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " UBnd in compare redist array", rcToReturn=rc)) then
   endif
-  allocate(LBnd(dimCount1, localDeCount1), stat=allocRcToTest )  
+  allocate(LBnd(dimCount1, localDeCount1), stat=allocRcToTest )
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " LBnd in compare redist array", rcToReturn=rc)) then
   endif
@@ -3058,7 +3058,7 @@ logical                       :: checkpoint = .FALSE.
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " UBnd2 in compare redist array", rcToReturn=rc)) then
   endif
-  allocate(LBnd2(dimCount2, localDeCount2), stat=allocRcToTest )  
+  allocate(LBnd2(dimCount2, localDeCount2), stat=allocRcToTest )
   if (ESMF_LogFoundAllocError(allocRcToTest, msg="integer variable"//           &
      " LBnd2 in compare redist array", rcToReturn=rc)) then
   endif
@@ -3069,19 +3069,19 @@ logical                       :: checkpoint = .FALSE.
           rcToReturn=rc)) return
 
   !-----------------------------------------------------------------------------
-  ! check for exclusive bound agreement 
+  ! check for exclusive bound agreement
   !-----------------------------------------------------------------------------
   do de=1, localDeCount1
      do k=1,dimCount1
         if( LBnd(k,de) /= LBnd2(k,de) ) then
-           print*,'exclusive Lower bounds disagree',LBnd(k,de),LBnd2(k,de) 
+           print*,'exclusive Lower bounds disagree',LBnd(k,de),LBnd2(k,de)
            localrc = ESMF_FAILURE
            call ESMF_LogSetError(ESMF_FAILURE,msg="exclusive L bounds disagree",&
               rcToReturn=localrc)
            return
         endif
         if( UBnd(k,de) /= UBnd2(k,de) ) then
-           print*,'exclusive Upper bounds disagree',UBnd(k,de),UBnd2(k,de) 
+           print*,'exclusive Upper bounds disagree',UBnd(k,de),UBnd2(k,de)
            localrc = ESMF_FAILURE
            call ESMF_LogSetError(ESMF_FAILURE,msg="exclusive U bounds disagree",&
               rcToReturn=localrc)
@@ -3212,7 +3212,7 @@ logical                       :: checkpoint = .FALSE.
              enddo   !   i2
            enddo    !   i1
         enddo    ! de
-#ifndef ESMF_NO_GREATER_THAN_4D    
+#ifndef ESMF_NO_GREATER_THAN_4D
      case(5)
      !--------------------------------------------------------------------------
      ! rank = 5
@@ -3359,15 +3359,15 @@ logical                       :: checkpoint = .FALSE.
   deallocate( LBnd2, UBnd2 )
 
   !-----------------------------------------------------------------------------
-  rc = ESMF_SUCCESS     
+  rc = ESMF_SUCCESS
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  end subroutine compare_redist_array 
+  end subroutine compare_redist_array
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  real(ESMF_KIND_R8) function create_coord(index, grid, axis, rc) 
+  real(ESMF_KIND_R8) function create_coord(index, grid, axis, rc)
   !-----------------------------------------------------------------------------
   ! selects coordinate value based upon specified grid type.
   !-----------------------------------------------------------------------------
@@ -3418,11 +3418,11 @@ logical                       :: checkpoint = .FALSE.
  !------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  real(ESMF_KIND_R8) function create_uniform_coord(k, finish, start, ncells) 
+  real(ESMF_KIND_R8) function create_uniform_coord(k, finish, start, ncells)
   !-----------------------------------------------------------------------------
   ! define the coordinate for a uniform grid in terms of the global index k,
   ! the top and bottom of the range (finish and start), and the total number
-  ! of cells. 
+  ! of cells.
   ! create_uniform_coord(1) = start
   ! create_uniform_coord(ncells) = finish
   !-----------------------------------------------------------------------------
@@ -3438,11 +3438,11 @@ logical                       :: checkpoint = .FALSE.
  !------------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  real(ESMF_KIND_R8) function create_gaussian_coord(k, finish, start, ncells) 
+  real(ESMF_KIND_R8) function create_gaussian_coord(k, finish, start, ncells)
   !-----------------------------------------------------------------------------
   ! define the coordinates for a gaussian grid in terms of the global index k,
   ! the top and bottom of the range (finish and start), and the total number
-  ! of cells. 
+  ! of cells.
   ! create_uniform_coord(1) = start
   ! create_uniform_coord(ncells) = finish
   !-----------------------------------------------------------------------------
@@ -3454,7 +3454,7 @@ logical                       :: checkpoint = .FALSE.
   allocate( root(ncells), w(ncells) )
 
   !-----------------------------------------------------------------------------
-  ! compute all the roots (we only are asking for one, but I can't figure out 
+  ! compute all the roots (we only are asking for one, but I can't figure out
   ! how to only compute the one we want).
   !-----------------------------------------------------------------------------
   call legendre_roots(ncells,root,w)
@@ -3463,9 +3463,9 @@ logical                       :: checkpoint = .FALSE.
   ! pih - root(ncells+1-k) constructs gaussian grid on the interval -pi to pi
   ! shift to 0:2*(root(ncells)-pih)
   !-----------------------------------------------------------------------------
-  coord =  root(ncells) - root(ncells+1-k) 
+  coord =  root(ncells) - root(ncells+1-k)
 
-  ! adjust range from start to finish 
+  ! adjust range from start to finish
   create_gaussian_coord = coord * 0.5*(finish - start)/(root(ncells)-pih) + start
 
   !-----------------------------------------------------------------------------
@@ -3483,7 +3483,7 @@ logical                       :: checkpoint = .FALSE.
       subroutine legendre_roots(l,root,w)
   !-----------------------------------------------------------------------------
   ! Subroutine finds the l roots (in theta) and gaussian weights associated
-  ! with the legendre polynomial of degree l > 1. (Source from SCRIP create 
+  ! with the legendre polynomial of degree l > 1. (Source from SCRIP create
   ! gaussian grid routine
   !-----------------------------------------------------------------------------
   implicit none

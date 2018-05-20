@@ -59,7 +59,7 @@ const char*  getDateAndTime(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-   static char 	datestr[1024];
+   static char          datestr[1024];
    time_t         ttime;
    struct tm*     tm;
 
@@ -86,28 +86,28 @@ const char*  getDateAndTime(
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int main(int    argc, 
+int main(int    argc,
          char*  argv[])
 {
-  	printf("hello from ESMCI_WebServServerSocketUTest\n");
+        printf("hello from ESMCI_WebServServerSocketUTest\n");
 
-   int	rc;
-	int	result = 0;
+   int  rc;
+        int     result = 0;
    char  name[80];
    char  failMsg[80];
 
-	int	portNum = 27060;
-	char	host[512] = { "" };
+        int     portNum = 27060;
+        char    host[512] = { "" };
 
 
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
-	gethostname(host, sizeof(host) - 1);
+        gethostname(host, sizeof(host) - 1);
 
-	ESMCI::ESMCI_WebServServerSocket*	
-		server = new ESMCI::ESMCI_WebServServerSocket();
+        ESMCI::ESMCI_WebServServerSocket*       
+                server = new ESMCI::ESMCI_WebServServerSocket();
 
    printf("\n");
    printf("ESMF_WebServServerSocketUTest\n");
@@ -123,11 +123,11 @@ int main(int    argc,
    strcpy(name, "Call connect");
    strcpy(failMsg, "Returned invalid socket file descriptor");
 
-   int	socketFd = server->connect(portNum);
+   int  socketFd = server->connect(portNum);
    printf("Socket FD: %d\n", socketFd);
 
    ESMC_Test((socketFd >= 0), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
+        printf("\n");
    //---------------------------------------------------------------------------
 
    //---------------------------------------------------------------------------
@@ -135,28 +135,28 @@ int main(int    argc,
    strcpy(name, "Call accept");
    strcpy(failMsg, "Returned invalid socket id");
 
-   int	socketId = server->accept();
+   int  socketId = server->accept();
    printf("Socket ID: %d\n", socketId);
 
    ESMC_Test((socketId >= 0), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
+        printf("\n");
    //---------------------------------------------------------------------------
 
-	int	numBytes = 0;
-	char	inputValue[257];
+        int     numBytes = 0;
+        char    inputValue[257];
 
    //---------------------------------------------------------------------------
    //NEX_disable_UTest
    strcpy(name, "Call read input string");
    strcpy(failMsg, "Returned invalid data size");
 
-   int	bytesRead = server->read(numBytes, inputValue);
+   int  bytesRead = server->read(numBytes, inputValue);
    printf(" Num Bytes: %d\n", numBytes);
    printf("Bytes Read: %d\n", bytesRead);
-	printf("Input: %s\n", inputValue);
+        printf("Input: %s\n", inputValue);
 
    ESMC_Test((bytesRead > 0), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
+        printf("\n");
    //---------------------------------------------------------------------------
 
    //---------------------------------------------------------------------------
@@ -164,14 +164,14 @@ int main(int    argc,
    strcpy(name, "Return input string");
    strcpy(failMsg, "Returned invalid data size");
 
-   int	bytesSent = server->send(inputValue);
+   int  bytesSent = server->send(inputValue);
    printf("Bytes Sent: %d\n", bytesSent);
 
    ESMC_Test((bytesSent == bytesRead), name, failMsg, &result, __FILE__, __LINE__, 0);
-	printf("\n");
+        printf("\n");
    //---------------------------------------------------------------------------
 
-	server->disconnect();
+        server->disconnect();
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
@@ -180,5 +180,5 @@ int main(int    argc,
    printf("\n-----------------------------------------------------\n");
    fflush(stdout);
 
-  	return 0;
+        return 0;
 }

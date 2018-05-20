@@ -1,15 +1,15 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-// convert a cubed sphere grid file in SCRIP format NetCDF file into a ESMF 
+// convert a cubed sphere grid file in SCRIP format NetCDF file into a ESMF
 // data format in NetCDF and generate a dual mesh NetCDF file using the center
 // coordiates.
 
@@ -57,25 +57,25 @@ bool handle_error(int status, int lineno) {
 }
 
 // order the vertices in celltbl (total number=numedges) in counter-clock wise order
-// to find the order of the vertices, we use the anchor vertex (lon,lat) (that is supposed to located 
+// to find the order of the vertices, we use the anchor vertex (lon,lat) (that is supposed to located
 // in the center of the polygon).  We sort the angle of the vector from the anchor vertex
-// to each corner vertex in ascending order (assuming 0 to 2PI) 
+// to each corner vertex in ascending order (assuming 0 to 2PI)
 void orderit(int index, double lon, double lat, int numedges, double *latlonbuf, int *next) {
   double *angles, temp, clon, clat;
   int i, j, min, temp1;
   angles = (double*)malloc(sizeof(double)*numedges);
 
   // When the corner vertices are cross the periodic boundary (0 degree longitude), need to
-  // convert the longitudes to be consistent with all the corners and the center 
+  // convert the longitudes to be consistent with all the corners and the center
   for (i=0; i< numedges; i++) {
     j=*(next+i)-1;
     clon = latlonbuf[j*2];
     clat = latlonbuf[j*2+1];
     if (fabs(clon-lon) > 180) {
       if (lon >= 180) {
-	clon = clon+360;
-      } else { 
-	clon = clon-360;
+        clon = clon+360;
+      } else {
+        clon = clon-360;
       }
     }
     //if (latlonbuf[j*2] >= 359.99999) latlonbuf[j*2]=latlonbuf[j*2]-360;
@@ -105,7 +105,7 @@ void orderit(int index, double lon, double lat, int numedges, double *latlonbuf,
   }
   free(angles);
 }
-     
+
 void convert3D(double lon, double lat, double *x, double *y) {
   double deg2rad = M_PI/180;
   double lonrad, latrad;
@@ -122,7 +122,7 @@ void orderit2(int index, double lon, double lat, int numedges, double *latlonbuf
   int i, j, min, temp1;
   double xcenter, ycenter;
   double xcorner, ycorner;
-  
+
   angles = (double*)malloc(sizeof(double)*numedges);
   convert3D(lon, lat, &xcenter, &ycenter);
 
@@ -166,13 +166,13 @@ void orderit2(int index, double lon, double lat, int numedges, double *latlonbuf
 #define ESMC_METHOD "c_nc_create"
 extern "C" {
   void FTN_X(c_nc_create)(
-			  char *infile,
-			  int *mode,
-			  ESMC_Logical *largefileflag,
-			  ESMC_Logical *netcdf4fileflag,
-			  int *ncid,
-			  int *rc,
-			  ESMCI_FortranStrLenArg infileLen)
+                          char *infile,
+                          int *mode,
+                          ESMC_Logical *largefileflag,
+                          ESMC_Logical *netcdf4fileflag,
+                          int *ncid,
+                          int *rc,
+                          ESMCI_FortranStrLenArg infileLen)
   {
     int status;
     int id;
@@ -182,22 +182,22 @@ extern "C" {
 
 #ifndef NC_64BIT_OFFSET
     if (*largefileflag == ESMF_TRUE) {
-	fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
+        fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
         ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: 64 bit file format "
-          "is not supported in this version of NetCDF library", ESMC_CONTEXT, 
+          "is not supported in this version of NetCDF library", ESMC_CONTEXT,
           rc);
-	return
+        return
     }
 #define NC_64BIT_OFFSET 0
 #endif
 
 #ifndef NC_NETCDF4
     if (*netcdf4fileflag == ESMF_TRUE) {
-	fprintf(stderr, "ERROR: NetCDF4 file format is not supported in this version of NetCDF library\n");
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: NetCDF4 file format "
+        fprintf(stderr, "ERROR: NetCDF4 file format is not supported in this version of NetCDF library\n");
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: NetCDF4 file format "
           "is not supported in this version of NetCDF library", ESMC_CONTEXT,
           rc);
-	return; //bail out
+        return; //bail out
     }
 #define NC_NETCDF4 0
 #endif
@@ -216,23 +216,23 @@ extern "C" {
     if (*largefileflag == ESMF_TRUE) {
       status = nc_create(c_infile, *mode | NC_64BIT_OFFSET, &id);
       if (status == NC_ENOTNC) {
-	fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
+        fprintf(stderr, "ERROR: 64 bit file format is not supported in this version of NetCDF library\n");
         fflush(stderr);
         ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: 64 bit file format "
-          "is not supported in this version of NetCDF library", ESMC_CONTEXT, 
+          "is not supported in this version of NetCDF library", ESMC_CONTEXT,
           rc);
-	return; //bail out
+        return; //bail out
       }
       if (handle_error(status,__LINE__)) return; //bail out
     } else if (*netcdf4fileflag == ESMF_TRUE) {
       status = nc_create(c_infile, *mode | NC_NETCDF4, &id);
       if (status == NC_ENOTNC) {
-	fprintf(stderr, "ERROR: NetCDF4 file format is not supported in this version of NetCDF library\n");
+        fprintf(stderr, "ERROR: NetCDF4 file format is not supported in this version of NetCDF library\n");
         fflush(stderr);
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: NetCDF4 file format "
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB, "ERROR: NetCDF4 file format "
           "is not supported in this version of NetCDF library", ESMC_CONTEXT,
           rc);
-	return; //bail out
+        return; //bail out
       }
       if (handle_error(status,__LINE__)) return; //bail out
     } else {
@@ -254,7 +254,7 @@ extern "C" {
 //--------------------------------------------------------------------------
 #undef ESMC_METHOD
 #define ESMC_METHOD "c_convertscrip"
-extern "C" { 
+extern "C" {
 void FTN_X(c_convertscrip)(
   char *infile,
   char *outfile,
@@ -293,6 +293,7 @@ void FTN_X(c_convertscrip)(
   size_t len;
   double *nodelons,  *nodelats;
   int totalsize;
+  int localrc;
 
   *rc = 1;
 #ifdef ESMF_NETCDF
@@ -312,9 +313,9 @@ void FTN_X(c_convertscrip)(
       ESMC_CONTEXT, rc);
     return; // bail out
   }
-  
+
   // Open intput SCRIP file
-  status = nc_open(c_infile, NC_NOWRITE, &ncid1);  
+  status = nc_open(c_infile, NC_NOWRITE, &ncid1);
   if (handle_error(status,__LINE__)) return; // bail out;
 
   // inquire dimension ids
@@ -400,8 +401,11 @@ void FTN_X(c_convertscrip)(
   totalsize = gsdim * gcdim;
   cells = (int*)malloc(sizeof(int)*totalsize);
   ESMCI::ClumpPntsLL(totalsize, cornerlons, cornerlats, TOL, cells, &totalnodes,
-		     &nodelons, &nodelats, &maxconnection,-91.0, 91.0, rc);
-  
+                     &nodelons, &nodelats, &maxconnection,-91.0, 91.0, &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc,
+            "Internal error", ESMC_CONTEXT, rc)) return;
+
+
   nodelatlon = (double*)malloc(sizeof(double)*totalnodes*2);
   totalneighbors = (unsigned char*)calloc(totalnodes, sizeof(unsigned char));
   for (i=0; i<totalnodes; i++) {
@@ -427,15 +431,15 @@ void FTN_X(c_convertscrip)(
 
     for (j=1; j<gcdim; j++) {
       for (k=0; k<j; k++) {
-	if (cells[i1+j]==cells[i1+k]) {
-	  // the two vertices belong to one cell, over-counted
-	  totalneighbors[cells[i1+j]]--;
+        if (cells[i1+j]==cells[i1+k]) {
+          // the two vertices belong to one cell, over-counted
+          totalneighbors[cells[i1+j]]--;
           //  printf("duplicate vertex at %d: vertex %d\n", i, cells[i1+j]);
-	  break;
-	}
+          break;
+        }
       }
       if (k==j) {
-	temp[count++]=cells[i1+j];
+        temp[count++]=cells[i1+j];
       }
     }
     // copy temp array back to cell, fill with unfilled space with -1
@@ -469,7 +473,7 @@ void FTN_X(c_convertscrip)(
     status = nc_create(c_outfile, NC_CLOBBER|NC_NETCDF4, &ncid2);
     if (status == NC_ENOTNC) {
       status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
-    } 
+    }
     if (handle_error(status,__LINE__)) return; // bail out;
 #else
     status = nc_create(c_outfile, NC_CLOBBER, &ncid2);
@@ -485,7 +489,7 @@ void FTN_X(c_convertscrip)(
     if (handle_error(status,__LINE__)) return; // bail out;
     status = nc_def_dim(ncid2, "coordDim", 2L, &vdimid);
     if (handle_error(status,__LINE__)) return; // bail out;
-    
+
     // define the variables
     dims[0]=vertdimid;
     dims[1]=vdimid;
@@ -517,7 +521,7 @@ void FTN_X(c_convertscrip)(
       strbuf = "degrees";
       status = nc_put_att_text(ncid2, ccoordid, "units", strlen(strbuf)+1, strbuf);
       if (handle_error(status,__LINE__)) return; // bail out;
-    } 
+    }
     if (!noarea) {
       status = nc_def_var(ncid2, "elementArea", NC_DOUBLE, 1, dims, &caid);
       if (handle_error(status,__LINE__)) return; // bail out;
@@ -527,7 +531,7 @@ void FTN_X(c_convertscrip)(
       if (status == NC_NOERR) {
         status = nc_copy_att(ncid1, areaid, "units", ncid2, caid);
         if (handle_error(status,__LINE__)) return; // bail out;
-      }    
+      }
       status = nc_inq_attid(ncid1, areaid, "long_name", &attid);
       if (status == NC_NOERR) {
         status = nc_copy_att(ncid1, areaid, "long_name", ncid2, caid);
@@ -540,7 +544,7 @@ void FTN_X(c_convertscrip)(
       // status = nc_copy_att(ncid1, maskid, "_FillValue", ncid2, cmid);
       // if (handle_error(status,__LINE__)) return; // bail out;
     }
- 
+
     // Global Attribute
     strbuf = "unstructured";
     status = nc_put_att_text(ncid2, NC_GLOBAL, "gridType", strlen(strbuf), strbuf);
@@ -555,11 +559,11 @@ void FTN_X(c_convertscrip)(
     strbuf2[strlen(strbuf2)-1] = '\0';
     status = nc_put_att_text(ncid2, NC_GLOBAL, "timeGenerated", strlen(strbuf2), strbuf2);
     if (handle_error(status,__LINE__)) return; // bail out;
-    
+
     status=nc_enddef(ncid2);
     if (handle_error(status,__LINE__)) return; // bail out;
 
-    nc_put_var_double(ncid2, vertexid, nodelatlon); 
+    nc_put_var_double(ncid2, vertexid, nodelatlon);
     if (handle_error(status,__LINE__)) return; // bail out;
     nc_put_var_int(ncid2, cellid, cells);
     if (handle_error(status,__LINE__)) return; // bail out;
@@ -571,7 +575,7 @@ void FTN_X(c_convertscrip)(
     free(edges);
     free(cells);
     free(nodelatlon);
-    
+
     inbuf = (double*)malloc(sizeof(double)*gsdim);
     if (!nocenter) {
       inbuf1 = (double*)malloc(sizeof(double)*gsdim*2);
@@ -579,13 +583,13 @@ void FTN_X(c_convertscrip)(
       if (handle_error(status,__LINE__)) return; // bail out;
       // copy inbuf to inbuf1
       for (i=0; i<gsdim; i++) {
-	inbuf1[i*2+1]=inbuf[i];
+        inbuf1[i*2+1]=inbuf[i];
       }
       status = nc_get_var_double(ncid1, ctlonid, inbuf);
       if (handle_error(status,__LINE__)) return; // bail out;
       // copy inbuf to inbuf1
       for (i=0; i<gsdim; i++) {
-	inbuf1[i*2]=inbuf[i];
+        inbuf1[i*2]=inbuf[i];
       }
       // get units of grid_center_lon
       status = nc_inq_attlen(ncid1, ctlonid, "units", &len);
@@ -599,15 +603,15 @@ void FTN_X(c_convertscrip)(
       }
       if (strncmp(units, "degrees", 7) && strncmp(units, "radians", 7)) {
           fprintf(stderr, "%s: The units attribute for grid_center_lon is not degrees nor radians.\n", c_infile);
-	  ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG, "The units "
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_VAL_WRONG, "The units "
             "attribute for grid_center_lon is not degrees nor radians.",
             ESMC_CONTEXT, rc);
-	  return;
+          return;
       }
       if (!strncmp(units, "radians", 7)) {
-	for (i=0; i<gsdim*2; i++) {
-	  inbuf1[i] *= ESMC_CoordSys_Rad2Deg;
-	}
+        for (i=0; i<gsdim*2; i++) {
+          inbuf1[i] *= ESMC_CoordSys_Rad2Deg;
+        }
       }
       starts[0]=0;
       starts[1]=0;
@@ -616,7 +620,7 @@ void FTN_X(c_convertscrip)(
       status = nc_put_vara_double(ncid2, ccoordid, starts, counts, inbuf1);
       if (handle_error(status,__LINE__)) return; // bail out;
       free(inbuf1);
-    }  
+    }
     if (!noarea) {
       status = nc_get_var_double(ncid1, areaid, inbuf);
       if (handle_error(status,__LINE__)) return; // bail out;
@@ -635,15 +639,17 @@ void FTN_X(c_convertscrip)(
     nc_close(ncid1);
     nc_close(ncid2);
     free(totalneighbors);
+    delete [] c_infile;
+    delete [] c_outfile;
     *rc = 0;
     return;
   }
   // Now create the dual mesh using the cell coordinates.  The
-  // format is the same except that the num_verts = the original num_cells (gsdim), 
+  // format is the same except that the num_verts = the original num_cells (gsdim),
   // vert_coords will be the original center-coords. num_cells = the original
   // num_verts (totalnodes) mask is not
   // changed, and cell_verts will be generated here
-  // 
+  //
   // for each vert in the original grid, find out which cell uses it, use the
   // the center of the cells to form a new cell
   // The dual mesh should have equal number of cells and vertices
@@ -652,7 +658,7 @@ void FTN_X(c_convertscrip)(
   // the new dual mesh may not have the same topology as the original mesh
   // it depends on how many edges are sharing a specific vertices
   // so, this has to be calculated as well
-  
+
   // First, read in the center coordinates
   free(edges);
   inbuf = (double*)malloc(sizeof(double)*gsdim);
@@ -701,7 +707,7 @@ void FTN_X(c_convertscrip)(
 
   dualcellcounts = (int*)malloc(sizeof(int)*totalnodes);
   dualcells = (int*)malloc(sizeof(int)*maxconnection*totalnodes);
-  for (i=0; i<totalnodes; i++) 
+  for (i=0; i<totalnodes; i++)
     dualcellcounts[i]=0;
 
   // initialize the values to -1
@@ -716,25 +722,25 @@ void FTN_X(c_convertscrip)(
       dualcells[i1*maxconnection+dualcellcounts[i1]]=i+1;
       dualcellcounts[i1]++;
       if (dualcellcounts[i1] > maxconnection) {
-	fprintf(stderr, "Vertex %d exceed maximal connections %d\n", i1, maxconnection);
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        fprintf(stderr, "Vertex %d exceed maximal connections %d\n", i1, maxconnection);
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
           "Unrecoveable internal error", ESMC_CONTEXT, rc);
-	return; // bail out
+        return; // bail out
       }
     }
   }
-    
+
   // remove the cells with less than 3 edges in dualcells table
-  // also remove them from the node coordinates table and the totalneighbors table 
+  // also remove them from the node coordinates table and the totalneighbors table
   for (i=0, i1=0; i<totalnodes; i++) {
     if (dualcellcounts[i] >= 3) {
       if (i1 != i) {
-	for (k=0; k<maxconnection; k++) {
-	  dualcells[i1*maxconnection+k]=dualcells[i*maxconnection+k];
-	  totalneighbors[i1]=totalneighbors[i];
-	  nodelatlon[i1*2]=nodelatlon[i*2];
-	  nodelatlon[i1*2+1]=nodelatlon[i*2+1];
-	}
+        for (k=0; k<maxconnection; k++) {
+          dualcells[i1*maxconnection+k]=dualcells[i*maxconnection+k];
+          totalneighbors[i1]=totalneighbors[i];
+          nodelatlon[i1*2]=nodelatlon[i*2];
+          nodelatlon[i1*2+1]=nodelatlon[i*2+1];
+        }
       }
       i1++;
     }
@@ -747,13 +753,13 @@ void FTN_X(c_convertscrip)(
   // lonbuf and latbuf contains the center vertex coordinates
   // next points to the cell_vertex location where we will fill
   // in the cell id in counter clockwise order
-  for (i = 0; i < goodnodes; i++) {  
+  for (i = 0; i < goodnodes; i++) {
       next = &dualcells[i*maxconnection];
       numedges = totalneighbors[i];
       if (fabs(nodelatlon[i*2+1]) > 88.0) {
-	orderit2(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);      
+        orderit2(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);
       } else {
-	orderit(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);      
+        orderit(i+1, nodelatlon[i*2], nodelatlon[i*2+1], numedges, inbuf1,next);
       }
   }
 
@@ -814,7 +820,7 @@ void FTN_X(c_convertscrip)(
     // status = nc_copy_att(ncid1, maskid, "_FillValue", ncid2, cmid);
     // if (handle_error(status,__LINE__)) return; // bail out;
   }
- 
+
   // Global Attribute
   strbuf = "unstructured";
   status = nc_put_att_text(ncid2, NC_GLOBAL, "gridType", strlen(strbuf), strbuf);
@@ -842,7 +848,7 @@ void FTN_X(c_convertscrip)(
     if (handle_error(status,__LINE__)) return; // bail out;
     free(inbuf2);
   }
-  nc_put_var_double(ncid2, vertexid, inbuf1); 
+  nc_put_var_double(ncid2, vertexid, inbuf1);
   if (handle_error(status,__LINE__)) return; // bail out;
   nc_put_var_int(ncid2, cellid, dualcells);
   if (handle_error(status,__LINE__)) return; // bail out;

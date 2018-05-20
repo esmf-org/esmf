@@ -349,7 +349,7 @@ program ESMF_ArrayArbHaloEx
 !EOE
 !BOC
   do i=1, 5
-    farrayPtr1d(i) = seqIndexList(i) / 10.
+    farrayPtr1d(i) = real(seqIndexList(i),ESMF_KIND_R8) / 10.d0
   enddo
 !EOC
 !call ESMF_ArrayPrint(array)
@@ -430,7 +430,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   do j=1, 3
     do i=1, 5
-      farrayPtr2d(i,j) = seqIndexList(i) / 10. + 100.*j
+      farrayPtr2d(i,j) = real(seqIndexList(i),ESMF_KIND_R8) / 10.d0 + 100.d0*j
     enddo
   enddo
 !EOC
@@ -531,7 +531,7 @@ program ESMF_ArrayArbHaloEx
 !BOC
   do j=1, 3
     do i=1, 5
-      farrayPtr2d(j,i) = seqIndexList(i) / 10. + 100.*j
+      farrayPtr2d(j,i) = real(seqIndexList(i),ESMF_KIND_R8) / 10.d0 + 100.d0*j
     enddo
   enddo
 !EOC
@@ -561,15 +561,11 @@ program ESMF_ArrayArbHaloEx
 ! the 1D arbitrary DistGrid, re-using the RouteHandle.}
 ! \mbox{} \\
 !
-! One of the benefits of mapping the undistributed dimension(s) to the 
-! "left side" of the Array dimensions is that Arrays that only differ 
-! in the size of the undistributed dimension(s) are weakly congruent in this
-! arrangement. Weakly congruent Arrays can reuse the same RouteHandle, saving
-! the overhead that is caused by the precompute step. In order to demonstrate 
-! this the RouteHandle of the previous halo call was not yet released and will
-! be applied to a weakly congruent Array.
+! Arrays can reuse the same RouteHandle, saving the overhead that is caused by
+! the precompute step. In order to demonstrate this the RouteHandle of the
+! previous halo call was not yet released and will be applied to a new Array.
 !
-! The following code creates an Array that is weakly congruent to the the 
+! The following code creates an Array that is compatible to the 
 ! previous Array by using the same input information as before, only that
 ! the size of the undistributed dimension is now 6 instead of 3.
 !EOE
@@ -609,13 +605,13 @@ program ESMF_ArrayArbHaloEx
 !BOC
   do j=1, 6
     do i=1, 5
-      farrayPtr2d(j,i) = seqIndexList(i) / 10. + 100.*j
+      farrayPtr2d(j,i) = real(seqIndexList(i),ESMF_KIND_R8) / 10.d0 + 100.d0*j
     enddo
   enddo
 !EOC
 !BOE
 ! Now the {\tt haloHandle} that was previously pre-computed for {\tt array} can
-! be used directly for the weakly congruent {\tt array2}.
+! be used directly for {\tt array2}.
 !EOE
 !BOC
   call ESMF_ArrayHalo(array2, routehandle=haloHandle, rc=rc)

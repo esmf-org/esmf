@@ -287,8 +287,6 @@ program ESMF_TraceSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-#if 0
-  ! - don't call this because no Finalize was registred for comp2
   call ESMF_GridCompFinalize(comp2, userRc=userrc, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
@@ -296,7 +294,6 @@ program ESMF_TraceSTest
   if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-#endif
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------

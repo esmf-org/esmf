@@ -69,9 +69,9 @@ ESMCI_WebServForkClient::ESMCI_WebServForkClient(
 //
 // !ARGUMENTS:
 //
-  string		hostName,
-  string		scriptDir,
-  string		scriptName
+  string                hostName,
+  string                scriptDir,
+  string                scriptName
   )
 //
 // !DESCRIPTION:
@@ -80,11 +80,11 @@ ESMCI_WebServForkClient::ESMCI_WebServForkClient(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-	: ESMCI_WebServCompSvrMgr(hostName, scriptDir, scriptName)
+        : ESMCI_WebServCompSvrMgr(hostName, scriptDir, scriptName)
 {
-	char	host[512] = {""};
-	gethostname(host, sizeof(host) - 1);
-	theHostName = host;
+        char    host[512] = {""};
+        gethostname(host, sizeof(host) - 1);
+        theHostName = host;
 }
 
 
@@ -108,7 +108,7 @@ ESMCI_WebServForkClient::~ESMCI_WebServForkClient(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	// need to free up memory here
+        // need to free up memory here
 }
 
 
@@ -140,44 +140,44 @@ printf("ESMCI_WebServForkClient::submitJob()\n");
 printf("Client ID: %d\n", clientId);
 printf("RegistrarHost: %s\n", registrarHost.c_str());
 printf("Port Num: %d\n", portNum);
-	int	pid = fork();
+        int     pid = fork();
 
 printf("PID: %d\n", pid);
-	if (pid < 0) // error occurred 
-	{ 
-		fprintf(stderr, "Fork failed!\n");
-		return "";
-	}
-	else if (pid == 0) // child process 
-	{ 
-		char		portNumStr[64];
-		char		clientIdStr[64];
-		string	scriptPath = theScriptDir + "/" + theScriptName;
+        if (pid < 0) // error occurred
+        {
+                fprintf(stderr, "Fork failed!\n");
+                return "";
+        }
+        else if (pid == 0) // child process
+        {
+                char            portNumStr[64];
+                char            clientIdStr[64];
+                string  scriptPath = theScriptDir + "/" + theScriptName;
 
-		sprintf(portNumStr, "%d", portNum);
-		sprintf(clientIdStr, "%d", clientId);
+                sprintf(portNumStr, "%d", portNum);
+                sprintf(clientIdStr, "%d", clientId);
 
 printf("Script Path: %s\n", scriptPath.c_str());
 printf("Script Name: %s\n", theScriptName.c_str());
 printf("Port Num: %s\n", portNumStr);
 printf("Client ID: %s\n", clientIdStr);
 
-		execlp(scriptPath.c_str(), 
-             theScriptName.c_str(), 
-             portNumStr, 
-             clientIdStr, 
+                execlp(scriptPath.c_str(),
+             theScriptName.c_str(),
+             portNumStr,
+             clientIdStr,
              registrarHost.c_str(),
              NULL);
-	}
+        }
 
-	//***
-	// Build the job string
-	//***
-	char		pidStr[64];
-	sprintf(pidStr, "%d", pid);
-	string	jobId = theHostName + "_" + pidStr;
+        //***
+        // Build the job string
+        //***
+        char            pidStr[64];
+        sprintf(pidStr, "%d", pid);
+        string  jobId = theHostName + "_" + pidStr;
 
-	return jobId;
+        return jobId;
 #else
 // TODO: Use the Windows CreateProcess system call.
         return "";
@@ -207,15 +207,15 @@ int  ESMCI_WebServForkClient::cancelJob(
 //-----------------------------------------------------------------------------
 {
 #if !defined (ESMF_OS_MinGW)
-	int	pid = extractPid(jobId);
-	int	rc = 0;
+        int     pid = extractPid(jobId);
+        int     rc = 0;
 
-	if (pid >= 0)
-	{
-		rc = kill(pid, SIGKILL);
-	}
+        if (pid >= 0)
+        {
+                rc = kill(pid, SIGKILL);
+        }
 
-	return rc;
+        return rc;
 #else
 // TODO: Use the Windows TerminateProcess system call.
         return -1;
@@ -244,7 +244,7 @@ int  ESMCI_WebServForkClient::jobStatus(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	return 0; // do something
+        return 0; // do something
 }
 
 
@@ -269,22 +269,22 @@ int  ESMCI_WebServForkClient::extractPid(
 //EOPI
 //-----------------------------------------------------------------------------
 {
-	int	pid = -1;
+        int     pid = -1;
 
-	//***
-	// Basically, the jobid is made up of the hostname plus underscore ('_')
-	// plus the process id.  So, search for the last underscore, and everything
-	// after that should be the process id.
-	//***
-	size_t	lastUnderscore = jobId.find_last_of('_');
-	if (lastUnderscore != string::npos)
-	{
-		string	pidStr = jobId.substr(lastUnderscore + 1);
+        //***
+        // Basically, the jobid is made up of the hostname plus underscore ('_')
+        // plus the process id.  So, search for the last underscore, and everything
+        // after that should be the process id.
+        //***
+        size_t  lastUnderscore = jobId.find_last_of('_');
+        if (lastUnderscore != string::npos)
+        {
+                string  pidStr = jobId.substr(lastUnderscore + 1);
 
-		pid = atoi(pidStr.c_str());
-	}
+                pid = atoi(pidStr.c_str());
+        }
 
-	return pid;
+        return pid;
 }
 
 

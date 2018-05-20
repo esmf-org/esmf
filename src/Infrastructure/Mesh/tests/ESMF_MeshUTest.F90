@@ -5170,7 +5170,7 @@ subroutine test_mesh_create_gt_1localde(correct, rc)
       allocate(nodeArbSeqIndexL(nodeLocalDeCount)) 
   
       !! Allocate and fill first list
-      allocate(nodeArbSeqIndexL(1)%ptr(1))
+      allocate(nodeArbSeqIndexL(1)%ptr(4))
       nodeArbSeqIndexL(1)%ptr=(/11,12,15,16/)
 
       ! Fill in elem data
@@ -5581,10 +5581,6 @@ subroutine test_mesh_create_easy_elems(correct, rc)
    ! Create Mesh structure in 1 step
    mesh=ESMF_MeshCreate(parametricDim=2, &
         coordSys=ESMF_COORDSYS_CART, &
-#define FIX_DEMO_FIELDWRITE_ISSUE_off
-#ifndef FIX_DEMO_FIELDWRITE_ISSUE
-        elementIds=elemIds,&
-#endif
         elementTypes=elemTypes,&
         elementCoords=elemCoords,&
         elementCornerCoords=elemCornerCoords, &
@@ -5600,18 +5596,6 @@ subroutine test_mesh_create_easy_elems(correct, rc)
    ! Output Mesh for debugging
    !call ESMF_MeshWrite(mesh,"meshee",rc=localrc)
    !if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
-
-#define DEMO_FIELDWRITE_ISSUE
-#ifdef DEMO_FIELDWRITE_ISSUE
-  field=ESMF_FieldCreate(mesh, typekind=ESMF_TYPEKIND_R8, &
-       meshloc=ESMF_MESHLOC_ELEMENT, rc=localrc)
-   if (rc /= ESMF_SUCCESS) return
-
-   call ESMF_FieldWrite(field,"tst_field.nc",rc=localrc)
-   if (rc /= ESMF_SUCCESS) return
-#endif
-
-
 
    ! Return success
    rc=ESMF_SUCCESS

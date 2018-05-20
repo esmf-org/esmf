@@ -45,24 +45,29 @@ def pet_count():
 class Manager(object):
     '''
     This singleton class is designed to ensure that ESMF is properly initialized 
-    and finalized.  ESMF is initialized at Manager creation, and the __del__ 
+    and finalized.  ESMF is initialized at 
+    :class:`~ESMF.api.esmpymanager.Manager` creation, and the __del__ 
     method is registered with atexit to ensure ESMF is always finalized prior to 
     exiting Python.  If the object is copied, the copy will always be an alias 
-    to the original Manager object.  The Manager will be created when the first 
+    to the original :class:`~ESMF.api.esmpymanager.Manager` object.  The 
+    :class:`~ESMF.api.esmpymanager.Manager` will be created when the first 
     ESMPy object is created if it is not created explicitly by the user.
 
-    Explicit creation of a Manager object allows for setting a flag which 
+    Explicit creation of a :class:`~ESMF.api.esmpymanager.Manager` object allows
+    for setting a flag which 
     results in the output of debug information from the ESMF logging capability 
     during the application runtime.  The output log files are named 
-    PET<processor number>.ESMF_LogFile.
+    PET<PET number>.ESMF_LogFile.
 
-    The processor rank (local_pet) and total number of processers (pet_count) 
-    can also be retrieved from the Manager using the following calls::
+    The PET rank (local_pet) and total number of PETs (pet_count) 
+    can also be retrieved from the :class:`~ESMF.api.esmpymanager.Manager` 
+    using the following calls::
 
         ESMF.local_pet()
         ESMF.pet_count()
 
-    *local_pet* and *pet_count* are also properties of the Manager.
+    ``local_pet`` and ``pet_count`` are also properties of the 
+    :class:`~ESMF.api.esmpymanager.Manager`.
 
     Calls ESMP_Initialize and registers __del__ with atexit when called the
     first time.  Subsequent calls only return whether or not ESMF is
@@ -159,8 +164,35 @@ class Manager(object):
 
     def barrier(self):
         '''
-        Collective VM communication call that blocks calling processor until 
-        all processors of the VM have issued the call.
+        Collective VM communication call that blocks calling PET until 
+        all PETs of the VM have issued the call.
         '''
         ESMP_VMBarrier(self.vm)
         
+    def _broadcast_(self, bcstBuf, count, rootPet=0):
+        '''
+        Broadcast data from bcstBuf across the VM.\n
+            Arguments:\n
+                Numpy.array(dtype=float64) :: bcstBuf\n
+                int :: count\n
+                int :: rootPet\n
+
+        '''
+        ESMP_VMBroadcast(self.vm, bcstBuf, count, rootPet)
+
+    def _reduce_(self, sendBuf, recvBuf, count, reduceflag=Reduce.SUM, rootPet=0):
+        '''
+        Reduce data from sendBuf into recvBuf across the VM.\n
+            Arguments:\n
+                Numpy.array(dtype=float64) :: sendBuf\n
+                Numpy.array(dtype=float64) :: recvBuf\n
+                int :: count\n
+                Reduce :: reduceflag\n
+                    Argument Values:\n
+                        Reduce.SUM\n
+                        Reduce.MIN\n
+                        Reduce.MAX\n
+                int :: rootPet\n
+
+        '''
+        ESMP_VMReduce(self.vm, sendBuf, recvBuf, count, reduceflag, rootPet)

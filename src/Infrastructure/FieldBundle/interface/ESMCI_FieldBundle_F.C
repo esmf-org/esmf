@@ -7,7 +7,7 @@
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
-
+#define ESMC_FILENAME "ESMCI_FieldBundle_F.C"
 // ESMC interface routines
 
 //-----------------------------------------------------------------------------
@@ -44,7 +44,7 @@ void FTN_X(c_esmc_fieldbundleserialize)(
                             int *status,
                             int *field_count,
                             char *buffer, int *length, int *offset,
-                            ESMC_InquireFlag *inquireflag, int *localrc,
+                            ESMC_InquireFlag *inquireflag, int *rc,
                             ESMCI_FortranStrLenArg buffer_l){
 
 #undef  ESMC_METHOD
@@ -54,13 +54,15 @@ void FTN_X(c_esmc_fieldbundleserialize)(
     int *ip;
 
     // TODO: verify length > need, and if not, make room.
-    int fixedpart = 8 * sizeof(int *);
+    int fixedpart = 8 * sizeof(int *);  // enough for the FB values + potential pointer alignment
     if (*inquireflag != ESMF_INQUIREONLY) {
       if ((*length - *offset) < fixedpart) {
-         
+         std::stringstream msg;
+         msg << "Buffer too short to add a FieldBundle object, length = "
+             << (*length - *offset) << " bytes";
          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-          "Buffer too short to add a FieldBundle object", ESMC_CONTEXT,
-          localrc);
+          msg, ESMC_CONTEXT,
+          rc);
          return;
  
         //buffer = (char *)realloc((void *)buffer,
@@ -75,11 +77,11 @@ void FTN_X(c_esmc_fieldbundleserialize)(
       *ip++ = *status;
       *ip++ = *field_count; 
     } else
-      ip += 2;
+      ip += 8;  // matches fixedpart
 
     *offset = (char *)ip - buffer;
 
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
     return;
 } 
 
@@ -88,7 +90,7 @@ void FTN_X(c_esmc_fieldbundleserialize)(
 void FTN_X(c_esmc_fieldbundledeserialize)( 
                               int *status,
                               int *field_count, 
-                              char *buffer, int *offset, int *localrc,
+                              char *buffer, int *offset, int *rc,
                               ESMCI_FortranStrLenArg buffer_l){
 
 #undef  ESMC_METHOD
@@ -103,7 +105,7 @@ void FTN_X(c_esmc_fieldbundledeserialize)(
 
     *offset = (char *)ip - buffer;
 
-    if (localrc) *localrc = ESMF_SUCCESS;
+    if (rc) *rc = ESMF_SUCCESS;
     return;
 } 
 

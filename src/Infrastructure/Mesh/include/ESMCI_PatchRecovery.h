@@ -1,9 +1,9 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 
@@ -29,9 +29,9 @@ class PatchRecov {
 public:
 PatchRecov();
 PatchRecov(const PatchRecov &rhs);
-PatchRecov &operator=(const PatchRecov &rhs);  
+PatchRecov &operator=(const PatchRecov &rhs);
 
-PatchRecov operator*(double val); 
+PatchRecov operator*(double val);
 
 
 void operator+=(const PatchRecov &rhs);
@@ -54,7 +54,7 @@ void CreatePatch(UInt pdeg,
            UInt threshold,       // How far from num dofs to invalidate.  If the
                                  // patch becomes invalid, we reduce it to a first order patch.
            const MEField<> &coord, // node coords (if pdim<sdim, then the object can
-		 const MCoord *_mc = NULL,
+                 const MCoord *_mc = NULL,
            MEField<> *src_mask_ptr=NULL
            );
 
@@ -66,7 +66,7 @@ void EvalPatchGrad(UInt nfield, const double coords[], Real result[]) const;
 Real EvalPatchAndGrad(UInt nfield, const double coords[], Real result[]) const;
 
 // This  may be done, for instance, on a boundary
-void MarkPatchBad() { patch_ok = false; } 
+void MarkPatchBad() { patch_ok = false; }
 bool PatchOk() { return patch_ok;}
 private:
  void eval_poly(UInt nsamples, UInt sample, UInt ldb, UInt cur_rhs,
@@ -100,7 +100,7 @@ void CreateElemPatch(UInt pdeg,
            UInt ptype,  // Use nodal or gaussian??
            const MeshObj &elem,  // the elem in question
            const MEField<> &cfield,
-	   MEField<> *src_mask_ptr,
+           MEField<> *src_mask_ptr,
            UInt numfields,
            NFIELD **rfield,
            UInt threshold,       // How far from num dofs to invalidate.  If the
@@ -117,7 +117,7 @@ void Eval( UInt npts,
           Real results[]) const;
 
 /**
- * Evaluate the patch gradients.  
+ * Evaluate the patch gradients.
  * results(npts, sdim)
  */
 void EvalGrad( UInt npts,

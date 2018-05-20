@@ -15,6 +15,8 @@
       module ESMF_VMSubrs
       use ESMF
       use ESMF_TestMod
+      
+      implicit none
 
       public
 
@@ -39,7 +41,7 @@
       integer::  func_results, myresults
       integer:: nsize, i, j
       integer:: isum, clock_count
-      real :: fsum4
+      real(ESMF_KIND_R4) :: fsum4
       real(ESMF_KIND_R8) :: fsum
       logical:: vmBool
 
@@ -72,7 +74,8 @@
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Test_VM Get Test"
-      call ESMF_VMGet(test_vm, localPet=test_localPet, petCount=test_npets, rc=rc)
+      call ESMF_VMGet(test_vm, localPet=test_localPet, petCount=test_npets, &
+        rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -919,7 +922,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      sum=0
+      fsum4=0
       do i=1,nsize
         f4array3_soln(i) = minval( f4array2(i,:) )
         print *, localPet,'f4array3(',i,')=',f4array3(i), &
@@ -1018,11 +1021,11 @@
         f4array3_soln(i) = maxval( f4array2(i,:) )
         print *, localPet,'f4array3(',i,')=',f4array3(i), &
                           'f4array3_soln(',i,')=',f4array3_soln(i)
-        f4sum=f4sum + abs( f4array3(i) - f4array3_soln(i) )
+        fsum4=fsum4 + abs( f4array3(i) - f4array3_soln(i) )
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MAXResults Test: ESMF_KIND_R4"
-      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((fsum4.eq.0.), name, failMsg, result, ESMF_SRCLINE)
 
       end subroutine test_AllReduce_max
 
@@ -1247,7 +1250,7 @@
       !EX_UTest
       write(failMsg, *) "Bad comparison result"
       write(name, *) "VMId Compare Test"
-      tf = ESMF_VMIdCompare (vmid1(1), vmid2(1))
+      tf = ESMF_VMIdCompare (vmid1(1), vmid2(1), rc=rc)
       call ESMF_Test(tf, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1261,7 +1264,7 @@
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VMId print test values Test"
-      call ESMF_VMIdPrint (vmid1(1), rc)
+      call ESMF_VMIdPrint (vmid1(1), rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -1308,14 +1311,14 @@
       !EX_UTest
       write(failMsg, *) "Destroy #1 failed"
       write(name, *) "VMId destroy #1 Test"
-      call ESMF_VMIdDestroy (vmid1, rc)
+      call ESMF_VMIdDestroy (vmid1, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Destroy #2 failed"
       write(name, *) "VMId destroy #2 Test"
-      call ESMF_VMIdDestroy (vmid2, rc)
+      call ESMF_VMIdDestroy (vmid2, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       deallocate (vmid1, vmid2)
@@ -1354,9 +1357,21 @@
       ! part of the supported ESMF user API!
       write(name, *) "Create temporary VMId"
       write(failMsg, *) 'Did not return ESMF_SUCCESS'
-      call ESMF_VMIdCreate (vmid_temp, rc)
+      call ESMF_VMIdCreate (vmid_temp, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Destroy a temporary VMId.
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Destroy VMId"
+      write(failMsg, *) 'Did not return ESMF_SUCCESS'
+      call ESMF_VMIdDestroy (vmid_temp, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_VMIdPrint (vmid_temp)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -1394,7 +1409,6 @@
       rc = merge (ESMF_SUCCESS, ESMF_FAILURE, object_found == ESMF_TRUE)
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-
 
       !------------------------------------------------------------------------
       !EX_UTest

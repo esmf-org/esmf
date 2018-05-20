@@ -115,7 +115,7 @@ module user_model1
 
     ! Local variables
     integer               :: localPet
-	  type(ESMF_AttPack)    :: attpack
+    type(ESMF_AttPack)    :: attpack
     type(ESMF_DistGrid)   :: distgrid
     type(ESMF_Array)      :: array
     type(ESMF_Field)      :: field

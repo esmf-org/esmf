@@ -39,7 +39,7 @@ using namespace std;
 // contains the full code (bodies) for the NetEsmfServer methods.
 //
 // This class provides the basic functionality setting up an ESMF Component
-// (Grid or Coupler) as a network-accessible service.  It provides the 
+// (Grid or Coupler) as a network-accessible service.  It provides the
 // methods to setup a socket service and process client requests.
 //
 //EOPI
@@ -48,35 +48,35 @@ using namespace std;
 namespace ESMCI
 {
 
-  class ESMCI_WebServNetEsmfServer 
+  class ESMCI_WebServNetEsmfServer
   {
   public:
 
      // Component type - Grid or Coupler
      typedef enum ESMC_CompType
-	  {
-		  ESMC_COMPTYPE_GRID = 0,
-		  ESMC_COMPTYPE_COUPLER = 1
-	  } ESMC_CompType;
+          {
+                  ESMC_COMPTYPE_GRID = 0,
+                  ESMC_COMPTYPE_COUPLER = 1
+          } ESMC_CompType;
 
      // constructor and destructor
-	  ESMCI_WebServNetEsmfServer(int  port);
-	  ~ESMCI_WebServNetEsmfServer();
+          ESMCI_WebServNetEsmfServer(int  port);
+          ~ESMCI_WebServNetEsmfServer();
 
      // port number access methods
-	  int  getPort()		{ return thePort; }
-	  void setPort(int  port);
+          int  getPort()                { return thePort; }
+          void setPort(int  port);
 
      // methods to setup socket service loop... one for grid components and
      // one for coupler components
-	  int  requestLoop(ESMCI::GridComp*	  comp,
+          int  requestLoop(ESMCI::GridComp*       comp,
                       ESMCI::State*      importState,
                       ESMCI::State*      exportState,
                       ESMCI::Clock*      clock,
                       int                phase,
                       ESMC_BlockingFlag  blockingFlag);
 
-	  int  requestLoop(ESMCI::CplComp*	  comp,
+          int  requestLoop(ESMCI::CplComp*        comp,
                       ESMCI::State*      importState,
                       ESMCI::State*      exportState,
                       ESMCI::Clock*      clock,
@@ -86,48 +86,48 @@ namespace ESMCI
   private:
 
      // methods to handle incoming requests
-	  int  getNextRequest();
-	  int  serviceRequest(int  request);
+          int  getNextRequest();
+          int  serviceRequest(int  request);
 
-	  int   getRequestId(const char  request[]);
-	  char* getRequestFromId(int  id);
+          int   getRequestId(const char  request[]);
+          char* getRequestFromId(int  id);
 
      // process request methods
-	  int   processNew();
-	  int   processInit();
-	  int   processRun();
-	  int   processFinal();
-	  int   processState();
-	  int   processFiles();
-	  int   processEnd();
-	  int   processPing();
+          int   processNew();
+          int   processInit();
+          int   processRun();
+          int   processFinal();
+          int   processState();
+          int   processFiles();
+          int   processEnd();
+          int   processPing();
 
      // internal data access methods
-	  int  getNextClientId();
-	  void  copyFile(const char*  srcFilename, 
+          int  getNextClientId();
+          void  copyFile(const char*  srcFilename,
                     const char*  destFilename);
 
-	  int					thePort;			// the port number of the socket service
-	  char				theMsg[8192];	// buffer to store client requests
-	  char*				theStatus;		// the current status of the service
+          int                                   thePort;                        // the port number of the socket service
+          char                          theMsg[8192];   // buffer to store client requests
+          char*                                 theStatus;              // the current status of the service
 
-	  ESMCI_WebServServerSocket		theSocket;		// the server socket
+          ESMCI_WebServServerSocket             theSocket;              // the server socket
 
-	  ESMC_CompType			theCompType;		// the component type
-	  ESMCI::GridComp*		theGridComp;		// pointer to grid component
-	  ESMCI::CplComp*			theCouplerComp;	// pointer to coupler component
-     ESMCI::State*			theImportState;	// component import state object
-     ESMCI::State*			theExportState;	// component export state object
-     ESMCI::Clock*			theClock;			// component clock
-	  int							thePhase;			// component phase
-	  ESMC_BlockingFlag		theBlockingFlag;	// component blocking flag
+          ESMC_CompType                         theCompType;            // the component type
+          ESMCI::GridComp*              theGridComp;            // pointer to grid component
+          ESMCI::CplComp*                       theCouplerComp;         // pointer to coupler component
+     ESMCI::State*                      theImportState;         // component import state object
+     ESMCI::State*                      theExportState;         // component export state object
+     ESMCI::Clock*                      theClock;                       // component clock
+          int                                                   thePhase;                       // component phase
+          ESMC_BlockingFlag             theBlockingFlag;        // component blocking flag
 
-     // list of client sessions and counter to keep track of the next 
+     // list of client sessions and counter to keep track of the next
      // client session id
-	  map<int, ESMCI_WebServClientInfo*>	theClients;
-	  int												theNextClientId;
+          map<int, ESMCI_WebServClientInfo*>    theClients;
+          int                                                                                           theNextClientId;
   };
 
 } // end namespace
 
-#endif 	// ESMCI_WebServNetEsmfServer_H
+#endif          // ESMCI_WebServNetEsmfServer_H
