@@ -104,5 +104,26 @@ extern "C" {
     
   }
   */
-                                   
+
+#define xstr(s) str(s)
+#define str(s) #s
+   
+  static void (*FTN_X(__real_ptr_mpi_allreduce))(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, 
+						 MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+  
+  void FTN_X(__real_mpi_allreduce)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, 
+				   MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
+    if (FTN_X(__real_ptr_mpi_allreduce) == NULL) {
+      FTN_X(__real_ptr_mpi_allreduce) = (void (*)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, 
+						  MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_allreduce)));
+    }
+    FTN_X(__real_ptr_mpi_allreduce)(sendbuf, recvbuf, count, datatype, op, comm, ierr);
+  }
+  
+  void FTN_X(mpi_allreduce)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, 
+			    MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
+    FTN_X(__wrap_mpi_allreduce)(sendbuf, recvbuf, count, datatype, op, comm, ierr);
+  }
+
+                                
 }

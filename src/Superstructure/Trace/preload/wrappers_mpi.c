@@ -155,7 +155,6 @@ extern "C" {
   void FTN_X(__wrap_mpi_allreduce)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, 
 				   MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
     printf("__wrap_mpi_allreduce_ (Fortran)\n");
-    //TODO:  DEAL with different MPI calls in trace
     if (c_esmftrace_isactive() == 1) {
       ESMCI::TraceMPIWaitStart();
     }
@@ -172,7 +171,6 @@ extern "C" {
   int __wrap_MPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
                             MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
     printf("__wrap_MPI_Allreduce (C)\n");
-    //TODO:  DEAL with different MPI calls in trace
     if (c_esmftrace_isactive() == 1) {
       ESMCI::TraceMPIWaitStart();
     }
