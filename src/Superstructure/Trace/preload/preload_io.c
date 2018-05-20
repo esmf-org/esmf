@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
+#include <stdarg.h>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_Trace.h"

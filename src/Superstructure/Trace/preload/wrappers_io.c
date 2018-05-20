@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_Trace.h"
