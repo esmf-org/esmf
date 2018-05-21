@@ -1619,7 +1619,7 @@ module NUOPC_Comp
     character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
     character(len=NUOPC_PhaseMapStringLength), pointer :: newPhases(:)
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
     call ESMF_GridCompGet(comp, name=name, rc=rc)
@@ -1724,7 +1724,7 @@ module NUOPC_Comp
     character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
     character(len=NUOPC_PhaseMapStringLength), pointer :: newPhases(:)
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
     call ESMF_CplCompGet(comp, name=name, rc=rc)
@@ -1867,7 +1867,7 @@ module NUOPC_Comp
     endif
     
     ! return successfully
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -1937,7 +1937,7 @@ module NUOPC_Comp
     endif
     
     ! return successfully
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -1973,7 +1973,7 @@ module NUOPC_Comp
     character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
     character(len=NUOPC_PhaseMapStringLength)           :: tempString
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
     call ESMF_GridCompGet(comp, name=name, rc=rc)
@@ -2071,7 +2071,7 @@ module NUOPC_Comp
     character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
     character(len=NUOPC_PhaseMapStringLength)           :: tempString
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
     call ESMF_CplCompGet(comp, name=name, rc=rc)
@@ -2173,7 +2173,7 @@ module NUOPC_Comp
     character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
     character(len=NUOPC_PhaseMapStringLength)           :: tempString
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
     call ESMF_GridCompGet(comp, name=name, rc=rc)
@@ -2278,7 +2278,7 @@ module NUOPC_Comp
     character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
     character(len=NUOPC_PhaseMapStringLength)           :: tempString
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
     call ESMF_CplCompGet(comp, name=name, rc=rc)
