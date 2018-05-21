@@ -21,7 +21,7 @@
 #include <ESMCI_ParEnv.h>
 #include <ESMCI_MeshRefine.h>
 #include <ESMCI_RefineTopo.h>
-#include <ESMCI_MeshOBjConn.h>
+#include <ESMCI_MeshObjConn.h>
 #include <ESMCI_MeshGen.h>
 #include <ESMCI_HAdapt.h>
 #include <ESMCI_Rebalance.h>
