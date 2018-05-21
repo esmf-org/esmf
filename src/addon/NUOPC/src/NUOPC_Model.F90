@@ -27,6 +27,7 @@ module NUOPC_Model
     label_Advance                   => label_Advance, &
     label_AdvanceClock              => label_AdvanceClock, &
     label_CheckImport               => label_CheckImport, &
+    label_DataInitialize            => label_DataInitialize, &
     label_SetRunClock               => label_SetRunClock, &
     label_Finalize                  => label_Finalize, &
     ModelBase_label_TimestampExport => label_TimestampExport, &
@@ -50,8 +51,6 @@ module NUOPC_Model
     label_Finalize
   
   character(*), parameter :: &
-    label_DataInitialize = "Model_DataInitialize"
-  character(*), parameter :: &
     label_SetClock = "Model_SetClock"
     
   ! Generic methods
@@ -70,8 +69,8 @@ module NUOPC_Model
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -88,32 +87,26 @@ module NUOPC_Model
     ! InitializePhaseMap.
 
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv00p1", "IPDv01p1", "IPDv02p1", "IPDv03p1", "IPDv04p1", "IPDv05p1"/), &
-      userRoutine=routine_Nop, rc=rc)
+      phaseLabelList=(/"IPDv00p1", "IPDv01p1", "IPDv02p1", "IPDv03p1", &
+      "IPDv04p1", "IPDv05p1"/), userRoutine=routine_Nop, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv00p2", "IPDv01p3", "IPDv02p3", "IPDv03p3", "IPDv04p3", "IPDv05p4"/), &
-      userRoutine=routine_Nop, rc=rc)
+      phaseLabelList=(/"IPDv00p2", "IPDv01p3", "IPDv02p3", "IPDv03p3", &
+      "IPDv04p3", "IPDv05p4"/), userRoutine=routine_Nop, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv00p3", "IPDv01p4", "IPDv02p4", "IPDv03p6", "IPDv04p6", "IPDv05p7"/), &
-      userRoutine=InitializeP3, rc=rc)
+      phaseLabelList=(/"IPDv00p3", "IPDv01p4", "IPDv02p4", "IPDv03p6", &
+      "IPDv04p6", "IPDv05p7"/), userRoutine=InitializeP3, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p4", "IPDv01p5"/), &
       userRoutine=InitializeP4, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv02p5", "IPDv03p7", "IPDv04p7", "IPDv05p8"/), &
-      userRoutine=InitializeP5, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -136,12 +129,14 @@ module NUOPC_Model
     integer, intent(out)  :: rc
     
     ! local variables
-    integer               :: localrc
-    character(ESMF_MAXSTR):: name
-    logical               :: clockIsPresent
-    logical               :: existflag
-    logical               :: allConnected
-    integer               :: i
+    character(*), parameter   :: rName="InitializeP3"
+    integer                   :: localrc
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: verbosity
+    logical                   :: clockIsPresent
+    logical                   :: existflag
+    logical                   :: allConnected
+    integer                   :: i
     character(ESMF_MAXSTR), pointer :: impStdNameList(:)
     character(ESMF_MAXSTR), pointer :: impItemNameList(:)
     character(ESMF_MAXSTR), pointer :: impConnectedList(:)
@@ -152,9 +147,18 @@ module NUOPC_Model
     nullify(impItemNameList)
     nullify(impConnectedList)
     
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+    ! intro
+    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! test whether internal Clock has already been set in the Component
-    call ESMF_GridCompGet(gcomp, name=name, clockIsPresent=clockIsPresent, &
-      rc=rc)
+    call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -206,6 +210,11 @@ module NUOPC_Model
     if (associated(impItemNameList)) deallocate(impItemNameList)
     if (associated(impConnectedList)) deallocate(impConnectedList)
     
+    ! extro
+    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -217,18 +226,25 @@ module NUOPC_Model
     integer, intent(out)  :: rc
     
     ! local variables
-    integer               :: localrc
-    type(ESMF_Clock)      :: internalClock
-    logical               :: existflag
-    character(ESMF_MAXSTR):: name
+    character(*), parameter   :: rName="InitializeP4"
+    integer                   :: localrc
+    type(ESMF_Clock)          :: internalClock
+    logical                   :: existflag
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: verbosity
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! intro
+    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! fill all export Fields with valid initial data for current time
     ! note that only connected Fields reside in exportState at this time
     ! SPECIALIZE by calling into attached method to fill initial data
@@ -252,118 +268,11 @@ module NUOPC_Model
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
     
-  end subroutine
-  
-  !-----------------------------------------------------------------------------
-  
-  subroutine InitializeP5(gcomp, importState, exportState, clock, rc)
-    type(ESMF_GridComp)   :: gcomp
-    type(ESMF_State)      :: importState, exportState
-    type(ESMF_Clock)      :: clock
-    integer, intent(out)  :: rc
-    
-    ! local variables
-    integer               :: localrc
-    type(ESMF_Clock)      :: internalClock
-    logical               :: existflag
-    character(ESMF_MAXSTR):: name, oldDataComplete, newDataComplete
-    integer               :: oldUpdatedCount, newUpdatedCount
-    logical               :: allUpdated
-
-    rc = ESMF_SUCCESS
-
-    ! query the Component for info
-    call ESMF_GridCompGet(gcomp, name=name, rc=rc)
+    ! extro
+    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    ! check how many Fields in the exportState have the "Updated" Attribute set
-    ! to "true" BEFORE calling the DataInitialize
-    allUpdated = NUOPC_IsUpdated(exportState, count=oldUpdatedCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
-    ! get the value of the "InitializeDataComplete" Attribute
-    call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
-      value=oldDataComplete, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    
-    ! Initialize component data structures, including its export Fields,
-    ! only connected Fields reside in exportState at this time.
-    ! Expect the component to set "InitializeDataComplete" Attribute when done.
-    ! SPECIALIZE by calling into attached method to fill initial data
-    call ESMF_MethodExecute(gcomp, label=label_DataInitialize, &
-      existflag=existflag, userRc=localrc, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, &
-      rcToReturn=rc)) &
-      return  ! bail out
-    
-    ! re-set the "InitializeDataProgress" Attribute to "false"
-    call NUOPC_CompAttributeSet(gcomp, &
-      name="InitializeDataProgress", value="false", rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
 
-    ! check how many Fields in the exportState have the "Updated" Attribute set
-    ! to "true" AFTER calling the DataInitialize
-    allUpdated = NUOPC_IsUpdated(exportState, count=newUpdatedCount, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
-    ! see if number of updated export fields went up
-    if (newUpdatedCount > oldUpdatedCount) then
-      ! there are more Fields now that have their "Updated" Attribute set "true"
-      ! -> set "InitializeDataProgress" Attribute "true"
-      call NUOPC_CompAttributeSet(gcomp, &
-        name="InitializeDataProgress", value="true", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-    endif
-    
-    ! get the value of the "InitializeDataComplete" Attribute
-    call NUOPC_CompAttributeGet(gcomp, name="InitializeDataComplete", &
-      value=newDataComplete, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    
-    ! see if the "InitializeDataComplete" Attribute has changed
-    if (trim(newDataComplete) /= trim(oldDataComplete)) then
-      ! there was a change in the "InitializeDataComplete" Attribute setting
-      ! -> set "InitializeDataProgress" Attribute "true"
-      call NUOPC_CompAttributeSet(gcomp, &
-        name="InitializeDataProgress", value="true", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-    endif
-    
-    ! correct setting of timestamps
-    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    if (allUpdated) then
-      ! update timestamp on all the export Fields
-      call NUOPC_UpdateTimestamp(exportState, internalClock, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) &
-        return  ! bail out
-    else
-      ! update timestamp on only those export Fields that have the 
-      ! "Updated" Attribute set to "true"
-      call NUOPC_UpdateTimestamp(exportState, internalClock, &
-        selective=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) &
-        return  ! bail out
-    endif
-    
   end subroutine
   
   !-----------------------------------------------------------------------------
@@ -379,9 +288,14 @@ module NUOPC_Model
 
     rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_GridCompGet(gcomp, name=name, clock=clock, &
-      exportState=exportState, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+
+    ! get to the clock and exportState
+    call ESMF_GridCompGet(gcomp, clock=clock, exportState=exportState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -423,8 +337,8 @@ module NUOPC_Model
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-    ! query the Component for info
-    call ESMF_GridCompGet(model, name=name, rc=rc)
+    ! query the component for info
+    call NUOPC_CompGet(model, name=name, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     

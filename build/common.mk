@@ -1543,6 +1543,12 @@ ESMF_CPPFLAGS       += -DESMF_TESTEXHAUSTIVE
 endif
 
 #-------------------------------------------------------------------------------
+# ESMF_BOPT is passed (by CPP) into test programs to control any differences
+# between the different BOPT modes.
+#-------------------------------------------------------------------------------
+ESMF_CPPFLAGS       += -DESMF_BOPT_$(ESMF_BOPT)
+
+#-------------------------------------------------------------------------------
 # ESMF_TESTCOMPTUNNEL is passed (by CPP) into test programs to control the
 # dependency on ESMF-threading.
 #-------------------------------------------------------------------------------
@@ -1569,6 +1575,18 @@ ESMF_CPPFLAGS        +=-DS$(ESMF_ABISTRING)=1
 #-------------------------------------------------------------------------------
 
 ESMF_CPPFLAGS        +=-DESMF_OS_$(ESMF_OS)=1
+
+#-------------------------------------------------------------------------------
+# Add ESMF_COMM to preprocessor flags
+#-------------------------------------------------------------------------------
+
+ESMF_CPPFLAGS        +=-DESMF_COMM=$(ESMF_COMM)
+
+#-------------------------------------------------------------------------------
+# Add ESMF_DIR to preprocessor flags
+#-------------------------------------------------------------------------------
+
+ESMF_CPPFLAGS        +=-DESMF_DIR=$(ESMF_DIR)
 
 #-------------------------------------------------------------------------------
 # construct precompiler flags to be used on Fortran sources

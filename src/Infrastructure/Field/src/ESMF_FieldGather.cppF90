@@ -77,16 +77,29 @@ contains
 !BOP
 ! !IROUTINE: ESMF_FieldFill - Fill data into a Field
 ! !INTERFACE:
-  subroutine ESMF_FieldFill(field, keywordEnforcer, &
-    dataFillScheme, const1, member, step, rc)
+  subroutine ESMF_FieldFill(field, keywordEnforcer, dataFillScheme, &
+    const1, member, step, &
+    param1I4, param2I4, param3I4, &
+    param1R4, param2R4, param3R4, &
+    param1R8, param2R8, param3R8, &
+    rc)
 ! !ARGUMENTS:
-    type(ESMF_Field), intent(inout)           :: field
+    type(ESMF_Field),   intent(inout)           :: field
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    character(len=*), intent(in), optional    :: dataFillScheme
-    real(ESMF_KIND_R8), optional              :: const1
-    integer, intent(in), optional             :: member
-    integer, intent(in), optional             :: step
-    integer, intent(out), optional            :: rc
+    character(len=*),      intent(in),  optional :: dataFillScheme
+    real(ESMF_KIND_R8),    intent(in),  optional :: const1
+    integer,               intent(in),  optional :: member
+    integer,               intent(in),  optional :: step
+    integer(ESMF_KIND_I4), intent(in),  optional :: param1I4
+    integer(ESMF_KIND_I4), intent(in),  optional :: param2I4
+    integer(ESMF_KIND_I4), intent(in),  optional :: param3I4
+    real(ESMF_KIND_R4),    intent(in),  optional :: param1R4
+    real(ESMF_KIND_R4),    intent(in),  optional :: param2R4
+    real(ESMF_KIND_R4),    intent(in),  optional :: param3R4
+    real(ESMF_KIND_R8),    intent(in),  optional :: param1R8
+    real(ESMF_KIND_R8),    intent(in),  optional :: param2R8
+    real(ESMF_KIND_R8),    intent(in),  optional :: param3R8
+    integer,               intent(out), optional :: rc
 ! !DESCRIPTION:
 !   \label{ESMF_FieldFill}
 !   Fill {\tt field} with data according to {\tt dataFillScheme}. Depending
@@ -138,6 +151,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: numOwnedElements
 
     integer                         :: l_member, l_step
+    integer                         :: l_param1I4, l_param2I4
     character(len=16)               :: l_dataFillScheme
     
     if (present(rc)) rc = ESMF_SUCCESS
@@ -153,8 +167,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     l_member = 1
     if(present(member)) l_member = member
+    if(present(param1I4)) l_member = param1I4
+    l_param1I4 = l_member
+    l_param2I4 = l_member
+    if(present(param2I4)) l_param2I4 = param2I4
     l_step = 1
     if(present(step)) l_step = step
+    if(present(param3I4)) l_member = param3I4
     l_dataFillScheme = "sincos"
     if(present(dataFillScheme)) l_dataFillScheme = dataFillScheme
       
@@ -211,7 +230,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               return  ! bail out
             do i=lbound(dataPtrR8D1,1),ubound(dataPtrR8D1,1)
               dataPtrR8D1(i) = &
-                sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.)
+                cos(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.)
             enddo
             if (geomtype==ESMF_GEOMTYPE_MESH) then
               deallocate(coord1PtrR8D1)
@@ -249,8 +268,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               return  ! bail out
             do i=lbound(dataPtrR8D1,1),ubound(dataPtrR8D1,1)
               dataPtrR8D1(i) = &
-                sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.) * &
-                cos(real(l_member)*3.1416*(coord2PtrR8D1(i)+real(l_step))/180.)
+                cos(real(param1I4)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.) * &
+                sin(real(param2I4)*3.1416*(coord2PtrR8D1(i)+real(l_step))/90.)
             enddo
             if (geomtype==ESMF_GEOMTYPE_MESH) then
               deallocate(coordPtrR8D1, coord1PtrR8D1, coord2PtrR8D1)
@@ -307,24 +326,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
               do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
                 dataPtrR8D2(i,j) = &
-                  sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.) * &
-                  cos(real(l_member)*3.1416*(coord2PtrR8D1(j)+real(l_step))/180.)
+                  cos(real(l_param1I4)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.) * &
+                  sin(real(l_param2I4)*3.1416*(coord2PtrR8D1(j)+real(l_step))/90.)
               enddo
               enddo
             else if (coordDimCount(1)==2 .and. coordDimCount(2)==1) then
               do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
               do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
                 dataPtrR8D2(i,j) = &
-                  sin(real(l_member)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/180.) * &
-                  cos(real(l_member)*3.1416*(coord2PtrR8D1(j)+real(l_step))/180.)
+                  cos(real(l_param1I4)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/360.) * &
+                  sin(real(l_param2I4)*3.1416*(coord2PtrR8D1(j)+real(l_step))/90.)
               enddo
               enddo
             else if (coordDimCount(1)==1 .and. coordDimCount(2)==2) then
               do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
               do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
                 dataPtrR8D2(i,j) = &
-                  sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.) * &
-                  cos(real(l_member)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/180.)
+                  cos(real(l_param1I4)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.) * &
+                  sin(real(l_param2I4)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/90.)
               enddo
               enddo
             else
@@ -332,8 +351,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               do j=lbound(dataPtrR8D2,2),ubound(dataPtrR8D2,2)
               do i=lbound(dataPtrR8D2,1),ubound(dataPtrR8D2,1)
                 dataPtrR8D2(i,j) = &
-                  sin(real(l_member)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/180.) * &
-                  cos(real(l_member)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/180.)
+                  cos(real(l_param1I4)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/360.) * &
+                  sin(real(l_param2I4)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/90.)
               enddo
               enddo
             endif
@@ -392,8 +411,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               do i=lbound(dataPtrR8D3,2),ubound(dataPtrR8D3,2)
               do k=lbound(dataPtrR8D3,1),ubound(dataPtrR8D3,1)
                 dataPtrR8D3(k,i,j) = &
-                  sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.) * &
-                  cos(real(l_member)*3.1416*(coord2PtrR8D1(j)+real(l_step))/180.)
+                  cos(real(l_param1I4)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.) * &
+                  sin(real(l_param2I4)*3.1416*(coord2PtrR8D1(j)+real(l_step))/90.)
               enddo
               enddo
               enddo
@@ -402,8 +421,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               do i=lbound(dataPtrR8D3,2),ubound(dataPtrR8D3,2)
               do k=lbound(dataPtrR8D3,1),ubound(dataPtrR8D3,1)
                 dataPtrR8D3(k,i,j) = &
-                  sin(real(l_member)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/180.) * &
-                  cos(real(l_member)*3.1416*(coord2PtrR8D1(j)+real(l_step))/180.)
+                  cos(real(l_param1I4)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/360.) * &
+                  sin(real(l_param2I4)*3.1416*(coord2PtrR8D1(j)+real(l_step))/90.)
               enddo
               enddo
               enddo
@@ -412,8 +431,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               do i=lbound(dataPtrR8D3,2),ubound(dataPtrR8D3,2)
               do k=lbound(dataPtrR8D3,1),ubound(dataPtrR8D3,1)
                 dataPtrR8D3(k,i,j) = &
-                  sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.) * &
-                  cos(real(l_member)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/180.)
+                  cos(real(l_param1I4)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.) * &
+                  sin(real(l_param2I4)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/90.)
               enddo
               enddo
               enddo
@@ -423,8 +442,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               do i=lbound(dataPtrR8D3,2),ubound(dataPtrR8D3,2)
               do k=lbound(dataPtrR8D3,1),ubound(dataPtrR8D3,1)
                 dataPtrR8D3(k,i,j) = &
-                  sin(real(l_member)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/180.) * &
-                  cos(real(l_member)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/180.)
+                  cos(real(l_param1I4)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/360.) * &
+                  sin(real(l_param2I4)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/90.)
               enddo
               enddo
               enddo
@@ -456,9 +475,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             do j=lbound(dataPtrR8D3,2),ubound(dataPtrR8D3,2)
             do i=lbound(dataPtrR8D3,1),ubound(dataPtrR8D3,1)
               dataPtrR8D3(i,j,k) = &
-                sin(real(l_member)*3.1416*(coord1PtrR8D3(i,j,k)+real(l_step))/180.) * &
-                cos(real(l_member)*3.1416*(coord2PtrR8D3(i,j,k)+real(l_step))/180.) * &
-                sin(real(l_member)*3.1416*(coord3PtrR8D3(i,j,k)+real(l_step))/180.)
+                cos(real(l_member)*3.1416*(coord1PtrR8D3(i,j,k)+real(l_step))/360.) * &
+                sin(real(l_member)*3.1416*(coord2PtrR8D3(i,j,k)+real(l_step))/90.) * &
+                cos(real(l_member)*3.1416*(coord3PtrR8D3(i,j,k)+real(l_step))/360.)
             enddo
             enddo
             enddo
@@ -493,7 +512,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               return  ! bail out
             do i=lbound(dataPtrR4D1,1),ubound(dataPtrR4D1,1)
               dataPtrR4D1(i) = real( &
-                sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.)&
+                cos(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.)&
                 , ESMF_KIND_R4)
             enddo
             if (geomtype==ESMF_GEOMTYPE_MESH) then
@@ -532,9 +551,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               return  ! bail out
             do i=lbound(dataPtrR4D1,1),ubound(dataPtrR4D1,1)
               dataPtrR4D1(i) = real( &
-                sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.)&
+                cos(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.)&
                 * &
-                cos(real(l_member)*3.1416*(coord2PtrR8D1(i)+real(l_step))/180.)&
+                sin(real(l_member)*3.1416*(coord2PtrR8D1(i)+real(l_step))/90.)&
                 , ESMF_KIND_R4)
             enddo
             if (geomtype==ESMF_GEOMTYPE_MESH) then
@@ -592,9 +611,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               do j=lbound(dataPtrR4D2,2),ubound(dataPtrR4D2,2)
               do i=lbound(dataPtrR4D2,1),ubound(dataPtrR4D2,1)
                 dataPtrR4D2(i,j) = real( &
-                  sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.)&
+                  cos(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.)&
                   * &
-                  cos(real(l_member)*3.1416*(coord2PtrR8D1(j)+real(l_step))/180.)&
+                  sin(real(l_member)*3.1416*(coord2PtrR8D1(j)+real(l_step))/90.)&
                   , ESMF_KIND_R4)
               enddo
               enddo
@@ -602,9 +621,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               do j=lbound(dataPtrR4D2,2),ubound(dataPtrR4D2,2)
               do i=lbound(dataPtrR4D2,1),ubound(dataPtrR4D2,1)
                 dataPtrR4D2(i,j) = real( &
-                  sin(real(l_member)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/180.)&
+                  cos(real(l_member)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/360.)&
                   * &
-                  cos(real(l_member)*3.1416*(coord2PtrR8D1(j)+real(l_step))/180.)&
+                  sin(real(l_member)*3.1416*(coord2PtrR8D1(j)+real(l_step))/90.)&
                   , ESMF_KIND_R4)
               enddo
               enddo
@@ -612,9 +631,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               do j=lbound(dataPtrR4D2,2),ubound(dataPtrR4D2,2)
               do i=lbound(dataPtrR4D2,1),ubound(dataPtrR4D2,1)
                 dataPtrR4D2(i,j) = real( &
-                  sin(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/180.)&
+                  cos(real(l_member)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.)&
                   * &
-                  cos(real(l_member)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/180.)&
+                  sin(real(l_member)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/90.)&
                   , ESMF_KIND_R4)
               enddo
               enddo
@@ -623,9 +642,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               do j=lbound(dataPtrR4D2,2),ubound(dataPtrR4D2,2)
               do i=lbound(dataPtrR4D2,1),ubound(dataPtrR4D2,1)
                 dataPtrR4D2(i,j) = real( &
-                  sin(real(l_member)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/180.)&
+                  cos(real(l_member)*3.1416*(coord1PtrR8D2(i,j)+real(l_step))/360.)&
                   * &
-                  cos(real(l_member)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/180.)&
+                  sin(real(l_member)*3.1416*(coord2PtrR8D2(i,j)+real(l_step))/90.)&
                   , ESMF_KIND_R4)
               enddo
               enddo
@@ -665,11 +684,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             do j=lbound(dataPtrR4D3,2),ubound(dataPtrR4D3,2)
             do i=lbound(dataPtrR4D3,1),ubound(dataPtrR4D3,1)
               dataPtrR4D3(i,j,k) = real( &
-                sin(real(l_member)*3.1416*(coord1PtrR8D3(i,j,k)+real(l_step))/180.)&
+                cos(real(l_member)*3.1416*(coord1PtrR8D3(i,j,k)+real(l_step))/360.)&
                 * &
-                cos(real(l_member)*3.1416*(coord2PtrR8D3(i,j,k)+real(l_step))/180.)&
+                sin(real(l_member)*3.1416*(coord2PtrR8D3(i,j,k)+real(l_step))/90.)&
                 * &
-                sin(real(l_member)*3.1416*(coord3PtrR8D3(i,j,k)+real(l_step))/180.)&
+                cos(real(l_member)*3.1416*(coord3PtrR8D3(i,j,k)+real(l_step))/360.)&
                 , ESMF_KIND_R4)
             enddo
             enddo

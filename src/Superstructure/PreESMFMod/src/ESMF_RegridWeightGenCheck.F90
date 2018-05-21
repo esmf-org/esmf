@@ -160,7 +160,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (.not. present(checkMethod)) then
       checkMethodLocal = ESMF_RWGCHECKMETHOD_FIELD
     else
-      checkMethodLocal = ESMF_RWGCHECKMETHOD_ARRAY
+      checkMethodLocal = checkMethod
     endif
 
 #ifdef ESMF_NETCDF

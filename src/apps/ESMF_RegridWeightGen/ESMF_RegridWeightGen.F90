@@ -72,6 +72,7 @@ program ESMF_RegridWeightGenApp
   type(ESMF_NormType_Flag) :: normType
   logical            :: useSrcCorner, useDstCorner
   logical            :: useTilePathFlag
+  integer            :: meshdim
   
   terminateProg = .false.
   
@@ -651,6 +652,44 @@ program ESMF_RegridWeightGenApp
     else
       tilePath=' '
       useTilePathFlag = .false.
+    endif
+
+    ! -- if src or dst grid is a 1D UGRID file, there are many restrictions: 
+    !    1. if it is dst grid, no conservative regridding, if it is src grid,
+    !    only nearest neighbor regridding allowed. 2. only allow regridding on
+    !    the corner, 3. only allow weight_only file.
+    if (srcFileType == ESMF_FILEFORMAT_UGRID) then
+       call ESMF_UGridInq(srcfile, nodeCoordDim = meshdim, rc=rc) 
+       if (meshdim == 1) then
+         if (method /= 'neareststod' .and. method /= 'nearestdtos') then
+            write(*,*)
+            print *, 'ERROR: only nearest neighbor regridding is supported for'
+            print *, '1D source grid in UGRID format.'
+            call ESMF_Finalize(endflag=ESMF_END_ABORT)
+         endif
+         if (.not. useSrcCorner) then
+            write(*,*)
+            print *, 'ERROR: Only allow regridding on the corner for 1D source grid.'
+            print *, 'Use --src_loc corner to specify it'
+            call ESMF_Finalize(endflag=ESMF_END_ABORT)
+         endif
+       endif
+    endif
+    if (dstFileType == ESMF_FILEFORMAT_UGRID) then
+       call ESMF_UGridInq(dstfile, nodeCoordDim = meshdim, rc=rc) 
+       if (meshdim == 1) then
+         if (method == 'conserve' .or. method == 'conserve2nd') then
+            write(*,*)
+            print *, 'ERROR: conservative regridding is not supported for 1D destination grid.'
+            call ESMF_Finalize(endflag=ESMF_END_ABORT)
+         endif
+         if (.not. useDstCorner) then
+            write(*,*)
+            print *, 'ERROR: Only allow regridding on the corner for 1D destination grid.'
+            print *, 'Use --dst_loc corner to specify it'
+            call ESMF_Finalize(endflag=ESMF_END_ABORT)
+         endif
+       endif
     endif
 
     checkFlag = .false.

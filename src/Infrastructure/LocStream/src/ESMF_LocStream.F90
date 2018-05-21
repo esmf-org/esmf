@@ -2191,9 +2191,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     Create a new {\tt ESMF\_LocStream} object and add the coordinate keys and mask key
 !     to the LocStream using the coordinates defined in a grid file.  Currently, it 
 !     supports the SCRIP format, the ESMF unstructured grid format and the UGRID format.
-!     For a grid in ESMF or UGRID format, it can construct the LocStream using either 
+!     For a 2D or 3D grid in ESMF or UGRID format, it can construct the LocStream using either 
 !     the center coordinates or the corner coordinates.  For a SCRIP format grid file, the
-!     LocStream can only be constructed using the center coordinates.  
+!     LocStream can only be constructed using the center coordinates.  In
+!     addition, it supports 1D network topology in UGRID format.  When
+!     construction a LocStream using a 1D UGRID, it always uses node
+!     coordinates (i.e., corner coordinates). 
 !
 !     The arguments are:
 !     \begin{description}
@@ -2365,6 +2368,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                              faceCoordFlag=haveface, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
+          if (totaldims == 1) then
+             call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                    msg="1D grid does not have face coordinates", &
+                    ESMF_CONTEXT, rcToReturn=rc)
+             return
+          endif
           if (.not. haveface) then
              call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
                     msg="The grid file does not have face coordinates", &
@@ -2418,7 +2427,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
           deallocate(coord2D)
        elseif (localfileformat == ESMF_FILEFORMAT_UGRID) then
-          allocate(coord2D(localcount, totaldims))
+          if (totaldims == 1) then
+	      allocate(coord2D(localcount, 2))
+	  else
+	      allocate(coord2D(localcount, totaldims))
+          endif
           call ESMF_UGridGetCoords(filename, meshid, coord2D, &
                                 starti, localcount, localcenterflag, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

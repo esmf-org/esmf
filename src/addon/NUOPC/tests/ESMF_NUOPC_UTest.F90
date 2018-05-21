@@ -178,7 +178,7 @@ program ESMF_NUOPC_UTest
 
   !LOCAL VARIABLES:
   type(ESMF_VM)           :: vm
-  integer                 :: petCount, localPet
+  integer                 :: petCount, localPet, slotCount
   type(ESMF_Time)         :: startTime, stopTime
   type(ESMF_TimeInterval) :: timeStep
   type(ESMF_Clock)        :: clockA, clockB, clockC
@@ -300,10 +300,33 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_DriverSetRunSequence() Test"
+  write(name, *) "NUOPC_DriverGet() slotCount Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_DriverGet(gridComp, slotCount=slotCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_DriverGet() slotCount validate Test"
+  write(failMsg, *) "The slotCount value does not validate"
+  call ESMF_Test((slotCount==1), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_DriverSetRunSequence() with correct slot Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_DriverSetRunSequence(gridComp, slot=1, clock=clockC, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_DriverSetRunSequence() with wrong slot Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_DriverSetRunSequence(gridComp, slot=2, clock=clockC, rc=rc)
+  call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -312,6 +335,21 @@ program ESMF_NUOPC_UTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_DriverNewRunSequence(gridComp, slotCount=2, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_DriverGet() slotCount Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_DriverGet(gridComp, slotCount=slotCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_DriverGet() slotCount validate Test"
+  write(failMsg, *) "The slotCount value does not validate"
+  call ESMF_Test((slotCount==2), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -349,6 +387,21 @@ program ESMF_NUOPC_UTest
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
   
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_DriverGet() slotCount Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call NUOPC_DriverGet(gridComp, slotCount=slotCount, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_DriverGet() slotCount validate Test"
+  write(failMsg, *) "The slotCount value does not validate"
+  call ESMF_Test((slotCount==1), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "NUOPC_FreeFormatGetLine() Test"
@@ -703,6 +756,14 @@ program ESMF_NUOPC_UTest
   write(name, *) "NUOPC_FreeFormatDestroy() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call NUOPC_FreeFormatDestroy(fdFF, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "NUOPC_GetTimestamp() for Field Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  flag = NUOPC_GetTimestamp(field, stopTime, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

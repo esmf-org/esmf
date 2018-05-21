@@ -142,7 +142,7 @@ program ESMF_FieldBundleSMMUTest
         !EX_UTest_Multi_Proc_Only
         call test_smm_1dbweak(rc)
         write(failMsg, *) ""
-        write(name, *) "FieldBundleSMM test using lpe for both src and dst, with halos weakly congruent"
+        write(name, *) "FieldBundleSMM test using lpe for both src and dst, with halos compatible"
         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)
@@ -730,7 +730,8 @@ subroutine test_field_bundle_smm_source_term_processing(srcTermProcessing, rc)
 
   integer, parameter :: fieldCount = 2
   integer, parameter :: dstMaxIndex(2) = (/10, 20/)
-  real, parameter :: tol = 10E-6
+  real(ESMF_KIND_R8), parameter :: tol = 1.D-4
+  real(ESMF_KIND_R8)            :: absDiff
 
   integer, intent(inout) :: srcTermProcessing(:), rc
 
@@ -743,6 +744,7 @@ subroutine test_field_bundle_smm_source_term_processing(srcTermProcessing, rc)
   real(ESMF_KIND_R8), pointer :: factorList(:), farrayPtrSrc(:, :), &
                                  farrayPtrDst(:, :)
   integer :: ii, jj, kk, failCount, shp(2)
+  character(len=160) :: msgString
 
   ! --------------------------------------------------------------------------------
   ! Create grids and field bundles. The source grid is slightly larger than than the
@@ -822,9 +824,12 @@ subroutine test_field_bundle_smm_source_term_processing(srcTermProcessing, rc)
     shp = shape(farrayPtrSrc)
     do ii=1,shp(1)
       do jj=1,shp(2)
-!        print *, abs(farrayPtrSrc(ii, jj) - farrayPtrDst(ii, jj))
-        if (abs(farrayPtrSrc(ii, jj) - farrayPtrDst(ii, jj)) .ge. tol) then
+        absDiff = abs(farrayPtrSrc(ii, jj) - farrayPtrDst(ii, jj))
+        if (absDiff .ge. tol) then
           failCount = failCount + 1
+          write(msgString,*) "Absolute difference above tolerance: ", farrayPtrSrc(ii, jj), &
+            " - ", farrayPtrDst(ii, jj), " = ", absDiff, " > ", tol
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         endif
       enddo
     enddo

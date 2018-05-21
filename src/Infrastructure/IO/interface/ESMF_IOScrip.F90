@@ -1000,6 +1000,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
       integer            :: totalsize, totallen
       integer            :: meshId
       integer            :: memstat
+      integer            :: dim
 
 #ifdef ESMF_NETCDF
       ! write out the indices and weights table sequentially to the output file
@@ -1291,8 +1292,13 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod)) then
             call ESMF_UGridInq(srcFile, srcmeshname, nodeCount=srcDim,  &
-                elementCount=srcNodeDim, units=srcunits, rc=status)
-                src_grid_corner =3
+                nodeCoordDim=dim, units=srcunits, rc=status)
+            ! If it is 1D network topology, there is no corner coordinates
+            if (dim==1) then 
+	      src_grid_corner = 0
+            else
+              src_grid_corner =3
+            endif
           else
             call ESMF_UGridInq(srcFile, srcmeshname, elementCount=srcDim, &
                 maxNodePElement=src_grid_corner, units=srcunits, &
@@ -1382,8 +1388,12 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_STOD%regridmethod .or. &
               methodlocal%regridmethod ==ESMF_REGRIDMETHOD_NEAREST_DTOS%regridmethod)) then
             call ESMF_UGridInq(dstFile, dstmeshname, nodeCount=dstDim,  &
-                elementCount=dstNodeDim, units=dstunits, rc=status)
-                dst_grid_corner =3
+                nodeCoordDim=dim, units=dstunits, rc=status)
+            if (dim==1) then 
+	      dst_grid_corner = 0
+            else
+              dst_grid_corner = 3
+            endif
           else
             call ESMF_UGridInq(dstFile, dstmeshname, elementCount=dstDim, &
                 maxNodePElement=dst_grid_corner, units=dstunits, &
@@ -2240,7 +2250,6 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
              ESMF_SRCLINE,trim(srcFile),&
              rc)) return
         else if (srcFileTypeLocal == ESMF_FILEFORMAT_UGRID) then
-           ! ESMF unstructured grid
            call ESMF_UGridInq(srcfile, srcmeshname, meshId=meshId, faceCoordFlag=faceCoordFlag)
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4334,7 +4343,6 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
       if (ESMF_LogFoundDeallocError(memstat,  &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
-      print *, PetNo, ' read block ', startConn, totalConn
       ncStatus = nf90_get_var(ncid, VarNo, elementConn, start=(/startConn/), &
                               count=(/totalConn/))
       if (CDFCheckError (ncStatus, &
@@ -4389,13 +4397,22 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     if (ncStatus == nf90_noerror) then
       if (startIndex == 0) then
          do i=1,totalConn
-           if (elementConn(i) /= ESMF_MESH_POLYBREAK) then
+           if (elementConn(i) >= 0) then
               elementConn(i)=elementConn(i)+1
            endif
          enddo
       endif
     endif
 
+    ! Check for negative index values that is not defiend as ESMF_MESH_POLYBREAK
+    do i=1,totalConn
+       if (elementConn(i) < 0 .and. elementConn(i) /= ESMF_MESH_POLYBREAK) then
+           call ESMF_LogSetError(rcToCheck=ESMF_FAILURE, &
+                msg="- negative index found in elementConn table", &
+                ESMF_CONTEXT, rcToReturn=rc)
+           return
+       endif
+    enddo          
     if (present(elementMask)) then
        allocate(elementMask(localcount), stat=memstat)
        if (ESMF_LogFoundAllocError(memstat,  &

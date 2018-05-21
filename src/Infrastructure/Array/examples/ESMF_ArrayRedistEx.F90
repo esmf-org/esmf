@@ -130,29 +130,17 @@ program ESMF_ArrayRedistEx
 ! \begin{sloppypar}
 ! The use of the precomputed {\tt redistHandle} is {\em not} restricted to
 ! the ({\tt srcArray}, {\tt dstArray}) pair. Instead the {\tt redistHandle}
-! can be used to redistribute data between any two Arrays that are weakly 
-! congruent to the Array pair used during precomputation. Arrays are 
-! {\em congruent} if they are defined on DistGrids that match with 
-! {\tt ESMF\_DISTGRIDMATCH\_EXACT} or higher, and have matching DE-local
-! array allocations (i.e. the same amount of padding around the exclusive 
-! region as well as the same shape in the undistributed dimensions). For Arrays
-! to be {\em weakly} congruent the shape and size of the undistributed
-! dimensions that have a smaller stride than the first distributed dimension
-! need not be the same. This definition covers even the case where an Array 
-! does not have any undistributed dimensions.
+! can be used to redistribute data between any two Arrays that are compatible
+! with the Array pair used during precomputation. I.e. any pair of Arrays that
+! matches {\tt srcArray} and {\tt dstArray} in {\em type}, {\em kind}, and 
+! memory layout of the {\em distributed} dimensions. However, the size, number, 
+! and index order of {\em undistributed} dimensions may be different.
+! See section \ref{RH:Reusability} for a more detailed discussion of
+! RouteHandle reusability.
 ! \end{sloppypar}
 !
-! For instance, an Array where the first two dimensions are undistributed, 
-! and are of size 5 and 6 (i.e. undistributed shape (5,6)), is weakly congruent
-! to an Array that only has a single undistributed first dimension. Furthermore,
-! the size of this single undistributed dimension is not restricted by the
-! number of undistributed elements in the first Array (i.e. here it does not
-! have to be 5x6=30). The Array is also weakly congruent to an Array that does
-! not have a first undistributed dimension at all. In either case the only 
-! restriction is that the distributed dimensions must be congruent.
-!
-! The transferability of RouteHandles between Array pairs that are weakly
-! congruent can greatly reduce the number of communication store calls needed.
+! The transferability of RouteHandles between Array pairs can greatly reduce
+! the number of communication store calls needed.
 ! In a typical application Arrays are often defined on the same decomposition,
 ! typically leading to congruent distributed dimensions. However, these Arrays
 ! do not always have the same shape or size in the undistributed dimensions.
@@ -188,13 +176,10 @@ program ESMF_ArrayRedistEx
 !BOE
 ! The following variation of the code shows that the same RouteHandle can be
 ! applied to an Array pair where the number of undistributed dimensions does
-! not match between source and destination Array. The two requirements are 
-! simply that each side is weakly congruent to the Array used during store, and
-! that the {\em total} number of undistributed elements on source and 
-! destination side is the same. Here we prepare a source Array with two leading
-! undistributed dimensions that multiply out to 2x5=10 undistributed elements.
-! The destination array is the same as before with only a single leading 
-! undistributed dimension of size 10.
+! not match between source and destination Array. Here we prepare a source
+! Array with two undistributed dimensions that multiply out to 2x5=10 
+! undistributed elements. The destination array is the same as before with 
+! only a single leading undistributed dimension of size 10.
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec4d, typekind=ESMF_TYPEKIND_R8, rank=4, rc=rc)

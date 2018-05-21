@@ -41,29 +41,39 @@
 !EOP
 !------------------------------------------------------------------------------
    subroutine f_esmf_statecreate(state, name, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_statecreate"
 
        use ESMF_UtilTypesMod
+       use ESMF_LogErrMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
        implicit none
 
        type(ESMF_State) :: state
-      character(len=*), intent(in) :: name
-      integer, intent(out) :: rc
+       character(len=*), intent(in) :: name
+       integer, intent(out) :: rc
 
+       integer :: localrc
 
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
 
-       state = ESMF_StateCreate(name=name, rc=rc)
-               
+       state = ESMF_StateCreate(name=name, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       rc = localrc
     
    end subroutine f_esmf_statecreate
 
 !------------------------------------------------------------------------------
    subroutine f_esmf_stateaddarray(state, array, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_stateaddarray"
 
        use ESMF_UtilTypesMod
+       use ESMF_LogErrMod
       !use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
        use ESMF_ArrayCreateMod
@@ -71,10 +81,12 @@
 
        type(ESMF_State) :: state        !inout
        type(ESMF_Array) :: array        !in
-      integer, intent(out) :: rc        !out
+       integer, intent(out) :: rc       !out
 
        ! local variable
        type(ESMF_Array) :: farray
+
+       integer :: localrc
 
        ! Must first create a proper ESMF_Array that contains the 
        ! required "isInit" class member.
@@ -83,20 +95,30 @@
        rc = ESMF_RC_NOT_IMPL
 
        ! Copy the this pointer a new ESMF_Array object
-       call ESMF_ArrayCopyThis(array, farray, rc)
+       call ESMF_ArrayCopyThis(array, farray, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
        !  set the valid init code of the new object
-       call ESMF_ArraySetInitCreated(farray, rc)
+       call ESMF_ArraySetInitCreated(farray, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
-       call ESMF_StateAdd(state=state, arrayList=(/farray/), rc=rc)
+       call ESMF_StateAdd(state=state, arrayList=(/farray/), rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
+       rc = localrc
 
    end subroutine f_esmf_stateaddarray
 
 !------------------------------------------------------------------------------
    subroutine f_esmf_stateaddfield(state, field, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_stateaddfield"
 
        use ESMF_UtilTypesMod
+       use ESMF_LogErrMod
       !use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
        use ESMF_FieldMod
@@ -104,17 +126,26 @@
 
        type(ESMF_State) :: state        !inout
        type(ESMF_Field) :: field        !in
-      integer, intent(out) :: rc        !out
+       integer, intent(out) :: rc       !out
+
+       integer :: localrc
 
        ! field is directly usable - it is a deep class implemented in Fortran
-       call ESMF_StateAdd(state=state, fieldList=(/field/), rc=rc)
+       call ESMF_StateAdd(state=state, fieldList=(/field/), rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       rc = localrc
 
    end subroutine f_esmf_stateaddfield
 
 !------------------------------------------------------------------------------
    subroutine f_esmf_stategetarray(state, arrayName, array, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_stategetarray"
 
        use ESMF_UtilTypesMod
+       use ESMF_LogErrMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
        use ESMF_ArrayCreateMod
@@ -123,29 +154,39 @@
        type(ESMF_State) :: state        !in
        character(len=*) :: arrayName    !in
        type(ESMF_Array) :: array        !out
-      integer, intent(out) :: rc        !out
+       integer, intent(out) :: rc       !out
 
        ! local variable
        type(ESMF_Array) :: farray
+
+       integer :: localrc
 
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
 
        call ESMF_StateGet(state=state, itemName=arrayName, &
-                               array=farray, rc=rc)
+                               array=farray, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
        ! the array object returned to the C interface must consist only of the
        ! this pointer. It must not contain the isInit member.
-       call ESMF_ArrayCopyThis(farray, array, rc)
+       call ESMF_ArrayCopyThis(farray, array, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
+       rc = localrc
 
    end subroutine f_esmf_stategetarray
 
 !------------------------------------------------------------------------------
 
    subroutine f_esmf_stategetfield(state, fieldName, field, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_stategetfield"
 
        use ESMF_UtilTypesMod
+       use ESMF_LogErrMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
        use ESMF_FieldMod
@@ -154,13 +195,19 @@
        type(ESMF_State) :: state        !in
        character(len=*) :: fieldName    !in
        type(ESMF_Field) :: field        !out
-      integer, intent(out) :: rc        !out
+       integer, intent(out) :: rc       !out
+
+       integer :: localrc
 
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
 
        call ESMF_StateGet(state=state, itemName=fieldName, &
-                               field=field, rc=rc)
+                               field=field, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       rc = localrc
 
    end subroutine f_esmf_stategetfield
 
@@ -168,36 +215,54 @@
 
 
    subroutine f_esmf_stateprint(state, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_stateprint"
        use ESMF_UtilTypesMod
+       use ESMF_LogErrMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
        implicit none
 
        type(ESMF_State) :: state
-       integer :: rc
+       integer, intent(out) :: rc
+
+       integer :: localrc
 
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
 
-       call ESMF_StatePrint(state,rc=rc)
+       call ESMF_StatePrint(state,rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       rc = localrc
 
    end subroutine f_esmf_stateprint
 
 !------------------------------------------------------------------------------
 
    subroutine f_esmf_statedestroy(state, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_statedestroy"
        use ESMF_UtilTypesMod
+       use ESMF_LogErrMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
        implicit none
 
        type(ESMF_State) :: state
-       integer :: rc              
+       integer, intent(out) :: rc
+
+       integer :: localrc
 
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
 
-       call ESMF_StateDestroy(state, rc=rc)
+       call ESMF_StateDestroy(state, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       rc = localrc
     
    end subroutine f_esmf_statedestroy
 
@@ -236,6 +301,8 @@
 
 !------------------------------------------------------------------------------
    subroutine f_esmf_stateadddata(statep, name, func, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_stateadddata"
        use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
@@ -254,6 +321,8 @@
    end subroutine f_esmf_stateadddata
 
    subroutine f_esmf_stategetdata(statep, name, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_stategetdata"
        use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
@@ -271,6 +340,8 @@
    end subroutine f_esmf_stategetdata
 
    subroutine f_esmf_stateget(statep, name, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_stateget"
        use ESMF_UtilTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
@@ -293,8 +364,11 @@
 !------------------------------------------------------------------------------
 
    subroutine f_esmf_stategetnumitems(state, itemCount, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_stategetnumitems"
 
        use ESMF_UtilTypesMod
+       use ESMF_LogErrMod
        use ESMF_StateTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
@@ -306,12 +380,17 @@
        integer, intent(out)         :: rc           !out
 
        ! local variable
+       integer :: localrc
 
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
 
 !       call ESMF_StateGetInfo(state=state, itemCount=itemCount, rc=rc)
-       call ESMF_StateGet(state=state, itemCount=itemCount, rc=rc)
+       call ESMF_StateGet(state=state, itemCount=itemCount, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       rc = localrc
 
    end subroutine f_esmf_stategetnumitems
 
@@ -320,8 +399,11 @@
 
    subroutine f_esmf_stategetitemnames(state, numItems, itemNameList, &
                                        itemTypeList, rc)
+#undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_statgetitemnames"
 
        use ESMF_UtilTypesMod
+       use ESMF_LogErrMod
        use ESMF_StateTypesMod
        use ESMF_BaseMod    ! ESMF base class
        use ESMF_StateMod
@@ -340,6 +422,7 @@
        type(ESMF_StateItem_Flag)  :: localTypeList(numItems)
 
        integer                    :: i
+       integer                    :: localrc
 
        ! Initialize return code; assume routine not implemented
        rc = ESMF_RC_NOT_IMPL
@@ -349,12 +432,16 @@
 !                              stateitemtypeList=localTypeList, rc=rc)
        call ESMF_StateGet(state=state, itemCount=itemCount, &
                           itemNameList=localNameList, &
-                          itemtypeList=localTypeList, rc=rc)
+                          itemtypeList=localTypeList, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU,  &
+           ESMF_CONTEXT, rcToReturn=rc)) return
 
        do i = 1, itemCount
           itemTypeList(i) = localTypeList(i)
           itemNameList(i) = localNameList(i)
        enddo
+
+       rc = localrc
 
    end subroutine f_esmf_stategetitemnames
 

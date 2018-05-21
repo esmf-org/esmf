@@ -33,6 +33,7 @@ module NUOPC_Comp
   public NUOPC_CompCheckSetClock
   public NUOPC_CompDerive
   public NUOPC_CompFilterPhaseMap
+  public NUOPC_CompGet
   public NUOPC_CompSearchPhaseMap
   public NUOPC_CompSearchRevPhaseMap
   public NUOPC_CompSetClock
@@ -99,6 +100,11 @@ module NUOPC_Comp
   interface NUOPC_CompFilterPhaseMap
     module procedure NUOPC_GridCompFilterPhaseMap
     module procedure NUOPC_CplCompFilterPhaseMap
+  end interface
+  !---------------------------------------------
+  interface NUOPC_CompGet
+    module procedure NUOPC_GridCompGet
+    module procedure NUOPC_CplCompGet
   end interface
   !---------------------------------------------
   interface NUOPC_CompSearchPhaseMap
@@ -1613,7 +1619,7 @@ module NUOPC_Comp
     character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
     character(len=NUOPC_PhaseMapStringLength), pointer :: newPhases(:)
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
     call ESMF_GridCompGet(comp, name=name, rc=rc)
@@ -1718,7 +1724,7 @@ module NUOPC_Comp
     character(len=NUOPC_PhaseMapStringLength), pointer :: phases(:)
     character(len=NUOPC_PhaseMapStringLength), pointer :: newPhases(:)
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
     call ESMF_CplCompGet(comp, name=name, rc=rc)
@@ -1798,6 +1804,146 @@ module NUOPC_Comp
 
   !-----------------------------------------------------------------------------
 !BOP
+! !IROUTINE: NUOPC_CompGet - Access info from GridComp
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompGet()
+  subroutine NUOPC_GridCompGet(comp, name, verbosity, profiling, rc)
+! !ARGUMENTS:
+    type(ESMF_GridComp)                       :: comp
+    character(len=*),   intent(out), optional :: name
+    integer,            intent(out), optional :: verbosity
+    integer,            intent(out), optional :: profiling
+    integer,            intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Access information from a GridComp.
+! value.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: lName, valueString
+    
+    ! query the component for its name
+    call ESMF_GridCompGet(comp, name=lName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+      
+    if (present(name)) then
+      call ESMF_GridCompGet(comp, name=name, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+    endif
+
+    if (present(verbosity)) then
+      ! initialize the output value
+      verbosity = 0
+      ! query the component for Verbosity
+      call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+      verbosity = ESMF_UtilString2Int(valueString, &
+        specialStringList=(/"high", "max "/), &
+        specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+    endif
+    
+    if (present(profiling)) then
+      ! initialize the output value
+      profiling = 0
+      ! query the component for Profiling
+      call NUOPC_CompAttributeGet(comp, name="Profiling", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+      profiling = ESMF_UtilString2Int(valueString, &
+        specialStringList=(/"high", "max "/), &
+        specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+    endif
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_CompGet - Access info from CplComp
+! !INTERFACE:
+  ! Private name; call using NUOPC_CompGet()
+  subroutine NUOPC_CplCompGet(comp, name, verbosity, profiling, rc)
+! !ARGUMENTS:
+    type(ESMF_CplComp)                        :: comp
+    character(len=*),   intent(out), optional :: name
+    integer,            intent(out), optional :: verbosity
+    integer,            intent(out), optional :: profiling
+    integer,            intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+! Access information from a CplComp.
+! value.
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR)          :: lName, valueString
+    
+    ! query the component for its name
+    call ESMF_CplCompGet(comp, name=lName, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+
+    if (present(name)) then
+      call ESMF_CplCompGet(comp, name=name, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+    endif
+
+    if (present(verbosity)) then
+      ! initialize the output value
+      verbosity = 0
+      ! query the component for Verbosity
+      call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+      verbosity = ESMF_UtilString2Int(valueString, &
+        specialStringList=(/"high", "max "/), &
+        specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+    endif
+    
+    if (present(profiling)) then
+      ! initialize the output value
+      profiling = 0
+      ! query the component for Profiling
+      call NUOPC_CompAttributeGet(comp, name="Profiling", value=valueString, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+      profiling = ESMF_UtilString2Int(valueString, &
+        specialStringList=(/"high", "max "/), &
+        specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME)) return  ! bail out
+    endif
+    
+    ! return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: NUOPC_CompSearchPhaseMap - Search the Phase Map of a GridComp
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompSearchPhaseMap()
@@ -1827,7 +1973,7 @@ module NUOPC_Comp
     character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
     character(len=NUOPC_PhaseMapStringLength)           :: tempString
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
     call ESMF_GridCompGet(comp, name=name, rc=rc)
@@ -1925,7 +2071,7 @@ module NUOPC_Comp
     character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
     character(len=NUOPC_PhaseMapStringLength)           :: tempString
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
     call ESMF_CplCompGet(comp, name=name, rc=rc)
@@ -2027,7 +2173,7 @@ module NUOPC_Comp
     character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
     character(len=NUOPC_PhaseMapStringLength)           :: tempString
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
     call ESMF_GridCompGet(comp, name=name, rc=rc)
@@ -2132,7 +2278,7 @@ module NUOPC_Comp
     character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
     character(len=NUOPC_PhaseMapStringLength)           :: tempString
 
-    rc = ESMF_SUCCESS
+    if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the Component for info
     call ESMF_CplCompGet(comp, name=name, rc=rc)

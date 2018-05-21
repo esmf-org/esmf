@@ -263,14 +263,10 @@ program ESMF_FieldRegridEx
 ! sparse matrix from this call and/or a {\tt routeHandle}. If the user gets the sparse matrix then they are responsible for deallocating it, but other than that
 ! can use it as they wish. The {\tt routeHandle} can be used in the {\tt ESMF\_FieldRegrid()} call to perform the actual interpolation of data from the source 
 ! to the destination field. This interpolation can be repeated for the same set of Fields as long as the coordinates at the staggerloc involved in the
-! regridding in the associated grid object don't change. The same {\tt routeHandle} can also be used between any pair of Fields which is weakly congruent 
-! to the pair used to create the {\tt routeHandle}.  Congruent Fields possess matching DistGrids and the shape of the 
-! local array tiles matches between the Fields for every DE. For weakly congruent Fields the sizes                                                               
-! of the undistributed dimensions, that vary faster with memory than the first distributed dimension,                                                            
-! are permitted to be different. This means that the same routehandle can be applied to a large class                                                            
-! of similar Fields that differ in the number of elements in the left most undistributed dimensions.             
-! You can apply the routehandle between any set of Fields weakly congruent to the original Fields used to create the routehandle without 
-! incurring an error. However, if you want                                     
+! regridding in the associated grid object don't change. The same {\tt routeHandle} can also be used between any pair of Fields that matches the original 
+! pari in {\em type}, {\em kind}, and memory layout of the {\em gridded} dimensions. However, the size, number, and index order of {\em ungridded} dimensions
+! may be different. See section \ref{RH:Reusability} for a more detailed discussion of RouteHandle reusability.
+! However, if you want                                     
 ! the routehandle to be the same interpolation between the grid objects upon which the Fields are built as was calculated                                        
 ! with the original {\tt ESMF\_FieldRegridStore()} call, then there                                                                                              
 ! are additional constraints on the grid objects. To be the same interpolation, the grid objects upon which the                                                  
@@ -311,8 +307,7 @@ program ESMF_FieldRegridEx
 
        ! Use the routeHandle to regrid data from srcField to dstField.
        ! As described above, the same routeHandle can be used to 
-       ! regrid any source and destination Fields which are weakly
-       ! congruent to the original srcField and dstField. 
+       ! regrid a large class of different source and destination Fields. 
        call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
 !EOC
   if (localrc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)

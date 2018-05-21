@@ -1117,6 +1117,9 @@ StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
           call c_ESMC_StateItemSerialize(sip%otype, sip%namep, &
                                          buffer, length, offset, &
                                          linquireflag, localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
           select case (sip%otype%ot)
             case (ESMF_STATEITEM_FIELDBUNDLE%ot)
@@ -1155,8 +1158,19 @@ StateClsAddListMacro(ESMF_State, State, states, spp, STATE)
 #endif
               continue ! TODO: serialize
             case (ESMF_STATEITEM_UNKNOWN%ot)
-              continue ! TODO: serialize
+              localrc = ESMF_RC_INTNRL_INCONS
+              if (ESMF_LogFoundError(localrc, &
+                  msg='unknown state item type', &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            case default
+              localrc = ESMF_RC_INTNRL_INCONS
+              if (ESMF_LogFoundError(localrc, &
+                  msg='unrecognized state item type', &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
           end select
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
       enddo
 
