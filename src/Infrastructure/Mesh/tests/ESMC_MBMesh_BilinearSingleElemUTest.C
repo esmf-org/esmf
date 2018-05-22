@@ -95,7 +95,6 @@ bool weight_gen(MBMesh *mesh, PointList *pl) {
 
 MBMesh* create_mesh_quad_single(int &rc, bool cart) {
   //
-
   //  1.0   4 -------- 3  -pi/8
   //        |          |
   //  0.0   |    11    |   0
@@ -301,7 +300,6 @@ MBMesh* create_mesh_tri_single(int &rc, bool cart) {
 PointList* create_pointlist_for_quad_single(int &rc, bool cart) {
   //
   //
-
   //  0.0(0)   x
   //
   //              0.0
@@ -320,6 +318,7 @@ PointList* create_pointlist_for_quad_single(int &rc, bool cart) {
   double z[np];
 
   if (cart) {
+
     x[0] = 0.0;
     y[0] = 0.0;
     dim = 2;

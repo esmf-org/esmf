@@ -28,20 +28,21 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_Mesh.h"
-#include "ESMCI_MeshRead.h"
-#include "ESMCI_MeshRegrid.h" //only for the conservative flag in add_elements
-#include "ESMCI_MeshVTK.h"
-#include "ESMCI_ParEnv.h"
-#include "ESMCI_MeshUtils.h"
-#include "ESMCI_GlobalIds.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
-#include "ESMCI_FindPnts.h"
+
+#include "Mesh/include/ESMCI_Mesh.h"
+#include "Mesh/include/Legacy/ESMCI_MeshRead.h"
+#include "Mesh/include/Regridding/ESMCI_MeshRegrid.h" //only for the conservative flag in add_elements
+#include "Mesh/include/Legacy/ESMCI_MeshVTK.h"
+#include "Mesh/include/Legacy/ESMCI_ParEnv.h"
+#include "Mesh/include/Legacy/ESMCI_MeshUtils.h"
+#include "Mesh/include/Legacy/ESMCI_GlobalIds.h"
+#include "Mesh/include/Legacy/ESMCI_FindPnts.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
-#include "Mesh/include/ESMCI_Phedra.h"
+#include "Mesh/include/Legacy/ESMCI_Phedra.h"
 #include "Mesh/include/ESMCI_XGridUtil.h"
-#include "Mesh/include/ESMCI_MeshMerge.h"
+#include "Mesh/include/Legacy/ESMCI_MeshMerge.h"
 #include "Mesh/include/ESMCI_MeshRedist.h"
 #include "Mesh/include/ESMCI_MeshDual.h"
 //-----------------------------------------------------------------------------
@@ -101,12 +102,12 @@ void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, in
 void ESMCI_meshinfoserialize(int *intMeshFreed,
                              int *spatialDim, int *parametricDim,
                              char *buffer, int *length, int *offset,
-                             ESMC_InquireFlag *inquireflag, int *localrc,
+                             ESMC_InquireFlag *inquireflag, int *rc,
                              ESMCI_FortranStrLenArg buffer_l);
 
 void ESMCI_meshinfodeserialize(int *intMeshFreed,
                                int *spatialDim, int *parametricDim,
-                               char *buffer, int *offset, int *localrc,
+                               char *buffer, int *offset, int *rc,
                                ESMCI_FortranStrLenArg buffer_l);
 
 void ESMCI_meshserialize(Mesh **meshpp,

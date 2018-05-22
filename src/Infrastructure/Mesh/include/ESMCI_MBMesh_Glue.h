@@ -33,7 +33,8 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
-#include "ESMCI_FindPnts.h"
+
+#include "Mesh/include/Legacy/ESMCI_FindPnts.h"
 #include "Mesh/include/ESMCI_XGridUtil.h"
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -113,11 +114,11 @@ void ESMCI_meshcreateelemdistgrid(Mesh **meshpp, int *egrid, int *num_lelems, in
 
 void ESMCI_meshinfoserialize(int *intMeshFreed,
                 char *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *localrc,
+                ESMC_InquireFlag *inquireflag, int *rc,
                              ESMCI_FortranStrLenArg buffer_l);
 
 void ESMCI_meshinfodeserialize(int *intMeshFreed,
-                                 char *buffer, int *offset, int *localrc,
+                                 char *buffer, int *offset, int *rc,
                                ESMCI_FortranStrLenArg buffer_l);
 
 void ESMCI_meshserialize(Mesh **meshpp,

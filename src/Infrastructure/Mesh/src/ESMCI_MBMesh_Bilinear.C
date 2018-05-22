@@ -13,7 +13,7 @@
 // Take out if MOAB isn't being used
 #if defined ESMF_MOAB
 
-#include <Mesh/include/ESMCI_Interp.h>
+#include <Mesh/include/Regridding/ESMCI_Interp.h>
 
 #include <Mesh/include/ESMCI_MBMesh.h>
 #include <Mesh/include/ESMCI_MBMesh_Bilinear.h>

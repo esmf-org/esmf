@@ -9,20 +9,20 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMCI_Interp.h>
-#include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMCI_MEValues.h>
-#include <Mesh/include/ESMCI_PatchRecovery.h>
-#include <Mesh/include/ESMCI_MeshField.h>
-#include <Mesh/include/ESMCI_CommRel.h>
-#include <Mesh/include/ESMCI_MeshOBjConn.h>
-#include <Mesh/include/ESMCI_MeshObj.h>
-#include <Mesh/include/ESMCI_MeshUtils.h>
-#include <Mesh/include/ESMCI_ConserveInterp.h>
-#include <Mesh/include/ESMCI_Sintdnode.h>
-#include <Mesh/include/ESMCI_MeshVTK.h>
+#include <Mesh/include/Regridding/ESMCI_Interp.h>
+#include <Mesh/include/Legacy/ESMCI_Exception.h>
+#include <Mesh/include/Legacy/ESMCI_MEValues.h>
+#include <Mesh/include/Regridding/ESMCI_PatchRecovery.h>
+#include <Mesh/include/Legacy/ESMCI_MeshField.h>
+#include <Mesh/include/Legacy/ESMCI_CommRel.h>
+#include <Mesh/include/Legacy/ESMCI_MeshObjConn.h>
+#include <Mesh/include/Legacy/ESMCI_MeshObj.h>
+#include <Mesh/include/Legacy/ESMCI_MeshUtils.h>
+#include <Mesh/include/Regridding/ESMCI_ConserveInterp.h>
+#include <Mesh/include/Legacy/ESMCI_Sintdnode.h>
+#include <Mesh/include/Legacy/ESMCI_MeshVTK.h>
 #include <Mesh/include/ESMCI_XGridUtil.h>
-#include <Mesh/include/ESMCI_MeshRegrid.h>
+#include <Mesh/include/Regridding/ESMCI_MeshRegrid.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
 
 #include <cassert>

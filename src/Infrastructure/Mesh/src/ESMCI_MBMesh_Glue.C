@@ -32,7 +32,7 @@
 #include "ESMCI_CoordSys.h"
 
 #include "Mesh/include/ESMCI_MathUtil.h"
-#include "Mesh/include/ESMCI_MeshRegrid.h"
+#include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
 
 #include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_MBMesh_Util.h"
@@ -994,6 +994,10 @@ printf("    PET %d - split elems\n", localPet);
         elemMaskII=elemMaskII_wsplit;
       }
     }
+
+#ifdef DEBUG
+printf("    PET %d - addelems\n", localPet);
+#endif
 
 #ifdef DEBUG
 printf("    PET %d - addelems\n", localPet);

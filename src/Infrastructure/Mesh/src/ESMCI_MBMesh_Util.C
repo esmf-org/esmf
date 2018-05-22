@@ -17,13 +17,13 @@
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
-#include <Mesh/include/ESMCI_Exception.h>
+#include <Mesh/include/Legacy/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_MBMesh.h>
-#include <Mesh/include/ESMCI_WMat.h>
+#include <Mesh/include/Regridding/ESMCI_WMat.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
 #include <Mesh/include/ESMCI_MBMesh_BBox.h>
 #include <Mesh/include/ESMCI_MBMesh_Search.h>
-#include "Mesh/include/ESMCI_MeshTypes.h"
+#include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
 
 #include <iostream>
 #include <iterator>

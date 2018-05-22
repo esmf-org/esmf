@@ -14,7 +14,7 @@
 
 #include "ESMCI_Mesh.h"
 
-#include "Mesh/include/ESMCI_Regrid_Helper.h"
+#include "Mesh/include/Regridding/ESMCI_Regrid_Helper.h"
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
@@ -117,13 +117,13 @@
     static void meshinfoserialize(int *intMeshFreed,
                                   int *spatialDim, int *parametricDim,
                                   char *buffer, int *length, int *offset,
-                                  ESMC_InquireFlag *inquireflag, int *localrc,
+                                  ESMC_InquireFlag *inquireflag, int *rc,
                                   ESMCI_FortranStrLenArg buffer_l);
 
 
     static void meshinfodeserialize(int *intMeshFreed,
                                     int *spatialDim, int *parametricDim,
-                                    char *buffer, int *offset, int *localrc,
+                                    char *buffer, int *offset, int *rc,
                                     ESMCI_FortranStrLenArg buffer_l);
 
     void meshserialize(char *buffer, int *length, int *offset,

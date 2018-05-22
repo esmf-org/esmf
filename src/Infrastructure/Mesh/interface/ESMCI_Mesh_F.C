@@ -25,11 +25,11 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_ParEnv.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/ESMCI_ClumpPnts.h"
+#include "Mesh/include/Legacy/ESMCI_ParEnv.h"
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -215,27 +215,28 @@ extern "C" void FTN_X(c_esmc_meshcreateelemdistgrid)(MeshCap **meshpp, int *egri
 extern "C" void FTN_X(c_esmc_meshinfoserialize)(int *intMeshFreed,
                 int *spatialDim, int *parametricDim,
                 char *buffer, int *length, int *offset,
-                ESMC_InquireFlag *inquireflag, int *localrc,
+                ESMC_InquireFlag *inquireflag, int *rc,
                 ESMCI_FortranStrLenArg buffer_l){
 
   MeshCap::meshinfoserialize(intMeshFreed,
                              spatialDim, parametricDim,
                              buffer, length, offset,
-                             inquireflag, localrc,
+                             inquireflag, rc,
                              buffer_l);
 
 }
 
 
 extern "C" void FTN_X(c_esmc_meshinfodeserialize)(int *intMeshFreed,
-                                 int *spatialDim, int *parametricDim,
-                                 char *buffer, int *offset, int *localrc,
-                                 ESMCI_FortranStrLenArg buffer_l){
+                             int *spatialDim, int *parametricDim,
+                             char *buffer, int *offset,
+                             int *rc,
+                             ESMCI_FortranStrLenArg buffer_l){
 
   MeshCap::meshinfodeserialize(intMeshFreed,
-                               spatialDim, parametricDim,
-                               buffer, offset, localrc,
-                               buffer_l);
+                             spatialDim, parametricDim,
+                             buffer, offset, rc,
+                             buffer_l);
 }
 
 
@@ -252,8 +253,9 @@ extern "C" void FTN_X(c_esmc_meshserialize)(MeshCap **meshpp,
 
 
 extern "C" void FTN_X(c_esmc_meshdeserialize)(MeshCap **meshpp,
-                                 char *buffer, int *offset, int *rc,
-                                 ESMCI_FortranStrLenArg buffer_l){
+                             char *buffer, int *offset,
+                             int *rc,
+                             ESMCI_FortranStrLenArg buffer_l){
 
   *meshpp=MeshCap::meshdeserialize(buffer, offset, rc,
                              buffer_l);

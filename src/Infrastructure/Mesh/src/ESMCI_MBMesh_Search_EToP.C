@@ -13,25 +13,25 @@
 // Take out if MOAB isn't being used
 #if defined ESMF_MOAB
 
-#include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMCI_MeshOBjConn.h>
-#include <Mesh/include/ESMCI_MeshUtils.h>
-#include <Mesh/include/ESMCI_MEValues.h>
-#include <Mesh/include/ESMCI_Polynomial.h>
-#include <Mesh/include/ESMCI_MeshField.h>
-#include <Mesh/include/ESMCI_MeshTypes.h>
+#include <Mesh/include/Legacy/ESMCI_Exception.h>
+#include <Mesh/include/Legacy/ESMCI_MeshObjConn.h>
+#include <Mesh/include/Legacy/ESMCI_MeshUtils.h>
+#include <Mesh/include/Legacy/ESMCI_MEValues.h>
+#include <Mesh/include/Legacy/ESMCI_Polynomial.h>
+#include <Mesh/include/Legacy/ESMCI_MeshField.h>
+#include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
-#include <Mesh/include/ESMCI_Ftn.h>
-#include <Mesh/include/ESMCI_ParEnv.h>
-#include <Mesh/include/ESMCI_Sintdnode.h>
+#include <Mesh/include/Legacy/ESMCI_Ftn.h>
+#include <Mesh/include/Legacy/ESMCI_ParEnv.h>
+#include <Mesh/include/Legacy/ESMCI_Sintdnode.h>
 #include <Mesh/include/ESMCI_XGridUtil.h>
-#include <Mesh/include/ESMCI_Phedra.h>
+#include <Mesh/include/Legacy/ESMCI_Phedra.h>
 #include <Mesh/include/ESMCI_MBMesh.h>
-#include <Mesh/include/ESMCI_WMat.h>
+#include <Mesh/include/Regridding/ESMCI_WMat.h>
 #include <Mesh/include/ESMCI_MBMesh_BBox.h>
 #include <Mesh/include/ESMCI_MBMesh_Search_EToP.h>
 #include <Mesh/include/ESMCI_MBMesh_Util.h>
-#include <Mesh/include/ESMCI_Interp.h>
+#include <Mesh/include/Regridding/ESMCI_Interp.h>
 
 #include <iostream>
 #include <iterator>
@@ -45,13 +45,12 @@
 
 #include <Mesh/include/ESMCI_MBMesh_Mapping.h>
 
-#include "ESMCI_BBox.h"
+#include "Mesh/include/Legacy/ESMCI_BBox.h"
 #include "moab/ElemEvaluator.hpp"
 
 #include "moab/CartVect.hpp"
 // for SphericalQuad
 //#include "ElemUtil.hpp"
-
 
 using std::vector;
 
@@ -221,10 +220,15 @@ static int found_func(void *c, void *y) {
   double pcoords[3];
 
   if (nd == 2) {
-    ElemEvaluator ee = ElemEvaluator(si->mesh->mesh, sr->src_elem);
-    ee.reverse_eval(si->coords, 1e-8, 1e-6, pcoords, &is_inside);
+    // ElemEvaluator ee = ElemEvaluator(si->mesh->mesh, sr->src_elem);
+    // ee.reverse_eval(si->coords, 1e-8, 1e-6, pcoords, &is_inside);
+
+    MBElemMap map = MBElemMap();
+    bool inside = map.cartesian_eval(coords, si->coords, num_nodes, pcoords, NULL);
+    is_inside = static_cast<int> (inside);
+
 #ifdef DEBUG_PCOORDS
-    printf("Cartesian parametric coordinates via MOAB\n");
+    printf("Cartesian parametric coordinates via ESMF\n");
     printf("  Node %d params = [%f,%f,%f]\n", si->snr.dst_gid, pcoords[0], pcoords[1], pcoords[2]);
 #endif
     // translate pcoords from [-1,1] to [0,1]
@@ -244,7 +248,6 @@ static int found_func(void *c, void *y) {
     si->snr.pcoord[0] = pcoords[0];
     si->snr.pcoord[1] = pcoords[1];
     si->snr.pcoord[2] = pcoords[2];
-
 
 #ifdef DEBUG_PCOORDS
     printf("  Node %d pcoords = [", si->snr.dst_gid);

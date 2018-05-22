@@ -9,16 +9,16 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMCI_ConserveInterp.h>
-#include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMCI_MeshOBjConn.h>
-#include <Mesh/include/ESMCI_MeshUtils.h>
-#include <Mesh/include/ESMCI_MEValues.h>
-#include <Mesh/include/ESMCI_Polynomial.h>
-#include <Mesh/include/ESMCI_MeshField.h>
-#include <Mesh/include/ESMCI_MeshTypes.h>
-#include <Mesh/include/ESMCI_Ftn.h>
-#include <Mesh/include/ESMCI_ParEnv.h>
+#include <Mesh/include/Regridding/ESMCI_ConserveInterp.h>
+#include <Mesh/include/Legacy/ESMCI_Exception.h>
+#include <Mesh/include/Legacy/ESMCI_MeshObjConn.h>
+#include <Mesh/include/Legacy/ESMCI_MeshUtils.h>
+#include <Mesh/include/Legacy/ESMCI_MEValues.h>
+#include <Mesh/include/Legacy/ESMCI_Polynomial.h>
+#include <Mesh/include/Legacy/ESMCI_MeshField.h>
+#include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
+#include <Mesh/include/Legacy/ESMCI_Ftn.h>
+#include <Mesh/include/Legacy/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
 
 #include <iostream>

@@ -473,7 +473,7 @@ int main(int argc, char *argv[]) {
   if (rc != ESMF_SUCCESS) return 0;
 
 // RLO: disable for now, segfault in PointList destructor on some platforms
-#if 0
+#if 1
 #if defined ESMF_MOAB
   MBMesh *mesh_quad_single;
   MBMesh *mesh_tri_single;

@@ -104,7 +104,6 @@ void MeshCap::MeshCap_to_PointList(ESMC_MeshLoc_Flag meshLoc,
 }
 
 
-
 // returns NULL if unsuccessful
 MeshCap *MeshCap::create_from_ptr(void **_mesh,
                               bool _is_esmf_mesh, int *rc) {
