@@ -551,6 +551,25 @@ end interface
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
+! !IROUTINE: ESMF_GridCreateMosaic -- Generic interface
+
+! !INTERFACE:
+interface ESMF_GridCreateMosaic
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_GridCreateMosaicReg
+      module procedure ESMF_GridCreateMosaicIReg
+
+
+! !DESCRIPTION:
+! This interface provides a single entry point for the various
+!  types of {\tt ESMF\_GridCreateMosaic} functions.
+!EOPI
+end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
 ! !IROUTINE: ESMF_GridGet -- Get information from a Grid
 
 ! !INTERFACE:
@@ -14065,6 +14084,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          center stagger location. The second index steps through the tiles. If each tile is 
 !          decomposed into different number of DEs, the first dimension is the maximal DEs of 
 !          all the tiles.  
+!     \item[{[coordSys]}]
+!          The coordinate system of the grid coordinate data.
+!          Only ESMF\_COORDSYS\_SPH\_DEG and ESMF\_COORDSYS\_SPH\_RAD are supported. 
+!          If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
+!     \item[{[coordTypeKind]}]
+!          The type/kind of the grid coordinate data. Only ESMF\_TYPEKIND\_R4
+!          and ESMF\_TYPEKIND\_R8 are supported.
+!          If not specified then defaults to ESMF\_TYPEKIND\_R8.
 !     \item[{[deLabelList]}]
 !          List assigning DE labels to the default sequence of DEs. The default
 !          sequence is given by the column major order in the sequence as they appear
@@ -14074,14 +14101,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          The list of stagger locations to fill with coordinates. Only {\tt ESMF\_STAGGERLOC\_CENTER}
 !          and {\tt ESMF\_STAGGERLOC\_CORNER} are supported.  If not present, no coordinates
 !          will be added or filled.
-!     \item[{[coordSys]}]
-!          The coordinate system of the grid coordinate data.
-!          Only ESMF\_COORDSYS\_SPH\_DEG and ESMF\_COORDSYS\_SPH\_RAD are supported. 
-!          If not specified then defaults to ESMF\_COORDSYS\_SPH\_DEG.
-!     \item[{[coordTypeKind]}]
-!          The type/kind of the grid coordinate data. Only ESMF\_TYPEKIND\_R4
-!          and ESMF\_TYPEKIND\_R8 are supported.
-!          If not specified then defaults to ESMF\_TYPEKIND\_R8.
 !     \item[{[delayout]}]
 !          Optional ESMF\_DELayout object to be used. If a delayout object is specified,
 !          the number of DEs must match with the total DEs defined in {\tt countsPerDEDim1PTile}
@@ -14145,11 +14164,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
-
-  !------------------------------------------------------------------------
-  ! default decomposition. The number of DEs has to be multiple of 6.
-  ! If the total PET count is less than 6, some PETs will get more than one DE.
-  ! Otherwise, total DEs is always less than or equal to total PETs.
 
   ! calculate totalDE based on the decomposition
   tiles=size(countsPerDEDim1PTile,2)
@@ -14675,16 +14689,16 @@ end subroutine CalculateConnection
 
 !-------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridCreateMosaic()"
+#define ESMF_METHOD "ESMF_GridCreateMosaicReg()"
 !BOP
 ! !IROUTINE: ESMF_GridCreateMosaic - Create a multi-tile Grid object with regular decomposition using the grid definition from a GRIDSPEC Mosaic file.
 
 ! !INTERFACE:
-  function ESMF_GridCreateMosaic(filename,keywordEnforcer, regDecompPTile, decompflagPTile, &
+  function ESMF_GridCreateMosaicReg(filename,keywordEnforcer, regDecompPTile, decompflagPTile, &
         deLabelList, staggerLocList, delayout, indexflag, name, tileFilePath, rc)
 !
 ! !RETURN VALUE:
-    type(ESMF_Grid) :: ESMF_GridCreateMosaic
+    type(ESMF_Grid) :: ESMF_GridCreateMosaicReg
 !
 ! !ARGUMENTS:
     character(len=*),               intent(in)            :: filename
@@ -15021,9 +15035,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-      ESMF_GridCreateMosaic = newgrid
+      ESMF_GridCreateMosaicReg = newgrid
     else
-      ESMF_GridCreateMosaic = grid
+      ESMF_GridCreateMosaicReg = grid
     endif
 
     ! - deallocate connectionList
@@ -15135,7 +15149,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        enddo
     endif
 
-    ESMF_GridCreateMosaic = grid
+    ESMF_GridCreateMosaicReg = grid
     deallocate(minIndexPDe, maxIndexPDe)
   endif
 
@@ -15146,7 +15160,491 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   return
 
-end function ESMF_GridCreateMosaic
+end function ESMF_GridCreateMosaicReg
+!-------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridCreateMosaicIReg()"
+!BOP
+! !IROUTINE: ESMF_GridCreateMosaic - Create a multi-tile Grid object with irregular decomposition using the grid definition from a GRIDSPEC Mosaic file.
+
+! !INTERFACE:
+  function ESMF_GridCreateMosaicIReg(filename,                  &
+          countsPerDEDim1PTile, countsPerDEDim2PTile,           &
+	  keywordEnforcer,                                      &
+          deLabelList, staggerLocList,                          &
+          delayout, indexflag, name, tileFilePath, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_Grid) :: ESMF_GridCreateMosaicIReg
+!
+! !ARGUMENTS:
+    character(len=*),               intent(in)            :: filename
+    integer,                        intent(in)            :: countsPerDEDim1PTile(:,:)
+    integer,                        intent(in)            :: countsPerDEDim2PTile(:,:)
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                        intent(in),  optional :: deLabelList(:)
+    type(ESMF_StaggerLoc),          intent(in),  optional :: staggerLocList(:)
+    type(ESMF_DELayout),            intent(in),  optional :: delayout
+    type(ESMF_Index_Flag),          intent(in),  optional :: indexflag
+    character(len=*),               intent(in),  optional :: name
+    character(len=*),               intent(in),  optional :: tileFilePath
+    integer,                        intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!   Create a multiple-tile {\tt ESMF\_Grid} based on the definition from a GRIDSPEC Mosaic file and its associated
+!   tile files using irregular decomposition.  Each tile can have different decomposition.  The tile connections
+!   are defined in a GRIDSPEC format Mosaic file.
+!   And each tile's coordination is defined in a separate NetCDF file.  The coordinates defined
+!   in the tile file is so-called "Super Grid".  In other words, the dimensions of the coordinate variables are
+!   {\tt (2*xdim+1, 2*ydim+1)} if {\tt (xdim, ydim)} is the size of the tile.  The Super Grid combines the corner,
+!   the edge and the center coordinates in one big array.  A Mosaic file may contain just one tile.  If a Mosaic contains
+!   multiple tiles.  Each tile is a logically rectangular lat/lon grid.  Currently, all the tiles have to be the same size.
+!   We will remove this limitation in the future release.
+!
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[filename]
+!          The name of the GRIDSPEC Mosaic file.
+!     \item[countsPerDEDim1PTile]
+!          This array specifies the number of cells per DE for index dimension 1 for the
+!          center stagger location. The second index steps through the tiles. If each tile is 
+!          decomposed into different number of DEs, the first dimension is the maximal DEs of 
+!          all the tiles.  
+!     \item[countsPerDEDim2PTile]
+!          This array specifies the number of cells per DE for index dimension 2 for the
+!          center stagger location. The second index steps through the tiles. If each tile is 
+!          decomposed into different number of DEs, the first dimension is the maximal DEs of 
+!          all the tiles.  
+!     \item[{[deLabelList]}]
+!          List assigning DE labels to the default sequence of DEs. The default
+!          sequence is given by the column major order in the sequence as they appear
+!          in {\tt countsPerDEDim1PTile}, followed by {\tt countsPerDEDim2PTile}, then the 
+!          tile index.
+!     \item[{[staggerLocList]}]
+!          The list of stagger locations to fill with coordinates. Please see Section~\ref{const:staggerloc}
+!          for a description of the available stagger locations. If not present, no coordinates
+!          will be added or filled.
+!     \item[{[delayout]}]
+!          Optional ESMF\_DELayout object to be used. If a delayout object is specified,
+!          the number of DEs must match with the total DEs defined in {\tt countsPerDEDim1PTile}
+!          and {\tt countsPerDEDim2PTile}.
+!     \item[{[indexflag]}]
+!          Indicates the indexing scheme to be used in the new Grid. Please see
+!          Section~\ref{const:indexflag} for the list of options. If not present,
+!          defaults to ESMF\_INDEX\_DELOCAL.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+!     \item[{[tileFilePath]}]
+!          Optional argument to define the path where the tile files reside. If it
+!          is given, it overwrites the path defined in {\tt gridlocation} variable
+!          in the mosaic file.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+    type(ESMF_VM)                               :: vm
+    integer                                     :: PetNo, PetCnt
+    integer                                     :: totalDE, nxy, nx, ny, bigFac
+    integer                                     :: sizex, sizey
+    type(ESMF_DELayout)                         :: defaultDELayout
+    type(ESMF_Grid)                             :: grid, newgrid
+    type(ESMF_DistGrid)                         :: distgrid, newdistgrid
+    integer                                     :: localrc
+    type(ESMF_DistGridConnection), allocatable :: connectionList(:)
+    integer                                    :: i, j, k, conn
+    integer                                    :: localDeCount, localDe, DeNo, tile
+    real(kind=ESMF_KIND_R8),  pointer          :: lonPtr(:,:), latPtr(:,:)
+    real(kind=ESMF_KIND_R8),  pointer          :: lonCornerPtr(:,:), latCornerPtr(:,:)
+    integer                                    :: tileCount
+    integer                                    :: connectionCount
+    integer                                    :: tileSize
+    integer                                    :: starti, startj, sizei, sizej
+    integer                                    :: ind, rem, rem1, rem2
+    integer                                    :: start(2), count(2)
+    integer, pointer                           :: minIndexPTile(:,:)
+    integer, pointer                           :: maxIndexPTile(:,:)
+    integer, pointer                           :: minIndexPDe(:,:)
+    integer, pointer                           :: maxIndexPDe(:,:)
+    integer, allocatable                       :: regDecomp2(:,:)
+    integer, allocatable                       :: demap(:)
+    integer                                    :: decount
+    !real(ESMF_KIND_R8)                        :: starttime, endtime
+    character(len=ESMF_MAXPATHLEN)             :: tempname
+    type(ESMF_Mosaic)                          :: mosaic
+    integer                                    :: totallen
+    integer                                    :: posVec(2), orientVec(2)
+    real(kind=ESMF_KIND_R4), parameter         :: pi = 3.1415926
+    real(kind=ESMF_KIND_R4), parameter         :: todeg = 180.0/pi
+    type(ESMF_Index_Flag)                      :: localIndexFlag
+    logical                                    :: isGlobal
+    integer, pointer                           :: deBlockList(:,:,:), deToTileMap(:)
+    integer, pointer                           :: DeDim1(:), DeDim2(:)
+    integer                                    :: t, minIndx, minIndy
+    integer, pointer                           :: PetMap1D(:), PetMap(:,:,:)
+    integer                                    :: lbnd(2), ubnd(2)
+    integer                                    :: tiles, totalelmt, s
+
+    if (present(rc)) rc=ESMF_SUCCESS
+
+    if (present(indexflag)) then
+       localIndexFlag = indexflag
+    else
+       localIndexFlag = ESMF_INDEX_DELOCAL
+    endif
+  !------------------------------------------------------------------------
+  !------------------------------------------------------------------------
+  ! get global vm information
+  !
+  call ESMF_VMGetCurrent(vm, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    ESMF_CONTEXT, rcToReturn=rc)) return
+
+  ! set up local pet info
+  call ESMF_VMGet(vm, localPet=PetNo, petCount=PetCnt, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  call ESMF_GridSpecReadMosaic(filename, mosaic, tileFilePath=tileFilePath, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  tileCount = mosaic%ntiles
+  sizex = mosaic%nx
+  sizey = mosaic%ny
+
+  if (tileCount > 1) then
+    ! use local index for everytile
+    ! should support different tile sizes -- TBD
+    allocate(minIndexPTile(2,tileCount))
+    allocate(maxIndexPTile(2,tileCount))
+    minIndexPTile(1,:)=1
+    minIndexPTile(2,:)=1
+    maxIndexPTile(1,:)=sizex
+    maxIndexPTile(2,:)=sizey
+
+    ! build connectionList for each connecation
+    connectionCount = mosaic%ncontacts
+
+    allocate(connectionList(connectionCount))
+    do i=1,connectionCount
+      call calculateConnect(minIndexPTile, maxIndexPTile, mosaic%contact(:,i), &
+           mosaic%connindex(:,:,i), orientVec, posVec)
+      call ESMF_DistGridConnectionSet(connection=connectionList(i), &
+        tileIndexA=mosaic%contact(1,i), tileIndexB=mosaic%contact(2,i), &
+        positionVector=(/posVec(1), posVec(2)/), &
+        orientationVector = (/orientVec(1), orientVec(2)/), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    enddo
+
+  ! calculate totalDE based on the decomposition
+  tiles=size(countsPerDEDim1PTile,2)
+  if (tiles /= 6) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- the second dimension of countsPerDEDim1PTile is not equal to 6", &
+           ESMF_CONTEXT, rcToReturn=rc)
+      return
+  endif      
+  if (size(countsPerDEDim2PTile,2) /= 6) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- the second dimension of countsPerDEDim2PTile is not equal to 6", &
+           ESMF_CONTEXT, rcToReturn=rc)
+      return
+  endif  
+  allocate(DeDim1(tiles), DeDim2(tiles))
+  do j=1,tiles
+    totalelmt = 0
+    DeDim1(j)=size(countsPerDEDim1Ptile,1)
+    DeDim2(j)=size(countsPerDEDim2Ptile,1)
+    do i=1,size(countsPerDEDim1PTile,1)
+      ! check the total elements counts in dimension 1 is equal to sizex
+      ! count how many DEs for this tile
+      totalelmt = countsPerDEDim1PTile(i,j)+totalelmt
+      if (countsPerDEDim1PTile(i,j)==0) then
+         DeDim1(j)=i-1
+         exit
+      endif
+    enddo
+    if (totalelmt /= sizex) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- the total number of elements in dimension 1 does not add up to size X", &
+           ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+    totalelmt = 0
+    do i=1,size(countsPerDEDim2PTile,1)
+      ! check the total elements counts in dimension 1 is equal to tilesize
+      ! count how many DEs for this tile
+      totalelmt = countsPerDEDim2PTile(i,j)+totalelmt
+      if (countsPerDEDim2PTile(i,j)==0) then
+         DeDim2(j)=i-1
+         exit
+      endif
+    enddo
+    if (totalelmt /= sizey) then
+      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- the total number of elements in dimension 2 does not add up to size Y", &
+           ESMF_CONTEXT, rcToReturn=rc)
+      return
+    endif
+  enddo
+
+  ! calculate totalDE
+  totalDE=0
+  do j=1,tiles
+     totalDE = totalDE+DeDim1(j)*DeDim2(j)
+  enddo
+
+  if (present(indexflag)) then
+     localIndexFlag = indexflag
+  else
+     localIndexFlag = ESMF_INDEX_DELOCAL
+  endif
+
+  if (present(delayout)) then
+     !Check if delayout has the same number of DEs
+     call ESMF_DELayoutGet(delayout, deCount=deCount, rc=localrc)
+     if (deCount /= totalDE) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="- the total number of DEs specified in delayout is inconsistent with the decomposition arguments", &
+             ESMF_CONTEXT, rcToReturn=rc)
+      return
+     endif
+     defaultDELayout = delayout 
+  else
+     defaultDELayout = ESMF_DELayoutCreate(deCount = totalDE, rc=localrc)
+     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+  endif
+
+    call ESMF_DELayoutGet(defaultDelayout, DeCount = decount, localDeCount=localDeCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (localDeCount > 0) then
+       allocate(demap(0:localDeCount-1))
+       call ESMF_DELayoutGet(defaultDElayout, localDeToDeMap = demap, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+       !print *, PetNo, ' demap ', decount, demap
+     endif
+
+    ! deBlockList and deToTileMap contains all the blocks for all the DEs (not
+    ! just the localDEs
+    allocate(deBlockList(2,2,decount),deToTileMap(decount))
+    !print *, PetNo, 'total DE count ', decount
+    ! minIndexPTile and maxIndexPTile are in ESMF_INDEX_GLOBAL, therefore, need
+    ! to use global index in deBlockList as well
+    k=1
+    do t=1,tiles
+       do j=1,DeDim2(t)
+         do i=1,DeDim1(t)
+            minIndx = sum(countsPerDEDim1PTile(1:i-1,t))+minIndexPTile(1,t)
+            minIndy = sum(countsPerDEDim2PTile(1:j-1,t))+minIndexPTile(2,t)
+            deBlockList(1,1,k)=minIndx
+            deBlockList(2,1,k)=minIndy
+            deBlockList(1,2,k)=minIndx+countsPerDEDim1PTile(i,t)-1
+            deBlockList(2,2,k)=minIndy+countsPerDEDim2PTile(j,t)-1
+            deToTileMap(k)=t
+            k=k+1
+         enddo
+       enddo
+    enddo
+
+    ! need to constrcut deBlockList and deToTileMap
+    distgrid = ESMF_DistGridCreate(&
+      minIndexPTile=minIndexPTile, maxIndexPTile=maxIndexPTile, &
+      deBlockList = deBlockList, deToTileMap = deToTileMap, &
+      indexflag=ESMF_INDEX_GLOBAL, connectionList=connectionList, &
+      deLabelList = deLabelList, &
+      delayout = defaultDelayout, &
+      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! - create Grid
+    ! coordinates from the cubedSphereTileCreate() routine
+    grid = ESMF_GridCreate(distgrid, coordSys=ESMF_COORDSYS_SPH_DEG, &
+          coordTypeKind=ESMF_TYPEKIND_R8, &
+         indexflag=localIndexFlag, name=name, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(staggerLocList)) then
+      do s=1, size(staggerLocList)
+         call ESMF_GridAddCoord(grid, staggerloc=staggerLocList(s), rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+      enddo
+      ! calculate the actual cubed sphere coordiantes for each DE
+          ! calculate the actual cubed sphere coordiantes for each DE
+      do localDe = 0,localdecount-1
+         j = demap(localDe)+1
+         start(1)=deBlockList(1,1,j)-minIndexPTile(1,deToTileMap(j))+1
+         start(2)=deBlockList(2,1,j)-minIndexPTile(2,deToTileMap(j))+1
+         count(1)=deBlockList(1,2,j)-deBlockList(1,1,j)+1
+         count(2)=deBlockList(2,2,j)-deBlockList(2,1,j)+1
+         tile = deToTileMap(j)  
+
+         do s=1, size(staggerLocList)
+            call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                staggerloc=staggerLocList(s), farrayPtr=lonPtr, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            count=ubound(lonPtr)-lbound(lonPtr)+1
+            call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                staggerloc=staggerLocList(s), farrayPtr=latPtr, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            !call ESMF_VMWtime(starttime, rc=localrc)
+            ! Generate glocal edge coordinates and local center coordinates
+            ! need to adjust the count???
+            totallen = len_trim(mosaic%filenames(tile))+len_trim(mosaic%tileDirectory)
+            tempname = trim(mosaic%tileDirectory)//trim(mosaic%filenames(tile))
+            call ESMF_GridSpecReadStagger(trim(tempname),sizex, sizey, lonPtr, latPtr, &
+                staggerLoc=staggerLocList(s), &
+                start=start, count=count, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+         enddo
+
+         !print *, 'Create CS size ', sizex, sizey, 'in', (endtime-starttime)*1000.0, ' msecs'
+       enddo !localDe
+    endif  !present(staggerLocList)
+
+    ESMF_GridCreateMosaicIReg = grid
+
+    ! - deallocate connectionList
+    deallocate(connectionList)
+    deallocate(minIndexPTile, maxIndexPTile)
+    deallocate(deBlockList,deToTileMap)
+    deallocate(DeDim1, DeDim2, demap)
+  else  ! one tile case
+    ! Figure out if it is a global grid or a regional grid
+    totallen = len_trim(mosaic%filenames(1))+len_trim(mosaic%tileDirectory)
+    tempname = trim(mosaic%tileDirectory)//trim(mosaic%filenames(1))
+    call ESMF_GridspecQueryTileGlobal(trim(tempname), isGlobal, rc=localrc)
+
+    allocate(PetMap1D(totalDE))
+    allocate(PetMap(size(countsPerDEDim1PTile,1),size(countsPerDEDim2PTile,1),1))
+    allocate(demap(0:totalDE-1))
+    totalDE=size(countsPerDEDim1PTile,1)*size(countsPerDEDim2PTile,1)
+    if (present(delayout)) then
+       !Check if delayout has the same number of DEs
+       call ESMF_DELayoutGet(delayout, deCount=deCount, rc=localrc)
+       if (deCount /= totalDE) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="- the total number of DEs specified in delayout is inconsistent with the decomposition arguments", &
+             ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
+       call ESMF_DELayoutGet(delayout, petMap = petMap1D, &
+            localDeCount=decount, localDeToDeMap=demap, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+       k=1
+       do j=1,size(countsPerDEDim2PTile,1)
+         do i=1,size(countsPerDEDim1PTile,1)
+           PetMap(i,j,1)=PetMap1D(k)
+           k=k+1
+         enddo
+       enddo
+    else
+       ! default DE layout
+       k=1
+       do j=1,size(countsPerDEDim2PTile,1)
+         do i=1,size(countsPerDEDim1PTile,1)
+           PetMap(i,j,1)=k
+           k=k+1
+         enddo
+       enddo
+     endif
+     if (isGlobal) then
+        grid = ESMF_GridCreate1PeriDim(               &
+           countsPerDEDim1=countsPerDEDim1PTile(:,1), &
+           countsPerDEDim2=countsPerDEDim2PTile(:,1), &
+           indexflag=localIndexFlag, &
+           coordSys=ESMF_COORDSYS_SPH_DEG, name=name, &
+           petMap = petMap, &
+           rc=localrc)
+     else
+        grid = ESMF_GridCreateNoPeriDim(              &
+           countsPerDEDim1=countsPerDEDim1PTile(:,1), &
+           countsPerDEDim2=countsPerDEDim2PTile(:,1), &
+           indexflag=localIndexFlag, &
+           coordSys=ESMF_COORDSYS_SPH_DEG, name=name, &
+           petMap = petMap, &
+           rc=localrc)
+     endif
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    allocate(minIndexPDe(2,totalDE), maxIndexPDe(2,totalDE))
+    call ESMF_DistgridGet(distgrid, minIndexPDe=minIndexPDe, maxIndexPDe = maxIndexPDe, &
+                          delayout=defaultDElayout, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_DELayoutGet(defaultDelayout, localDeCount=localDeCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    if (localDeCount > 0) then
+       allocate(demap(0:localDeCount-1))
+       call ESMF_DELayoutGet(defaultDElayout, localDeToDeMap = demap, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+     endif
+
+    if (present(staggerLocList)) then
+       do s=1, size(staggerLocList)
+          call ESMF_GridAddCoord(grid, staggerloc=staggerLocList(s), rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          do localDe = 0,localDeCount-1
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                staggerloc=staggerLocList(s), farrayPtr=lonPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+             start(1)=minIndexPDe(1,demap(localDe)+1)
+             start(2)=minIndexPDe(2,demap(localDe)+1)
+             count=ubound(lonPtr)-lbound(lonPtr)+1
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                staggerloc=staggerLocList(s), farrayPtr=latPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             !call ESMF_VMWtime(starttime, rc=localrc)
+             ! Generate glocal edge coordinates and local center coordinates
+             ! need to adjust the count???
+             call ESMF_GridSpecReadStagger(trim(tempname),sizex, sizey, lonPtr, latPtr, &
+                staggerLoc=staggerLocList(s), &
+                start=start, count=count, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
+      !call ESMF_VMWtime(endtime, rc=localrc)
+      !print *, 'Create CS size ', nx, ny, 'in', (endtime-starttime)*1000.0, ' msecs'
+         enddo
+       enddo
+    endif
+    ESMF_GridCreateMosaicIReg = grid
+    deallocate(demap, petMap1D, petmap)
+    deallocate(minIndexPDe, maxIndexPDe)
+  endif
+
+  ! Get rid of mosaic info
+  call ESMF_MosaicDestroy(mosaic, rc=localrc)
+  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return 
+
+  return
+
+end function ESMF_GridCreateMosaicIreg
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
