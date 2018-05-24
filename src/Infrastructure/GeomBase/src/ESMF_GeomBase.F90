@@ -326,10 +326,10 @@ end interface
           endif
 
           if (present(ungriddedLBound) .and. present (undistLBound)) then
-              if (size(ungriddedLBound) .gt. 0) undistLBound = ungriddedLBound
+              if (size(ungriddedLBound) .gt. 0) undistLBound(1:size(ungriddedLBound)) = ungriddedLBound
           endif
           if (present(ungriddedUBound) .and. present (undistUBound)) then
-              if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
+              if (size(ungriddedUBound) .gt. 0) undistUBound(1:size(ungriddedUBound)) = ungriddedUBound
           endif
 
            ! Distgrid
@@ -364,10 +364,10 @@ end interface
           endif
 
           if (present(ungriddedLBound) .and. present (undistLBound)) then
-              if (size(ungriddedLBound) .gt. 0) undistLBound = ungriddedLBound
+              if (size(ungriddedLBound) .gt. 0) undistLBound(1:size(ungriddedLBound)) = ungriddedLBound
           endif
           if (present(ungriddedUBound) .and. present (undistUBound)) then
-              if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
+              if (size(ungriddedUBound) .gt. 0) undistUBound(1:size(ungriddedUBound)) = ungriddedUBound
           endif
 
           ! Get distgrid
@@ -387,10 +387,10 @@ end interface
           endif
 
           if (present(ungriddedLBound) .and. present (undistLBound)) then
-              if (size(ungriddedLBound) .gt. 0) undistLBound = ungriddedLBound
+              if (size(ungriddedLBound) .gt. 0) undistLBound(1:size(ungriddedLBound)) = ungriddedLBound
           endif
           if (present(ungriddedUBound) .and. present (undistUBound)) then
-                if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
+                if (size(ungriddedUBound) .gt. 0) undistUBound(1:size(ungriddedUBound)) = ungriddedUBound
           endif
 
           ! Get distgrid
