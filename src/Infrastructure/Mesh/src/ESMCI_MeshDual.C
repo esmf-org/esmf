@@ -10,18 +10,18 @@
 //
 //==============================================================================
 #include <Mesh/include/ESMCI_MeshRedist.h>
-#include <Mesh/include/ESMCI_MeshTypes.h>
-#include <Mesh/include/ESMCI_MeshObjTopo.h>
-#include <Mesh/include/ESMCI_MeshOBjConn.h>
+#include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
+#include <Mesh/include/Legacy/ESMCI_MeshObjTopo.h>
+#include <Mesh/include/Legacy/ESMCI_MeshObjConn.h>
 #include <Mesh/include/ESMCI_Mapping.h>
-#include <Mesh/include/ESMCI_MeshObj.h>
+#include <Mesh/include/Legacy/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_Mesh.h>
-#include <Mesh/include/ESMCI_MeshUtils.h>
+#include <Mesh/include/Legacy/ESMCI_MeshUtils.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
-#include "Mesh/include/ESMCI_DDir.h" 
-#include <Mesh/include/ESMCI_ParEnv.h>
-#include <Mesh/include/ESMCI_CommReg.h>
-#include <Mesh/include/ESMCI_MeshVTK.h>
+#include "Mesh/include/Legacy/ESMCI_DDir.h" 
+#include <Mesh/include/Legacy/ESMCI_ParEnv.h>
+#include <Mesh/include/Legacy/ESMCI_CommReg.h>
+#include <Mesh/include/Legacy/ESMCI_MeshVTK.h>
 
 #include <iostream>
 #include <fstream>

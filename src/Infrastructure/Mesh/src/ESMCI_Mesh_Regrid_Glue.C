@@ -25,17 +25,17 @@
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
 #include "Mesh/include/ESMCI_Mesh.h"
-#include "Mesh/include/ESMCI_MeshRead.h"
-#include "Mesh/include/ESMCI_MeshRegrid.h"
-#include "Mesh/include/ESMCI_Exception.h"
-#include "Mesh/include/ESMCI_Integrate.h"
-#include "Mesh/include/ESMCI_Interp.h"
-#include "Mesh/include/ESMCI_Extrapolation.h"
+#include "Mesh/include/Legacy/ESMCI_MeshRead.h"
+#include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
+#include "Mesh/include/Legacy/ESMCI_Exception.h"
+#include "Mesh/include/Regridding/ESMCI_Integrate.h"
+#include "Mesh/include/Regridding/ESMCI_Interp.h"
+#include "Mesh/include/Regridding/ESMCI_Extrapolation.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
-#include "Mesh/include/ESMCI_Phedra.h"
+#include "Mesh/include/Legacy/ESMCI_Phedra.h"
 #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
-#include "Mesh/include/ESMCI_MeshMerge.h"
+#include "Mesh/include/Legacy/ESMCI_MeshMerge.h"
 #include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
 
 #include <iostream>
@@ -334,6 +334,8 @@ void ESMCI_regrid_create(
           // Construct factor list entry
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
+          
+#define ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL_off
 
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
           printf("d_id=%d  s_id=%d s=%d w=%20.17E \n",w.id,wc.id,wc.src_id,wc.value);

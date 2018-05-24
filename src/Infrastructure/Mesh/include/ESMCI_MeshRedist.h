@@ -13,8 +13,8 @@
 #define ESMCI_MeshRedist_h
 
 #include <list>
-#include <Mesh/include/ESMCI_MeshTypes.h>
-#include <Mesh/include/ESMCI_MeshObj.h>
+#include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
+#include <Mesh/include/Legacy/ESMCI_MeshObj.h>
 
 
 

@@ -13,12 +13,12 @@
 #define  ESMCI_MathUtil_h
 
 
-#include <Mesh/include/ESMCI_MeshDB.h>
-#include <Mesh/include/ESMCI_MeshObj.h>
-#include <Mesh/include/ESMCI_MEField.h>
-#include <Mesh/include/ESMCI_MasterElement.h>
-#include <Mesh/include/ESMCI_Exception.h>
-#include <Mesh/include/ESMCI_MCoord.h>
+#include <Mesh/include/Legacy/ESMCI_MeshDB.h>
+#include <Mesh/include/Legacy/ESMCI_MeshObj.h>
+#include <Mesh/include/Legacy/ESMCI_MEField.h>
+#include <Mesh/include/Legacy/ESMCI_MasterElement.h>
+#include <Mesh/include/Legacy/ESMCI_Exception.h>
+#include <Mesh/include/Legacy/ESMCI_MCoord.h>
 
 #include <vector>
 #include <limits>

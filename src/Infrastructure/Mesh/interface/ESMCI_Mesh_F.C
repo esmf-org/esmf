@@ -25,11 +25,11 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
-#include "ESMCI_ParEnv.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/ESMCI_ClumpPnts.h"
+#include "Mesh/include/Legacy/ESMCI_ParEnv.h"
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.

@@ -14,8 +14,8 @@
 
 #include <vector>
 #include <Mesh/include/ESMCI_Mesh.h>
-#include <Mesh/include/ESMCI_Sintdnode.h>
-#include <Mesh/include/ESMCI_Interp.h>
+#include <Mesh/include/Legacy/ESMCI_Sintdnode.h>
+#include <Mesh/include/Regridding/ESMCI_Interp.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
 
 namespace ESMCI {

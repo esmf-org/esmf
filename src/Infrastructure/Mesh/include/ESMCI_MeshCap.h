@@ -14,7 +14,7 @@
 
 #include "ESMCI_Mesh.h"
 
-#include "Mesh/include/ESMCI_Regrid_Helper.h"
+#include "Mesh/include/Regridding/ESMCI_Regrid_Helper.h"
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"

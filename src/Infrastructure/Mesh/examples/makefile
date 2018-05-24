@@ -29,6 +29,17 @@ CLEANDIRS   =
 CLEANFILES  = $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
+ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/$(LOCDIR)/../include \
+                           -I$(ESMF_DIR)/$(LOCDIR)/../include/Legacy \
+                           -I$(ESMF_DIR)/$(LOCDIR)/../include/Regridding
+
+ifeq ($(ESMF_MOAB),internal)
+ESMF_CXXCOMPILECPPFLAGS += -I$(ESMF_DIR)/$(LOCDIR)/../src/Moab \
+                           -I$(ESMF_DIR)/$(LOCDIR)/../src/Moab/parallel \
+                           -I$(ESMF_DIR)/$(LOCDIR)/../src/Moab/LocalDiscretization
+
+endif
+
 #
 #  Run targets
 #

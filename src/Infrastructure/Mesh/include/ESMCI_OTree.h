@@ -20,7 +20,7 @@
 #define ESMCI_OTree_H
 
 // FOR ESMF
-#include <Mesh/include/ESMCI_Exception.h>
+#include <Mesh/include/Legacy/ESMCI_Exception.h>
 
 // OUTSIDE ESMF
 //#include "ESMCI_Exception.h"

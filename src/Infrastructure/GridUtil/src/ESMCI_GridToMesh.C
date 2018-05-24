@@ -27,11 +27,11 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Ptypes.h"
 #include "Mesh/include/ESMCI_Mesh.h"
-#include "Mesh/include/ESMCI_IOField.h"
-#include "Mesh/include/ESMCI_ParEnv.h"
-#include "Mesh/include/ESMCI_DDir.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
-#include "Mesh/include/ESMCI_Phedra.h"
+#include "Mesh/include/Legacy/ESMCI_IOField.h"
+#include "Mesh/include/Legacy/ESMCI_ParEnv.h"
+#include "Mesh/include/Legacy/ESMCI_DDir.h"
+#include "Mesh/include/Legacy/ESMCI_Phedra.h"
 
 #include "PointList/include/ESMCI_PointList.h"
 
