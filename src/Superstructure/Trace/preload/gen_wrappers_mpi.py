@@ -177,7 +177,7 @@ extern "C" {
       FTN_X(__real_ptr_{{f.name}})({{f.args}});
     }
 
-    void {{f.name}}({{f.params}}) {
+    void FTN_X({{f.name}})({{f.params}}) {
       FTN_X(__wrap_{{f.name}})({{f.args}});
     }
 

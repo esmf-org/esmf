@@ -90,7 +90,7 @@ extern "C" {
       FTN_X(__real_ptr_mpi_allgather)(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
     }
 
-    void mpi_allgather(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr) {
+    void FTN_X(mpi_allgather)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr) {
       FTN_X(__wrap_mpi_allgather)(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
     }
 
@@ -104,7 +104,7 @@ extern "C" {
       FTN_X(__real_ptr_mpi_allgatherv)(sendbuf, sendcount, sendtype, recvbuf, recvcount, displs, recvtype, comm, ierr);
     }
 
-    void mpi_allgatherv(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr) {
+    void FTN_X(mpi_allgatherv)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr) {
       FTN_X(__wrap_mpi_allgatherv)(sendbuf, sendcount, sendtype, recvbuf, recvcount, displs, recvtype, comm, ierr);
     }
 
@@ -118,7 +118,7 @@ extern "C" {
       FTN_X(__real_ptr_mpi_allreduce)(sendbuf, recvbuf, count, datatype, op, comm, ierr);
     }
 
-    void mpi_allreduce(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
+    void FTN_X(mpi_allreduce)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
       FTN_X(__wrap_mpi_allreduce)(sendbuf, recvbuf, count, datatype, op, comm, ierr);
     }
 
@@ -132,7 +132,7 @@ extern "C" {
       FTN_X(__real_ptr_mpi_barrier)(comm, ierr);
     }
 
-    void mpi_barrier(MPI_Fint *comm, MPI_Fint *ierr) {
+    void FTN_X(mpi_barrier)(MPI_Fint *comm, MPI_Fint *ierr) {
       FTN_X(__wrap_mpi_barrier)(comm, ierr);
     }
 
@@ -146,7 +146,7 @@ extern "C" {
       FTN_X(__real_ptr_mpi_wait)(request, status, ierr);
     }
 
-    void mpi_wait(MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierr) {
+    void FTN_X(mpi_wait)(MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierr) {
       FTN_X(__wrap_mpi_wait)(request, status, ierr);
     }
 
