@@ -42,14 +42,14 @@
 #define BT_REGION_EXIT 1
 
 extern "C" {
-  void c_esmftrace_setactive(int ready);
-  int c_esmftrace_isactive();
+  void c_esmftrace_notify_wrappers(int initialized);
+  int c_esmftrace_isinitialized();
 }
 
 namespace ESMCI { 
   void TraceOpen(std::string trace_dir, int *rc);
   void TraceClose(int *rc);
-  bool TraceActive();
+  bool TraceInitialized();
   bool TraceIsEnabledForPET(int *rc);
   std::string TraceGetMetadataString();
   int TraceMapVmId(VMId *vmid, int *rc);

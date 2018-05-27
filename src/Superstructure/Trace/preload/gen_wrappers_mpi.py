@@ -3,6 +3,8 @@
 # Jinja2 is required:
 # http://jinja.pocoo.org/docs/2.10/intro/#installation
 #
+# See README in this directory.
+#
 
 from jinja2 import Environment
 
@@ -71,7 +73,7 @@ extern "C" {
     extern {{f.ret}} __real_{{f.name}}({{f.params}});    
 
     {{f.ret}} __wrap_{{f.name}}({{f.params}}) {
-      if (c_esmftrace_isactive() == 1 && insideMPIRegion == 0) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
         //printf("__wrap_{{f.name}} (C)\\n");
         insideMPIRegion = 1;
         ESMCI::TraceMPIWaitStart();
@@ -94,7 +96,7 @@ extern "C" {
     extern void FTN_X(__real_{{f.name}})({{f.params}});    
 
     void FTN_X(__wrap_{{f.name}})({{f.params}}) {
-      if (c_esmftrace_isactive() == 1 && insideMPIRegion == 0) {
+      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
         //printf("__wrap_{{f.name}}_ (Fortran)\\n");
         insideMPIRegion = 1;
         ESMCI::TraceMPIWaitStart();
@@ -186,6 +188,9 @@ extern "C" {
 
 """
 
+template_static_linkopts="""
+ESMF_TRACE_WRAPPERS_MPI := {% for f in cfunc_list %}{{f.name}} {% endfor %}{% for f in ffunc_list %} {{f.name}}_ {{f.name}}__ {% endfor %}"""
+
 
 # C MPI Functions
 cfunc_list = [
@@ -193,22 +198,19 @@ cfunc_list = [
     {
         'ret':'int', 'name':'MPI_Allreduce',
         'params':'const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm',
-        'args':'sendbuf, recvbuf, count, datatype, op, comm',
-        'types':'const void *, void *, int, MPI_Datatype, MPI_Op, MPI_Comm'
+        'args':'sendbuf, recvbuf, count, datatype, op, comm'
     },
 
     {
         'ret':'int', 'name':'MPI_Barrier',
         'params':'MPI_Comm comm',
-        'args':'comm',
-        'types':'MPI_Comm'
+        'args':'comm'
     },
 
     {
         'ret':'int', 'name':'MPI_Wait',
         'params':'MPI_Request *request, MPI_Status *status',
-        'args':'request, status',
-        'types':'MPI_Request *, MPI_Status *'
+        'args':'request, status'
     }
 
     
@@ -273,6 +275,10 @@ def gen():
     f.write(text)
     f.close()
     print 'Generated preload_mpi.c'
+
+    template = Environment().from_string(template_static_linkopts)
+    text = template.render(cfunc_list=cfunc_list, ffunc_list=ffunc_list) 
+    print "\nFor use in $ESMF_DIR/build/common.mk:\n" + text
     
     
 if __name__ == '__main__':

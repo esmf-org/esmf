@@ -28,7 +28,7 @@ extern "C" {
   extern ssize_t __real_write(int fd, const void *buf, size_t nbytes);
 
   ssize_t __wrap_write(int fd, const void *buf, size_t nbytes) {
-    if (c_esmftrace_isactive() == 1 && insideWrite == 0) {
+    if (c_esmftrace_isinitialized() == 1 && insideWrite == 0) {
       insideWrite = 1;
       ESMCI::TraceIOWriteStart();
       ssize_t ret = __real_write(fd, buf, nbytes);
@@ -46,7 +46,7 @@ extern "C" {
   extern ssize_t __real_writev(int fd, const struct iovec *iov, int iovcnt);
 
   ssize_t __wrap_writev(int fd, const struct iovec *iov, int iovcnt) {    
-    if (c_esmftrace_isactive() == 1 && insideWrite == 0) {
+    if (c_esmftrace_isinitialized() == 1 && insideWrite == 0) {
       insideWrite = 1;
       ESMCI::TraceIOWriteStart();
       ssize_t ret = __real_writev(fd, iov, iovcnt);
@@ -63,7 +63,7 @@ extern "C" {
   extern ssize_t __real_pwrite(int fd, const void *buf, size_t nbyte, off_t offset);
 
   ssize_t __wrap_pwrite(int fd, const void *buf, size_t nbytes, off_t offset) {
-    if (c_esmftrace_isactive() == 1 && insideWrite == 0) {
+    if (c_esmftrace_isinitialized() == 1 && insideWrite == 0) {
       insideWrite = 1;
       ESMCI::TraceIOWriteStart();
       ssize_t ret = __real_pwrite(fd, buf, nbytes, offset);
@@ -83,13 +83,13 @@ extern "C" {
 
   ssize_t __wrap_read(int fd, void *buf, size_t nbyte) {
 
-    if (c_esmftrace_isactive() == 1) {
+    if (c_esmftrace_isinitialized() == 1) {
       ESMCI::TraceIOReadStart();
     }
     
     ssize_t ret = __real_read(fd, buf, nbyte);
 
-    if (c_esmftrace_isactive() == 1) {
+    if (c_esmftrace_isinitialized() == 1) {
       ESMCI::TraceIOReadEnd(ret > 0 ? ret : 0);
     }
     
@@ -109,13 +109,13 @@ extern "C" {
     mode_t mode = va_arg(args, int);
     va_end(args);
     
-    if (c_esmftrace_isactive() == 1) {
+    if (c_esmftrace_isinitialized() == 1) {
       ESMCI::TraceIOOpenStart(path);
     }
 
     int ret =  __real_open(path, oflag, mode);
 
-    if (c_esmftrace_isactive() == 1) {
+    if (c_esmftrace_isinitialized() == 1) {
       ESMCI::TraceIOOpenEnd();
     }
     

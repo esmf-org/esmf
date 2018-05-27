@@ -2,7 +2,7 @@
 
 ALL: tracelib_preload tracelib_static
 
-SOURCEC	  = preload.c preload_io.c preload_mpi.c wrappers_io.c wrappers_mpi.c
+SOURCEC	  = preload.c preload_io.c preload_mpi.c wrappers.c wrappers_io.c wrappers_mpi.c
 SOURCEF	  = 
 SOURCEH	  = 
 STOREH    = 
@@ -19,11 +19,13 @@ CLOBBERDIRS =
 
 include $(ESMF_DIR)/makefile
 
+#ESMF_CXXCOMPILEOPTS += -save-temps
+
 DIRS	  = 
 
 
-tracelib_preload: preload.o preload_io.o preload_mpi.o wrappers_io.o wrappers_mpi.o
+tracelib_preload: preload.o preload_io.o preload_mpi.o wrappers.o wrappers_io.o wrappers_mpi.o
 	$(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS)
 
-tracelib_static: wrappers_io.o wrappers_mpi.o
-	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_LDIR)/libesmftrace_static.a wrappers_io.o wrappers_mpi.o
+tracelib_static: wrappers_io.o wrappers_mpi.o wrappers.o
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_LDIR)/libesmftrace_static.a wrappers.o wrappers_io.o wrappers_mpi.o

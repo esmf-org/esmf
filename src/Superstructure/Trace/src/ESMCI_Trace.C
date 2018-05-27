@@ -83,7 +83,7 @@ namespace ESMCI {
     }
   };
 
-  static bool traceActive = false;
+  static bool traceInitialized = false;
   static bool traceLocalPet = false;
   static int traceClock = 0;
   static int64_t traceClockOffset = 0;
@@ -164,8 +164,8 @@ namespace ESMCI {
     return str.substr(first, (last - first + 1));
   }
 
-  bool TraceActive() {
-    return traceActive;
+  bool TraceInitialized() {
+    return traceInitialized;
   }
   
 #undef  ESMC_METHOD
@@ -674,8 +674,8 @@ namespace ESMCI {
 
     PushIOStats();  /* needed in case there are I/O events before first region */
     PushMPIStats();
-    traceActive = true;
-    c_esmftrace_setactive(1);
+    traceInitialized = true;
+    c_esmftrace_notify_wrappers(1);
   }
   
     
@@ -691,8 +691,8 @@ namespace ESMCI {
     
     if (ctx != NULL) {
       
-      traceActive = false;
-      c_esmftrace_setactive(0);
+      traceInitialized = false;
+      c_esmftrace_notify_wrappers(0);
       PopIOStats();
       PopMPIStats();
       
@@ -834,7 +834,7 @@ namespace ESMCI {
    * This function used only in tests.
    */
   void TraceTest_GetMPIWaitStats(int *count, long long *time) {
-    if (!traceActive) return;
+    if (!traceInitialized) return;
     if (count != NULL) {
       *count = (int) mpiWaitCount.back();
     }
@@ -1025,12 +1025,13 @@ namespace ESMCI {
 }
 
 /* will be overridden if preloader present */
-void c_esmftrace_setactive(int ready) {
-  printf("IGNORNING call to c_esmftrace_setactive: %d\n", ready);
-}
+//void c_esmftrace_notify_wrappers(int initialized) {
+//  printf("IGNORNING call to c_esmftrace_notify_wrappers: %d\n", initialized);
+  //nothing to do here -- linker will replace this function with a different one
+//}
 
 /* will be overridden if preloader present */
-int c_esmftrace_isactive() {
-  if (ESMCI::traceActive) return 1;
-  else return 0;
-}
+//int c_esmftrace_isinitialized() {
+//  if (ESMCI::traceInitialized) return 1;
+//  else return 0;
+//}

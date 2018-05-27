@@ -25,9 +25,7 @@ TESTS_RUN = \
 TESTS_RUN_UNI = \
 		RUN_ESMF_TraceUTestUNI \
 		RUN_ESMF_TraceClkMonoUTestUNI \
-		RUN_ESMF_TraceClkMonoSyncUTestUNI \
-		RUN_ESMF_TraceIOUTest \
-		RUN_ESMF_TraceMPIUTest 
+		RUN_ESMF_TraceClkMonoSyncUTestUNI 
 
 include ${ESMF_DIR}/makefile
 
@@ -37,6 +35,10 @@ CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout
 CLOBBERDIRS =
 
+ifeq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
+ESMF_F90LINKOPTS += $(ESMF_TRACE_STATICLINKOPTS)
+ESMF_F90ESMFLINKLIBS += $(ESMF_TRACE_STATICLINKLIBS)
+endif
 
 # --- TraceUTest
 
@@ -84,10 +86,10 @@ RUN_ESMF_TraceIOUTest:
 	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceIO NP=4 ftest_preload
 	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
-RUN_ESMF_TraceIOUTestUNI:
-	rm -rf $(ESMF_TESTDIR)/traceout
-	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceIO NP=1 ftest_preload
-	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
+#RUN_ESMF_TraceIOUTestUNI:
+#	rm -rf $(ESMF_TESTDIR)/traceout
+#	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceIO NP=1 ftest_preload
+#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
 # --- TraceMPIUTest
 
@@ -96,26 +98,25 @@ RUN_ESMF_TraceMPIUTest:
 	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceMPI NP=4 ftest_preload
 	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
-RUN_ESMF_TraceMPIUTestUNI:
-	rm -rf $(ESMF_TESTDIR)/traceout
-	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceMPI NP=1 ftest_preload
-	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
+#RUN_ESMF_TraceMPIUTestUNI:
+#	rm -rf $(ESMF_TESTDIR)/traceout
+#	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceMPI NP=1 ftest_preload
+#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
+
 
 # --- customized target for testing with LD_PRELOAD --- #
-ESMF_LDPRELOAD=$(ESMF_LDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)
-
 ftest_preload:
 	-@cd $(ESMF_TESTDIR) ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
-	if [ ! -f $(ESMF_LDPRELOAD) ]; then \
-	  echo Warning: ESMF_$(TNAME)UTest cannot test preload functions because library does not exist: $(ESMF_LDPRELOAD) ; \
+	if [ ! -f $(ESMF_TRACE_LDPRELOAD) ]; then \
+	  echo Warning: ESMF_$(TNAME)UTest cannot test preload functions because library does not exist: $(ESMF_TRACE_LDPRELOAD) ; \
 	fi ; \
 	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest ; \
-	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest ; \
+	  echo env LD_PRELOAD=$(ESMF_TRACE_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest ; \
+	  env LD_PRELOAD=$(ESMF_TRACE_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest ; \
 	else \
-	  echo env LD_PRELOAD=$(ESMF_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest 1\> ./ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
-	  env LD_PRELOAD=$(ESMF_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
+	  echo env LD_PRELOAD=$(ESMF_TRACE_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest 1\> ./ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
+	  env LD_PRELOAD=$(ESMF_TRACE_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
 	fi ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMF_$(TNAME)UTest.Log ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log

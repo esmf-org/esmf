@@ -324,6 +324,13 @@ ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
 	-@echo "ESMF_SL_LIBLIBS:      $(ESMF_SL_LIBLIBS)"
 endif
 	-@echo ""
+	-@echo "ESMF Tracing linker options:"
+ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
+	-@echo "ESMF_TRACE_LDPRELOAD=$(ESMF_TRACE_LDPRELOAD)"
+endif
+	-@echo "ESMF_TRACE_STATICLINKOPTS=$(ESMF_TRACE_STATICLINKOPTS)"
+	-@echo "ESMF_TRACE_STATICLINKLIBS=$(ESMF_TRACE_STATICLINKLIBS)"
+	-@echo ""
 	-@echo ""
 	-@echo "--------------------------------------------------------------"
 ifeq ($(ESMF_OS),MinGW)
@@ -420,10 +427,10 @@ info_mk: chkdir_lib
 	-@echo "" >> $(MKINFO)	
 	-@echo "# ESMF Tracing compile/link options" >> $(MKINFO)
 ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)	
-	-@echo "ESMF_TRACE_LDPRELOAD=$(ESMF_LIBDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)" >> $(MKINFO)
+	-@echo "ESMF_TRACE_LDPRELOAD=$(ESMF_TRACE_LDPRELOAD)" >> $(MKINFO)
 endif
-	-@echo "ESMF_TRACE_STATICLINKOPTS=-static -Wl,--wrap=write -Wl,--wrap=writev -Wl,--wrap=pwrite -Wl,--wrap=read -Wl,--wrap=open -Wl,--wrap=MPI_Barrier -Wl,--wrap=MPI_Wait -Wl,--wrap=mpi_barrier_ -Wl,--wrap=mpi_wait_ -Wl,--wrap=mpi_allgather_ -Wl,--wrap=mpi_allgatherv_ -Wl,--wrap=mpi_allreduce_" >> $(MKINFO)
-	-@echo "ESMF_TRACE_STATICLINKLIBS=-lesmftrace_static" >> $(MKINFO)
+	-@echo "ESMF_TRACE_STATICLINKOPTS=$(ESMF_TRACE_STATICLINKOPTS)" >> $(MKINFO)
+	-@echo "ESMF_TRACE_STATICLINKLIBS=$(ESMF_TRACE_STATICLINKLIBS)" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "# Internal ESMF variables, do NOT depend on these!" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)

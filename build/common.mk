@@ -1636,6 +1636,20 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
+# Build variables for static wrapping and preloading functions for ESMF trace
+#-------------------------------------------------------------------------------
+
+ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
+ESMF_TRACE_LDPRELOAD := $(ESMF_LIBDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)
+endif
+ESMF_TRACE_STATICLINKLIBS := -lesmftrace_static
+
+ESMF_TRACE_WRAPPERS_IO  := write writev pwrite read open
+ESMF_TRACE_WRAPPERS_MPI := MPI_Allreduce MPI_Barrier MPI_Wait  mpi_allgather_ mpi_allgather__  mpi_allgatherv_ mpi_allgatherv__  mpi_allreduce_ mpi_allreduce__  mpi_barrier_ mpi_barrier__  mpi_wait_ mpi_wait__ 
+COMMA := ,
+ESMF_TRACE_STATICLINKOPTS := -static -Wl,--wrap=c_esmftrace_notify_wrappers -Wl,--wrap=c_esmftrace_isinitialized $(addprefix -Wl$(COMMA)--wrap=, $(ESMF_TRACE_WRAPPERS_IO)) $(addprefix -Wl$(COMMA)--wrap=, $(ESMF_TRACE_WRAPPERS_MPI))
+
+#-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
