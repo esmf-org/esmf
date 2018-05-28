@@ -79,6 +79,10 @@
                                         ESMC_CoordSys_Flag *coordSys,
                                           bool _is_esmf_mesh, int *rc);
 
+    static MeshCap *meshcreate_from_grid(Grid **gridpp,
+                                                  bool _is_esmf_mesh, 
+                                                  int *rc);
+
     void meshaddnodes(int *num_nodes, int *nodeId,
                       double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,
                       ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
