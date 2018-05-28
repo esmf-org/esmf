@@ -500,6 +500,25 @@ extern "C" void FTN_X(c_esmc_meshcreateeasyelems)(MeshCap **meshpp,
 
 } // meshcreate
 
+
+
+extern "C" void FTN_X(c_esmc_meshcreatefromgrid)(MeshCap **meshpp,
+                                                 Grid **gridpp,
+                                                 int *rc)
+{
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshcreatefromgrid()"
+
+  // Create Mesh depending on whether MOAB or not
+  if (Moab_on) {
+    *meshpp=MeshCap::meshcreate_from_grid(gridpp,false,rc);
+  } else {
+    *meshpp=MeshCap::meshcreate_from_grid(gridpp,true,rc);
+  }
+
+} // meshcreate
+
+
 #if 0
 extern "C" void FTN_X(c_esmc_meshaddelements)(MeshCap **meshpp,
                                               int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
