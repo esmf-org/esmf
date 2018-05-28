@@ -114,7 +114,6 @@ extern "C" {
 """
 
 template_preload_mpi = """
-
 /**
  *
  * preload_mpi.c
@@ -130,6 +129,8 @@ template_preload_mpi = """
  * Since we are using dynamic linking, the __real_<SYMBOL>
  * functions are looked up at runtime using dlsym().
  */
+
+#ifndef ESMF_MPIUNI
 
 #ifdef ESMF_PGIVERSION_MAJOR
 /* required for RTLD_NEXT */
@@ -190,6 +191,7 @@ extern "C" {
 
 }
 
+#endif
 
 """
 
