@@ -25,7 +25,9 @@ TESTS_RUN = \
 TESTS_RUN_UNI = \
 		RUN_ESMF_TraceUTestUNI \
 		RUN_ESMF_TraceClkMonoUTestUNI \
-		RUN_ESMF_TraceClkMonoSyncUTestUNI 
+		RUN_ESMF_TraceClkMonoSyncUTestUNI \
+		RUN_ESMF_TraceIOUTestUNI \
+		RUN_ESMF_TraceMPIUTestUNI 
 
 include ${ESMF_DIR}/makefile
 
@@ -86,10 +88,10 @@ RUN_ESMF_TraceIOUTest:
 	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceIO NP=4 ftest_preload
 	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
-#RUN_ESMF_TraceIOUTestUNI:
-#	rm -rf $(ESMF_TESTDIR)/traceout
-#	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceIO NP=1 ftest_preload
-#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
+RUN_ESMF_TraceIOUTestUNI:
+	rm -rf $(ESMF_TESTDIR)/traceout
+	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceIO NP=1 ftest_preload
+	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
 # --- TraceMPIUTest
 
@@ -98,10 +100,10 @@ RUN_ESMF_TraceMPIUTest:
 	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceMPI NP=4 ftest_preload
 	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
-#RUN_ESMF_TraceMPIUTestUNI:
-#	rm -rf $(ESMF_TESTDIR)/traceout
-#	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceMPI NP=1 ftest_preload
-#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
+RUN_ESMF_TraceMPIUTestUNI:
+	rm -rf $(ESMF_TESTDIR)/traceout
+	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceMPI NP=1 ftest_preload
+	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
 
 # --- customized target for testing with LD_PRELOAD --- #

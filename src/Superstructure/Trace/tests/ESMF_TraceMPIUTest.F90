@@ -29,8 +29,9 @@ program ESMF_TraceMPIUTest
 ! !USES:
   use ESMF_TestMod
   use ESMF
+#ifndef ESMF_MPIUNI
   use MPI, only: MPI_INTEGER, MPI_SUM
-
+#endif
   implicit none
 
 !------------------------------------------------------------------------------
@@ -116,19 +117,29 @@ program ESMF_TraceMPIUTest
   !  INTEGER    COUNT, DATATYPE, OP, COMM, IERROR
   send = 1
   recv = -1
+#ifndef ESMF_MPIUNI
   CALL MPI_ALLREDUCE(send, recv, 1, MPI_INTEGER, MPI_SUM, mpicomm, ierr)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(failMsg, *) "MPI_ALLREDUCE failed with ierr =", ierr
+#ifndef ESMF_MPIUNI
   call ESMF_Test((ierr==0), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
+#endif
   !-------------------------------------------------------------------------
   
   !------------------------------------------------------------------------
   !NEX_UTest
   print *, "MPI_ALLREDUCE returned ", recv
   write(failMsg, *) "MPI_ALLREDUCE produced unexpected result. Expected 4, got ", recv
+#ifndef ESMF_MPIUNI
   call ESMF_Test((recv==4), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
+#endif
   !-------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -144,16 +155,23 @@ program ESMF_TraceMPIUTest
   !NEX_UTest
   print *, "MPI call count = ", mpitest_count
   write(failMsg, *) "Unexpected MPI call count"
+#ifndef ESMF_MPIUNI
   call ESMF_Test((mpitest_count==1), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
+#endif
   !-------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
   !NEX_UTest
   print *, "MPI time = ", mpitest_time
   write(failMsg, *) "Unexpected MPI time"
+#ifndef ESMF_MPIUNI
   call ESMF_Test((mpitest_time > 0), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
+#endif
   !------------------------------------------------------------------------- 
-  
   
   !------------------------------------------------------------------------
   !NEX_UTest
