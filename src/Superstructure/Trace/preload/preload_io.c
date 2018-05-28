@@ -10,6 +10,11 @@
  * functions are looked up at runtime using dlsym().
  */
 
+#ifdef ESMF_PGIVERSION_MAJOR
+/* required for RTLD_NEXT */
+#define _GNU_SOURCE
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/uio.h>
