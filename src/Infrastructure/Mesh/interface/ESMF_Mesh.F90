@@ -1495,7 +1495,7 @@ end function ESMF_MeshCreateFromDG
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshCreateFromGrid()"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a Grid
 !
 ! !INTERFACE:
@@ -1520,7 +1520,7 @@ end function ESMF_MeshCreateFromDG
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOPI
+!EOP
 !------------------------------------------------------------------------------
     integer::  localrc
     type(ESMF_CoordSys_Flag) :: coordSys
