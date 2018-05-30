@@ -395,6 +395,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 ! !INTERFACE:
     subroutine ESMF_MeshGetFieldBounds(mesh, keywordEnforcer, &
+        meshloc, &
         localDe, gridToFieldMap, &
         ungriddedLBound, ungriddedUBound, &
         totalLBound, totalUBound, totalCount, rc)
@@ -402,6 +403,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(in)            :: mesh     
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    type(ESMF_MeshLoc),intent(in),optional :: meshloc
     integer,         intent(in),  optional :: localDe
     integer,         intent(in),  optional :: gridToFieldMap(:)    
     integer,         intent(in),  optional :: ungriddedLBound(:)
@@ -423,6 +425,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item [mesh]
 !       {\tt ESMF\_Mesh}.
+! \item [{[meshloc]}]
+!       \begin{sloppypar}
+!       Which part of the mesh to build the Field on. Can be set to either
+!       {\tt ESMF\_MESHLOC\_NODE} or {\tt ESMF\_MESHLOC\_ELEMENT}. If not set,
+!       defaults to {\tt ESMF\_MESHLOC\_NODE}.
+!       \end{sloppypar}
 ! \item [{[localDe]}]
 !       Local DE for which information is requested. {\tt [0,..,localDeCount-1]}.
 !       For {\tt localDeCount==1} the {\tt localDe} argument may be omitted,
@@ -493,7 +501,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
 
      ! Create GeomBase from Mesh
-    geombase=ESMF_GeomBaseCreate(mesh,rc=localrc)
+    geombase=ESMF_GeomBaseCreate(mesh, loc=meshloc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  

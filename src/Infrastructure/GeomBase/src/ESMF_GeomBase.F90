@@ -501,8 +501,8 @@ end interface
 !
 ! !ARGUMENTS:
        type(ESMF_Mesh),       intent(in)              :: mesh
-       type(ESMF_MeshLoc),    intent(in), optional    :: loc
-        integer,               intent(out),  optional  :: rc
+       type(ESMF_MeshLoc),    intent(in),  optional   :: loc
+       integer,               intent(out), optional   :: rc
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_GeomBase} object from an {\tt ESMF\_Mesh} object.
