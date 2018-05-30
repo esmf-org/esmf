@@ -23,9 +23,14 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
+ifeq ($(ESMF_OS),Darwin)
+ESMF_TRACE_ESMFLIB = -lesmf
+else
+ESMF_TRACE_ESMFLIB =
+endif
 
 tracelib_preload: preload.o preload_io.o preload_mpi.o wrappers.o wrappers_io.o wrappers_mpi.o
-	$(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) -lesmf
+	$(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX) *.o $(ESMF_SL_LIBLIBS) $(ESMF_TRACE_ESMFLIB)
 
 tracelib_static: wrappers_io.o wrappers_mpi.o wrappers.o
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_LDIR)/libesmftrace_static.a wrappers.o wrappers_io.o wrappers_mpi.o
