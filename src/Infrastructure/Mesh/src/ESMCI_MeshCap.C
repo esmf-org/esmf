@@ -1546,3 +1546,62 @@ MeshCap *MeshCap::meshcreate_easy_elems(int *pdim,
 
 
 
+// returns NULL if unsuccessful
+MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp,
+                                       bool _is_esmf_mesh, 
+                                       int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshcreate_from_grid()"
+  int localrc;
+
+  // Dereference grid pointer
+  if (gridpp == NULL) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                     " Grid pointer NULL",
+                                     ESMC_CONTEXT, rc)) return NULL;
+  }
+  Grid *gridp=*gridpp;
+
+  if (gridp == NULL) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+                                     " Grid pointer NULL",
+                                     ESMC_CONTEXT, rc)) return NULL;
+  }
+  Grid &grid=*gridp;
+
+  // Empty vector of Arrays
+  std::vector<ESMCI::Array*> empty_arrays;
+
+  // Create mesh depending on the type
+  Mesh *mesh;
+  void *mbmesh;
+  if (_is_esmf_mesh) {
+    ESMCI_GridToMeshCell(grid,
+                         empty_arrays,
+                         &mesh, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                       ESMC_CONTEXT, rc)) return NULL;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+            "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return NULL;
+  }
+
+  // Create MeshCap
+  MeshCap *mc=new MeshCap();
+
+  // Set member variables
+  mc->is_esmf_mesh=_is_esmf_mesh;
+  if (_is_esmf_mesh) {
+    mc->mesh=mesh;
+  } else {
+    mc->mbmesh=mbmesh;
+  }
+
+  // Output new MeshCap
+  return mc;
+}
+
+
+

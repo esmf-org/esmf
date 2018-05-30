@@ -53,6 +53,7 @@ module ESMF_MeshMod
   use ESMF_IOUGridMod
   use ESMF_ArrayMod
   use ESMF_UtilCubedSphereMod
+  use ESMF_GridMod
   implicit none
 
 !------------------------------------------------------------------------------
@@ -217,6 +218,7 @@ module ESMF_MeshMod
      module procedure ESMF_MeshCreateRedist
      module procedure ESMF_MeshCreateEasyElemsGen
      module procedure ESMF_MeshCreateEasyElems1Type
+     module procedure ESMF_MeshCreateFromGrid
    end interface
 
 !------------------------------------------------------------------------------
@@ -1489,6 +1491,98 @@ num_elems, &
     return
 end function ESMF_MeshCreateFromDG
 !------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshCreateFromGrid()"
+!BOP
+! !IROUTINE: ESMF_MeshCreate - Create a Mesh from a Grid
+!
+! !INTERFACE:
+  ! Private name; call using ESMF_MeshCreate()
+    function ESMF_MeshCreateFromGrid(grid, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)         :: ESMF_MeshCreateFromGrid
+! !ARGUMENTS:
+    type(ESMF_Grid),        intent(in)            :: grid
+    integer,                intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!   Create a Mesh from an ESMF Grid. 
+!
+!   \begin{description}
+!   \item [grid]
+!         The ESMF Grid from which to create the Mesh.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer::  localrc
+    type(ESMF_CoordSys_Flag) :: coordSys
+    integer :: dimCount
+
+    ! Create C side Mesh
+    call C_ESMC_MeshCreateFromGrid(ESMF_MeshCreateFromGrid%this, &
+         grid, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! The C side has been created
+    ESMF_MeshCreateFromGrid%isCMeshFreed=.false.
+
+    ! Get information about the Grid to set in the new Mesh
+    call ESMF_GridGet(grid,              &
+                      coordSys=coordSys, &
+                      dimCount=dimCount, &
+                      rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set dimension information
+    ESMF_MeshCreateFromGrid%spatialDim=dimCount
+    ESMF_MeshCreateFromGrid%parametricDim=dimCount
+
+    ! Set coord sys information
+    ESMF_MeshCreateFromGrid%coordSys=coordSys
+
+    ! Create nodal distgrid
+    call C_ESMC_MeshCreateNodeDistGrid( &
+         ESMF_MeshCreateFromGrid%this, &
+         ESMF_MeshCreateFromGrid%nodal_distgrid, &
+         ESMF_MeshCreateFromGrid%numOwnedNodes, &
+         localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Create element distgrid
+    call C_ESMC_MeshCreateElemDistGrid( &
+         ESMF_MeshCreateFromGrid%this, &
+         ESMF_MeshCreateFromGrid%element_distgrid, &
+         ESMF_MeshCreateFromGrid%numOwnedElements, &
+         localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Can't happen here
+    ESMF_MeshCreateFromGrid%hasSplitElem=.false.
+
+    ! Set as fully created
+    ESMF_MeshCreateFromGrid%isFullyCreated=.true.
+
+    ! Set init status of mesh
+    ESMF_INIT_SET_CREATED(ESMF_MeshCreateFromGrid)
+
+    ! Return success
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+end function ESMF_MeshCreateFromGrid
+!------------------------------------------------------------------------------
+
 
 !!------------------------------------------------------------------------------
 !#undef  ESMF_METHOD
