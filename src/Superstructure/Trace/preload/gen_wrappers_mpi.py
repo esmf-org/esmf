@@ -25,6 +25,8 @@ template_wrappers_mpi_h = """
 #ifndef _WRAPPERS_MPI_H
 #define _WRAPPERS_MPI_H
 
+#ifndef ESMF_MPIUNI
+
 #include <mpi.h>
 
 extern "C" {
@@ -37,6 +39,7 @@ extern "C" {
   {% endfor %}
 }
 
+#endif
 #endif
 """
 
@@ -55,6 +58,7 @@ template_wrappers_mpi = """
  *
  */
 
+#ifndef ESMF_MPIUNI
 #include <mpi.h>
 
 #include "ESMCI_Macros.h"
@@ -111,6 +115,7 @@ extern "C" {
   {% endfor %}
 
 }
+#endif
 """
 
 template_preload_mpi = """

@@ -12,6 +12,8 @@
  *
  */
 
+#ifndef ESMF_MPIUNI
+
 #include <mpi.h>
 
 #include "ESMCI_Macros.h"
@@ -166,3 +168,5 @@ extern "C" {
   
 
 }
+
+#endif
