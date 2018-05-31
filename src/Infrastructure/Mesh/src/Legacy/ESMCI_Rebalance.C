@@ -17,7 +17,7 @@
 #include <Mesh/include/Legacy/ESMCI_MeshField.h>
 
 
-#include <Zoltan/zoltan.h>
+#include <Mesh/src/Zoltan/zoltan.h>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
