@@ -12,6 +12,16 @@
 #include <stdio.h>
 #include "ESMCI_Trace.h"
 
+/* 
+ *  Darwin platforms use dlopen()/dlsym() to load these
+ *  wrappers, so we do not need to define them here.
+ *  The reason for this is that the Darwin dynamic
+ *  linker will not replace these with the symbols
+ *  defined in the preload library, so we need to
+ *  explicitly use dlsym() to find those symbols.
+ */
+#ifndef ESMF_OS_Darwin
+
 extern "C" {
 
   /* will be overridden if preloader present */
@@ -27,3 +37,5 @@ extern "C" {
   }
   
 }
+
+#endif

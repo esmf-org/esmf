@@ -41,10 +41,13 @@
 #define BT_REGION_ENTER 0
 #define BT_REGION_EXIT 1
 
+
+#if (!defined ESMF_OS_Darwin || defined ESMF_NO_DLFCN)
 extern "C" {
   void c_esmftrace_notify_wrappers(int initialized);
   int c_esmftrace_isinitialized();
 }
+#endif
 
 namespace ESMCI { 
   void TraceOpen(std::string trace_dir, int *rc);

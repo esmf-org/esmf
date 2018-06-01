@@ -33,6 +33,9 @@
 #include <mach/mach.h>
 #include <mach/clock.h>
 #include <mach/mach_time.h>
+#ifndef ESMF_NO_DLFCN
+#include <dlfcn.h>
+#endif
 #endif
 
 #include "ESMCI_Macros.h"
@@ -90,6 +93,10 @@ namespace ESMCI {
   static HashMap<string, int, REGION_HASHTABLE_SIZE, StringHashF> regionMap;
   static int nextRegionId = 1;
   
+#if (defined ESMF_OS_Darwin && !defined ESMF_NO_DLFCN)
+  static void (*notify_wrappers)(int initialized) = NULL;
+#endif
+
   //this data structure used to map VMIds(vmKey,localid) to an integer id
 #define VMID_MAP_SIZE 10000
   static VMId vmIdMap[VMID_MAP_SIZE];
@@ -675,7 +682,25 @@ namespace ESMCI {
     PushIOStats();  /* needed in case there are I/O events before first region */
     PushMPIStats();
     traceInitialized = true;
+
+#if (defined ESMF_OS_Darwin && !defined ESMF_NO_DLFCN)
+    void *preload_lib = dlopen(NULL, RTLD_LAZY);
+    if (preload_lib == NULL) {
+      //printf("cannot open lib\n");
+    }
+    else {
+      notify_wrappers = (void (*)(int)) dlsym(preload_lib, "c_esmftrace_notify_wrappers");
+      if (notify_wrappers != NULL) {
+	//printf("found notify_wrappers!");
+	notify_wrappers(1);
+      }
+      else {
+	//printf("did NOT find notify_wrappers!");
+      }
+    }
+#else
     c_esmftrace_notify_wrappers(1);
+#endif
   }
   
     
@@ -692,7 +717,14 @@ namespace ESMCI {
     if (ctx != NULL) {
       
       traceInitialized = false;
+#if (defined ESMF_OS_Darwin && !defined ESMF_NO_DLFCN)      
+      if (notify_wrappers != NULL) {
+	notify_wrappers(0);
+      }
+#else
       c_esmftrace_notify_wrappers(0);
+#endif
+      
       PopIOStats();
       PopMPIStats();
       
