@@ -23,10 +23,12 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
+ESMF_TRACE_ESMFLIB = 
 ifeq ($(ESMF_OS),Darwin)
-ESMF_TRACE_ESMFLIB = -lesmf
-else
-ESMF_TRACE_ESMFLIB =
+  ESMF_TRACE_ESMFLIB = -lesmf
+endif
+ifeq  ($(ESMF_OS),MinGW)
+  ESMF_TRACE_ESMFLIB = -lesmf
 endif
 
 tracelib_preload: preload.o preload_io.o preload_mpi.o wrappers.o wrappers_io.o wrappers_mpi.o

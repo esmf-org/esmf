@@ -9,7 +9,9 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef ESMF_OS_MinGW
 #include <sys/uio.h>
+#endif
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>

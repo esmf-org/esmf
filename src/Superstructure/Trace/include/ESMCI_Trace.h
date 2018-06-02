@@ -49,6 +49,10 @@ extern "C" {
 }
 #endif
 
+#ifdef ESMF_OS_MinGW
+#define DLL_EXPORT __declspec(dllexport)
+#endif
+
 namespace ESMCI { 
   void TraceOpen(std::string trace_dir, int *rc);
   void TraceClose(int *rc);
@@ -58,15 +62,15 @@ namespace ESMCI {
   int TraceMapVmId(VMId *vmid, int *rc);
 
   //////////////// IO Tracing //////////
-  void TraceIOOpenStart(const char *path);
-  void TraceIOOpenEnd();
-  void TraceIOCloseStart();
-  void TraceIOCloseEnd();
+  void DLL_EXPORT TraceIOOpenStart(const char *path);
+  void DLL_EXPORT TraceIOOpenEnd();
+  void DLL_EXPORT TraceIOCloseStart();
+  void DLL_EXPORT TraceIOCloseEnd();
   
-  void TraceIOWriteStart();
-  void TraceIOWriteEnd(size_t nbytes);
-  void TraceIOReadStart();
-  void TraceIOReadEnd(size_t nbytes);
+  void DLL_EXPORT TraceIOWriteStart();
+  void DLL_EXPORT TraceIOWriteEnd(size_t nbytes);
+  void DLL_EXPORT TraceIOReadStart();
+  void DLL_EXPORT TraceIOReadEnd(size_t nbytes);
   /////////////////////////////////////
   
   ///////////// MPI ////////////
