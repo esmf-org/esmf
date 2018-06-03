@@ -1645,9 +1645,23 @@ endif
 ESMF_TRACE_STATICLINKLIBS := -lesmftrace_static
 
 ESMF_TRACE_WRAPPERS_IO  := write writev pwrite read open
-ESMF_TRACE_WRAPPERS_MPI := MPI_Allreduce MPI_Barrier MPI_Wait  mpi_allgather_ mpi_allgather__  mpi_allgatherv_ mpi_allgatherv__  mpi_allreduce_ mpi_allreduce__  mpi_barrier_ mpi_barrier__  mpi_wait_ mpi_wait__ 
+ESMF_TRACE_WRAPPERS_MPI := MPI_Allreduce MPI_Barrier MPI_Wait
+ESMF_TRACE_WRAPPERS_MPI += mpi_allgather_ mpi_allgather__ mpi_allgatherv_ mpi_allgatherv__
+ESMF_TRACE_WRAPPERS_MPI += mpi_allreduce_ mpi_allreduce__ mpi_alltoall_ mpi_alltoall__
+ESMF_TRACE_WRAPPERS_MPI += mpi_alltoallv_ mpi_alltoallv__ mpi_alltoallw_ mpi_alltoallw__
+ESMF_TRACE_WRAPPERS_MPI += mpi_barrier_ mpi_barrier__ mpi_bcast_ mpi_bcast__
+ESMF_TRACE_WRAPPERS_MPI += mpi_exscan_ mpi_exscan__ mpi_gather_ mpi_gather__
+ESMF_TRACE_WRAPPERS_MPI += mpi_gatherv_ mpi_gatherv__ mpi_recv_ mpi_recv__
+ESMF_TRACE_WRAPPERS_MPI += mpi_reduce_ mpi_reduce__ mpi_reduce_scatter_ mpi_reduce_scatter__
+ESMF_TRACE_WRAPPERS_MPI += mpi_scatter_ mpi_scatter__ mpi_scatterv_ mpi_scatterv__
+ESMF_TRACE_WRAPPERS_MPI += mpi_scan_ mpi_scan__ mpi_send_ mpi_send__
+ESMF_TRACE_WRAPPERS_MPI += mpi_wait_ mpi_wait__ mpi_waitall_ mpi_waitall__
+ESMF_TRACE_WRAPPERS_MPI += mpi_waitany_ mpi_waitany__
+
 COMMA := ,
-ESMF_TRACE_STATICLINKOPTS := -static -Wl,--wrap=c_esmftrace_notify_wrappers -Wl,--wrap=c_esmftrace_isinitialized $(addprefix -Wl$(COMMA)--wrap=, $(ESMF_TRACE_WRAPPERS_IO)) $(addprefix -Wl$(COMMA)--wrap=, $(ESMF_TRACE_WRAPPERS_MPI))
+ESMF_TRACE_STATICLINKOPTS := -static -Wl,--wrap=c_esmftrace_notify_wrappers -Wl,--wrap=c_esmftrace_isinitialized
+ESMF_TRACE_STATICLINKOPTS += $(addprefix -Wl$(COMMA)--wrap=, $(ESMF_TRACE_WRAPPERS_IO))
+ESMF_TRACE_STATICLINKOPTS += $(addprefix -Wl$(COMMA)--wrap=, $(ESMF_TRACE_WRAPPERS_MPI))
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------

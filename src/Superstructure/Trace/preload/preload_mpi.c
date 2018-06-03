@@ -1,5 +1,4 @@
 
-
 /**
  *
  * preload_mpi.c
@@ -130,6 +129,48 @@ extern "C" {
     }
 
   
+    static void (*FTN_X(__real_ptr_mpi_alltoall))(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_alltoall)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_alltoall) == NULL) {
+        FTN_X(__real_ptr_mpi_alltoall) = (void (*)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_alltoall)));
+      }
+      FTN_X(__real_ptr_mpi_alltoall)(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
+    }
+
+    void FTN_X(mpi_alltoall)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_alltoall)(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_alltoallv))(MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_alltoallv)(MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_alltoallv) == NULL) {
+        FTN_X(__real_ptr_mpi_alltoallv) = (void (*)(MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_alltoallv)));
+      }
+      FTN_X(__real_ptr_mpi_alltoallv)(sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, ierr);
+    }
+
+    void FTN_X(mpi_alltoallv)(MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_alltoallv)(sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_alltoallw))(MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_alltoallw)(MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_alltoallw) == NULL) {
+        FTN_X(__real_ptr_mpi_alltoallw) = (void (*)(MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_alltoallw)));
+      }
+      FTN_X(__real_ptr_mpi_alltoallw)(sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, ierr);
+    }
+
+    void FTN_X(mpi_alltoallw)(MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_alltoallw)(sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, ierr);
+    }
+
+  
     static void (*FTN_X(__real_ptr_mpi_barrier))(MPI_Fint *comm, MPI_Fint *ierr) = NULL;
 
     void FTN_X(__real_mpi_barrier)(MPI_Fint *comm, MPI_Fint *ierr) {
@@ -144,6 +185,160 @@ extern "C" {
     }
 
   
+    static void (*FTN_X(__real_ptr_mpi_bcast))(MPI_Fint *buffer, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_bcast)(MPI_Fint *buffer, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_bcast) == NULL) {
+        FTN_X(__real_ptr_mpi_bcast) = (void (*)(MPI_Fint *buffer, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_bcast)));
+      }
+      FTN_X(__real_ptr_mpi_bcast)(buffer, count, datatype, root, comm, ierr);
+    }
+
+    void FTN_X(mpi_bcast)(MPI_Fint *buffer, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_bcast)(buffer, count, datatype, root, comm, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_exscan))(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_exscan)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_exscan) == NULL) {
+        FTN_X(__real_ptr_mpi_exscan) = (void (*)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_exscan)));
+      }
+      FTN_X(__real_ptr_mpi_exscan)(sendbuf, recvbuf, count, datatype, op, comm, ierr);
+    }
+
+    void FTN_X(mpi_exscan)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_exscan)(sendbuf, recvbuf, count, datatype, op, comm, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_gather))(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_gather)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_gather) == NULL) {
+        FTN_X(__real_ptr_mpi_gather) = (void (*)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_gather)));
+      }
+      FTN_X(__real_ptr_mpi_gather)(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierr);
+    }
+
+    void FTN_X(mpi_gather)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_gather)(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_gatherv))(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_gatherv)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_gatherv) == NULL) {
+        FTN_X(__real_ptr_mpi_gatherv) = (void (*)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_gatherv)));
+      }
+      FTN_X(__real_ptr_mpi_gatherv)(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm, ierr);
+    }
+
+    void FTN_X(mpi_gatherv)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_gatherv)(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_recv))(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_recv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_recv) == NULL) {
+        FTN_X(__real_ptr_mpi_recv) = (void (*)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_recv)));
+      }
+      FTN_X(__real_ptr_mpi_recv)(buf, count, source, tag, comm, status, ierr);
+    }
+
+    void FTN_X(mpi_recv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_recv)(buf, count, source, tag, comm, status, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_reduce))(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_reduce)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_reduce) == NULL) {
+        FTN_X(__real_ptr_mpi_reduce) = (void (*)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_reduce)));
+      }
+      FTN_X(__real_ptr_mpi_reduce)(sendbuf, recvbuf, count, datatype, op, root, comm, ierr);
+    }
+
+    void FTN_X(mpi_reduce)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_reduce)(sendbuf, recvbuf, count, datatype, op, root, comm, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_reduce_scatter))(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_reduce_scatter)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_reduce_scatter) == NULL) {
+        FTN_X(__real_ptr_mpi_reduce_scatter) = (void (*)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_reduce_scatter)));
+      }
+      FTN_X(__real_ptr_mpi_reduce_scatter)(sendbuf, recvbuf, recvcounts, datatype, op, comm, ierr);
+    }
+
+    void FTN_X(mpi_reduce_scatter)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_reduce_scatter)(sendbuf, recvbuf, recvcounts, datatype, op, comm, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_scatter))(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_scatter)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_scatter) == NULL) {
+        FTN_X(__real_ptr_mpi_scatter) = (void (*)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_scatter)));
+      }
+      FTN_X(__real_ptr_mpi_scatter)(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierr);
+    }
+
+    void FTN_X(mpi_scatter)(MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_scatter)(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_scatterv))(MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *displs, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_scatterv)(MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *displs, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_scatterv) == NULL) {
+        FTN_X(__real_ptr_mpi_scatterv) = (void (*)(MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *displs, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_scatterv)));
+      }
+      FTN_X(__real_ptr_mpi_scatterv)(sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm, ierr);
+    }
+
+    void FTN_X(mpi_scatterv)(MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *displs, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_scatterv)(sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_scan))(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_scan)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_scan) == NULL) {
+        FTN_X(__real_ptr_mpi_scan) = (void (*)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_scan)));
+      }
+      FTN_X(__real_ptr_mpi_scan)(sendbuf, recvbuf, count, datatype, op, comm, ierr);
+    }
+
+    void FTN_X(mpi_scan)(MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_scan)(sendbuf, recvbuf, count, datatype, op, comm, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_send))(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_send)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_send) == NULL) {
+        FTN_X(__real_ptr_mpi_send) = (void (*)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_send)));
+      }
+      FTN_X(__real_ptr_mpi_send)(buf, count, datatype, dest, tag, comm, ierr);
+    }
+
+    void FTN_X(mpi_send)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_send)(buf, count, datatype, dest, tag, comm, ierr);
+    }
+
+  
     static void (*FTN_X(__real_ptr_mpi_wait))(MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierr) = NULL;
 
     void FTN_X(__real_mpi_wait)(MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierr) {
@@ -155,6 +350,34 @@ extern "C" {
 
     void FTN_X(mpi_wait)(MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierr) {
       FTN_X(__wrap_mpi_wait)(request, status, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_waitall))(MPI_Fint *count, MPI_Fint *reqs, MPI_Fint *stats, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_waitall)(MPI_Fint *count, MPI_Fint *reqs, MPI_Fint *stats, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_waitall) == NULL) {
+        FTN_X(__real_ptr_mpi_waitall) = (void (*)(MPI_Fint *count, MPI_Fint *reqs, MPI_Fint *stats, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_waitall)));
+      }
+      FTN_X(__real_ptr_mpi_waitall)(count, reqs, stats, ierr);
+    }
+
+    void FTN_X(mpi_waitall)(MPI_Fint *count, MPI_Fint *reqs, MPI_Fint *stats, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_waitall)(count, reqs, stats, ierr);
+    }
+
+  
+    static void (*FTN_X(__real_ptr_mpi_waitany))(MPI_Fint *count, MPI_Fint *reqs, MPI_Fint *index, MPI_Fint *status, MPI_Fint *ierr) = NULL;
+
+    void FTN_X(__real_mpi_waitany)(MPI_Fint *count, MPI_Fint *reqs, MPI_Fint *index, MPI_Fint *status, MPI_Fint *ierr) {
+      if (FTN_X(__real_ptr_mpi_waitany) == NULL) {
+        FTN_X(__real_ptr_mpi_waitany) = (void (*)(MPI_Fint *count, MPI_Fint *reqs, MPI_Fint *index, MPI_Fint *status, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_waitany)));
+      }
+      FTN_X(__real_ptr_mpi_waitany)(count, reqs, index, status, ierr);
+    }
+
+    void FTN_X(mpi_waitany)(MPI_Fint *count, MPI_Fint *reqs, MPI_Fint *index, MPI_Fint *status, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_waitany)(count, reqs, index, status, ierr);
     }
 
   

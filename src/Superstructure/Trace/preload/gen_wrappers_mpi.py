@@ -201,7 +201,9 @@ extern "C" {
 """
 
 template_static_linkopts="""
-ESMF_TRACE_WRAPPERS_MPI := {% for f in cfunc_list %}{{f.name}} {% endfor %}{% for f in ffunc_list %} {{f.name}}_ {{f.name}}__ {% endfor %}"""
+ESMF_TRACE_WRAPPERS_MPI :={% for f in cfunc_list %} {{f.name}}{% if loop.index % 4 == 0 %}\nESMF_TRACE_WRAPPERS_MPI +={% endif %}{% endfor %}
+ESMF_TRACE_WRAPPERS_MPI +={% for f in ffunc_list %} {{f.name}}_ {{f.name}}__{% if loop.index % 2 == 0 %}\nESMF_TRACE_WRAPPERS_MPI +={% endif %}{% endfor %}
+"""
 
 
 # C MPI Functions
@@ -248,17 +250,114 @@ ffunc_list = [
         'params':'MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr',
         'args':'sendbuf, recvbuf, count, datatype, op, comm, ierr'
     },
+
+    {
+        'name':'mpi_alltoall',
+        'params':'MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierr'
+    },
+
+    {
+        'name':'mpi_alltoallv',
+        'params':'MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtype, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm, ierr'
+    },
+
+    {
+        'name':'mpi_alltoallw',
+        'params':'MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *sdispls, MPI_Fint *sendtypes, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *rdispls, MPI_Fint *recvtypes, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm, ierr'
+    },
     
     {
         'name':'mpi_barrier', 'params':'MPI_Fint *comm, MPI_Fint *ierr', 'args':'comm, ierr'
+    },
+
+    {
+        'name':'mpi_bcast',
+        'params':'MPI_Fint *buffer, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'buffer, count, datatype, root, comm, ierr'
+    },
+
+    {
+        'name':'mpi_exscan',
+        'params':'MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'sendbuf, recvbuf, count, datatype, op, comm, ierr'      
+    },
+    
+    {
+        'name':'mpi_gather',
+        'params':'MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierr'
+    },
+
+    {
+        'name':'mpi_gatherv',
+        'params':'MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *displs, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm, ierr'
+    },
+
+    {
+        'name':'mpi_recv',
+        'params':'MPI_Fint *buf, MPI_Fint *count, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr',
+        'args':'buf, count, source, tag, comm, status, ierr'
+    },
+    
+    {
+        'name':'mpi_reduce',
+        'params':'MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'sendbuf, recvbuf, count, datatype, op, root, comm, ierr'      
+    },
+
+    {
+        'name':'mpi_reduce_scatter',
+        'params':'MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *recvcounts, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'sendbuf, recvbuf, recvcounts, datatype, op, comm, ierr'
+        
+    },
+    
+    {
+        'name': 'mpi_scatter',
+        'params': 'MPI_Fint *sendbuf, MPI_Fint *sendcount, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm, ierr'
+    },
+
+    {
+        'name': 'mpi_scatterv',
+        'params': 'MPI_Fint *sendbuf, MPI_Fint *sendcounts, MPI_Fint *displs, MPI_Fint *sendtype, MPI_Fint *recvbuf, MPI_Fint *recvcount, MPI_Fint *recvtype, MPI_Fint *root, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'sendbuf, sendcounts, displs, sendtype, recvbuf, recvcount, recvtype, root, comm, ierr'
+    },    
+
+    {
+        'name':'mpi_scan',
+        'params':'MPI_Fint *sendbuf, MPI_Fint *recvbuf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *op, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'sendbuf, recvbuf, count, datatype, op, comm, ierr'      
+    },
+
+    {
+        'name':'mpi_send',
+        'params':'MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *dest, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *ierr',
+        'args':'buf, count, datatype, dest, tag, comm, ierr'
     },
     
     {
         'name':'mpi_wait',
         'params':'MPI_Fint *request, MPI_Fint *status, MPI_Fint *ierr',
         'args':'request, status, ierr'
-    }
+    },
 
+    {
+        'name':'mpi_waitall',
+        'params':'MPI_Fint *count, MPI_Fint *reqs, MPI_Fint *stats, MPI_Fint *ierr',
+        'args':'count, reqs, stats, ierr'
+    },
+
+    {
+        'name':'mpi_waitany',
+        'params':'MPI_Fint *count, MPI_Fint *reqs, MPI_Fint *index, MPI_Fint *status, MPI_Fint *ierr',
+        'args':'count, reqs, index, status, ierr'
+    }
+    
 ]
 
 
