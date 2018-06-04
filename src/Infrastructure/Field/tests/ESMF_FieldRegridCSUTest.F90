@@ -223,13 +223,33 @@
       !EX_UTest
       ! Test regrid with Cubed Sphere grid defined in a mosaic file
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Bilinear regrid a cubed sphere Grid defined in GRIDSPEC Mosaic file"
+      write(name, *) "Bilinear regrid a regularly decomposed cubed sphere Grid defined in GRIDSPEC Mosaic file"
 
       ! initialize 
       rc=ESMF_SUCCESS
        
       ! do test
-      call test_bilinear_regrid_csmosaic(rc)
+      call test_bilinear_regrid_csmosaic(.true.,rc)
+
+      ! return results depending on the presence of the NetCDF library
+#ifdef ESMF_NETCDF
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+      write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+      call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test regrid with Cubed Sphere grid defined in a mosaic file
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Bilinear regrid an irregularly decomposed cubed sphere Grid defined in GRIDSPEC Mosaic file"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+       
+      ! do test
+      call test_bilinear_regrid_csmosaic(.false.,rc)
 
       ! return results depending on the presence of the NetCDF library
 #ifdef ESMF_NETCDF
@@ -4407,9 +4427,10 @@ subroutine test_bilinear_regrid_csgrid_irreg(rc)
 
  end subroutine test_conserve_regrid_csmesh
 
- subroutine test_bilinear_regrid_csmosaic(rc)
+ subroutine test_bilinear_regrid_csmosaic(regular, rc)
 #undef ESMF_METHOD
 #define ESMF_METHOD "test_bilinear_regrid_csgrid"
+  logical :: regular
   integer, intent(out)  :: rc
   logical :: correct
   integer :: localrc
@@ -4438,10 +4459,11 @@ subroutine test_bilinear_regrid_csgrid_irreg(rc)
   integer src_tile_size, dst_nx, dst_ny
   real(ESMF_KIND_R8) :: lon, lat, theta, phi, relErr
   real(ESMF_KIND_R8) :: coords(2), maxRelErr
-  integer :: localPet, petCount
+  integer :: localPet, petCount, i
   real(ESMF_KIND_R8), parameter ::  DEG2RAD = &
                 3.141592653589793_ESMF_KIND_R8/180.0_ESMF_KIND_R8 
   integer :: decomptile(2,6)
+  integer :: countsPerDEDim1(3,6), countsPerDEDim2(2,6)
   character(len=ESMF_MAXPATHLEN) :: filename
   
   ! init success flag
@@ -4460,27 +4482,47 @@ subroutine test_bilinear_regrid_csgrid_irreg(rc)
             ESMF_CONTEXT, rcToReturn=rc)) return
 
   filename = "data/C48_mosaic.nc"
+
   dst_nx = 47
   dst_ny = 47
 
-  ! Set up decomposition for src Grid
-  decomptile(:,1)=(/2,2/)
-  decomptile(:,2)=(/2,2/)
-  decomptile(:,3)=(/2,2/)
-  decomptile(:,4)=(/2,2/)
-  decomptile(:,5)=(/2,2/)
-  decomptile(:,6)=(/2,2/)
+  if (regular) then
+    ! Set up decomposition for src Grid
+    decomptile(:,1)=(/2,2/)
+    decomptile(:,2)=(/2,2/)
+    decomptile(:,3)=(/2,2/)
+    decomptile(:,4)=(/2,2/)
+    decomptile(:,5)=(/2,2/)
+    decomptile(:,6)=(/2,2/)
 
-  ! Create Src Grid
-  srcGrid=ESMF_GridCreateMosaic(filename=trim(filename), &
+    ! Create Src Grid
+    srcGrid=ESMF_GridCreateMosaic(filename=trim(filename), &
        tileFilePath="./data/", regDecompPTile=decomptile, &
        staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
        indexflag=ESMF_INDEX_GLOBAL, &
        rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+       ESMF_ERR_PASSTHRU, &
+       ESMF_CONTEXT, rcToReturn=rc)) return
+  else 
+    ! Setup irregular decomposition
+    do i=1,3
+      CountsPerDeDim1(:,i)=(/24,12,12/)
+      CountsPerDeDim1(:,i+3)=(/24,24,0/)
+      CountsPerDeDim2(:,i)=(/36,12/)
+      CountsPerDeDim2(:,i+3)=(/48,0/)
+    enddo
+    srcGrid=ESMF_GridCreateMosaic(trim(filename), &
+       CountsPerDeDim1, CountsPerDeDim2, &	
+       tileFilePath="./data/",           &
+       staggerLocList = (/ESMF_STAGGERLOC_CORNER, ESMF_STAGGERLOC_CENTER/), &
+       indexflag = ESMF_INDEX_GLOBAL, &
+       rc=localrc)
   if (ESMF_LogFoundError(localrc, &
        ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
-
+  endif
+      
   ! Create Dst Grid
   dstGrid=ESMF_GridCreate1PeriDimUfrm(maxIndex=(/dst_nx,dst_ny/), &
        minCornerCoord=(/0.0_ESMF_KIND_R8,-90.0_ESMF_KIND_R8/), &

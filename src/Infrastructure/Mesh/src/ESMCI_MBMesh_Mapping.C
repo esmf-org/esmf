@@ -12,7 +12,7 @@
 // Take out if MOAB isn't being used
 #if defined ESMF_MOAB
 
-#include <Mesh/include/ESMCI_Exception.h>
+#include <Mesh/include/Legacy/ESMCI_Exception.h>
 #include <Mesh/include/ESMCI_MBMesh_Mapping.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
 
@@ -177,14 +177,12 @@ bool MBElemMap::spherical_eval(const double *mdata,
 
   double p1,p2;  // Get rid of degenerate edges
 
-
   int first_removed_ind=-1;
   remove_0len_edges3D(&num_pnts, pnts, &first_removed_ind);
 
 
   // Map triangles
   if (num_pnts==3) {
-
     if (calc_gc_parameters_tri(point,
                                pnts+6, pnts, pnts+3,
                                &p1, &p2)) {
@@ -237,8 +235,7 @@ bool MBElemMap::spherical_eval(const double *mdata,
   return false;
 }
 
-/*
-bool MBElemMap::cartesian_eval(const double *mdata, const double *point, double *pcoord, double *dist) const
+bool MBElemMap::cartesian_eval(const double *mdata, const double *point, int num_pnts, double *pcoord, double *dist)
 {
   // Init output
   if (dist) *dist = std::numeric_limits<double>::max();
@@ -249,28 +246,95 @@ bool MBElemMap::cartesian_eval(const double *mdata, const double *point, double 
 
   int pdim=2, sdim=2, ndof=2;
 
-  POLY_Mapping mpstd, jacobian_invert;
+  // POLY_Mapping mpstd, jacobian_invert;
 
   double s[pdim];
   double delta_s[pdim];
   double res[pdim];
   double jac[sdim][sdim];
   double jac_inv[sdim][sdim];
-  double sgrads[SFUNC_TYPE::ndofs][sdim];
+  // double sgrads[SFUNC_TYPE::ndofs][sdim];
+  double sgrads[num_pnts][sdim];
   double dnorm = 0.0, rnorm = 0.0;
   int niters = 0;
+  double one4th = 1./4.;
 
   for (unsigned int i = 0; i < pdim; i++) {
     s[i] = delta_s[i] = res[i] = 0.0;
   }
 
-  POLY_Mapping<SFUNC_TYPE,MPTraits<>,SPATIAL_DIM,PARAMETRIC_DIM> *mpstd =
-    trade<MPTraits<> >();
+  // POLY_Mapping<SFUNC_TYPE,MPTraits<>,SPATIAL_DIM,PARAMETRIC_DIM> *mpstd =
+    // trade<MPTraits<> >();
   bool converged = false;
   do {
-    SFUNC_TYPE::shape_grads(1, s, &sgrads[0][0]);
+    // replace shape_grads call with if/else block below (from Mapping)
+    // SFUNC_TYPE::shape_grads(1, s, &sgrads[0][0]);
+    // triangle
+    if (num_pnts == 3){
+      // dof 1
+      sgrads[0][0] = -1.0;
+      sgrads[0][1] = -1.0;
+
+      // dof 2
+      sgrads[1][0] = 1.0;
+      sgrads[1][1] = 0.0;
+
+      // dof 3
+      sgrads[2][0] = 0.0;
+      sgrads[2][1] = 1.0;
+
+    } else if (num_pnts == 4){
+      double xi = s[0], eta = s[1];
+
+      // dof 1
+      sgrads[0][0] = -one4th*(1.0-eta);
+      sgrads[0][1] = -one4th*(1.0-xi);
+
+      // dof 2
+      sgrads[1][0] = one4th*(1.0-eta);
+      sgrads[1][1] = -one4th*(1.0+xi);
+
+      // dof 3
+      sgrads[2][0] = one4th*(1.0+eta);
+      sgrads[2][1] = one4th*(1.0+xi);
+
+      // dof 4
+      sgrads[3][0] = -one4th*(1.0+eta);
+      sgrads[3][1] = one4th*(1.0-xi);
+    }
+    
     // Calculate residual.  Also use loop to start jacobian
-    mpstd->forward(1, mdata, s, res); // F($)
+    
+    // replace forward call with loops below
+    // mpstd->forward(1, mdata, s, res); // F($)
+    
+    // ---------------------------- forward ----------------------------------
+    // We get the shape function values at points
+    std::vector<double> svals(num_pnts);
+
+    if (num_pnts == 3){
+        // this comes from the shape() call inside of forward()
+        double xi = s[0], eta = s[1];
+        svals[0] = 1.0 - xi - eta;
+        svals[1] = xi;
+        svals[2] = eta;
+    } else if (num_pnts == 4){
+        double xi = s[0], eta = s[1];
+        // this comes from the shape() call inside of forward()
+        svals[0] = one4th*(1.0-xi)*(1.0-eta);
+        svals[1] = one4th*(1.0+xi)*(1.0-eta);
+        svals[2] = one4th*(1.0+xi)*(1.0+eta);
+        svals[3] = one4th*(1.0-xi)*(1.0+eta);
+    }
+
+    for (unsigned int i = 0; i < sdim; i++) {
+      res[i] = 0.0;
+      for (unsigned int ncf = 0; ncf < num_pnts; ncf++) {
+        res[i] += mdata[ncf*sdim+i]*svals[ncf];
+      } // ncf
+    } // sdim
+
+    // ---------------------------- forward ----------------------------------
     rnorm = 0.0;
     for (unsigned int i = 0; i < sdim; i++) {
       res[i] = point[i] - res[i];  // x - F(x) = -R(x)
@@ -278,7 +342,7 @@ bool MBElemMap::cartesian_eval(const double *mdata, const double *point, double 
       // Load forward jacobian
       for (unsigned int j = 0; j < sdim; j++) {
         jac[i][j] = 0.0;
-        for (unsigned int k = 0; k < SFUNC_TYPE::ndofs; k++) {
+        for (unsigned int k = 0; k < num_pnts; k++) {
           jac[i][j] += sgrads[k][j]*mdata[k*sdim+i];
         }
       }
@@ -290,9 +354,13 @@ bool MBElemMap::cartesian_eval(const double *mdata, const double *point, double 
 //      break;
 //    }
 
-
     // So now res holds -F(x) and jac has jacobian.  We must invert the jacobian
-    POLY_Mapping_jacobian_invert<sdim>(&jac[0][0], &jac_inv[0][0]);
+    // POLY_Mapping_jacobian_invert<sdim>(&jac[0][0], &jac_inv[0][0]);
+    double deti = 1.0/(jac[0][0]*jac[1][1] - jac[0][1]*jac[1][0]);
+    jac_inv[0][0] = deti*jac[1][1];
+    jac_inv[0][1] = -deti*jac[0][1];
+    jac_inv[1][0] = -deti*jac[1][0];
+    jac_inv[1][1] = deti*jac[0][0];
 
     // delta_s = jac_inv*res
     dnorm = 0;
@@ -301,7 +369,6 @@ bool MBElemMap::cartesian_eval(const double *mdata, const double *point, double 
       for (unsigned int j = 0; j < sdim; j++) {
         delta_s[i] += jac_inv[i][j]*res[j];
       }
-
       // snew = sold+delta
       s[i] = s[i] + delta_s[i];
       dnorm += delta_s[i]*delta_s[i];
@@ -320,14 +387,73 @@ bool MBElemMap::cartesian_eval(const double *mdata, const double *point, double 
 
   if (!converged) {
     if (dist) *dist = std::numeric_limits<double>::max();
+#ifdef DEBUG_CARTMAP
+  printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DEBUG ~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+  printf("Newton iteration did not converge!! dnorm = %f\n", dnorm);
+  printf("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ DEBUG ~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+#endif
     return false;
   }
 
+  bool in=true;
+  if (num_pnts == 3){
+    const double in_tol = 1e-10;
+
+    if ((pcoord[0] <-in_tol) || (pcoord[1] <-in_tol)) {
+      double out_dist[2]={0.0,0.0};
+
+       if (pcoord[0] < -in_tol) {
+          out_dist[0] = -pcoord[0];
+          in=false;
+       } else if (pcoord[0] > 1.0+in_tol) {
+          out_dist[0] = pcoord[0]-1.0;
+          // no setting of in, this is just to calculate dist
+       }
+
+       if (pcoord[1] < -in_tol) {
+          out_dist[1] = -pcoord[1];
+          in=false;
+       } else if (pcoord[1] > 1.0+in_tol) {
+          out_dist[1] = pcoord[1]-1.0;
+          // no setting of in, this is just to calculate dist
+       }
+
+       if (dist) *dist=std::sqrt(out_dist[0]*out_dist[0]+out_dist[1]*out_dist[1]);
+
+    } else if ((pcoord[0] + pcoord[1]) > 1.0+in_tol) {
+      if (dist) *dist = std::abs((pcoord[0] + pcoord[1]) - 1.0);
+      in=false;
+    }
+
+  } else if (num_pnts == 4){
+    const double in_tol = 1e-10;
+    double max_out[2]={0.0,0.0};
+
+    if (pcoord[0] < -1.0-in_tol) {
+      max_out[0]=-1.0 - pcoord[0];
+      in= false;
+    } else if (pcoord[0] > 1.0+in_tol) {
+      max_out[0]=pcoord[0] - 1.0;
+      in= false;
+    }
+
+    if (pcoord[1] < -1.0-in_tol) {
+      max_out[1]=-1.0 - pcoord[1];
+      in= false;
+    } else if (pcoord[1] > 1.0+in_tol) {
+      max_out[1]=pcoord[1] - 1.0;
+      in= false;
+    }
+
+    if (dist) *dist=std::sqrt(max_out[0]*max_out[0]+max_out[1]*max_out[1]);
+
+  }
+  
   // check parametric bounds.
-  double sdist=0.0;
-  bool resu = SFUNC_TYPE::is_in(pcoord, &sdist);
-  if(dist) *dist = sdist;
-  return resu;
-}*/
+  // double sdist=0.0;
+  // bool resu = SFUNC_TYPE::is_in(pcoord, &sdist);
+  // if(dist) *dist = sdist;
+  return in;
+}
 
 #endif

@@ -3780,7 +3780,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !    \begin{description}
 !    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_BIN}:]\ All data in the file will
 !      be overwritten with each Array's data.
-!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF}:]\ Only the
+!    \item[{\tt iofmt} = {\tt ESMF\_IOFMT\_NETCDF, ESMF\_IOFMT\_NETCDF\_64BIT\_OFFSET}:]\ Only the
 !      data corresponding to each Array's name will be
 !      be overwritten. If the {\tt timeslice} option is given, only data for
 !      the given timeslice may be overwritten.

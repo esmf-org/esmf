@@ -38,7 +38,7 @@
 #include "ESMCI_GridToMesh.h"
 #include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/ESMCI_Mesh.h"
-#include "Mesh/include/ESMCI_MeshRead.h"
+#include "Mesh/include/Legacy/ESMCI_MeshRead.h"
 
 
 // Some xlf compilers don't define this
@@ -9107,7 +9107,7 @@ int GridCellIter::getGlobalID(
 
   // Convert to DE based
   for (int i=0; i<rank; i++) {
-    deBasedInd[i]=curInd[i]-exLBndInd[i];
+    deBasedInd[i]=curInd[i]-lBndInd[i];
   }
       
   // determine sequence index
@@ -9445,10 +9445,17 @@ void GridCellIter::setArrayData(
   
   //// Get LocalArray cooresponding to staggerloc, coord and localDE
   localArray=array->getLocalarrayList()[curDE];
-   
-  //// Get pointer to LocalArray data
-  localArray->setData(curInd, data);
+
   
+  // Convert curInd to index used in localArray
+  int arrayInd[ESMF_MAXDIM];
+  for (int i=0; i<rank; i++) {
+    arrayInd[i]=(curInd[i]-lBndInd[i])+exLBndInd[i];
+  }
+
+  //// Get pointer to LocalArray data
+  localArray->setData(arrayInd, data);
+   
 }
 
 // Add more types here if necessary
@@ -9504,9 +9511,14 @@ void GridCellIter::getArrayData(
   //// Get LocalArray cooresponding to staggerloc, coord and localDE
   localArray=array->getLocalarrayList()[curDE];
   
+  // Convert curInd to index used in localArray
+  int arrayInd[ESMF_MAXDIM];
+  for (int i=0; i<rank; i++) {
+    arrayInd[i]=(curInd[i]-lBndInd[i])+exLBndInd[i];
+  }
+
   //// Get pointer to LocalArray data
-  localArray->getDataInternal(curInd, data);
-  
+  localArray->getDataInternal(arrayInd, data);
 }
 
 // Add more types here if necessary

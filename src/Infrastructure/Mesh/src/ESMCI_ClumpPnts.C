@@ -15,7 +15,7 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_F90Interface.h"
-#include "ESMCI_Exception.h"
+#include "Mesh/include/Legacy/ESMCI_Exception.h"
 #include "Mesh/include/ESMCI_OTree.h"
 #include "Mesh/include/ESMCI_ClumpPnts.h"
 #include "ESMCI_VM.h"

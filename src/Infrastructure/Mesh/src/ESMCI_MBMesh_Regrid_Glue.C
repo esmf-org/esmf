@@ -29,10 +29,10 @@
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
 #include "Mesh/include/ESMCI_MBMesh.h"
-#include "Mesh/include/ESMCI_MeshRegrid.h"
-#include "Mesh/include/ESMCI_Exception.h"
-#include "Mesh/include/ESMCI_Interp.h"
-#include "Mesh/include/ESMCI_Extrapolation.h"
+#include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
+#include "Mesh/include/Legacy/ESMCI_Exception.h"
+#include "Mesh/include/Regridding/ESMCI_Interp.h"
+#include "Mesh/include/Regridding/ESMCI_Extrapolation.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 
 #include "Mesh/include/ESMCI_MBMesh_Regrid_Glue.h"
@@ -59,8 +59,6 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, PointList *dstpl, IWeight
                      int *regridPoleType, int *regridPoleNPnts,
                      int *regridScheme,
                      int *map_type, int *unmappedaction);
-
-
 #if 0
 // prototypes from below
 static bool all_mesh_node_ids_in_wmat(Mesh &mesh, WMat &wts, int *missing_id);

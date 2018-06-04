@@ -326,10 +326,10 @@ end interface
           endif
 
           if (present(ungriddedLBound) .and. present (undistLBound)) then
-              if (size(ungriddedLBound) .gt. 0) undistLBound = ungriddedLBound
+              if (size(ungriddedLBound) .gt. 0) undistLBound(1:size(ungriddedLBound)) = ungriddedLBound
           endif
           if (present(ungriddedUBound) .and. present (undistUBound)) then
-              if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
+              if (size(ungriddedUBound) .gt. 0) undistUBound(1:size(ungriddedUBound)) = ungriddedUBound
           endif
 
            ! Distgrid
@@ -364,10 +364,10 @@ end interface
           endif
 
           if (present(ungriddedLBound) .and. present (undistLBound)) then
-              if (size(ungriddedLBound) .gt. 0) undistLBound = ungriddedLBound
+              if (size(ungriddedLBound) .gt. 0) undistLBound(1:size(ungriddedLBound)) = ungriddedLBound
           endif
           if (present(ungriddedUBound) .and. present (undistUBound)) then
-              if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
+              if (size(ungriddedUBound) .gt. 0) undistUBound(1:size(ungriddedUBound)) = ungriddedUBound
           endif
 
           ! Get distgrid
@@ -387,10 +387,10 @@ end interface
           endif
 
           if (present(ungriddedLBound) .and. present (undistLBound)) then
-              if (size(ungriddedLBound) .gt. 0) undistLBound = ungriddedLBound
+              if (size(ungriddedLBound) .gt. 0) undistLBound(1:size(ungriddedLBound)) = ungriddedLBound
           endif
           if (present(ungriddedUBound) .and. present (undistUBound)) then
-                if (size(ungriddedUBound) .gt. 0) undistUBound = ungriddedUBound
+                if (size(ungriddedUBound) .gt. 0) undistUBound(1:size(ungriddedUBound)) = ungriddedUBound
           endif
 
           ! Get distgrid
@@ -501,8 +501,8 @@ end interface
 !
 ! !ARGUMENTS:
        type(ESMF_Mesh),       intent(in)              :: mesh
-       type(ESMF_MeshLoc),    intent(in), optional    :: loc
-        integer,               intent(out),  optional  :: rc
+       type(ESMF_MeshLoc),    intent(in),  optional   :: loc
+       integer,               intent(out), optional   :: rc
 !
 ! !DESCRIPTION:
 ! Create an {\tt ESMF\_GeomBase} object from an {\tt ESMF\_Mesh} object.

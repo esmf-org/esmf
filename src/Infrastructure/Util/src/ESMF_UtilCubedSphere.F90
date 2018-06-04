@@ -227,8 +227,10 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, Lo
         n=tile
         do j=start(2), start(2)+count(2)-1
            do i=start(1),start(1)+count(1)-1
-              call cell_center2(grid_global(i,j,  1:2,n), grid_global(i+1,j,  1:2,n),   &
-                                grid_global(i,j+1,1:2,n), grid_global(i+1,j+1,1:2,n),   &
+              call cell_center2(grid_global(i,j,  1,n), grid_global(i,j,  2,n),   &
+	      	   	        grid_global(i+1,j,1,n), grid_global(i+1,j,2,n),   &
+                                grid_global(i,j+1,1,n), grid_global(i,j+1,2,n),   &
+                                grid_global(i+1,j+1,1,n), grid_global(i+1,j+1,2,n),   &
                                 alocs)
               LonCenter(i-start(1)+1,j-start(2)+1) = alocs(1)
               LatCenter(i-start(1)+1,j-start(2)+1) = alocs(2)
@@ -238,8 +240,10 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, Lo
         do n=1,ntiles
            do j=1,npts
               do i=1,npts
-                  call cell_center2(grid_global(i,j,  1:2,n), grid_global(i+1,j,  1:2,n),   &
-                                grid_global(i,j+1,1:2,n), grid_global(i+1,j+1,1:2,n),   &
+              call cell_center2(grid_global(i,j,  1,n), grid_global(i,j,  2,n),   &
+	      	   	        grid_global(i+1,j,1,n), grid_global(i+1,j,2,n),   &
+                                grid_global(i,j+1,1,n), grid_global(i,j+1,2,n),   &
+                                grid_global(i+1,j+1,1,n), grid_global(i+1,j+1,2,n),   &
                                 alocs)
                   jg = (n-1)*npts + j
                   LonCenter(i,jg) = alocs(1)
@@ -318,8 +322,10 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
     if (present(LonCenter) .and. present(LatCenter)) then
         do j=1, count(2)
            do i=1,count(1)
-              call cell_center2(tile_local(i,j,  1:2), tile_local(i+1,j,  1:2),   &
-                                tile_local(i,j+1,1:2), tile_local(i+1,j+1,1:2),   &
+              call cell_center2(tile_local(i,j,  1), tile_local(i,j,    2),   &
+	      	   		tile_local(i+1,j,1), tile_local(i+1,j,  2),   &
+                                tile_local(i,j+1,1), tile_local(i,j+1,  2),   &
+                                tile_local(i+1,j+1,1), tile_local(i+1,j+1,2),   &
                                 alocs)
               LonCenter(i,j) = alocs(1)
               LatCenter(i,j) = alocs(2)
@@ -1084,19 +1090,19 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
 
  end  subroutine cart_to_latlon
 
- subroutine cell_center2(q1, q2, q3, q4, e2)
-      real , intent(in ) :: q1(2), q2(2), q3(2), q4(2)
+ subroutine cell_center2(q11, q12, q21, q22, q31, q32, q41, q42, e2)
+      real , intent(in)  :: q11, q12, q21, q22, q31, q32, q41, q42
       real , intent(out) :: e2(2)
 ! Local
       real p1(3), p2(3), p3(3), p4(3)
       real ec(3)
       real dd
       integer k
-
-      call latlon2xyz(q1, p1)
-      call latlon2xyz(q2, p2)
-      call latlon2xyz(q3, p3)
-      call latlon2xyz(q4, p4)
+      
+      call latlon2xyz2(q11, q12, p1)
+      call latlon2xyz2(q21, q22, p2)
+      call latlon2xyz2(q31, q32, p3)
+      call latlon2xyz2(q41, q42, p4)
 
       do k=1,3
          ec(k) = p1(k) + p2(k) + p3(k) + p4(k)

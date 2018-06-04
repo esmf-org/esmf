@@ -42,7 +42,6 @@
 #include <vector>
 #include <cstring>
 
-
 #if !defined (M_PI)
 // for Windows...
 #define M_PI 3.14159265358979323846
@@ -119,6 +118,7 @@ bool pcoords(MBMesh *mesh) {
     printf("\n");
 */
   }
+
   strcpy(name, "Return parametric coordinates of a point in a cell");
   strcpy(failMsg, "Could not return parametric coordinates of a point in a cell");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -227,7 +227,6 @@ int main(int argc, char *argv[]) {
 
   rc=ESMC_VMGet(vm, &localPet, &petCount, (int *)NULL, (MPI_Comm *)NULL,
                 (int *)NULL, (int *)NULL);
-
   if (rc != ESMF_SUCCESS) return 0;
 
   // common vector for pointlist verification

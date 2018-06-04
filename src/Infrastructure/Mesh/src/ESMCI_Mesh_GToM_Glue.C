@@ -27,12 +27,12 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_Ptypes.h"
 #include "Mesh/include/ESMCI_Mesh.h"
-#include "Mesh/include/ESMCI_MeshRegrid.h"
-#include "Mesh/include/ESMCI_IOField.h"
-#include "Mesh/include/ESMCI_ParEnv.h"
-#include "Mesh/include/ESMCI_DDir.h"
+#include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
+#include "Mesh/include/Legacy/ESMCI_IOField.h"
+#include "Mesh/include/Legacy/ESMCI_ParEnv.h"
+#include "Mesh/include/Legacy/ESMCI_DDir.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
-#include "Mesh/include/ESMCI_Phedra.h"
+#include "Mesh/include/Legacy/ESMCI_Phedra.h"
 
 #include <limits>
 #include <iostream>
@@ -1273,13 +1273,13 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
   }
 
 
-  //// DON'T NEED NODE FIELDS RIGHT NOW, SO SAVE UNTIL YOU HAVE MORE TIME ///
-#if 0
+  //// Node Fields
 #define GTOM_NFIELD_MASK 0
 #define GTOM_NFIELD_MASK_VAL 1
-#define GTOM_NFIELD_ORIG_COORD 2
-#define GTOM_NFIELD_NUM 3
-
+#define GTOM_NFIELD_COORD 2
+#define GTOM_NFIELD_ORIG_COORD 3
+#define GTOM_NFIELD_NUM 4
+  
   static void create_nfields(Grid *grid, Mesh *mesh,
                              IOField<NodalField> *nfields[GTOM_NFIELD_NUM]) {
 
@@ -1294,11 +1294,142 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
      nfields[GTOM_NFIELD_MASK_VAL] = mesh->RegisterNodalField(*mesh, "node_mask_val", 1);
    }
 
-   // Original coords
-   // How do I tell if I need these? Maybe leave them for now
+    // Coords
+    if (grid->hasCoordStaggerLoc(ESMCI_STAGGERLOC_CORNER)) {
+                                           
+      // Add node coord field
+      nfields[GTOM_NFIELD_COORD]=mesh->RegisterNodalField(*mesh, "coordinates", mesh->spatial_dim()); 
+
+      // If not cartesian then add original coordinates field
+      if (grid->getCoordSys() != ESMC_COORDSYS_CART) {
+        nfields[GTOM_NFIELD_ORIG_COORD]=mesh->RegisterNodalField(*mesh, "orig_coordinates", grid->getDimCount()); 
+      }      
+    } else {
+      int localrc;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+         "- Grid does not contain coordinates at staggerloc=ESMF_STAGGERLOC_CORNER. ", ESMC_CONTEXT, &localrc);
+      throw localrc;
+    }
 
   }
-#endif
+
+
+  // Set node fields in mesh
+  static void set_nfields(Grid *grid, Mesh *mesh,
+                          IOField<NodalField> *nfields[GTOM_NFIELD_NUM]) {
+    int localrc;
+
+    // Get distgrid for the center staggerloc
+    DistGrid *cnrDistgrid;
+    grid->getStaggerDistgrid(ESMCI_STAGGERLOC_CORNER, &cnrDistgrid);
+
+    // Get localDECount
+    int localDECount=cnrDistgrid->getDELayout()->getLocalDeCount();
+                       
+    // Loop again adding information to nodes
+    for (int lDE=0; lDE < localDECount; lDE++) {
+
+      // Get Corner DE bounds
+      int cnr_ubnd[ESMF_MAXDIM];
+      int cnr_lbnd[ESMF_MAXDIM];
+      grid->getDistExclusiveUBound(cnrDistgrid, lDE, cnr_ubnd);
+      grid->getDistExclusiveLBound(cnrDistgrid, lDE, cnr_lbnd);
+
+
+      // Loop over bounds
+      int index[2];
+      int nonde_index[2];
+      for (int i0=cnr_lbnd[0]; i0<=cnr_ubnd[0]; i0++){
+        for (int i1=cnr_lbnd[1]; i1<=cnr_ubnd[1]; i1++){
+
+          // Set index
+          index[0]=i0;
+          index[1]=i1;
+
+          // De based index
+          int de_index[2];
+          de_index[0]=i0-cnr_lbnd[0];
+          de_index[1]=i1-cnr_lbnd[1];
+
+          // Get node global id
+          int node_gid;
+          bool is_local;
+          if (!_get_global_id(cnrDistgrid, lDE, de_index,
+                              &node_gid, &is_local)) {
+            continue; // If we can't find a global id, then just skip
+          }
+
+          // Only set node information if this is the owner
+          if (!is_local) continue;
+
+          // Get associated node
+          Mesh::MeshObjIDMap::iterator mi =  mesh->map_find(MeshObj::NODE, node_gid);
+
+          // If it doesn't exist then go to next
+          if (mi == mesh->map_end(MeshObj::NODE)) {
+            continue;
+          }
+
+          // Get node 
+          MeshObj &node=*mi;
+
+          // Mask
+          // Init to 0 (set later in ESMF_FieldRegridStore()
+          if (nfields[GTOM_NFIELD_MASK]) {
+            double *d=nfields[GTOM_NFIELD_MASK]->data(node);
+            *d=0.0;
+          }
+
+          // Mask Val
+          // Get data from grid
+          if (nfields[GTOM_NFIELD_MASK_VAL]) {
+            double *d=nfields[GTOM_NFIELD_MASK_VAL]->data(node);
+            localrc=grid->getItemInternalConvert(ESMCI_STAGGERLOC_CORNER,
+                                                 ESMC_GRIDITEM_MASK,
+                                                 lDE, index, d);
+            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+              throw localrc;  // bail out with exception
+          }
+
+
+          // (Cart) Coords
+          // Get data from grid
+          if (nfields[GTOM_NFIELD_COORD]) {
+
+            // Get original coord
+            double orig_coord[ESMF_MAXDIM];
+            localrc=grid->getCoordInternalConvert(ESMCI_STAGGERLOC_CORNER,
+                                                  lDE, index, orig_coord);
+            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+              throw localrc;  // bail out with exception
+
+            // Get data field in mesh
+            double *d=nfields[GTOM_NFIELD_COORD]->data(node);
+
+            // Call into coordsys method to convert to Cart
+            localrc=ESMCI_CoordSys_ConvertToCart(grid->getCoordSys(),
+                                                 grid->getDimCount(),
+                                                 orig_coord,  // Input coordinates 
+                                                 d);
+            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+              throw localrc;  // bail out with exception
+          }
+
+
+          // Original Coords
+          // Get data from grid
+          if (nfields[GTOM_NFIELD_ORIG_COORD]) {
+            double *d=nfields[GTOM_NFIELD_ORIG_COORD]->data(node);
+            localrc=grid->getCoordInternalConvert(ESMCI_STAGGERLOC_CORNER,
+                                                  lDE, index, d);
+            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+              throw localrc;  // bail out with exception
+          }
+          
+        }
+      }
+    } 
+  }
 
 
   /// Element fields
@@ -1340,13 +1471,20 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
     }
 
 
-    // DO LATER
-#if 0
     // COORDS
     if (grid->hasCoordStaggerLoc(ESMCI_STAGGERLOC_CENTER)) {
+                                           
+      // Add element coords field
+      efields[GTOM_EFIELD_COORD] = mesh->RegisterField("elem_coordinates",
+                 MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, mesh->spatial_dim(), true);
 
+      // If not cartesian then add original coordinates field
+      if (grid->getCoordSys() != ESMC_COORDSYS_CART) {
+        efields[GTOM_EFIELD_ORIG_COORD]= mesh->RegisterField("elem_orig_coordinates",
+                   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, grid->getDimCount(), true);
+      }      
     }
-#endif
+
 
     // Fracs are always there
     efields[GTOM_EFIELD_FRAC] = mesh->RegisterField("elem_frac",
@@ -1444,12 +1582,43 @@ Par::Out() << "\tnot in mesh!!" << std::endl;
               throw localrc;  // bail out with exception
           }
 
-#if 0
-          // COORDS
-          if (grid->hasCoordStaggerLoc(ESMCI_STAGGERLOC_CENTER)) {
 
+          // (Cart) Coords
+          // Get data from grid
+          if (efields[GTOM_EFIELD_COORD]) {
+
+            // Get original coord
+            double orig_coord[ESMF_MAXDIM];
+            localrc=grid->getCoordInternalConvert(ESMCI_STAGGERLOC_CENTER,
+                                                  lDE, index, orig_coord);
+            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+              throw localrc;  // bail out with exception
+
+            // Get data field in mesh
+            double *d=efields[GTOM_EFIELD_COORD]->data(elem);
+
+            // Call into coordsys method to convert to Cart
+            localrc=ESMCI_CoordSys_ConvertToCart(grid->getCoordSys(),
+                                                 grid->getDimCount(), 
+                                                 orig_coord,  // Input coordinates 
+                                                 d);
+            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+              throw localrc;  // bail out with exception
+
+            //printf("id=%d orig_coords=%g %g coords=%g %g %g\n",elem.get_id(),orig_coord[0],orig_coord[1],d[0],d[1],d[2]);
           }
-#endif
+
+
+          // Original Coords
+          // Get data from grid
+          if (efields[GTOM_EFIELD_ORIG_COORD]) {
+            double *d=efields[GTOM_EFIELD_ORIG_COORD]->data(elem);
+            localrc=grid->getCoordInternalConvert(ESMCI_STAGGERLOC_CENTER,
+                                                  lDE, index, d);
+            if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+              throw localrc;  // bail out with exception
+          }
+
 
           // Init fracs
           if (efields[GTOM_EFIELD_FRAC]) {
@@ -1776,10 +1945,7 @@ void ESMCI_GridToMeshCell(const Grid &grid_,
  }
 
 
- // Set up the node coordinate field
- IOField<NodalField> *node_coord = mesh->RegisterNodalField(*mesh, "coordinates", sdim);
-
- // Loop again adding information to nodes
+ // Loop setting local node owners
  for (int lDE=0; lDE < localDECount; lDE++) {
 
    // Get Corner DE bounds
@@ -1829,33 +1995,6 @@ void ESMCI_GridToMeshCell(const Grid &grid_,
        // Set owner to the current processor
        node->set_owner(Par::Rank());
 
-       // Put in coordinates
-       double *coord = node_coord->data(*node);
-
-       // get orig coordinates
-       double orig_coord[ESMF_MAXDIM];
-       localrc=grid->getCoordInternalConvert(ESMCI_STAGGERLOC_CORNER, lDE,
-                                             index, orig_coord);
-       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-                                         NULL)) throw localrc;
-
-       // Call into coordsys method to convert to Cart
-       localrc=ESMCI_CoordSys_ConvertToCart(grid->getCoordSys(),
-                                            grid->getDimCount(),
-                                            orig_coord,  // Input coordinates
-                                            coord);
-       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-                                         NULL)) throw localrc;
-#if 0
-       // DEBUG
-       if ((node->get_id()==1) ||
-           (node->get_id()==2) ||
-           (node->get_id()==13) ||
-           (node->get_id()==12)) {
-         printf("node gid=%d i=%d %d lDE=%d %20.17f %20.17f %20.17f oc=%20.17f %20.17f\n",node->get_id(),i0,i1,lDE,coord[0],coord[1],coord[2],orig_coord[0],orig_coord[1]);
-       }
-#endif
-
      }
    }
  }
@@ -1882,6 +2021,14 @@ void ESMCI_GridToMeshCell(const Grid &grid_,
    node->set_owner(proc);
  }
 
+ // Add node Fields
+ IOField<NodalField> *nfields[GTOM_NFIELD_NUM];
+ create_nfields(grid, mesh, nfields);
+
+ // Set node fields
+ // (This has to happen before mesh is committed below)
+ set_nfields(grid, mesh, nfields);
+
  // Add element Fields
  MEField<> *efields[GTOM_EFIELD_NUM];
  create_efields(grid, mesh, efields);
@@ -1890,7 +2037,7 @@ void ESMCI_GridToMeshCell(const Grid &grid_,
  mesh->build_sym_comm_rel(MeshObj::NODE);
  mesh->Commit();
 
- // set element fields
+ // Set element fields
  set_efields(grid, mesh, efields);
 
  // Halo fields, so entities with an owner on another processor

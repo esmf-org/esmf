@@ -14,7 +14,7 @@
 
 #include "ESMCI_Mesh.h"
 
-#include "Mesh/include/ESMCI_Regrid_Helper.h"
+#include "Mesh/include/Regridding/ESMCI_Regrid_Helper.h"
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
@@ -78,6 +78,10 @@
                                         double *elemCoords,
                                         ESMC_CoordSys_Flag *coordSys,
                                           bool _is_esmf_mesh, int *rc);
+
+    static MeshCap *meshcreate_from_grid(Grid **gridpp,
+                                                  bool _is_esmf_mesh, 
+                                                  int *rc);
 
     void meshaddnodes(int *num_nodes, int *nodeId,
                       double *nodeCoord, int *nodeOwner, InterArray<int> *nodeMaskII,

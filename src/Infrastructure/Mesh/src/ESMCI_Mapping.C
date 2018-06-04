@@ -11,14 +11,14 @@
 //==============================================================================
 #include <Mesh/include/ESMCI_Mapping.h>
 #include <Mesh/include/ESMCI_ShapeFunc.h>
-#include <Mesh/include/ESMCI_ParEnv.h>
+#include <Mesh/include/Legacy/ESMCI_ParEnv.h>
 #include <iostream>
 #include <limits>
 #include <Mesh/include/ESMCI_MathUtil.h>
 
 #include <Mesh/include/sacado/Sacado.hpp>
 
-#include <Mesh/include/ESMCI_Exception.h>
+#include <Mesh/include/Legacy/ESMCI_Exception.h>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string

@@ -298,7 +298,6 @@ int main(int argc, char *argv[]) {
   Interface *mb_mesh_quad_sph=mesh_quad_sph->mesh;
   int merr_quad_sph=mb_mesh_quad_sph->get_entities_by_dimension(0,mesh_quad_sph->pdim,range_quad_sph);
   if (merr_quad_sph != MB_SUCCESS) rc = ESMF_FAILURE;
-
   // clean up
   delete mesh_quad_sph;
 #else
@@ -344,7 +343,6 @@ int main(int argc, char *argv[]) {
   strcpy(name, "get_entities");
   strcpy(failMsg, "Cannot get entities");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-
 
   // --------------------------------------------------------------------------
   // get entities from meshes created with spherical triangles
