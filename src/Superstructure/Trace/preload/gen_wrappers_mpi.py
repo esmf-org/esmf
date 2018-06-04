@@ -299,8 +299,8 @@ ffunc_list = [
 
     {
         'name':'mpi_recv',
-        'params':'MPI_Fint *buf, MPI_Fint *count, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr',
-        'args':'buf, count, source, tag, comm, status, ierr'
+        'params':'MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr',
+        'args':'buf, count, datatype, source, tag, comm, status, ierr'
     },
     
     {

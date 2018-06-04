@@ -261,19 +261,19 @@ extern "C" {
       }
     }
   
-    extern void FTN_X(__real_mpi_recv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr);    
+    extern void FTN_X(__real_mpi_recv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr);    
 
-    void FTN_X(__wrap_mpi_recv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) {
+    void FTN_X(__wrap_mpi_recv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) {
       if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
         //printf("__wrap_mpi_recv_ (Fortran)\n");
         insideMPIRegion = 1;
         ESMCI::TraceMPIWaitStart();
-        FTN_X(__real_mpi_recv)(buf, count, source, tag, comm, status, ierr);
+        FTN_X(__real_mpi_recv)(buf, count, datatype, source, tag, comm, status, ierr);
         ESMCI::TraceMPIWaitEnd();
         insideMPIRegion = 0;
       }
       else {
-        FTN_X(__real_mpi_recv)(buf, count, source, tag, comm, status, ierr);
+        FTN_X(__real_mpi_recv)(buf, count, datatype, source, tag, comm, status, ierr);
       }
     }
   

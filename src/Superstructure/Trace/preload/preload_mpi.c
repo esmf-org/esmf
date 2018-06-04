@@ -241,17 +241,17 @@ extern "C" {
     }
 
   
-    static void (*FTN_X(__real_ptr_mpi_recv))(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) = NULL;
+    static void (*FTN_X(__real_ptr_mpi_recv))(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) = NULL;
 
-    void FTN_X(__real_mpi_recv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) {
+    void FTN_X(__real_mpi_recv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) {
       if (FTN_X(__real_ptr_mpi_recv) == NULL) {
-        FTN_X(__real_ptr_mpi_recv) = (void (*)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_recv)));
+        FTN_X(__real_ptr_mpi_recv) = (void (*)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr)) dlsym(RTLD_NEXT, xstr(FTN_X(mpi_recv)));
       }
-      FTN_X(__real_ptr_mpi_recv)(buf, count, source, tag, comm, status, ierr);
+      FTN_X(__real_ptr_mpi_recv)(buf, count, datatype, source, tag, comm, status, ierr);
     }
 
-    void FTN_X(mpi_recv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) {
-      FTN_X(__wrap_mpi_recv)(buf, count, source, tag, comm, status, ierr);
+    void FTN_X(mpi_recv)(MPI_Fint *buf, MPI_Fint *count, MPI_Fint *datatype, MPI_Fint *source, MPI_Fint *tag, MPI_Fint *comm, MPI_Fint *status, MPI_Fint *ierr) {
+      FTN_X(__wrap_mpi_recv)(buf, count, datatype, source, tag, comm, status, ierr);
     }
 
   
