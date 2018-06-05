@@ -6788,7 +6788,7 @@ end function ESMF_GridCreateFrmScrip
     real(ESMF_KIND_R8),  allocatable :: cornerlon2D(:,:), cornerlat2D(:,:)
     real(ESMF_KIND_R8),  allocatable :: cornerlon3D(:,:,:), cornerlat3D(:,:,:)
     real(ESMF_KIND_R8),  allocatable :: corner1D(:), corner2D(:,:)
-    integer :: msgbuf(7)
+    integer :: msgbuf(8)
     type(ESMF_CommHandle) :: commHandle
     integer :: localMinIndex(2), gridEdgeLWidth(2), gridEdgeUWidth(2)
     type(ESMF_Grid)  :: grid
@@ -6808,7 +6808,9 @@ end function ESMF_GridCreateFrmScrip
     integer :: i,j,k,localroot
     integer :: maxIndex2D(2)
     integer, pointer :: minind(:,:)
-
+    character(len=30) :: units
+    type(ESMF_CoordSys_Flag) :: coordsys
+   
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -6858,7 +6860,7 @@ end function ESMF_GridCreateFrmScrip
     ! data to all the PETs
     if (PetNo == 0) then
         call ESMF_GridspecInq(grid_filename, ndims, gridims, coord_names=coordNames, &
-                dimids=dimids, coordids = coordids, rc=localrc)
+                dimids=dimids, coordids = coordids, units=units, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         ! broadcast the values to other PETs (generalized)
@@ -6866,19 +6868,45 @@ end function ESMF_GridCreateFrmScrip
         msgbuf(2:3) = gridims(:)
         msgbuf(4:5) = coordids(:)
         msgbuf(6:7) = dimids(:)
-        call ESMF_VMBroadcast(vm, msgbuf, 7, 0, rc=localrc)
+        if (trim(units) .eq. 'degrees') then
+	  msgbuf(8) = 0
+	  coordsys = ESMF_COORDSYS_SPH_DEG
+	elseif (units(1:1) .eq. 'm') then
+	  msgbuf(8) = 1
+	  coordsys = ESMF_COORDSYS_CART
+	elseif (units(1:1) .eq. 'k') then
+	  msgbuf(8) = 2
+	  coordsys = ESMF_COORDSYS_CART
+        endif
+        call ESMF_VMBroadcast(vm, msgbuf, 8, 0, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
     else
-        call ESMF_VMBroadcast(vm, msgbuf, 7, 0, rc=localrc)
+        call ESMF_VMBroadcast(vm, msgbuf, 8, 0, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
         ndims = msgbuf(1)
         gridims = msgbuf(2:3)
         coordids = msgbuf(4:5)
         dimids = msgbuf(6:7)
+	if (msgbuf(8) == 0) then
+          units = "degrees"
+	  coordsys = ESMF_COORDSYS_SPH_DEG
+	elseif (msgbuf(8) == 1) then
+	  units = "meters"
+	  coordsys = ESMF_COORDSYS_CART
+	elseif (msgbuf(8) == 2) then
+          units = "kilometers"
+	  coordsys = ESMF_COORDSYS_CART
+        endif
     endif
 
+    if (localIsSphere .and. coordsys == ESMF_COORDSYS_CART) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+            msg="- A global grid cannot use Cartisian coordinates", &
+            ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif      
     ! Create Grid based on the input distgrid
     gridEdgeLWidth=(/0,0/)
     if (localIsSphere) then
@@ -6896,12 +6924,25 @@ end function ESMF_GridCreateFrmScrip
              allocate(cornerlon2D(2,gridims(1)), cornerlat2D(2, gridims(2)))
              call ESMF_GridspecGetVar1D(grid_filename, coordids, loncoord1D, latcoord1D,&
                                     cornerlon=cornerlon2D, cornerlat=cornerlat2D, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
           else
              allocate(loncoord1D(gridims(1)), latcoord1D(gridims(2)))
              call ESMF_GridspecGetVar1D(grid_filename, coordids, loncoord1D, latcoord1D,&
                                     rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
           endif
         endif
+        ! convert to kilometer if the units is "meters"
+        if (units(1:1) .eq. 'm') then
+	   loncoord1D = loncoord1D * 1.d-3
+	   latcoord1D = latcoord1D * 1.d-3
+           if (localAddCornerStagger) then
+	      cornerlon2D = cornerlon2D * 1.d-3
+	      cornerlat2D = cornerlat2D * 1.d-3
+           endif
+         endif
 
         if (localIsSphere) then
            grid = ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=gridims, &
@@ -6911,17 +6952,24 @@ end function ESMF_GridCreateFrmScrip
                 coordDep1=(/1/), coordDep2=(/2/), &
                 coordSys=ESMF_COORDSYS_SPH_DEG, &
                 indexflag=indexflag, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
         else
             grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=gridims, &
                 regDecomp=regDecomp, &
                 gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
                 coordDep1=(/1/), coordDep2=(/2/), &
-                coordSys=ESMF_COORDSYS_SPH_DEG, &
+                coordSys=coordsys, &
                 indexflag=indexflag, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
         endif
+
+#if 0
+        call ESMF_AttributeSet(grid, "units", trim(units), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-
+#endif        
         ! Set coordinate tables -  Put Corners into coordinates
         localStaggerLoc = ESMF_STAGGERLOC_CENTER
 
@@ -7001,22 +7049,29 @@ end function ESMF_GridCreateFrmScrip
         endif
     elseif (ndims==2) then
         if (localIsSphere) then
-              grid = ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=gridims, &
+           grid = ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=gridims, &
                   regDecomp=regDecomp, &
                   gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
                   polekindflag=polekindflag, &
                   coordSys=ESMF_COORDSYS_SPH_DEG, &
                   indexflag=indexflag, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
         else
-              grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=gridims, &
+           grid = ESMF_GridCreateNoPeriDim(minIndex=(/1,1/), maxIndex=gridims, &
                   regDecomp=regDecomp, &
                   gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
-                  coordSys=ESMF_COORDSYS_SPH_DEG, &
+                  coordSys=coordsys, &
                   indexflag=indexflag, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
         endif
+
+#if 0
+        call ESMF_AttributeSet(grid, "units", trim(units), rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-
+#endif
         if (mod(PetNo, regDecomp(1)) == 0) then
            call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7039,16 +7094,26 @@ end function ESMF_GridCreateFrmScrip
                                     cornerlon=cornerlon3D, cornerlat=cornerlat3D, &
                                     start=minind(:,PetNo+1), count=total, &
                                     rc=localrc)
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
            else
                 call ESMF_GridspecGetVar2D(grid_filename, coordids,  &
                                     loncoord=loncoord2D, latcoord=latcoord2D, &
                                     start=minind(:,PetNo+1), count=total, &
                                     rc=localrc)
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
            endif
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-
+        ! convert to kilometer if the units is "meters"
+        if (units(1:1) .eq. 'm') then
+	   loncoord2D = loncoord2D * 1.d-3
+	   latcoord2D = latcoord2D * 1.d-3
+           if (localAddCornerStagger) then
+	      cornerlon3D = cornerlon3D * 1.d-3
+	      cornerlat3D = cornerlat3D * 1.d-3
+           endif
+        endif
         ! Set coordinate tables -  Put Corners into coordinates
         localStaggerLoc = ESMF_STAGGERLOC_CENTER
 

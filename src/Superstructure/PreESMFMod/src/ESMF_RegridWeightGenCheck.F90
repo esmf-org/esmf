@@ -766,7 +766,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     character(ESMF_MAXPATHLEN) :: units, buffer
     character(ESMF_MAXPATHLEN) :: msg
-
+    logical :: cart
     real(ESMF_KIND_R8), parameter :: d2r = 3.141592653589793238/180
 
 #ifdef ESMF_NETCDF
@@ -786,7 +786,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !-----------------------------------------------------------------
     ! get the grid coordinates
     !-----------------------------------------------------------------
-
+    cart = .false.
     ncstat = nf90_inq_varid(nc_file_id, 'yc_a', nc_srcgridlat_id)
     if(ncstat /= 0) then
       write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
@@ -828,7 +828,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! convert to radians if coordinates are in degrees
     if (trim(units)==trim("degrees")) then
       src_lat = src_lat*d2r
-    else if (trim(units)/=trim("radians")) then
+    else if (units(1:1) .eq. 'm' .or. units(1:1) .eq. 'k') then
+      ! Cartesian coordinate, convert into spherical
+      cart = .true.
+    else if (trim(units) /= "radius") then
       write (msg, '(a,i4)') "- units are not 'degrees' or 'radians'"
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, msg=msg, &
         line=__LINE__, file=__FILE__ , rcToReturn=rc)
@@ -874,8 +877,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     units = buffer(1:unitsLen)
     ! convert to radians if coordinates are in degrees
+    if ((trim(units) == "degrees" .or. trim(units) == "radians") .and. &
+        cart) then
+      write (msg, '(a,i4)') "- source grid lat/lon units are inconsistent"
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, msg=msg, &
+        line=__LINE__, file=__FILE__ , rcToReturn=rc)
+      return
+    endif
     if (trim(units)==trim("degrees")) then
       src_lon = src_lon*d2r
+    else if (units(1:1) .eq. 'm' .or. units(1:1) .eq. 'k') then
+      ! Cartesian coordinate, convert into spherical
+      if (.not. cart) then 
+        write (msg, '(a,i4)') "- source grid lat/lon units are inconsistent"
+        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, msg=msg, &
+          line=__LINE__, file=__FILE__ , rcToReturn=rc)
+        return
+      endif
     else if (trim(units)/=trim("radians")) then
       write (msg, '(a,i4)') "- units are not 'degrees' or 'radians'"
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, msg=msg, &
@@ -883,8 +901,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return
     endif
 
+    ! Convert Cartesian to Spherical
+    if (cart) then
+       call convertCart2Sph(src_lon, src_lat,units)
+    endif
+    cart = .false.
     !-----------------------------------------------------------------
-    ! get the grid coordinates
+    ! get the destination grid coordinates
     !-----------------------------------------------------------------
     ncstat = nf90_inq_varid(nc_file_id, 'yc_b', nc_dstgridlat_id)
     if(ncstat /= 0) then
@@ -927,6 +950,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! convert to radians if coordinates are in degrees
     if (trim(units)==trim("degrees")) then
       dst_lat = dst_lat*d2r
+    else if (units(1:1) .eq. 'm' .or. units(1:1) .eq. 'k') then
+      ! Cartesian coordinate, convert into spherical
+      cart = .true.
     else if (trim(units)/=trim("radians")) then
       write (msg, '(a,i4)') "- units are not 'degrees' or 'radians'"
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, msg=msg, &
@@ -972,14 +998,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     units = buffer(1:unitsLen)
+    if ((trim(units) == "degrees" .or. trim(units) == "radians") .and. &
+        cart) then
+      write (msg, '(a,i4)') "- source grid lat/lon units are inconsistent"
+      call ESMF_LogSetError(ESMF_RC_OBJ_BAD, msg=msg, &
+        line=__LINE__, file=__FILE__ , rcToReturn=rc)
+      return
+    endif
     ! convert to radians if coordinates are in degrees
     if (trim(units)==trim("degrees")) then
       dst_lon = dst_lon*d2r
+    else if (units(1:1) .eq. 'm' .or. units(1:1) .eq. 'k') then
+      ! Cartesian coordinate, convert into spherical
+      if (.not. cart) then 
+        write (msg, '(a,i4)') "- source grid lat/lon units are inconsistent"
+        call ESMF_LogSetError(ESMF_RC_OBJ_BAD, msg=msg, &
+          line=__LINE__, file=__FILE__ , rcToReturn=rc)
+        return
+      endif
     else if (trim(units)/=trim("radians")) then
       write (msg, '(a,i4)') "- units are not 'degrees' or 'radians'"
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, msg=msg, &
         line=__LINE__, file=__FILE__ , rcToReturn=rc)
       return
+    endif
+    ! Convert Cartesian to Spherical
+    if (cart) then
+       call convertCart2Sph(dst_lon, dst_lat, units)
     endif
 
     !-----------------------------------------------------------------
@@ -1110,4 +1155,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   end subroutine GridReadCoords
 
+  subroutine convertCart2Sph(lons, lats, units)
+
+    real(ESMF_KIND_R8), pointer :: lons(:)
+    real(ESMF_KIND_R8), pointer :: lats(:)
+    character(*) :: units
+
+    real(ESMF_KIND_R8) :: scale
+
+    ! This is a very primitive and incorrect convertion. The purpose
+    ! is to generate some values that can be used to generate synthetic
+    ! field values using the same equation used when the coordinates are
+    ! in radians
+    
+    if (units(1:1) .eq. 'm') then
+      scale = 1.0d0/6.371d6
+    else
+      scale = 1.0d0/6.371d3
+    endif
+    lons=lons*scale
+    lats=lats*scale
+  end subroutine convertCart2Sph
 end module ESMF_RegridWeightGenCheckMod
