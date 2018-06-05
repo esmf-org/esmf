@@ -251,7 +251,7 @@ use File::Find
 			if (!$SUMMARY) { # Print only if full output requested
                         	print "\n\n";
                         	if ($no_leak_count == 1) {
-                                	print "The following system test have no memory leks\n";
+                                	print "The following system test have no memory leaks\n";
                         	}
                         	else {
                                 	print "The following system tests have no memory leaks:\n";
