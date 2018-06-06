@@ -1882,6 +1882,7 @@ endif
 # subdir and it will go up to the top dir and build from there.
 lib: info
 	@$(MAKE) build_libs
+	@$(MAKE) build_tracelibs
 	@$(MAKE) info_mk
 	@echo "ESMF library built successfully on "`date`
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
