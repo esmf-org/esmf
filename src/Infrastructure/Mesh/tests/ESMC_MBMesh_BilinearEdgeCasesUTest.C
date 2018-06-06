@@ -59,6 +59,10 @@ bool weight_gen(MBMesh *mesh, PointList *pl) {
   char failMsg[80];
   int result = 0;
 
+  // early exit for ESMF_MOAB=OFF
+  if (mesh == NULL || pl == NULL)
+    return true;
+  
   // do bilinear regridding between mesh and pointlist
   IWeights wt;
   IWeights &wts = wt;
@@ -90,6 +94,15 @@ bool weight_gen(MBMesh *mesh, PointList *pl) {
   else return false;
 
 }
+
+#else
+
+// dummy function for ESMF_MOAB=OFF
+bool weight_gen(void *mesh, void *pl) {return true;}
+
+#endif
+
+#if defined ESMF_MOAB
 
 MBMesh* create_mesh_quad_single(int &rc, bool cart, bool collapsed = false) {
   //
@@ -472,16 +485,29 @@ int main(int argc, char *argv[]) {
                 (int *)NULL, (int *)NULL);
   if (rc != ESMF_SUCCESS) return 0;
 
-// RLO: disable for now, segfault in PointList destructor on some platforms
-#if 1
 #if defined ESMF_MOAB
-  MBMesh *mesh_quad_single;
-  MBMesh *mesh_tri_single;
-  PointList *pl_on_edge;
-  PointList *pl_on_node;
-  PointList *pl;
-  bool cart;
+
+  MBMesh *mesh_quad_single = NULL;
+  MBMesh *mesh_tri_single = NULL;
+  PointList *pl_on_edge = NULL;
+  PointList *pl_on_node = NULL;
+  PointList *pl = NULL;
+  bool cart =  false;
   bool collapsed = false;
+
+#else
+
+void *mesh_quad_single = NULL;
+void *mesh_tri_single = NULL;
+void *pl_on_edge = NULL;
+void *pl_on_node = NULL;
+void *pl = NULL;
+bool cart =  false;
+bool collapsed = false;
+
+#endif
+
+#if defined ESMF_MOAB
 
   // --------------------------------------------------------------------------
   // quad mesh bilinear cartesian with pointlist point on edge
@@ -773,7 +799,6 @@ int main(int argc, char *argv[]) {
   ESMC_Test((weight_gen(mesh_quad_single, pl)), name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
-#endif
   // --------------------------------------------------------------------------
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

@@ -79,17 +79,19 @@
 !
 ! !INTERFACE:
   subroutine ESMF_GridspecInq(grid_filename, ndims, grid_dims, coord_names, &
-        dimids, coordids, hasbound, rc)
+        is3D, dimids, coordids, hasbound, units, rc)
 
 ! !ARGUMENTS:
 
     character(len=*), intent(in)  :: grid_filename
     integer, intent(out)          :: ndims
     integer, intent(out)          :: grid_dims(:)
+    logical, intent(in), optional :: is3D
     character(len=*), intent(in), optional :: coord_names(:)
     integer, intent(out), optional:: dimids(:)
     integer, intent(out), optional:: coordids(:)
     logical, intent(out), optional:: hasbound
+    character(len=*), intent(out), optional ::units
     integer, intent(out), optional :: rc
 
     integer :: localrc, ncStatus
@@ -99,14 +101,20 @@
     integer :: gridid, i
     integer :: dimidslocal(2), localdimids(2)
     character (len=256) :: errmsg, boundvar
-    character (len=80)  :: attstr
+    character (len=80)  :: attstr, axisstr
     logical :: foundlon, foundlat
     logical :: useCoordName
+    logical :: is3Dlocal;
     integer, parameter :: nf90_noerror = 0
 
 #ifdef ESMF_NETCDF
     foundlat = .false.
     foundlon = .false.
+    if (present(is3D)) then
+      is3Dlocal = is3D
+    else
+      is3Dlocal = .false.
+    endif
     ncStatus = nf90_open (path=trim(grid_filename), mode=nf90_nowrite, ncid=gridid)
     if (CDFCheckError (ncStatus, &
         ESMF_METHOD,  &
@@ -121,7 +129,8 @@
                  ESMF_CONTEXT, rcToReturn=rc)
             return
         endif
-        ncStatus = nf90_inq_varid(gridid, coord_names(1), varids(1))
+      do i=1,2
+        ncStatus = nf90_inq_varid(gridid, coord_names(i), varid)
         errmsg ="variable "//trim(coord_names(1))//" in "//trim(grid_filename)
         if (CDFCheckError (ncStatus, &
                 ESMF_METHOD,  &
@@ -133,52 +142,13 @@
         ! latitude.
         ! First check units attribute for longitude, it has to be one of degrees_east,
         ! degree_east, degree_E, degreeE or degreesE
-        ncStatus = nf90_inquire_attribute(gridid, varids(1), "units", len=len)
-        errmsg ="attribute units for "//trim(coord_names(1))//" in "//trim(grid_filename)
-        if (CDFCheckError (ncStatus, &
-                ESMF_METHOD,  &
-                ESMF_SRCLINE, &
-                errmsg, &
-                rc)) return
-        ncStatus = nf90_get_att(gridid, varids(1), 'units',attstr)
-        if (CDFCheckError (ncStatus, &
-                ESMF_METHOD,  &
-                ESMF_SRCLINE, &
-                errmsg, &
-                rc)) return
-        if (attstr(len:len) .eq. achar(0)) len = len-1
-        if (.not. (attstr(1:len) .eq. 'degrees_east' .or. &
-                attstr(1:len) .eq. 'degree_east' .or. &
-                attstr(1:len) .eq. 'degree_E' .or. &
-                attstr(1:len) .eq. 'degrees_E' .or. &
-                attstr(1:len) .eq. 'degreeE' .or. &
-                attstr(1:len) .eq. 'degreesE'))  then
-            ! It is not longitude, check for Latitude units
-            if (.not. (attstr(1:len) .eq. 'degrees_north' .or. &
-                attstr(1:len) .eq. 'degree_north' .or. &
-                attstr(1:len) .eq. 'degree_N' .or. &
-                attstr(1:len) .eq. 'degrees_N' .or. &
-                attstr(1:len) .eq. 'degreeN' .or. &
-                attstr(1:len) .eq. 'degreesN'))  then
-                call ESMF_LogSetError(ESMF_FAILURE, &
-                   msg="- The unit of the coordinate variable is incorrect.", &
-                   ESMF_CONTEXT, rcToReturn=rc)
-                return
-            else
-                ! It is a latitude variable
-                varids(2)=varids(1)
-                foundlat = .true.
-            endif
-        endif
-        ncStatus = nf90_inq_varid(gridid, coord_names(2), varid)
-        errmsg ="variable "//trim(coord_names(2))//" in "//trim(grid_filename)
-        if (CDFCheckError (ncStatus, &
-                ESMF_METHOD,  &
-                ESMF_SRCLINE, &
-                errmsg, &
-                rc)) return
+        !
+        ! Added support for Cartesian coordinates in v8.0.0.  The Catesian coordinates
+        ! should have attribute "axis" set to "X" or "Y" and units are "m" or
+        ! "meters" for meters and "km" for kilometers.
+
         ncStatus = nf90_inquire_attribute(gridid, varid, "units", len=len)
-        errmsg ="attribute units for "//trim(coord_names(2))//" in "//trim(grid_filename)
+        errmsg ="attribute units for "//trim(coord_names(1))//" in "//trim(grid_filename)
         if (CDFCheckError (ncStatus, &
                 ESMF_METHOD,  &
                 ESMF_SRCLINE, &
@@ -191,34 +161,53 @@
                 errmsg, &
                 rc)) return
         if (attstr(len:len) .eq. achar(0)) len = len-1
-        if (foundlat) then
-          ! Check if the variable is a longitude variable
-          if (.not. (attstr(1:len) .eq. 'degrees_east' .or. &
+        if (attstr(1:len) .eq. 'degrees_east' .or. &
                 attstr(1:len) .eq. 'degree_east' .or. &
                 attstr(1:len) .eq. 'degree_E' .or. &
                 attstr(1:len) .eq. 'degrees_E' .or. &
                 attstr(1:len) .eq. 'degreeE' .or. &
-                attstr(1:len) .eq. 'degreesE'))  then
-             call ESMF_LogSetError(ESMF_FAILURE, &
-                 msg="- The units attribute for longitude variable is incorrect", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-             return
-          endif
-          varids(1)=varid
-        else  !Check for latitude variable
-          if (.not. (attstr(1:len) .eq. 'degrees_north' .or. &
+                attstr(1:len) .eq. 'degreesE')  then
+		foundlon = .true.
+		varids(1)=varid
+                if (present(units)) units = "degrees"
+        endif
+        ! It is not longitude, check for Latitude units
+        if (attstr(1:len) .eq. 'degrees_north' .or. &
                 attstr(1:len) .eq. 'degree_north' .or. &
                 attstr(1:len) .eq. 'degree_N' .or. &
                 attstr(1:len) .eq. 'degrees_N' .or. &
                 attstr(1:len) .eq. 'degreeN' .or. &
-                attstr(1:len) .eq. 'degreesN'))  then
-             call ESMF_LogSetError(ESMF_FAILURE, &
-         msg="- The units attribute for latitude variable is incorrect", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-             return
-          endif
-          varids(2)=varid
+                attstr(1:len) .eq. 'degreesN')  then
+                varids(2)=varid
+                foundlat = .true.
+                if (present(units)) units = "degrees"
         endif
+        if (attstr(1:len) .eq. 'm' .or. attstr(1:len) .eq. 'meters' .or. &
+	    attstr(1:len) .eq. 'km' .or. attstr(1:len) .eq. 'kilometers') then
+            if (present(units)) units = attstr(1:len)
+	    ! check if the axis attribute exists
+            ncStatus = nf90_get_att(gridid, varid, 'axis',axisstr)
+	    if (trim(axisstr) .eq. 'X') then
+		foundlon = .true.
+		varids(1)=varid
+            elseif (trim(axisstr) .eq. 'Y') then
+		varids(2)=varids(1)
+		foundlat = .true.
+		varids(2)=varid
+            else
+	        call ESMF_LogSetError(ESMF_FAILURE, &
+                   msg="- Not a valid coordinate variable.", &
+                   ESMF_CONTEXT, rcToReturn=rc)
+                return
+            endif
+        endif
+      enddo
+      if (.not. (foundlon .and. foundlat)) then
+        call ESMF_LogSetError(ESMF_FAILURE, &
+           msg="- Not a valid coordinate variable.", &
+           ESMF_CONTEXT, rcToReturn=rc)
+        return
+      endif
     else
         ! get a list of variables in the file, inquire its standard_name and/or long_name to
         ! find out which one is longitude and which one is latitude variable
@@ -252,7 +241,7 @@
                   attstr(1:len) .eq. "degrees_E" .or. &
                   attstr(1:len) .eq. "degreeE" .or. &
                   attstr(1:len) .eq. "degreesE")  then
-                        if (foundlon) then
+                  if (foundlon) then
                    call ESMF_LogSetError(ESMF_FAILURE, &
                       msg="- Duplicate longitude variables defined", &
                       ESMF_CONTEXT, rcToReturn=rc)
@@ -260,6 +249,7 @@
                 else
                    varids(1)=i
                    foundlon = .true.
+                   if (present(units)) units = "degrees"
                 endif
               else if (attstr(1:len) .eq. "degrees_north" .or. &
                    attstr(1:len) .eq. "degree_north" .or. &
@@ -275,6 +265,7 @@
                 else
                   varids(2)=i
                   foundlat = .true.
+                  if (present(units)) units = "degrees"
                 endif
               !else
           !        print *, "not the right units :", attstr(1:len), len
@@ -344,7 +335,6 @@
       rc)) return
 
     if (present(coordids)) coordids = varids
-
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
@@ -381,6 +371,7 @@ end subroutine ESMF_GridspecInq
     integer:: gridid, boundId, VarId, totaldims
     integer:: len, i
     character(len=256) :: errmsg, boundvar
+    character (len=80)  :: attstr
 
 #ifdef ESMF_NETCDF
 
@@ -406,7 +397,7 @@ end subroutine ESMF_GridspecInq
       ESMF_SRCLINE,&
       errmsg, &
       rc)) return
-
+    
     if (present(cornerlon)) then
       ! find the bound variable for lon
       ncStatus = nf90_inquire_attribute(gridid, varids(1), "bounds", len=len)
@@ -514,7 +505,7 @@ end subroutine ESMF_GridspecGetVar1D
     integer:: start2(2), count2(2), start3(3), count3(3)
     integer:: dimids(2), grid_dims(2)
     character(len=256) :: errmsg
-    character(len=80)  :: boundvar
+    character(len=80)  :: boundvar, attstr
 
 #ifdef ESMF_NETCDF
     ! Open the grid and mosaic files
