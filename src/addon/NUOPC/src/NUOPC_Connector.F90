@@ -2770,7 +2770,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
       if (btest(verbosity,12)) then
         write (iString,'(I4)') i
-        write (msgString,*) "loop over all entries in cplList: "// &
+        write (msgString, '(A)') "loop over all entries in cplList: "// &
           trim(adjustl(iString))//": "//trim(cplName)
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
