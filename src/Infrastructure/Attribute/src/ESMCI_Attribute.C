@@ -3799,20 +3799,20 @@ if (attrRoot == ESMF_TRUE) {
 
   for (i=0; i<attrList.size(); i++) {
     sprintf(msgbuf, "%sAttr %d:\n", indent.c_str(), i);
-    attprint(msgbuf, strsize, tofile, fp);
+    attprint(msgbuf, tofile, fp);
 
     sprintf(msgbuf, "%s    name: %s\n", indent.c_str(),
         attrList.at(i)->attrName.c_str());
-    attprint(msgbuf, strsize, tofile, fp);
+    attprint(msgbuf, tofile, fp);
 
     if (attrList.at(i)->items <= 0) {
       sprintf(msgbuf, "%s    value: \n", indent.c_str());
-      attprint(msgbuf, strsize, tofile, fp);
+      attprint(msgbuf, tofile, fp);
     }
 
     if (attrList.at(i)->items == 1) {
       sprintf(msgbuf, "%s    value: ", indent.c_str());
-      attprint(msgbuf, strsize, tofile, fp);
+      attprint(msgbuf, tofile, fp);
 
       if (attrList.at(i)->tk == ESMC_TYPEKIND_I4)
         sprintf(msgbuf, "%d\n", attrList.at(i)->vip.at(0));
@@ -3832,13 +3832,13 @@ if (attrRoot == ESMF_TRUE) {
           ESMC_CONTEXT, &localrc);
         return localrc;
       }
-      attprint(msgbuf, strsize, tofile, fp);
+      attprint(msgbuf, tofile, fp);
     }
 
     if (attrList.at(i)->items > 1) {
       sprintf(msgbuf, "%s    %d items, values:\n", indent.c_str(),
           attrList.at(i)->items);
-      attprint(msgbuf, strsize, tofile, fp);
+      attprint(msgbuf, tofile, fp);
       for (unsigned int j=0; j<attrList.at(i)->items; j++) {
         if (attrList.at(i)->tk == ESMC_TYPEKIND_I4) {
           sprintf(msgbuf, "%s        item %d: %d\n", indent.c_str(), j,
@@ -3864,33 +3864,33 @@ if (attrRoot == ESMF_TRUE) {
             &localrc);
           return localrc;
         }
-      attprint(msgbuf, strsize, tofile, fp);
+      attprint(msgbuf, tofile, fp);
       }
     }
     // print convention
     sprintf(msgbuf, "%s    convention: %s\n", indent.c_str(),
         attrList.at(i)->attrConvention.c_str());
-    attprint(msgbuf, strsize, tofile, fp);
+    attprint(msgbuf, tofile, fp);
 
     // print purpose
     sprintf(msgbuf, "%s    purpose: %s\n", indent.c_str(),
         attrList.at(i)->attrPurpose.c_str());
-    attprint(msgbuf, strsize, tofile, fp);
+    attprint(msgbuf, tofile, fp);
 
     // print object
     sprintf(msgbuf, "%s    object: %s\n", indent.c_str(),
         attrList.at(i)->attrObject.c_str());
-    attprint(msgbuf, strsize, tofile, fp);
+    attprint(msgbuf, tofile, fp);
 
     sprintf(msgbuf, "%s    attrCount: %d\n", indent.c_str(),
         attrList.at(i)->getCountTotal());
-    attprint(msgbuf, strsize, tofile, fp);
+    attprint(msgbuf, tofile, fp);
   }
 
   for (i=0; i<packList.size(); i++) {
     sprintf(msgbuf, "\n%sPack %d: %s\n", indent.c_str(),
         i, packList.at(i)->attrName.c_str());
-    attprint(msgbuf, strsize, tofile, fp);
+    attprint(msgbuf, tofile, fp);
     packList.at(i)->print_to_file(tofile, fp, ++level);
   }
 
@@ -3898,7 +3898,7 @@ if (attrRoot == ESMF_TRUE) {
   for (i=0; i<linkList.size(); i++) {
     sprintf(msgbuf, "\n%sLink to Object %d: %s\n", indent.c_str(),
         i, linkList.at(i)->attrBase->ESMC_Base::ESMC_BaseGetName());
-    attprint(msgbuf, strsize, tofile, fp);
+    attprint(msgbuf, tofile, fp);
     linkList.at(i)->print_to_file(tofile, fp, ++level);
   }
 */
