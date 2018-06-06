@@ -128,12 +128,12 @@ static const int keySize = 4*sizeof(int) + 1;
   sprintf(msg, "P%d - rootList = [", localPet);
   for (unsigned int i=0; i<roots.size(); ++i) sprintf(msg + strlen(msg), "%d, ", roots.at(i));
   sprintf(msg + strlen(msg), "]\n");
-  attprint(msg, strsize, true, fp);
+  attprint(msg, true, fp);
 
   sprintf(msg, "P%d - nonrootList = [", localPet);
   for (unsigned int i=0; i<nonroots.size(); ++i) sprintf(msg + strlen(msg), "%d, ", nonroots.at(i));
   sprintf(msg + strlen(msg), "]\n");
-  attprint(msg, strsize, true, fp);
+  attprint(msg, true, fp);
 #endif
 
   // find out if update is necessary
@@ -283,7 +283,7 @@ static const int keySize = 4*sizeof(int) + 1;
   sprintf(msg,
       "\nName = %s, Convention = %s, Purpose = %s\n",
       attrName.c_str(), attrConvention.c_str(), attrPurpose.c_str());
-  attprint(msg, strsize, true, fp);
+  attprint(msg, true, fp);
   // key = ID, xor [name, conv, purp], value changes, struct changes, pack changes
   char msg[ESMF_MAXSTR*10];
   sprintf(msg, "(This)   key: %s, BaseID: %d, attrRoot: %d\n"
@@ -303,13 +303,13 @@ static const int keySize = 4*sizeof(int) + 1;
           (*(reinterpret_cast<int*> (distkey+5))),
           (*(reinterpret_cast<int*> (distkey+9))),
           (*(reinterpret_cast<int*> (distkey+13))));
-  attprint(msg, strsize, true, fp);
+  attprint(msg, true, fp);
 #endif
 
   if (!AttributeUpdateKeyCompare(thiskey, distkey)) {
 #ifdef DEBUG_PRINT_RUN
   sprintf(msg, "!!!NO MATCH!!!\n");
-  attprint(msg, strsize, true, fp);
+  attprint(msg, true, fp);
 #endif
 
     // first two blocks for handling of non-ordered containers
@@ -347,7 +347,7 @@ static const int keySize = 4*sizeof(int) + 1;
 #ifdef DEBUG_PRINT_RUN
   else { 
   sprintf(msg, "!!!MATCH!!!\n");
-  attprint(msg, strsize, true, fp);
+  attprint(msg, true, fp);
   }
 #endif
 
@@ -388,7 +388,7 @@ static const int keySize = 4*sizeof(int) + 1;
     }
 #ifdef DEBUG_PRINT_RUN
     sprintf(msg, "  - added Attribute: %s\n", attr->attrName.c_str());
-    attprint(msg, strsize, true, fp);
+    attprint(msg, true, fp);
 #endif
     // RLO: All reset calls removed April 2014 because they are now seen as an
     // optimization that is causing failures in the MultiReconcile and ClosedLoop
@@ -470,7 +470,7 @@ static const int keySize = 4*sizeof(int) + 1;
 
 #ifdef DEBUG_PRINT_RUN
     sprintf(msg, "  - replaced Attribute: %s\n", attr->attrName.c_str());
-    attprint(msg, strsize, true, fp);
+    attprint(msg, true, fp);
 #endif
 
     // can delete this one and not call reset because this is a value copy
@@ -511,7 +511,7 @@ static const int keySize = 4*sizeof(int) + 1;
     }*/
 #ifdef DEBUG_PRINT_RUN
     sprintf(msg, "  - added AttPack: %s\n", attr->attrName.c_str());
-    attprint(msg, strsize, true, fp);
+    attprint(msg, true, fp);
 #endif
 
   }
@@ -521,14 +521,14 @@ static const int keySize = 4*sizeof(int) + 1;
 #ifdef DEBUG_PRINT_RUN
     sprintf(msg, "  - recursing attrList to Attribute: %s\n",
             attrList.at(i)->attrName.c_str());
-    attprint(msg, strsize, true, fp);
+    attprint(msg, true, fp);
 #endif
     localrc = attrList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
     if (localrc == ESMC_ATTUPDATERM_ATTRIBUTE) {
 #ifdef DEBUG_PRINT_RUN
       sprintf(msg, "  - removing Attribute: %s\n",
               attrList.at(i)->attrName.c_str());
-      attprint(msg, strsize, true, fp);
+      attprint(msg, true, fp);
 #endif
       localrc = AttributeRemove(attrList.at(i)->attrName);
       if (localrc != ESMF_SUCCESS) {
@@ -569,14 +569,14 @@ static const int keySize = 4*sizeof(int) + 1;
 #ifdef DEBUG_PRINT_RUN
     sprintf(msg, "  - recursing packList to AttPack: %s\n",
             packList.at(i)->attrName.c_str());
-    attprint(msg, strsize, true, fp);
+    attprint(msg, true, fp);
 #endif
     localrc = packList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
     if (localrc == ESMC_ATTUPDATERM_ATTPACK) {
  #ifdef DEBUG_PRINT_RUN
       sprintf(msg, "  - removing AttPack: %s\n",
               packList.at(i)->attrName.c_str());
-      attprint(msg, strsize, true, fp);
+      attprint(msg, true, fp);
  #endif
      localrc = AttPackRemove(packList.at(i));
       if (localrc != ESMF_SUCCESS) {
@@ -609,7 +609,7 @@ static const int keySize = 4*sizeof(int) + 1;
 #ifdef DEBUG_PRINT_RUN
     sprintf(msg, "  - recursing linkList to root of class: %d\n",
             linkList.at(i)->attrBase->classID);
-    attprint(msg, strsize, true, fp);
+    attprint(msg, true, fp);
 #endif
       localrc = linkList.at(i)->AttributeUpdateBufRecv(recvBuf,localPet,offset,length);
 #ifdef DEBUG_PRINT_RUN
@@ -632,7 +632,7 @@ static const int keySize = 4*sizeof(int) + 1;
       else
         sprintf(msg,
             "returned %d from linkList traversal\n", localrc);
-      attprint(msg, strsize, true, fp);
+      attprint(msg, true, fp);
 #endif
       // handling for unordered containers
       if (localrc == ESMC_ATTUPDATERM_HOOKANDCONTINUE) {
@@ -739,7 +739,7 @@ static const int keySize = 4*sizeof(int) + 1;
   sprintf(msg,
     "\nName = %s, Convention = %s, Purpose = %s\n",
     attrName.c_str(), attrConvention.c_str(), attrPurpose.c_str());
-  attprint(msg, strsize, true, fp);
+  attprint(msg, true, fp);
   // key = ID, xor [name, conv, purp], value changes, struct changes, pack changes
   sprintf(msg, "key: %s, BaseID: %d, attrRoot: %d\n"
                "    Changes: (value) %d (struct) %d (pack) %d\n"
@@ -751,7 +751,7 @@ static const int keySize = 4*sizeof(int) + 1;
                       (*(reinterpret_cast<int*> (key+9))),
                       (*(reinterpret_cast<int*> (key+13))),
                       attrList.size(), packList.size(), linkList.size());
-  attprint(msg, strsize, true, fp);
+  attprint(msg, true, fp);
 #endif
 
   // get key info
@@ -864,7 +864,7 @@ static const int keySize = 4*sizeof(int) + 1;
 #ifdef DEBUG_PRINT_RUN
     sprintf(msg, "attrList recursion %d of %d\n",
         localPet, i, attrList.size());
-    attprint(msg, strsize, true, fp);
+    attprint(msg, true, fp);
 #endif
     localrc = attrList.at(i)->AttributeUpdateBufSend(sendBuf,localPet,offset,length);
   }
@@ -874,7 +874,7 @@ static const int keySize = 4*sizeof(int) + 1;
 #ifdef DEBUG_PRINT_RUN
     sprintf(msg, "packList recursion %d of %d\n",
         localPet, i, packList.size());
-    attprint(msg, strsize, true, fp);
+    attprint(msg, true, fp);
 #endif
     localrc = packList.at(i)->AttributeUpdateBufSend(sendBuf,localPet,offset,length);
   }
@@ -884,7 +884,7 @@ static const int keySize = 4*sizeof(int) + 1;
 #ifdef DEBUG_PRINT_RUN
     sprintf(msg, "linkList recursion %d of %d\n",
         localPet, i, linkList.size());
-    attprint(msg, strsize, true, fp);
+    attprint(msg, true, fp);
 #endif
     localrc = linkList.at(i)->AttributeUpdateBufSend(sendBuf,localPet,offset,length);
   }
@@ -1079,7 +1079,7 @@ static const int keySize = 4*sizeof(int) + 1;
 #ifdef DEBUG_PRINT_RUN      
 sprintf(msg, "\nP%d RECEIVE \"%s\" from P%d\n",
             localPet, recvBuf, roots[indRecv]);
-attprint(msg, strsize, true, fp);
+attprint(msg, true, fp);
 #endif
   }
     
@@ -1104,7 +1104,7 @@ attprint(msg, strsize, true, fp);
 #ifdef DEBUG_PRINT_RUN      
 sprintf(msg, "\nP%d, SEND \"%s\" to P%d\n",
         localPet, sendBuf, nonroots[indSend]);
-attprint(msg, strsize, true, fp);
+attprint(msg, true, fp);
 #endif
         vm->recv(&handshake, sizeof(int), nonroots[indSend]);
         vm->send(&sendBufSize, sizeof(sendBufSize), nonroots[indSend]);
