@@ -59,7 +59,10 @@ module ESMF_TraceMod
   public ESMF_TraceComponentInfo
   public ESMF_TraceMemInfo
   public ESMF_TraceClock
-!EOPI
+  
+! - ESMF-internal - only for unit tests
+  public ESMF_TraceTest_GetMPIWaitStats
+  !EOPI
   
   interface ESMF_TracePhaseEnter
      module procedure ESMF_TraceGridCompPhaseEnter
@@ -888,4 +891,26 @@ contains
 
   end function ESMF_TraceMethodToEnum
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TraceTest_GetMPIWaitStats"
+!BOPI 
+! !IROUTINE: ESMF_TraceTest_GetMPIWaitStats - MPI Statistics - for testing only
+! 
+! !INTERFACE: 
+  subroutine ESMF_TraceTest_GetMPIWaitStats(count, time, rc)
+! !ARGUMENTS: 
+    integer, intent(out)               :: count
+    integer(ESMF_KIND_I8), intent(out) :: time
+    integer, intent(out), optional     :: rc
+!
+!EOPI
+!-------------------------------------------------------------------------------
+
+    if (present(rc)) rc = ESMF_SUCCESS 
+    call c_esmftracetest_getmpiwaitstats(count, time)
+    
+  end subroutine ESMF_TraceTest_GetMPIWaitStats
+
+
+  
 end module

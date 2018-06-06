@@ -1,0 +1,38 @@
+# $Id$ 
+
+ALL: tracelib_preload tracelib_static
+
+SOURCEC	  = preload.c preload_io.c preload_mpi.c wrappers.c wrappers_io.c wrappers_mpi.c
+SOURCEF	  = 
+SOURCEH	  = 
+STOREH    = 
+
+OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
+OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
+
+LIBBASE	  = libesmf
+LOCDIR	  = src/Superstructure/Trace/preload
+
+CLEANDIRS   =
+CLEANFILES  = $(ESMF_LDIR)/libesmftrace_* 
+CLOBBERDIRS =
+
+include $(ESMF_DIR)/makefile
+
+#ESMF_CXXCOMPILEOPTS += -save-temps
+
+DIRS	  = 
+
+ESMF_TRACE_ESMFLIB = 
+ifeq ($(ESMF_OS),Darwin)
+  ESMF_TRACE_ESMFLIB = -lesmf
+endif
+ifeq  ($(ESMF_OS),MinGW)
+  ESMF_TRACE_ESMFLIB = -lesmf
+endif
+
+tracelib_preload: preload.o preload_io.o preload_mpi.o wrappers.o wrappers_io.o wrappers_mpi.o
+	$(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX) $^ $(ESMF_SL_LIBLIBS) $(ESMF_TRACE_ESMFLIB)
+
+tracelib_static: wrappers_io.o wrappers_mpi.o wrappers.o
+	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_LDIR)/libesmftrace_static.a $^

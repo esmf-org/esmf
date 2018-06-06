@@ -16,6 +16,6 @@ include $(ESMF_DIR)/makefile
 DIRS      = src interface tests doc examples
 
 CLEANDIRS   =
-CLEANFILES  =
+CLEANFILES  = preload/*.o
 CLOBBERDIRS =
 
