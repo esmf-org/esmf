@@ -1636,6 +1636,34 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
+# Build variables for static wrapping and preloading functions for ESMF trace
+#-------------------------------------------------------------------------------
+
+ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
+ESMF_TRACE_LDPRELOAD := $(ESMF_LIBDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)
+endif
+ESMF_TRACE_STATICLINKLIBS := -lesmftrace_static
+
+ESMF_TRACE_WRAPPERS_IO  := write writev pwrite read open
+ESMF_TRACE_WRAPPERS_MPI := MPI_Allreduce MPI_Barrier MPI_Wait
+ESMF_TRACE_WRAPPERS_MPI += mpi_allgather_ mpi_allgather__ mpi_allgatherv_ mpi_allgatherv__
+ESMF_TRACE_WRAPPERS_MPI += mpi_allreduce_ mpi_allreduce__ mpi_alltoall_ mpi_alltoall__
+ESMF_TRACE_WRAPPERS_MPI += mpi_alltoallv_ mpi_alltoallv__ mpi_alltoallw_ mpi_alltoallw__
+ESMF_TRACE_WRAPPERS_MPI += mpi_barrier_ mpi_barrier__ mpi_bcast_ mpi_bcast__
+ESMF_TRACE_WRAPPERS_MPI += mpi_exscan_ mpi_exscan__ mpi_gather_ mpi_gather__
+ESMF_TRACE_WRAPPERS_MPI += mpi_gatherv_ mpi_gatherv__ mpi_recv_ mpi_recv__
+ESMF_TRACE_WRAPPERS_MPI += mpi_reduce_ mpi_reduce__ mpi_reduce_scatter_ mpi_reduce_scatter__
+ESMF_TRACE_WRAPPERS_MPI += mpi_scatter_ mpi_scatter__ mpi_scatterv_ mpi_scatterv__
+ESMF_TRACE_WRAPPERS_MPI += mpi_scan_ mpi_scan__ mpi_send_ mpi_send__
+ESMF_TRACE_WRAPPERS_MPI += mpi_wait_ mpi_wait__ mpi_waitall_ mpi_waitall__
+ESMF_TRACE_WRAPPERS_MPI += mpi_waitany_ mpi_waitany__
+
+COMMA := ,
+ESMF_TRACE_STATICLINKOPTS := -static -Wl,--wrap=c_esmftrace_notify_wrappers -Wl,--wrap=c_esmftrace_isinitialized
+ESMF_TRACE_STATICLINKOPTS += $(addprefix -Wl$(COMMA)--wrap=, $(ESMF_TRACE_WRAPPERS_IO))
+ESMF_TRACE_STATICLINKOPTS += $(addprefix -Wl$(COMMA)--wrap=, $(ESMF_TRACE_WRAPPERS_MPI))
+
+#-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
@@ -1854,6 +1882,7 @@ endif
 # subdir and it will go up to the top dir and build from there.
 lib: info
 	@$(MAKE) build_libs
+	@$(MAKE) build_tracelibs
 	@$(MAKE) info_mk
 	@echo "ESMF library built successfully on "`date`
 	@echo "To verify, build and run the unit and system tests with: $(MAKE) check"
@@ -1867,6 +1896,14 @@ endif
 	cd $(ESMF_DIR) ; $(MAKE) ranlib
 ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
 	cd $(ESMF_DIR) ; $(MAKE) shared
+endif
+
+build_tracelibs:
+	cd $(ESMF_DIR)/src/Superstructure/Trace/preload ;\
+	$(MAKE) tracelib_static
+ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
+	cd $(ESMF_DIR)/src/Superstructure/Trace/preload ;\
+	$(MAKE) tracelib_preload
 endif
 
 # Build only stuff in and below the current dir.

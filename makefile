@@ -324,6 +324,13 @@ ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
 	-@echo "ESMF_SL_LIBLIBS:      $(ESMF_SL_LIBLIBS)"
 endif
 	-@echo ""
+	-@echo "ESMF Tracing linker options:"
+ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
+	-@echo "ESMF_TRACE_LDPRELOAD=$(ESMF_TRACE_LDPRELOAD)"
+endif
+	-@echo "ESMF_TRACE_STATICLINKOPTS=$(ESMF_TRACE_STATICLINKOPTS)"
+	-@echo "ESMF_TRACE_STATICLINKLIBS=$(ESMF_TRACE_STATICLINKLIBS)"
+	-@echo ""
 	-@echo ""
 	-@echo "--------------------------------------------------------------"
 ifeq ($(ESMF_OS),MinGW)
@@ -417,6 +424,13 @@ info_mk: chkdir_lib
 	-@echo "ESMF_OPENACC_F90LINKOPTS=$(ESMF_OPENACC_F90LINKOPTS)" >> $(MKINFO)
 	-@echo "ESMF_OPENACC_CXXCOMPILEOPTS=$(ESMF_OPENACC_CXXCOMPILEOPTS)" >> $(MKINFO)
 	-@echo "ESMF_OPENACC_CXXLINKOPTS=$(ESMF_OPENACC_CXXLINKOPTS)" >> $(MKINFO)
+	-@echo "" >> $(MKINFO)	
+	-@echo "# ESMF Tracing compile/link options" >> $(MKINFO)
+ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)	
+	-@echo "ESMF_TRACE_LDPRELOAD=$(ESMF_TRACE_LDPRELOAD)" >> $(MKINFO)
+endif
+	-@echo "ESMF_TRACE_STATICLINKOPTS=$(ESMF_TRACE_STATICLINKOPTS)" >> $(MKINFO)
+	-@echo "ESMF_TRACE_STATICLINKLIBS=$(ESMF_TRACE_STATICLINKLIBS)" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
 	-@echo "# Internal ESMF variables, do NOT depend on these!" >> $(MKINFO)
 	-@echo "" >> $(MKINFO)
