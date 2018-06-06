@@ -209,11 +209,11 @@ ESMF_TRACE_WRAPPERS_MPI +={% for f in ffunc_list %} {{f.name}}_ {{f.name}}__{% i
 # C MPI Functions
 cfunc_list = [
 
-    {
-        'ret':'int', 'name':'MPI_Allreduce',
-        'params':'const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm',
-        'args':'sendbuf, recvbuf, count, datatype, op, comm'
-    },
+#    {
+#        'ret':'int', 'name':'MPI_Allreduce',
+#        'params':'const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm',
+#        'args':'sendbuf, recvbuf, count, datatype, op, comm'
+#    },
 
     {
         'ret':'int', 'name':'MPI_Barrier',

@@ -39,20 +39,6 @@ extern "C" {
    */
 
   
-    static int (*__real_ptr_MPI_Allreduce)(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) = NULL;
-
-    int __real_MPI_Allreduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
-      if (__real_ptr_MPI_Allreduce == NULL) {
-        __real_ptr_MPI_Allreduce = (int (*)(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Allreduce");
-      }
-      return __real_ptr_MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
-    }
-
-    int MPI_Allreduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
-      return __wrap_MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
-    }
-
-  
     static int (*__real_ptr_MPI_Barrier)(MPI_Comm comm) = NULL;
 
     int __real_MPI_Barrier(MPI_Comm comm) {

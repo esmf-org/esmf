@@ -1645,7 +1645,7 @@ endif
 ESMF_TRACE_STATICLINKLIBS := -lesmftrace_static
 
 ESMF_TRACE_WRAPPERS_IO  := write writev pwrite read open
-ESMF_TRACE_WRAPPERS_MPI := MPI_Allreduce MPI_Barrier MPI_Wait
+ESMF_TRACE_WRAPPERS_MPI := MPI_Barrier MPI_Wait
 ESMF_TRACE_WRAPPERS_MPI += mpi_allgather_ mpi_allgather__ mpi_allgatherv_ mpi_allgatherv__
 ESMF_TRACE_WRAPPERS_MPI += mpi_allreduce_ mpi_allreduce__ mpi_alltoall_ mpi_alltoall__
 ESMF_TRACE_WRAPPERS_MPI += mpi_alltoallv_ mpi_alltoallv__ mpi_alltoallw_ mpi_alltoallw__
