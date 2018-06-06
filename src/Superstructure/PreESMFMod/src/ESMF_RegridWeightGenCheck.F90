@@ -831,7 +831,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else if (units(1:1) .eq. 'm' .or. units(1:1) .eq. 'k') then
       ! Cartesian coordinate, convert into spherical
       cart = .true.
-    else if (trim(units) /= "radius") then
+    else if (trim(units) /= "radians") then
       write (msg, '(a,i4)') "- units are not 'degrees' or 'radians'"
       call ESMF_LogSetError(ESMF_RC_OBJ_BAD, msg=msg, &
         line=__LINE__, file=__FILE__ , rcToReturn=rc)
