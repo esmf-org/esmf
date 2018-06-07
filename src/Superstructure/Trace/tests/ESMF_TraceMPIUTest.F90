@@ -30,9 +30,14 @@ program ESMF_TraceMPIUTest
   use ESMF_TestMod
   use ESMF
 #ifndef ESMF_MPIUNI
-  use MPI, only: MPI_INTEGER, MPI_SUM
+!  use MPI, only: MPI_INTEGER, MPI_SUM
 #endif
+
   implicit none
+
+#ifndef ESMF_MPIUNI
+  include 'mpif.h'
+#endif
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
