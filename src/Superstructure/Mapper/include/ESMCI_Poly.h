@@ -13,6 +13,87 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* Polynomial center and scale info */
+    template<typename T>
+    class PolyCSInfo{
+      public:
+        PolyCSInfo();
+        PolyCSInfo(const std::pair<T, T> &mean_and_stddev);
+        PolyCSInfo(const T &mean, const T &stddev);
+        T get_mean(void ) const;
+        T get_stddev(void ) const;
+        T center_and_scale(const T& val) const;
+        void center_and_scale(T &val) const;
+        std::vector<T> center_and_scale(const std::vector<T> &vals) const;
+        void center_and_scale(std::vector<T> &vals) const;
+      private:
+        T mean_;
+        T stddev_;
+    };
+
+    template<typename T>
+    PolyCSInfo<T>::PolyCSInfo():mean_(0), stddev_(0)
+    {}
+
+    template<typename T>
+    PolyCSInfo<T>::PolyCSInfo(const std::pair<T, T> &mean_and_stddev):mean_(mean_and_stddev.first), stddev_(mean_and_stddev.second)
+    {}
+
+    template<typename T>
+    PolyCSInfo<T>::PolyCSInfo(const T& mean, const T &stddev):mean_(mean), stddev_(stddev)
+    {}
+
+    template<typename T>
+    T PolyCSInfo<T>::get_mean(void ) const
+    {
+      return mean_;
+    }
+
+    template<typename T>
+    T PolyCSInfo<T>::get_stddev(void ) const
+    {
+      return stddev_;
+    }
+
+    /* Center and scale the value so that the value is centered around the mean
+     * and has a unit standard deviation
+     */
+    template<typename T>
+    T PolyCSInfo<T>::center_and_scale(const T &val) const
+    {
+      T scale = (stddev_ != 0) ? stddev_ : 1;
+      return (val - mean_)/scale;
+    }
+
+    template<typename T>
+    void PolyCSInfo<T>::center_and_scale(T &val) const
+    {
+      T scale = (stddev_ != 0) ? stddev_ : 1;
+      val = (val - mean_)/scale;
+    }
+
+    template<typename T>
+    std::vector<T> PolyCSInfo<T>::center_and_scale(const std::vector<T> &vals) const
+    {
+      std::vector<T> ret_vals = vals;
+      T scale = (stddev_ != 0) ? stddev_ : 1;
+      for(typename std::vector<T>::iterator iter = ret_vals.begin();
+          iter != ret_vals.end(); ++iter){
+        *iter = (*iter - mean_)/scale;
+      }
+      return ret_vals;
+    }
+
+    template<typename T>
+    void PolyCSInfo<T>::center_and_scale(std::vector<T> &vals) const
+    {
+      T scale = (stddev_ != 0) ? stddev_ : 1;
+      for(typename std::vector<T>::iterator iter = vals.begin();
+          iter != vals.end(); ++iter){
+        *iter = (*iter - mean_)/scale;
+      }
+    }
+
     /* The generic polynomial class
      * This class is abstract and is extended to implement
      * univariable/ 2 variable polynomials
@@ -24,6 +105,7 @@ namespace ESMCI{
         virtual void set_coeffs(const std::vector<CType>& coeffs) = 0;
         virtual void set_coeffs(std::initializer_list<CType> coeffs) = 0;
         virtual void set_vnames(const std::vector<std::string> &vnames) = 0;
+        virtual void set_cs_info(const PolyCSInfo<CType> &csinfo) = 0;
         virtual std::vector<std::string> get_vnames(void ) const = 0;
         virtual void set_degs(const std::vector<std::vector<DType> >& degs) = 0;
         virtual int get_max_deg(void ) const = 0;

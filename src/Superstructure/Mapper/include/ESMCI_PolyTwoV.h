@@ -78,12 +78,14 @@ namespace ESMCI{
         std::vector<std::string> get_vnames(void ) const; 
         void set_coeffs(const std::vector<CType>& coeffs); 
         void set_coeffs(std::initializer_list<CType> coeffs);
+        void set_cs_info(const PolyCSInfo<CType> &csinfo);
         std::vector<CType> get_coeffs(void ) const;
         CType eval(const std::vector<CType> &vvals) const;
       private:
         int max_deg_;
         std::vector<CType> coeffs_;
         std::vector<std::string> vnames_;
+        PolyCSInfo<CType> csinfo_;
     }; // class TwoVIDPoly
 
     template<typename CType>
@@ -231,6 +233,12 @@ namespace ESMCI{
     {
       coeffs_.assign(coeffs.begin(), coeffs.end());
       max_deg_ = TwoVIDPolyUtil::get_max_deg(coeffs_.size());
+    }
+
+    template<typename CType>
+    inline void TwoVIDPoly<CType>::set_cs_info(const PolyCSInfo<CType> &csinfo)
+    {
+      csinfo_ = csinfo;
     }
 
     template<typename CType>

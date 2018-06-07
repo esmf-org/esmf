@@ -52,12 +52,14 @@ namespace ESMCI{
         std::vector<std::string> get_vnames(void ) const;
         void set_coeffs(const std::vector<CType>& coeffs); 
         void set_coeffs(std::initializer_list<CType> coeffs);
+        void set_cs_info(const PolyCSInfo<CType> &csinfo);
         std::vector<CType> get_coeffs(void ) const;
         CType eval(const std::vector<CType> &vvals) const;
         CType eval(const CType &vval) const;
       private:
         std::vector<CType> coeffs_;
         std::vector<std::string> vnames_;
+        PolyCSInfo<CType> csinfo_;
     }; // class UVIDPoly
 
     template<typename CType>
@@ -117,6 +119,12 @@ namespace ESMCI{
     }
 
     template<typename CType>
+    inline void UVIDPoly<CType>::set_cs_info(const PolyCSInfo<CType> &csinfo)
+    {
+      csinfo_ = csinfo;
+    }
+
+    template<typename CType>
     inline std::vector<CType> UVIDPoly<CType>::get_coeffs(void ) const
     {
       return coeffs_;
@@ -127,12 +135,13 @@ namespace ESMCI{
     inline CType UVIDPoly<CType>::eval(const std::vector<CType> &vvals) const
     {
       assert(vvals.size() == 1);
+      std::vector<CType> sc_vvals = csinfo_.center_and_scale(vvals);
 
       CType res = 0;
       std::size_t cur_deg = coeffs_.size() - 1;
       for(typename std::vector<CType>::const_iterator citer = coeffs_.cbegin();
           citer != coeffs_.cend(); ++citer){
-        res += (*citer) * pow(vvals[0], cur_deg);
+        res += (*citer) * pow(sc_vvals[0], cur_deg);
         cur_deg--;
       }
 
