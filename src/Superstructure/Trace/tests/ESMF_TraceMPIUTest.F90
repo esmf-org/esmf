@@ -122,6 +122,7 @@ program ESMF_TraceMPIUTest
   !  INTEGER    COUNT, DATATYPE, OP, COMM, IERROR
   send = 1
   recv = -1
+  ierr = 0
 #ifndef ESMF_MPIUNI
   CALL MPI_ALLREDUCE(send, recv, 1, MPI_INTEGER, MPI_SUM, mpicomm, ierr)
 #endif
