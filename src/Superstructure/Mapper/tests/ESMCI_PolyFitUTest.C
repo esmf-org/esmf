@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
     //std::cout << "p0(" << *citer1 << ") = " << p0.eval(*citer1)
     //          << " : " << *citer2 << "\n"; 
     if(fabs(*citer2 - p0.eval(*citer1)) > tol){
+      std::cout << "Expected value = " << *citer2 << ", Eval value = " << p0.eval(*citer1) << ", tol = " << tol << "\n";
       test_success = false;
       break;
     }
@@ -97,5 +98,32 @@ int main(int argc, char *argv[])
   //      max_deg, xvals_p4, yvals_p4, p4);
   //std::cout << p4 << std::endl;
 
+  std::vector<float> xvals_atm = {3600, 7200, 14400, 28800};
+  std::vector<float> yvals_atm = {1273.542, 819.708, 426.051, 290.470};
+
+  strncpy(name, "2 Degree Polynomial fit Utest (ATM data)", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "2 Degree Polynomial fit Utest (ATM data) failed", ESMF_MAX_STRLEN);
+  ESMCI::MapperUtil::UVIDPoly<float> p5;
+  max_deg = 2;
+  rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, xvals_atm, yvals_atm, p5);
+  //std::cout << p5 << std::endl;
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  strncpy(name, "2 Degree Polynomial fit Accuracy (ATM data) Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "2 Degree Polynomial fit Utest Accuracy (ATM data) failed", ESMF_MAX_STRLEN);
+  test_success = true;
+  tol = 100;
+  for(std::vector<float>::const_iterator citer1 = xvals_atm.cbegin(),
+      citer2 = yvals_atm.cbegin();
+      (citer1 != xvals_atm.cend()) && (citer2 != yvals_atm.cend()); ++citer1, ++citer2){
+    //std::cout << "p5(" << *citer1 << ") = " << p5.eval(*citer1)
+    //          << " : " << *citer2 << "\n"; 
+    if(fabs(*citer2 - p5.eval(*citer1)) > tol){
+      std::cout << "Expected value = " << *citer2 << ", Eval value = " << p5.eval(*citer1) << ", tol = " << tol << "\n";
+      test_success = false;
+      break;
+    }
+  }
+  ESMC_Test(test_success, name, failMsg, &result, __FILE__, __LINE__, 0); 
+  
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }
