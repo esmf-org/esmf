@@ -15,6 +15,7 @@ Class APIs
     mesh
     locstream
     regrid
+    regridfromfile
 
 ---------------
 Named Constants

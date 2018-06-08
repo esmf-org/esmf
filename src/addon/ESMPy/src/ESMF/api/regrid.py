@@ -34,9 +34,9 @@ class Regrid(object):
 
     *REQUIRED:*
 
-    :param :class:`~ESMF.api.field.Field` srcfield: source :class:`~ESMF.api.field.Field` associated with an underlying :class:`~ESMF.api.grid.Grid`,
+    :param Field srcfield: source :class:`~ESMF.api.field.Field` associated with an underlying :class:`~ESMF.api.grid.Grid`,
         :class:`~ESMF.api.mesh.Mesh` or :class:`~ESMF.api.locstream.LocStream`.
-    :param :class:`~ESMF.api.field.Field` dstfield: destination :class:`~ESMF.api.field.Field` associated with an underlying
+    :param Field dstfield: destination :class:`~ESMF.api.field.Field` associated with an underlying
         :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh` or :class:`~ESMF.api.locstream.LocStream`.  The data in this :class:`~ESMF.api.field.Field` may be overwritten
         by this call.
 
@@ -188,14 +188,14 @@ class Regrid(object):
         import atexit; atexit.register(self.__del__)
         self._finalized = False
 
-    def __call__(self, srcfield, dstfield, filename=None, zero_region=None):
+    def __call__(self, srcfield, dstfield, zero_region=None):
         """
         Call a regridding operation from srcfield to dstfield.
 
         *REQUIRED:*
 
-        :param :class:`~ESMF.api.field.Field` srcfield: the :class:`~ESMF.api.field.Field` of source data to regrid.
-        :param :class:`~ESMF.api.field.Field` dstfield: the :class:`~ESMF.api.field.Field` to hold the regridded data.
+        :param Field srcfield: the :class:`~ESMF.api.field.Field` of source data to regrid.
+        :param Field dstfield: the :class:`~ESMF.api.field.Field` to hold the regridded data.
 
         *OPTIONAL:*
 
@@ -374,9 +374,9 @@ class RegridFromFile(object):
 
     *REQUIRED:*
 
-    :param :class:`~ESMF.api.field.Field` srcfield: source :class:`~ESMF.api.field.Field` associated with an underlying :class:`~ESMF.api.grid.Grid`,
+    :param Field srcfield: source :class:`~ESMF.api.field.Field` associated with an underlying :class:`~ESMF.api.grid.Grid`,
         :class:`~ESMF.api.mesh.Mesh` or :class:`~ESMF.api.locstream.LocStream`.
-    :param :class:`~ESMF.api.field.Field` dstfield: destination :class:`~ESMF.api.field.Field` associated with an underlying
+    :param Field dstfield: destination :class:`~ESMF.api.field.Field` associated with an underlying
         :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh` or :class:`~ESMF.api.locstream.LocStream`.  The data in this :class:`~ESMF.api.field.Field` may be overwritten
         by this call.
     :param string filename: the name of the file from which to retrieve the
@@ -401,8 +401,8 @@ class RegridFromFile(object):
 
         *REQUIRED:*
 
-        :param :class:`~ESMF.api.field.Field` srcfield: the :class:`~ESMF.api.field.Field` of source data to regrid.
-        :param :class:`~ESMF.api.field.Field` dstfield: the :class:`~ESMF.api.field.Field` to hold the regridded data.
+        :param Field srcfield: the :class:`~ESMF.api.field.Field` of source data to regrid.
+        :param Field dstfield: the :class:`~ESMF.api.field.Field` to hold the regridded data.
 
         *OPTIONAL:*
 

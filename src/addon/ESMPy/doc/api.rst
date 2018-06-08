@@ -14,16 +14,17 @@ Regridding between :class:`Fields <ESMF.api.field.Field>` is accomplished with t
 :class:`~ESMF.api.regrid.Regrid` class.  All of these classes are explained in 
 more detail in the sections provided by the links in the following table.
 
-=======================================  ==============================================================================
-Class                                    Description
-=======================================  ==============================================================================
-:class:`~ESMF.api.esmpymanager.Manager`  A manager class to initialize and finalize ESMF
-:class:`~ESMF.api.field.Field`           A data field built on a :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh`, or :class:`~ESMF.api.locstream.LocStream`
-:class:`~ESMF.api.grid.Grid`             A class to represent a logically rectangular grid
-:class:`~ESMF.api.mesh.Mesh`             A class to represent an unstructured grid
-:class:`~ESMF.api.locstream.LocStream`   A class to represent observational data as a collection of disconnected points
-:class:`~ESMF.api.regrid.Regrid`         The regridding utility
-=======================================  ==============================================================================
+========================================  ==============================================================================
+Class                                     Description
+========================================  ==============================================================================
+:class:`~ESMF.api.esmpymanager.Manager`   A manager class to initialize and finalize ESMF
+:class:`~ESMF.api.field.Field`            A data field built on a :class:`~ESMF.api.grid.Grid`, :class:`~ESMF.api.mesh.Mesh`, or :class:`~ESMF.api.locstream.LocStream`
+:class:`~ESMF.api.grid.Grid`              A class to represent a logically rectangular grid
+:class:`~ESMF.api.mesh.Mesh`              A class to represent an unstructured grid
+:class:`~ESMF.api.locstream.LocStream`    A class to represent observational data as a collection of disconnected points
+:class:`~ESMF.api.regrid.Regrid`          The regridding utility
+:class:`~ESMF.api.regrid.RegridFromFile`  The from file regridding utility
+========================================  ==============================================================================
 
 
 ---------------

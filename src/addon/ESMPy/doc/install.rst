@@ -46,7 +46,7 @@ Specific versions of the conda package can be installed like this:
 
 .. code::
 
-conda create -n esmpy -c nesii -c conda-forge esmpy=7.1.0r
+    conda create -n esmpy -c nesii -c conda-forge esmpy=7.1.0r
 
 ----------------------------
 Installing ESMPy from Source
