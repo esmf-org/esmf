@@ -28,23 +28,6 @@ extern "C" {
    */
 
   
-    extern int __real_MPI_Allreduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);    
-
-    int __wrap_MPI_Allreduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
-      if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
-        //printf("__wrap_MPI_Allreduce (C)\n");
-        insideMPIRegion = 1;
-        ESMCI::TraceMPIWaitStart();
-        int ret = __real_MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
-        ESMCI::TraceMPIWaitEnd();
-        insideMPIRegion = 0;
-        return ret;
-      }
-      else {
-        return __real_MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
-      }
-    }
-  
     extern int __real_MPI_Barrier(MPI_Comm comm);    
 
     int __wrap_MPI_Barrier(MPI_Comm comm) {
