@@ -116,3 +116,10 @@ src/system_tests/ESMF_ArrayRedistMPMD/user_model1.o
 src/system_tests/ESMF_ArrayRedistMPMD/user_model2.mod
 src/system_tests/ESMF_ArrayRedistMPMD/user_model2.o
 
+src/Superstructure/Trace/preload/preload.o
+src/Superstructure/Trace/preload/preload_io.o
+src/Superstructure/Trace/preload/preload_mpi.o
+src/Superstructure/Trace/preload/wrappers.o
+src/Superstructure/Trace/preload/wrappers_io.o
+src/Superstructure/Trace/preload/wrappers_mpi.o
+`
