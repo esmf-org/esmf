@@ -1639,7 +1639,16 @@ endif
 # Build variables for static wrapping and preloading functions for ESMF trace
 #-------------------------------------------------------------------------------
 
-ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
+ESMF_TRACE_BUILD_SHARED := ON
+
+ifeq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
+ESMF_TRACE_BUILD_SHARED := OFF
+endif
+ifneq (,$(findstring ESMF_NO_DLFCN,$(ESMF_CXXCOMPILECPPFLAGS)))
+ESMF_TRACE_BUILD_SHARED := OFF
+endif
+
+ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
 ESMF_TRACE_LDPRELOAD := $(ESMF_LIBDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)
 endif
 ESMF_TRACE_STATICLINKLIBS := -lesmftrace_static
@@ -1901,7 +1910,7 @@ endif
 build_tracelibs:
 	cd $(ESMF_DIR)/src/Superstructure/Trace/preload ;\
 	$(MAKE) tracelib_static
-ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
+ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
 	cd $(ESMF_DIR)/src/Superstructure/Trace/preload ;\
 	$(MAKE) tracelib_preload
 endif
