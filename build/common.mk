@@ -1647,6 +1647,10 @@ endif
 ifneq (,$(findstring ESMF_NO_DLFCN,$(ESMF_CXXCOMPILECPPFLAGS)))
 ESMF_TRACE_BUILD_SHARED := OFF
 endif
+ifeq ($(ESMF_OS),Cygwin)
+# Cygwin does not support RTLD_NEXT needed by dlsym
+ESMF_TRACE_BUILD_SHARED := OFF
+endif
 
 ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
 ESMF_TRACE_LDPRELOAD := $(ESMF_LIBDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)
