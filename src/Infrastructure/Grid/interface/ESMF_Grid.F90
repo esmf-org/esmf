@@ -6684,7 +6684,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
 #endif
 
     return
@@ -6808,8 +6810,8 @@ end function ESMF_GridCreateFrmScrip
     integer :: i,j,k,localroot
     integer :: maxIndex2D(2)
     integer, pointer :: minind(:,:)
-    character(len=30) :: units
     type(ESMF_CoordSys_Flag) :: coordsys
+    character (len=256) :: units
    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -6875,7 +6877,7 @@ end function ESMF_GridCreateFrmScrip
 	  msgbuf(8) = 1
 	  coordsys = ESMF_COORDSYS_CART
 	elseif (units(1:1) .eq. 'k') then
-	  msgbuf(8) = 2
+      	  msgbuf(8) = 2
 	  coordsys = ESMF_COORDSYS_CART
         endif
         call ESMF_VMBroadcast(vm, msgbuf, 8, 0, rc=localrc)
@@ -6936,14 +6938,13 @@ end function ESMF_GridCreateFrmScrip
         endif
         ! convert to kilometer if the units is "meters"
         if (units(1:1) .eq. 'm') then
-	   loncoord1D = loncoord1D * 1.d-3
-	   latcoord1D = latcoord1D * 1.d-3
+	   loncoord1D(:) = loncoord1D(:) * 1.d-3
+	   latcoord1D(:) = latcoord1D(:) * 1.d-3
            if (localAddCornerStagger) then
-	      cornerlon2D = cornerlon2D * 1.d-3
-	      cornerlat2D = cornerlat2D * 1.d-3
+	      cornerlon2D(:,:) = cornerlon2D(:,:) * 1.d-3
+	      cornerlat2D(:,:) = cornerlat2D(:,:) * 1.d-3
            endif
          endif
-
         if (localIsSphere) then
            grid = ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=gridims, &
                 regDecomp=regDecomp, &
@@ -6965,11 +6966,6 @@ end function ESMF_GridCreateFrmScrip
                 ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-#if 0
-        call ESMF_AttributeSet(grid, "units", trim(units), rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-#endif        
         ! Set coordinate tables -  Put Corners into coordinates
         localStaggerLoc = ESMF_STAGGERLOC_CENTER
 
@@ -7067,11 +7063,6 @@ end function ESMF_GridCreateFrmScrip
                   ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-#if 0
-        call ESMF_AttributeSet(grid, "units", trim(units), rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-#endif
         if (mod(PetNo, regDecomp(1)) == 0) then
            call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7107,11 +7098,11 @@ end function ESMF_GridCreateFrmScrip
         endif
         ! convert to kilometer if the units is "meters"
         if (units(1:1) .eq. 'm') then
-	   loncoord2D = loncoord2D * 1.d-3
-	   latcoord2D = latcoord2D * 1.d-3
+	   loncoord2D(:,:) = loncoord2D(:,:) * 1.d-3
+	   latcoord2D(:,:) = latcoord2D(:,:) * 1.d-3
            if (localAddCornerStagger) then
-	      cornerlon3D = cornerlon3D * 1.d-3
-	      cornerlat3D = cornerlat3D * 1.d-3
+	      cornerlon3D(:,:,:) = cornerlon3D(:,:,:) * 1.d-3
+	      cornerlat3D(:,:,:) = cornerlat3D(:,:,:) * 1.d-3
            endif
         endif
         ! Set coordinate tables -  Put Corners into coordinates
@@ -7374,10 +7365,12 @@ end function ESMF_GridCreateFrmScrip
     if (present(rc)) rc=ESMF_SUCCESS
     return
 #else
-    if (present(rc)) rc = ESMF_RC_LIB_NOT_PRESENT
+    call ESMF_LogSetError(rcToCheck=ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+    return
 #endif
 
-    return
 end function ESMF_GridCreateFrmGridspec
 
 !------------------------------------------------------------------------------
@@ -29969,7 +29962,7 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
     real(ESMF_KIND_R8), pointer::scripArray2(:,:)
     integer(ESMF_KIND_I4), pointer :: fptrMask(:,:), scripArrayMask(:)
     logical :: hasmask, hasarea
-    character(len=256) :: errmsg, units
+    character (len=256) :: errmsg, units
 
 #ifdef ESMF_NETCDF
     call ESMF_VMGetCurrent(vm, rc=rc)
