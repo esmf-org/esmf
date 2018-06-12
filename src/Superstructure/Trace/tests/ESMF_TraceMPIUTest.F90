@@ -59,6 +59,7 @@ program ESMF_TraceMPIUTest
   integer                :: result = 0
 
   type(ESMF_VM) :: vm
+  integer       :: petCount
   type(ESMF_GridComp) :: gridcomp
 
   integer                 :: funit
@@ -82,7 +83,8 @@ program ESMF_TraceMPIUTest
   call ESMF_VMGetGlobal(vm=vm, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   
-  call ESMF_VMGet(vm, localPet=localPet, mpiCommunicator=mpicomm, rc=rc)
+  call ESMF_VMGet(vm, localPet=localPet, petCount=petCount, &
+       mpiCommunicator=mpicomm, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   
@@ -142,7 +144,7 @@ program ESMF_TraceMPIUTest
   print *, "MPI_ALLREDUCE returned ", recv
   write(failMsg, *) "MPI_ALLREDUCE produced unexpected result. Expected 4, got ", recv
 #ifndef ESMF_MPIUNI
-  call ESMF_Test((recv==4), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((recv==petCount), name, failMsg, result, ESMF_SRCLINE)
 #else
   call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
 #endif
