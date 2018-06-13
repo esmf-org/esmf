@@ -2189,7 +2189,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogPrivateGetInit,ESMF_LogPrivateInit,alog)
 
-      if (alog%FileIsOpen /= ESMF_TRUE) then
+      if (alog%FileIsOpen /= ESMF_TRUE .and. .not. isDefault) then
         write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
             ": ESMF_Log not open -- cannot ESMF_LogSet()."
         if (present (rc)) rc = ESMF_RC_CANNOT_SET
