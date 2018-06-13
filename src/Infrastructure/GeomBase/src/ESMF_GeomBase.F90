@@ -1438,7 +1438,7 @@ end subroutine ESMF_GeomBaseGet
     if (linquireflag == ESMF_NOINQUIRE) then
       buffer(geomobj_loffset:geomobj_loffset+3) =  &
           transfer (offset - geomobj_loffset + 1, buffer)
-      print *, ESMF_METHOD, ': geom object len =', offset - geomobj_loffset + 1
+!      print *, ESMF_METHOD, ': geom object len =', offset - geomobj_loffset + 1
     end if
 #endif
 
@@ -1522,7 +1522,7 @@ end subroutine ESMF_GeomBaseGet
 #if defined (ESMCI_GEOMBASELEN_CODE)
     geomobj_len = transfer (buffer(offset:offset+3), geomobj_len)
     offset = offset + 4
-    print *, ESMF_METHOD, ': geom object len =', geomobj_len
+!    print *, ESMF_METHOD, ': geom object len =', geomobj_len
 #endif
 
     ! Get info depending on type
