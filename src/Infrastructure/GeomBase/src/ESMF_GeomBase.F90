@@ -1282,6 +1282,14 @@ end subroutine ESMF_GeomBaseGet
 
  end subroutine ESMF_GeomBaseGetPLocalDe
 
+! -----------------------------------------------------------------------------
+!
+! serialize() and deserialize()
+!
+! -----------------------------------------------------------------------------
+
+#define ESMCI_GEOMBASELEN_CODE 1
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GeomBaseSerialize"
@@ -1336,6 +1344,8 @@ end subroutine ESMF_GeomBaseGet
     type(ESMF_AttReconcileFlag) :: lattreconflag
     type(ESMF_InquireFlag) :: linquireflag
 
+    integer :: geomobj_loffset
+
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
@@ -1369,6 +1379,14 @@ end subroutine ESMF_GeomBaseGet
     if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+#if defined (ESMCI_GEOMBASELEN_CODE)
+    ! Leave room for the length of the serialized Geom object
+    geomobj_loffset = offset
+    if (linquireflag == ESMF_NOINQUIRE)  &
+        buffer(offset:offset+3) = transfer (123421, buffer)  ! Dummy value for the moment
+    offset = offset + 4
+#endif
 
     ! Get info depending on type
     select case(gbcp%type%type)
@@ -1415,6 +1433,14 @@ end subroutine ESMF_GeomBaseGet
                                ESMF_CONTEXT, rcToReturn=rc)) return
     end select
 
+#if defined (ESMCI_GEOMBASELEN_CODE)
+    ! Set length of the serialized object
+    if (linquireflag == ESMF_NOINQUIRE) then
+      buffer(geomobj_loffset:geomobj_loffset+3) =  &
+          transfer (offset - geomobj_loffset + 1, buffer)
+      print *, ESMF_METHOD, ': geom object len =', offset - geomobj_loffset + 1
+    end if
+#endif
 
     ! Set return value
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1439,7 +1465,7 @@ end subroutine ESMF_GeomBaseGet
       integer, intent(inout) :: offset
       type(ESMF_AttReconcileFlag), optional :: attreconflag
       integer, intent(out), optional :: rc
- !
+!
 ! !DESCRIPTION:
 !      Takes a byte-stream buffer and reads the information needed to
 !      recreate a Grid object.  Recursively calls the deserialize routines
@@ -1455,7 +1481,7 @@ end subroutine ESMF_GeomBaseGet
 !           updated by this routine and return pointing to the next
 !           unread byte in the buffer.
 !     \item[{[attreconflag]}]
-!           Flag to tell if Attribute serialization is to be done
+!           Flag to tell if Attribute deserialization is to be done
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1464,6 +1490,8 @@ end subroutine ESMF_GeomBaseGet
     type(ESMF_GeomBaseClass),pointer :: gbcp
     integer :: localrc
     type(ESMF_AttReconcileFlag) :: lattreconflag
+
+    integer :: geomobj_len
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1480,7 +1508,7 @@ end subroutine ESMF_GeomBaseGet
     if (ESMF_LogFoundAllocError(localrc, msg="Allocating GeomBase type object", &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
 
-    ! serialize GeomBase info
+    ! deserialize GeomBase info
     call c_ESMC_GeomBaseDeserialize(gbcp%type%type,     &
                                     gbcp%staggerloc%staggerloc, &
                                     gbcp%meshloc%meshloc, &
@@ -1490,6 +1518,12 @@ end subroutine ESMF_GeomBaseGet
     if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+#if defined (ESMCI_GEOMBASELEN_CODE)
+    geomobj_len = transfer (buffer(offset:offset+3), geomobj_len)
+    offset = offset + 4
+    print *, ESMF_METHOD, ': geom object len =', geomobj_len
+#endif
 
     ! Get info depending on type
     select case(gbcp%type%type)
