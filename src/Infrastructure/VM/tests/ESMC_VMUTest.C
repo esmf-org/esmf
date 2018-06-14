@@ -120,11 +120,6 @@ int main(void){
       if (out[i] != petCount) correct = false;
       // printf("PET%d: out[%d] = %d\n", localPet, i, out[i]);
     }
-  } else {
-    for (int i = 0; i < len; ++i) {
-      if (out[i] != 0) correct = false;
-      // printf("PET%d: out[%d] = %d\n", localPet, i, out[i]);
-    }
   }
   ESMC_Test((rc==ESMF_SUCCESS && correct), name, failMsg, &result, __FILE__, __LINE__, 0);
   }
@@ -149,11 +144,6 @@ int main(void){
   if (localPet == 0) {
     for (int i = 0; i < len; ++i) {
       if (out[i] != (long long)petCount) correct = false;
-      // printf("PET%d: out[%d] = %lld\n", localPet, i, out[i]);
-    }
-  } else {
-    for (int i = 0; i < len; ++i) {
-      if (out[i] != (long long)0) correct = false;
       // printf("PET%d: out[%d] = %lld\n", localPet, i, out[i]);
     }
   }
@@ -182,11 +172,6 @@ int main(void){
       if (out[i] != (float)petCount) correct = false;
       // printf("PET%d: out[%d] = %f\n", localPet, i, out[i]);
     }
-  } else {
-    for (int i = 0; i < len; ++i) {
-      if (out[i] != (float)0) correct = false;
-      // printf("PET%d: out[%d] = %f\n", localPet, i, out[i]);
-    }
   }
   ESMC_Test((rc==ESMF_SUCCESS && correct), name, failMsg, &result, __FILE__, __LINE__, 0);
   }
@@ -211,11 +196,6 @@ int main(void){
   if (localPet == 0) {
     for (int i = 0; i < len; ++i) {
       if (out[i] != (double)petCount) correct = false;
-      // printf("PET%d: out[%d] = %f\n", localPet, i, out[i]);
-    }
-  } else {
-    for (int i = 0; i < len; ++i) {
-      if (out[i] != (double)0) correct = false;
       // printf("PET%d: out[%d] = %f\n", localPet, i, out[i]);
     }
   }
