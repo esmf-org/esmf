@@ -112,14 +112,17 @@ library. If {\tt ESMF\_BOPT} is {\tt O}, {\tt ESMF\_OPTLEVEL} can also be set
 to a numeric value between 0 and 4 to select a specific optimization level.
 
 \item[ESMF\_COMM]
-On systems with a vendor-supplied MPI communications library the vendor library 
+On systems with a vendor-supplied MPI communications library, the vendor library 
 is chosen by default for communications and {\tt ESMF\_COMM} need not be set.
-For other systems (e.g. Linux or Darwin) a multitude of MPI implementations is
-available and {\tt ESMF\_COMM} must be set to indicate which implementation is
+For other systems (e.g. Linux or Darwin) where a multitude of MPI implementations are
+available, {\tt ESMF\_COMM} must be set to indicate which implementation is
 used to build the ESMF library. Set {\tt ESMF\_COMM} according to your situation
 to: {\tt mpich, mpich2, mpich3, lam, openmpi} or {\tt intelmpi}. {\tt ESMF\_COMM} may
 also be set to {\tt user} indicating that the user will set all the required
-flags using advanced ESMF environment variables.
+flags using advanced ESMF environment variables.  Some individual MPI builds may create
+additional libraries that need to be linked in, such as the legacy C++ bindings.
+These may be specified via the {\tt ESMF\_CXXLINKLIBS} and {\tt ESMF\_F90LINKLIBS}
+environment variables.
 
 Alternatively, ESMF comes with a single-processor MPI-bypass library which is
 the default for Linux and Darwin systems. To force the use of this bypass
