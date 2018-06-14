@@ -714,7 +714,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     return 0;
   }
 
-  if(false){ // Check if the two polygons are the same
+  if(true){ // Check if the two polygons are the same
     // The number of p and q points have to be the same
     if(num_p == num_q ) {
       // 1. Find the two points on p and q with smallest arc length distance
