@@ -87,6 +87,9 @@
 
 !  Misc string methods
       public :: ESMF_UtilString2Int
+      public :: ESMF_UtilString2Real
+      public :: ESMF_UtilString2Double
+      public :: ESMF_UtilStringInt2String
       public :: ESMF_UtilStringLowerCase
       public :: ESMF_UtilStringUpperCase
       public :: ESMF_UtilArray2String
@@ -743,6 +746,69 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------- 
 ! misc string routines
 !------------------------------------------------------------------------- 
+
+!BOP
+! !IROUTINE: ESMF_UtilString2Double - Convert a string to floating point real
+! !INTERFACE:
+  function ESMF_UtilString2Double(string, keywordEnforcer, rc)
+! !RETURN VALUE:
+    real(ESMF_KIND_R8) :: ESMF_UtilString2Double
+! !ARGUMENTS:
+    character(len=*), intent(in)            :: string
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return the numerical real value represented by the {\tt string}.
+!
+!   Leading and trailing blanks in {\tt string} are ignored when directly
+!   converting into integers.
+!
+!   This procedure may fail when used in an expression in a {\tt write} statement
+!   with some older, pre-Fortran 2003, compiler environments that do not support
+!   re-entrant I/O calls.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[string]
+!     The string to be converted
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                 :: ioerr
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ESMF_UtilString2Double = 0 ! initialize
+
+    if (verify(trim(adjustl(string)),".-+0123456789de") == 0) then
+      ! should convert to real just fine
+      read (string, *, iostat=ioerr) ESMF_UtilString2Double
+      if (ioerr /= 0) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="The string '"//trim(string)//"' could not be converted to double.", &
+            line=__LINE__, &
+            file=ESMF_FILENAME, &
+            rcToReturn=rc)
+        return ! bail out
+      end if
+    else
+      ! the string contains characters besides numbers
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="The string '"//trim(string)//"' contains characters besides "// &
+          "numbers, cannot convert to double.", &
+        line=__LINE__, &
+        file=ESMF_FILENAME, &
+        rcToReturn=rc)
+      return ! bail out
+    endif
+
+  end function ESMF_UtilString2Double
+  !-----------------------------------------------------------------------------
+
 !------------------------------------------------------------------------- 
 !BOP
 ! !IROUTINE: ESMF_UtilString2Int - Convert a string to an integer
@@ -834,7 +900,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       enddo
     endif
     
-    if (verify(trim(adjustl(string)),"-+0123456789") == 0) then
+    if (verify(trim(adjustl(string)),"-+0123456789e") == 0) then
       ! should convert to integer just fine
       read (string, "(i12)", iostat=ioerr) ESMF_UtilString2Int
       if (ioerr /= 0) then
@@ -857,6 +923,133 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     
   end function ESMF_UtilString2Int
+  !-----------------------------------------------------------------------------
+
+!BOP
+! !IROUTINE: ESMF_UtilString2Real - Convert a string to floating point real
+! !INTERFACE:
+  function ESMF_UtilString2Real(string, keywordEnforcer, rc)
+! !RETURN VALUE:
+    real :: ESMF_UtilString2Real
+! !ARGUMENTS:
+    character(len=*), intent(in)            :: string
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Return the numerical real value represented by the {\tt string}.
+!
+!   Leading and trailing blanks in {\tt string} are ignored when directly
+!   converting into integers.
+!
+!   This procedure may fail when used in an expression in a {\tt write} statement
+!   with some older, pre-Fortran 2003, compiler environments that do not support
+!   re-entrant I/O calls.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[string]
+!     The string to be converted
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    ! local variables
+    integer                 :: ioerr
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ESMF_UtilString2Real = 0 ! initialize
+
+    if (verify(trim(adjustl(string)),".-+0123456789e") == 0) then
+      ! should convert to real just fine
+      read (string, *, iostat=ioerr) ESMF_UtilString2Real
+      if (ioerr /= 0) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="The string '"//trim(string)//"' could not be converted to real.", &
+            line=__LINE__, &
+            file=ESMF_FILENAME, &
+            rcToReturn=rc)
+        return ! bail out
+      end if
+    else
+      ! the string contains characters besides numbers
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="The string '"//trim(string)//"' contains characters besides "// &
+          "numbers, cannot convert to real.", &
+        line=__LINE__, &
+        file=ESMF_FILENAME, &
+        rcToReturn=rc)
+      return ! bail out
+    endif
+
+  end function ESMF_UtilString2Real
+  !-----------------------------------------------------------------------------
+
+
+  pure function int2str_len (i)
+
+  ! Internal function for use by ESMF_UtilStringInt2String.
+
+    integer :: int2str_len
+
+    integer, intent(in) :: i
+
+    character(16) :: string
+
+    write (string,'(i16)') i
+    int2str_len = len_trim (adjustl (string))
+
+  end function int2str_len
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_UtilStringInt2String"
+!BOP
+!  !IROUTINE:  ESMF_UtilStringInt2String - convert integer to character string
+!
+! !INTERFACE:
+    function ESMF_UtilStringInt2String (i, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+      integer, intent(in) :: i
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      integer, intent(out), optional  :: rc
+! !RETURN VALUE:
+      character(int2str_len (i)) :: ESMF_UtilStringInt2String
+
+!
+! !DESCRIPTION:
+!   Converts given an integer to string representation.  The returned string is
+!   sized such that it does not contain leading or trailing blanks.
+!
+!   This procedure may fail when used in an expression in a {\tt write} statement
+!   with some older, pre-Fortran 2003, compiler environments that do not support
+!   re-entrant I/O calls.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[i]
+!       An integer.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+
+    integer :: ioerr
+
+    write (ESMF_UtilStringInt2String,'(i0)', iostat=ioerr) i
+    if (ioerr /= 0) then
+      if (ESMF_LogFoundError (ESMF_RC_VAL_OUTOFRANGE, msg=ESMF_METHOD // ': conversion error',  &
+          ESMF_CONTEXT, rcToReturn=rc))  &
+        return
+    end if
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_UtilStringInt2String
   !-----------------------------------------------------------------------------
 
 

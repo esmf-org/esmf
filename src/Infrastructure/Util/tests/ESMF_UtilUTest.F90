@@ -108,6 +108,8 @@
       character(ESMF_MAXSTR) :: str, cstr
       integer :: cstrlen
       integer :: valueInt
+      real :: valueReal
+      real(ESMF_KIND_R8) :: valueDouble
 #endif
 
 !-------------------------------------------------------------------------------
@@ -361,7 +363,7 @@
     ! Test ascending sort
     write (name, *) "Testing ascending real sort"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    sorted_reals = random_values
+    sorted_reals = real (random_values)
     call ESMF_UtilSort (sorted_reals, direction=ESMF_SORTFLAG_ASCENDING, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -384,7 +386,7 @@
     ! Test descending sort
     write (name, *) "Testing descending real sort"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    sorted_reals = random_values
+    sorted_reals = real (random_values)
     call ESMF_UtilSort (sorted_reals, direction=ESMF_SORTFLAG_DESCENDING, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -457,7 +459,7 @@
     ! Test ascending sort
     write (name, *) "Testing ascending integer sort"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    sorted_ints = random_values * 123456
+    sorted_ints = int (random_values * 123456)
     call ESMF_UtilSort (sorted_ints, direction=ESMF_SORTFLAG_ASCENDING, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -481,7 +483,7 @@
     ! Test descending sort
     write (name, *) "Testing descending integer sort"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    sorted_ints = random_values * 123456
+    sorted_ints = int (random_values * 123456)
     call ESMF_UtilSort (sorted_ints, direction=ESMF_SORTFLAG_DESCENDING, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -507,7 +509,7 @@
     ! Test ascending sort
     write (name, *) "Testing ascending double integer sort"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    sorted_dblints = random_values * 123456
+    sorted_dblints = int (random_values * 123456, ESMF_KIND_I8)
     call ESMF_UtilSort (sorted_dblints, direction=ESMF_SORTFLAG_ASCENDING, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -531,7 +533,7 @@
     ! Test descending sort
     write (name, *) "Testing descending double integer sort"
     write (failMsg, *) "did not return ESMF_SUCCESS"
-    sorted_dblints = random_values * 123456
+    sorted_dblints = int (random_values * 123456, ESMF_KIND_I8)
     call ESMF_UtilSort (sorted_dblints, direction=ESMF_SORTFLAG_DESCENDING, rc=rc)
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
@@ -712,6 +714,10 @@
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
+  ! String to integer
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
   !EX_UTest
   ! Test converting numeric string to integer
   write(name, *) "ESMF_UtilString2Int() - no blanks - Test"
@@ -814,6 +820,166 @@
   call ESMF_Test((valueInt == 2), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
+  ! String to real
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  ! Test converting numeric string to real
+  write(name, *) "ESMF_UtilString2Real() - no blanks - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueReal = ESMF_UtilString2Real("123.45", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Real() - no blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test(abs(valueReal - 123.45) < 0.01, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Real() - negative value - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueReal = ESMF_UtilString2Real("-45.678", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Real() - negative value - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((abs (valueReal) - 45.678) < 0.001, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Real() - explicit positive value - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueReal = ESMF_UtilString2Real("+98765.4", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Real() - explicit positive value - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test(abs (valueReal - 98765.4) < 0.1, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Real() - leading blanks - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueReal = ESMF_UtilString2Real("   456", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Real() - leading blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test(abs (valueReal - 456.0) < 0.000001, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Real() - trailing blanks - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueReal = ESMF_UtilString2Real("789   ", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Real() - leading blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test(abs (valueReal - 789.0) < 0.000001, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  ! String to double
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  ! Test converting numeric string to double
+  write(name, *) "ESMF_UtilString2Double() - no blanks - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueDouble = ESMF_UtilString2Double("123.45d0", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Double() - no blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test(abs(valueDouble - 123.45d0) < 0.01d0, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Double() - negative value - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueDouble = ESMF_UtilString2Double("-45.678e0", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Double() - negative value - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test((abs (valueDouble) - 45.678d0) < 0.001d0, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Double() - explicit positive value - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueDouble = ESMF_UtilString2Double("+98765.4", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Double() - explicit positive value - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test(abs (valueDouble - 98765.4d0) < 0.1d0, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Double() - leading blanks - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueDouble = ESMF_UtilString2Double("   456", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Double() - leading blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test(abs (valueDouble - 456.0d0) < 0.000001d0, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Double() - trailing blanks - Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  valueDouble = ESMF_UtilString2Double("789   ", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !EX_UTest
+  write(name, *) "ESMF_UtilString2Double() - leading blanks - Test"
+  write(failMsg, *) "Did not convert correctly"
+  call ESMF_Test(abs (valueDouble - 789.0d0) < 0.000001d0, name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
 ! Internal string utilities (NOT part of the external ESMF API)
 !==============================================================
 
@@ -832,7 +998,7 @@
     write (name, *) "Testing converting C string to Fortran string"
     write (failMsg, *) "conversion failure"
     cstr = 'A text string' // achar (0)
-    str = repeat (achar(255), len (str))
+    str = repeat (achar(127), len (str))
     call ESMF_CtoF90String (cstr, str, rc)
     if (rc == ESMF_SUCCESS) then
       if (str /= 'A text string') then
@@ -847,7 +1013,7 @@
     write (name, *) "Testing converting Fortran string to C string"
     write (failMsg, *) "conversion failure"
     str = 'A second text string'
-    cstr = repeat (achar(255), len (cstr))
+    cstr = repeat (achar(127), len (cstr))
     call ESMF_F90toCString (str, cstr, rc)
     if (rc == ESMF_SUCCESS) then
       cstrlen = index (cstr, achar (0))
