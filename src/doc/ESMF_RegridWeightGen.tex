@@ -880,17 +880,9 @@ grid are defined in counterclockwise order. Since the grid is a regular lat/lon 
 the coordinate variables are 1D and the bound variables are 2D with the first dimension equal to 2.
 The bound coordinates will be read in and stored in a ESMF Grid object as the corner stagger coordinates when doing a conservative regrid.  In case there are multiple sets of coordinate variables defined in a grid file,
 the offline regrid application will return an error for duplicate latitude or longitude variables unless
-"{\tt \verb+--+src\_coordinates}" or "{\tt \verb+--+src\_coordinates}" options are used to specify the coordinate variable names
+"{\tt \verb+--+src\_coordinates}" 
+or "{\tt \verb+--+src\_coordinates}" options are used to specify the coordinate variable names
 to be used in the regrid.
-
-Since a CF convension tile file does not have a way to specify the grid mask, the mask is usually derived by the missing values stored in a data variable.  ESMF\_RegridWeightGen provides an option for users to
-derive the grid mask from a data variable's missing values.  The value of the missing value is defined by the
-variable attribute {\tt missing\_value} or {\tt \_FillValue}.  If the value of the data point is equal to the
-missing value, the grid mask for that grid point is set to 0, otherwise, it is set to 1.   In the following
-grid, the variable {\tt so} can be used to derive the grid mask.  A data variable could be a 2D, 3D or 4D.
-For example, it may have additional depth and time dimensions.
-It is assumed that the first and the second dimensions of the data variable should be the longitude and the
-latitude dimension.  ESMF\_RegridWeightGen will use the first 2D data values to derive the grid mask.
 
 \begin{verbatim}
 netcdf single_tile_grid {
@@ -918,6 +910,43 @@ variables:
 		so:missing_value = 1.e+20f ;
 }
 \end{verbatim}
+
+2D Cartesian coordinates can be supplied in additional to the required
+longitude/latitude coordinates.  They can be used in ESMF to create a grid and
+used in ESMF\_RegridWeightGen.   The Cartesian coordinate variables have to
+include an "{\tt axis}" attribute with value "X" or "Y".  The "{\tt units}"
+attribute can be either "m" or  "meters" for meters or  "km" or  "kilometers"
+for kilometers.  When a grid with 2D Cartesian coordinates are used in
+ESMF\_RegridWeightGen, the optional arguments "{\tt \verb+--+src\_coordinates}" 
+or "{\tt \verb+--+src\_coordinates}" have to be used to specify the coordinate
+variable names.  A grid with 2D Cartesian coordinates can only be regridded
+with another grid in 2D Cartesian coordinates.  Internally in ESMF, the
+Cartesian coordinates are all converted into kilometers.  Here is an example
+of the 2D Cartesian coordinates:
+
+\begin{verbatim}
+      double xc(xc) ;
+              xc:long_name = "x-coordinate in Cartesian system" ;
+              xc:standard_name = "projection_x_coordinate" ;
+              xc:axis = "X" ;
+              xc:units = "m" ;
+      double yc(yc) ;
+              yc:long_name = "y-coordinate in Cartesian system" ;
+              yc:standard_name = "projection_y_coordinate" ;
+              yc:axis = "Y" ;
+              yc:units = "m" ;
+\end{verbatim}
+
+
+Since a CF convension tile file does not have a way to specify the grid mask, the mask is usually derived by the missing values stored in a data variable.  ESMF\_RegridWeightGen provides an option for users to
+derive the grid mask from a data variable's missing values.  The value of the missing value is defined by the
+variable attribute {\tt missing\_value} or {\tt \_FillValue}.  If the value of the data point is equal to the
+missing value, the grid mask for that grid point is set to 0, otherwise, it is set to 1.   In the following
+grid, the variable {\tt so} can be used to derive the grid mask.  A data variable could be a 2D, 3D or 4D.
+For example, it may have additional depth and time dimensions.
+It is assumed that the first and the second dimensions of the data variable should be the longitude and the
+latitude dimension.  ESMF\_RegridWeightGen will use the first 2D data values to derive the grid mask.
+
 
 \subsubsection{CF Convention UGRID File Format}\label{sec:fileformat:ugrid}
 
@@ -1062,7 +1091,7 @@ variables:
 GRIDSPEC is a draft proposal to extend the Climate and Forecast (CF) metadata conventions for the representation of gridded data for Earth System Models.  The original GRIDSPEC standard was proposed by V. Balaji and Z. Liang of GFDL (see \htmladdnormallink{ref} {http://www.gfdl.noaa.gov/~vb/gridstd/gridstd.html}). GRIDSPEC extends the current CF convention to support grid  mosaics, i.e., a grid consisting of multiple logically
 rectangular grid tiles. It also provides a mechanism for storing a grid dataset in multiple files.  Therefore,
 it introduces different types of files, such as a mosaic file that defines the multiple tiles and their
-connectivity, and a tile file for a single tile grid definition on a so-called ``Supergrid'' format. When using the ESMF API, the file format flag {\tt ESMF\_FILEFORMAT\_MOSAIC} can be used to indicate a file in this format.
+connectivity, and a tile file for a single tile grid definition on a so-called "Supergrid" format. When using the ESMF API, the file format flag {\tt ESMF\_FILEFORMAT\_MOSAIC} can be used to indicate a file in this format.
 
 Following is an example of a mosaic file that defines a 6 tile Cubed Sphere grid:
 
@@ -1304,7 +1333,7 @@ variables:
 
 \subsubsection{Source Grid Description}
 
-The variables describing the source grid in the weight file end with the suffix ``\_a''. To be consistent with the original use of this weight file format 
+The variables describing the source grid in the weight file end with the suffix "\_a". To be consistent with the original use of this weight file format 
 the grid information is written to the file such that the location being regridded is always the cell center. This means that the grid structure described here may not be identical to that in the source grid file. The full set of these variables may not always be present in the weight file. The following is an 
 explanation of each variable:
 \begin{description}
@@ -1323,7 +1352,7 @@ explanation of each variable:
 
 \subsubsection{Destination Grid Description}
 
-The variables describing the destination grid in the weight file end with the suffix ``\_b''. To be consistent with the original use of this weight file format 
+The variables describing the destination grid in the weight file end with the suffix "\_b". To be consistent with the original use of this weight file format 
 the grid information is written to the file such that the location being regridded is always the cell center. This means that the grid structure described here may not be identical to that in the destination grid file. The full set of these variables may not always be present in the weight file. The following is an 
 explanation of each variable:
 \begin{description}
@@ -1370,7 +1399,7 @@ over the source grid to a destination field ({\tt dst\_field}) defined over the 
 \end{verbatim}
 
 If the first-order conservative interpolation method is specified ("-m conserve") then the destination field may need to be adjusted by the destination fraction ({\tt frac\_b}). 
-This should be done if the normalization type is ``dstarea'' and if the destination grid extends outside the unmasked source grid. If it isn't known if the destination extends outside the source, then it doesn't hurt to apply the destination fraction. (If it doesn't extend outside, then the fraction will be 1.0 everywhere anyway.) 
+This should be done if the normalization type is "dstarea" and if the destination grid extends outside the unmasked source grid. If it isn't known if the destination extends outside the source, then it doesn't hurt to apply the destination fraction. (If it doesn't extend outside, then the fraction will be 1.0 everywhere anyway.) 
 The following code shows how to adjust an already interpolated destination field ({\tt dst\_field}) by the destination fraction. The variables {\tt n\_b}, and {\tt frac\_b} are from the weight file:
 
 \begin{verbatim}
@@ -1390,9 +1419,9 @@ The following is an explanation of the global attributes describing the weight f
   \itemsep0em
   \item[title] Always set to  "ESMF Offline Regridding Weight Generator" when generated by {\tt ESMF\_RegridWeightGen}.
   \item[normalization] The normalization type used to compute conservative regridding weights. The options for this are described in section~\ref{sec:rwg_conserve} which contains a description of the conservative regridding method.  
-  \item[map\_method] An indication of the mapping method which is constrained by the original use of this format. In some cases the method specified here will differ from the actual regridding method used, for example weights generated with the ``patch'' method will have this attribute set to ``Bilinear remapping''. 
+  \item[map\_method] An indication of the mapping method which is constrained by the original use of this format. In some cases the method specified here will differ from the actual regridding method used, for example weights generated with the "patch" method will have this attribute set to "Bilinear remapping". 
   \item[ESMF\_regrid\_method] The ESMF regridding method used to generate the weight file. 
-  \item[conventions] The set of conventions that the weight file follows. Currently only ``NCAR-CSM'' is supported.
+  \item[conventions] The set of conventions that the weight file follows. Currently only "NCAR-CSM" is supported.
   \item[domain\_a] The source grid file name. 
   \item[domain\_b] The destination grid file name. 
   \item[grid\_file\_src] The source grid file name. 
