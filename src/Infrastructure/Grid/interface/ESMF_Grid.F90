@@ -6935,16 +6935,16 @@ end function ESMF_GridCreateFrmScrip
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
           endif
+          ! convert to kilometer if the units is "meters"
+          if (units(1:1) .eq. 'm') then
+             loncoord1D(:) = loncoord1D(:) * 1.d-3
+	     latcoord1D(:) = latcoord1D(:) * 1.d-3
+             if (localAddCornerStagger) then
+	        cornerlon2D(:,:) = cornerlon2D(:,:) * 1.d-3
+	        cornerlat2D(:,:) = cornerlat2D(:,:) * 1.d-3
+             endif
+          endif
         endif
-        ! convert to kilometer if the units is "meters"
-        if (units(1:1) .eq. 'm') then
-	   loncoord1D(:) = loncoord1D(:) * 1.d-3
-	   latcoord1D(:) = latcoord1D(:) * 1.d-3
-           if (localAddCornerStagger) then
-	      cornerlon2D(:,:) = cornerlon2D(:,:) * 1.d-3
-	      cornerlat2D(:,:) = cornerlat2D(:,:) * 1.d-3
-           endif
-         endif
         if (localIsSphere) then
            grid = ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=gridims, &
                 regDecomp=regDecomp, &
