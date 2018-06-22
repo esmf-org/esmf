@@ -1815,7 +1815,11 @@ return acos(v);
 }
 // arc length = arc angle * radius = arc angle * 1 = arccos(v1.v2)
 double gcdistance(double * v1, double * v2){
-  return acos(dot(xvector(v1, 3), xvector(v2, 3)));
+  double dotprod = dot(xvector(v1, 3), xvector(v2, 3));
+  // Work around spurious floating point result
+  if(std::abs(dotprod) > 1.01) Throw() << "Dot product from two unit vectors exceeded 1. by 1%\n";
+  if(std::abs(dotprod) > 1) return 0;
+  return acos(dotprod);
 }
 
 bool intersect_line_with_line(const double *p1, const double *p2, const double *q1, const double *q2, double * result, bool * coincident,
