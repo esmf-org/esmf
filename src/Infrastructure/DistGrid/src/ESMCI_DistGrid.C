@@ -478,7 +478,8 @@ DistGrid *DistGrid::create(
           int kk = k; // default working for single tile
           if (dg->tileCount>1){
             // multi tile
-            kk += dg->tileListPDe[i] * dimCount;  // shift to correct tile
+            // shift to correct tile, but remember tiles are numbered base 1
+            kk += (dg->tileListPDe[i] - 1) * dimCount;  
           }
           // minIndex
           deBlockListAlloc[i*2*dimCount+k] =
@@ -488,7 +489,7 @@ DistGrid *DistGrid::create(
               == dg->minIndexPDimPTile[kk]){
               // found edge DE -> adjust bounds
               deBlockListAlloc[i*2*dimCount+k] -=
-                firstExtra->array[k];
+                firstExtra->array[kk];
             }
           }
           // maxIndex
@@ -499,7 +500,7 @@ DistGrid *DistGrid::create(
               dg->maxIndexPDimPTile[kk]){
               // found edge DE -> adjust bounds
               deBlockListAlloc[i*2*dimCount+dimCount+k] +=
-                lastExtra->array[k];
+                lastExtra->array[kk];
             }
           }
         }
