@@ -279,11 +279,11 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     if (btest(verbosity,8)) then
-      call ESMF_LogWrite(trim(name)//": importState xferPolicy = "// &
+      call ESMF_LogWrite(trim(name)//": importState FieldTransferPolicy = "// &
         trim(importXferPolicy), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_LogWrite(trim(name)//": exportState xferPolicy = "// &
+      call ESMF_LogWrite(trim(name)//": exportState FieldTransferPolicy = "// &
         trim(exportXferPolicy), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
