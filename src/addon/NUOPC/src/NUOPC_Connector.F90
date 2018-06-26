@@ -597,7 +597,7 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     character(ESMF_MAXSTR), pointer       :: exportCplSetList(:)
     character(ESMF_MAXSTR), pointer       :: cplList(:)
     character(ESMF_MAXSTR), pointer       :: cplSetList(:)
-    character(len=160)                    :: msgString
+    character(len=240)                    :: msgString
     integer                               :: verbosity, profiling
     logical                               :: match
     type(ESMF_StateIntent_Flag)           :: importStateIntent
@@ -804,15 +804,10 @@ print *, "current bondLevel=", bondLevel
                 cplList(count) = importStandardNameList(i)
                 cplSetList(count) = importCplSetList(i)
                 if (btest(verbosity,10)) then
-                  write (msgString,'(A, ": added cplList(", I3, ")=", A60)') &
-                    trim(name), count, cplList(count)
-                  call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-                  if (ESMF_LogFoundError(rcToCheck=rc, &
-                    msg=ESMF_LOGERR_PASSTHRU, &
-                    line=__LINE__, file=trim(name)//":"//FILENAME, &
-                    rcToReturn=rc)) return  ! bail out
-                  write (msgString,'(A, ": added cplSet(", I3, ")=", A60)') &
-                    trim(name), count, cplSetList(count)
+                  write (msgString, '(A, ": added cplList(", I3, ")=", A, '//&
+                    '", cplSet(", I3, ")=", A)') &
+                    trim(name), count, trim(cplList(count)), &
+                    count, trim(cplSetList(count))
                   call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
                   if (ESMF_LogFoundError(rcToCheck=rc, &
                     msg=ESMF_LOGERR_PASSTHRU, &
@@ -951,7 +946,7 @@ print *, "current bondLevel=", bondLevel
     type(type_InternalState)        :: is
     logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: connectionString
-    character(ESMF_MAXSTR)          :: name
+    character(ESMF_MAXSTR)          :: name, iString
     character(len=160)              :: msgString
     character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
     character(ESMF_MAXSTR)          :: iSharePolicy, eSharePolicy
@@ -1085,7 +1080,6 @@ print *, "current bondLevel=", bondLevel
 
     ! main loop over all entries in the cplList
     do i=1, cplListSize
-!print *, "cplList(",i,")=", trim(cplList(i))
       call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1093,6 +1087,16 @@ print *, "current bondLevel=", bondLevel
       cplName = chopStringList(1) ! first part is the standard name of cpl field
       deallocate(chopStringList)
 
+      if (btest(verbosity,12)) then
+        write (iString,'(I4)') i
+        write (msgString, '(A)') trim(name)//": handle "// &
+          "cplList("//trim(adjustl(iString))//"): "//trim(cplName)
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+      
       ! find import and export side match
       foundFlag = .false. ! reset
       do eMatch=1, size(exportStandardNameList)  ! consumer side
@@ -1151,6 +1155,14 @@ print *, "current bondLevel=", bondLevel
         return  ! bail out
       endif
       
+      if (btest(verbosity,12)) then
+        write (msgString, '(A)') trim(name)//": - connected."
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+      
       if (iMatch>0 .and. eMatch>0) then
         ! there are matching Fields in the import and export States
         iField=importFieldList(iMatch)
@@ -1192,6 +1204,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionField", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- both sides must provide the Field."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must provide, export side must accept
             acceptFlag=.true.
@@ -1203,6 +1223,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionField", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must provide, export side must accept the Field."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           else  ! eTransferOffer=="cannot provide"
             ! -> import side must provide, export side must accept
             acceptFlag=.true.
@@ -1214,6 +1242,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionField", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must provide, export side must accept the Field."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
         elseif (trim(iTransferOffer)=="can provide") then
           if (trim(eTransferOffer)=="will provide") then
@@ -1227,6 +1263,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionField", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must accept, export side must provide the Field."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must provide, export side must accept
             acceptFlag=.true.
@@ -1238,6 +1282,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionField", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must accept, export side must provide the Field."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           else  ! eTransferOffer=="cannot provide"
             ! -> import side must provide, export side must accept
             acceptFlag=.true.
@@ -1249,6 +1301,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionField", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must accept, export side must provide the Field."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
         else  ! iTransferOffer=="cannot provide"
           if (trim(eTransferOffer)=="will provide") then
@@ -1262,6 +1322,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionField", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must accept, export side must provide the Field."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must accept, export side must provide
             acceptFlag=.true.
@@ -1273,6 +1341,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionField", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must accept, export side must provide the Field."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           else  ! eTransferOffer=="cannot provide"
             ! -> neither side is able to provide -> error
             call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -1301,6 +1377,14 @@ print *, "current bondLevel=", bondLevel
               name="ShareStatusField", value="shared", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- both sides want to share the Field -> shared."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           else
             ! at least one side does not want to share -> not shared
             ! but don't modify attribute here because if alread shared through
@@ -1330,6 +1414,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- both sides must provide the GeomObject."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must provide, export side must accept
             acceptFlag=.true.
@@ -1341,6 +1433,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must provide, export side must accept the GeomObject."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           else  ! eTransferOffer=="cannot provide"
             ! -> import side must provide, export side must accept
             acceptFlag=.true.
@@ -1352,6 +1452,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must provide, export side must accept the GeomObject."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
         elseif (trim(iTransferOffer)=="can provide") then
           if (trim(eTransferOffer)=="will provide") then
@@ -1365,6 +1473,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must accept, export side must provide the GeomObject."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must provide, export side must accept
             acceptFlag=.true.
@@ -1376,6 +1492,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must provide, export side must accept the GeomObject."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           else  ! eTransferOffer=="cannot provide"
             ! -> import side must provide, export side must accept
             acceptFlag=.true.
@@ -1387,6 +1511,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must provide, export side must accept the GeomObject."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
         else  ! iTransferOffer=="cannot provide"
           if (trim(eTransferOffer)=="will provide") then
@@ -1400,6 +1532,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must accept, export side must provide the GeomObject."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           elseif (trim(eTransferOffer)=="can provide") then
             ! -> import side must accept, export side must provide
             acceptFlag=.true.
@@ -1411,6 +1551,14 @@ print *, "current bondLevel=", bondLevel
               name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- import side must accept, export side must provide the GeomObject."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           else  ! eTransferOffer=="cannot provide"
             ! -> neither side is able to provide -> error
             call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -1439,6 +1587,14 @@ print *, "current bondLevel=", bondLevel
               name="ShareStatusGeomObject", value="shared", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,12)) then
+              write (msgString, '(A)') trim(name)//": "//&
+                "- both sides want to share the GeomObject -> shared."
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           else
             ! at least one side does not want to share -> not shared
             ! at least one side does not want to share -> not shared
@@ -1516,7 +1672,7 @@ print *, "current bondLevel=", bondLevel
     type(type_InternalState)        :: is
     logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: connectionString
-    character(ESMF_MAXSTR)          :: name
+    character(ESMF_MAXSTR)          :: name, iString
     character(len=160)              :: msgString
     character(ESMF_MAXSTR)          :: geomobjname, fieldName
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
@@ -1632,13 +1788,22 @@ print *, "current bondLevel=", bondLevel
     
     ! main loop over all entries in the cplList
     do i=1, cplListSize
-!print *, "cplList(",i,")=", trim(cplList(i))
       call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
       deallocate(chopStringList)
+      
+      if (btest(verbosity,12)) then
+        write (iString,'(I4)') i
+        write (msgString, '(A)') trim(name)//": handle "// &
+          "cplList("//trim(adjustl(iString))//"): "//trim(cplName)
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
       
       ! find import and export side match
       foundFlag = .false. ! reset
@@ -1737,10 +1902,22 @@ print *, "current bondLevel=", bondLevel
           value=eShareStatus, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-#if 0
-call ESMF_LogWrite("iShareStatus: "//trim(iShareStatus), ESMF_LOGMSG_INFO, rc=rc)
-call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc)
-#endif
+
+        if (btest(verbosity,12)) then
+          write (msgString, '(A)') trim(name)//": "//&
+            "- import Field ShareStatus="//trim(iShareStatus)
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          write (msgString, '(A)') trim(name)//": "//&
+            "- export Field ShareStatus="//trim(eShareStatus)
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
+
         sharedFlag = .false. ! reset
         if (trim(iShareStatus)=="shared" .and. trim(eShareStatus)=="shared") &
           sharedFlag = .true.
@@ -2203,7 +2380,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     type(type_InternalState)        :: is
     logical                         :: foundFlag
     character(ESMF_MAXSTR)          :: connectionString
-    character(ESMF_MAXSTR)          :: name
+    character(ESMF_MAXSTR)          :: name, iString
     character(len=160)              :: msgString
     character(ESMF_MAXSTR)          :: geomobjname
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
@@ -2311,13 +2488,22 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
     ! main loop over all entries in the cplList
     do i=1, cplListSize
-!print *, "cplList(",i,")=", trim(cplList(i))
       call chopString(cplList(i), chopChar=":", chopStringList=chopStringList, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       cplName = chopStringList(1) ! first part is the standard name of cpl field
       deallocate(chopStringList)
+      
+      if (btest(verbosity,12)) then
+        write (iString,'(I4)') i
+        write (msgString, '(A)') trim(name)//": handle "// &
+          "cplList("//trim(adjustl(iString))//"): "//trim(cplName)
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
       
       ! find import and export side match
       foundFlag = .false. ! reset
@@ -2770,8 +2956,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
       if (btest(verbosity,12)) then
         write (iString,'(I4)') i
-        write (msgString, '(A)') "loop over all entries in cplList: "// &
-          trim(adjustl(iString))//": "//trim(cplName)
+        write (msgString, '(A)') trim(name)//": handle "// &
+          "cplList("//trim(adjustl(iString))//"): "//trim(cplName)
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
