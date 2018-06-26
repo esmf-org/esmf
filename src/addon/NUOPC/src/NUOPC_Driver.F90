@@ -374,7 +374,8 @@ module NUOPC_Driver
     logical                   :: clockIsPresent
     type(ESMF_Clock)          :: internalClock
     integer                   :: i, j, k, l, cIndex
-    character(ESMF_MAXSTR)    :: iString, jString, lString, compName, msgString
+    character(ESMF_MAXSTR)    :: iString, jString, lString
+    character(ESMF_MAXSTR)    :: compName, stateName, msgString
     character(ESMF_MAXSTR)    :: petListBuffer(100)
     integer                   :: lineCount
     integer, pointer          :: i_petList(:), j_petList(:), c_petList(:)
@@ -523,15 +524,35 @@ module NUOPC_Driver
         
         ! for now create the States here ... in the long run may be moved?
         
-        is%wrap%modelIS(i) = ESMF_StateCreate(name="modelComp "// &
-          trim(adjustl(iString))//" Import State", &
+        stateName = "modelComp "//trim(adjustl(iString))//" Import State"
+        
+        if (btest(verbosity,14)) then
+          write (msgString,"(A)") trim(name)//&
+            " - Creating state: "//trim(stateName)
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
+
+        is%wrap%modelIS(i) = ESMF_StateCreate(name=trim(stateName), &
           stateintent=ESMF_STATEINTENT_IMPORT, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
 
-        is%wrap%modelES(i) = ESMF_StateCreate(name="modelComp "// &
-          trim(adjustl(iString))//" Export State", &
+        stateName = "modelComp "//trim(adjustl(iString))//" Export State"
+        
+        if (btest(verbosity,14)) then
+          write (msgString,"(A)") trim(name)//&
+            " - Creating state: "//trim(stateName)
+          call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
+
+        is%wrap%modelES(i) = ESMF_StateCreate(name=trim(stateName), &
           stateintent=ESMF_STATEINTENT_EXPORT, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
