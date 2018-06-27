@@ -1255,7 +1255,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           call ESMF_GridspecInq(srcFile, src_ndims, src_grid_dims, &
                 dimids = src_dimids, coordids = src_coordids, &
                 coord_names = srccoordnames, hasbound=srchasbound, &
-		units=srcunits,rc=status)
+                units=srcunits,rc=status)
           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
           src_grid_rank = 2
@@ -1298,7 +1298,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
                 nodeCoordDim=dim, units=srcunits, rc=status)
             ! If it is 1D network topology, there is no corner coordinates
             if (dim==1) then 
-	      src_grid_corner = 0
+              src_grid_corner = 0
             else
               src_grid_corner =3
             endif
@@ -1351,7 +1351,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
           call ESMF_GridspecInq(dstFile, dst_ndims, dst_grid_dims, &
                 dimids = dst_dimids, coordids = dst_coordids, &
                 coord_names = dstcoordnames, hasbound=dsthasbound, &
-		units=dstunits, rc=status)
+                units=dstunits, rc=status)
           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
           dst_grid_rank = 2
@@ -1393,7 +1393,7 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
             call ESMF_UGridInq(dstFile, dstmeshname, nodeCount=dstDim,  &
                 nodeCoordDim=dim, units=dstunits, rc=status)
             if (dim==1) then 
-	      dst_grid_corner = 0
+              dst_grid_corner = 0
             else
               dst_grid_corner = 3
             endif
@@ -4756,10 +4756,12 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
 
 #ifdef ESMF_NETCDF
     if ( ncStatus .ne. nf90_noerror) then
-        call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgFlag=ESMF_LOGMSG_ERROR, &
-            ESMF_CONTEXT)
+        call ESMF_LogWrite (  &
+            msg="netCDF Error: " // trim (errmsg) // ": " // trim (nf90_strerror(ncStatus)),  &
+            logmsgFlag=ESMF_LOGMSG_ERROR, &
+            line=lineNo, file=fileName, method=module)
         print '("NetCDF Error: ", A, " : ", A)', &
-        trim(errmsg),trim(nf90_strerror(ncStatus))
+            trim(errmsg),trim(nf90_strerror(ncStatus))
         call ESMF_LogFlush()
         if (present(rc)) rc = ESMF_FAILURE
         CDFCheckError = .TRUE.

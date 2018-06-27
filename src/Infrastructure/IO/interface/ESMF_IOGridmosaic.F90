@@ -1288,10 +1288,12 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
 
 #ifdef ESMF_NETCDF
     if ( ncStatus .ne. nf90_noerror) then
-        call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgFlag=ESMF_LOGMSG_ERROR, &
+        call ESMF_LogWrite (  &
+            msg="netCDF Error: " // trim (errmsg) // ": " // trim (nf90_strerror(ncStatus)),  &
+            logmsgFlag=ESMF_LOGMSG_ERROR, &
             line=lineNo, file=fileName, method=module)
         print '("NetCDF Error: ", A, " : ", A)', &
-                trim(errmsg),trim(nf90_strerror(ncStatus))
+            trim(errmsg),trim(nf90_strerror(ncStatus))
         call ESMF_LogFlush()
         if (present(rc)) rc = ESMF_FAILURE
         CDFCheckError = .TRUE.

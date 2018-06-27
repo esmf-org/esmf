@@ -167,8 +167,8 @@
                 attstr(1:len) .eq. 'degrees_E' .or. &
                 attstr(1:len) .eq. 'degreeE' .or. &
                 attstr(1:len) .eq. 'degreesE')  then
-		foundlon = .true.
-		varids(1)=varid
+                foundlon = .true.
+                varids(1)=varid
                 if (present(units)) units = "degrees"
         endif
         ! It is not longitude, check for Latitude units
@@ -183,19 +183,19 @@
                 if (present(units)) units = "degrees"
         endif
         if (attstr(1:len) .eq. 'm' .or. attstr(1:len) .eq. 'meters' .or. &
-	    attstr(1:len) .eq. 'km' .or. attstr(1:len) .eq. 'kilometers') then
+            attstr(1:len) .eq. 'km' .or. attstr(1:len) .eq. 'kilometers') then
             if (present(units)) units = attstr(1:len)
-	    ! check if the axis attribute exists
+            ! check if the axis attribute exists
             ncStatus = nf90_get_att(gridid, varid, 'axis',axisstr)
-	    if (trim(axisstr) .eq. 'X') then
-		foundlon = .true.
-		varids(1)=varid
+            if (trim(axisstr) .eq. 'X') then
+                foundlon = .true.
+                varids(1)=varid
             elseif (trim(axisstr) .eq. 'Y') then
-		varids(2)=varids(1)
-		foundlat = .true.
-		varids(2)=varid
+                varids(2)=varids(1)
+                foundlat = .true.
+                varids(2)=varid
             else
-	        call ESMF_LogSetError(ESMF_FAILURE, &
+                call ESMF_LogSetError(ESMF_FAILURE, &
                    msg="- Not a valid coordinate variable.", &
                    ESMF_CONTEXT, rcToReturn=rc)
                 return
@@ -840,10 +840,12 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
 
 #ifdef ESMF_NETCDF
     if ( ncStatus .ne. nf90_noerror) then
-        call ESMF_LogWrite (msg="netCDF Status Return Error", logmsgFlag=ESMF_LOGMSG_ERROR, &
+        call ESMF_LogWrite (  &
+            msg="netCDF Error: " // trim (errmsg) // ": " // trim (nf90_strerror(ncStatus)),  &
+            logmsgFlag=ESMF_LOGMSG_ERROR, &
             line=lineNo, file=fileName, method=module)
         print '("NetCDF Error: ", A, " : ", A)', &
-                trim(errmsg),trim(nf90_strerror(ncStatus))
+            trim(errmsg),trim(nf90_strerror(ncStatus))
         call ESMF_LogFlush()
         if (present(rc)) rc = ESMF_FAILURE
         CDFCheckError = .TRUE.
