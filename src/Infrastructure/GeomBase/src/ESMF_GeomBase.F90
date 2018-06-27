@@ -1386,7 +1386,7 @@ end subroutine ESMF_GeomBaseGet
     if (linquireflag == ESMF_NOINQUIRE)  &
         buffer(offset:offset+3) = transfer (123421, buffer)  ! Dummy value for the moment
     offset = offset + 4
-    print *, ESMF_METHOD, ': offset at start of Geom object =', offset
+    ! print *, ESMF_METHOD, ': offset at start of Geom object =', offset
 
     ! Get info depending on type
     select case(gbcp%type%type)
@@ -1434,7 +1434,7 @@ end subroutine ESMF_GeomBaseGet
     end select
 
     ! Set length of the serialized object
-    print *, ESMF_METHOD, ': offset after geom object serialize =', offset
+    ! print *, ESMF_METHOD, ': offset after geom object serialize =', offset
     if (linquireflag == ESMF_NOINQUIRE)  &
         buffer(geomobj_loffset:geomobj_loffset+3) =  &
             transfer (offset - (geomobj_loffset+4), buffer)
