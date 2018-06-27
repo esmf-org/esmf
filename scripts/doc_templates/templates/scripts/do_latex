@@ -52,10 +52,10 @@ if (-e $1_$2doc.ctex) then
 
   # perform pre-processing
   if(($1 == "ESMF")||($1 == "ESMC")) then
-    gcc -E -x c -P -C -DCONSTITUENT $1_$2doc.ctex | grep -v "^#pragma" > $1_$2doc.tex
-    gcc -E -x c -P -C $1.cbib | grep -v "^#pragma" > $1.bib
+    gcc -E -x c -P -C -nostdinc -DCONSTITUENT $1_$2doc.ctex | grep -v "^#pragma" > $1_$2doc.tex
+    gcc -E -x c -P -C -nostdinc $1.cbib | grep -v "^#pragma" > $1.bib
   else
-    gcc -E -x c -P -C -DSTANDALONE $1_$2doc.ctex | grep -v "^#pragma" > $1_$2doc.tex
+    gcc -E -x c -P -C -nostdinc -DSTANDALONE $1_$2doc.ctex | grep -v "^#pragma" > $1_$2doc.tex
   endif
 
 endif
