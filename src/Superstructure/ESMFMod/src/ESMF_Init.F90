@@ -415,6 +415,59 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
       endif
       
+      ! Write out warning about performance impact of logging
+      if ((logkindflagUse/=ESMF_LOGKIND_NONE) .and. &
+        (logkindflagUse/=ESMF_LOGKIND_MULTI_ON_ERROR)) then
+        call ESMF_LogWrite(&
+          "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", &
+          ESMF_LOGMSG_INFO, rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, &
+            ": Error writing into the default log"
+          return
+        endif
+        call ESMF_LogWrite( &
+          "!!! THE ESMF_LOG IS SET TO OUTPUT ALL LOG MESSAGES !!!", &
+          ESMF_LOGMSG_INFO, rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, &
+            ": Error writing into the default log"
+          return
+        endif
+        call ESMF_LogWrite( &
+          "!!!     THIS MAY CAUSE SLOWDOWN IN PERFORMANCE     !!!", &
+          ESMF_LOGMSG_INFO, rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, &
+            ": Error writing into the default log"
+          return
+        endif
+        call ESMF_LogWrite( &
+          "!!! FOR PRODUCTION RUNS, USE:                      !!!", &
+          ESMF_LOGMSG_INFO, rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, &
+            ": Error writing into the default log"
+          return
+        endif
+        call ESMF_LogWrite( &
+          "!!!                   ESMF_LOGKIND_MULTI_ON_ERROR  !!!", &
+          ESMF_LOGMSG_INFO, rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, &
+            ": Error writing into the default log"
+          return
+        endif
+        call ESMF_LogWrite(&
+          "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", &
+          ESMF_LOGMSG_INFO, rc=localrc)
+        if (localrc /= ESMF_SUCCESS) then
+          write (ESMF_UtilIOStderr,*) ESMF_METHOD, &
+            ": Error writing into the default log"
+          return
+        endif
+      endif
+
       ! Write our version number, build location, and other details to the log
       call ESMF_LogWrite(&
            "Running with ESMF Version   : " // ESMF_VERSION_STRING, &
