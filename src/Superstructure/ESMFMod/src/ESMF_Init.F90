@@ -469,6 +469,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
 
       ! Write our version number, build location, and other details to the log
+#ifdef ESMFVERSIONGIT
+      call ESMF_LogWrite(&
+           "Running with ESMF Version   : " // ESMFVERSIONGIT, &
+           ESMF_LOGMSG_INFO, rc=localrc)
+      if (localrc /= ESMF_SUCCESS) then
+         write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
+         return
+      endif
+#else
       call ESMF_LogWrite(&
            "Running with ESMF Version   : " // ESMF_VERSION_STRING, &
            ESMF_LOGMSG_INFO, rc=localrc)
@@ -476,7 +485,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          write (ESMF_UtilIOStderr,*) ESMF_METHOD, ": Error writing into the default log"
          return
       endif
-
+#endif
       call c_esmc_initget_build_datetime (build_date, build_time, localrc)
       call ESMF_LogWrite(&
            "ESMF library build date/time: " // trim (build_date) // ' ' // build_time,  &

@@ -63,7 +63,7 @@ script_info:
 	-@echo "ESMF_VERSION_STRING:    $(ESMF_VERSION_STRING)"
 ifeq ($(shell $(ESMF_DIR)/scripts/available git),git)
 	@if [ -d $(ESMF_DIR)/.git ] ; then \
-	git describe --tags ;\
+        echo $(ESMF_VERSION_STRING_GIT);\
 	echo "--------------------------------------------------------------" ;\
 	git status ;\
 	else \

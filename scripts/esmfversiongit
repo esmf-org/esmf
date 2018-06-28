@@ -1,0 +1,5 @@
+#!/bin/sh
+# return the ESMF version from Git if available, or empty string otherwise
+if [ -d $ESMF_DIR/.git ] ; then \
+git describe --tags
+fi

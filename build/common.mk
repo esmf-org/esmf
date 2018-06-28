@@ -668,6 +668,13 @@ ESMF_CPPFLAGS += -DESMF_NO_INTEGER_2_BYTE
 endif           
 #-------------------------------------------------------------------------------
 
+ifeq ($(shell $(ESMF_DIR)/scripts/available git),git)
+export ESMF_VERSION_STRING_GIT := $(shell $(ESMF_DIR)/scripts/esmfversiongit)
+endif
+
+ifdef ESMF_VERSION_STRING_GIT
+ESMF_CPPFLAGS += -DESMFVERSIONGIT='"$(ESMF_VERSION_STRING_GIT)"'
+endif
 
 #-------------------------------------------------------------------------------
 # default settings for common.mk
