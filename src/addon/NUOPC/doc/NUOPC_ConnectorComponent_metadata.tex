@@ -10,28 +10,43 @@ The Connector Component metadata is implemented as an ESMF Attribute Package:
     \end{itemize} 
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
+\begin{longtable}{|p{.22\textwidth}|p{.6\textwidth}|p{.2\textwidth}|}
      \hline\hline
      {\bf Attribute name} & {\bf Definition} & {\bf Controlled vocabulary}\\
      \hline\hline
      {\tt Kind} & String value indicating component kind.& Connector\\ \hline
      {\tt Verbosity} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits are reserved to control verbosity of the generic component implementation. Higher bits are available for user level verbosity control. \newline
-                       {\bf bit 0}: Intro/Extro of methods with indentation\newline
-                       {\bf bit 1}: Intro/Extro with memory info\newline
-                       {\bf bit 2}: Intro/Extro with garbage collection info\newline
-                       {\bf bit 8}: Log FieldTransferPolicy\newline
-                       {\bf bit 9}: Log bond level info\newline
-                       {\bf bit 10}: Log CplList construction\newline
-                       {\bf bit 11}: Log GeomObject Transfer\newline
-                       {\bf bit 12}: Log looping over all elements in CplList for RouteHandle computation and FieldSharing\newline
-                       {\bf bit 13}: Log info about entering Run phase\newline
-                       {\bf bit 14}: Log info about RouteHandle execution\newline
-                       {\bf bit 15}: Log info about RouteHandle release
+                       {\bf bit 0}: Intro/Extro of methods with indentation.\newline
+                       {\bf bit 1}: Intro/Extro with memory info.\newline
+                       {\bf bit 2}: Intro/Extro with garbage collection info.\newline
+                       {\bf bit 8}: Log FieldTransferPolicy.\newline
+                       {\bf bit 9}: Log bond level info.\newline
+                       {\bf bit 10}: Log CplList construction.\newline
+                       {\bf bit 11}: Log GeomObject Transfer.\newline
+                       {\bf bit 12}: Log looping over all elements in CplList for RouteHandle computation and FieldSharing.\newline
+                       {\bf bit 13}: Log info about entering Run phase.\newline
+                       {\bf bit 14}: Log info about RouteHandle execution.\newline
+                       {\bf bit 15}: Log info about RouteHandle release.
                      & 0, 1, 2, ... \newline
                        "max" = set all lower 16 bits\\ \hline
      {\tt Profiling} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits are reserved to control profiling of the generic component implementation. Higher bits are available for user level profiling control. \newline
-                       {\bf bit 0}: Run method execution timings\newline
-                       {\bf bit 1}: Reconcile timings
+                       {\bf bit 0}: Run method execution timings.\newline
+                       {\bf bit 1}: Reconcile timings.
+                     & 0, 1, 2, ... \newline
+                       "max" = set all lower 16 bits\\ \hline
+     {\tt Diagnostic} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits are reserved to control diagnostic of the generic component implementation. Higher bits are available for user level diagnostic control. \newline
+                       {\bf bit 0}: Dump fields of the importState on entering the Initialize method.\newline
+                       {\bf bit 1}: Dump fields of the importState on exiting the Initialize method.\newline
+                       {\bf bit 2}: Dump fields of the exportState on entering the Initialize method.\newline
+                       {\bf bit 3}: Dump fields of the exportState on exiting the Initialize method.\newline
+                       {\bf bit 4}: Dump fields of the importState on entering the Run method.\newline
+                       {\bf bit 5}: Dump fields of the importState on exiting the Run method.\newline
+                       {\bf bit 6}: Dump fields of the exportState on entering the Run method.\newline
+                       {\bf bit 7}: Dump fields of the exportState on exiting the Run method.\newline
+                       {\bf bit 8}: Dump fields of the importState on entering the Finalize method.\newline
+                       {\bf bit 9}: Dump fields of the importState on exiting the Finalize method.\newline
+                       {\bf bit 10}: Dump fields of the exportState on entering the Finalize method.\newline
+                       {\bf bit 11}: Dump fields of the exportState on exiting the Finalize method.
                      & 0, 1, 2, ... \newline
                        "max" = set all lower 16 bits\\ \hline
      {\tt CompLabel} & String value holding the label under which the component was added to its parent driver.& {\em no restriction}\\ \hline
@@ -40,4 +55,4 @@ The Connector Component metadata is implemented as an ESMF Attribute Package:
      {\tt FinalizePhaseMap} & List of string values, mapping the logical NUOPC finalize phases to the actual ESMF finalize phase number under which the entry point is registered.& {\em label-string}=Z, where {\em label-string} can be chosen freely, and Z = actual ESMF phase number. \\ \hline
      {\tt CplList} & List of StandardNames of the connected Fields. Each StandardName entry may be followed by a colon separated list of connection options. The details are discussed in section \ref{connection_options} & {\em Standard names} as per field dictionary, followed by {\em connection options} defined in section \ref{connection_options}.\\ \hline
      \hline
-\end{tabular}
+\end{longtable}

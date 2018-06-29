@@ -10,22 +10,26 @@ The Model component metadata is implemented as an ESMF Attribute Package:
     \end{itemize} 
 \end{itemize}
 
-\begin{tabular}{|p{5cm}|p{5cm}|p{35mm}|}
+{\bf Note} that some of the Attribute names in the following table are longer than the table column width. In these cases the
+Attribute name had to be broken into multiple lines. When that happens, a hyphen shows up to indicate the line break. The hyphen
+is {\em not} part of the Attribute name!
+
+\begin{longtable}{|p{.22\textwidth}|p{.6\textwidth}|p{.2\textwidth}|}
      \hline\hline
      {\bf Attribute name} & {\bf Definition} & {\bf Controlled vocabulary}\\
      \hline\hline
      {\tt Kind} & String value indicating component kind.& Model\\ \hline
      {\tt Verbosity} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits are reserved to control verbosity of the generic component implementation. Higher bits are available for user level verbosity control. \newline
-                       {\bf bit 0}: Intro/Extro of methods with indentation\newline
-                       {\bf bit 1}: Intro/Extro with memory info\newline
-                       {\bf bit 2}: Intro/Extro with garbage collection info\newline
-                       {\bf bit 8}: Log Initialize phase with $>>>$, $<<<$, and currTime\newline
-                       {\bf bit 9}: Log Run phase with $>>>$, $<<<$, and currTime\newline
-                       {\bf bit 10}: Log Finalize phase with $>>>$, $<<<$, and currTime\newline
-                       {\bf bit 11}: Log info about data dependency during initialize resolution\newline
-                       {\bf bit 12}: Log run sequence execution\newline
-                       {\bf bit 13}: Log Component creation\newline
-                       {\bf bit 14}: Log State creation
+                       {\bf bit 0}: Intro/Extro of methods with indentation.\newline
+                       {\bf bit 1}: Intro/Extro with memory info.\newline
+                       {\bf bit 2}: Intro/Extro with garbage collection info.\newline
+                       {\bf bit 8}: Log Initialize phase with $>>>$, $<<<$, and currTime.\newline
+                       {\bf bit 9}: Log Run phase with $>>>$, $<<<$, and currTime.\newline
+                       {\bf bit 10}: Log Finalize phase with $>>>$, $<<<$, and currTime.\newline
+                       {\bf bit 11}: Log info about data dependency during initialize resolution.\newline
+                       {\bf bit 12}: Log run sequence execution.\newline
+                       {\bf bit 13}: Log Component creation.\newline
+                       {\bf bit 14}: Log State creation.
                      & 0, 1, 2, ... \newline
                        "max" = set all lower 16 bits\\ \hline
      {\tt Profiling} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits are reserved to control profiling of the generic component implementation. Higher bits are available for user level profiling control.
@@ -35,10 +39,10 @@ The Model component metadata is implemented as an ESMF Attribute Package:
      {\tt InitializePhaseMap} & List of string values, mapping the logical NUOPC initialize phases, of a specific Initialize Phase Definition (IPD) version, to the actual ESMF initialize phase number under which the entry point is registered.& IPDvXXpY=Z, where XX = two-digit revision number, e.g. 01, Y = logical NUOPC phase number, Z = actual ESMF phase number, with Y, Z > 0 and Y, Z < 10 \\ \hline
      {\tt RunPhaseMap} & List of string values, mapping the logical NUOPC run phases to the actual ESMF run phase number under which the entry point is registered.& {\em label-string}=Z, where {\em label-string} can be chosen freely, and Z = actual ESMF phase number. \\ \hline
      {\tt FinalizePhaseMap} & List of string values, mapping the logical NUOPC finalize phases to the actual ESMF finalize phase number under which the entry point is registered.& {\em label-string}=Z, where {\em label-string} can be chosen freely, and Z = actual ESMF phase number. \\ \hline
-     {\tt InternalInitializePhaseMap} & List of string values, mapping the logical NUOPC initialize phases, of a specific Initialize Phase Definition (IPD) version, to the actual ESMF initialize phase number under which the entry point is registered.& IPDvXXpY=Z, where XX = two-digit revision number, e.g. 01, Y = logical NUOPC phase number, Z = actual ESMF phase number, with Y, Z > 0 and Y, Z < 10 \\ \hline
+     {\tt Internal\-InitializePhaseMap} & List of string values, mapping the logical NUOPC initialize phases, of a specific Initialize Phase Definition (IPD) version, to the actual ESMF initialize phase number under which the entry point is registered.& IPDvXXpY=Z, where XX = two-digit revision number, e.g. 01, Y = logical NUOPC phase number, Z = actual ESMF phase number, with Y, Z > 0 and Y, Z < 10 \\ \hline
      {\tt NestingGeneration} & Integer value enumerating nesting level.& 0, 1, 2, ...\\ \hline
      {\tt Nestling} & Integer value enumerating siblings within the same generation.& 0, 1, 2, ...\\ \hline
-     {\tt InitializeDataComplete} & String value indicating whether all initialize data dependencies have been satisfied.& false, true\\ \hline
-     {\tt InitializeDataProgress} & String value indicating whether progress is being made resolving initialize data dependencies.& false, true\\ \hline
+     {\tt Initialize\-DataComplete} & String value indicating whether all initialize data dependencies have been satisfied.& false, true\\ \hline
+     {\tt Initialize\-DataProgress} & String value indicating whether progress is being made resolving initialize data dependencies.& false, true\\ \hline
      \hline
-\end{tabular}
+\end{longtable}
