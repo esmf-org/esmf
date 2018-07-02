@@ -36,16 +36,16 @@ The Connector Component metadata is implemented as an ESMF Attribute Package:
                        "max" = set all lower 16 bits\\ \hline
      {\tt Diagnostic} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits are reserved to control diagnostic of the generic component implementation. Higher bits are available for user level diagnostic control. \newline
                        {\bf bit 0}: Dump fields of the importState on entering the Initialize method.\newline
-                       {\bf bit 1}: Dump fields of the importState on exiting the Initialize method.\newline
-                       {\bf bit 2}: Dump fields of the exportState on entering the Initialize method.\newline
+                       {\bf bit 1}: Dump fields of the exportState on entering the Initialize method.\newline
+                       {\bf bit 2}: Dump fields of the importState on exiting the Initialize method.\newline
                        {\bf bit 3}: Dump fields of the exportState on exiting the Initialize method.\newline
                        {\bf bit 4}: Dump fields of the importState on entering the Run method.\newline
-                       {\bf bit 5}: Dump fields of the importState on exiting the Run method.\newline
-                       {\bf bit 6}: Dump fields of the exportState on entering the Run method.\newline
+                       {\bf bit 5}: Dump fields of the exportState on entering the Run method.\newline
+                       {\bf bit 6}: Dump fields of the importState on exiting the Run method.\newline
                        {\bf bit 7}: Dump fields of the exportState on exiting the Run method.\newline
                        {\bf bit 8}: Dump fields of the importState on entering the Finalize method.\newline
-                       {\bf bit 9}: Dump fields of the importState on exiting the Finalize method.\newline
-                       {\bf bit 10}: Dump fields of the exportState on entering the Finalize method.\newline
+                       {\bf bit 9}: Dump fields of the exportState on entering the Finalize method.\newline
+                       {\bf bit 10}: Dump fields of the importState on exiting the Finalize method.\newline
                        {\bf bit 11}: Dump fields of the exportState on exiting the Finalize method.
                      & 0, 1, 2, ... \newline
                        "max" = set all lower 16 bits\\ \hline

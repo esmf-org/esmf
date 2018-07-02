@@ -197,14 +197,17 @@ module NUOPC_Connector
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter               :: rName="InitializeP0"
-    character(ESMF_MAXSTR)                :: name
-    integer                               :: verbosity
+    character(*), parameter   :: rName="InitializeP0"
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: verbosity, diagnostic
+    integer, save             :: step=1
+    type(ESMF_FileStatus_Flag):: status
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+      diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -213,11 +216,58 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle diagnostic
+    if (btest(diagnostic,0)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,1)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
     ! filter all other entries but those of type IPDv05
     call NUOPC_CompFilterPhaseMap(cplcomp, ESMF_METHOD_INITIALIZE, &
       acceptStringList=(/"IPDv05p"/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle diagnostic
+    if (btest(diagnostic,2)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,3)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! increment step counter
+    step=step+1
 
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
@@ -235,16 +285,18 @@ module NUOPC_Connector
     integer, intent(out) :: rc
 
     ! local variables
-    character(*), parameter               :: rName="InitializeIPDv05p1"
-    character(ESMF_MAXSTR)                :: name
-    character(ESMF_MAXSTR)                :: importXferPolicy, exportXferPolicy
-    integer                               :: verbosity, profiling
+    character(*), parameter   :: rName="InitializeIPDv05p1"
+    character(ESMF_MAXSTR)    :: name
+    character(ESMF_MAXSTR)    :: importXferPolicy, exportXferPolicy
+    integer                   :: verbosity, profiling, diagnostic
+    integer, save             :: step=1
+    type(ESMF_FileStatus_Flag):: status
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
     call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
-      profiling=profiling, rc=rc)
+      profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -253,6 +305,28 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle diagnostic
+    if (btest(diagnostic,0)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,1)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
     ! reconcile the States including Attributes
     if (btest(profiling,1)) then    ! PROFILE
       call ESMF_VMLogMemInfo("befP1 Reconcile")
@@ -299,6 +373,31 @@ module NUOPC_Connector
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
+
+    ! handle diagnostic
+    if (btest(diagnostic,2)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,3)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! increment step counter
+    step=step+1
 
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
@@ -424,13 +523,15 @@ module NUOPC_Connector
     character(ESMF_MAXSTR), pointer       :: importCplSetList(:)
     character(ESMF_MAXSTR), pointer       :: exportCplSetList(:)
     logical                               :: match
-    integer                               :: verbosity, profiling
+    integer                   :: verbosity, profiling, diagnostic
+    integer, save             :: step=1
+    type(ESMF_FileStatus_Flag):: status
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
     call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
-      profiling=profiling, rc=rc)
+      profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -438,6 +539,28 @@ module NUOPC_Connector
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle diagnostic
+    if (btest(diagnostic,0)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,1)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! reconcile the States including Attributes
     if (btest(profiling,1)) then    ! PROFILE
@@ -565,6 +688,31 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
     
+    ! handle diagnostic
+    if (btest(diagnostic,2)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,3)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! increment step counter
+    step=step+1
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -598,19 +746,43 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     character(ESMF_MAXSTR), pointer       :: cplList(:)
     character(ESMF_MAXSTR), pointer       :: cplSetList(:)
     character(len=240)                    :: msgString
-    integer                               :: verbosity, profiling
     logical                               :: match
     type(ESMF_StateIntent_Flag)           :: importStateIntent
     character(ESMF_MAXSTR)                :: fieldName
+    integer                   :: verbosity, profiling, diagnostic
+    integer, save             :: step=1
+    type(ESMF_FileStatus_Flag):: status
     
     rc = ESMF_SUCCESS
 
     ! query the component for info
     call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
-      profiling=profiling, rc=rc)
+      profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+    ! handle diagnostic
+    if (btest(diagnostic,0)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,1)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! intro
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -854,6 +1026,31 @@ print *, "current bondLevel=", bondLevel
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
     
+    ! handle diagnostic
+    if (btest(diagnostic,2)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,3)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! increment step counter
+    step=step+1
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -870,15 +1067,18 @@ print *, "current bondLevel=", bondLevel
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter               :: rName="InitializeIPDv03p1"
-    type(ESMF_Clock)                      :: internalClock
-    character(ESMF_MAXSTR)                :: name
-    integer                               :: verbosity
+    character(*), parameter   :: rName="InitializeIPDv03p1"
+    type(ESMF_Clock)          :: internalClock
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: verbosity, diagnostic
+    integer, save             :: step=1
+    type(ESMF_FileStatus_Flag):: status
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+      diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -886,6 +1086,28 @@ print *, "current bondLevel=", bondLevel
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle diagnostic
+    if (btest(diagnostic,0)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,1)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
 #if 0
 ! There is currently no need to set the internal clock of a Connector. Also
@@ -909,6 +1131,31 @@ print *, "current bondLevel=", bondLevel
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! handle diagnostic
+    if (btest(diagnostic,2)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,3)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! increment step counter
+    step=step+1
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -951,13 +1198,15 @@ print *, "current bondLevel=", bondLevel
     character(ESMF_MAXSTR)          :: iTransferOffer, eTransferOffer
     character(ESMF_MAXSTR)          :: iSharePolicy, eSharePolicy
     logical                         :: matchE, matchI, acceptFlag
-    integer                         :: verbosity, profiling
+    integer                   :: verbosity, profiling, diagnostic
+    integer, save             :: step=1
+    type(ESMF_FileStatus_Flag):: status
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
     call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
-      profiling=profiling, rc=rc)
+      profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -966,6 +1215,28 @@ print *, "current bondLevel=", bondLevel
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+    ! handle diagnostic
+    if (btest(diagnostic,0)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,1)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! prepare local pointer variables
     nullify(cplList)
     nullify(cplSetList)
@@ -1624,6 +1895,31 @@ print *, "current bondLevel=", bondLevel
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! handle diagnostic
+    if (btest(diagnostic,2)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,3)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! increment step counter
+    step=step+1
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1677,7 +1973,6 @@ print *, "current bondLevel=", bondLevel
     character(ESMF_MAXSTR)          :: geomobjname, fieldName
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     character(ESMF_MAXSTR)          :: iShareStatus, eShareStatus
-    integer                         :: verbosity, profiling
     integer(ESMF_KIND_I4), pointer  :: ungriddedLBound(:), ungriddedUBound(:)
     integer(ESMF_KIND_I4), pointer  :: gridToFieldMap(:)
     integer                         :: fieldDimCount, gridDimCount, arbDimCount
@@ -1686,12 +1981,15 @@ print *, "current bondLevel=", bondLevel
     integer, allocatable            :: minIndex(:), maxIndex(:)
     logical                         :: sharedFlag
     type(ESMF_Array)                :: array
+    integer                   :: verbosity, profiling, diagnostic
+    integer, save             :: step=1
+    type(ESMF_FileStatus_Flag):: status
     
     rc = ESMF_SUCCESS
 
     ! query the component for info
     call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
-      profiling=profiling, rc=rc)
+      profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -1699,6 +1997,28 @@ print *, "current bondLevel=", bondLevel
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle diagnostic
+    if (btest(diagnostic,0)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,1)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! prepare local pointer variables
     nullify(cplList)
@@ -2334,6 +2654,28 @@ print *, "current bondLevel=", bondLevel
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
     
+    ! handle diagnostic
+    if (btest(diagnostic,2)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,3)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2384,14 +2726,16 @@ print *, "current bondLevel=", bondLevel
     character(len=160)              :: msgString
     character(ESMF_MAXSTR)          :: geomobjname
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
-    integer                         :: verbosity, profiling
     logical                         :: matchE, matchI
+    integer                   :: verbosity, profiling, diagnostic
+    integer, save             :: step=1
+    type(ESMF_FileStatus_Flag):: status
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
     call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
-      profiling=profiling, rc=rc)
+      profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -2399,6 +2743,28 @@ print *, "current bondLevel=", bondLevel
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle diagnostic
+    if (btest(diagnostic,0)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,1)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! prepare local pointer variables
     nullify(cplList)
@@ -2726,6 +3092,31 @@ print *, "current bondLevel=", bondLevel
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
 
+    ! handle diagnostic
+    if (btest(diagnostic,2)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,3)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! increment step counter
+    step=step+1
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2742,15 +3133,17 @@ print *, "current bondLevel=", bondLevel
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter         :: rName="InitializeIPDv05p6a"
-    character(ESMF_MAXSTR)          :: name
-    integer                         :: verbosity, profiling
+    character(*), parameter   :: rName="InitializeIPDv05p6a"
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: verbosity, profiling, diagnostic
+    integer, save             :: step=1
+    type(ESMF_FileStatus_Flag):: status
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
     call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
-      profiling=profiling, rc=rc)
+      profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -2758,6 +3151,28 @@ print *, "current bondLevel=", bondLevel
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle diagnostic
+    if (btest(diagnostic,0)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,1)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! re-reconcile the States because they may have changed
     ! (previous proxy objects are dropped before fresh reconcile)
@@ -2773,6 +3188,31 @@ print *, "current bondLevel=", bondLevel
     if (btest(profiling,1)) then    ! PROFILE
       call ESMF_VMLogMemInfo("aftP5a Reconcile")
     endif
+
+    ! handle diagnostic
+    if (btest(diagnostic,2)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,3)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! increment step counter
+    step=step+1
 
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
@@ -2822,17 +3262,20 @@ print *, "current bondLevel=", bondLevel
     character(ESMF_MAXSTR)          :: connectionString
     character(ESMF_MAXSTR)          :: name, iString
     character(len=160)              :: msgString
-    integer                         :: verbosity
     logical                         :: matchE, matchI
     integer                         :: count
     integer                         :: sIndex
     character(ESMF_MAXSTR)          :: iShareStatus, eShareStatus
     logical                         :: sharedFlag
+    integer                   :: verbosity, diagnostic
+    integer, save             :: step=1
+    type(ESMF_FileStatus_Flag):: status
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+      diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -2840,6 +3283,28 @@ print *, "current bondLevel=", bondLevel
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle diagnostic
+    if (btest(diagnostic,0)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,1)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! prepare local pointer variables
     nullify(cplList)
@@ -3198,6 +3663,31 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (associated(exportNamespaceList)) deallocate(exportNamespaceList)
     if (associated(exportCplSetList)) deallocate(exportCplSetList)
     
+    ! handle diagnostic
+    if (btest(diagnostic,2)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,3)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! increment step counter
+    step=step+1
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3302,9 +3792,11 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     character(ESMF_MAXSTR)    :: compName, pLabel
     character(len=160)        :: msgString
     integer                   :: phase
-    integer                   :: verbosity, profiling
+    integer                   :: verbosity, profiling, diagnostic
     character(ESMF_MAXSTR)    :: name
     integer                   :: i
+    integer, save             :: step=1
+    type(ESMF_FileStatus_Flag):: status
 
     real(ESMF_KIND_R8)        :: timeBase, time0, time
 
@@ -3316,7 +3808,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
     ! query the component for info
     call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
-      profiling=profiling, rc=rc)
+      profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
@@ -3330,7 +3822,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! conditionally output diagnostic to Log file
+    ! handle verbosity
     if (btest(verbosity,13)) then
       call NUOPC_CompSearchRevPhaseMap(cplcomp, ESMF_METHOD_RUN, &
         phaseIndex=phase, phaseLabel=pLabel, rc=rc)
@@ -3344,7 +3836,30 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
         return  ! bail out
     endif
     
-    if (btest(profiling,0)) then    ! PROFILE
+    ! handle diagnostic
+    if (btest(diagnostic,4)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,5)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! handle profiling
+    if (btest(profiling,0)) then
       call ESMF_VMWtime(time)
       write (msgString, *) trim(name)//": Profile 01 time=   ", &
         time-time0, time-timeBase
@@ -3358,8 +3873,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-    if (btest(profiling,0)) then    ! PROFILE
-      ! PROFILE
+    if (btest(profiling,0)) then
       call ESMF_VMWtime(time)
       write (msgString, *) trim(name)//": Profile 02 time=   ", &
         time-time0, time-timeBase
@@ -3370,8 +3884,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     !TODO: here may be the place to ensure incoming States are consistent
     !TODO: with the Fields held in the FieldBundle inside the internal State?
       
-    if (btest(profiling,0)) then    ! PROFILE
-      ! PROFILE
+    if (btest(profiling,0)) then
       call ESMF_VMWtime(time)
       write (msgString, *) trim(name)//": Profile 03 time=   ", &
         time-time0, time-timeBase
@@ -3388,8 +3901,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-    if (btest(profiling,0)) then    ! PROFILE
-      ! PROFILE
+    ! handle profiling
+    if (btest(profiling,0)) then
       call ESMF_VMWtime(time)
       write (msgString, *) trim(name)//": Profile 04 time=   ", &
         time-time0, time-timeBase
@@ -3434,8 +3947,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       endif    
     endif
     
-    if (btest(profiling,0)) then    ! PROFILE
-      ! PROFILE
+    ! handle profiling
+    if (btest(profiling,0)) then
       call ESMF_VMWtime(time)
       write (msgString, *) trim(name)//": Profile 05 time=   ", &
         time-time0, time-timeBase
@@ -3450,8 +3963,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    if (btest(profiling,0)) then    ! PROFILE
-      ! PROFILE
+    ! handle profiling
+    if (btest(profiling,0)) then
       call ESMF_VMWtime(time)
       write (msgString, *) trim(name)//": Profile 06 time=   ", &
         time-time0, time-timeBase
@@ -3463,8 +3976,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    if (btest(profiling,0)) then    ! PROFILE
-      ! PROFILE
+    ! handle profiling
+    if (btest(profiling,0)) then
       call ESMF_VMWtime(time)
       write (msgString, *) trim(name)//": Profile 07 time=   ", &
         time-time0, time-timeBase
@@ -3479,8 +3992,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       if (vas == rootVas) exit
     enddo
     
-    if (btest(profiling,0)) then    ! PROFILE
-      ! PROFILE
+    ! handle profiling
+    if (btest(profiling,0)) then
       call ESMF_VMWtime(time)
       write (msgString, *) trim(name)//": Profile 08 time=   ", &
         time-time0, time-timeBase
@@ -3495,8 +4008,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    if (btest(profiling,0)) then    ! PROFILE
-      ! PROFILE
+    ! handle profiling
+    if (btest(profiling,0)) then
       call ESMF_VMWtime(time)
       write (msgString, *) trim(name)//": Profile 09 time=   ", &
         time-time0, time-timeBase
@@ -3510,8 +4023,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    if (btest(profiling,0)) then    ! PROFILE
-      ! PROFILE
+    ! handle profiling
+    if (btest(profiling,0)) then
       call ESMF_VMWtime(time)
       write (msgString, *) trim(name)//": Profile 10 time=   ", &
         time-time0, time-timeBase
@@ -3519,7 +4032,29 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     endif
 
-    ! conditionally output diagnostic to Log file
+    ! handle diagnostic
+    if (btest(diagnostic,6)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,7)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! handle verbosity
     if (btest(verbosity,13)) then
       write (msgString,"(A)") "<<<"//trim(compName)//&
       " leaving Run (phase="//trim(adjustl(pLabel))//")"
@@ -3529,6 +4064,9 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
         return  ! bail out
     endif
     
+    ! increment step counter
+    step=step+1
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3551,13 +4089,16 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     integer                   :: localrc
     logical                   :: existflag
     character(ESMF_MAXSTR)    :: name
-    integer                   :: verbosity
+    integer                   :: verbosity, diagnostic
     integer                   :: i
+    integer, save             :: step=1
+    type(ESMF_FileStatus_Flag):: status
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+      diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -3572,6 +4113,28 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
+    ! handle diagnostic
+    if (btest(diagnostic,8)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,9)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
     ! SPECIALIZE by calling into attached method to release routehandle
     call ESMF_MethodExecute(cplcomp, label=label_ReleaseRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
@@ -3698,6 +4261,31 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
       
+    ! handle diagnostic
+    if (btest(diagnostic,10)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,11)) then
+      status=ESMF_FILESTATUS_OLD
+      if (step==1) status=ESMF_FILESTATUS_REPLACE
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_", &
+        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! increment step counter
+    step=step+1
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
