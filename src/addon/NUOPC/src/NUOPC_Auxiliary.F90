@@ -250,7 +250,8 @@ module NUOPC_Auxiliary
 !    {\tt ESMF\_IOFMT\_NETCDF}.
 !   \item[{[relaxedflag]}]
 !     If {\tt .true.}, then no error is returned even if the call cannot write
-!     the file due to library limitations. Default is {\tt .false.}.
+!     the file due to library limitations, or because {\tt field} does not 
+!     contain any data. Default is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -258,18 +259,26 @@ module NUOPC_Auxiliary
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)  :: standardName
-    logical                 :: ioCapable
-    logical                 :: doItFlag
+    character(ESMF_MAXSTR)      :: standardName
+    logical                     :: ioCapable
+    logical                     :: doItFlag
+    type(ESMF_FieldStatus_Flag) :: fieldStatus
 
     if (present(rc)) rc = ESMF_SUCCESS
     
     ioCapable = (ESMF_IO_PIO_PRESENT .and. &
       (ESMF_IO_NETCDF_PRESENT .or. ESMF_IO_PNETCDF_PRESENT))
+      
+    call ESMF_FieldGet(field, status=fieldStatus, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     
     doItFlag = .true. ! default
     if (present(relaxedFlag)) then
-      doItFlag = .not.relaxedflag .or. (relaxedflag.and.ioCapable)
+      doItFlag = .not.relaxedflag .or. (relaxedflag.and.ioCapable.and. &
+        (fieldStatus==ESMF_FIELDSTATUS_COMPLETE))
     endif
     
     if (doItFlag) then
