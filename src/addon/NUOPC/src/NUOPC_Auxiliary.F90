@@ -370,8 +370,8 @@ module NUOPC_Auxiliary
     integer                         :: i, itemCount
     type(ESMF_Field)                :: field
     type(ESMF_StateItem_Flag)       :: itemType
-    character(len=80)               :: fileName
-    character(len=80), allocatable  :: fieldNameList_loc(:)
+    character(len=160)              :: fileName
+    character(len=160), allocatable :: fieldNameList_loc(:)
 
     if (present(rc)) rc = ESMF_SUCCESS
 

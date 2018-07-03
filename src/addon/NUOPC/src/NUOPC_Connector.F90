@@ -200,8 +200,8 @@ module NUOPC_Connector
     character(*), parameter   :: rName="InitializeP0"
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity, diagnostic
-    integer, save             :: step=1
-    type(ESMF_FileStatus_Flag):: status
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
     rc = ESMF_SUCCESS
 
@@ -217,22 +217,29 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(diagnostic,0)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,1)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -246,29 +253,22 @@ module NUOPC_Connector
 
     ! handle diagnostic
     if (btest(diagnostic,2)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,3)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     
-    ! increment step counter
-    step=step+1
-
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -289,8 +289,8 @@ module NUOPC_Connector
     character(ESMF_MAXSTR)    :: name
     character(ESMF_MAXSTR)    :: importXferPolicy, exportXferPolicy
     integer                   :: verbosity, profiling, diagnostic
-    integer, save             :: step=1
-    type(ESMF_FileStatus_Flag):: status
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
     rc = ESMF_SUCCESS
 
@@ -306,22 +306,29 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(diagnostic,0)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,1)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -376,29 +383,22 @@ module NUOPC_Connector
 
     ! handle diagnostic
     if (btest(diagnostic,2)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,3)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     
-    ! increment step counter
-    step=step+1
-
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -524,8 +524,8 @@ module NUOPC_Connector
     character(ESMF_MAXSTR), pointer       :: exportCplSetList(:)
     logical                               :: match
     integer                   :: verbosity, profiling, diagnostic
-    integer, save             :: step=1
-    type(ESMF_FileStatus_Flag):: status
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
     rc = ESMF_SUCCESS
 
@@ -541,22 +541,29 @@ module NUOPC_Connector
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(diagnostic,0)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,1)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -690,29 +697,22 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     
     ! handle diagnostic
     if (btest(diagnostic,2)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,3)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     
-    ! increment step counter
-    step=step+1
-
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -750,8 +750,8 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     type(ESMF_StateIntent_Flag)           :: importStateIntent
     character(ESMF_MAXSTR)                :: fieldName
     integer                   :: verbosity, profiling, diagnostic
-    integer, save             :: step=1
-    type(ESMF_FileStatus_Flag):: status
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
     
     rc = ESMF_SUCCESS
 
@@ -762,22 +762,29 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
     ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(diagnostic,0)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,1)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1028,29 +1035,22 @@ print *, "current bondLevel=", bondLevel
     
     ! handle diagnostic
     if (btest(diagnostic,2)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,3)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     
-    ! increment step counter
-    step=step+1
-
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1071,8 +1071,8 @@ print *, "current bondLevel=", bondLevel
     type(ESMF_Clock)          :: internalClock
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity, diagnostic
-    integer, save             :: step=1
-    type(ESMF_FileStatus_Flag):: status
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
     rc = ESMF_SUCCESS
 
@@ -1088,22 +1088,29 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(diagnostic,0)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,1)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1133,29 +1140,22 @@ print *, "current bondLevel=", bondLevel
     
     ! handle diagnostic
     if (btest(diagnostic,2)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,3)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     
-    ! increment step counter
-    step=step+1
-
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1199,8 +1199,8 @@ print *, "current bondLevel=", bondLevel
     character(ESMF_MAXSTR)          :: iSharePolicy, eSharePolicy
     logical                         :: matchE, matchI, acceptFlag
     integer                   :: verbosity, profiling, diagnostic
-    integer, save             :: step=1
-    type(ESMF_FileStatus_Flag):: status
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
     rc = ESMF_SUCCESS
 
@@ -1216,22 +1216,29 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
     ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(diagnostic,0)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,1)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1897,29 +1904,22 @@ print *, "current bondLevel=", bondLevel
     
     ! handle diagnostic
     if (btest(diagnostic,2)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,3)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     
-    ! increment step counter
-    step=step+1
-
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1982,8 +1982,8 @@ print *, "current bondLevel=", bondLevel
     logical                         :: sharedFlag
     type(ESMF_Array)                :: array
     integer                   :: verbosity, profiling, diagnostic
-    integer, save             :: step=1
-    type(ESMF_FileStatus_Flag):: status
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
     
     rc = ESMF_SUCCESS
 
@@ -1999,22 +1999,29 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(diagnostic,0)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,1)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -2656,21 +2663,17 @@ print *, "current bondLevel=", bondLevel
     
     ! handle diagnostic
     if (btest(diagnostic,2)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,3)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -2728,8 +2731,8 @@ print *, "current bondLevel=", bondLevel
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     logical                         :: matchE, matchI
     integer                   :: verbosity, profiling, diagnostic
-    integer, save             :: step=1
-    type(ESMF_FileStatus_Flag):: status
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
     rc = ESMF_SUCCESS
 
@@ -2745,22 +2748,29 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(diagnostic,0)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,1)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3094,29 +3104,22 @@ print *, "current bondLevel=", bondLevel
 
     ! handle diagnostic
     if (btest(diagnostic,2)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,3)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     
-    ! increment step counter
-    step=step+1
-
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3136,8 +3139,8 @@ print *, "current bondLevel=", bondLevel
     character(*), parameter   :: rName="InitializeIPDv05p6a"
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity, profiling, diagnostic
-    integer, save             :: step=1
-    type(ESMF_FileStatus_Flag):: status
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
     rc = ESMF_SUCCESS
 
@@ -3153,22 +3156,29 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(diagnostic,0)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,1)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3191,29 +3201,22 @@ print *, "current bondLevel=", bondLevel
 
     ! handle diagnostic
     if (btest(diagnostic,2)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,3)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     
-    ! increment step counter
-    step=step+1
-
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3268,8 +3271,8 @@ print *, "current bondLevel=", bondLevel
     character(ESMF_MAXSTR)          :: iShareStatus, eShareStatus
     logical                         :: sharedFlag
     integer                   :: verbosity, diagnostic
-    integer, save             :: step=1
-    type(ESMF_FileStatus_Flag):: status
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
     rc = ESMF_SUCCESS
 
@@ -3285,22 +3288,29 @@ print *, "current bondLevel=", bondLevel
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(diagnostic,0)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,1)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3665,29 +3675,22 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     
     ! handle diagnostic
     if (btest(diagnostic,2)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,3)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     
-    ! increment step counter
-    step=step+1
-
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3795,8 +3798,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     integer                   :: verbosity, profiling, diagnostic
     character(ESMF_MAXSTR)    :: name
     integer                   :: i
-    integer, save             :: step=1
-    type(ESMF_FileStatus_Flag):: status
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
     real(ESMF_KIND_R8)        :: timeBase, time0, time
 
@@ -3837,22 +3840,29 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     endif
     
     ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(diagnostic,4)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,5)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -4034,21 +4044,17 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
     ! handle diagnostic
     if (btest(diagnostic,6)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,7)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -4064,9 +4070,6 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
         return  ! bail out
     endif
     
-    ! increment step counter
-    step=step+1
-
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4091,8 +4094,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity, diagnostic
     integer                   :: i
-    integer, save             :: step=1
-    type(ESMF_FileStatus_Flag):: status
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
     rc = ESMF_SUCCESS
 
@@ -4114,22 +4117,29 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
     ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     if (btest(diagnostic,8)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,9)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_enter_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -4263,29 +4273,22 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       
     ! handle diagnostic
     if (btest(diagnostic,10)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_import_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     if (btest(diagnostic,11)) then
-      status=ESMF_FILESTATUS_OLD
-      if (step==1) status=ESMF_FILESTATUS_REPLACE
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
-        trim(name)//"_"//trim(rName)//"_exit_export_", &
-        timeslice=step, status=status, relaxedFlag=.true., rc=rc)
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
     
-    ! increment step counter
-    step=step+1
-
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
