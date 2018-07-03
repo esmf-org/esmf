@@ -1050,12 +1050,24 @@
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         if (present(unit)) then
-          if (present(preString)) then
-            write (unit, "(A, I4, I3, I3, I3, I3, I3, I4)") preString, &
-              yy, mm, dd, h, m, s, ms
+          if (trim(options)=="underscore") then
+            if (present(preString)) then
+              write (unit, "(A, '_', I4.4, '_', I2.2, '_', I2.2, '_', I2.2, "//&
+                "'_', I2.2, '_', I2.2, '_', I3.3)") preString, &
+                yy, mm, dd, h, m, s, ms
+            else
+              write (unit, "(I4.4, '_', I2.2, '_', I2.2, '_', I2.2, "//&
+                "'_', I2.2, '_', I2.2, '_', I3.3)") &
+                yy, mm, dd, h, m, s, ms
+            endif
           else
-            write (unit, "(I4, I3, I3, I3, I3, I3, I4)") &
-              yy, mm, dd, h, m, s, ms
+            if (present(preString)) then
+              write (unit, "(A, I4, I3, I3, I3, I3, I3, I4)") preString, &
+                yy, mm, dd, h, m, s, ms
+            else
+              write (unit, "(I4, I3, I3, I3, I3, I3, I4)") &
+                yy, mm, dd, h, m, s, ms
+            endif
           endif
         else
           if (present(preString)) then
