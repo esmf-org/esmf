@@ -179,13 +179,16 @@ module NUOPC_ModelBase
     ! local variables
     character(*), parameter   :: rName="InitializeP0"
     character(ESMF_MAXSTR)    :: name
-    integer                   :: verbosity
     type(type_InternalState)  :: is
+    integer                   :: verbosity, diagnostic
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
+      diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -193,6 +196,35 @@ module NUOPC_ModelBase
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,0)) then
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,1)) then
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! filter all other entries but those of type IPDv00
     call NUOPC_CompFilterPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
@@ -209,6 +241,24 @@ module NUOPC_ModelBase
     
     ! store the incoming clock as driverClock in internal state
     is%wrap%driverClock = clock
+    
+    ! handle diagnostic
+    if (btest(diagnostic,2)) then
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,3)) then
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
@@ -234,12 +284,15 @@ module NUOPC_ModelBase
     integer                   :: oldUpdatedCount, newUpdatedCount
     logical                   :: allUpdated
     character(ESMF_MAXSTR)    :: name, valueString1, valueString2
-    integer                   :: verbosity
+    integer                   :: verbosity, diagnostic
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
+      diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -248,6 +301,35 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,0)) then
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,1)) then
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
     ! check how many Fields in the exportState have "Updated" set
     ! to "true" BEFORE calling the DataInitialize
     allUpdated = NUOPC_IsUpdated(exportState, count=oldUpdatedCount, rc=rc)
@@ -335,6 +417,7 @@ module NUOPC_ModelBase
         return  ! bail out
     endif
     
+    ! handle verbosity
     if (btest(verbosity,11)) then
       call NUOPC_CompAttributeGet(gcomp, name="InitializeDataProgress", &
         value=valueString1, rc=rc)
@@ -354,6 +437,24 @@ module NUOPC_ModelBase
         return  ! bail out
     endif
     
+    ! handle diagnostic
+    if (btest(diagnostic,2)) then
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,3)) then
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -378,8 +479,10 @@ module NUOPC_ModelBase
     logical                   :: existflag
     character(ESMF_MAXSTR)    :: msgString, pLabel
     integer                   :: phase
-    integer                   :: verbosity
+    integer                   :: verbosity, diagnostic
     character(ESMF_MAXSTR)    :: name
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
 #define NUOPC_MODELBASE_TRACE__OFF
 #ifdef NUOPC_MODELBASE_TRACE
@@ -389,7 +492,8 @@ module NUOPC_ModelBase
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
+      diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -403,6 +507,35 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
+    
+    ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,4)) then
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,5)) then
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -450,7 +583,7 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
-    ! conditionally output info to Log file
+    ! handle verbosity
     if (btest(verbosity,9)) then
       call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_RUN, &
         phaseIndex=phase, phaseLabel=pLabel, rc=rc)
@@ -503,7 +636,7 @@ module NUOPC_ModelBase
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
-      ! conditionally output time-loop info to Log file
+      ! handle verbosity
       if (btest(verbosity,12)) then
         call ESMF_ClockPrint(internalClock, options="currTime", &
           preString=trim(name)//": time step-loop starting, current time: ", &
@@ -590,7 +723,7 @@ module NUOPC_ModelBase
      call ESMF_TraceRegionExit("NUOPC_ModelBase:AdvanceClock")
 #endif
     
-      ! conditionally output time-loop info to Log file
+      ! handle verbosity
       if (btest(verbosity,12)) then
         call ESMF_ClockPrint(internalClock, options="currTime", &
           preString=trim(name)//": time step-loop ending,   current time: ", &
@@ -638,7 +771,25 @@ module NUOPC_ModelBase
    call ESMF_TraceRegionExit("NUOPC_ModelBase:TimestampExport")
 #endif
 
-    ! conditionally output info to Log file
+    ! handle diagnostic
+    if (btest(diagnostic,6)) then
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,7)) then
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
+    ! handle verbosity
     if (btest(verbosity,9)) then
       call ESMF_ClockPrint(internalClock, options="currTime", &
         preString="<<<"//trim(name)//&
@@ -786,13 +937,16 @@ module NUOPC_ModelBase
     integer                   :: localrc, stat
     logical                   :: existflag
     character(ESMF_MAXSTR)    :: name
-    integer                   :: verbosity
+    integer                   :: verbosity, diagnostic
     type(type_InternalState)  :: is
+    type(ESMF_Time)           :: currTime
+    character(len=40)         :: currTimeString
 
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
+      diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -801,6 +955,35 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! handle diagnostic
+    if (diagnostic>0) then
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_TimePrint(currTime, unit=currTimeString, options="underscore", &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,8)) then
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,9)) then
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
     ! SPECIALIZE by calling into optional attached method
     call ESMF_MethodExecute(gcomp, label=label_Finalize, existflag=existflag, &
       userRc=localrc, rc=rc)
@@ -825,6 +1008,24 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
+    ! handle diagnostic
+    if (btest(diagnostic,10)) then
+      call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    if (btest(diagnostic,11)) then
+      call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
+        trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
+        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+    
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
