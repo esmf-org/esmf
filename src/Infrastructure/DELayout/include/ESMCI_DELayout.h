@@ -375,7 +375,7 @@ class XXE{
       xxeSubList = new XXE*[xxeSubMaxCountArg];
       xxeSubCount  = 0;
       xxeSubMaxCount = xxeSubMaxCountArg;
-      bufferInfoList.reserve(1000);  // initial preparation
+      bufferInfoList.reserve(10000);  // initial preparation
       lastFilterBitField = 0x0;
       superVectorOkay = true;
       rh = NULL;
