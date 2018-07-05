@@ -451,7 +451,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           return
         endif
         call ESMF_LogWrite( &
-          "!!!                   ESMF_LOGKIND_MULTI_ON_ERROR  !!!", &
+          "!!!                   ESMF_LOGKIND_Multi_On_Error  !!!", &
           ESMF_LOGMSG_INFO, rc=localrc)
         if (localrc /= ESMF_SUCCESS) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD, &
