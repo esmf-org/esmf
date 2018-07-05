@@ -167,7 +167,8 @@ module NUOPC_Mediator
     if (btest(diagnostic,0)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -175,7 +176,8 @@ module NUOPC_Mediator
     if (btest(diagnostic,1)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -223,7 +225,8 @@ module NUOPC_Mediator
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -231,7 +234,8 @@ module NUOPC_Mediator
     if (btest(diagnostic,3)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -290,7 +294,8 @@ module NUOPC_Mediator
     if (btest(diagnostic,0)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -298,7 +303,8 @@ module NUOPC_Mediator
     if (btest(diagnostic,1)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -331,7 +337,8 @@ module NUOPC_Mediator
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -339,7 +346,8 @@ module NUOPC_Mediator
     if (btest(diagnostic,3)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
