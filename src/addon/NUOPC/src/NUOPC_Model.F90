@@ -292,7 +292,8 @@ module NUOPC_Model
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, &
+      diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
