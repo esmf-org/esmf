@@ -12,6 +12,7 @@ TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMCI_PolyUTest \
                 $(ESMF_TESTDIR)/ESMCI_MatUTest \
                 $(ESMF_TESTDIR)/ESMCI_PolyFitUTest \
                 $(ESMF_TESTDIR)/ESMCI_SolverUTest \
+                $(ESMF_TESTDIR)/ESMCI_GraphUTest \
                 $(ESMF_TESTDIR)/ESMCI_LoadBalancerUTest
 
 TESTS_RUN     =
@@ -21,6 +22,7 @@ TESTS_RUN_UNI =	RUN_ESMCI_PolyUTestUNI \
                 RUN_ESMCI_MatUTestUNI \
                 RUN_ESMCI_PolyFitUTestUNI \
                 RUN_ESMCI_SolverUTestUNI \
+                RUN_ESMCI_GraphUTestUNI \
                 RUN_ESMCI_LoadBalancerUTestUNI
 
 
@@ -55,6 +57,9 @@ RUN_ESMCI_PolyFitUTestUNI:
 
 RUN_ESMCI_SolverUTestUNI:
 	$(MAKE) TNAME=Solver NP=1 ctest
+
+RUN_ESMCI_GraphUTestUNI:
+	$(MAKE) TNAME=DGraph NP=1 ctest
 
 RUN_ESMCI_LoadBalancerUTestUNI:
 	$(MAKE) TNAME=LoadBalancer NP=1 ctest
