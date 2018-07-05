@@ -2415,9 +2415,13 @@ print *, "current bondLevel=", bondLevel
                 return  ! bail out
             endif
           else
-            ! shared: query additional info from provider to share with acceptor
-            call ESMF_FieldGet(providerField, name=fieldName, array=array, &
-              rc=rc)
+            ! shared:
+            ! obtain the array from provider to be shared with acceptor
+            call ESMF_FieldGet(providerField, array=array, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! accceptor fieldName to remain unchanged
+            call ESMF_FieldGet(acceptorField, name=fieldName, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             !TODO: make sure that this FieldCreate() sets total widths correctly
@@ -2577,9 +2581,13 @@ print *, "current bondLevel=", bondLevel
                 return  ! bail out
             endif
           else
-            ! shared: query additional info from provider to share with acceptor
-            call ESMF_FieldGet(providerField, name=fieldName, array=array, &
-              rc=rc)
+            ! shared:
+            ! obtain the array from provider to be shared with acceptor
+            call ESMF_FieldGet(providerField, array=array, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! accceptor fieldName to remain unchanged
+            call ESMF_FieldGet(acceptorField, name=fieldName, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             !TODO: make sure that this FieldCreate() sets total widths correctly
