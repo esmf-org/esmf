@@ -306,6 +306,7 @@ module NUOPC_Base
   end subroutine
   !-----------------------------------------------------------------------------
 
+!TODO: change "name" -> "fieldName", but must deprecate "name" for a while.
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_Advertise - Advertise a single Field in a State
