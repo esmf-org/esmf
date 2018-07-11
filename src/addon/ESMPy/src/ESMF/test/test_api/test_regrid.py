@@ -381,6 +381,51 @@ class TestRegrid(TestBase):
                 if dstfield.grid.mask[StaggerLoc.CENTER][i, j] == 0:
                     assert(dstfield[i, j] == 0)
 
+    def test_field_regrid_zeroregion_select_ndbounds(self):
+        # Test zero region select during a sparse matrix multiplication having undistributed dimensions.
+
+        # Create source field and mask some elements
+        srcgrid = grid_create_from_bounds([0, 4], [0, 4], 24, 24, corners=False, domask=True)
+        srcfield = Field(srcgrid, ndbounds=[3])
+        srcfield.data[:] = 33.33
+        srcmask = srcgrid.get_item(GridItem.MASK)
+        srcmask[3:30, 10:40] = 0
+
+        # Create the destination field without a mask
+        dstgrid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=False, domask=False)
+        dstfield = Field(dstgrid, ndbounds=[3])
+        dstfield.data[:] = -999
+
+        # Regrid in-memory
+        rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR, src_mask_values=np.array([0]),
+                    dst_mask_values=np.array([0]), unmapped_action=UnmappedAction.IGNORE)
+        _ = rh(srcfield, dstfield, zero_region=Region.SELECT)
+
+        # Assert fill values are retained
+        self.assertGreater(np.sum(dstfield.data == 33.33), 10)
+        self.assertGreater(np.sum(dstfield.data == -999), 10)
+
+        # Write the regridding operation weights to file
+        dstfield.data[:] = -999
+        filename = '_esmf_test_weights_.nc'
+        _ = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR, src_mask_values=np.array([0]),
+                   unmapped_action=UnmappedAction.IGNORE, filename=filename)
+        self.assertTrue(np.all(dstfield.data == -999))
+
+        # Compute the regrid from file route handle
+        rh2 = RegridFromFile(srcfield, dstfield, filename=filename)
+        self.assertTrue(np.all(dstfield.data == -999))
+        dstfield = rh2(srcfield, dstfield, zero_region=ESMF.Region.SELECT)
+
+        # Assert fill values are retained
+        self.assertGreater(np.sum(dstfield.data == 33.33), 10)
+        self.assertGreater(np.sum(dstfield.data == -999), 10)
+
+        try:
+            os.remove(filename)
+        except FileNotFoundError:
+            pass
+
     @attr('parallel')
     def test_field_regrid_area(self):
         # create mesh

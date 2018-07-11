@@ -423,15 +423,7 @@ class RegridFromFile(object):
         self.destroy()
 
     def __repr__(self):
-        string = ("RegridFromFile:\n"
-                  "    routehandle = %r\n"
-                  "    srcfield = %r\n"
-                  "    dstfield = %r\n"
-                  %
-                  (self._routehandle,
-                   self.srcfield,
-                   self.dstfield))
-
+        string = "RegridFromFile:\n    routehandle = {}\n".format(self._routehandle)
         return string
 
     @property
@@ -460,10 +452,6 @@ class RegridFromFile(object):
     @property
     def routehandle(self):
         return self._routehandle
-
-    @property
-    def srcfield(self):
-        return self._srcfield
 
     @property
     def struct(self):
