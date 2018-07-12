@@ -3100,8 +3100,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
 !------------------------------------------------------------------------------
     integer                 :: localrc      ! local return code
-    integer :: local_sendData(size (sendData))
-    integer :: local_recvData(size (recvData))
+    integer, allocatable    :: local_sendData(:)
+    integer, allocatable    :: local_recvData(:)
+    integer                 :: memstat
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -3124,6 +3125,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Call into the C++ interface.
+    allocate (local_sendData(size (sendData)), local_recvData(size (recvData)), stat=memstat)
+    if (ESMF_LogFoundAllocError(memstat, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
     local_sendData = merge (1, 0, sendData)
     call c_ESMC_VMAllToAllV(vm,  &
         local_sendData, sendCounts(1), sendOffsets(1), &
@@ -3132,6 +3137,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     recvData = local_recvData == 1
+
+    deallocate (local_sendData, local_recvData, stat=memstat)
+    if (ESMF_LogFoundDeallocError(memstat, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
