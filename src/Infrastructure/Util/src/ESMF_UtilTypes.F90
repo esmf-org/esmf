@@ -1443,29 +1443,41 @@ subroutine ESMF_dkas_string(string, dkval)
  character(len=*), intent(out) :: string
  type(ESMF_TypeKind_Flag), intent(in) :: dkval
 
+ string = '(UNKNOWN)'
 #ifndef ESMF_NO_INTEGER_1_BYTE 
  if (dkval == ESMF_TYPEKIND_I1) then
-   write(string,'(a)') 'ESMF_TYPEKIND_I1'
+   string = 'ESMF_TYPEKIND_I1'
  endif
 #endif
 #ifndef ESMF_NO_INTEGER_2_BYTE 
  if (dkval == ESMF_TYPEKIND_I2) then
-   write(string,'(a)') 'ESMF_TYPEKIND_I2'
+   string = 'ESMF_TYPEKIND_I2'
  endif
 #endif
  if (dkval == ESMF_TYPEKIND_I4) then
-   write(string,'(a)') 'ESMF_TYPEKIND_I4'
+   string = 'ESMF_TYPEKIND_I4'
  elseif (dkval == ESMF_TYPEKIND_I8) then
-   write(string,'(a)') 'ESMF_TYPEKIND_I8'
+   string = 'ESMF_TYPEKIND_I8'
  elseif (dkval == ESMF_TYPEKIND_R4) then
-   write(string,'(a)') 'ESMF_TYPEKIND_R4'
+   string = 'ESMF_TYPEKIND_R4'
  elseif (dkval == ESMF_TYPEKIND_R8) then
-   write(string,'(a)') 'ESMF_TYPEKIND_R8'
+   string = 'ESMF_TYPEKIND_R8'
  elseif (dkval == ESMF_TYPEKIND_C8) then
-   write(string,'(a)') 'ESMF_TYPEKIND_C8'
+   string = 'ESMF_TYPEKIND_C8'
  elseif (dkval == ESMF_TYPEKIND_C16) then
-   write(string,'(a)') 'ESMF_TYPEKIND_C16'
+   string = 'ESMF_TYPEKIND_C16'
+ elseif (dkval == ESMF_TYPEKIND_LOGICAL) then
+   string = 'ESMF_TYPEKIND_LOGICAL'
+ elseif (dkval == ESMF_TYPEKIND_CHARACTER) then
+   string = 'ESMF_TYPEKIND_CHARACTER'
+ elseif (dkval == ESMF_TYPEKIND_I) then
+   string = 'ESMF_TYPEKIND_I'
+ elseif (dkval == ESMF_TYPEKIND_R) then
+   string = 'ESMF_TYPEKIND_R'
+ elseif (dkval == ESMF_NOKIND) then
+   string = 'ESMF_NOKIND'
  endif
+   
 end subroutine
 
 
