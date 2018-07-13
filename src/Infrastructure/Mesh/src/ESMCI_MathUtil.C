@@ -280,104 +280,49 @@ bool intersect_tri_with_line(const double *tri, const double *l1, const double *
   }
 
 
+double tri_area(const double * const u, const double * const v, const double * const w) {
 
-#if 0
-
-  ///////////// This way of calculating great circle area doesn't work very well for small polygons ///////////
-
-
-//    w
-//    | \
-//    |   \
-//    |     \
-//    u------v
-//    ^
-//    | --- angle being calculated
-//
-  double angle(double *u, double *v, double *w) {
-
-  double cosa=u[0]*v[0]+u[1]*v[1]+u[2]*v[2];
-
-  double cosb=u[0]*w[0]+u[1]*w[1]+u[2]*w[2];
-
-  double cosc=v[0]*w[0]+v[1]*w[1]+v[2]*w[2];
-
-
-  double sina=sqrt(1.0-cosa*cosa);
-
-  double sinb=sqrt(1.0-cosb*cosb);
-
-
-    // Calculate the cosine of the angle we're calculating
-    // using spherical trigonometry formula
-    double cos_angle=(cosc-(cosa*cosb))/(sina*sinb);
-
-   // If we've gone a little out of bounds due to round off, shift back
-   if (cos_angle > 1.0) cos_angle=1.0;
-   if (cos_angle < -1.0) cos_angle=-1.0;
-
-   // return angle
-   return acos(cos_angle);
-
-}
-
-// Compute the great circle area of a polygon on a sphere
-double great_circle_area(int n, double *pnts) {
-
-  // sum angles around polygon
-  double sum=0.0;
-  for (int i=0; i<n; i++) {
-    // points that make up a side of polygon
-    double *pnt0=pnts+3*i;
-    double *pnt1=pnts+3*((i+1)%n);
-    double *pnt2=pnts+3*((i+2)%n);
-
-    // compute angle for pnt1
-    sum += angle(pnt1, pnt2, pnt0);
-  }
-
-  // return area
-  return sum-(((double)(n-2))*((double)M_PI));
-}
-#endif
-
-
-
-  double tri_area(const double * const u, const double * const v, const double * const w) {
-#define CROSS_PRODUCT3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
-#define NORM(a) sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
-
+  // temporary vector used below
   double tmp_vec[3];
 
-  CROSS_PRODUCT3D(tmp_vec,u,v);
-  double sina=NORM(tmp_vec);
-  double a=asin(sina);
+  // Compute length of side a (i.e. the angle from the center of the sphere)
+  MU_CROSS_PRODUCT_VEC3D(tmp_vec,u,v);
+  double sina=MU_LEN_VEC3D(tmp_vec);
+  double cosa=MU_DOT_VEC3D(u,v);
+  double a=atan2(sina,cosa);
 
-  CROSS_PRODUCT3D(tmp_vec,u,w);
-  double sinb=NORM(tmp_vec);
-  double b=asin(sinb);
+  // Compute length of side b (i.e. the angle from the center of the sphere)
+  MU_CROSS_PRODUCT_VEC3D(tmp_vec,u,w);
+  double sinb=MU_LEN_VEC3D(tmp_vec);
+  double cosb=MU_DOT_VEC3D(u,w);
+  double b=atan2(sinb,cosb);
 
-  CROSS_PRODUCT3D(tmp_vec,w,v);
-  double sinc=NORM(tmp_vec);
-  double c=asin(sinc);
+  // Compute length of side b (i.e. the angle from the center of the sphere)
+  MU_CROSS_PRODUCT_VEC3D(tmp_vec,w,v);
+  double sinc=MU_LEN_VEC3D(tmp_vec);
+  double cosc=MU_DOT_VEC3D(w,v);
+  double c=atan2(sinc,cosc);
 
+  // Compute semi-perimeter
   double s=0.5*(a+b+c);
 
-  double t = tan ( s / 2.0 ) * tan ( ( s - a ) / 2.0 ) *
-             tan ( ( s - b ) / 2.0 ) * tan ( ( s - c ) / 2.0 );
+  // Compute t
+  double t = tan( 0.5*s ) * tan( 0.5*(s-a) ) *
+             tan( 0.5*(s-b) ) * tan( 0.5*(s-c) );
 
+  // For debugging
   //  if (mathutil_debug) {
-  //  printf("a=%30.27f b=%30.27f c=%30.27f a+b+c=%30.27f s=%30.27f t=%40.37f \n",a,b,c,a+b+c,s,t);
+  //  printf("gca sina=%f sinb=%f sinc=%f \n",sina,sinb,sinc);
+  //  printf("gca a=%f b=%f c=%f \n",a,b,c);
+  //  printf("gca t=%f \n",t);
   //}
 
-  double area= std::abs ( 4.0 * atan ( sqrt (std::abs ( t ) ) ) );
+  // Use t to compute triangle area
+  double area= std::abs( 4.0*atan( sqrt( std::abs(t) ) ) );
 
+  // Output area
   return area;
-
-#undef CROSS_PRODUCT3D
-#undef NORM
 }
-
 
 // Compute the great circle area of a polygon on a sphere
 double great_circle_area(int n, double *pnts) {
