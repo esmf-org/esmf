@@ -1227,6 +1227,7 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
   Mesh & meshmid = *midmesh;
   meshmid.set_parametric_dimension(pdim);
   meshmid.set_spatial_dimension(sdim);
+  meshmid.orig_spatial_dim=pdim;
   int rc;
   int me = VM::getCurrent(&rc)->getLocalPet();
 

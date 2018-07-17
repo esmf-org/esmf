@@ -116,6 +116,7 @@ MeshCXX::~MeshCXX(){
     // set internal mesh dimensions
     (meshp)->set_parametric_dimension(pdim);
     (meshp)->set_spatial_dimension(cart_sdim);
+    (meshp)->orig_spatial_dim=sdim;
 
     // Set the number of nodes and elements
     ThrowAssert(meshp->num_elems() == 0);
