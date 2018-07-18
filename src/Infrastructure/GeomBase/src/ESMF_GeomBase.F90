@@ -1580,10 +1580,12 @@ logical, parameter :: ENABLE_SHARED_GRID_SUPPORT = .false.
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
           if (trace) print *, ESMF_METHOD, ': PET', mypet, ' - shared object_found = ', object_found == ESMF_TRUE
-          if (ENABLE_SHARED_GRID_SUPPORT) then
+          if (ENABLE_SHARED_GRID_SUPPORT .and. object_found == ESMF_TRUE) then
             gbcp%grid = grid_temp
-            if (trace) print *, ESMF_METHOD, ': Grid linked for sharing.'
-            ! if (trace) call ESMF_GridPrint (gbcp%grid)
+            if (trace)  &
+              print *, ESMF_METHOD, ': Grid linked for sharing.'
+            if (trace)  &
+              call ESMF_GridPrint (gbcp%grid)
 ! TODO: (increment Base and/or VM refCount?, etc.  Gerhard says not yet.)
             gbcp%grid%isInit = ESMF_INIT_CREATED
             offset = offset + geomobj_len
