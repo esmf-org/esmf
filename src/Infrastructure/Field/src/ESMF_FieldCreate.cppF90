@@ -1562,7 +1562,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [grid]
 !       {\tt ESMF\_Grid} object.
 ! \item[typekind]
-!      The typekind of the Field.
+!      The typekind of the Field. See section \ref{const:typekind}
+!      for a list of valid typekind options.
 ! \item[{[indexflag]}]
 !      Indicate how DE-local indices are defined. By default each DE|s
 !      exclusive region is placed to start at the local index space origin,
@@ -2615,7 +2616,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [locstream]
 !       {\tt ESMF\_LocStream} object.
 ! \item[typekind]
-!      The typekind of the Field.
+!       The typekind of the Field. See section \ref{const:typekind}
+!       for a list of valid typekind options.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -3290,7 +3292,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [mesh]
 !       {\tt ESMF\_Mesh} object.
 ! \item [typekind]
-!       The typekind of the Field.
+!       The typekind of the Field. See section \ref{const:typekind}
+!       for a list of valid typekind options.
 ! \item [{[meshloc]}]
 !       \begin{sloppypar}
 !       The part of the Mesh on which to build the Field. For valid
@@ -4039,7 +4042,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item [xgrid]
 !       {\tt ESMF\_XGrid} object.
 ! \item[typekind]
-!      The typekind of the Field.
+!       The typekind of the Field. See section \ref{const:typekind}
+!       for a list of valid typekind options.
 ! \item [{[xgridside]}]
 !       Which side of the XGrid to create the Field on (either ESMF\_XGRIDSIDE\_A,
 !       ESMF\_XGRIDSIDE\_B, or ESMF\_XGRIDSIDE\_BALANCED). If not passed in then
