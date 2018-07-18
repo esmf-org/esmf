@@ -5731,7 +5731,7 @@ namespace ESMCI {
     name.sin_family = AF_INET;
     name.sin_port = htons(port);
     name.sin_addr.s_addr = INADDR_ANY;  // system to fill in automatically
-    if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0){
+    if (::bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0){
       perror("socketServerInit: bind()");
       return SOCKERR_UNSPEC;  // bail out
     }
