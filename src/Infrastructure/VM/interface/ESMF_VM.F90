@@ -845,7 +845,7 @@ contains
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING}, error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.
 !
@@ -1579,7 +1579,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING}, error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.
 !
@@ -2022,7 +2022,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING}, error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.
 !
@@ -2391,7 +2391,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that performs a total exchange
-!   operation, sending pieces of the contiguous data buffer {\tt semdData} to
+!   operation, sending pieces of the contiguous data buffer {\tt sendData} to
 !   all other PETs while receiving data into the contiguous data buffer
 !   {\tt recvData} from all other PETs.
 !
@@ -2401,7 +2401,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING}, error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.
 !
@@ -2706,7 +2706,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that performs a total exchange
-!   operation, sending pieces of the contiguous data buffer {\tt semdData} to
+!   operation, sending pieces of the contiguous data buffer {\tt sendData} to
 !   all other PETs while receiving data into the contiguous data buffer
 !   {\tt recvData} from all other PETs.
 !
@@ -2717,7 +2717,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING}, error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.
 !
@@ -4475,7 +4475,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING}, error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.
 !
@@ -5981,7 +5981,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   {\sc Todo:} The current version of this method does not provide an 
 !   implementation of the {\em non-blocking} feature. When calling this 
-!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING} error code 
+!   method with {\tt syncflag = ESMF\_SYNC\_NONBLOCKING}, error code 
 !   {\tt ESMF\_RC\_NOT\_IMPL} will be returned and an error will be 
 !   logged.
 !
