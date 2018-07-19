@@ -231,7 +231,8 @@ module NUOPC_Connector
     if (btest(diagnostic,0)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -239,7 +240,8 @@ module NUOPC_Connector
     if (btest(diagnostic,1)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -255,7 +257,8 @@ module NUOPC_Connector
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -263,7 +266,8 @@ module NUOPC_Connector
     if (btest(diagnostic,3)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -320,7 +324,8 @@ module NUOPC_Connector
     if (btest(diagnostic,0)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -328,7 +333,8 @@ module NUOPC_Connector
     if (btest(diagnostic,1)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -385,7 +391,8 @@ module NUOPC_Connector
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -393,7 +400,8 @@ module NUOPC_Connector
     if (btest(diagnostic,3)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -555,7 +563,8 @@ module NUOPC_Connector
     if (btest(diagnostic,0)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -563,7 +572,8 @@ module NUOPC_Connector
     if (btest(diagnostic,1)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -699,7 +709,8 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -707,7 +718,8 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     if (btest(diagnostic,3)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -776,7 +788,8 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     if (btest(diagnostic,0)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -784,7 +797,8 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     if (btest(diagnostic,1)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1037,7 +1051,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1045,7 +1060,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,3)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1102,7 +1118,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,0)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1110,7 +1127,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,1)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1142,7 +1160,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1150,7 +1169,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,3)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1230,7 +1250,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,0)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1238,7 +1259,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,1)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1365,7 +1387,7 @@ print *, "current bondLevel=", bondLevel
       cplName = chopStringList(1) ! first part is the standard name of cpl field
       deallocate(chopStringList)
 
-      if (btest(verbosity,12)) then
+      if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
           "cplList("//trim(adjustl(iString))//"): "//trim(cplName)
@@ -1906,7 +1928,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1914,7 +1937,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,3)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -1981,9 +2005,10 @@ print *, "current bondLevel=", bondLevel
     integer, allocatable            :: minIndex(:), maxIndex(:)
     logical                         :: sharedFlag
     type(ESMF_Array)                :: array
-    integer                   :: verbosity, profiling, diagnostic
-    type(ESMF_Time)           :: currTime
-    character(len=40)         :: currTimeString
+    integer                         :: verbosity, profiling, diagnostic
+    type(ESMF_Time)                 :: currTime
+    character(len=40)               :: currTimeString
+    character(len=40)               :: transferDirection
     
     rc = ESMF_SUCCESS
 
@@ -2013,7 +2038,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,0)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -2021,7 +2047,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,1)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -2122,7 +2149,7 @@ print *, "current bondLevel=", bondLevel
       cplName = chopStringList(1) ! first part is the standard name of cpl field
       deallocate(chopStringList)
       
-      if (btest(verbosity,12)) then
+      if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
           "cplList("//trim(adjustl(iString))//"): "//trim(cplName)
@@ -2211,12 +2238,14 @@ print *, "current bondLevel=", bondLevel
           acceptorField = eField
           providerState = importState
           acceptorState = exportState
+          transferDirection = "(import -> export)"
         elseif ((trim(eTransferAction)=="provide") &
           .and.(trim(iTransferAction)=="accept")) then
           providerField = eField
           acceptorField = iField
           providerState = exportState
           acceptorState = importState
+          transferDirection = "(import <- export)"
         else  ! not a situation that needs handling here
           cycle ! continue with the next i
         endif
@@ -2270,8 +2299,8 @@ print *, "current bondLevel=", bondLevel
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,11)) then
               call ESMF_LogWrite(trim(name)//": transferring underlying "// &
-                "DistGrid for Grid: "//trim(geomobjname), &
-                ESMF_LOGMSG_INFO, rc=rc)
+                "DistGrid "//trim(transferDirection)//" for Grid: "&
+                //trim(geomobjname), ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
@@ -2389,9 +2418,13 @@ print *, "current bondLevel=", bondLevel
                 return  ! bail out
             endif
           else
-            ! shared: query additional info from provider to share with acceptor
-            call ESMF_FieldGet(providerField, name=fieldName, array=array, &
-              rc=rc)
+            ! shared:
+            ! obtain the array from provider to be shared with acceptor
+            call ESMF_FieldGet(providerField, array=array, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! accceptor fieldName to remain unchanged
+            call ESMF_FieldGet(acceptorField, name=fieldName, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             !TODO: make sure that this FieldCreate() sets total widths correctly
@@ -2458,8 +2491,9 @@ print *, "current bondLevel=", bondLevel
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//": transferring underlying DistGrid", &
-                ESMF_LOGMSG_INFO, rc=rc)
+              call ESMF_LogWrite(trim(name)//&
+                ": transferring underlying DistGrid "//trim(transferDirection)&
+                //" for Mesh", ESMF_LOGMSG_INFO, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
@@ -2551,9 +2585,13 @@ print *, "current bondLevel=", bondLevel
                 return  ! bail out
             endif
           else
-            ! shared: query additional info from provider to share with acceptor
-            call ESMF_FieldGet(providerField, name=fieldName, array=array, &
-              rc=rc)
+            ! shared:
+            ! obtain the array from provider to be shared with acceptor
+            call ESMF_FieldGet(providerField, array=array, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! accceptor fieldName to remain unchanged
+            call ESMF_FieldGet(acceptorField, name=fieldName, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             !TODO: make sure that this FieldCreate() sets total widths correctly
@@ -2615,8 +2653,9 @@ print *, "current bondLevel=", bondLevel
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (btest(verbosity,11)) then
-            call ESMF_LogWrite(trim(name)//": transferring underlying DistGrid", &
-              ESMF_LOGMSG_INFO, rc=rc)
+            call ESMF_LogWrite(trim(name)//&
+              ": transferring underlying DistGrid "//trim(transferDirection)&
+              //" for LocStream", ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
@@ -2665,7 +2704,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -2673,7 +2713,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,3)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -2730,9 +2771,10 @@ print *, "current bondLevel=", bondLevel
     character(ESMF_MAXSTR)          :: geomobjname
     character(ESMF_MAXSTR)          :: iTransferAction, eTransferAction
     logical                         :: matchE, matchI
-    integer                   :: verbosity, profiling, diagnostic
-    type(ESMF_Time)           :: currTime
-    character(len=40)         :: currTimeString
+    integer                         :: verbosity, profiling, diagnostic
+    type(ESMF_Time)                 :: currTime
+    character(len=40)               :: currTimeString
+    character(len=40)               :: transferDirection
 
     rc = ESMF_SUCCESS
 
@@ -2762,7 +2804,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,0)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -2770,7 +2813,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,1)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -2871,7 +2915,7 @@ print *, "current bondLevel=", bondLevel
       cplName = chopStringList(1) ! first part is the standard name of cpl field
       deallocate(chopStringList)
       
-      if (btest(verbosity,12)) then
+      if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
           "cplList("//trim(adjustl(iString))//"): "//trim(cplName)
@@ -2958,20 +3002,14 @@ print *, "current bondLevel=", bondLevel
           .and.(trim(eTransferAction)=="accept")) then
           providerField = iField
           acceptorField = eField
+          transferDirection = "(import -> export)"
         elseif ((trim(eTransferAction)=="provide") &
           .and.(trim(iTransferAction)=="accept")) then
           providerField = eField
           acceptorField = iField
+          transferDirection = "(import <- export)"
         else  ! not a situation that needs handling here
           cycle ! continue with the next i
-        endif
-
-        if (btest(verbosity,11)) then
-          call ESMF_LogWrite(trim(name)//&
-            ": transferring the full Grid/Mesh/LocStream", &
-            ESMF_LOGMSG_INFO, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         endif
 
         ! transfer the underlying Grid/Mesh/LocStream from provider to acceptor
@@ -2979,6 +3017,13 @@ print *, "current bondLevel=", bondLevel
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         if (geomtype==ESMF_GEOMTYPE_GRID) then
+          if (btest(verbosity,11)) then
+            call ESMF_LogWrite(trim(name)//&
+              ": transferring the full Grid with coordinates "//&
+              trim(transferDirection), ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
           call ESMF_FieldGet(providerField, grid=providerGrid, &
             staggerloc=staggerloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3000,7 +3045,21 @@ print *, "current bondLevel=", bondLevel
             staggerloc=staggerloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (btest(verbosity,11)) then
+            call ESMF_LogWrite(trim(name)//&
+              ": done transferring the full Grid with coordinates", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
         elseif (geomtype==ESMF_GEOMTYPE_MESH) then
+          if (btest(verbosity,11)) then
+            call ESMF_LogWrite(trim(name)//&
+              ": transferring the full Mesh with coordinates "//&
+              trim(transferDirection), ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
           call ESMF_FieldGet(providerField, mesh=providerMesh, &
             meshloc=meshloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3036,7 +3095,21 @@ print *, "current bondLevel=", bondLevel
             meshloc=meshloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (btest(verbosity,11)) then
+            call ESMF_LogWrite(trim(name)//&
+              ": done transferring the full Mesh with coordinates", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
         elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
+          if (btest(verbosity,11)) then
+            call ESMF_LogWrite(trim(name)//&
+              ": transferring the full LocStream with coordinates "//&
+              trim(transferDirection), ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
           call ESMF_FieldGet(providerField, locstream=providerLocstream, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3057,6 +3130,13 @@ print *, "current bondLevel=", bondLevel
             rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (btest(verbosity,11)) then
+            call ESMF_LogWrite(trim(name)//&
+              ": done transferring the full LocStream with coordinates", &
+              ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
         else
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             msg="Provided GeomType must be Grid, Mesh, or LocStream.", &
@@ -3065,14 +3145,6 @@ print *, "current bondLevel=", bondLevel
           return  ! bail out
         endif
           
-        if (btest(verbosity,11)) then
-          call ESMF_LogWrite(trim(name)//&
-            ": done transferring the full Grid/Mesh/LocStream", &
-            ESMF_LOGMSG_INFO, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        endif
-        
         ! Need to reset the TransferOfferGeomObject and TransferActionGeomObject
         ! attributes on the acceptorField, just in case this Field interacts on
         ! multiple levels of a component hierarchy.
@@ -3106,7 +3178,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3114,7 +3187,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,3)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3170,7 +3244,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,0)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3178,7 +3253,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,1)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3203,7 +3279,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3211,7 +3288,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,3)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3302,7 +3380,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,0)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3310,7 +3389,8 @@ print *, "current bondLevel=", bondLevel
     if (btest(diagnostic,1)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3429,7 +3509,7 @@ print *, "current bondLevel=", bondLevel
       cplName = chopStringList(1) ! first part is the standard name of cpl field
       deallocate(chopStringList)
 
-      if (btest(verbosity,12)) then
+      if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
           "cplList("//trim(adjustl(iString))//"): "//trim(cplName)
@@ -3677,7 +3757,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (btest(diagnostic,2)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3685,7 +3766,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (btest(diagnostic,3)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3854,7 +3936,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (btest(diagnostic,4)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3862,7 +3945,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (btest(diagnostic,5)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -4046,7 +4130,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (btest(diagnostic,6)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -4054,7 +4139,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (btest(diagnostic,7)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -4131,7 +4217,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (btest(diagnostic,8)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -4139,7 +4226,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (btest(diagnostic,9)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_enter_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -4275,7 +4363,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (btest(diagnostic,10)) then
       call NUOPC_Write(importState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_import_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -4283,7 +4372,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     if (btest(diagnostic,11)) then
       call NUOPC_Write(exportState, fileNamePrefix="diagnostic_"//&
         trim(name)//"_"//trim(rName)//"_exit_export_"//trim(currTimeString)//&
-        "_", status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., rc=rc)
+        "_", timeslice=1, status=ESMF_FILESTATUS_REPLACE, relaxedFlag=.true., &
+        rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out

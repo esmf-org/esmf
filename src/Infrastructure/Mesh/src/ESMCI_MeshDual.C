@@ -153,6 +153,7 @@ namespace ESMCI {
   // Set Mesh dimensions
   dual_mesh->set_spatial_dimension(sdim);
   dual_mesh->set_parametric_dimension(pdim);
+  dual_mesh->orig_spatial_dim=src_mesh->orig_spatial_dim;
 
   // Get element coordinates
   MEField<> *elem_coords=src_mesh->GetField("elem_coordinates"); 

@@ -26,7 +26,7 @@ extern "C" {
 
   /* will be overridden if preloader present */
   void c_esmftrace_notify_wrappers(int initialized) {
-    printf("IGNORNING call to c_esmftrace_notify_wrappers: %d\n", initialized);
+    printf("IGNORING call to c_esmftrace_notify_wrappers: %d\n", initialized);
     //nothing to do here -- linker will replace this function with a different one
   }
   

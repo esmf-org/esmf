@@ -290,6 +290,9 @@ extern "C" {
     case ESMC_TYPEKIND_R8:
       vmt = vmR8;
       break;
+    case ESMC_TYPEKIND_LOGICAL:
+      vmt = vmL4;
+      break;
     case ESMC_TYPEKIND_CHARACTER:
       if (sendData_len == 1 && recvData_len == 1)
         vmt = vmBYTE;

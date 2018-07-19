@@ -115,6 +115,7 @@ extern int MPIUNI_Memcpy(void*,const void*,int);
 #define MPI_BYTE            sizeof(char)
 #define MPI_INT             sizeof(int)
 #define MPI_UNSIGNED        sizeof(unsigned int)
+#define MPI_LOGICAL         sizeof(int)
 #define MPI_LONG            sizeof(long)
 #define MPI_LONG_LONG_INT   sizeof(long long int)
 #define MPI_SHORT           sizeof(short)

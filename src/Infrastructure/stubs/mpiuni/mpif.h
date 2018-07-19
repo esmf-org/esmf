@@ -35,6 +35,7 @@
        integer, parameter :: MPI_DOUBLE_PRECISION=2
        integer, parameter :: MPI_COMPLEX=3
        integer, parameter :: MPI_CHARACTER=4
+       integer, parameter :: MPI_LOGICAL=5
 
        integer, parameter :: MPI_REAL4 = MPI_REAL
        integer, parameter :: MPI_REAL8 = MPI_DOUBLE_PRECISION

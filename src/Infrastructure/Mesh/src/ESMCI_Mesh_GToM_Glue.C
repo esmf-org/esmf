@@ -137,6 +137,8 @@ void ESMCI_GridToMesh(const Grid &grid_, int staggerLoc,
  // if ((sdim<3)&&is_sphere) Throw()<<"Sphere's not supported with less than 3 dimesnions";
  mesh.set_spatial_dimension(sdim);
 
+ // original spatial dim is the same as grid dimension
+ mesh.orig_spatial_dim=pdim;
 
  // See if this is for conservative regridding
  bool isConserve=false;
@@ -1841,6 +1843,9 @@ void ESMCI_GridToMeshCell(const Grid &grid_,
  // In what dimension is the grid embedded?? (sphere = 3, simple rectangle = 2, etc...)
  UInt sdim = grid->getCartCoordDimCount();
  mesh->set_spatial_dimension(sdim);
+
+ // original spatial dim is the same as grid dimension
+ mesh->orig_spatial_dim=pdim;
 
  // Get distgrid for the center staggerloc
  DistGrid *centerDistgrid;

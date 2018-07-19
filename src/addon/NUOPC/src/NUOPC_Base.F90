@@ -306,6 +306,7 @@ module NUOPC_Base
   end subroutine
   !-----------------------------------------------------------------------------
 
+!TODO: change "name" -> "fieldName", but must deprecate "name" for a while.
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_Advertise - Advertise a single Field in a State
@@ -343,7 +344,10 @@ module NUOPC_Base
 !     The {\tt ESMF\_State} object through which the field is advertised.
 !   \item[StandardName]
 !     The "StandardName" attribute of the advertised field. Must be a 
-!     StandardName found in the  NUOPC Field Dictionary.
+!     StandardName found in the NUOPC Field Dictionary.\newline
+!     NOTE that if by below default rules, {\tt StandardName} is also used as
+!     the input for {\tt name}, then it must not contain the slash ("/")
+!     character.
 !   \item[{[Units]}]
 !     The "Units" attribute of the advertised field. Must be convertible to the
 !     canonical units specified in the NUOPC Field Dictionary for the specified
@@ -358,10 +362,14 @@ module NUOPC_Base
 !   \item[{[ShortName]}]
 !     The "ShortName" attribute of the advertised field. NUOPC does not restrict
 !     the value of this attribute.
-!     If omitted, the default is to use the StandardName.
+!     If omitted, the default is to use the StandardName.\newline
+!     NOTE that if by below default rules, {\tt ShortName} is also used as
+!     the input for {\tt name}, then it must not contain the slash ("/")
+!     character.
 !   \item[{[name]}]
 !     The actual name of the advertised field by which it is accessed in the
-!     state object. NUOPC does not restrict the value of this variable.
+!     state object. The string provided for {\tt name} must not contain the
+!     slash ("/") character.
 !     If omitted, the default is to use the value of the ShortName.
 !   \item[{[TransferOfferField]}]
 !     The "TransferOfferField" attribute of the advertised field. NUOPC 

@@ -3696,6 +3696,7 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
       mpitype = MPI_DOUBLE;
       break;
     case vmBYTE:
+    case vmL4:
       localrc = -1;   // error
       return localrc; // bail out
     }
@@ -3717,6 +3718,7 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
       templen *= 8;   // 8 bytes
       break;
     case vmBYTE:
+    case vmL4:
       localrc = -1;   // error
       return localrc; // bail out
     }
@@ -3787,6 +3789,7 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
           }
           break;
         case vmBYTE:
+        case vmL4:
           localrc = -1;   // error
           return localrc; // bail out
         }
@@ -3854,6 +3857,7 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
           }
           break;
         case vmBYTE:
+        case vmL4:
           localrc = -1;   // error
           return localrc; // bail out
         }
@@ -3921,6 +3925,7 @@ int VMK::reduce(void *in, void *out, int len, vmType type, vmOp op, int root){
           }
           break;
         case vmBYTE:
+        case vmL4:
           localrc = -1;   // error
           return localrc; // bail out
         }
@@ -3965,6 +3970,7 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
       mpitype = MPI_DOUBLE;
       break;
     case vmBYTE:
+    case vmL4:
       localrc = -1;   // error
       return localrc; // bail out
     }
@@ -3986,6 +3992,7 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
       templen *= 8;   // 8 bytes
       break;
     case vmBYTE:
+    case vmL4:
       localrc = -1;   // error
       return localrc; // bail out
     }
@@ -4056,6 +4063,7 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
         }
         break;
       case vmBYTE:
+      case vmL4:
         localrc = -1;   // error
         return localrc; // bail out
       }
@@ -4123,6 +4131,7 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
         }
         break;
       case vmBYTE:
+      case vmL4:
         localrc = -1;   // error
         return localrc; // bail out
       }
@@ -4190,6 +4199,7 @@ int VMK::allreduce(void *in, void *out, int len, vmType type, vmOp op){
         }
         break;
       case vmBYTE:
+      case vmL4:
         localrc = -1;   // error
         return localrc; // bail out
       }
@@ -4250,6 +4260,7 @@ int VMK::allfullreduce(void *in, void *out, int len, vmType type, vmOp op){
       }
       break;
     case vmBYTE:
+    case vmL4:
       localrc = -1;   // error
       return localrc; // bail out
     }
@@ -4294,6 +4305,7 @@ int VMK::allfullreduce(void *in, void *out, int len, vmType type, vmOp op){
       }
       break;
     case vmBYTE:
+    case vmL4:
       localrc = -1;   // error
       return localrc; // bail out
     }
@@ -4338,6 +4350,7 @@ int VMK::allfullreduce(void *in, void *out, int len, vmType type, vmOp op){
       }
       break;
     case vmBYTE:
+    case vmL4:
       localrc = -1;   // error
       return localrc; // bail out
     }
@@ -4413,6 +4426,7 @@ int VMK::reduce_scatter(void *in, void *out, int *outCounts,
       mpitype = MPI_DOUBLE;
       break;
     case vmBYTE:
+    case vmL4:
       localrc = -1;   // error
       return localrc; // bail out
     }
@@ -4498,6 +4512,9 @@ int VMK::scatterv(void *in, int *inCounts, int *inOffsets, void *out,
     case vmR8:
       mpitype = MPI_DOUBLE;
       break;
+    case vmL4:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     localrc = MPI_Scatterv(in, inCounts, inOffsets, mpitype, out, outCount,
       mpitype, root, mpi_c);
@@ -4518,6 +4535,7 @@ int VMK::scatterv(void *in, int *inCounts, int *inOffsets, void *out,
       size=8;
       break;
     case vmBYTE:
+    case vmL4:
       localrc = -1;   // error
       return localrc; // bail out
     }
@@ -4657,6 +4675,9 @@ int VMK::gatherv(void *in, int inCount, void *out, int *outCounts,
     case vmR8:
       mpitype = MPI_DOUBLE;
       break;
+    case vmL4:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     localrc = MPI_Gatherv(in, inCount, mpitype, out, outCounts, outOffsets,
       mpitype, root, mpi_c);
@@ -4679,6 +4700,9 @@ int VMK::gatherv(void *in, int inCount, void *out, int *outCounts,
     case vmR8:
       size=8;
       break;
+    case vmL4:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     int root = 0; // arbitrary root, 0 always exists!
     if (mypet==root){
@@ -4796,6 +4820,9 @@ int VMK::allgatherv(void *in, int inCount, void *out, int *outCounts,
     case vmR8:
       mpitype = MPI_DOUBLE;
       break;
+    case vmL4:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     localrc = MPI_Allgatherv(in, inCount, mpitype, out, outCounts, outOffsets,
       mpitype, mpi_c);
@@ -4818,6 +4845,9 @@ int VMK::allgatherv(void *in, int inCount, void *out, int *outCounts,
     case vmR8:
       size=8;
       break;
+    case vmL4:
+      localrc = -1;   // error
+      return localrc; // bail out
     }
     int root = 0; // arbitrary root, 0 always exists!
     if (mypet==root){
@@ -4879,6 +4909,9 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
     case vmR8:
       mpitype = MPI_DOUBLE;
       break;
+    case vmL4:
+      mpitype = MPI_LOGICAL;
+      break;
     }
     localrc = MPI_Alltoall(in, inCount, mpitype, out, outCount, mpitype, mpi_c);
   }else{
@@ -4899,6 +4932,9 @@ int VMK::alltoall(void *in, int inCount, void *out, int outCount,
       break;
     case vmR8:
       size=8;
+      break;
+    case vmL4:
+      size=4;
       break;
     }
     char *inC = (char *)in;
@@ -4952,6 +4988,9 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
     case vmR8:
       mpitype = MPI_DOUBLE;
       break;
+    case vmL4:
+      mpitype = MPI_LOGICAL;
+      break;
     }
     localrc = MPI_Alltoallv(in, inCounts, inOffsets, mpitype, out, outCounts,
       outOffsets, mpitype, mpi_c);
@@ -4973,6 +5012,9 @@ int VMK::alltoallv(void *in, int *inCounts, int *inOffsets, void *out,
       break;
     case vmR8:
       size=8;
+      break;
+    case vmL4:
+      size=4;
       break;
     }
     char *inC = (char *)in;
@@ -5689,7 +5731,7 @@ namespace ESMCI {
     name.sin_family = AF_INET;
     name.sin_port = htons(port);
     name.sin_addr.s_addr = INADDR_ANY;  // system to fill in automatically
-    if (bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0){
+    if (::bind(sock, (struct sockaddr *) &name, sizeof(name)) < 0){
       perror("socketServerInit: bind()");
       return SOCKERR_UNSPEC;  // bail out
     }
