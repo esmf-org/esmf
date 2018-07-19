@@ -52,6 +52,7 @@
 #endif
 
 \section{Log Class}
+\label{log_class}
 
 \subsection{Description}
 #ifdef STANDALONE
