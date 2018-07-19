@@ -378,6 +378,33 @@ methods.
 
 \section{Overall Rules and Behavior}
 
+\subsection{Return Code Handling}
+
+All ESMF methods pass a {\em return code} back to the caller via the {\tt rc}
+argument. If no errors are encountered during the method execution, a
+value of {\tt ESMF\_SUCCESS} is returned. Otherwise one of the predefined
+error codes is returned to the caller. See the appendix, section 
+\ref{appendix_esmf_error_codes}, for a full list of the ESMF error return codes.
+
+Any code calling an ESMF method must check the return code. If {\tt rc} is not
+equal to {\tt ESMF\_SUCCESS}, the calling code is expected to break out of its
+execution and pass the {\tt rc} to the next level up. All ESMF errors are to be
+handled as {\em fatal}, i.e. the calling code must {\em bail-on-all-errors}.
+
+ESMF provides a number of methods, described under section \ref{log_class},
+that make implementation of the bail-on-all-errors stategy more convenient.
+Consistent use of these methods will ensure that a full back trace is generated
+in the ESMF log output whenever an error condition is triggered.
+
+Note that in ESMF requesting not present information, e.g. via a {\tt Get()}
+method, will trigger an error condition. Combined with the bail-on-all-errors
+strategy this has the advantage of producing an error trace pointing to the
+earliest location in the code that attempts to access unavailable information.
+In cases where the calling side is able to handle the presence or absence of
+certain pieces of of information, the code first must query for the resepctive
+{\tt isPresent} argument. If this argument comes back as {\tt .true.} it is
+safe to query for the actual information.
+
 \subsection{Local and Global Views and Associated Conventions}
 
 ESMF data objects such as Fields are distributed over
