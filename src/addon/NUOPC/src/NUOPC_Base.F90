@@ -2502,13 +2502,14 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_Realize - Realize previously advertised Fields inside a State on a single Grid with internal allocation
 ! !INTERFACE:
   ! call using generic interface: NUOPC_Realize
-  subroutine NUOPC_RealizeCompleteG(state, grid, fieldName, typekind, selection,&
-    dataFillScheme, rc)
+  subroutine NUOPC_RealizeCompleteG(state, grid, fieldName, typekind, &
+    staggerloc, selection, dataFillScheme, rc)
 ! !ARGUMENTS:
     type(ESMF_State)                                :: state
     type(ESMF_Grid),          intent(in)            :: grid
     character(*),             intent(in),  optional :: fieldName
     type(ESMF_TypeKind_Flag), intent(in),  optional :: typekind
+    type(ESMF_StaggerLoc),    intent(in),  optional :: staggerloc
     character(len=*),         intent(in),  optional :: selection
     character(len=*),         intent(in),  optional :: dataFillScheme    
     integer,                  intent(out), optional :: rc
@@ -2542,6 +2543,10 @@ module NUOPC_Base
 !     The typekind of the internally created field(s). The valid options are
 !     {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
 !     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8} (default).
+!   \item[{[staggerloc]}]
+!     Stagger location of data in grid cells. By default use the same
+!     stagger location as the advertising field, or 
+!     {\tt ESMF\_STAGGERLOC\_CENTER} if the advertising field was created empty.
 !   \item[{[selection]}]
 !     Selection of mode of operation:
 !     \begin{itemize}
@@ -2562,9 +2567,11 @@ module NUOPC_Base
     ! local variables
     character(len=80), allocatable  :: fieldNameList(:)
     integer                         :: i, itemCount, k
-    type(ESMF_Field)                :: field
+    type(ESMF_Field)                :: field, fieldAdv
+    type(ESMF_FieldStatus_Flag)     :: fieldStatus
     character(len=80)               :: selectionOpt
     type(ESMF_TypeKind_Flag)        :: typekindOpt
+    type(ESMF_StaggerLoc)           :: staggerlocOpt
     character(len=80)               :: value
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -2594,19 +2601,44 @@ module NUOPC_Base
       selectionOpt="realize_all"
     endif
     
-    ! optional typekind argument
-    if (present(typekind)) then
-      typekindOpt=typekind
-    else
-      typekindOpt=ESMF_TYPEKIND_R8
-    endif
-
     k=1 ! initialize
     do i=1, itemCount
+      ! access the advertised field
+      call ESMF_StateGet(state, itemName=fieldNameList(i), field=fieldAdv, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) &
+        return  ! bail out
+      ! obtain the fieldStatus of the advertised field
+      call ESMF_FieldGet(fieldAdv, status=fieldStatus, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) &
+        return  ! bail out
+      ! optionally query the advertised field
+      if (fieldStatus /= ESMF_FIELDSTATUS_EMPTY) then
+        ! obtain typekind and staggerloc arguments from advertised field
+        call ESMF_FieldGet(fieldAdv, typekind=typekindOpt, &
+          staggerloc=staggerlocOpt, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) &
+          return  ! bail out
+      else
+        ! set defaults
+        typekindOpt=ESMF_TYPEKIND_R8
+        staggerlocOpt=ESMF_STAGGERLOC_CENTER
+      endif
+      ! present arguments override any default
+      if (present(typekind)) then
+        typekindOpt=typekind
+      endif
+      if (present(staggerloc)) then
+        staggerlocOpt=staggerloc
+      endif
+      
       if (trim(selectionOpt)=="realize_all") then
         ! create a Field
         field = ESMF_FieldCreate(grid, typekindOpt, &
-          name=fieldNameList(i), rc=rc)
+          staggerloc=staggerlocOpt, name=fieldNameList(i), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) &
           return  ! bail out
@@ -2628,7 +2660,7 @@ module NUOPC_Base
         if (NUOPC_IsConnected(state, fieldName=fieldNameList(i))) then
           ! create a Field
           field = ESMF_FieldCreate(grid, typekindOpt, &
-            name=fieldNameList(i), rc=rc)
+            staggerloc=staggerlocOpt, name=fieldNameList(i), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME)) &
             return  ! bail out
@@ -2685,7 +2717,7 @@ module NUOPC_Base
           if (trim(value)=="provide") then
             ! create a Field
             field = ESMF_FieldCreate(grid, typekindOpt, &
-              name=fieldNameList(i), rc=rc)
+              staggerloc=staggerlocOpt, name=fieldNameList(i), rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=FILENAME)) &
               return  ! bail out
@@ -2891,13 +2923,14 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_Realize - Realize previously advertised Fields inside a State on a single Mesh with internal allocation
 ! !INTERFACE:
   ! call using generic interface: NUOPC_Realize
-  subroutine NUOPC_RealizeCompleteM(state, mesh, fieldName, typekind, selection,&
-    dataFillScheme, rc)
+  subroutine NUOPC_RealizeCompleteM(state, mesh, fieldName, typekind, &
+    meshloc, selection, dataFillScheme, rc)
 ! !ARGUMENTS:
     type(ESMF_State)                                :: state
     type(ESMF_Mesh),          intent(in)            :: mesh
     character(*),             intent(in),  optional :: fieldName
     type(ESMF_TypeKind_Flag), intent(in),  optional :: typekind
+    type(ESMF_MeshLoc),       intent(in),  optional :: meshloc
     character(len=*),         intent(in),  optional :: selection
     character(len=*),         intent(in),  optional :: dataFillScheme    
     integer,                  intent(out), optional :: rc
@@ -2930,6 +2963,10 @@ module NUOPC_Base
 !     The typekind of the internally created field(s). The valid options are
 !     {\tt ESMF\_TYPEKIND\_I4}, {\tt ESMF\_TYPEKIND\_I8},
 !     {\tt ESMF\_TYPEKIND\_R4}, and {\tt ESMF\_TYPEKIND\_R8} (default).
+!   \item[{[meshloc]}]
+!     Location of data in the mesh cell. By default use the same
+!     mesh location as the advertising field, or 
+!     {\tt ESMF\_STAGGERLOC\_NODE} if the advertising field was created empty.
 !   \item[{[selection]}]
 !     Selection of mode of operation:
 !     \begin{itemize}
@@ -2949,9 +2986,11 @@ module NUOPC_Base
     ! local variables
     character(len=80), allocatable  :: fieldNameList(:)
     integer                         :: i, itemCount, k
-    type(ESMF_Field)                :: field
+    type(ESMF_Field)                :: field, fieldAdv
+    type(ESMF_FieldStatus_Flag)     :: fieldStatus
     character(len=80)               :: selectionOpt
     type(ESMF_TypeKind_Flag)        :: typekindOpt
+    type(ESMF_MeshLoc)              :: meshlocOpt
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -2980,19 +3019,44 @@ module NUOPC_Base
       selectionOpt="realize_all"
     endif
     
-    ! optional typekind argument
-    if (present(typekind)) then
-      typekindOpt=typekind
-    else
-      typekindOpt=ESMF_TYPEKIND_R8
-    endif
-
     k=1 ! initialize
     do i=1, itemCount
+      ! access the advertised field
+      call ESMF_StateGet(state, itemName=fieldNameList(i), field=fieldAdv, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) &
+        return  ! bail out
+      ! obtain the fieldStatus of the advertised field
+      call ESMF_FieldGet(fieldAdv, status=fieldStatus, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) &
+        return  ! bail out
+      ! optionally query the advertised field
+      if (fieldStatus /= ESMF_FIELDSTATUS_EMPTY) then
+        ! obtain typekind and staggerloc arguments from advertised field
+        call ESMF_FieldGet(fieldAdv, typekind=typekindOpt, &
+          meshloc=meshlocOpt, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) &
+          return  ! bail out
+      else
+        ! set defaults
+        typekindOpt=ESMF_TYPEKIND_R8
+        meshlocOpt=ESMF_MESHLOC_NODE
+      endif
+      ! present arguments override any default
+      if (present(typekind)) then
+        typekindOpt=typekind
+      endif
+      if (present(meshloc)) then
+        meshlocOpt=meshloc
+      endif
+
       if (trim(selectionOpt)=="realize_all") then
         ! create a Field
         field = ESMF_FieldCreate(mesh, typekindOpt, &
-          name=fieldNameList(i), rc=rc)
+          meshloc=meshlocOpt, name=fieldNameList(i), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) &
           return  ! bail out
@@ -3014,7 +3078,7 @@ module NUOPC_Base
         if (NUOPC_IsConnected(state, fieldName=fieldNameList(i))) then
           ! create a Field
           field = ESMF_FieldCreate(mesh, typekindOpt, &
-            name=fieldNameList(i), rc=rc)
+          meshloc=meshlocOpt, name=fieldNameList(i), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME)) &
             return  ! bail out
