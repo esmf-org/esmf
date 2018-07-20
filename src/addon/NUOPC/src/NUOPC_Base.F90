@@ -1321,23 +1321,22 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_GetTimestamp - Get the timestamp of a Field
 ! !INTERFACE:
-  function NUOPC_GetTimestamp(field, time, rc)
-! !RETURN VALUE:
-    logical :: NUOPC_GetTimestamp
+  subroutine NUOPC_GetTimestamp(field, isValid, time, rc)
 ! !ARGUMENTS:
     type(ESMF_Field), intent(in)            :: field
-    type(ESMF_Time),  intent(out)           :: time
+    logical,          intent(out), optional :: isValid
+    type(ESMF_Time),  intent(out), optional :: time
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Access the timestamp on {\tt field} in form af an {\tt ESMF\_Time} object.
-!   Return {\tt .true.} if the Field holds a valid timestamp, {\tt .false.}
-!   otherwise.
+!   Access the timestamp on {\tt field} in form of an {\tt ESMF\_Time} object.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[field]
 !     The {\tt ESMF\_Field} object to be checked.
-!   \item[time]
+!   \item[{[isValid]}]
+!     Set to {\tt .true.} if the timestamp is valid, {\tt .false.} otherwise.
+!   \item[{[time]}]
 !     The timestamp as {\tt ESMF\_Time} object.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1353,8 +1352,7 @@ module NUOPC_Base
     character(ESMF_MAXSTR)  :: msgString
 #endif
 
-    NUOPC_GetTimestamp = .false. ! initialize
-
+    if (present(isValid)) isValid = .false. ! initialize
     if (present(rc)) rc = ESMF_SUCCESS
     
     call ESMF_AttributeGet(field, &
@@ -1374,20 +1372,22 @@ module NUOPC_Base
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
 #endif
     else
-      NUOPC_GetTimestamp = .true.
-      calkf = valueList(10)
-      call ESMF_TimeSet(time, &
-        yy=valueList(1), mm=valueList(2), dd=valueList(3), &
-         h=valueList(4),  m=valueList(5),  s=valueList(6), &
-        ms=valueList(7), us=valueList(8), ns=valueList(9), &
-        calkindflag=calkf, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+      if (present(isValid)) isValid = .true. ! indicate valid timestamp
+      if (present(time)) then
+        calkf = valueList(10)
+        call ESMF_TimeSet(time, &
+          yy=valueList(1), mm=valueList(2), dd=valueList(3), &
+           h=valueList(4),  m=valueList(5),  s=valueList(6), &
+          ms=valueList(7), us=valueList(8), ns=valueList(9), &
+          calkindflag=calkf, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+      endif
     endif
 
-  end function
+  end subroutine
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
@@ -1781,6 +1781,7 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
+    logical                 :: isValid
     type(ESMF_Time)         :: fieldTime
 #ifdef DEBUG
     character(ESMF_MAXSTR)  :: msgString
@@ -1790,11 +1791,13 @@ module NUOPC_Base
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    if (NUOPC_GetTimestamp(field, fieldTime, rc=rc)) then
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
+    call NUOPC_GetTimestamp(field, isValid=isValid, time=fieldTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    
+    if (isValid) then
       ! valid timestamp
       if (fieldTime /= time) then
         ! times do not match
@@ -1821,10 +1824,6 @@ module NUOPC_Base
         NUOPC_IsAtTimeField = .true.
       endif
     else
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
       ! invalid timestamp
       NUOPC_IsAtTimeField = .false.
     endif
