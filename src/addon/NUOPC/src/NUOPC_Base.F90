@@ -1750,94 +1750,6 @@ module NUOPC_Base
   end subroutine
   !-----------------------------------------------------------------------------
   
-! Reverted the NUOPC_IsAtTime implementation below because it is failing
-! in CESM.  I was able to track down the failure to the need to pass the
-! calkindflag to ESMF_TimeSet() before comparing the timestamps. The
-! implementation below uses NUOPC_GetTimestamp() which does not set the
-! calkindflag.  This results in the comparison failing, even when
-! timestamps are equal.  For now, I am reverting to the previous version
-! of this function.  Rocky Dunlap
-
-!!$  !-----------------------------------------------------------------------------
-!!$!BOP
-!!$! !IROUTINE: NUOPC_IsAtTime - Check if a Field is at the given Time
-!!$! !INTERFACE:
-!!$  ! call using generic interface: NUOPC_IsAtTime
-!!$  function NUOPC_IsAtTimeField(field, time, rc)
-!!$! !RETURN VALUE:
-!!$    logical :: NUOPC_IsAtTimeField
-!!$! !ARGUMENTS:
-!!$    type(ESMF_Field), intent(in)            :: field
-!!$    type(ESMF_Time),  intent(in)            :: time
-!!$    integer,          intent(out), optional :: rc
-!!$! !DESCRIPTION:
-!!$!   Returns {\tt .true.} if {\tt field} has a timestamp attribute
-!!$!   that matches {\tt time}. Otherwise returns {\tt .false.}.
-!!$!
-!!$!   The arguments are:
-!!$!   \begin{description}
-!!$!   \item[field]
-!!$!     The {\tt ESMF\_Field} object to be checked.
-!!$!   \item[time]
-!!$!     The time to compare against.
-!!$!   \item[{[rc]}]
-!!$!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!!$!   \end{description}
-!!$!
-!!$!EOP
-!!$  !-----------------------------------------------------------------------------
-!!$    ! local variables
-!!$    type(ESMF_Time)         :: fieldTime
-!!$#ifdef DEBUG
-!!$    character(ESMF_MAXSTR)  :: msgString
-!!$#endif
-!!$
-!!$    NUOPC_IsAtTimeField = .false. ! initialize
-!!$    
-!!$    if (present(rc)) rc = ESMF_SUCCESS
-!!$    
-!!$    if (NUOPC_GetTimestamp(field, fieldTime, rc=rc)) then
-!!$      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-!!$        line=__LINE__, &
-!!$        file=FILENAME)) &
-!!$        return  ! bail out
-!!$      ! valid timestamp
-!!$      if (fieldTime /= time) then
-!!$        ! times do not match
-!!$        NUOPC_IsAtTimeField = .false.
-!!$#ifdef DEBUG
-!!$        write (msgString,*) "NUOPC_IsAtTimeField() time mismatch detected: "
-!!$        call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
-!!$        write (msgString,*) "field time:  ", valueList
-!!$        call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
-!!$        call ESMF_TimeGet(time, &
-!!$          yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
-!!$           h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
-!!$          ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
-!!$          rc=rc)
-!!$        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-!!$          line=__LINE__, &
-!!$          file=FILENAME)) &
-!!$          return  ! bail out
-!!$        write (msgString,*) "target time: ", valueList
-!!$        call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
-!!$#endif
-!!$      else
-!!$        ! times do match
-!!$        NUOPC_IsAtTimeField = .true.
-!!$      endif
-!!$    else
-!!$      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-!!$        line=__LINE__, &
-!!$        file=FILENAME)) &
-!!$        return  ! bail out
-!!$      ! invalid timestamp
-!!$      NUOPC_IsAtTimeField = .false.
-!!$    endif
-!!$
-!!$  end function
-!!$  !-----------------------------------------------------------------------------
-
   !-----------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: NUOPC_IsAtTime - Check if a Field is at the given Time
@@ -1868,51 +1780,22 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     type(ESMF_Time)         :: fieldTime
-    integer                 :: i, valueList(10)
-    type(ESMF_CalKind_Flag) :: calkindflag
 #ifdef DEBUG
     character(ESMF_MAXSTR)  :: msgString
 #endif
 
+    NUOPC_IsAtTimeField = .false. ! initialize
+    
     if (present(rc)) rc = ESMF_SUCCESS
     
-    NUOPC_IsAtTimeField = .true. ! initialize
-    
-    call ESMF_TimeGet(time, calkindflag=calkindflag, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-
-    call ESMF_AttributeGet(field, &
-      name="TimeStamp", valueList=valueList, &
-      convention="NUOPC", purpose="Instance", &
-      attnestflag=ESMF_ATTNEST_ON, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    if (ValueList(2)==0) then
-      ! month value of 0 is indicative of an uninitialized timestamp
-      NUOPC_IsAtTimeField = .false.
-#ifdef DEBUG
-      write (msgString,*) "NUOPC_IsAtTimeField() uninitialized time detected: "
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
-      write (msgString,*) "field time:  ", valueList
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
-#endif
-      return
-    else
-      call ESMF_TimeSet(fieldTime, &
-        yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
-         h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
-        ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
-        calkindflag=calkindflag, rc=rc)
+    if (NUOPC_GetTimestamp(field, fieldTime, rc=rc)) then
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
+      ! valid timestamp
       if (fieldTime /= time) then
+        ! times do not match
         NUOPC_IsAtTimeField = .false.
 #ifdef DEBUG
         write (msgString,*) "NUOPC_IsAtTimeField() time mismatch detected: "
@@ -1931,13 +1814,21 @@ module NUOPC_Base
         write (msgString,*) "target time: ", valueList
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
 #endif
-        return
+      else
+        ! times do match
+        NUOPC_IsAtTimeField = .true.
       endif
+    else
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      ! invalid timestamp
+      NUOPC_IsAtTimeField = .false.
     endif
 
   end function
   !-----------------------------------------------------------------------------
-
 
   !-----------------------------------------------------------------------------
 !BOP
