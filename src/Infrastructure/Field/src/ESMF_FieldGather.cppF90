@@ -268,8 +268,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               return  ! bail out
             do i=lbound(dataPtrR8D1,1),ubound(dataPtrR8D1,1)
               dataPtrR8D1(i) = &
-                cos(real(param1I4)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.) * &
-                sin(real(param2I4)*3.1416*(coord2PtrR8D1(i)+real(l_step))/90.)
+                cos(real(l_param1I4)*3.1416*(coord1PtrR8D1(i)+real(l_step))/360.) * &
+                sin(real(l_param2I4)*3.1416*(coord2PtrR8D1(i)+real(l_step))/90.)
             enddo
             if (geomtype==ESMF_GEOMTYPE_MESH) then
               deallocate(coordPtrR8D1, coord1PtrR8D1, coord2PtrR8D1)
