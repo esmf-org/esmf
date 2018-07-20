@@ -5410,11 +5410,48 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     type(ESMF_RouteHandle), intent(out), optional :: rh
     type(ESMF_State),       intent(out), optional :: state
     character(*),           intent(in),  optional :: CplSet
-    character(ESMF_MAXSTR), pointer, optional     :: cplSetList(:)
+    character(ESMF_MAXSTR), pointer,     optional :: cplSetList(:)
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Get parameters from the {\tt connector} internal state.
+!   Get parameters from the {\tt connector} internal state.
+!
+!   The Connector keeps information about the connection that it implements 
+!   in its internal state. When customizing a Connector, it is often necessary
+!   to access and sometimes modify these data objects.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[connector]
+!     The Connector component.
+!   \item[{[srcFields]}]
+!     The FieldBundle under which the Connector keeps track of all connected
+!     source side fields. The order in which the fields are stored
+!     in {\tt srcFields} is significant, as it corresponds to the order of
+!     fields in {\tt dstFields}. Consequently, when accessing and modifying
+!     the fields inside of {\tt srcFields}, it is imporant to use the
+!     {\tt itemorderflag=ESMF\_ITEMORDER\_ADDORDER} option to
+!     {\tt ESMF\_FieldBundleGet()}.
+!   \item[{[dstFields]}]
+!     The FieldBundle under which the Connector keeps track of all connected
+!     destination side fields. The order in which the fields are stored
+!     in {\tt dstFields} is significant, as it corresponds to the order of
+!     fields in {\tt srcFields}. Consequently, when accessing and modifying
+!     the fields inside of {\tt dstFields}, it is imporant to use the
+!     {\tt itemorderflag=ESMF\_ITEMORDER\_ADDORDER} option to
+!     {\tt ESMF\_FieldBundleGet()}.
+!   \item[{[rh]}]
+!     The RouteHandle that the Connector uses to move data from {\tt srcFields}
+!     to {\tt dstFields}.
+!   \item[{[state]}]
+!     A State object that the Connector keeps to make customization of the 
+!     Connector more convenient. The generic Connector code handles creation
+!     and destruction of {\tt state}, but does {\em not} access it directly 
+!     for information.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -5504,7 +5541,44 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Set parameters in the {\tt connector} internal state.
+!   Set parameters in the {\tt connector} internal state.
+!
+!   The Connector keeps information about the connection that it implements 
+!   in its internal state. When customizing a Connector, it is often necessary
+!   to access and sometimes modify these data objects.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[connector]
+!     The Connector component.
+!   \item[{[srcFields]}]
+!     The FieldBundle under which the Connector keeps track of all connected
+!     source side fields. The order in which the fields are stored
+!     in {\tt srcFields} is significant, as it corresponds to the order of
+!     fields in {\tt dstFields}. Consequently, when setting {\tt srcFields}, it
+!     is important to add them in the same order as for {\tt dstFields}.
+!   \item[{[dstFields]}]
+!     The FieldBundle under which the Connector keeps track of all connected
+!     destination side fields. The order in which the fields are stored
+!     in {\tt dstFields} is significant, as it corresponds to the order of
+!     fields in {\tt srcFields}. Consequently, when setting {\tt dstFields}, it
+!     is important to add them in the same order as for {\tt srcFields}.
+!   \item[{[rh]}]
+!     The RouteHandle that the Connector uses to move data from {\tt srcFields}
+!     to {\tt dstFields}.
+!   \item[{[state]}]
+!     A State object that the Connector keeps to make customization of the 
+!     Connector more convenient. Only in very rare cases would the user want
+!     to replace the {\tt state} that is managed by the generic Connector
+!     implementation. If {\tt state} is set by this call, the user essentially
+!     claims ownership of the previous {\tt state} object, and becomes 
+!     responsible for its destruction. Ownership of the new {\tt state} is 
+!     transferred to the Connector and must not be explicitly destroyed by the
+!     user code.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
