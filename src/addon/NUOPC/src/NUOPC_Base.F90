@@ -1347,7 +1347,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     type(ESMF_Time)         :: fieldTime
-    integer                 :: valueList(9)
+    integer                 :: valueList(10)
 #ifdef DEBUG
     character(ESMF_MAXSTR)  :: msgString
 #endif
@@ -1455,7 +1455,7 @@ module NUOPC_Base
 
     ! Set up a customized list of Attributes to be added to the Fields
     attrList(1) = "Connected"  ! values: "true" or "false"
-    attrList(2) = "TimeStamp"  ! values: list of 9 integers: yy,mm,dd,h,m,s,ms,us,ns
+    attrList(2) = "TimeStamp"  ! values: list of 10 integers: yy,mm,dd,h,m,s,ms,us,ns,calkind
     attrList(3) = "ProducerConnection"! values: "open", "targeted", "connected"
     attrList(4) = "ConsumerConnection"! values: "open", "targeted", "connected"
     attrList(5) = "Updated" ! values: "true" or "false"
@@ -1603,7 +1603,7 @@ module NUOPC_Base
       
     ! set TimeStamp
     call ESMF_AttributeSet(field, &
-      name="TimeStamp", valueList=(/0,0,0,0,0,0,0,0,0/), &
+      name="TimeStamp", valueList=(/0,0,0,0,0,0,0,0,0,0/), &
       convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1868,7 +1868,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     type(ESMF_Time)         :: fieldTime
-    integer                 :: i, valueList(9)
+    integer                 :: i, valueList(10)
     type(ESMF_CalKind_Flag) :: calkindflag
 #ifdef DEBUG
     character(ESMF_MAXSTR)  :: msgString
@@ -3388,7 +3388,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     type(ESMF_Field)                      :: field
-    integer                 :: i, localPet, valueList(9)
+    integer                 :: i, localPet, valueList(10)
     type(ESMF_VM)           :: vm
     
     real(ESMF_KIND_R8)        :: timeBase, time0, time
@@ -3581,7 +3581,7 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     type(ESMF_Field)              :: srcField, dstField
-    integer                       :: i, valueList(9), srcCount, dstCount
+    integer                       :: i, valueList(10), srcCount, dstCount
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -3755,7 +3755,7 @@ module NUOPC_Base
     ! local variables
     type(ESMF_Field),       pointer       :: fieldList(:)
     type(ESMF_Field)                      :: field
-    integer                 :: i, localPet, valueList(9)
+    integer                 :: i, localPet, valueList(10)
     type(ESMF_VM)           :: vm
     
     real(ESMF_KIND_R8)        :: timeBase, time0, time
@@ -3928,7 +3928,8 @@ module NUOPC_Base
     character(ESMF_MAXSTR)                :: value
     type(ESMF_Field)                      :: field
     type(ESMF_Time)         :: time
-    integer                 :: yy, mm, dd, h, m, s, ms, us, ns
+    type(ESMF_CalKind_Flag) :: calkf
+    integer                 :: yy, mm, dd, h, m, s, ms, us, ns, ckf
     integer                 :: i
     logical                 :: selected
     
@@ -3941,11 +3942,12 @@ module NUOPC_Base
       return  ! bail out
 
     call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, us=us, &
-      ns=ns, rc=rc)
+      ns=ns, calkindflag=calkf, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+    ckf = calkf
   
     nullify(StandardNameList)
     nullify(itemNameList)
@@ -3984,7 +3986,7 @@ module NUOPC_Base
         endif
         if (selected) then
           call ESMF_AttributeSet(field, &
-            name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns/), &
+            name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns,ckf/), &
             convention="NUOPC", purpose="Instance", &
             attnestflag=ESMF_ATTNEST_ON, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
