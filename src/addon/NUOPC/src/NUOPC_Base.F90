@@ -1348,6 +1348,7 @@ module NUOPC_Base
     ! local variables
     type(ESMF_Time)         :: fieldTime
     integer                 :: valueList(10)
+    type(ESMF_CalKind_Flag) :: calkf
 #ifdef DEBUG
     character(ESMF_MAXSTR)  :: msgString
 #endif
@@ -1364,7 +1365,7 @@ module NUOPC_Base
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    if (ValueList(2)==0) then
+    if (valueList(2)==0) then
       ! month value of 0 is indicative of an uninitialized timestamp
 #ifdef DEBUG
       write (msgString,*) "NUOPC_IsAtTimeField() uninitialized time detected: "
@@ -1374,11 +1375,12 @@ module NUOPC_Base
 #endif
     else
       NUOPC_GetTimestamp = .true.
+      calkf = valueList(10)
       call ESMF_TimeSet(time, &
-        yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
-         h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
-        ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
-        rc=rc)
+        yy=valueList(1), mm=valueList(2), dd=valueList(3), &
+         h=valueList(4),  m=valueList(5),  s=valueList(6), &
+        ms=valueList(7), us=valueList(8), ns=valueList(9), &
+        calkindflag=calkf, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
@@ -1803,9 +1805,9 @@ module NUOPC_Base
         write (msgString,*) "field time:  ", valueList
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_WARNING)
         call ESMF_TimeGet(time, &
-          yy=valueList(1), mm=ValueList(2), dd=ValueList(3), &
-           h=valueList(4),  m=ValueList(5),  s=ValueList(6), &
-          ms=valueList(7), us=ValueList(8), ns=ValueList(9), &
+          yy=valueList(1), mm=valueList(2), dd=valueList(3), &
+           h=valueList(4),  m=valueList(5),  s=valueList(6), &
+          ms=valueList(7), us=valueList(8), ns=valueList(9), &
           rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
