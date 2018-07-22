@@ -110,6 +110,7 @@
 ! - ESMF-public methods:
       public operator(==)
       public operator(/=)
+      public assignment(=)
       public ESMF_CalendarCreate
       public ESMF_CalendarDestroy
       public ESMF_CalendarFinalize
@@ -158,6 +159,13 @@
 ! 
 ! INTERFACE BLOCKS
 ! 
+!==============================================================================
+
+interface assignment (=)
+  module procedure ESMF_CalKindToInt
+  module procedure ESMF_IntToCalKind
+end interface
+
 !==============================================================================
 !BOP
 ! !IROUTINE:  ESMF_CalendarAssignment(=) - Assign a Calendar to another Calendar
@@ -421,6 +429,18 @@
 !==============================================================================
 
       contains
+
+subroutine ESMF_CalKindToInt(lhsInt, rhsCalKind)
+  integer,                  intent(out) :: lhsInt
+  type(ESMF_CalKind_Flag),  intent(in)  :: rhsCalKind
+  lhsInt = rhsCalKind%calkindflag
+end subroutine
+
+subroutine ESMF_IntToCalKind(lhsCalKind, rhsInt)
+  type(ESMF_CalKind_Flag),  intent(out) :: lhsCalKind
+  integer,                  intent(in)  :: rhsInt
+  lhsCalKind = ESMF_CalKind_Flag(rhsInt)
+end subroutine
 
 !==============================================================================
 #undef  ESMF_METHOD
