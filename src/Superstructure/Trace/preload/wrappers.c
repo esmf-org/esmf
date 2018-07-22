@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include "ESMCI_Trace.h"
 
 extern "C" {
 
@@ -16,20 +17,19 @@ extern "C" {
    * the c_esmftrace_notify_wrappers() function with this one
    * to catch the notification.
    */
-  void __wrap_c_esmftrace_notify_wrappers(int initialized) {
+  int __wrap_c_esmftrace_notify_wrappers(int initialized) {
     if (initialized == 1) {
-      printf("ESMF Tracing enabled with static instrumentation\n");
+      //printf("ESMF Tracing enabled with static instrumentation\n");
       traceInitialized = 1;
     }
     else {
       traceInitialized = 0;
     }
+    return TRACE_WRAP_STATIC;
   }
-
    
   int __wrap_c_esmftrace_isinitialized() {
     return traceInitialized;
   }  
-  
   
 }

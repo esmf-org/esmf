@@ -20,31 +20,13 @@
 #define ESMF_CLOCK_MONOTONIC      2
 #define ESMF_CLOCK_MONOTONIC_SYNC 3
 
-
-//how often to flush streams to file
-#define BT_FLUSH_STREAM_INTERVAL 100
-
-//constants used in tracing events
-#define BT_ESMF_TRACE_VERSION "0.2"
-
-#define BT_CNTL_START 0
-#define BT_CNTL_END 1
-#define BT_CNTL_STARTP 2
-#define BT_CNTL_ENDP 3
-#define BT_CNTL_STARTE 4
-#define BT_CNTL_ENDE 5
-
-#define BT_METHOD_INIT 0
-#define BT_METHOD_RUN 1
-#define BT_METHOD_FINAL 2
-
-#define BT_REGION_ENTER 0
-#define BT_REGION_EXIT 1
-
+#define TRACE_WRAP_NONE    0  /* no wrappers */
+#define TRACE_WRAP_DYNAMIC 1  /* dynamic linker does wrapping */
+#define TRACE_WRAP_STATIC  2  /* wrappers statically compiled in */
 
 #if (!defined ESMF_OS_Darwin || defined ESMF_NO_DLFCN)
 extern "C" {
-  void c_esmftrace_notify_wrappers(int initialized);
+  int c_esmftrace_notify_wrappers(int initialized);
   int c_esmftrace_isinitialized();
 }
 #endif

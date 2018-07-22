@@ -11,23 +11,23 @@ LOCDIR	  = src/Superstructure/Trace/tests
 TESTS_BUILD = \
 		$(ESMF_TESTDIR)/ESMF_TraceClkMonoUTest \
 		$(ESMF_TESTDIR)/ESMF_TraceClkMonoSyncUTest \
-		$(ESMF_TESTDIR)/ESMF_TraceUTest 
-#		$(ESMF_TESTDIR)/ESMF_TraceIOUTest \
-#		$(ESMF_TESTDIR)/ESMF_TraceMPIUTest 
+		$(ESMF_TESTDIR)/ESMF_TraceUTest \
+		$(ESMF_TESTDIR)/ESMF_TraceIOUTest \
+		$(ESMF_TESTDIR)/ESMF_TraceMPIUTest 
 
 TESTS_RUN = \
 		RUN_ESMF_TraceUTest \
 		RUN_ESMF_TraceClkMonoUTest \
 		RUN_ESMF_TraceClkMonoSyncUTest \
-#		RUN_ESMF_TraceIOUTest \
-#		RUN_ESMF_TraceMPIUTest 
+		RUN_ESMF_TraceIOUTest \
+		RUN_ESMF_TraceMPIUTest 
 
 TESTS_RUN_UNI = \
 		RUN_ESMF_TraceUTestUNI \
 		RUN_ESMF_TraceClkMonoUTestUNI \
 		RUN_ESMF_TraceClkMonoSyncUTestUNI \
-#		RUN_ESMF_TraceIOUTestUNI \
-#		RUN_ESMF_TraceMPIUTestUNI 
+		RUN_ESMF_TraceIOUTestUNI \
+		RUN_ESMF_TraceMPIUTestUNI 
 
 include ${ESMF_DIR}/makefile
 
@@ -37,9 +37,17 @@ CLEANDIRS   =
 CLEANFILES  = $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout
 CLOBBERDIRS =
 
+ESMF_TESTTRACE_TARGET = ftest
+
+ifeq ($(ESMF_TESTTRACE),ON)
+ESMF_F90COMPILEOPTS += -DESMF_TESTTRACE
+# add link options for static builds, if required
 ifneq ($(ESMF_TRACE_BUILD_SHARED),ON)
 ESMF_F90LINKOPTS += $(ESMF_TRACE_STATICLINKOPTS)
 ESMF_F90ESMFLINKLIBS += $(ESMF_TRACE_STATICLINKLIBS)
+else
+ESMF_TESTTRACE_TARGET = ftest_preload
+endif
 endif
 
 # --- TraceUTest
@@ -50,60 +58,50 @@ ESMF_UTEST_Trace_OBJS = ESMF_SimpleComp.o
 RUN_ESMF_TraceUTest:
 	rm -rf $(ESMF_TESTDIR)/traceout
 	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=Trace NP=4 ftest
-#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
 RUN_ESMF_TraceUTestUNI:
 	rm -rf $(ESMF_TESTDIR)/traceout
 	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=Trace NP=1 ftest
-#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
 # --- TraceClkMonoUTest
 
 RUN_ESMF_TraceClkMonoUTest:
 	rm -rf $(ESMF_TESTDIR)/traceout
 	env ESMF_RUNTIME_TRACE=ON ESMF_RUNTIME_TRACE_CLOCK=MONOTONIC $(MAKE) TNAME=TraceClkMono NP=4 ftest
-#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
 RUN_ESMF_TraceClkMonoUTestUNI:
 	rm -rf $(ESMF_TESTDIR)/traceout
 	env ESMF_RUNTIME_TRACE=ON ESMF_RUNTIME_TRACE_CLOCK=MONOTONIC $(MAKE) TNAME=TraceClkMono NP=1 ftest
-#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
 # --- TraceClkMonoSyncUTest
 
 RUN_ESMF_TraceClkMonoSyncUTest:
 	rm -rf $(ESMF_TESTDIR)/traceout
 	env ESMF_RUNTIME_TRACE=ON ESMF_RUNTIME_TRACE_CLOCK=MONOTONIC_SYNC $(MAKE) TNAME=TraceClkMonoSync NP=4 ftest
-#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
 RUN_ESMF_TraceClkMonoSyncUTestUNI:
 	rm -rf $(ESMF_TESTDIR)/traceout
 	env ESMF_RUNTIME_TRACE=ON ESMF_RUNTIME_TRACE_CLOCK=MONOTONIC_SYNC $(MAKE) TNAME=TraceClkMonoSync NP=1 ftest
-#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
 
 # --- TraceIOUTest
 
 RUN_ESMF_TraceIOUTest:
 	rm -rf $(ESMF_TESTDIR)/traceout
-	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceIO NP=4 ftest_preload
-#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
+	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceIO NP=4 $(ESMF_TESTTRACE_TARGET) 
 
 RUN_ESMF_TraceIOUTestUNI:
 	rm -rf $(ESMF_TESTDIR)/traceout
-	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceIO NP=1 ftest_preload
-#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
+	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceIO NP=1 $(ESMF_TESTTRACE_TARGET) 
 
 # --- TraceMPIUTest
 
 RUN_ESMF_TraceMPIUTest:
 	rm -rf $(ESMF_TESTDIR)/traceout
-	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceMPI NP=4 ftest_preload
-#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
+	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceMPI NP=4 $(ESMF_TESTTRACE_TARGET) 
 
 RUN_ESMF_TraceMPIUTestUNI:
 	rm -rf $(ESMF_TESTDIR)/traceout
-	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceMPI NP=1 ftest_preload
-#	ls -la $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout/*
+	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceMPI NP=1 $(ESMF_TESTTRACE_TARGET)
 
 
 ifneq ($(ESMF_OS),Darwin)

@@ -5,6 +5,7 @@
  */
 
 #include <stdio.h>
+#include "ESMCI_Trace.h"
 
 extern "C" {
 
@@ -16,14 +17,14 @@ extern "C" {
    * this symbol when LD_PRELOAD is specified so we can
    * catch this notification.
    */
-  void c_esmftrace_notify_wrappers(int initialized) {
+  int c_esmftrace_notify_wrappers(int initialized) {
     if (initialized == 1) {
-      printf("ESMF Tracing enabled with dynamic instrumentation\n"); 
       traceInitialized = 1;
     }
     else {
       traceInitialized = 0;
     }
+    return TRACE_WRAP_DYNAMIC;
   }
 
   /**

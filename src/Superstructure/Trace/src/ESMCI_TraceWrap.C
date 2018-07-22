@@ -25,9 +25,12 @@
 extern "C" {
 
   /* will be overridden if preloader present */
-  void c_esmftrace_notify_wrappers(int initialized) {
-    printf("IGNORING call to c_esmftrace_notify_wrappers: %d\n", initialized);
-    //nothing to do here -- linker will replace this function with a different one
+  int c_esmftrace_notify_wrappers(int initialized) {
+    //printf("IGNORING call to c_esmftrace_notify_wrappers: %d\n", initialized);
+    //returning 0, indicating that there are no wrappers present
+    //if this function is replaced by the linker, it will return > 0,
+    //indicating that wrappers are present
+    return TRACE_WRAP_NONE;
   }
   
   /* will be overridden if preloader present */

@@ -79,7 +79,7 @@ namespace ESMCI {
       unsigned long hash = 5381;
       int c;
       const char *str = s.c_str();     
-      while (c = *str++)
+      while ((c = *str++))
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
       //printf("hash for %s = %d\n", s.c_str(), hash % REGION_HASHTABLE_SIZE);
       return hash % REGION_HASHTABLE_SIZE;
@@ -94,7 +94,7 @@ namespace ESMCI {
   static int nextRegionId = 1;
   
 #if (defined ESMF_OS_Darwin && !defined ESMF_NO_DLFCN)
-  static void (*notify_wrappers)(int initialized) = NULL;
+  static int (*notify_wrappers)(int initialized) = NULL;
 #endif
 
   //this data structure used to map VMIds(vmKey,localid) to an integer id
@@ -683,24 +683,38 @@ namespace ESMCI {
     PushMPIStats();
     traceInitialized = true;
 
+    int wrappersPresent = TRACE_WRAP_NONE;
 #if (defined ESMF_OS_Darwin && !defined ESMF_NO_DLFCN)
     void *preload_lib = dlopen(NULL, RTLD_LAZY);
     if (preload_lib == NULL) {
-      //printf("cannot open lib\n");
+      ESMC_LogDefault.Write("ESMF Tracing could not open shared library containing instrumentation.", ESMC_LOGMSG_WARNING);
     }
     else {
-      notify_wrappers = (void (*)(int)) dlsym(preload_lib, "c_esmftrace_notify_wrappers");
+      notify_wrappers = (int (*)(int)) dlsym(preload_lib, "c_esmftrace_notify_wrappers");
       if (notify_wrappers != NULL) {
-	//printf("found notify_wrappers!");
-	notify_wrappers(1);
+	wrappersPresent = notify_wrappers(1);
       }
       else {
-	//printf("did NOT find notify_wrappers!");
+        ESMC_LogDefault.Write("ESMF Tracing could not load dynamic instrumentation functions.", ESMC_LOGMSG_WARNING);
       }
     }
 #else
-    c_esmftrace_notify_wrappers(1);
+    wrappersPresent = c_esmftrace_notify_wrappers(1);
 #endif
+
+    if (wrappersPresent != TRACE_WRAP_NONE) {
+      logMsg.str("");
+      logMsg << "ESMF Tracing enabled with "; 
+      if (wrappersPresent == TRACE_WRAP_DYNAMIC) {
+        logMsg << "DYNAMIC";
+      }
+      else if (wrappersPresent == TRACE_WRAP_STATIC) {
+        logMsg << "STATIC";
+      }
+      logMsg << " instrumentation.  This option should only be used for profiling applications and NOT for production runs.";
+      ESMC_LogDefault.Write(logMsg.str().c_str(), ESMC_LOGMSG_INFO);
+    }
+    
   }
   
     
@@ -1056,14 +1070,3 @@ namespace ESMCI {
 
 }
 
-/* will be overridden if preloader present */
-//void c_esmftrace_notify_wrappers(int initialized) {
-//  printf("IGNORING call to c_esmftrace_notify_wrappers: %d\n", initialized);
-  //nothing to do here -- linker will replace this function with a different one
-//}
-
-/* will be overridden if preloader present */
-//int c_esmftrace_isinitialized() {
-//  if (ESMCI::traceInitialized) return 1;
-//  else return 0;
-//}
