@@ -33,9 +33,10 @@
 #include <mach/mach.h>
 #include <mach/clock.h>
 #include <mach/mach_time.h>
+#endif
+
 #ifndef ESMF_NO_DLFCN
 #include <dlfcn.h>
-#endif
 #endif
 
 #include "ESMCI_Macros.h"
@@ -93,7 +94,7 @@ namespace ESMCI {
   static HashMap<string, int, REGION_HASHTABLE_SIZE, StringHashF> regionMap;
   static int nextRegionId = 1;
   
-#if (defined ESMF_OS_Darwin && !defined ESMF_NO_DLFCN)
+#ifndef ESMF_NO_DLFCN
   static int (*notify_wrappers)(int initialized) = NULL;
 #endif
 
@@ -684,10 +685,10 @@ namespace ESMCI {
     traceInitialized = true;
 
     int wrappersPresent = TRACE_WRAP_NONE;
-#if (defined ESMF_OS_Darwin && !defined ESMF_NO_DLFCN)
+#ifndef ESMF_NO_DLFCN
     void *preload_lib = dlopen(NULL, RTLD_LAZY);
     if (preload_lib == NULL) {
-      ESMC_LogDefault.Write("ESMF Tracing could not open shared library containing instrumentation.", ESMC_LOGMSG_WARNING);
+      ESMC_LogDefault.Write("ESMF Tracing could not open shared library containing instrumentation.", ESMC_LOGMSG_WARN);
     }
     else {
       notify_wrappers = (int (*)(int)) dlsym(preload_lib, "c_esmftrace_notify_wrappers");
@@ -695,7 +696,7 @@ namespace ESMCI {
 	wrappersPresent = notify_wrappers(1);
       }
       else {
-        ESMC_LogDefault.Write("ESMF Tracing could not load dynamic instrumentation functions.", ESMC_LOGMSG_WARNING);
+        ESMC_LogDefault.Write("ESMF Tracing could not load dynamic instrumentation functions.", ESMC_LOGMSG_WARN);
       }
     }
 #else
@@ -731,7 +732,7 @@ namespace ESMCI {
     if (ctx != NULL) {
       
       traceInitialized = false;
-#if (defined ESMF_OS_Darwin && !defined ESMF_NO_DLFCN)      
+#ifndef ESMF_NO_DLFCN      
       if (notify_wrappers != NULL) {
 	notify_wrappers(0);
       }

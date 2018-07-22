@@ -20,16 +20,14 @@
  *  defined in the preload library, so we need to
  *  explicitly use dlsym() to find those symbols.
  */
-#ifndef ESMF_OS_Darwin
+#ifdef ESMF_NO_DLFCN
 
 extern "C" {
 
   /* will be overridden if preloader present */
   int c_esmftrace_notify_wrappers(int initialized) {
-    //printf("IGNORING call to c_esmftrace_notify_wrappers: %d\n", initialized);
-    //returning 0, indicating that there are no wrappers present
-    //if this function is replaced by the linker, it will return > 0,
-    //indicating that wrappers are present
+    //returning TRACE_WRAP_NONE, indicating that there are no wrappers present
+    //this function may be replaced by the linker if wrappers are present
     return TRACE_WRAP_NONE;
   }
   

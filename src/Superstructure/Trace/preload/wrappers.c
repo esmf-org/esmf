@@ -19,7 +19,6 @@ extern "C" {
    */
   int __wrap_c_esmftrace_notify_wrappers(int initialized) {
     if (initialized == 1) {
-      //printf("ESMF Tracing enabled with static instrumentation\n");
       traceInitialized = 1;
     }
     else {
