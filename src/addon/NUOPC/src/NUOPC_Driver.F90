@@ -1521,14 +1521,14 @@ module NUOPC_Driver
         return  ! bail out
       if (allUpdated) then
         ! update timestamp on all the export Fields
-        call NUOPC_UpdateTimestamp(exportState, internalClock, rc=rc)
+        call NUOPC_SetTimestamp(exportState, internalClock, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
       else
         ! update timestamp on only those export Fields that have the 
         ! "Updated" attribute set to "true"
-        call NUOPC_UpdateTimestamp(exportState, internalClock, &
+        call NUOPC_SetTimestamp(exportState, internalClock, &
           selective=.true., rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
