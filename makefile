@@ -134,6 +134,8 @@ endif
 	-@echo "ESMF_TESTFORCEOPENACC:  $(ESMF_TESTFORCEOPENACC)"
 	-@echo "ESMF_TESTHARNESS_ARRAY: $(ESMF_TESTHARNESS_ARRAY)"
 	-@echo "ESMF_TESTHARNESS_FIELD: $(ESMF_TESTHARNESS_FIELD)"
+	-@if [ "$(ESMF_TESTTRACE)" = "ON" ] ; then \
+	  echo "ESMF_TESTTRACE:         $(ESMF_TESTTRACE)" ; fi
 	-@echo "ESMF_MPIRUN:            $(ESMF_MPIRUN)"
 	-@if [ "$(ESMF_TESTMPMD)" = "ON" ] ; then \
 	  echo "ESMF_MPIMPMDRUN:        $(ESMF_MPIMPMDRUN)" ; fi
