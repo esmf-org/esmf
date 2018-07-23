@@ -92,6 +92,7 @@ module NUOPC
   public NUOPC_Realize                    ! method
   public NUOPC_Reconcile                  ! method, internal use only 
   public NUOPC_SetAttribute               ! method
+  public NUOPC_SetTimestamp               ! method
   public NUOPC_UpdateTimestamp            ! method, internal use only
 
   ! public Auxiliary API
