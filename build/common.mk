@@ -1919,11 +1919,13 @@ ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
 endif
 
 build_tracelibs:
+ifeq ($(ESMF_TESTTRACE),ON)
 	cd $(ESMF_DIR)/src/Superstructure/Trace/preload ;\
 	$(MAKE) tracelib_static
 ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
 	cd $(ESMF_DIR)/src/Superstructure/Trace/preload ;\
 	$(MAKE) tracelib_preload
+endif
 endif
 
 # Build only stuff in and below the current dir.

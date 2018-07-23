@@ -19,7 +19,15 @@
 
 #include <mpi.h>
 
+#ifdef MPICH2_CONST
+#define ESMF_MPI_CONST MPICH2_CONST
+#else
+#define ESMF_MPI_CONST const
+#endif
+
 extern "C" {
+  
+  int __wrap_MPI_Allreduce(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);
   
   int __wrap_MPI_Barrier(MPI_Comm comm);
   

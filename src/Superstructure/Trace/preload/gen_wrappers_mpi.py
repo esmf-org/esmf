@@ -29,6 +29,12 @@ template_wrappers_mpi_h = """
 
 #include <mpi.h>
 
+#ifdef MPICH2_CONST
+#define ESMF_MPI_CONST MPICH2_CONST
+#else
+#define ESMF_MPI_CONST const
+#endif
+
 extern "C" {
   {% for f in cfunc_list %}
   {{f.ret}} __wrap_{{f.name}}({{f.params}});
@@ -64,6 +70,7 @@ template_wrappers_mpi = """
 #include "ESMCI_Macros.h"
 #include "ESMCI_Trace.h"
 #include "preload.h"
+#include "wrappers_mpi.h"
 
 extern "C" {
 
@@ -209,11 +216,11 @@ ESMF_TRACE_WRAPPERS_MPI +={% for f in ffunc_list %} {{f.name}}_ {{f.name}}__{% i
 # C MPI Functions
 cfunc_list = [
 
-#    {
-#        'ret':'int', 'name':'MPI_Allreduce',
-#        'params':'const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm',
-#        'args':'sendbuf, recvbuf, count, datatype, op, comm'
-#    },
+    {
+        'ret':'int', 'name':'MPI_Allreduce',
+        'params':'ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm',
+        'args':'sendbuf, recvbuf, count, datatype, op, comm'
+    },
 
     {
         'ret':'int', 'name':'MPI_Barrier',
