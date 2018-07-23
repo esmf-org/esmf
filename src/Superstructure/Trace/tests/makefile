@@ -31,10 +31,12 @@ TESTS_RUN_UNI = \
 
 include ${ESMF_DIR}/makefile
 
+PRELOADSCRIPT = $(ESMF_TESTDIR)/preload.sh
+
 DIRS        =
 
 CLEANDIRS   =
-CLEANFILES  = $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout
+CLEANFILES  = $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout $(PRELOADSCRIPT)
 CLOBBERDIRS =
 
 ESMF_TESTTRACE_TARGET = ftest
@@ -110,19 +112,29 @@ else
 ENV_PRELOAD = DYLD_INSERT_LIBRARIES
 endif
 
+# MPT implementations do not pick up LD_PRELOAD
+# so we pass a small script to each MPI task
+ifneq (,$(findstring mpich,$(ESMF_COMM)))
+ESMF_PRELOAD_SH = ./preload.sh
+endif
+
 # --- customized target for testing with LD_PRELOAD --- #
-ftest_preload:
+ftest_preload: $(PRELOADSCRIPT)
 	-@cd $(ESMF_TESTDIR) ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
-	if [ ! -f $(ESMF_TRACE_LDPRELOAD) ]; then \
-	  echo Warning: ESMF_$(TNAME)UTest cannot test preload functions because library does not exist: $(ESMF_TRACE_LDPRELOAD) ; \
-	fi ; \
-	if [ $(ESMF_BATCHDEPRECATED) = "true" ] ; then \
-	  echo env $(ENV_PRELOAD)=$(ESMF_TRACE_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest ; \
-	  env $(ENV_PRELOAD)=$(ESMF_TRACE_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest ; \
+	if [ -z $(ESMF_PRELOAD_SH) ] ; then \
+	  echo env $(ENV_PRELOAD)=$(ESMF_TRACE_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1\> ./ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
+	  env $(ENV_PRELOAD)=$(ESMF_TRACE_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
 	else \
-	  echo env $(ENV_PRELOAD)=$(ESMF_TRACE_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest 1\> ./ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
-	  env $(ENV_PRELOAD)=$(ESMF_TRACE_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
+	  echo $(ESMF_MPIRUN) -np $(NP) $(ESMF_PRELOAD_SH) ./ESMF_$(TNAME)UTest 1\> ./ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
+	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_PRELOAD_SH) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
 	fi ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMF_$(TNAME)UTest.Log ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
+
+$(PRELOADSCRIPT):
+	-@cd $(ESMF_TESTDIR)
+	-@echo "#!/bin/sh" > $(PRELOADSCRIPT)
+	-@echo "# Script to preload ESMF dynamic trace library" >> $(PRELOADSCRIPT)
+	-@echo 'env LD_PRELOAD="$$LD_PRELOAD $(ESMF_TRACE_LDPRELOAD)" $$*' >> $(PRELOADSCRIPT)
+	chmod 755 $@
