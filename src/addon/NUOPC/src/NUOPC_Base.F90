@@ -118,7 +118,9 @@ module NUOPC_Base
     module procedure NUOPC_UpdateAcrossFieldLists
     module procedure NUOPC_FieldBundleUpdateTime
     module procedure NUOPC_StateUpdateTimestamp
+    module procedure NUOPC_StateSetTimestampClk
     module procedure NUOPC_StateSetTimestamp
+    module procedure NUOPC_FieldSetTimestamp
   end interface
   
   !-----------------------------------------------------------------------------
@@ -3279,9 +3281,9 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    type(ESMF_Field)                      :: field
-    integer                 :: i, localPet, valueList(10)
-    type(ESMF_VM)           :: vm
+    type(ESMF_Field)          :: field
+    integer                   :: i, localPet, valueList(10)
+    type(ESMF_VM)             :: vm
     
     real(ESMF_KIND_R8)        :: timeBase, time0, time
     character(ESMF_MAXSTR)    :: msgString
@@ -3347,14 +3349,17 @@ module NUOPC_Base
       time0=time
     call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
 #endif
-        call ESMF_AttributeGet(field, &
-          name="TimeStamp", valueList=valueList, &
-          convention="NUOPC", purpose="Instance", &
-          attnestflag=ESMF_ATTNEST_ON, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME)) &
-          return  ! bail out
+
+        if (localPet == rootPet) then
+          call ESMF_AttributeGet(field, &
+            name="TimeStamp", valueList=valueList, &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+        endif
 
 #ifdef PROFILE_DETAILS_on
     ! PROFILE
@@ -3645,11 +3650,10 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    type(ESMF_Field),       pointer       :: fieldList(:)
-    type(ESMF_Field)                      :: field
-    integer                 :: i, localPet, valueList(10)
-    type(ESMF_VM)           :: vm
-    
+    type(ESMF_Field), pointer :: fieldList(:)
+    type(ESMF_Field)          :: field
+    integer                   :: i, localPet, valueList(10)
+    type(ESMF_VM)             :: vm
     real(ESMF_KIND_R8)        :: timeBase, time0, time
     character(ESMF_MAXSTR)    :: msgString
 
@@ -3783,7 +3787,7 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_UpdateTimestamp - Set the TimeStamp on all the Fields in a State
 ! !INTERFACE:
   ! call using generic interface: NUOPC_UpdateTimestamp
-  subroutine NUOPC_StateSetTimestamp(state, clock, selective, rc)
+  subroutine NUOPC_StateSetTimestampClk(state, clock, selective, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     type(ESMF_Clock), intent(in)            :: clock
@@ -3814,33 +3818,71 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR), pointer       :: StandardNameList(:)
-    character(ESMF_MAXSTR), pointer       :: itemNameList(:)
-    type(ESMF_Field),       pointer       :: fieldList(:)
-    character(ESMF_MAXSTR)                :: value
-    type(ESMF_Field)                      :: field
-    type(ESMF_Time)         :: time
-    type(ESMF_CalKind_Flag) :: calkf
-    integer                 :: yy, mm, dd, h, m, s, ms, us, ns, ckf
-    integer                 :: i
-    logical                 :: selected
-    
+    type(ESMF_Time)                       :: time
+
     if (present(rc)) rc = ESMF_SUCCESS
-    
+
     call ESMF_ClockGet(clock, currTime=time, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
 
-    call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, us=us, &
-      ns=ns, calkindflag=calkf, rc=rc)
+    call NUOPC_UpdateTimestamp(state, time=time, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-    ckf = calkf
+
+  end subroutine
+  !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_UpdateTimestamp - Set the TimeStamp on all the Fields in a State
+! !INTERFACE:
+  ! call using generic interface: NUOPC_UpdateTimestamp
+  subroutine NUOPC_StateSetTimestamp(state, time, selective, rc)
+! !ARGUMENTS:
+    type(ESMF_State), intent(inout)         :: state
+    type(ESMF_Time),  intent(in)            :: time
+    logical,          intent(in),  optional :: selective
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Set the "TimeStamp" attribute according to {\tt clock} on all the fields in
+!   {\tt state}. Depending on {\tt selective}, all or only some fields may be
+!   updated.
+!
+!   This call should rarely be needed in user written code. It is used 
+!   by the generic Connector.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[state]
+!     The {\tt ESMF\_State} object holding the fields.
+!   \item[time]
+!     The {\tt ESMF\_Time} object defining the TimeStamp.
+!   \item[{[selective]}]
+!     If {\tt .true.}, then only set the "TimeStamp" attributes on those fields
+!     for which the "Updated" attribute is equal to "true". Otherwise set the
+!     "TimeStamp" attribute on all the fields. Default is {\tt .false.}.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    character(ESMF_MAXSTR), pointer       :: StandardNameList(:)
+    character(ESMF_MAXSTR), pointer       :: itemNameList(:)
+    type(ESMF_Field),       pointer       :: fieldList(:)
+    character(ESMF_MAXSTR)                :: value
+    type(ESMF_Field)                      :: field
+    integer                               :: i
+    logical                               :: selected
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
     nullify(StandardNameList)
     nullify(itemNameList)
     nullify(fieldList)
@@ -3877,10 +3919,7 @@ module NUOPC_Base
           selected=.true.
         endif
         if (selected) then
-          call ESMF_AttributeSet(field, &
-            name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns,ckf/), &
-            convention="NUOPC", purpose="Instance", &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          call NUOPC_UpdateTimestamp(field, time=time, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, &
             file=FILENAME)) &
@@ -3896,4 +3935,58 @@ module NUOPC_Base
   end subroutine
   !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+!BOP
+! !IROUTINE: NUOPC_UpdateTimestamp - Set the TimeStamp on a Field
+! !INTERFACE:
+  ! call using generic interface: NUOPC_UpdateTimestamp
+  subroutine NUOPC_FieldSetTimestamp(field, time, rc)
+! !ARGUMENTS:
+    type(ESMF_Field), intent(inout)         :: field
+    type(ESMF_Time),  intent(in)            :: time
+    integer,          intent(out), optional :: rc
+! !DESCRIPTION:
+!   Set the "TimeStamp" attribute according to {\tt time} on {\tt field}.
+!
+!   This call should rarely be needed in user written code.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[field]
+!     The {\tt ESMF\_Field} object to be updated.
+!   \item[time]
+!     The {\tt ESMF\_Time} object defining the TimeStamp.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+  !-----------------------------------------------------------------------------
+    ! local variables
+    type(ESMF_CalKind_Flag) :: calkf
+    integer                 :: yy, mm, dd, h, m, s, ms, us, ns, ckf
+
+    if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! access the 10 pieces of a time object
+    call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, us=us, &
+      ns=ns, calkindflag=calkf, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    ! convert calendar kind flag into integer
+    ckf = calkf
+    ! set the 10 integer values representing the time stamp
+    call ESMF_AttributeSet(field, &
+      name="TimeStamp", valueList=(/yy,mm,dd,h,m,s,ms,us,ns,ckf/), &
+      convention="NUOPC", purpose="Instance", &
+      attnestflag=ESMF_ATTNEST_ON, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+  end subroutine
+  !-----------------------------------------------------------------------------
+
 end module
