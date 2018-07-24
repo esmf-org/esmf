@@ -1369,6 +1369,35 @@ endif
 endif
 
 #-------------------------------------------------------------------------------
+# yaml-cpp C++ YAML API
+#-------------------------------------------------------------------------------
+ifeq ($(ESMF_YAMLCPP),standard)
+ifneq ($(origin ESMF_YAMLCPP_LIBS), environment)
+ESMF_YAMLCPP_LIBS = -lyaml-cpp
+endif
+endif
+
+ifdef ESMF_YAMLCPP
+ESMF_CPPFLAGS                += -DESMF_YAMLCPP=1 -DESMF_YAML=1
+ifdef ESMF_YAMLCPP_INCLUDE
+ESMF_CXXCOMPILEPATHSTHIRD    += -I$(ESMF_YAMLCPP_INCLUDE)
+ESMF_F90COMPILEPATHSTHIRD    += -I$(ESMF_YAMLCPP_INCLUDE)
+endif
+ifdef ESMF_YAMLCPP_LIBS
+ESMF_CXXLINKLIBS          += $(ESMF_YAMLCPP_LIBS)
+ESMF_CXXLINKRPATHSTHIRD   += $(addprefix $(ESMF_CXXRPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_YAMLCPP_LIBS))))
+ESMF_F90LINKLIBS          += $(ESMF_YAMLCPP_LIBS)
+ESMF_F90LINKRPATHSTHIRD   += $(addprefix $(ESMF_F90RPATHPREFIX),$(subst -L,,$(filter -L%,$(ESMF_YAMLCPP_LIBS))))
+endif
+ifdef ESMF_YAMLCPP_LIBPATH
+ESMF_CXXLINKPATHSTHIRD    += -L$(ESMF_YAMLCPP_LIBPATH)
+ESMF_F90LINKPATHSTHIRD    += -L$(ESMF_YAMLCPP_LIBPATH)
+ESMF_CXXLINKRPATHSTHIRD   += $(ESMF_CXXRPATHPREFIX)$(ESMF_YAMLCPP_LIBPATH)
+ESMF_F90LINKRPATHSTHIRD   += $(ESMF_F90RPATHPREFIX)$(ESMF_YAMLCPP_LIBPATH)
+endif
+endif
+
+#-------------------------------------------------------------------------------
 # PIO
 #-------------------------------------------------------------------------------
 ifneq ($(origin ESMF_PIO), environment)

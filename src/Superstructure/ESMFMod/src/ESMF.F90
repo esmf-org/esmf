@@ -109,6 +109,8 @@ module ESMF
     use ESMF_InitMod
 
     use ESMFIOMod
+
+    use ESMF_IO_YAMLMod
     
     use ESMF_IOScripMod, only: ESMF_SparseMatrixWrite
 
