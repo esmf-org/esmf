@@ -15,8 +15,8 @@
 
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
-#define ASMM_STORE_MEMLOG_off
-#define ASMM_STORE_TUNELOG_off
+#define ASMM_STORE_MEMLOG_on
+#define ASMM_STORE_TUNELOG_on
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_DUMPSMM_off
 
@@ -9700,7 +9700,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-#define SMMSTOREENCODEXXEINFO_off
+#define SMMSTOREENCODEXXEINFO_on
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -10021,6 +10021,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       // start writing a fresh XXE stream
       xxe->clearReset(startCount, startDataCount, startCommhandleCount,
         startXxeSubCount, startBufferInfoListSize);
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.1"));
+#endif
       localrc = sparseMatMulStoreEncodeXXEStream(vm, sendnbVector, recvnbVector,
         srcTermProcessingOpt, pipelineDepth, elementTK, valueTK, factorTK,
         dataSizeSrc, dataSizeDst, dataSizeFactors, srcLocalDeCount,
@@ -10028,16 +10031,25 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         vectorLength, xxe);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.2"));
+#endif
 #if 0
       // optimize the XXE entire stream
       localrc = xxe->optimize();
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
 #endif
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.3"));
+#endif
       // get XXE ready for execution
       localrc = xxe->execReady();
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.4"));
+#endif
       // obtain timing
       double dtAverage = 0.;
       double dtStart, dtEnd;
@@ -10052,6 +10064,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
             ESMC_CONTEXT, &rc)) return rc;
         vm->barrier();
         vm->wtime(&dtEnd);
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.5"));
+#endif
         dtAverage += dtEnd - dtStart;
       }
       dtAverage /= dtCount;
@@ -10063,6 +10078,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         << " dtAverage=" << dtAverage;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
+#endif
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.6"));
 #endif
       // determine optimum pipelineDepth
       if (pipelineDepth==1){
@@ -10089,6 +10107,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     }
 #endif
 
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.7"));
+#endif
     // all PETs vote on pipelineDepthOpt
     vector<int> pipelineDepthOptList(petCount);
     vm->allgather(&pipelineDepthOpt, &pipelineDepthOptList[0], sizeof(int));

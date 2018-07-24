@@ -688,7 +688,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2"));
 #endif
 
-  // setup the src side information, sorted by seqIndex
+    // Step2: setup the src side information, sorted by seqIndex
 #ifdef SRC_ELEMENT_SORT_VECTOR
   vector<ElementSort<SIT> > srcElementSort;
   srcElementSort.reserve(srcElementCount);
@@ -756,6 +756,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.0"));
 #endif
   
+  // Step3: fill srcLinSeqVect
+
   switch (typekindFactors){
   case ESMC_TYPEKIND_R4:
     {
