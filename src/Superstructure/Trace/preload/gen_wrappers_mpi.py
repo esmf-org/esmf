@@ -31,6 +31,10 @@ template_wrappers_mpi_h = """
 
 #ifdef MPICH2_CONST
 #define ESMF_MPI_CONST MPICH2_CONST
+#elif defined(OPEN_MPI) && OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION == 7 && OMPI_RELEASE_VERSION <= 4 
+#define ESMF_MPI_CONST
+#elif defined(OPEN_MPI) && OMPI_MAJOR_VERSION == 1 && OMPI_MINOR_VERSION <= 6
+#define ESMF_MPI_CONST 
 #else
 #define ESMF_MPI_CONST const
 #endif
