@@ -309,7 +309,7 @@ void ESMCI_regrid_create(
     std::pair<UInt,UInt> iisize = wts->count_matrix_entries();
     int num_entries = iisize.first;
     int *iientries = new int[2*iisize.first];
-    int larg[2] = {2, iisize.first};
+    int larg[2] = {2, static_cast<int>(iisize.first)};
     // Gather the list
     ESMCI::InterArray<int> ii(iientries, 2, larg);
     ESMCI::InterArray<int> *iiptr = &ii;
