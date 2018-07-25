@@ -532,6 +532,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     seqIndexUBound[i] = seqIndexUBound[i-1] + 7680;
   }
   
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.1"));
+#endif
+
   if (haloFlag){
     // for halo, straight forward construction of dstLinSeqVect from rim
     for (int i=0; i<dstLocalDeCount; i++){
@@ -597,10 +601,16 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       }
     }
     
-    for (int i=0; i<petCount; i++)
-      printf("localPet=%d, talkToPet[%d]=%d\n", localPet, i, talkToPet[i]);
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.2"));
+#endif
+
+//    for (int i=0; i<petCount; i++)
+//      printf("localPet=%d, talkToPet[%d]=%d\n", localPet, i, talkToPet[i]);
     
     vector<int> talkToMe(petCount);
+    
+    vm->barrier();
     
     vm->timerReset("alltoall");
     vm->timerStart("alltoall");
@@ -611,7 +621,26 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     vm->timerLog("alltoall");
 
 #ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.2"));
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.3"));
+#endif
+    
+    int nrecvs;
+    talkToMe.assign(petCount,1);
+    vm->barrier();
+    
+    vm->timerReset("reduce_scatter");
+    vm->timerStart("reduce_scatter");
+    
+    localrc = vm->reduce_scatter(&(talkToPet[0]), &nrecvs, &(talkToMe[0]), 
+      vmI4, vmSUM);
+    
+    vm->timerStop("reduce_scatter");
+    vm->timerLog("reduce_scatter");
+    
+printf("localPet=%d, nrecvs=%d\n", localPet, nrecvs);
+
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.4"));
 #endif
     
     
