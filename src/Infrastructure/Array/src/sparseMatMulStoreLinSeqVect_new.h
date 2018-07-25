@@ -1,3 +1,4 @@
+#define TIMERS
 //-----------------------------------------------------------------------------
 
   template<typename IT> struct SparseMatrixIndex{
@@ -538,6 +539,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 
   if (haloFlag){
     // for halo, straight forward construction of dstLinSeqVect from rim
+#ifdef TIMERS
+    vm->timerReset("construct_talkToPet");
+#endif
     for (int i=0; i<dstLocalDeCount; i++){
       if (dstLocalDeElementCount[i]){
         // there are elements for local DE i
@@ -574,9 +578,12 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
             element.factorList[0].partnerSeqIndex = seqIndex;
             memcpy(element.factorList[0].factor, factor, 8);
             dstLinSeqVect[i].push_back(element);
-            // set the talkToPet[] entry, find via bisection
-            int j=petCount/2; // starting guess
-            int jL=0, jU=petCount-1;
+            // find talkToPet[] index via bisection
+#ifdef TIMERS
+            vm->timerStart("construct_talkToPet");
+#endif
+            SIT j=petCount/2; // starting guess
+            SIT jL=0, jU=petCount-1;
             while ((j>jL) && (j<jU) &&
               (seqIndex.decompSeqIndex < seqIndexLBound[j]
               || seqIndex.decompSeqIndex > seqIndexUBound[j])){
@@ -596,10 +603,17 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
               // set the talkToPet[] entry
               talkToPet[j] = 1;
             }
+#ifdef TIMERS
+            vm->timerStop("construct_talkToPet");
+#endif
           }
         }
       }
     }
+    
+#ifdef TIMERS
+    vm->timerLog("construct_talkToPet");
+#endif
     
 #ifdef ASMM_STORE_MEMLOG_on
     VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.2"));
@@ -610,15 +624,18 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     
     vector<int> talkToMe(petCount);
     
+#ifdef TIMERS
     vm->barrier();
-    
     vm->timerReset("alltoall");
     vm->timerStart("alltoall");
+#endif
     
     localrc = vm->alltoall(&(talkToPet[0]), 1, &(talkToMe[0]), 1, vmI4);
     
+#ifdef TIMERS
     vm->timerStop("alltoall");
     vm->timerLog("alltoall");
+#endif
 
 #ifdef ASMM_STORE_MEMLOG_on
     VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.3"));
@@ -626,16 +643,20 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     
     int nrecvs;
     talkToMe.assign(petCount,1);
+
+#ifdef TIMERS
     vm->barrier();
-    
     vm->timerReset("reduce_scatter");
     vm->timerStart("reduce_scatter");
+#endif
     
     localrc = vm->reduce_scatter(&(talkToPet[0]), &nrecvs, &(talkToMe[0]), 
       vmI4, vmSUM);
     
+#ifdef TIMERS
     vm->timerStop("reduce_scatter");
     vm->timerLog("reduce_scatter");
+#endif
     
 printf("localPet=%d, nrecvs=%d\n", localPet, nrecvs);
 
@@ -772,6 +793,10 @@ printf("localPet=%d, nrecvs=%d\n", localPet, nrecvs);
 #endif
 
     // Step2: setup the src side information, sorted by seqIndex
+#ifdef TIMERS
+    vm->timerReset("construct_srcElementSort");
+    vm->timerStart("construct_srcElementSort");
+#endif
 #ifdef SRC_ELEMENT_SORT_VECTOR
   vector<ElementSort<SIT> > srcElementSort;
   srcElementSort.reserve(srcElementCount);
@@ -815,6 +840,11 @@ printf("localPet=%d, nrecvs=%d\n", localPet, nrecvs);
   }
   
 #ifdef TIMERS
+    vm->timerStop("construct_srcElementSort");
+    vm->timerLog("construct_srcElementSort");
+#endif
+
+#ifdef TIMERS
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.3a"));
 #endif
@@ -840,6 +870,10 @@ printf("localPet=%d, nrecvs=%d\n", localPet, nrecvs);
 #endif
   
   // Step3: fill srcLinSeqVect
+#ifdef TIMERS
+    vm->timerReset("fill_srcLinSeqVect");
+    vm->timerStart("fill_srcLinSeqVect");
+#endif
 
   switch (typekindFactors){
   case ESMC_TYPEKIND_R4:
@@ -874,6 +908,11 @@ printf("localPet=%d, nrecvs=%d\n", localPet, nrecvs);
     break;
   }
   
+#ifdef TIMERS
+    vm->timerStop("fill_srcLinSeqVect");
+    vm->timerLog("fill_srcLinSeqVect");
+#endif
+
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new4.0"));
 #endif
@@ -912,6 +951,10 @@ printf("localPet=%d, nrecvs=%d\n", localPet, nrecvs);
 #endif
   
   // clear out dstLinSeqVect elements that did not find src partners
+#ifdef TIMERS
+    vm->timerReset("cleanout_dstLinSeqVect");
+    vm->timerStart("cleanout_dstLinSeqVect");
+#endif
   for (int i=0; i<dstLocalDeCount; i++){
     typename vector<AssociationElement<DIT,SIT> >::iterator itD
       = dstLinSeqVect[i].begin();
@@ -932,6 +975,10 @@ printf("localPet=%d, nrecvs=%d\n", localPet, nrecvs);
         ++itD;
     }
   }
+#ifdef TIMERS
+    vm->timerStop("cleanout_dstLinSeqVect");
+    vm->timerLog("cleanout_dstLinSeqVect");
+#endif
   
 #if 0
   // not sure if maybe for general sparse matrix case, where the same src
