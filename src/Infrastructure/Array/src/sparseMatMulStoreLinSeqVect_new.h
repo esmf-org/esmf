@@ -519,8 +519,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   
   // Step1: construct dstLinSeqVect
   
-  // setup vector to indicate which PETs localPET needs to talk to
-  vector<int> talkToPet(petCount, 0); // 0 means no talk
+  // setup vector to indicate which PETs are responders for localPET's requests
+  vector<int> responderPet(petCount, 0); // 0 means not a responder, 1 responder
+  // setup vector to indicate which PETs are requesters and localPET has response
+  vector<int> requesterPet(petCount);
 
   //TODO: this should not happen here, but I needs some table to search in
   vector<int> seqIndexLBound(petCount);
@@ -540,7 +542,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   if (haloFlag){
     // for halo, straight forward construction of dstLinSeqVect from rim
 #ifdef TIMERS
-    vm->timerReset("construct_talkToPet");
+    vm->timerReset("construct_responderPet");
 #endif
     for (int i=0; i<dstLocalDeCount; i++){
       if (dstLocalDeElementCount[i]){
@@ -578,9 +580,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
             element.factorList[0].partnerSeqIndex = seqIndex;
             memcpy(element.factorList[0].factor, factor, 8);
             dstLinSeqVect[i].push_back(element);
-            // find talkToPet[] index via bisection
+            // find responderPet[] index via bisection
 #ifdef TIMERS
-            vm->timerStart("construct_talkToPet");
+            vm->timerStart("construct_responderPet");
 #endif
             SIT j=petCount/2; // starting guess
             SIT jL=0, jU=petCount-1;
@@ -600,11 +602,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
               // found PET with correct bounds
 //printf("j=%d::  %d <= %d <= %d\n", j,
 //  seqIndexLBound[j], seqIndex.decompSeqIndex, seqIndexUBound[j]);
-              // set the talkToPet[] entry
-              talkToPet[j] = 1;
+              // set the responderPet[] entry
+              responderPet[j] = 1;
             }
 #ifdef TIMERS
-            vm->timerStop("construct_talkToPet");
+            vm->timerStop("construct_responderPet");
 #endif
           }
         }
@@ -612,7 +614,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     }
     
 #ifdef TIMERS
-    vm->timerLog("construct_talkToPet");
+    vm->timerLog("construct_responderPet");
 #endif
     
 #ifdef ASMM_STORE_MEMLOG_on
@@ -620,29 +622,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #endif
 
 //    for (int i=0; i<petCount; i++)
-//      printf("localPet=%d, talkToPet[%d]=%d\n", localPet, i, talkToPet[i]);
-    
-    vector<int> talkToMe(petCount);
-    
-#ifdef TIMERS
-    vm->barrier();
-    vm->timerReset("alltoall");
-    vm->timerStart("alltoall");
-#endif
-    
-    localrc = vm->alltoall(&(talkToPet[0]), 1, &(talkToMe[0]), 1, vmI4);
-    
-#ifdef TIMERS
-    vm->timerStop("alltoall");
-    vm->timerLog("alltoall");
-#endif
-
-#ifdef ASMM_STORE_MEMLOG_on
-    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.3"));
-#endif
+//      printf("localPet=%d, responderPet[%d]=%d\n", localPet, i, responderPet[i]);
     
     int nrecvs;
-    talkToMe.assign(petCount,1);
+    requesterPet.assign(petCount,1);
 
 #ifdef TIMERS
     vm->barrier();
@@ -650,7 +633,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     vm->timerStart("reduce_scatter");
 #endif
     
-    localrc = vm->reduce_scatter(&(talkToPet[0]), &nrecvs, &(talkToMe[0]), 
+    localrc = vm->reduce_scatter(&(responderPet[0]), &nrecvs, &(requesterPet[0]), 
       vmI4, vmSUM);
     
 #ifdef TIMERS
@@ -661,8 +644,26 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 printf("localPet=%d, nrecvs=%d\n", localPet, nrecvs);
 
 #ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.3"));
+#endif
+
+#ifdef TIMERS
+    vm->barrier();
+    vm->timerReset("alltoall");
+    vm->timerStart("alltoall");
+#endif
+    
+    localrc = vm->alltoall(&(responderPet[0]), 1, &(requesterPet[0]), 1, vmI4);
+    
+#ifdef TIMERS
+    vm->timerStop("alltoall");
+    vm->timerLog("alltoall");
+#endif
+
+#ifdef ASMM_STORE_MEMLOG_on
     VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.4"));
 #endif
+    
     
     
   }else{  // haloFlag
@@ -880,28 +881,32 @@ printf("localPet=%d, nrecvs=%d\n", localPet, nrecvs);
     {
       FillLinSeqVect<SIT,DIT,ESMC_R4> 
         fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
-      fillLinSeqVect.totalExchange(vm);
+//      fillLinSeqVect.totalExchange(vm);
+      fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
     }
     break;
   case ESMC_TYPEKIND_R8:
     {
       FillLinSeqVect<SIT,DIT,ESMC_R8> 
         fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
-      fillLinSeqVect.totalExchange(vm);
+//      fillLinSeqVect.totalExchange(vm);
+      fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
     }
     break;
   case ESMC_TYPEKIND_I4:
     {
       FillLinSeqVect<SIT,DIT,ESMC_I4> 
         fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
-      fillLinSeqVect.totalExchange(vm);
+//      fillLinSeqVect.totalExchange(vm);
+      fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
     }
     break;
   case ESMC_TYPEKIND_I8:
     {
       FillLinSeqVect<SIT,DIT,ESMC_I8> 
         fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
-      fillLinSeqVect.totalExchange(vm);
+//      fillLinSeqVect.totalExchange(vm);
+      fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
     }
     break;
   default:
