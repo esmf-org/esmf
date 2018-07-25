@@ -4361,38 +4361,6 @@ int VMK::allfullreduce(void *in, void *out, int len, vmType type, vmOp op){
 }
 
 
-int VMK::scatter(void *in, void *out, int len, int root){
-  int localrc=0;
-  if (mpionly){
-    localrc = MPI_Scatter(in, len, MPI_BYTE, out, len, MPI_BYTE, root, mpi_c);
-  }else{
-    // This is a very simplistic, probably very bad peformance implementation.
-    if (mypet==root){
-      // I am root -> send chunks to all other PETs
-      char *rootin = (char *)in;
-      for (int i=0; i<root; i++){
-        localrc = send(rootin, len, i);
-        if (localrc) return localrc;
-        rootin += len;
-      }
-      // memcpy root's chunk
-      memcpy(out, rootin, len);
-      rootin += len;
-      // keep sending chunks
-      for (int i=root+1; i<npets; i++){
-        localrc = send(rootin, len, i);
-        if (localrc) return localrc;
-        rootin += len;
-      }
-    }else{
-      // all other PETs receive their chunk
-      localrc = recv(out, len, root);
-    }
-  }
-  return localrc;
-}
-
-
 int VMK::reduce_scatter(void *in, void *out, int *outCounts,
   vmType type, vmOp op){
   int localrc=0;
@@ -4439,6 +4407,38 @@ int VMK::reduce_scatter(void *in, void *out, int *outCounts,
 }
 
     
+int VMK::scatter(void *in, void *out, int len, int root){
+  int localrc=0;
+  if (mpionly){
+    localrc = MPI_Scatter(in, len, MPI_BYTE, out, len, MPI_BYTE, root, mpi_c);
+  }else{
+    // This is a very simplistic, probably very bad peformance implementation.
+    if (mypet==root){
+      // I am root -> send chunks to all other PETs
+      char *rootin = (char *)in;
+      for (int i=0; i<root; i++){
+        localrc = send(rootin, len, i);
+        if (localrc) return localrc;
+        rootin += len;
+      }
+      // memcpy root's chunk
+      memcpy(out, rootin, len);
+      rootin += len;
+      // keep sending chunks
+      for (int i=root+1; i<npets; i++){
+        localrc = send(rootin, len, i);
+        if (localrc) return localrc;
+        rootin += len;
+      }
+    }else{
+      // all other PETs receive their chunk
+      localrc = recv(out, len, root);
+    }
+  }
+  return localrc;
+}
+
+
 int VMK::scatter(void *in, void *out, int len, int root,
   commhandle **ch){
   int localrc=0;
