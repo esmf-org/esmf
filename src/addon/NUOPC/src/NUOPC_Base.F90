@@ -38,6 +38,7 @@ module NUOPC_Base
   public NUOPC_FieldDictionaryEgest       ! defined in NUOPC_FieldDictionaryApi
   public NUOPC_FieldDictionaryGetEntry    ! defined in NUOPC_FieldDictionaryApi
   public NUOPC_FieldDictionaryHasEntry    ! defined in NUOPC_FieldDictionaryApi
+  public NUOPC_FieldDictionaryIngest      ! defined in NUOPC_FieldDictionaryApi
   public NUOPC_FieldDictionaryMatchSyno   ! defined in NUOPC_FieldDictionaryApi
   public NUOPC_FieldDictionarySetSyno     ! defined in NUOPC_FieldDictionaryApi
   public NUOPC_FieldDictionarySetup       ! defined in NUOPC_FieldDictionaryApi
