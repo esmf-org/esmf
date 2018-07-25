@@ -518,6 +518,20 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   
   // Step1: construct dstLinSeqVect
   
+  // setup vector to indicate which PETs localPET needs to talk to
+  vector<int> talkToPet(petCount, 0); // 0 means no talk
+
+  //TODO: this should not happen here, but I needs some table to search in
+  vector<int> seqIndexLBound(petCount);
+  vector<int> seqIndexUBound(petCount);
+  const int seqIndexCountPPet = 7680; // special for current study-smm-07
+  seqIndexLBound[0] = 1;
+  seqIndexUBound[0] = seqIndexCountPPet;
+  for (int i=1; i<petCount; i++){
+    seqIndexLBound[i] = seqIndexUBound[i-1] + 1;
+    seqIndexUBound[i] = seqIndexUBound[i-1] + 7680;
+  }
+  
   if (haloFlag){
     // for halo, straight forward construction of dstLinSeqVect from rim
     for (int i=0; i<dstLocalDeCount; i++){
@@ -556,10 +570,50 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
             element.factorList[0].partnerSeqIndex = seqIndex;
             memcpy(element.factorList[0].factor, factor, 8);
             dstLinSeqVect[i].push_back(element);
+            // set the talkToPet[] entry, find via bisection
+            int j=petCount/2; // starting guess
+            int jL=0, jU=petCount-1;
+            while ((j>jL) && (j<jU) &&
+              (seqIndex.decompSeqIndex < seqIndexLBound[j]
+              || seqIndex.decompSeqIndex > seqIndexUBound[j])){
+              if (seqIndex.decompSeqIndex < seqIndexLBound[j]){
+                jU = j;
+                j = jL + (jU-jL)/2;
+              }else if (seqIndex.decompSeqIndex > seqIndexUBound[j]){
+                jL = j;
+                j = jU - (jU-jL)/2;
+              }
+            }
+            if (seqIndex.decompSeqIndex >= seqIndexLBound[j] &&
+              seqIndex.decompSeqIndex <= seqIndexUBound[j]){
+              // found PET with correct bounds
+//printf("j=%d::  %d <= %d <= %d\n", j,
+//  seqIndexLBound[j], seqIndex.decompSeqIndex, seqIndexUBound[j]);
+              // set the talkToPet[] entry
+              talkToPet[j] = 1;
+            }
           }
         }
       }
     }
+    
+    for (int i=0; i<petCount; i++)
+      printf("localPet=%d, talkToPet[%d]=%d\n", localPet, i, talkToPet[i]);
+    
+    vector<int> talkToMe(petCount);
+    
+    vm->timerReset("alltoall");
+    vm->timerStart("alltoall");
+    
+    localrc = vm->alltoall(&(talkToPet[0]), 1, &(talkToMe[0]), 1, vmI4);
+    
+    vm->timerStop("alltoall");
+    vm->timerLog("alltoall");
+
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.2"));
+#endif
+    
     
   }else{  // haloFlag
     // for not-halo, construction of dstLinSeqVect is more complex
