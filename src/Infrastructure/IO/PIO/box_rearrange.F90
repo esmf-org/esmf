@@ -2195,6 +2195,7 @@ end subroutine box_rearrange_io2comp_int
     integer,allocatable :: blk_len(:)
     integer(kind=pio_offset) :: i8blocksize
     integer(kind=pio_offset),allocatable :: displace(:)
+    integer, allocatable :: displace_int(:)
     integer(kind=pio_offset),allocatable :: bsizeT(:)
     integer :: numblks
     integer :: newTYPEs,newTYPEr
@@ -2528,7 +2529,7 @@ end subroutine box_rearrange_io2comp_int
 #endif
         
              len = rcount(i)/blocksize
-             allocate(displace(len))
+             allocate(displace(len), displace_int(len))
              if(blocksize == 1) then
                 displace(:) = rindex(pos:pos+rcount(i)-1)
              else
@@ -2544,8 +2545,9 @@ end subroutine box_rearrange_io2comp_int
 #endif
              !DBG call alloc_print_usage(iosystem%comp_comm,80,'l2629')
              ! need rindex to contain 0-based displacements here
+             displace_int = int (displace)
              call MPI_TYPE_CREATE_INDEXED_BLOCK( &
-                  len, 1, int(displace), &               ! count,blen, disp
+                  len, 1, displace_int, &               ! count,blen, disp
                   newTYPEr, rtype(i), ierror )       ! oldtype, newtype
              call CheckMPIReturn(subName,ierror)
 #ifdef MEMCHK   
@@ -2558,7 +2560,7 @@ end subroutine box_rearrange_io2comp_int
              call MPI_TYPE_COMMIT(rtype(i), ierror)
              call CheckMPIReturn(subName,ierror)
 
-             deallocate(displace)
+             deallocate(displace, displace_int)
              pos = pos + rcount(i)
           end do
           call MPI_TYPE_FREE(newTYPEr,ierror)
@@ -2610,22 +2612,23 @@ end subroutine box_rearrange_io2comp_int
 
        if (scount(i) /= 0) then
           len = scount(i)/blocksize
-          allocate(displace(len))
+          allocate(displace(len), displace_int(len))
           if(blocksize == 1) then
              displace(:) = sindex(pos:pos+scount(i)-1)
           else
              sindex(pos:pos+scount(i)-1) = sindex(pos:pos+scount(i)-1)+1
              call calcdisplace(blocksize,sindex(pos:pos+scount(i)-1),displace)
           endif
+          displace_int = int (displace)
           call MPI_TYPE_CREATE_INDEXED_BLOCK( &
-               len, 1, int(displace), &        ! count, blen, disp
+               len, 1, displace_int, &        ! count, blen, disp
                newTYPEs, stype(i), ierror )       ! oldtype, newtype
           call CheckMPIReturn(subName,ierror)
 
           call MPI_TYPE_COMMIT(stype(i), ierror)
           call CheckMPIReturn(subName,ierror)
 
-          deallocate(displace)
+          deallocate(displace, displace_int)
           pos = pos + scount(i)
        endif
 
