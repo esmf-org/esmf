@@ -277,6 +277,7 @@ module NUOPC_FieldDictionaryDef
           exit freeform_input
         end if
 
+        ! add standard name entries
         do k = 1, nameCount
           isPres = NUOPC_FieldDictionaryHasEntryI(fieldDictionary, &
             standardNames(k), rc=localrc)
@@ -290,6 +291,15 @@ module NUOPC_FieldDictionaryDef
           end if
         end do
 
+        ! add synonyms
+        if (nameCount > 1) then
+          call NUOPC_FieldDictionarySetSynoI(fieldDictionary, &
+            standardNames(1:nameCount), rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) exit freeform_input
+        end if
+
+        ! reset buffers and counter
         nameCount      = 0
         standardNames  = ""
         canonicalUnits = ""
