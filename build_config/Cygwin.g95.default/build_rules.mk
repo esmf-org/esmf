@@ -191,3 +191,9 @@ ESMF_CXXLINKOPTS += -Wl,--enable-auto-import
 #
 ESMF_SL_LIBOPTS       += -shared
 ESMF_SL_LIBLIBS       += -L$(ESMF_CXXLIBFULLPATH) -lgcc -L$(ESMF_F90LIBFULLPATH) -lf95
+
+############################################################
+# Add compile options required by external libraries
+ifneq ($(ESMF_YAMLCPP),)
+ESMF_CXXCOMPILEOPTS  += -std=c++11
+endif

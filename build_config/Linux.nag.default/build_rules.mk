@@ -183,3 +183,9 @@ ESMF_SL_LIBOPTS  += -shared
 #
 ESMF_SO_F90COMPILEOPTS  = -pic
 ESMF_SO_CXXCOMPILEOPTS  = -fPIC
+
+############################################################
+# Add compile options required by external libraries
+ifneq ($(ESMF_YAMLCPP),)
+ESMF_CXXCOMPILEOPTS  += -std=c++11
+endif

@@ -123,3 +123,9 @@ ESMF_SL_LIBOPTS  += -q64
 endif
 ESMF_SO_F90LINKOPTSEXE = -bdynamic -brtl
 ESMF_SO_CXXLINKOPTSEXE = -bdynamic -brtl
+
+############################################################
+# Add compile options required by external libraries
+ifneq ($(ESMF_YAMLCPP),)
+ESMF_CXXCOMPILEOPTS  += -qlanglvl=c++11
+endif
