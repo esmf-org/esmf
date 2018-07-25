@@ -2,7 +2,7 @@
 
 ALL: tracelib_preload tracelib_static
 
-SOURCEC	  = preload.c preload_io.c preload_mpi.c wrappers.c wrappers_io.c wrappers_mpi.c
+SOURCEC	  = preload.C preload_io.C preload_mpi.C wrappers.C wrappers_io.C wrappers_mpi.C
 SOURCEF	  = 
 SOURCEH	  = 
 STOREH    = 
