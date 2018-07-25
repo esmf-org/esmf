@@ -22,6 +22,7 @@
 
 // higher level, 3rd party or system includes here
 #include <iostream>
+#include <iomanip>
 #include <string>
 
 // associated class definition files
@@ -460,11 +461,11 @@ localrc = vmp->broadcast(bcstData, len, rootPet);
                 "canonical_units is required for field " + stdname, ESMC_CONTEXT, &rc);
               return rc;
           }
-          os << "standardName:          " << stdname << std::endl;
-          os << "canonicalUnits:        " << units[stdname] << std::endl;
+          os << "standardName: " << std::setw(50) << stdname << std::endl;
+          os << "canonicalUnits: " << std::setw(48) << units[stdname].as<std::string>() << std::endl;
           for (YAML::const_iterator q=names[stdname].begin();q!=names[stdname].end();q++) {
             if (stdname.compare(q->as<std::string>()) != 0)
-              os << "synonym:               " << q->as<std::string>() << std::endl;
+              os << "synonym: " << std::setw(55) << q->as<std::string>() << std::endl;
           }
           os << "----------------------------------------------------------------" << std::endl;
           this->producer.type     = outType;
