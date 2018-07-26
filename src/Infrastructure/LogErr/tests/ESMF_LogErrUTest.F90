@@ -81,6 +81,7 @@
       type(ESMF_Time) :: my_time, log_time
       integer :: log8unit, moe_unit
       logical :: was_found
+      logical :: flush_flag
       logical :: highRes_flag
       logical :: trace_flag
       type(ESMF_LogMsg_Flag), pointer :: logabort_flags(:)
@@ -517,6 +518,30 @@
       call ESMF_LogGet (trace=trace_flag, rc=rc)
       call ESMF_Test(rc == ESMF_SUCCESS .and. .not. trace_flag,  &
           name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test accessing flush immediate flag
+      write (failMsg, *) "Did not return ESMF_SUCCESS"
+      write (name, *) "LogGet flush immediate flag get"
+      call ESMF_LogGet (flush=trace_flag, rc=rc)
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test turning on flush immediate
+      write (failMsg, *) "Did not return ESMF_SUCCESS"
+      write (name, *) "LogSet flush immediate flag set to .true."
+      call ESMF_LogSet (flush=.true., rc=rc)
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test restoring flush immediate flag
+      write (failMsg, *) "Did not return ESMF_SUCCESS"
+      write (name, *) "LogSet flush immediate flag restore"
+      call ESMF_LogSet (flush=trace_flag, rc=rc)
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
       !-----------------------------------------------------------------------
       !EX_UTest

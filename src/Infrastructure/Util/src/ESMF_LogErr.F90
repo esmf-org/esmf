@@ -1531,7 +1531,7 @@ end function ESMF_LogFoundNetCDFError
 !
       type(ESMF_Log),          intent(in),  optional :: log
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_Logical),      intent(out), optional :: flush
+      logical,                 intent(out), optional :: flush
       type(ESMF_LogMsg_Flag),  pointer,     optional :: logmsgAbort(:)
       type(ESMF_LogKind_Flag), intent(out), optional :: logkindflag
       integer,                 intent(out), optional :: maxElements
