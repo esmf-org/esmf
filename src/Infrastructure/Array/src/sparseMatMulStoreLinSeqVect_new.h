@@ -517,6 +517,179 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   const int *srcLocalDeToDeMap = srcArray->getDELayout()->getLocalDeToDeMap();
   const int *dstLocalDeToDeMap = dstArray->getDELayout()->getLocalDeToDeMap();
   
+  // Step0: construct helper maps if possible to optimize exchanges below
+  
+#ifdef TIMERS
+    vm->timerReset("find_srcSeqIndexMinMax");
+    vm->timerStart("find_srcSeqIndexMinMax");
+#endif
+  // find local srcSeqIndex Min/Max
+  SIT srcSeqIndexMinMax[2]; // [0]=min, [1]=max
+  srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1] = -1; // visibly invalidate
+  bool firstMinMax = true;
+  for (int i=0; i<srcLocalDeCount; i++){
+    if (srcLocalDeElementCount[i]){
+      // there are elements for local DE i
+      ArrayElement arrayElement(srcArray, i, true, false, false);
+      // loop over all elements in exclusive region for local DE i
+      while(arrayElement.isWithin()){
+        // determine the sequentialized index for the current Array element
+        SeqIndex<SIT> seqIndex = arrayElement.getSequenceIndex<SIT>();
+        // record seqIndex min and max
+        if (firstMinMax){
+          srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1]
+            = seqIndex.decompSeqIndex; // initialize
+          firstMinMax = false;
+        }else{
+          if (seqIndex.decompSeqIndex < srcSeqIndexMinMax[0])
+            srcSeqIndexMinMax[0] = seqIndex.decompSeqIndex;
+          if (seqIndex.decompSeqIndex > srcSeqIndexMinMax[1])
+            srcSeqIndexMinMax[1] = seqIndex.decompSeqIndex;
+        }
+        arrayElement.next();
+      } // end while over all exclusive elements
+    }
+  }
+  // communicate srcSeqIndexMinMax across all Pets
+  vector<SIT> srcSeqIndexMinMaxList(2*petCount);
+  vm->allgather(srcSeqIndexMinMax, &(srcSeqIndexMinMaxList[0]), 2*sizeof(SIT));
+  // find global srcSeqIndex min/max
+  vector<int> srcElementCountList(petCount);
+  vm->allgather(&srcElementCount, &(srcElementCountList[0]), sizeof(int));
+  SIT srcSeqIndexMinGlobal, srcSeqIndexMaxGlobal;
+  bool pastInitFlag = false; // reset
+  for (int i=0; i<petCount; i++){
+    if (srcElementCountList[i]){
+      // Pet i holds elements in srcArray
+      if (pastInitFlag){
+        if (srcSeqIndexMinMaxList[2*i] < srcSeqIndexMinGlobal)
+          srcSeqIndexMinGlobal = srcSeqIndexMinMaxList[2*i];
+        if (srcSeqIndexMinMaxList[2*i+1] > srcSeqIndexMaxGlobal)
+          srcSeqIndexMaxGlobal = srcSeqIndexMinMaxList[2*i+1];
+      }else{
+        // initialization
+        srcSeqIndexMinGlobal = srcSeqIndexMinMaxList[2*i];
+        srcSeqIndexMaxGlobal = srcSeqIndexMinMaxList[2*i+1];
+        pastInitFlag = true; // set
+      }
+    }
+  }
+#ifdef TIMERS
+    vm->timerStop("find_srcSeqIndexMinMax");
+    vm->timerLog("find_srcSeqIndexMinMax");
+#endif
+  
+printf("global srcMin/Max = %d/%d\n",srcSeqIndexMinGlobal,srcSeqIndexMaxGlobal);
+  
+  // evenly divide the sequence index range across all PETs
+  vector<SIT> srcSeqIndexRangeMin(petCount);
+  vector<SIT> srcSeqIndexRangeMax(petCount);
+  srcSeqIndexRangeMin[0] = srcSeqIndexMinGlobal;  // start
+  SIT indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
+    / (SIT) petCount;
+  SIT extraIndices = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
+    % (SIT)petCount;
+  for (int i=0; i<petCount-1; i++){
+    srcSeqIndexRangeMax[i] = srcSeqIndexRangeMin[i] + indicesPerPet - 1;
+    if (i<extraIndices)
+      ++srcSeqIndexRangeMax[i];   // distribute extra indices evenly
+    srcSeqIndexRangeMin[i+1] = srcSeqIndexRangeMax[i] + 1;
+  }
+  srcSeqIndexRangeMax[petCount-1] = srcSeqIndexMaxGlobal;  // finish
+  
+#ifdef TIMERS
+    vm->timerReset("construct_haveInfo");
+    vm->timerStart("construct_haveInfo");
+#endif
+  // construct the haveInfo vector locally
+  vector<int> haveInfo(petCount,0);   // 0 means localPet does not have any info
+  for (int i=0; i<srcLocalDeCount; i++){
+    if (srcLocalDeElementCount[i]){
+      // there are elements for local DE i
+      ArrayElement arrayElement(srcArray, i, true, false, false);
+      // loop over all elements in exclusive region for local DE i
+      while(arrayElement.isWithin()){
+        // determine the sequentialized index for the current Array element
+        SeqIndex<SIT> seqIndex = arrayElement.getSequenceIndex<SIT>();
+        // find the matching seqIndex range
+        int j=petCount/2;         // starting guess in the middle
+        int jL=0, jU=petCount-1;  // initial bi-section range
+        while ((j>jL) && (j<jU) &&
+          (seqIndex.decompSeqIndex < srcSeqIndexRangeMin[j]
+          || seqIndex.decompSeqIndex > srcSeqIndexRangeMax[j])){
+          if (seqIndex.decompSeqIndex < srcSeqIndexRangeMin[j]){
+            jU = j;
+            j = jL + (jU-jL)/2;
+          }else if (seqIndex.decompSeqIndex > srcSeqIndexRangeMax[j]){
+            jL = j;
+            j = jU - (jU-jL)/2;
+          }
+        }
+        if (seqIndex.decompSeqIndex >= srcSeqIndexRangeMin[j] &&
+          seqIndex.decompSeqIndex <= srcSeqIndexRangeMax[j]){
+          // found PET with correct bounds
+//printf("j=%d::  %d <= %d <= %d\n", j,
+//  srcSeqIndexRangeMin[j], seqIndex.decompSeqIndex, srcSeqIndexRangeMax[j]);
+          // set the haveInfo[] entry
+          haveInfo[j] = 1;
+        }
+        arrayElement.next();
+      } // end while over all exclusive elements
+    }
+  }
+#ifdef TIMERS
+    vm->timerStop("construct_haveInfo");
+    vm->timerLog("construct_haveInfo");
+#endif
+  
+#ifdef TIMERS
+    vm->timerReset("construct_hasInfo");
+    vm->timerStart("construct_hasInfo");
+#endif
+  vector<int> hasInfo(petCount);
+  localrc = vm->alltoall(&(haveInfo[0]), 1, &(hasInfo[0]), 1, vmI4);
+
+  vector<int> hasInfoList;
+  for (int i=0; i<petCount; i++)
+    if (hasInfo[i]) hasInfoList.push_back(i);
+  
+  int hasInfoListCount = hasInfoList.size();
+
+  for (int i=0; i<hasInfoListCount; i++)
+    printf("localPet=%d. hasInfoList[%d]=%d\n", localPet, i, hasInfoList[i]);
+  
+  vector<int> hasInfoListCounts(petCount);
+  localrc = vm->allgather(&hasInfoListCount, &(hasInfoListCounts[0]),
+    sizeof(int));
+  
+  if (localPet==0){
+    std::cout << "hasInfoListCounts min=" << 
+      *min_element(hasInfoListCounts.begin(), hasInfoListCounts.end()) << 
+      " max=" <<
+      *max_element(hasInfoListCounts.begin(), hasInfoListCounts.end()) << "\n";
+  }
+  
+  vector<int> hasInfoListsOffsets(petCount);
+  hasInfoListsOffsets[0] = 0;  // starting position
+  for (int i=1; i<petCount; i++)
+    hasInfoListsOffsets[i] = hasInfoListsOffsets[i-1]
+      + hasInfoListCounts[i-1];
+  int totalHasInfoListCount = hasInfoListsOffsets[petCount-1]
+    + hasInfoListCounts[petCount-1];
+  
+  printf("totalHasInfoListCount = %d\n", totalHasInfoListCount);
+  
+  // gather all of the hasInfoList's on all of the PETs
+  vector<int> hasInfoLists(totalHasInfoListCount);
+  localrc = vm->allgatherv(&(hasInfoList[0]), hasInfoListCount,
+    &(hasInfoLists[0]), &(hasInfoListCounts[0]), &(hasInfoListsOffsets[0]), 
+    vmI4);
+  
+#ifdef TIMERS
+    vm->timerStop("construct_hasInfo");
+    vm->timerLog("construct_hasInfo");
+#endif
+    
   // Step1: construct dstLinSeqVect
   
   // setup vector to indicate which PETs are responders for localPET's requests
@@ -524,17 +697,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   // setup vector to indicate which PETs are requesters and localPET has response
   vector<int> requesterPet(petCount);
 
-  //TODO: this should not happen here, but I needs some table to search in
-  vector<int> seqIndexLBound(petCount);
-  vector<int> seqIndexUBound(petCount);
-  const int seqIndexCountPPet = 7680; // special for current study-smm-07
-  seqIndexLBound[0] = 1;
-  seqIndexUBound[0] = seqIndexCountPPet;
-  for (int i=1; i<petCount; i++){
-    seqIndexLBound[i] = seqIndexUBound[i-1] + 1;
-    seqIndexUBound[i] = seqIndexUBound[i-1] + 7680;
-  }
-  
 #ifdef ASMM_STORE_MEMLOG_on
     VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.1"));
 #endif
@@ -580,30 +742,32 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
             element.factorList[0].partnerSeqIndex = seqIndex;
             memcpy(element.factorList[0].factor, factor, 8);
             dstLinSeqVect[i].push_back(element);
-            // find responderPet[] index via bisection
+            // find the matching seqIndex range
 #ifdef TIMERS
             vm->timerStart("construct_responderPet");
 #endif
-            SIT j=petCount/2; // starting guess
-            SIT jL=0, jU=petCount-1;
+            int j=petCount/2;         // starting guess in the middle
+            int jL=0, jU=petCount-1;  // initial bi-section range
             while ((j>jL) && (j<jU) &&
-              (seqIndex.decompSeqIndex < seqIndexLBound[j]
-              || seqIndex.decompSeqIndex > seqIndexUBound[j])){
-              if (seqIndex.decompSeqIndex < seqIndexLBound[j]){
+              (seqIndex.decompSeqIndex < srcSeqIndexRangeMin[j]
+              || seqIndex.decompSeqIndex > srcSeqIndexRangeMax[j])){
+              if (seqIndex.decompSeqIndex < srcSeqIndexRangeMin[j]){
                 jU = j;
                 j = jL + (jU-jL)/2;
-              }else if (seqIndex.decompSeqIndex > seqIndexUBound[j]){
+              }else if (seqIndex.decompSeqIndex > srcSeqIndexRangeMax[j]){
                 jL = j;
                 j = jU - (jU-jL)/2;
               }
             }
-            if (seqIndex.decompSeqIndex >= seqIndexLBound[j] &&
-              seqIndex.decompSeqIndex <= seqIndexUBound[j]){
+            if (seqIndex.decompSeqIndex >= srcSeqIndexRangeMin[j] &&
+              seqIndex.decompSeqIndex <= srcSeqIndexRangeMax[j]){
               // found PET with correct bounds
-//printf("j=%d::  %d <= %d <= %d\n", j,
-//  seqIndexLBound[j], seqIndex.decompSeqIndex, seqIndexUBound[j]);
-              // set the responderPet[] entry
-              responderPet[j] = 1;
+              // now set all those responderPet elements that are indicated
+              // by the hasInfoLists entries for j
+              for (int kk=0; kk<hasInfoListCounts[j]; kk++){
+                int ind = hasInfoListsOffsets[j]+kk;
+                responderPet[hasInfoLists[ind]] = 1;
+              }
             }
 #ifdef TIMERS
             vm->timerStop("construct_responderPet");
