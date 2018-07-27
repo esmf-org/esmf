@@ -20,9 +20,7 @@
 #include "params_const.h"
 #include "order_const.h"
 
-#if defined (ESMF_OS_MinGW)
-#define strcasecmp _strcmpi
-#endif
+#include <strings.h>
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */
