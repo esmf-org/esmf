@@ -472,6 +472,10 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         xfarrayPtr = 0.0
+        call ESMF_XGridGet(xgrid, elementCount=eleCount, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldPrint(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
