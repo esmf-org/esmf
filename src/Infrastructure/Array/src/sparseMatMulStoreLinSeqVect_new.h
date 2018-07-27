@@ -1172,8 +1172,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   
   // clear out dstLinSeqVect elements that did not find src partners
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
-    vm->timerReset("cleanout_dstLinSeqVect");
-    vm->timerStart("cleanout_dstLinSeqVect");
+  vm->timerReset("cleanout_dstLinSeqVect");
 #endif
   for (int i=0; i<dstLocalDeCount; i++){
     typename vector<AssociationElement<DIT,SIT> >::iterator itD
@@ -1189,15 +1188,30 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
           ++it;
       }
       // remove dstLinSeqVect elements without factorList elements
-      if ((itD->factorList).size()==0)
-        itD = dstLinSeqVect[i].erase(itD);
-      else
+      if ((itD->factorList).size()==0){
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->timerStart("cleanout_dstLinSeqVect");
+#endif
+#ifdef STORELINSEQVECT_NEW_LOG_on
+  {
+    std::stringstream msg;
+    msg << "STORELINSEQVECT_NEW_LOG:" << __LINE__ << 
+      " erasing itD with seqIndex.decompSeqIndex=" << 
+      itD->seqIndex.decompSeqIndex << " .tensorSeqIndex=" <<
+      itD->seqIndex.tensorSeqIndex;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+        itD = dstLinSeqVect[i].erase(itD);  // erase the element
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->timerStop("cleanout_dstLinSeqVect");
+#endif
+      }else
         ++itD;
     }
   }
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
-    vm->timerStop("cleanout_dstLinSeqVect");
-    vm->timerLog("cleanout_dstLinSeqVect");
+  vm->timerLog("cleanout_dstLinSeqVect");
 #endif
   
 #if 0
