@@ -1078,7 +1078,11 @@ end interface
            if (present(dimCount)) dimCount = 1
            if (present(distgridToGridMap)) distgridToGridMap = 1
            if (present(localDECount)) then
-               call ESMF_XGridGet(gbcp%xgrid, localDECount=localDECount, rc=localrc)
+               call ESMF_DistGridGet(gbcp%xgrid%xgtypep%distgridM, delayout=localdelayout, rc=localrc)
+               if (ESMF_LogFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rcToReturn=rc)) return
+               call ESMF_DelayoutGet(localdelayout, localDECount=localDECount, rc=localrc)
                if (ESMF_LogFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rcToReturn=rc)) return
