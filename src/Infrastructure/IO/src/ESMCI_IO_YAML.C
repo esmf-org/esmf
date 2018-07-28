@@ -545,26 +545,37 @@ namespace ESMCI {
 
     int rc = ESMF_SUCCESS;
 
-    // retrieve previously cached or just created content
-    // write content to file
+    // bail out if no filename provided
     if (filename.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
         "No filename provided", ESMC_CONTEXT, &rc);
       return rc;
     }
 
+    // check if content is available
     if (this->producer.buffer.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
         "Content not initialized -- call cinit() first?", ESMC_CONTEXT, &rc);
       return rc;
     }
 
-    std::ofstream fout(filename);
-    fout << this->producer.buffer;
-    fout.close();
+    // only write on pet 0
+    ESMCI::VM *globalVM = ESMCI::VM::getGlobal(&rc);
+    if (ESMC_LogDefault.MsgFoundError (rc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL))
+      return rc;
+
+    int localPet = globalVM->getLocalPet();
+
+    // only write file on PET 0
+    if (localPet == 0) {
+      std::ofstream fout(filename);
+      fout << this->producer.buffer;
+      fout.close();
+    }
 
     return rc;
-  }; // output_write
+  }; // cwrite
 
 //-------------------------------------------------------------------------
 //BOP
