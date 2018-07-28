@@ -108,8 +108,10 @@ namespace ESMCI {
       int cwrite(std::ostream& ostream) const;
       // - write to file
       int cwrite(const std::string& filename) const;
+      // - return content line count
+      int clinec(void) const { return producer.capacity; };
       // - return content size
-      int csize(void) const { return producer.capacity; };
+      int csize(void) const { return producer.buffer.size(); };
       // - return content buffer
       const char* cget(void) const { return producer.buffer.data(); };
 

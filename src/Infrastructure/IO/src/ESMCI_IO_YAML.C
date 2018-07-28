@@ -428,20 +428,24 @@ namespace ESMCI {
 
     int rc = ESMF_SUCCESS;
 
+    std::ostringstream os;
+
+    // reset internal storage at each call
+    this->producer.type     = IO_YAML::ContentType::Unset;
+    this->producer.buffer   = "";
+    this->producer.capacity = 0;
+
     if (type == IO_YAML::ContentType::Unset) {
 
       // do nothing
+      return rc;
 
     } else if (type == IO_YAML::ContentType::Native) {
 
       try {
-        std::ostringstream os;
 #ifdef ESMF_YAMLCPP
         os << this->doc << std::endl;
 #endif
-        this->producer.type     = type;
-        this->producer.buffer   = os.str();
-        this->producer.capacity = this->producer.buffer.size();
       } catch(...) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
           "- Caught exception", ESMC_CONTEXT, &rc);
@@ -454,7 +458,6 @@ namespace ESMCI {
 #ifdef ESMF_YAMLCPP
         YAML::Node names = this->parser.data["standardName"];
         YAML::Node units = this->parser.data["canonicalUnits"];
-        std::ostringstream os;
         for (YAML::const_iterator it=names.begin(); it!=names.end(); ++it) {
           std::string stdname = it->first.as<std::string>();
           if (!units[stdname]) {
@@ -469,10 +472,6 @@ namespace ESMCI {
               os << "synonym: " << std::setw(55) << q->as<std::string>() << std::endl;
           }
           os << "----------------------------------------------------------------" << std::endl;
-          this->producer.type     = type;
-          this->producer.buffer   = os.str();
-          this->producer.capacity = std::count(this->producer.buffer.begin(),
-                                               this->producer.buffer.end(),'\n');
         }
 #endif
       } else {
@@ -485,6 +484,15 @@ namespace ESMCI {
         "Output format not yet implemented", ESMC_CONTEXT, &rc);
       return rc;
     }
+
+    this->producer.type     = type;
+    this->producer.buffer   = os.str();
+    this->producer.capacity = std::count(this->producer.buffer.begin(),
+                                         this->producer.buffer.end(),'\n');
+    // line count is set to at least 1 if buffer not empty
+    this->producer.capacity =
+      this->producer.capacity ? this->producer.capacity :
+        ( this->producer.buffer.empty() ? 0 : 1 );
 
     return rc;
 

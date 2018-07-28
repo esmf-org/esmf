@@ -142,6 +142,17 @@ namespace ESMCI {
     }
 
     //--------------------------------------------------------------------
+    void FTN_X(c_esmc_io_yamlclinec)(IO_YAML   **ptr,
+                                    int        *count,
+                                    int        *status    ) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_io_yamlclinec()"
+      ESMF_CHECK_POINTER(ptr, status)
+      *count = (*ptr)->clinec();
+      if (ESMC_PRESENT(status)) *status = ESMF_SUCCESS;
+    }
+
+    //--------------------------------------------------------------------
     void FTN_X(c_esmc_io_yamlcsize)(IO_YAML   **ptr,
                                    int        *size,
                                    int        *status     ) {

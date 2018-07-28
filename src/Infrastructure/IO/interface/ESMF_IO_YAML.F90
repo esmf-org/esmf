@@ -524,13 +524,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
   subroutine ESMF_IO_YAMLContentGet(yaml, keywordEnforcer, &
-    content, contentSize, rc)
+    content, contentSize, lineCount, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_IO_YAML)                                  :: yaml
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*),             intent(out), optional :: content(:)
     integer,                      intent(out), optional :: contentSize
+    integer,                      intent(out), optional :: lineCount
     integer,                      intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -544,17 +545,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          A character(1) array that will hold the content. It must be
 !          at least of size {\tt contentSize}.
 !     \item[{contentSize}]
-!          The size of the available content. It should be retrieved first,
-!          to properly allocate the {\tt content} array.
+!          The number of characters of the available content. It should be
+!          retrieved first, to properly allocate the {\tt content} array.
+!     \item[{lineCount}]
+!          The number of lines of the available content. It should be
+!          retrieved first, to properly allocate the {\tt content} array.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !     
 !EOPI
 
-    ! local return code
+    ! local return codes
     integer :: localrc, stat
-    integer :: i, j, k, maxlen
+    ! local variables
+    integer :: i, j, k
+    integer :: contentLineCount, contentStringLen
     character(len=1), allocatable :: buffer(:)
 !
 !   ! Assume failure until success
@@ -566,11 +572,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
     end if
 
+    if (present(lineCount)) then
+      call c_ESMC_IO_YAMLCLineC(yaml, lineCount, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
+
     if (present(content)) then
 
       ! setup receiving buffer for parsed content
-      maxlen = len(content(1))
-      allocate(buffer(maxlen*size(content)), stat=stat)
+      contentStringLen = len(content(1))
+      contentLineCount = size(content)
+      allocate(buffer(contentStringLen * contentLineCount), &
+        stat=stat)
       if (ESMF_LogFoundAllocError(statusToCheck=stat, &
         msg="Allocation of string buffer.", &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -591,10 +605,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (buffer(j) == achar(10)) then
             k = 0
             i = i + 1
+            if (i > contentLineCount) exit
             cycle
         else
             k = k + 1
-            if (k > maxlen) cycle
+            if (k > contentStringLen) cycle
         end if
         content(i)(k:k) = buffer(j)
       end do

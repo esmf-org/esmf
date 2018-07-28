@@ -353,7 +353,7 @@ module NUOPC_FreeFormatDef
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! get capacity (# lines) of generated FreeFormat object
-    call ESMF_IO_YAMLContentGet(ioyaml, contentSize=lineCount, rc=localrc)
+    call ESMF_IO_YAMLContentGet(ioyaml, lineCount=lineCount, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
