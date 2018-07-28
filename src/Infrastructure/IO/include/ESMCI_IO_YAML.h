@@ -81,6 +81,9 @@ namespace ESMCI {
 
 // !PUBLIC MEMBER FUNCTIONS:
     public:
+      // native constructor/destructor
+      IO_YAML(void);
+      ~IO_YAML() {};
       // explicit create/destroy:
       static IO_YAML* create(int* rc);
       static int destroy(IO_YAML** ioyaml);

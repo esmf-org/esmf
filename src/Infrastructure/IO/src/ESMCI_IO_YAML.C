@@ -49,6 +49,37 @@ namespace ESMCI {
 // This section includes all the IO_YAML routines
 //
 //
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  IO_YAML - native C++ constructor
+//
+// !INTERFACE:
+      IO_YAML::IO_YAML(void)
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      Initialize internal storage.
+//
+//EOP
+// !REQUIREMENTS:
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMCI::IO_YAML() native constructor"
+
+ {
+   // parser storage
+   parser.format     = IO_YAML::ParseFormat::Unset;
+
+   // content producer storage
+   producer.type     = IO_YAML::ContentType::Unset;
+   producer.buffer   = "";
+   producer.capacity = 0;
+
+ } // IO_YAML
 
 //-------------------------------------------------------------------------
 //BOP
