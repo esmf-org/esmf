@@ -321,6 +321,8 @@ module NUOPC_FieldDictionaryApi
         rcToReturn=rc)) &
         return  ! bail out
 
+      NUOPC_FieldDictionaryIsSetup = .false.
+
     end if
 
   end subroutine
