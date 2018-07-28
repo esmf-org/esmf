@@ -22,6 +22,7 @@
 #include "ESMCI_IO_YAML.h"
 
 #include <string>
+#include <cstring>
 
 //------------------------------------------------------------------------------
 //BOP
@@ -106,26 +107,70 @@ namespace ESMCI {
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamloutput)(IO_YAML   **ptr,
-                                     const IO_YAML::OutputType::value *outType,
-                                     const char *filename,
-                                     char       *content,
-                                     int        *contentsize,
-                                     int        *status,
-                                     ESMCI_FortranStrLenArg fileName_l) {
+    void FTN_X(c_esmc_io_yamlcinit)(IO_YAML   **ptr,
+                           const IO_YAML::ContentType::value *type,
+                           int                          *status) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_io_yamloutput()"
+#define ESMC_METHOD "c_esmc_io_yamlcinit()"
       ESMF_CHECK_POINTER(ptr, status)
-      IO_YAML::OutputType::value outOption = IO_YAML::OutputType::Unset;
-      if (outType != NULL) outOption = *outType;
-      int rc = (*ptr)->output(outOption, filename, content, contentsize);
+      IO_YAML::ContentType::value ltype = IO_YAML::ContentType::Unset;
+      if (type != NULL) ltype = *type;
+      int rc = (*ptr)->cinit(ltype);
       if (ESMC_PRESENT(status)) *status = rc;
     }
 
     //--------------------------------------------------------------------
+    void FTN_X(c_esmc_io_yamlcprint)(IO_YAML   **ptr,
+                                     int        *status) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_io_yamlcprint()"
+      ESMF_CHECK_POINTER(ptr, status)
+      int rc = (*ptr)->cwrite();
+      if (ESMC_PRESENT(status)) *status = rc;
+    }
+
+    //--------------------------------------------------------------------
+    void FTN_X(c_esmc_io_yamlcwrite)(IO_YAML   **ptr,
+                                     const char *filename,
+                                     int        *status,
+                                     ESMCI_FortranStrLenArg filename_l) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_io_yamlcwrite()"
+      ESMF_CHECK_POINTER(ptr, status)
+      int rc = (*ptr)->cwrite(std::string(filename,filename_l));
+      if (ESMC_PRESENT(status)) *status = rc;
+    }
+
+    //--------------------------------------------------------------------
+    void FTN_X(c_esmc_io_yamlcsize)(IO_YAML   **ptr,
+                                   int        *size,
+                                   int        *status     ) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_io_yamlcsize()"
+      ESMF_CHECK_POINTER(ptr, status)
+      *size = (*ptr)->csize();
+      if (ESMC_PRESENT(status)) *status = ESMF_SUCCESS;
+    }
+
+    //--------------------------------------------------------------------
+    void FTN_X(c_esmc_io_yamlcget)(IO_YAML   **ptr,
+                                   char       *data,
+                                   int        *status) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_io_yamlcget()"
+      ESMF_CHECK_POINTER(ptr, status)
+      if (data) {
+        const std::string buffer = (*ptr)->cget();
+        size_t len = buffer.copy(data, std::strlen(data));
+        data[len] = '\0';
+      }
+      if (ESMC_PRESENT(status)) *status = ESMF_SUCCESS;
+    }
+
+    //--------------------------------------------------------------------
     void FTN_X(c_esmc_io_yamlparse)(IO_YAML **ptr,
-                                    const IO_YAML::ParseFormat::value *parseFmt,
-                                    int      *status) {
+                              const IO_YAML::ParseFormat::value *parseFmt,
+                              int                               *status) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlparse()"
       ESMF_CHECK_POINTER(ptr, status)

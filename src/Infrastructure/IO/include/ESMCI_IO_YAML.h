@@ -57,7 +57,7 @@ namespace ESMCI {
       struct ParseFormat {
         enum value { Unset, NUOPCFieldDictionary };
       };
-      struct OutputType {
+      struct ContentType {
         enum value { Unset, Native, NUOPCFieldDictionary };
       };
 
@@ -74,7 +74,7 @@ namespace ESMCI {
       } parser;
 
       struct {
-        OutputType::value type;
+        ContentType::value type;
         int capacity;
         std::string buffer;
       } producer;
@@ -98,11 +98,20 @@ namespace ESMCI {
       int write(const std::string& filename) const;
       //   - to output stream
       int write(std::ostream& ostream) const;
-      // - output
-      int output(const IO_YAML::OutputType::value& type, 
-                 const char* filename, 
-                 char* content,
-                 int* contentsize);
+
+      // content methods
+      // - create content from parsed YAML
+      int cinit(const IO_YAML::ContentType::value& type);
+      // - write to standard output
+      int cwrite(void) const;
+      // - write to output stream
+      int cwrite(std::ostream& ostream) const;
+      // - write to file
+      int cwrite(const std::string& filename) const;
+      // - return content size
+      int csize(void) const { return producer.capacity; };
+      // - return content buffer
+      const char* cget(void) const { return producer.buffer.data(); };
 
       // process methods:
       // - parse 
@@ -114,10 +123,6 @@ namespace ESMCI {
       // - parse 
       int nuopc_fd_parser(void);
   };
-
-  // auxiliary functions to allocate/deallocate IO_YAML objects from heap
-  IO_YAML* ESMCI_IO_YAMLCreate(int*);
-  void ESMCI_IO_YAMLDestroy(IO_YAML**, int*);
 
 } // end of namespace ESMCI
 

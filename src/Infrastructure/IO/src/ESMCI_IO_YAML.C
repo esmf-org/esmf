@@ -144,7 +144,9 @@ namespace ESMCI {
     const std::string& filename) {       // in
 
 // !DESCRIPTION:
-//      Populate an {\tt ESMC\_IO\_YAML} object by reading a YAML file
+//      Populate an {\tt ESMC\_IO\_YAML} object by reading a YAML file.
+//      This method reads on PET 0 and broadcast the content to all
+//      other PETs
 //
 //EOP
 // !REQUIREMENTS:
@@ -160,7 +162,6 @@ namespace ESMCI {
       return rc;
     }
 
-/*
     int localPet, petCount;
     ESMCI::VM *globalVM;
 
@@ -173,56 +174,48 @@ namespace ESMCI {
     localPet = globalVM->getLocalPet();
     petCount = globalVM->getPetCount();
 
-#ifdef ESMF_YAMLCPP
+    size_t lbuf = 0;
+    std::string yaml;
 
     if (localPet == 0) {
-      try {
-        this->doc = YAML::LoadFile(filename);
-      } catch(...) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-          "- Caught exception", ESMC_CONTEXT, &rc);
-      }
-    }
-    if (petCount > 1) {
-      std::string buffer;
-      if (localPet == 0) {
-        std::ostringstream os;
-        os << this->doc;
-        buffer = os.str();
-        
-
-      bu
-      
-
-localrc = vmp->broadcast(bcstData, len, rootPet);
-      
-     
-    }
-      
-      
-#else
-    // yaml-cpp library not present
-    rc = ESMF_RC_LIB_NOT_PRESENT;
-
-#endif
-*/
-
-    // read from all PETs for now
-#ifdef ESMF_YAMLCPP
-
-    try {
-      this->doc = YAML::LoadFile(filename);
-    } catch(...) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "- Caught exception", ESMC_CONTEXT, &rc);
+      // open YAML file
+      std::ifstream f(filename);
+      // create string buffer to hold the entire file content
+      std::ostringstream os;
+      os << f.rdbuf();
+      yaml = os.str();
+      // get buffer length
+      lbuf = yaml.size() + 1;
     }
 
-#else
+    // broadcast buffer size
+    rc = globalVM->broadcast(&lbuf, sizeof(lbuf), 0);
+    if (ESMC_LogDefault.MsgFoundError (rc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL))
+      return rc;
 
-    // yaml-cpp library not present
-    rc = ESMF_RC_LIB_NOT_PRESENT;
+    // allocate buffer on all PETs and populate it on PET 0
+    char* buf = new char[lbuf];
+    if (localPet == 0) {
+      yaml.copy(buf,lbuf - 1);
+      buf[lbuf] = '\0';
+    }
 
-#endif
+    // broadcast buffer
+    rc = globalVM->broadcast(buf, lbuf, 0);
+    if (ESMC_LogDefault.MsgFoundError (rc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL))
+      return rc;
+
+    yaml.assign(buf);
+
+    delete [] buf;
+
+    // now can ingest YAML content on all PETs
+    rc = this->ingest(yaml);
+    if (ESMC_LogDefault.MsgFoundError (rc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL))
+      return rc;
 
     return rc;
 
@@ -320,7 +313,8 @@ localrc = vmp->broadcast(bcstData, len, rootPet);
     const std::string& filename) const {       // in
 
 // !DESCRIPTION:
-//      Write YAML content of {\tt ESMC\_IO\_YAML} object to file
+//      Write YAML content of {\tt ESMC\_IO\_YAML} object to file.
+//      This method only writes to file on PET 0.
 //
 //EOP
 // !REQUIREMENTS:
@@ -335,19 +329,32 @@ localrc = vmp->broadcast(bcstData, len, rootPet);
         "Filename argument cannot be NULL", ESMC_CONTEXT, &rc);
       return rc;
     }
+    int localPet;
+    ESMCI::VM *globalVM;
 
-    try {
+    // only write on pet 0
+    globalVM = ESMCI::VM::getGlobal(&rc);
+    if (ESMC_LogDefault.MsgFoundError (rc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, NULL))
+      return rc;
+
+    localPet = globalVM->getLocalPet();
+
+    // only write file on PET 0
+    if (localPet == 0) {
+      try {
 #ifdef ESMF_YAMLCPP
-      std::ofstream fout(filename);
-      fout << this->doc << std::endl;
-      fout.close();
+        std::ofstream fout(filename);
+        fout << this->doc << std::endl;
+        fout.close();
 #else
-      // yaml-cpp library not present
-      rc = ESMF_RC_LIB_NOT_PRESENT;
+        // yaml-cpp library not present
+        rc = ESMF_RC_LIB_NOT_PRESENT;
 #endif
-    } catch(...) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "- Caught exception", ESMC_CONTEXT, &rc);
+      } catch(...) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "- Caught exception", ESMC_CONTEXT, &rc);
+      }
     }
 
     return rc;
@@ -394,26 +401,22 @@ localrc = vmp->broadcast(bcstData, len, rootPet);
 
   }; // IO_YAML::write to output stream
 
-
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  IO_YAML::output - output parsed content of {\tt ESMC\_IO\_YAML} object
+// !IROUTINE:  IO_YAML::cinit - create content from parsed YAML in {\tt ESMC\_IO\_YAML} object
 //
 // !INTERFACE:
-  int IO_YAML::output(
+  int IO_YAML::cinit(
 //
 // !RETURN VALUE:
 //    int return code
 //
 // !ARGUMENTS:
-    const IO_YAML::OutputType::value& outType, // in
-    const char* filename,                      // in
-    char* content,                             // out
-    int*  contentsize) {                       // out
+    const IO_YAML::ContentType::value& type) { // in
 
 // !DESCRIPTION:
-//      Output parsed YAML content of {\tt ESMC\_IO\_YAML} object in the 
-//      format specified by outType. If outType is IO_YAML::OutputType::Unset,
+//      Create content from parsed YAML in {\tt ESMC\_IO\_YAML} object in the
+//      format specified by type. If type is IO_YAML::ContentType::Unset,
 //      no format conversion is performed and this function returns content
 //      cached during a previous call.
 //
@@ -421,24 +424,22 @@ localrc = vmp->broadcast(bcstData, len, rootPet);
 // !REQUIREMENTS:
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::output()"
+#define ESMC_METHOD "ESMCI_IO_YAML::cinit()"
 
     int rc = ESMF_SUCCESS;
 
-    if (outType == IO_YAML::OutputType::Unset) {
+    if (type == IO_YAML::ContentType::Unset) {
 
-      // return cached content if available
-      if (this->producer.buffer.empty()) 
-        return rc;
+      // do nothing
 
-    } else if (outType == IO_YAML::OutputType::Native) {
+    } else if (type == IO_YAML::ContentType::Native) {
 
       try {
         std::ostringstream os;
 #ifdef ESMF_YAMLCPP
         os << this->doc << std::endl;
 #endif
-        this->producer.type     = outType;
+        this->producer.type     = type;
         this->producer.buffer   = os.str();
         this->producer.capacity = this->producer.buffer.size();
       } catch(...) {
@@ -447,7 +448,7 @@ localrc = vmp->broadcast(bcstData, len, rootPet);
         return rc;
       }
     
-    } else if (outType == IO_YAML::OutputType::NUOPCFieldDictionary) {
+    } else if (type == IO_YAML::ContentType::NUOPCFieldDictionary) {
 
       if (this->parser.format == IO_YAML::ParseFormat::NUOPCFieldDictionary) {
 #ifdef ESMF_YAMLCPP
@@ -468,7 +469,7 @@ localrc = vmp->broadcast(bcstData, len, rootPet);
               os << "synonym: " << std::setw(55) << q->as<std::string>() << std::endl;
           }
           os << "----------------------------------------------------------------" << std::endl;
-          this->producer.type     = outType;
+          this->producer.type     = type;
           this->producer.buffer   = os.str();
           this->producer.capacity = std::count(this->producer.buffer.begin(),
                                                this->producer.buffer.end(),'\n');
@@ -485,43 +486,116 @@ localrc = vmp->broadcast(bcstData, len, rootPet);
       return rc;
     }
 
-    // retrieve previously cached or just created content
-    // write content to file
-    if (filename) {
-      std::ofstream fout(filename);
-      fout << this->producer.buffer;
-      fout.close();
-    } 
-
-    // copy content to input char buffer
-    if (content) {
-      if (this->producer.buffer.empty()) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
-          "No stored content", ESMC_CONTEXT, &rc);
-        return rc;
-      }
-      if (strlen(content) < this->producer.buffer.size()) {
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "content size (%lu) must be at least %lu",
-          strlen(content), this->producer.buffer.size());
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE, logMsg, 
-          ESMC_CONTEXT, &rc);
-        return rc;
-      } else {
-          int lenbuf = this->producer.buffer.size();
-          (void) this->producer.buffer.copy(content,lenbuf);
-          content[lenbuf]='\0';
-      }
-    }
-
-    // return content size
-    if (contentsize) {
-      *contentsize = this->producer.capacity;
-    }
-
     return rc;
 
-  }; // IO_YAML::output
+  }; // IO_YAML::cinit
+
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  IO_YAML::cwrite - output parsed content of {\tt ESMC\_IO\_YAML} object
+//
+// !INTERFACE:
+  int IO_YAML::cwrite(void
+//
+// !RETURN VALUE:
+//    int return code
+    ) const {
+
+// !DESCRIPTION:
+//      Write cached output from parsed YAML content of {\tt ESMC\_IO\_YAML}
+//      object to standard output.
+//
+//EOP
+// !REQUIREMENTS:
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::cwrite()"
+
+    int rc = ESMF_SUCCESS;
+
+    std::cout << this->producer.buffer;
+
+    return rc;
+  }; // cwrite
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  IO_YAML::cwrite - output parsed content of {\tt ESMC\_IO\_YAML} object
+//
+// !INTERFACE:
+  int IO_YAML::cwrite(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+    const std::string& filename) const { // in
+
+// !DESCRIPTION:
+//      Write cached content from parsed YAML content of {\tt ESMC\_IO\_YAML}
+//      object to file. If no content exists (e.g. cinit() was not called)
+//      filename is NULL, return error.
+//
+//EOP
+// !REQUIREMENTS:
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::cwrite()"
+
+    int rc = ESMF_SUCCESS;
+
+    // retrieve previously cached or just created content
+    // write content to file
+    if (filename.empty()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
+        "No filename provided", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+
+    if (this->producer.buffer.empty()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_OBJ_BAD,
+        "Content not initialized -- call cinit() first?", ESMC_CONTEXT, &rc);
+      return rc;
+    }
+
+    std::ofstream fout(filename);
+    fout << this->producer.buffer;
+    fout.close();
+
+    return rc;
+  }; // output_write
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  IO_YAML::cwrite - output parsed content of {\tt ESMC\_IO\_YAML} object
+//
+// !INTERFACE:
+  int IO_YAML::cwrite(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+    std::ostream& ostream) const { // in
+
+// !DESCRIPTION:
+//      Write cached content from parsed YAML content of {\tt ESMC\_IO\_YAML}
+//      object to file. If no content exists (e.g. cinit() was not called)
+//      filename is NULL, return error.
+//
+//EOP
+// !REQUIREMENTS:
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::cwrite()"
+
+    int rc = ESMF_SUCCESS;
+
+    ostream << this->producer.buffer;
+
+    return rc;
+  }; // output_write
 
 //-------------------------------------------------------------------------
 //BOP

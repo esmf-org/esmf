@@ -346,20 +346,14 @@ module NUOPC_FreeFormatDef
 
     if (present(rc)) rc = ESMF_SUCCESS
 
-    ! parse YAML doc as NUOPC Field Dictionary
-    call ESMF_IO_YAMLParse(ioyaml, parseflag=ESMF_IOYAML_PARSE_NUOPCFD, &
-      rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
     ! generate content for FreeFormat object
-    call ESMF_IO_YAMLOutput(ioyaml, outflag=ESMF_IOYAML_OUTPUT_FREEFORM, &
+    call ESMF_IO_YAMLContentInit(ioyaml, cflag=ESMF_IOYAML_CONTENT_FREEFORM, &
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! get capacity (# lines) of generated FreeFormat object
-    call ESMF_IO_YAMLOutput(ioyaml, contentSize=lineCount, rc=localrc)
+    call ESMF_IO_YAMLContentGet(ioyaml, contentSize=lineCount, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
@@ -374,7 +368,7 @@ module NUOPC_FreeFormatDef
     stringList = ""
 
     ! retrieve content of FreeFormat object
-    call ESMF_IO_YAMLOutput(ioyaml, content=stringList, rc=localrc)
+    call ESMF_IO_YAMLContentGet(ioyaml, content=stringList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
@@ -466,13 +460,13 @@ module NUOPC_FreeFormatDef
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-      ! parse YAML content as a NUOPC field dictionary
+      ! parse YAML doc as NUOPC Field Dictionary
       call ESMF_IO_YAMLParse(ioyaml, parseflag=ESMF_IOYAML_PARSE_NUOPCFD, &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-      ! create FreeFormat object by parsing config
+      ! create FreeFormat object from parsed content
       NUOPC_FreeFormatCreateReadFile = &
         NUOPC_FreeFormatCreateReadYAML(ioyaml, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &

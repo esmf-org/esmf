@@ -55,7 +55,7 @@
         ESMF_INIT_DECLARE
       end type
 
-      type ESMF_IO_YAMLOutput_Flag
+      type ESMF_IO_YAMLContent_Flag
 #ifndef ESMF_NO_SEQUENCE
         sequence
 #endif
@@ -63,10 +63,10 @@
         integer :: exp_type
       end type
 
-      type (ESMF_IO_YAMLOutput_Flag), parameter :: &
-        ESMF_IOYAML_OUTPUT_UNSET    = ESMF_IO_YAMLOutput_Flag(0), &
-        ESMF_IOYAML_OUTPUT_NATIVE   = ESMF_IO_YAMLOutput_Flag(1), &
-        ESMF_IOYAML_OUTPUT_FREEFORM = ESMF_IO_YAMLOutput_Flag(2)
+      type (ESMF_IO_YAMLContent_Flag), parameter :: &
+        ESMF_IOYAML_CONTENT_UNSET    = ESMF_IO_YAMLContent_Flag(0), &
+        ESMF_IOYAML_CONTENT_NATIVE   = ESMF_IO_YAMLContent_Flag(1), &
+        ESMF_IOYAML_CONTENT_FREEFORM = ESMF_IO_YAMLContent_Flag(2)
 
       type ESMF_IO_YAMLParse_Flag
 #ifndef ESMF_NO_SEQUENCE
@@ -86,13 +86,13 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_IO_YAML
-      public ESMF_IO_YAMLOutput_Flag
+      public ESMF_IO_YAMLContent_Flag
       public ESMF_IO_YAMLParse_Flag
 !------------------------------------------------------------------------------
 ! !PUBLIC PARAMETERS:
-      public ESMF_IOYAML_OUTPUT_UNSET
-      public ESMF_IOYAML_OUTPUT_NATIVE
-      public ESMF_IOYAML_OUTPUT_FREEFORM
+      public ESMF_IOYAML_CONTENT_UNSET
+      public ESMF_IOYAML_CONTENT_NATIVE
+      public ESMF_IOYAML_CONTENT_FREEFORM
       public ESMF_IOYAML_PARSE_UNSET
       public ESMF_IOYAML_PARSE_NUOPCFD
 !
@@ -100,7 +100,9 @@
       public ESMF_IO_YAMLCreate
       public ESMF_IO_YAMLDestroy
       public ESMF_IO_YAMLIngest
-      public ESMF_IO_YAMLOutput
+      public ESMF_IO_YAMLContentInit
+      public ESMF_IO_YAMLContentGet
+      public ESMF_IO_YAMLContentWrite
       public ESMF_IO_YAMLParse
       public ESMF_IO_YAMLRead
       public ESMF_IO_YAMLWrite
@@ -218,12 +220,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Reads a new {\tt ESMF\_YAML\_IO} object.    
+!     Load YAML content into {\tt ESMF\_YAML\_IO} object from file.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{yaml}]
-!          Read contents of this {\tt ESMF\_IO_YAML} object.
+!          Existing {\tt ESMF\_IO_YAML} object.
+!     \item[{fileName}]
+!          Name of YAML file to read content from.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -302,7 +306,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_IO_YAMLWrite()"
 !BOPI
-! !IROUTINE: ESMF_IO_YAMLWrite - Write a new ESMF YAML I/O object
+! !IROUTINE: ESMF_IO_YAMLWrite - Write to file YAML content of ESMF YAML I/O object
 !
 ! !INTERFACE:
   subroutine ESMF_IO_YAMLWrite(yaml, keywordEnforcer, fileName, rc)
@@ -314,12 +318,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Writes the content of a {\tt ESMF\_YAML\_IO} object to file.
+!     Writes the YAML content of a {\tt ESMF\_YAML\_IO} object to file.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{yaml}]
-!          Write contents of this {\tt ESMF\_IO_YAML} object.
+!          Write YAML content of this {\tt ESMF\_IO_YAML} object.
 !     \item[{fileName}]
 !          The file name to be written to.
 !     \item[{[rc]}]
@@ -377,8 +381,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item[{yaml}]
 !          Parse contents of this {\tt ESMF\_IO_YAML} object.
-!     \item[{parseFormat}]
-!          Interpret YAML content according to {\tt parseFormat}.
+!     \item[{parseflag}]
+!          Interpret YAML content according to {\tt parseflag}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -406,32 +410,142 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !------------------------------------------------------------------------------
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_IO_YAMLOutput()"
+#define ESMF_METHOD "ESMF_IO_YAMLContentInit()"
 !BOPI
-! !IROUTINE: ESMF_IO_YAMLOutput - Output a new ESMF YAML I/O object
+! !IROUTINE: ESMF_IO_YAMLContentInit - Create content from ESMF YAML I/O object
 !
 ! !INTERFACE:
-  subroutine ESMF_IO_YAMLOutput(yaml, keywordEnforcer, outflag, &
-    fileName, content, contentSize, rc)
+  subroutine ESMF_IO_YAMLContentInit(yaml, keywordEnforcer, cflag, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_IO_YAML)                                  :: yaml
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    type(ESMF_IO_YAMLOutput_Flag), intent(in), optional :: outflag
-    character(len=*),              intent(in), optional :: fileName
-    character(len=*),             intent(out), optional :: content(:)
-    integer,                      intent(out), optional :: contentSize
+    type(ESMF_IO_YAMLContent_Flag), intent(in), optional :: cflag
     integer,                      intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Output the parsed content of a {\tt ESMF\_YAML\_IO} object.
+!     Create content from parsed YAML in a {\tt ESMF\_YAML\_IO} object.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[{yaml}]
 !          Output parsed contents of this {\tt ESMF\_IO_YAML} object.
-!     \item[{outflag}]
-!          Return parsed content in {\tt ESMF_IO_YAMLOutput_Flag} format
+!     \item[{cflag}]
+!          Return parsed content in {\tt ESMF_IO_YAMLContent_Flag} format
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+    ! local return code
+    integer :: localrc
+    type(ESMF_IO_YAMLContent_Flag) :: localcflag
+!
+!   ! Assume failure until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    localcflag = ESMF_IOYAML_CONTENT_UNSET
+    if (present(cflag)) localcflag = cflag
+
+    call c_ESMC_IO_YAMLCInit(yaml, localcflag, localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_IO_YAMLContentInit
+
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_IO_YAMLContentWrite()"
+!BOPI
+! !IROUTINE: ESMF_IO_YAMLContentWrite - Write content of ESMF YAML I/O object
+!
+! !INTERFACE:
+  subroutine ESMF_IO_YAMLContentWrite(yaml, keywordEnforcer, &
+    fileName, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_IO_YAML)                                  :: yaml
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len=*),              intent(in), optional :: fileName
+    integer,                      intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Write cached content of a {\tt ESMF\_YAML\_IO} object to file.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{yaml}]
+!          Write parsed contents of this {\tt ESMF\_IO_YAML} object.
+!     \item[{fileName}]
+!          Name of file to write content to.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+    ! local return code
+    integer :: localrc
+!
+!   ! Assume failure until success
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    if (present(fileName)) then
+      call c_ESMC_IO_YAMLCWrite(yaml, fileName, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      call c_ESMC_IO_YAMLCPrint(yaml, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    ! Return success
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end subroutine ESMF_IO_YAMLContentWrite
+
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_IO_YAMLContentGet()"
+!BOPI
+! !IROUTINE: ESMF_IO_YAMLContentGet - Get content of an ESMF YAML I/O object
+!
+! !INTERFACE:
+  subroutine ESMF_IO_YAMLContentGet(yaml, keywordEnforcer, &
+    content, contentSize, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_IO_YAML)                                  :: yaml
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    character(len=*),             intent(out), optional :: content(:)
+    integer,                      intent(out), optional :: contentSize
+    integer,                      intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Retrieve the parsed content of a {\tt ESMF\_YAML\_IO} object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{yaml}]
+!          Output parsed content of this {\tt ESMF\_IO_YAML} object.
+!     \item[{content}]
+!          A character(1) array that will hold the content. It must be
+!          at least of size {\tt contentSize}.
+!     \item[{contentSize}]
+!          The size of the available content. It should be retrieved first,
+!          to properly allocate the {\tt content} array.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -442,10 +556,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer :: localrc, stat
     integer :: i, j, k, maxlen
     character(len=1), allocatable :: buffer(:)
-    character(len=1), pointer :: p
 !
 !   ! Assume failure until success
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    if (present(contentSize)) then
+      call c_ESMC_IO_YAMLCSize(yaml, contentSize, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    end if
 
     if (present(content)) then
 
@@ -456,10 +575,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         msg="Allocation of string buffer.", &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-      ! buffer must be initialized or the following API won't be able to check its size
+      ! initialize buffer
       buffer = ""
 
-      call c_ESMC_IO_YAMLOutput(yaml, outflag, fileName, buffer, contentSize, localrc)
+      call c_ESMC_IO_YAMLCGet(yaml, buffer, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -486,20 +605,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         msg="Free memory associated with string buffer.", &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    else
-
-      call c_ESMC_IO_YAMLOutput(yaml, outflag, fileName, null(p), contentSize, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
-
     end if
 
     ! Return success
     if (present(rc)) rc = ESMF_SUCCESS
 
-  end subroutine ESMF_IO_YAMLOutput
+  end subroutine ESMF_IO_YAMLContentGet
 
 !------------------------------------------------------------------------------
 
       end module ESMF_IO_YAMLMod
-
