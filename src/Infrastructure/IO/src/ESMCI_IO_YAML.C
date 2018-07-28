@@ -448,7 +448,7 @@ namespace ESMCI {
         return rc;
       }
     
-    } else if (type == IO_YAML::ContentType::NUOPCFieldDictionary) {
+    } else if (type == IO_YAML::ContentType::NUOPCFreeFormat) {
 
       if (this->parser.format == IO_YAML::ParseFormat::NUOPCFieldDictionary) {
 #ifdef ESMF_YAMLCPP

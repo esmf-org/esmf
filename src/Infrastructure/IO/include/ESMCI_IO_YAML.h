@@ -55,10 +55,10 @@ namespace ESMCI {
 // !PUBLIC TYPES:
     public:
       struct ParseFormat {
-        enum value { Unset, NUOPCFieldDictionary };
+        enum value { Unset = 0, NUOPCFieldDictionary };
       };
       struct ContentType {
-        enum value { Unset, Native, NUOPCFieldDictionary };
+        enum value { Unset = 0, Native, NUOPCFreeFormat };
       };
 
 // !PRIVATE TYPES:
