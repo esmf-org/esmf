@@ -70,12 +70,7 @@ program ESMF_IO_YAMLUTest
   yaml = ESMF_IO_YAMLCreate(rc=rc)
   write(failMsg, *) "did not return ESMF_SUCCESS"
   write(name, *) "ESMF_IO_YAMLCreate(): create YAML_IO object"
-#if ESMF_YAMLCPP
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-#else
-  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
-  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
-#endif
 
   !-----------------------------------------------------------------------------
   ! read YAML file

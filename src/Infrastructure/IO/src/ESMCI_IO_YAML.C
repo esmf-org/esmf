@@ -840,7 +840,7 @@ namespace ESMCI {
     return rc;
 
 #else
-    int rc = ESMC_RC_LIB_NOT_PRESENT
+    int rc = ESMC_RC_LIB_NOT_PRESENT;
 #endif
 
     return rc;
