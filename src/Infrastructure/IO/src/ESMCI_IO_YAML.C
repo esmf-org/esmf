@@ -276,6 +276,13 @@ namespace ESMCI {
 
     int rc = ESMF_SUCCESS;
 
+    // internal storage is now stale, since fresh content is being ingested
+    // clear stale internal storage
+    parser.format     = IO_YAML::ParseFormat::Unset;
+    producer.type     = IO_YAML::ContentType::Unset;
+    producer.buffer   = "";
+    producer.capacity = 0;
+
     try {
 #ifdef ESMF_YAMLCPP
       this->doc = YAML::Load(content);
