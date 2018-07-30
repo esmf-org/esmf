@@ -117,6 +117,9 @@ endif
 ifneq (,$(findstring mpich,$(ESMF_COMM)))
 ESMF_PRELOAD_SH = ./preload.sh
 endif
+ifeq ($(ESMF_COMM),mpi)
+ESMF_PRELOAD_SH = ./preload.sh
+endif
 
 # --- customized target for testing with LD_PRELOAD --- #
 ftest_preload: $(PRELOADSCRIPT)
