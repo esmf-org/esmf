@@ -185,24 +185,24 @@ integer,              intent(out), optional :: rc
 !           Coordinates at the area weighted center of the xgrid cells. Must enter with shape(centroid)=(/dimCount, elementCount/).
 !     \item [{[distgridA]}]
 !           List of distgrids whose sequence index list is an overlap between a Grid
-!           on sideA and the xgrid object. Must enter with shape(distgridA)=(/ngridA/).
+!           on sideA and the xgrid object. Must enter with shape(distgridA)=(/sideAGridCount+sideAMeshCount/).
 !     \item [{[distgridB]}]
 !           List of distgrids whose sequence index list is an overlap between a Grid
-!           on sideB and the xgrid object. Must enter with shape(distgridB)=(/ngridB/).
+!           on sideB and the xgrid object. Must enter with shape(distgridB)=(/sideBGridCount+sideBMeshCount/).
 !     \item [{[distgridM]}]
 !           The distgrid whose sequence index list fully describes the xgrid object.
 !     \item [{[sparseMatA2X]}]
 !           Indexlist from a Grid index space on side A to xgrid index space; 
-!           indexFactorlist from a Grid index space on side A to xgrid index space. Must enter with shape(sparsematA2X)=(/ngridA/).
+!           indexFactorlist from a Grid index space on side A to xgrid index space. Must enter with shape(sparsematA2X)=(/sideAGridCount+sideAMeshCount/).
 !     \item [{[sparseMatX2A]}]
 !           Indexlist from xgrid index space to a Grid index space on side A; 
-!           indexFactorlist from xgrid index space to a Grid index space on side A. Must enter with shape(sparsematX2A)=(/ngridA/).
+!           indexFactorlist from xgrid index space to a Grid index space on side A. Must enter with shape(sparsematX2A)=(/sideAGridCount+sideAMeshCount/).
 !     \item [{[sparseMatB2X]}]
 !           Indexlist from a Grid index space on side B to xgrid index space; 
-!           indexFactorlist from a Grid index space on side B to xgrid index space. Must enter with shape(sparsematB2X)=(/ngridB/).
+!           indexFactorlist from a Grid index space on side B to xgrid index space. Must enter with shape(sparsematB2X)=(/sideBGridCount+sideBMeshCount/).
 !     \item [{[sparseMatX2B]}]
 !           Indexlist from xgrid index space to a Grid index space on side B; 
-!           indexFactorlist from xgrid index space to a Grid index space on side B. Must enter with shape(sparsematX2B)=(/ngridB/).
+!           indexFactorlist from xgrid index space to a Grid index space on side B. Must enter with shape(sparsematX2B)=(/sideBGridCount+sideBMeshCount/).
 !     \item [{[name]}]
 !           Name of the xgrid object.
 !     \item [{[rc]}]
