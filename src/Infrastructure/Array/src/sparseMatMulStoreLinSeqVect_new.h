@@ -1,5 +1,6 @@
 #define STORELINSEQVECT_NEW_LOG_on
 #define STORELINSEQVECT_NEW_TIMERS_on
+#define STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
 //-----------------------------------------------------------------------------
 
   template<typename IT> struct SparseMatrixIndex{
@@ -1096,32 +1097,44 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     {
       FillLinSeqVect<SIT,DIT,ESMC_R4> 
         fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
-//      fillLinSeqVect.totalExchange(vm);
+#ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
       fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
+#else
+      fillLinSeqVect.totalExchange(vm);
+#endif
     }
     break;
   case ESMC_TYPEKIND_R8:
     {
       FillLinSeqVect<SIT,DIT,ESMC_R8> 
         fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
-//      fillLinSeqVect.totalExchange(vm);
+#ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
       fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
+#else
+      fillLinSeqVect.totalExchange(vm);
+#endif
     }
     break;
   case ESMC_TYPEKIND_I4:
     {
       FillLinSeqVect<SIT,DIT,ESMC_I4> 
         fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
-//      fillLinSeqVect.totalExchange(vm);
+#ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
       fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
+#else
+      fillLinSeqVect.totalExchange(vm);
+#endif
     }
     break;
   case ESMC_TYPEKIND_I8:
     {
       FillLinSeqVect<SIT,DIT,ESMC_I8> 
         fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
-//      fillLinSeqVect.totalExchange(vm);
+#ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
       fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
+#else
+      fillLinSeqVect.totalExchange(vm);
+#endif
     }
     break;
   default:

@@ -8106,6 +8106,15 @@ template<typename SIT, typename DIT>
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
+  VM *vm = VM::getCurrent(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    &rc)) return rc;
+
+#if 1
+  vm->timerReset("tSparseMatMulStore");
+  vm->timerStart("tSparseMatMulStore");
+#endif
+
   try{
 
   //---------------------------------------------------------------------------
@@ -8113,9 +8122,6 @@ template<typename SIT, typename DIT>
   //---------------------------------------------------------------------------
 
   // get the current VM and VM releated information
-  VM *vm = VM::getCurrent(&localrc);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-    &rc)) return rc;
   int localPet = vm->getLocalPet();
   int petCount = vm->getPetCount();
 
@@ -8738,6 +8744,11 @@ template<typename SIT, typename DIT>
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore5.0"));
+#endif
+
+#if 1
+  vm->timerStop("tSparseMatMulStore");
+  vm->timerLog("tSparseMatMulStore");
 #endif
 
   // return successfully
