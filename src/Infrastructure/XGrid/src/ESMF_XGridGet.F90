@@ -1008,7 +1008,7 @@ end subroutine ESMF_XGridGetSMMSpecFrac
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetDG()"
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_XGridGet - Get an individual DistGrid from an XGrid
 
 ! !INTERFACE: ESMF_XGridGet
@@ -1052,7 +1052,7 @@ integer,                   intent(out), optional :: rc
 !       is created.
 !     \end{description}
 !
-!EOP
+!EOPI
 
     type(ESMF_XGridType), pointer :: xgtypep
     type(ESMF_XGridSide_Flag)     :: l_xgridSide
