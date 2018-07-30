@@ -539,8 +539,8 @@
 !EOE
 !BOC
     call ESMF_XGridGet(xgrid, &
-        ngridA=ngridA, &    ! number of Grids on side A
-        ngridB=ngridB, &    ! number of Grids on side B
+        sideAGridCount=ngridA, &    ! number of Grids on side A
+        sideBGridCount=ngridB, &    ! number of Grids on side B
         sideAGrid=l_sideA, &    ! list of Grids on side A
         sideBGrid=l_sideB, &    ! list of Grids on side B
         area=l_area, &      ! list of area of XGrid

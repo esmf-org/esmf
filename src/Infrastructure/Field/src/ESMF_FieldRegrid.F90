@@ -1604,6 +1604,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Mesh)      :: srcMesh, dstMesh
 
         integer :: srcIdx, dstIdx, ngrid_a, ngrid_b
+        integer :: sideAGC, sideAMC, sideBGC, sideBMC
         type(ESMF_XGridSide_Flag) :: srcSide, dstSide
         type(ESMF_XGridGeomBase), allocatable :: gridA(:), gridB(:)
         type(ESMF_Grid)      :: srcGrid
@@ -1642,10 +1643,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! look for the correct Grid to use
         ! first Get necessary information from XGrid and Fields
-        call ESMF_XGridGet(xgrid, ngridA=ngrid_a, ngridB=ngrid_b, &
+        call ESMF_XGridGet(xgrid, &
+            sideAGridCount=sideAGC, sideAMeshCount=sideAMC, &
+            sideBGridCount=sideBGC, sideBMeshCount=sideBMC, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+        ngrid_a = sideAGC + sideAMC
+        ngrid_b = sideBGC + sideBMC
         allocate(gridA(ngrid_a), gridB(ngrid_b))
 
         call ESMF_XGridGet(xgrid, gridA, gridB, rc=localrc)

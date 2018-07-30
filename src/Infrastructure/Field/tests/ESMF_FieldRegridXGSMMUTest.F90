@@ -128,7 +128,8 @@ contains
         type(ESMF_XGridSpec)                :: l_sparseMatA2X(2), l_sparseMatX2B(1)
         type(ESMF_Field)                    :: field, srcField(2), dstField(1)
 
-        integer                             :: eleCount, ngridA, ngridB
+        integer                             :: eleCount
+        integer                             :: sideAGC, sideBGC, sideAMC, sideBMC
         integer                             :: elb, eub, ec, lpet, npet
 
         real(ESMF_KIND_R8), pointer         :: farrayPtr(:,:), xfarrayPtr(:)
@@ -411,7 +412,9 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_XGridGet(xgrid, ngridA=ngridA, ngridB=ngridB, &
+        call ESMF_XGridGet(xgrid, &
+            sideAGridCount=sideAGC, sideBGridCount=sideBGC, &
+            sideAMeshCount=sideAMC, sideBMeshCount=sideBMC, &
             sideAGrid=l_sideA, sideBGrid=l_sideB, area=l_area, &
             centroid=l_centroid, distgridA=l_sideAdg, &
             distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
@@ -469,6 +472,10 @@ contains
             ESMF_CONTEXT, rcToReturn=rc)) return
 
         xfarrayPtr = 0.0
+        call ESMF_XGridGet(xgrid, elementCount=eleCount, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
         call ESMF_FieldPrint(field, rc=localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -607,7 +614,8 @@ contains
         type(ESMF_XGridSpec)                :: l_sparseMatA2X(2), l_sparseMatX2B(1)
         type(ESMF_Field)                    :: field, srcField(2), dstField(1)
 
-        integer                             :: eleCount, ngridA, ngridB
+        integer                             :: eleCount
+        integer                             :: sideAGC, sideBGC, sideAMC, sideBMC
         integer                             :: elb, eub, ec, lpet, npet
 
         real(ESMF_KIND_R8), pointer         :: farrayPtr(:,:), xfarrayPtr(:)
@@ -884,7 +892,9 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_XGridGet(xgrid, ngridA=ngridA, ngridB=ngridB, &
+        call ESMF_XGridGet(xgrid, &
+            sideAGridCount=sideAGC, sideBGridCount=sideBGC, &
+            sideAMeshCount=sideAMC, sideBMeshCount=sideBMC, &
             sideAGrid=l_sideA, sideBGrid=l_sideB, area=l_area, &
             centroid=l_centroid, distgridA=l_sideAdg, &
             distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &

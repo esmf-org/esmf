@@ -215,7 +215,8 @@ contains
         type(ESMF_Field)                    :: field, srcField(2), dstField(1)
 
         type(ESMF_VM)                       :: vm
-        integer                             :: lpet, eleCount, ngridA, ngridB
+        integer                             :: lpet, eleCount,ndim
+        integer                             :: sideAGC, sideBGC, sideAMC, sideBMC
         integer                             :: elb, eub, ec
 
         real(ESMF_KIND_R8), pointer         :: fptr(:,:), xfptr(:)
@@ -402,8 +403,12 @@ contains
         call ESMF_Test(xgridBool, name, failMsg, result, ESMF_SRCLINE)
 
 
-        call ESMF_XGridGet(xgrid, ngridA=ngridA, ngridB=ngridB, &
+        call ESMF_XGridGet(xgrid, &
+            sideAGridCount=sideAGC, sideBGridCount=sideBGC, &
+            sideAMeshCount=sideAMC, sideBMeshCount=sideBMC, &
             sideAGrid=l_sideA, sideBGrid=l_sideB, area=l_area, &
+            elementCount=eleCount, &
+            dimCount=ndim, &
             centroid=l_centroid, distgridA=l_sideAdg, &
             distgridM = distgrid, sparseMatA2X=l_sparseMatA2X, &
             sparseMatX2B=l_sparseMatX2B, &
@@ -419,7 +424,7 @@ contains
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
-        !print *, lpet, eleCount, elb, eub
+        !print *, lpet, eleCount, ec, elb, eub
 
         !call ESMF_DistGridPrint(distgrid, rc=localrc)
         !if (ESMF_LogFoundError(localrc, &
@@ -4507,6 +4512,7 @@ end subroutine test_CSGridToGrid_2nd
     type(ESMF_Field), allocatable             :: srcField(:)
     type(ESMF_Field), allocatable             :: dstField(:)
     integer                                   :: l_scheme
+    integer                                   :: sideAGC, sideBGC, sideAMC, sideBMC
     real(ESMF_KIND_R8)                        :: global_sum, l_area_adj
     character(len=1)                          :: cids(10) = (/'0','1','2','3','4','5','6','7','8','9'/)
 
@@ -4538,11 +4544,16 @@ end subroutine test_CSGridToGrid_2nd
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_XGridGet(xgrid, ngridA=nsrc, ngridB=ndst, rc=localrc)
+    call ESMF_XGridGet(xgrid, &
+        sideAGridCount=sideAGC, sideBGridCount=sideBGC, &
+        sideAMeshCount=sideAMC, sideBMeshCount=sideBMC, &
+        rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    nsrc = sideAGC
+    ndst = sideBGC
     allocate(srcGrid(nsrc), srcField(nsrc), srcFrac(nsrc), srcFrac2(nsrc), srcArea(nsrc))
     allocate(dstGrid(ndst), dstField(ndst), dstFrac(ndst), dstFrac2(ndst), dstArea(ndst))
 
@@ -4861,6 +4872,7 @@ end subroutine test_CSGridToGrid_2nd
     type(ESMF_Field), allocatable             :: srcField(:)
     type(ESMF_Field), allocatable             :: dstField(:)
     integer                                   :: l_scheme
+    integer                                   :: sideAGC, sideBGC, sideAMC, sideBMC
     real(ESMF_KIND_R8)                        :: global_sum
     character(len=1)                          :: cids(10) = (/'0','1','2','3','4','5','6','7','8','9'/)
 
@@ -4890,11 +4902,16 @@ end subroutine test_CSGridToGrid_2nd
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_XGridGet(xgrid, ngridA=nsrc, ngridB=ndst, rc=localrc)
+    call ESMF_XGridGet(xgrid, &
+        sideAGridCount=sideAGC, sideBGridCount=sideBGC, &
+        sideAMeshCount=sideAMC, sideBMeshCount=sideBMC, &
+        rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    nsrc = sideAMC
+    ndst = sideBMC
     allocate(srcGrid(nsrc), srcField(nsrc), srcFrac(nsrc), srcFrac2(nsrc), srcArea(nsrc))
     allocate(dstGrid(ndst), dstField(ndst), dstFrac(ndst), dstFrac2(ndst), dstArea(ndst))
 

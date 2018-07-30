@@ -1063,6 +1063,7 @@ contains
     type(ESMF_Field), allocatable             :: srcField(:)
     type(ESMF_Field), allocatable             :: dstField(:)
     integer                                   :: l_scheme
+    integer                                   :: sideAGC, sideBGC, sideAMC, sideBMC
     real(ESMF_KIND_R8)                        :: global_sum
 
     l_scheme = ESMF_REGRID_SCHEME_REGION3D
@@ -1091,11 +1092,16 @@ contains
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_XGridGet(xgrid, ngridA=nsrc, ngridB=ndst, rc=localrc)
+    call ESMF_XGridGet(xgrid, &
+        sideAGridCount=sideAGC, sideBGridCount=sideBGC, &
+        sideAMeshCount=sideAMC, sideBMeshCount=sideBMC, &
+        rc=localrc)
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
+    nsrc=sideAGC
+    ndst=sideBGC
     allocate(srcGrid(nsrc), srcField(nsrc), srcFrac(nsrc), srcFrac2(nsrc), srcArea(nsrc))
     allocate(dstGrid(ndst), dstField(ndst), dstFrac(ndst), dstFrac2(ndst), dstArea(ndst))
 
