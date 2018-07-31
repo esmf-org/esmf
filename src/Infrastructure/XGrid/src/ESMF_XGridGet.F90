@@ -168,7 +168,7 @@ integer,              intent(out), optional :: rc
 !     \item [{[dimCount]}]
 !           Number of dimension of the xgrid.
 !     \item [{[elementCount]}]
-!          Number of elements in exclusive region of the xgrid.
+!          Number of elements in exclusive region of the xgrid on this PET.
 !     \item [{[sideAGrid]}]
 !           List of 2D Grids on side A. Must enter with shape(sideAGrid)=(/sideAGridCount/).
 !     \item [{[sideBGrid]}]
@@ -180,9 +180,9 @@ integer,              intent(out), optional :: rc
 !     \item [{[mesh]}]
 !           Super mesh stored in XGrid when storeOverlay is set true during XGrid creation.
 !     \item [{[area]}]
-!           Area of the xgrid cells. Must enter with shape(area)=(/elementCount/).
+!           Area of the xgrid cells on this PET. Must enter with shape(area)=(/elementCount/).
 !     \item [{[centroid]}]
-!           Coordinates at the area weighted center of the xgrid cells. Must enter with shape(centroid)=(/dimCount, elementCount/).
+!           Coordinates at the area weighted center of the xgrid cells on this PET. Must enter with shape(centroid)=(/dimCount, elementCount/).
 !     \item [{[distgridA]}]
 !           List of distgrids whose sequence index list is an overlap between a Grid
 !           on sideA and the xgrid object. Must enter with shape(distgridA)=(/sideAGridCount+sideAMeshCount/).
