@@ -1,5 +1,5 @@
-#define STORELINSEQVECT_NEW_LOG_on
-#define STORELINSEQVECT_NEW_TIMERS_on
+#define STORELINSEQVECT_NEW_LOG_off
+#define STORELINSEQVECT_NEW_TIMERS_off
 #define STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
 //-----------------------------------------------------------------------------
 

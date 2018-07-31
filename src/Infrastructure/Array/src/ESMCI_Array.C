@@ -15,8 +15,8 @@
 
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
-#define ASMM_STORE_MEMLOG_on
-#define ASMM_STORE_TUNELOG_on
+#define ASMM_STORE_MEMLOG_off
+#define ASMM_STORE_TUNELOG_off
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_DUMPSMM_off
 
@@ -8110,7 +8110,7 @@ template<typename SIT, typename DIT>
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
-#if 1
+#if 0
   vm->timerReset("tSparseMatMulStore");
   vm->timerStart("tSparseMatMulStore");
 #endif
@@ -8746,7 +8746,7 @@ template<typename SIT, typename DIT>
   VM::logMemInfo(std::string("ASMMStore5.0"));
 #endif
 
-#if 1
+#if 0
   vm->timerStop("tSparseMatMulStore");
   vm->timerLog("tSparseMatMulStore");
 #endif
@@ -9711,7 +9711,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-#define SMMSTOREENCODEXXEINFO_on
+#define SMMSTOREENCODEXXEINFO_off
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
