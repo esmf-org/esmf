@@ -1015,7 +1015,7 @@ int ESMC_FieldSMMStore(
     ESMC_Field dstField,                           // in
     const char *filename,                          // in
     ESMC_RouteHandle *routehandle,                 // out
-    ESMC_Logical *ignoreUnmatchedIndices,          // in
+    enum ESMC_Logical *ignoreUnmatchedIndices,     // in
     int *srcTermProcessing,                        // in
     int *pipeLineDepth);                           // in
 
