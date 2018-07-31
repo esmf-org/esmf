@@ -228,7 +228,7 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, Lo
         do j=start(2), start(2)+count(2)-1
            do i=start(1),start(1)+count(1)-1
               call cell_center2(grid_global(i,j,  1,n), grid_global(i,j,  2,n),   &
-	      	   	        grid_global(i+1,j,1,n), grid_global(i+1,j,2,n),   &
+                                grid_global(i+1,j,1,n), grid_global(i+1,j,2,n),   &
                                 grid_global(i,j+1,1,n), grid_global(i,j+1,2,n),   &
                                 grid_global(i+1,j+1,1,n), grid_global(i+1,j+1,2,n),   &
                                 alocs)
@@ -241,7 +241,7 @@ subroutine ESMF_UtilCreateCSCoords(npts, LonEdge,LatEdge, start, count, tile, Lo
            do j=1,npts
               do i=1,npts
               call cell_center2(grid_global(i,j,  1,n), grid_global(i,j,  2,n),   &
-	      	   	        grid_global(i+1,j,1,n), grid_global(i+1,j,2,n),   &
+                                grid_global(i+1,j,1,n), grid_global(i+1,j,2,n),   &
                                 grid_global(i,j+1,1,n), grid_global(i,j+1,2,n),   &
                                 grid_global(i+1,j+1,1,n), grid_global(i+1,j+1,2,n),   &
                                 alocs)
@@ -323,7 +323,7 @@ subroutine ESMF_UtilCreateCSCoordsPar(npts, LonEdge,LatEdge, start, count, tile,
         do j=1, count(2)
            do i=1,count(1)
               call cell_center2(tile_local(i,j,  1), tile_local(i,j,    2),   &
-	      	   		tile_local(i+1,j,1), tile_local(i+1,j,  2),   &
+                                tile_local(i+1,j,1), tile_local(i+1,j,  2),   &
                                 tile_local(i,j+1,1), tile_local(i,j+1,  2),   &
                                 tile_local(i+1,j+1,1), tile_local(i+1,j+1,2),   &
                                 alocs)
