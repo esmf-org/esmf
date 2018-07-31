@@ -2060,13 +2060,42 @@ void VM::logMemInfo(
   info << "Top-most, releasable space (bytes):        \t" << m.keepcost;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-  info.str(""); // clear info
   long total = 0; // init
   if (m.hblkhd>=0 && m.uordblks>=0){
     total = (long)m.hblkhd+(long)m.uordblks;
     total /= (long)1024;  // scale to KiB
   }
+  info.str(""); // clear info
   info << "Total space in use, mmap + non-mmap (KiB): \t" << total;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  // access through malloc_stats()
+  FILE *stderrOrig = stderr;
+  char *buf;
+  size_t len;
+  stderr = open_memstream(&buf, &len);
+  malloc_stats();
+  fflush(stderr);
+  std::string malloc_stats_output;
+  if (buf){
+    malloc_stats_output = string(buf, buf+len);
+    free(buf);
+  }
+  stderr = stderrOrig;
+  size_t pos = malloc_stats_output.rfind("system bytes     =");
+  pos += 18;
+  long system = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
+  system /= (long)1024;  // scale to KiB
+  info.str(""); // clear info
+  info << "Total space held (mmap + non-mmap) (KiB):  \t" << system;
+  sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  pos = malloc_stats_output.rfind("in use bytes     =");
+  pos += 18;
+  long in_use = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
+  in_use /= (long)1024;  // scale to KiB
+  info.str(""); // clear info
+  info << "Total space used (mmap + non-mmap) (KiB):  \t" << in_use;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
   ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   // output the wtime since execution start
