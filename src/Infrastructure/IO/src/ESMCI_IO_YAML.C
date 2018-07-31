@@ -209,14 +209,24 @@ namespace ESMCI {
     std::string yaml;
 
     if (localPet == 0) {
-      // open YAML file
-      std::ifstream f(filename);
-      // create string buffer to hold the entire file content
-      std::ostringstream os;
-      os << f.rdbuf();
-      yaml = os.str();
-      // get buffer length
-      lbuf = yaml.size() + 1;
+      try {
+#ifdef ESMF_YAMLCPP
+        // load YAML from file
+        this->doc = YAML::LoadFile(filename);
+
+        // copy content to string
+        std::ostringstream os;
+        os << this->doc;
+        yaml = os.str();
+#else
+        // yaml-cpp library not present
+        rc = ESMF_RC_LIB_NOT_PRESENT;
+#endif
+      } catch(...) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+          "Caught exception reading content from file", ESMC_CONTEXT, &rc);
+      }
+      lbuf = yaml.size();
     }
 
     // broadcast buffer size
@@ -226,24 +236,18 @@ namespace ESMCI {
       return rc;
 
     // allocate buffer on all PETs and populate it on PET 0
-    char* buf = new char[lbuf];
-    if (localPet == 0) {
-      yaml.copy(buf,lbuf - 1);
-      buf[lbuf] = '\0';
-    }
+    std::string buf(lbuf,'\0');
+    if (localPet == 0)
+      buf = yaml;
 
     // broadcast buffer
-    rc = globalVM->broadcast(buf, lbuf, 0);
+    rc = globalVM->broadcast(&buf[0], lbuf, 0);
     if (ESMC_LogDefault.MsgFoundError (rc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL))
       return rc;
 
-    yaml.assign(buf);
-
-    delete [] buf;
-
     // now can ingest YAML content on all PETs
-    rc = this->ingest(yaml);
+    rc = this->ingest(buf);
     if (ESMC_LogDefault.MsgFoundError (rc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL))
       return rc;
@@ -292,7 +296,7 @@ namespace ESMCI {
 #endif
     } catch(...) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "- Caught exception", ESMC_CONTEXT, &rc);
+        "Caught exception ingesting content", ESMC_CONTEXT, &rc);
     }
 
     return rc;
