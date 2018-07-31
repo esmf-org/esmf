@@ -1307,7 +1307,7 @@ contains
     if (ESMF_LogFoundError(localrc, &
         ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-    write(*, *), 'eleCount = ', eleCount, 'size(fptr) = ', size(exf)
+    write(*, *) 'eleCount = ', eleCount, 'size(fptr) = ', size(exf)
     if(eleCount /= size(exf)) then
       print *, 'elementCount is not equal to size(exf)'
       if(present(rc)) rc = ESMF_RC_NOT_VALID
