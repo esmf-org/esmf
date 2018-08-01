@@ -152,5 +152,38 @@ int main(int argc, char *argv[])
   }
   std::cout << "\n";
 
+  // Test4 : Perform a poly fit using the solver
+  // Initial value of the variables - coefficients of the fit function
+  std::vector<float> pcomp1_xvals = {3600.0, 7200.0, 14400.0, 28800.0};
+  std::vector<float> pcomp1_yvals = {1273.542, 819.700, 426.051, 290.470};
+  
+  // Functions in x, y and z used to create the user
+  // constraint functions
+  std::vector<std::string> pcomp1_vnames = {"x"};
+
+  // Perform a 2deg fit
+  // ax^2 + bx + c = y
+  // Substitute x and y values to get 4 linear equations
+  // Initial values of coeffs a, b, c == 1
+  std::vector<float> init_coeff_vals = {1.0, 1.0, 1.0};
+  // First user constraint function a * x_1^2 + b * x_1 + c - y_1 = 0
+
+  // User constraint functions
+  // Constraint functions are square of the difference between
+  // (pair-wise) the functions above
+  std::vector<ESMCI::MapperUtil::TwoVIDPoly<float> > funcs_test4;
+
+  // Create a solver instance and optimize init_vals
+  ESMCI::MapperUtil::SESolver<float> solver_test4(pcomp1_vnames, init_coeff_vals, funcs_test4);
+  solver_test4.set_niters(SOLVER_MAX_ITERS);
+  std::vector<float> sol_vals_test4 = solver_test4.minimize();
+
+  for(std::vector<float>::const_iterator citer = sol_vals_test4.cbegin();
+      citer != sol_vals_test4.cend(); ++citer){
+    std::cout << *citer << ", ";
+  }
+  std::cout << "\n";
+
+
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }
