@@ -2,7 +2,7 @@
 
 ALL: build_here 
 
-SOURCEC	  = ESMCI_GraphDotUtils.C
+SOURCEC	  = ESMCI_RunSeqDGraph.C ESMCI_GraphDotUtils.C ESMCI_RunSeqUtils.C
 SOURCEF	  = ESMF_MapperRunSeqUtil.F90 ESMF_Mapper.F90 ESMF_MapperUtil.F90
 SOURCEH	  = 
 

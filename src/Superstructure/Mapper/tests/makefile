@@ -13,6 +13,7 @@ TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMCI_PolyUTest \
                 $(ESMF_TESTDIR)/ESMCI_PolyFitUTest \
                 $(ESMF_TESTDIR)/ESMCI_SolverUTest \
                 $(ESMF_TESTDIR)/ESMCI_GraphUTest \
+                $(ESMF_TESTDIR)/ESMCI_RunSeqUTest \
                 $(ESMF_TESTDIR)/ESMCI_LoadBalancerUTest
 
 TESTS_RUN     =
@@ -23,6 +24,7 @@ TESTS_RUN_UNI =	RUN_ESMCI_PolyUTestUNI \
                 RUN_ESMCI_PolyFitUTestUNI \
                 RUN_ESMCI_SolverUTestUNI \
                 RUN_ESMCI_GraphUTestUNI \
+                RUN_ESMCI_RunSeqUTestUNI \
                 RUN_ESMCI_LoadBalancerUTestUNI
 
 
@@ -40,6 +42,9 @@ ESMF_CXXLINKLIBS += -L/home/jayeshkrishna/parvis/lapack-3.4.2 -llapacke -llapack
 
 ESMCI_GraphUTest.o: ../src/ESMCI_GraphDotUtils.o
 ESMCI_UTEST_Graph_OBJS = ../src/ESMCI_GraphDotUtils.o
+
+ESMCI_RunSeqUTest.o: ../src/ESMCI_RunSeqDGraph.o ../src/ESMCI_RunSeqUtils.o ../src/ESMCI_GraphDotUtils.o
+ESMCI_UTEST_RunSeq_OBJS = ../src/ESMCI_RunSeqDGraph.o ../src/ESMCI_RunSeqUtils.o ../src/ESMCI_GraphDotUtils.o
 
 #       
 #       
@@ -63,6 +68,11 @@ RUN_ESMCI_SolverUTestUNI:
 
 RUN_ESMCI_GraphUTestUNI:
 	$(MAKE) TNAME=DGraph NP=1 ctest
+
+RUN_ESMCI_RunSeqUTestUNI:
+	cp -f StackedRunSeq.txt ${ESMF_TESTDIR}
+	cp -f ThreeCompAndMedRunSeq.txt ${ESMF_TESTDIR}
+	$(MAKE) TNAME=RunSeq NP=1 ctest
 
 RUN_ESMCI_LoadBalancerUTestUNI:
 	$(MAKE) TNAME=LoadBalancer NP=1 ctest
