@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
   char name[ESMF_MAX_STRLEN];
   char failMsgNPetsNeg[ESMF_MAX_STRLEN];
   char failMsgSolnDiv[ESMF_MAX_STRLEN];
-  const int MAX_ITER = 5;
+  const int MAX_ITER = 10;
 
   ESMC_TestStart(__FILE__, __LINE__, 0);
 
@@ -47,7 +47,8 @@ int main(int argc, char *argv[])
   rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, pcomp3_xvals, pcomp3_yvals, pcomp3);
   assert(rc == 0);
   
-  std::vector<int> npets = {2048, 4096, 8192};
+//  std::vector<int> npets = {2048, 4096, 8192};
+  std::vector<int> npets = {4096, 2048, 1024};
   std::vector<float> parallel_exec_times = {pcomp1.eval(npets[0]), pcomp2.eval(npets[1]), pcomp3.eval(npets[2])};
   std::vector<float> serial_exec_times = {npets[0]*parallel_exec_times[0], npets[1] * parallel_exec_times[1], npets[2] * parallel_exec_times[2]};
   ESMCI::MapperUtil::LoadBalancer<float> lb(ncomps, parallel_exec_times, serial_exec_times, npets);
