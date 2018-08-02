@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <sstream>
 #include <initializer_list>
 #include <cassert>
 #include <cmath>
@@ -12,7 +13,7 @@
 namespace ESMCI{
   namespace MapperUtil{
 
-    /* Univariate (1 variable) polynomial class
+    /* Multivariate (multiple variables) linear polynomial class
      * This class is abstract and derives from the general polynomial class
      */
     template<typename CType, typename DType>
@@ -36,7 +37,7 @@ namespace ESMCI{
       assert(0);
     }
 
-    /* Univariate polynomial with integer degrees
+    /* Multivariate linear polynomial with integer degrees
      * This concrete class derives from the univariate polynomial class
      */
     template<typename CType>
@@ -63,13 +64,13 @@ namespace ESMCI{
     }; // class MVIDLPoly
 
     namespace MVIDLPolyUtil{
-      std::vector<string> append_int2str(const std::string &str, int range_start,
+      std::vector<std::string> append_int2str(const std::string &str, int range_start,
         int range_end)
       {
-        std::vector<string> res;
+        std::vector<std::string> res;
         assert(range_end > range_start);
         for(int i=range_start; i<range_end; i++){
-          std::stringstream ostr;
+          std::ostringstream ostr;
           ostr << str.c_str() << i;
           res.push_back(ostr.str());
         }
@@ -95,13 +96,15 @@ namespace ESMCI{
     template<typename CType>
     inline MVIDLPoly<CType>::MVIDLPoly(const std::vector<CType>& coeffs):coeffs_(coeffs)
     {
-      vnames_ = MVIDPolyUtil::append_int2str(std::string("x"), 0, coeffs.size());
+      assert(coeffs.size() > 0);
+      vnames_ = MVIDLPolyUtil::append_int2str(std::string("x"), 0, coeffs.size()-1);
     }
 
     template<typename CType>
     inline MVIDLPoly<CType>::MVIDLPoly(std::initializer_list<CType> coeffs):coeffs_(coeffs.begin(), coeffs.end())
     {
-      vnames_ = MVIDPolyUtil::append_int2str(std::string("x"), 0, coeffs.size());
+      assert(coeffs.size() > 0);
+      vnames_ = MVIDLPolyUtil::append_int2str(std::string("x"), 0, coeffs.size()-1);
     }
 
     template<typename CType>
@@ -183,13 +186,13 @@ namespace ESMCI{
       std::vector<std::string> vnames = p.get_vnames();
       assert(vnames.size() == coeffs.size() - 1);
 
-      typename std::vector<CType>::const_iterator coeffs_iter = coeffs_.cbegin();
-      typename std::vector<CType>::const_iterator vnames_iter = vnames_.cbegin();
-      for(;(coeffs_iter != coeffs_.cend()) && (vnames_iter != vnames_.cend());
+      typename std::vector<CType>::const_iterator coeffs_iter = coeffs.cbegin();
+      typename std::vector<std::string>::const_iterator vnames_iter = vnames.cbegin();
+      for(;(coeffs_iter != coeffs.cend()) && (vnames_iter != vnames.cend());
           ++coeffs_iter, ++vnames_iter){
         ostr << *coeffs_iter << *vnames_iter << " + ";
       }
-      for(;coeffs_iter != coeffs_cend(); ++coeffs_iter){
+      for(;coeffs_iter != coeffs.cend(); ++coeffs_iter){
         ostr << *coeffs_iter;
       }
 
@@ -209,19 +212,19 @@ namespace ESMCI{
       // Info on whether rhs coeff already included in the result
       std::vector<bool> rhs_coeffs_in_res(rhs_vnames.size(), false);
 
-      typename std::vector<CType>>::const_iterator citer_lhs = lhs_coeffs.cbegin();
+      typename std::vector<CType>::const_iterator citer_lhs = lhs_coeffs.cbegin();
       typename std::vector<std::string>::const_iterator viter_lhs = lhs_vnames.cbegin();
 
       typename std::vector<CType>::const_iterator citer_rhs = rhs_coeffs.cbegin();
       typename std::vector<std::string>::const_iterator viter_rhs = rhs_vnames.cbegin();
-      typename std::vector<bool>::iterator biter_rhs = rhs_coeffs_in_res.cbegin();
+      typename std::vector<bool>::iterator biter_rhs = rhs_coeffs_in_res.begin();
       for(;(citer_lhs != lhs_coeffs.cend()) && (viter_lhs != lhs_vnames.cend());
           ++citer_lhs, ++viter_lhs){
         CType res = *citer_lhs;
 
         citer_rhs = rhs_coeffs.cbegin();
         viter_rhs = rhs_vnames.cbegin();
-        biter_rhs = rhs_coeffs_in_res.cbegin();
+        biter_rhs = rhs_coeffs_in_res.begin();
         for(; (citer_rhs != rhs_coeffs.cend()) &&
               (viter_rhs != rhs_vnames.cend()) &&
               (biter_rhs != rhs_coeffs_in_res.cend());
@@ -238,7 +241,7 @@ namespace ESMCI{
       }
       citer_rhs = rhs_coeffs.cbegin();
       viter_rhs = rhs_vnames.cbegin();
-      biter_rhs = rhs_coeffs_in_res.cbegin();
+      biter_rhs = rhs_coeffs_in_res.begin();
       for(; (citer_rhs != rhs_coeffs.cend()) &&
             (viter_rhs != rhs_vnames.cend()) &&
             (biter_rhs != rhs_coeffs_in_res.cend());
@@ -250,8 +253,8 @@ namespace ESMCI{
         }
       }
 
-      assert(citer_lhs != lhs_coeffs_.cend());
-      assert(citer_rhs != rhs_coeffs_.cend());
+      assert(citer_lhs != lhs_coeffs.cend());
+      assert(citer_rhs != rhs_coeffs.cend());
       res_coeffs.push_back(*citer_lhs + *citer_rhs);
 
       MVIDLPoly<CType> res(res_coeffs);
@@ -280,19 +283,19 @@ namespace ESMCI{
       // Info on whether rhs coeff already included in the result
       std::vector<bool> rhs_coeffs_in_res(rhs_vnames.size(), false);
 
-      typename std::vector<CType>>::const_iterator citer_lhs = lhs_coeffs.cbegin();
+      typename std::vector<CType>::const_iterator citer_lhs = lhs_coeffs.cbegin();
       typename std::vector<std::string>::const_iterator viter_lhs = lhs_vnames.cbegin();
 
       typename std::vector<CType>::const_iterator citer_rhs = rhs_coeffs.cbegin();
       typename std::vector<std::string>::const_iterator viter_rhs = rhs_vnames.cbegin();
-      typename std::vector<bool>::iterator biter_rhs = rhs_coeffs_in_res.cbegin();
+      typename std::vector<bool>::iterator biter_rhs = rhs_coeffs_in_res.begin();
       for(;(citer_lhs != lhs_coeffs.cend()) && (viter_lhs != lhs_vnames.cend());
           ++citer_lhs, ++viter_lhs){
         CType res = *citer_lhs;
 
         citer_rhs = rhs_coeffs.cbegin();
         viter_rhs = rhs_vnames.cbegin();
-        biter_rhs = rhs_coeffs_in_res.cbegin();
+        biter_rhs = rhs_coeffs_in_res.begin();
         for(; (citer_rhs != rhs_coeffs.cend()) &&
               (viter_rhs != rhs_vnames.cend()) &&
               (biter_rhs != rhs_coeffs_in_res.cend());
@@ -309,7 +312,7 @@ namespace ESMCI{
       }
       citer_rhs = rhs_coeffs.cbegin();
       viter_rhs = rhs_vnames.cbegin();
-      biter_rhs = rhs_coeffs_in_res.cbegin();
+      biter_rhs = rhs_coeffs_in_res.begin();
       for(; (citer_rhs != rhs_coeffs.cend()) &&
             (viter_rhs != rhs_vnames.cend()) &&
             (biter_rhs != rhs_coeffs_in_res.cend());
@@ -321,8 +324,8 @@ namespace ESMCI{
         }
       }
 
-      assert(citer_lhs != lhs_coeffs_.cend());
-      assert(citer_rhs != rhs_coeffs_.cend());
+      assert(citer_lhs != lhs_coeffs.cend());
+      assert(citer_rhs != rhs_coeffs.cend());
       res_coeffs.push_back(*citer_lhs - *citer_rhs);
 
       MVIDLPoly<CType> res(res_coeffs);
@@ -341,9 +344,8 @@ namespace ESMCI{
     template<typename CType>
     MVIDLPoly<CType> operator*(const MVIDLPoly<CType> &lhs, const CType &rhs)
     {
-      MVIDLPoly<CType> res;
       std::vector<CType> res_coeffs = lhs.get_coeffs();
-      std::vector<std::string> res_vnames = lhs_get_vnames();
+      std::vector<std::string> res_vnames = lhs.get_vnames();
 
       for(typename std::vector<CType>::iterator iter = res_coeffs.begin();
           iter != res_coeffs.end(); ++iter){
