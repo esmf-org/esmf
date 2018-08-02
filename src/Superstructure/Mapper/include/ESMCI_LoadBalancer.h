@@ -28,7 +28,7 @@ namespace ESMCI{
         LoadBalancer(int ncomps);
         LoadBalancer(int ncomps, const std::vector<T> &wexec_times, const std::vector<T>& serial_exec_times, const std::vector<int> &npets);
         void set_lb_info(const std::vector<T> &wexec_times, const std::vector<T> &serial_exec_times, const std::vector<int> &npets);
-        std::vector<int> optimize(void );
+        T optimize(std::vector<int> &opt_npets);
       private:
         void rec_exec_info(void );
         int ncomps_;
@@ -101,14 +101,23 @@ namespace ESMCI{
      * (wallclock times) of two components
      */
     template<typename T>
-    inline std::vector<int> LoadBalancer<T>::optimize(void )
+    inline T LoadBalancer<T>::optimize(std::vector<int> &opt_npets)
     {
+      //T opt_wtime = static_cast<T>(0);
+      std::vector<T> opt_wtimes(npets_.size(), static_cast<T>(0));
       rec_exec_info();
 
       int total_pets = std::accumulate(npets_.cbegin(),
                         npets_.cend(), 0);
 
-      std::vector<int> res(npets_.size(), total_pets);
+      //std::vector<int> res(npets_.size(), total_pets);
+      if(opt_npets.empty()){
+        opt_npets.resize(npets_.size());
+        for(std::vector<int>::iterator iter = opt_npets.begin();
+            iter != opt_npets.end(); ++iter){
+          *iter = total_pets;
+        }
+      }
 
       T total_time = std::accumulate(serial_exec_times_.cbegin(),
                       serial_exec_times_.cend(), 0);
@@ -121,8 +130,10 @@ namespace ESMCI{
          * scale linearly and redistribute PETs based on the weighted
          * (weighted on the serial execution time) average
          */ 
-        for(unsigned int i=0; i<res.size(); i++){
-          res[i] = static_cast<int> (res[i] * serial_exec_times_[i] / total_time);
+        for(unsigned int i=0; i< static_cast<int>(opt_npets.size()); i++){
+          opt_npets[i] =
+            static_cast<int> (opt_npets[i] * serial_exec_times_[i] / total_time);
+          opt_wtimes[i] = static_cast<T>(serial_exec_times_[i]/opt_npets[i]);
         }
       }
       else{
@@ -183,11 +194,19 @@ namespace ESMCI{
         SESolver<T> solver(vnames, npets, ifuncs);
         std::vector<T> new_pets = solver.minimize();
         for(int i=0; i<ncomps_; i++){
-          res[i] = static_cast<int>(new_pets[i]);
+          opt_npets[i] = static_cast<int>(new_pets[i]);
+          opt_wtimes[i] = static_cast<T>(serial_exec_times_[i]/opt_npets[i]);
         }
       }
 
-      return res;
+      typename std::vector<T>::iterator opt_wtime_iter = std::max_element(
+                                                  opt_wtimes.begin(), opt_wtimes.end());
+      if(opt_wtime_iter != opt_wtimes.end()){
+        return *opt_wtime_iter;
+      }
+      else{
+        return static_cast<T>(0);
+      }
     }
 
   } // MapperUtil

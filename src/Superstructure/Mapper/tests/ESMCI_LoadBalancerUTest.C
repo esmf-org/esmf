@@ -58,7 +58,9 @@ int main(int argc, char *argv[])
   strncpy(failMsgSolnDiv, "Load Balancer test failed (solution diverging, idle time increasing)", ESMF_MAX_STRLEN);
   for(int i=0; i<MAX_ITER; i++){
     std::cout << "Load Balancer iter : " << i << "\n";
-    std::vector<int> opt_npets = lb.optimize();
+    std::vector<int> opt_npets;
+    float opt_wtime = lb.optimize(opt_npets);
+    std::cout << "Optimized time : " << opt_wtime << "\n";
     std::cout << "Optimized pet list : ";
     for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
         citer != opt_npets.cend(); ++citer){
