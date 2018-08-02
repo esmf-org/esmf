@@ -20,15 +20,22 @@ namespace ESMCI{
                   const std::string &comp_phase_name,
                   const std::pair<int, int> &pet_range,
                   const std::pair<T, T> &time_intvl);
+        CompInfo( const std::string &comp_name,
+                  const std::string &comp_phase_name,
+                  const std::pair<int, int> &pet_range,
+                  const std::pair<T, T> &time_intvl,
+                  T stime);
         std::string get_comp_name(void ) const;
         std::string get_comp_phase_name(void ) const;
         std::pair<int, int> get_pet_range(void ) const;
         std::pair<T, T> get_time_interval(void ) const;
+        T get_stime(void ) const;
       private:
         std::string comp_name_;
         std::string comp_phase_name_;
         std::pair<int, int> pet_range_;
         std::pair<T, T> time_intvl_;
+        T stime_;
     };
 
     // comparators for the comp info class
@@ -95,6 +102,23 @@ namespace ESMCI{
                 pet_range_(pet_range),
                 time_intvl_(time_intvl)
     {
+      stime_ = static_cast<T>((time_intvl.second - time_intvl.first) * 
+                (pet_range.second - pet_range.first + 1));
+    }
+
+    template<typename T>
+    inline CompInfo<T>::CompInfo(
+              const std::string &comp_name,
+              const std::string &comp_phase_name,
+              const std::pair<int, int> &pet_range,
+              const std::pair<T, T> &time_intvl,
+              T stime):
+                comp_name_(comp_name),
+                comp_phase_name_(comp_phase_name),
+                pet_range_(pet_range),
+                time_intvl_(time_intvl),
+                stime_(stime)
+    {
     }
 
     template<typename T>
@@ -119,6 +143,12 @@ namespace ESMCI{
     std::pair<T, T> CompInfo<T>::get_time_interval(void ) const
     {
       return time_intvl_;
+    }
+
+    template<typename T>
+    T CompInfo<T>::get_stime(void ) const
+    {
+      return stime_;
     }
 
     template<typename T>
