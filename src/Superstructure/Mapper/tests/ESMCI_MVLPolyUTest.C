@@ -94,5 +94,14 @@ int main(int argc, char *argv[])
   strncpy(failMsg, "Polynomial Addition different vars (explicit names) test failed", ESMF_MAX_STRLEN);
   ESMC_Test((p12 == p12_exp), name, failMsg, &result, __FILE__, __LINE__, 0);
 
+  ESMCI::MapperUtil::MVIDLPoly<float> p11_der_by_c;
+  ESMCI::MapperUtil::MVIDLPoly<float> p11_der_by_c_exp = {0.0, 0.0, 0.0, 0.0, 5.0};
+  p11_der_by_c_exp.set_vnames(p11_exp_vnames);
+  rc = FindPDerivative(p11, "c", p11_der_by_c);
+  //std::cout << "d(p11)/dc = " << p11_der_by_c << "\n";
+  strncpy(name, "Polynomial Derivative UTest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial Derivative test failed", ESMF_MAX_STRLEN);
+  ESMC_Test((p11_der_by_c == p11_der_by_c_exp), name, failMsg, &result, __FILE__, __LINE__, 0);
+
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }

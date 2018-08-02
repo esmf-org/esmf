@@ -6,6 +6,7 @@
 #include "ESMCI_Poly.h"
 #include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyTwoV.h"
+#include "ESMCI_LPolyMV.h"
 
 namespace ESMCI{
   namespace MapperUtil{
@@ -28,6 +29,39 @@ namespace ESMCI{
       }
 
       dpoly.set_coeffs(dpoly_coeffs);
+      return ESMF_SUCCESS;
+    }
+
+    /* Find the partial derivative of a multivariate linear polynomial
+     * wrt variable vname 
+     * The derivative is stored in (returned via) dpoly
+     */
+    template<typename CType, typename DType>
+    inline int FindPDerivative(const MVLPoly<CType, DType>& poly,
+                  const std::string &vname,
+                  MVLPoly<CType, DType>& dpoly)
+    {
+      std::vector<CType> poly_coeffs = poly.get_coeffs();
+      std::vector<std::string> poly_vnames = poly.get_vnames();
+      std::vector<CType> dpoly_coeffs(poly_coeffs.size(),
+                          static_cast<CType>(0));
+
+      CType vname_coeff = static_cast<CType>(0);
+      typename std::vector<CType>::const_iterator cciter = poly_coeffs.cbegin();
+      typename std::vector<std::string>::const_iterator cviter = poly_vnames.cbegin();
+      for(; (cciter != poly_coeffs.cend()) && (cviter != poly_vnames.cend())
+          ; ++cciter, ++cviter){
+        if(vname == *cviter){
+          vname_coeff = *cciter;
+          break;
+        }
+      }
+      if(dpoly_coeffs.size() > 0){
+        dpoly_coeffs[dpoly_coeffs.size()-1] = vname_coeff;
+      }
+
+      dpoly.set_coeffs(dpoly_coeffs);
+      dpoly.set_vnames(poly_vnames);
       return ESMF_SUCCESS;
     }
 
