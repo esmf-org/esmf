@@ -29,12 +29,12 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !CLASS: ESMCI::IO_YAML - Handles low-level YAML IO for ESMF internals and
-//  ESMF user API.  Currently relies on the external yaml-cpp library to 
-//  process YAML 1.2 content (see: https://github.com/jbeder/yaml-cpp).
+// !CLASS: ESMCI::IO_YAML - Add support for YAML language
 //
 // !DESCRIPTION:
-//  TODO
+//  This class enables ESMF to read, write, and parse text in
+//  "YAML Ain't Markup Language" (YAML) version 1.2 via the external
+//  yaml-cpp library (see: https://github.com/jbeder/yaml-cpp).
 //-------------------------------------------------------------------------
 //
 // !USES:
@@ -46,8 +46,9 @@
 
 namespace ESMCI {
 
-  class IO_YAML;
+ // classes and structs
 
+  class IO_YAML;
 
 // class definition type
 
@@ -127,7 +128,11 @@ namespace ESMCI {
       // helper to process methods:
       // - parse 
       int nuopc_fd_parser(void);
-  };
+//
+//EOP
+//-------------------------------------------------------------------------
+
+  }; // end class IO_YAML
 
 } // end of namespace ESMCI
 
