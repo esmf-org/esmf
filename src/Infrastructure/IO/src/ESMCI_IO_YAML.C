@@ -193,17 +193,14 @@ namespace ESMCI {
       return rc;
     }
 
-    int localPet, petCount;
-    ESMCI::VM *globalVM;
-
-    // only read on pet 0
-    globalVM = ESMCI::VM::getGlobal(&rc);
+    // only read on PET 0 of current VM
+    ESMCI::VM *vm = ESMCI::VM::getCurrent(&rc);
     if (ESMC_LogDefault.MsgFoundError (rc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL))
       return rc;
 
-    localPet = globalVM->getLocalPet();
-    petCount = globalVM->getPetCount();
+    int localPet = vm->getLocalPet();
+    int petCount = vm->getPetCount();
 
     size_t lbuf = 0;
     std::string yaml;
@@ -230,7 +227,7 @@ namespace ESMCI {
     }
 
     // broadcast buffer size
-    rc = globalVM->broadcast(&lbuf, sizeof(lbuf), 0);
+    rc = vm->broadcast(&lbuf, sizeof(lbuf), 0);
     if (ESMC_LogDefault.MsgFoundError (rc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL))
       return rc;
@@ -241,7 +238,7 @@ namespace ESMCI {
       buf = yaml;
 
     // broadcast buffer
-    rc = globalVM->broadcast(&buf[0], lbuf, 0);
+    rc = vm->broadcast(&buf[0], lbuf, 0);
     if (ESMC_LogDefault.MsgFoundError (rc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL))
       return rc;
@@ -371,16 +368,14 @@ namespace ESMCI {
         "Filename argument cannot be NULL", ESMC_CONTEXT, &rc);
       return rc;
     }
-    int localPet;
-    ESMCI::VM *globalVM;
 
-    // only write on pet 0
-    globalVM = ESMCI::VM::getGlobal(&rc);
+    // only read on PET 0 of current VM
+    ESMCI::VM *vm = ESMCI::VM::getCurrent(&rc);
     if (ESMC_LogDefault.MsgFoundError (rc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL))
       return rc;
 
-    localPet = globalVM->getLocalPet();
+    int localPet = vm->getLocalPet();
 
     // only write file on PET 0
     if (localPet == 0) {
@@ -609,13 +604,13 @@ namespace ESMCI {
       return rc;
     }
 
-    // only write on pet 0
-    ESMCI::VM *globalVM = ESMCI::VM::getGlobal(&rc);
+    // only read on PET 0 of current VM
+    ESMCI::VM *vm = ESMCI::VM::getCurrent(&rc);
     if (ESMC_LogDefault.MsgFoundError (rc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, NULL))
       return rc;
 
-    int localPet = globalVM->getLocalPet();
+    int localPet = vm->getLocalPet();
 
     // only write file on PET 0
     if (localPet == 0) {
@@ -844,7 +839,7 @@ namespace ESMCI {
     return rc;
 
 #else
-    int rc = ESMC_RC_LIB_NOT_PRESENT;
+    int rc = ESMF_RC_LIB_NOT_PRESENT;
 #endif
 
     return rc;
