@@ -67,7 +67,7 @@ namespace ESMCI {
                                    ESMCI_FortranStrLenArg fileName_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlread()"
-      ESMF_CHECK_POINTER(ptr, status)
+      ESMF_CHECK_POINTER(*ptr, status)
       int rc = (*ptr)->read(std::string(fileName,fileName_l));
       if (ESMC_PRESENT(status)) *status = rc;
     }
@@ -79,7 +79,7 @@ namespace ESMCI {
                                    ESMCI_FortranStrLenArg fileName_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlwrite()"
-      ESMF_CHECK_POINTER(ptr, status)
+      ESMF_CHECK_POINTER(*ptr, status)
       int rc = (*ptr)->write(std::string(fileName,fileName_l));
       if (ESMC_PRESENT(status)) *status = rc;
     }
@@ -89,7 +89,7 @@ namespace ESMCI {
                                    int       *status) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlprint()"
-      ESMF_CHECK_POINTER(ptr, status)
+      ESMF_CHECK_POINTER(*ptr, status)
       int rc = (*ptr)->write();
       if (ESMC_PRESENT(status)) *status = rc;
     }
@@ -101,7 +101,7 @@ namespace ESMCI {
                                      ESMCI_FortranStrLenArg content_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlingest()"
-      ESMF_CHECK_POINTER(ptr, status)
+      ESMF_CHECK_POINTER(*ptr, status)
       int rc = (*ptr)->ingest(std::string(content,content_l));
       if (ESMC_PRESENT(status)) *status = rc;
     }
@@ -112,7 +112,7 @@ namespace ESMCI {
                            int                          *status) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlcinit()"
-      ESMF_CHECK_POINTER(ptr, status)
+      ESMF_CHECK_POINTER(*ptr, status)
       IO_YAML::ContentType::value ltype = IO_YAML::ContentType::Unset;
       if (type != NULL) ltype = *type;
       int rc = (*ptr)->cinit(ltype);
@@ -120,11 +120,11 @@ namespace ESMCI {
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlcprint)(IO_YAML   **ptr,
+    void FTN_X(c_esmc_io_yamlcprint)(IO_YAML  **ptr,
                                      int        *status) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlcprint()"
-      ESMF_CHECK_POINTER(ptr, status)
+      ESMF_CHECK_POINTER(*ptr, status)
       int rc = (*ptr)->cwrite();
       if (ESMC_PRESENT(status)) *status = rc;
     }
@@ -136,29 +136,29 @@ namespace ESMCI {
                                      ESMCI_FortranStrLenArg filename_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlcwrite()"
-      ESMF_CHECK_POINTER(ptr, status)
+      ESMF_CHECK_POINTER(*ptr, status)
       int rc = (*ptr)->cwrite(std::string(filename,filename_l));
       if (ESMC_PRESENT(status)) *status = rc;
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlclinec)(IO_YAML   **ptr,
+    void FTN_X(c_esmc_io_yamlclinec)(IO_YAML  **ptr,
                                     int        *count,
                                     int        *status    ) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlclinec()"
-      ESMF_CHECK_POINTER(ptr, status)
+      ESMF_CHECK_POINTER(*ptr, status)
       *count = (*ptr)->clinec();
       if (ESMC_PRESENT(status)) *status = ESMF_SUCCESS;
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlcsize)(IO_YAML   **ptr,
+    void FTN_X(c_esmc_io_yamlcsize)(IO_YAML  **ptr,
                                    int        *size,
                                    int        *status     ) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlcsize()"
-      ESMF_CHECK_POINTER(ptr, status)
+      ESMF_CHECK_POINTER(*ptr, status)
       *size = (*ptr)->csize();
       if (ESMC_PRESENT(status)) *status = ESMF_SUCCESS;
     }
@@ -169,7 +169,7 @@ namespace ESMCI {
                                    int        *status) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlcget()"
-      ESMF_CHECK_POINTER(ptr, status)
+      ESMF_CHECK_POINTER(*ptr, status)
       if (data) {
         const std::string buffer = (*ptr)->cget();
         size_t len = buffer.copy(data, std::strlen(data));
@@ -184,7 +184,7 @@ namespace ESMCI {
                               int                               *status) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlparse()"
-      ESMF_CHECK_POINTER(ptr, status)
+      ESMF_CHECK_POINTER(*ptr, status)
       IO_YAML::ParseFormat::value formOption = IO_YAML::ParseFormat::Unset;
       if (parseFmt != NULL) formOption = *parseFmt;
       int rc = (*ptr)->parse(formOption);
