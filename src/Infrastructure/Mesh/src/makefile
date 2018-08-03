@@ -8,7 +8,6 @@ ESMF_CXXCOMPILECPPFLAGS += -DMPICH_IGNORE_CXX_SEEK
 
 SOURCEC	  = \
 					 ESMCI_ClumpPnts.C \
-           ESMCI_Mapping.C \
 					 ESMCI_MathUtil.C \
            ESMCI_Mesh_Glue.C \
            ESMCI_Mesh_GToM_Glue.C \
@@ -20,7 +19,6 @@ SOURCEC	  = \
 					 ESMCI_MeshDual.C \
 					 ESMCI_MeshRedist.C \
 					 ESMCI_OTree.C \
-					 ESMCI_ShapeFunc.C \
 					 ESMCI_XGridUtil.C
 
 
@@ -34,6 +32,7 @@ SOURCEC	  += ESMCI_MBMesh.C \
              ESMCI_MBMesh_Rendez_EtoP.C \
              ESMCI_MBMesh_Search_EToE.C \
              ESMCI_MBMesh_Search_EToP.C \
+             ESMCI_MBMesh_ShapeFunc.C \
              ESMCI_MBMesh_Conserve.C \
              ESMCI_MBMesh_Bilinear.C \
              ESMCI_MBMesh_Glue.C \

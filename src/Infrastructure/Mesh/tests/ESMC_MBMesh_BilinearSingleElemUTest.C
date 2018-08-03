@@ -21,7 +21,13 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
+#include "Mesh/include/ESMCI_Mesh_Glue.h"
+
 #if defined ESMF_MOAB
+#include "ESMC_MBMeshTestUtilMesh.C"
+#include "ESMC_MBMeshTestUtilMBMesh.C"
+#include "ESMC_MBMeshTestUtilPL.C"
+
 // other headers
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Glue.h"
@@ -50,47 +56,211 @@
 using namespace std;
 
 #if defined ESMF_MOAB
-typedef std::map<WMat::Entry, std::vector<WMat::Entry> > WeightMap;
-WeightMap weights;
-WeightMap::iterator begin_row() { return weights.begin(); }
-WeightMap::iterator end_row() { return weights.end(); }
+MBMesh* create_mesh_pent_single(int &rc, bool cart) {
+  //
+  //
+  //  1.0         4
+  //           /      \
+  //         /          \ 
+  //  0.0  5      11      3
+  //        \            /
+  //         \          /
+  // -1.0     1 ------ 2
+  //
+  //    -1.0 -0.5  0  0.5  1.0
+  //   -pi/8 -pi/4 0  pi/4 pi/8
+  //
+  //      Node Ids at corners
+  //      Element Ids in centers
+  //
+  //
+  //      ( Everything owned by PET 0)
+  //
 
-bool weight_gen(MBMesh *mesh, PointList *pl) {
-  int rc = ESMF_RC_NOT_IMPL;
-  char name[80];
-  char failMsg[80];
-  int result = 0;
+  rc = ESMF_RC_NOT_IMPL;
 
-  // do bilinear regridding between mesh and pointlist
-  IWeights wt;
-  IWeights &wts = wt;
-  calc_bilinear_regrid_wgts(mesh, pl, wts);
+  int pdim = 2;
+  int sdim = 2;
 
-  cout << endl << "Bilinear Weight Matrix" << endl;
-  // print out weights
-  WeightMap::iterator mb = wts.begin_row(), me = wts.end_row();
-  for(; mb != me; ++mb) {
-    WMat::Entry col = mb->first;
-    vector<WMat::Entry> row = mb->second;
+  // set Mesh parameters
+  int num_elem = 1;
+  int num_node = 5;
 
-    cout << "[" << col.id << "," << col.idx << "," << col.value << ","
-         << col.src_id << "] - ";
+  double pi = 3.14159;
+  double * nodeCoord;
+  nodeCoord = (double *) malloc (2*num_node * sizeof (double));
 
-    vector<WMat::Entry>::iterator vb = row.begin(), ve = row.end();
-    for(; vb != ve; ++vb) {
-      WMat::Entry rv = *vb;
-      cout << "[" << rv.id << "," << rv.idx << "," << rv.value << ","
-           << rv.src_id << "] ";
-    }
-    cout << endl;
+  ESMC_CoordSys_Flag coordSys=ESMC_COORDSYS_CART;
+  if (cart) {
+    nodeCoord[0] = -0.5;
+    nodeCoord[1] = -1.0;
+    nodeCoord[2] = 0.5;
+    nodeCoord[3] = -1.0;
+    nodeCoord[4] = 1.0;
+    nodeCoord[5] = 0.0;
+    nodeCoord[6] = 0.0;
+    nodeCoord[7] = 1.0;
+    nodeCoord[8] = -0.5;
+    nodeCoord[9] = 0.0;
+
+  } else {
+    coordSys = ESMC_COORDSYS_SPH_RAD;
+//    sdim = 3;
+
+    nodeCoord[0] = -1*pi/4;
+    nodeCoord[1] = -1*pi/8;
+    nodeCoord[2] = pi/4;
+    nodeCoord[3] = -1*pi/8;
+    nodeCoord[4] = pi/8;
+    nodeCoord[5] = 0;
+    nodeCoord[6] = 0;
+    nodeCoord[7] = pi/8;
+    nodeCoord[8] = -1*pi/4;
+    nodeCoord[9] = 0;
   }
-  cout << endl;
+
+  int nodeId_s [] ={1,2,3,4,5};
+  int nodeOwner_s [] ={0,0,0,0,0};
+  int nodeMask_s [] ={0,0,0,0,0};
+  int elemId_s [] ={11};
+  int elemType_s [] ={5};
+  int elemConn_s [] ={1,2,3,4,5};
+  int elemMask_s [] ={1};
+
+  MBMesh *mesh = new MBMesh();
+  void *meshp = static_cast<void *> (mesh);
+
+  MBMesh_create(&meshp, &pdim, &sdim, &coordSys, &rc);
+  if (rc != ESMF_SUCCESS) return NULL;
+
+  InterArray<int> *ii_node = new InterArray<int>(nodeMask_s,num_node);
+
+  MBMesh_addnodes(&meshp, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
+                  ii_node, &coordSys, &sdim, &rc);
+  if (rc != ESMF_SUCCESS) return NULL;
+
+  InterArray<int> *ii_elem = new InterArray<int>(elemMask_s,1);
+
+  int areapresent = 0;
+  int coordspresent = 0;
+  int numelemconn = num_node;
+  int regridconserve = 0;
+  MBMesh_addelements(&meshp, &num_elem, elemId_s, elemType_s, ii_elem,
+                     &areapresent, NULL,
+                     &coordspresent, NULL,
+                     &numelemconn, elemConn_s,
+                     &regridconserve,
+                     &coordSys, &sdim, &rc);
+  if (rc != ESMF_SUCCESS) return NULL;
+
+  delete ii_node;
+  delete ii_elem;
 
   rc = ESMF_SUCCESS;
+  return static_cast<MBMesh *>(meshp);
+}
 
-  if (rc == ESMF_SUCCESS) return true;
-  else return false;
+Mesh* create_mesh_pent_legacy(int &rc, bool cart) {
+  //
+  //
+  //  1.0         4
+  //           /      \
+  //         /          \ 
+  //  0.0  5      11      3
+  //        \            /
+  //         \          /
+  // -1.0     1 ------ 2
+  //
+  //    -1.0 -0.5  0  0.5  1.0
+  //   -pi/8 -pi/4 0  pi/4 pi/8
+  //
+  //      Node Ids at corners
+  //      Element Ids in centers
+  //
+  //
+  //      ( Everything owned by PET 0)
+  //
 
+  rc = ESMF_RC_NOT_IMPL;
+
+  int pdim = 2;
+  int sdim = 2;
+
+  // set Mesh parameters
+  int num_elem = 1;
+  int num_node = 5;
+
+  double pi = 3.14159;
+  double * nodeCoord;
+  nodeCoord = (double *) malloc (2*num_node * sizeof (double));
+
+  ESMC_CoordSys_Flag coordSys=ESMC_COORDSYS_CART;
+  if (cart) {
+    nodeCoord[0] = -0.5;
+    nodeCoord[1] = -1.0;
+    nodeCoord[2] = 0.5;
+    nodeCoord[3] = -1.0;
+    nodeCoord[4] = 1.0;
+    nodeCoord[5] = 0.0;
+    nodeCoord[6] = 0.0;
+    nodeCoord[7] = 1.0;
+    nodeCoord[8] = -0.5;
+    nodeCoord[9] = 0.0;
+
+  } else {
+    coordSys = ESMC_COORDSYS_SPH_RAD;
+//    sdim = 3;
+
+    nodeCoord[0] = -1*pi/4;
+    nodeCoord[1] = -1*pi/8;
+    nodeCoord[2] = pi/4;
+    nodeCoord[3] = -1*pi/8;
+    nodeCoord[4] = pi/8;
+    nodeCoord[5] = 0;
+    nodeCoord[6] = 0;
+    nodeCoord[7] = pi/8;
+    nodeCoord[8] = -1*pi/4;
+    nodeCoord[9] = 0;
+  }
+
+  int nodeId_s [] ={1,2,3,4,5};
+  int nodeOwner_s [] ={0,0,0,0,0};
+  int nodeMask_s [] ={0,0,0,0,0};
+  int elemId_s [] ={11};
+  int elemType_s [] ={5};
+  int elemConn_s [] ={1,2,3,4,5};
+  int elemMask_s [] ={1};
+
+  Mesh *mesh = new Mesh();
+
+  ESMCI_meshcreate(&mesh, &pdim, &sdim, &coordSys, &rc);
+  if (rc != ESMF_SUCCESS) return NULL;
+
+  InterArray<int> *ii_node = new InterArray<int>(nodeMask_s,num_node);
+
+  ESMCI_meshaddnodes(&mesh, &num_node, nodeId_s, nodeCoord, nodeOwner_s,
+                  ii_node, &coordSys, &sdim, &rc);
+  if (rc != ESMF_SUCCESS) return NULL;
+
+  InterArray<int> *ii_elem = new InterArray<int>(elemMask_s,1);
+
+  int areapresent = 0;
+  int coordspresent = 0;
+  int numelemconn = num_node;
+  int regridconserve = 0;
+  ESMCI_meshaddelements(&mesh, &num_elem, elemId_s, elemType_s, ii_elem,
+                     &areapresent, NULL,
+                     &coordspresent, NULL,
+                     &numelemconn, elemConn_s,
+                     &regridconserve,
+                     &coordSys, &sdim, &rc);
+  if (rc != ESMF_SUCCESS) return NULL;
+
+  delete ii_node;
+  delete ii_elem;
+
+  rc = ESMF_SUCCESS;
+  return mesh;
 }
 
 MBMesh* create_mesh_quad_single(int &rc, bool cart) {
@@ -126,8 +296,8 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart) {
 
   ESMC_CoordSys_Flag coordSys=ESMC_COORDSYS_CART;
   if (cart) {
-    nodeCoord[0] = -100.0;
-    nodeCoord[1] = -100.0;
+    nodeCoord[0] = -1.0;
+    nodeCoord[1] = -1.0;
     nodeCoord[2] = 1.0;
     nodeCoord[3] = -1.0;
     nodeCoord[4] = 1.0;
@@ -151,7 +321,7 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart) {
 
   int nodeId_s [] ={1,2,3,4};
   int nodeOwner_s [] ={0,0,0,0};
-  int nodeMask_s [] ={1,1,1,1};
+  int nodeMask_s [] ={0,0,0,0};
   int elemId_s [] ={11};
   int elemType_s [] ={ESMC_MESHELEMTYPE_QUAD};
   int elemConn_s [] ={1,2,3,4};
@@ -258,7 +428,7 @@ MBMesh* create_mesh_tri_single(int &rc, bool cart) {
 
   int nodeId_s [] ={1,2,3};
   int nodeOwner_s [] ={0,0,0};
-  int nodeMask_s [] ={1,1,1};
+  int nodeMask_s [] ={0,0,0};
   int elemId_s [] ={11};
   int elemType_s [] ={ESMC_MESHELEMTYPE_TRI};
   int elemConn_s [] ={1,2,3};
@@ -368,7 +538,10 @@ int main(int argc, char *argv[]) {
 
 #if defined ESMF_MOAB
   //----------------------------------------------------------------------------
-  //ESMC_MoabSet(true);
+  bool cart;
+
+  vector<double> weights;
+  weights.resize(4);
 #endif
 
   // Get parallel information
@@ -379,16 +552,105 @@ int main(int argc, char *argv[]) {
                 (int *)NULL, (int *)NULL);
   if (rc != ESMF_SUCCESS) return 0;
 
+#ifdef verify_triangulation
+  // --------------------------------------------------------------------------
+  // pent mesh MOAB
+  // --------------------------------------------------------------------------
+
+  cart = true;
+
+  // build a mesh
+  MBMesh *mesh_pent_single = create_mesh_pent_single(rc, cart);
+
+  // Call into MOAB
+  Interface *mbmesh=mesh_pent_single->mesh;
+  char filename[20] = "pentagon.vtk";
+  int merr=mbmesh->write_file(filename,NULL,NULL);
+  ESMC_Test(merr==MB_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // --------------------------------------------------------------------------
+  // pent mesh LEGACY
+  // --------------------------------------------------------------------------
+
+  cart = true;
+
+  // build a mesh
+  Mesh *mesh_pent_legacy = create_mesh_pent_legacy(rc, cart);
+
+
+  // Call into legacy mesh creation
+  char filenamel[20] = "pentagon_legacy.vtk";
+  WriteMesh(*mesh_pent_legacy, filenamel);
+  ESMC_Test(merr==MB_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+
+
 #if defined ESMF_MOAB
+  MBMesh *mesh_pent_single;
   MBMesh *mesh_quad_single;
   MBMesh *mesh_tri_single;
   PointList *pl_quad_single;
-  bool cart;
+
+  // --------------------------------------------------------------------------
+  // pent mesh bilinear cartesian
+  // --------------------------------------------------------------------------
+
+  // build a pointlist
+  pl_quad_single = create_pointlist_for_quad_single(rc, cart);
+
+  // expected result
+  std::fill(weights.begin(), weights.end(), UNINITVAL);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "pentagon Cartesian bilinear weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test((weight_gen(mesh_pent_single, pl_quad_single, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // clean up
+  delete pl_quad_single;
+  delete mesh_pent_single;
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "pentagon Cartesian bilinear weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+
+  // --------------------------------------------------------------------------
+  // pent mesh bilinear spherical
+  // --------------------------------------------------------------------------
+
+#if defined ESMF_MOAB
+  cart = false;
+
+  // build a mesh
+  mesh_pent_single = create_mesh_pent_single(rc, cart);
+
+  // build a pointlist
+  pl_quad_single = create_pointlist_for_quad_single(rc, cart);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "pentagon spherical bilinear weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test((weight_gen(mesh_pent_single, pl_quad_single, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // clean up
+  delete pl_quad_single;
+  delete mesh_pent_single;
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "pentagon spherical bilinear weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+
 
   // --------------------------------------------------------------------------
   // quad mesh bilinear cartesian
   // --------------------------------------------------------------------------
-
+#if defined ESMF_MOAB
   cart = true;
 
   // build a mesh
@@ -397,11 +659,14 @@ int main(int argc, char *argv[]) {
   // build a pointlist
   pl_quad_single = create_pointlist_for_quad_single(rc, cart);
 
+  // expected result
+  std::fill(weights.begin(), weights.end(), UNINITVAL);
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   strcpy(name, "Quadrilateral Cartesian bilinear weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl_quad_single)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_quad_single, pl_quad_single, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl_quad_single;
@@ -430,7 +695,7 @@ int main(int argc, char *argv[]) {
   //NEX_UTest
   strcpy(name, "Quadrilateral spherical bilinear weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl_quad_single)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_quad_single, pl_quad_single, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl_quad_single;
@@ -459,7 +724,7 @@ int main(int argc, char *argv[]) {
   //NEX_UTest
   strcpy(name, "Triangle Cartesian bilinear weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_tri_single, pl_quad_single)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_tri_single, pl_quad_single, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl_quad_single;
@@ -488,7 +753,7 @@ int main(int argc, char *argv[]) {
   //NEX_UTest
   strcpy(name, "Triangle spherical bilinear weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_tri_single, pl_quad_single)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_tri_single, pl_quad_single, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
 //  double * nodeCoord;
 //  nodeCoord = (double *) malloc (9 * sizeof (double));
@@ -512,7 +777,6 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "Weights were not generated correctly");
   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
-
   // --------------------------------------------------------------------------
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

@@ -12,7 +12,7 @@
 #ifndef ESMCI_SHAPELAGRANGE_H_
 #define ESMCI_SHAPELAGRANGE_H_
 
-#include <Mesh/include/ESMCI_ShapeFunc.h>
+#include <Mesh/include/Regridding/ESMCI_ShapeFunc.h>
 #include <Mesh/include/Legacy/ESMCI_Exception.h>
 
 

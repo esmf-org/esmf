@@ -27,6 +27,7 @@ namespace ESMCI {
 
   public:
     int sdim, pdim; // dimensions MAYBE I SHOULD NAME THESE MORE SIMILAR TO WHAT IN OTHER MESH
+    int orig_sdim;
     Interface *mesh; // Moab mesh  MAYBE I SHOULD NAME ThIS SOMETHING ELSE????
 
     int num_verts;

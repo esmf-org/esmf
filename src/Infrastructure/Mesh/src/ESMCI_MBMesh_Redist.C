@@ -190,7 +190,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
                                      moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
   }     
 
- // Setup masking tags
+  // Setup masking tags
   if (src_mesh->has_elem_mask) {
     def_val=0;
     merr=moab_mesh->tag_get_handle("elem_mask", 1, MB_TYPE_INTEGER, out_mesh->elem_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
@@ -200,16 +200,35 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
                                        moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
     }     
 
-    /// DON'T ADD THIS RIGHT NOW SINCE IT ISN'T NECESARY IN A RENDEZ. MESH ///
-    /// def_val=0;
-    /// merr=moab_mesh->tag_get_handle("elem_mask_val", 1, MB_TYPE_INTEGER, out_mesh->elem_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
-    /// if (merr != MB_SUCCESS) {
-    ///  int localrc;
-    ///  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-    ///                                   moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
-    ///}     
+    def_val=0;
+    merr=moab_mesh->tag_get_handle("elem_mask_val", 1, MB_TYPE_INTEGER, out_mesh->elem_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
+    if (merr != MB_SUCCESS) {
+    int localrc;
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
+    }
   }
   out_mesh->has_elem_mask=src_mesh->has_elem_mask;
+
+  // Setup masking tags
+  if (src_mesh->has_node_mask) {
+    def_val=0;
+    merr=moab_mesh->tag_get_handle("node_mask", 1, MB_TYPE_INTEGER, out_mesh->node_mask_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
+    if (merr != MB_SUCCESS) {
+      int localrc;
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
+    }     
+
+    def_val=0;
+    merr=moab_mesh->tag_get_handle("node_mask_val", 1, MB_TYPE_INTEGER, out_mesh->node_mask_val_tag, MB_TAG_EXCL|MB_TAG_DENSE, &def_val);
+    if (merr != MB_SUCCESS) {
+    int localrc;
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT, &localrc)) throw localrc;
+    }
+  }
+  out_mesh->has_node_mask=src_mesh->has_node_mask;
 
   // Do output
   *_out_mesh=out_mesh;
@@ -553,6 +572,11 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
       size += sizeof(int);
     }
 
+    if (src_mesh->has_node_mask) {
+      // Only pack mask field (not mask_val), since that's the only one needed for rend. 
+      size += sizeof(int);
+    }
+
     // output size
     return size;
   }
@@ -596,6 +620,19 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
       // Pack into buffer
       *((int *)(buff+off))=vert_gid;
       off +=sizeof(int);        
+
+      if (src_mesh->has_node_mask) {
+        // Get dst node mask 
+        int masked, merr;
+        merr=src_mesh->mesh->tag_get_data(src_mesh->node_mask_tag, &verts[v], 1, &masked);
+        if (merr != MB_SUCCESS) {
+          Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
+        }
+        
+        // Pack number of mask
+        *((int *)(buff+off))=masked;
+        off +=sizeof(int);
+      }
     }
 
     // Pack mask data
@@ -612,6 +649,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
       *((int *)(buff+off))=masked;
       off +=sizeof(int);
     }
+
   }
 
 
@@ -638,6 +676,11 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     
     // Mask Size
     if (out_mesh->has_elem_mask) {
+      size += sizeof(int);
+    }
+
+    // Mask Size
+    if (out_mesh->has_node_mask) {
       size += sizeof(int);
     }
 
@@ -719,6 +762,21 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
 
       // Get vert EntityHandle
       verts[v]=ogtvi->second;
+      
+      // Unpack mask data
+      if (out_mesh->has_node_mask) {
+        // Unpack node mask tag
+        int masked;
+        masked=*((int *)(buff+off));
+        off +=sizeof(int);
+        
+        // Set node mask tag
+        merr=out_mesh->mesh->tag_set_data(out_mesh->node_mask_tag, &verts[v], 1, &masked);
+        if (merr != MB_SUCCESS) {
+          Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
+        }
+      }
+
     }
 
     // Get entity type of element

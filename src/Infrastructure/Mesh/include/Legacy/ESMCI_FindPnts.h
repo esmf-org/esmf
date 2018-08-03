@@ -15,7 +15,7 @@
 
 #include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
 #include <Mesh/include/Legacy/ESMCI_MeshObjTopo.h>
-#include <Mesh/include/ESMCI_Mapping.h>
+#include <Mesh/include/Regridding/ESMCI_Mapping.h>
 #include <Mesh/include/Legacy/ESMCI_MeshObj.h>
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/Legacy/ESMCI_MeshUtils.h>

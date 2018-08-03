@@ -126,14 +126,14 @@ MBMesh_BBox &MBMesh_BBox::operator=(const MBMesh_BBox &rhs) {
 }
 
 
-MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp) :
+MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp, bool is_sph) :
   isempty(false)
 {
 
  int merr;
 
  // Don't handle 3D things right now
- if (mbmp->pdim==3) Throw() << "Need to handle 3D spheres!";
+ // if (mbmp->pdim==3) Throw() << "Need to handle 3D spheres!";
 
   // Set dim as spatial dim
   dim=mbmp->sdim;
@@ -217,6 +217,54 @@ MBMesh_BBox::MBMesh_BBox(MBMesh *mbmp, EntityHandle elem, double normexp) :
         if (coords[j] > max[j]) max[j] = coords[j];
       }
     }
+    
+    // If this is on a 3D sphere then extend outward to include the bulge
+    // Spatial dimension is assumed to be 3, because we don't allow sdim<pdim
+    if ((mbmp->pdim==3) && is_sph) {
+      // Compute diameter of min max box
+      // (as an easy stand in for diameter of the cell)
+      double diam=std::sqrt((max[0]-min[0])*(max[0]-min[0])+
+                            (max[1]-min[1])*(max[1]-min[1])+
+                            (max[2]-min[2])*(max[2]-min[2]));
+    
+      // Reduce the diameter by 1/2 because
+      // that's the most it can be (in the case that the cell is the diameter of the whole sphere)
+      diam *=0.5;
+    
+      // // Loop through extending the min max box if necessary
+      // for (UInt n = 0; n < topo.num_nodes; n++) {
+      //   const MeshObj &node = *(obj.Relations[n].obj);
+      //   const double *coord = coords.data(node);
+
+      // Loop over verts
+      for(int i=0; i<num_verts; i++) {
+        // Get vert coords
+        double coord[3];
+        merr=mbmp->mesh->get_coords(verts+i,1,coord);
+        if (merr != MB_SUCCESS) {
+          Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
+        }
+    
+        // Compute unit vector in direction of point 
+        double len=std::sqrt(coord[0]*coord[0]+coord[1]*coord[1]+coord[2]*coord[2]);
+        double uvec[3];
+        uvec[0]=coord[0]/len;
+        uvec[1]=coord[1]/len;
+        uvec[2]=coord[2]/len;
+    
+        // Compute new point
+        double new_pnt[3];
+        new_pnt[0]=coord[0]+diam*uvec[0];
+        new_pnt[1]=coord[1]+diam*uvec[1];
+        new_pnt[2]=coord[2]+diam*uvec[2];
+    
+        for (UInt j = 0; j < 3; j++) {
+          if (new_pnt[j] < min[j]) min[j] = new_pnt[j];
+          if (new_pnt[j] > max[j]) max[j] = new_pnt[j];
+        }
+      }
+    }
+
   } // nonshell
 }
 

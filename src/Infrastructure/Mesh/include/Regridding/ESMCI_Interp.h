@@ -18,7 +18,7 @@
 #include <Mesh/include/Legacy/ESMCI_Migrator.h>
 #include <Mesh/include/Legacy/ESMCI_SparseMsg.h>
 #include <Mesh/include/Regridding/ESMCI_WMat.h>
-#include <Mesh/include/ESMCI_Mapping.h>
+#include <Mesh/include/Regridding/ESMCI_Mapping.h>
 #include <Mesh/src/Zoltan/zoltan.h>
 #include "PointList/include/ESMCI_PointList.h"
 

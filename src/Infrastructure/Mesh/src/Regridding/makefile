@@ -12,6 +12,7 @@ SOURCEC	  = \
 					 ESMCI_Extrapolation.C \
 					 ESMCI_Integrate.C \
 					 ESMCI_Interp.C \
+					 ESMCI_Mapping.C \
 					 ESMCI_MeshRegrid.C \
 					 ESMCI_PatchRecovery.C \
 					 ESMCI_Regrid_Helper.C \
@@ -19,6 +20,7 @@ SOURCEC	  = \
 					 ESMCI_SearchNearest.C \
 					 ESMCI_SearchNearestNPnts.C \
 					 ESMCI_SearchNearestDToS.C \
+					 ESMCI_ShapeFunc.C \
 					 ESMCI_WMat.C \
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

@@ -154,12 +154,14 @@ int main(int argc, char *argv[]) {
   PointList *pl;
   pl = create_pointlist_for_quad_parallel(rc);
 
+  int map_type = MB_MAP_TYPE_CART_APPROX;
+
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
   // call rendezvous between mesh and pointlist
   MBMesh *mesh_rend=NULL;
   PointList *pl_rend=NULL;
-  create_rendez_mbmesh_etop(mesh, pl, &mesh_rend, &pl_rend);
+  create_rendez_mbmesh_etop(mesh, pl, &mesh_rend, &pl_rend, &map_type);
 #else
   rc = ESMF_SUCCESS;
 #endif

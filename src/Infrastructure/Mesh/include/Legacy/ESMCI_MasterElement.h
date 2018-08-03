@@ -12,8 +12,8 @@
 #ifndef ESMCI_MasterElement_h
 #define ESMCI_MasterElement_h
 
-#include <Mesh/include/ESMCI_ShapeFunc.h>
-#include <Mesh/include/ESMCI_Mapping.h>
+#include <Mesh/include/Regridding/ESMCI_ShapeFunc.h>
+#include <Mesh/include/Regridding/ESMCI_Mapping.h>
 #include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
 #include <Mesh/include/Legacy/ESMCI_Quadrature.h>
 

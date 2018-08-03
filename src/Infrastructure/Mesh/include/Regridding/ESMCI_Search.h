@@ -17,7 +17,7 @@
 #include <Mesh/include/ESMCI_OTree.h>
 #include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
 #include <Mesh/include/Legacy/ESMCI_MeshObj.h>
-#include <Mesh/include/ESMCI_Mapping.h>
+#include <Mesh/include/Regridding/ESMCI_Mapping.h>
 #include <Mesh/include/Regridding/ESMCI_SearchFlags.h>
 #include <Mesh/include/Regridding/ESMCI_WMat.h>
 #include "PointList/include/ESMCI_PointList.h"

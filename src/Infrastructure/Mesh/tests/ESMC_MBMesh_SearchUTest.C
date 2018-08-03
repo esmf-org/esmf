@@ -129,17 +129,21 @@ bool pcoords(MBMesh *mesh) {
 }
 
 
-bool search_gen(MBMesh *mesh, PointList *pl, vector<double*> &cv) {
+bool search_gen(MBMesh *mesh, PointList *pl, vector<double*> &cv, bool cart=true) {
   int rc = ESMF_RC_NOT_IMPL;
   char name[80];
   char failMsg[80];
   int result = 0;
 
+  int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+  if (cart) map_type = MB_MAP_TYPE_CART_APPROX;
+
+  WMat dst_status;
+
   // search between mesh and pointlist
   MBMesh_Search_EToP_Result_List sr;
-  MBMesh_Search_EToP(mesh, ESMCI_UNMAPPEDACTION_IGNORE,
-                     pl, ESMCI_UNMAPPEDACTION_IGNORE,
-                     10E-8, sr);
+  MBMesh_Search_EToP(mesh, pl, ESMCI_UNMAPPEDACTION_IGNORE, &map_type,
+                     10E-8, sr, false, dst_status, NULL, NULL);
   rc = ESMF_SUCCESS;
 
   strcpy(name, "Search between a Mesh and a PointList");
@@ -241,9 +245,11 @@ int main(int argc, char *argv[]) {
   PointList *pl_quad;
   pl_quad = create_pointlist_for_quad(&cv, rc);
 
+  bool cart = true;
+
   strcpy(name, "Simple mesh search");
   strcpy(failMsg, "Search results did not validate");
-  ESMC_Test((search_gen(mesh_quad, pl_quad, cv)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((search_gen(mesh_quad, pl_quad, cv, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 #else
   strcpy(name, "Simple mesh search");
   strcpy(failMsg, "Search results did not validate");
@@ -259,9 +265,11 @@ int main(int argc, char *argv[]) {
   PointList *pl_tri;
   pl_tri = create_pointlist_for_tri(&cv, rc);
 
+  cart = true;
+  
   strcpy(name, "Triangles mesh search");
   strcpy(failMsg, "Search results did not validate");
-  ESMC_Test((search_gen(mesh_tri, pl_tri, cv)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((search_gen(mesh_tri, pl_tri, cv, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 #else
   strcpy(name, "Triangles mesh search");
   strcpy(failMsg, "Search results did not validate");
