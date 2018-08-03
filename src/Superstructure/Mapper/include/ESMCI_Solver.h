@@ -7,6 +7,7 @@
 #include "ESMCI_Poly.h"
 #include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyTwoV.h"
+#include "ESMCI_LPolyMV.h"
 #include "ESMCI_PolyDer.h"
 #include "ESMCI_Mat.h"
 
@@ -22,8 +23,10 @@ namespace ESMCI{
       public:
         virtual ~SESolver() = default;
         SESolver(const std::vector<std::string> &vnames, const std::vector<T> &init_vals, const std::vector<TwoVIDPoly<T> > &funcs);
+        SESolver(const std::vector<std::string> &vnames, const std::vector<T> &init_vals, const std::vector<TwoVIDPoly<T> > &two_vid_funcs, const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs);
         void set_init_vals(const std::vector<T> &init_vals);
         void set_funcs(const std::vector<TwoVIDPoly<T> > &funcs);
+        void set_funcs(const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs);
         void set_niters(int niters);
         std::vector<T> minimize(void ) const;
 
@@ -33,11 +36,24 @@ namespace ESMCI{
         std::vector<std::string> vnames_;
         std::vector<T> init_vals_;
         std::vector<TwoVIDPoly<T> > funcs_;
+        std::vector<MVIDLPoly<T> > mvid_lpoly_funcs_;
     }; //class SESolver
 
 
     template<typename T>
     inline SESolver<T>::SESolver(const std::vector<std::string> &vnames, const std::vector<T> &init_vals, const std::vector<TwoVIDPoly<T> > &funcs):niters_(DEFAULT_NITERS),vnames_(vnames),init_vals_(init_vals),funcs_(funcs)
+    {}
+
+    template<typename T>
+    inline SESolver<T>::SESolver(const std::vector<std::string> &vnames,
+      const std::vector<T> &init_vals,
+      const std::vector<TwoVIDPoly<T> > &two_vid_funcs,
+      const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs)
+        :niters_(DEFAULT_NITERS),
+        vnames_(vnames),
+        init_vals_(init_vals),
+        funcs_(two_vid_funcs),
+        mvid_lpoly_funcs_(mvid_lpoly_funcs)
     {}
 
     template<typename T>
@@ -50,6 +66,12 @@ namespace ESMCI{
     inline void SESolver<T>::set_funcs(const std::vector<TwoVIDPoly<T> > &funcs)
     {
       funcs_ = funcs;
+    }
+
+    template<typename T>
+    inline void SESolver<T>::set_funcs(const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs)
+    {
+      mvid_lpoly_funcs_ = mvid_lpoly_funcs;
     }
 
     template<typename T>
@@ -69,26 +91,53 @@ namespace ESMCI{
        * J[i][j] = d(funcs[i])/d(vnames[j])
        */  
       template<typename T>
-      std::vector<std::vector<TwoVIDPoly<T> > > calc_jacobian(
+      std::vector<std::vector<GenPoly<T, int> *> > calc_jacobian(
           const std::vector<std::string> &vnames,
-          const std::vector<TwoVIDPoly<T> > &funcs)
+          const std::vector<TwoVIDPoly<T> > &funcs,
+          const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs)
       {
-        int nrows = funcs.size();
+        //int nrows = funcs.size() + mvid_lpoly_funcs;
         int ncols = vnames.size();
-        std::vector<std::vector<TwoVIDPoly<T> > > JF;
-        for(int i=0; i<nrows; i++){
-          std::vector<TwoVIDPoly<T> > JFrow;
+        std::vector<std::vector<GenPoly<T, int> *> > JF;
+        for(int i=0; i<static_cast<int>(funcs.size()); i++){
+          std::vector<GenPoly<T, int> *> JFrow;
           for(int j=0; j<ncols; j++){
-            TwoVIDPoly<T> df;
-            int ret = FindPDerivative(funcs[i], vnames[j], df);
+            TwoVIDPoly<T> *pdf = new TwoVIDPoly<T>();
+            int ret = FindPDerivative(funcs[i], vnames[j], *pdf);
             assert(ret == 0);
             std::cout << "d(" << funcs[i] << ")/d" << vnames[j].c_str()
-                      << " = " << df << "\n";
-            JFrow.push_back(df);
+                      << " = " << *pdf << "\n";
+            JFrow.push_back(pdf);
+          }
+          JF.push_back(JFrow);
+        }
+        for(int i=0; i<static_cast<int>(mvid_lpoly_funcs.size()); i++){
+          std::vector<GenPoly<T, int> *> JFrow;
+          for(int j=0; j<ncols; j++){
+            MVIDLPoly<T> *pdf = new MVIDLPoly<T>();
+            int ret = FindPDerivative(mvid_lpoly_funcs[i], vnames[j], *pdf);
+            assert(ret == 0);
+            std::cout << "d(" << funcs[i] << ")/d" << vnames[j].c_str()
+                      << " = " << *pdf << "\n";
+            JFrow.push_back(pdf);
           }
           JF.push_back(JFrow);
         }
         return JF;
+      }
+
+      template<typename T>
+      void free_jacobian(
+        std::vector<std::vector<GenPoly<T, int> *> > &j)
+      {
+        for(typename std::vector<std::vector<GenPoly<T, int> *> >::iterator iter =
+              j.begin();
+            iter != j.end(); ++iter){
+          for(typename std::vector<GenPoly<T, int> *>::iterator piter = (*iter).begin();
+              piter != (*iter).end(); ++piter){
+            delete(*piter);
+          }
+        }
       }
 
       /* Evaluate the Jacobian, j, using values of variables
@@ -101,7 +150,7 @@ namespace ESMCI{
        */
       template<typename T>
       Matrix<T> eval_jacobian(
-        const std::vector<std::vector<TwoVIDPoly<T> > > &j,
+        const std::vector<std::vector<GenPoly<T, int> *> > &j,
         const std::vector<std::string> &vnames,
         const std::vector<T> &vvals)
       {
@@ -110,13 +159,14 @@ namespace ESMCI{
 
         assert(vnames.size() == vvals.size());
         std::vector<T> res_data;
-        for(typename std::vector<std::vector<TwoVIDPoly<T> > >::const_iterator
+        for(typename std::vector<std::vector<GenPoly<T, int> *> >::const_iterator
               jciter = j.cbegin(); jciter != j.cend(); ++jciter){
-          std::vector<TwoVIDPoly<T> > jrow = *jciter;
-          for(typename std::vector<TwoVIDPoly<T> >::const_iterator
+          std::vector<GenPoly<T, int> *> jrow = *jciter;
+          for(typename std::vector<GenPoly<T, int> *>::const_iterator
               jrciter = jrow.cbegin(); jrciter != jrow.cend(); ++jrciter){
-            TwoVIDPoly<T> p = *jrciter;
-            std::vector<std::string> pvnames = p.get_vnames();
+            GenPoly<T, int> *pp = *jrciter;
+            assert(pp);
+            std::vector<std::string> pvnames = pp->get_vnames();
             std::vector<T> pvvals;
             for(std::vector<std::string>::const_iterator pvciter = pvnames.cbegin();
                 pvciter != pvnames.cend(); ++pvciter){
@@ -128,7 +178,7 @@ namespace ESMCI{
                 }
               }
             }
-            res_data.push_back(p.eval(pvvals));
+            res_data.push_back(pp->eval(pvvals));
           }
         }
 
@@ -146,7 +196,7 @@ namespace ESMCI{
        * Returns a 1D matrix (mx1) of values of type T
        */
       template<typename T>
-      Matrix<T> eval_funcs(const std::vector<TwoVIDPoly<T> >& funcs,
+      Matrix<T> eval_funcs(const std::vector<const GenPoly<T, int> *>& funcs,
         const std::vector<std::string> &vnames,
         const std::vector<T> &vvals)
       {
@@ -155,10 +205,10 @@ namespace ESMCI{
         std::vector<T> res_data;
 
         assert(vnames.size() == vvals.size());
-        for(typename std::vector<TwoVIDPoly<T> >::const_iterator
+        for(typename std::vector<const GenPoly<T, int> *>::const_iterator
               cfiter = funcs.cbegin(); cfiter != funcs.cend(); ++cfiter){
-          TwoVIDPoly<T> p = *cfiter;
-          std::vector<std::string> pvnames = p.get_vnames();
+          const GenPoly<T, int> *pp = *cfiter;
+          std::vector<std::string> pvnames = pp->get_vnames();
           std::vector<T> pvvals;
           for(std::vector<std::string>::const_iterator pvciter = pvnames.cbegin();
               pvciter != pvnames.cend(); ++pvciter){
@@ -170,7 +220,7 @@ namespace ESMCI{
               }
             }
           }
-          res_data.push_back(p.eval(pvvals));
+          res_data.push_back(pp->eval(pvvals));
         }
 
         std::vector<int> dims = {nrows, ncols};
@@ -187,12 +237,22 @@ namespace ESMCI{
       std::vector<T> Xj_init_vals(vnames_.size(), 0);
       Matrix<T> Xj(Xi_dims, Xj_init_vals);
 
+      std::vector<const GenPoly<T, int> *> all_funcs;
+      for(typename std::vector<TwoVIDPoly<T> >::const_iterator iter = funcs_.cbegin();
+          iter != funcs_.cend(); ++iter){
+        all_funcs.push_back(&(*iter));
+      }
+      for(typename std::vector<MVIDLPoly<T> >::const_iterator iter = mvid_lpoly_funcs_.cbegin();
+          iter != mvid_lpoly_funcs_.cend(); ++iter){
+        all_funcs.push_back(&(*iter));
+      }
+
       /* C = Sum of all input variables */
       T C = std::accumulate(init_vals_.cbegin(), init_vals_.cend(), 0);
 
       /* Calculate the Jacobian matrix for the user constraint functions */
-      std::vector<std::vector<TwoVIDPoly<T> > > JF =
-        SESolverUtils::calc_jacobian(vnames_,funcs_);
+      std::vector<std::vector<GenPoly<T, int> *> > JF =
+        SESolverUtils::calc_jacobian(vnames_,funcs_, mvid_lpoly_funcs_);
 
       /* Solve for new values of Xi such that we minimize the user 
        * specified constraints (specified via funcs_ )
@@ -236,7 +296,7 @@ namespace ESMCI{
           Jinv = J.inv();
         }
 
-        Matrix<T> Feval = SESolverUtils::eval_funcs(funcs_, vnames_, Xi.get_data());
+        Matrix<T> Feval = SESolverUtils::eval_funcs(all_funcs, vnames_, Xi.get_data());
         /* If there are more variables than functions we add a last row.
          * The last row corresponds to a constraint that the sum of the input
          * variables need to remain constant (see variable C above,
@@ -257,6 +317,8 @@ namespace ESMCI{
         std::cout << "Xj = \n" << Xj << "\n";
         Xi = Xj;
       }
+  
+      SESolverUtils::free_jacobian(JF);
 
       return Xj.get_data();
     }
