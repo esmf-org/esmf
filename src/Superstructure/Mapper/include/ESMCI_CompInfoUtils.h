@@ -26,6 +26,7 @@ namespace ESMCI{
             const CompInfo<T> &comp_info) const;
           std::vector<std::pair<int, int> > get_past_pet_ranges(
             const CompInfo<T> &comp_info) const;
+          std::vector<int> get_past_npets(const CompInfo<T> &comp_info) const;
           std::vector<T> get_past_wtimes(const CompInfo<T> &comp_info) const;
           std::vector<T> get_past_stimes(const CompInfo<T> &comp_info) const;
           bool get_scaling_function(const CompInfo<T> &comp_info, UVIDPoly<T> &f) const;
@@ -38,6 +39,7 @@ namespace ESMCI{
               void add_info(const CompInfo<T> &comp_info);
               std::vector<std::pair<T, T> > get_past_time_intervals(void ) const;
               std::vector<std::pair<int, int> > get_past_pet_ranges(void ) const;
+              std::vector<int> get_past_npets(void ) const;
               std::vector<T> get_past_wtimes(void ) const;
               std::vector<T> get_past_stimes(void ) const;
               void get_past_times(std::vector<T> &past_wtimes,
@@ -120,6 +122,23 @@ namespace ESMCI{
       }
       else{
         std::vector<std::pair<int, int> > tmp;
+        return tmp;
+      }
+    }
+
+    template<typename T>
+    std::vector<int> CompInfoStore<T>::get_past_npets(
+      const CompInfo<T> &comp_info) const
+    {
+      std::string backup_info_key = comp_info.get_comp_name() +
+                                    comp_info.get_comp_phase_name();
+      typename std::map<std::string, CompBackupInfo>::const_iterator iter =
+        backup_info_.find(backup_info_key);
+      if(iter != backup_info_.end()){
+        return iter->second.get_past_npets();
+      }
+      else{
+        std::vector<int> tmp;
         return tmp;
       }
     }
@@ -239,6 +258,12 @@ namespace ESMCI{
     std::vector<std::pair<int, int> > CompInfoStore<T>::CompBackupInfo::get_past_pet_ranges(void ) const
     {
       return past_pet_ranges_;
+    }
+
+    template<typename T>
+    std::vector<int> CompInfoStore<T>::CompBackupInfo::get_past_npets(void ) const
+    {
+      return past_npets_;
     }
 
     template<typename T>
