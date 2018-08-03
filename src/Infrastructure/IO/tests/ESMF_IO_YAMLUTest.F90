@@ -58,13 +58,14 @@ program ESMF_IO_YAMLUTest
   !-----------------------------------------------------------------------------
   ! check if ESMF was built with YAML support
 #if ESMF_YAMLCPP
-! print *, "ESMF was built with YAML support via the external yaml-cpp library"
+  write(6,'(2x,"INFO",2x,"ESMF was built with YAML support via the external yaml-cpp library")')
 #else
-! print *, "ESMF was built with NO support for YAML"
+  write(6,'(2x,"INFO",2x,"ESMF was built with NO YAML support")')
 #endif
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
+  !NEX_UTest
   ! create IO_YAML object
   rc = ESMF_FAILURE
   yaml = ESMF_IO_YAMLCreate(rc=rc)
@@ -73,12 +74,13 @@ program ESMF_IO_YAMLUTest
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
+  !NEX_UTest
   ! read YAML file
   rc = ESMF_FAILURE
   call ESMF_IO_YAMLRead(yaml, "fd.yaml", rc=rc)
-  write(failMsg, *) "did not return ESMF_SUCCESS"
   write(name, *) "ESMF_IO_YAMLRead(): read in YAML file"
 #if ESMF_YAMLCPP
+  write(failMsg, *) "did not return ESMF_SUCCESS"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -86,12 +88,13 @@ program ESMF_IO_YAMLUTest
 #endif
 
   !-----------------------------------------------------------------------------
+  !NEX_UTest
   ! write YAML to standard output
   rc = ESMF_FAILURE
   call ESMF_IO_YAMLWrite(yaml, rc=rc)
-  write(failMsg, *) "did not return ESMF_SUCCESS"
   write(name, *) "ESMF_IO_YAMLWrite(): write native YAML content to standard output"
 #if ESMF_YAMLCPP
+  write(failMsg, *) "did not return ESMF_SUCCESS"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -99,6 +102,7 @@ program ESMF_IO_YAMLUTest
 #endif
 
   !-----------------------------------------------------------------------------
+  !NEX_UTest
   ! generate content from YAML
   rc = ESMF_FAILURE
   call ESMF_IO_YAMLContentInit(yaml, cflag=ESMF_IOYAML_CONTENT_NATIVE, rc=rc)
@@ -107,7 +111,8 @@ program ESMF_IO_YAMLUTest
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
-  ! check content
+  !NEX_UTest
+  ! check content - get line count
   lineCount = 0
   rc = ESMF_FAILURE
   call ESMF_IO_YAMLContentGet(yaml, lineCount=lineCount, rc=rc)
@@ -115,6 +120,9 @@ program ESMF_IO_YAMLUTest
   write(name, *) "ESMF_IO_YAMLContentGet(): get content line count"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  ! check content - get content
   allocate(content(lineCount))
   content = ""
   rc = ESMF_FAILURE
@@ -122,28 +130,41 @@ program ESMF_IO_YAMLUTest
   write(failMsg, *) "did not return ESMF_SUCCESS"
   write(name, *) "ESMF_IO_YAMLContentGet(): get content"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-! do i = 1, lineCount
-!   print *,i,trim(content(i))
-! end do
+  do i = 1, lineCount
+    print *,i,trim(content(i))
+  end do
   deallocate(content)
 
   !-----------------------------------------------------------------------------
+  !NEX_UTest
   ! now properly parse YAML
   rc = ESMF_FAILURE
   call ESMF_IO_YAMLParse(yaml, parseflag=ESMF_IOYAML_PARSE_NUOPCFD, rc=rc)
-  write(failMsg, *) "did not return ESMF_SUCCESS"
   write(name, *) "ESMF_IO_YAMLParse(): parse YAML as NUOPC Field dictionary"
+#if ESMF_YAMLCPP
+  write(failMsg, *) "did not return ESMF_SUCCESS"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !-----------------------------------------------------------------------------
+  !NEX_UTest
   ! re-generate content from YAML
   rc = ESMF_FAILURE
   call ESMF_IO_YAMLContentInit(yaml, cflag=ESMF_IOYAML_CONTENT_FREEFORM, rc=rc)
-  write(failMsg, *) "did not return ESMF_SUCCESS"
   write(name, *) "ESMF_IO_YAMLParse(): generate FreeFormat content from YAML"
+#if ESMF_YAMLCPP
+  write(failMsg, *) "did not return ESMF_SUCCESS"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMC_RC_ARG_INCOMP"
+  call ESMF_Test((rc==ESMC_RC_ARG_INCOMP), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !-----------------------------------------------------------------------------
+  !NEX_UTest
   ! check content
   lineCount = 0
   rc = ESMF_FAILURE
@@ -152,6 +173,9 @@ program ESMF_IO_YAMLUTest
   write(name, *) "ESMF_IO_YAMLContentGet(): get FreeFormat content line count"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  ! check content
   allocate(content(lineCount))
   content = ""
   rc = ESMF_FAILURE
@@ -159,18 +183,19 @@ program ESMF_IO_YAMLUTest
   write(failMsg, *) "did not return ESMF_SUCCESS"
   write(name, *) "ESMF_IO_YAMLContentGet(): get FreeFormat content"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-! do i = 1, lineCount
-!   print *,i,trim(content(i))
-! end do
+  do i = 1, lineCount
+    print *,i,trim(content(i))
+  end do
   deallocate(content)
 
   !-----------------------------------------------------------------------------
+  !NEX_UTest
   ! ingest new YAML into YAML_IO object
   rc = ESMF_FAILURE
   call ESMF_IO_YAMLIngest(yaml, test_yaml, rc=rc)
-  write(failMsg, *) "did not return ESMF_SUCCESS"
   write(name, *) "ESMF_IO_YAMLIngest(): ingest YAML content"
 #if ESMF_YAMLCPP
+  write(failMsg, *) "did not return ESMF_SUCCESS"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -178,6 +203,7 @@ program ESMF_IO_YAMLUTest
 #endif
 
   !-----------------------------------------------------------------------------
+  !NEX_UTest
   ! generate content from ingested YAML
   rc = ESMF_FAILURE
   call ESMF_IO_YAMLContentInit(yaml, cflag=ESMF_IOYAML_CONTENT_NATIVE, rc=rc)
@@ -186,7 +212,8 @@ program ESMF_IO_YAMLUTest
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
-  ! check content
+  !NEX_UTest
+  ! check content - get length
   clength = 0
   rc = ESMF_FAILURE
   call ESMF_IO_YAMLContentGet(yaml, contentSize=clength, rc=rc)
@@ -194,6 +221,9 @@ program ESMF_IO_YAMLUTest
   write(name, *) "ESMF_IO_YAMLContentGet(): get native content size (length)"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  ! check content - get line count
   lineCount = 0
   rc = ESMF_FAILURE
   call ESMF_IO_YAMLContentGet(yaml, lineCount=lineCount, rc=rc)
@@ -201,6 +231,9 @@ program ESMF_IO_YAMLUTest
   write(name, *) "ESMF_IO_YAMLContentGet(): get native content line count"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  ! check content - get content
   allocate(content(lineCount))
   content = ""
   rc = ESMF_FAILURE
@@ -209,29 +242,48 @@ program ESMF_IO_YAMLUTest
   write(name, *) "ESMF_IO_YAMLContentGet(): get native content"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  ! check content - verify length: method #1
+  write(failMsg, *) "content length is different"
+  write(name, *) "ESMF_IO_YAMLContentGet(): verify content size (1)"
+#if ESMF_YAMLCPP
   length = 0
   do i = 1, lineCount
     length = length + len_trim(content(i)) + 1
   end do
-  ! test 1
-  write(failMsg, *) "content length is different"
-  write(name, *) "ESMF_IO_YAMLContentGet(): check content size (1)"
-  call ESMF_Test((length==clength), name, failMsg, result, ESMF_SRCLINE)
-  ! test 2
-  write(failMsg, *) "content length is different"
-  write(name, *) "ESMF_IO_YAMLContentGet(): check content size (2)"
-  call ESMF_Test((length == len(test_yaml)), name, failMsg, result, ESMF_SRCLINE)
+  success = (length==clength)
+#else
+  success = .true.
+#endif
+  call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  ! check content - verify length: method #2
+  write(failMsg, *) "content length is different"
+  write(name, *) "ESMF_IO_YAMLContentGet(): verify content size (2)"
+#if ESMF_YAMLCPP
+  success = (length == len(test_yaml)
+#else
+  success = .true.
+#endif
+  call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  ! check content - verify content
   ! now check content
-! print *,"  Ingested content:"
-! print *,"  -----------------"
-! print *,test_yaml
-! print *,"  Generated content:"
-! print *,"  -----------------"
-! do i = 1, lineCount
-!   print *,i,trim(content(i))
-! end do
-! print *,""
+#if ESMF_YAMLCPP
+  print *,"  Ingested content:"
+  print *,"  -----------------"
+  print *,test_yaml
+  print *,"  Generated content:"
+  print *,"  -----------------"
+  do i = 1, lineCount
+    print *,i,trim(content(i))
+  end do
+  print *,""
 
   i = 0
   epos = 0
@@ -251,21 +303,25 @@ program ESMF_IO_YAMLUTest
         (test_yaml(ipos:epos-1) == content(i)(1:epos-ipos))
     end if
   end do
+  deallocate(content)
+#else
+  success = .true.
+#endif
   write(failMsg, *) "generated native ontent does not match ingested YAML content"
-  write(name, *) "ESMF_IO_YAMLContentGet(): get YAML content"
+  write(name, *) "ESMF_IO_YAMLContentGet(): verified retrieved YAML content"
   call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
 
-  deallocate(content)
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  ! re-generate content from YAML -- this test should always FAIL
+  rc = ESMF_FAILURE
+  call ESMF_IO_YAMLContentInit(yaml, cflag=ESMF_IOYAML_CONTENT_FREEFORM, rc=rc)
+  write(name, *) "ESMF_IO_YAMLContentInit(): generate incompatible FreeFormat content from YAML"
+  write(failMsg, *) "did not return ESMC_RC_ARG_INCOMP"
+  call ESMF_Test((rc==ESMC_RC_ARG_INCOMP), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
-  ! re-generate content from YAML -- this test should FAIL
-! rc = ESMF_FAILURE
-! call ESMF_IO_YAMLContentInit(yaml, cflag=ESMF_IOYAML_CONTENT_FREEFORM, rc=rc)
-! write(failMsg, *) "did not return ESMC_RC_ARG_INCOMP"
-! write(name, *) "ESMF_IO_YAMLContentInit(): generate incompatible FreeFormat content from YAML"
-! call ESMF_Test((rc==ESMC_RC_ARG_INCOMP), name, failMsg, result, ESMF_SRCLINE)
-
-  !-----------------------------------------------------------------------------
+  !NEX_UTest
   ! destroy IO_YAML object
   rc = ESMF_FAILURE
   call ESMF_IO_YAMLDestroy(yaml, rc=rc)
