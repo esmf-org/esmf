@@ -176,6 +176,7 @@ int main(int argc, char *argv[])
   // Create a solver instance and optimize init_vals
   ESMCI::MapperUtil::SESolver<float> solver_test4(pcomp1_vnames, init_coeff_vals, funcs_test4);
   solver_test4.set_niters(SOLVER_MAX_ITERS);
+  /*
   std::vector<float> sol_vals_test4 = solver_test4.minimize();
 
   for(std::vector<float>::const_iterator citer = sol_vals_test4.cbegin();
@@ -183,7 +184,7 @@ int main(int argc, char *argv[])
     std::cout << *citer << ", ";
   }
   std::cout << "\n";
-
+  */
 
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }
