@@ -432,14 +432,12 @@ module NUOPC_FieldDictionaryApi
 !BOP
 ! !IROUTINE: NUOPC_FieldDictionarySetup - Setup the NUOPC Field dictionary from file
 ! !INTERFACE:
-  subroutine NUOPC_FieldDictionarySetupFile(fileName, iofmt, label, rc)
+  subroutine NUOPC_FieldDictionarySetupFile(fileName, rc)
 ! !ARGUMENTS:
     character(len=*),      intent(in)              :: fileName
-    type(ESMF_IOFmt_flag), intent(in)              :: iofmt
-    character(len=*),      intent(in),  optional   :: label
     integer,               intent(out), optional   :: rc
 ! !DESCRIPTION:
-!   Setup the NUOPC Field dictionary by reading its content from file.
+!   Setup the NUOPC Field dictionary by reading its content from YAML file.
 !   If the NUOPC Field dictionary already exists, remove it and create a new one.
 !EOP
   !-----------------------------------------------------------------------------
@@ -448,7 +446,8 @@ module NUOPC_FieldDictionaryApi
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! create a NUOPC FreeFormat by reading from file with I/O format iofmt
-    freeFormat = NUOPC_FreeFormatCreate(fileName, iofmt=iofmt, label=label, rc=rc)
+    freeFormat = NUOPC_FreeFormatCreate(fileName, &
+      iofmt=ESMF_IOFMT_YAML, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 
