@@ -172,8 +172,10 @@ namespace ESMCI {
       ESMF_CHECK_POINTER(*ptr, status)
       if (data) {
         const std::string buffer = (*ptr)->cget();
-        size_t len = buffer.copy(data, std::strlen(data));
-        data[len] = '\0';
+        if (!buffer.empty()) {
+          size_t len = buffer.copy(data, std::strlen(data));
+          data[len] = '\0';
+        }
       }
       if (ESMC_PRESENT(status)) *status = ESMF_SUCCESS;
     }
