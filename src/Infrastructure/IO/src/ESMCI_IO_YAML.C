@@ -614,7 +614,7 @@ namespace ESMCI {
 
     // only write file on PET 0
     if (localPet == 0) {
-      std::ofstream fout(filename);
+      std::ofstream fout(filename.c_str());
       fout << this->producer.buffer;
       fout.close();
     }
