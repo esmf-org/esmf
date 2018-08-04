@@ -264,7 +264,7 @@ program ESMF_IO_YAMLUTest
   write(failMsg, *) "content length is different"
   write(name, *) "ESMF_IO_YAMLContentGet(): verify content size (2)"
 #if ESMF_YAMLCPP
-  success = (length == len(test_yaml)
+  success = (length == len(test_yaml))
 #else
   success = .true.
 #endif
