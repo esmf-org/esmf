@@ -280,17 +280,17 @@ static int found_func(void *c, void *y) {
   MBMappingBase *map = NULL;
   if (num_nodes == 3) {
     if (si->mesh->sdim == si->mesh->pdim)
-      map = MB_POLY_Mapping<tri_shape_func,MBTraits<>>::instance();
+      map = MB_POLY_Mapping<tri_shape_func, MBTraits<> >::instance();
     else
-      map = MB_POLY_Mapping<tri_shape_func,MBTraits<>, 3,2>::instance();
+      map = MB_POLY_Mapping<tri_shape_func, MBTraits<>, 3,2>::instance();
   } else if (num_nodes == 4) {
     if (si->mesh->sdim == si->mesh->pdim)
-      map = MB_POLY_Mapping<quad_shape_func,MBTraits<>>::instance();
+      map = MB_POLY_Mapping<quad_shape_func, MBTraits<> >::instance();
     else
-      map = MB_POLY_Mapping<quad_shape_func,MBTraits<>, 3,2>::instance();
+      map = MB_POLY_Mapping<quad_shape_func, MBTraits<>, 3,2>::instance();
   } else if (num_nodes == 8) {
     if (si->mesh->sdim == si->mesh->pdim)
-      map = MB_POLY_Mapping<hex_shape_func,MBTraits<>>::instance();
+      map = MB_POLY_Mapping<hex_shape_func, MBTraits<> >::instance();
     else {
       std::string err = "Hexagons cannot be built in 2D parametric space.";
       throw(err.c_str());
