@@ -12,13 +12,13 @@
 #include <Mesh/include/Legacy/ESMCI_MeshUtils.h>
 
 #include <Mesh/include/Legacy/ESMCI_MeshObjTopo.h>
-#include <Mesh/include/ESMCI_Mapping.h>
+#include <Mesh/include/Regridding/ESMCI_Mapping.h>
 #include <Mesh/include/Legacy/ESMCI_MeshObjConn.h>
 #include <Mesh/include/sacado/Sacado.hpp>
 #include <Mesh/include/Legacy/ESMCI_MEValues.h>
 #include <Mesh/include/Legacy/ESMCI_MeshField.h>
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
-#include <Mesh/include/ESMCI_ShapeFunc.h>
+#include <Mesh/include/Regridding/ESMCI_ShapeFunc.h>
 
 #include <iostream>
 #include <iomanip>

@@ -571,39 +571,41 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_RouteHandleDestroy - Release resources associated with a RouteHandle
 
 ! !INTERFACE:
-  subroutine ESMF_RouteHandleDestroy(routehandle, noGarbage, rc)
+  subroutine ESMF_RouteHandleDestroy(routehandle, keywordEnforcer, &
+    noGarbage, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_RouteHandle), intent(inout)          :: routehandle   
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),   optional :: noGarbage
     integer,                intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
-!   Destroys an {\tt ESMF\_RouteHandle}, releaseing the resources associated
+!   Destroys an {\tt ESMF\_RouteHandle}, releasing the resources associated
 !   with the object.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[routehandle] 
 !     The {\tt ESMF\_RouteHandle} to be destroyed.
-! \item[{[noGarbage]}]
-!      If set to {\tt .TRUE.} the object will be fully destroyed and removed
-!      from the ESMF garbage collection system. Note however that under this 
-!      condition ESMF cannot protect against accessing the destroyed object 
-!      through dangling aliases -- a situation which may lead to hard to debug 
-!      application crashes.
+!   \item[{[noGarbage]}]
+!     If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!     from the ESMF garbage collection system. Note however that under this 
+!     condition ESMF cannot protect against accessing the destroyed object 
+!     through dangling aliases -- a situation which may lead to hard to debug 
+!     application crashes.
 ! 
-!      It is generally recommended to leave the {\tt noGarbage} argument
-!      set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
-!      garbage collection system which will prevent problems with dangling
-!      aliases or incorrect sequences of destroy calls. However this level of
-!      support requires that a small remnant of the object is kept in memory
-!      past the destroy call. This can lead to an unexpected increase in memory
-!      consumption over the course of execution in applications that use 
-!      temporary ESMF objects. For situations where the repeated creation and 
-!      destruction of temporary objects leads to memory issues, it is 
-!      recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
-!      removing the entire temporary object from memory.
+!     It is generally recommended to leave the {\tt noGarbage} argument
+!     set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!     garbage collection system which will prevent problems with dangling
+!     aliases or incorrect sequences of destroy calls. However this level of
+!     support requires that a small remnant of the object is kept in memory
+!     past the destroy call. This can lead to an unexpected increase in memory
+!     consumption over the course of execution in applications that use 
+!     temporary ESMF objects. For situations where the repeated creation and 
+!     destruction of temporary objects leads to memory issues, it is 
+!     recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!     removing the entire temporary object from memory.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -798,11 +800,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_RouteHandleRelease - Release all RouteHandle resources
 
 ! !INTERFACE:
-  subroutine ESMF_RouteHandleRelease(routehandle, rc)
+  subroutine ESMF_RouteHandleRelease(routehandle, keywordEnforcer, noGarbage, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_RouteHandle), intent(inout) :: routehandle   
-    integer, intent(out), optional :: rc
+    type(ESMF_RouteHandle), intent(inout)          :: routehandle   
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    logical,                intent(in),   optional :: noGarbage
+    integer,                intent(out),  optional :: rc
 !
 ! !DESCRIPTION:
 !   Same as {\tt ESMF\_RouteHandleDestroy}.
@@ -811,6 +815,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[routehandle] 
 !     The {\tt ESMF\_RouteHandle} to be released.
+!   \item[{[noGarbage]}]
+!     If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!     from the ESMF garbage collection system. Note however that under this 
+!     condition ESMF cannot protect against accessing the destroyed object 
+!     through dangling aliases -- a situation which may lead to hard to debug 
+!     application crashes.
+! 
+!     It is generally recommended to leave the {\tt noGarbage} argument
+!     set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!     garbage collection system which will prevent problems with dangling
+!     aliases or incorrect sequences of destroy calls. However this level of
+!     support requires that a small remnant of the object is kept in memory
+!     past the destroy call. This can lead to an unexpected increase in memory
+!     consumption over the course of execution in applications that use 
+!     temporary ESMF objects. For situations where the repeated creation and 
+!     destruction of temporary objects leads to memory issues, it is 
+!     recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!     removing the entire temporary object from memory.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -826,7 +848,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! check input variable
     ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
 
-    call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
+    call ESMF_RouteHandleDestroy(routehandle, noGarbage=noGarbage, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc))  return

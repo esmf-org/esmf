@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
 
   // build a pointlist
   PointList *pl_quad;
-  pl_quad = MBMesh_to_PointList(mesh_quad, &rc);
+  pl_quad = MBMesh_to_PointList(mesh_quad, ESMC_MESHLOC_NODE, NULL, &rc);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
 
   // build a pointlist
   PointList *pl_quad_sph;
-  pl_quad_sph = MBMesh_to_PointList(mesh_quad_sph, &rc);
+  pl_quad_sph = MBMesh_to_PointList(mesh_quad_sph, ESMC_MESHLOC_NODE, NULL, &rc);
 
   //----------------------------------------------------------------------------
   //NEX_UTest

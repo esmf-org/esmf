@@ -783,11 +783,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     alog => null ()
     if (present(log)) then
-      if(log%logTableIndex>0) then
+      if (log%logTableIndex > 0) then
          alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
-      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      if (ESMF_LogDefault%logTableIndex > 0) then
+        alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      end if
     endif
 
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
@@ -916,13 +918,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     nullify(alog) ! ensure that the association status is well defined
 
     if (present(log)) then
-      if(log%logTableIndex>0) then
+      if (log%logTableIndex > 0) then
          alog => ESMF_LogTable(log%logTableIndex)
       else
          localrc = ESMF_RC_OBJ_NOT_CREATED
       endif
     else
-      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      if (ESMF_LogDefault%logTableIndex > 0) then
+        alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      end if
     endif
 
     if (associated(alog)) then
@@ -1091,7 +1095,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     nullify(alog) ! ensure that the association status is well defined
 
     if (present(log)) then
-      if(log%logTableIndex>0) then
+      if (log%logTableIndex > 0) then
          alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
@@ -1200,7 +1204,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     nullify(alog) ! ensure that the association status is well defined
 
     if (present(log)) then
-      if(log%logTableIndex>0) then
+      if (log%logTableIndex > 0) then
          alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
@@ -1322,7 +1326,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     nullify(alog) ! ensure that the association status is well defined
 
     if (present(log)) then
-      if(log%logTableIndex>0) then
+      if (log%logTableIndex > 0) then
          alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
@@ -1527,7 +1531,7 @@ end function ESMF_LogFoundNetCDFError
 !
       type(ESMF_Log),          intent(in),  optional :: log
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-      type(ESMF_Logical),      intent(out), optional :: flush
+      logical,                 intent(out), optional :: flush
       type(ESMF_LogMsg_Flag),  pointer,     optional :: logmsgAbort(:)
       type(ESMF_LogKind_Flag), intent(out), optional :: logkindflag
       integer,                 intent(out), optional :: maxElements
@@ -1590,11 +1594,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     nullify(alog) ! ensure that the association status is well defined
 
     if (present(log)) then
-      if(log%logTableIndex>0) then
+      if (log%logTableIndex > 0) then
          alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
-      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      if (ESMF_LogDefault%logTableIndex > 0) then
+        alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      end if
     endif
 
     if (associated(alog)) then
@@ -1785,7 +1791,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         rc=ESMF_FAILURE
     endif
 
-    if(log%logTableIndex>0) then
+    if (log%logTableIndex > 0) then
       alog => ESMF_LogTable(log%logTableIndex)
     else
       ESMF_LogTableCount = ESMF_LogTableCount + 1   ! counting number of files
@@ -2174,12 +2180,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     isDefault = .false.
     if (present(log)) then
-      if(log%logTableIndex>0) then
+      if (log%logTableIndex > 0) then
          alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
-      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
-      isDefault = .true.
+      if (ESMF_LogDefault%logTableIndex > 0) then
+        alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+        isDefault = .true.
+      end if
     endif
 
     ! Initialize return code; assume routine not implemented
@@ -2364,11 +2372,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     nullify(alog) ! ensure that the association status is well defined
 
     if (present(log)) then
-      if(log%logTableIndex>0) then
+      if (log%logTableIndex > 0) then
          alog => ESMF_LogTable(log%logTableIndex)
       endif
     else
-      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      if (ESMF_LogDefault%logTableIndex > 0) then
+        alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      end if
     endif
 
     if (associated(alog)) then
@@ -2498,20 +2508,29 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ESMF_INIT_CHECK_SET_SHALLOW(ESMF_LogGetInit,ESMF_LogInit,log)
 
-    nullify(alog) ! ensure that the association status is well defined
-
-    if (present(log)) then
-      if(log%logTableIndex>0) then
-         alog => ESMF_LogTable(log%logTableIndex)
-      endif
-    else
-      alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
-    endif
-
     ! Initialize return code; assume routine not implemented
     if (present(rc)) then
       rc=ESMF_RC_NOT_IMPL
     endif
+
+    nullify(alog) ! ensure that the association status is well defined
+
+    localrc = ESMF_SUCCESS
+    if (present(log)) then
+      if (log%logTableIndex > 0) then
+         alog => ESMF_LogTable(log%logTableIndex)
+      else
+        localrc = ESMF_RC_OBJ_INIT
+      endif
+    else
+      if (ESMF_LogDefault%logTableIndex > 0) then
+        alog => ESMF_LogTable(ESMF_LogDefault%logTableIndex)
+      else
+        localrc = ESMF_RC_OBJ_INIT
+      end if
+    endif
+
+    ! Check argument sanity
 
     argcase = 0
     argcase = argcase + merge (1, 0, present (logmsgFlag))
@@ -2545,6 +2564,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     if (associated(alog)) then
 
+      ! Open the log file if necessary
       if (alog%logkindflag /= ESMF_LOGKIND_NONE) then
 
         if (alog%deferredOpenFlag) then
@@ -2567,7 +2587,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         if (alog%FileIsOpen /= ESMF_TRUE) then
           write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-              ": ESMF_Log not open -- cannot ESMF_LogWrite()."
+              ": ESMF_Log not open -- cannot ESMF_LogWrite().  Log message = ", trim (msg)
           if (present(rc)) rc=ESMF_FAILURE
           return
         endif
@@ -2584,6 +2604,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return
           end if
         end if
+
+        ! Add the message to the message queue awaiting flushing
 
         index = alog%fIndex
 
@@ -2665,7 +2687,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(rc)) then
         rc=ESMF_SUCCESS
       endif
+    else
+      write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
+          ": ESMF_Log not open -- cannot ESMF_LogWrite().  Log message = ", trim (msg)
+      if (present (rc)) then
+        rc = localrc
+      end if
     endif
+
 end subroutine ESMF_LogWrite
 
 !--------------------------------------------------------------------------

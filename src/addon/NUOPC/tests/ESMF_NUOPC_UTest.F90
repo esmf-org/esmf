@@ -993,9 +993,9 @@ program ESMF_NUOPC_UTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "NUOPC_UpdateTimestamp() Test"
+  write(name, *) "NUOPC_SetTimestamp() Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call NUOPC_UpdateTimestamp(stateA, clockA, rc=rc)
+  call NUOPC_SetTimestamp(stateA, clockA, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 

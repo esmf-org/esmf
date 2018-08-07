@@ -170,12 +170,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      aligned with the global index space, if a global index space is well
 !      defined by the associated Grid. See section \ref{const:indexflag}
 !      for a list of valid indexflag options.
-! \item [{[staggerloc]}]
-!       Stagger location of data in grid cells.  For valid
-!       predefined values see section \ref{const:staggerloc}.
-!       To create a custom stagger location see section
-!       \ref{sec:usage:staggerloc:adv}. The default
-!       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension
@@ -406,12 +400,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      aligned with the global index space, if a global index space is well
 !      defined by the associated Grid. See section \ref{const:indexflag}
 !      for a list of valid indexflag options.
-! \item [{[staggerloc]}]
-!       Stagger location of data in grid cells.  For valid
-!       predefined values see section \ref{const:staggerloc}.
-!       To create a custom stagger location see section
-!       \ref{sec:usage:staggerloc:adv}. The default
-!       value is {\tt ESMF\_STAGGERLOC\_CENTER}.
 ! \item [{[gridToFieldMap]}]
 !       List with number of elements equal to the
 !       {\tt grid}|s dimCount.  The list elements map each dimension

@@ -27,9 +27,7 @@ double Timer_Callback_Time, Timer_Global_Callback_Time;
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#if defined (ESMF_OS_MinGW)
-#define strcasecmp _strcmpi
-#endif
+#include <strings.h>
 
 #include "dr_const.h"
 #include "dr_err_const.h"

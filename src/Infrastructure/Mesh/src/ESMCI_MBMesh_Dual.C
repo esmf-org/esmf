@@ -1,7 +1,8 @@
 // $Id: ESMCI_MeshRedist.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research, 
+// Copyright 
+2002-2018, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 // Laboratory, University of Michigan, National Centers for Environmental 
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -9,29 +10,43 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMCI_MeshRedist.h>
-#include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
-#include <Mesh/include/Legacy/ESMCI_MeshObjTopo.h>
-#include <Mesh/include/Legacy/ESMCI_MeshObjConn.h>
-#include <Mesh/include/Regridding/ESMCI_Mapping.h>
-#include <Mesh/include/Legacy/ESMCI_MeshObj.h>
-#include <Mesh/include/ESMCI_Mesh.h>
-#include <Mesh/include/Legacy/ESMCI_MeshUtils.h>
-#include <Mesh/include/ESMCI_MathUtil.h>
-#include "Mesh/include/Legacy/ESMCI_DDir.h" 
+// #include <Mesh/include/ESMCI_MeshRedist.h>
+// #include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
+// #include <Mesh/include/Legacy/ESMCI_MeshObjTopo.h>
+// #include <Mesh/include/Legacy/ESMCI_MeshObjConn.h>
+// #include <Mesh/include/Regridding/ESMCI_Mapping.h>
+// #include <Mesh/include/Legacy/ESMCI_MeshObj.h>
+// #include <Mesh/include/ESMCI_Mesh.h>
+// #include <Mesh/include/Legacy/ESMCI_MeshUtils.h>
+// #include <Mesh/include/ESMCI_MathUtil.h>
+// #include "Mesh/include/Legacy/ESMCI_DDir.h" 
+// #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
+// #include <Mesh/include/Legacy/ESMCI_CommReg.h>
+// #include <Mesh/include/Legacy/ESMCI_MeshVTK.h>
+
+#if defined ESMF_MOAB
+#include "moab/Core.hpp"
+using namespace moab;
+
+#include <Mesh/include/ESMCI_MBMesh.h>
+#include <Mesh/include/ESMCI_MBMesh_Dual.h>
+#include <Mesh/include/Legacy/ESMCI_MBMesh_Types.h>
+
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
 #include <Mesh/include/Legacy/ESMCI_CommReg.h>
-#include <Mesh/include/Legacy/ESMCI_MeshVTK.h>
+
+#include <Mesh/include/ESMCI_MathUtil.h>
+
+
+#endif
+
 
 #include <iostream>
 #include <fstream>
 #include <algorithm>
 #include <iterator>
-
 #include <ostream>
-
 #include <set>
-
 #include <limits>
 #include <vector>
 
@@ -45,8 +60,8 @@ static const char *const version = "$Id: ESMCI_MeshDual.C,v 1.23 2012/01/06 20:1
 
  
 namespace ESMCI {
-
-  const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype);
+  
+#if defined ESMF_MOAB
 
   void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_ind, 
                    double *tri_frac);
@@ -83,17 +98,17 @@ namespace ESMCI {
   // Create a dual of the input Mesh 
   // This adds ghostcells to the input mesh, 
   // it also creates ghostcells for the dual mesh
-  void MeshDual(Mesh *src_mesh, Mesh **_dual_mesh) {
+  void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh) {
 
-  Trace __trace("MeshDual(Mesh *src_mesh, Mesh **dual_mesh)");
+  Trace __trace("MeshDual(MBMesh *src_mesh, MBMesh **dual_mesh)");
 
   // Don't currently support duals of 3D Meshes
-  if (src_mesh->parametric_dim()>2) {
+  if (src_mesh->pdim()>2) {
     Throw() <<" Creation of a dual mesh isn't supported for Meshes of parametric dim greater than 3.\n";
   }
 
   // Need element coordinates
-  if (!src_mesh->GetField("elem_coordinates")) {
+  if (src_mesh->has_elem_coords) {
     Throw() <<" Creation of a dual mesh requires element coordinates. \n";
   }
 
@@ -102,16 +117,16 @@ namespace ESMCI {
   // cells
    {
     int num_snd=0;
-    MEField<> *snd[10],*rcv[10];
+    vector<Tag> snd,rcv;
     
     // Load coord field
-    MEField<> *psc = src_mesh->GetCoordField();
+    Tag *psc = src_mesh->node_orig_coords_tag;
     snd[num_snd]=psc;
     rcv[num_snd]=psc;
     num_snd++;
 
     // Load element mask value field
-    MEField<> *psm = src_mesh->GetField("elem_mask_val");
+    Tag *psm = src_mesh->elem_mask_val_tag;
     if (psm != NULL) {
       snd[num_snd]=psm;
       rcv[num_snd]=psm;
@@ -119,7 +134,7 @@ namespace ESMCI {
     }
 
     // Load element mask field
-    MEField<> *psem = src_mesh->GetField("elem_mask");
+    Tag *psem = src_mesh->elem_mask_tag;
     if (psem != NULL) {
       snd[num_snd]=psem;
       rcv[num_snd]=psem;
@@ -127,7 +142,7 @@ namespace ESMCI {
     }
 
     // Load element coordinate field
-    MEField<> *psec = src_mesh->GetField("elem_coordinates");
+    Tag *psec = src_mesh->elem_coords_tag;
     if (psec != NULL) {
       snd[num_snd]=psec;
       rcv[num_snd]=psec;
@@ -144,33 +159,37 @@ namespace ESMCI {
 
  
   // Get some useful info
-  int sdim=src_mesh->spatial_dim();
-  int pdim=src_mesh->parametric_dim();
+  int sdim=src_mesh->sdim();
+  int pdim=src_mesh->pdim();
 
   // Create Mesh
-  Mesh *dual_mesh=new Mesh();
+  Mesh *dual_mesh=new MBMesh();
 
   // Set Mesh dimensions
-  dual_mesh->set_spatial_dimension(sdim);
-  dual_mesh->set_parametric_dimension(pdim);
+  dual_mesh->sdim = sdim;
+  dual_mesh->pdim = pdim;
   dual_mesh->orig_spatial_dim=src_mesh->orig_spatial_dim;
 
-  // Get element coordinates
-  MEField<> *elem_coords=src_mesh->GetField("elem_coordinates"); 
-  if (!elem_coords) {
-    Throw() <<" Creation of a dual mesh requires element coordinates. \n";
+  // Get a range containing all elements
+  Range range_elem;
+  merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->sdim,range_elem);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
   }
-
 
   // Iterate through all src elements counting the number and creating a map
   std::map<UInt,UInt> id_to_index;
-   int pos=0;
-  MeshDB::iterator ei = src_mesh->elem_begin_all(), ee = src_mesh->elem_end_all();
-  for (; ei != ee; ++ei) {
-    MeshObj &elem=*ei;
+  int pos=0;
+  for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
+    const EntityHandle elem=*it;
 
     // Get element id
-    UInt elem_id=elem.get_id();
+    int elem_id;
+    merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
+    if (merr != MB_SUCCESS)
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
 
     // Translate id if split
     if ((src_mesh->is_split) && (elem_id > src_mesh->max_non_split_id)) {
@@ -210,16 +229,22 @@ namespace ESMCI {
   int max_num_elems=0;
   int max_num_elemConn=0;
   int max_num_node_elems=0;
-  MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
-  for (; ni != ne; ++ni) {
-    MeshObj &node=*ni;
+  // Get a range containing all elements
+  Range range_node;
+  merr=src_mesh->mesh->get_entities_by_dimension(0,0,range_node);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                     moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+  for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
+    const EntityHandle node=*it;
     
     // Only do local nodes
     // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
     // CAN END UP NOT MAKING AN ELEM AS A HOME FOR 
     // A NODE THAT'S NEEDED ON ANOTHER PROC
     //if (!GetAttr(node).is_locally_owned()) continue;
-
+    
     // Get number of elems
     int num_node_elems=0;
     get_num_elems_around_node(&node, &num_node_elems);    
@@ -229,14 +254,13 @@ namespace ESMCI {
     
     // maximum number of elems per node
     if (num_node_elems > max_num_node_elems) max_num_node_elems = num_node_elems;
-
+    
     // Count number of elements
     max_num_elems++;
-
+    
     // Count number of connections
     max_num_elemConn += num_node_elems;
   }
- 
 
   // Create temp arrays for getting ordered elem ids
   MDSS *tmp_mdss=NULL;
@@ -263,9 +287,8 @@ namespace ESMCI {
   // Iterate through src nodes creating elements
   int num_elems=0;
   int conn_pos=0;
-  ni = src_mesh->node_begin();
-  for (; ni != ne; ++ni) {
-    MeshObj &node=*ni;
+  for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
+    const EntityHandle node=*it;
     
     // Only do local nodes
     // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
@@ -287,10 +310,21 @@ namespace ESMCI {
     elemType[num_elems]=num_elems_around_node_ids;
     
     // Save elemId
-    elemId[num_elems]=node.get_id();
+    int elem_id;
+    merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &elem_id);
+    if (merr != MB_SUCCESS)
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    elemId[num_elems]=elem_id;
 
     // Save owner
-    elemOwner[num_elems]=node.get_owner();
+    int owner;
+    merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, node, 1, &owner);
+    if (merr != MB_SUCCESS)
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+
+    elemOwner[num_elems]=owner;
 
     // printf("%d# eId=%d eT=%d ::",Par::Rank(),elemId[num_elems],elemType[num_elems]);
     
@@ -331,17 +365,36 @@ namespace ESMCI {
   if (elems_around_node_ids != NULL) delete [] elems_around_node_ids;
 
 
+
+
+
+
+
+
+
+
+
   // Iterate through all src elements creating nodes
   MeshObj **nodes=NULL;
   if (num_nodes>0) nodes=new MeshObj *[num_nodes];
+
+  EntityHandle *nodes=NULL;
+  if (num_nmodes>0) {
+    nodes=new EntityHandle[num_nodes];
+    dual_mesh->verts=nodes;
+  }
+  
   pos=0;
-   int data_index=0;
-  ei = src_mesh->elem_begin_all();
-  for (; ei != ee; ++ei) {
-      MeshObj &elem=*ei;
+  int data_index=0;
+  for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
+    const EntityHandle elem=*it;
 
       // Get element id
-      UInt elem_id=elem.get_id();
+      int elem_id;
+      merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
+      if (merr != MB_SUCCESS)
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
 
       // Translate id if split
       if ((src_mesh->is_split) && (elem_id > src_mesh->max_non_split_id)) {
@@ -354,7 +407,12 @@ namespace ESMCI {
       }
 
       // Get owner
-      UInt owner=elem.get_owner();
+      int owner;
+      merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, elem, 1, &owner);
+      if (merr != MB_SUCCESS)
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+
 
       // Translate owner if split
       // (Interestingly we DON'T have to translate the owner for
@@ -368,11 +426,35 @@ namespace ESMCI {
       // (Note we are also using nodes_used to skip collapsed split elems, so unused here 
       //  might also mean it was a split elem, that's not the original elem)
       if (nodes_used[pos]) {
+        
+        double c[3];
+        merr = src_mesh->mesh->get_coords(elem, 1, c);
+        if (merr != MB_SUCCESS)
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
 
+        // Add vertex
+        merr=dual_mesh->mesh->create_vertex(c,nodes[data_index]);
+        if (merr != MB_SUCCESS) {
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }
+        
+        
         // Create node  
-        MeshObj *node = new MeshObj(MeshObj::NODE, elem_id, data_index);
-        node->set_owner(owner);
-        dual_mesh->add_node(node, 0);
+        // MeshObj *node = new MeshObj(MeshObj::NODE, elem_id, data_index);
+        // node->set_owner(owner);
+        // dual_mesh->add_node(node, 0);
+        
+        // how do you set node specific info on a moab mesh?
+        // owner
+        
+        // id
+        
+        // mask
+        
+        
+        
         data_index++;
 
         //printf("%d# node=%d owner=%d islocal=%d \n",Par::Rank(),node->get_id(),node->get_owner(),GetAttr(*node).is_locally_owned());
@@ -386,20 +468,26 @@ namespace ESMCI {
       pos++;
     }
 
-    // Register Node fields
-    IOField<NodalField> *dm_node_coord = dual_mesh->RegisterNodalField(*dual_mesh, "coordinates", sdim);
 
-    IOField<NodalField> *dm_node_mask_val=NULL;
-    MEField<> *elem_mask_val=src_mesh->GetField("elem_mask_val"); 
-    if (elem_mask_val != NULL) {
-      dm_node_mask_val = dual_mesh->RegisterNodalField(*dual_mesh, "node_mask_val", 1);
-    }
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////// STOPPED HERE ///////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-    IOField<NodalField> *dm_node_mask=NULL;
-    MEField<> *elem_mask=src_mesh->GetField("elem_mask"); 
-    if (elem_mask != NULL) {
-      dm_node_mask = dual_mesh->RegisterNodalField(*dual_mesh, "mask", 1);
-    }
+
+    // // Register Node fields
+    // IOField<NodalField> *dm_node_coord = dual_mesh->RegisterNodalField(*dual_mesh, "coordinates", sdim);
+    // 
+    // IOField<NodalField> *dm_node_mask_val=NULL;
+    // MEField<> *elem_mask_val=src_mesh->GetField("elem_mask_val"); 
+    // if (elem_mask_val != NULL) {
+    //   dm_node_mask_val = dual_mesh->RegisterNodalField(*dual_mesh, "node_mask_val", 1);
+    // }
+    // 
+    // IOField<NodalField> *dm_node_mask=NULL;
+    // MEField<> *elem_mask=src_mesh->GetField("elem_mask"); 
+    // if (elem_mask != NULL) {
+    //   dm_node_mask = dual_mesh->RegisterNodalField(*dual_mesh, "mask", 1);
+    // }
 
 
     // Iterate through all src elements putting in node coords
@@ -1222,5 +1310,6 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
   
   }
 
+#endif
 
   } // namespace

@@ -21,11 +21,17 @@
 // ESMF Test header
 #include "ESMC_Test.h"
 
+#if defined ESMF_MOAB
 // other headers
 #include "ESMCI_MBMesh.h"
+#include "ESMCI_MBMesh_Bilinear.h"
 #include "ESMCI_MBMesh_Glue.h"
+#include "ESMCI_MBMesh_Mapping.h"
 #include "ESMCI_MBMesh_Util.h"
+#include "ESMCI_WMat.h"
 #include "ESMCI_PointList.h"
+
+#endif
 
 #include <iostream>
 #include <iterator>
@@ -37,7 +43,89 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+static double UNINITVAL = -42;
+
 using namespace std;
+
+
+// test base class ideas
+// - almost equal function
+// - vector comparison with IWeights
+// - 
+
+bool weights_correct(IWeights &wts, vector<double> weights) {
+  bool correct = true;
+  if (weights[0] != UNINITVAL) {
+    int ind = 0;
+    WMat::WeightMap::iterator mb = wts.begin_row(), me = wts.end_row();
+    for(; mb != me; ++mb) {
+      vector<WMat::Entry> row = mb->second;
+      vector<WMat::Entry>::iterator vb = row.begin(), ve = row.end();
+      for(; vb != ve; ++vb) {
+        WMat::Entry rv = *vb;
+        if (rv.value /= weights[ind]) correct = false;
+        ++ind;
+      }
+    }
+    if (weights.size() != ind) correct = false;
+  }
+  
+  return correct;
+}
+
+#if defined ESMF_MOAB
+bool weight_gen(MBMesh *mesh, PointList *pl, vector<double> weights, bool cart=true) {
+  bool correct = false;
+
+  // early exit for ESMF_MOAB=OFF
+  if (mesh == NULL || pl == NULL)
+    return true;
+  
+  // Cartesian?
+  int map_type = MB_MAP_TYPE_GREAT_CIRCLE;
+  if (cart) map_type = MB_MAP_TYPE_CART_APPROX;
+  
+  // do bilinear regridding between mesh and pointlist
+  IWeights wt, dst_status;
+  IWeights &wts = wt;
+  IWeights &ds = dst_status;
+  calc_bilinear_regrid_wgts(mesh, pl, wts, &map_type, true, ds);
+
+  // verify results
+  if (weights_correct(wts, weights)) correct = true;
+
+  // output weight matrix for debugging purposes
+#define BILINEAR_WEIGHTS
+#ifdef BILINEAR_WEIGHTS
+  cout << endl << "Bilinear Weight Matrix" << endl;
+  // print out weights
+  WMat::WeightMap::iterator mb = wts.begin_row(), me = wts.end_row();
+  for(; mb != me; ++mb) {
+    WMat::Entry col = mb->first;
+    vector<WMat::Entry> row = mb->second;
+
+    cout << "[" << col.id << "," << col.idx << "," << col.value << ","
+         << col.src_id << "] - ";
+
+    vector<WMat::Entry>::iterator vb = row.begin(), ve = row.end();
+    for(; vb != ve; ++vb) {
+      WMat::Entry rv = *vb;
+      cout << "[" << rv.id << "," << rv.idx << "," << rv.value << ","
+           << rv.src_id << "] ";
+    }
+    cout << endl;
+  }
+  cout << endl;
+#endif
+
+  return correct;
+}
+#else
+// dummy function for ESMF_MOAB=OFF
+bool weight_gen(void *mesh, void *pl) {return true;}
+#endif
+
+#if defined ESMF_MOAB
 
 MBMesh* create_mesh_quad(int &rc) {
   //
@@ -1804,4 +1892,4 @@ MBMesh* create_mesh_quad_10(int &rc) {
   rc = ESMF_SUCCESS;
   return static_cast<MBMesh *>(meshp);
 }
-
+#endif

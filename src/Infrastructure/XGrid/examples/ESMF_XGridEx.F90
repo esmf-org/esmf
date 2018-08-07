@@ -446,8 +446,8 @@
       endflag=ESMF_END_ABORT)
 
     call ESMF_XGridGet(xgrid, &
-      ngridA=ngridA, &    ! number of Grids on side A
-      ngridB=ngridB, &    ! number of Grids on side B
+      sideAGridCount=ngridA, &    ! number of Grids on side A
+      sideBGridCount=ngridB, &    ! number of Grids on side B
       sideAGrid=l_sideA, &    ! list of Grids on side A
       sideBGrid=l_sideB, &    ! list of Grids on side B
       distgridA=l_sideAdg, &  ! list of Distgrids on side A

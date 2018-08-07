@@ -1,3 +1,6 @@
+#define STORELINSEQVECT_NEW_LOG_off
+#define STORELINSEQVECT_NEW_TIMERS_off
+#define STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
 //-----------------------------------------------------------------------------
 
   template<typename IT> struct SparseMatrixIndex{
@@ -507,7 +510,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   try{
 
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0"));
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new0.0"));
 #endif
   
   // prepare
@@ -516,10 +519,239 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   const int *srcLocalDeToDeMap = srcArray->getDELayout()->getLocalDeToDeMap();
   const int *dstLocalDeToDeMap = dstArray->getDELayout()->getLocalDeToDeMap();
   
+  // Step0: construct helper maps if possible to optimize exchanges below
+  
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+  vm->timerReset("find_srcSeqIndexMinMax");
+  vm->timerStart("find_srcSeqIndexMinMax");
+#endif
+  // find local srcSeqIndex Min/Max
+  SIT srcSeqIndexMinMax[2]; // [0]=min, [1]=max
+  srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1] = -1; // visibly invalidate
+  bool firstMinMax = true;
+  for (int i=0; i<srcLocalDeCount; i++){
+    if (srcLocalDeElementCount[i]){
+      // there are elements for local DE i
+      ArrayElement arrayElement(srcArray, i, true, false, false);
+      // loop over all elements in exclusive region for local DE i
+      while(arrayElement.isWithin()){
+        // determine the sequentialized index for the current Array element
+        SeqIndex<SIT> seqIndex = arrayElement.getSequenceIndex<SIT>();
+        // record seqIndex min and max
+        if (firstMinMax){
+          srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1]
+            = seqIndex.decompSeqIndex; // initialize
+          firstMinMax = false;
+        }else{
+          if (seqIndex.decompSeqIndex < srcSeqIndexMinMax[0])
+            srcSeqIndexMinMax[0] = seqIndex.decompSeqIndex;
+          if (seqIndex.decompSeqIndex > srcSeqIndexMinMax[1])
+            srcSeqIndexMinMax[1] = seqIndex.decompSeqIndex;
+        }
+        arrayElement.next();
+      } // end while over all exclusive elements
+    }
+  }
+  // communicate srcSeqIndexMinMax across all Pets
+  vector<SIT> srcSeqIndexMinMaxList(2*petCount);
+  vm->allgather(srcSeqIndexMinMax, &(srcSeqIndexMinMaxList[0]), 2*sizeof(SIT));
+  // find global srcSeqIndex min/max
+  vector<int> srcElementCountList(petCount);
+  vm->allgather(&srcElementCount, &(srcElementCountList[0]), sizeof(int));
+  SIT srcSeqIndexMinGlobal, srcSeqIndexMaxGlobal;
+  bool pastInitFlag = false; // reset
+  for (int i=0; i<petCount; i++){
+    if (srcElementCountList[i]){
+      // Pet i holds elements in srcArray
+      if (pastInitFlag){
+        if (srcSeqIndexMinMaxList[2*i] < srcSeqIndexMinGlobal)
+          srcSeqIndexMinGlobal = srcSeqIndexMinMaxList[2*i];
+        if (srcSeqIndexMinMaxList[2*i+1] > srcSeqIndexMaxGlobal)
+          srcSeqIndexMaxGlobal = srcSeqIndexMinMaxList[2*i+1];
+      }else{
+        // initialization
+        srcSeqIndexMinGlobal = srcSeqIndexMinMaxList[2*i];
+        srcSeqIndexMaxGlobal = srcSeqIndexMinMaxList[2*i+1];
+        pastInitFlag = true; // set
+      }
+    }
+  }
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+  vm->timerStop("find_srcSeqIndexMinMax");
+  vm->timerLog("find_srcSeqIndexMinMax");
+#endif
+  
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new0.1"));
+#endif
+
+#ifdef STORELINSEQVECT_NEW_LOG_on
+  {
+    std::stringstream msg;
+    msg << "STORELINSEQVECT_NEW_LOG:" << __LINE__ << " global srcMin/Max = " 
+      << srcSeqIndexMinGlobal << "/" << srcSeqIndexMaxGlobal;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+    
+  // evenly divide the sequence index range across all PETs
+  vector<SIT> srcSeqIndexRangeMin(petCount);
+  vector<SIT> srcSeqIndexRangeMax(petCount);
+  srcSeqIndexRangeMin[0] = srcSeqIndexMinGlobal;  // start
+  SIT indicesPerPet = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
+    / (SIT) petCount;
+  SIT extraIndices = (srcSeqIndexMaxGlobal - srcSeqIndexMinGlobal + 1)
+    % (SIT)petCount;
+  for (int i=0; i<petCount-1; i++){
+    srcSeqIndexRangeMax[i] = srcSeqIndexRangeMin[i] + indicesPerPet - 1;
+    if (i<extraIndices)
+      ++srcSeqIndexRangeMax[i];   // distribute extra indices evenly
+    srcSeqIndexRangeMin[i+1] = srcSeqIndexRangeMax[i] + 1;
+  }
+  srcSeqIndexRangeMax[petCount-1] = srcSeqIndexMaxGlobal;  // finish
+  
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new0.2"));
+#endif
+
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+  vm->timerReset("construct_haveInfo");
+  vm->timerStart("construct_haveInfo");
+#endif
+  // construct the haveInfo vector locally
+  vector<int> haveInfo(petCount,0);   // 0 means localPet does not have any info
+  for (int i=0; i<srcLocalDeCount; i++){
+    if (srcLocalDeElementCount[i]){
+      // there are elements for local DE i
+      ArrayElement arrayElement(srcArray, i, true, false, false);
+      // loop over all elements in exclusive region for local DE i
+      while(arrayElement.isWithin()){
+        // determine the sequentialized index for the current Array element
+        SeqIndex<SIT> seqIndex = arrayElement.getSequenceIndex<SIT>();
+        // find the matching seqIndex range
+        int j=petCount/2;         // starting guess in the middle
+        int jL=0, jU=petCount-1;  // initial bi-section range
+        while ((j>jL) && (j<jU) &&
+          (seqIndex.decompSeqIndex < srcSeqIndexRangeMin[j]
+          || seqIndex.decompSeqIndex > srcSeqIndexRangeMax[j])){
+          if (seqIndex.decompSeqIndex < srcSeqIndexRangeMin[j]){
+            jU = j;
+            j = jL + (jU-jL)/2;
+          }else if (seqIndex.decompSeqIndex > srcSeqIndexRangeMax[j]){
+            jL = j;
+            j = jU - (jU-jL)/2;
+          }
+        }
+        if (seqIndex.decompSeqIndex >= srcSeqIndexRangeMin[j] &&
+          seqIndex.decompSeqIndex <= srcSeqIndexRangeMax[j]){
+          // found PET with correct bounds
+          // set the haveInfo[] entry
+          haveInfo[j] = 1;
+        }
+        arrayElement.next();
+      } // end while over all exclusive elements
+    }
+  }
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+  vm->timerStop("construct_haveInfo");
+  vm->timerLog("construct_haveInfo");
+#endif
+  
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new0.3"));
+#endif
+
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+  vm->timerReset("construct_hasInfo");
+  vm->timerStart("construct_hasInfo");
+#endif
+  // transpose haveInfo -> hasInfo
+  vector<int> hasInfo(petCount);
+  localrc = vm->alltoall(&(haveInfo[0]), 1, &(hasInfo[0]), 1, vmI4);
+  // compact hasInfo -> hasInfoList
+  vector<int> hasInfoList;
+  for (int i=0; i<petCount; i++)
+    if (hasInfo[i]) hasInfoList.push_back(i);
+  
+#ifdef STORELINSEQVECT_NEW_LOG_on
+  {
+    std::stringstream msg;
+    for (unsigned i=0; i<hasInfoList.size(); i++){
+      msg.str("");  // clear
+      msg << "STORELINSEQVECT_NEW_LOG:" << __LINE__ << " hasInfoList[" <<
+        i << "] = " << hasInfoList[i];
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+  }
+#endif
+
+  // every PET to know all other hasInfoListCount's
+  unsigned hasInfoListCount = hasInfoList.size();
+  vector<int> hasInfoListCounts(petCount);
+  localrc = vm->allgather(&hasInfoListCount, &(hasInfoListCounts[0]), 
+    sizeof(int));
+  
+#ifdef STORELINSEQVECT_NEW_LOG_on
+  {
+    std::stringstream msg;
+    msg << "STORELINSEQVECT_NEW_LOG:" << __LINE__ << 
+      " hasInfoListCounts min=" << 
+      *min_element(hasInfoListCounts.begin(), hasInfoListCounts.end()) << 
+      " max=" << 
+      *max_element(hasInfoListCounts.begin(), hasInfoListCounts.end());
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
+  // prepare hasInfoListsOffsets[] for the allgatherv, and later access
+  vector<int> hasInfoListsOffsets(petCount);
+  hasInfoListsOffsets[0] = 0;  // starting position
+  for (int i=1; i<petCount; i++)
+    hasInfoListsOffsets[i] = hasInfoListsOffsets[i-1]
+      + hasInfoListCounts[i-1];
+  int totalHasInfoListCount = hasInfoListsOffsets[petCount-1]
+    + hasInfoListCounts[petCount-1];
+  
+#ifdef STORELINSEQVECT_NEW_LOG_on
+  {
+    std::stringstream msg;
+    msg << "STORELINSEQVECT_NEW_LOG:" << __LINE__ << 
+      " totalHasInfoListCount=" << totalHasInfoListCount;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+  
+  // gather all of the hasInfoList's on all of the PETs
+  vector<int> hasInfoLists(totalHasInfoListCount);
+  localrc = vm->allgatherv(&(hasInfoList[0]), hasInfoListCount,
+    &(hasInfoLists[0]), &(hasInfoListCounts[0]), &(hasInfoListsOffsets[0]), 
+    vmI4);
+  
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+  vm->timerStop("construct_hasInfo");
+  vm->timerLog("construct_hasInfo");
+#endif
+    
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new0.4"));
+#endif
+
   // Step1: construct dstLinSeqVect
   
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0"));
+#endif
+
+  // setup vector to indicate which PETs are responders for localPET's requests
+  vector<int> responderPet(petCount, 0); // 0 means not a responder, 1 responder
+  // setup vector to indicate which PETs are requesters and localPET has response
+  vector<int> requesterPet(petCount);
+
   if (haloFlag){
     // for halo, straight forward construction of dstLinSeqVect from rim
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->timerReset("construct_responderPet");
+#endif
     for (int i=0; i<dstLocalDeCount; i++){
       if (dstLocalDeElementCount[i]){
         // there are elements for local DE i
@@ -556,10 +788,99 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
             element.factorList[0].partnerSeqIndex = seqIndex;
             memcpy(element.factorList[0].factor, factor, 8);
             dstLinSeqVect[i].push_back(element);
+            // find the matching seqIndex range
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+            vm->timerStart("construct_responderPet");
+#endif
+            int j=petCount/2;         // starting guess in the middle
+            int jL=0, jU=petCount-1;  // initial bi-section range
+            while ((j>jL) && (j<jU) &&
+              (seqIndex.decompSeqIndex < srcSeqIndexRangeMin[j]
+              || seqIndex.decompSeqIndex > srcSeqIndexRangeMax[j])){
+              if (seqIndex.decompSeqIndex < srcSeqIndexRangeMin[j]){
+                jU = j;
+                j = jL + (jU-jL)/2;
+              }else if (seqIndex.decompSeqIndex > srcSeqIndexRangeMax[j]){
+                jL = j;
+                j = jU - (jU-jL)/2;
+              }
+            }
+            if (seqIndex.decompSeqIndex >= srcSeqIndexRangeMin[j] &&
+              seqIndex.decompSeqIndex <= srcSeqIndexRangeMax[j]){
+              // found PET with correct bounds
+              // now set all those responderPet elements that are indicated
+              // by the hasInfoLists entries for j
+              for (int kk=0; kk<hasInfoListCounts[j]; kk++){
+                int ind = hasInfoListsOffsets[j]+kk;
+                responderPet[hasInfoLists[ind]] = 1;
+              }
+            }
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+            vm->timerStop("construct_responderPet");
+#endif
           }
         }
       }
     }
+    
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->timerLog("construct_responderPet");
+#endif
+    
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.2"));
+#endif
+
+//    for (int i=0; i<petCount; i++)
+//      printf("localPet=%d, responderPet[%d]=%d\n", localPet, i, responderPet[i]);
+    
+    int nrecvs;
+    requesterPet.assign(petCount,1);
+
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->barrier();
+    vm->timerReset("reduce_scatter");
+    vm->timerStart("reduce_scatter");
+#endif
+    
+    localrc = vm->reduce_scatter(&(responderPet[0]), &nrecvs, &(requesterPet[0]), 
+      vmI4, vmSUM);
+    
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->timerStop("reduce_scatter");
+    vm->timerLog("reduce_scatter");
+#endif
+    
+#ifdef STORELINSEQVECT_NEW_LOG_on
+    {
+      std::stringstream msg;
+      msg << "STORELINSEQVECT_NEW_LOG:" << __LINE__ << 
+        " nrecvs=" << nrecvs;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.3"));
+#endif
+
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->barrier();
+    vm->timerReset("alltoall");
+    vm->timerStart("alltoall");
+#endif
+    
+    // transpose responderPet -> requesterPet
+    localrc = vm->alltoall(&(responderPet[0]), 1, &(requesterPet[0]), 1, vmI4);
+    
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->timerStop("alltoall");
+    vm->timerLog("alltoall");
+#endif
+
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new1.0.4"));
+#endif
     
   }else{  // haloFlag
     // for not-halo, construction of dstLinSeqVect is more complex
@@ -676,7 +997,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #endif
   dstElementSort.sort();
   
-#ifdef TIMERS
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2a"));
 #endif
@@ -688,7 +1009,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2"));
 #endif
 
-  // setup the src side information, sorted by seqIndex
+    // Step2: setup the src side information, sorted by seqIndex
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->timerReset("construct_srcElementSort");
+    vm->timerStart("construct_srcElementSort");
+#endif
 #ifdef SRC_ELEMENT_SORT_VECTOR
   vector<ElementSort<SIT> > srcElementSort;
   srcElementSort.reserve(srcElementCount);
@@ -731,7 +1056,12 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     }
   }
   
-#ifdef TIMERS
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->timerStop("construct_srcElementSort");
+    vm->timerLog("construct_srcElementSort");
+#endif
+
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.3a"));
 #endif
@@ -756,39 +1086,66 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.0"));
 #endif
   
+  // Step3: fill srcLinSeqVect
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->timerReset("fill_srcLinSeqVect");
+    vm->timerStart("fill_srcLinSeqVect");
+#endif
+
   switch (typekindFactors){
   case ESMC_TYPEKIND_R4:
     {
       FillLinSeqVect<SIT,DIT,ESMC_R4> 
         fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+#ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
+      fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
+#else
       fillLinSeqVect.totalExchange(vm);
+#endif
     }
     break;
   case ESMC_TYPEKIND_R8:
     {
       FillLinSeqVect<SIT,DIT,ESMC_R8> 
         fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+#ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
+      fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
+#else
       fillLinSeqVect.totalExchange(vm);
+#endif
     }
     break;
   case ESMC_TYPEKIND_I4:
     {
       FillLinSeqVect<SIT,DIT,ESMC_I4> 
         fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+#ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
+      fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
+#else
       fillLinSeqVect.totalExchange(vm);
+#endif
     }
     break;
   case ESMC_TYPEKIND_I8:
     {
       FillLinSeqVect<SIT,DIT,ESMC_I8> 
         fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+#ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
+      fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
+#else
       fillLinSeqVect.totalExchange(vm);
+#endif
     }
     break;
   default:
     break;
   }
   
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->timerStop("fill_srcLinSeqVect");
+    vm->timerLog("fill_srcLinSeqVect");
+#endif
+
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new4.0"));
 #endif
@@ -827,6 +1184,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #endif
   
   // clear out dstLinSeqVect elements that did not find src partners
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+  vm->timerReset("cleanout_dstLinSeqVect");
+#endif
   for (int i=0; i<dstLocalDeCount; i++){
     typename vector<AssociationElement<DIT,SIT> >::iterator itD
       = dstLinSeqVect[i].begin();
@@ -841,12 +1201,31 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
           ++it;
       }
       // remove dstLinSeqVect elements without factorList elements
-      if ((itD->factorList).size()==0)
-        itD = dstLinSeqVect[i].erase(itD);
-      else
+      if ((itD->factorList).size()==0){
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->timerStart("cleanout_dstLinSeqVect");
+#endif
+#ifdef STORELINSEQVECT_NEW_LOG_on
+  {
+    std::stringstream msg;
+    msg << "STORELINSEQVECT_NEW_LOG:" << __LINE__ << 
+      " erasing itD with seqIndex.decompSeqIndex=" << 
+      itD->seqIndex.decompSeqIndex << " .tensorSeqIndex=" <<
+      itD->seqIndex.tensorSeqIndex;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+        itD = dstLinSeqVect[i].erase(itD);  // erase the element
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->timerStop("cleanout_dstLinSeqVect");
+#endif
+      }else
         ++itD;
     }
   }
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+  vm->timerLog("cleanout_dstLinSeqVect");
+#endif
   
 #if 0
   // not sure if maybe for general sparse matrix case, where the same src

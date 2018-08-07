@@ -15,10 +15,7 @@
 #include "phg.h"
 #include "zz_heap.h"
 
-#if defined (ESMF_OS_MinGW)
-#define strcasecmp _strcmpi
-#define strncasecmp _strnicmp
-#endif
+#include <strings.h>
 
 #ifdef __cplusplus
 /* if C++, define the rest of this header file as extern C */

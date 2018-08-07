@@ -237,7 +237,9 @@ export ESMF_ETCDIR = default
 endif
 
 ifndef ESMF_MOAB
-export ESMF_MOAB = default
+#TODO: reactivate MOAB once issues from August2018 commit resolved.
+#export ESMF_MOAB = default
+export ESMF_MOAB = OFF
 endif
 
 ifndef ESMF_ACC_SOFTWARE_STACK

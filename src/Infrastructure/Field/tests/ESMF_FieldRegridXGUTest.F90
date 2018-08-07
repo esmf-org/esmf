@@ -945,7 +945,7 @@ contains
     type(ESMF_Mesh)                 :: mesh_atm, mesh_ocn, mesh_xgrid, meshM
     real(ESMF_KIND_R8)              :: srcsum(3), allsrcsum(3), scale
     real(ESMF_KIND_R8)              :: dstFlux_reg, dstFlux, totalXArea, totalSrcArea, error
-    integer                         :: l_scheme
+    integer                         :: l_scheme, eleCount
 
     type(ESMF_VM)   :: vm
 
@@ -1302,6 +1302,17 @@ contains
         ESMF_CONTEXT, rcToReturn=rc)) return
     !print *, 'src: ', srcFracPtr(:,1)
     !print *, 'dst: ', dstFracPtr
+
+    call ESMF_XGridGet(xgrid, elementCount=eleCount, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    write(*, *) 'eleCount = ', eleCount, 'size(fptr) = ', size(exf)
+    if(eleCount /= size(exf)) then
+      print *, 'elementCount is not equal to size(exf)'
+      if(present(rc)) rc = ESMF_RC_NOT_VALID
+      return
+    endif
 
     call ESMF_FieldRegridGetArea(srcArea, rc=localrc)
     if (ESMF_LogFoundError(localrc, &

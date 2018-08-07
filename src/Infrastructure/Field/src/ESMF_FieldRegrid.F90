@@ -283,16 +283,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_FieldRegridRelease - Free resources used by a regridding operation
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldRegridRelease(routehandle, keywordEnforcer, rc)
+      subroutine ESMF_FieldRegridRelease(routehandle, keywordEnforcer, &
+        noGarbage, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RouteHandle), intent(inout)         :: routehandle
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+      logical,                intent(in),  optional :: noGarbage
       integer,                intent(out), optional :: rc 
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.0.0] Added argument {\tt noGarbage}.
+!   The argument provides a mechanism to override the default garbage collection
+!   mechanism when destroying an ESMF object.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -302,6 +310,24 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{description}
 !     \item [routehandle]
 !           Handle carrying the sparse matrix
+!     \item[{[noGarbage]}]
+!     If set to {\tt .TRUE.} the object will be fully destroyed and removed
+!     from the ESMF garbage collection system. Note however that under this 
+!     condition ESMF cannot protect against accessing the destroyed object 
+!     through dangling aliases -- a situation which may lead to hard to debug 
+!     application crashes.
+! 
+!     It is generally recommended to leave the {\tt noGarbage} argument
+!     set to {\tt .FALSE.} (the default), and to take advantage of the ESMF 
+!     garbage collection system which will prevent problems with dangling
+!     aliases or incorrect sequences of destroy calls. However this level of
+!     support requires that a small remnant of the object is kept in memory
+!     past the destroy call. This can lead to an unexpected increase in memory
+!     consumption over the course of execution in applications that use 
+!     temporary ESMF objects. For situations where the repeated creation and 
+!     destruction of temporary objects leads to memory issues, it is 
+!     recommended to call with {\tt noGarbage} set to {\tt .TRUE.}, fully 
+!     removing the entire temporary object from memory.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -309,7 +335,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
         integer :: localrc
 
-        call ESMF_RouteHandleRelease(routehandle=routehandle, rc=localrc)
+        call ESMF_RouteHandleRelease(routehandle, noGarbage=noGarbage, &
+          rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -1604,6 +1631,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Mesh)      :: srcMesh, dstMesh
 
         integer :: srcIdx, dstIdx, ngrid_a, ngrid_b
+        integer :: sideAGC, sideAMC, sideBGC, sideBMC
         type(ESMF_XGridSide_Flag) :: srcSide, dstSide
         type(ESMF_XGridGeomBase), allocatable :: gridA(:), gridB(:)
         type(ESMF_Grid)      :: srcGrid
@@ -1642,10 +1670,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         ! look for the correct Grid to use
         ! first Get necessary information from XGrid and Fields
-        call ESMF_XGridGet(xgrid, ngridA=ngrid_a, ngridB=ngrid_b, &
+        call ESMF_XGridGet(xgrid, &
+            sideAGridCount=sideAGC, sideAMeshCount=sideAMC, &
+            sideBGridCount=sideBGC, sideBMeshCount=sideBMC, &
             rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+        ngrid_a = sideAGC + sideAMC
+        ngrid_b = sideBGC + sideBMC
         allocate(gridA(ngrid_a), gridB(ngrid_b))
 
         call ESMF_XGridGet(xgrid, gridA, gridB, rc=localrc)

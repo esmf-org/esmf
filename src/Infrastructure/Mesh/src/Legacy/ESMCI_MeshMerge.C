@@ -13,7 +13,7 @@
 #include <Mesh/include/Regridding/ESMCI_ConserveInterp.h>
 #include <Mesh/include/Legacy/ESMCI_Exception.h> 
 #include <Mesh/include/Regridding/ESMCI_Interp.h>
-#include <Mesh/include/ESMCI_Mapping.h>
+#include <Mesh/include/Regridding/ESMCI_Mapping.h>
 #include <Mesh/include/ESMCI_MathUtil.h> 
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/Legacy/ESMCI_MeshMerge.h>

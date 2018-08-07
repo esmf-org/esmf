@@ -987,7 +987,7 @@ void ESMCI_meshaddelements(Mesh **meshpp,
       double *subelem_dbl_buf=new double[3*max_num_conn];
       int    *subelem_int_buf=new int[max_num_conn];
       int    *subelem_tri_ind=new int[3*(max_num_conn-2)];
-       double *subelem_tri_area=new double[max_num_conn-2];
+      double *subelem_tri_area=new double[max_num_conn-2];
 
       double *elemtris_area=new double[max_num_elemtris];
       int *elemtris_split_elem_pos=new int[max_num_elemtris];

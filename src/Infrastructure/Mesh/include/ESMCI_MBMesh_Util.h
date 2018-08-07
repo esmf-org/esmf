@@ -27,6 +27,8 @@
 #include <Mesh/include/ESMCI_MBMesh.h>
 #include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
 #include "ESMCI_PointList.h"
+#include "Util/include/ESMC_Util.h"
+#include "Util/include/ESMCI_F90Interface.h"
 
 #include <vector>
 
@@ -54,9 +56,7 @@ void MBMesh_get_local_elem_gids(MBMesh *mbmp, std::vector<UInt> &egids);
 // useful for translating pcoords from MOAB to ESMF domain
 void translate(double *pcoords);
 
-//ESMCI::PointList *MBMesh_to_PointList(MBMesh *mesh, ESMC_MeshLoc_Flag meshLoc, ESMCI::InterfaceInt *maskValuesArg, int *rc);
-ESMCI::PointList *MBMesh_to_PointList(MBMesh *mesh, int *rc);
-
+ESMCI::PointList *MBMesh_to_PointList(MBMesh *mesh, ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, int *rc);
 #endif // ESMF_MOAB
 
 #endif

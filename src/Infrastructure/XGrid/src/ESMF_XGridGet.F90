@@ -117,11 +117,12 @@ contains
 ! ! Private name; call using ESMF_XGridGet()
 
 subroutine ESMF_XGridGetDefault(xgrid, keywordEnforcer, &
+    sideAGridCount, sideBGridCount, sideAMeshCount, sideBMeshCount, &
+    dimCount, elementCount, &
     sideAGrid, sideBGrid, sideAMesh, sideBMesh, &
     mesh, &
-    ngridA, ngridB, area, centroid, &
+    area, centroid, &
     distgridA, distgridB, distgridM, &
-    dimCount, localDECount, &
     sparseMatA2X, sparseMatX2A, sparseMatB2X, sparseMatX2B, &
     name, &
     rc) 
@@ -130,17 +131,18 @@ subroutine ESMF_XGridGetDefault(xgrid, keywordEnforcer, &
 ! !ARGUMENTS:
 type(ESMF_XGrid),     intent(in)            :: xgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+integer,              intent(out), optional :: sideAGridCount, sideBGridCount
+integer,              intent(out), optional :: sideAMeshCount, sideBMeshCount
+integer,              intent(out), optional :: dimCount
+integer,              intent(out), optional :: elementCount
 type(ESMF_Grid),      intent(out), optional :: sideAGrid(:), sideBGrid(:)
 type(ESMF_Mesh),      intent(out), optional :: sideAMesh(:), sideBMesh(:)
 type(ESMF_Mesh),      intent(out), optional :: mesh
-integer,              intent(out), optional :: ngridA, ngridB
 real(ESMF_KIND_R8),   intent(out), optional :: area(:)
 real(ESMF_KIND_R8),   intent(out), optional :: centroid(:,:)
 type(ESMF_DistGrid),  intent(out), optional :: distgridA(:)
 type(ESMF_DistGrid),  intent(out), optional :: distgridB(:)
 type(ESMF_DistGrid),  intent(out), optional :: distgridM
-integer,              intent(out), optional :: dimCount
-integer,              intent(out), optional :: localDECount
 type(ESMF_XGridSpec), intent(out), optional :: sparseMatA2X(:)
 type(ESMF_XGridSpec), intent(out), optional :: sparseMatX2A(:)
 type(ESMF_XGridSpec), intent(out), optional :: sparseMatB2X(:)
@@ -155,50 +157,54 @@ integer,              intent(out), optional :: rc
 !     \begin{description}
 !     \item [xgrid]
 !       The {\tt ESMF\_XGrid} object used to retrieve information from.
-!     \item [{[sideAGrid]}]
-!           List of 2D Grids on side A
-!     \item [{[sideBGrid]}]
-!           List of 2D Grids on side B
-!     \item [{[sideAMesh]}]
-!           List of 2D Meshes on side A
-!     \item [{[sideBMesh]}]
-!           List of 2D Meshes on side B
-!     \item [{[mesh]}]
-!           Super mesh stored in XGrid when storeOverlay is set true during XGrid creation
-!     \item [{[ngridA]}]
-!           Number of Grids or Meshes on the A side
-!     \item [{[ngridB]}]
-!           Number of Grids or Meshes on the B side
-!     \item [{[area]}]
-!           Area of the xgrid cells
-!     \item [{[centroid]}]
-!           Coordinates at the area weighted center of the xgrid cells
-!     \item [{[distgridA]}]
-!           list of distgrids whose sequence index list is an overlap between a Grid
-!           on sideA and the xgrid object.
-!     \item [{[distgridB]}]
-!           list of distgrids whose sequence index list is an overlap between a Grid
-!           on sideB and the xgrid object.
-!     \item [{[distgridM]}]
-!           the distgrid whose sequence index list fully describes the xgrid object.
+!     \item [{[sideAGridCount]}]
+!           Total Number of Grids on the A side.
+!     \item [{[sideBGridCount]}]
+!           Total Number of Grids on the B side.
+!     \item [{[sideAMeshCount]}]
+!           Total Number of Meshes on the A side.
+!     \item [{[sideBMeshCount]}]
+!           Total Number of Meshes on the B side.
 !     \item [{[dimCount]}]
-!           dimension of the xgrid 
-!     \item [{[localDECount]}]
-!           number of local DEs on local PET
+!           Number of dimension of the xgrid.
+!     \item [{[elementCount]}]
+!          Number of elements in exclusive region of the xgrid on this PET.
+!     \item [{[sideAGrid]}]
+!           List of 2D Grids on side A. Must enter with shape(sideAGrid)=(/sideAGridCount/).
+!     \item [{[sideBGrid]}]
+!           List of 2D Grids on side B. Must enter with shape(sideBGrid)=(/sideBGridCount/).
+!     \item [{[sideAMesh]}]
+!           List of 2D Meshes on side A. Must enter with shape(sideAMesh)=(/sideAMeshCount/).
+!     \item [{[sideBMesh]}]
+!           List of 2D Meshes on side B. Must enter with shape(sideBMesh)=(/sideBMeshCount/).
+!     \item [{[mesh]}]
+!           Super mesh stored in XGrid when storeOverlay is set true during XGrid creation.
+!     \item [{[area]}]
+!           Area of the xgrid cells on this PET. Must enter with shape(area)=(/elementCount/).
+!     \item [{[centroid]}]
+!           Coordinates at the area weighted center of the xgrid cells on this PET. Must enter with shape(centroid)=(/dimCount, elementCount/).
+!     \item [{[distgridA]}]
+!           List of distgrids whose sequence index list is an overlap between a Grid
+!           on sideA and the xgrid object. Must enter with shape(distgridA)=(/sideAGridCount+sideAMeshCount/).
+!     \item [{[distgridB]}]
+!           List of distgrids whose sequence index list is an overlap between a Grid
+!           on sideB and the xgrid object. Must enter with shape(distgridB)=(/sideBGridCount+sideBMeshCount/).
+!     \item [{[distgridM]}]
+!           The distgrid whose sequence index list fully describes the xgrid object.
 !     \item [{[sparseMatA2X]}]
-!           indexlist from a Grid index space on side A to xgrid index space
-!           indexFactorlist from a Grid index space on side A to xgrid index space
+!           Indexlist from a Grid index space on side A to xgrid index space; 
+!           indexFactorlist from a Grid index space on side A to xgrid index space. Must enter with shape(sparsematA2X)=(/sideAGridCount+sideAMeshCount/).
 !     \item [{[sparseMatX2A]}]
-!           indexlist from xgrid index space to a Grid index space on side A
-!           indexFactorlist from xgrid index space to a Grid index space on side A
+!           Indexlist from xgrid index space to a Grid index space on side A; 
+!           indexFactorlist from xgrid index space to a Grid index space on side A. Must enter with shape(sparsematX2A)=(/sideAGridCount+sideAMeshCount/).
 !     \item [{[sparseMatB2X]}]
-!           indexlist from a Grid index space on side B to xgrid index space
-!           indexFactorlist from a Grid index space on side B to xgrid index space
+!           Indexlist from a Grid index space on side B to xgrid index space; 
+!           indexFactorlist from a Grid index space on side B to xgrid index space. Must enter with shape(sparsematB2X)=(/sideBGridCount+sideBMeshCount/).
 !     \item [{[sparseMatX2B]}]
-!           indexlist from xgrid index space to a Grid index space on side B
-!           indexFactorlist from xgrid index space to a Grid index space on side B
+!           Indexlist from xgrid index space to a Grid index space on side B; 
+!           indexFactorlist from xgrid index space to a Grid index space on side B. Must enter with shape(sparsematX2B)=(/sideBGridCount+sideBMeshCount/).
 !     \item [{[name]}]
-!           name of the xgrid object.
+!           Name of the xgrid object.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} only if the {\tt ESMF\_XGrid} 
 !           is created.
@@ -223,12 +229,49 @@ integer,              intent(out), optional :: rc
 
     xgtypep => xgrid%xgtypep
 
-    if(present(ngridA)) then
-        ngridA = size(xgtypep%sideA, 1)
+    if(present(sideAGridCount)) then
+        count = 0
+        do i = 1, size(xgtypep%sideA, 1)
+          call ESMF_XGridGeomBaseGet(xgtypep%sideA(i), geomtype=xggt, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          if(xggt == ESMF_XGRIDGEOMTYPE_GRID) count = count + 1
+        enddo
+        sideAGridCount = count
     endif
-
-    if(present(ngridB)) then
-        ngridB = size(xgtypep%sideB, 1)
+    if(present(sideBGridCount)) then
+        count = 0
+        do i = 1, size(xgtypep%sideB, 1)
+          call ESMF_XGridGeomBaseGet(xgtypep%sideB(i), geomtype=xggt, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          if(xggt == ESMF_XGRIDGEOMTYPE_GRID) count = count + 1
+        enddo
+        sideBGridCount = count
+    endif
+    if(present(sideAMeshCount)) then
+        count = 0
+        do i = 1, size(xgtypep%sideA, 1)
+          call ESMF_XGridGeomBaseGet(xgtypep%sideA(i), geomtype=xggt, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          if(xggt == ESMF_XGRIDGEOMTYPE_MESH) count = count + 1
+        enddo
+        sideAMeshCount = count
+    endif
+    if(present(sideBMeshCount)) then
+        count = 0
+        do i = 1, size(xgtypep%sideB, 1)
+          call ESMF_XGridGeomBaseGet(xgtypep%sideB(i), geomtype=xggt, rc=localrc)
+          if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          if(xggt == ESMF_XGRIDGEOMTYPE_MESH) count = count + 1
+        enddo
+        sideBMeshCount = count
     endif
 
     if(present(sideAGrid)) then
@@ -506,13 +549,9 @@ integer,              intent(out), optional :: rc
     if(present(dimCount)) then
         dimCount = 1
     endif
-
-    if(present(localDECount)) then
-        call ESMF_DistGridGet(xgtypep%distgridM, delayout=delayout, rc=localrc)
-        if (ESMF_LogFoundError(localrc, &
-            ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_DELayoutGet(delayout, localDECount=localDECount, rc=localrc)
+    if(present(elementCount)) then
+        call ESMF_DistGridGet(xgtypep%distgridM, localDe=0, elementCount=elementCount, &
+            rc=localrc)
         if (ESMF_LogFoundError(localrc, &
             ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -1008,7 +1047,7 @@ end subroutine ESMF_XGridGetSMMSpecFrac
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetDG()"
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_XGridGet - Get an individual DistGrid from an XGrid
 
 ! !INTERFACE: ESMF_XGridGet
@@ -1052,7 +1091,7 @@ integer,                   intent(out), optional :: rc
 !       is created.
 !     \end{description}
 !
-!EOP
+!EOPI
 
     type(ESMF_XGridType), pointer :: xgtypep
     type(ESMF_XGridSide_Flag)     :: l_xgridSide
@@ -1117,7 +1156,7 @@ end subroutine ESMF_XGridGetDG
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetEle()"
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_XGridGet - Get DE-local information from an XGrid
 
 ! !INTERFACE: ESMF_XGridGet
@@ -1159,7 +1198,7 @@ integer,          intent(out), optional :: rc
 !           is created.
 !     \end{description}
 !
-!EOP
+!EOPI
 
     type(ESMF_XGridType), pointer   :: xgtypep
     type(ESMF_DELayout)             :: delayout

@@ -82,10 +82,11 @@ void MBMesh_getlocalelemcoords(void **meshpp, double *ecoords,
                                int *_orig_sdim, int *rc);
 
 
-void MBMesh_meshturnoncellmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
-void MBMesh_meshturnoffcellmask(void **mbmpp, int *rc);
+void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
+void MBMesh_turnoffelemmask(void **mbmpp, int *rc);
 
-
+void MBMesh_turnonnodemask(void **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
+void MBMesh_turnoffnodemask(void **meshpp, int *rc);
 
 #if 0
 

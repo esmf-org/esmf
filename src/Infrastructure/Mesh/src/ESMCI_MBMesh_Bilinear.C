@@ -93,15 +93,48 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
                                    de = sr.dst_nodes.end();
     for (; db != de; db++) {
 
-      // Get all nodes on this element
-      const EntityHandle* nodes;
-      int num_nodes = 0;
-      int merr= mesh-> get_connectivity(sr.src_elem, nodes, num_nodes);
+#ifdef MOAB_UNORDERED_CONNECTIVITY
+      // Get the nodes on this element (only corners)
+      // note: other get_connectivity calls return ordered sets of nodes, which
+      //       destroys the original ordering of the nodes (counter-clockwise)
+      Range nodes;
+      int merr= mesh->get_connectivity(&(sr.src_elem), 1, nodes, true);
       if (merr != MB_SUCCESS) {
         Throw() << "MOAB ERROR:: "<<moab::ErrorCodeStr[merr];
       }
 
-      // get coords of dst_node
+      // get the ids of the nodes of the elements and count them
+      vector<double> gids;
+      gids.reserve(8);
+      int num_nodes = 0;
+      for(Range::iterator it=nodes.begin(); it !=nodes.end(); it++) {
+        const EntityHandle *ent=(&*it);
+        int gid;
+        MBMesh_get_gid(srcmb, *ent, &gid);
+        gids.push_back(gid);
+        ++num_nodes;
+      }
+#else
+      // Get the nodes on this element (only corners) in ordered list
+      vector<EntityHandle> nodes;
+      int merr= mesh->get_connectivity(&(sr.src_elem), 1, nodes, true);
+      if (merr != MB_SUCCESS) {
+        Throw() << "MOAB ERROR:: "<<moab::ErrorCodeStr[merr];
+      }
+
+      // get the ids of the nodes of the elements and count them
+      vector<double> gids;
+      gids.reserve(8);
+      int num_nodes = 0;
+      for(int i = 0; i < nodes.size(); ++i) {
+        int gid;
+        MBMesh_get_gid(srcmb, nodes[i], &gid);
+        gids.push_back(gid);
+        ++num_nodes;
+      }
+
+#endif
+      // put the pcoords into a vector
       vector<double> p;
       p.push_back(db->pcoord[0]);
       p.push_back(db->pcoord[1]);
@@ -114,9 +147,10 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
 
       // weight generation
       if (num_nodes == 3) {
+        a.push_back(1-db->pcoord[0]-db->pcoord[1]);
         a.push_back(db->pcoord[0]);
         a.push_back(db->pcoord[1]);
-        a.push_back(1-db->pcoord[0]-db->pcoord[1]);
+        // pcoord_2d(p, a);
       }
       else if (num_nodes == 4)
         pcoord_2d(p, a);
@@ -133,17 +167,17 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
 
       // Loop over nodes of the element
       for(int i = 0; i<num_nodes; ++i) {
-        int gid; MBMesh_get_gid(srcmb, nodes[i], &gid);
-        col.push_back(IWeights::Entry(gid, 0, a[i], db->dst_gid));
+        col.push_back(IWeights::Entry(gids[i], 0, a[i], db->dst_gid));
       }
-
+      
       // insert the row
       iw.InsertRow(row, col);
     }
   }
 }
 
-void calc_bilinear_regrid_wgts(MBMesh *srcmb, PointList *dstpl, IWeights &wts) {
+void calc_bilinear_regrid_wgts(MBMesh *srcmb, PointList *dstpl, IWeights &wts, 
+                               int *map_type, bool set_dst_status, WMat &dst_status) {
 #define ESMC_METHOD "calc_bilinear_regrid_wgts()"
 
   // Get Parallel Information
@@ -163,7 +197,7 @@ void calc_bilinear_regrid_wgts(MBMesh *srcmb, PointList *dstpl, IWeights &wts) {
   if (petCount > 1) {
 
     // Create rendez meshes
-    create_rendez_mbmesh_etop(srcmb, dstpl, &srcmesh_rend, &dstpl_rend);
+    create_rendez_mbmesh_etop(srcmb, dstpl, &srcmesh_rend, &dstpl_rend, map_type);
 
     // Use rendezvous meshes instead
     srcmesh_regrid=srcmesh_rend;
@@ -172,9 +206,10 @@ void calc_bilinear_regrid_wgts(MBMesh *srcmb, PointList *dstpl, IWeights &wts) {
 
   // Do search
   MBMesh_Search_EToP_Result_List result;
-  MBMesh_Search_EToP(srcmesh_regrid, ESMCI_UNMAPPEDACTION_IGNORE,
+  MBMesh_Search_EToP(srcmesh_regrid, 
                       dstpl_regrid, ESMCI_UNMAPPEDACTION_IGNORE,
-                      1.0E-8, result);
+                      map_type, 1.0E-8, result, 
+                      set_dst_status, dst_status, NULL, NULL);
 
   // Calculate the bilinear weight matrix
   calc_bilinear_mat(srcmesh_regrid, dstpl_regrid, result, wts);

@@ -18,6 +18,7 @@
 #endif
 
 #include <mpi.h>
+#include <vector>
 
 #ifdef VMK_STANDALONE
 #include <pthread.h>
@@ -547,6 +548,8 @@ class ComPat2{
      
   // communication patterns
   void totalExchange(VMK *vmk);
+  void selectiveExchange(VMK *vmk, std::vector<int>&responderPet, 
+    std::vector<int>&requesterPet);
 }; // ComPat2
 
 

@@ -59,9 +59,11 @@
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
  
 #ifdef ESMF_TESTEXHAUSTIVE
- 
+
+
 ! This #if surrounds all the tests to enable turning on just one test
 #if 1
      !------------------------------------------------------------------------
@@ -268,7 +270,6 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
@@ -283,7 +284,6 @@
  
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
  
       !------------------------------------------------------------------------
       !EX_UTest
@@ -314,9 +314,9 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
       !------------------------------------------------------------------------
  
+      !------------------------------------------------------------------------
       !EX_UTest
        ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
@@ -352,7 +352,6 @@
 #endif
 
       !------------------------------------------------------------------------
-
       !EX_UTest
        ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
@@ -367,9 +366,7 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
       !------------------------------------------------------------------------
- 
        !EX_UTest
       ! Test regrid with masks
        write(failMsg, *) "Test unsuccessful"
@@ -384,10 +381,7 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
       !------------------------------------------------------------------------
-
-
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
@@ -403,7 +397,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
@@ -419,7 +412,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-  
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
@@ -435,7 +427,6 @@
        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
@@ -465,7 +456,6 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
- 
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -483,8 +473,6 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-
-
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -692,6 +680,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
        !------------------------------------------------------------------------
  
+       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
@@ -705,7 +694,6 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
@@ -737,9 +725,7 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
- 
       !------------------------------------------------------------------------
-
 
       !------------------------------------------------------------------------
        !EX_UTest
@@ -855,7 +841,6 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
- 
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -936,7 +921,6 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
       !------------------------------------------------------------------------
       !EX_UTest
 
@@ -1001,7 +985,6 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
@@ -1018,7 +1001,6 @@
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
       !------------------------------------------------------------------------
 
       !------------------------------------------------------------------------
@@ -5608,6 +5590,7 @@ write(*,*) "LOCALRC=",localrc
 
         !! if error is too big report an error
         if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
+           print *, "ERROR: ", farrayPtr1D(i2), x+y+20.0
            correct=.false.
         endif
 
@@ -6353,6 +6336,7 @@ write(*,*) "LOCALRC=",localrc
 
         !! if error is too big report an error
         if ( abs( farrayPtr1D(i2)-(x+y+20.0) ) > 0.0001) then
+          print *, abs( farrayPtr1D(i2)-(x+y+20.0) ), x, y, farrayPtr1D(i2), (x+y+20.0)
            correct=.false.
         endif
 

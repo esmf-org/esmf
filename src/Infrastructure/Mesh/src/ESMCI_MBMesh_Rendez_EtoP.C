@@ -20,6 +20,7 @@
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
 #include <Mesh/include/ESMCI_MBMesh_BBox.h>
 #include <Mesh/include/ESMCI_MBMesh_Redist.h>
+#include <Mesh/include/ESMCI_MBMesh_Mapping.h>
 
 #include <limits>
 #include <iostream>
@@ -147,7 +148,10 @@ static void GetObject(void *user, int numGlobalIds, int numLids, int numObjs,
   *err = 0;
 }
 
-static void assign_elems_to_procs(MBMesh *mesh, std::vector<EntityHandle> *elems, double geom_tol, UInt sdim, Zoltan_Struct *zz, std::vector<EH_Comm_Pair> *elem_to_proc_list) {
+static void assign_elems_to_procs(MBMesh *mesh, 
+    std::vector<EntityHandle> *elems, double geom_tol, UInt sdim, 
+    Zoltan_Struct *zz, std::vector<EH_Comm_Pair> *elem_to_proc_list, 
+    bool is_sph) {
   Trace __trace("assign_elems_to_procs()");
 #undef  ESMC_METHOD
 #define ESMC_METHOD "assign_elems_to_procs()"
@@ -168,7 +172,7 @@ static void assign_elems_to_procs(MBMesh *mesh, std::vector<EntityHandle> *elems
     EntityHandle &elem = *si;
 
     // Get bounding box for elem
-    MBMesh_BBox ebox(mesh, elem, geom_tol);
+    MBMesh_BBox ebox(mesh, elem, geom_tol, is_sph);
 
     // Assingn elems to procs using zoltan struct
     Zoltan_LB_Box_Assign(zz, ebox.getMin()[0]-geom_tol,
@@ -255,7 +259,8 @@ void get_vector_of_points(PointList *pl, std::vector<point*> *points) {
 }
 
 // Get a vector of elems in a mesh that intersect with a bounding box
-void get_vector_of_elems_that_overlap_box(MBMesh *mesh, BBox &bbox, std::vector<EntityHandle> *elems, double geom_tol) {
+void get_vector_of_elems_that_overlap_box(MBMesh *mesh, BBox &bbox, 
+    std::vector<EntityHandle> *elems, double geom_tol, bool is_sph) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "get_vector_of_elems_that_overlap_box()"
   int merr, localrc;
@@ -276,7 +281,7 @@ void get_vector_of_elems_that_overlap_box(MBMesh *mesh, BBox &bbox, std::vector<
     const EntityHandle eh=*it;
     
     // Get bbox of element
-    MBMesh_BBox elem_bbox(mesh, eh, 0.25);
+    MBMesh_BBox elem_bbox(mesh, eh, 0.25, is_sph);
 
     if (Mixed_BBoxIntersect(elem_bbox, bbox, geom_tol)) {
       elems->push_back(eh);
@@ -285,9 +290,10 @@ void get_vector_of_elems_that_overlap_box(MBMesh *mesh, BBox &bbox, std::vector<
 }
 
 
-void calc_rendez_comm_pattern(MBMesh *srcmesh, PointList *dstpl,
+void calc_rendez_comm_pattern(MBMesh *srcmesh, PointList *dstpl, 
                               std::vector<EH_Comm_Pair> *src_elem_to_proc_list,
-                              std::vector<PL_Comm_Pair> *dst_point_to_proc_list) {
+                              std::vector<PL_Comm_Pair> *dst_point_to_proc_list,
+                              bool is_sph) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "calc_rendez_comm_pattern()"
   int rc, localrc;
@@ -296,7 +302,6 @@ void calc_rendez_comm_pattern(MBMesh *srcmesh, PointList *dstpl,
   MPI_Comm mpi_comm = VM::getCurrent(&localrc)->getMpi_c();
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
-
 
   // Init Zoltan
   float ver;
@@ -341,7 +346,8 @@ void calc_rendez_comm_pattern(MBMesh *srcmesh, PointList *dstpl,
   BBox dst_bbox = BBoxParUnion(BBox(sdim, cmin, cmax));
 
   //// Set list of source elements (only those that overlap BBox of dstpl)
-  get_vector_of_elems_that_overlap_box(srcmesh, dst_bbox, &(zd.src_elems), 1e-6);
+  get_vector_of_elems_that_overlap_box(srcmesh, dst_bbox, &(zd.src_elems), 
+                                       1e-6, is_sph);
 
 #if 0
   printf("%d# src_elems.size=%d\n",Par::Rank(),zd.src_elems.size());
@@ -379,7 +385,7 @@ void calc_rendez_comm_pattern(MBMesh *srcmesh, PointList *dstpl,
 
   // Calc. where source elems are to go
   assign_elems_to_procs(srcmesh, &(zd.src_elems), 1e-6, srcmesh->sdim,
-                                   zz, src_elem_to_proc_list);
+                                   zz, src_elem_to_proc_list, is_sph);
 
   // Calc. where destintation points are to go
   assign_points_to_procs(dstpl, &(zd.dst_points), 1e-6, dstpl->get_coord_dim(),
@@ -391,7 +397,8 @@ void calc_rendez_comm_pattern(MBMesh *srcmesh, PointList *dstpl,
 
 
 // This creates src and dst rendezvous meshes where the overlap is based on elements and points
-void create_rendez_mbmesh_etop(MBMesh *srcmesh, PointList *dstpl, MBMesh **_srcmesh_rendez, PointList **_dstpl_rendez) {
+void create_rendez_mbmesh_etop(MBMesh *srcmesh, PointList *dstpl, 
+    MBMesh **_srcmesh_rendez, PointList **_dstpl_rendez, int *map_type) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "create_rendez_mbmesh_etop()"
 
@@ -401,10 +408,15 @@ void create_rendez_mbmesh_etop(MBMesh *srcmesh, PointList *dstpl, MBMesh **_srcm
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
 
+  // handle map type
+  bool is_sph = false;
+  if (*map_type == MB_MAP_TYPE_GREAT_CIRCLE) is_sph = true;
+
   // Compute communication pattern to build rendezvous meshes
   std::vector<EH_Comm_Pair> src_elem_to_proc_list;
   std::vector<PL_Comm_Pair> dst_point_to_proc_list;
-  calc_rendez_comm_pattern(srcmesh, dstpl, &src_elem_to_proc_list, &dst_point_to_proc_list);
+  calc_rendez_comm_pattern(srcmesh, dstpl, 
+      &src_elem_to_proc_list, &dst_point_to_proc_list, is_sph);
 
 /*
   // Debug print of src list

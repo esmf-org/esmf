@@ -51,51 +51,6 @@
 
 using namespace std;
 
-#if defined ESMF_MOAB
-typedef std::map<WMat::Entry, std::vector<WMat::Entry> > WeightMap;
-WeightMap weights;
-WeightMap::iterator begin_row() { return weights.begin(); }
-WeightMap::iterator end_row() { return weights.end(); }
-
-bool weight_gen(MBMesh *mesh, PointList *pl) {
-  int rc = ESMF_RC_NOT_IMPL;
-  char name[80];
-  char failMsg[80];
-  int result = 0;
-
-  // do bilinear regridding between mesh and pointlist
-  IWeights wt;
-  IWeights &wts = wt;
-  calc_bilinear_regrid_wgts(mesh, pl, wts);
-
-  cout << endl << "Bilinear Weight Matrix" << endl;
-  // print out weights
-  WeightMap::iterator mb = wts.begin_row(), me = wts.end_row();
-  for(; mb != me; ++mb) {
-    WMat::Entry col = mb->first;
-    vector<WMat::Entry> row = mb->second;
-
-    cout << "[" << col.id << "," << col.idx << "," << col.value << ","
-         << col.src_id << "] - ";
-
-    vector<WMat::Entry>::iterator vb = row.begin(), ve = row.end();
-    for(; vb != ve; ++vb) {
-      WMat::Entry rv = *vb;
-      cout << "[" << rv.id << "," << rv.idx << "," << rv.value << ","
-           << rv.src_id << "] ";
-    }
-    cout << endl;
-  }
-  cout << endl;
-
-  rc = ESMF_SUCCESS;
-
-  if (rc == ESMF_SUCCESS) return true;
-  else return false;
-
-}
-#endif
-
 int main(int argc, char *argv[]) {
 
   char name[80];
@@ -113,7 +68,10 @@ int main(int argc, char *argv[]) {
 
 #if defined ESMF_MOAB
   //----------------------------------------------------------------------------
-  //ESMC_MoabSet(true);
+  bool cart = false;
+
+  vector<double> weights;
+  weights.resize(4);
 #endif
 
   // Get parallel information
@@ -129,6 +87,7 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
 
 #if defined ESMF_MOAB
+  cart = true;
   // build a mesh
   MBMesh *mesh_quad_par;
   mesh_quad_par = create_mesh_quad_10_parallel(ESMC_COORDSYS_CART, rc);
@@ -137,11 +96,14 @@ int main(int argc, char *argv[]) {
   PointList *pl_quad_par;
   pl_quad_par = create_pointlist_for_quad_parallel(rc);
 
+  // expected result
+  std::fill(weights.begin(), weights.end(), UNINITVAL);
+
   //----------------------------------------------------------------------------
   //NEX_UTest_Multi_Proc_Only
   strcpy(name, "Quadrilateral bilinear weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_par, pl_quad_par)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_quad_par, pl_quad_par, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl_quad_par;
@@ -158,6 +120,7 @@ int main(int argc, char *argv[]) {
   // --------------------------------------------------------------------------
 
 #if defined ESMF_MOAB
+  cart = false;
   // build a mesh
   MBMesh *mesh_quad_sph_par;
   mesh_quad_sph_par = create_mesh_quad_sph_10_parallel(ESMC_COORDSYS_SPH_RAD, rc);
@@ -170,7 +133,7 @@ int main(int argc, char *argv[]) {
   //NEX_UTest_Multi_Proc_Only
   strcpy(name, "Spherical quadrilateral bilinear weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_sph_par, pl_quad_sph_par)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_quad_sph_par, pl_quad_sph_par, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl_quad_sph_par;
