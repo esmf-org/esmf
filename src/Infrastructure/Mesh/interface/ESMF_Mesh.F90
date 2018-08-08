@@ -76,7 +76,7 @@ module ESMF_MeshMod
     type(ESMF_DistGrid) :: element_distgrid
     logical :: isCMeshFreed   ! Has the mesh memory been release?
     integer :: createStage
-    logical :: isFullyCreated ! Are the distgrids there and the numOwned X correct
+    logical :: isFullyCreated ! Is all the information there 
     integer :: numOwnedNodes
     integer :: numOwnedElements
       integer :: spatialDim
@@ -137,8 +137,10 @@ module ESMF_MeshMod
         ESMF_MESHLOC_NODE = ESMF_MeshLoc(0), &
         ESMF_MESHLOC_ELEMENT = ESMF_MeshLoc(1), &
             ESMF_MESHLOC_NONE = ESMF_MeshLoc(2)
+ 
 
- !------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
 !     ! ESMF_Mesh
 !
 !------------------------------------------------------------------------------
@@ -193,6 +195,7 @@ module ESMF_MeshMod
   public ESMF_MeshGetIntPtr
   public ESMF_MeshCreateFromIntPtr
   public ESMF_MeshCreateCubedSphere
+  public ESMF_MeshEmptyCreate
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -2934,7 +2937,6 @@ end function ESMF_MeshCreateFromScrip
 !------------------------------------------------------------------------------
 
 
-
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshGetIntPtr()"
@@ -4413,6 +4415,67 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !-----------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshEmptyCreate()"
+!BOP
+! !IROUTINE: ESMF_MeshEmptyCreate - Create a Mesh to hold Distgrid information
+!
+! !INTERFACE:
+    function ESMF_MeshEmptyCreate(nodalDistgrid, elementDistgrid, rc)
+!
+!
+! !RETURN VALUE:
+    type(ESMF_Mesh)         :: ESMF_MeshEmptyCreate
+! !ARGUMENTS:
+    type(ESMF_DistGrid),        intent(in), optional  :: elementdistgrid
+    type(ESMF_DistGrid),        intent(in), optional  :: nodalDistgrid
+    integer,                    intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!   Create a Mesh to hold distribution information (i.e. Distgrids).
+!   Such a mesh will have no coordinate or connectivity information stored.
+!   Aside from holding distgrids the Mesh created by this call can't be used in other
+!   ESMF functionality (e.g. it can't be used to create a Field or in regridding). 
+!
+!   \begin{description}
+!   \item [{[nodalDistgrid]}]
+!         The nodal distgrid.
+!   \item [{[elementDistgrid]}]
+!         The elemental distgrid.
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+
+    ! Set nodal distgrid
+    if (present(nodalDistgrid)) then
+      ESMF_MeshEmptyCreate%nodal_distgrid = nodalDistgrid
+    endif
+
+    ! Set element distgrid
+    if (present(elementDistgrid)) then
+      ESMF_MeshEmptyCreate%element_distgrid = elementDistgrid
+    endif
+
+    ! Mark that there isn't a C mesh underneath
+    ESMF_MeshEmptyCreate%isCMeshFreed = .true. ! helps problems in reconcile
+
+    ! This is only a vehical for carrying distgrids, so it's not fully
+    ! created yet. It should error out of most calls, except a specific set
+    ! of MeshGet() queries. 
+    ESMF_MeshEmptyCreate%isFullyCreated=.false.
+
+    ! mark as empty
+    ESMF_INIT_SET_CREATED(ESMF_MeshEmptyCreate)
+
+    if (present(rc)) rc=ESMF_SUCCESS
+    return
+end function ESMF_MeshEmptyCreate
+
 ! -----------------------------------------------------------------------------
 #undef ESMF_METHOD
 #define ESMF_METHOD "ESMF_MeshFreeMemory"
@@ -4475,7 +4538,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 ! !INTERFACE:
       subroutine ESMF_MeshGet(mesh, parametricDim, spatialDim, &
-                   nodalDistgrid, elementDistgrid, &
+                   nodalDistgridIsPresent, nodalDistgrid, &
+                   elementDistgridIsPresent, elementDistgrid, &
                    numOwnedNodes, ownedNodeCoords, &
                    numOwnedElements, ownedElemCoords, isMemFreed, coordSys, rc)
 !
@@ -4485,7 +4549,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Mesh),          intent(in)            :: mesh
     integer,                  intent(out), optional :: parametricDim
     integer,                  intent(out), optional :: spatialDim
+    logical,                  intent(out), optional :: nodalDistgridIsPresent
     type(ESMF_DistGrid),      intent(out), optional :: nodalDistgrid
+    logical,                  intent(out), optional :: elementDistgridIsPresent
     type(ESMF_DistGrid),      intent(out), optional :: elementDistgrid
     integer,                  intent(out), optional :: numOwnedNodes
     real(ESMF_KIND_R8),       intent(out), optional :: ownedNodeCoords(:)
@@ -4510,11 +4576,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The number of coordinate dimensions needed to describe the locations of the nodes
 ! making up the Mesh. For a manifold, the spatial dimension can be larger than the
 ! parametric dim (e.g. the 2D surface of a sphere in 3D space), but it can't be smaller.
+! \item [{[nodalDistgridIsPresent]}]
+! .true. if nodalDistgrid was set in Mesh object, .false. otherwise. 
 ! \item [{[nodalDistgrid]}]
 ! A Distgrid describing the distribution of the nodes across the PETs. Note that
 ! on each PET the distgrid will only contain entries for nodes owned by that PET.
 ! This is the DistGrid that would be used to construct the Array in a Field that is constructed
 ! on {\tt mesh}.
+! \item [{[elementDistgridIsPresent]}]
+! .true. if elementDistgrid was set in Mesh object, .false. otherwise. 
 ! \item [{[elementDistgrid]}]
 ! A Distgrid describing the distribution of elements across the PETs. Note that
 ! on each PET the distgrid will only contain entries for elements owned by that PET.
@@ -4545,20 +4615,40 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{description}
 !
 !EOP
-      integer  :: localrc
+    integer  :: localrc
+    logical  :: isCreated
 
-      localrc = ESMF_SUCCESS
+    ! Init local rc
+    localrc = ESMF_SUCCESS
 
-      ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+    !!! Error check status of Mesh versus what's being asked for !!!
 
-    ! If mesh has not been fully created
+    ! Make sure mesh is initialized
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has not been fully created, make sure that the user
+    ! isn't asking for something that requires a fully created mesh
     if (.not. mesh%isFullyCreated) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
-                 msg="- the mesh has not been fully created", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-       return
+
+       if (present(parametricDim) .or. &
+            present(spatialDim) .or. &
+            present(numOwnedNodes) .or. &
+            present(ownedNodeCoords) .or. &
+            present(numOwnedElements) .or. &
+            present(ownedElemCoords) .or. &
+            present(isMemFreed) .or. &
+            present(coordSys)) then
+
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg="- the mesh has not been fully created", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif
     endif
 
+    !!! Get information from Mesh !!!
+
+    ! Get node coords
     if (present(ownedNodeCoords)) then
        ! If mesh has been freed then exit
        if (mesh%isCMeshFreed) then
@@ -4607,18 +4697,93 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            ESMF_CONTEXT, rcToReturn=rc)) return
     endif
 
-      if (present(parametricDim)) parametricDim=mesh%parametricDim
-      if (present(spatialDim)) spatialDim=mesh%spatialDim
-      if (present(nodalDistgrid)) nodalDistgrid = mesh%nodal_distgrid
-      if (present(elementDistgrid)) elementDistgrid = mesh%element_distgrid
-      if (present(numOwnedNodes)) numOwnedNodes =mesh%numOwnedNodes
-      if (present(numOwnedElements)) numOwnedElements =mesh%numOwnedElements
-      if (present(isMemFreed)) then
-            isMemFreed=mesh%isCMeshFreed
-      endif
-      if (present(coordSys)) coordSys =mesh%coordSys
+    ! Get parametric dim
+    if (present(parametricDim)) parametricDim=mesh%parametricDim
 
-      if (present(rc)) rc = localrc
+    ! Get spatial dim
+    if (present(spatialDim)) spatialDim=mesh%spatialDim
+
+    ! Get nodal Distgrid presence
+    if (present(nodalDistgridIsPresent)) then
+
+       ! Get is created state of nodal distgrid
+       isCreated=ESMF_DistGridIsCreated(mesh%nodal_distgrid,rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Output state
+       nodalDistgridIsPresent=isCreated
+    endif
+
+    ! Get nodal Distgrid
+    if (present(nodalDistgrid)) then
+
+       ! Get is created state of nodal distgrid
+       isCreated=ESMF_DistGridIsCreated(mesh%nodal_distgrid,rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Make sure mesh contains nodal distgrid
+       if (.not. isCreated) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg="- this mesh doesn't contain a valid nodal distgrid", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return       
+       endif
+       
+       ! Output distgrid
+       nodalDistgrid = mesh%nodal_distgrid
+    endif
+
+    ! Get nodal Distgrid presence
+    if (present(elementDistgridIsPresent)) then
+
+       ! Get is created state of nodal distgrid
+       isCreated=ESMF_DistGridIsCreated(mesh%element_distgrid,rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Output state
+       elementDistgridIsPresent=isCreated
+    endif
+
+    ! Get element Distgrid
+    if (present(elementDistgrid)) then
+
+       ! Get is created state of nodal distgrid
+       isCreated=ESMF_DistGridIsCreated(mesh%element_distgrid,rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+       ! Make sure mesh contains element distgrid
+       if (.not. isCreated) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+               msg="- this mesh doesn't contain a valid element distgrid", &
+               ESMF_CONTEXT, rcToReturn=rc)
+          return       
+       endif
+       
+       ! Output distgrid
+       elementDistgrid = mesh%element_distgrid
+    endif
+
+
+    ! Get number owned nodes
+    if (present(numOwnedNodes)) numOwnedNodes =mesh%numOwnedNodes
+
+    ! Get number owned elements
+    if (present(numOwnedElements)) numOwnedElements =mesh%numOwnedElements
+
+    ! Get freed status
+    if (present(isMemFreed)) then
+       isMemFreed=mesh%isCMeshFreed
+    endif
+
+    ! Get coord system
+    if (present(coordSys)) coordSys =mesh%coordSys
+
+    ! Error output
+    if (present(rc)) rc = localrc
 
     end subroutine ESMF_MeshGet
 
