@@ -403,15 +403,14 @@ module NUOPC_FreeFormatDef
     integer,               intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Create a new FreeFormat object from a file with given {\tt iofmt}.
-!   Supported values for {\tt iofmt} are: {\tt ESMF_IOFMT_CONFIG} (ESMF Config file)
-!   and {\tt ESMF_IOFMT_YAML} (YAML file).
-!   If {\tt ESMF_IOFMT_CONFIG} is used, the optional argument {\tt label} must
-!   be provided, and {\tt relaxedflag} may be used.
-!   If I/O format is {\tt ESMF_IOFMT_YAML}, both {\tt label} and {\tt relaxedflag}
-!   are ignored.
-!   If {\tt iofmt} is not provided, it defaults to {\tt ESMF_IOFMT_CONFIG}.
+!   Supported values for {\tt iofmt} are: {\tt ESMF\_IOFMT\_CONFIG} 
+!   (ESMF Config file) and {\tt ESMF\_IOFMT\_YAML} (YAML file).
+!   If {\tt ESMF\_IOFMT\_CONFIG} is used, the optional argument {\tt label}
+!   must be provided, and {\tt relaxedflag} may be used.
+!   If I/O format is {\tt ESMF\_IOFMT\_YAML}, both {\tt label} and 
+!   {\tt relaxedflag} are ignored.
+!   If {\tt iofmt} is not provided, it defaults to {\tt ESMF\_IOFMT\_CONFIG}.
 !
-
 !EOP
   !-----------------------------------------------------------------------------
     integer               :: localrc

@@ -405,8 +405,9 @@ module NUOPC_FieldDictionaryApi
 ! !DESCRIPTION:
 !   Setup an empty NUOPC Field dictionary.
 !
-!   Note: NUOPC_FieldDictionaryIsSetup is set to .true. even if the NUOPC Field
-!   dictionary is not fully setup (empty). This behavior needs to be revisited.
+!   Note: {\tt NUOPC\_FieldDictionaryIsSetup} is set to .true. even if the NUOPC
+!   Field dictionary is not fully setup (empty). This behavior needs to be
+!   revisited.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
