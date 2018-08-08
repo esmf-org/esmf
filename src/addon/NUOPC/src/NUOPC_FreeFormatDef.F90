@@ -323,7 +323,7 @@ module NUOPC_FreeFormatDef
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_FreeFormatCreate - Create a FreeFormat object from YAML
 ! !INTERFACE:
   ! call using generic interface: NUOPC_FreeFormatCreate
@@ -338,7 +338,7 @@ module NUOPC_FreeFormatDef
 !   must exist or an error is returned.
 !
 
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     integer :: localrc, stat
     integer :: lineCount
@@ -388,7 +388,7 @@ module NUOPC_FreeFormatDef
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_FreeFormatCreate - Create a FreeFormat object from file
 ! !INTERFACE:
   ! call using generic interface: NUOPC_FreeFormatCreate
@@ -411,7 +411,7 @@ module NUOPC_FreeFormatDef
 !   {\tt relaxedflag} are ignored.
 !   If {\tt iofmt} is not provided, it defaults to {\tt ESMF\_IOFMT\_CONFIG}.
 !
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     integer               :: localrc
     type(ESMF_IOFmt_flag) :: iofmtOpt

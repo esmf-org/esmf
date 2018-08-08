@@ -191,7 +191,7 @@ module NUOPC_FieldDictionaryApi
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_FieldDictionaryIngest - Ingest FreeFormat content into NUOPC Field dictionary
 ! !INTERFACE:
   subroutine NUOPC_FieldDictionaryIngest(freeFormat, rc)
@@ -200,7 +200,7 @@ module NUOPC_FieldDictionaryApi
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Ingest the content of a FreeFormat object into an existing NUOPC Field dictionary.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     integer :: localrc
 
@@ -365,6 +365,7 @@ module NUOPC_FieldDictionaryApi
 !BOP
 ! !IROUTINE: NUOPC_FieldDictionarySetup - Setup the default NUOPC Field dictionary
 ! !INTERFACE:
+!   call using generic interface: NUOPC_FieldDictionarySetup
   subroutine NUOPC_FieldDictionarySetupDefault(rc)
 ! !ARGUMENTS:
     integer,      intent(out), optional   :: rc
@@ -396,7 +397,7 @@ module NUOPC_FieldDictionaryApi
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: NUOPC_FieldDictionarySetup - Setup an empty NUOPC Field dictionary
 ! !INTERFACE:
   subroutine NUOPC_FieldDictionarySetupEmpty(rc)
@@ -408,7 +409,7 @@ module NUOPC_FieldDictionaryApi
 !   Note: {\tt NUOPC\_FieldDictionaryIsSetup} is set to .true. even if the NUOPC
 !   Field dictionary is not fully setup (empty). This behavior needs to be
 !   revisited.
-!EOP
+!EOPI
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -433,6 +434,7 @@ module NUOPC_FieldDictionaryApi
 !BOP
 ! !IROUTINE: NUOPC_FieldDictionarySetup - Setup the NUOPC Field dictionary from file
 ! !INTERFACE:
+!   call using generic interface: NUOPC_FieldDictionarySetup
   subroutine NUOPC_FieldDictionarySetupFile(fileName, rc)
 ! !ARGUMENTS:
     character(len=*),      intent(in)              :: fileName
