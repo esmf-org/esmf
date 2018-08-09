@@ -8,6 +8,10 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the University of Illinois-NCSA License.
 //
+//==============================================================================
+#define ESMC_FILENAME "ESMCI_IO_YAML.C"
+//==============================================================================
+//
 // ESMC IO_YAML method code (body) file
 //
 //-------------------------------------------------------------------------
@@ -18,8 +22,6 @@
 // in the companion file {\tt ESMCI\_IO\_YAML.h}
 //
 //-------------------------------------------------------------------------
-#define ESMC_FILENAME "ESMCI_IO_YAML.C"
-
 // higher level, 3rd party or system includes here
 #include <iostream>
 #include <iomanip>
@@ -33,7 +35,6 @@
 #include "ESMCI_Util.h"
 #include "ESMCI_VM.h"
 
-
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
@@ -42,15 +43,16 @@ static const char *const version = "$Id$";
 
 namespace ESMCI {
 
-//
-//-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
 //
 // This section includes all the IO_YAML routines
 //
-//
 //-------------------------------------------------------------------------
-//BOP
+
+//-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::IO_YAML() native constructor"
+//BOPI
 // !IROUTINE:  IO_YAML - native C++ constructor
 //
 // !INTERFACE:
@@ -65,10 +67,8 @@ namespace ESMCI {
 // !DESCRIPTION:
 //      Initialize internal storage.
 //
-//EOP
-// !REQUIREMENTS:
- #undef  ESMC_METHOD
- #define ESMC_METHOD "ESMCI::IO_YAML() native constructor"
+//EOPI
+//-------------------------------------------------------------------------
 
  {
    // parser storage
@@ -82,7 +82,9 @@ namespace ESMCI {
  } // IO_YAML
 
 //-------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::create()"
+//BOPI
 // !IROUTINE:  IO_YAML::create - explicit creator
 //
 // !INTERFACE:
@@ -97,11 +99,10 @@ namespace ESMCI {
 // !DESCRIPTION:
 //      Create a new {\tt ESMC\_IO\_YAML} object
 //
-//EOP
-// !REQUIREMENTS:
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::create()"
+//EOPI
+//-------------------------------------------------------------------------
+    // initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
     IO_YAML* ioyaml;
 
@@ -113,14 +114,16 @@ namespace ESMCI {
       return ESMC_NULL_POINTER;
     }
 
-    if (rc != NULL)
-      *rc = ESMF_SUCCESS;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
 
     return ioyaml;
   };
 
 //-------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::destroy()"
+//BOPI
 // !IROUTINE:  IO_YAML::destroy - delete IO_YAML object
 //
 // !INTERFACE:
@@ -135,13 +138,10 @@ namespace ESMCI {
 // !DESCRIPTION:
 //      Delete an {\tt ESMC\_IO\_YAML} object and set pointer to NULL
 //
-//EOP
-// !REQUIREMENTS:
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::destroy()"
-
-    int rc = ESMF_SUCCESS;
+//EOPI
+//-------------------------------------------------------------------------
+    // initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     // return with errors for NULL pointer
     if (ioyaml == ESMC_NULL_POINTER || *ioyaml == ESMC_NULL_POINTER){
@@ -153,6 +153,7 @@ namespace ESMCI {
     try {
       delete (*ioyaml);
       *ioyaml = ESMC_NULL_POINTER;
+      rc = ESMF_SUCCESS;
     } catch(...) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, 
         "- Caught exception", ESMC_CONTEXT, &rc);
@@ -162,7 +163,9 @@ namespace ESMCI {
   };
 
 //-------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::read()"
+//BOPI
 // !IROUTINE:  IO_YAML::read - read in a YAML 1.2 file
 //
 // !INTERFACE:
@@ -179,13 +182,10 @@ namespace ESMCI {
 //      This method reads on PET 0 and broadcast the content to all
 //      other PETs
 //
-//EOP
-// !REQUIREMENTS:
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::read()"
-
-    int rc = ESMF_SUCCESS;
+//EOPI
+//-------------------------------------------------------------------------
+    // initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     if (filename.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -215,6 +215,9 @@ namespace ESMCI {
         std::ostringstream os;
         os << this->doc;
         yaml = os.str();
+        lbuf = yaml.size();
+
+        rc = ESMF_SUCCESS;
 #else
         // yaml-cpp library not present
         rc = ESMF_RC_LIB_NOT_PRESENT;
@@ -223,8 +226,13 @@ namespace ESMCI {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
           "Caught exception reading content from file", ESMC_CONTEXT, &rc);
       }
-      lbuf = yaml.size();
     }
+
+    // broadcast return code
+    vm->broadcast(&rc, sizeof(int), 0);
+    if (ESMC_LogDefault.MsgFoundError (rc, "root PET exited with error",
+      ESMC_CONTEXT, NULL))
+      return rc;
 
     // broadcast buffer size
     rc = vm->broadcast(&lbuf, sizeof(lbuf), 0);
@@ -249,12 +257,16 @@ namespace ESMCI {
       ESMC_CONTEXT, NULL))
       return rc;
 
+    // return successfully
+    rc = ESMF_SUCCESS;
     return rc;
 
   }; // IO_YAML::read
 
 //-------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::ingest()"
+//BOPI
 // !IROUTINE:  IO_YAML::ingest - read YAML content from string
 //
 // !INTERFACE:
@@ -269,13 +281,10 @@ namespace ESMCI {
 // !DESCRIPTION:
 //      Populate an {\tt ESMC\_IO\_YAML} object by reading from YAML string
 //
-//EOP
-// !REQUIREMENTS:
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::ingest()"
-
-    int rc = ESMF_SUCCESS;
+//EOPI
+//-------------------------------------------------------------------------
+    // initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     // internal storage is now stale, since fresh content is being ingested
     // clear stale internal storage
@@ -287,6 +296,7 @@ namespace ESMCI {
     try {
 #ifdef ESMF_YAMLCPP
       this->doc = YAML::Load(content);
+      rc = ESMF_SUCCESS;
 #else
       // yaml-cpp library not present
       rc = ESMF_RC_LIB_NOT_PRESENT;
@@ -301,7 +311,9 @@ namespace ESMCI {
   }; // IO_YAML::ingest
 
 //-------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::write()"
+//BOPI
 // !IROUTINE:  IO_YAML::write - write {\tt ESMC\_IO\_YAML} content to standard output
 //
 // !INTERFACE:
@@ -314,17 +326,15 @@ namespace ESMCI {
 // !DESCRIPTION:
 //      Write YAML content of {\tt ESMC\_IO\_YAML} object to standard output
 //
-//EOP
-// !REQUIREMENTS:
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::write()"
-
-    int rc = ESMF_SUCCESS;
+//EOPI
+//-------------------------------------------------------------------------
+    // initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     try {
 #ifdef ESMF_YAMLCPP
       std::cout << this->doc << std::endl;
+      rc = ESMF_SUCCESS;
 #else
       // yaml-cpp library not present
       rc = ESMF_RC_LIB_NOT_PRESENT;
@@ -339,7 +349,9 @@ namespace ESMCI {
   }; // IO_YAML::write to stdout
 
 //-------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::write()"
+//BOPI
 // !IROUTINE:  IO_YAML::write - write {\tt ESMC\_IO\_YAML} content to file
 //
 // !INTERFACE:
@@ -355,13 +367,10 @@ namespace ESMCI {
 //      Write YAML content of {\tt ESMC\_IO\_YAML} object to file.
 //      This method only writes to file on PET 0.
 //
-//EOP
-// !REQUIREMENTS:
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::write()"
-
-    int rc = ESMF_SUCCESS;
+//EOPI
+//-------------------------------------------------------------------------
+    // initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     if (filename.empty()) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
@@ -384,6 +393,7 @@ namespace ESMCI {
         std::ofstream fout(filename);
         fout << this->doc << std::endl;
         fout.close();
+        rc = ESMF_SUCCESS;
 #else
         // yaml-cpp library not present
         rc = ESMF_RC_LIB_NOT_PRESENT;
@@ -394,12 +404,20 @@ namespace ESMCI {
       }
     }
 
+    // broadcast return code
+    vm->broadcast(&rc, sizeof(int), 0);
+    if (ESMC_LogDefault.MsgFoundError (rc, "root PET exited with error",
+      ESMC_CONTEXT, NULL))
+      return rc;
+
     return rc;
 
   }; // IO_YAML::write to file
 
 //-------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::write()"
+//BOPI
 // !IROUTINE:  IO_YAML::write - write {\tt ESMC\_IO\_YAML} content to output stream
 //
 // !INTERFACE:
@@ -414,17 +432,15 @@ namespace ESMCI {
 // !DESCRIPTION:
 //      Write YAML content of {\tt ESMC\_IO\_YAML} object to output stream
 //
-//EOP
-// !REQUIREMENTS:
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::write()"
-
-    int rc = ESMF_SUCCESS;
+//EOPI
+//-------------------------------------------------------------------------
+    // initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     try {
 #ifdef ESMF_YAMLCPP
       ostream << this->doc << std::endl;
+      rc = ESMF_SUCCESS;
 #else
       // yaml-cpp library not present
       rc = ESMF_RC_LIB_NOT_PRESENT;
@@ -439,7 +455,9 @@ namespace ESMCI {
   }; // IO_YAML::write to output stream
 
 //-------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::cinit()"
+//BOPI
 // !IROUTINE:  IO_YAML::cinit - create content from parsed YAML in {\tt ESMC\_IO\_YAML} object
 //
 // !INTERFACE:
@@ -457,13 +475,10 @@ namespace ESMCI {
 //      no format conversion is performed and this function returns content
 //      cached during a previous call.
 //
-//EOP
-// !REQUIREMENTS:
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::cinit()"
-
-    int rc = ESMF_SUCCESS;
+//EOPI
+//-------------------------------------------------------------------------
+    // initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     std::ostringstream os;
 
@@ -475,6 +490,7 @@ namespace ESMCI {
     if (type == IO_YAML::ContentType::Unset) {
 
       // do nothing
+      rc = ESMF_SUCCESS;
       return rc;
 
     } else if (type == IO_YAML::ContentType::Native) {
@@ -482,6 +498,9 @@ namespace ESMCI {
       try {
 #ifdef ESMF_YAMLCPP
         os << this->doc << std::endl;
+        rc = ESMF_SUCCESS;
+#else
+        rc = ESMF_RC_LIB_NOT_PRESENT;
 #endif
       } catch(...) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -511,6 +530,7 @@ namespace ESMCI {
           os << "----------------------------------------------------------------" << std::endl;
         }
 #endif
+        rc = ESMF_SUCCESS;
       } else {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
           "No suitable content for this output type", ESMC_CONTEXT, &rc);
@@ -537,7 +557,9 @@ namespace ESMCI {
 
 
 //-------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::cwrite()"
+//BOPI
 // !IROUTINE:  IO_YAML::cwrite - output parsed content of {\tt ESMC\_IO\_YAML} object
 //
 // !INTERFACE:
@@ -551,21 +573,22 @@ namespace ESMCI {
 //      Write cached output from parsed YAML content of {\tt ESMC\_IO\_YAML}
 //      object to standard output.
 //
-//EOP
-// !REQUIREMENTS:
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::cwrite()"
-
-    int rc = ESMF_SUCCESS;
+//EOPI
+//-------------------------------------------------------------------------
+    // initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     std::cout << this->producer.buffer;
 
+    // return successfully
+    rc = ESMF_SUCCESS;
     return rc;
   }; // cwrite
 
 //-------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::cwrite()"
+//BOPI
 // !IROUTINE:  IO_YAML::cwrite - output parsed content of {\tt ESMC\_IO\_YAML} object
 //
 // !INTERFACE:
@@ -582,13 +605,10 @@ namespace ESMCI {
 //      object to file. If no content exists (e.g. cinit() was not called)
 //      filename is NULL, return error.
 //
-//EOP
-// !REQUIREMENTS:
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::cwrite()"
-
-    int rc = ESMF_SUCCESS;
+//EOPI
+//-------------------------------------------------------------------------
+    // initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     // bail out if no filename provided
     if (filename.empty()) {
@@ -619,11 +639,15 @@ namespace ESMCI {
       fout.close();
     }
 
+    // return successfully
+    rc = ESMF_SUCCESS;
     return rc;
   }; // cwrite
 
 //-------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::cwrite()"
+//BOPI
 // !IROUTINE:  IO_YAML::cwrite - output parsed content of {\tt ESMC\_IO\_YAML} object
 //
 // !INTERFACE:
@@ -640,21 +664,22 @@ namespace ESMCI {
 //      object to file. If no content exists (e.g. cinit() was not called)
 //      filename is NULL, return error.
 //
-//EOP
-// !REQUIREMENTS:
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::cwrite()"
-
-    int rc = ESMF_SUCCESS;
+//EOPI
+//-------------------------------------------------------------------------
+    // initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     ostream << this->producer.buffer;
 
+    // return successfully
+    rc = ESMF_SUCCESS;
     return rc;
   }; // output_write
 
 //-------------------------------------------------------------------------
-//BOP
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::parse()"
+//BOPI
 // !IROUTINE:  IO_YAML::parse - parse content of {\tt ESMC\_IO\_YAML} object
 //
 // !INTERFACE:
@@ -671,20 +696,19 @@ namespace ESMCI {
 //      The resulting data is stored internally and can be accessed by the
 //      {\tt ESMCI::IO\_YAML::output()} function.
 //
-//EOP
-// !REQUIREMENTS:
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::parse()"
-
-    int rc = ESMF_SUCCESS;
+//EOPI
+//-------------------------------------------------------------------------
+    // initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     if (format == IO_YAML::ParseFormat::NUOPCFieldDictionary) {
         rc = this->nuopc_fd_parser();
+        if (ESMC_LogDefault.MsgFoundError (rc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, NULL))
+          return rc;
     } else {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
         "Parse format not yet implemented", ESMC_CONTEXT, &rc);
-      return rc;
     }
 
     return rc;
@@ -696,6 +720,8 @@ namespace ESMCI {
 //
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_IO_YAML::nuopc_fd_parser()"
 //BOPI
 // !IROUTINE:  IO_YAML::nuopc_fd_parser - parser for NUOPC Field Dictionary
 //
@@ -713,13 +739,11 @@ namespace ESMCI {
 //      {\tt ESMCI::IO\_YAML::output()} function.
 //
 //EOPI
-// !REQUIREMENTS:
-
-#undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI_IO_YAML::parse()"
+//-------------------------------------------------------------------------
 
 #ifdef ESMF_YAMLCPP
-    int rc = ESMF_SUCCESS;
+    // initialize return code; assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
 
     YAML::Node dict;
     YAML::Node node;
@@ -785,9 +809,9 @@ namespace ESMCI {
           return rc;
         }
       } else {
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_VALID,
-            "entry items must include keyword 'standard_name'", ESMC_CONTEXT, &rc);
-          return rc;
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_VALID,
+          "entry items must include keyword 'standard_name'", ESMC_CONTEXT, &rc);
+        return rc;
       }
 
       if ((*it)["alias"]) {
@@ -836,8 +860,8 @@ namespace ESMCI {
     this->parser.data["canonicalUnits"] = units;
     this->parser.format = IO_YAML::ParseFormat::NUOPCFieldDictionary;
 
-    return rc;
-
+    // return successfully
+    rc = ESMF_SUCCESS;
 #else
     int rc = ESMF_RC_LIB_NOT_PRESENT;
 #endif

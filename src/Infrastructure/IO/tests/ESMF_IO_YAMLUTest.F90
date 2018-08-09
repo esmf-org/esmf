@@ -106,9 +106,14 @@ program ESMF_IO_YAMLUTest
   ! generate content from YAML
   rc = ESMF_FAILURE
   call ESMF_IO_YAMLContentInit(yaml, cflag=ESMF_IOYAML_CONTENT_NATIVE, rc=rc)
-  write(failMsg, *) "did not return ESMF_SUCCESS"
   write(name, *) "ESMF_IO_YAMLContentInit(): generate native content from YAML"
+#if ESMF_YAMLCPP
+  write(failMsg, *) "did not return ESMF_SUCCESS"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -207,9 +212,14 @@ program ESMF_IO_YAMLUTest
   ! generate content from ingested YAML
   rc = ESMF_FAILURE
   call ESMF_IO_YAMLContentInit(yaml, cflag=ESMF_IOYAML_CONTENT_NATIVE, rc=rc)
-  write(failMsg, *) "did not return ESMF_SUCCESS"
   write(name, *) "ESMF_IO_YAMLContentInit(): generate native content from YAML"
+#if ESMF_YAMLCPP
+  write(failMsg, *) "did not return ESMF_SUCCESS"
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
@@ -308,7 +318,7 @@ program ESMF_IO_YAMLUTest
   success = .true.
 #endif
   write(failMsg, *) "generated native ontent does not match ingested YAML content"
-  write(name, *) "ESMF_IO_YAMLContentGet(): verified retrieved YAML content"
+  write(name, *) "ESMF_IO_YAMLContentGet(): verify retrieved YAML content"
   call ESMF_Test(success, name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
