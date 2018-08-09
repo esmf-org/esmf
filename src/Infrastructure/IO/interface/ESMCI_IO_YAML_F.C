@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-//
+#define ESMC_FILENAME "ESMCI_IO_YAML_F.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
@@ -18,8 +18,9 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 #include "ESMCI_F90Interface.h"
-#include "ESMCI_Util.h"
 #include "ESMCI_IO_YAML.h"
+#include "ESMCI_LogErr.h"
+#include "ESMCI_Util.h"
 
 #include <string>
 #include <cstring>
@@ -42,134 +43,188 @@ namespace ESMCI {
   extern "C" {
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlcreate)(IO_YAML **ptr,
-                                     int      *status) {
+    void FTN_X(c_esmc_io_yamlcreate)(IO_YAML **ptr, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlcreate()"
-      int rc;
-      *ptr = IO_YAML::create(&rc);
-      if (ESMC_PRESENT(status)) *status = rc;
+      // Initialize return code; assume routine not implemented
+      if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
+      // call into C++
+      *ptr = IO_YAML::create(&localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamldestroy)(IO_YAML **ptr, 
-                                      int      *status) {
+    void FTN_X(c_esmc_io_yamldestroy)(IO_YAML **ptr, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamldestroy()"
-      int rc = IO_YAML::destroy(ptr);
-      if (ESMC_PRESENT(status)) *status = rc;
+      // Initialize return code; assume routine not implemented
+      if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
+      // call into C++
+      localrc = IO_YAML::destroy(ptr);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlread)(IO_YAML   **ptr,
-                                   const char *fileName,
-                                   int        *status,
-                                   ESMCI_FortranStrLenArg fileName_l) {
+    void FTN_X(c_esmc_io_yamlread)(IO_YAML **ptr,
+      const char *fileName, int *rc, ESMCI_FortranStrLenArg fileName_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlread()"
-      ESMF_CHECK_POINTER(*ptr, status)
-      int rc = (*ptr)->read(std::string(fileName,fileName_l));
-      if (ESMC_PRESENT(status)) *status = rc;
+      // Initialize return code; assume routine not implemented
+      if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
+      // check pointer argument
+      ESMF_CHECK_POINTER(*ptr, rc)
+      // call into C++
+      localrc = (*ptr)->read(std::string(fileName,fileName_l));
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlwrite)(IO_YAML  **ptr,
-                                   const char *fileName,
-                                   int        *status,
-                                   ESMCI_FortranStrLenArg fileName_l) {
+    void FTN_X(c_esmc_io_yamlwrite)(IO_YAML **ptr,
+      const char *fileName, int *rc, ESMCI_FortranStrLenArg fileName_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlwrite()"
-      ESMF_CHECK_POINTER(*ptr, status)
-      int rc = (*ptr)->write(std::string(fileName,fileName_l));
-      if (ESMC_PRESENT(status)) *status = rc;
+      // Initialize return code; assume routine not implemented
+      if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
+      // check pointer argument
+      ESMF_CHECK_POINTER(*ptr, rc)
+      // call into C++
+      localrc = (*ptr)->write(std::string(fileName,fileName_l));
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlprint)(IO_YAML **ptr,
-                                   int       *status) {
+    void FTN_X(c_esmc_io_yamlprint)(IO_YAML **ptr, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlprint()"
-      ESMF_CHECK_POINTER(*ptr, status)
-      int rc = (*ptr)->write();
-      if (ESMC_PRESENT(status)) *status = rc;
+      // Initialize return code; assume routine not implemented
+      if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
+      // check pointer argument
+      ESMF_CHECK_POINTER(*ptr, rc)
+      // call into C++
+      localrc = (*ptr)->write();
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlingest)(IO_YAML   **ptr,
-                                     const char *content,
-                                     int        *status,
-                                     ESMCI_FortranStrLenArg content_l) {
+    void FTN_X(c_esmc_io_yamlingest)(IO_YAML **ptr,
+      const char *content, int *rc, ESMCI_FortranStrLenArg content_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlingest()"
-      ESMF_CHECK_POINTER(*ptr, status)
-      int rc = (*ptr)->ingest(std::string(content,content_l));
-      if (ESMC_PRESENT(status)) *status = rc;
+      // Initialize return code; assume routine not implemented
+      if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
+      // check pointer argument
+      ESMF_CHECK_POINTER(*ptr, rc)
+      // call into C++
+      localrc = (*ptr)->ingest(std::string(content,content_l));
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlcinit)(IO_YAML   **ptr,
-                           const IO_YAML::ContentType::value *type,
-                           int                          *status) {
+    void FTN_X(c_esmc_io_yamlcinit)(IO_YAML **ptr,
+      const IO_YAML::ContentType::value *type, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlcinit()"
-      ESMF_CHECK_POINTER(*ptr, status)
+      // Initialize return code; assume routine not implemented
+      if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
+      // check pointer argument
+      ESMF_CHECK_POINTER(*ptr, rc)
+      // set default content type
       IO_YAML::ContentType::value ltype = IO_YAML::ContentType::Unset;
       if (type != NULL) ltype = *type;
-      int rc = (*ptr)->cinit(ltype);
-      if (ESMC_PRESENT(status)) *status = rc;
+      // call into C++
+      localrc = (*ptr)->cinit(ltype);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlcprint)(IO_YAML  **ptr,
-                                     int        *status) {
+    void FTN_X(c_esmc_io_yamlcprint)(IO_YAML **ptr, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlcprint()"
-      ESMF_CHECK_POINTER(*ptr, status)
-      int rc = (*ptr)->cwrite();
-      if (ESMC_PRESENT(status)) *status = rc;
+      // Initialize return code; assume routine not implemented
+      if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
+      // check pointer argument
+      ESMF_CHECK_POINTER(*ptr, rc)
+      // call into C++
+      localrc = (*ptr)->cwrite();
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlcwrite)(IO_YAML   **ptr,
-                                     const char *filename,
-                                     int        *status,
-                                     ESMCI_FortranStrLenArg filename_l) {
+    void FTN_X(c_esmc_io_yamlcwrite)(IO_YAML **ptr,
+      const char *filename, int *rc, ESMCI_FortranStrLenArg filename_l) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlcwrite()"
-      ESMF_CHECK_POINTER(*ptr, status)
-      int rc = (*ptr)->cwrite(std::string(filename,filename_l));
-      if (ESMC_PRESENT(status)) *status = rc;
+      // Initialize return code; assume routine not implemented
+      if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
+      // check pointer argument
+      ESMF_CHECK_POINTER(*ptr, rc)
+      // call into C++
+      localrc = (*ptr)->cwrite(std::string(filename,filename_l));
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlclinec)(IO_YAML  **ptr,
-                                    int        *count,
-                                    int        *status    ) {
+    void FTN_X(c_esmc_io_yamlclinec)(IO_YAML **ptr, int *count, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlclinec()"
-      ESMF_CHECK_POINTER(*ptr, status)
+      // Initialize return code; assume routine not implemented
+      if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
+      // check pointer argument
+      ESMF_CHECK_POINTER(*ptr, rc)
+      // call into C++
       *count = (*ptr)->clinec();
-      if (ESMC_PRESENT(status)) *status = ESMF_SUCCESS;
+      // this call always succeeds
+      localrc = ESMF_SUCCESS;
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlcsize)(IO_YAML  **ptr,
-                                   int        *size,
-                                   int        *status     ) {
+    void FTN_X(c_esmc_io_yamlcsize)(IO_YAML **ptr, int *size, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlcsize()"
-      ESMF_CHECK_POINTER(*ptr, status)
+      // Initialize return code; assume routine not implemented
+      if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
+      // check pointer argument
+      ESMF_CHECK_POINTER(*ptr, rc)
+      // call into C++
       *size = (*ptr)->csize();
-      if (ESMC_PRESENT(status)) *status = ESMF_SUCCESS;
+      // this call always succeeds
+      localrc = ESMF_SUCCESS;
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     //--------------------------------------------------------------------
-    void FTN_X(c_esmc_io_yamlcget)(IO_YAML   **ptr,
-                                   char       *data,
-                                   int        *status) {
+    void FTN_X(c_esmc_io_yamlcget)(IO_YAML **ptr, char *data, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlcget()"
-      ESMF_CHECK_POINTER(*ptr, status)
+      // Initialize return code; assume routine not implemented
+      if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
+      // check pointer argument
+      ESMF_CHECK_POINTER(*ptr, rc)
+      // call into C++
       if (data) {
         const std::string buffer = (*ptr)->cget();
         if (!buffer.empty()) {
@@ -177,20 +232,29 @@ namespace ESMCI {
           data[len] = '\0';
         }
       }
-      if (ESMC_PRESENT(status)) *status = ESMF_SUCCESS;
+      // this call always succeeds
+      localrc = ESMF_SUCCESS;
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
     //--------------------------------------------------------------------
     void FTN_X(c_esmc_io_yamlparse)(IO_YAML **ptr,
-                              const IO_YAML::ParseFormat::value *parseFmt,
-                              int                               *status) {
+      const IO_YAML::ParseFormat::value *parseFmt, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_io_yamlparse()"
-      ESMF_CHECK_POINTER(*ptr, status)
+      // Initialize return code; assume routine not implemented
+      if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+      int localrc = ESMC_RC_NOT_IMPL;
+      // check pointer argument
+      ESMF_CHECK_POINTER(*ptr, rc)
+      // set default parse format
       IO_YAML::ParseFormat::value formOption = IO_YAML::ParseFormat::Unset;
       if (parseFmt != NULL) formOption = *parseFmt;
-      int rc = (*ptr)->parse(formOption);
-      if (ESMC_PRESENT(status)) *status = rc;
+      // call into C++
+      localrc = (*ptr)->parse(formOption);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+        ESMC_NOT_PRESENT_FILTER(rc))) return;
     }
 
 };
