@@ -208,27 +208,27 @@ endif
           fi; \
          fi
 	-@if [ -n "$(ESMF_XERCES)" ] ; then \
-	  echo "ESMF_XERCES:             $(ESMF_XERCES)" ; \
+	  echo "ESMF_XERCES:            $(ESMF_XERCES)" ; \
 	  if [ -n "$(ESMF_XERCES_INCLUDE)" ] ; then \
-	    echo "ESMF_XERCES_INCLUDE:     $(ESMF_XERCES_INCLUDE)" ; \
+	    echo "ESMF_XERCES_INCLUDE:    $(ESMF_XERCES_INCLUDE)" ; \
           fi; \
 	  if [ -n "$(ESMF_XERCES_LIBS)" ] ; then \
-	    echo "ESMF_XERCES_LIBS:        $(ESMF_XERCES_LIBS)" ; \
+	    echo "ESMF_XERCES_LIBS:       $(ESMF_XERCES_LIBS)" ; \
           fi; \
 	  if [ -n "$(ESMF_XERCES_LIBPATH)" ] ; then \
-	    echo "ESMF_XERCES_LIBPATH:     $(ESMF_XERCES_LIBPATH)" ; \
+	    echo "ESMF_XERCES_LIBPATH:    $(ESMF_XERCES_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_YAMLCPP)" ] ; then \
-	  echo "ESMF_YAMLCPP:             $(ESMF_YAMLCPP)" ; \
+	  echo "ESMF_YAMLCPP:            $(ESMF_YAMLCPP)" ; \
 	  if [ -n "$(ESMF_YAMLCPP_INCLUDE)" ] ; then \
-	    echo "ESMF_YAMLCPP_INCLUDE:     $(ESMF_YAMLCPP_INCLUDE)" ; \
+	    echo "ESMF_YAMLCPP_INCLUDE:    $(ESMF_YAMLCPP_INCLUDE)" ; \
           fi; \
 	  if [ -n "$(ESMF_YAMLCPP_LIBS)" ] ; then \
-	    echo "ESMF_YAMLCPP_LIBS:        $(ESMF_YAMLCPP_LIBS)" ; \
+	    echo "ESMF_YAMLCPP_LIBS:       $(ESMF_YAMLCPP_LIBS)" ; \
           fi; \
 	  if [ -n "$(ESMF_YAMLCPP_LIBPATH)" ] ; then \
-	    echo "ESMF_YAMLCPP_LIBPATH:     $(ESMF_YAMLCPP_LIBPATH)" ; \
+	    echo "ESMF_YAMLCPP_LIBPATH:    $(ESMF_YAMLCPP_LIBPATH)" ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_PIO)" ] ; then \
@@ -534,27 +534,27 @@ endif
           fi; \
          fi
 	-@if [ -n "$(ESMF_XERCES)" ] ; then \
-	  echo "# ESMF_XERCES:            $(ESMF_XERCES)" >> $(MKINFO) ; \
+	  echo "# ESMF_XERCES:           $(ESMF_XERCES)" >> $(MKINFO) ; \
 	  if [ -n "$(ESMF_XERCES_INCLUDE)" ] ; then \
-	    echo "# ESMF_XERCES_INCLUDE:    $(ESMF_XERCES_INCLUDE)" >> $(MKINFO) ; \
+	    echo "# ESMF_XERCES_INCLUDE:   $(ESMF_XERCES_INCLUDE)" >> $(MKINFO) ; \
           fi; \
 	  if [ -n "$(ESMF_XERCES_LIBS)" ] ; then \
-	    echo "# ESMF_XERCES_LIBS:       $(ESMF_XERCES_LIBS)" >> $(MKINFO) ; \
+	    echo "# ESMF_XERCES_LIBS:      $(ESMF_XERCES_LIBS)" >> $(MKINFO) ; \
           fi; \
 	  if [ -n "$(ESMF_XERCES_LIBPATH)" ] ; then \
-	    echo "# ESMF_XERCES_LIBPATH:    $(ESMF_XERCES_LIBPATH)" >> $(MKINFO) ; \
+	    echo "# ESMF_XERCES_LIBPATH:   $(ESMF_XERCES_LIBPATH)" >> $(MKINFO) ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_YAMLCPP)" ] ; then \
-	  echo "# ESMF_YAMLCPP:            $(ESMF_YAMLCPP)" >> $(MKINFO) ; \
+	  echo "# ESMF_YAMLCPP:           $(ESMF_YAMLCPP)" >> $(MKINFO) ; \
 	  if [ -n "$(ESMF_YAMLCPP_INCLUDE)" ] ; then \
-	    echo "# ESMF_YAMLCPP_INCLUDE:    $(ESMF_YAMLCPP_INCLUDE)" >> $(MKINFO) ; \
+	    echo "# ESMF_YAMLCPP_INCLUDE:   $(ESMF_YAMLCPP_INCLUDE)" >> $(MKINFO) ; \
           fi; \
 	  if [ -n "$(ESMF_YAMLCPP_LIBS)" ] ; then \
-	    echo "# ESMF_YAMLCPP_LIBS:       $(ESMF_YAMLCPP_LIBS)" >> $(MKINFO) ; \
+	    echo "# ESMF_YAMLCPP_LIBS:      $(ESMF_YAMLCPP_LIBS)" >> $(MKINFO) ; \
           fi; \
 	  if [ -n "$(ESMF_YAMLCPP_LIBPATH)" ] ; then \
-	    echo "# ESMF_YAMLCPP_LIBPATH:    $(ESMF_YAMLCPP_LIBPATH)" >> $(MKINFO) ; \
+	    echo "# ESMF_YAMLCPP_LIBPATH:   $(ESMF_YAMLCPP_LIBPATH)" >> $(MKINFO) ; \
           fi; \
          fi
 	-@if [ -n "$(ESMF_PIO)" ] ; then \
