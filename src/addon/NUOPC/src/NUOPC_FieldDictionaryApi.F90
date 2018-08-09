@@ -365,7 +365,7 @@ module NUOPC_FieldDictionaryApi
 !BOP
 ! !IROUTINE: NUOPC_FieldDictionarySetup - Setup the default NUOPC Field dictionary
 ! !INTERFACE:
-!   call using generic interface: NUOPC_FieldDictionarySetup
+  ! Private name; call using NUOPC_FieldDictionarySetup()
   subroutine NUOPC_FieldDictionarySetupDefault(rc)
 ! !ARGUMENTS:
     integer,      intent(out), optional   :: rc
@@ -434,7 +434,7 @@ module NUOPC_FieldDictionaryApi
 !BOP
 ! !IROUTINE: NUOPC_FieldDictionarySetup - Setup the NUOPC Field dictionary from file
 ! !INTERFACE:
-!   call using generic interface: NUOPC_FieldDictionarySetup
+  ! Private name; call using NUOPC_FieldDictionarySetup()
   subroutine NUOPC_FieldDictionarySetupFile(fileName, rc)
 ! !ARGUMENTS:
     character(len=*),      intent(in)              :: fileName

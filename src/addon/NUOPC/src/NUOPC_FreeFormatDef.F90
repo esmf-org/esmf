@@ -137,7 +137,7 @@ module NUOPC_FreeFormatDef
 !BOP
 ! !IROUTINE: NUOPC_FreeFormatCreate - Create a FreeFormat object
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_FreeFormatCreate
+  ! Private name; call using NUOPC_FreeFormatCreate()
   function NUOPC_FreeFormatCreateDefault(stringList, capacity, rc)
 ! !RETURN VALUE:
     type(NUOPC_FreeFormat) :: NUOPC_FreeFormatCreateDefault
@@ -207,7 +207,7 @@ module NUOPC_FreeFormatDef
 !BOP
 ! !IROUTINE: NUOPC_FreeFormatCreate - Create a FreeFormat object from Config
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_FreeFormatCreate
+  ! Private name; call using NUOPC_FreeFormatCreate()
   function NUOPC_FreeFormatCreateRead(config, label, relaxedflag, rc)
 ! !RETURN VALUE:
     type(NUOPC_FreeFormat) :: NUOPC_FreeFormatCreateRead
@@ -326,7 +326,7 @@ module NUOPC_FreeFormatDef
 !BOPI
 ! !IROUTINE: NUOPC_FreeFormatCreate - Create a FreeFormat object from YAML
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_FreeFormatCreate
+  ! Private name; call using NUOPC_FreeFormatCreate()
   function NUOPC_FreeFormatCreateReadYAML(ioyaml, rc)
 ! !RETURN VALUE:
     type(NUOPC_FreeFormat) :: NUOPC_FreeFormatCreateReadYAML
@@ -391,7 +391,7 @@ module NUOPC_FreeFormatDef
 !BOPI
 ! !IROUTINE: NUOPC_FreeFormatCreate - Create a FreeFormat object from file
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_FreeFormatCreate
+  ! Private name; call using NUOPC_FreeFormatCreate()
   function NUOPC_FreeFormatCreateReadFile(fileName, iofmt, label, relaxedflag, rc)
 ! !RETURN VALUE:
     type(NUOPC_FreeFormat) :: NUOPC_FreeFormatCreateReadFile

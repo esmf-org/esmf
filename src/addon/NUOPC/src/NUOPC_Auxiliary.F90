@@ -47,7 +47,7 @@ module NUOPC_Auxiliary
 !BOP
 ! !IROUTINE: NUOPC_Write - Write a distributed interpolation matrix to file in SCRIP format
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_Write
+  ! Private name; call using NUOPC_Write()
   subroutine NUOPC_SCRIPWrite(factorList, factorIndexList, fileName, &
     relaxedflag, rc)
 ! !ARGUMENTS:
@@ -109,7 +109,7 @@ module NUOPC_Auxiliary
 !BOP
 ! !IROUTINE: NUOPC_Write - Write a distributed factorList to file
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_Write
+  ! Private name; call using NUOPC_Write()
   subroutine NUOPC_FactorsWrite(factorList, fileName, rc)
 ! !ARGUMENTS:
     real(ESMF_KIND_R8), pointer               :: factorList(:)
@@ -196,7 +196,7 @@ module NUOPC_Auxiliary
 !BOP
 ! !IROUTINE: NUOPC_Write - Write Field data to file
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_Write
+  ! Private name; call using NUOPC_Write()
   subroutine NUOPC_FieldWrite(field, fileName, overwrite, status, timeslice, &
     iofmt, relaxedflag, rc)
 ! !ARGUMENTS:
@@ -307,7 +307,7 @@ module NUOPC_Auxiliary
 !BOP
 ! !IROUTINE: NUOPC_Write - Write the Fields within a State to NetCDF files
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_Write
+  ! Private name; call using NUOPC_Write()
   subroutine NUOPC_StateWrite(state, fieldNameList, fileNamePrefix, overwrite, &
     status, timeslice, relaxedflag, rc)
 ! !ARGUMENTS:

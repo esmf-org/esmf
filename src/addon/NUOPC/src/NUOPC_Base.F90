@@ -318,7 +318,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_Advertise - Advertise a single Field in a State
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_Advertise
+  ! Private name; call using NUOPC_Advertise() 
   subroutine NUOPC_AdvertiseField(state, StandardName, Units, &
     LongName, ShortName, name, TransferOfferField, SharePolicyField, &
     TransferOfferGeomObject, SharePolicyGeomObject, rc)
@@ -574,7 +574,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_Advertise - Advertise a list of Fields in a State
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_Advertise
+  ! Private name; call using NUOPC_Advertise() 
   subroutine NUOPC_AdvertiseFields(state, StandardNames, &
     TransferOfferField, SharePolicyField, &
     TransferOfferGeomObject, SharePolicyGeomObject, rc)
@@ -832,7 +832,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_GetAttribute - Get the value of a NUOPC Field Attribute
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_GetAttribute
+  ! Private name; call using NUOPC_GetAttribute()
   subroutine NUOPC_GetAttributeFieldVal(field, name, value, rc)
 ! !ARGUMENTS:
     type(ESMF_Field), intent(in)            :: field
@@ -895,7 +895,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_GetAttribute - Get the typekind of a NUOPC Field Attribute
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_GetAttribute
+  ! Private name; call using NUOPC_GetAttribute()
   subroutine NUOPC_GetAttributeFieldTK(field, name, typekind, rc)
 ! !ARGUMENTS:
     type(ESMF_Field),         intent(in)            :: field
@@ -938,7 +938,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_GetAttribute - Get the value of a NUOPC State Attribute
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_GetAttribute
+  ! Private name; call using NUOPC_GetAttribute()
   subroutine NUOPC_GetAttributeState(state, name, value, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
@@ -1401,7 +1401,7 @@ module NUOPC_Base
 !BOPI
 ! !IROUTINE: NUOPC_InitAttributes - Initialize the NUOPC Field Attributes
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_InitAttributes
+  ! Private name; call using NUOPC_InitAttributes()
   subroutine NUOPC_InitAttributesField(field, StandardName, Units, LongName, &
     ShortName, Connected, rc)
 ! !ARGUMENTS:
@@ -1713,7 +1713,7 @@ module NUOPC_Base
 !BOPI
 ! !IROUTINE: NUOPC_InitAttribute - Initialize the NUOPC State Attributes
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_InitAttributes
+  ! Private name; call using NUOPC_InitAttributes()
   subroutine NUOPC_InitAttributesState(state, rc)
 ! !ARGUMENTS:
     type(ESMF_state)                      :: state
@@ -1763,7 +1763,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_IsAtTime - Check if a Field is at the given Time
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_IsAtTime
+  ! Private name; call using NUOPC_IsAtTime()
   function NUOPC_IsAtTimeField(field, time, rc)
 ! !RETURN VALUE:
     logical :: NUOPC_IsAtTimeField
@@ -1842,7 +1842,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_IsAtTime - Check if Field(s) in a State are at the given Time
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_IsAtTime
+  ! Private name; call using NUOPC_IsAtTime()
   function NUOPC_IsAtTimeState(state, time, fieldName, count, fieldList, rc)
 ! !RETURN VALUE:
     logical :: NUOPC_IsAtTimeState
@@ -1970,7 +1970,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_IsConnected - Check if a Field is connected
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_IsConnected
+  ! Private name; call using NUOPC_IsConnected()
   function NUOPC_IsConnectedField(field, rc)
 ! !RETURN VALUE:
     logical :: NUOPC_IsConnectedField
@@ -2016,7 +2016,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_IsConnected - Check if Field(s) in a State are connected
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_IsConnected
+  ! Private name; call using NUOPC_IsConnected()
   function NUOPC_IsConnectedState(state, fieldName, count, rc)
 ! !RETURN VALUE:
     logical :: NUOPC_IsConnectedState
@@ -2111,7 +2111,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_IsUpdated - Check if a Field is marked as updated
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_IsUpdated
+  ! Private name; call using NUOPC_IsUpdated()
   function NUOPC_IsUpdatedField(field, rc)
 ! !RETURN VALUE:
     logical :: NUOPC_IsUpdatedField
@@ -2155,7 +2155,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_IsUpdated - Check if Field(s) in a State are marked as updated
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_IsUpdated
+  ! Private name; call using NUOPC_IsUpdated()
   function NUOPC_IsUpdatedState(state, fieldName, count, rc)
 ! !RETURN VALUE:
     logical :: NUOPC_IsUpdatedState
@@ -2400,7 +2400,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_Realize - Realize previously advertised Fields inside a State on a single Grid with internal allocation
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_Realize
+  ! Private name; call using NUOPC_Realize()
   subroutine NUOPC_RealizeCompleteG(state, grid, fieldName, typekind, &
     staggerloc, selection, dataFillScheme, rc)
 ! !ARGUMENTS:
@@ -2657,7 +2657,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_Realize - Realize previously advertised Fields inside a State on a single LocStream with internal allocation
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_Realize
+  ! Private name; call using NUOPC_Realize()
   subroutine NUOPC_RealizeCompleteLS(state, locstream, fieldName, typekind, selection,&
     dataFillScheme, rc)
 ! !ARGUMENTS:
@@ -2821,7 +2821,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_Realize - Realize previously advertised Fields inside a State on a single Mesh with internal allocation
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_Realize
+  ! Private name; call using NUOPC_Realize()
   subroutine NUOPC_RealizeCompleteM(state, mesh, fieldName, typekind, &
     meshloc, selection, dataFillScheme, rc)
 ! !ARGUMENTS:
@@ -3017,7 +3017,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_Realize - Realize a previously advertised Field in a State
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_Realize
+  ! Private name; call using NUOPC_Realize()
   subroutine NUOPC_RealizeField(state, field, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
@@ -3173,7 +3173,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_SetAttribute - Set the value of a NUOPC Field Attribute
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_SetAttribute
+  ! Private name; call using NUOPC_SetAttribute()
   subroutine NUOPC_SetAttributeField(field, name, value, rc)
 ! !ARGUMENTS:
     type(ESMF_Field)                      :: field
@@ -3216,7 +3216,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_SetAttribute - Set the value of a NUOPC State Attribute
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_SetAttribute
+  ! Private name; call using NUOPC_SetAttribute()
   subroutine NUOPC_SetAttributeState(state, name, value, rc)
 ! !ARGUMENTS:
     type(ESMF_State)                      :: state
@@ -3259,7 +3259,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_SetTimestamp - Set the TimeStamp on a Field
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_SetTimestamp
+  ! Private name; call using NUOPC_SetTimestamp()
   subroutine NUOPC_SetTimestampField(field, time, rc)
 ! !ARGUMENTS:
     type(ESMF_Field), intent(inout)         :: field
@@ -3313,7 +3313,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_SetTimestamp - Set the TimeStamp on all the Fields in a State
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_SetTimestamp
+  ! Private name; call using NUOPC_SetTimestamp()
   subroutine NUOPC_SetTimestampState(state, time, selective, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
@@ -3411,7 +3411,7 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_SetTimestamp - Set the TimeStamp on all the Fields in a State from Clock
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_SetTimestamp
+  ! Private name; call using NUOPC_SetTimestamp()
   subroutine NUOPC_SetTimestampStateClk(state, clock, selective, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
@@ -3466,7 +3466,7 @@ module NUOPC_Base
 !BOPI
 ! !IROUTINE: NUOPC_UpdateTimestamp - Update the TimeStamp on all the Fields across PETs
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_UpdateTimestamp
+  ! Private name; call using NUOPC_UpdateTimestamp()
   subroutine NUOPC_UpdateFieldList(fieldList, rootPet, rc)
 ! !ARGUMENTS:
     type(ESMF_Field), pointer               :: fieldList(:)
@@ -3564,7 +3564,7 @@ module NUOPC_Base
 !BOPI
 ! !IROUTINE: NUOPC_UpdateTimestamp - Propagate the TimeStamp from src to dst Fields
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_UpdateTimestamp
+  ! Private name; call using NUOPC_UpdateTimestamp()
   subroutine NUOPC_UpdateAcrossFieldLists(srcFieldList, dstFieldList, rc)
 ! !ARGUMENTS:
     type(ESMF_Field), pointer               :: srcFieldList(:)
@@ -3651,7 +3651,7 @@ module NUOPC_Base
 !BOPI
 ! !IROUTINE: NUOPC_UpdateTimestamp - Update the TimeStamp on all the Fields in a FieldBundle
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_UpdateTimestamp
+  ! Private name; call using NUOPC_UpdateTimestamp()
   subroutine NUOPC_FieldBundleUpdateTime(srcFields, dstFields, rc)
 ! !ARGUMENTS:
     type(ESMF_FieldBundle), intent(in)            :: srcFields
@@ -3730,7 +3730,7 @@ module NUOPC_Base
 !BOPI
 ! !IROUTINE: NUOPC_UpdateTimestamp - Update the TimeStamp on all the Fields in a State
 ! !INTERFACE:
-  ! call using generic interface: NUOPC_UpdateTimestamp
+  ! Private name; call using NUOPC_UpdateTimestamp()
   subroutine NUOPC_StateUpdateTimestamp(state, rootPet, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
