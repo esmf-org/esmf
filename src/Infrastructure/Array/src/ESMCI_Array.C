@@ -7805,7 +7805,7 @@ namespace ArrayHelper{
 template<typename IT> struct FactorElement{
   char factor[8]; // large enough for R8 and I8
   SeqIndex<IT> partnerSeqIndex;
-  vector<int> partnerDe;
+  int partnerDe;
 };
 template<typename IT>
   bool operator==(FactorElement<IT> a, FactorElement<IT> b){
@@ -7822,8 +7822,8 @@ template<typename IT>
 
 // AssociationElement
 template<typename IT1, typename IT2> struct AssociationElement{
-  SeqIndex<IT1> seqIndex;
   vector<FactorElement<IT2> > factorList;
+  SeqIndex<IT1> seqIndex;
   int linIndex;
 };
 template<typename IT1, typename IT2>
@@ -8473,7 +8473,7 @@ template<typename SIT, typename DIT>
 #endif
 
   // Set OPTION!!!
-#define SMMSLSQV_OPTION 2
+#define SMMSLSQV_OPTION 3
   // OPTION 1 - Use sparseMatMulStoreLinSeqVect() for all cases
   // OPTION 2 - Use sparseMatMulStoreLinSeqVect_new() for halo, old all other
   // OPTION 3 - Use sparseMatMulStoreLinSeqVect_new() for all cases
@@ -8998,7 +8998,7 @@ fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
       unsigned factorCount = dstLinSeqVect[j][index2Ref[i]].factorList.size();
       for (unsigned k=0; k<factorCount; k++){
         int partnerDe =
-          dstLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe[0];
+          dstLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe;
         int kk;
         for (kk=0; kk<recvnbDiffPartnerDeCount; kk++)
           if (recvnbPartnerDeList[kk]==partnerDe) break;
@@ -9299,7 +9299,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       unsigned factorCount = srcLinSeqVect[j][index2Ref[i]].factorList.size();
       for (unsigned k=0; k<factorCount; k++){
         int partnerDe =
-          srcLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe[0];
+          srcLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe;
         int kk;
         for (kk=0; kk<sendnbDiffPartnerDeCount; kk++)
           if (sendnbPartnerDeList[kk]==partnerDe) break;
