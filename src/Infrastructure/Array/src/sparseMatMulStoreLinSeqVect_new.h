@@ -1023,36 +1023,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.0"));
 #endif
   
-  // list of dst factor elements, sorted by partnerSeqIndex, i.e. src seqIndex
-  // Use a list here, because elements will be removed during totalExchange()
-  // and for this need constant complexity for frequent removal.
-  list<FactorElementSort<DIT,SIT> > dstElementSort;
-  for (int i=0; i<dstLocalDeCount; i++){
-    for (unsigned j=0; j<dstLinSeqVect[i].size(); j++){
-      for (unsigned k=0; k<dstLinSeqVect[i][j].factorList.size(); k++){
-        dstElementSort.push_back(
-          FactorElementSort<DIT,SIT>(dstLinSeqVect[i][j].seqIndex, 
-            dstLocalDeToDeMap[i], &(dstLinSeqVect[i][j].factorList[k])));
-      }
-    }
-  }
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.1"));
-#endif
-  dstElementSort.sort();
-  
-#ifdef STORELINSEQVECT_NEW_TIMERS_on
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2a"));
-#endif
-  vm->timerReset("linIndex");
-  vm->timerReset("seqIndex");
-#endif  // TIMERS
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2"));
-#endif
-
     // Step2: setup the src side information, sorted by seqIndex
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
     vm->timerReset("construct_srcElementSort");
@@ -1107,14 +1077,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.3a"));
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.1a"));
 #endif
   vm->timerLog("linIndex");
   vm->timerLog("seqIndex");
 #endif  // TIMERS
   
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.3"));
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.1"));
 #endif
 #ifdef SRC_ELEMENT_SORT_VECTOR
   sort(srcElementSort.begin(), srcElementSort.end());
@@ -1123,14 +1093,44 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.4"));
-#endif
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.0"));
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2"));
 #endif
   
   // Step3: fill srcLinSeqVect
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.0"));
+#endif
+
+  // list of dst factor elements, sorted by partnerSeqIndex, i.e. src seqIndex
+  // Use a list here, because elements will be removed during totalExchange()
+  // and for this need constant complexity for frequent removal.
+  list<FactorElementSort<DIT,SIT> > dstElementSort;
+  for (int i=0; i<dstLocalDeCount; i++){
+    for (unsigned j=0; j<dstLinSeqVect[i].size(); j++){
+      for (unsigned k=0; k<dstLinSeqVect[i][j].factorList.size(); k++){
+        dstElementSort.push_back(
+          FactorElementSort<DIT,SIT>(dstLinSeqVect[i][j].seqIndex, 
+            dstLocalDeToDeMap[i], &(dstLinSeqVect[i][j].factorList[k])));
+      }
+    }
+  }
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.1"));
+#endif
+  dstElementSort.sort();
+  
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.2a"));
+#endif
+  vm->timerReset("linIndex");
+  vm->timerReset("seqIndex");
+#endif  // TIMERS
+  
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.2"));
+#endif
+
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
     vm->timerReset("fill_srcLinSeqVect");
     vm->timerStart("fill_srcLinSeqVect");
