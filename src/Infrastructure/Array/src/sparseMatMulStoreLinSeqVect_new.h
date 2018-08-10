@@ -284,23 +284,20 @@
 #else
     list<ElementSort<SIT,DIT> > &srcElementSort;
 #endif
-    vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect;
     // members that are initialized internally:
     vector<MsgElement<DIT,SIT,T> > request;
    public:
     FillLinSeqVect(
       list<FactorElementSort<DIT,SIT> > &dstElementSort_,
 #ifdef SRC_ELEMENT_SORT_VECTOR
-      vector<ElementSort<SIT,DIT> > &srcElementSort_,
+      vector<ElementSort<SIT,DIT> > &srcElementSort_
 #else
-      list<ElementSort<SIT,DIT> > &srcElementSort_,
+      list<ElementSort<SIT,DIT> > &srcElementSort_
 #endif
-      vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect_
     ):
       // members that need to be set on this level because of reference
       dstElementSort(dstElementSort_),
-      srcElementSort(srcElementSort_),
-      srcLinSeqVect(srcLinSeqVect_)
+      srcElementSort(srcElementSort_)
     {
       request.resize(0);
     }
@@ -323,24 +320,12 @@
       while ((itD != dstElementSort.end()) && (itS != srcElementSort.end())){
         if (itD->fep->partnerSeqIndex == itS->seqIndex){
           // a match means that both sides need to record this...
-#if 0
-          // src side now knows about a srcLinSeqVect[][] element to be added
-          AssociationElement<SIT,DIT> element;
-          element.linIndex = itS->linIndex;
-          element.seqIndex = itS->seqIndex;
-          element.factorList.resize(1);
-          element.factorList[0].partnerSeqIndex = itD->seqIndex;
-          element.factorList[0].partnerDe=itD->de;
-          *(T*)(element.factorList[0].factor) = *(T*)(itD->fep->factor);
-          srcLinSeqVect[itS->localDe].push_back(element);
-#else
           // src side now knows about a factor that needs to be added
           FactorElement<DIT> factorElement;
           factorElement.partnerSeqIndex = itD->seqIndex;
           factorElement.partnerDe=itD->de;
           *(T*)(factorElement.factor) = *(T*)(itD->fep->factor);
           itS->factorList.push_back(factorElement);
-#endif
           // dst side now knows partnerDe for a FactorElement
           itD->fep->partnerDe=itS->de;
           // erase the satisfied dstElementSort element
@@ -413,24 +398,12 @@
       while ((iReq < size) && (itS != srcElementSort.end())){
         if (request[iReq].partnerSeqIndex == itS->seqIndex){
           // a match means that both sides need to record this...
-#if 0
-          // src side now knows about a srcLinSeqVect[][] element to be added
-          AssociationElement<SIT,DIT> element;
-          element.linIndex = itS->linIndex;
-          element.seqIndex = itS->seqIndex;
-          element.factorList.resize(1);
-          element.factorList[0].partnerSeqIndex = request[iReq].seqIndex;
-          element.factorList[0].partnerDe=request[iReq].de;
-          *(T*)(element.factorList[0].factor) = request[iReq].factor;
-          srcLinSeqVect[itS->localDe].push_back(element);
-#else
           // src side now knows about a factor that needs to be added
           FactorElement<DIT> factorElement;
           factorElement.partnerSeqIndex = request[iReq].seqIndex;
           factorElement.partnerDe=request[iReq].de;
           *(T*)(factorElement.factor) = request[iReq].factor;
           itS->factorList.push_back(factorElement);
-#endif
           // dst side now knows partnerDe for a FactorElement
           // ... this means an element is added to the response
           request[iRes].seqIndex = itS->seqIndex;
@@ -1132,15 +1105,15 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #endif
 
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
-    vm->timerReset("fill_srcLinSeqVect");
-    vm->timerStart("fill_srcLinSeqVect");
+    vm->timerReset("fill_LinSeqVect");
+    vm->timerStart("fill_LinSeqVect");
 #endif
 
   switch (typekindFactors){
   case ESMC_TYPEKIND_R4:
     {
       FillLinSeqVect<SIT,DIT,ESMC_R4> 
-        fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+        fillLinSeqVect(dstElementSort, srcElementSort);
 #ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
       fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
 #else
@@ -1151,7 +1124,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   case ESMC_TYPEKIND_R8:
     {
       FillLinSeqVect<SIT,DIT,ESMC_R8> 
-        fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+        fillLinSeqVect(dstElementSort, srcElementSort);
 #ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
       fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
 #else
@@ -1162,7 +1135,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   case ESMC_TYPEKIND_I4:
     {
       FillLinSeqVect<SIT,DIT,ESMC_I4> 
-        fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+        fillLinSeqVect(dstElementSort, srcElementSort);
 #ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
       fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
 #else
@@ -1173,7 +1146,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   case ESMC_TYPEKIND_I8:
     {
       FillLinSeqVect<SIT,DIT,ESMC_I8> 
-        fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+        fillLinSeqVect(dstElementSort, srcElementSort);
 #ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
       fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
 #else
@@ -1186,8 +1159,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   }
   
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
-    vm->timerStop("fill_srcLinSeqVect");
-    vm->timerLog("fill_srcLinSeqVect");
+    vm->timerStop("fill_LinSeqVect");
+    vm->timerLog("fill_LinSeqVect");
 #endif
 
 #ifdef ASMM_STORE_MEMLOG_on
@@ -1292,40 +1265,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     }
   }
   
-#if 0
-  //TODO: remove this section now that srcLinSeqVect is constructed from
-  //TODO: srcElementSort!!!!!!!
-  //
-  // not sure if maybe for general sparse matrix case, where the same src
-  // element goes to multiple dst elements, it may be better to combine
-  // srcLinSeqVect elements here? Need to do performance profiling for this.
-  //
-  // sort srcLinSeqVect
-  for (int i=0; i<srcLocalDeCount; i++)
-    sort(srcLinSeqVect[i].begin(), srcLinSeqVect[i].end());
-  // combine elements with the same seqIndex, using factorList
-  for (int i=0; i<srcLocalDeCount; i++){
-    typename vector<AssociationElement<SIT,DIT> >::iterator itS
-      = srcLinSeqVect[i].begin();
-    typename vector<AssociationElement<SIT,DIT> >::iterator itSS
-      = srcLinSeqVect[i].begin();
-    while (itS != srcLinSeqVect[i].end()){
-      if (itSS != itS){
-        // not the exact same element
-        if (itSS->seqIndex == itS->seqIndex){
-          // combine itS into itSS
-          itSS->factorList.push_back(itS->factorList[0]);
-          itS = srcLinSeqVect[i].erase(itS);
-        }else{
-          itSS = itS;
-        }
-      }else{
-        ++itS;
-      }
-    }
-  }
-#endif
-
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new5.0"));
 #endif
