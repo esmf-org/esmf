@@ -367,6 +367,9 @@
     virtual void generateRequest(int responsePet,
       char* &requestBuffer, int &requestSize){
       // called on every localPet for every responsePet != localPet
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Enter FillLinSeqVect.generateRequest()"));
+#endif
       unsigned size = dstElementSort.size();
       if (size != request.size()){
         // a new request must be constructed
@@ -384,12 +387,18 @@
       requestSize = size * sizeof(MsgElement<DIT,SIT,T>);
       requestBuffer = NULL;
       if (requestSize) requestBuffer = (char *)&(request[0]);
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Exit FillLinSeqVect.generateRequest()"));
+#endif
     }
     
     virtual void handleRequest(int requestPet,
       char *requestBuffer, int requestSize,
       char* &responseBuffer, int  &responseSize)const{
       // called on every localPet for every requestPet != localPet
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Enter FillLinSeqVect.handleRequest()"));
+#endif
       MsgElement<DIT,SIT,T> *request = (MsgElement<DIT,SIT,T> *)requestBuffer;
       int size = requestSize / sizeof(MsgElement<DIT,SIT,T>);
       // process the request and fill the response into the same buffer
@@ -445,6 +454,9 @@
       }
       responseSize = iRes * sizeof(MsgElement<DIT,SIT,T>);
       responseBuffer = requestBuffer;
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Exit FillLinSeqVect.handleRequest()"));
+#endif
     }
     
     virtual void handleResponse(int responsePet,
@@ -1012,7 +1024,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #endif
   
   // list of dst factor elements, sorted by partnerSeqIndex, i.e. src seqIndex
-  // use a list here, because elements will be removed during totalExchange()
+  // Use a list here, because elements will be removed during totalExchange()
+  // and for this need constant complexity for frequent removal.
   list<FactorElementSort<DIT,SIT> > dstElementSort;
   for (int i=0; i<dstLocalDeCount; i++){
     for (unsigned j=0; j<dstLinSeqVect[i].size(); j++){
@@ -1270,11 +1283,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   typename list<ElementSort<SIT,DIT> >::iterator itS;
 #endif
   for (itS=srcElementSort.begin(); itS!=srcElementSort.end(); ++itS){
-    AssociationElement<SIT,DIT> element;
-    element.linIndex = itS->linIndex;
-    element.seqIndex = itS->seqIndex;
-    element.factorList = itS->factorList;
-    srcLinSeqVect[itS->localDe].push_back(element);
+    if (itS->factorList.size() > 0){
+      AssociationElement<SIT,DIT> element;
+      element.linIndex = itS->linIndex;
+      element.seqIndex = itS->seqIndex;
+      element.factorList = itS->factorList;
+      srcLinSeqVect[itS->localDe].push_back(element);
+    }
   }
   
 #if 0
