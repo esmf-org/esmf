@@ -2,9 +2,9 @@
 
 ALL: build_here 
 
-SOURCEC	  = esmftrc.c ESMCI_Trace.C ESMCI_TraceWrap.C ESMCI_TraceMetadata.C
+SOURCEC	  = esmftrc.c ESMCI_Trace.C ESMCI_TraceWrap.C ESMCI_TraceMetadata.C ESMCI_TraceClock.C
 SOURCEF	  = 
-SOURCEH	  = esmftrc.h ESMCI_Trace.h ESMCI_HashMap.h ESMCI_HashNode.h ESMCI_KeyHash.h
+SOURCEH	  = esmftrc.h ESMCI_Trace.h ESMCI_TraceUtil.h ESMCI_HashMap.h ESMCI_HashNode.h ESMCI_KeyHash.h ESMCI_RegionNode.h ESMCI_ComponentInfo.h
 STOREH    = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

@@ -95,6 +95,20 @@ namespace ESMCI {
       }
     }
 
+    bool reverse(const V &value, K &key) {
+      for (unsigned long i=0; i < tableSize; i++) {
+        HashNode<K, V> *entry = table[i];
+        while (entry != NULL && entry->getValue() != value) {
+          entry = entry->getNext();
+        }
+        if (entry != NULL) {
+          key = entry->getKey();
+          return true;
+        }
+      }
+      return false;
+    }
+    
     void remove(const K &key)
     {
       unsigned long hashValue = hashFunc(key);

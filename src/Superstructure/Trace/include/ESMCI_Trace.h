@@ -38,6 +38,8 @@ extern "C" {
 #endif
 
 namespace ESMCI { 
+  void TraceInitializeClock(int *rc);
+  uint64_t TraceGetClock(void *data);
   void TraceOpen(std::string trace_dir, int *rc);
   void TraceClose(int *rc);
   bool TraceInitialized();
