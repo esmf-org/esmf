@@ -316,6 +316,9 @@
       typename list<ElementSort<SIT> >::iterator itS =
 #endif
         srcElementSort.begin();
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Enter FillLinSeqVect.handleLocal()"));
+#endif
       while ((itD != dstElementSort.end()) && (itS != srcElementSort.end())){
         if (itD->fep->partnerSeqIndex == itS->seqIndex){
           // a match means that both sides need to record this...
@@ -346,6 +349,9 @@
           ++itS;
         }
       }
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Exit FillLinSeqVect.handleLocal()"));
+#endif
     }
     
     virtual void generateRequest(int responsePet,
@@ -424,6 +430,9 @@
     
     virtual void handleResponse(int responsePet,
       char const *responseBuffer, int responseSize)const{
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Enter FillLinSeqVect.handleResponse()"));
+#endif
       // called on every localPet for every responsePet != localPet
       MsgElement<DIT,SIT,T> *response =
         (MsgElement<DIT,SIT,T> *)responseBuffer;
@@ -455,7 +464,7 @@
         }
       }
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("FillLinSeqVect.handleResponse()"));
+  VM::logMemInfo(std::string("Exit FillLinSeqVect.handleResponse()"));
 #endif
     }
     
