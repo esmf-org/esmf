@@ -82,6 +82,26 @@ namespace ESMCI {
   template<typename T> bool operator!=(SeqIndex<T> a, SeqIndex<T> b);
   template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b);
 
+  template<typename T> struct SeqIndexLite{
+    T decompSeqIndex;
+    SeqIndexLite(){
+      decompSeqIndex = -1;  // invalidate
+    }
+    void print(){
+      printf("SeqIndexLite: (%d)\n", decompSeqIndex);
+    }
+    void fprint(std::FILE *fp){
+      fprintf(fp, "SeqIndexLite: (%d)\n", decompSeqIndex);
+    }
+    bool valid(){
+      if (decompSeqIndex == -1) return false; // invalid seqIndex
+      return true;  // otherwise valid
+    }
+  };  // struct seqIndex
+  template<typename T> bool operator==(SeqIndexLite<T> a, SeqIndexLite<T> b);
+  template<typename T> bool operator!=(SeqIndexLite<T> a, SeqIndexLite<T> b);
+  template<typename T> bool operator<(SeqIndexLite<T> a, SeqIndexLite<T> b);
+
   template<typename T> class SeqInd{
     int n;  // number of components in sequence index
     T const *index;

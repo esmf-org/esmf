@@ -1074,12 +1074,17 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.0"));
 #endif
 
+  int const nChunks = 2;
+  for (int chunk=0; chunk<nChunks; chunk++){
+  
   // list of dst factor elements, sorted by partnerSeqIndex, i.e. src seqIndex
   // Use a list here, because elements will be removed during totalExchange()
   // and for this need constant complexity for frequent removal.
   list<FactorElementSort<DIT,SIT> > dstElementSort;
   for (int i=0; i<dstLocalDeCount; i++){
-    for (unsigned j=0; j<dstLinSeqVect[i].size(); j++){
+    unsigned jChunk = dstLinSeqVect[i].size()/nChunks + 1;
+    for (unsigned j=chunk*jChunk; 
+      (j<dstLinSeqVect[i].size())&&(j<(chunk+1)*jChunk); j++){
       for (unsigned k=0; k<dstLinSeqVect[i][j].factorList.size(); k++){
         dstElementSort.push_back(
           FactorElementSort<DIT,SIT>(dstLinSeqVect[i][j].seqIndex, 
@@ -1108,6 +1113,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     vm->timerReset("fill_LinSeqVect");
     vm->timerStart("fill_LinSeqVect");
 #endif
+    
+  vm->barrier();  //TODO: only for debugging
 
   switch (typekindFactors){
   case ESMC_TYPEKIND_R4:
@@ -1162,6 +1169,12 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     vm->timerStop("fill_LinSeqVect");
     vm->timerLog("fill_LinSeqVect");
 #endif
+    
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.3"));
+#endif
+
+  } // for-chunk
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new4.0"));
@@ -1244,6 +1257,12 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   vm->timerLog("cleanout_dstLinSeqVect");
 #endif
   
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new5.0"));
+#endif
+
+  vm->barrier();  //TODO: only for debugging
+
   // Construct srcLinSeqVect from srcElementSort
   for (int i=0; i<srcLocalDeCount; i++){
     if (srcLocalDeElementCount[i]){
@@ -1266,7 +1285,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   }
   
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new5.0"));
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new6.0"));
 #endif
   
 #ifdef ASMM_STORE_LOG_on
