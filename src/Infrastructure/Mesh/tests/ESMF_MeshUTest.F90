@@ -81,6 +81,8 @@ program ESMF_MeshUTest
   integer :: sizeOfList
   type(ESMF_CoordSys_Flag) :: coordSys
   integer :: dimCount, localDECount
+  logical :: nodalIsPresent, elementIsPresent
+  type(ESMF_MESHSTATUS_FLAG) :: status
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -207,6 +209,12 @@ program ESMF_MeshUTest
        coordSys=ESMF_COORDSYS_CART, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+  ! Check Mesh status
+  call ESMF_MeshGet(mesh, status=status, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (status .ne. ESMF_MESHSTATUS_STRUCTCREATED) correct=.false. 
+
   ! Fill in node data
   numNodes=9
 
@@ -238,6 +246,12 @@ program ESMF_MeshUTest
   deallocate(nodeIds)
    deallocate(nodeCoords)
   deallocate(nodeOwners)
+
+  ! Check Mesh status
+  call ESMF_MeshGet(mesh, status=status, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (status .ne. ESMF_MESHSTATUS_NODESADDED) correct=.false. 
 
   ! Fill in elem data
   numElems=4
@@ -272,12 +286,20 @@ program ESMF_MeshUTest
                             elementArea=elemAreas, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+
   ! deallocate elem data
   deallocate(elemIds)
   deallocate(elemTypes)
   deallocate(elemConn)
   deallocate(elemAreas)
   deallocate(elemCoords)
+
+  ! Check Mesh status
+  call ESMF_MeshGet(mesh, status=status, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (status .ne. ESMF_MESHSTATUS_COMPLETE) correct=.false. 
+
 
   !! Write mesh for debugging
   ! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
@@ -2149,9 +2171,166 @@ endif
   call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Mesh Empty Create"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Setup lists
+  if (petCount .eq. 1) then  
+     allocate(nodeIds(9))
+     nodeIds=(/1,2,3,4,5,6,7,8,9/) 
+
+      allocate(elemIds(4))
+      elemIds=(/1,2,3,4/) 
+
+  else if (petCount .eq. 4) then  
+      if (localPet .eq. 0) then
+        allocate(elemIds(1))
+        elemIds(1)=4
+        
+        allocate(nodeIds(4))
+        nodeIds=(/5,6,8,9/)
+        
+     else if (localPet .eq. 1) then
+        allocate(elemIds(1))
+        elemIds(1)=3
+        
+        allocate(nodeIds(2))
+        nodeIds=(/7,4/)
+        
+     else if (localPet .eq. 2) then
+        allocate(elemIds(1))
+        elemIds(1)=2
+        
+        allocate(nodeIds(2))
+        nodeIds=(/2,3/)
+        
+     else if (localPet .eq. 3) then
+        allocate(elemIds(1))
+        elemIds(1)=1
+        
+        allocate(nodeIds(1))
+        nodeIds=(/1/)
+     endif
+  endif
+
+
+  ! Create node Distgrid
+  nodedistgrid=ESMF_DistGridCreate(nodeIds, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+ 
+  ! Create element Distgrid
+  elemdistgrid=ESMF_DistGridCreate(elemIds, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Deallocate
+  deallocate(elemIds)
+  deallocate(nodeIds)
+
+  ! Create redisted mesh
+  mesh=ESMF_MeshEmptyCreate(nodalDistgrid=nodedistgrid, &
+    elementDistgrid=elemdistgrid, rc=localrc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+  ! Check Output mesh
+  call ESMF_MeshGet(mesh, nodalDistgridIsPresent=nodalIsPresent, &
+                    elementDistgridIsPresent=elementIsPresent, &
+                    status=status, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check correctness
+  if (.not. nodalIsPresent .or.  .not. elementIsPresent) then
+     correct=.false.
+  endif
+
+  if (status .ne. ESMF_MESHSTATUS_EMPTY) then
+     correct=.false.
+  endif
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Create redisted mesh with just node distgrid
+  mesh=ESMF_MeshEmptyCreate(nodalDistgrid=nodedistgrid, &
+    rc=localrc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+
+  ! Check Output mesh
+  call ESMF_MeshGet(mesh, nodalDistgridIsPresent=nodalIsPresent, &
+                    elementDistgridIsPresent=elementIsPresent, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check correctness
+  if (.not. nodalIsPresent .or.  elementIsPresent) then
+     correct=.false.
+  endif
+  
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Create redisted mesh with just elem distgrid
+  mesh=ESMF_MeshEmptyCreate(elementDistgrid=elemdistgrid, &
+    rc=localrc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+
+  ! Check Output mesh
+  call ESMF_MeshGet(mesh, nodalDistgridIsPresent=nodalIsPresent, &
+                    elementDistgridIsPresent=elementIsPresent, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check correctness
+  if (nodalIsPresent .or.  .not. elementIsPresent) then
+     correct=.false.
+  endif
+  
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Create redisted mesh with no distgrid
+  mesh=ESMF_MeshEmptyCreate(rc=localrc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+
+  ! Check Output mesh
+  call ESMF_MeshGet(mesh, nodalDistgridIsPresent=nodalIsPresent, &
+                    elementDistgridIsPresent=elementIsPresent, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Check correctness
+  if (nodalIsPresent .or. elementIsPresent) then
+     correct=.false.
+  endif
+  
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Get rid of Distgrids
+  call ESMF_DistgridDestroy(nodedistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_DistgridDestroy(elemdistgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
 
 #if 1
-  ! OFF UNTIL I SEE IF THE OLD STUFF WORKS
 
   !------------------------------------------------------------------------
   !NEX_UTest
