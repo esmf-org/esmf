@@ -182,7 +182,7 @@ integer,              intent(out), optional :: rc
 !     \item [{[area]}]
 !           Area of the xgrid cells on this PET. Must enter with shape(area)=(/elementCount/).
 !     \item [{[centroid]}]
-!           Coordinates at the area weighted center of the xgrid cells on this PET. Must enter with shape(centroid)=(/dimCount, elementCount/).
+!           Coordinates at the area weighted center of the xgrid cells on this PET. Must enter with shape(centroid)=(/elementCount, dimCount/).
 !     \item [{[distgridA]}]
 !           List of distgrids whose sequence index list is an overlap between a Grid
 !           on sideA and the xgrid object. Must enter with shape(distgridA)=(/sideAGridCount+sideAMeshCount/).
@@ -213,7 +213,7 @@ integer,              intent(out), optional :: rc
 !EOP
 
     integer :: localrc, ngrid_a, ngrid_b, n_idx_a2x, n_idx_x2a, n_idx_b2x, n_idx_x2b
-    integer :: n_wgts_a, n_wgts_b, ndim, ncells, i, count
+    integer :: n_wgts_a, n_wgts_b, ndim, ncells, i, count, pdim
     type(ESMF_XGridType), pointer :: xgtypep
     type(ESMF_DELayout)           :: delayout
     type(ESMF_XGridGeomType_Flag) :: xggt
@@ -547,7 +547,15 @@ integer,              intent(out), optional :: rc
     endif
 
     if(present(dimCount)) then
-        dimCount = 1
+      if(.not. xgtypep%storeOverlay) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="- Cannot retrieve dimCount of the super mesh when storeOverylay is false.", &
+             ESMF_CONTEXT, rcToReturn=rc)
+          return
+      endif    
+      call C_ESMC_MeshGetDimensions(xgtypep%mesh%this, dimCount, pdim, localrc);
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     if(present(elementCount)) then
         call ESMF_DistGridGet(xgtypep%distgridM, localDe=0, elementCount=elementCount, &
