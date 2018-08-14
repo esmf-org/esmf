@@ -82,6 +82,7 @@ program ESMF_MeshUTest
   type(ESMF_CoordSys_Flag) :: coordSys
   integer :: dimCount, localDECount
   logical :: nodalIsPresent, elementIsPresent
+  type(ESMF_MESHSTATUS_FLAG) :: status
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -208,6 +209,12 @@ program ESMF_MeshUTest
        coordSys=ESMF_COORDSYS_CART, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+  ! Check Mesh status
+  call ESMF_MeshGet(mesh, status=status, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (status .ne. ESMF_MESHSTATUS_STRUCTCREATED) correct=.false. 
+
   ! Fill in node data
   numNodes=9
 
@@ -239,6 +246,12 @@ program ESMF_MeshUTest
   deallocate(nodeIds)
    deallocate(nodeCoords)
   deallocate(nodeOwners)
+
+  ! Check Mesh status
+  call ESMF_MeshGet(mesh, status=status, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (status .ne. ESMF_MESHSTATUS_NODESADDED) correct=.false. 
 
   ! Fill in elem data
   numElems=4
@@ -273,12 +286,20 @@ program ESMF_MeshUTest
                             elementArea=elemAreas, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
+
   ! deallocate elem data
   deallocate(elemIds)
   deallocate(elemTypes)
   deallocate(elemConn)
   deallocate(elemAreas)
   deallocate(elemCoords)
+
+  ! Check Mesh status
+  call ESMF_MeshGet(mesh, status=status, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  if (status .ne. ESMF_MESHSTATUS_COMPLETE) correct=.false. 
+
 
   !! Write mesh for debugging
   ! call ESMF_MeshWrite(mesh,"tmesh",rc=localrc)
@@ -2216,17 +2237,21 @@ endif
     elementDistgrid=elemdistgrid, rc=localrc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-
   ! Check Output mesh
   call ESMF_MeshGet(mesh, nodalDistgridIsPresent=nodalIsPresent, &
-                    elementDistgridIsPresent=elementIsPresent, rc=localrc)
+                    elementDistgridIsPresent=elementIsPresent, &
+                    status=status, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   ! Check correctness
   if (.not. nodalIsPresent .or.  .not. elementIsPresent) then
      correct=.false.
   endif
-  
+
+  if (status .ne. ESMF_MESHSTATUS_EMPTY) then
+     correct=.false.
+  endif
+
   ! Get rid of Mesh
   call ESMF_MeshDestroy(mesh, rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE

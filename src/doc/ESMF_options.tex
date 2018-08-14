@@ -545,6 +545,38 @@ The valid values are:
          Calculate the difference of the two point sets from the source Meshes.
 \end{description}
 
+\subsection{ESMF\_MESHSTATUS}
+\label{const:meshstatus}
+
+{\sf DESCRIPTION:\\}
+The ESMF Mesh class can exist in several states. The ESMF\_MESHSTATUS 
+flag is used to indicate which of these states a Mesh is currently in. 
+
+The type of this flag is:
+
+{\tt type(ESMF\_MeshStatus\_Flag)}
+
+The valid values are:
+\begin{description}
+\item [ESMF\_MESHSTATUS\_UNINIT:] The Mesh status is uninitialized. This might
+       happen if the Mesh hasn't been created yet, or if the Mesh has been destroyed.
+\item [ESMF\_MESHSTATUS\_EMPTY:] Status after a Mesh has been created with 
+      {\tt ESMF\_MeshEmptyCreate}.  Only distribution information has been set in the Mesh. 
+      This object can be used in the {\tt ESMF\_MeshGet()}
+      method to retrieve distgrids and the distgrid's presence.  
+\item [ESMF\_MESHSTATUS\_STRUCTCREATED:] Status after a Mesh has been through the first
+      step of the three step creation process. The Mesh is now ready to have nodes added
+      to it. 
+\item [ESMF\_MESHSTATUS\_NODESADDED:] Status after a Mesh has been through the second
+      step of the three step creation process. The Mesh is now ready to be completed with 
+      elements. 
+\item [ESMF\_MESHSTATUS\_COMPLETE:] The Mesh has been completely created 
+      and can be used to create a Field. Further, if the internal Mesh memory hasn't been
+      freed, then the Mesh should be usable in any Mesh functionality (e.g. 
+      regridding). The status of the internal Mesh memory can be checked using
+      the {\tt isMemFreed} argument to {\tt ESMF\_MeshGet()}.
+\end{description}
+
 \subsection{ESMF\_METHOD}
 \label{const:method}
 
