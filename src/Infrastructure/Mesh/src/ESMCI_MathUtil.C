@@ -382,8 +382,8 @@ double great_circle_area(int n, double *pnts) {
 // Compute the great circle area of a polygon on a sphere
 double great_circle_area(int n, double *pnts) {
 
-  // Make sure that it's at least a triangle
-  if (n < 3) Throw() << "Can't compute the area of a polygon containing fewer than 3 corners.";
+  // The area of a degenerate triangle is 0.0
+  if (n < 3) return 0.0;
 
   // sum areas around polygon
   double sum=0.0;
