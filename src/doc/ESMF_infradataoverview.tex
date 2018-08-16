@@ -614,9 +614,9 @@ should also be set on {\tt ESMF\_STAGGERLOC\_CENTER}.
  the sparse matrix or routeHandle). If the user needs the unmapped points, the {\tt ESMF\_FieldRegridStore()} method has the capability to return
  a list of them using the {\tt unmappedDstList} argument.  In addition to ignoring them, the user also has the option to return
  an error if unmapped destination points exist. This is the default behavior, so the user can either not set the {\tt unmappedaction} argument
- or the user can set it to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. At this point ESMF does not support extrapolation to destination points outside 
- the unmasked source Field. Currently, the unmapped destination error detection doesn't work with the nearest destination to source regrid method
-({\tt ESMF\_REGRIDMETHOD\_NEAREST\_DTOS}), so with this method the regridding behaves as if {\tt ESMF\_UNMAPPEDACTION\_IGNORE} is always on. 
+ or the user can set it to {\tt ESMF\_UNMAPPEDACTION\_ERROR}. Currently, the unmapped destination error detection doesn't 
+ work with the nearest destination to source regrid method ({\tt ESMF\_REGRIDMETHOD\_NEAREST\_DTOS}), so with this method the regridding 
+ behaves as if {\tt ESMF\_UNMAPPEDACTION\_IGNORE} is always on. 
 
 \subsubsection{Spherical grids and poles}
 In the case that the Grid is on a sphere ({\tt coordSys=ESMF\_COORDSYS\_SPH\_DEG or ESMF\_COORDSYS\_SPH\_RAD})
