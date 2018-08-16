@@ -340,7 +340,7 @@ void WMat::MergeDisjoint(const WMat &wmat2) {
     WeightMap::const_iterator ce = weights.lower_bound(upper);
 
     // If there are no constraints which match continue to next row
-    if (ci != wmat2.weights.end()) {
+    if (ci != weights.end()) {
 
       // Loop over contraints which match
       // see if any have the same dst id
