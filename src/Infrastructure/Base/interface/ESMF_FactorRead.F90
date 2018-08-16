@@ -115,7 +115,7 @@ subroutine ESMF_FactorRead(filename, factorList, factorIndexList, rc)
     ! Dimensions for the factor variables.
     character(len=3), parameter :: dfactor = "n_s"
 
-    integer :: ncid, varid, dimid, localPet, petCount, nElements, esplit, lb, ub
+    integer :: ncid, varid, dimid, localPet, petCount, nElements, esplit, lb, ub, remainder
     integer, dimension(1) :: nElementsArray, startArray
     integer :: ncStatus, theSize
     type(ESMF_VM) :: vm
@@ -127,7 +127,7 @@ subroutine ESMF_FactorRead(filename, factorList, factorIndexList, rc)
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Get all VM information
-    call ESMF_VMGetGlobal(vm, rc=rc)
+    call ESMF_VMGetCurrent(vm, rc=rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -149,29 +149,22 @@ subroutine ESMF_FactorRead(filename, factorList, factorIndexList, rc)
 
     ! Compute the lower and upper bounds for the current PET -------------------
 
-    esplit = ceiling(real(nElements) / real(petCount))
-    if (localPet == 0) then
-      lb = 1
+    esplit = floor(real(nElements) / real(petCount))
+    remainder = nElements - esplit*petCount
+    if (localPet<remainder) then
+      lb = localPet * (esplit+1) + 1
+      theSize = esplit+1
     else
-      lb = localPet * esplit + 1
+      lb = localPet * esplit + remainder + 1
+      theSize = esplit
     endif
-    ub = lb + esplit - 1
-
-    if (ub > nElements) then
-      ub = nElements
-    endif
+    ub = lb + theSize - 1
 
     ! --------------------------------------------------------------------------
 
     ! Convert to arrays as expected by the netCDF Fortran interface. Set the size
     ! of the factor arrays to zero if the localPet will not read any values.
-    if (lb <= nElements) then
-      theSize = ub - lb + 1
-    else
-      theSize = 0
-    endif
     startArray = (/lb/)
-    theSize = ub - lb + 1
     nElementsArray = (/theSize/)
 
     ! Allocate our factor arrays now that we know the size of the dimension.
