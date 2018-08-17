@@ -168,7 +168,7 @@ integer,              intent(out), optional :: rc
 !     \item [{[dimCount]}]
 !           Number of dimension of the xgrid.
 !     \item [{[elementCount]}]
-!          Number of elements in exclusive region of the xgrid.
+!          Number of elements in exclusive region of the xgrid on this PET.
 !     \item [{[sideAGrid]}]
 !           List of 2D Grids on side A. Must enter with shape(sideAGrid)=(/sideAGridCount/).
 !     \item [{[sideBGrid]}]
@@ -180,29 +180,29 @@ integer,              intent(out), optional :: rc
 !     \item [{[mesh]}]
 !           Super mesh stored in XGrid when storeOverlay is set true during XGrid creation.
 !     \item [{[area]}]
-!           Area of the xgrid cells. Must enter with shape(area)=(/elementCount/).
+!           Area of the xgrid cells on this PET. Must enter with shape(area)=(/elementCount/).
 !     \item [{[centroid]}]
-!           Coordinates at the area weighted center of the xgrid cells. Must enter with shape(centroid)=(/dimCount, elementCount/).
+!           Coordinates at the area weighted center of the xgrid cells on this PET. Must enter with shape(centroid)=(/elementCount, dimCount/).
 !     \item [{[distgridA]}]
 !           List of distgrids whose sequence index list is an overlap between a Grid
-!           on sideA and the xgrid object. Must enter with shape(distgridA)=(/ngridA/).
+!           on sideA and the xgrid object. Must enter with shape(distgridA)=(/sideAGridCount+sideAMeshCount/).
 !     \item [{[distgridB]}]
 !           List of distgrids whose sequence index list is an overlap between a Grid
-!           on sideB and the xgrid object. Must enter with shape(distgridB)=(/ngridB/).
+!           on sideB and the xgrid object. Must enter with shape(distgridB)=(/sideBGridCount+sideBMeshCount/).
 !     \item [{[distgridM]}]
 !           The distgrid whose sequence index list fully describes the xgrid object.
 !     \item [{[sparseMatA2X]}]
 !           Indexlist from a Grid index space on side A to xgrid index space; 
-!           indexFactorlist from a Grid index space on side A to xgrid index space. Must enter with shape(sparsematA2X)=(/ngridA/).
+!           indexFactorlist from a Grid index space on side A to xgrid index space. Must enter with shape(sparsematA2X)=(/sideAGridCount+sideAMeshCount/).
 !     \item [{[sparseMatX2A]}]
 !           Indexlist from xgrid index space to a Grid index space on side A; 
-!           indexFactorlist from xgrid index space to a Grid index space on side A. Must enter with shape(sparsematX2A)=(/ngridA/).
+!           indexFactorlist from xgrid index space to a Grid index space on side A. Must enter with shape(sparsematX2A)=(/sideAGridCount+sideAMeshCount/).
 !     \item [{[sparseMatB2X]}]
 !           Indexlist from a Grid index space on side B to xgrid index space; 
-!           indexFactorlist from a Grid index space on side B to xgrid index space. Must enter with shape(sparsematB2X)=(/ngridB/).
+!           indexFactorlist from a Grid index space on side B to xgrid index space. Must enter with shape(sparsematB2X)=(/sideBGridCount+sideBMeshCount/).
 !     \item [{[sparseMatX2B]}]
 !           Indexlist from xgrid index space to a Grid index space on side B; 
-!           indexFactorlist from xgrid index space to a Grid index space on side B. Must enter with shape(sparsematX2B)=(/ngridB/).
+!           indexFactorlist from xgrid index space to a Grid index space on side B. Must enter with shape(sparsematX2B)=(/sideBGridCount+sideBMeshCount/).
 !     \item [{[name]}]
 !           Name of the xgrid object.
 !     \item [{[rc]}]
@@ -213,7 +213,7 @@ integer,              intent(out), optional :: rc
 !EOP
 
     integer :: localrc, ngrid_a, ngrid_b, n_idx_a2x, n_idx_x2a, n_idx_b2x, n_idx_x2b
-    integer :: n_wgts_a, n_wgts_b, ndim, ncells, i, count
+    integer :: n_wgts_a, n_wgts_b, ndim, ncells, i, count, pdim
     type(ESMF_XGridType), pointer :: xgtypep
     type(ESMF_DELayout)           :: delayout
     type(ESMF_XGridGeomType_Flag) :: xggt
@@ -547,7 +547,15 @@ integer,              intent(out), optional :: rc
     endif
 
     if(present(dimCount)) then
-        dimCount = 1
+      if(.not. xgtypep%storeOverlay) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="- Cannot retrieve dimCount of the super mesh when storeOverylay is false.", &
+             ESMF_CONTEXT, rcToReturn=rc)
+          return
+      endif    
+      call C_ESMC_MeshGetDimensions(xgtypep%mesh%this, dimCount, pdim, localrc);
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
     if(present(elementCount)) then
         call ESMF_DistGridGet(xgtypep%distgridM, localDe=0, elementCount=elementCount, &
@@ -1047,7 +1055,7 @@ end subroutine ESMF_XGridGetSMMSpecFrac
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_XGridGetDG()"
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_XGridGet - Get an individual DistGrid from an XGrid
 
 ! !INTERFACE: ESMF_XGridGet
@@ -1091,7 +1099,7 @@ integer,                   intent(out), optional :: rc
 !       is created.
 !     \end{description}
 !
-!EOP
+!EOPI
 
     type(ESMF_XGridType), pointer :: xgtypep
     type(ESMF_XGridSide_Flag)     :: l_xgridSide

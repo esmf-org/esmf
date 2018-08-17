@@ -217,3 +217,9 @@ ESMF_CXXLINKLIBS += -lU77 $(shell $(ESMF_DIR)/scripts/libs.absoft $(ESMF_F90COMP
 # Blank out shared library options
 #
 ESMF_SL_LIBS_TO_MAKE  =
+
+############################################################
+# Add compile options required by external libraries
+ifneq ($(ESMF_YAMLCPP),)
+ESMF_CXXCOMPILEOPTS  += -std=c++11
+endif

@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMCI_ShapeFunc.h>
+#include <Mesh/include/Regridding/ESMCI_ShapeFunc.h>
 #include <Mesh/include/Legacy/ESMCI_Exception.h>
 
 #include <Mesh/include/sacado/Sacado.hpp>

@@ -302,16 +302,14 @@ void translate(double *pcoords) {
 
 
 // This method converts a Mesh to a PointList
- ESMCI::PointList *MBMesh_to_PointList(MBMesh *mesh, int *rc) {
+ESMCI::PointList *MBMesh_to_PointList(MBMesh *mesh, ESMC_MeshLoc_Flag meshLoc, ESMCI::InterArray<int> *maskValuesArg, int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMeshToPointList()"
 
   ESMCI::PointList *plp = NULL;
 
   int localrc;
-//  MEField<> *cfield;
-//  MEField<> *src_mask_val;
-//  Mesh::MeshObjIDMap::const_iterator mb,mi,me;
+  Tag src_mask_val;
 
   // Get localPet
   int localPet = VM::getCurrent(&localrc)->getLocalPet();
@@ -323,40 +321,44 @@ void translate(double *pcoords) {
 
   // MOAB error
   int merr;
+  Range range_ent;
 
-/* disable masking for now
   if (meshLoc == ESMC_MESHLOC_NODE) {
 
-    //     cfield = GetCoordField();
-    cfield = GetField("coordinates");
-    if (cfield == NULL) {
-      int localrc;
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-         "- mesh node coordinates unavailable",
-         ESMC_CONTEXT, &localrc)) throw localrc;
-    }
-    mb = map_begin(MeshObj::NODE);
-    me = map_end(MeshObj::NODE);
+    // if (!mesh->has_node_orig_coords) {
+    //   int localrc;
+    //   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+    //      "- mesh node coordinates unavailable",
+    //      ESMC_CONTEXT, &localrc)) throw localrc;
+    // }
 
-    src_mask_val = GetField("node_mask_val");
+    src_mask_val = mesh->node_mask_val_tag;
+
+    merr=moab_mesh->get_entities_by_dimension(0,0,range_ent);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    }
+
 
   } else if (meshLoc == ESMC_MESHLOC_ELEMENT) {
 
     //need check here to see that elem coordinates are set
-    cfield = GetField("elem_coordinates");
-    if (cfield == NULL) {
-
-      MBMesh_get_elem_coords(MBMesh *mbmp, EntityHandle elem, int max_num_nodes, int *num_nodes, double *coords);
-
+    if (!mesh->has_elem_coords) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
          "- mesh element coordinates unavailable",
          ESMC_CONTEXT, &localrc)) throw localrc;
     }
-    mb = map_begin(MeshObj::ELEMENT);
-    me = map_end(MeshObj::ELEMENT);
 
-    src_mask_val = GetField("elem_mask_val");
+    src_mask_val = mesh->elem_mask_val_tag;
+
+    merr=moab_mesh->get_entities_by_dimension(0,mesh->sdim,range_ent);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    }
+
 
   } else {
     //unknown meshLoc
@@ -365,136 +367,115 @@ void translate(double *pcoords) {
        "- illegal value specified for mesh location",
        ESMC_CONTEXT, &localrc)) throw localrc;
   }
-*/
 
-  //int numMaskValues;
-  //int *ptrMaskValues;
+  int numMaskValues;
+  int *ptrMaskValues;
 
-  //if (src_mask_val==NULL) {         //no masking info in mesh
+  if (present(maskValuesArg)) {
+    numMaskValues=maskValuesArg->extent[0];
+    ptrMaskValues=&(maskValuesArg->array[0]);
+  } else {
+    numMaskValues=0;
+    ptrMaskValues = NULL;
+  }
 
-    Range range_node;
-    merr=moab_mesh->get_entities_by_dimension(0,0,range_node);
+  int num_local_pts=0;
+  for(Range::iterator it=range_ent.begin(); it !=range_ent.end(); it++) {
+    const EntityHandle *ent=(&*it);
+
+    // Get owner
+    int owner;
+    merr=moab_mesh->tag_get_data(mesh->owner_tag, ent, 1, &owner);
     if (merr != MB_SUCCESS) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
     }
-
-    int num_local_pts=0;
-    for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
-      const EntityHandle *nodep=(&*it);
-
-      // Get owner
-      int owner;
-      merr=moab_mesh->tag_get_data(mesh->owner_tag, nodep, 1, &owner);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
-      if (owner == localPet) num_local_pts++;
-    }
-
-    // number of nodes
-    int num_nodes;
-    merr = moab_mesh->get_number_entities_by_dimension(0, 0, num_nodes);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
-
-    // Create PointList
-    // RLO: now this is using a potential different number of nodes
-    plp = new PointList(num_local_pts, mesh->sdim);
-
-    // Loop through adding local nodes
-    for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
-      const EntityHandle *nodep=(&*it);
-
-      // Get the owner again..
-      int owner;
-      merr=moab_mesh->tag_get_data(mesh->owner_tag, nodep, 1, &owner);
-      if (merr != MB_SUCCESS)
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-
-      // if this node is owned, add it to the pointlist
-      double c[3];
-      //vector<EntityHandle> nodev;
-      if (owner == localPet) {
-
-        merr = moab_mesh->get_coords(nodep, 1, c);
+    if (owner == localPet) {
+      if (present(maskValuesArg)) {
+        int mv;
+        // get the mask values out of the moab mesh
+        merr=moab_mesh->tag_get_data(src_mask_val, ent, 1, &mv);
         if (merr != MB_SUCCESS)
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
             moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-        int id = moab_mesh->id_from_handle(*nodep);
-        
-        plp->add(id, c);
+        // Only put objects in if they're not masked
+        bool mask=false;
+        for (int i=0; i<numMaskValues; i++) {
+          int mvi=ptrMaskValues[i];
 
+          if (mv == mvi) {
+            mask=true;
+            break;
+          }
+        }
+        if (mask) continue;
       }
+      
+      num_local_pts++;
     }
-
-
-  /* masking disable for now *** else {
   }
 
-    if (present(maskValuesArg)) {
-      numMaskValues=maskValuesArg->extent[0];
-      ptrMaskValues=&(maskValuesArg->array[0]);
-    } else {
-      numMaskValues=0;
-      ptrMaskValues = NULL;
-    }
+  // Create PointList
+  plp = new PointList(num_local_pts, mesh->sdim);
 
-    int num_local_pts=0;
-    for (mi=mb; mi != me; ++mi) {
-      const MeshObj &obj = *mi;
+  // Loop through adding local nodes
+  for(Range::iterator it=range_ent.begin(); it !=range_ent.end(); it++) {
+    const EntityHandle *ent=(&*it);
 
-      if (GetAttr(obj).is_locally_owned()) {
-        double *mv=src_mask_val->data(*mi);
-        int mv_int = (int)((*mv)+0.5);
+    // Get the owner again..
+    int owner;
+    merr=moab_mesh->tag_get_data(mesh->owner_tag, ent, 1, &owner);
+    if (merr != MB_SUCCESS)
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
 
-        // Only put objects in if they're not masked
-        bool mask=false;
-        for (int i=0; i<numMaskValues; i++) {
-          int mvi=ptrMaskValues[i];
+    // if this node is owned, add it to the pointlist
+    double c[3];
+    //vector<EntityHandle> nodev;
+    if (owner == localPet) {
 
-          if (mv_int == mvi) {
-            mask=true;
-            break;
-          }
-        }
-        if (!mask)
-          num_local_pts++;
-      }
-    }
-
-    // Create PointList
-    plp = new PointList(num_local_pts,mesh->sdim);
-
-    // Loop through adding local nodes
-    for (mi=mb; mi != me; ++mi) {
-      const MeshObj &obj = *mi;
-
-      if (GetAttr(obj).is_locally_owned()) {
-        double *mv=src_mask_val->data(*mi);
-        int mv_int = (int)((*mv)+0.5);
+      if (present(maskValuesArg)) {
+        // get the mask values out of the moab mesh
+        int mv;
+        merr=moab_mesh->tag_get_data(src_mask_val, ent, 1, &mv);
+        if (merr != MB_SUCCESS)
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
 
         // Only put objects in if they're not masked
         bool mask=false;
         for (int i=0; i<numMaskValues; i++) {
           int mvi=ptrMaskValues[i];
-
-          if (mv_int == mvi) {
+          if (mv == mvi) {
             mask=true;
             break;
           }
         }
-        if (!mask) {
-          double *coords=cfield->data(obj);
-          plp->add(obj.get_id(),coords);
-        }
+        if (mask) continue;
       }
+      
+      if (meshLoc == ESMC_MESHLOC_NODE) {
+        merr = moab_mesh->get_coords(ent, 1, c);
+        if (merr != MB_SUCCESS)
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      } else if (meshLoc == ESMC_MESHLOC_ELEMENT) {
+        merr=moab_mesh->tag_get_data(mesh->elem_coords_tag, ent, 1, c);
+        if (merr != MB_SUCCESS)
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }
+      
+      int id;
+      merr=moab_mesh->tag_get_data(mesh->gid_tag, ent, 1, &id);
+      if (merr != MB_SUCCESS)
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      // printf("PET%d: id = %d, c = [%f, %f, %f]\n", localPet, id, c[0], c[1], c[2]);
+      
+      plp->add(id, c);
     }
-  }*/
+  }
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
   return plp;

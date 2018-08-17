@@ -2428,9 +2428,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           deallocate(coord2D)
        elseif (localfileformat == ESMF_FILEFORMAT_UGRID) then
           if (totaldims == 1) then
-	      allocate(coord2D(localcount, 2))
-	  else
-	      allocate(coord2D(localcount, totaldims))
+              allocate(coord2D(localcount, 2))
+          else
+              allocate(coord2D(localcount, totaldims))
           endif
           call ESMF_UGridGetCoords(filename, meshid, coord2D, &
                                 starti, localcount, localcenterflag, rc=localrc)

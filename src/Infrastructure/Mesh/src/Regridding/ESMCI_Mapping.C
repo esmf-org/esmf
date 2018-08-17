@@ -9,8 +9,8 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/ESMCI_Mapping.h>
-#include <Mesh/include/ESMCI_ShapeFunc.h>
+#include <Mesh/include/Regridding/ESMCI_Mapping.h>
+#include <Mesh/include/Regridding/ESMCI_ShapeFunc.h>
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
 #include <iostream>
 #include <limits>

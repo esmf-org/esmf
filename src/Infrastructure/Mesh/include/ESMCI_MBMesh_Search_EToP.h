@@ -47,6 +47,7 @@ struct MBMesh_Search_EToP_Result {
 
   EntityHandle src_elem;
   std::vector<etop_sr> dst_nodes;
+  double dist;
 
   bool operator<(const MBMesh_Search_EToP_Result &rhs) const {
     return src_elem < rhs.src_elem;
@@ -61,9 +62,12 @@ struct MBMesh_Search_EToP_Result {
 typedef std::vector<MBMesh_Search_EToP_Result*> MBMesh_Search_EToP_Result_List;
 
 
-void MBMesh_Search_EToP(MBMesh *mbmAp, int unmappedactionA,
+void MBMesh_Search_EToP(MBMesh *mbmAp,
                         PointList *mbmBp, int unmappedactionB,
-                        double stol, MBMesh_Search_EToP_Result_List &result);
+                        int *map_type, double stol, 
+                        MBMesh_Search_EToP_Result_List &result,
+                        bool set_dst_status, WMat &dst_status,
+                        std::vector<int> *revised_dst_loc, OTree *box_in);
 
 #endif
 #endif

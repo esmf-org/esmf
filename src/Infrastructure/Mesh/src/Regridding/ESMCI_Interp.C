@@ -2192,6 +2192,9 @@ void calc_nearest_npnts_mat_serial(PointList *srcpointlist, PointList *dstpointl
     Throw() << "src and dst must have the same spatial dimension for nearest regridding";
   }
 
+  // Get dimension
+  int sdim=srcpointlist->get_coord_dim();
+
   // Convert to double
   // (Just in case ESMC_R8 is different)
   double dist_exponent_dbl = (double)dist_exponent;
@@ -2219,7 +2222,7 @@ void calc_nearest_npnts_mat_serial(PointList *srcpointlist, PointList *dstpointl
     double dst_pnt[3];
     dst_pnt[0] = coord[0];
     dst_pnt[1] = coord[1];
-    dst_pnt[2] = (dstpointlist->get_coord_dim() == 3 ? coord[2] : 0.0);
+    dst_pnt[2] = (sdim == 3 ? coord[2] : 0.0);
 
     // Set row info (i.e. the destination id)
     IWeights::Entry row(dst_id, 0, 0.0, 0);
@@ -2233,7 +2236,10 @@ void calc_nearest_npnts_mat_serial(PointList *srcpointlist, PointList *dstpointl
     for (int i=0; i<sr.nodes.size(); i++) {
 
       // Get coordinates of src point
-      double *coord=sr.nodes[i].pcoord;
+      double coord[3];
+      coord[0] = sr.nodes[i].pcoord[0];
+      coord[1] = sr.nodes[i].pcoord[1];
+      coord[2] = (sdim == 3 ? sr.nodes[i].pcoord[2] : 0.0);
 
       // Calculate distance
       double dist=sqrt((dst_pnt[0]-coord[0])*(dst_pnt[0]-coord[0])+
@@ -2253,7 +2259,10 @@ void calc_nearest_npnts_mat_serial(PointList *srcpointlist, PointList *dstpointl
       for (int i=0; i<sr.nodes.size(); i++) {
 
         // Get coordinates of src point
-        double *coord=sr.nodes[i].pcoord;
+        double coord[3];
+        coord[0] = sr.nodes[i].pcoord[0];
+        coord[1] = sr.nodes[i].pcoord[1];
+        coord[2] = (sdim == 3 ? sr.nodes[i].pcoord[2] : 0.0);
 
         // Calculate distance
         double dist=sqrt((dst_pnt[0]-coord[0])*(dst_pnt[0]-coord[0])+
@@ -2283,7 +2292,10 @@ void calc_nearest_npnts_mat_serial(PointList *srcpointlist, PointList *dstpointl
       for (int i=0; i<sr.nodes.size(); i++) {
 
         // Get coordinates of src point
-        double *coord=sr.nodes[i].pcoord;
+        double coord[3];
+        coord[0] = sr.nodes[i].pcoord[0];
+        coord[1] = sr.nodes[i].pcoord[1];
+        coord[2] = (sdim == 3 ? sr.nodes[i].pcoord[2] : 0.0);
 
         // Calculate distance
         double dist=sqrt((dst_pnt[0]-coord[0])*(dst_pnt[0]-coord[0])+

@@ -22,6 +22,10 @@
 #include "ESMC_Test.h"
 
 #if defined ESMF_MOAB
+#include "ESMC_MBMeshTestUtilMesh.C"
+#include "ESMC_MBMeshTestUtilMBMesh.C"
+#include "ESMC_MBMeshTestUtilPL.C"
+
 // other headers
 #include "ESMCI_MBMesh.h"
 #include "ESMCI_MBMesh_Glue.h"
@@ -30,6 +34,7 @@
 
 #include "MBTagConventions.hpp"
 #include "moab/Core.hpp"
+#include "moab/ParallelComm.hpp"
 
 #include "ESMCI_WMat.h"
 #endif
@@ -47,63 +52,6 @@
 using namespace std;
 
 #if defined ESMF_MOAB
-
-typedef std::map<WMat::Entry, std::vector<WMat::Entry> > WeightMap;
-WeightMap weights;
-WeightMap::iterator begin_row() { return weights.begin(); }
-WeightMap::iterator end_row() { return weights.end(); }
-
-bool weight_gen(MBMesh *mesh, PointList *pl) {
-  int rc = ESMF_RC_NOT_IMPL;
-  char name[80];
-  char failMsg[80];
-  int result = 0;
-
-  // early exit for ESMF_MOAB=OFF
-  if (mesh == NULL || pl == NULL)
-    return true;
-  
-  // do bilinear regridding between mesh and pointlist
-  IWeights wt;
-  IWeights &wts = wt;
-  calc_bilinear_regrid_wgts(mesh, pl, wts);
-
-  cout << endl << "Bilinear Weight Matrix" << endl;
-  // print out weights
-  WeightMap::iterator mb = wts.begin_row(), me = wts.end_row();
-  for(; mb != me; ++mb) {
-    WMat::Entry col = mb->first;
-    vector<WMat::Entry> row = mb->second;
-
-    cout << "[" << col.id << "," << col.idx << "," << col.value << ","
-         << col.src_id << "] - ";
-
-    vector<WMat::Entry>::iterator vb = row.begin(), ve = row.end();
-    for(; vb != ve; ++vb) {
-      WMat::Entry rv = *vb;
-      cout << "[" << rv.id << "," << rv.idx << "," << rv.value << ","
-           << rv.src_id << "] ";
-    }
-    cout << endl;
-  }
-  cout << endl;
-
-  rc = ESMF_SUCCESS;
-
-  if (rc == ESMF_SUCCESS) return true;
-  else return false;
-
-}
-
-#else
-
-// dummy function for ESMF_MOAB=OFF
-bool weight_gen(void *mesh, void *pl) {return true;}
-
-#endif
-
-#if defined ESMF_MOAB
-
 MBMesh* create_mesh_quad_single(int &rc, bool cart, bool collapsed = false) {
   //
 
@@ -166,7 +114,7 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart, bool collapsed = false) {
 
   int nodeId_s [] ={1,2,3,4};
   int nodeOwner_s [] ={0,0,0,0};
-  int nodeMask_s [] ={1,1,1,1};
+  int nodeMask_s [] ={0,0,0,0};
   int elemId_s [] ={11};
   int elemType_s [] ={ESMC_MESHELEMTYPE_QUAD};
   int elemConn_s [] ={1,2,3,4};
@@ -184,6 +132,7 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart, bool collapsed = false) {
                   ii_node, &coordSys, &sdim, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
+
   InterArray<int> *ii_elem = new InterArray<int>(elemMask_s,1);
 
   int areapresent = 0;
@@ -198,11 +147,37 @@ MBMesh* create_mesh_quad_single(int &rc, bool cart, bool collapsed = false) {
                      &coordSys, &sdim, &rc);
   if (rc != ESMF_SUCCESS) return NULL;
 
+MBMesh *mbmesh = static_cast<MBMesh *>(meshp);
+
+#ifdef DEBUG_MASK
+  EntityHandle *verts=new EntityHandle[num_node];
+  mbmesh->verts=verts;
+  printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMESH_BILINEAR_TEST ~~~~~~~~~~~~~~~\n");
+  printf("ESMCI_MBMESH_BILINEAR_TEST - has_node_mask == %s\n", mbmesh->has_node_mask ? "true" : "false");
+  
+  int testmask[num_node];
+  int merr;
+  // this fails with a moab error, invalid tag ( try passing elements instead of verts?)
+  Range nodes;
+  merr=mbmesh->mesh->get_entities_by_dimension(0, 0, nodes);
+  if (merr != MB_SUCCESS) throw (ESMC_RC_MOAB_ERROR);
+
+  merr=mbmesh->mesh->tag_get_data(mbmesh->node_mask_val_tag,  nodes, testmask);
+  if (merr != MB_SUCCESS) throw (ESMC_RC_MOAB_ERROR);
+
+  printf("ESMCI_MBMESH_BILINEAR_TEST - tag_get_data test mask is = [");
+  for (int i = 0; i < num_node; ++i)
+    printf("%d, ", testmask[i]);
+  printf("]\n");
+  printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMESH_BILINEAR_TEST ~~~~~~~~~~~~~~~\n");
+#endif
+
+
   delete ii_node;
   delete ii_elem;
 
   rc = ESMF_SUCCESS;
-  return static_cast<MBMesh *>(meshp);
+  return mbmesh;
 }
 
 MBMesh* create_mesh_tri_single(int &rc, bool cart) {
@@ -260,7 +235,7 @@ MBMesh* create_mesh_tri_single(int &rc, bool cart) {
 
   int nodeId_s [] ={1,2,3};
   int nodeOwner_s [] ={0,0,0};
-  int nodeMask_s [] ={1,1,1};
+  int nodeMask_s [] ={0,0,0};
   int elemId_s [] ={11};
   int elemType_s [] ={ESMC_MESHELEMTYPE_TRI};
   int elemConn_s [] ={1,2,3};
@@ -472,11 +447,6 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   rc=ESMC_LogSet(true);
 
-#if defined ESMF_MOAB
-  //----------------------------------------------------------------------------
-  //ESMC_MoabSet(true);
-#endif
-
   // Get parallel information
   vm=ESMC_VMGetGlobal(&rc);
   if (rc != ESMF_SUCCESS) return 0;
@@ -495,15 +465,18 @@ int main(int argc, char *argv[]) {
   bool cart =  false;
   bool collapsed = false;
 
+  vector<double> weights;
+  weights.resize(4);
+
 #else
 
-void *mesh_quad_single = NULL;
-void *mesh_tri_single = NULL;
-void *pl_on_edge = NULL;
-void *pl_on_node = NULL;
-void *pl = NULL;
-bool cart =  false;
-bool collapsed = false;
+  void *mesh_quad_single = NULL;
+  void *mesh_tri_single = NULL;
+  void *pl_on_edge = NULL;
+  void *pl_on_node = NULL;
+  void *pl = NULL;
+  bool cart =  false;
+  bool collapsed = false;
 
 #endif
 
@@ -520,12 +493,15 @@ bool collapsed = false;
 
   // build a pointlist
   pl_on_edge = create_pointlist_on_edge(rc, cart);
+  
+  // expected result
+  std::fill(weights.begin(), weights.end(), UNINITVAL);
 
   //----------------------------------------------------------------------------
   //NEX_disable_UTest
   strcpy(name, "Quadrilateral Cartesian bilinear weight generation with pointlist point on edge");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl_on_edge)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_quad_single, pl_on_edge, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl_on_edge;
@@ -533,7 +509,7 @@ bool collapsed = false;
 #else
   strcpy(name, "Quadrilateral Cartesian bilinear weight generation with pointlist point on edge");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl_on_edge)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
   // --------------------------------------------------------------------------
@@ -554,7 +530,7 @@ bool collapsed = false;
   //NEX_disable_UTest
   strcpy(name, "Quadrilateral spherical bilinear weight generation with pointlist point on edge");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl_on_edge)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_quad_single, pl_on_edge, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl_on_edge;
@@ -562,7 +538,7 @@ bool collapsed = false;
 #else
   strcpy(name, "Quadrilateral spherical bilinear weight generation with pointlist point on edge");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl_on_edge)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
   // --------------------------------------------------------------------------
@@ -583,7 +559,7 @@ bool collapsed = false;
   //NEX_disable_UTest
   strcpy(name, "Quadrilateral Cartesian bilinear weight generation with pointlist point on node");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl_on_node)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_quad_single, pl_on_node, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl_on_node;
@@ -591,7 +567,7 @@ bool collapsed = false;
 #else
   strcpy(name, "Quadrilateral Cartesian bilinear weight generation with pointlist point on node");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl_on_node)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
   // --------------------------------------------------------------------------
@@ -612,7 +588,7 @@ bool collapsed = false;
   //NEX_disable_UTest
   strcpy(name, "Quadrilateral spherical bilinear weight generation with pointlist point on node");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl_on_node)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_quad_single, pl_on_node, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl_on_node;
@@ -620,7 +596,7 @@ bool collapsed = false;
 #else
   strcpy(name, "Quadrilateral spherical bilinear weight generation with pointlist point on node");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl_on_node)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
   // --------------------------------------------------------------------------
@@ -641,7 +617,7 @@ bool collapsed = false;
   //NEX_disable_UTest
   strcpy(name, "Triangle Cartesian bilinear weight generation with pointlist point on edge");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_tri_single, pl_on_edge)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_tri_single, pl_on_edge, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl_on_edge;
@@ -649,7 +625,7 @@ bool collapsed = false;
 #else
   strcpy(name, "Triangle Cartesian bilinear weight generation with pointlist point on edge");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_tri_single, pl_on_edge)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
   // --------------------------------------------------------------------------
@@ -670,7 +646,7 @@ bool collapsed = false;
   //NEX_disable_UTest
   strcpy(name, "Triangle spherical bilinear weight generation with pointlist point on edge");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_tri_single, pl_on_edge)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_tri_single, pl_on_edge, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl_on_edge;
@@ -678,7 +654,7 @@ bool collapsed = false;
 #else
   strcpy(name, "Triangle spherical bilinear weight generation with pointlist point on edge");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_tri_single, pl_on_edge)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
   // --------------------------------------------------------------------------
@@ -699,7 +675,7 @@ bool collapsed = false;
   //NEX_disable_UTest
   strcpy(name, "Triangle Cartesian bilinear weight generation with pointlist point on node");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_tri_single, pl_on_node)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_tri_single, pl_on_node, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl_on_node;
@@ -707,7 +683,7 @@ bool collapsed = false;
 #else
   strcpy(name, "Triangle Cartesian bilinear weight generation with pointlist point on node");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_tri_single, pl_on_node)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
   // --------------------------------------------------------------------------
@@ -728,7 +704,7 @@ bool collapsed = false;
   //NEX_disable_UTest
   strcpy(name, "Triangle spherical bilinear weight generation with pointlist point on node");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_tri_single, pl_on_node)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_tri_single, pl_on_node, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl_on_node;
@@ -736,7 +712,7 @@ bool collapsed = false;
 #else
   strcpy(name, "Triangle spherical bilinear weight generation with pointlist point on node");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_tri_single, pl_on_node)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
   // --------------------------------------------------------------------------
@@ -758,7 +734,7 @@ bool collapsed = false;
   //NEX_disable_UTest
   strcpy(name, "Collapsed quadrilateral to triangle Cartesian bilinear weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_quad_single, pl, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl;
@@ -766,7 +742,7 @@ bool collapsed = false;
 #else
   strcpy(name, "Collapsed quadrilateral to triangle Cartesian bilinear weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
   // --------------------------------------------------------------------------
@@ -788,7 +764,7 @@ bool collapsed = false;
   //NEX_disable_UTest
   strcpy(name, "Collapsed quadrilateral to triangle spherical bilinear weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((weight_gen(mesh_quad_single, pl, weights, cart)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   // clean up
   delete pl;
@@ -796,7 +772,7 @@ bool collapsed = false;
 #else
   strcpy(name, "Collapsed quadrilateral to triangle spherical bilinear weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
-  ESMC_Test((weight_gen(mesh_quad_single, pl)), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
 #endif
 
   // --------------------------------------------------------------------------

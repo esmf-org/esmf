@@ -40,6 +40,7 @@ module NUOPC_FieldDictionaryDef
   public NUOPC_FieldDictionaryEgestI
   public NUOPC_FieldDictionaryGetEntryI
   public NUOPC_FieldDictionaryHasEntryI
+  public NUOPC_FieldDictionaryIngestI
   public NUOPC_FieldDictionaryMatchSynoI
   public NUOPC_FieldDictionarySetSynoI
   public NUOPC_FieldDictionaryDefinition
@@ -220,6 +221,166 @@ module NUOPC_FieldDictionaryDef
     NUOPC_FieldDictionaryHasEntryI = isPres
     
   end function
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionaryIngestI - Ingest FreeFormat into NUOPC Field dictionary
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionaryIngestI(fieldDictionary, freeFormat, rc)
+! !ARGUMENTS:
+    type(ESMF_Container),   intent(inout)         :: fieldDictionary
+    type(NUOPC_FreeFormat), intent(in)            :: freeFormat
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Ingest the contents of a FreeFormat object into the NUOPC Field dictionary.
+!EOPI
+  !-----------------------------------------------------------------------------
+    integer                                         :: localrc
+    integer                                         :: stat, i, k, nameCount
+    character(len=NUOPC_FreeFormatLen)              :: keyString, valueString
+    character(len=NUOPC_FreeFormatLen)              :: canonicalUnits
+    character(len=NUOPC_FreeFormatLen), allocatable :: standardNames(:)
+    character(len=NUOPC_FreeFormatLen), allocatable :: tmpList(:)
+
+    logical                     :: isPres
+    integer,          parameter :: bufferSize = 10
+    character(len=*), parameter :: sepString  = &
+      "----------------------------------------------------------------"
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! allocate buffer to hold list of standard names and synonyms
+    allocate(standardNames(bufferSize), stat=stat)
+    if (ESMF_LogFoundAllocError(stat, msg="allocating internal workspace", &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return
+
+    nameCount      = 0
+    standardNames  = ""
+    canonicalUnits = ""
+
+    ! process lines from FreeFormat object
+    freeform_input: do i = 1, freeFormat % count
+
+      if (trim(freeFormat % stringList(i)) == sepString) then
+
+        if (nameCount == 0) then
+          call ESMF_LogSetError(ESMF_RC_NOT_FOUND, &
+            msg="Invalid FreeFormat object: missing standardName", &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)
+          exit freeform_input
+        end if
+        if (len_trim(canonicalUnits) == 0) then
+          call ESMF_LogSetError(ESMF_RC_NOT_FOUND, &
+            msg="Invalid FreeFormat object: missing canonicalUnits", &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)
+          exit freeform_input
+        end if
+
+        ! add standard name entries
+        do k = 1, nameCount
+          isPres = NUOPC_FieldDictionaryHasEntryI(fieldDictionary, &
+            standardNames(k), rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) exit freeform_input
+          if (.not.isPres) then
+            call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
+              standardNames(k), canonicalUnits, rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=FILENAME, rcToReturn=rc)) exit freeform_input
+          end if
+        end do
+
+        ! add synonyms
+        if (nameCount > 1) then
+          call NUOPC_FieldDictionarySetSynoI(fieldDictionary, &
+            standardNames(1:nameCount), rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) exit freeform_input
+        end if
+
+        ! reset buffers and counter
+        nameCount      = 0
+        standardNames  = ""
+        canonicalUnits = ""
+
+      else
+
+        read(freeFormat % stringList(i), *, iostat=stat) keyString, valueString
+        if (stat /= 0) then
+          call ESMF_LogSetError(ESMF_RC_CANNOT_GET, &
+            msg="Error reading from FreeFormat object", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)
+          exit freeform_input
+        end if
+
+        select case (trim(keyString))
+          case ("canonicalUnits:")
+            if (len_trim(canonicalUnits) > 0) then
+              call ESMF_LogSetError(ESMF_RC_DUP_NAME, &
+                msg="Invalid FreeFormat object: canonicalUnits", &
+                line=__LINE__, &
+                file=FILENAME, &
+                rcToReturn=rc)
+              exit freeform_input
+            end if
+            canonicalUnits = valueString
+          case ("standardName:","synonym:")
+            nameCount = nameCount + 1
+            if (nameCount > size(standardNames)) then
+              allocate(tmpList(size(standardNames)), stat=stat)
+              if (ESMF_LogFoundAllocError(stat, &
+                msg="allocating internal workspace", &
+                line=__LINE__, file=FILENAME, &
+                rcToReturn=rc)) exit freeform_input
+              tmpList = standardNames
+              deallocate(standardNames, stat=stat)
+              if (ESMF_LogFoundAllocError(stat, &
+                msg="deallocating internal workspace", &
+                line=__LINE__, file=FILENAME, &
+                rcToReturn=rc)) exit freeform_input
+              allocate(standardNames(size(tmpList)+bufferSize), stat=stat)
+              if (ESMF_LogFoundAllocError(stat, &
+                msg="allocating internal workspace", &
+                line=__LINE__, file=FILENAME, &
+                rcToReturn=rc)) exit freeform_input
+              standardNames = ""
+              standardNames(1:size(tmpList)) = tmpList
+              deallocate(tmpList, stat=stat)
+              if (ESMF_LogFoundDeallocError(stat, &
+                msg="deallocating internal workspace", &
+                line=__LINE__, file=FILENAME, &
+                rcToReturn=rc)) exit freeform_input
+            end if
+            standardNames(nameCount) = valueString
+          case default
+            call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+              msg="Invalid FreeFormat keyword: " // trim(keyString), &
+              line=__LINE__, &
+              file=FILENAME, &
+              rcToReturn=rc)
+            exit freeform_input
+        end select
+      end if
+    end do freeform_input
+
+    if (allocated(tmpList)) then
+      deallocate(tmpList, stat=stat)
+      isPres = ESMF_LogFoundDeallocError(stat, &
+        msg="deallocating internal workspace", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)
+     end if
+
+    if (allocated(standardNames)) then
+      deallocate(standardNames, stat=stat)
+      isPres = ESMF_LogFoundDeallocError(stat, &
+        msg="deallocating internal workspace", &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)
+     end if
+
+  end subroutine
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------

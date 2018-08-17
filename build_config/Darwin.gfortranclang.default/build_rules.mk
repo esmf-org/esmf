@@ -243,3 +243,8 @@ ESMF_CXXLINKLIBS += -lgfortran -lstdc++ -lc++
 ESMF_SL_LIBOPTS  += -dynamiclib
 ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
 
+############################################################
+# Add compile options required by external libraries
+ifneq ($(ESMF_YAMLCPP),)
+ESMF_CXXCOMPILEOPTS  += -std=c++11
+endif

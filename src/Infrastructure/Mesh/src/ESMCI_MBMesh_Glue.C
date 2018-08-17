@@ -159,6 +159,7 @@ void MBMesh_create(void **mbmpp,
     // Set dimensions
     mbmp->pdim=*pdim;
     mbmp->sdim=cart_sdim;
+    mbmp->orig_sdim=*sdim;
 
     // Output mesh
     *mbmpp=(void *)mbmp;
@@ -279,6 +280,10 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
     }
 
     // Set mask information
+// #define DEBUG_MASK
+#ifdef DEBUG_MASK
+    printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMesh_Glue mask ~~~~~~~~~~~~~~~\n");
+#endif
     mbmp->has_node_mask=false;
     if (present(nodeMaskII)) { // if masks exist
       // Error checking
@@ -309,7 +314,6 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                          moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
       }
-
       // Set values in node mask value
       merr=moab_mesh->tag_set_data(mbmp->node_mask_val_tag, verts, num_verts, nodeMaskII->array);
       if (merr != MB_SUCCESS) {
@@ -319,7 +323,35 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
 
       // Record the fact that it has masks
       mbmp->has_node_mask=true;
+
+#ifdef DEBUG_MASK
+      {
+        int localrc = 0;
+        int merr = 0;
+
+        int node_mask[num_verts];
+        if (mbmp->has_node_mask) { 
+          Range nodes;
+          merr=mbmp->mesh->get_entities_by_dimension(0, 0, nodes);
+          if (merr != MB_SUCCESS) throw (ESMC_RC_MOAB_ERROR);
+          merr=mbmp->mesh->tag_get_data(mbmp->node_mask_val_tag, nodes, &node_mask);
+          if (merr != MB_SUCCESS)
+            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+              moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }
+
+        printf("node_mask = [");
+        for (int i = 0; i < num_verts; ++i)
+          printf("%d, ", node_mask[i]);
+        printf("]\n");
+      }
+#endif
+
     }
+#ifdef DEBUG_MASK
+    printf("has_node_mask = %d\n", mbmp->has_node_mask);
+    printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMesh_Glue mask ~~~~~~~~~~~~~~~\n");
+#endif
 
  /* XMRKX */
 
@@ -478,14 +510,95 @@ static void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int
     return;
 }
 
+// triangulate > 4 sided
+// sdim = spatial dim
+// num_p = number of points in poly
+// p     = poly coords size=num_p*sdim
+// oeid  = id of original element for debug output
+// td    = temporary buffer size=num_p*sdim
+// ti    = temporary integer buffer size = num_p
+// tri_ind = output array  size = 3*(nump-2)
+// tri_area = area of each sub-triangle is of whole poly size=(num_p-2)
+static void triangulate_warea(int sdim, int num_p, double *p, int oeid,
+                              double *td, int *ti, int *tri_ind,
+                              double *tri_area) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "triangulate_warea()"
+
+          int localrc;
+
+          // Call into triagulation routines
+          int ret;
+          if (sdim==2) {
+            ret=triangulate_poly<GEOM_CART2D>(num_p, p, td,
+                                              ti, tri_ind);
+          } else if (sdim==3) {
+            ret=triangulate_poly<GEOM_SPH2D3D>(num_p, p, td,
+                                               ti, tri_ind);
+          } else {
+            if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                                          " - triangulate can't be used for polygons with spatial dimension not equal to 2 or 3",
+                                              ESMC_CONTEXT, &localrc)) throw localrc;
+          }
+
+          // Check return code
+          if (ret != ESMCI_TP_SUCCESS) {
+            if (ret == ESMCI_TP_DEGENERATE_POLY) {
+              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
+                   " - can't triangulate a polygon with less than 3 sides",
+                                                ESMC_CONTEXT, &localrc)) throw localrc;
+            } else if (ret == ESMCI_TP_CLOCKWISE_POLY) {
+              char msg[1024];
+              sprintf(msg," - there was a problem (e.g. repeated points, clockwise poly, etc.) with the triangulation of the element with id=%d ",oeid);
+              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP, msg,
+                                              ESMC_CONTEXT, &localrc)) throw localrc;
+            } else {
+              if (ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                                " - unknown error in triangulation", ESMC_CONTEXT, &localrc)) throw localrc;
+            }
+          }
+
+
+          // Calculate triangule areas
+          int ti_pos=0;
+          for (int i=0; i<num_p-2; i++) {
+            // Copy triangle coordinates into td
+            int td_pos=0;
+            for (int j=0; j<3; j++) {
+              double *pnt=p+sdim*tri_ind[ti_pos+j];
+              for (int k=0; k<sdim; k++) {
+                td[td_pos]=pnt[k];
+                td_pos++;
+              }
+            }
+
+            // compute area of triangle
+            double area;
+            if (sdim == 2) {
+              area = area_of_flat_2D_polygon(3, td);
+            } else if (sdim == 3) {
+              area = great_circle_area(3, td);
+            } // Other sdim caught above
+
+            // Save areas to use for computing fractions
+            tri_area[i]=area;
+
+            // Advance to next triangle
+            ti_pos +=3;
+          }
+
+    return;
+}
+
 
 void MBMesh_addelements(void **mbmpp,
-                                              int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
-                                              int *_areaPresent, double *elemArea,
-                                              int *_coordsPresent, double *elemCoords,
-                                              int *_num_elemConn, int *elemConn, int *regridConserve,
-                                              ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
-                                              int *rc)
+                        int *_num_elems, int *elemId, 
+                        int *elemType, InterArray<int> *_elemMaskII ,
+                        int *_areaPresent, double *elemArea,
+                        int *_coordsPresent, double *elemCoords,
+                        int *_num_elemConn, int *elemConn, int *regridConserve,
+                        ESMC_CoordSys_Flag *_coordSys, int *_orig_sdim,
+                        int *rc)
 {
 
   /* XMRKX */
@@ -541,7 +654,7 @@ void MBMesh_addelements(void **mbmpp,
 
     int areaPresent=*_areaPresent;
 
-    int coordsPresent=*_coordsPresent;
+    int elemCoordsPresent=*_coordsPresent;
 
     ESMC_CoordSys_Flag coordSys=*_coordSys;
     int orig_sdim = *_orig_sdim;   // original sdim (before conversion to Cartesian)
@@ -681,7 +794,7 @@ printf("    PET %d - elem coords\n", localPet);
     // Handle element coords
     mbmp->has_elem_coords=false;
     mbmp->has_elem_orig_coords=false;
-    if (coordsPresent == 1) { // if coords exist
+    if (elemCoordsPresent == 1) { // if coords exist
 
       // Add element coords field
       merr=moab_mesh->tag_get_handle("elem_coords", mbmp->sdim, MB_TYPE_DOUBLE, mbmp->elem_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
@@ -707,19 +820,54 @@ printf("    PET %d - elem coords\n", localPet);
       mbmp->has_elem_coords=true;
     }
 
+    // Variable indicating if any of the elements on this PET are split
+    bool is_split_local=false;
 
     // Count the number of extra elements we need for splitting
     int num_extra_elem=0;
     int max_num_conn=0;
-    if (parametric_dim==2) {
+    int max_num_elemtris=0;
+     if (parametric_dim==2) {
+      int conn_pos=0;
       for (int e = 0; e < num_elems; ++e) {
-        if (elemType[e] >4) {
-          num_extra_elem += (elemType[e]-3); // Original elem + # sides-2
+
+        // Only count split elements
+        if (elemType[e] > 4) {
+
+          // Loop here through each set of connection looking for polybreaks to
+          // figure out the size of each sub-elem
+          int subelem_size=0;
+          int num_elemtris=0;
+          for (int i=0; i<elemType[e]; i++) {
+
+            // Advance size of element, or start a new one
+            if (elemConn[conn_pos] != MESH_POLYBREAK_IND) {
+              subelem_size++;
+            } else {
+              // record this elem
+              num_extra_elem += (subelem_size-2); // num tri = # sides-2
+              num_elemtris += (subelem_size-2); // num tri = # sides-2
+              if (subelem_size > max_num_conn) max_num_conn=subelem_size;
+              subelem_size=0;
+            }
+
+            // next connection
+            conn_pos++;
+          }
+
+          // record this elem
+          num_extra_elem += (subelem_size-3); // num tri = # sides-2 - 1 (for orig elem)
+          num_elemtris += (subelem_size-2); // num tri = # sides-2 (count orig elem)
+          if (num_elemtris > max_num_elemtris) max_num_elemtris=num_elemtris;
+          if (subelem_size > max_num_conn) max_num_conn=subelem_size;
+        } else {
+          conn_pos += elemType[e];
         }
+      }
 
-        if (elemType[e] > max_num_conn) max_num_conn=elemType[e];
-       }
-
+      // mark if mesh on this particular PET is split
+      if (num_extra_elem > 0) is_split_local=true;
+      
       int tot_num_extra_elem=0;
       MPI_Allreduce(&num_extra_elem,&tot_num_extra_elem,1,MPI_INT,MPI_SUM,mpi_comm);
 
@@ -764,15 +912,15 @@ printf("    PET %d - elem coords\n", localPet);
       // printf("%d# beg_extra_ids=%d end=%d\n",Par::Rank(),beg_extra_ids,beg_extra_ids+num_extra_elem-1);
     }
 
-
+#if 0
     // Don't currently support split elements with element coords
-    if (mbmp->is_split && coordsPresent) {
+    if (mbmp->is_split && elemCoordsPresent) {
       int localrc;
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
          "- ESMF doesn't currently support both element coords and polygons with >4 sides in the same Mesh.",
              ESMC_CONTEXT, &localrc)) throw localrc;
     }
-
+#endif
 
     // Get number of verts
     int num_verts = mbmp->num_verts;
@@ -833,7 +981,6 @@ printf("    PET %d - elem coords\n", localPet);
           ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
-
     // Generate connectivity list with split elements
     // TODO: MAYBE EVENTUALLY PUT EXTRA SPLIT ONES AT END
     int num_elems_wsplit=0;
@@ -841,14 +988,15 @@ printf("    PET %d - elem coords\n", localPet);
     int *elemType_wsplit=NULL;
     int *elemId_wsplit=NULL;
     double *elemArea_wsplit=NULL;
+    double *elemCoords_wsplit=NULL;
     int *elemMaskIIArray_wsplit=NULL;
-     InterArray<int> *elemMaskII_wsplit=NULL;
+    InterArray<int> *elemMaskII_wsplit=NULL;
 
 #ifdef DEBUG
 printf("    PET %d - split elems\n", localPet);
 #endif
 
-    if (mbmp->is_split) {
+    if (is_split_local) {
       // New number of elements
       num_elems_wsplit=num_elems+num_extra_elem;
 
@@ -856,8 +1004,8 @@ printf("    PET %d - split elems\n", localPet);
       elemConn_wsplit=new int[num_elemConn+3*num_extra_elem];
       elemType_wsplit=new int[num_elems_wsplit];
       elemId_wsplit=new int[num_elems_wsplit];
-        if (areaPresent==1) elemArea_wsplit=new double[num_elems_wsplit];
-
+      if (areaPresent==1) elemArea_wsplit=new double[num_elems_wsplit];
+      if (elemCoordsPresent==1) elemCoords_wsplit=new double[orig_sdim*num_elems_wsplit];
 
       //// Setup for split mask
       int *elemMaskIIArray=NULL;
@@ -875,11 +1023,14 @@ printf("    PET %d - split elems\n", localPet);
 
 
       // Allocate some temporary variables for splitting
-      double *polyCoords=new double[3*max_num_conn];
-      double *polyDblBuf=new double[3*max_num_conn];
-      int    *polyIntBuf=new int[max_num_conn];
-      int    *triInd=new int[3*(max_num_conn-2)];
-      double *triFrac=new double[max_num_conn-2];
+      double *subelem_coords=new double[3*max_num_conn];
+      double *subelem_dbl_buf=new double[3*max_num_conn];
+      int    *subelem_int_buf=new int[max_num_conn];
+      int    *subelem_tri_ind=new int[3*(max_num_conn-2)];
+      double *subelem_tri_area=new double[max_num_conn-2];
+
+      double *elemtris_area=new double[max_num_elemtris];
+      int *elemtris_split_elem_pos=new int[max_num_elemtris];
 
       // new id counter
       int curr_extra_id=beg_extra_ids;
@@ -896,6 +1047,28 @@ printf("    PET %d - split elems\n", localPet);
         // More than 4 side, split
          if (elemType[e]>4) {
 
+          // Init for frac calc
+          int    num_elemtris=0;
+          double tot_elemtris_area=0.0;
+
+          // Loop while we're still in this element
+          bool first_elem=true;
+          int end_of_elem=conn_pos+elemType[e];
+          while (conn_pos < end_of_elem) {
+
+            // Skip poly breaks
+            if (elemConn[conn_pos] == MESH_POLYBREAK_IND) conn_pos++;
+
+            // Find sub-elements (may be only one)
+            int subelem_size=0;
+            for (int i=conn_pos; i<end_of_elem; i++) {
+              if (elemConn[i] == MESH_POLYBREAK_IND) break;
+              subelem_size++;
+            }
+
+            //   printf("id=%d subelem_size=%d\n",elemId[e],subelem_size);
+
+
           // Get coordinates
           int crd_pos=0;
           for (int i=0; i<elemType[e]; i++) {
@@ -909,79 +1082,126 @@ printf("    PET %d - split elems\n", localPet);
             }
 
             for (int j=0; j<sdim; j++) {
-              polyCoords[crd_pos]=coords[j];
+              subelem_coords[crd_pos]=coords[j];
               crd_pos++;
             }
 
-            // printf("id=%d coord=%f %f \n",elemId[e],polyCoords[crd_pos-2],polyCoords[crd_pos-1]);
+            // printf("id=%d coord=%f %f \n",elemId[e],subelem_coords[crd_pos-2],subelem_coords[crd_pos-1]);
           }
 
           // Triangulate polygon
-          triangulate(sdim, elemType[e], polyCoords, polyDblBuf, polyIntBuf,
-                      triInd, triFrac);
+          triangulate_warea(sdim, subelem_size, subelem_coords, elemId[e],
+                            subelem_dbl_buf, subelem_int_buf,
+                            subelem_tri_ind, subelem_tri_area);
 
 
           // Create split element list
           int tI_pos=0;
-          for (int i=0; i<elemType[e]-2; i++) {
-            // First id is same, others are from new ids
-            if (i==0) {
-              elemId_wsplit[split_elem_pos]=elemId[e];
-              mbmp->split_id_to_frac[elemId[e]]=triFrac[i];
-            } else {
-              elemId_wsplit[split_elem_pos]=curr_extra_id;
-              mbmp->split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
-              mbmp->split_id_to_frac[curr_extra_id]=triFrac[i];
-              curr_extra_id++;
+          for (int i=0; i<subelem_size-2; i++) {
+             // First id is same, others are from new ids
+             if (first_elem) {
+               elemId_wsplit[split_elem_pos]=elemId[e];
+               first_elem=false;
+             } else {
+               elemId_wsplit[split_elem_pos]=curr_extra_id;
+               mbmp->split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
+               curr_extra_id++;
              }
 
             // Type is triangle
             elemType_wsplit[split_elem_pos]=3;
 
-            // Set area to fraction of original area
-            if (areaPresent==1) elemArea_wsplit[split_elem_pos]=elemArea[e]*triFrac[i];
-
             // Set mask (if it exists)
             if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
 
-            // Next split element
-            split_elem_pos++;
+             // Set element coords. (if it exists)
+             if (elemCoordsPresent==1) {
+               double *elem_pnt=elemCoords+orig_sdim*e;
+               double *elem_pnt_wsplit=elemCoords_wsplit+orig_sdim*split_elem_pos;
+               for (int j=0; j<orig_sdim; j++) {
+                 elem_pnt_wsplit[j]=elem_pnt[j];
+               }
+             }
 
-            // Set triangle corners based on triInd
-            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos+triInd[tI_pos]];
-            elemConn_wsplit[split_conn_pos+1]=elemConn[conn_pos+triInd[tI_pos+1]];
-            elemConn_wsplit[split_conn_pos+2]=elemConn[conn_pos+triInd[tI_pos+2]];
+
+             // Set triangle corners based on subelem_tri_ind
+            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos+subelem_tri_ind[tI_pos]];
+            elemConn_wsplit[split_conn_pos+1]=elemConn[conn_pos+subelem_tri_ind[tI_pos+1]];
+            elemConn_wsplit[split_conn_pos+2]=elemConn[conn_pos+subelem_tri_ind[tI_pos+2]];
+
+            // Acumulate over sub-elems in one element
+            elemtris_split_elem_pos[num_elemtris]=split_elem_pos;
+            elemtris_area[num_elemtris]=subelem_tri_area[i];
+            tot_elemtris_area += elemtris_area[num_elemtris];
+            num_elemtris++;
 
             // printf("%d eid=%d seid=%d %d %d %d %f\n",i,elemId[e],elemId_wsplit[split_elem_pos-1],elemConn_wsplit[split_conn_pos],elemConn_wsplit[split_conn_pos+1],elemConn_wsplit[split_conn_pos+2],triFrac[i]);
+
+            // Advance
+            split_elem_pos++;
             split_conn_pos +=3;
             tI_pos +=3;
+           }
 
-          }
+           // Advance to next elemConn position
+          conn_pos +=subelem_size;
 
-          // Advance to next elemConn position
-          conn_pos +=elemType[e];
+           } // end of loop through sub elems
+
+           // Loop over elem setting fracs
+           if (tot_elemtris_area > 0.0) {
+             for (int i=0; i<num_elemtris; i++) {
+               double frac=elemtris_area[i]/tot_elemtris_area;
+               int sep=elemtris_split_elem_pos[i];
+
+               // Add frac to mesh split information
+               mbmp->split_id_to_frac[elemId_wsplit[sep]]=frac;
+
+               // Set area to fraction of original area
+               if (areaPresent==1) elemArea_wsplit[sep]=elemArea[e]*frac;
+             }
+           } else {
+             for (int i=0; i<num_elemtris; i++) {
+               double frac=elemtris_area[i]/tot_elemtris_area;
+               int sep=elemtris_split_elem_pos[i];
+
+               // Add frac to mesh split information
+               mbmp->split_id_to_frac[elemId_wsplit[sep]]=0.0;
+
+               // Set area to fraction of original area
+               if (areaPresent==1) elemArea_wsplit[sep]=0.0;
+             }
+           }
 
         } else { // just copy
           elemId_wsplit[split_elem_pos]=elemId[e];
           elemType_wsplit[split_elem_pos]=elemType[e];
           if (areaPresent==1) elemArea_wsplit[split_elem_pos]=elemArea[e];
+          if (elemCoordsPresent==1) {
+            double *elem_pnt=elemCoords+orig_sdim*e;
+            double *elem_pnt_wsplit=elemCoords_wsplit+orig_sdim*split_elem_pos;
+            for (int j=0; j<orig_sdim; j++) {
+              elem_pnt_wsplit[j]=elem_pnt[j];
+            }
+          }
           if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
           split_elem_pos++;
-           for (int i=0; i<elemType[e]; i++) {
+          for (int i=0; i<elemType[e]; i++) {
             elemConn_wsplit[split_conn_pos]=elemConn[conn_pos];
-             split_conn_pos++;
+            split_conn_pos++;
             conn_pos++;
           }
         }
       }
 
-
-       // Allocate some temporary variables for splitting
-      delete [] polyCoords;
-      delete [] polyDblBuf;
-      delete [] polyIntBuf;
-      delete [] triInd;
-      delete [] triFrac;
+      // Allocate some temporary variables for splitting
+      delete [] subelem_coords;
+      delete [] subelem_dbl_buf;
+      delete [] subelem_int_buf;
+      delete [] subelem_tri_ind;
+      delete [] subelem_tri_area;
+      delete [] elemtris_area;
+      delete [] elemtris_split_elem_pos;
 
       // Use the new split list for the connection lists below
       num_elems=num_elems_wsplit;
@@ -989,6 +1209,7 @@ printf("    PET %d - split elems\n", localPet);
       elemType=elemType_wsplit;
       elemId=elemId_wsplit;
       if (areaPresent==1) elemArea=elemArea_wsplit;
+      if (elemCoordsPresent==1) elemCoords=elemCoords_wsplit;
 
       if (present(elemMaskII)) {
         elemMaskII=elemMaskII_wsplit;
@@ -1303,12 +1524,15 @@ printf("    PET %d - parallel sharing\n", localPet);
 #endif
 
   // Get rid of extra memory for split elements
-  if (mbmp->is_split) {
+  if (is_split_local) {
     if (elemConn_wsplit != NULL) delete [] elemConn_wsplit;
      if (elemType_wsplit != NULL) delete [] elemType_wsplit;
     if (elemId_wsplit != NULL) delete [] elemId_wsplit;
     if (areaPresent==1) {
       if (elemArea_wsplit != NULL) delete [] elemArea_wsplit;
+    }
+    if (elemCoordsPresent==1) {
+      if (elemCoords_wsplit != NULL) delete [] elemCoords_wsplit;
     }
 
     //// Setup for split mask
@@ -1344,7 +1568,180 @@ printf("    PET %d - parallel sharing\n", localPet);
   if (rc!=NULL) *rc = ESMF_SUCCESS;
 }
 
-void MBMesh_meshturnoncellmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
+void MBMesh_turnonnodemask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
+
+  int merr, localrc;
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+        throw localrc;  // bail out with exception
+    }
+
+    // Get Moab Mesh wrapper
+    MBMesh *mbmp=*((MBMesh **)mbmpp);
+
+    //Get MOAB Mesh
+    Interface *moab_mesh=mbmp->mesh;
+
+
+    // If no mask values then leave
+    if (!present(maskValuesArg)) {
+      // Set return code
+      if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+      // Leave
+      return;
+    }
+
+    // Get mask values
+    int numMaskValues=(maskValuesArg)->extent[0];
+    int *ptrMaskValues=&((maskValuesArg)->array[0]);
+
+    // If has masks
+    if (mbmp->has_node_mask) {
+
+      // Get a range containing all nodes
+      Range range_node;
+      merr=moab_mesh->get_entities_by_dimension(0,0,range_node);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }
+
+      // Loop through elements setting values
+      for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
+        const EntityHandle node=*it;
+
+        // Get mask value
+        int mv;
+        merr=moab_mesh->tag_get_data(mbmp->node_mask_val_tag, &node, 1, &mv);
+        if (merr != MB_SUCCESS) {
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                           moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }
+
+        // See if mv matches any mask values
+        int masked=0;
+        for (int i=0; i<numMaskValues; i++) {
+          int mvi=ptrMaskValues[i];
+          if (mv==mvi) {
+            masked=1;
+            break;
+          }
+        }
+
+        // Set global id
+        merr=moab_mesh->tag_set_data(mbmp->node_mask_tag, &node, 1, &masked);
+         if (merr != MB_SUCCESS) {
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }
+      }
+    }
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                             "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+// Turn OFF masking
+ void MBMesh_turnoffnodemask(void **mbmpp, int *rc) {
+
+  int merr, localrc;
+
+  try {
+
+    // Initialize the parallel environment for mesh (if not already done)
+    {
+      int localrc;
+      ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+      if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+        throw localrc;  // bail out with exception
+    }
+
+    // Get Moab Mesh wrapper
+    MBMesh *mbmp=*((MBMesh **)mbmpp);
+
+    //Get MOAB Mesh
+    Interface *moab_mesh=mbmp->mesh;
+
+    // If has masks
+    if (mbmp->has_node_mask) {
+      // Get a range containing all nodes
+      Range range_node;
+      merr=moab_mesh->get_entities_by_dimension(0,0,range_node);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }
+
+      // Loop through elements setting values
+      for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
+        const EntityHandle node=*it;
+
+        // unset masked value
+        int masked=0;
+        merr=moab_mesh->tag_set_data(mbmp->node_mask_tag, &node, 1, &masked);
+        if (merr != MB_SUCCESS) {
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }
+
+      }
+    }
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                            "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+     // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                        "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+void MBMesh_turnonelemmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc) {
 
   int merr, localrc;
 
@@ -1448,7 +1845,7 @@ void MBMesh_meshturnoncellmask(void **mbmpp, ESMCI::InterArray<int> *maskValuesA
 }
 
 // Turn OFF masking
- void MBMesh_meshturnoffcellmask(void **mbmpp, int *rc) {
+ void MBMesh_turnoffelemmask(void **mbmpp, int *rc) {
 
   int merr, localrc;
 

@@ -146,3 +146,9 @@ ESMF_CXXLINKLIBS += -lxlf90_r -lxlfmath -lxl
 # Blank out shared library options
 #
 ESMF_SL_LIBS_TO_MAKE  =
+
+############################################################
+# Add compile options required by external libraries
+ifneq ($(ESMF_YAMLCPP),)
+ESMF_CXXCOMPILEOPTS  += -std=c++11
+endif

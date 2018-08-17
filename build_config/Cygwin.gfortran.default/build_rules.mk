@@ -199,3 +199,9 @@ ESMF_CXXLINKOPTS += -Wl,--enable-auto-import
 #
 ESMF_SL_LIBOPTS       += -shared
 ESMF_SL_LIBLIBS       += $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS) -lgfortran
+
+############################################################
+# Add compile options required by external libraries
+ifneq ($(ESMF_YAMLCPP),)
+ESMF_CXXCOMPILEOPTS  += -std=c++11
+endif

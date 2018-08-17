@@ -63,6 +63,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
                           ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
                           int *nentries, ESMCI::TempWeights **tweights,
                           int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl, 
+                          int *_has_statusArray, ESMCI::Array **_statusArray,
                           int*rc);
 
 

@@ -6871,14 +6871,14 @@ end function ESMF_GridCreateFrmScrip
         msgbuf(4:5) = coordids(:)
         msgbuf(6:7) = dimids(:)
         if (trim(units) .eq. 'degrees') then
-	  msgbuf(8) = 0
-	  coordsys = ESMF_COORDSYS_SPH_DEG
-	elseif (units(1:1) .eq. 'm') then
-	  msgbuf(8) = 1
-	  coordsys = ESMF_COORDSYS_CART
-	elseif (units(1:1) .eq. 'k') then
-      	  msgbuf(8) = 2
-	  coordsys = ESMF_COORDSYS_CART
+          msgbuf(8) = 0
+          coordsys = ESMF_COORDSYS_SPH_DEG
+        elseif (units(1:1) .eq. 'm') then
+          msgbuf(8) = 1
+          coordsys = ESMF_COORDSYS_CART
+        elseif (units(1:1) .eq. 'k') then
+          msgbuf(8) = 2
+          coordsys = ESMF_COORDSYS_CART
         endif
         call ESMF_VMBroadcast(vm, msgbuf, 8, 0, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6891,15 +6891,15 @@ end function ESMF_GridCreateFrmScrip
         gridims = msgbuf(2:3)
         coordids = msgbuf(4:5)
         dimids = msgbuf(6:7)
-	if (msgbuf(8) == 0) then
+        if (msgbuf(8) == 0) then
           units = "degrees"
-	  coordsys = ESMF_COORDSYS_SPH_DEG
-	elseif (msgbuf(8) == 1) then
-	  units = "meters"
-	  coordsys = ESMF_COORDSYS_CART
-	elseif (msgbuf(8) == 2) then
+          coordsys = ESMF_COORDSYS_SPH_DEG
+        elseif (msgbuf(8) == 1) then
+          units = "meters"
+          coordsys = ESMF_COORDSYS_CART
+        elseif (msgbuf(8) == 2) then
           units = "kilometers"
-	  coordsys = ESMF_COORDSYS_CART
+          coordsys = ESMF_COORDSYS_CART
         endif
     endif
 
@@ -6938,10 +6938,10 @@ end function ESMF_GridCreateFrmScrip
           ! convert to kilometer if the units is "meters"
           if (units(1:1) .eq. 'm') then
              loncoord1D(:) = loncoord1D(:) * 1.d-3
-	     latcoord1D(:) = latcoord1D(:) * 1.d-3
+             latcoord1D(:) = latcoord1D(:) * 1.d-3
              if (localAddCornerStagger) then
-	        cornerlon2D(:,:) = cornerlon2D(:,:) * 1.d-3
-	        cornerlat2D(:,:) = cornerlat2D(:,:) * 1.d-3
+                cornerlon2D(:,:) = cornerlon2D(:,:) * 1.d-3
+                cornerlat2D(:,:) = cornerlat2D(:,:) * 1.d-3
              endif
           endif
         endif
@@ -7098,11 +7098,11 @@ end function ESMF_GridCreateFrmScrip
         endif
         ! convert to kilometer if the units is "meters"
         if (units(1:1) .eq. 'm') then
-	   loncoord2D(:,:) = loncoord2D(:,:) * 1.d-3
-	   latcoord2D(:,:) = latcoord2D(:,:) * 1.d-3
+           loncoord2D(:,:) = loncoord2D(:,:) * 1.d-3
+           latcoord2D(:,:) = latcoord2D(:,:) * 1.d-3
            if (localAddCornerStagger) then
-	      cornerlon3D(:,:,:) = cornerlon3D(:,:,:) * 1.d-3
-	      cornerlat3D(:,:,:) = cornerlat3D(:,:,:) * 1.d-3
+              cornerlon3D(:,:,:) = cornerlon3D(:,:,:) * 1.d-3
+              cornerlat3D(:,:,:) = cornerlat3D(:,:,:) * 1.d-3
            endif
         endif
         ! Set coordinate tables -  Put Corners into coordinates
@@ -15228,7 +15228,7 @@ end function ESMF_GridCreateMosaicReg
 ! !INTERFACE:
   function ESMF_GridCreateMosaicIReg(filename,                  &
           countsPerDEDim1PTile, countsPerDEDim2PTile,           &
-	  keywordEnforcer,                                      &
+          keywordEnforcer,                                      &
           deLabelList, staggerLocList,                          &
           delayout, indexflag, name, tileFilePath, rc)
 !

@@ -4764,6 +4764,8 @@ int DistGrid::getIndexTupleFromSeqIndex(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
+  //TODO: bail out with error if arbitrary sequence indices are present
+  
   if ((int)indexTuple.size() != dimCount)
     indexTuple.resize(dimCount);
   

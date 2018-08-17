@@ -1,0 +1,25 @@
+# option 1 -- most hierarchical
+---
+field_dictionary:
+    version_number: 0.0.1
+    last_modified:  2018-03-14T11:01:19Z
+    institution:    ESPC CSC/MCL Committee
+    contact:        xfd@noaa.gov
+
+    source:         https://github.com/NCAR/xfd
+    description:    Community-based dictionary for shared coupling fields
+
+    entries:
+      - standard_name: air_pressure
+        canonical_units: Pa
+        description: Air pressure
+      - standard_name: air_temperature
+        canonical_units: K
+        description: 
+          Bulk temperature of the air,
+          not the surface (skin) temperature
+      - alias: p
+        standard_name: air_pressure
+      - alias: [ t, temp ]
+        standard_name: air_temperature
+...

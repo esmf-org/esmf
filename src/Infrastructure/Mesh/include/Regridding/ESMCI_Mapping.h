@@ -15,7 +15,7 @@
 #include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
 #include <Mesh/include/Legacy/ESMCI_MeshObjTopo.h>
 #include <Mesh/include/Legacy/ESMCI_Exception.h>
-#include <Mesh/include/ESMCI_ShapeFunc.h>
+#include <Mesh/include/Regridding/ESMCI_ShapeFunc.h>
 
 #include <string>
 

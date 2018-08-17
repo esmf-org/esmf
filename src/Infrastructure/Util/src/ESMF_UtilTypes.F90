@@ -538,7 +538,9 @@
                            ESMF_IOFMT_NETCDF_64BIT_OFFSET = ESMF_IOFmt_Flag(2), &
                            ESMF_IOFMT_NETCDF4  = ESMF_IOFmt_Flag(3), &
                            ESMF_IOFMT_NETCDF4P = ESMF_IOFmt_Flag(4), &
-                           ESMF_IOFMT_NETCDF4C = ESMF_IOFmt_Flag(5)
+                           ESMF_IOFMT_NETCDF4C = ESMF_IOFmt_Flag(5), &
+                           ESMF_IOFMT_CONFIG   = ESMF_IOFmt_Flag(6), &
+                           ESMF_IOFMT_YAML     = ESMF_IOFmt_Flag(7)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Index_Flag
@@ -1014,7 +1016,8 @@
 
       public ESMF_IOFmt_Flag, ESMF_IOFMT_BIN, ESMF_IOFMT_NETCDF, &
              ESMF_IOFMT_NETCDF_64BIT_OFFSET, ESMF_IOFMT_NETCDF4,  &
-             ESMF_IOFMT_NETCDF4P, ESMF_IOFMT_NETCDF4C
+             ESMF_IOFMT_NETCDF4P, ESMF_IOFMT_NETCDF4C, &
+             ESMF_IOFMT_CONFIG, ESMF_IOFMT_YAML
 
       public ESMF_Index_Flag
       public ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL, ESMF_INDEX_USER
