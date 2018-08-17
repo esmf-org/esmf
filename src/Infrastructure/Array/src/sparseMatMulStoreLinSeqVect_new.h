@@ -1114,8 +1114,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     vm->timerStart("fill_LinSeqVect");
 #endif
     
-  vm->barrier();  //TODO: only for debugging
-
   switch (typekindFactors){
   case ESMC_TYPEKIND_R4:
     {
@@ -1260,8 +1258,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new5.0"));
 #endif
-
-  vm->barrier();  //TODO: only for debugging
 
   // Construct srcLinSeqVect from srcElementSort
   for (int i=0; i<srcLocalDeCount; i++){

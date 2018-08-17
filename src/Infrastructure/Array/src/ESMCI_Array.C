@@ -8556,8 +8556,6 @@ template<typename SIT, typename DIT>
   VM::logMemInfo(std::string("ASMMStore4.0"));
 #endif
 
-  vm->barrier();  //TODO: only for debugging
-
   // prepare for relative run-time addressing (RRA)
   int rraCount = srcArray->delayout->getLocalDeCount();
   rraCount += dstArray->delayout->getLocalDeCount();
@@ -9058,9 +9056,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     VM::logMemInfo(std::string("ASMMStoreNbVectors3.0"));
 #endif
 
-for (int i=0; i<localPet; i++) vm->barrier(); //TODO: only for debugging
-  
-  
     // invert the look-up direction
     vector<vector<ArrayHelper::DstInfo<DIT,SIT> > >
       dstInfoTable(recvnbDiffPartnerDeCount);
@@ -9129,8 +9124,6 @@ for (int i=0; i<localPet; i++) vm->barrier(); //TODO: only for debugging
     VMK::wtime(&t9c2);   //gjt - profile
 #endif
 
-for (int i=localPet; i<petCount; i++) vm->barrier(); //TODO: only for debugging
-    
     // sort each "recvnbDiffPartnerDeCount group" (opposite of src)
     if (!vectorFlag){
       // no vectorization possible -> sort for scalar optimization
@@ -9223,15 +9216,13 @@ for (int i=localPet; i<petCount; i++) vm->barrier(); //TODO: only for debugging
     }
 #endif
 
-for (int i=0; i<localPet; i++) vm->barrier(); //TODO: only for debugging
-
-
 #ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9d);   //gjt - profile
 #endif
 
     // construct recv elements
-    recvnbVector.resize(recvnbDiffPartnerDeCount);
+    int oldSize = recvnbVector.size();
+    recvnbVector.resize(oldSize+recvnbDiffPartnerDeCount);
     for (int i=0; i<recvnbDiffPartnerDeCount; i++){
       int vectorLength = dstInfoTable[i].begin()->vectorLength;
       // initialize the bufferIndex member in the dstInfoTable
@@ -9290,17 +9281,18 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       srcDelayout->getDEMatchPET(srcDe, *vm, NULL, &srcPet, 1);
       int dstDe = dstLocalDeToDeMap[j];
       // fill values into recvnbVector
-      recvnbVector[i].srcPet = srcPet;
-      recvnbVector[i].srcDe = srcDe;
-      recvnbVector[i].srcLocalDe = i;
-      recvnbVector[i].dstDe = dstDe;
-      recvnbVector[i].dstLocalDe = j;
-      recvnbVector[i].bufferInfo = (char **)xxe->getBufferInfoPtr();
-      recvnbVector[i].partnerDeDataCount = kk;
-      recvnbVector[i].vectorFlag = vectorFlag;
-      recvnbVector[i].dstInfoTable.swap(dstInfoTable[i]);
-      recvnbVector[i].localPet = localPet;
-      recvnbVector[i].petCount = petCount;
+      int ii = oldSize + i;
+      recvnbVector[ii].srcPet = srcPet;
+      recvnbVector[ii].srcDe = srcDe;
+      recvnbVector[ii].srcLocalDe = i;
+      recvnbVector[ii].dstDe = dstDe;
+      recvnbVector[ii].dstLocalDe = j;
+      recvnbVector[ii].bufferInfo = (char **)xxe->getBufferInfoPtr();
+      recvnbVector[ii].partnerDeDataCount = kk;
+      recvnbVector[ii].vectorFlag = vectorFlag;
+      recvnbVector[ii].dstInfoTable.swap(dstInfoTable[i]);
+      recvnbVector[ii].localPet = localPet;
+      recvnbVector[ii].petCount = petCount;
 #ifdef ASMM_STORE_LOG_on_disabled
       fprintf(asmm_store_log_fp, "gjt: recvnbElement localPet %d, srcPet %d, "
         "vectorLength=%d\n", localPet, srcPet, vectorLength);
@@ -9331,10 +9323,6 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   VM::logMemInfo(std::string("ASMMStoreNbVectors6.0"));
 #endif
   
-for (int i=localPet; i<petCount; i++) vm->barrier(); //TODO: only for debugging
-//-------------  
-
-
   // determine send pattern for all localDEs on src side
   for (int j=0; j<srcLocalDeCount; j++){
     vector<int> index2Ref;
@@ -9534,7 +9522,8 @@ for (int i=localPet; i<petCount; i++) vm->barrier(); //TODO: only for debugging
 #endif
 
     // construct send elements
-    sendnbVector.resize(sendnbDiffPartnerDeCount);
+    int oldSize = sendnbVector.size();
+    sendnbVector.resize(oldSize+sendnbDiffPartnerDeCount);
     for (int i=0; i<sendnbDiffPartnerDeCount; i++){
       int vectorLength = srcInfoTable[i].begin()->vectorLength;
       // use a temporary vector to aide in deflating of the message to be sent
@@ -9596,18 +9585,19 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       int dstPet;   //TODO: DE-based comms
       dstDelayout->getDEMatchPET(dstDe, *vm, NULL, &dstPet, 1);
       // fill values into sendnbVector
-      sendnbVector[i].dstPet = dstPet;
-      sendnbVector[i].dstDe = dstDe;
-      sendnbVector[i].dstLocalDe = i;
-      sendnbVector[i].srcDe = srcDe;
-      sendnbVector[i].srcLocalDe = j;
-      sendnbVector[i].partnerDeDataCount = deflator.size();
-      sendnbVector[i].vectorFlag = vectorFlag;
-      sendnbVector[i].srcInfoTable.swap(srcInfoTable[i]);
-      sendnbVector[i].linIndexContigBlockList = linIndexContigBlockList;
-      sendnbVector[i].bufferInfo = (char **)xxe->getBufferInfoPtr();
-      sendnbVector[i].localPet = localPet;
-      sendnbVector[i].petCount = petCount;
+      int ii = oldSize + i;
+      sendnbVector[ii].dstPet = dstPet;
+      sendnbVector[ii].dstDe = dstDe;
+      sendnbVector[ii].dstLocalDe = i;
+      sendnbVector[ii].srcDe = srcDe;
+      sendnbVector[ii].srcLocalDe = j;
+      sendnbVector[ii].partnerDeDataCount = deflator.size();
+      sendnbVector[ii].vectorFlag = vectorFlag;
+      sendnbVector[ii].srcInfoTable.swap(srcInfoTable[i]);
+      sendnbVector[ii].linIndexContigBlockList = linIndexContigBlockList;
+      sendnbVector[ii].bufferInfo = (char **)xxe->getBufferInfoPtr();
+      sendnbVector[ii].localPet = localPet;
+      sendnbVector[ii].petCount = petCount;
 
 #ifdef MSG_DEFLATE_DEBUG
 // debug
@@ -9814,7 +9804,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-#define SMMSTOREENCODEXXEINFO_off
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -9946,18 +9935,19 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 
   if (srcTermProcessingArg && *srcTermProcessingArg >= 0){
     // use the provided srcTermProcessing
-#ifdef SMMSTOREENCODEXXEINFO_on
+#ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "srcTermProcessingArg = %d was provided -> do not tune",
-      *srcTermProcessingArg);
+    sprintf(msg, "ASMM_STORE_TUNELOG: %d srcTermProcessingArg = %d"
+      " was provided -> do not tune", __LINE__, *srcTermProcessingArg);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     srcTermProcessingOpt = *srcTermProcessingArg;
   }else{
     // optimize srcTermProcessing
-#ifdef SMMSTOREENCODEXXEINFO_on
+#ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "srcTermProcessingArg was NOT provided -> tuning...");
+    sprintf(msg, "ASMM_STORE_TUNELOG: %d srcTermProcessingArg was NOT"
+      " provided -> tuning...", __LINE__);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
 #ifdef WORKAROUND_NONBLOCKPROGRESSBUG
@@ -10068,9 +10058,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       // new high vote found
       srcTermProcessingOpt = srcTermProcessingOptList[petCount-1];
     }
-#ifdef SMMSTOREENCODEXXEINFO_on
-    sprintf(msg, "... finished tuning, found srcTermProcessingOpt = %d",
-      srcTermProcessingOpt);
+#ifdef ASMM_STORE_TUNELOG_on
+    sprintf(msg, "ASMM_STORE_TUNELOG: %d ... finished tuning, found"
+      " srcTermProcessingOpt = %d", __LINE__, srcTermProcessingOpt);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     if (srcTermProcessingArg) *srcTermProcessingArg = srcTermProcessingOpt;
@@ -10117,18 +10107,19 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 
   if (pipelineDepthArg && *pipelineDepthArg >= 0){
     // use the provided pipelineDepthArg
-#ifdef SMMSTOREENCODEXXEINFO_on
+#ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "pipelineDepthArg = %d was provided -> do not tune",
-      *pipelineDepthArg);
+    sprintf(msg, "ASMM_STORE_TUNELOG: %d pipelineDepthArg = %d was provided"
+      " -> do not tune", __LINE__, *pipelineDepthArg);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     pipelineDepthOpt = *pipelineDepthArg;
   }else{
     // optimize pipeline depth
-#ifdef SMMSTOREENCODEXXEINFO_on
+#ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "pipelineDepthArg was NOT provided -> tuning...");
+    sprintf(msg, "ASMM_STORE_TUNELOG: %d pipelineDepthArg was NOT provided"
+      " -> tuning...", __LINE__);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     for (int pipelineDepth=1; pipelineDepth<=petCount; pipelineDepth*=2){
@@ -10249,7 +10240,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       // new high vote found
       pipelineDepthOpt = pipelineDepthOptList[petCount-1];
     }
-#ifdef SMMSTOREENCODEXXEINFO_on
+#ifdef ASMM_STORE_TUNELOG_on
     sprintf(msg, "... finished tuning, found pipelineDepthOpt = %d",
       pipelineDepthOpt);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
