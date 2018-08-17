@@ -4385,7 +4385,9 @@ function ESMF_MeshCreateCubedSphere(tileSize, nx, ny, rc)
   deallocate(lonEdge, latEdge)
 
   ESMF_MeshCreateCubedSphere = mesh
-  rc=ESMF_SUCCESS
+
+  ! Set return code
+  if (present(rc)) rc=ESMF_SUCCESS
 
 end function ESMF_MeshCreateCubedSphere
 ! -----------------------------------------------------------------------------
@@ -4463,7 +4465,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! Mark as deleted
       ESMF_INIT_SET_DELETED(mesh)
 
-      if (present (rc)) rc = localrc
+      ! Set return code
+      if (present(rc)) rc=ESMF_SUCCESS
 
     end subroutine ESMF_MeshDestroy
 
@@ -4523,7 +4526,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! of MeshGet() queries. 
     ESMF_MeshEmptyCreate%status=ESMF_MESHSTATUS_EMPTY
 
-    ! mark as empty
+    ! mark as created
     ESMF_INIT_SET_CREATED(ESMF_MeshEmptyCreate)
 
     if (present(rc)) rc=ESMF_SUCCESS
