@@ -366,7 +366,13 @@ module ESMF_ComplianceICMod
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
-      
+
+    if (outputTrace) then
+      call ESMF_TraceComponentInfo(comp, rc=rc)
+      if (ESMF_LogFoundError(rc, &
+        line=__LINE__, file=FILENAME)) return                              
+    endif
+    
     endif
     ! Stop Compliance Checking
     !---------------------------------------------------------------------------
@@ -500,9 +506,9 @@ module ESMF_ComplianceICMod
           if (ESMF_LogFoundError(rc, &
                line=__LINE__, file=FILENAME)) return                              
        endif
-       call ESMF_TraceComponentInfo(comp, rc=rc)
-       if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return                              
+       !call ESMF_TraceComponentInfo(comp, rc=rc)
+       !if (ESMF_LogFoundError(rc, &
+       !     line=__LINE__, file=FILENAME)) return                              
        call ESMF_TracePhaseEnter(comp, rc=rc)
        if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return                              
@@ -780,9 +786,9 @@ module ESMF_ComplianceICMod
           if (ESMF_LogFoundError(rc, &
                line=__LINE__, file=FILENAME)) return                              
        endif
-       call ESMF_TraceComponentInfo(comp, rc=rc)
-       if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return                              
+       !call ESMF_TraceComponentInfo(comp, rc=rc)
+       !if (ESMF_LogFoundError(rc, &
+       !     line=__LINE__, file=FILENAME)) return                              
        call ESMF_TracePhaseEnter(comp, rc=rc)
        if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return                              
@@ -1034,9 +1040,9 @@ module ESMF_ComplianceICMod
           if (ESMF_LogFoundError(rc, &
                line=__LINE__, file=FILENAME)) return                              
        endif
-       call ESMF_TraceComponentInfo(comp, rc=rc)
-       if (ESMF_LogFoundError(rc, &
-            line=__LINE__, file=FILENAME)) return                              
+       !call ESMF_TraceComponentInfo(comp, rc=rc)
+       !if (ESMF_LogFoundError(rc, &
+       !     line=__LINE__, file=FILENAME)) return                              
        call ESMF_TracePhaseEnter(comp, rc=rc)
        if (ESMF_LogFoundError(rc, &
             line=__LINE__, file=FILENAME)) return                              

@@ -297,7 +297,13 @@ contains
                 line=__LINE__, &
                 file=FILENAME)) &
                 return  ! bail out
-      
+
+            if (outputTrace) then
+              call NUOPC_TraceComponentInfo(comp, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, file=FILENAME)) return                              
+            endif
+              
         endif
       ! Stop Compliance Checking
       !---------------------------------------------------------------------------
@@ -441,9 +447,9 @@ contains
                   if (ESMF_LogFoundError(rc, &
                        line=__LINE__, file=FILENAME)) return                              
                endif
-               call NUOPC_TraceComponentInfo(comp, rc=rc)
-               if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return                              
+               !call NUOPC_TraceComponentInfo(comp, rc=rc)
+               !if (ESMF_LogFoundError(rc, &
+               !     line=__LINE__, file=FILENAME)) return                              
                call ESMF_TracePhaseEnter(comp, rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
@@ -708,9 +714,9 @@ contains
                    if (ESMF_LogFoundError(rc, &
                         line=__LINE__, file=FILENAME)) return                              
                 endif
-                call NUOPC_TraceComponentInfo(comp, rc=rc)
-                if (ESMF_LogFoundError(rc, &
-                     line=__LINE__, file=FILENAME)) return                              
+                !call NUOPC_TraceComponentInfo(comp, rc=rc)
+                !if (ESMF_LogFoundError(rc, &
+                !     line=__LINE__, file=FILENAME)) return                              
                call ESMF_TracePhaseEnter(comp, rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
@@ -959,9 +965,9 @@ contains
                   if (ESMF_LogFoundError(rc, &
                        line=__LINE__, file=FILENAME)) return                              
                endif
-               call NUOPC_TraceComponentInfo(comp, rc=rc)
-               if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return                              
+               !call NUOPC_TraceComponentInfo(comp, rc=rc)
+               !if (ESMF_LogFoundError(rc, &
+               !     line=__LINE__, file=FILENAME)) return                              
                call ESMF_TracePhaseEnter(comp, rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              

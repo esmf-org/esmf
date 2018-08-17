@@ -24,12 +24,14 @@ namespace ESMCI {
   RegionNode(RegionNode *parent, int id, bool isUserRegion):
     _parent(parent), _id(id), _isUserRegion(isUserRegion),
       _count(0), _total(0), _min(UINT64T_BIG), _max(0),
-      _mean(0.0), _variance(0.0), _last_entered(0) {}
+      _mean(0.0), _variance(0.0), _last_entered(0),
+      _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {}
     
   RegionNode(int id):
     _parent(NULL), _id(id), _isUserRegion(false),
       _count(0), _total(0), _min(UINT64T_BIG), _max(0),
-      _mean(0.0), _variance(0.0), _last_entered(0) {}
+      _mean(0.0), _variance(0.0), _last_entered(0),
+      _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {}
 
     ~RegionNode() {
       while (!_children.empty()) {
@@ -183,27 +185,30 @@ namespace ESMCI {
       return st;
     }
 
-    /*
-    std::string getName() {
-      return _name;
-    }
-
-    void setName(std::string name) {
-      _name = name;
-    }
-    */
-    
-    vector<RegionNode *> getChildren() {
+    vector<RegionNode *> getChildren() const {
       return _children;
     }
 
-    vector<RegionNode *> getChildrenSorted() {
+    void sortChildren() {
       sort(_children.begin(), _children.end(), RegionNodeCompare());
-      return _children;
     }
-    
-    int getId() {
-      return _id;
+
+    ///// MPI //////
+    void enteredMPI(uint64_t start) {
+      _time_mpi_start = start;
+    }
+
+    void exitedMPI(uint64_t stop) {
+      _time_mpi += (stop - _time_mpi_start);
+      _count_mpi++;
+    }
+
+    uint64_t getTotalMPI() const {
+      return _time_mpi;
+    }
+
+    size_t getCountMPI() const {
+      return _count_mpi;
     }
     
   private:
@@ -217,8 +222,7 @@ namespace ESMCI {
     RegionNode *_parent;
     int _id;
     bool _isUserRegion;
-    //std::string _name;
-
+   
     vector<RegionNode *> _children;
 
     size_t _count;
@@ -230,6 +234,10 @@ namespace ESMCI {
     
     uint64_t _last_entered;
 
+    uint64_t _time_mpi_start;
+    uint64_t _time_mpi;
+    size_t _count_mpi;
+    
   };
 
 }

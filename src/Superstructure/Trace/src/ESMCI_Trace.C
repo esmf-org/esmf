@@ -45,13 +45,8 @@
 #include "ESMCI_TraceUtil.h"
 #include <esmftrc.h>
 
-#ifdef __cplusplus
-# define TO_VOID_PTR(_value)           static_cast<void *>(_value)
-# define FROM_VOID_PTR(_type, _value)  static_cast<_type *>(_value)
-#else
-# define TO_VOID_PTR(_value)           ((void *) (_value))
-# define FROM_VOID_PTR(_type, _value)  ((_type *) (_value))
-#endif
+#define TO_VOID_PTR(_value)           static_cast<void *>(_value)
+#define FROM_VOID_PTR(_type, _value)  static_cast<_type *>(_value)
 
 #ifndef ESMF_OS_MinGW
 #define TRACE_DIR_PERMISSIONS (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
@@ -63,7 +58,8 @@
 #define EVENT_BUF_SIZE_DEFAULT 4096
 #define EVENT_BUF_SIZE_EAGER 1024
 #define REGION_HASHTABLE_SIZE 100
-
+#define VMID_MAP_SIZE 10000
+  
 using std::string;
 using std::vector;
 using std::stringstream;
@@ -133,14 +129,14 @@ namespace ESMCI {
   static int (*notify_wrappers)(int initialized) = NULL;
 #endif
 
-  //this data structure used to map VMIds(vmKey,localid) to an integer id
-#define VMID_MAP_SIZE 10000
-  static VMId vmIdMap[VMID_MAP_SIZE];
-  static int nextVmId = 0;
-
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceMapVmId()"  
   int TraceMapVmId(VMId *vmid, int *rc) {
+
+    //this data structure used to map VMIds(vmKey,localid)
+    //to an integer id
+    static VMId vmIdMap[VMID_MAP_SIZE];
+    static int nextVmId = 0;
 
     int localrc = ESMC_RC_NOT_IMPL;
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
@@ -149,32 +145,27 @@ namespace ESMCI {
     //search backward - vm more likely to be at the end
     for (foundIdx=nextVmId-1; foundIdx >= 0; foundIdx--) {
       if (VMIdCompare(vmid, &(vmIdMap[foundIdx]))) {
-        break;
-      }
-    }
-    if (foundIdx >= 0) {
-      if (rc!=NULL) *rc = ESMF_SUCCESS;
-      return foundIdx;
-    }
-    else {
-      if (nextVmId >= VMID_MAP_SIZE) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                      "Out of VmIdMap space inside tracing", ESMC_CONTEXT, rc);
-        return -1;
-      }
-      else {
-        localrc = (&vmIdMap[nextVmId])->create ();
-        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                                          ESMC_CONTEXT, rc))
-          return -1;
-        VMIdCopy(&(vmIdMap[nextVmId]), vmid);
-        foundIdx = nextVmId;
-        nextVmId++;
-
-        if (rc!=NULL) *rc=ESMF_SUCCESS;
+        if (rc!=NULL) *rc = ESMF_SUCCESS;
         return foundIdx;
       }
-    }        
+    }
+    if (nextVmId >= VMID_MAP_SIZE) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                    "Out of VmIdMap space inside tracing", ESMC_CONTEXT, rc);
+      return -1;
+    }
+    else {
+      localrc = (&vmIdMap[nextVmId])->create();
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                        ESMC_CONTEXT, rc))
+        return -1;
+      VMIdCopy(&(vmIdMap[nextVmId]), vmid);
+      foundIdx = nextVmId;
+      nextVmId++;
+      
+      if (rc!=NULL) *rc=ESMF_SUCCESS;
+      return foundIdx;
+    } 
   }
   
   bool TraceInitialized() {
@@ -196,7 +187,6 @@ namespace ESMCI {
       return false;
 
     if (tracingEnabled == 0) return false;
-    //printf("Tracing enabled\n");
     
     //then check if local PET is enabled 
     VM *globalvm = VM::getGlobal(&localrc);
@@ -335,11 +325,13 @@ namespace ESMCI {
     }
   }
 
+  /*
   static void PushIOStats();
   static void PopIOStats();
   static void PushMPIStats();
   static void PopMPIStats();
-  
+  */
+
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceOpen()"  
   void TraceOpen(std::string trace_dir, int *rc) {
@@ -364,45 +356,8 @@ namespace ESMCI {
          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
       return;
     
-    //determine which clock to use
-    /*
-    traceClock = ESMF_CLOCK_REALTIME;  //default
-    std::string strClk = "REALTIME";   //default
-    
-    char const *envClk = VM::getenv("ESMF_RUNTIME_TRACE_CLOCK");
-    if (envClk != NULL && strlen(envClk) > 0) {     
-      strClk = envClk;
-      if (strClk == "REALTIME") {
-        traceClock = ESMF_CLOCK_REALTIME;
-      }
-      else if (strClk == "MONOTONIC") {
-        traceClock = ESMF_CLOCK_MONOTONIC;
-      }
-      else if (strClk == "MONOTONIC_SYNC") {
-        traceClock = ESMF_CLOCK_MONOTONIC_SYNC;
-      }
-    }
-
-    //determine local offsets if requested
-    if (traceClock == ESMF_CLOCK_MONOTONIC_SYNC) {
-      traceClockOffset = clock_sync_offset(&localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
-           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
-        return;
-      }
-      //printf("[%d] local offset = %lld\n", stream_id, traceClockOffset);
-    }
-
-    std::stringstream logMsg;
-    logMsg << "ESMF Tracing enabled using clock: " + strClk;
-    if (traceClock == ESMF_CLOCK_MONOTONIC_SYNC) {
-      logMsg << " (local offset = " << traceClockOffset << ")";
-    }
-    ESMC_LogDefault.Write(logMsg.str().c_str(), ESMC_LOGMSG_INFO);
-    */
-    
     // set up callbacks
-    cbs.sys_clock_clock_get_value = TraceGetClock;  //get_clock;
+    cbs.sys_clock_clock_get_value = TraceGetClock;
     cbs.is_backend_full = is_backend_full;
     cbs.open_packet = open_packet;
     cbs.close_packet = close_packet;
@@ -513,8 +468,8 @@ namespace ESMCI {
     //store as global context
     g_esmftrc_platform_filesys_ctx = ctx;
 
-    PushIOStats();  /* needed in case there are I/O events before first region */
-    PushMPIStats();
+    //PushIOStats();  
+    //PushMPIStats();
     traceInitialized = true;
 
     int wrappersPresent = TRACE_WRAP_NONE;
@@ -578,17 +533,19 @@ namespace ESMCI {
       }
       name.insert(0, prefix);
       
-      snprintf(strbuf, STATLINE, "%-35s %-6lu %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f",
+      snprintf(strbuf, STATLINE, "%-35s %-6lu %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f %-6lu",
                name.c_str(), rn->getCount(), rn->getTotal()*NANOS_TO_MILLIS,
                rn->getSelfTime()*NANOS_TO_MILLIS, rn->getMean()*NANOS_TO_MILLIS,
-               rn->getMin()*NANOS_TO_MILLIS, rn->getMax()*NANOS_TO_MILLIS, rn->getStdDev()*NANOS_TO_MILLIS);
+               rn->getMin()*NANOS_TO_MILLIS, rn->getMax()*NANOS_TO_MILLIS,
+               rn->getTotalMPI()*NANOS_TO_MILLIS, rn->getCountMPI());
       if (printToLog) {
         ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
       }
       else {
         std::cout << std::string(strbuf) << "\n";
       }
-    } 
+    }
+    rn->sortChildren();
     for (unsigned i = 0; i < rn->getChildren().size(); i++) {
       printProfile(rn->getChildren().at(i), printToLog, prefix + "  ");
     }
@@ -596,8 +553,8 @@ namespace ESMCI {
   
   static void printProfile(bool printToLog) {
     char strbuf[STATLINE];
-    snprintf(strbuf, STATLINE, "%-35s %-6s %-11s %-11s %-11s %-11s %-11s %-11s",
-             "Region", "Count", "Total (ms)", "Self (ms)", "Mean (ms)", "Min (ms)", "Max (ms)", "Std. Dev. (ms)");
+    snprintf(strbuf, STATLINE, "%-35s %-6s %-11s %-11s %-11s %-11s %-11s %-11s %-6s",
+             "Region", "Count", "Total (ms)", "Self (ms)", "Mean (ms)", "Min (ms)", "Max (ms)", "MPI (ms)", "MPI#");
     if (printToLog) {
       ESMC_LogDefault.Write("**************** Region Timings *******************", ESMC_LOGMSG_INFO);
       ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
@@ -633,8 +590,8 @@ namespace ESMCI {
       c_esmftrace_notify_wrappers(0);
 #endif
       
-      PopIOStats();
-      PopMPIStats();
+      //PopIOStats();
+      //PopMPIStats();
       
       if (esmftrc_packet_is_open(&ctx->ctx) &&
           !esmftrc_packet_is_empty(&ctx->ctx)) {
@@ -686,43 +643,19 @@ namespace ESMCI {
   void TraceIOCloseEnd() {
   }
 
-  static vector<size_t> writeTotalBytes;
-  static vector<uint64_t> writeTotalTime;
-  static uint64_t writeStartTimestamp = -1;
-    
   void TraceIOWriteStart() {
-    writeStartTimestamp = TraceGetClock(NULL);
   }
 
   void TraceIOWriteEnd(size_t nbytes) {
-    uint64_t writeEndTimestamp = TraceGetClock(NULL);
-    writeTotalTime.back() = writeTotalTime.back() + (writeEndTimestamp - writeStartTimestamp);
-    writeTotalBytes.back() = writeTotalBytes.back() + nbytes;
-    writeStartTimestamp = -1;
   }
-
-  static vector<size_t> readTotalBytes;
-  static vector<uint64_t> readTotalTime;
-  static uint64_t readStartTimestamp = -1;
   
   void TraceIOReadStart() {
-    readStartTimestamp = TraceGetClock(NULL);
   }
 
   void TraceIOReadEnd(size_t nbytes) {
-    uint64_t readEndTimestamp = TraceGetClock(NULL);
-    readTotalTime.back() = readTotalTime.back() + (readEndTimestamp - readStartTimestamp);
-    readTotalBytes.back() = readTotalBytes.back() + nbytes;
-    readStartTimestamp = -1;
   }
 
-  static void PushIOStats() {
-    readTotalBytes.push_back(0);
-    readTotalTime.push_back(0);
-    writeTotalBytes.push_back(0);
-    writeTotalTime.push_back(0);
-  }
-
+  /*
   static void PopIOStats() {
 
     size_t readBytes = readTotalBytes.back();
@@ -742,65 +675,41 @@ namespace ESMCI {
       esmftrc_default_trace_iowrite(esmftrc_platform_get_default_ctx(),
                                     writeBytes, writeTime);
     }
-
   }
+  */
   
   ////////////////////////////////////////////////////
 
   /////////////////// MPI /////////////////////
 
-  static vector<size_t> mpiBarrierCount;
-  static vector<uint64_t> mpiBarrierTime;
-  static uint64_t mpiBarrierStartTimestamp = -1;
-  
-  void TraceMPIBarrierStart() {
-    mpiBarrierStartTimestamp = TraceGetClock(NULL);
-    mpiBarrierCount.back() = mpiBarrierCount.back() + 1;
-  }
-
-  void TraceMPIBarrierEnd() {
-    uint64_t mpiBarrierEndTimestamp = TraceGetClock(NULL);
-    mpiBarrierTime.back() = mpiBarrierTime.back() + (mpiBarrierEndTimestamp - mpiBarrierStartTimestamp);
-    mpiBarrierStartTimestamp = -1;
-  }
-
-  static vector<size_t> mpiWaitCount;
-  static vector<uint64_t> mpiWaitTime;
-  static uint64_t mpiWaitStartTimestamp = -1;
-  
   void TraceMPIWaitStart() {
-    mpiWaitStartTimestamp = TraceGetClock(NULL);
-    mpiWaitCount.back() = mpiWaitCount.back() + 1;
+    if (profileActive) {
+      currentRegionNode->enteredMPI(TraceGetClock(NULL));
+    }
   }
   
   void TraceMPIWaitEnd() {
-    uint64_t mpiWaitEndTimestamp = TraceGetClock(NULL);
-    mpiWaitTime.back() = mpiWaitTime.back() + (mpiWaitEndTimestamp - mpiWaitStartTimestamp);
-    mpiWaitStartTimestamp = -1;
-  }  
-
+    if (profileActive) {
+      currentRegionNode->exitedMPI(TraceGetClock(NULL));
+    }
+  }
+  
+  
   /*
    * This function used only in tests.
    */
   void TraceTest_GetMPIWaitStats(int *count, long long *time) {
     if (!traceInitialized) return;
-    if (count != NULL) {
-      *count = (int) mpiWaitCount.back();
-    }
-    if (time != NULL) {
-      *time = (long long) mpiWaitTime.back();
+    if (profileActive) {
+      if (count != NULL)
+        *count = currentRegionNode->getCountMPI();
+      if (time != NULL)
+        *time = currentRegionNode->getTotalMPI();
     }
   }
 
-  
-  static void PushMPIStats() {
-    mpiBarrierCount.push_back(0);
-    mpiBarrierTime.push_back(0);
-    mpiWaitCount.push_back(0);
-    mpiWaitTime.push_back(0);
-  }
-
-  static void PopMPIStats() {
+  /*
+    static void PopMPIStats() {
 
     size_t count = mpiBarrierCount.back();
     uint64_t time = mpiBarrierTime.back();
@@ -821,17 +730,13 @@ namespace ESMCI {
     }
     
   }
-
+  */
   
   /////////////////////////////////////////////
   
   void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
     if (!traceLocalPet) return;
 
-    PushIOStats();  /* reset statistics for this region */
-    PushMPIStats();
-
-    //TODO: combine regions below with MPI and IO stats above
     if (profileActive) {
       int regionId = -1;
       ESMFPhaseId phaseId(ESMFId(*ep_vmid, *ep_baseid), *ep_method, *ep_phase);
@@ -843,16 +748,14 @@ namespace ESMCI {
       currentRegionNode = currentRegionNode->getOrAddChild(regionId);
       currentRegionNode->entered(TraceGetClock(NULL));
     }
-    
+
+    //TODO:  change this to use the region_id instead and output a region definition?
     esmftrc_default_trace_phase_enter(esmftrc_platform_get_default_ctx(),
                                       *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
   
   void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
     if (!traceLocalPet) return;
-
-    PopIOStats();  /* issue events if there was I/O activity */
-    PopMPIStats();
 
     if (profileActive) {
       /* assume phases are well-formed, so do not resolve regionId */
@@ -895,9 +798,6 @@ namespace ESMCI {
       currentRegionNode->entered(TraceGetClock(NULL));
     }
     
-    PushIOStats();
-    PushMPIStats();
-    
     esmftrc_default_trace_regionid_enter(esmftrc_platform_get_default_ctx(),
                                          regionId);
         
@@ -924,16 +824,12 @@ namespace ESMCI {
       currentRegionNode = currentRegionNode->getParent();
     }
 
-    PopIOStats();
-    PopMPIStats();
-    
     esmftrc_default_trace_regionid_exit(esmftrc_platform_get_default_ctx(),
                                          regionId);
 
   }
 
   //IPDv00p1=6||IPDv00p2=7||IPDv00p3=4||IPDv00p4=5::RunPhase1=1::FinalizePhase1=1
-  //TODO: need a component level class (vmid, baseid) -> comp name?
   static void UpdateComponentInfoMap(string phaseStr, ESMFId esmfId, int method, string compName) {
     if (phaseStr.length() > 1) {
       vector<string> phases = split(trim(phaseStr), "||");
