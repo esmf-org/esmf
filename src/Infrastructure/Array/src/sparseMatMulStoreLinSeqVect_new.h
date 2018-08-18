@@ -31,14 +31,14 @@
   template<typename SIT, typename DIT, typename T>
     class QuerySparseMatrix:public ComPat2{
     SparseMatrix<SIT,DIT> const &sparseMatrix;
-    vector<vector<AssociationElement<DIT,SIT> > >&dstLinSeqVect;
+    vector<vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > >&dstLinSeqVect;
     // members that are initialized internally:
     vector<SparseMatrixIndex<DIT> > sparseMatrixDind;
     vector<MsgRequElement<DIT> > request;
    public:
     QuerySparseMatrix(
       SparseMatrix<SIT,DIT> const &sparseMatrix_,
-      vector<vector<AssociationElement<DIT,SIT> > >&dstLinSeqVect_
+      vector<vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > >&dstLinSeqVect_
     ):
       // members that need to be set on this level because of reference
       sparseMatrix(sparseMatrix_),
@@ -64,9 +64,9 @@
           SeqInd<DIT> seqInd = sparseMatrix.getDstSeqIndex(i);
           element.seqIndex.decompSeqIndex = seqInd.getIndex(0);
           if (seqInd.getN()>1)
-            element.seqIndex.tensorSeqIndex = seqInd.getIndex(1);
+            element.seqIndex.setTensor(seqInd.getIndex(1));
           else
-            element.seqIndex.tensorSeqIndex = 1;
+            element.seqIndex.setTensor(1);
           sparseMatrixDind.push_back(element);
         }
       }
@@ -76,7 +76,7 @@
       int size = 0;
       for (unsigned i=0; i<dstLinSeqVect.size(); i++){
         size += dstLinSeqVect[i].size();
-        typename vector<AssociationElement<DIT,SIT> >::iterator itD
+        typename vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > >::iterator itD
           = dstLinSeqVect[i].begin();
         typename vector<SparseMatrixIndex<DIT> >::iterator itSM
           = sparseMatrixDind.begin();
@@ -85,14 +85,14 @@
           if (itD->seqIndex == itSM->seqIndex){
             // found a sparse matrix entry with matching dst seqIndex
             // add the factor to the factorList of the dstLinSeqVect element
-            FactorElement<SIT> element;
+            FactorElement<SeqIndex<SIT> > element;
             // cast SeqInd -> SeqIndex representation
             SeqInd<SIT> seqInd = sparseMatrix.getSrcSeqIndex(itSM->index);
             element.partnerSeqIndex.decompSeqIndex = seqInd.getIndex(0);
             if (seqInd.getN()>1)
-              element.partnerSeqIndex.tensorSeqIndex = seqInd.getIndex(1);
+              element.partnerSeqIndex.setTensor(seqInd.getIndex(1));
             else
-              element.partnerSeqIndex.tensorSeqIndex = 1;
+              element.partnerSeqIndex.setTensor(1);
             element.partnerDe=-1;
             *(T *)(element.factor) = factorList[itSM->index];
             itD->factorList.push_back(element);
@@ -118,7 +118,7 @@
       if (size>0){
         int j=0;
         for (unsigned i=0; i<dstLinSeqVect.size(); i++){
-          typename vector<AssociationElement<DIT,SIT> >::iterator itD;
+          typename vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > >::iterator itD;
           for (itD = dstLinSeqVect[i].begin(); itD != dstLinSeqVect[i].end();
             ++itD){
             request[j].seqIndex = itD->seqIndex;
@@ -162,9 +162,9 @@
           SeqInd<SIT> seqInd = sparseMatrix.getSrcSeqIndex(itSM->index);
           element.srcSeqIndex.decompSeqIndex = seqInd.getIndex(0);
           if (seqInd.getN()>1)
-            element.srcSeqIndex.tensorSeqIndex = seqInd.getIndex(1);
+            element.srcSeqIndex.setTensor(seqInd.getIndex(1));
           else
-            element.srcSeqIndex.tensorSeqIndex = 1;
+            element.srcSeqIndex.setTensor(1);
           // record other members
           element.dstSeqIndex = itSM->seqIndex;
           element.factor = factorList[itSM->index];
@@ -200,14 +200,14 @@
         (MsgRespElement<SIT,DIT,T> *)responseBuffer;
       int size = responseSize / sizeof(MsgRespElement<SIT,DIT,T>);
       for (unsigned i=0; i<dstLinSeqVect.size(); i++){
-        typename vector<AssociationElement<DIT,SIT> >::iterator itD
+        typename vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > >::iterator itD
           = dstLinSeqVect[i].begin();
         int iRes = 0; // response index
         while ((iRes < size) && (itD != dstLinSeqVect[i].end())){
           if (response[iRes].dstSeqIndex == itD->seqIndex){
             // found a response with matching dst seqIndex
             // add the factor to the factorList of the dstLinSeqVect element
-            FactorElement<SIT> element;
+            FactorElement<SeqIndex<SIT> > element;
             element.partnerSeqIndex = response[iRes].srcSeqIndex;
             element.partnerDe = -1;
             *(T *)(element.factor) = response[iRes].factor;
@@ -242,9 +242,9 @@
   template<typename IT1, typename IT2> struct FactorElementSort{
     SeqIndex<IT1> seqIndex;
     int de;
-    FactorElement<IT2> *fep;
+    FactorElement<SeqIndex<IT2> > *fep;
     FactorElementSort(SeqIndex<IT1> seqIndex_, int de_,
-      FactorElement<IT2> *fep_){
+      FactorElement<SeqIndex<IT2> > *fep_){
       seqIndex = seqIndex_;
       de = de_;
       fep = fep_;
@@ -260,7 +260,7 @@
     int linIndex;
     int localDe;
     int de;
-    vector <FactorElement<IT2> > factorList;
+    vector <FactorElement<SeqIndex<IT2> > > factorList;
   };
   template<typename IT1, typename IT2> bool operator <
     (ElementSort<IT1,IT2> a, ElementSort<IT1,IT2> b){
@@ -321,7 +321,7 @@
         if (itD->fep->partnerSeqIndex == itS->seqIndex){
           // a match means that both sides need to record this...
           // src side now knows about a factor that needs to be added
-          FactorElement<DIT> factorElement;
+          FactorElement<SeqIndex<DIT> > factorElement;
           factorElement.partnerSeqIndex = itD->seqIndex;
           factorElement.partnerDe=itD->de;
           *(T*)(factorElement.factor) = *(T*)(itD->fep->factor);
@@ -399,7 +399,7 @@
         if (request[iReq].partnerSeqIndex == itS->seqIndex){
           // a match means that both sides need to record this...
           // src side now knows about a factor that needs to be added
-          FactorElement<DIT> factorElement;
+          FactorElement<SeqIndex<DIT> > factorElement;
           factorElement.partnerSeqIndex = request[iReq].seqIndex;
           factorElement.partnerDe=request[iReq].de;
           *(T*)(factorElement.factor) = request[iReq].factor;
@@ -505,8 +505,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   int dstElementCount,                    // in
   const int *srcLocalDeElementCount,      // in
   const int *dstLocalDeElementCount,      // in
-  vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect, // inout
-  vector<vector<AssociationElement<DIT,SIT> > >&dstLinSeqVect  // inout
+  vector<vector<AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > > >&srcLinSeqVect, // inout
+  vector<vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > >&dstLinSeqVect  // inout
   ){
 //
 // !DESCRIPTION:
@@ -796,7 +796,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
           if (seqIndex.valid()){
             // this rim element holds a valid seqIndex
             // add the element to dstLinSeqVect[i]
-            AssociationElement<DIT,SIT> element;
+            AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > element;
             element.linIndex = dstArray->getRimLinIndex()[i][k];
             element.seqIndex = seqIndex;
             element.factorList.resize(1);
@@ -910,7 +910,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
         // loop over all elements in exclusive region for local DE i
         while(arrayElement.isWithin()){
           // add the element to dstLinSeqVect[i]
-          AssociationElement<DIT,SIT> element;
+          AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > element;
           element.linIndex = arrayElement.getLinearIndex();
           element.seqIndex = arrayElement.getSequenceIndex<DIT>();
           element.factorList.resize(0);
@@ -978,7 +978,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     // for other cases this extra loop here is a waste of time
     // clear out dstLinSeqVect elements without factor elements
     for (int i=0; i<dstLocalDeCount; i++){
-      typename vector<AssociationElement<DIT,SIT> >::iterator itD
+      typename vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > >::iterator itD
         = dstLinSeqVect[i].begin();
       while (itD != dstLinSeqVect[i].end()){
         // remove dstLinSeqVect elements without factorList elements
@@ -1218,11 +1218,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   vm->timerReset("cleanout_dstLinSeqVect");
 #endif
   for (int i=0; i<dstLocalDeCount; i++){
-    typename vector<AssociationElement<DIT,SIT> >::iterator itD
+    typename vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > >::iterator itD
       = dstLinSeqVect[i].begin();
     while (itD != dstLinSeqVect[i].end()){
       // remove factorList elements without partnerDe
-      typename vector<FactorElement<SIT> >::iterator it
+      typename vector<FactorElement<SeqIndex<SIT> > >::iterator it
         = itD->factorList.begin(); 
       while (it != itD->factorList.end()){
         if ((it->partnerDe)==-1)
@@ -1276,7 +1276,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #endif
   for (itS=srcElementSort.begin(); itS!=srcElementSort.end(); ++itS){
     if (itS->factorList.size() > 0){
-      AssociationElement<SIT,DIT> element;
+      AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > element;
       element.linIndex = itS->linIndex;
       element.seqIndex = itS->seqIndex;
       element.factorList = itS->factorList;

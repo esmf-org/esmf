@@ -2399,7 +2399,7 @@ template<typename IT> int Array::getSequenceIndexExclusive(
     seqIndex->decompSeqIndex = -1;  // invalidate
 
   // determine sequentialized index for tensor dimensions
-  seqIndex->tensorSeqIndex = getTensorSequenceIndex(index);
+  seqIndex->setTensor(getTensorSequenceIndex(index));
 
   // return successfully
   return ESMF_SUCCESS;
@@ -2438,8 +2438,8 @@ template<typename IT> SeqIndex<IT> Array::getSequenceIndexTile(
 
   // initialize seqIndex
   SeqIndex<IT> seqIndex;
-  seqIndex.decompSeqIndex = seqIndex.tensorSeqIndex = -1;
-
+  seqIndex.decompSeqIndex = -1;
+  seqIndex.setTensor(-1);
   // prepare decompIndex for decomposed dimensions in the DistGrid order
   int dimCount = distgrid->getDimCount();
   int *decompIndex = new int[dimCount];
@@ -2465,7 +2465,7 @@ template<typename IT> SeqIndex<IT> Array::getSequenceIndexTile(
   delete [] decompIndex;
 
   // determine sequentialized index for tensor dimensions
-  seqIndex.tensorSeqIndex = getTensorSequenceIndex(index);
+  seqIndex.setTensor(getTensorSequenceIndex(index));
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -2883,8 +2883,7 @@ template<>
       int off = arrayElement.getArbSequenceIndexOffset() - offStart;
       rimSeqIndexI4[localDe][i].decompSeqIndex =
         rimSeqIndexArg->array[off];
-      rimSeqIndexI4[localDe][i].tensorSeqIndex =
-        arrayElement.getTensorSequenceIndex();
+      rimSeqIndexI4[localDe][i].setTensor(arrayElement.getTensorSequenceIndex());
 #if 0
 printf("setRimSeqIndex(): %d, %d, %d, (%d, %d), %d\n", i, offStart, off,
   rimSeqIndexI4[localDe][i].decompSeqIndex,
@@ -2969,8 +2968,7 @@ template<>
         int off = arrayElement.getArbSequenceIndexOffset() - offStart;
         rimSeqIndexI8[localDe][i].decompSeqIndex =
           rimSeqIndexArg->array[off];
-        rimSeqIndexI8[localDe][i].tensorSeqIndex =
-          arrayElement.getTensorSequenceIndex();
+        rimSeqIndexI8[localDe][i].setTensor(arrayElement.getTensorSequenceIndex());
 #if 0
 printf("setRimSeqIndex(): %d, %d, %d, (%lld, %d), %d\n", i, offStart, off,
   rimSeqIndexI8[localDe][i].decompSeqIndex,
@@ -5695,9 +5693,9 @@ fprintf(stderr, "factorListCount = %d\n", factorListCount);
         // fill this info into factorIndexList
         int fili = 4*factorIndexListIndex;
         factorIndexList[fili]   = srcSeqIndex.decompSeqIndex;
-        factorIndexList[fili+1] = srcSeqIndex.tensorSeqIndex;
+        factorIndexList[fili+1] = srcSeqIndex.getTensor();
         factorIndexList[fili+2] = dstSeqIndex.decompSeqIndex;
-        factorIndexList[fili+3] = dstSeqIndex.tensorSeqIndex;
+        factorIndexList[fili+3] = dstSeqIndex.getTensor();
 
         ++factorIndexListIndex;
         multiDimIndexLoop.next();
@@ -5884,17 +5882,17 @@ int Array::redistRelease(
 
 
 //-----------------------------------------------------------------------------
-template<typename T> bool operator==(SeqIndex<T> a, SeqIndex<T> b){
+template<typename T> bool operator==(SeqIndexTensor<T> a, SeqIndexTensor<T> b){
   if (a.decompSeqIndex != b.decompSeqIndex) return false;
   // decompSeqIndex was equal -> check tensorSeqIndex
   return (a.tensorSeqIndex == b.tensorSeqIndex);
 }
-template<typename T> bool operator!=(SeqIndex<T> a, SeqIndex<T> b){
+template<typename T> bool operator!=(SeqIndexTensor<T> a, SeqIndexTensor<T> b){
   if (a.decompSeqIndex != b.decompSeqIndex) return true;
   // decompSeqIndex was equal -> check tensorSeqIndex
   return (a.tensorSeqIndex != b.tensorSeqIndex);
 }
-template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b){
+template<typename T> bool operator<(SeqIndexTensor<T> a, SeqIndexTensor<T> b){
   if (a.decompSeqIndex < b.decompSeqIndex) return true;
   if (a.decompSeqIndex > b.decompSeqIndex) return false;
   // decompSeqIndex must be equal
@@ -5904,13 +5902,13 @@ template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b){
 
 
 //-----------------------------------------------------------------------------
-template<typename T> bool operator==(SeqIndexLite<T> a, SeqIndexLite<T> b){
+template<typename T> bool operator==(SeqIndex<T> a, SeqIndex<T> b){
   return (a.decompSeqIndex == b.decompSeqIndex);
 }
-template<typename T> bool operator!=(SeqIndexLite<T> a, SeqIndexLite<T> b){
+template<typename T> bool operator!=(SeqIndex<T> a, SeqIndex<T> b){
   return (a.decompSeqIndex != b.decompSeqIndex);
 }
-template<typename T> bool operator<(SeqIndexLite<T> a, SeqIndexLite<T> b){
+template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b){
   return (a.decompSeqIndex < b.decompSeqIndex);
 }
 //-----------------------------------------------------------------------------
@@ -5937,8 +5935,8 @@ namespace ArrayHelper{
   template<typename IT1, typename IT2> struct DstInfo{
     int linIndex;               // if vector element then this is start
     int vectorLength;           // ==1 single element, > 1 vector element
-    SeqIndex<IT1> seqIndex;        // if vector element then this is start
-    SeqIndex<IT2> partnerSeqIndex; // if vector element then this is start
+    IT1 seqIndex;        // if vector element then this is start
+    IT2 partnerSeqIndex; // if vector element then this is start
     void *factor;               // if vector element then this factor for all
     int bufferIndex;            // index into the receive buffer
   };
@@ -5960,7 +5958,7 @@ namespace ArrayHelper{
     bool vectorOrderDstInfo(DstInfo<IT1,IT2> a, DstInfo<IT1,IT2> b){
     if (a.seqIndex.decompSeqIndex == b.seqIndex.decompSeqIndex)
       if (a.partnerSeqIndex.decompSeqIndex == b.partnerSeqIndex.decompSeqIndex)
-        return (a.seqIndex.tensorSeqIndex < b.seqIndex.tensorSeqIndex);
+        return (a.seqIndex.getTensor() < b.seqIndex.getTensor());
       else
         return
           (a.partnerSeqIndex.decompSeqIndex < b.partnerSeqIndex.decompSeqIndex);
@@ -5995,8 +5993,8 @@ namespace ArrayHelper{
   template<typename IT1, typename IT2> struct SrcInfo{
     int linIndex;               // if vector element then this is start
     int vectorLength;           // ==1 single element, > 1 vector element
-    SeqIndex<IT1> seqIndex;        // if vector element then this is start
-    SeqIndex<IT2> partnerSeqIndex; // if vector element then this is start
+    IT1 seqIndex;        // if vector element then this is start
+    IT2 partnerSeqIndex; // if vector element then this is start
     void *factor;               // if vector element then this factor for all
   };
   template<typename IT1, typename IT2>
@@ -6018,7 +6016,7 @@ namespace ArrayHelper{
     if (a.partnerSeqIndex.decompSeqIndex == b.partnerSeqIndex.decompSeqIndex)
       if (a.seqIndex.decompSeqIndex == b.seqIndex.decompSeqIndex)
         return
-          (a.partnerSeqIndex.tensorSeqIndex < b.partnerSeqIndex.tensorSeqIndex);
+          (a.partnerSeqIndex.getTensor() < b.partnerSeqIndex.getTensor());
       else
         return (a.seqIndex.decompSeqIndex < b.seqIndex.decompSeqIndex);
     else
@@ -6098,7 +6096,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::DstInfo<IT1,IT2> >::iterator pp =
         dstInfoTable.begin();
       while (pp != dstInfoTable.end()){
-        SeqIndex<IT1> seqIndex = pp->seqIndex;
+        IT1 seqIndex = pp->seqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == dstInfoTable.end()) || !(seqIndex == pp->seqIndex)) break;
@@ -6158,7 +6156,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::DstInfo<IT1,IT2> >::iterator pp =
         dstInfoTable.begin();
       while (pp != dstInfoTable.end()){
-        SeqIndex<IT1> seqIndex = pp->seqIndex;
+        IT1 seqIndex = pp->seqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == dstInfoTable.end()) || !(seqIndex == pp->seqIndex)) break;
@@ -6467,7 +6465,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::DstInfo<IT1,IT2> >::iterator pp =
         dstInfoTable.begin();
       while (pp != dstInfoTable.end()){
-        SeqIndex<IT1> seqIndex = pp->seqIndex;
+        IT1 seqIndex = pp->seqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == dstInfoTable.end()) || !(seqIndex == pp->seqIndex)) break;
@@ -6490,7 +6488,7 @@ namespace ArrayHelper{
         rraOffsetList[bufferItem] = pp->linIndex/vectorLength;
         valueOffsetList[bufferItem] = bufferItem;
         // skip dstInfoTable elements that were summed up on the src side
-        SeqIndex<IT1> seqIndex = pp->seqIndex;
+        IT1 seqIndex = pp->seqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == dstInfoTable.end()) || !(seqIndex == pp->seqIndex)) break;
@@ -6700,7 +6698,7 @@ namespace ArrayHelper{
       for (unsigned i=0; i<recvnbVector.size(); i++){
         pp = recvnbVector[i].dstInfoTable.begin();
         while (pp != recvnbVector[i].dstInfoTable.end()){
-          SeqIndex<IT1> seqIndex = pp->seqIndex;
+          IT1 seqIndex = pp->seqIndex;
           for (int term=0; term<srcTermProcessing; term++){
             ++pp;
             if ((pp == recvnbVector[i].dstInfoTable.end())
@@ -6737,7 +6735,7 @@ namespace ArrayHelper{
           dstInfoSort.push_back(DstInfoSrcSeqSort<IT1,IT2>(pp, i,
             rraIndexList[i]));
           pp->bufferIndex = bufferItem; // adjust to modified buffer structure
-          SeqIndex<IT1> seqIndex = pp->seqIndex;
+          IT1 seqIndex = pp->seqIndex;
           for (int term=0; term<srcTermProcessing; term++){
             ++pp;
             if ((pp == recvnbVector[i].dstInfoTable.end())
@@ -6963,7 +6961,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::SrcInfo<IT1,IT2> >::iterator pp =
         srcInfoTable.begin();
       while (pp != srcInfoTable.end()){
-        SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+        IT2 partnerSeqIndex = pp->partnerSeqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == srcInfoTable.end()) ||
@@ -7007,7 +7005,7 @@ namespace ArrayHelper{
         {
           ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            IT2 partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_R4 *)(pp->factor);
@@ -7025,7 +7023,7 @@ namespace ArrayHelper{
         {
           ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            IT2 partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_R8 *)(pp->factor);
@@ -7043,7 +7041,7 @@ namespace ArrayHelper{
         {
           ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            IT2 partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_I4 *)(pp->factor);
@@ -7061,7 +7059,7 @@ namespace ArrayHelper{
         {
           ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            IT2 partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_I8 *)(pp->factor);
@@ -7268,7 +7266,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::SrcInfo<IT1,IT2> >::iterator pp =
         srcInfoTable.begin();
       while (pp != srcInfoTable.end()){
-        SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+        IT2 partnerSeqIndex = pp->partnerSeqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == srcInfoTable.end()) ||
@@ -7312,7 +7310,7 @@ namespace ArrayHelper{
         {
           ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            IT2 partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_R4 *)(pp->factor);
@@ -7330,7 +7328,7 @@ namespace ArrayHelper{
         {
           ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            IT2 partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_R8 *)(pp->factor);
@@ -7348,7 +7346,7 @@ namespace ArrayHelper{
         {
           ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            IT2 partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_I4 *)(pp->factor);
@@ -7366,7 +7364,7 @@ namespace ArrayHelper{
         {
           ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            IT2 partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_I8 *)(pp->factor);
@@ -7450,7 +7448,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::DstInfo<IT2,IT1> >::iterator pp =
         pRecv->dstInfoTable.begin();
       while (pp != pRecv->dstInfoTable.end()){
-        SeqIndex<IT1> seqIndex = pp->seqIndex;
+        IT1 seqIndex = pp->seqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == pRecv->dstInfoTable.end()) ||
@@ -7599,7 +7597,7 @@ namespace ArrayHelper{
       typename vector<ArrayHelper::SrcInfo<IT1,IT2> >::iterator pp =
         srcInfoTable.begin();
       while (pp != srcInfoTable.end()){
-        SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+        IT2 partnerSeqIndex = pp->partnerSeqIndex;
         for (int term=0; term<srcTermProcessing; term++){
           ++pp;
           if ((pp == srcInfoTable.end()) ||
@@ -7643,7 +7641,7 @@ namespace ArrayHelper{
         {
           ESMC_R4 *factorListT = (ESMC_R4 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            IT2 partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_R4 *)(pp->factor);
@@ -7661,7 +7659,7 @@ namespace ArrayHelper{
         {
           ESMC_R8 *factorListT = (ESMC_R8 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            IT2 partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_R8 *)(pp->factor);
@@ -7679,7 +7677,7 @@ namespace ArrayHelper{
         {
           ESMC_I4 *factorListT = (ESMC_I4 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            IT2 partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_I4 *)(pp->factor);
@@ -7697,7 +7695,7 @@ namespace ArrayHelper{
         {
           ESMC_I8 *factorListT = (ESMC_I8 *)factorList;
           while (pp != srcInfoTable.end()){
-            SeqIndex<IT2> partnerSeqIndex = pp->partnerSeqIndex;
+            IT2 partnerSeqIndex = pp->partnerSeqIndex;
             for (int term=0; term<srcTermProcessing; term++){
               rraOffsetList[kk] = pp->linIndex/vectorLength;
               factorListT[kk] = *(ESMC_I8 *)(pp->factor);
@@ -7818,7 +7816,7 @@ namespace ArrayHelper{
 // FactorElement
 template<typename IT> struct FactorElement{
   char factor[8]; // large enough for R8 and I8
-  SeqIndex<IT> partnerSeqIndex;
+  IT partnerSeqIndex;
   int partnerDe;
 };
 template<typename IT>
@@ -7837,7 +7835,7 @@ template<typename IT>
 // AssociationElement
 template<typename IT1, typename IT2> struct AssociationElement{
   vector<FactorElement<IT2> > factorList;
-  SeqIndex<IT1> seqIndex;
+  IT1 seqIndex;
   int linIndex;
 };
 template<typename IT1, typename IT2>
@@ -7993,14 +7991,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   ESMC_TypeKind_Flag typekindDst,         // in
   const int *srcLocalDeElementCount,      // in
   const int *dstLocalDeElementCount,      // in
-  vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect, // in - sparse mat "run dist."
-  vector<vector<AssociationElement<DIT,SIT> > >&dstLinSeqVect, // in - sparse mat "run dist."
+  vector<vector<AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > > >&srcLinSeqVect, // in - sparse mat "run dist."
+  vector<vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > >&dstLinSeqVect, // in - sparse mat "run dist."
   RouteHandle **routehandle,              // inout
 #ifdef ASMM_STORE_TIMING_on
   double *t8, double *t9, double *t10, double *t11,
 #endif
-  vector<ArrayHelper::SendnbElement<SIT,DIT> > &sendnbVector, // inout
-  vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector  // inout
+  vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > > &sendnbVector, // inout
+  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > > &recvnbVector  // inout
   );
 
 
@@ -8038,8 +8036,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   int dstElementCount,                    // in
   const int *srcLocalDeElementCount,      // in
   const int *dstLocalDeElementCount,      // in
-  vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect, // inout
-  vector<vector<AssociationElement<DIT,SIT> > >&dstLinSeqVect  // inout
+  vector<vector<AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > > >&srcLinSeqVect, // inout
+  vector<vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > >&dstLinSeqVect  // inout
   );
 
 
@@ -8477,9 +8475,9 @@ template<typename SIT, typename DIT>
   }
 
   // tansform into "run distribution"
-  vector<vector<AssociationElement<SIT,DIT> > >
+  vector<vector<AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > > >
     srcLinSeqVect(srcLocalDeCount);
-  vector<vector<AssociationElement<DIT,SIT> > >
+  vector<vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > >
     dstLinSeqVect(dstLocalDeCount);
 
 #ifdef ASMM_STORE_MEMLOG_on
@@ -8584,7 +8582,7 @@ template<typename SIT, typename DIT>
   if (srcArray->tensorCount) undistributedDimsPresent = true;
   if (dstArray->tensorCount) undistributedDimsPresent = true;
 
-malloc_trim(0);  
+malloc_trim(0);
   
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -8615,8 +8613,8 @@ malloc_trim(0);
 #endif
 
   // tansform "run distribution" into nb-vectors
-  vector<ArrayHelper::SendnbElement<SIT,DIT> > sendnbVector;
-  vector<ArrayHelper::RecvnbElement<DIT,SIT> > recvnbVector;
+  vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > > sendnbVector;
+  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > > recvnbVector;
   localrc = sparseMatMulStoreNbVectors(vm,
     srcArray->delayout, dstArray->delayout,
     tensorMixFlag, srcTensorContigLength, dstTensorContigLength,
@@ -8636,9 +8634,12 @@ malloc_trim(0);
 #endif
 
   // force vectors out of scope by swapping with empty vector, to free memory
-  vector<vector<AssociationElement<SIT,DIT> > >().swap(srcLinSeqVect);
-  vector<vector<AssociationElement<DIT,SIT> > >().swap(dstLinSeqVect);
+  vector<vector<AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > > >().swap(srcLinSeqVect);
+  vector<vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > >().swap(dstLinSeqVect);
 
+  malloc_trim(0);
+  vm->barrier();  //TODO: only for debugging
+  
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.4"));
 #endif
@@ -8671,8 +8672,8 @@ malloc_trim(0);
   delete [] srcLocalDeElementCount;
   delete [] dstLocalDeElementCount;
   // force vectors out of scope by swapping with empty vector, to free memory
-  vector<ArrayHelper::SendnbElement<SIT,DIT> >().swap(sendnbVector);
-  vector<ArrayHelper::RecvnbElement<DIT,SIT> >().swap(recvnbVector);
+  vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > >().swap(sendnbVector);
+  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > >().swap(recvnbVector);
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.6"));
@@ -8807,14 +8808,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   ESMC_TypeKind_Flag typekindDst,         // in
   const int *srcLocalDeElementCount,      // in
   const int *dstLocalDeElementCount,      // in
-  vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect, // in - sparse mat "run dist."
-  vector<vector<AssociationElement<DIT,SIT> > >&dstLinSeqVect, // in - sparse mat "run dist."
+  vector<vector<AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > > >&srcLinSeqVect, // in - sparse mat "run dist."
+  vector<vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > >&dstLinSeqVect, // in - sparse mat "run dist."
   RouteHandle **routehandle,              // inout
 #ifdef ASMM_STORE_TIMING_on
   double *t8, double *t9, double *t10, double *t11,
 #endif
-  vector<ArrayHelper::SendnbElement<SIT,DIT> > &sendnbVector, // inout
-  vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector  // inout
+  vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > > &sendnbVector, // inout
+  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > > &recvnbVector  // inout
   ){
 //
 // !DESCRIPTION:
@@ -9062,7 +9063,7 @@ for (int i=0; i<localPet; i++) vm->barrier(); //TODO: only for debugging
   
   
     // invert the look-up direction
-    vector<vector<ArrayHelper::DstInfo<DIT,SIT> > >
+    vector<vector<ArrayHelper::DstInfo<SeqIndex<DIT>,SeqIndex<SIT> > > >
       dstInfoTable(recvnbDiffPartnerDeCount);
     int *dstInfoTableInit = new int[recvnbDiffPartnerDeCount];
     for (int i=0; i<recvnbDiffPartnerDeCount; i++){
@@ -9093,9 +9094,8 @@ for (int i=0; i<localPet; i++) vm->barrier(); //TODO: only for debugging
         .partnerSeqIndex;
       if (!tensorMixFlag){
         // default into tensor for tensor src/dst mode
-        dstInfoTable[partnerDeListIndex][index2].partnerSeqIndex
-          .tensorSeqIndex
-          = dstInfoTable[partnerDeListIndex][index2].seqIndex.tensorSeqIndex;
+        dstInfoTable[partnerDeListIndex][index2].partnerSeqIndex.setTensor(
+          dstInfoTable[partnerDeListIndex][index2].seqIndex.getTensor());
       }
       char *localDeFactorBufferEntry = localDeFactorBuffer + i*dataSizeFactors;
       memcpy(localDeFactorBufferEntry,
@@ -9113,7 +9113,7 @@ for (int i=0; i<localPet; i++) vm->barrier(); //TODO: only for debugging
 
 
     // force vectors out of scope by swapping with empty vector, to free memory
-    vector<AssociationElement<DIT,SIT> > ().swap(dstLinSeqVect[j]);
+    vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > ().swap(dstLinSeqVect[j]);
   
 #ifdef ASMM_STORE_MEMLOG_on
     VM::logMemInfo(std::string("ASMMStoreNbVectors4.0"));
@@ -9136,19 +9136,19 @@ for (int i=localPet; i<petCount; i++) vm->barrier(); //TODO: only for debugging
       // no vectorization possible -> sort for scalar optimization
       for (int i=0; i<recvnbDiffPartnerDeCount; i++)
         sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
-          ArrayHelper::scalarOrderDstInfo<DIT,SIT>);
+          ArrayHelper::scalarOrderDstInfo<SeqIndex<DIT>,SeqIndex<SIT> >);
     }else if (dstTensorContigLength == 1){
       // support vectorization during execution, but nothing to deflate here
       // sort for scalar optimization
       for (int i=0; i<recvnbDiffPartnerDeCount; i++)
         sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
-          ArrayHelper::scalarOrderDstInfo<DIT,SIT>);
+          ArrayHelper::scalarOrderDstInfo<SeqIndex<DIT>,SeqIndex<SIT> >);
     }else{
       // vectorization
       // sort vector optimization
       for (int i=0; i<recvnbDiffPartnerDeCount; i++){
         sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
-          ArrayHelper::vectorOrderDstInfo<DIT,SIT>);
+          ArrayHelper::vectorOrderDstInfo<SeqIndex<DIT>,SeqIndex<SIT> >);
 #ifdef ASMM_STORE_LOG_on_disabled
         for (int k=0; k<dstInfoTable[i].size(); k++)
           fprintf(asmm_store_log_fp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
@@ -9160,11 +9160,11 @@ for (int i=localPet; i<petCount; i++) vm->barrier(); //TODO: only for debugging
             dstInfoTable[i][k].factor);
 #endif
         // vectorize -> deflate dstInfoTable
-        typename vector<ArrayHelper::DstInfo<DIT,SIT> >::iterator rangeStart =
+        typename vector<ArrayHelper::DstInfo<SeqIndex<DIT>,SeqIndex<SIT> > >::iterator rangeStart =
           dstInfoTable[i].begin();
-        typename vector<ArrayHelper::DstInfo<DIT,SIT> >::iterator rangeStop =
+        typename vector<ArrayHelper::DstInfo<SeqIndex<DIT>,SeqIndex<SIT> > >::iterator rangeStop =
           rangeStart;
-        typename vector<ArrayHelper::DstInfo<DIT,SIT> >::iterator rangeWrite =
+        typename vector<ArrayHelper::DstInfo<SeqIndex<DIT>,SeqIndex<SIT> > >::iterator rangeWrite =
           rangeStart;
         while (rangeStart != dstInfoTable[i].end()){
           int vectorLength = 1; // initialize
@@ -9399,7 +9399,7 @@ for (int i=localPet; i<petCount; i++) vm->barrier(); //TODO: only for debugging
     VM::logMemInfo(std::string("ASMMStoreNbVectors7.0"));
 #endif
     // invert the look-up direction
-    vector<vector<ArrayHelper::SrcInfo<SIT,DIT> > >
+    vector<vector<ArrayHelper::SrcInfo<SeqIndex<SIT>,SeqIndex<DIT> > > >
       srcInfoTable(sendnbDiffPartnerDeCount);
     int *srcInfoTableInit = new int[sendnbDiffPartnerDeCount];
     for (int i=0; i<sendnbDiffPartnerDeCount; i++){
@@ -9427,9 +9427,8 @@ for (int i=localPet; i<petCount; i++) vm->barrier(); //TODO: only for debugging
         .partnerSeqIndex;
       if (!tensorMixFlag){
         // default into tensor for tensor src/dst mode
-        srcInfoTable[partnerDeListIndex][index2].partnerSeqIndex
-          .tensorSeqIndex =
-          srcInfoTable[partnerDeListIndex][index2].seqIndex.tensorSeqIndex;
+        srcInfoTable[partnerDeListIndex][index2].partnerSeqIndex.setTensor(
+          srcInfoTable[partnerDeListIndex][index2].seqIndex.getTensor());
       }
       char *localDeFactorBufferEntry = localDeFactorBuffer + i*dataSizeFactors;
       memcpy(localDeFactorBufferEntry,
@@ -9446,7 +9445,7 @@ for (int i=localPet; i<petCount; i++) vm->barrier(); //TODO: only for debugging
     delete [] partnerDeRef;
 
     // force vectors out of scope by swapping with empty vector, to free memory
-    vector<AssociationElement<DIT,SIT> > ().swap(srcLinSeqVect[j]);
+    vector<AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > > ().swap(srcLinSeqVect[j]);
   
 #ifdef ASMM_STORE_MEMLOG_on
     VM::logMemInfo(std::string("ASMMStoreNbVectors8.0"));
@@ -9463,25 +9462,25 @@ for (int i=localPet; i<petCount; i++) vm->barrier(); //TODO: only for debugging
       // no vectorization possible -> sort for scalar optimization
       for (int i=0; i<sendnbDiffPartnerDeCount; i++)
         sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
-          ArrayHelper::scalarOrderSrcInfo<SIT,DIT>);
+          ArrayHelper::scalarOrderSrcInfo<SeqIndex<SIT>,SeqIndex<DIT> >);
     }else if (srcTensorContigLength == 1){
       // support vectorization during execution, but nothing to deflate here
       // sort for scalar optimization
       for (int i=0; i<sendnbDiffPartnerDeCount; i++)
         sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
-          ArrayHelper::scalarOrderSrcInfo<SIT,DIT>);
+          ArrayHelper::scalarOrderSrcInfo<SeqIndex<SIT>,SeqIndex<DIT> >);
     }else{
       // vectorization
       // sort vector optimization
       for (int i=0; i<sendnbDiffPartnerDeCount; i++){
         sort(srcInfoTable[i].begin(), srcInfoTable[i].end(),
-          ArrayHelper::vectorOrderSrcInfo<SIT,DIT>);
+          ArrayHelper::vectorOrderSrcInfo<SeqIndex<SIT>,SeqIndex<DIT> >);
         // vectorize -> deflate srcInfoTable
-        typename vector<ArrayHelper::SrcInfo<SIT,DIT> >::iterator rangeStart =
+        typename vector<ArrayHelper::SrcInfo<SeqIndex<SIT>,SeqIndex<DIT> > >::iterator rangeStart =
           srcInfoTable[i].begin();
-        typename vector<ArrayHelper::SrcInfo<SIT,DIT> >::iterator rangeStop =
+        typename vector<ArrayHelper::SrcInfo<SeqIndex<SIT>,SeqIndex<DIT> > >::iterator rangeStop =
           rangeStart;
-        typename vector<ArrayHelper::SrcInfo<SIT,DIT> >::iterator rangeWrite =
+        typename vector<ArrayHelper::SrcInfo<SeqIndex<SIT>,SeqIndex<DIT> > >::iterator rangeWrite =
           rangeStart;
         while (rangeStart != srcInfoTable[i].end()){
           int vectorLength = 1; // initialize
@@ -9660,14 +9659,14 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #ifdef FORCE_SHRINK_AFTER_SORT_on
   // shrink size of recvnbVector to where it was before sort
   // may come at a performance hit
-  vector<ArrayHelper::RecvnbElement<DIT,SIT> > recvnbV = recvnbVector;
+  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > > recvnbV = recvnbVector;
   recvnbV.swap(recvnbVector);
-  vector<ArrayHelper::RecvnbElement<DIT,SIT> > ().swap(recvnbV);
+  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > > ().swap(recvnbV);
   // shrink size of sendnbVector to where it was before sort
   // may come at a performance hit
-  vector<ArrayHelper::SendnbElement<SIT,DIT> > sendnbV = sendnbVector;
+  vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > > sendnbV = sendnbVector;
   sendnbV.swap(sendnbVector);
-  vector<ArrayHelper::SendnbElement<SIT,DIT> > ().swap(sendnbV);
+  vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > > ().swap(sendnbV);
 #endif
 
 #ifdef ASMM_STORE_MEMLOG_on
@@ -9981,6 +9980,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         vectorLength, xxe);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
+      malloc_trim(0);
 #if 0
       // optimize the XXE entire stream
       localrc = xxe->optimize();
@@ -10145,6 +10145,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         vectorLength, xxe);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
+      malloc_trim(0);
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.2"));
 #endif
@@ -10286,6 +10287,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     vectorLength, xxe);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
+  
+  malloc_trim(0);
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.1"));

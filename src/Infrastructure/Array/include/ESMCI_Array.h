@@ -60,10 +60,10 @@ namespace ESMCI {
   // class definitions
 
   //============================================================================
-  template<typename T> struct SeqIndex{
+  template<typename T> struct SeqIndexTensor{
     T decompSeqIndex;
     int tensorSeqIndex;
-    SeqIndex(){
+    SeqIndexTensor(){
       decompSeqIndex = -1;  // invalidate
       tensorSeqIndex = -1;  // invalidate
     }
@@ -77,14 +77,23 @@ namespace ESMCI {
       if (decompSeqIndex == -1) return false; // invalid seqIndex
       return true;  // otherwise valid
     }
+    void incrementTensor(){
+      ++tensorSeqIndex;
+    }
+    void setTensor(int tensorSeqIndex_){
+      tensorSeqIndex = tensorSeqIndex_;
+    }
+    int getTensor(){
+      return tensorSeqIndex;
+    }
   };  // struct seqIndex
-  template<typename T> bool operator==(SeqIndex<T> a, SeqIndex<T> b);
-  template<typename T> bool operator!=(SeqIndex<T> a, SeqIndex<T> b);
-  template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b);
+  template<typename T> bool operator==(SeqIndexTensor<T> a, SeqIndexTensor<T> b);
+  template<typename T> bool operator!=(SeqIndexTensor<T> a, SeqIndexTensor<T> b);
+  template<typename T> bool operator<(SeqIndexTensor<T> a, SeqIndexTensor<T> b);
 
-  template<typename T> struct SeqIndexLite{
+  template<typename T> struct SeqIndex{
     T decompSeqIndex;
-    SeqIndexLite(){
+    SeqIndex(){
       decompSeqIndex = -1;  // invalidate
     }
     void print(){
@@ -97,10 +106,19 @@ namespace ESMCI {
       if (decompSeqIndex == -1) return false; // invalid seqIndex
       return true;  // otherwise valid
     }
+    void incrementTensor(){
+      // no-op
+    }
+    void setTensor(int tensorSeqIndex_){
+      // no-op
+    }
+    int getTensor(){
+      return 1; // dummy
+    }
   };  // struct seqIndex
-  template<typename T> bool operator==(SeqIndexLite<T> a, SeqIndexLite<T> b);
-  template<typename T> bool operator!=(SeqIndexLite<T> a, SeqIndexLite<T> b);
-  template<typename T> bool operator<(SeqIndexLite<T> a, SeqIndexLite<T> b);
+  template<typename T> bool operator==(SeqIndex<T> a, SeqIndex<T> b);
+  template<typename T> bool operator!=(SeqIndex<T> a, SeqIndex<T> b);
+  template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b);
 
   template<typename T> class SeqInd{
     int n;  // number of components in sequence index
@@ -573,9 +591,9 @@ namespace ESMCI {
           }else{
             // increment the tensorSeqIndex
             if (indexTK==ESMC_TYPEKIND_I4)
-              ((SeqIndex<ESMC_I4>*)seqIndex)->tensorSeqIndex++;
+              ((SeqIndex<ESMC_I4>*)seqIndex)->incrementTensor();
             else if (indexTK==ESMC_TYPEKIND_I8)
-              ((SeqIndex<ESMC_I8>*)seqIndex)->tensorSeqIndex++;
+              ((SeqIndex<ESMC_I8>*)seqIndex)->incrementTensor();
           }
         }
       }
