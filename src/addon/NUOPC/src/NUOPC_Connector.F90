@@ -2775,6 +2775,7 @@ print *, "current bondLevel=", bondLevel
     type(ESMF_Time)                 :: currTime
     character(len=40)               :: currTimeString
     character(len=40)               :: transferDirection
+    logical                         :: isPresentNDG, isPresentEDG
 
     rc = ESMF_SUCCESS
 
@@ -3070,26 +3071,45 @@ print *, "current bondLevel=", bondLevel
           call ESMF_FieldGet(acceptorField, mesh=acceptorMesh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call ESMF_MeshGet(acceptorMesh, nodalDistgrid=nDistgrid, &
-            elementDistgrid=eDistgrid, rc=rc)
+          call ESMF_MeshGet(acceptorMesh, nodalDistgridIsPresent=isPresentNDG, &
+            elementDistgridIsPresent=isPresentEDG, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (meshNoConnections) then
-            ! provider Mesh does not have connections
-            ! -> need both DistGrids on the acceptor side
-            !TODO: When Mesh implements a name, make sure to transfer it here!
+          if (isPresentNDG.and.isPresentEDG) then
+            ! get and use both DistGrids
+            call ESMF_MeshGet(acceptorMesh, nodalDistgrid=nDistgrid, &
+              elementDistgrid=eDistgrid, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             acceptorMesh = ESMF_MeshCreate(providerMesh, &
               nodalDistgrid=nDistgrid, elementDistgrid=eDistgrid, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          else
-            ! provider Mesh does have connections
-            ! -> only need one DistGrid on the acceptor side -> use eDistgrid
-            !TODO: When Mesh implements a name, make sure to transfer it here!
+          elseif (isPresentNDG.and. .not.isPresentEDG) then
+            ! only use Node DistGrids
+            call ESMF_MeshGet(acceptorMesh, nodalDistgrid=nDistgrid, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            acceptorMesh = ESMF_MeshCreate(providerMesh, &
+              nodalDistgrid=nDistgrid, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          elseif (isPresentEDG.and. .not.isPresentNDG) then
+            ! only use Element DistGrids
+            call ESMF_MeshGet(acceptorMesh, elementDistgrid=eDistgrid, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             acceptorMesh = ESMF_MeshCreate(providerMesh, &
               elementDistgrid=eDistgrid, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          else
+            ! cannot create Mesh without a DistGrid -> error out
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="Acceptor side must define nodal or element DistGrid.", &
+              line=__LINE__, file=trim(name)//":"//FILENAME, &
+              rcToReturn=rc)
+            return  ! bail out
           endif
           call ESMF_FieldEmptySet(acceptorField, mesh=acceptorMesh, &
             meshloc=meshloc, rc=rc)
