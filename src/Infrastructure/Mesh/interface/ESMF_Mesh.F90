@@ -5126,8 +5126,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOPI
       integer :: i,localrc
       type(ESMF_AttReconcileFlag) :: attreconflag
-       type(ESMF_InquireFlag) :: linquireflag
+      type(ESMF_InquireFlag) :: linquireflag
       integer :: intMeshFreed,intFullyCreated
+      logical :: isPresentNDG, isPresentEDG
+      integer :: intIsPresentNDG, intIsPresentEDG
 
       ! Initialize
       localrc = ESMF_RC_NOT_IMPL
@@ -5136,35 +5138,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       ! check variables
       ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit,mesh,rc)
 
-
-      ! If mesh has not been fully created
-      if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
-         call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
-              msg="- the mesh has not been fully created", &
-              ESMF_CONTEXT, rcToReturn=rc)
-         return
-      endif
-
-
       if (present (inquireflag)) then
         linquireflag = inquireflag
       else
         linquireflag = ESMF_NOINQUIRE
       end if
-
-     ! Serialize Node Distgrid
-     call c_ESMC_DistgridSerialize(mesh%nodal_distgrid, buffer, length, offset, &
-                                 linquireflag, localrc)
-       if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-     ! Serialize Element Distgrid
-     call c_ESMC_DistgridSerialize(mesh%element_distgrid, buffer, length, offset, &
-                                 linquireflag, localrc)
-      if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
 
       ! Convert logicals to ints
       if (mesh%isCMeshFreed) then
@@ -5172,14 +5150,50 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else
         intMeshFreed=0
       endif
-
-      ! Serialize other Mesh items
+      
+      ! Check for Distgrids being present
+      call ESMF_MeshGet(mesh, nodalDistgridIsPresent=isPresentNDG, &
+        elementDistgridIsPresent=isPresentEDG, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+      if (isPresentNDG) then
+        intIsPresentNDG=1
+      else
+        intIsPresentNDG=0
+      endif
+      if (isPresentEDG) then
+        intIsPresentEDG=1
+      else
+        intIsPresentEDG=0
+      endif
+      
+      ! Serialize Mesh info items
       call c_ESMC_MeshInfoSerialize(intMeshFreed, &
               mesh%spatialDim, mesh%parametricDim, &
+              intIsPresentNDG, intIsPresentEDG, &
               buffer, length, offset,linquireflag, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Conditionally serialize Node Distgrid
+      if (isPresentNDG) then
+        call c_ESMC_DistgridSerialize(mesh%nodal_distgrid, buffer, length, &
+          offset, linquireflag, localrc)
+        if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      ! Conditionally serialize Element Distgrid
+      if (isPresentEDG) then
+        call c_ESMC_DistgridSerialize(mesh%element_distgrid, buffer, length, &
+          offset, linquireflag, localrc)
+        if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
 
       ! If exists serialize mesh
       if (.not. mesh%isCMeshFreed) then
@@ -5236,41 +5250,48 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       integer :: i
       type(ESMF_AttReconcileFlag) :: attreconflag
       integer :: intMeshFreed, spatialDim, parametricDim
+      integer :: intIsPresentNDG, intIsPresentEDG
 
        ! Initialize
       localrc = ESMF_RC_NOT_IMPL
       if  (present(rc)) rc = ESMF_RC_NOT_IMPL
 
 
-     ! Deserialize node Distgrid
-     call c_ESMC_DistGridDeserialize(ESMF_MeshDeserialize%nodal_distgrid, buffer, offset, localrc)
-     if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-      call ESMF_DistGridSetInitCreated(ESMF_MeshDeserialize%nodal_distgrid, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-     ! Deserialize element Distgrid
-     call c_ESMC_DistGridDeserialize(ESMF_MeshDeserialize%element_distgrid, buffer, offset, localrc)
-     if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-      call ESMF_DistGridSetInitCreated(ESMF_MeshDeserialize%element_distgrid, rc=localrc)
-      if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-      ! Deserialize other ESMF_MeshDeserialize items
+      ! Deserialize Mesh info items
       call c_ESMC_MeshInfoDeserialize(intMeshFreed, &
            spatialDim, parametricDim, &
+           intIsPresentNDG, intIsPresentEDG, &
            buffer, offset, localrc)
       if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Conditinally deserialize Node Distgrid
+      if (intIsPresentNDG==1) then
+        call c_ESMC_DistGridDeserialize(ESMF_MeshDeserialize%nodal_distgrid, &
+          buffer, offset, localrc)
+        if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_DistGridSetInitCreated(ESMF_MeshDeserialize%nodal_distgrid, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+      
+      ! Conditinally deserialize Element Distgrid
+      if (intIsPresentEDG==1) then
+        call c_ESMC_DistGridDeserialize(ESMF_MeshDeserialize%element_distgrid, &
+          buffer, offset, localrc)
+        if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+        call ESMF_DistGridSetInitCreated(ESMF_MeshDeserialize%element_distgrid, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
 
       ! Convert ints to logicals
       if (intMeshFreed .eq. 1) then
