@@ -833,16 +833,20 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_GetAttribute - Get the value of a NUOPC Field Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_GetAttribute()
-  subroutine NUOPC_GetAttributeFieldVal(field, name, value, rc)
+  subroutine NUOPC_GetAttributeFieldVal(field, name, value, isPresent, isSet, rc)
 ! !ARGUMENTS:
     type(ESMF_Field), intent(in)            :: field
     character(*),     intent(in)            :: name
     character(*),     intent(out)           :: value
+    logical,          intent(out), optional :: isPresent
+    logical,          intent(out), optional :: isSet
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Access the attribute {\tt name} inside of {\tt field} using the
-!   convention {\tt NUOPC} and purpose {\tt Instance}. Returns with error if
-!   the attribute is not present or not set.
+!   convention {\tt NUOPC} and purpose {\tt Instance}.
+!
+!   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
+!   the Attribute is not present or not set, respectively.
 !
 !   The arguments are:
 !   \begin{description}
@@ -852,6 +856,12 @@ module NUOPC_Base
 !     The name of the queried attribute.
 !   \item[value]
 !     The value of the queried attribute.
+!   \item[{[isPresent]}]
+!     Set to {\tt .true.} if the queried attribute is present, {\tt .false.}
+!     otherwise.
+!   \item[{[isSet]}]
+!     Set to {\tt .true.} if the queried attribute is set, {\tt .false.}
+!     otherwise.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -872,20 +882,30 @@ module NUOPC_Base
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+    if (present(isPresent)) isPresent = .true.
+    if (present(isSet)) isSet = .true.
     if (trim(value) == trim(defaultvalue)) then
       ! attribute not present
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
+      if (present(isPresent)) then
+        isPresent = .false.
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
     else if (len_trim(value) == 0) then
       ! attribute present but not set
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
+      if (present(isSet)) then
+        isSet = .false.
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
     endif
     
   end subroutine
@@ -896,16 +916,19 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_GetAttribute - Get the typekind of a NUOPC Field Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_GetAttribute()
-  subroutine NUOPC_GetAttributeFieldTK(field, name, typekind, rc)
+  subroutine NUOPC_GetAttributeFieldTK(field, name, typekind, isPresent, rc)
 ! !ARGUMENTS:
     type(ESMF_Field),         intent(in)            :: field
     character(*),             intent(in)            :: name
     type(ESMF_TypeKind_Flag), intent(out)           :: typekind
+    logical,                  intent(out), optional :: isPresent
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Query the {\tt typekind} of the attribute {\tt name} inside of {\tt field}
-!   using the convention {\tt NUOPC} and purpose {\tt Instance}. Returns with 
-!   error if the attribute is not present or not set.
+!   using the convention {\tt NUOPC} and purpose {\tt Instance}.
+!
+!   Unless {\tt isPresent} is provided, return with error if the Attribute is
+!   not present.
 !
 !   The arguments are:
 !   \begin{description}
@@ -915,6 +938,9 @@ module NUOPC_Base
 !     The name of the queried attribute.
 !   \item[typekind]
 !     The typekind of the queried attribute.
+!   \item[{[isPresent]}]
+!     Set to {\tt .true.} if the queried attribute is present, {\tt .false.}
+!     otherwise.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -922,6 +948,18 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
+
+    if (present(isPresent)) then
+      isPresent = .true.
+      call ESMF_AttributeGet(field, name=name, &
+        convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      if (.not.isPresent) return
+    endif
 
     call ESMF_AttributeGet(field, name=name, typekind=typekind, &
       convention="NUOPC", purpose="Instance", &
@@ -939,11 +977,13 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_GetAttribute - Get the value of a NUOPC State Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_GetAttribute()
-  subroutine NUOPC_GetAttributeState(state, name, value, rc)
+  subroutine NUOPC_GetAttributeState(state, name, value, isPresent, isSet, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(in)            :: state
     character(*),     intent(in)            :: name
     character(*),     intent(out)           :: value
+    logical,          intent(out), optional :: isPresent
+    logical,          intent(out), optional :: isSet
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Access the attribute {\tt name} inside of {\tt state} using the
@@ -958,6 +998,12 @@ module NUOPC_Base
 !     The name of the queried attribute.
 !   \item[value]
 !     The value of the queried attribute.
+!   \item[{[isPresent]}]
+!     Set to {\tt .true.} if the queried attribute is present, {\tt .false.}
+!     otherwise.
+!   \item[{[isSet]}]
+!     Set to {\tt .true.} if the queried attribute is set, {\tt .false.}
+!     otherwise.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -972,27 +1018,36 @@ module NUOPC_Base
     defaultvalue = "CheckThisDefaultValue"
 
     call ESMF_AttributeGet(state, name=name, value=value, &
-      defaultvalue=defaultvalue, &
-      convention="NUOPC", purpose="Instance", &
+      defaultvalue=defaultvalue, convention="NUOPC", purpose="Instance", &
       attnestflag=ESMF_ATTNEST_ON, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+    if (present(isPresent)) isPresent = .true.
+    if (present(isSet)) isSet = .true.
     if (trim(value) == trim(defaultvalue)) then
       ! attribute not present
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
+      if (present(isPresent)) then
+        isPresent = .false.
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
     else if (len_trim(value) == 0) then
       ! attribute present but not set
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
+      if (present(isSet)) then
+        isSet = .false.
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
     endif
     
   end subroutine

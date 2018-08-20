@@ -745,7 +745,7 @@ module NUOPC_Comp
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
 !
-!   Unless {\tt isPresent}  is provided, return with error if the Attribute is
+!   Unless {\tt isPresent} is provided, return with error if the Attribute is
 !   not present.
 !EOP
   !-----------------------------------------------------------------------------
@@ -814,7 +814,7 @@ module NUOPC_Comp
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
 !
-!   Unless {\tt isPresent}  is provided, return with error if the Attribute is
+!   Unless {\tt isPresent} is provided, return with error if the Attribute is
 !   not present.
 !EOP
   !-----------------------------------------------------------------------------
