@@ -12,6 +12,7 @@ TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMCI_PolyUTest \
                 $(ESMF_TESTDIR)/ESMCI_MVLPolyUTest \
                 $(ESMF_TESTDIR)/ESMCI_MatUTest \
                 $(ESMF_TESTDIR)/ESMCI_PolyFitUTest \
+                $(ESMF_TESTDIR)/ESMCI_LFitUTest \
                 $(ESMF_TESTDIR)/ESMCI_SolverUTest \
                 $(ESMF_TESTDIR)/ESMCI_GraphUTest \
                 $(ESMF_TESTDIR)/ESMCI_RunSeqUTest \
@@ -26,6 +27,7 @@ TESTS_RUN_UNI =	RUN_ESMCI_PolyUTestUNI \
                 RUN_ESMCI_MVLPolyUTestUNI \
                 RUN_ESMCI_MatUTestUNI \
                 RUN_ESMCI_PolyFitUTestUNI \
+                RUN_ESMCI_LFitUTestUNI \
                 RUN_ESMCI_SolverUTestUNI \
                 RUN_ESMCI_GraphUTestUNI \
                 RUN_ESMCI_RunSeqUTestUNI \
@@ -71,6 +73,9 @@ RUN_ESMCI_MatUTestUNI:
 
 RUN_ESMCI_PolyFitUTestUNI:
 	$(MAKE) TNAME=FitPoly NP=1 ctest
+
+RUN_ESMCI_LFitUTestUNI:
+	$(MAKE) TNAME=LinearFit NP=1 ctest
 
 RUN_ESMCI_SolverUTestUNI:
 	$(MAKE) TNAME=Solver NP=1 ctest
