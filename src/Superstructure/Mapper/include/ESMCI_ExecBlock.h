@@ -42,6 +42,7 @@ namespace ESMCI{
         template<typename U>
         friend std::ostream &operator<<(std::ostream &ostr, const ExecBlock<U> &exec_block);
       private:
+        int get_next_exec_id(void ) const;
         std::vector<CompInfo<T> > comp_phases_;
         std::pair<int, int> pet_range_;
         std::pair<T, T> time_intvl_;
@@ -66,6 +67,7 @@ namespace ESMCI{
     template<typename T>
     inline ExecBlock<T>::ExecBlock():sfunc_is_valid_(false), exec_id_(0)
     {
+      exec_id_ = get_next_exec_id();
     }
 
     template<typename T>
@@ -294,6 +296,15 @@ namespace ESMCI{
             sfunc_is_valid_ = true;
           }
         }
+        if(sfunc_is_valid_){
+          /* Set the variable name for the scaling function */
+          const std::string ENAME_PREFIX("e");
+          std::ostringstream ostr;
+          ostr << ENAME_PREFIX.c_str() << exec_id_;
+
+          std::vector<std::string> vnames(1, ostr.str());
+          sfunc_.set_vnames(vnames);
+        }
       }
 
       return sfunc_is_valid_;
@@ -305,6 +316,13 @@ namespace ESMCI{
           MVIDLPoly<T> &constraint_funcs)
     {
       return false;
+    }
+
+    template<typename T>
+    int ExecBlock<T>::get_next_exec_id(void ) const
+    {
+      static int next_exec_id = 0;
+      return next_exec_id++;
     }
 
   } // namespace MapperUtil
