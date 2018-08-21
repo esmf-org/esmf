@@ -13,6 +13,8 @@
 #include "ESMCI_CompInfoUtils.h"
 #include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyFit.h"
+#include "ESMCI_LPolyMV.h"
+#include "ESMCI_LFit.h"
 #include "ESMC_Macros.h"
 
 namespace ESMCI{
@@ -36,6 +38,7 @@ namespace ESMCI{
         PetCmpInfo cmp_pet_range(const CompInfo<T> &comp_info) const;
         PetCmpInfo cmp_pet_range(const ExecBlock<T> &exec_block) const;
         bool get_scaling_function(UVIDPoly<T> &f);
+        bool get_scaling_function(UVIDPoly<T> &f, MVIDLPoly<T> &constraint_funcs);
         template<typename U>
         friend std::ostream &operator<<(std::ostream &ostr, const ExecBlock<U> &exec_block);
       private:
@@ -270,6 +273,7 @@ namespace ESMCI{
         }
 
         const int MIN_VALS_REQD_FOR_POLYFIT = 3;
+        const int MIN_VALS_REQD_FOR_LFIT = 2;
         const int MAX_DEG = 2;
         if(npast_comp_times >= MIN_VALS_REQD_FOR_POLYFIT){
           int ret = PolyFit(POLY_FIT_LS_LAPACK, MAX_DEG,
@@ -281,9 +285,26 @@ namespace ESMCI{
             sfunc_is_valid_ = true;
           }
         }
+        else if(npast_comp_times == MIN_VALS_REQD_FOR_LFIT){
+          int ret = LinearFit(exec_block_past_npets, exec_block_past_wtimes, sfunc_);
+          if(ret != ESMF_SUCCESS){
+            std::cerr << "Error: Finding linear fit for exec block\n";
+          }
+          else{
+            sfunc_is_valid_ = true;
+          }
+        }
       }
 
       return sfunc_is_valid_;
+    }
+
+
+    template<typename T>
+    bool ExecBlock<T>::get_scaling_function(UVIDPoly<T> &f,
+          MVIDLPoly<T> &constraint_funcs)
+    {
+      return false;
     }
 
   } // namespace MapperUtil

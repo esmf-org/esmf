@@ -11,6 +11,7 @@
 
 #include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyFit.h"
+#include "ESMCI_LFit.h"
 #include "ESMCI_CompInfo.h"
 #include "ESMCI_Macros.h"
 
@@ -228,6 +229,7 @@ namespace ESMCI{
 
       const int MAX_DEG = 2;
       const int MIN_VALS_REQD_FOR_POLYFIT = 3;
+      const int MIN_VALS_REQD_FOR_LFIT = 2;
       if(past_npets_.size() >= MIN_VALS_REQD_FOR_POLYFIT){
         int ret = PolyFit(POLY_FIT_LS_LAPACK, MAX_DEG, past_npets_, past_wtimes_, sfunc_);
         if(ret != ESMF_SUCCESS){
@@ -237,7 +239,19 @@ namespace ESMCI{
         else{
           sfunc_is_valid_ = true;
         }
+      }
+      else if(past_npets_.size() >= MIN_VALS_REQD_FOR_LFIT){
+        int ret = LinearFit(past_npets_, past_wtimes_, sfunc_);
+        if(ret != ESMF_SUCCESS){
+          std::cerr << "Error : Finding linear fit for component " << comp_name_.c_str()
+                    << "\n";
+        }
+        else{
+          sfunc_is_valid_ = true;
+        }
+      }
 
+      if(sfunc_is_valid_){
         /* Create a unique variable name for each component phase, using comp id */
         const std::string VNAME_PREFIX("x");
         std::ostringstream ostr;
