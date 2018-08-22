@@ -28,6 +28,7 @@ namespace ESMCI{
         std::string get_comp_name(void ) const;
         std::string get_comp_phase_name(void ) const;
         std::pair<int, int> get_pet_range(void ) const;
+        int get_npets(void ) const;
         std::pair<T, T> get_time_interval(void ) const;
         T get_stime(void ) const;
       private:
@@ -137,6 +138,12 @@ namespace ESMCI{
     std::pair<int, int> CompInfo<T>::get_pet_range(void ) const
     {
       return pet_range_;
+    }
+
+    template<typename T>
+    int CompInfo<T>::get_npets(void ) const
+    {
+      return pet_range_.second - pet_range_.first + 1;
     }
 
     template<typename T>
