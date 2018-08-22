@@ -21,14 +21,17 @@ module NUOPC_FieldDictionaryDef
   
   private
 
+  ! private constants
+  integer, parameter :: NUOPC_FieldDictionaryEntryLen = 256
+
   ! public types
   public NUOPC_FieldDictionaryEntryS, NUOPC_FieldDictionaryEntry
 
   type NUOPC_FieldDictionaryEntryS
-    character(ESMF_MAXSTR)          :: standardName
-    character(ESMF_MAXSTR)          :: canonicalUnits
-    character(ESMF_MAXSTR), pointer :: connectedOptions(:)
-    character(ESMF_MAXSTR), pointer :: synonyms(:)
+    character(NUOPC_FieldDictionaryEntryLen)          :: standardName
+    character(NUOPC_FieldDictionaryEntryLen)          :: canonicalUnits
+    character(NUOPC_FieldDictionaryEntryLen), pointer :: connectedOptions(:)
+    character(NUOPC_FieldDictionaryEntryLen), pointer :: synonyms(:)
   end type
   
   type NUOPC_FieldDictionaryEntry
@@ -452,9 +455,9 @@ module NUOPC_FieldDictionaryDef
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                           :: i, k, j, stat
-    type(NUOPC_FieldDictionaryEntry)  :: fdEntry
-    character(ESMF_MAXSTR), pointer   :: synonyms(:)
+    integer                                           :: i, k, j, stat
+    type(NUOPC_FieldDictionaryEntry)                  :: fdEntry
+    character(NUOPC_FieldDictionaryEntryLen), pointer :: synonyms(:)
     
     if (present(rc)) rc = ESMF_SUCCESS
     
