@@ -242,7 +242,7 @@ namespace ESMCI{
               comp_phases_.cbegin();
             citer != comp_phases_.cend(); ++citer, i++){
           /* Get current number of pets */
-          std::pair<int, int> cur_pet_range = (*citer).get_pet_range();
+          std::pair<int, int> cur_npets = (*citer).get_npets();
           UVIDPoly<T> comp_phase_sfunc;
           bool ret = cinfo_store->get_scaling_function(*citer, comp_phase_sfunc);
           if(!ret){
@@ -252,8 +252,7 @@ namespace ESMCI{
             comp_phase_sfunc.get_vnames();
           assert(comp_phase_sfunc_vnames.size() == 1);
           comp_phase_npets.push_back(
-            std::pair<std::string, int>(comp_phase_sfunc_vnames[0], 
-            cur_pet_range.second - cur_pet_range.first));
+            std::pair<std::string, int>(comp_phase_sfunc_vnames[0], cur_npets));
           
           /* Get past (including current) comp phase info */
           std::vector<std::pair<int, int> > past_pet_ranges =
@@ -362,7 +361,7 @@ namespace ESMCI{
           for(std::vector<std::pair<std::string, int> >::const_iterator citer = 
                 comp_phase_npets.cbegin(); citer != comp_phase_npets.cend(); ++citer){
             MVIDLPoly<T> sfunc_cfunc;
-            T ratio = (pet_range_.second - pet_range_.first)/(*citer).second;
+            T ratio = (pet_range_.second - pet_range_.first + 1)/(*citer).second;
             std::vector<T> sfunc_cfunc_coeffs;
             sfunc_cfunc_coeffs.push_back(1);
             sfunc_cfunc_coeffs.push_back(static_cast<T>(-1) * ratio);
