@@ -37,8 +37,10 @@ namespace ESMCI{
         };
         PetCmpInfo cmp_pet_range(const CompInfo<T> &comp_info) const;
         PetCmpInfo cmp_pet_range(const ExecBlock<T> &exec_block) const;
+        std::pair<int, int> get_pet_range(void ) const;
+        int get_npets(void ) const;
         bool get_scaling_function(UVIDPoly<T> &f);
-        bool get_scaling_function(UVIDPoly<T> &f, MVIDLPoly<T> &constraint_funcs);
+        bool get_scaling_function(UVIDPoly<T> &f, std::vector<MVIDLPoly<T> >&constraint_funcs);
         template<typename U>
         friend std::ostream &operator<<(std::ostream &ostr, const ExecBlock<U> &exec_block);
       private:
@@ -48,6 +50,7 @@ namespace ESMCI{
         std::pair<T, T> time_intvl_;
         bool sfunc_is_valid_;
         UVIDPoly<T> sfunc_;
+        std::vector<MVIDLPoly<T> > sfunc_cfuncs_;
         int exec_id_;
     };
 
@@ -193,6 +196,18 @@ namespace ESMCI{
     }
 
     template<typename T>
+    std::pair<int, int> ExecBlock<T>::get_pet_range(void ) const
+    {
+      return pet_range_;
+    }
+
+    template<typename T>
+    int ExecBlock<T>::get_npets(void ) const
+    {
+      return pet_range_.second - pet_range_.first + 1;
+    }
+
+    template<typename T>
     bool ExecBlock<T>::get_scaling_function(UVIDPoly<T> &f)
     {
       if(sfunc_is_valid_){
@@ -208,9 +223,25 @@ namespace ESMCI{
         /* Get the past wtime and npets for each component phase
          * - each row is past info for component i
          */
+        std::vector<std::pair<std::string, int> > comp_phase_npets;
         for(typename std::vector<CompInfo<T> >::const_iterator citer =
               comp_phases_.cbegin();
-            citer != comp_phases_.cend(); ++citer){
+            citer != comp_phases_.cend(); ++citer, i++){
+          /* Get current number of pets */
+          std::pair<int, int> cur_pet_range = (*citer).get_pet_range();
+          UVIDPoly<T> comp_phase_sfunc;
+          bool ret = cinfo_store->get_scaling_function(*citer, comp_phase_sfunc);
+          if(!ret){
+            return false;
+          }
+          std::vector<std::string> comp_phase_sfunc_vnames = 
+            comp_phase_sfunc.get_vnames();
+          assert(comp_phase_sfunc_vnames.size() == 1);
+          comp_phase_npets.push_back(
+            std::pair<std::string, int>(comp_phase_sfunc_vnames[0], 
+            cur_pet_range.second - cur_pet_range.first));
+          
+          /* Get past (including current) comp phase info */
           std::vector<std::pair<int, int> > past_pet_ranges =
             cinfo_store->get_past_pet_ranges(*citer);
           comp_past_pet_ranges.push_back(past_pet_ranges);
@@ -304,6 +335,27 @@ namespace ESMCI{
 
           std::vector<std::string> vnames(1, ostr.str());
           sfunc_.set_vnames(vnames);
+
+          /* Set the constraint functions for the scaling function
+           * The constraint functions are the constraints imposed by
+           * the individual components (the number of pets) that
+           * compose the execution block
+           * If Exec block with npets e1 is composed of comp phases with
+           * npets x1 and x2
+           * e1 - k1 * x1 = 0
+           * e1 - k2 * x2 = 0
+           */
+          for(std::vector<std::pair<std::string, int> >::const_iterator citer = 
+                comp_phase_npets.cbegin(); citer != comp_phase_npets.cend(); ++citer){
+            MVIDLPoly<T> sfunc_cfunc;
+            T ratio = (pet_range_.second - pet_range_.first)/(*citer).second;
+            std::vector<T> sfunc_cfunc_coeffs;
+            sfunc_cfunc_coeffs.push_back(1);
+            sfunc_cfunc_coeffs.push_back(static_cast<T>(-1) * ratio);
+            std::vector<std::string> sfunc_cfunc_vnames;
+            sfunc_cfunc_vnames.push_back(vnames[0]);
+            sfunc_cfunc_vnames.push_back((*citer).first);
+          }
         }
       }
 
@@ -313,9 +365,19 @@ namespace ESMCI{
 
     template<typename T>
     bool ExecBlock<T>::get_scaling_function(UVIDPoly<T> &f,
-          MVIDLPoly<T> &constraint_funcs)
+          std::vector<MVIDLPoly<T> > &constraint_funcs)
     {
-      return false;
+      if(!sfunc_is_valid){
+        bool ret = get_scaling_function(f);
+        if(!ret){
+          return ret;
+        }
+      }
+
+      f = sfunc_;
+      constraint_funcs = sfunc_cfuncs_;
+
+      return true;
     }
 
     template<typename T>
