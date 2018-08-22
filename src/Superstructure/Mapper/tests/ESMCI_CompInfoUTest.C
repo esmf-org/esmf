@@ -43,6 +43,8 @@ int main(int argc, char *argv[])
 
     ESMCI::MapperUtil::CompInfoStore<float> *comp_info_store =
       ESMCI::MapperUtil::CompInfoStore<float>::get_instance();
+
+    ESMCI::MapperUtil::CompInfoStore<float>::finalize();
   }
   catch(...){
     rc = ESMF_FAILURE;
@@ -93,6 +95,7 @@ int main(int argc, char *argv[])
     if(has_scaling_func){
       std::cout << sfunc << "\n";
     }
+    ESMCI::MapperUtil::CompInfoStore<float>::finalize();
   }
   catch(...){
     rc = ESMF_FAILURE;

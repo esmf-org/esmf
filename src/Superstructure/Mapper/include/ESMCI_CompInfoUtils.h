@@ -31,6 +31,7 @@ namespace ESMCI{
           std::vector<T> get_past_wtimes(const CompInfo<T> &comp_info) const;
           std::vector<T> get_past_stimes(const CompInfo<T> &comp_info) const;
           bool get_scaling_function(const CompInfo<T> &comp_info, UVIDPoly<T> &f) const;
+          static void finalize(void );
       private:
           class CompBackupInfo{
             public:
@@ -60,17 +61,20 @@ namespace ESMCI{
           };
           std::map<std::string, CompBackupInfo> backup_info_;
           int next_comp_id_;
+          static CompInfoStore<T> *store_instance_;
           CompInfoStore();
     };
 
     template<typename T>
+    CompInfoStore<T> *CompInfoStore<T>::store_instance_ = NULL;
+
+    template<typename T>
     CompInfoStore<T> *CompInfoStore<T>::get_instance(void )
     {
-      static CompInfoStore<T> *store_instance = NULL;
-      if(store_instance == NULL){
-        store_instance = new CompInfoStore<T>();
+      if(store_instance_ == NULL){
+        store_instance_ = new CompInfoStore<T>();
       }
-      return store_instance;
+      return store_instance_;
     }
 
     template<typename T>
@@ -197,6 +201,15 @@ namespace ESMCI{
     template<typename T>
     CompInfoStore<T>::CompInfoStore():next_comp_id_(0)
     {
+    }
+
+    template<typename T>
+    void CompInfoStore<T>::finalize(void )
+    {
+      if(store_instance_){
+        delete(store_instance_);
+        store_instance_ = NULL;
+      }
     }
 
     // CompBackupInfo class functions
