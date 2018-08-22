@@ -39,6 +39,8 @@ namespace ESMCI{
         PetCmpInfo cmp_pet_range(const ExecBlock<T> &exec_block) const;
         std::pair<int, int> get_pet_range(void ) const;
         int get_npets(void ) const;
+        std::pair<T, T> get_time_interval(void ) const;
+        T get_wtime(void ) const;
         bool get_scaling_function(UVIDPoly<T> &f);
         bool get_scaling_function(UVIDPoly<T> &f, std::vector<MVIDLPoly<T> >&constraint_funcs);
         template<typename U>
@@ -205,6 +207,18 @@ namespace ESMCI{
     int ExecBlock<T>::get_npets(void ) const
     {
       return pet_range_.second - pet_range_.first + 1;
+    }
+
+    template<typename T>
+    std::pair<T, T> ExecBlock<T>::get_time_interval(void ) const
+    {
+      return time_intvl_;
+    }
+
+    template<typename T>
+    T ExecBlock<T>::get_wtime(void ) const
+    {
+      return time_intvl_.second - time_intvl_.first;
     }
 
     template<typename T>
