@@ -40,6 +40,8 @@ module NUOPC_FieldDictionaryDef
 
   ! public module interfaces
   public NUOPC_FieldDictionaryAddEntryI
+  public NUOPC_FieldDictionaryCreateI
+  public NUOPC_FieldDictionaryDestroyI
   public NUOPC_FieldDictionaryEgestI
   public NUOPC_FieldDictionaryGetEntryI
   public NUOPC_FieldDictionaryHasEntryI
@@ -96,6 +98,98 @@ module NUOPC_FieldDictionaryDef
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionaryCreateI - Create an empty NUOPC Field dictionary
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionaryCreateI(fieldDictionary, rc)
+! !ARGUMENTS:
+    type(ESMF_Container), intent(out)           :: fieldDictionary
+    integer,              intent(out), optional :: rc
+! !DESCRIPTION:
+!   Create an empty container to host a NUOPC Field dictionary. Garbage feature
+!   will always be on for this container.
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    fieldDictionary = ESMF_ContainerCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    call ESMF_ContainerGarbageOn(fieldDictionary, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionaryDestroyI - Destroy a NUOPC Field dictionary
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionaryDestroyI(fieldDictionary, rc)
+! !ARGUMENTS:
+    type(ESMF_Container), intent(inout)         :: fieldDictionary
+    integer,              intent(out), optional :: rc
+! !DESCRIPTION:
+!   Erase the content of a NUOPC Field dictionary and free up the memory
+!   associated with it.
+!EOPI
+  !-----------------------------------------------------------------------------
+    integer :: localrc
+    integer :: garbageCount, item
+    type(NUOPC_FieldDictionaryEntry) :: fdEntry
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! clear NUOPC Field dictionary content (move to garbage)
+    call ESMF_ContainerClear(fieldDictionary, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
+    ! retrieve number of dictionary items in garbage
+    call ESMF_ContainerGarbageGet(fieldDictionary, &
+      garbageCount=garbageCount, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
+    ! loop over garbage items to deallocate them
+    do item = 1, garbageCount
+      call ESMF_ContainerGarbageGetUDT(fieldDictionary, &
+        item, fdEntry, localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      deallocate(fdEntry % wrap, stat=localrc)
+      if (ESMF_LogFoundDeallocError(statusToCheck=localrc, &
+        msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+    end do
+
+    ! destroy original NUOPC Field dictionary container
+    call ESMF_ContainerDestroy(fieldDictionary, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
 

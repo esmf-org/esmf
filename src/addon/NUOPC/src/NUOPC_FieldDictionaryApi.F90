@@ -271,50 +271,13 @@ module NUOPC_FieldDictionaryApi
 !EOPI
   !-----------------------------------------------------------------------------
     integer :: localrc
-    integer :: garbageCount, item
-    type(NUOPC_FieldDictionaryEntry) :: fdEntry
 
     if (present(rc)) rc = ESMF_SUCCESS
 
     if (NUOPC_FieldDictionaryIsSetup) then
 
       ! clear NUOPC Field dictionary content (move to garbage)
-      call ESMF_ContainerClear(NUOPC_FieldDictionary, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)) &
-        return  ! bail out
-
-      ! retrieve number of dictionary items in garbage
-      call ESMF_ContainerGarbageGet(NUOPC_FieldDictionary, &
-        garbageCount=garbageCount, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)) &
-        return  ! bail out
-
-      ! loop over garbage items to deallocate them
-      do item = 1, garbageCount
-        call ESMF_ContainerGarbageGetUDT(NUOPC_FieldDictionary, &
-          item, fdEntry, localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-        deallocate(fdEntry % wrap, stat=localrc)
-        if (ESMF_LogFoundDeallocError(statusToCheck=localrc, &
-          msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-      end do
-
-      ! destroy NUOPC Field dictionary original container
-      call ESMF_ContainerDestroy(NUOPC_FieldDictionary, rc=localrc)
+      call NUOPC_FieldDictionaryDestroyI(NUOPC_FieldDictionary, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
@@ -377,11 +340,7 @@ module NUOPC_FieldDictionaryApi
 
     if (.not.NUOPC_FieldDictionaryIsSetup) then
     
-      NUOPC_FieldDictionary = ESMF_ContainerCreate(rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-    
-      call ESMF_ContainerGarbageOn(NUOPC_FieldDictionary, rc=rc)
+      call NUOPC_FieldDictionaryCreateI(NUOPC_FieldDictionary, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
 
@@ -415,11 +374,7 @@ module NUOPC_FieldDictionaryApi
 
     if (.not.NUOPC_FieldDictionaryIsSetup) then
 
-      NUOPC_FieldDictionary = ESMF_ContainerCreate(rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-
-      call ESMF_ContainerGarbageOn(NUOPC_FieldDictionary, rc=rc)
+      call NUOPC_FieldDictionaryCreateI(NUOPC_FieldDictionary, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
 
