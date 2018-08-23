@@ -23,8 +23,8 @@ namespace ESMCI{
         int get_ncols(void ) const;
         int to_pet_id(int tem_col_idx) const;
         int to_tem_col_idx(int pet_id) const;
-        int to_time(int tem_row_idx) const;
-        int to_tem_row_idx(int time) const;
+        T to_time(int tem_row_idx) const;
+        int to_tem_row_idx(T time) const;
       private:
         int nrows_;
         int ncols_;
@@ -98,13 +98,13 @@ namespace ESMCI{
     }
 
     template<typename T>
-    int TimeExtentMatrixInfo<T>::to_time(int tem_row_idx) const
+    T TimeExtentMatrixInfo<T>::to_time(int tem_row_idx) const
     {
       return row2time_map_.at(tem_row_idx);
     }
 
     template<typename T>
-    int TimeExtentMatrixInfo<T>::to_tem_row_idx(int time) const
+    int TimeExtentMatrixInfo<T>::to_tem_row_idx(T time) const
     {
       return time2row_map_.at(time);
     }
