@@ -50,31 +50,38 @@ int main(int argc, char *argv[])
 //  std::vector<int> npets = {2048, 4096, 8192};
   std::vector<std::pair<int, int> > comp_pet_ranges = {
                                                         std::pair<int, int>(0, 4095),
-                                                        std::pair<int, int>(4096, 6143)
+                                                        std::pair<int, int>(4096, 6143),
+                                                        std::pair<int, int>(6144, 7167)
                                                         };
   std::vector<int> comp_npets = {
     comp_pet_ranges[0].second - comp_pet_ranges[0].first + 1,
-    comp_pet_ranges[1].second - comp_pet_ranges[1].first + 1
+    comp_pet_ranges[1].second - comp_pet_ranges[1].first + 1,
+    comp_pet_ranges[2].second - comp_pet_ranges[2].first + 1
                             };
   std::vector<std::pair<float, float> > comp_time_intvls = {
     std::pair<float, float>(0, pcomp1.eval(comp_npets[0])),
-    std::pair<float, float>(0, pcomp2.eval(comp_npets[1]))
+    std::pair<float, float>(0, pcomp2.eval(comp_npets[1])),
+    std::pair<float, float>(0, pcomp3.eval(comp_npets[2]))
                                                             };
 
   ESMCI::MapperUtil::CompInfo<float> comp0("comp0", "run",
                                       comp_pet_ranges[0], comp_time_intvls[0]);
   ESMCI::MapperUtil::CompInfo<float> comp1("comp1", "run",
                                       comp_pet_ranges[1], comp_time_intvls[1]);
+  ESMCI::MapperUtil::CompInfo<float> comp2("comp2", "run",
+                                      comp_pet_ranges[2], comp_time_intvls[2]);
 
   std::vector<ESMCI::MapperUtil::CompInfo<float> > comp_infos = {
                                                                   comp0,
-                                                                  comp1
+                                                                  comp1,
+                                                                  comp2
                                                                 };
   ESMCI::MapperUtil::CompInfoStore<float> *comp_info_store =
     ESMCI::MapperUtil::CompInfoStore<float>::get_instance();
 
   comp_info_store->add_comp_info(comp_infos[0]);
   comp_info_store->add_comp_info(comp_infos[1]);
+  comp_info_store->add_comp_info(comp_infos[2]);
 
   ESMCI::MapperUtil::LoadBalancer<float> lb(comp_infos);
 
@@ -105,9 +112,13 @@ int main(int argc, char *argv[])
     comp_pet_ranges[1].first = comp_pet_ranges[0].second + 1;
     comp_pet_ranges[1].second = comp_pet_ranges[1].first + opt_npets[1] - 1;
 
+    comp_pet_ranges[2].first = comp_pet_ranges[1].second + 1;
+    comp_pet_ranges[2].second = comp_pet_ranges[2].first + opt_npets[2] - 1;
+
     /* FIXME: Generalize the code below for n comps, put in a for loop */
     comp_npets[0] = comp_pet_ranges[0].second - comp_pet_ranges[0].first + 1;
     comp_npets[1] = comp_pet_ranges[1].second - comp_pet_ranges[1].first + 1;
+    comp_npets[2] = comp_pet_ranges[2].second - comp_pet_ranges[2].first + 1;
 
     comp_time_intvls[0].first = 0;
     comp_time_intvls[0].second = pcomp1.eval(comp_npets[0]);
@@ -115,14 +126,21 @@ int main(int argc, char *argv[])
     comp_time_intvls[1].first = 0;
     comp_time_intvls[1].second = pcomp2.eval(comp_npets[1]);
 
+    comp_time_intvls[2].first = 0;
+    comp_time_intvls[2].second = pcomp3.eval(comp_npets[2]);
+
     comp_infos[0].set_pet_range(comp_pet_ranges[0]);
     comp_infos[0].set_time_interval(comp_time_intvls[0]);
 
     comp_infos[1].set_pet_range(comp_pet_ranges[1]);
     comp_infos[1].set_time_interval(comp_time_intvls[1]);
 
+    comp_infos[2].set_pet_range(comp_pet_ranges[2]);
+    comp_infos[2].set_time_interval(comp_time_intvls[2]);
+
     comp_info_store->add_comp_info(comp_infos[0]);
     comp_info_store->add_comp_info(comp_infos[1]);
+    comp_info_store->add_comp_info(comp_infos[2]);
 
     lb.set_lb_info(comp_infos);
   }
