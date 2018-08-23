@@ -360,14 +360,18 @@ namespace ESMCI{
            */
           for(std::vector<std::pair<std::string, int> >::const_iterator citer = 
                 comp_phase_npets.cbegin(); citer != comp_phase_npets.cend(); ++citer){
-            MVIDLPoly<T> sfunc_cfunc;
             T ratio = (pet_range_.second - pet_range_.first + 1)/(*citer).second;
             std::vector<T> sfunc_cfunc_coeffs;
             sfunc_cfunc_coeffs.push_back(1);
             sfunc_cfunc_coeffs.push_back(static_cast<T>(-1) * ratio);
+            sfunc_cfunc_coeffs.push_back(0);
             std::vector<std::string> sfunc_cfunc_vnames;
             sfunc_cfunc_vnames.push_back(vnames[0]);
             sfunc_cfunc_vnames.push_back((*citer).first);
+
+            MVIDLPoly<T> sfunc_cfunc(sfunc_cfunc_coeffs);
+            sfunc_cfunc.set_vnames(sfunc_cfunc_vnames);
+            sfunc_cfuncs_.push_back(sfunc_cfunc);
           }
         }
       }
