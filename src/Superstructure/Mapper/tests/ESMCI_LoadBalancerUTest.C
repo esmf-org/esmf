@@ -48,10 +48,35 @@ int main(int argc, char *argv[])
   assert(rc == 0);
   
 //  std::vector<int> npets = {2048, 4096, 8192};
-  std::vector<int> npets = {4096, 2048, 1024};
-  std::vector<float> parallel_exec_times = {pcomp1.eval(npets[0]), pcomp2.eval(npets[1]), pcomp3.eval(npets[2])};
-  std::vector<float> serial_exec_times = {npets[0]*parallel_exec_times[0], npets[1] * parallel_exec_times[1], npets[2] * parallel_exec_times[2]};
-  ESMCI::MapperUtil::LoadBalancer<float> lb(ncomps, parallel_exec_times, serial_exec_times, npets);
+  std::vector<std::pair<int, int> > comp_pet_ranges = {
+                                                        std::pair<int, int>(0, 4095),
+                                                        std::pair<int, int>(4096, 6143),
+                                                        std::pair<int, int>(6144, 7167)
+                                                        };
+  std::vector<int> comp_npets = {
+    comp_pet_ranges[0].second - comp_pet_ranges[0].first + 1,
+    comp_pet_ranges[1].second - comp_pet_ranges[1].first + 1,
+    comp_pet_ranges[2].second - comp_pet_ranges[2].first + 1
+                            };
+  std::vector<std::pair<float, float> > comp_time_intvls = {
+    std::pair<float, float>(0, pcomp1.eval(comp_npets[0])),
+    std::pair<float, float>(0, pcomp2.eval(comp_npets[1])),
+    std::pair<float, float>(0, pcomp3.eval(comp_npets[2]))
+                                                            };
+
+  ESMCI::MapperUtil::CompInfo<float> comp0("comp0", "run",
+                                      comp_pet_ranges[0], comp_time_intvls[0]);
+  ESMCI::MapperUtil::CompInfo<float> comp1("comp1", "run",
+                                      comp_pet_ranges[1], comp_time_intvls[1]);
+  ESMCI::MapperUtil::CompInfo<float> comp2("comp2", "run",
+                                      comp_pet_ranges[2], comp_time_intvls[2]);
+
+  std::vector<ESMCI::MapperUtil::CompInfo<float> > comp_infos = {
+                                                                  comp0,
+                                                                  comp1,
+                                                                  comp2
+                                                                };
+  ESMCI::MapperUtil::LoadBalancer<float> lb(comp_infos);
 
   strncpy(name, "Load Balancer UTest", ESMF_MAX_STRLEN);
   strncpy(failMsgNPetsNeg, "Load Balancer test failed (returned number of PETs < 0)", ESMF_MAX_STRLEN);
@@ -59,7 +84,9 @@ int main(int argc, char *argv[])
   for(int i=0; i<MAX_ITER; i++){
     std::cout << "Load Balancer iter : " << i << "\n";
     std::vector<int> opt_npets;
-    float opt_wtime = lb.optimize(opt_npets);
+    std::vector<std::pair<int, int> > opt_pet_ranges;
+    float opt_wtime;
+    bool opt_pets_available = lb.optimize(opt_npets, opt_pet_ranges, opt_wtime);
     std::cout << "Optimized time : " << opt_wtime << "\n";
     std::cout << "Optimized pet list : ";
     for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
@@ -71,10 +98,40 @@ int main(int argc, char *argv[])
         citer != opt_npets.cend(); ++citer){
       ESMC_Test((*citer > 0), name, failMsgNPetsNeg, &result, __FILE__, __LINE__, 0);
     }
-    parallel_exec_times = {pcomp1.eval(opt_npets[0]), pcomp2.eval(opt_npets[1]), pcomp3.eval(opt_npets[2])};
-    serial_exec_times = {opt_npets[0]*parallel_exec_times[0], opt_npets[1] * parallel_exec_times[1], opt_npets[2] * parallel_exec_times[2]};
-    lb.set_lb_info(parallel_exec_times, serial_exec_times, opt_npets);
 
+    comp_pet_ranges[0].first = 0;
+    comp_pet_ranges[0].second = comp_pet_ranges[0].first + opt_npets[0] - 1;
+
+    comp_pet_ranges[1].first = comp_pet_ranges[0].second + 1;
+    comp_pet_ranges[1].second = comp_pet_ranges[1].first + opt_npets[1] - 1;
+
+    comp_pet_ranges[2].first = comp_pet_ranges[1].second + 1;
+    comp_pet_ranges[2].second = comp_pet_ranges[2].first + opt_npets[2] - 1;
+
+    /* FIXME: Generalize the code below for n comps, put in a for loop */
+    comp_npets[0] = comp_pet_ranges[0].second - comp_pet_ranges[0].first + 1;
+    comp_npets[1] = comp_pet_ranges[1].second - comp_pet_ranges[1].first + 1;
+    comp_npets[2] = comp_pet_ranges[2].second - comp_pet_ranges[2].first + 1;
+
+    comp_time_intvls[0].first = 0;
+    comp_time_intvls[0].second = pcomp1.eval(comp_npets[0]);
+
+    comp_time_intvls[1].first = 0;
+    comp_time_intvls[1].second = pcomp2.eval(comp_npets[1]);
+
+    comp_time_intvls[2].first = 0;
+    comp_time_intvls[2].second = pcomp3.eval(comp_npets[2]);
+
+    comp_infos[0].set_pet_range(comp_pet_ranges[0]);
+    comp_infos[0].set_time_interval(comp_time_intvls[0]);
+
+    comp_infos[1].set_pet_range(comp_pet_ranges[1]);
+    comp_infos[1].set_time_interval(comp_time_intvls[1]);
+
+    comp_infos[2].set_pet_range(comp_pet_ranges[2]);
+    comp_infos[2].set_time_interval(comp_time_intvls[2]);
+
+    lb.set_lb_info(comp_infos);
   }
 
   ESMC_TestEnd(__FILE__, __LINE__, 0);
