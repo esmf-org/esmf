@@ -103,7 +103,7 @@ module NUOPC_FieldDictionaryApi
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Egest the contents of the NUOPC Field dictionary into a FreeFormat object.
-!   If I/O format option {\tt iofmt} is provided and equal to {\tt ESMF_IOFMT_YAML},
+!   If I/O format option {\tt iofmt} is provided and equal to {\tt ESMF\_IOFMT\_YAML},
 !   the FreeFormat object will contain the NUOPC Field dictionary expressed in YAML
 !   format. Other values for {\tt iofmt} are ignored and this method behaves as if
 !   the optional {\tt iofmt} argument were missing. In such a case, {\tt freeFormat}
