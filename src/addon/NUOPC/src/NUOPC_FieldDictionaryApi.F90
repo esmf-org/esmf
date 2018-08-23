@@ -96,12 +96,18 @@ module NUOPC_FieldDictionaryApi
 !BOP
 ! !IROUTINE: NUOPC_FieldDictionaryEgest - Egest NUOPC Field dictionary into FreeFormat
 ! !INTERFACE:
-  subroutine NUOPC_FieldDictionaryEgest(freeFormat, rc)
+  subroutine NUOPC_FieldDictionaryEgest(freeFormat, iofmt, rc)
 ! !ARGUMENTS:
     type(NUOPC_FreeFormat), intent(out)           :: freeFormat
+    type(ESMF_IOFmt_Flag),  intent(in),  optional :: iofmt
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Egest the contents of the NUOPC Field dictionary into a FreeFormat object.
+!   If I/O format option {\tt iofmt} is provided and equal to {\tt ESMF_IOFMT_YAML},
+!   the FreeFormat object will contain the NUOPC Field dictionary expressed in YAML
+!   format. Other values for {\tt iofmt} are ignored and this method behaves as if
+!   the optional {\tt iofmt} argument were missing. In such a case, {\tt freeFormat}
+!   will contain NUOPC Field dictionary entries in the traditional format.
 !   It is the caller's responsibility to destroy the created {\tt freeFormat}
 !   object.
 !EOP
@@ -114,7 +120,8 @@ module NUOPC_FieldDictionaryApi
       file=FILENAME)) &
       return  ! bail out
     
-    call NUOPC_FieldDictionaryEgestI(NUOPC_FieldDictionary, freeFormat, rc=rc)
+    call NUOPC_FieldDictionaryEgestI(NUOPC_FieldDictionary, freeFormat, &
+      iofmt=iofmt, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
