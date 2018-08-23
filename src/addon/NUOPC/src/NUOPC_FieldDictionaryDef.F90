@@ -21,7 +21,8 @@ module NUOPC_FieldDictionaryDef
   
   private
 
-  ! private constants
+  ! public constants
+  public NUOPC_FieldDictionaryEntryLen
   integer, parameter :: NUOPC_FieldDictionaryEntryLen = 256
 
   ! public types
@@ -249,8 +250,11 @@ module NUOPC_FieldDictionaryDef
 !EOPI
   !-----------------------------------------------------------------------------
     type(NUOPC_FieldDictionaryEntry)                :: fdEntry
-    integer                                         :: stat, i, k, count
+    integer                                         :: stat, i, k, count, len
     character(len=NUOPC_FreeFormatLen)              :: tempString
+    character(len=10)                               :: lenString
+    character(len=*), parameter :: sepString  = &
+      "----------------------------------------------------------------"
     
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -261,35 +265,44 @@ module NUOPC_FieldDictionaryDef
     
     ! create free format object with estimated capacity
     freeFormat = NUOPC_FreeFormatCreate(capacity=4*count, rc=rc)
-
+    
     do i=1, count
       call ESMF_ContainerGetUDTByIndex(fieldDictionary, i, fdEntry, &
         ESMF_ITEMORDER_ABC, rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      write(tempString, "('standardName:          ',a40)") &
+      ! determine approoriate character length for output
+      len = max(48,len_trim(fdEntry%wrap%standardName), &
+        len_trim(fdEntry%wrap%canonicalUnits))
+      do k=1, size(fdEntry%wrap%synonyms)
+        len = max(len,len_trim(fdEntry%wrap%synonyms(k)))
+      enddo
+      write(lenString,"(I3)") len
+      ! standardName
+      write(tempString, "('standardName:   ',a"//trim(lenString)//")") &
         trim(fdEntry%wrap%standardName)
       call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      write(tempString, "('canonicalUnits:        ',a40)") &
+      ! canonicalUnits
+      write(tempString, "('canonicalUnits: ',a"//trim(lenString)//")") &
         trim(fdEntry%wrap%canonicalUnits)
       call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
+      ! synonyms
       do k=1, size(fdEntry%wrap%synonyms)
-        write(tempString, "('synonym:               ',a40)") &
+        write(tempString, "('synonym:        ',a"//trim(lenString)//")") &
           trim(fdEntry%wrap%synonyms(k))
         call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) &
           return  ! bail out
       enddo
-      tempString="----------------------------------------------------------------"
-      call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=rc)
+      call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(sepString)/), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out

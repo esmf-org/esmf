@@ -22,6 +22,9 @@ module NUOPC_FieldDictionaryApi
 
   private
 
+  ! public constants
+  public NUOPC_FieldDictionaryEntryLen
+
   ! public types
   public NUOPC_FieldDictionaryEntryS, NUOPC_FieldDictionaryEntry
 
