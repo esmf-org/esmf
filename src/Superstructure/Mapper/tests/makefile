@@ -18,7 +18,8 @@ TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMCI_PolyUTest \
                 $(ESMF_TESTDIR)/ESMCI_RunSeqUTest \
                 $(ESMF_TESTDIR)/ESMCI_ExecBlockUTest \
                 $(ESMF_TESTDIR)/ESMCI_CompInfoUTest \
-                $(ESMF_TESTDIR)/ESMCI_LoadBalancerUTest
+                $(ESMF_TESTDIR)/ESMCI_LoadBalancerUTest \
+                $(ESMF_TESTDIR)/ESMCI_LoadBalancerMCompsUTest
 
 TESTS_RUN     =
 
@@ -33,7 +34,8 @@ TESTS_RUN_UNI =	RUN_ESMCI_PolyUTestUNI \
                 RUN_ESMCI_RunSeqUTestUNI \
                 RUN_ESMCI_ExecBlockUTestUNI \
                 RUN_ESMCI_CompInfoUTestUNI \
-                RUN_ESMCI_LoadBalancerUTestUNI
+                RUN_ESMCI_LoadBalancerUTestUNI \
+                RUN_ESMCI_LoadBalancerMCompsUTestUNI
 
 
 include $(ESMF_DIR)/makefile
@@ -96,4 +98,7 @@ RUN_ESMCI_CompInfoUTestUNI:
 
 RUN_ESMCI_LoadBalancerUTestUNI:
 	$(MAKE) TNAME=LoadBalancer NP=1 ctest
+
+RUN_ESMCI_LoadBalancerMCompsUTestUNI:
+	$(MAKE) TNAME=LoadBalancerMComps NP=1 ctest
 

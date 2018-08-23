@@ -101,6 +101,22 @@ int main(int argc, char *argv[])
       std::cout << *citer << ", ";
     }
     std::cout << "\n";
+    if(!opt_pets_available){
+      /* The solution has converged or solver no longer works for the case */
+      lb.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
+      std::cout << "Optimal Optimized time : " << opt_wtime << "\n";
+      std::cout << "Optimal Optimized pet list : ";
+      for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
+          citer != opt_npets.cend(); ++citer){
+        std::cout << *citer << ", ";
+      }
+      std::cout << "\n";
+      for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
+          citer != opt_npets.cend(); ++citer){
+        ESMC_Test((*citer > 0), name, failMsgNPetsNeg, &result, __FILE__, __LINE__, 0);
+      }
+      break;
+    }
     for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
         citer != opt_npets.cend(); ++citer){
       ESMC_Test((*citer > 0), name, failMsgNPetsNeg, &result, __FILE__, __LINE__, 0);
