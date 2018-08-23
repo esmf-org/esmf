@@ -33,11 +33,13 @@ namespace ESMCI{
         std::pair<T, T> get_time_interval(void ) const;
         void set_time_interval(const std::pair<T, T> &time_intvl);
         T get_stime(void ) const;
+        void set_stime(T stime);
       private:
         std::string comp_name_;
         std::string comp_phase_name_;
         std::pair<int, int> pet_range_;
         std::pair<T, T> time_intvl_;
+        bool stime_set_by_user_;
         T stime_;
     };
 
@@ -103,10 +105,9 @@ namespace ESMCI{
                 comp_name_(comp_name),
                 comp_phase_name_(comp_phase_name),
                 pet_range_(pet_range),
-                time_intvl_(time_intvl)
+                time_intvl_(time_intvl),
+                stime_set_by_user_(false)
     {
-      stime_ = static_cast<T>((time_intvl.second - time_intvl.first) * 
-                (pet_range.second - pet_range.first + 1));
     }
 
     template<typename T>
@@ -120,6 +121,7 @@ namespace ESMCI{
                 comp_phase_name_(comp_phase_name),
                 pet_range_(pet_range),
                 time_intvl_(time_intvl),
+                stime_set_by_user_(true),
                 stime_(stime)
     {
     }
@@ -145,6 +147,7 @@ namespace ESMCI{
     template<typename T>
     void CompInfo<T>::set_pet_range(const std::pair<int, int> &pet_range)
     {
+      stime_set_by_user_ = false;
       pet_range_ = pet_range;
     }
 
@@ -163,13 +166,27 @@ namespace ESMCI{
     template<typename T>
     void CompInfo<T>::set_time_interval(const std::pair<T, T> &time_intvl)
     {
+      stime_set_by_user_ = false;
       time_intvl_ = time_intvl;
     }
 
     template<typename T>
     T CompInfo<T>::get_stime(void ) const
     {
-      return stime_;
+      if(stime_set_by_user_){
+        return stime_;
+      }
+      else{
+        return static_cast<T>((time_intvl_.second - time_intvl_.first) *
+                  (pet_range_.second - pet_range_.first + 1));
+      }
+    }
+
+    template<typename T>
+    void CompInfo<T>::set_stime(T stime)
+    {
+      stime_set_by_user_ = true;
+      stime_ = stime;
     }
 
     template<typename T>
