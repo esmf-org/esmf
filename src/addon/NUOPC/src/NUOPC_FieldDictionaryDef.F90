@@ -866,7 +866,67 @@ module NUOPC_FieldDictionaryDef
 !   Create NUOPC Field dictionary.
 !EOPI
   !-----------------------------------------------------------------------------
+    type(NUOPC_FreeFormat)  :: freeFormatFD
+    
     if (present(rc)) rc = ESMF_SUCCESS
+
+#define USE_FREE_FORMAT_DEFAULT_FD_off
+#ifdef USE_FREE_FORMAT_DEFAULT_FD
+    freeFormatFD = NUOPC_FreeFormatCreate(stringList=(/ &
+"standardName:                          air_pressure_at_sea_level", &
+"canonicalUnits:                                               Pa", &
+"----------------------------------------------------------------", &
+"standardName:               magnitude_of_surface_downward_stress", &
+"canonicalUnits:                                               Pa", &
+"----------------------------------------------------------------", &
+"standardName:                                 precipitation_flux", &
+"canonicalUnits:                                       kg m-2 s-1", &
+"----------------------------------------------------------------", &
+"standardName:                 sea_surface_height_above_sea_level", &
+"canonicalUnits:                                                m", &
+"----------------------------------------------------------------", &
+"standardName:                               sea_surface_salinity", &
+"canonicalUnits:                                             1e-3", &
+"----------------------------------------------------------------", &
+"standardName:                            sea_surface_temperature", &
+"canonicalUnits:                                                K", &
+"----------------------------------------------------------------", &
+"standardName:                   surface_downward_eastward_stress", &
+"canonicalUnits:                                               Pa", &
+"----------------------------------------------------------------", &
+"standardName:                  surface_downward_heat_flux_in_air", &
+"canonicalUnits:                                            W m-2", &
+"----------------------------------------------------------------", &
+"standardName:                  surface_downward_northward_stress", &
+"canonicalUnits:                                               Pa", &
+"----------------------------------------------------------------", &
+"standardName:                        surface_downward_water_flux", &
+"canonicalUnits:                                       kg m-2 s-1", &
+"----------------------------------------------------------------", &
+"standardName:                surface_eastward_sea_water_velocity", &
+"canonicalUnits:                                            m s-1", &
+"----------------------------------------------------------------", &
+"standardName:                 surface_net_downward_longwave_flux", &
+"canonicalUnits:                                            W m-2", &
+"----------------------------------------------------------------", &
+"standardName:                surface_net_downward_shortwave_flux", &
+"canonicalUnits:                                            W m-2", &
+"----------------------------------------------------------------", &
+"standardName:               surface_northward_sea_water_velocity", &
+"canonicalUnits:                                            m s-1", &
+"----------------------------------------------------------------"/), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call NUOPC_FieldDictionaryIngestI(fieldDictionary, freeFormatFD, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+#else
 
 !BOLT l l
 ! "{\bf StandardName}"
@@ -984,6 +1044,7 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !EOLT
+#endif
   end subroutine
   !-----------------------------------------------------------------------------
 
