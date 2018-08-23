@@ -45,21 +45,18 @@
 #include "ESMCI_TraceUtil.h"
 #include <esmftrc.h>
 
-#define TO_VOID_PTR(_value)           static_cast<void *>(_value)
-#define FROM_VOID_PTR(_type, _value)  static_cast<_type *>(_value)
-
 #ifndef ESMF_OS_MinGW
 #define TRACE_DIR_PERMISSIONS (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)
 #else
 #define TRACE_DIR_PERMISSIONS (S_IRWXU)
 #endif
 
-#define NODENAME_LEN 100
 #define EVENT_BUF_SIZE_DEFAULT 4096
 #define EVENT_BUF_SIZE_EAGER 1024
 #define REGION_HASHTABLE_SIZE 100
 #define VMID_MAP_SIZE 10000
-  
+#define REGION_MAX_COUNT 65500
+
 using std::string;
 using std::vector;
 using std::stringstream;
@@ -115,14 +112,22 @@ namespace ESMCI {
   static HashMap<string, int, REGION_HASHTABLE_SIZE, StringHashF> userRegionMap;
   static HashMap<ESMFPhaseId, int, REGION_HASHTABLE_SIZE, ESMFPhaseHashF> phaseRegionMap;
   static HashMap<ESMFId, ComponentInfo *, REGION_HASHTABLE_SIZE, ESMFIdHashF> componentInfoMap;
-  
-  static int next_region_id() {
-    static int next = 0;
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::next_region_id()"  
+  static uint16_t next_region_id(int *rc) {
+    static uint16_t next = 1;
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+    if (next > REGION_MAX_COUNT) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                    "Too many trace regions defined.", ESMC_CONTEXT, rc);
+      return 0;
+    }
     return next++;
   } 
 
   static bool profileActive = true;
-  static RegionNode rootRegionNode(next_region_id());
+  static RegionNode rootRegionNode(next_region_id(NULL));
   static RegionNode *currentRegionNode = &rootRegionNode;
   
 #ifndef ESMF_NO_DLFCN
@@ -260,19 +265,12 @@ namespace ESMCI {
     }
     
   }
-
-  struct esmftrc_platform_filesys_ctx {
-    struct esmftrc_default_ctx ctx;
-    FILE *fh;
-    int stream_id;
-    char nodename[NODENAME_LEN];
-  };
   
   //global context
-  static struct esmftrc_platform_filesys_ctx *g_esmftrc_platform_filesys_ctx = NULL;
+  static struct esmftrc_platform_filesys_ctx *traceCtx = NULL;
 
   static struct esmftrc_default_ctx *esmftrc_platform_get_default_ctx() {
-    return &g_esmftrc_platform_filesys_ctx->ctx;
+    return &traceCtx->ctx;
   }
   
   static void write_packet(struct esmftrc_platform_filesys_ctx *ctx) {
@@ -308,7 +306,7 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::write_metadata()"  
   static void write_metadata(const char *trace_dir, int *rc) {
 
-    *rc = ESMF_SUCCESS;
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
     
     string metadata_string = TraceGetMetadataString();
     string filename(trace_dir);
@@ -324,13 +322,6 @@ namespace ESMCI {
                                     ESMC_CONTEXT, rc);
     }
   }
-
-  /*
-  static void PushIOStats();
-  static void PopIOStats();
-  static void PushMPIStats();
-  static void PopMPIStats();
-  */
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceOpen()"  
@@ -461,15 +452,15 @@ namespace ESMCI {
         return;
       }
     }
+
+    ctx->latch_ts = 0;
     
     esmftrc_init(&ctx->ctx, buf, eventBufSize, cbs, ctx);
     open_packet(ctx);
 
     //store as global context
-    g_esmftrc_platform_filesys_ctx = ctx;
+    traceCtx = ctx;
 
-    //PushIOStats();  
-    //PushMPIStats();
     traceInitialized = true;
 
     int wrappersPresent = TRACE_WRAP_NONE;
@@ -505,6 +496,19 @@ namespace ESMCI {
     }
     
   }
+
+  static string getPhaseNameFromRegionId(uint16_t regionId) {
+    ESMFPhaseId phaseId;
+    bool present = phaseRegionMap.reverse(regionId, phaseId);
+    if (present) {
+      ComponentInfo *ci = NULL;
+      bool present = componentInfoMap.get(phaseId.getESMFId(), ci);
+      if (present && ci != NULL) {
+        return ci->getPhaseName(phaseId);
+      }
+    }
+    return "";
+  }
   
 #define STATLINE 256
   static void printProfile(RegionNode *rn, bool printToLog, std::string prefix) {
@@ -521,15 +525,8 @@ namespace ESMCI {
         }
       }
       else {
-        ESMFPhaseId phaseId;
-        bool present = phaseRegionMap.reverse(rn->getId(), phaseId);
-        if (present) {
-          ComponentInfo *ci = NULL;
-          bool present = componentInfoMap.get(phaseId.getESMFId(), ci);
-          if (present && ci != NULL) {
-            name = ci->getPhaseName(phaseId);
-          }
-        }
+        name = getPhaseNameFromRegionId(rn->getId());
+        if (name.length() == 0) name = "UNKNOWN";
       }
       name.insert(0, prefix);
       
@@ -572,7 +569,7 @@ namespace ESMCI {
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceClose()"
   void TraceClose(int *rc) {
-    struct esmftrc_platform_filesys_ctx *ctx = g_esmftrc_platform_filesys_ctx;
+    struct esmftrc_platform_filesys_ctx *ctx = traceCtx;
     
     if(rc != NULL) *rc = ESMF_SUCCESS;
 
@@ -589,9 +586,11 @@ namespace ESMCI {
 #else
       c_esmftrace_notify_wrappers(0);
 #endif
-      
-      //PopIOStats();
-      //PopMPIStats();
+
+      if (profileActive) {
+        printProfile(true);
+        AddRegionProfilesToTrace(&rootRegionNode);
+      }
       
       if (esmftrc_packet_is_open(&ctx->ctx) &&
           !esmftrc_packet_is_empty(&ctx->ctx)) {
@@ -601,15 +600,8 @@ namespace ESMCI {
       fclose(ctx->fh);
       free(esmftrc_packet_buf(&ctx->ctx));
       free(ctx);
-      g_esmftrc_platform_filesys_ctx = NULL;
-
-      
-      if (profileActive) {
-        //std::cout << "PROFILE TREE:\n";
-        //rootRegionNode.printProfile(true);
-        printProfile(true);
-      }
-      
+      traceCtx = NULL;
+            
     }
     
   }
@@ -617,16 +609,19 @@ namespace ESMCI {
    
   ///////////////////// I/O Tracing //////////////////
 
-  static std::string openFilename;
-  static uint64_t openStartTimestamp = -1;
+  //static std::string openFilename;
+  //static uint64_t openStartTimestamp = -1;
 
   void TraceIOOpenStart(const char *path) {
-    if (!traceLocalPet) return;    
-    openStartTimestamp = TraceGetClock(NULL);
-    openFilename = string(path);
+    /*
+      if (!traceLocalPet) return;    
+      openStartTimestamp = TraceGetClock(NULL);
+      openFilename = string(path);
+    */
   }
   
   void TraceIOOpenEnd() {
+    /*
     if (!traceLocalPet) return;
     uint64_t openEndTimestamp = TraceGetClock(NULL);
     uint64_t openTime = openEndTimestamp - openStartTimestamp;
@@ -635,6 +630,7 @@ namespace ESMCI {
                                  openFilename.c_str(), openTime);
 
     openStartTimestamp = -1;
+    */
   }
 
   void TraceIOCloseStart() {
@@ -684,13 +680,13 @@ namespace ESMCI {
 
   void TraceMPIWaitStart() {
     if (profileActive) {
-      currentRegionNode->enteredMPI(TraceGetClock(NULL));
+      currentRegionNode->enteredMPI(TraceGetClock(traceCtx));
     }
   }
   
   void TraceMPIWaitEnd() {
     if (profileActive) {
-      currentRegionNode->exitedMPI(TraceGetClock(NULL));
+      currentRegionNode->exitedMPI(TraceGetClock(traceCtx));
     }
   }
   
@@ -708,18 +704,9 @@ namespace ESMCI {
     }
   }
 
+
+
   /*
-    static void PopMPIStats() {
-
-    size_t count = mpiBarrierCount.back();
-    uint64_t time = mpiBarrierTime.back();
-    mpiBarrierCount.pop_back();
-    mpiBarrierTime.pop_back();
-    if (count > 0) {
-      esmftrc_default_trace_mpibarrier(esmftrc_platform_get_default_ctx(),
-                                       count, time);
-    }
-
     count = mpiWaitCount.back();
     time = mpiWaitTime.back();
     mpiWaitCount.pop_back();
@@ -733,39 +720,73 @@ namespace ESMCI {
   */
   
   /////////////////////////////////////////////
-  
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventPhaseEnter()"
   void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
     if (!traceLocalPet) return;
 
-    if (profileActive) {
-      int regionId = -1;
-      ESMFPhaseId phaseId(ESMFId(*ep_vmid, *ep_baseid), *ep_method, *ep_phase);
-      bool present = phaseRegionMap.get(phaseId, regionId);
-      if (!present) {
-        regionId = next_region_id();
-        phaseRegionMap.put(phaseId, regionId);
-      }
-      currentRegionNode = currentRegionNode->getOrAddChild(regionId);
-      currentRegionNode->entered(TraceGetClock(NULL));
+    TraceClockLatch(traceCtx);  /* lock in time on clock */
+    
+    //TODO:  change this to use the region_id instead and output a region definition?
+    //esmftrc_default_trace_phase_enter(esmftrc_platform_get_default_ctx(),
+    //                                  *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+
+    int regionId = -1;
+    ESMFPhaseId phaseId(ESMFId(*ep_vmid, *ep_baseid), *ep_method, *ep_phase);
+    bool present = phaseRegionMap.get(phaseId, regionId);
+    if (!present) {
+      int localrc;
+      regionId = next_region_id(&localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
+                                        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc)) {
+        return;
+      }        
+      phaseRegionMap.put(phaseId, regionId);
+      //add definition to trace
+      esmftrc_default_trace_define_region(esmftrc_platform_get_default_ctx(),
+                                          regionId,
+                                          TRACE_REGIONTYPE_PHASE,
+                                            *ep_vmid, *ep_baseid, *ep_method, *ep_phase,
+                                          getPhaseNameFromRegionId(regionId).c_str()); 
     }
 
-    //TODO:  change this to use the region_id instead and output a region definition?
-    esmftrc_default_trace_phase_enter(esmftrc_platform_get_default_ctx(),
-                                      *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+    esmftrc_default_trace_regionid_enter(esmftrc_platform_get_default_ctx(),
+                                         regionId);
+    
+    if (profileActive) {
+      currentRegionNode = currentRegionNode->getOrAddChild(regionId);
+      currentRegionNode->entered(traceCtx->latch_ts);
+    }
+
+    TraceClockUnlatch(traceCtx);
+    
   }
   
   void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
     if (!traceLocalPet) return;
 
+    TraceClockLatch(traceCtx);
+    
+    int regionId = -1;
+    ESMFPhaseId phaseId(ESMFId(*ep_vmid, *ep_baseid), *ep_method, *ep_phase);
+    phaseRegionMap.get(phaseId, regionId);  /* should always be present */
+
+    esmftrc_default_trace_regionid_exit(esmftrc_platform_get_default_ctx(),
+                                         regionId);
+    
+    //esmftrc_default_trace_phase_exit(esmftrc_platform_get_default_ctx(),
+    //                                 *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
+    
     if (profileActive) {
       /* assume phases are well-formed, so do not resolve regionId */
-      currentRegionNode->exited(TraceGetClock(NULL));
+      currentRegionNode->exited(traceCtx->latch_ts);
       currentRegionNode = currentRegionNode->getParent();
     }
+
+    TraceClockUnlatch(traceCtx);
     
-    esmftrc_default_trace_phase_exit(esmftrc_platform_get_default_ctx(),
-                                     *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
-  }
+   }
 
   void TraceEventPhasePrologueEnter(int *ep_vmid, int *ep_baseid, int *ep_method, int *ep_phase) {
     if (!traceLocalPet) return;
@@ -779,54 +800,81 @@ namespace ESMCI {
                                         *ep_vmid, *ep_baseid, *ep_method, *ep_phase);
   }
 
+#define ESMF
+  
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventRegionEnter()"
   void TraceEventRegionEnter(std::string name) {
     if (!traceLocalPet) return;
 
+    TraceClockLatch(traceCtx);
+    
     int regionId = 0;
     bool present = userRegionMap.get(name, regionId);
     if (!present) {
-      regionId = next_region_id();
+      int localrc;
+      regionId = next_region_id(&localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
+             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc)) {
+        return;
+      }         
       userRegionMap.put(name, regionId);
       //add definition to trace
       esmftrc_default_trace_define_region(esmftrc_platform_get_default_ctx(),
                                           regionId,
+                                          TRACE_REGIONTYPE_USER,
+                                          0, 0, 0, 0,
                                           name.c_str());
     }
 
-    if (profileActive) {
-      currentRegionNode = currentRegionNode->getOrAddChild(regionId, true);
-      currentRegionNode->entered(TraceGetClock(NULL));
-    }
-    
     esmftrc_default_trace_regionid_enter(esmftrc_platform_get_default_ctx(),
                                          regionId);
-        
+    
+    if (profileActive) {
+      currentRegionNode = currentRegionNode->getOrAddChild(regionId, true);
+      currentRegionNode->entered(traceCtx->latch_ts);
+    }
+
+    TraceClockUnlatch(traceCtx);
+         
   }
 
   void TraceEventRegionExit(std::string name) {
     if (!traceLocalPet) return;
 
+    TraceClockLatch(traceCtx);
+    
     int regionId = 0;
     bool present = userRegionMap.get(name, regionId);
     if (!present) {
+      int localrc;
       //if timing regions are well-formed, then this should
       //never happen since the region would have already been
       //added - but we'll allow for poorly formed regions
-      regionId = next_region_id();
+      regionId = next_region_id(&localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
+             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &localrc)) {
+        return;
+      }         
       userRegionMap.put(name, regionId);
       //add definition to trace
       esmftrc_default_trace_define_region(esmftrc_platform_get_default_ctx(),
                                           regionId,
+                                          TRACE_REGIONTYPE_USER,
+                                          0, 0, 0, 0,
                                           name.c_str());
-    }
-    else if (profileActive) {
-      currentRegionNode->exited(TraceGetClock(NULL));
-      currentRegionNode = currentRegionNode->getParent();
     }
 
     esmftrc_default_trace_regionid_exit(esmftrc_platform_get_default_ctx(),
-                                         regionId);
+                                        regionId);
 
+    if (present && profileActive) {
+      currentRegionNode->exited(traceCtx->latch_ts);
+      currentRegionNode = currentRegionNode->getParent();
+    }
+
+    TraceClockUnlatch(traceCtx);
+ 
   }
 
   //IPDv00p1=6||IPDv00p2=7||IPDv00p3=4||IPDv00p4=5::RunPhase1=1::FinalizePhase1=1
@@ -936,5 +984,28 @@ namespace ESMCI {
     
   }
 
+
+  static void AddRegionProfilesToTrace(RegionNode *rn) {
+
+    if (!traceLocalPet) return;
+    
+    esmftrc_default_trace_region_profile(
+        esmftrc_platform_get_default_ctx(),
+        rn->getId(),
+	rn->getParentId(),
+	rn->getTotal(),
+	rn->getSelfTime(),
+	rn->getCount(),
+	rn->getMax(),
+	rn->getMin(),
+	rn->getMean(),
+	rn->getStdDev());
+      
+      for (unsigned i = 0; i < rn->getChildren().size(); i++) {
+        AddRegionProfilesToTrace(rn->getChildren().at(i));
+      }
+    
+  }
+  
 }
 

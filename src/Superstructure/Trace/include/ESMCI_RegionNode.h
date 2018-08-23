@@ -21,7 +21,7 @@ namespace ESMCI {
     
   public:
         
-  RegionNode(RegionNode *parent, int id, bool isUserRegion):
+  RegionNode(RegionNode *parent, uint16_t id, bool isUserRegion):
     _parent(parent), _id(id), _isUserRegion(isUserRegion),
       _count(0), _total(0), _min(UINT64T_BIG), _max(0),
       _mean(0.0), _variance(0.0), _last_entered(0),
@@ -57,7 +57,7 @@ namespace ESMCI {
       return getTotal() > rhs.getTotal();
     }
     
-    int getId() const {
+    uint16_t getId() const {
       return _id;
     }
     
@@ -65,6 +65,13 @@ namespace ESMCI {
       return _parent;
     }
 
+    uint16_t getParentId() const {
+      if (_parent != NULL)
+        return _parent->getId();
+      else
+        return 0;
+    } 
+    
     bool isUserRegion() const {
       return _isUserRegion;
     }
@@ -199,6 +206,7 @@ namespace ESMCI {
     }
 
     void exitedMPI(uint64_t stop) {
+      std::cout << "enter: " << _time_mpi_start << " exit: " << stop << "\n";
       _time_mpi += (stop - _time_mpi_start);
       _count_mpi++;
     }
@@ -220,7 +228,7 @@ namespace ESMCI {
     };
     
     RegionNode *_parent;
-    int _id;
+    uint16_t _id;
     bool _isUserRegion;
    
     vector<RegionNode *> _children;

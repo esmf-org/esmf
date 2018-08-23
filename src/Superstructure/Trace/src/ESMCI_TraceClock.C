@@ -199,17 +199,48 @@ namespace ESMCI {
 
   }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceClockLatch()"
+  void TraceClockLatch(struct esmftrc_platform_filesys_ctx *ctx) {
+    switch(traceClock) {
+    case ESMF_CLOCK_REALTIME:
+      ctx->latch_ts = get_real_clock();
+      break;
+    case ESMF_CLOCK_MONOTONIC:
+      ctx->latch_ts = get_monotonic_raw_clock();
+      break;
+    case ESMF_CLOCK_MONOTONIC_SYNC:
+      ctx->latch_ts = get_monotonic_clock();
+      break;
+    default:
+      ctx->latch_ts = 0;
+    }
+  }
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceClockUnlatch()"
+  void TraceClockUnlatch(struct esmftrc_platform_filesys_ctx *ctx) {
+    ctx->latch_ts = 0;
+  }
+  
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceGetClock()"
   uint64_t TraceGetClock(void *data) {
+    struct esmftrc_platform_filesys_ctx *ctx =
+      FROM_VOID_PTR(struct esmftrc_platform_filesys_ctx, data);
+
+    /* if clock is latched, return that value */
+    if (ctx->latch_ts != 0) return ctx->latch_ts;
+    
     switch(traceClock) {
     case ESMF_CLOCK_REALTIME:
       return get_real_clock();
     case ESMF_CLOCK_MONOTONIC:
       return get_monotonic_raw_clock();
     case ESMF_CLOCK_MONOTONIC_SYNC:
-      return get_monotonic_clock();      
+      return get_monotonic_clock();
     }
+    
     return 0;
   }
 
