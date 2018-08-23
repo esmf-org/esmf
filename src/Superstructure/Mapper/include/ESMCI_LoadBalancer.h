@@ -2,6 +2,7 @@
 #define ESMCI_LoadBalancer_H
 
 #include <string>
+#include <queue>
 #include <vector>
 #include <algorithm>
 #include <functional>
@@ -21,6 +22,7 @@
 
 namespace ESMCI{
   namespace MapperUtil{
+
     /* Load Balancer class
      * The load balancer class is used to balance the load between different
      * components. The load is balanced by minimizing the idle time, the
@@ -40,9 +42,33 @@ namespace ESMCI{
         bool optimize(std::vector<int> &opt_npets,
                     std::vector<std::pair<int, int> > &opt_pet_ranges,
                     T &opt_wtime);
+        bool get_optimal(std::vector<int> &opt_npets,
+                    std::vector<std::pair<int, int> > &opt_pet_ranges,
+                    T &opt_wtime);
       private:
+        /* Load Balancer backup info
+         * This is the information stored in the LoadBalancer corresponding
+         * to comp_infos_
+         */
+        class LoadBalancerBackupInfo{
+          public:
+            LoadBalancerBackupInfo(
+              const std::vector<int> &opt_npets,
+              const std::vector<std::pair<int, int> > &opt_pet_ranges,
+              T opt_wtime);
+            void get_info(std::vector<int> &opt_npets,
+                  std::vector<std::pair<int, int> > &opt_pet_ranges,
+                  T &opt_wtime) const;
+            bool operator<(const LoadBalancerBackupInfo &other_info) const;
+          private:
+            std::vector<int> opt_npets_;
+            std::vector<std::pair<int, int> > opt_pet_ranges_;
+            T opt_wtime_;
+        }; // class LoadBalancerBackupInfo
+
         std::vector<CompInfo<T> > comp_infos_;
         LoadBalancerAlg opt_alg_;
+        std::priority_queue<LoadBalancerBackupInfo> backup_infos_;
         bool get_constraint_funcs(
           std::vector<std::vector<ExecBlock<T> > > &pexec_blocks,
           std::vector<TwoVIDPoly<T> > &twovidp_cfuncs,
@@ -78,6 +104,7 @@ namespace ESMCI{
     template<typename T>
     inline void LoadBalancer<T>::set_lb_info(const std::vector<CompInfo<T> > &comp_infos)
     {
+      assert(comp_infos_.empty() || (comp_infos_.size() == comp_infos.size()));
       comp_infos_ = comp_infos;
     }
 
@@ -353,9 +380,55 @@ namespace ESMCI{
         opt_wtime = static_cast<T>(0);
         return false;
       }
+
+      LoadBalancerBackupInfo backup_info(opt_npets, opt_pet_ranges, opt_wtime);
+      backup_infos_.push(backup_info);
       return true;
+    }
+
+    template<typename T>
+    bool LoadBalancer<T>::get_optimal(std::vector<int> &opt_npets,
+                    std::vector<std::pair<int, int> > &opt_pet_ranges,
+                    T &opt_wtime)
+    {
+      if(backup_infos_.empty()){
+        return false;
+      }
+
+      backup_infos_.top().get_info(opt_npets, opt_pet_ranges, opt_wtime);
+      return true;
+    }
+
+    template<typename T>
+    LoadBalancer<T>::LoadBalancerBackupInfo::LoadBalancerBackupInfo(
+      const std::vector<int> &opt_npets,
+      const std::vector<std::pair<int, int> > &opt_pet_ranges,
+      T opt_wtime):
+        opt_npets_(opt_npets),
+        opt_pet_ranges_(opt_pet_ranges),
+        opt_wtime_(opt_wtime)
+    {
+    }
+
+    template<typename T>
+    bool LoadBalancer<T>::LoadBalancerBackupInfo::operator<(
+      const LoadBalancerBackupInfo &other_info) const
+    {
+      return (opt_wtime_ < other_info.opt_wtime_);
+    }
+
+    template<typename T>
+    void LoadBalancer<T>::LoadBalancerBackupInfo::get_info(
+      std::vector<int> &opt_npets,
+      std::vector<std::pair<int, int> > &opt_pet_ranges,
+      T &opt_wtime) const
+    {
+      opt_npets = opt_npets_;
+      opt_pet_ranges = opt_pet_ranges_;
+      opt_wtime = opt_wtime_;
     }
 
   } // MapperUtil
 } //namespace ESMCI
+
 #endif // ESMCI_LoadBalancer_H
