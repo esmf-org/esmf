@@ -367,6 +367,10 @@ namespace ESMCI{
         std::vector<T> new_pets = solver.minimize();
         for(int i=0; i<ncomps; i++){
           opt_npets[i] = static_cast<int>(new_pets[i]);
+          /* The solver is returning us -ve PET values, cannot minimize further */
+          if(opt_npets[i] <= 0){
+            return false;
+          }
           opt_wtimes[i] = static_cast<T>(comp_stimes[i]/opt_npets[i]);
         }
       }
@@ -414,7 +418,7 @@ namespace ESMCI{
     bool LoadBalancer<T>::LoadBalancerBackupInfo::operator<(
       const LoadBalancerBackupInfo &other_info) const
     {
-      return (opt_wtime_ < other_info.opt_wtime_);
+      return (opt_wtime_ > other_info.opt_wtime_);
     }
 
     template<typename T>
