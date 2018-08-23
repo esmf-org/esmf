@@ -240,9 +240,9 @@ namespace ESMCI{
         std::vector<std::pair<std::string, int> > comp_phase_npets;
         for(typename std::vector<CompInfo<T> >::const_iterator citer =
               comp_phases_.cbegin();
-            citer != comp_phases_.cend(); ++citer, i++){
+            citer != comp_phases_.cend(); ++citer){
           /* Get current number of pets */
-          std::pair<int, int> cur_npets = (*citer).get_npets();
+          int cur_npets = (*citer).get_npets();
           UVIDPoly<T> comp_phase_sfunc;
           bool ret = cinfo_store->get_scaling_function(*citer, comp_phase_sfunc);
           if(!ret){
@@ -380,7 +380,7 @@ namespace ESMCI{
     bool ExecBlock<T>::get_scaling_function(UVIDPoly<T> &f,
           std::vector<MVIDLPoly<T> > &constraint_funcs)
     {
-      if(!sfunc_is_valid){
+      if(!sfunc_is_valid_){
         bool ret = get_scaling_function(f);
         if(!ret){
           return ret;
