@@ -113,9 +113,12 @@ namespace ESMCI{
             bool ret = citer_exec_block_list->get_scaling_function(
                                         sfunc_first_exec_block,
                                         sfunc_cfuncs_first_exec_block);
+            if(!ret){
+              /* Not enough data to get a scaling function */
+              return ret;
+            }
             first_exec_block_npets = citer_exec_block_list->get_npets();
             exec_block_list_npets += first_exec_block_npets;
-            assert(ret);
             ++citer_exec_block_list;
           }
           else{
@@ -161,7 +164,10 @@ namespace ESMCI{
               bool ret = citer_exec_block_list->get_scaling_function(
                                     sfunc_iexec_block,
                                     sfunc_cfuncs_iexec_block);
-              assert(ret);
+              if(!ret){
+                /* Not enough data for getting a scaling function */
+                return ret;
+              }
               int iexec_block_npets = citer_exec_block_list->get_npets();
               std::vector<std::string> sfunc_iexec_block_vnames = 
                 sfunc_iexec_block.get_vnames();
@@ -204,16 +210,16 @@ namespace ESMCI{
               TwoVIDPoly<T> idle_time_func_sq = idle_time_func * idle_time_func;
               twovidp_cfuncs.push_back(idle_time_func_sq);
 
-              assert(exec_block_list_vnames.size() == (*citer).size());
-              /* Also add the constraint that Sum(ei) - C = 0 */
-              std::vector<T> final_constraint_coeffs((*citer).size(), 1);
-              final_constraint_coeffs.push_back(
-                static_cast<T>(-1) * exec_block_list_npets);
-              MVIDLPoly<T> final_cfunc(final_constraint_coeffs);
-              final_cfunc.set_vnames(exec_block_list_vnames);
-
-              mvidlp_cfuncs.push_back(final_cfunc);
             }
+            assert(exec_block_list_vnames.size() == (*citer).size());
+            /* Also add the constraint that Sum(ei) - C = 0 */
+            std::vector<T> final_constraint_coeffs((*citer).size(), 1);
+            final_constraint_coeffs.push_back(
+              static_cast<T>(-1) * exec_block_list_npets);
+            MVIDLPoly<T> final_cfunc(final_constraint_coeffs);
+            final_cfunc.set_vnames(exec_block_list_vnames);
+
+            mvidlp_cfuncs.push_back(final_cfunc);
           }
           else{
             /* Only one execution block in the list, we need at least two parallel
