@@ -254,6 +254,7 @@ namespace ESMCI{
         }
       }
       else if(past_npets_.size() >= MIN_VALS_REQD_FOR_LFIT){
+        /*
         int ret = LinearFit(past_npets_, past_wtimes_, sfunc_);
         if(ret != ESMF_SUCCESS){
           std::cerr << "Error : Finding linear fit for component " << comp_name_.c_str()
@@ -262,6 +263,7 @@ namespace ESMCI{
         else{
           sfunc_is_valid_ = true;
         }
+        */
       }
 
       if(sfunc_is_valid_){
