@@ -180,6 +180,8 @@ module NUOPC_FieldDictionaryApi
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
 
+    NUOPC_FieldDictionaryHasEntry = .false.
+
     call NUOPC_FieldDictionarySetup(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -246,6 +248,8 @@ module NUOPC_FieldDictionaryApi
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
+
+    NUOPC_FieldDictionaryMatchSyno = .false.
 
     call NUOPC_FieldDictionarySetup(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

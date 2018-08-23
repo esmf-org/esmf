@@ -555,6 +555,8 @@ module NUOPC_FieldDictionaryDef
     
     if (present(rc)) rc = ESMF_SUCCESS
     
+    NUOPC_FieldDictionaryHasEntryI = .false.
+
     call c_ESMC_ContainerGetIsPresent(fieldDictionary, trim(standardName), &
       isPres, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
