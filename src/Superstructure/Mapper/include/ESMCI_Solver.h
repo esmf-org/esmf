@@ -117,7 +117,7 @@ namespace ESMCI{
             MVIDLPoly<T> *pdf = new MVIDLPoly<T>();
             int ret = FindPDerivative(mvid_lpoly_funcs[i], vnames[j], *pdf);
             assert(ret == 0);
-            std::cout << "d(" << funcs[i] << ")/d" << vnames[j].c_str()
+            std::cout << "d(" << mvid_lpoly_funcs[i] << ")/d" << vnames[j].c_str()
                       << " = " << *pdf << "\n";
             JFrow.push_back(pdf);
           }
