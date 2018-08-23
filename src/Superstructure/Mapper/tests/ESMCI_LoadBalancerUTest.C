@@ -76,6 +76,13 @@ int main(int argc, char *argv[])
                                                                   comp1,
                                                                   comp2
                                                                 };
+  ESMCI::MapperUtil::CompInfoStore<float> *comp_info_store =
+    ESMCI::MapperUtil::CompInfoStore<float>::get_instance();
+
+  comp_info_store->add_comp_info(comp_infos[0]);
+  comp_info_store->add_comp_info(comp_infos[1]);
+  comp_info_store->add_comp_info(comp_infos[2]);
+
   ESMCI::MapperUtil::LoadBalancer<float> lb(comp_infos);
 
   strncpy(name, "Load Balancer UTest", ESMF_MAX_STRLEN);
@@ -131,8 +138,13 @@ int main(int argc, char *argv[])
     comp_infos[2].set_pet_range(comp_pet_ranges[2]);
     comp_infos[2].set_time_interval(comp_time_intvls[2]);
 
+    comp_info_store->add_comp_info(comp_infos[0]);
+    comp_info_store->add_comp_info(comp_infos[1]);
+    comp_info_store->add_comp_info(comp_infos[2]);
+
     lb.set_lb_info(comp_infos);
   }
 
+  ESMCI::MapperUtil::CompInfoStore<float>::finalize();
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }
