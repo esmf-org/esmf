@@ -871,6 +871,10 @@ module NUOPC_FieldDictionaryDef
     if (present(rc)) rc = ESMF_SUCCESS
 
 #define USE_FREE_FORMAT_DEFAULT_FD_off
+!TODO: Cannot switch over to the FreeFormatFD approach until we solve:
+!TODO: (1) The canonical units are not correctly ingested.
+!TODO: (2) The ProTex extension needs to handle processing the FreeFormatFD
+!TODO:     so it shows up in the NUOPC reference manual as table.
 #ifdef USE_FREE_FORMAT_DEFAULT_FD
     freeFormatFD = NUOPC_FreeFormatCreate(stringList=(/ &
 "standardName:                          air_pressure_at_sea_level", &
