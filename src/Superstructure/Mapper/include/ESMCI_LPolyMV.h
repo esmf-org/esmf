@@ -64,7 +64,7 @@ namespace ESMCI{
     }; // class MVIDLPoly
 
     namespace MVIDLPolyUtil{
-      std::vector<std::string> append_int2str(const std::string &str, int range_start,
+      inline std::vector<std::string> append_int2str(const std::string &str, int range_start,
         int range_end)
       {
         std::vector<std::string> res;
