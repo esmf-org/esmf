@@ -969,159 +969,160 @@ end interface
        endif
     endif
 
+    if (present(dimCount).or.present(localDECount).or.present(distgrid).or. &
+      present(distgridToGridMap).or.present(indexflag)) then
+
+      ! Get info depending on type
+      select case(gbcp%type%type)
+         case (ESMF_GEOMTYPE_GRID%type) ! Grid
+              call ESMF_GridGet(grid=gbcp%grid,  &
+                        dimCount=dimCount,  localDECount=localDECount, &
+                        distgridToGridMap=distgridToGridMap, &
+                        indexflag=indexFlag, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+              call ESMF_GridGet(grid=gbcp%grid, staggerloc=gbcp%staggerloc, &
+                        distgrid=distgrid, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+         case (ESMF_GEOMTYPE_MESH%type) ! Mesh
+            ! Get distgrid
+            if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
+               call ESMF_MeshGet(mesh=gbcp%mesh, &
+                    nodalDistgrid=localDistgrid, &
+                    rc=localrc)
+               if (ESMF_LogFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
+               call ESMF_MeshGet(mesh=gbcp%mesh, &
+                    elementDistgrid=localDistgrid, &
+                    rc=localrc)
+               if (ESMF_LogFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            else
+               if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
+                    msg=" Bad Mesh Location value", &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
 
 
+            if (present(dimCount)) then
+               call ESMF_DistGridGet(localDistgrid, &
+                    dimCount=dimCount, rc=localrc)
+               if (ESMF_LogFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
 
-    ! Get info depending on type
-    select case(gbcp%type%type)
-       case (ESMF_GEOMTYPE_GRID%type) ! Grid
-            call ESMF_GridGet(grid=gbcp%grid,  &
-                      dimCount=dimCount,  localDECount=localDECount, &
-                      distgridToGridMap=distgridToGridMap, &
-                      indexflag=indexFlag, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-            call ESMF_GridGet(grid=gbcp%grid, staggerloc=gbcp%staggerloc, &
-                      distgrid=distgrid, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
+            if (present(localDECount)) then
+               call ESMF_DistGridGet(localDistgrid, &
+                    delayout=localDeLayout, rc=localrc)
+               if (ESMF_LogFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
 
-       case (ESMF_GEOMTYPE_MESH%type) ! Mesh
-          ! Get distgrid
-          if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
-             call ESMF_MeshGet(mesh=gbcp%mesh, &
-                  nodalDistgrid=localDistgrid, &
-                  rc=localrc)
-             if (ESMF_LogFoundError(localrc, &
-                  ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-          else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
-             call ESMF_MeshGet(mesh=gbcp%mesh, &
-                  elementDistgrid=localDistgrid, &
-                  rc=localrc)
-             if (ESMF_LogFoundError(localrc, &
-                  ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-          else
-             if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                  msg=" Bad Mesh Location value", &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-          endif
+               call ESMF_DELayoutGet(localDelayout, &
+                    localDECount=localDECount, rc=localrc)
+               if (ESMF_LogFoundError(localrc, &
+                    ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+            if (present(distgridToGridMap)) then
+               do i=1,size(distgridToGridMap)
+                  distgridToGridMap(i)=i
+               enddo
+            endif
+
+            ! Distgrid
+            if (present(distgrid)) then
+               if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
+                  call ESMF_MeshGet(mesh=gbcp%mesh, &
+                       nodalDistgrid=distgrid, &
+                       rc=localrc)
+                  if (ESMF_LogFoundError(localrc, &
+                       ESMF_ERR_PASSTHRU, &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
+               else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
+                  call ESMF_MeshGet(mesh=gbcp%mesh, &
+                       elementDistgrid=distgrid, &
+                       rc=localrc)
+                  if (ESMF_LogFoundError(localrc, &
+                       ESMF_ERR_PASSTHRU, &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
+               else
+                  if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
+                       msg=" Bad Mesh Location value", &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
+               endif
+            endif
+            if (present(indexFlag)) indexFlag = ESMF_INDEX_DELOCAL
 
 
-          if (present(dimCount)) then
-             call ESMF_DistGridGet(localDistgrid, &
-                  dimCount=dimCount, rc=localrc)
-             if (ESMF_LogFoundError(localrc, &
-                  ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-          endif
+         case (ESMF_GEOMTYPE_LOCSTREAM%type) ! LocStream
+              if (present(dimCount)) dimCount = 1
+              if (present(distgridToGridMap)) distgridToGridMap = 1
+              call ESMF_LocStreamGet(gbcp%locstream, distgrid=distgrid, &
+                     localDECount=localDECount, indexflag=indexflag, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                                   ESMF_ERR_PASSTHRU, &
+                                   ESMF_CONTEXT, rcToReturn=rc)) return
 
-          if (present(localDECount)) then
-             call ESMF_DistGridGet(localDistgrid, &
-                  delayout=localDeLayout, rc=localrc)
-             if (ESMF_LogFoundError(localrc, &
-                  ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
+         case (ESMF_GEOMTYPE_XGRID%type) ! XGrid
 
-             call ESMF_DELayoutGet(localDelayout, &
-                  localDECount=localDECount, rc=localrc)
-             if (ESMF_LogFoundError(localrc, &
-                  ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-          endif
-          if (present(distgridToGridMap)) then
-             do i=1,size(distgridToGridMap)
-                distgridToGridMap(i)=i
-             enddo
-          endif
-
-          ! Distgrid
-          if (present(distgrid)) then
-             if (gbcp%meshloc == ESMF_MESHLOC_NODE) then
-                call ESMF_MeshGet(mesh=gbcp%mesh, &
-                     nodalDistgrid=distgrid, &
-                     rc=localrc)
-                if (ESMF_LogFoundError(localrc, &
-                     ESMF_ERR_PASSTHRU, &
-                     ESMF_CONTEXT, rcToReturn=rc)) return
-             else if (gbcp%meshloc == ESMF_MESHLOC_ELEMENT) then
-                call ESMF_MeshGet(mesh=gbcp%mesh, &
-                     elementDistgrid=distgrid, &
-                     rc=localrc)
-                if (ESMF_LogFoundError(localrc, &
-                     ESMF_ERR_PASSTHRU, &
-                     ESMF_CONTEXT, rcToReturn=rc)) return
-             else
-                if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                     msg=" Bad Mesh Location value", &
-                     ESMF_CONTEXT, rcToReturn=rc)) return
+           if(gbcp%xgridside == ESMF_XGRIDSIDE_BALANCED) then
+             if (present(dimCount)) dimCount = 1
+             if (present(distgridToGridMap)) distgridToGridMap = 1
+             if (present(localDECount)) then
+                 call ESMF_DistGridGet(gbcp%xgrid%xgtypep%distgridM, delayout=localdelayout, rc=localrc)
+                 if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+                 call ESMF_DelayoutGet(localdelayout, localDECount=localDECount, rc=localrc)
+                 if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
              endif
-          endif
-          if (present(indexFlag)) indexFlag = ESMF_INDEX_DELOCAL
-
-
-       case (ESMF_GEOMTYPE_LOCSTREAM%type) ! LocStream
-            if (present(dimCount)) dimCount = 1
-            if (present(distgridToGridMap)) distgridToGridMap = 1
-            call ESMF_LocStreamGet(gbcp%locstream, distgrid=distgrid, &
-                   localDECount=localDECount, indexflag=indexflag, rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rcToReturn=rc)) return
-
-       case (ESMF_GEOMTYPE_XGRID%type) ! XGrid
-
-         if(gbcp%xgridside == ESMF_XGRIDSIDE_BALANCED) then
-           if (present(dimCount)) dimCount = 1
-           if (present(distgridToGridMap)) distgridToGridMap = 1
-           if (present(localDECount)) then
-               call ESMF_DistGridGet(gbcp%xgrid%xgtypep%distgridM, delayout=localdelayout, rc=localrc)
-               if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
-               call ESMF_DelayoutGet(localdelayout, localDECount=localDECount, rc=localrc)
-               if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
-           endif
-         else
-           call ESMF_XGridGet(gbcp%xgrid, xgrid_geombase, xgridSide=gbcp%xgridSide, &
-                              gridindex=gbcp%xgridindex, rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-                            ESMF_ERR_PASSTHRU, &
-                            ESMF_CONTEXT, rcToReturn=rc)) return
-           call ESMF_XGridGeomBaseGet(xgrid_geombase, &
-              dimCount=dimCount, localDeCount=localDECount, distgrid=distgrid, &
-              distgridToGridMap=distgridToGridMap, indexFlag=indexFlag, &
-              grid=grid, staggerloc=staggerloc, mesh=mesh, meshloc=meshloc, &
-              rc=localrc)
-           if (ESMF_LogFoundError(localrc, &
-              ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-         endif
-
-         ! Get distgrid
-         if (present(distgrid)) then
-             call ESMF_XGridGet(gbcp%xgrid, gridIndex=gbcp%xgridindex, &
-                                xgridSide=gbcp%xgridSide, &
-                                distgrid=distgrid, rc=localrc)
+           else
+             call ESMF_XGridGet(gbcp%xgrid, xgrid_geombase, xgridSide=gbcp%xgridSide, &
+                                gridindex=gbcp%xgridindex, rc=localrc)
              if (ESMF_LogFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rcToReturn=rc)) return
-         endif
-         if (present(indexFlag)) indexFlag = ESMF_INDEX_DELOCAL
-         if (present(xgridside)) xgridside=gbcp%xgridside
-         if (present(gridIndex)) gridIndex=gbcp%xgridIndex
+                              ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rcToReturn=rc)) return
+             call ESMF_XGridGeomBaseGet(xgrid_geombase, &
+                dimCount=dimCount, localDeCount=localDECount, distgrid=distgrid, &
+                distgridToGridMap=distgridToGridMap, indexFlag=indexFlag, &
+                grid=grid, staggerloc=staggerloc, mesh=mesh, meshloc=meshloc, &
+                rc=localrc)
+             if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
 
-       case default
-         if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
-                               msg=" Bad type value", &
-                               ESMF_CONTEXT, rcToReturn=rc)) return
-    end select
+           ! Get distgrid
+           if (present(distgrid)) then
+               call ESMF_XGridGet(gbcp%xgrid, gridIndex=gbcp%xgridindex, &
+                                  xgridSide=gbcp%xgridSide, &
+                                  distgrid=distgrid, rc=localrc)
+               if (ESMF_LogFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rcToReturn=rc)) return
+           endif
+           if (present(indexFlag)) indexFlag = ESMF_INDEX_DELOCAL
+           if (present(xgridside)) xgridside=gbcp%xgridside
+           if (present(gridIndex)) gridIndex=gbcp%xgridIndex
 
+         case default
+           if (ESMF_LogFoundError(ESMF_RC_ARG_VALUE, &
+                                 msg=" Bad type value", &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+      end select
+      
+    endif
 
     ! Set return value
     if (present(rc)) rc = ESMF_SUCCESS

@@ -22,6 +22,9 @@ module NUOPC_FieldDictionaryApi
 
   private
 
+  ! public constants
+  public NUOPC_FieldDictionaryEntryLen
+
   ! public types
   public NUOPC_FieldDictionaryEntryS, NUOPC_FieldDictionaryEntry
 
@@ -96,12 +99,18 @@ module NUOPC_FieldDictionaryApi
 !BOP
 ! !IROUTINE: NUOPC_FieldDictionaryEgest - Egest NUOPC Field dictionary into FreeFormat
 ! !INTERFACE:
-  subroutine NUOPC_FieldDictionaryEgest(freeFormat, rc)
+  subroutine NUOPC_FieldDictionaryEgest(freeFormat, iofmt, rc)
 ! !ARGUMENTS:
     type(NUOPC_FreeFormat), intent(out)           :: freeFormat
+    type(ESMF_IOFmt_Flag),  intent(in),  optional :: iofmt
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Egest the contents of the NUOPC Field dictionary into a FreeFormat object.
+!   If I/O format option {\tt iofmt} is provided and equal to {\tt ESMF\_IOFMT\_YAML},
+!   the FreeFormat object will contain the NUOPC Field dictionary expressed in YAML
+!   format. Other values for {\tt iofmt} are ignored and this method behaves as if
+!   the optional {\tt iofmt} argument were missing. In such a case, {\tt freeFormat}
+!   will contain NUOPC Field dictionary entries in the traditional format.
 !   It is the caller's responsibility to destroy the created {\tt freeFormat}
 !   object.
 !EOP
@@ -114,7 +123,8 @@ module NUOPC_FieldDictionaryApi
       file=FILENAME)) &
       return  ! bail out
     
-    call NUOPC_FieldDictionaryEgestI(NUOPC_FieldDictionary, freeFormat, rc=rc)
+    call NUOPC_FieldDictionaryEgestI(NUOPC_FieldDictionary, freeFormat, &
+      iofmt=iofmt, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
@@ -172,6 +182,8 @@ module NUOPC_FieldDictionaryApi
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
+
+    NUOPC_FieldDictionaryHasEntry = .false.
 
     call NUOPC_FieldDictionarySetup(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -240,6 +252,8 @@ module NUOPC_FieldDictionaryApi
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
 
+    NUOPC_FieldDictionaryMatchSyno = .false.
+
     call NUOPC_FieldDictionarySetup(rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -271,50 +285,13 @@ module NUOPC_FieldDictionaryApi
 !EOPI
   !-----------------------------------------------------------------------------
     integer :: localrc
-    integer :: garbageCount, item
-    type(NUOPC_FieldDictionaryEntry) :: fdEntry
 
     if (present(rc)) rc = ESMF_SUCCESS
 
     if (NUOPC_FieldDictionaryIsSetup) then
 
       ! clear NUOPC Field dictionary content (move to garbage)
-      call ESMF_ContainerClear(NUOPC_FieldDictionary, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)) &
-        return  ! bail out
-
-      ! retrieve number of dictionary items in garbage
-      call ESMF_ContainerGarbageGet(NUOPC_FieldDictionary, &
-        garbageCount=garbageCount, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)) &
-        return  ! bail out
-
-      ! loop over garbage items to deallocate them
-      do item = 1, garbageCount
-        call ESMF_ContainerGarbageGetUDT(NUOPC_FieldDictionary, &
-          item, fdEntry, localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-        deallocate(fdEntry % wrap, stat=localrc)
-        if (ESMF_LogFoundDeallocError(statusToCheck=localrc, &
-          msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-      end do
-
-      ! destroy NUOPC Field dictionary original container
-      call ESMF_ContainerDestroy(NUOPC_FieldDictionary, rc=localrc)
+      call NUOPC_FieldDictionaryDestroyI(NUOPC_FieldDictionary, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
@@ -377,11 +354,7 @@ module NUOPC_FieldDictionaryApi
 
     if (.not.NUOPC_FieldDictionaryIsSetup) then
     
-      NUOPC_FieldDictionary = ESMF_ContainerCreate(rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-    
-      call ESMF_ContainerGarbageOn(NUOPC_FieldDictionary, rc=rc)
+      call NUOPC_FieldDictionaryCreateI(NUOPC_FieldDictionary, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
 
@@ -415,11 +388,7 @@ module NUOPC_FieldDictionaryApi
 
     if (.not.NUOPC_FieldDictionaryIsSetup) then
 
-      NUOPC_FieldDictionary = ESMF_ContainerCreate(rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-
-      call ESMF_ContainerGarbageOn(NUOPC_FieldDictionary, rc=rc)
+      call NUOPC_FieldDictionaryCreateI(NUOPC_FieldDictionary, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
 

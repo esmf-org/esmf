@@ -21,14 +21,18 @@ module NUOPC_FieldDictionaryDef
   
   private
 
+  ! public constants
+  public NUOPC_FieldDictionaryEntryLen
+  integer, parameter :: NUOPC_FieldDictionaryEntryLen = 256
+
   ! public types
   public NUOPC_FieldDictionaryEntryS, NUOPC_FieldDictionaryEntry
 
   type NUOPC_FieldDictionaryEntryS
-    character(ESMF_MAXSTR)          :: standardName
-    character(ESMF_MAXSTR)          :: canonicalUnits
-    character(ESMF_MAXSTR), pointer :: connectedOptions(:)
-    character(ESMF_MAXSTR), pointer :: synonyms(:)
+    character(NUOPC_FieldDictionaryEntryLen)          :: standardName
+    character(NUOPC_FieldDictionaryEntryLen)          :: canonicalUnits
+    character(NUOPC_FieldDictionaryEntryLen), pointer :: connectedOptions(:)
+    character(NUOPC_FieldDictionaryEntryLen), pointer :: synonyms(:)
   end type
   
   type NUOPC_FieldDictionaryEntry
@@ -37,6 +41,8 @@ module NUOPC_FieldDictionaryDef
 
   ! public module interfaces
   public NUOPC_FieldDictionaryAddEntryI
+  public NUOPC_FieldDictionaryCreateI
+  public NUOPC_FieldDictionaryDestroyI
   public NUOPC_FieldDictionaryEgestI
   public NUOPC_FieldDictionaryGetEntryI
   public NUOPC_FieldDictionaryHasEntryI
@@ -98,22 +104,157 @@ module NUOPC_FieldDictionaryDef
 
   !-----------------------------------------------------------------------------
 !BOPI
+! !IROUTINE: NUOPC_FieldDictionaryCreateI - Create an empty NUOPC Field dictionary
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionaryCreateI(fieldDictionary, rc)
+! !ARGUMENTS:
+    type(ESMF_Container), intent(out)           :: fieldDictionary
+    integer,              intent(out), optional :: rc
+! !DESCRIPTION:
+!   Create an empty container to host a NUOPC Field dictionary. Garbage feature
+!   will always be on for this container.
+!
+!EOPI
+  !-----------------------------------------------------------------------------
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    fieldDictionary = ESMF_ContainerCreate(rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+    call ESMF_ContainerGarbageOn(fieldDictionary, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionaryDestroyI - Destroy a NUOPC Field dictionary
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionaryDestroyI(fieldDictionary, rc)
+! !ARGUMENTS:
+    type(ESMF_Container), intent(inout)         :: fieldDictionary
+    integer,              intent(out), optional :: rc
+! !DESCRIPTION:
+!   Erase the content of a NUOPC Field dictionary and free up the memory
+!   associated with it.
+!EOPI
+  !-----------------------------------------------------------------------------
+    integer :: localrc
+    integer :: garbageCount, item
+    type(NUOPC_FieldDictionaryEntry) :: fdEntry
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! clear NUOPC Field dictionary content (move to garbage)
+    call ESMF_ContainerClear(fieldDictionary, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
+    ! retrieve number of dictionary items in garbage
+    call ESMF_ContainerGarbageGet(fieldDictionary, &
+      garbageCount=garbageCount, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
+    ! loop over garbage items to deallocate them
+    do item = 1, garbageCount
+      call ESMF_ContainerGarbageGetUDT(fieldDictionary, &
+        item, fdEntry, localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      deallocate(fdEntry % wrap, stat=localrc)
+      if (ESMF_LogFoundDeallocError(statusToCheck=localrc, &
+        msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+    end do
+
+    ! destroy original NUOPC Field dictionary container
+    call ESMF_ContainerDestroy(fieldDictionary, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE: NUOPC_FieldDictionaryEgestI - Egest NUOPC Field dictionary into FreeFormat
 ! !INTERFACE:
-  subroutine NUOPC_FieldDictionaryEgestI(fieldDictionary, freeFormat, rc)
+  subroutine NUOPC_FieldDictionaryEgestI(fieldDictionary, freeFormat, iofmt, rc)
+! !ARGUMENTS:
+    type(ESMF_Container),   intent(inout)         :: fieldDictionary
+    type(NUOPC_FreeFormat), intent(out)           :: freeFormat
+    type(ESMF_IOFmt_Flag),  intent(in),  optional :: iofmt
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Egest the contents of the NUOPC Field dictionary into a FreeFormat object
+!   in the format specified by {\tt iofmt}.
+!   It is the caller's responsibility to destroy the created {\tt freeFormat}
+!   object.
+!EOPI
+  !-----------------------------------------------------------------------------
+    integer :: localrc
+    logical :: isIOFmtYAML
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    isIOFmtYAML = .false.
+    if (present(iofmt)) isIOFmtYAML = (iofmt == ESMF_IOFMT_YAML)
+
+    if (isIOFmtYAML) then
+      call NUOPC_FieldDictionaryEgestYAMLI(fieldDictionary, freeFormat, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    else
+      call NUOPC_FieldDictionaryEgestDefaultI(fieldDictionary, freeFormat, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    end if
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionaryEgestDefaultI - Egest NUOPC Field dictionary into default FreeFormat
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionaryEgestDefaultI(fieldDictionary, freeFormat, rc)
 ! !ARGUMENTS:
     type(ESMF_Container),   intent(inout)         :: fieldDictionary
     type(NUOPC_FreeFormat), intent(out)           :: freeFormat
     integer,                intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Egest the contents of the NUOPC Field dictionary into a FreeFormat object.
+!   Egest the contents of the NUOPC Field dictionary into a default FreeFormat object.
 !   It is the caller's responsibility to destroy the created {\tt freeFormat}
 !   object.
 !EOPI
   !-----------------------------------------------------------------------------
     type(NUOPC_FieldDictionaryEntry)                :: fdEntry
-    integer                                         :: stat, i, k, count
+    integer                                         :: stat, i, k, count, len
     character(len=NUOPC_FreeFormatLen)              :: tempString
+    character(len=10)                               :: lenString
+    character(len=*), parameter :: sepString  = &
+      "----------------------------------------------------------------"
     
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -124,35 +265,44 @@ module NUOPC_FieldDictionaryDef
     
     ! create free format object with estimated capacity
     freeFormat = NUOPC_FreeFormatCreate(capacity=4*count, rc=rc)
-
+    
     do i=1, count
       call ESMF_ContainerGetUDTByIndex(fieldDictionary, i, fdEntry, &
         ESMF_ITEMORDER_ABC, rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      write(tempString, "('standardName:          ',a40)") &
+      ! determine approoriate character length for output
+      len = max(48,len_trim(fdEntry%wrap%standardName), &
+        len_trim(fdEntry%wrap%canonicalUnits))
+      do k=1, size(fdEntry%wrap%synonyms)
+        len = max(len,len_trim(fdEntry%wrap%synonyms(k)))
+      enddo
+      write(lenString,"(I3)") len
+      ! standardName
+      write(tempString, "('standardName:   ',a"//trim(lenString)//")") &
         trim(fdEntry%wrap%standardName)
       call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      write(tempString, "('canonicalUnits:        ',a40)") &
+      ! canonicalUnits
+      write(tempString, "('canonicalUnits: ',a"//trim(lenString)//")") &
         trim(fdEntry%wrap%canonicalUnits)
       call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
+      ! synonyms
       do k=1, size(fdEntry%wrap%synonyms)
-        write(tempString, "('synonym:               ',a40)") &
+        write(tempString, "('synonym:        ',a"//trim(lenString)//")") &
           trim(fdEntry%wrap%synonyms(k))
         call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) &
           return  ! bail out
       enddo
-      tempString="----------------------------------------------------------------"
-      call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=rc)
+      call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(sepString)/), rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -161,6 +311,211 @@ module NUOPC_FieldDictionaryDef
   end subroutine
   !-----------------------------------------------------------------------------
   
+  !-----------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: NUOPC_FieldDictionaryEgestYAMLI - Egest NUOPC Field dictionary into FreeFormat as YAML
+! !INTERFACE:
+  subroutine NUOPC_FieldDictionaryEgestYAMLI(fieldDictionary, freeFormat, rc)
+! !ARGUMENTS:
+    type(ESMF_Container),   intent(inout)         :: fieldDictionary
+    type(NUOPC_FreeFormat), intent(out)           :: freeFormat
+    integer,                intent(out), optional :: rc
+! !DESCRIPTION:
+!   Egest the contents of the NUOPC Field dictionary into a FreeFormat object
+!   expressed using the YAML Ain't Markup Language (YAML).
+!   An empty FreeFormat object is returned in case of empty NUOPC Field dictionary.
+!   It is the caller's responsibility to destroy the created {\tt freeFormat}
+!   object.
+!EOPI
+  !-----------------------------------------------------------------------------
+    character(len=*), parameter :: intro(6) = &
+      (/&
+      "field_dictionary:                                                   ", &
+      "  version_number: 0.0.0                                             ", &
+      "  institution: National ESPC, CSC & MCL Working Groups              ", &
+      "  source: automatically generated by the NUOPC Layer                ", &
+      "  description: Community-based dictionary for shared coupling fields", &
+      "  entries:                                                          "  &
+      /)
+
+    integer :: localrc
+    integer :: aliasCount, capacity, item, itemCount, localItemCount, k
+    logical :: isNamePres, isAliasPres
+    type(ESMF_Container)               :: localFieldDictionary
+    type(NUOPC_FieldDictionaryEntry)   :: fdEntry, lfdEntry
+    character(len=NUOPC_FreeFormatLen) :: tempString
+
+    ! The NUOPC Field dictionary lists synonyms as standard names as well.
+    ! However, synonyms should be properly listed only as aliases in the
+    ! NUOPC Field dictionary YAML file to avoid duplicates and reduce size.
+    ! This is accomplished here by copying the NUOPC Field dictionary to a
+    ! local Field dictionary, then removing those standard name entries that
+    ! were added as synonyms in the original ESMF_ITEMORDER_ADDORDER.
+
+    if (present(rc)) rc = ESMF_SUCCESS
+
+    ! create local Field dictionary
+    call NUOPC_FieldDictionaryCreateI(localFieldDictionary, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! retrieve number of item in NUOPC Field dictionary
+    call ESMF_ContainerGet(fieldDictionary, itemCount=itemCount, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! copy NUOPC Field dictionary to local Field dictionary
+    do item = 1, itemCount
+      call ESMF_ContainerGetUDTByIndex(fieldDictionary, item, fdEntry, &
+        ESMF_ITEMORDER_ADDORDER, localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call NUOPC_FieldDictionaryAddEntryI(localFieldDictionary, &
+        trim(fdEntry%wrap%standardName), &
+        trim(fdEntry%wrap%canonicalUnits), &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    end do
+
+    ! now remove synonyms
+    do item = 1, itemCount
+      call ESMF_ContainerGetUDTByIndex(fieldDictionary, item, fdEntry, &
+        ESMF_ITEMORDER_ADDORDER, localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      isNamePres = NUOPC_FieldDictionaryHasEntryI(localFieldDictionary, &
+        trim(fdEntry%wrap%standardName), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      if (isNamePres) then
+        do k = 1, size(fdEntry%wrap%synonyms)
+          isAliasPres = NUOPC_FieldDictionaryHasEntryI(localFieldDictionary, &
+            trim(fdEntry%wrap%synonyms(k)), rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+          if (isAliasPres) then
+            call ESMF_ContainerRemove(localFieldDictionary, &
+              itemNameList=(/trim(fdEntry%wrap%synonyms(k))/), rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+              return
+          end if
+        end do
+      end if
+    end do
+
+    ! compute capacity of FreeFormat object
+
+    ! (a) retrieve number of item in local Field dictionary
+    call ESMF_ContainerGet(localFieldDictionary, itemCount=localItemCount, &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! (b) count total number of aliases
+    aliasCount = 0
+    do item = 1, localItemCount
+      call ESMF_ContainerGetUDTByIndex(localFieldDictionary, item, fdEntry, &
+        ESMF_ITEMORDER_ADDORDER, localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      aliasCount = aliasCount + size(fdEntry%wrap%synonyms)
+    end do
+
+    capacity = 0
+    if (localItemCount > 0) capacity = size(intro) + 2*(localItemCount + aliasCount)
+
+    ! create free format object with estimated capacity
+    freeFormat = NUOPC_FreeFormatCreate(capacity=capacity, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! fill FreeFormat object
+
+    ! add intro
+    if (capacity > 0) then
+      do item = 1, size(intro)
+        call NUOPC_FreeFormatAdd(freeFormat, (/intro(item)/), rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      end do
+    end if
+
+    ! add standard names first
+    do item = 1, localItemCount
+      call ESMF_ContainerGetUDTByIndex(localFieldDictionary, item, fdEntry, &
+        ESMF_ITEMORDER_ABC, localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      tempString = ""
+      write(tempString, "(4x,'- standard_name: ',a)") &
+        trim(fdEntry%wrap%standardName)
+      call NUOPC_FreeFormatAdd(freeFormat, (/tempString/), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      write(tempString, "(6x,'canonical_units: ',a)") &
+        trim(fdEntry%wrap%canonicalUnits)
+      call NUOPC_FreeFormatAdd(freeFormat, (/tempString/), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    end do
+
+    ! now add aliases
+    do item = 1, localItemCount
+      call ESMF_ContainerGetUDTByIndex(localFieldDictionary, item, lfdEntry, &
+        ESMF_ITEMORDER_ABC, localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+
+      call ESMF_ContainerGetUDT(fieldDictionary, &
+        trim(lfdEntry%wrap%standardName), fdEntry, localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+
+      do k = 1, size(fdEntry%wrap%synonyms)
+        tempString = ""
+        write(tempString, "(4x,'- alias: ',a)") &
+          trim(fdEntry%wrap%synonyms(k))
+        call NUOPC_FreeFormatAdd(freeFormat, (/tempString/), rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+        tempString = ""
+        write(tempString, "(4x,'  standard_name: ',a)") &
+          trim(fdEntry%wrap%standardName)
+        call NUOPC_FreeFormatAdd(freeFormat, (/tempString/), rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      enddo
+    enddo
+
+    ! delete local Field dictionary
+    call NUOPC_FieldDictionaryDestroyI(localFieldDictionary, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+  end subroutine
+  !-----------------------------------------------------------------------------
+
   !-----------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: NUOPC_FieldDictionaryGetEntryI - Get information about a NUOPC Field dictionary entry
@@ -213,6 +568,8 @@ module NUOPC_FieldDictionaryDef
     
     if (present(rc)) rc = ESMF_SUCCESS
     
+    NUOPC_FieldDictionaryHasEntryI = .false.
+
     call c_ESMC_ContainerGetIsPresent(fieldDictionary, trim(standardName), &
       isPres, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -452,9 +809,9 @@ module NUOPC_FieldDictionaryDef
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                           :: i, k, j, stat
-    type(NUOPC_FieldDictionaryEntry)  :: fdEntry
-    character(ESMF_MAXSTR), pointer   :: synonyms(:)
+    integer                                           :: i, k, j, stat
+    type(NUOPC_FieldDictionaryEntry)                  :: fdEntry
+    character(NUOPC_FieldDictionaryEntryLen), pointer :: synonyms(:)
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -509,7 +866,71 @@ module NUOPC_FieldDictionaryDef
 !   Create NUOPC Field dictionary.
 !EOPI
   !-----------------------------------------------------------------------------
+    type(NUOPC_FreeFormat)  :: freeFormatFD
+    
     if (present(rc)) rc = ESMF_SUCCESS
+
+#define USE_FREE_FORMAT_DEFAULT_FD_off
+!TODO: Cannot switch over to the FreeFormatFD approach until we solve:
+!TODO: (1) The canonical units are not correctly ingested.
+!TODO: (2) The ProTex extension needs to handle processing the FreeFormatFD
+!TODO:     so it shows up in the NUOPC reference manual as table.
+#ifdef USE_FREE_FORMAT_DEFAULT_FD
+    freeFormatFD = NUOPC_FreeFormatCreate(stringList=(/ &
+"standardName:                          air_pressure_at_sea_level", &
+"canonicalUnits:                                               Pa", &
+"----------------------------------------------------------------", &
+"standardName:               magnitude_of_surface_downward_stress", &
+"canonicalUnits:                                               Pa", &
+"----------------------------------------------------------------", &
+"standardName:                                 precipitation_flux", &
+"canonicalUnits:                                       kg m-2 s-1", &
+"----------------------------------------------------------------", &
+"standardName:                 sea_surface_height_above_sea_level", &
+"canonicalUnits:                                                m", &
+"----------------------------------------------------------------", &
+"standardName:                               sea_surface_salinity", &
+"canonicalUnits:                                             1e-3", &
+"----------------------------------------------------------------", &
+"standardName:                            sea_surface_temperature", &
+"canonicalUnits:                                                K", &
+"----------------------------------------------------------------", &
+"standardName:                   surface_downward_eastward_stress", &
+"canonicalUnits:                                               Pa", &
+"----------------------------------------------------------------", &
+"standardName:                  surface_downward_heat_flux_in_air", &
+"canonicalUnits:                                            W m-2", &
+"----------------------------------------------------------------", &
+"standardName:                  surface_downward_northward_stress", &
+"canonicalUnits:                                               Pa", &
+"----------------------------------------------------------------", &
+"standardName:                        surface_downward_water_flux", &
+"canonicalUnits:                                       kg m-2 s-1", &
+"----------------------------------------------------------------", &
+"standardName:                surface_eastward_sea_water_velocity", &
+"canonicalUnits:                                            m s-1", &
+"----------------------------------------------------------------", &
+"standardName:                 surface_net_downward_longwave_flux", &
+"canonicalUnits:                                            W m-2", &
+"----------------------------------------------------------------", &
+"standardName:                surface_net_downward_shortwave_flux", &
+"canonicalUnits:                                            W m-2", &
+"----------------------------------------------------------------", &
+"standardName:               surface_northward_sea_water_velocity", &
+"canonicalUnits:                                            m s-1", &
+"----------------------------------------------------------------"/), &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+    call NUOPC_FieldDictionaryIngestI(fieldDictionary, freeFormatFD, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
+
+#else
 
 !BOLT l l
 ! "{\bf StandardName}"
@@ -627,6 +1048,7 @@ module NUOPC_FieldDictionaryDef
       line=__LINE__, file=FILENAME)) return  ! bail out
 !EOTL
 !EOLT
+#endif
   end subroutine
   !-----------------------------------------------------------------------------
 

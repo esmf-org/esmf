@@ -65,8 +65,6 @@ module NUOPC_Comp
     module procedure NUOPC_CplCompAttributeGetI
     module procedure NUOPC_GridCompAttributeGetSL
     module procedure NUOPC_CplCompAttributeGetSL
-    module procedure NUOPC_GridCompAttributeGetTK
-    module procedure NUOPC_CplCompAttributeGetTK
   end interface
   !---------------------------------------------
   interface NUOPC_CompAttributeIngest
@@ -484,18 +482,21 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
-  subroutine NUOPC_GridCompAttributeGet(comp, name, value, rc)
+  subroutine NUOPC_GridCompAttributeGet(comp, name, value, isPresent, isSet, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(in)            :: comp
     character(*),        intent(in)            :: name
     character(*),        intent(out)           :: value
+    logical,             intent(out), optional :: isPresent
+    logical,             intent(out), optional :: isSet
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Access the Attribute {\tt name} inside of {\tt comp} using the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
 !
-!   Return with error if the Attribute is not present or not set.
+!   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
+!   the Attribute is not present or not set, respectively.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -512,20 +513,30 @@ module NUOPC_Comp
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+    if (present(isPresent)) isPresent = .true.
+    if (present(isSet)) isSet = .true.
     if (trim(value) == trim(defaultvalue)) then
       ! attribute not present
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
+      if (present(isPresent)) then
+        isPresent = .false.
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
     else if (len_trim(value) == 0) then
       ! attribute present but not set
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
+      if (present(isSet)) then
+        isSet = .false.
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
     endif
     
   end subroutine
@@ -536,18 +547,21 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
-  subroutine NUOPC_CplCompAttributeGet(comp, name, value, rc)
+  subroutine NUOPC_CplCompAttributeGet(comp, name, value, isPresent, isSet, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(in)            :: comp
     character(*),        intent(in)            :: name
     character(*),        intent(out)           :: value
+    logical,             intent(out), optional :: isPresent
+    logical,             intent(out), optional :: isSet
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Access the Attribute {\tt name} inside of {\tt comp} using the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
 !
-!   Return with error if the Attribute is not present or not set.
+!   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
+!   the Attribute is not present or not set, respectively.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
@@ -564,20 +578,30 @@ module NUOPC_Comp
       line=__LINE__, &
       file=FILENAME)) &
       return  ! bail out
+    if (present(isPresent)) isPresent = .true.
+    if (present(isSet)) isSet = .true.
     if (trim(value) == trim(defaultvalue)) then
       ! attribute not present
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
+      if (present(isPresent)) then
+        isPresent = .false.
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
     else if (len_trim(value) == 0) then
       ! attribute present but not set
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
+      if (present(isSet)) then
+        isSet = .false.
+      else
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
     endif
     
   end subroutine
@@ -588,23 +612,49 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
-  subroutine NUOPC_GridCompAttributeGetI(comp, name, value, rc)
+  subroutine NUOPC_GridCompAttributeGetI(comp, name, value, isPresent, isSet, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(in)            :: comp
     character(*),        intent(in)            :: name
     integer,             intent(out)           :: value
+    logical,             intent(out), optional :: isPresent
+    logical,             intent(out), optional :: isSet
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Access the Attribute {\tt name} inside of {\tt comp} using the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
 !
-!   Return with error if the Attribute is not present or not set.
+!   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
+!   the Attribute is not present or not set, respectively.
 !EOP
   !-----------------------------------------------------------------------------
-    
+    ! local variables
+    integer :: itemCount
+        
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    if (present(isPresent)) isPresent = .true.
+    if (present(isSet)) isSet = .true.
 
+    if (present(isPresent) .or. present(isSet)) then
+      call ESMF_AttributeGet(comp, name=name, &
+        convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, itemCount=itemCount, isPresent=isPresent, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      if (present(isPresent)) then
+        if (.not.isPresent) return
+      endif
+      if (itemCount==0 .and. present(isSet)) then
+        isSet = .false.
+        return
+      endif
+    endif
+    
     call ESMF_AttributeGet(comp, name=name, value=value, &
       convention="NUOPC", purpose="Instance", &
       attnestflag=ESMF_ATTNEST_ON, rc=rc)
@@ -621,23 +671,49 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
-  subroutine NUOPC_CplCompAttributeGetI(comp, name, value, rc)
+  subroutine NUOPC_CplCompAttributeGetI(comp, name, value, isPresent, isSet, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(in)            :: comp
     character(*),        intent(in)            :: name
     integer,             intent(out)           :: value
+    logical,             intent(out), optional :: isPresent
+    logical,             intent(out), optional :: isSet
     integer,             intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Access the Attribute {\tt name} inside of {\tt comp} using the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
 !
-!   Return with error if the Attribute is not present or not set.
+!   Unless {\tt isPresent} and {\tt isSet} are provided, return with error if 
+!   the Attribute is not present or not set, respectively.
 !EOP
   !-----------------------------------------------------------------------------
-    
+    ! local variables
+    integer :: itemCount
+        
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    if (present(isPresent)) isPresent = .true.
+    if (present(isSet)) isSet = .true.
 
+    if (present(isPresent) .or. present(isSet)) then
+      call ESMF_AttributeGet(comp, name=name, &
+        convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, itemCount=itemCount, isPresent=isPresent, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      if (present(isPresent)) then
+        if (.not.isPresent) return
+      endif
+      if (itemCount==0 .and. present(isSet)) then
+        isSet = .false.
+        return
+      endif
+    endif
+    
     call ESMF_AttributeGet(comp, name=name, value=value, &
       convention="NUOPC", purpose="Instance", &
       attnestflag=ESMF_ATTNEST_ON, rc=rc)
@@ -654,23 +730,48 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
-  subroutine NUOPC_GridCompAttributeGetSL(comp, name, valueList, itemCount, &
-    rc)
+  subroutine NUOPC_GridCompAttributeGetSL(comp, name, valueList, isPresent, &
+    itemCount, typekind, rc)
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in)            :: comp
-    character(*),        intent(in)            :: name
-    character(*),        intent(out), optional :: valueList(:)
-    integer,             intent(out), optional :: itemCount
-    integer,             intent(out), optional :: rc
+    type(ESMF_GridComp),       intent(in)            :: comp
+    character(*),              intent(in)            :: name
+    character(*),              intent(out), optional :: valueList(:)
+    logical,                   intent(out), optional :: isPresent
+    integer,                   intent(out), optional :: itemCount
+    type(ESMF_TypeKind_Flag),  intent(out), optional :: typekind
+    integer,                   intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Access the Attribute {\tt name} inside of {\tt comp} using the highest level
 !   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
 !   purpose="Instance").
 !
-!   Return with error if the Attribute is not present or not set.
+!   Unless {\tt isPresent} is provided, return with error if the Attribute is
+!   not present.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
+
+    if (present(isPresent)) then
+      isPresent = .true.
+      call ESMF_AttributeGet(comp, name=name, &
+        convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      if (.not.isPresent) return
+    endif
+
+    if (present(typekind)) then
+      call ESMF_AttributeGet(comp, name=name, typekind=typekind, &
+        convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
 
     if (present(valueList)) then
       call ESMF_AttributeGet(comp, name=name, valueList=valueList, &
@@ -698,105 +799,66 @@ module NUOPC_Comp
 ! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_CompAttributeGet() 
-  subroutine NUOPC_CplCompAttributeGetSL(comp, name, valueList, itemCount, &
-    rc)
-! !ARGUMENTS:
-    type(ESMF_CplComp), intent(in)            :: comp
-    character(*),       intent(in)            :: name
-    character(*),       intent(out), optional :: valueList(:)
-    integer,            intent(out), optional :: itemCount
-    integer,            intent(out), optional :: rc
-! !DESCRIPTION:
-!   Access the Attribute {\tt name} inside of {\tt comp} using the highest level
-!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
-!   purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
-!EOP
-  !-----------------------------------------------------------------------------
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    if (present(valueList)) then
-      call ESMF_AttributeGet(comp, name=name, valueList=valueList, &
-        itemCount=itemCount, convention="NUOPC", purpose="Instance", &
-        attnestflag=ESMF_ATTNEST_ON, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    else
-      call ESMF_AttributeGet(comp, name=name, &
-        itemCount=itemCount, convention="NUOPC", purpose="Instance", &
-        attnestflag=ESMF_ATTNEST_ON, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, &
-        file=FILENAME)) &
-        return  ! bail out
-    endif
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC GridComp Attribute
-! !INTERFACE:
-  ! Private name; call using NUOPC_CompAttributeGet() 
-  subroutine NUOPC_GridCompAttributeGetTK(comp, name, typekind, rc)
-! !ARGUMENTS:
-    type(ESMF_GridComp),      intent(in)            :: comp
-    character(*),             intent(in)            :: name
-    type(ESMF_TypeKind_Flag), intent(out)           :: typekind
-    integer,                  intent(out), optional :: rc
-! !DESCRIPTION:
-!   Query the {\tt typekind} of the Attribute {\tt name} inside of {\tt comp} 
-!   using the highest level of the standard NUOPC AttPack hierarchy 
-!   (convention="NUOPC", purpose="Instance").
-!
-!   Return with error if the Attribute is not present or not set.
-!EOP
-  !-----------------------------------------------------------------------------
-    if (present(rc)) rc = ESMF_SUCCESS
-
-    call ESMF_AttributeGet(comp, name=name, typekind=typekind, &
-      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
-    
-  end subroutine
-  !-----------------------------------------------------------------------------
-  
-  !-----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: NUOPC_CompAttributeGet - Get a NUOPC CplComp Attribute
-! !INTERFACE:
-  ! Private name; call using NUOPC_CompAttributeGet() 
-  subroutine NUOPC_CplCompAttributeGetTK(comp, name, typekind, rc)
+  subroutine NUOPC_CplCompAttributeGetSL(comp, name, valueList, isPresent, &
+    itemCount, typekind, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp),       intent(in)            :: comp
     character(*),             intent(in)            :: name
-    type(ESMF_TypeKind_Flag), intent(out)           :: typekind
+    character(*),             intent(out), optional :: valueList(:)
+    logical,                  intent(out), optional :: isPresent
+    integer,                  intent(out), optional :: itemCount
+    type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Query the {\tt typekind} of the Attribute {\tt name} inside of {\tt comp} 
-!   using the highest level of the standard NUOPC AttPack hierarchy 
-!   (convention="NUOPC", purpose="Instance").
+!   Access the Attribute {\tt name} inside of {\tt comp} using the highest level
+!   of the standard NUOPC AttPack hierarchy (convention="NUOPC", 
+!   purpose="Instance").
 !
-!   Return with error if the Attribute is not present or not set.
+!   Unless {\tt isPresent} is provided, return with error if the Attribute is
+!   not present.
 !EOP
   !-----------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
 
-    call ESMF_AttributeGet(comp, name=name, typekind=typekind, &
-      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+    if (present(isPresent)) then
+      isPresent = .true.
+      call ESMF_AttributeGet(comp, name=name, &
+        convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      if (.not.isPresent) return
+    endif
+
+    if (present(typekind)) then
+      call ESMF_AttributeGet(comp, name=name, typekind=typekind, &
+        convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
+
+    if (present(valueList)) then
+      call ESMF_AttributeGet(comp, name=name, valueList=valueList, &
+        itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      call ESMF_AttributeGet(comp, name=name, &
+        itemCount=itemCount, convention="NUOPC", purpose="Instance", &
+        attnestflag=ESMF_ATTNEST_ON, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    endif
     
   end subroutine
   !-----------------------------------------------------------------------------
