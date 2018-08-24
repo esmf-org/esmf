@@ -659,18 +659,15 @@ module NUOPC_FieldDictionaryDef
 
       else
 
-        read(freeFormat % stringList(i), *, iostat=stat) keyString, valueString
-        if (stat /= 0) then
-          call ESMF_LogSetError(ESMF_RC_CANNOT_GET, &
-            msg="Error reading from FreeFormat object", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
-          exit freeform_input
-        end if
+        call getKeyValue(freeFormat % stringList(i), &
+          keyString, valueString, localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, &
+          msg="Error reading from FreeFormat object", &
+          line=__LINE__, file=FILENAME, &
+          rcToReturn=rc)) exit freeform_input
 
         select case (trim(keyString))
-          case ("canonicalUnits:")
+          case ("canonicalUnits")
             if (len_trim(canonicalUnits) > 0) then
               call ESMF_LogSetError(ESMF_RC_DUP_NAME, &
                 msg="Invalid FreeFormat object: canonicalUnits", &
@@ -680,7 +677,7 @@ module NUOPC_FieldDictionaryDef
               exit freeform_input
             end if
             canonicalUnits = valueString
-          case ("standardName:","synonym:")
+          case ("standardName","synonym")
             nameCount = nameCount + 1
             if (nameCount > size(standardNames)) then
               allocate(tmpList(size(standardNames)), stat=stat)
@@ -732,6 +729,43 @@ module NUOPC_FieldDictionaryDef
         msg="deallocating internal workspace", &
         line=__LINE__, file=FILENAME, rcToReturn=rc)
      end if
+
+  contains
+
+    subroutine getKeyValue(string, keyString, valueString, rc)
+      character(len=*), intent(in)    :: string
+      character(len=*), intent(inout) :: keyString
+      character(len=*), intent(inout) :: valueString
+      integer,          intent(out)   :: rc
+
+      integer :: ic, lenString
+
+      rc = ESMF_SUCCESS
+
+      keyString   = ""
+      valueString = ""
+
+      ic = index(string, ":")
+      if (ic > 2) then
+        keyString = adjustl(string(1:ic-1))
+      else
+        call ESMF_LogSetError(ESMF_RC_NOT_FOUND, &
+          msg="key not found", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)
+        return
+      end if
+
+      lenString = len_trim(string)
+      if (ic < lenString) then
+        valueString = adjustl(string(ic+1:lenString))
+      else
+        call ESMF_LogSetError(ESMF_RC_NOT_FOUND, &
+          msg="value not found", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)
+        return
+      end if
+
+    end subroutine getKeyValue
 
   end subroutine
   !-----------------------------------------------------------------------------
