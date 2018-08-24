@@ -19,11 +19,12 @@ extern "C" {
   void FTN_X(c_esmftrace_open)
      (                          
       const char *trace_dir,
+      int *profileToLog,
       int *rc,
       ESMCI_FortranStrLenArg nlen)  //strlen for trace_dir
   {
     string dirname = string(trace_dir, ESMC_F90lentrim(trace_dir, nlen));
-    ESMCI::TraceOpen(dirname, rc);
+    ESMCI::TraceOpen(dirname, profileToLog, rc);
   }
 
   void FTN_X(c_esmftrace_close)(int *rc)

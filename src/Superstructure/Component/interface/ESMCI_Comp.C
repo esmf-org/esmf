@@ -137,9 +137,9 @@ extern "C" {
   }
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_getcompliancechecktrace"
-  void FTN_X(c_esmc_getcompliancechecktrace)(int *traceIsOn, int *rc){
+  void FTN_X(c_esmc_getcompliancechecktrace)(int *traceIsOn, int *profileIsOn, int *rc){
     if (rc) *rc = ESMC_RC_NOT_IMPL;
-    int localrc = ESMCI::Comp::getComplianceCheckerTrace(traceIsOn);
+    int localrc = ESMCI::Comp::getComplianceCheckerTrace(traceIsOn, profileIsOn);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc)) return;
     // return successfully
@@ -925,7 +925,8 @@ int Comp::getComplianceCheckerTrace(
 //
 // !ARGUMENTS:
 //
-    int *traceIsOn
+    int *traceIsOn,
+    int *profileIsOn
   ){
 //
 // !DESCRIPTION:
@@ -936,20 +937,35 @@ int Comp::getComplianceCheckerTrace(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  // check input
-  char const *envVar = VM::getenv("ESMF_RUNTIME_TRACE");
-  *traceIsOn = 0;
-  if (envVar != NULL && traceIsOn != NULL){
-    std::string value(envVar);
-    int index;
-    index = value.find("on");
-    if (index == std::string::npos)
-      index = value.find("ON");
-    if (index != std::string::npos){
-      *traceIsOn=1;
+  if (traceIsOn != NULL) { 
+    *traceIsOn = 0;
+    char const *envVar = VM::getenv("ESMF_RUNTIME_TRACE");
+    if (envVar != NULL) {
+      std::string value(envVar);
+      int index;
+      index = value.find("on");
+      if (index == std::string::npos)
+        index = value.find("ON");
+      if (index != std::string::npos){
+        *traceIsOn=1;
+      }
     }
   }
-
+  if (profileIsOn != NULL) {
+    *profileIsOn = 0;
+    char const *envVar = VM::getenv("ESMF_RUNTIME_PROFILE");
+    if (envVar != NULL) {
+      std::string value(envVar);
+      int index;
+      index = value.find("on");
+      if (index == std::string::npos)
+        index = value.find("ON");
+      if (index != std::string::npos){
+        *profileIsOn=1;
+      }
+    }
+  }
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;

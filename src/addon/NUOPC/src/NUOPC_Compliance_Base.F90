@@ -98,7 +98,7 @@ contains
         integer :: configrc
         integer :: jsonIsOn
         integer :: textIsOn
-        integer :: traceIsOn
+        integer :: traceIsOn, profileIsOn
         type(ESMF_Config) :: config
         character(10) :: cfgIncludeState
         character(10) :: cfgIncludeVmStats
@@ -122,12 +122,12 @@ contains
           outputText = .false.
         endif
 
-        call c_esmc_getComplianceCheckTrace(traceIsOn, rc)
+        call c_esmc_getComplianceCheckTrace(traceIsOn, profileIsOn, rc)
         if (ESMF_LogFoundError(rc, &
             line=__LINE__, &
             file=FILENAME)) &
             return  ! bail out
-        if (traceIsOn == 1) then
+        if (traceIsOn == 1 .or. profileIsOn == 1) then
           outputTrace = .true.
         else
           outputTrace = .false.

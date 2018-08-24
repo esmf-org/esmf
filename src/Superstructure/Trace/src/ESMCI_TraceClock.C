@@ -280,7 +280,7 @@ namespace ESMCI {
     }
 
     std::stringstream logMsg;
-    logMsg << "ESMF Tracing enabled using clock: " + strClk;
+    logMsg << "ESMF Trace/Profile clock: " + strClk;
     if (traceClock == ESMF_CLOCK_MONOTONIC_SYNC) {
       logMsg << " (local offset = " << traceClockOffset << ")";
     }

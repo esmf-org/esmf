@@ -61,10 +61,9 @@ namespace ESMCI {
   uint64_t TraceGetClock(void *data);
   void TraceClockLatch(struct esmftrc_platform_filesys_ctx *ctx);
   void TraceClockUnlatch(struct esmftrc_platform_filesys_ctx *ctx);
-  void TraceOpen(std::string trace_dir, int *rc);
+  void TraceOpen(std::string trace_dir, int *profileToLog, int *rc);
   void TraceClose(int *rc);
   bool TraceInitialized();
-  bool TraceIsEnabledForPET(int *rc);
   std::string TraceGetMetadataString();
   int TraceMapVmId(VMId *vmid, int *rc);
 

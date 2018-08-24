@@ -102,9 +102,10 @@ contains
 ! !IROUTINE: ESMF_TraceOpen - Initialize tracing infrastructure
 ! 
 ! !INTERFACE: 
-  subroutine ESMF_TraceOpen(traceDir, rc)
+  subroutine ESMF_TraceOpen(traceDir, profileToLog, rc)
 ! !ARGUMENTS: 
     character(len=*), intent(in)             :: traceDir
+    integer,          intent(in)             :: profileToLog
     integer,          intent(out), optional  :: rc
 !
 ! !DESCRIPTION:
@@ -115,7 +116,7 @@ contains
 !-------------------------------------------------------------------------------
     if (present(rc)) rc = ESMF_SUCCESS
     
-    call c_esmftrace_open(traceDir, rc)
+    call c_esmftrace_open(traceDir, profileToLog, rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
   end subroutine ESMF_TraceOpen

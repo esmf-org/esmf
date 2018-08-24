@@ -32,7 +32,7 @@ namespace ESMCI {
     
     std::string metadata_string;
     metadata_string = ""
-    {% for ln in lines %}"{{ln}}"
+    {% for ln in lines %}"{{ln}}\\n"
     {% endfor %};
 
     return metadata_string;
