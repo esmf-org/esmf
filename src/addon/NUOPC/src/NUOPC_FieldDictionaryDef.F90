@@ -900,6 +900,9 @@ module NUOPC_FieldDictionaryDef
     
     if (present(rc)) rc = ESMF_SUCCESS
 
+!   The following definition of the default FD is pulled into the NUOPC RefDoc
+!   via ProTex. Modify with care.
+!
 !BOLTFD l l
 ! ":{\bf StandardName}"
 ! ":{\bf CanonicalUnits}"
