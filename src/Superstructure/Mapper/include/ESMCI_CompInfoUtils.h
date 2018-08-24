@@ -31,6 +31,7 @@ namespace ESMCI{
           std::vector<T> get_past_wtimes(const CompInfo<T> &comp_info) const;
           std::vector<T> get_past_stimes(const CompInfo<T> &comp_info) const;
           bool get_scaling_function(const CompInfo<T> &comp_info, UVIDPoly<T> &f) const;
+          static void reset(void );
           static void finalize(void );
       private:
           class CompBackupInfo{
@@ -201,6 +202,12 @@ namespace ESMCI{
     template<typename T>
     CompInfoStore<T>::CompInfoStore():next_comp_id_(0)
     {
+    }
+
+    template<typename T>
+    void CompInfoStore<T>::reset(void )
+    {
+      finalize();
     }
 
     template<typename T>
