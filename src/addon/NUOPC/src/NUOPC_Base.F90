@@ -1509,11 +1509,11 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)                    :: attrList(19)
-    character(NUOPC_FieldDictionaryEntryLen)  :: tempString
-    logical                                   :: accepted
-    integer                                   :: i
-    type(NUOPC_FieldDictionaryEntry)          :: fdEntry
+    character(ESMF_MAXSTR)            :: attrList(19)
+    character(ESMF_MAXSTR)            :: tempString
+    logical                           :: accepted
+    integer                           :: i
+    type(NUOPC_FieldDictionaryEntry)  :: fdEntry
     
     if (present(rc)) rc = ESMF_SUCCESS
 

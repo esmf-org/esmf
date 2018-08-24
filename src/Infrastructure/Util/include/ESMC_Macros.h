@@ -42,7 +42,7 @@
 #define ESMF_SUCCESS  0
 #define ESMF_FAILURE -1
 
-#define ESMF_MAXSTR 128
+#define ESMF_MAXSTR 256
 #define ESMF_MAXDIM 7
 #define ESMF_MAXIGRIDDIM 3
 // TODO:FIELDINTEGRATION: Remove the MAXIGRIDDIM and increase the 
