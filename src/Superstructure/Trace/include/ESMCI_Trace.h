@@ -94,16 +94,16 @@ namespace ESMCI {
   ////////////////////////////////
 
   void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, 
-			    int *ep_method, int *ep_phase);
+			    int *ep_method, int *ep_phase, int *rc);
   void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, 
-			   int *ep_method, int *ep_phase);
+			   int *ep_method, int *ep_phase, int *rc);
   void TraceEventPhasePrologueEnter(int *ep_vmid, int *ep_baseid, 
                                     int *ep_method, int *ep_phase);
   void TraceEventPhaseEpilogueExit(int *ep_vmid, int *ep_baseid, 
                                     int *ep_method, int *ep_phase);
   
-  void TraceEventRegionEnter(std::string name);
-  void TraceEventRegionExit(std::string name);
+  void TraceEventRegionEnter(std::string name, int *rc);
+  void TraceEventRegionExit(std::string name, int *rc);
   
   void TraceEventComponentInfo(Comp *comp, int *ep_vmid, int *ep_baseid,
                                const char *ep_name,

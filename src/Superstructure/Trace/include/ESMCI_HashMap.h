@@ -50,6 +50,18 @@ namespace ESMCI {
       }
     }
 
+    vector<HashNode<K, V> *> getEntries() const {
+      vector<HashNode<K, V> *> entries;
+      for (size_t i = 0; i < tableSize; ++i) {
+        HashNode<K, V> *entry = table[i];
+        while (entry != NULL) {
+          entries.push_back(entry);
+          entry = entry->getNext();
+        }
+      }
+      return entries;
+    }
+    
     bool get(const K &key, V &value)
     {
       unsigned long hashValue = hashFunc(key);
