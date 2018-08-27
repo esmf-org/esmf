@@ -408,6 +408,8 @@ module NUOPC_FieldDictionaryApi
 ! !DESCRIPTION:
 !   Setup the NUOPC Field dictionary by reading its content from YAML file.
 !   If the NUOPC Field dictionary already exists, remove it and create a new one.
+!   This feature requires ESMF built with YAML support. Please see the
+!   ESMF User's Guide for details.
 !EOP
   !-----------------------------------------------------------------------------
     type(NUOPC_FreeFormat) :: freeFormat
