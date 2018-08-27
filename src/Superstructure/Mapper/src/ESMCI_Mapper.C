@@ -79,19 +79,14 @@ namespace ESMCI{
       std::vector<std::vector<MapperUtil::CompInfo<float> > > opt_layouts;
       get_rseq_opt_layouts(opt_layouts);
       if(use_load_balancer_){
-        MapperUtil::LoadBalancer<float> lb;
+        bool opt_pets_available = false;
         for(std::vector<std::vector<MapperUtil::CompInfo<float> > >::const_iterator
               citer_list = opt_layouts.cbegin();
               citer_list != opt_layouts.cend(); ++citer_list){
-          lb.set_lb_info(*citer_list);
-          for(int i=0; i<lbal_max_iters_; i++){
-            bool opt_pets_available = lb.optimize(opt_npets, opt_pet_ranges, opt_wtime);
-            if(!opt_pets_available){
-              break;
-            }
-          }
+          lb_.set_lb_info(*citer_list);
+          bool opt_pets_available = lb_.optimize(opt_npets, opt_pet_ranges, opt_wtime);
         }
-        lb.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
+        lb_.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
       }
       else{
         /* Find the layout with the min opt_wtime among opt_layouts */
@@ -100,14 +95,11 @@ namespace ESMCI{
       return true;
     }
     else if(use_load_balancer_){
-      MapperUtil::LoadBalancer<float> lb(comp_infos_);
-      for(int i=0; i<lbal_max_iters_; i++){
-        bool opt_pets_available = lb.optimize(opt_npets, opt_pet_ranges, opt_wtime);
-        if(!opt_pets_available){
-          break;
-        }
+      lb_.set_lb_info(comp_infos_);
+      bool opt_pets_available = lb_.optimize(opt_npets, opt_pet_ranges, opt_wtime);
+      if(!opt_pets_available){
+        lb_.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
       }
-      lb.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
 
       return true;
     }
