@@ -351,6 +351,9 @@ namespace ESMCI{
       if(!found_constraint_funcs){
         for(int i=0; i<ncomps; i++){
           opt_npets[i] = static_cast<int>(total_pets * comp_stimes[i] / total_stime);
+          if(opt_npets[i] <= 0){
+            return false;
+          }
           opt_wtimes[i] = static_cast<T>(comp_stimes[i]/opt_npets[i]);
         }
       }
@@ -385,6 +388,7 @@ namespace ESMCI{
         return false;
       }
 
+      //std::cout << "Saving npets = " << opt_npets[0] << "\n";
       LoadBalancerBackupInfo backup_info(opt_npets, opt_pet_ranges, opt_wtime);
       backup_infos_.push(backup_info);
       return true;
