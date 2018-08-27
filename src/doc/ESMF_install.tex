@@ -403,6 +403,58 @@ typical case where {\tt ESMF\_XERCES} is set to {\tt "standard"},
 \end{description}
 
 
+\subsubsection{yaml-cpp}
+\label{sec:yaml-cpp}
+Support for I/O in YAML Ain't Markup Language
+(\htmladdnormallink{YAML\texttrademark}{http://yaml.org})
+may be added to ESMF through the open-source
+\htmladdnormallink{yaml-cpp}{https://github.com/jbeder/yaml-cpp} library,
+a YAML parser and emitter written in C++ that implements
+\htmladdnormallink{YAML Version 1.2 specifications}{http://yaml.org/spec/1.2/spec.html}.
+
+The following environment variables enable, and specify the name and location of the
+desired yaml-cpp C++ library and associated header files:
+
+\begin{description}
+
+\item[ESMF\_YAMLCPP] Possible values: {\it not set} (default), {\tt "standard"},
+{\it <userstring>}.
+
+\begin{description}
+\item[{\it not set}] (default) YAML support will be disabled.
+The {\tt ESMF\_YAMLCPP\_INCLUDE}, {\tt ESMF\_YAMLCPP\_LIBPATH}, and
+{\tt ESMF\_YAMLCPP\_LIBS} environment variables will be ignored.
+
+\item[{\tt "standard"}] {\tt ESMF\_YAMLCPP\_LIBS} will be set to
+{\tt "-lyaml-cpp"} if not set.  The {\tt ESMF\_YAMLCPP\_INCLUDE} and
+{\tt ESMF\_YAMLCPP\_LIBPATH} environment variables will also be used,
+if defined.
+
+\item[{\it <userstring>}] If set, {\tt ESMF\_YAMLCPP\_INCLUDE},
+{\tt ESMF\_YAMLCPP\_LIBPATH}, and {\tt ESMF\_YAMLCPP\_LIBS} environment
+variables will be used, if defined.
+\end{description}
+
+\item[ESMF\_YAMLCPP\_INCLUDE] Typical value: {\tt /usr/local/include}
+(no default).
+
+Specifies the path where the yaml-cpp C++ header files are located.
+
+\item[ESMF\_YAMLCPP\_LIBPATH] Typical value: {\tt /usr/local/lib} (no default).
+
+Specifies the path where the yaml-cpp C++ library file is located.
+
+\item[ESMF\_YAMLCPP\_LIBS] Typical value: {\tt "-lyaml-cpp"} (no default).
+
+Specifies the linker directives needed to link the yaml-cpp C++ library to
+the application.
+
+The default value depends on the setting of {\tt ESMF\_YAMLCPP}.  For the
+typical case where {\tt ESMF\_YAMLCPP} is set to {\tt "standard"},
+{\tt ESMF\_YAMLCPP\_LIBS} is set to {\tt "-lyaml-cpp"}.
+\end{description}
+
+
 \subsection{ESMF Environment Variables}
 \label{EnvironmentVariables}
 
@@ -899,6 +951,18 @@ See \ref{sec:xerces}
 
 \item[ESMF\_XERCES\_LIBS]
 See \ref{sec:xerces}
+
+\item[ESMF\_YAMLCPP]
+See \ref{sec:yaml-cpp}
+
+\item[ESMF\_YAMLCPP\_INCLUDE]
+See \ref{sec:yaml-cpp}
+
+\item[ESMF\_YAMLCPP\_LIBPATH]
+See \ref{sec:yaml-cpp}
+
+\item[ESMF\_YAMLCPP\_LIBS]
+See \ref{sec:yaml-cpp}
 
 \end{description}
 
