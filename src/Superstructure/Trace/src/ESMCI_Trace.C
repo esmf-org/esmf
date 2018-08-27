@@ -60,6 +60,7 @@
 using std::string;
 using std::vector;
 using std::stringstream;
+using std::ofstream;
 
 namespace ESMCI {
 
@@ -461,7 +462,6 @@ namespace ESMCI {
         }
       }
       else {
-        //printf("ESMF_RUNTIME_PROFILE_OUTPUT is NOT defined\n");
         // if not specified, default is to output text
         if (profileToLog != NULL && *profileToLog == 1) {
           //printf("set output to log\n");
@@ -574,7 +574,7 @@ namespace ESMCI {
       globalvm->barrier();
            
       // my specific file
-      std::stringstream stream_file;
+      stringstream stream_file;
       stream_file << stream_dir_root << "/esmf_stream_" << std::setfill('0') << std::setw(4) << stream_id;
     
       ctx->fh = fopen(stream_file.str().c_str(), "wb");
@@ -622,9 +622,14 @@ namespace ESMCI {
     }
     return "";
   }
-  
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::printProfile()"  
 #define STATLINE 256
-  static void printProfile(RegionNode *rn, bool printToLog, std::string prefix) {
+  static void printProfile(RegionNode *rn, bool printToLog, string prefix, ofstream &ofs, int *rc) {
+
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
     if (rn->getParent() != NULL) {
       char strname[50];
       char strbuf[STATLINE];
@@ -652,38 +657,61 @@ namespace ESMCI {
         ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
       }
       else {
-        std::cout << std::string(strbuf) << "\n";
+        ofs << strbuf << "\n";
       }
     }
     rn->sortChildren();
     for (unsigned i = 0; i < rn->getChildren().size(); i++) {
-      printProfile(rn->getChildren().at(i), printToLog, prefix + "  ");
+      printProfile(rn->getChildren().at(i), printToLog, prefix + "  ", ofs, rc);
     }
+    if (rc!=NULL) *rc=ESMF_SUCCESS;
   }
-  
-  static void printProfile(bool printToLog) {
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::printProfile()"  
+  static void printProfile(bool printToLog, int *rc) {
+
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+    ofstream ofs;
+    int localrc;
     char strbuf[STATLINE];
     snprintf(strbuf, STATLINE, "%-35s %-6s %-11s %-11s %-11s %-11s %-11s %-11s %-6s",
              "Region", "Count", "Total (ms)", "Self (ms)", "Mean (ms)", "Min (ms)", "Max (ms)", "MPI (ms)", "MPI#");
+
     if (printToLog) {
       ESMC_LogDefault.Write("**************** Region Timings *******************", ESMC_LOGMSG_INFO);
       ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
     }
     else {
-      /*
-      std::ofstream ofs (filename.c_str(), std::ofstream::trunc);
+      VM *globalvm = VM::getGlobal(&localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
+           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+        return;
+
+      stringstream fname;
+      fname << (globalvm->getPetCount() - 1);
+      int width = fname.str().length();
+      fname.str("");
+      fname << "esmf_profile." << std::setfill('0') << std::setw(width) << globalvm->getLocalPet();
+      ofs.open(fname.str().c_str(), ofstream::trunc);
       if (ofs.is_open() && !ofs.fail()) {
-        ofs << metadata_string;
-        ofs.close();
+        ofs << strbuf << "\n";
       }
       else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error writing trace metadata file", 
-        ESMC_CONTEXT, rc);
-                                      }
-      */
-      std::cout << std::string(strbuf) << "\n";
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error opening profile output file", 
+           ESMC_CONTEXT, rc);
+        return;
+      }
     }
-    printProfile(&rootRegionNode, printToLog, "");
+    printProfile(&rootRegionNode, printToLog, "", ofs, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, "Error writing profile output file", 
+         ESMC_CONTEXT, rc))
+      return;
+    if (!printToLog) {
+      ofs.close();
+    }
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
   
@@ -691,6 +719,8 @@ namespace ESMCI {
 #define ESMC_METHOD "ESMCI::TraceClose()"
   void TraceClose(int *rc) {
 
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    
     // allow calling multiple times, only closes
     // on the first call, needed in testing
     if (traceInitialized) {
@@ -698,10 +728,10 @@ namespace ESMCI {
       FinalizeWrappers();
 
       if (profileOutputToLog) {
-        printProfile(true);
+        printProfile(true, rc);
       }
       if (profileOutputToFile) {
-        printProfile(false);
+        printProfile(false, rc);
       }
       if (profileOutputToBinary) {
         AddRegionProfilesToTrace(&rootRegionNode);
