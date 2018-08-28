@@ -196,7 +196,12 @@ namespace ESMCI{
     CType TwoDVIDPoly<CType>::eval(const std::vector<CType> &vvals) const
     {
       if(has_dep_vfunc_){
-        assert(0);
+        std::vector<CType> p_vvals;
+        for(typename std::vector<MVIDLPoly<CType> >::const_iterator citer = dps_.cbegin();
+              citer != dps_.cend(); ++citer){
+          p_vvals.push_back((*citer).eval(vvals));
+        }
+        return p_.eval(p_vvals);
       }
       else{
         return p_.eval(vvals);
@@ -207,18 +212,76 @@ namespace ESMCI{
     TwoDVIDPoly<CType> TwoDVIDPoly<CType>::find_pd(const std::string &vname) const
     {
       int ret = ESMF_SUCCESS;
+      bool is_dep_var = false;
+
       TwoDVIDPoly<CType> res;
-      if(has_dep_vfunc_){
-        assert(0);
+
+      std::vector<std::string> p_vnames = p_.get_vnames();
+      assert(p_vnames.size() == 2);
+      std::vector<std::string>::const_iterator iter = std::find(p_vnames.cbegin(),
+                                                        p_vnames.cend(),
+                                                        vname);
+      if(iter == p_vnames.cend()){
+        is_dep_var = true;
+      }
+
+      if(has_dep_vfunc_ && is_dep_var){
+        int ret = ESMF_SUCCESS;
+        TwoVIDPoly<CType> pd;
+        /* x = first var, y = second var */
+        TwoVIDPoly<CType> dp_dx;
+        TwoVIDPoly<CType> dp_dy;
+
+        ret = FindPDerivative(p_, p_vnames[0], dp_dx);
+        assert(ret == ESMF_SUCCESS);
+
+        ret = FindPDerivative(p_, p_vnames[1], dp_dy);
+        assert(ret == ESMF_SUCCESS);
+
+        MVIDLPoly<CType> dx_dv;
+        CType coeff_dx_dv = static_cast<CType>(0);
+        MVIDLPoly<CType> dy_dv;
+        CType coeff_dy_dv = static_cast<CType>(0);
+
+        assert(dps_.size() == 2);
+
+        ret = FindPDerivative(dps_[0], vname, dx_dv);
+        assert(ret == ESMF_SUCCESS);
+        std::vector<CType> dx_dv_coeffs = dx_dv.get_coeffs();
+        for(typename std::vector<CType>::const_iterator citer = dx_dv_coeffs.cbegin();
+              citer != dx_dv_coeffs.cend(); ++citer){
+          if(*citer != static_cast<CType>(0)){
+            coeff_dx_dv = *citer;
+            break;
+          }
+        }
+
+        ret = FindPDerivative(dps_[1], vname, dy_dv);
+        assert(ret == ESMF_SUCCESS);
+        std::vector<CType> dy_dv_coeffs = dy_dv.get_coeffs();
+        for(typename std::vector<CType>::const_iterator citer = dy_dv_coeffs.cbegin();
+              citer != dy_dv_coeffs.cend(); ++citer){
+          if(*citer != static_cast<CType>(0)){
+            coeff_dy_dv = *citer;
+            break;
+          }
+        }
+
+        pd = coeff_dx_dv * dp_dx + coeff_dy_dv * dp_dy;
+        
+        res.p_ = pd;
       }
       else{
         TwoVIDPoly<CType> pd;
         ret = FindPDerivative(p_, vname, pd);
         assert(ret == ESMF_SUCCESS);
 
-        res.set_coeffs(pd.get_coeffs());
-        res.set_vnames(p_.get_vnames());
+        //res.set_coeffs(pd.get_coeffs());
+        //res.set_vnames(p_.get_vnames());
+        res.p_ = pd;
       }
+      res.dps_ = dps_;
+      res.has_dep_vfunc_ = has_dep_vfunc_;
       return res;
     }
 
@@ -227,7 +290,13 @@ namespace ESMCI{
     {
       ostr << p.p_;
       if(p.has_dep_vfunc_){
-        assert(0);
+        ostr << "( Dependencies : ";
+        for(typename std::vector<MVIDLPoly<CType> >::const_iterator citer =
+              p.dps_.cbegin();
+            citer != p.dps_.cend(); ++citer){
+          ostr << *citer << ", ";
+        }
+        ostr << " ) ";
       }
       return ostr;
     }
