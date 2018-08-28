@@ -999,26 +999,14 @@ int Comp::getComplianceCheckerText(
 
   // check input
   if (textIsOn != NULL) {
+    *textIsOn = 0; //default is off
     char const *envVar = VM::getenv("ESMF_RUNTIME_COMPLIANCECHECK");
-    if (envVar == NULL) {
-      *textIsOn = 0;
-    }
-    else {
+    if (envVar != NULL) {
       std::string value(envVar);
-      if (value.length() == 0) {
-        *textIsOn = 0;
-      }
-      else {
-        *textIsOn = 1;  //default to on if env variable present
-      }
-
-      // see if TEXT is specified in ESMF_RUNTIME_COMPLIANCECHECK
-      int index;
-      index = value.find("text=off");
-      if (index == std::string::npos)
-        index = value.find("TEXT=OFF");
-      if (index != std::string::npos){
-        *textIsOn=0;
+      if (value.find("ON") != std::string::npos ||
+          value.find("on") != std::string::npos ||
+          value.find("On") != std::string::npos) {
+        *textIsOn = 1;
       }
     }
   }
