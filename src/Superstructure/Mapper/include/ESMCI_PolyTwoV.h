@@ -533,6 +533,8 @@ namespace ESMCI{
     TwoVIDPoly<CRType> operator*(const CLType &lhs, const TwoVIDPoly<CRType> &rhs)
     {
       TwoVIDPoly<CRType> plhs(static_cast<CRType>(lhs));
+      std::vector<std::string> vnames = rhs.get_vnames();
+      plhs.set_vnames(vnames);
       return plhs * rhs;
     }
 

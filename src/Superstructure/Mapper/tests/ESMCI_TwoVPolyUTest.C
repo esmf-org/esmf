@@ -61,6 +61,20 @@ int main(int argc, char *argv[])
   rc = ESMCI::MapperUtil::FindPDerivative(p1, std::string("p"), p7);
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //std::cout << p7 << std::endl;
+
+  const float SCALE_FACTOR = 0.01;
+  const double TOL = 0.001;
+  //ESMCI::MapperUtil::TwoVIDPoly<float> SCALE_FACTOR = {0.01};
+  //SCALE_FACTOR.set_vnames(p1_vnames);
+  ESMCI::MapperUtil::TwoVIDPoly<float> sp1 = SCALE_FACTOR * p1;
+  ESMCI::MapperUtil::TwoVIDPoly<float> esp1 = {0.01, 0.02, 0.03, 0.04, 0.05, 0.06};
+  esp1.set_vnames(p1_vnames);
+  strncpy(name, "Polynomial Scaling Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial Scaling Utest failed", ESMF_MAX_STRLEN);
+  std::cout << sp1 << "\n";
+  std::cout << esp1 << "\n";
+  ESMC_Test((sp1.equals(esp1, TOL)), name, failMsg, &result, __FILE__, __LINE__, 0);
+
   strncpy(name, "Polynomial derivative (2 deg) wrt p Correctness Utest", ESMF_MAX_STRLEN);
   strncpy(failMsg, "Polynomial derivative (2 deg) wrt p Correctness Utest failed", ESMF_MAX_STRLEN);
   ESMCI::MapperUtil::TwoVIDPoly<float> ep7 = {2, 2, 4};
