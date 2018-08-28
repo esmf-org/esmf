@@ -1064,7 +1064,13 @@ namespace ESMCI {
 
   //IPDv00p1=6||IPDv00p2=7||IPDv00p3=4||IPDv00p4=5::RunPhase1=1::FinalizePhase1=1
   static void UpdateComponentInfoMap(string phaseStr, ESMFId esmfId, int method, string compName) {
-    if (phaseStr.length() > 1) {
+    ComponentInfo *ci = NULL;
+    bool present = componentInfoMap.get(esmfId, ci);
+    if (!present) {
+      ci = new ComponentInfo(esmfId, compName);
+      componentInfoMap.put(esmfId, ci);
+    }
+    if (ci !=NULL && phaseStr.length() > 1) {
       vector<string> phases = split(trim(phaseStr), "||");
       for (unsigned i = 0; i < phases.size(); i++) {
         vector<string> phase = split(trim(phases.at(i)), "=");
@@ -1073,13 +1079,6 @@ namespace ESMCI {
           stringstream ss(trim(phase.at(1)));
           ss >> phasenum;
           if(!(ss.fail())) {
-            ComponentInfo *ci = NULL;
-            bool present = componentInfoMap.get(esmfId, ci);
-            if (!present) {
-              //TODO: free this memory
-              ci = new ComponentInfo(esmfId, compName);
-              componentInfoMap.put(esmfId, ci);
-            }
             ci->setPhaseName(ESMFPhaseId(esmfId, method, phasenum), phase.at(0)); 
             //std::cout << "Added region: " + compName + ", " + phase.at(0) + "\n";
           }
