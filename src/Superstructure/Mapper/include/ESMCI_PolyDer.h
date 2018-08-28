@@ -7,6 +7,7 @@
 #include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyTwoV.h"
 #include "ESMCI_LPolyMV.h"
+#include "ESMCI_PolyTwoDV.h"
 
 namespace ESMCI{
   namespace MapperUtil{
@@ -183,6 +184,14 @@ namespace ESMCI{
       }
 
       return ret;
+    }
+
+    template<typename CType>
+    inline int FindPDerivative(const TwoDVIDPoly<CType>& poly, const std::string &vname,
+                  TwoDVIDPoly<CType>& dpoly)
+    {
+      dpoly = poly.find_pd(vname);
+      return ESMF_SUCCESS;
     }
   } // namespace MapperUtil
 } //namespace ESMCI

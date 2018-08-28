@@ -9,6 +9,7 @@ LOCDIR	  = src/Superstructure/Mapper/tests
 .NOTPARALLEL:
 TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMCI_PolyUTest \
                 $(ESMF_TESTDIR)/ESMCI_TwoVPolyUTest \
+                $(ESMF_TESTDIR)/ESMCI_TwoDVPolyUTest \
                 $(ESMF_TESTDIR)/ESMCI_MVLPolyUTest \
                 $(ESMF_TESTDIR)/ESMCI_MatUTest \
                 $(ESMF_TESTDIR)/ESMCI_PolyFitUTest \
@@ -26,6 +27,7 @@ TESTS_RUN     =
 
 TESTS_RUN_UNI =	RUN_ESMCI_PolyUTestUNI \
                 RUN_ESMCI_TwoVPolyUTestUNI \
+                RUN_ESMCI_TwoDVPolyUTestUNI \
                 RUN_ESMCI_MVLPolyUTestUNI \
                 RUN_ESMCI_MatUTestUNI \
                 RUN_ESMCI_PolyFitUTestUNI \
@@ -70,6 +72,9 @@ RUN_ESMCI_PolyUTestUNI:
 	$(MAKE) TNAME=UniVPoly NP=1 ctest
 
 RUN_ESMCI_TwoVPolyUTestUNI:
+	$(MAKE) TNAME=TwoVPoly NP=1 ctest
+
+RUN_ESMCI_TwoDVPolyUTestUNI:
 	$(MAKE) TNAME=TwoVPoly NP=1 ctest
 
 RUN_ESMCI_MVLPolyUTestUNI:
