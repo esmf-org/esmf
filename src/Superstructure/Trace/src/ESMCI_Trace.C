@@ -598,6 +598,10 @@ namespace ESMCI {
       esmftrc_init(&ctx->ctx, buf, eventBufSize, cbs, ctx);
       open_packet(ctx);
 
+    }  
+    else {
+      // this PET either has no tracing/profiling or only profiling to log/text
+      globalvm->barrier();  //match barrier call above
     }
     
     if (traceLocalPet || profileLocalPet) {
