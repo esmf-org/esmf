@@ -27,7 +27,7 @@ namespace ESMCI {
       _mean(0.0), _variance(0.0), _last_entered(0),
       _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {}
     
-  RegionNode(int id):
+  RegionNode(uint16_t id):
     _parent(NULL), _id(id), _isUserRegion(false),
       _count(0), _total(0), _min(UINT64T_BIG), _max(0),
       _mean(0.0), _variance(0.0), _last_entered(0),

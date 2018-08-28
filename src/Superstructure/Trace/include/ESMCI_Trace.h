@@ -15,7 +15,6 @@
 
 #include <string.h>
 #include "ESMCI_Comp.h"
-#include "ESMCI_RegionNode.h"
 #include <esmftrc.h>
 
 #define TO_VOID_PTR(_value)           static_cast<void *>(_value)
@@ -112,7 +111,6 @@ namespace ESMCI {
   void TraceEventClock(int *ep_year, int *ep_month, int *ep_day,
                        int *ep_hour, int *ep_minute, int *ep_second);
 
-  static void AddRegionProfilesToTrace(RegionNode *rn);
 }
 
 #endif

@@ -21,6 +21,9 @@
 #include "ESMCI_HashNode.h"
 #include "ESMCI_KeyHash.h"
 #include <cstddef>
+#include <vector>
+
+using std::vector;
 
 namespace ESMCI {
   // Hash map class template

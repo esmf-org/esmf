@@ -714,6 +714,24 @@ namespace ESMCI {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
   
+  static void AddRegionProfilesToTrace(RegionNode *rn) {
+    
+    esmftrc_default_trace_region_profile(
+        esmftrc_platform_get_default_ctx(),
+	rn->getId(),
+	rn->getParentId(),
+	rn->getTotal(),
+	rn->getSelfTime(),
+	rn->getCount(),
+	rn->getMax(),
+	rn->getMin(),
+	rn->getMean(),
+	rn->getStdDev());
+     
+    for (unsigned i = 0; i < rn->getChildren().size(); i++) {
+      AddRegionProfilesToTrace(rn->getChildren().at(i));
+    }
+  }
   
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceClose()"
@@ -1169,25 +1187,5 @@ namespace ESMCI {
     
   }
 
-
-  static void AddRegionProfilesToTrace(RegionNode *rn) {
-
-    esmftrc_default_trace_region_profile(
-        esmftrc_platform_get_default_ctx(),
-        rn->getId(),
-	rn->getParentId(),
-	rn->getTotal(),
-	rn->getSelfTime(),
-	rn->getCount(),
-	rn->getMax(),
-	rn->getMin(),
-	rn->getMean(),
-	rn->getStdDev());
-    
-      for (unsigned i = 0; i < rn->getChildren().size(); i++) {
-        AddRegionProfilesToTrace(rn->getChildren().at(i));
-      }
-  }
-  
 }
 
