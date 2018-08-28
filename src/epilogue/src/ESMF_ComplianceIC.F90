@@ -2662,7 +2662,8 @@ module ESMF_ComplianceICMod
       if (startTime /= startTimeCopy) clockModified = .true.
       if (stopTime /= stopTimeCopy) clockModified = .true.
       if (runDuration /= runDurationCopy) clockModified = .true.
-      if (runTimeStepCount /= runTimeStepCountCopy) clockModified = .true.
+      if (abs(runTimeStepCount-runTimeStepCountCopy) >= tiny(runTimeStepCount))&
+        clockModified = .true.
       if (refTime /= refTimeCopy) clockModified = .true.
       if (currTime /= currTimeCopy) clockModified = .true.
       if (advanceCount /= advanceCountCopy) clockModified = .true.
