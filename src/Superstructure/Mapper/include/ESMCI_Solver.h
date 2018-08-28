@@ -8,6 +8,7 @@
 #include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyTwoV.h"
 #include "ESMCI_LPolyMV.h"
+#include "ESMCI_PolyTwoDV.h"
 #include "ESMCI_PolyDer.h"
 #include "ESMCI_Mat.h"
 
@@ -23,9 +24,11 @@ namespace ESMCI{
       public:
         virtual ~SESolver() = default;
         SESolver(const std::vector<std::string> &vnames, const std::vector<T> &init_vals, const std::vector<TwoVIDPoly<T> > &funcs);
+        SESolver(const std::vector<std::string> &vnames, const std::vector<T> &init_vals, const std::vector<TwoDVIDPoly<T> > &two_dvid_funcs, const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs);
         SESolver(const std::vector<std::string> &vnames, const std::vector<T> &init_vals, const std::vector<TwoVIDPoly<T> > &two_vid_funcs, const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs);
         void set_init_vals(const std::vector<T> &init_vals);
         void set_funcs(const std::vector<TwoVIDPoly<T> > &funcs);
+        void set_funcs(const std::vector<TwoDVIDPoly<T> > &dfuncs);
         void set_funcs(const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs);
         void set_niters(int niters);
         std::vector<T> minimize(void ) const;
@@ -36,6 +39,7 @@ namespace ESMCI{
         std::vector<std::string> vnames_;
         std::vector<T> init_vals_;
         std::vector<TwoVIDPoly<T> > funcs_;
+        std::vector<TwoDVIDPoly<T> > dfuncs_;
         std::vector<MVIDLPoly<T> > mvid_lpoly_funcs_;
     }; //class SESolver
 
@@ -57,6 +61,18 @@ namespace ESMCI{
     {}
 
     template<typename T>
+    inline SESolver<T>::SESolver(const std::vector<std::string> &vnames,
+      const std::vector<T> &init_vals,
+      const std::vector<TwoDVIDPoly<T> > &two_dvid_funcs,
+      const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs)
+        :niters_(DEFAULT_NITERS),
+        vnames_(vnames),
+        init_vals_(init_vals),
+        dfuncs_(two_dvid_funcs),
+        mvid_lpoly_funcs_(mvid_lpoly_funcs)
+    {}
+
+    template<typename T>
     inline void SESolver<T>::set_init_vals(const std::vector<T> &init_vals)
     {
       init_vals_ = init_vals;
@@ -66,6 +82,12 @@ namespace ESMCI{
     inline void SESolver<T>::set_funcs(const std::vector<TwoVIDPoly<T> > &funcs)
     {
       funcs_ = funcs;
+    }
+
+    template<typename T>
+    inline void SESolver<T>::set_funcs(const std::vector<TwoDVIDPoly<T> > &funcs)
+    {
+      dfuncs_ = funcs;
     }
 
     template<typename T>
@@ -94,6 +116,7 @@ namespace ESMCI{
       std::vector<std::vector<GenPoly<T, int> *> > calc_jacobian(
           const std::vector<std::string> &vnames,
           const std::vector<TwoVIDPoly<T> > &funcs,
+          const std::vector<TwoDVIDPoly<T> > &dfuncs,
           const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs)
       {
         //int nrows = funcs.size() + mvid_lpoly_funcs;
@@ -106,6 +129,18 @@ namespace ESMCI{
             int ret = FindPDerivative(funcs[i], vnames[j], *pdf);
             assert(ret == 0);
             std::cout << "d(" << funcs[i] << ")/d" << vnames[j].c_str()
+                      << " = " << *pdf << "\n";
+            JFrow.push_back(pdf);
+          }
+          JF.push_back(JFrow);
+        }
+        for(int i=0; i<static_cast<int>(dfuncs.size()); i++){
+          std::vector<GenPoly<T, int> *> JFrow;
+          for(int j=0; j<ncols; j++){
+            TwoDVIDPoly<T> *pdf = new TwoDVIDPoly<T>();
+            int ret = FindPDerivative(dfuncs[i], vnames[j], *pdf);
+            assert(ret == 0);
+            std::cout << "d(" << dfuncs[i] << ")/d" << vnames[j].c_str()
                       << " = " << *pdf << "\n";
             JFrow.push_back(pdf);
           }
@@ -242,6 +277,10 @@ namespace ESMCI{
           iter != funcs_.cend(); ++iter){
         all_funcs.push_back(&(*iter));
       }
+      for(typename std::vector<TwoDVIDPoly<T> >::const_iterator iter = dfuncs_.cbegin();
+          iter != dfuncs_.cend(); ++iter){
+        all_funcs.push_back(&(*iter));
+      }
       for(typename std::vector<MVIDLPoly<T> >::const_iterator iter = mvid_lpoly_funcs_.cbegin();
           iter != mvid_lpoly_funcs_.cend(); ++iter){
         all_funcs.push_back(&(*iter));
@@ -252,7 +291,7 @@ namespace ESMCI{
 
       /* Calculate the Jacobian matrix for the user constraint functions */
       std::vector<std::vector<GenPoly<T, int> *> > JF =
-        SESolverUtils::calc_jacobian(vnames_,funcs_, mvid_lpoly_funcs_);
+        SESolverUtils::calc_jacobian(vnames_,funcs_, dfuncs_, mvid_lpoly_funcs_);
 
       /* Solve for new values of Xi such that we minimize the user 
        * specified constraints (specified via funcs_ )
