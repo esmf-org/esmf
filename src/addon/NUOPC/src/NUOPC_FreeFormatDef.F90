@@ -159,7 +159,7 @@ module NUOPC_FreeFormatDef
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    ! initialize members
+    ! initialize return members
     NUOPC_FreeFormatCreateDefault%stringList => NULL()
     NUOPC_FreeFormatCreateDefault%count      =  0;
     
@@ -236,6 +236,10 @@ module NUOPC_FreeFormatDef
     
     if (present(rc)) rc = ESMF_SUCCESS
     
+    ! initialize return members
+    NUOPC_FreeFormatCreateRead%stringList => NULL()
+    NUOPC_FreeFormatCreateRead%count      =  0;
+
     call ESMF_ConfigFindLabel(config, label=label, isPresent=isPresent, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
@@ -346,6 +350,10 @@ module NUOPC_FreeFormatDef
 
     if (present(rc)) rc = ESMF_SUCCESS
 
+    ! initialize return members
+    NUOPC_FreeFormatCreateReadYAML%stringList => NULL()
+    NUOPC_FreeFormatCreateReadYAML%count      =  0;
+
     ! generate content for FreeFormat object
     call ESMF_IO_YAMLContentInit(ioyaml, cflag=ESMF_IOYAML_CONTENT_FREEFORM, &
       rc=localrc)
@@ -420,6 +428,11 @@ module NUOPC_FreeFormatDef
 
     if (present(rc)) rc = ESMF_SUCCESS
 
+    ! initialize return members
+    NUOPC_FreeFormatCreateReadFile%stringList => NULL()
+    NUOPC_FreeFormatCreateReadFile%count      =  0;
+
+    ! set defaults
     iofmtOpt = ESMF_IOFMT_CONFIG
     if (present(iofmt)) iofmtOpt = iofmt
 
