@@ -77,6 +77,8 @@
       public ESMF_ClockSetInitDeleted
       public ESMF_ClockGetThis
       public ESMF_ClockSetThis
+      
+      public ESMF_ClockEQAlias
 
 !------------------------------------------------------------------------------
 !EOPI
@@ -293,6 +295,53 @@
     
       end subroutine ESMF_ClockSetThis
 
+!------------------------------------------------------------------------------
+
+! -------------------------- ESMF-internal method -----------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_ClockEQAlias()"
+!BOPI
+! !IROUTINE:  ESMF_ClockEQAlias - Compare two Clocks for equality based on alias
+!
+! !INTERFACE:
+      function ESMF_ClockEQAlias(clock1, clock2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_ClockEQAlias
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(in) :: clock1
+      type(ESMF_Clock), intent(in) :: clock2
+
+! !DESCRIPTION:
+!     This method overloads the (==) operator for the {\tt ESMF\_Clock}
+!     class.  See "interface operator(==)" above for complete description.
+!
+!EOPI
+      ESMF_INIT_TYPE clockinit1, clockinit2
+      integer :: localrc1, localrc2
+      logical :: lval1, lval2
+
+      ! Use the following logic, rather than "ESMF-INIT-CHECK-DEEP", to gain
+      ! init checks on both args, and in the case where both are uninitialized,
+      ! to distinguish equality based on uninitialized type (uncreated,
+      ! deleted).
+
+      ! TODO: Consider moving this logic to C++: use Base class? status?
+      !       Or replicate logic for C interface also.
+
+      ! check inputs
+      clockinit1 = ESMF_ClockGetInit(clock1)
+      clockinit2 = ESMF_ClockGetInit(clock2)
+
+      if (clockinit1.eq.ESMF_INIT_CREATED.and. &
+        clockinit2.eq.ESMF_INIT_CREATED) then
+        ESMF_ClockEQAlias = clock1%this .eq. clock2%this
+      else
+        ESMF_ClockEQAlias = .false.
+      endif
+
+      end function ESMF_ClockEQAlias
 !------------------------------------------------------------------------------
 
       end module ESMF_ClockTypeMod

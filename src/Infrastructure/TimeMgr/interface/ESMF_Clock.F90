@@ -102,6 +102,8 @@
       public ESMF_ClockSetInitDeleted
       public ESMF_ClockGetThis
       public ESMF_ClockSetThis
+      
+      public ESMF_ClockEQAlias
 
 !EOPI
 
