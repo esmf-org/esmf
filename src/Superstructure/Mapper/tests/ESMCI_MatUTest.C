@@ -70,6 +70,12 @@ int main(int argc, char *argv[])
   ESMCI::MapperUtil::Matrix<float> em10_inv = {{2, 2}, {-2, 1, 1.5, -0.5}};
   ESMC_Test((m11.equals(em10_inv, tol)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
+  strncpy(name, "Matrix (2x2) Pseudo inverse Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Matrix (2x2) Pseudo inverse test failed", ESMF_MAX_STRLEN);
+  ESMCI::MapperUtil::Matrix<float> m10_pinv = m10.pinv();
+  //std::cout << m10_pinv << "\n";
+  ESMC_Test((m10_pinv.equals(em10_inv, tol)), name, failMsg, &result, __FILE__, __LINE__, 0);
+
   strncpy(name, "Matrix (3x3) inverse Utest", ESMF_MAX_STRLEN);
   strncpy(failMsg, "Matrix (3x3) inverse test failed", ESMF_MAX_STRLEN);
   ESMCI::MapperUtil::Matrix<float> m12 = {{3, 3}, {7, 2, 1, 0, 3, -1, -3, 4, -2}};
@@ -79,10 +85,29 @@ int main(int argc, char *argv[])
   ESMCI::MapperUtil::Matrix<float> em12_inv = {{3, 3}, {-2, 8, -5, 3, -11, 7, 9, -34, 21}};
   ESMC_Test((m13.equals(em12_inv, tol)), name, failMsg, &result, __FILE__, __LINE__, 0);
 
+  strncpy(name, "Matrix (3x3) Pseudo inverse Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Matrix (3x3) Pseudo inverse test failed", ESMF_MAX_STRLEN);
+  ESMCI::MapperUtil::Matrix<float> m12_pinv = m12.pinv();
+  ESMC_Test((m12_pinv.equals(em12_inv, tol)), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  strncpy(name, "Matrix (2x4) Pseudo inverse Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Matrix (2x4) Pseudo inverse test failed", ESMF_MAX_STRLEN);
+  ESMCI::MapperUtil::Matrix<float> m14 = {{2, 4}, {1, 1, 1, 1, 5, 7, 7, 9}};
+  ESMCI::MapperUtil::Matrix<float> em14_pinv = {{4, 2}, {2, -0.25, 0.25, 0, 0.25, 0, -1.5, 0.25}};
+  ESMCI::MapperUtil::Matrix<float> m14_pinv = m14.pinv();
+  std::cout << m14_pinv << "\n";
+  ESMC_Test((m14_pinv.equals(em14_pinv, tol)), name, failMsg, &result, __FILE__, __LINE__, 0);
   // Singular matrix
   // ESMCI::MapperUtil::Matrix<float> m14 = {{2, 2}, {3, 4, 6, 8}};
   // ESMCI::MapperUtil::Matrix<float> m15 = m14.inv();
   // std::cout << m15 << std::endl;
 
+  //ESMCI::MapperUtil::Matrix<float> m3 = {{3, 4}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}};
+  strncpy(name, "Matrix (3x4) transpose Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Matrix (3x4) transpose test failed", ESMF_MAX_STRLEN);
+  ESMCI::MapperUtil::Matrix<float> m3_trans = m3.transpose();
+  ESMCI::MapperUtil::Matrix<float> em3_trans = {{4, 3}, {1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12}};
+  std::cout << m3_trans << "\n";
+  ESMC_Test((m3_trans.equals(em3_trans, tol)), name, failMsg, &result, __FILE__, __LINE__, 0);
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }

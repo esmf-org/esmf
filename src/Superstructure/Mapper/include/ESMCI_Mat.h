@@ -2,6 +2,7 @@
 #define ESMCI_Mat_H
 
 #include "ESMCI_Macros.h"
+#include <stdexcept>
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -29,7 +30,9 @@ namespace ESMCI{
         T *get_data_by_ref(void );
         std::vector<T> get_data(void ) const;
 
+        Matrix<T> transpose(void ) const;
         Matrix<T> inv(void ) const;
+        Matrix<T> pinv(void ) const;
 
         bool equals(const Matrix<T> &m, double tol) const;
 
@@ -94,6 +97,39 @@ namespace ESMCI{
       return data_;
     }
 
+    template<typename T>
+    Matrix<T> Matrix<T>::transpose(void ) const
+    {
+      assert(dims_.size() <= 2);
+      int nelems = static_cast<int>(data_.size());
+      if(dims_.size() == 1){
+        return Matrix<T>(dims_, data_);
+      }
+      else{
+        std::vector<int> dims(dims_.rbegin(), dims_.rend());
+        if((dims_[0] == 1) || dims_[1] == 1){
+          return Matrix<T>(dims, data_);
+        }
+        else{
+          // FIXME: Use inplace transpose
+          std::vector<T> data(data_.size(), static_cast<T>(0));
+          int nrows = dims_[0];
+          int ncols = dims_[1];
+          int tnrows = ncols;
+          int tncols = nrows;
+          for(int idx = 0; idx < nelems; idx++){
+            int ridx = idx/ncols;
+            int cidx = idx - ridx * ncols;
+            int tridx = cidx;
+            int tcidx = ridx;
+            int tidx = tridx * tncols + tcidx;
+            data[tidx] = data_[idx];
+          }
+          return Matrix<T>(dims, data);  
+        }
+      }
+    }
+
     /* Calculate the inverse of the matrix using LAPACK */
     inline int LAPACK_Minv(int m, float *A)
     {
@@ -149,9 +185,28 @@ namespace ESMCI{
       assert(std::adjacent_find(dims_.cbegin(), dims_.cend(), std::not_equal_to<T>()) == dims_.cend());
 
       int ret = LAPACK_Minv(res.dims_[0], res.get_data_by_ref());
-      assert(ret == ESMF_SUCCESS);
+      //assert(ret == ESMF_SUCCESS);
+      if(ret != ESMF_SUCCESS){
+        std::string err_msg("LAPACK routine to find inv failed");
+        throw std::runtime_error(err_msg);
+      }
 
       return res;
+    }
+
+    /* Compute pseudo inverse = Inverse(A_transpose * A) * A_transpose */
+    template<typename T>
+    Matrix<T> Matrix<T>::pinv(void ) const
+    {
+      Matrix<T> trans = transpose();
+      try{
+        // Left inverse
+        return ((trans * (*this)).inv() * trans);
+      }
+      catch(...){
+        // Right inverse
+        return (trans * ((*this) * trans).inv());
+      }
     }
 
     template<typename T>
