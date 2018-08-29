@@ -2132,6 +2132,7 @@ module NUOPC_Driver
     real(ESMF_KIND_R8)              :: timeBase, timeStart, timeStop
     real(ESMF_KIND_R8)              :: timeSum(1000)  ! room for 1000 elements
     logical                         :: loopFlag, firstFlag
+    integer                         :: loopLevel
     integer                         :: indentCount
 
     rc = ESMF_SUCCESS
@@ -2168,7 +2169,7 @@ module NUOPC_Driver
       return  ! bail out
 
     ! initialize
-    runLoopCounter=1
+    runLoopCounter=0
 
     ! conditionally output info to Log file
     if (btest(verbosity,9)) then
@@ -2284,13 +2285,19 @@ module NUOPC_Driver
     ! use RunSequence iterator to execute the actual time stepping loop
     nullify(runElement) ! prepare runElement for iterator use
     do while (NUOPC_RunSequenceIterate(is%wrap%runSeq, runSeqIndex, &
-      runElement, loopFlag=loopFlag, rc=rc))
+      runElement, rc=rc))
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
 
-      ! access to the currently active clock
-      internalClock = runElement%runSeq%clock
+      if (ESMF_ClockEQAlias(internalClock,runElement%runSeq%clock)) then
+        loopFlag = .false.
+      else      
+        ! access to the currently active clock
+        internalClock = runElement%runSeq%clock
+        ! indicate that this is a new loop
+        loopFlag = .true.
+      endif
 
       if (loopFlag) then
         ! increment the loop counter
@@ -2300,8 +2307,9 @@ module NUOPC_Driver
       if (firstFlag .or. loopFlag) then
         firstFlag = .false. ! reset
         if (btest(verbosity,12)) then
-          write(msgString,"(A,I6)") &
-            trim(name)//": RunSequence iteration #", runLoopCounter
+          write(msgString,"(A,I4,A,I6)") &
+            trim(name)//": RunSequence loopLevel=", &
+            runElement%runSeq%loopLevel,"  iteration #", runLoopCounter
           call ESMF_ClockPrint(internalClock, options="currTime", &
             preString=trim(msgString)//", current time: ", &
             unit=timeString, rc=rc)
