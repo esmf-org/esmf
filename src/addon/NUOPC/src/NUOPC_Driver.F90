@@ -676,6 +676,12 @@ module NUOPC_Driver
 
     deallocate(compList, petLists)
 
+    ! query Component for its Clock (set during specialization)
+    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    
     ! initialize the default Run Sequence...
     nullify(is%wrap%runSeq) ! initialize
     is%wrap%runPhaseToRunSeqMap = 0 ! initialize
@@ -685,6 +691,13 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! set the upper most slot runClock as alias of Driver internalClock
+    !TODO: This is different than when a RunSequence is ingested, where _all_
+    !TODO: slots, including upper most slot, will have their own Clock objects.
+    call NUOPC_RunSequenceSet(is%wrap%runSeq(1), internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! map run phase 1 to first run sequence element
     is%wrap%runPhaseToRunSeqMap(1) = 1
     
@@ -747,12 +760,6 @@ module NUOPC_Driver
       endif
     enddo
       
-    ! query Component for its Clock (set during specialization)
-    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    
     ! -> NUOPC Initialize Sequence requires presence of InitP0 for every 
     ! -> Model and Connector component, where they must set the
     ! -> "InitializePhaseMap" metadata.
@@ -2255,7 +2262,7 @@ module NUOPC_Driver
     ! determine the correct run sequence index for the current runPhase    
     runSeqIndex = is%wrap%runPhaseToRunSeqMap(runPhase)
     
-#if 1
+#if 0
 !DON'T do this anymore, because now use a separate clock instance on _all_
 !levels of the Run Sequence!
 !
@@ -4372,10 +4379,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, allocatable                            :: slotStack(:)
     character(len=NUOPC_FreeFormatLen)              :: tempString
     type(ESMF_TimeInterval)                         :: timeStep, runDuration
-    type(ESMF_Clock)                                :: internalClock, subClock
+    type(ESMF_Clock)                                :: internalClock, runClock
     integer                                         :: level, slot, slotHWM
     integer                                         :: slotCount
     integer                                         :: colonIndex
+    logical                                         :: haveTimeStep
     logical                                         :: haveRunDuration
     real(ESMF_KIND_R8)                              :: seconds
     logical                                         :: optAutoAddConnectors
@@ -4546,10 +4554,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 return  ! bail out
               tempString = tempString(1:colonIndex-1) ! truncate at ":"
             endif
+            haveTimeStep = .false. ! reset
             if (index(tempString,"*") == 2) then
               ! a wildcard indicating that the time will be set explicitly
+              !TODO: for now just access the timeStep from DriverClock
+              call ESMF_ClockGet(internalClock, timeStep=timeStep, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, &
+                file=trim(name)//":"//FILENAME)) &
+                return  ! bail out
+              haveTimeStep = .true. ! reset
             else
               ! assume that what follows the "@" is actually a number
+              haveTimeStep = .true. ! reset
               read(tempString(2:len(tempString)), *) seconds
 #if 1
               print *, "found timeStep indicator: ", seconds
@@ -4559,34 +4576,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 line=__LINE__, &
                 file=trim(name)//":"//FILENAME)) &
                 return  ! bail out
-              ! create a new Clock object for the slot and set the timeStep
-              subClock = ESMF_ClockCreate(internalClock, rc=rc)  ! make a copy
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
+            ! create a new Clock object for the slot and set the timeStep
+            runClock = ESMF_ClockCreate(internalClock, rc=rc)  ! make a copy
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (haveTimeStep) then
               ! set timeStep
-              call ESMF_ClockSet(subClock, timeStep=timeStep, rc=rc)
+              call ESMF_ClockSet(runClock, timeStep=timeStep, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              if (haveRunDuration) then
-                ! set runDuration
-                call ESMF_ClockSet(subClock, runDuration=runDuration, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              endif
-              call NUOPC_DriverSetRunSequence(driver, slot=slot, &
-                clock=subClock, rc=rc)
+            endif
+            if (haveRunDuration) then
+              ! set runDuration
+              call ESMF_ClockSet(runClock, runDuration=runDuration, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              if (slot==1) then
-                ! adjust Driver clock itself to be consistent with slot==1 clock
-                ! This is necessary right now because Driver clock is used for
-                ! model initialization!
-                !TODO: this can be removed once models see "their" highest
-                !TODO: RunSequence slot clock during initialization!!!!
-                call ESMF_ClockSet(internalClock, timeStep=timeStep, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              endif
+            endif
+            ! set runClock 
+            call NUOPC_DriverSetRunSequence(driver, slot=slot, clock=runClock, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (slot==1) then
+              ! adjust Driver clock itself to be consistent with slot==1 clock
+              ! This is necessary right now because Driver clock is used for
+              ! model initialization!
+              !TODO: this can be removed once models see "their" highest
+              !TODO: RunSequence slot clock during initialization!!!!
+              call ESMF_ClockSet(internalClock, timeStep=timeStep, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
           else
             ! exiting time loop level
