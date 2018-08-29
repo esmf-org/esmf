@@ -2255,14 +2255,19 @@ module NUOPC_Driver
     ! determine the correct run sequence index for the current runPhase    
     runSeqIndex = is%wrap%runPhaseToRunSeqMap(runPhase)
     
-#if 0
+#if 1
 !DON'T do this anymore, because now use a separate clock instance on _all_
 !levels of the Run Sequence!
-    ! alias the component's internalClock in this runPhase run sequence
-    call NUOPC_RunSequenceSet(is%wrap%runSeq(runSeqIndex), internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
+!
+!CONDITIONALLY re-enabled as to allow for those cases that do not use
+!Ingestion routines...
+    if (.not.ESMF_ClockIsCreated(is%wrap%runSeq(runSeqIndex)%clock)) then
+      ! alias the component's internalClock in this runPhase run sequence
+      call NUOPC_RunSequenceSet(is%wrap%runSeq(runSeqIndex), internalClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 #endif
 
     if (btest(verbosity,12)) then
@@ -4371,6 +4376,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                                         :: level, slot, slotHWM
     integer                                         :: slotCount
     integer                                         :: colonIndex
+    logical                                         :: haveRunDuration
     real(ESMF_KIND_R8)                              :: seconds
     logical                                         :: optAutoAddConnectors
     type(ESMF_CplComp)                              :: conn
@@ -4525,8 +4531,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
             colonIndex = index(tempString,":")
+            haveRunDuration = .false. ! reset
             if (colonIndex>0) then
               ! a runDuration is present
+              haveRunDuration = .true.
               read(tempString(colonIndex+1:len_trim(tempString)), *) seconds
 #if 1
               print *, "found runDuration indicator: ", seconds
@@ -4555,10 +4563,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               subClock = ESMF_ClockCreate(internalClock, rc=rc)  ! make a copy
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-              call ESMF_ClockSet(subClock, timeStep=timeStep, & ! set timeStep
-                runDuration=runDuration, rc=rc) ! set runDuration
+              ! set timeStep
+              call ESMF_ClockSet(subClock, timeStep=timeStep, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              if (haveRunDuration) then
+                ! set runDuration
+                call ESMF_ClockSet(subClock, runDuration=runDuration, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+              endif
               call NUOPC_DriverSetRunSequence(driver, slot=slot, &
                 clock=subClock, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
