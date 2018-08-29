@@ -697,12 +697,17 @@ module NUOPC_RunSequenceDef
         "runSeq", line=__LINE__, file=FILENAME, rcToReturn=rc)
       return
     endif
+    
+    ! reference the clock of the correct RunSequence slot
+    ! for ENDDO this does not change the clock on left hand side
     clock = runSeq(i)%clock
     
     if (.not.associated(runElement%next)) then
       ! "ENDDO" element
       if (present(loopFlag)) loopFlag=.true.
-!print *, "found ENDDO element"
+#if 1
+      print *, "found ENDDO element"
+#endif
       ! advance the clock and check for stop time
       call ESMF_ClockAdvance(clock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -726,7 +731,9 @@ module NUOPC_RunSequenceDef
       endif
     else
       ! "LINK" element
-!print *, "found LINK element"
+#if 1
+      print *, "found LINK element"
+#endif
       if (associated(runSeq(i)%stack)) then
         ! detected recursive link
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="recursive link detected",&
