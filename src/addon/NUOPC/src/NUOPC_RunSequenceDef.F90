@@ -53,8 +53,12 @@ module NUOPC_RunSequenceDef
   type NUOPC_RunSequence
     type(ESMF_Clock)                :: clock  ! time loop information
     type(NUOPC_RunElement), pointer :: first  ! first element of sequence
+    ! - run-time members
     type(NUOPC_RunElement), pointer :: stack  ! run-time stack element pointer
     integer                         :: loopLevel
+    integer                         :: loopIteration
+    integer                         :: levelMember
+    integer                         :: levelChildren
   end type
   
 !==============================================================================
@@ -330,10 +334,12 @@ module NUOPC_RunSequenceDef
       nullify(runElement%next)  ! terminal element
       ! hook up runElement to runSeqNew
       runSeqNew(i)%first => runElement
-      ! initialize stack member
+      ! initialize run-time members
       nullify(runSeqNew(i)%stack)
-      ! reset loop members
       runSeqNew(i)%loopLevel = -1
+      runSeqNew(i)%loopIteration = -1
+      runSeqNew(i)%levelMember = -1
+      runSeqNew(i)%levelChildren = -1
     enddo
     
     ! deallocate the incoming runSeq
@@ -459,6 +465,11 @@ module NUOPC_RunSequenceDef
           "be associated", line=__LINE__, file=FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
+      ! set the loop and level members for top level
+      runSeq(runSeqIndex)%loopLevel=1
+      runSeq(runSeqIndex)%loopIteration=1
+      runSeq(runSeqIndex)%levelMember=1
+      runSeq(runSeqIndex)%levelChildren=0
       ! check the clock
       clock = runSeq(runSeqIndex)%clock
       clockIsStopTime = ESMF_ClockIsStopTime(clock, rc=rc)
@@ -721,6 +732,10 @@ module NUOPC_RunSequenceDef
       else
         ! loop back to start of same run sequence slot
         runElement => runSeq(i)%first  ! first element in next iteration
+        ! increment the iteration counter
+        runSeq(i)%loopIteration = runSeq(i)%loopIteration + 1
+        ! reset the children counter
+        runSeq(i)%levelChildren = 0
       endif
     else
       ! "LINK" element
@@ -738,9 +753,16 @@ module NUOPC_RunSequenceDef
         checkClock=runElement%runSeq%clock, setStartTimeToCurrent=.true., rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME)) return  ! bail out
-      ! follow the link
+      ! set the linked RunSequence level index one higher than current one
+      runSeq(i)%loopLevel = runElement%runSeq%loopLevel + 1
+      ! set the linked RunSequence member index
+      runElement%runSeq%levelChildren = runElement%runSeq%levelChildren + 1
+      runSeq(i)%levelMember = runElement%runSeq%levelChildren
+      ! reset the linked RunSequence iteration counter
+      runSeq(i)%loopIteration = 1
+      ! put the next element in the current level onto the new levels stack
       runSeq(i)%stack => runElement%next  ! set stack pointer for return
-      ! start at the top of sequence
+      ! follow the link: start at the top of linked sequence
       runElement => runSeq(i)%first  ! first element in next iteration
     endif
     

@@ -2118,7 +2118,7 @@ module NUOPC_Driver
     character(*), parameter         :: rName="Run"
     integer                         :: localrc
     type(type_InternalState)        :: is
-    type(ESMF_Clock)                :: internalClock
+    type(ESMF_Clock)                :: internalClock, activeClock
     logical                         :: existflag
     integer                         :: i, j, phase, runPhase, runSeqIndex
     character(ESMF_MAXSTR)          :: iString, jString, pLabel
@@ -2127,13 +2127,14 @@ module NUOPC_Driver
     type(ESMF_State)                :: imState, exState
     character(ESMF_MAXSTR)          :: name, compName, profileString
     integer                         :: verbosity, profiling
-    integer                         :: runElementCounter, runLoopCounter
+    integer                         :: runElementCounter
     integer                         :: runElementCounterMax
     real(ESMF_KIND_R8)              :: timeBase, timeStart, timeStop
     real(ESMF_KIND_R8)              :: timeSum(1000)  ! room for 1000 elements
-    logical                         :: loopFlag, firstFlag
-    integer                         :: loopLevel
     integer                         :: indentCount
+    integer                         :: loopLevel, loopLevelPrev
+    integer                         :: levelMember, levelMemberPrev
+    integer                         :: loopIteration, loopIterationPrev
 
     rc = ESMF_SUCCESS
 
@@ -2168,9 +2169,6 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-    ! initialize
-    runLoopCounter=0
-
     ! conditionally output info to Log file
     if (btest(verbosity,9)) then
       call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_RUN, &
@@ -2198,9 +2196,9 @@ module NUOPC_Driver
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       runElementCounter=0
-      write (msgString, "( A, ES16.8, A, I6, '/', I6 )" ) &
+      write (msgString, "( A, ES16.8, A, I6)" ) &
         "RunProfile time=   ", timeStart-timeBase, &
-        "   runLoop/runElement=", runLoopCounter, runElementCounter
+        "   runElement=", runElementCounter
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2280,8 +2278,12 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
+    
+    ! initialize "Prev" variables
+    loopLevelPrev = 0
+    levelMemberPrev = 0
+    loopIterationPrev = 0
 
-    firstFlag = .true.
     ! use RunSequence iterator to execute the actual time stepping loop
     nullify(runElement) ! prepare runElement for iterator use
     do while (NUOPC_RunSequenceIterate(is%wrap%runSeq, runSeqIndex, &
@@ -2290,27 +2292,28 @@ module NUOPC_Driver
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
 
-      if (ESMF_ClockEQAlias(internalClock,runElement%runSeq%clock)) then
-        loopFlag = .false.
-      else      
-        ! access to the currently active clock
-        internalClock = runElement%runSeq%clock
-        ! indicate that this is a new loop
-        loopFlag = .true.
+      if (.not.ESMF_ClockEQAlias(activeClock,runElement%runSeq%clock)) then
+        ! set activeClock
+        activeClock = runElement%runSeq%clock
       endif
 
-      if (loopFlag) then
-        ! increment the loop counter
-        runLoopCounter=runLoopCounter+1
-      endif
-
-      if (firstFlag .or. loopFlag) then
-        firstFlag = .false. ! reset
-        if (btest(verbosity,12)) then
-          write(msgString,"(A,I4,A,I6)") &
+      if (btest(verbosity,12)) then
+        loopLevel = runElement%runSeq%loopLevel
+        levelMember = runElement%runSeq%levelMember
+        loopIteration = runElement%runSeq%loopIteration
+        if ((loopLevel/=loopLevelPrev).or.(levelMember/=levelMemberPrev).or.&
+          (loopIteration/=loopIterationPrev)) then
+          ! update the "Prev' variables
+          loopLevelPrev = loopLevel
+          levelMemberPrev = levelMember
+          loopIterationPrev = loopIteration
+          ! write iteration info to Log
+          write(msgString,"(A,I4,A,I4,A,I4)") &
             trim(name)//": RunSequence loopLevel=", &
-            runElement%runSeq%loopLevel,"  iteration #", runLoopCounter
-          call ESMF_ClockPrint(internalClock, options="currTime", &
+            runElement%runSeq%loopLevel, "  levelMember=", &
+            runElement%runSeq%levelMember, "  loopIteration=", &
+            runElement%runSeq%loopIteration
+          call ESMF_ClockPrint(activeClock, options="currTime", &
             preString=trim(msgString)//", current time: ", &
             unit=timeString, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2319,13 +2322,6 @@ module NUOPC_Driver
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-        endif
-      endif
-      
-      if (btest(profiling,0)) then
-        if (loopFlag) then
-          ! reset
-          runElementCounter = 0
         endif
       endif
       
@@ -2361,10 +2357,9 @@ module NUOPC_Driver
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
             runElementCounter=runElementCounter+1
-            write (msgString, "( A40,A,ES16.8,A,I6,'/',I6 )" ) &
+            write (msgString, "( A40,A,ES16.8)" ) &
               trim(profileString), &
-              " time=", timeStart-timeBase, &
-              "   runLoop/runElement=", runLoopCounter, runElementCounter
+              " time=", timeStart-timeBase
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2376,7 +2371,7 @@ module NUOPC_Driver
 #endif    
           call ESMF_GridCompRun(is%wrap%modelComp(i), &
             importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-            clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+            clock=activeClock, phase=phase, userRc=localrc, rc=rc)
 #ifdef NUOPC_DRIVER_TRACE
           call ESMF_TraceRegionExit("NUOPC_Driver:GridComp:Callthrough")
 #endif
@@ -2397,10 +2392,9 @@ module NUOPC_Driver
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
-            write (msgString, "( A40,A,ES16.8,A,I6,'/',I6,A,ES16.8)" ) &
+            write (msgString, "( A40,A,ES16.8,A,ES16.8)" ) &
               trim(profileString), &
               " time=", timeStop-timeBase, &
-              "   runLoop/runElement=", runLoopCounter, runElementCounter, &
               "   diffTime=", timeStop-timeStart
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2427,9 +2421,8 @@ module NUOPC_Driver
       call ESMF_LogSet(indentCount=indentCount-2, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      write(msgString,"(A,I6)") &
-        trim(name)//": end <--------- RunSequence, total iterations: ", &
-        runLoopCounter
+      write(msgString,"(A)") &
+        trim(name)//": end <--------- RunSequence"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2466,8 +2459,7 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      write (msgString, *) "  total number of loops executed:   ", &
-        runLoopCounter
+      write (msgString, *) "  total number of loops executed:   "
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2535,10 +2527,9 @@ module NUOPC_Driver
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
             runElementCounter=runElementCounter+1
-            write (msgString, "( A40,A,ES16.8,A,I6,'/',I6 )" ) &
+            write (msgString, "( A40,A,ES16.8)" ) &
               trim(profileString), &
-              " time=", timeStart-timeBase, &
-              "   runLoop/runElement=", runLoopCounter, runElementCounter
+              " time=", timeStart-timeBase
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2550,7 +2541,7 @@ module NUOPC_Driver
 #endif          
           call ESMF_CplCompRun(is%wrap%connectorComp(i,j), &
             importState=imState, exportState=exState, &
-            clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+            clock=activeClock, phase=phase, userRc=localrc, rc=rc)
 #ifdef NUOPC_DRIVER_TRACE
           call ESMF_TraceRegionExit("NUOPC_Driver:CplComp:Callthrough")
 #endif
@@ -2573,10 +2564,9 @@ module NUOPC_Driver
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
-            write (msgString, "( A40,A,ES16.8,A,I6,'/',I6,A,ES16.8)" ) &
+            write (msgString, "( A40,A,ES16.8,A,ES16.8)" ) &
               trim(profileString), &
               " time=", timeStop-timeBase, &
-              "   runLoop/runElement=", runLoopCounter, runElementCounter, &
               "   diffTime=", timeStop-timeStart
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
