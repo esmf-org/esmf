@@ -692,8 +692,6 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
     ! set the upper most slot runClock as alias of Driver internalClock
-    !TODO: This is different than when a RunSequence is ingested, where _all_
-    !TODO: slots, including upper most slot, will have their own Clock objects.
     call NUOPC_RunSequenceSet(is%wrap%runSeq(1), internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4557,7 +4555,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             haveTimeStep = .false. ! reset
             if (index(tempString,"*") == 2) then
               ! a wildcard indicating that the time will be set explicitly
-              !TODO: for now just access the timeStep from DriverClock
+              !TODO: use the correct wildcard rules, depending on the level
               call ESMF_ClockGet(internalClock, timeStep=timeStep, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, &
@@ -4577,10 +4575,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 file=trim(name)//":"//FILENAME)) &
                 return  ! bail out
             endif
-            ! create a new Clock object for the slot and set the timeStep
-            runClock = ESMF_ClockCreate(internalClock, rc=rc)  ! make a copy
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (slot==1) then
+              ! this is the top time-loop, runClock is alias to driver clock
+              runClock = internalClock
+            else
+              ! create a new Clock for this slot, starting as driver clock copy
+              runClock = ESMF_ClockCreate(internalClock, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
             if (haveTimeStep) then
               ! set timeStep
               call ESMF_ClockSet(runClock, timeStep=timeStep, rc=rc)
@@ -4598,16 +4601,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (slot==1) then
-              ! adjust Driver clock itself to be consistent with slot==1 clock
-              ! This is necessary right now because Driver clock is used for
-              ! model initialization!
-              !TODO: this can be removed once models see "their" highest
-              !TODO: RunSequence slot clock during initialization!!!!
-              call ESMF_ClockSet(internalClock, timeStep=timeStep, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            endif
           else
             ! exiting time loop level
             slot = slotStack(level)
