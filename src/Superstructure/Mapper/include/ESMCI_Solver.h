@@ -22,6 +22,12 @@ namespace ESMCI{
     template<typename T>
     class SESolver{
       public:
+        /* A function object used to generate vals in an under-constrained system */
+        class UConstraintValGenerator{
+          public:
+            virtual std::vector<T> get_vals(const std::vector<T> &available_vals) const { assert(0); }
+            virtual ~UConstraintValGenerator() = default;
+        };
         virtual ~SESolver() = default;
         SESolver(const std::vector<std::string> &vnames, const std::vector<T> &init_vals, const std::vector<TwoVIDPoly<T> > &funcs);
         SESolver(const std::vector<std::string> &vnames, const std::vector<T> &init_vals, const std::vector<TwoDVIDPoly<T> > &two_dvid_funcs, const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs);
@@ -31,7 +37,7 @@ namespace ESMCI{
         void set_funcs(const std::vector<TwoDVIDPoly<T> > &dfuncs);
         void set_funcs(const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs);
         void set_niters(int niters);
-        std::vector<T> minimize(void ) const;
+        std::vector<T> minimize(const UConstraintValGenerator &uc_vgen) const;
 
       private:
         static const int DEFAULT_NITERS = 10;
@@ -265,8 +271,15 @@ namespace ESMCI{
     } // SESolverUtils
 
     template<typename T>
-    std::vector<T> SESolver<T>::minimize(void ) const
+    std::vector<T> SESolver<T>::minimize(
+      const UConstraintValGenerator &uc_vgen) const
     {
+      enum Sol_Constraint_type{
+        SOL_UNDER_CONSTRAINED,
+        SOL_NORMAL_CONSTRAINED,
+        SOL_OVER_CONSTRAINED
+      };
+      Sol_Constraint_type sc_type = SOL_NORMAL_CONSTRAINED;
       std::vector<int> Xi_dims = {static_cast<int>(vnames_.size()), 1};
       Matrix<T> Xi(Xi_dims, init_vals_);
       std::vector<T> Xj_init_vals(vnames_.size(), 0);
@@ -286,12 +299,22 @@ namespace ESMCI{
         all_funcs.push_back(&(*iter));
       }
 
+      std::vector<std::string> jvnames(vnames_.cbegin(), vnames_.cend());
+      if(all_funcs.size() < vnames_.size()){
+        sc_type = SOL_UNDER_CONSTRAINED;
+        int nvars_in_solver = static_cast<int>(all_funcs.size());
+        jvnames.erase(jvnames.begin() + nvars_in_solver, jvnames.end());
+      }
+      else if(all_funcs.size() > vnames_.size()){
+        sc_type = SOL_OVER_CONSTRAINED;
+      }
+
       /* C = Sum of all input variables */
       T C = std::accumulate(init_vals_.cbegin(), init_vals_.cend(), 0);
 
       /* Calculate the Jacobian matrix for the user constraint functions */
       std::vector<std::vector<GenPoly<T, int> *> > JF =
-        SESolverUtils::calc_jacobian(vnames_,funcs_, dfuncs_, mvid_lpoly_funcs_);
+        SESolverUtils::calc_jacobian(jvnames, funcs_, dfuncs_, mvid_lpoly_funcs_);
 
       /* Solve for new values of Xi such that we minimize the user 
        * specified constraints (specified via funcs_ )
@@ -305,6 +328,8 @@ namespace ESMCI{
        */
       for(int i=0; i<niters_; i++){
         Matrix<T> J = SESolverUtils::eval_jacobian(JF, vnames_, Xi.get_data());
+        //std::cout << "Jacobian :\n";
+        //std::cout << J << "\n";
         int ncols = vnames_.size();
         std::vector<T> J_data = J.get_data();
         std::vector<int> J_dims = J.get_dims();
@@ -313,8 +338,9 @@ namespace ESMCI{
          * in the Jacobian. This row corresponds to a constraint that all of
          * the input variables need to add up to a constant
          */
-        bool needs_last_row = (vnames_.size() > static_cast<size_t>(J_dims[0])) ?
-                              true : false;
+        //bool needs_last_row = (vnames_.size() > static_cast<size_t>(J_dims[0])) ?
+        //                      true : false;
+        bool needs_last_row = false;
         if(needs_last_row){
           assert(vnames_.size() == static_cast<size_t>(J_dims[0]) + 1);
           J_dims[0] += 1;
@@ -332,7 +358,13 @@ namespace ESMCI{
           Jinv = J_with_last_rones.inv();
         }
         else{
-          Jinv = J.inv();
+          if((sc_type == SOL_OVER_CONSTRAINED) ||
+              (sc_type == SOL_UNDER_CONSTRAINED)){
+            Jinv = J.pinv();
+          }
+          else{
+            Jinv = J.inv();
+          }
         }
 
         Matrix<T> Feval = SESolverUtils::eval_funcs(all_funcs, vnames_, Xi.get_data());
@@ -352,8 +384,24 @@ namespace ESMCI{
           Feval = Feval_with_last_row;
         }
 
-        Xj = Xi - Jinv * Feval;
-        std::cout << "Xj = \n" << Xj << "\n";
+        if(sc_type == SOL_UNDER_CONSTRAINED){
+          int nv_in_solver = static_cast<int>(all_funcs.size());
+          std::vector<int> X_uc_dims = {nv_in_solver, 1};
+          std::vector<T> Xi_uc_data = Xi.get_data();
+          Xi_uc_data.erase(Xi_uc_data.begin() + nv_in_solver, Xi_uc_data.end());
+          std::vector<T> Xj_uc_data = Xj.get_data();
+          Xj_uc_data.erase(Xj_uc_data.begin() + nv_in_solver, Xj_uc_data.end());
+          Matrix<T> Xj_uc(X_uc_dims, Xj_uc_data);
+          Matrix<T> Xi_uc(X_uc_dims, Xi_uc_data);
+
+          Xj_uc = Xi_uc - Jinv * Feval;
+          std::vector<T> Xj_uc_vals = Xj_uc.get_data();
+          Xj = Matrix<T>(Xi_dims, uc_vgen.get_vals(Xj_uc_vals));
+        }
+        else{
+          Xj = Xi - Jinv * Feval;
+        }
+        //std::cout << "Xj = \n" << Xj << "\n";
         Xi = Xj;
       }
   

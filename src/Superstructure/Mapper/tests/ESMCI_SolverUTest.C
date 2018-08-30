@@ -4,9 +4,42 @@
 #include "ESMCI_Poly.h"
 #include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyTwoV.h"
+#include "ESMCI_LPolyMV.h"
 #include "ESMCI_Mat.h"
 #include "ESMCI_Solver.h"
 #include "ESMC_Test.h"
+
+template<typename T>
+class ThreeValFromTwoGenerator
+  : public ESMCI::MapperUtil::SESolver<T>::UConstraintValGenerator
+{
+  public:
+    ThreeValFromTwoGenerator(T sum);
+    void set_sum(T sum);
+    std::vector<T> get_vals(const std::vector<T> &available_vals) const;
+  private:
+    T sum_;
+};
+
+template<typename T>
+ThreeValFromTwoGenerator<T>::ThreeValFromTwoGenerator(T sum):sum_(sum)
+{
+}
+
+template<typename T>
+void ThreeValFromTwoGenerator<T>::set_sum(T sum)
+{
+  sum_ = sum;
+}
+
+template<typename T>
+std::vector<T> ThreeValFromTwoGenerator<T>::get_vals(const std::vector<T> &available_vals) const
+{
+  std::vector<T> res(available_vals.cbegin(), available_vals.cend());
+  T avals_sum = std::accumulate(available_vals.cbegin(), available_vals.cend(), static_cast<T>(0));
+  res.push_back(sum_ - avals_sum);
+  return res;
+}
 
 int main(int argc, char *argv[])
 {
@@ -49,10 +82,18 @@ int main(int argc, char *argv[])
   std::vector<ESMCI::MapperUtil::TwoVIDPoly<float> > funcs =
     {(p1_2v_xy - p2_2v)* (p1_2v_xy - p2_2v), (p1_2v_xz - p3_2v) * (p1_2v_xz - p3_2v)};
 
+  float init_vals_sum = std::accumulate(init_vals.cbegin(), init_vals.cend(), 0.0);
+  ThreeValFromTwoGenerator<float> uc_vgen(init_vals_sum);
+  std::vector<ESMCI::MapperUtil::MVIDLPoly<float> > mvid_lpoly_funcs;
+  ESMCI::MapperUtil::MVIDLPoly<float> final_constraint =
+    {1.0, 1.0, 1.0, static_cast<float>(-1.0) * init_vals_sum};
+  final_constraint.set_vnames(vnames);
+  mvid_lpoly_funcs.push_back(final_constraint);
+
   // Create a solver instance and optimize init_vals
-  ESMCI::MapperUtil::SESolver<float> solver(vnames, init_vals, funcs);
+  ESMCI::MapperUtil::SESolver<float> solver(vnames, init_vals, funcs, mvid_lpoly_funcs);
   solver.set_niters(SOLVER_MAX_ITERS);
-  std::vector<float> sol_vals = solver.minimize();
+  std::vector<float> sol_vals = solver.minimize(uc_vgen);
 
   for(std::vector<float>::const_iterator citer = sol_vals.cbegin();
       citer != sol_vals.cend(); ++citer){
@@ -94,11 +135,21 @@ int main(int argc, char *argv[])
     { (p1_2v_xy_test2 - p2_2v_test2)* (p1_2v_xy_test2 - p2_2v_test2),
       (p1_2v_xz_test2 - p3_2v_test2) * (p1_2v_xz_test2 - p3_2v_test2)};
 
+  float init_vals_test2_sum = std::accumulate(init_vals_test2.cbegin(),
+    init_vals_test2.cend(), 0.0);
+  uc_vgen.set_sum(init_vals_test2_sum);
+
+  std::vector<ESMCI::MapperUtil::MVIDLPoly<float> > mvid_lpoly_funcs_test2;
+  ESMCI::MapperUtil::MVIDLPoly<float> final_constraint_test2 =
+    {1.0, 1.0, 1.0, static_cast<float>(-1.0) * init_vals_test2_sum};
+  final_constraint_test2.set_vnames(vnames_test2);
+  mvid_lpoly_funcs_test2.push_back(final_constraint_test2);
+
   // Create a solver instance and optimize init_vals
   ESMCI::MapperUtil::SESolver<float> solver_test2(vnames_test2,
-    init_vals_test2, funcs_test2);
+    init_vals_test2, funcs_test2, mvid_lpoly_funcs_test2);
   solver_test2.set_niters(SOLVER_MAX_ITERS);
-  std::vector<float> sol_vals_test2 = solver_test2.minimize();
+  std::vector<float> sol_vals_test2 = solver_test2.minimize(uc_vgen);
 
   for(std::vector<float>::const_iterator citer = sol_vals_test2.cbegin();
       citer != sol_vals_test2.cend(); ++citer){
@@ -140,14 +191,50 @@ int main(int argc, char *argv[])
     { (p1_2v_xy_test3 - p2_2v_test3)* (p1_2v_xy_test3 - p2_2v_test3),
       (p1_2v_xz_test3 - p3_2v_test3) * (p1_2v_xz_test3 - p3_2v_test3)};
 
+  float init_vals_test3_sum = std::accumulate(init_vals_test3.cbegin(),
+    init_vals_test3.cend(), 0.0);
+  uc_vgen.set_sum(init_vals_test3_sum);
+
+  std::vector<ESMCI::MapperUtil::MVIDLPoly<float> > mvid_lpoly_funcs_test3;
+  ESMCI::MapperUtil::MVIDLPoly<float> final_constraint_test3 =
+    {1.0, 1.0, 1.0, static_cast<float>(-1.0) * init_vals_test3_sum};
+  final_constraint_test3.set_vnames(vnames_test3);
+  mvid_lpoly_funcs_test3.push_back(final_constraint_test3);
+
   // Create a solver instance and optimize init_vals
   ESMCI::MapperUtil::SESolver<float> solver_test3(vnames_test3,
-    init_vals_test3, funcs_test3);
+    init_vals_test3, funcs_test3, mvid_lpoly_funcs_test3);
   solver_test3.set_niters(SOLVER_MAX_ITERS);
-  std::vector<float> sol_vals_test3 = solver_test3.minimize();
+  std::vector<float> sol_vals_test3 = solver_test3.minimize(uc_vgen);
 
   for(std::vector<float>::const_iterator citer = sol_vals_test3.cbegin();
       citer != sol_vals_test3.cend(); ++citer){
+    std::cout << *citer << ", ";
+  }
+  std::cout << "\n";
+
+  std::cout << "============= Overconstrained system ==================\n";
+  std::vector<std::string> p2v_yz_vnames_test4 = {"y", "z"};
+  ESMCI::MapperUtil::TwoVIDPoly<float> p2_2v_yz_test4(p2_test3, p2v_yz_vnames_test4);
+  std::cout << p2_2v_yz_test4 << "\n";
+  ESMCI::MapperUtil::TwoVIDPoly<float> p3_2v_test4(p3_test3, p2v_yz_vnames_test4);
+  std::cout << p3_2v_test4 << "\n";
+  std::vector<ESMCI::MapperUtil::TwoVIDPoly<float> > funcs_test4 =
+    { (p1_2v_xy_test3 - p2_2v_test3)* (p1_2v_xy_test3 - p2_2v_test3),
+      (p1_2v_xz_test3 - p3_2v_test3) * (p1_2v_xz_test3 - p3_2v_test3),
+      (p2_2v_yz_test4 - p3_2v_test4) * (p2_2v_yz_test4 - p3_2v_test4)
+      };
+
+  uc_vgen.set_sum(init_vals_test3_sum);
+
+  // Create a solver instance and optimize init_vals
+  ESMCI::MapperUtil::SESolver<float> solver_test4(vnames_test3,
+    init_vals_test3, funcs_test4, mvid_lpoly_funcs_test3);
+  solver_test4.set_niters(SOLVER_MAX_ITERS);
+  std::vector<float> sol_vals_test4 = solver_test4.minimize(uc_vgen);
+
+  for(std::vector<float>::const_iterator citer = sol_vals_test4.cbegin();
+      citer != sol_vals_test4.cend(); ++citer){
     std::cout << *citer << ", ";
   }
   std::cout << "\n";
@@ -171,13 +258,13 @@ int main(int argc, char *argv[])
   // User constraint functions
   // Constraint functions are square of the difference between
   // (pair-wise) the functions above
-  std::vector<ESMCI::MapperUtil::TwoVIDPoly<float> > funcs_test4;
+  std::vector<ESMCI::MapperUtil::TwoVIDPoly<float> > funcs_test5;
 
   // Create a solver instance and optimize init_vals
-  ESMCI::MapperUtil::SESolver<float> solver_test4(pcomp1_vnames, init_coeff_vals, funcs_test4);
-  solver_test4.set_niters(SOLVER_MAX_ITERS);
+  ESMCI::MapperUtil::SESolver<float> solver_test5(pcomp1_vnames, init_coeff_vals, funcs_test5);
+  solver_test5.set_niters(SOLVER_MAX_ITERS);
   /*
-  std::vector<float> sol_vals_test4 = solver_test4.minimize();
+  std::vector<float> sol_vals_test4 = solver_test4.minimize(uc_vgen);
 
   for(std::vector<float>::const_iterator citer = sol_vals_test4.cbegin();
       citer != sol_vals_test4.cend(); ++citer){
