@@ -130,7 +130,25 @@ namespace ESMCI{
     template<typename CType>
     std::vector<std::string> TwoDVIDPoly<CType>::get_vnames(void ) const
     {
-      return p_.get_vnames();
+      if(!has_dep_vfunc_){
+        return p_.get_vnames();
+      }
+      else{
+        std::vector<std::string> all_vnames_uniq;
+        for(typename std::vector<MVIDLPoly<CType> >::const_iterator citer = dps_.cbegin();
+            citer != dps_.cend(); ++citer){
+          std::vector<std::string> tmp_dp_vnames = (*citer).get_vnames();
+          all_vnames_uniq.insert(all_vnames_uniq.end(),
+            tmp_dp_vnames.begin(), tmp_dp_vnames.end());
+        }
+        std::sort(all_vnames_uniq.begin(), all_vnames_uniq.end());
+        all_vnames_uniq.erase(std::unique(all_vnames_uniq.begin(), all_vnames_uniq.end()),
+                              all_vnames_uniq.end());
+        
+        std::vector<std::string> p_vnames = p_.get_vnames();
+        all_vnames_uniq.insert(all_vnames_uniq.end(), p_vnames.begin(), p_vnames.end());
+        return all_vnames_uniq;
+      }
     }
 
     template<typename CType>
