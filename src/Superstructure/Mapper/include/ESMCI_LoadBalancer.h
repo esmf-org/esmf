@@ -11,6 +11,7 @@
 #include "ESMCI_Poly.h"
 #include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyTwoV.h"
+#include "ESMCI_PolyTwoDV.h"
 #include "ESMCI_PolyDer.h"
 #include "ESMCI_PolyFit.h"
 #include "ESMCI_Mat.h"
@@ -71,7 +72,7 @@ namespace ESMCI{
         std::priority_queue<LoadBalancerBackupInfo> backup_infos_;
         bool get_constraint_funcs(
           std::vector<std::vector<ExecBlock<T> > > &pexec_blocks,
-          std::vector<TwoVIDPoly<T> > &twovidp_cfuncs,
+          std::vector<TwoDVIDPoly<T> > &twodvidp_cfuncs,
           std::vector<MVIDLPoly<T> > &mvidlp_cfuncs,
           std::vector<std::string> &cfuncs_vnames,
           std::vector<int> &cfuncs_vivals);
@@ -111,7 +112,7 @@ namespace ESMCI{
     template<typename T>
     bool LoadBalancer<T>::get_constraint_funcs(
       std::vector<std::vector<ExecBlock<T> > > &pexec_blocks,
-      std::vector<TwoVIDPoly<T> > &twovidp_cfuncs,
+      std::vector<TwoDVIDPoly<T> > &twodvidp_cfuncs,
       std::vector<MVIDLPoly<T> > &mvidlp_cfuncs,
       std::vector<std::string> &cfuncs_vnames,
       std::vector<int> &cfuncs_vivals)
@@ -222,20 +223,20 @@ namespace ESMCI{
               }
 
               /* Find idle time function */
-              std::vector<std::string> twovid_sfunc_vnames;
-              twovid_sfunc_vnames.push_back(sfunc_first_exec_block_vnames[0]);
-              twovid_sfunc_vnames.push_back(sfunc_iexec_block_vnames[0]);
+              std::vector<std::string> twodvid_sfunc_vnames;
+              twodvid_sfunc_vnames.push_back(sfunc_first_exec_block_vnames[0]);
+              twodvid_sfunc_vnames.push_back(sfunc_iexec_block_vnames[0]);
 
-              TwoVIDPoly<T> twovid_sfunc_first_exec_block(sfunc_first_exec_block,
-                              twovid_sfunc_vnames);
-              TwoVIDPoly<T> twovid_sfunc_iexec_block(sfunc_iexec_block,
-                              twovid_sfunc_vnames);
-              TwoVIDPoly<T> idle_time_func = twovid_sfunc_iexec_block -
-                                              twovid_sfunc_first_exec_block;
+              TwoDVIDPoly<T> twodvid_sfunc_first_exec_block(sfunc_first_exec_block,
+                              twodvid_sfunc_vnames);
+              TwoDVIDPoly<T> twodvid_sfunc_iexec_block(sfunc_iexec_block,
+                              twodvid_sfunc_vnames);
+              TwoDVIDPoly<T> idle_time_func = twodvid_sfunc_iexec_block -
+                                              twodvid_sfunc_first_exec_block;
 
               /* Add the square of the idle time function as a constraint */
-              TwoVIDPoly<T> idle_time_func_sq = idle_time_func * idle_time_func;
-              twovidp_cfuncs.push_back(idle_time_func_sq);
+              TwoDVIDPoly<T> idle_time_func_sq = idle_time_func * idle_time_func;
+              twodvidp_cfuncs.push_back(idle_time_func_sq);
 
             }
             assert(exec_block_list_vnames.size() == (*citer).size());
@@ -292,7 +293,7 @@ namespace ESMCI{
           cfuncs_vivals.push_back((*citer).second);
         }
 
-        return (!twovidp_cfuncs.empty());
+        return (!twodvidp_cfuncs.empty());
       }
     
       return false;
@@ -310,7 +311,7 @@ namespace ESMCI{
                   std::vector<std::pair<int, int> > &opt_pet_ranges,
                   T &opt_wtime)
     {
-      std::vector<TwoVIDPoly<T> > twovidp_cfuncs;
+      std::vector<TwoDVIDPoly<T> > twodvidp_cfuncs;
       std::vector<MVIDLPoly<T> > mvidlp_cfuncs;
       std::vector<std::string> cfuncs_vnames;
       std::vector<int> cfuncs_vivals;
@@ -343,7 +344,7 @@ namespace ESMCI{
       if(found_pexec_blocks && !pexec_blocks.empty()){
         found_constraint_funcs = get_constraint_funcs(
                                         pexec_blocks,
-                                        twovidp_cfuncs,
+                                        twodvidp_cfuncs,
                                         mvidlp_cfuncs,
                                         cfuncs_vnames, cfuncs_vivals);
       }
@@ -366,8 +367,9 @@ namespace ESMCI{
         }
         /* Use the solver to optimize the number of PETs */
         SESolver<T> solver(cfuncs_vnames, tmp_cfuncs_vivals,
-                            twovidp_cfuncs, mvidlp_cfuncs);
-        std::vector<T> new_pets = solver.minimize();
+                            twodvidp_cfuncs, mvidlp_cfuncs);
+        typename SESolver<T>::UConstraintValGenerator uc_vgen;
+        std::vector<T> new_pets = solver.minimize(uc_vgen);
         for(int i=0; i<ncomps; i++){
           opt_npets[i] = static_cast<int>(new_pets[i]);
           /* The solver is returning us -ve PET values, cannot minimize further */
