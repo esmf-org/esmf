@@ -76,45 +76,93 @@ module NUOPC_FreeFormatDef
 !BOP
 ! !IROUTINE: NUOPC_FreeFormatAdd - Add lines to a FreeFormat object
 ! !INTERFACE:
-  subroutine NUOPC_FreeFormatAdd(freeFormat, stringList, rc)
+  subroutine NUOPC_FreeFormatAdd(freeFormat, stringList, line, rc)
 ! !ARGUMENTS:
     type(NUOPC_FreeFormat),           intent(inout) :: freeFormat
     character(len=*),                 intent(in)    :: stringList(:)
+    integer,                optional, intent(in)    :: line
     integer,                optional, intent(out)   :: rc
 ! !DESCRIPTION:
 !   Add lines to a FreeFormat object. The capacity of {\tt freeFormat} may 
-!   increase during this operation. The elements in {\tt stringList} are 
-!   added to the end of {\tt freeFormat}.
+!   increase during this operation. The new lines provided in {\tt stringList}
+!   are added starting at position {\tt line}. If {\tt line} is greater than the
+!   current {\tt lineCount} of {\tt freeFormat}, blank lines are inserted to
+!   fill the gap. By default, i.e. without specifying the {\tt line} argument,
+!   the elements in {\tt stringList} are added to the {\em end} of the
+!   {\tt freeFormat} object.
 !EOP
   !-----------------------------------------------------------------------------
-    integer             :: stat, i, j
+    integer             :: stat, i, j, lineOpt
     integer             :: stringCount, availableCount, newCapacity
-    integer, parameter  :: extraCount = 10
+    integer, parameter  :: extraCount = 10 ! resize with additional capacity
+    integer             :: neededCount, gapCount
     character(len=NUOPC_FreeFormatLen), pointer   :: newStringList(:)
 
     if (present(rc)) rc = ESMF_SUCCESS
     
+    if (present(line)) then
+      ! sanity check
+      if (line<1) then
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+          msg="The 'line' argument must be a positive integer starting at 1.", &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
+      lineOpt = line
+    else
+      lineOpt = freeFormat%count + 1
+    endif
+    
     stringCount = size(stringList)
     availableCount = size(freeFormat%stringList)-freeFormat%count
     
-    if (stringCount >= availableCount) then
-      newCapacity = freeFormat%count + stringCount + extraCount
+    gapCount = lineOpt - (freeFormat%count + 1)
+    neededCount = stringCount ! initialize
+    if (gapCount > 0) neededCount = neededCount + gapCount
+    
+    ! deal with capacity and moving old strings
+    if (neededCount > availableCount) then
+      ! must allocate a new stringList
+      newCapacity = freeFormat%count + neededCount + extraCount
       allocate(newStringList(newCapacity), stat=stat)
       if (ESMF_LogFoundAllocError(statusToCheck=stat, &
         msg="Allocation of new stringList.", &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      do i=1, freeFormat%count
-        newStringList(i) = freeFormat%stringList(i)  ! copy the existing entries
+      ! copy lines from old to new allocation
+      do i=1, lineOpt-1
+        newStringList(i) = freeFormat%stringList(i)
       enddo
+      do i=lineOpt, lineOpt+stringCount-1
+        newStringList(i) = ""
+      enddo
+      do i=lineOpt, freeFormat%count
+        newStringList(i+stringCount) = freeFormat%stringList(i)
+      enddo
+      ! replace old with new allocation
       deallocate(freeFormat%stringList, stat=stat)
       if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
         msg="Deallocation of stringList.", &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       freeFormat%stringList => newStringList ! point to the new stringList
+    else
+      ! the existing stringList has enough capacity -> deal with gap not zero
+      if (gapCount > 0) then
+        ! blank out gap lines
+        do i=freeFormat%count+1, freeFormat%count+gapCount
+          freeFormat%stringList(i) = ""
+        enddo
+      elseif (gapCount < 0) then
+        ! move the existing lines to create space to insert new strings
+        do i=freeFormat%count, lineOpt, -1
+          freeFormat%stringList(i+stringCount) = freeFormat%stringList(i)
+        enddo
+      endif
     endif
     
     ! fill in the new strings
-    i = freeFormat%count + 1
+    i = lineOpt
     do j=1, stringCount
       if (len_trim(stringList(j)) > NUOPC_FreeFormatLen) then
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -128,7 +176,8 @@ module NUOPC_FreeFormatDef
       i=i+1
     enddo
 
-    freeFormat%count = freeFormat%count + stringCount
+    ! finally adjust the new count
+    freeFormat%count = freeFormat%count + neededCount
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -138,61 +187,57 @@ module NUOPC_FreeFormatDef
 ! !IROUTINE: NUOPC_FreeFormatCreate - Create a FreeFormat object
 ! !INTERFACE:
   ! Private name; call using NUOPC_FreeFormatCreate()
-  function NUOPC_FreeFormatCreateDefault(stringList, capacity, rc)
+  function NUOPC_FreeFormatCreateDefault(freeFormat, stringList, capacity, rc)
 ! !RETURN VALUE:
     type(NUOPC_FreeFormat) :: NUOPC_FreeFormatCreateDefault
 ! !ARGUMENTS:
-    character(len=*), optional, intent(in)  :: stringList(:)
-    integer,          optional, intent(in)  :: capacity
-    integer,          optional, intent(out) :: rc
+    type(NUOPC_FreeFormat), optional, intent(in)  :: freeFormat
+    character(len=*),       optional, intent(in)  :: stringList(:)
+    integer,                optional, intent(in)  :: capacity
+    integer,                optional, intent(out) :: rc
 ! !DESCRIPTION:
-!   Create a new FreeFormat object. If {\tt stringList} is provided, then the
-!   newly created object will hold the provided strings and the count is that 
-!   of {\tt size(stringList)}. If {\tt capacity} is provided, it is used to set
-!   the capacity of the newly created FreeFormat object. Providing a
-!   {\tt capacity} that is smaller than {\tt size(stringList)} triggers an
-!   error.
+!   Create a new FreeFormat object, which by default is empty. 
+!   If {\tt freeFormat} is provided, then the newly created object starts as
+!   a copy of {\tt freeFormat}. If {\tt stringList} is provided, then it is
+!   added to the end of the newly created object. If {\tt capacity} is provided,
+!   it is used for the {\em initial} creation of the newly created FreeFormat 
+!   object. However, if the {\tt freeFormat} or {\tt stringList} arguments are
+!   present, the final capacity may be larger than specified by {\tt capacity}.
 !EOP
   !-----------------------------------------------------------------------------
-    integer   :: stat, i
-    integer   :: stringCount, capacityOpt
-    
+    integer                                     :: stat, i
+    integer                                     :: lineCount, capacityOpt
+    character(len=NUOPC_FreeFormatLen), pointer :: stringListOpt(:)    
+
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! initialize return members
     NUOPC_FreeFormatCreateDefault%stringList => NULL()
     NUOPC_FreeFormatCreateDefault%count      =  0;
     
-    ! determine count
-    if (present(stringList)) then
-      stringCount = size(stringList)
-    else
-      stringCount = 0
-    endif
+    ! determine initial capacity
+    capacityOpt = 10  ! default
+    if (present(capacity)) capacityOpt = capacity
     
-    ! determine capacity
-    if (present(capacity)) then
-      capacityOpt = capacity
-      if (stringCount>capacity) then
-        ! error condition
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="Capacity if provided must at least be as large as stringCount", &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)
-        return  ! bail out
-      endif
-    else
-      capacityOpt = stringCount
-    endif
-    
-    ! allocate
+    ! create initial allocation
     allocate(NUOPC_FreeFormatCreateDefault%stringList(capacityOpt), stat=stat)
     if (ESMF_LogFoundAllocError(statusToCheck=stat, &
       msg="Allocation of NUOPC_FreeFormat%stringList.", &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
-    ! conditionally fill initial strings
+    ! conditionally copy the incoming freeFormat contents
+    if (present(freeFormat)) then
+      call NUOPC_FreeFormatGet(freeFormat, lineCount=lineCount, &
+        stringList=stringListOpt, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+      call NUOPC_FreeFormatAdd(NUOPC_FreeFormatCreateDefault, &
+        stringListOpt(1:lineCount), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME)) return  ! bail out
+    endif
+    
+    ! conditionally add the stringList to the end
     if (present(stringList)) then
       call NUOPC_FreeFormatAdd(NUOPC_FreeFormatCreateDefault, stringList, &
         rc=rc)
@@ -309,7 +354,8 @@ module NUOPC_FreeFormatDef
       deallocate(line)
     enddo
     
-    NUOPC_FreeFormatCreateRead = NUOPC_FreeFormatCreate(stringList, rc=rc)
+    NUOPC_FreeFormatCreateRead = NUOPC_FreeFormatCreate(stringList=stringList, &
+      rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
 
@@ -382,7 +428,7 @@ module NUOPC_FreeFormatDef
 
     ! create new FreeFormat object using content from YAML parser
     NUOPC_FreeFormatCreateReadYAML = &
-      NUOPC_FreeFormatCreateDefault(stringList, rc=localrc)
+      NUOPC_FreeFormatCreateDefault(stringList=stringList, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
