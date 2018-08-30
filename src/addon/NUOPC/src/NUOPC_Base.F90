@@ -758,8 +758,11 @@ module NUOPC_Base
     ! local variables
     type(ESMF_Time)           :: checkCurrTime, currTime, stopTime, startTime
     type(ESMF_TimeInterval)   :: checkTimeStep, timeStep
+    integer                   :: checkTimeStepSec, timeStepSec
     type(ESMF_Direction_Flag) :: direction
     type(ESMF_Time)           :: setTime
+    character(len=160)        :: msgString
+    character(len=20)         :: aSecString, bSecString
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -787,10 +790,24 @@ module NUOPC_Base
     endif
     
     ! ensure that the check timestep is a multiple of the internal one
-    if (ceiling(checkTimeStep/timeStep) /= floor(checkTimeStep/timeStep))&
-      then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="checkClock timestep is not multiple of setClock timestep!", &
+    if (ceiling(checkTimeStep/timeStep) /= floor(checkTimeStep/timeStep)) then
+      call ESMF_TimeIntervalGet(checkTimeStep, s=checkTimeStepSec, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      call ESMF_TimeIntervalGet(timeStep, s=timeStepSec, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      write (aSecString, *) checkTimeStepSec
+      write (bSecString, *) timeStepSec
+      write (msgString,"(A)") "checkClock timeStep="//&
+        trim(adjustl(aSecString))//&
+        "s is not a multiple of setClock timeStep="//&
+        trim(adjustl(bSecString))//"s."
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg=msgString, &
         line=__LINE__, &
         file=FILENAME, &
         rcToReturn=rc)
