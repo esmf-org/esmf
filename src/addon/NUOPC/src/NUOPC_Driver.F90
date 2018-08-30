@@ -4284,7 +4284,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     autoAddConnectors, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                           :: driver
-    type(NUOPC_FreeFormat), intent(in)            :: freeFormat
+    type(NUOPC_FreeFormat), intent(in), target    :: freeFormat
     logical,                intent(in),  optional :: autoAddConnectors
     integer,                intent(out), optional :: rc 
 !
@@ -4379,7 +4379,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_TimeInterval)                         :: timeStep, runDuration
     type(ESMF_Clock)                                :: internalClock, runClock
     integer                                         :: level, slot, slotHWM
-    integer                                         :: slotCount
+    integer                                         :: slotCount, topLoops
     integer                                         :: colonIndex
     logical                                         :: haveTimeStep
     logical                                         :: haveRunDuration
@@ -4388,7 +4388,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CplComp)                              :: conn
     integer                                         :: verbosity, vInherit
     character(len=10)                               :: vString
-
+    logical                                         :: needDriverTopLoop
+    type(NUOPC_FreeFormat), target                  :: freeFormatTemp
+    type(NUOPC_FreeFormat), pointer                 :: freeFormatPtr
+    
     if (present(rc)) rc = ESMF_SUCCESS
     
     optAutoAddConnectors = .false. ! default
@@ -4413,7 +4416,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return  ! bail out
     
     ! determine slotCount and potentially automatically add connectors
+    ! also detect if a driver top loop is needed
     slotCount = 0
+    level = 0
+    topLoops = 0
+    needDriverTopLoop = .false.
     do i=1, lineCount
       call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
         rc=rc)
@@ -4428,57 +4435,118 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return  ! bail out
       if (tokenCount == 1) then
         if (index(trim(tokenList(1)),"@") == 1) then
+          ! start or end of a time loop
           slotCount = slotCount + 1
+          if (len_trim(tokenList(1))>1) then
+            ! start of a time loop
+            if (level==0) topLoops = topLoops + 1 ! count top loop
+            level = level + 1
+          else
+            ! end of a time loop
+            level = level - 1
+          endif
+        else
+          ! some other element
+          if (level==0) needDriverTopLoop = .true.  ! element outside top loop
         endif
-      elseif (optAutoAddConnectors .and. &
-        ((tokenCount == 3) .or. (tokenCount == 4))) then
-        ! a connector if the second element is "->"
-        if (trim(tokenList(2)) /= "->") then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="Configuration line incorrectly formatted.", &
-            line=__LINE__, &
-            file=trim(name)//":"//FILENAME, rcToReturn=rc)
-          return  ! bail out
-        endif
-        ! determine whether this connector component already exists
-        call NUOPC_DriverGetCplComp(driver, srcCompLabel=trim(tokenList(1)), &
-          dstCompLabel=trim(tokenList(3)), comp=conn, relaxedflag=.true., rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
-        if (.not.ESMF_CplCompIsCreated(conn)) then
-          ! this is a new connector component that needs to be added to driver
-          call NUOPC_DriverAddComp(driver, &
-            srcCompLabel=trim(tokenList(1)), dstCompLabel=trim(tokenList(3)), &
-            compSetServicesRoutine=cplSS, comp=conn, rc=rc)
+      else
+        if (level==0) needDriverTopLoop = .true.  ! element outside top loop
+        if (optAutoAddConnectors .and. &
+          ((tokenCount == 3) .or. (tokenCount == 4))) then
+          ! a connector if the second element is "->"
+          if (trim(tokenList(2)) /= "->") then
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="Configuration line incorrectly formatted.", &
+              line=__LINE__, &
+              file=trim(name)//":"//FILENAME, rcToReturn=rc)
+            return  ! bail out
+          endif
+          ! determine whether this connector component already exists
+          call NUOPC_DriverGetCplComp(driver, srcCompLabel=trim(tokenList(1)), &
+            dstCompLabel=trim(tokenList(3)), comp=conn, relaxedflag=.true., rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          ! automatically created connectors inherit lower 8-bit
-          ! of parent's verbosity setting
-          vInherit = ibits(verbosity,0,8)
-          write(vString,"(I10)") vInherit
-          call NUOPC_CompAttributeSet(conn, name="Verbosity", &
-            value=vString, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
-          ! optionally additional options
-          if (tokenCount == 4) then
-            ! there are additional connection options specified
-            ! -> set as Attribute for now on the connector object
-            call ESMF_AttributeSet(conn, name="ConnectionOptions", &
-              value=trim(tokenList(4)), rc=rc)
+          if (.not.ESMF_CplCompIsCreated(conn)) then
+            ! this is a new connector component that needs to be added to driver
+            call NUOPC_DriverAddComp(driver, &
+              srcCompLabel=trim(tokenList(1)), dstCompLabel=trim(tokenList(3)), &
+              compSetServicesRoutine=cplSS, comp=conn, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
+            ! automatically created connectors inherit lower 8-bit
+            ! of parent's verbosity setting
+            vInherit = ibits(verbosity,0,8)
+            write(vString,"(I10)") vInherit
+            call NUOPC_CompAttributeSet(conn, name="Verbosity", &
+              value=vString, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+            ! optionally additional options
+            if (tokenCount == 4) then
+              ! there are additional connection options specified
+              ! -> set as Attribute for now on the connector object
+              call ESMF_AttributeSet(conn, name="ConnectionOptions", &
+                value=trim(tokenList(4)), rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
         endif
       endif
       deallocate(tokenList)
     enddo
+
+    ! sanity check
+    if (mod(slotCount,2)/=0) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="RunSequence has unbalanced '@' tokens.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+
+    ! OR together the already set needDriverTopLoop, with topLoops condition
+    if (topLoops>1) needDriverTopLoop = .true.
+
+    ! Conditionally add driver top loop level
+    if (needDriverTopLoop) then
+      ! add slots to hold the driver top loop
+      lineCount = lineCount + 2
+      slotCount = slotCount + 2
+      ! make a copy of the incoming FreeFormat object, then add 2 '@' lines
+      freeFormatTemp = NUOPC_FreeFormatCreate(freeFormat, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      ! add at the beginning
+      call NUOPC_FreeFormatAdd(freeFormatTemp, stringList=(/"@*"/), line=1, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      ! add at the end
+      call NUOPC_FreeFormatAdd(freeFormatTemp, stringList=(/"@"/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      ! now start using the modified FreeFormat object
+      freeFormatPtr => freeFormatTemp
+    else
+      ! keep using the unmodified incoming FreeFormat object
+      freeFormatPtr => freeFormat
+    endif
+    
+    ! Finish up setting the appropriate slotCount
     slotCount = slotCount / 2     ! divide by two because double counted "@"
     slotCount = max(slotCount, 1) ! at least one slot
 
+    ! allocate the slotStack
     allocate(slotStack(slotCount))
 
     ! Replace the default RunSequence with a customized one
@@ -4495,17 +4563,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
+    ! actual ingestion of run sequence, constructing NUOPC representation
     level = 0
     slot = 0
     slotHWM = 0
     do i=1, lineCount
-      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
-        rc=rc)
+      call NUOPC_FreeFormatGetLine(freeFormatPtr, line=i, &
+        tokenCount=tokenCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       allocate(tokenList(tokenCount))
-      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenList=tokenList, &
+      call NUOPC_FreeFormatGetLine(freeFormatPtr, line=i, tokenList=tokenList, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -4647,7 +4716,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     enddo
     ! clean-up
     deallocate(slotStack)
-    
+
+    if (needDriverTopLoop) then
+      ! destroy the temporary FreeFormat object copy
+      call NUOPC_FreeFormatDestroy(freeFormatTemp, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+    endif
+
   end subroutine
   !-----------------------------------------------------------------------------
 
