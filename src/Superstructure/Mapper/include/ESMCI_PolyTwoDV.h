@@ -40,7 +40,7 @@ namespace ESMCI{
         int get_max_deg(void ) const;
         void set_vnames(const std::vector<std::string>& vnames);
         std::vector<std::string> get_vnames(void ) const;
-        std::vector<std::vector<std::string> > get_dvnames(void ) const;
+        std::vector<std::string> get_dvnames(void ) const;
         void set_coeffs(const std::vector<CType>& coeffs);
         void set_coeffs(std::initializer_list<CType> coeffs);
         void set_dfuncs(const std::vector<MVIDLPoly<CType> > &dps);
@@ -74,6 +74,10 @@ namespace ESMCI{
         template<typename T, typename U>
         friend TwoDVIDPoly<U> operator*(const T &lhs,
           const TwoDVIDPoly<U> &rhs);
+
+        template<typename T>
+        friend bool operator==(const TwoDVIDPoly<T> &lhs,
+          const TwoDVIDPoly<T> &rhs);
       private:
         TwoVIDPoly<CType> p_;
         std::vector<MVIDLPoly<CType> > dps_;
@@ -134,17 +138,7 @@ namespace ESMCI{
         return p_.get_vnames();
       }
       else{
-        std::vector<std::string> all_vnames_uniq;
-        for(typename std::vector<MVIDLPoly<CType> >::const_iterator citer = dps_.cbegin();
-            citer != dps_.cend(); ++citer){
-          std::vector<std::string> tmp_dp_vnames = (*citer).get_vnames();
-          all_vnames_uniq.insert(all_vnames_uniq.end(),
-            tmp_dp_vnames.begin(), tmp_dp_vnames.end());
-        }
-        std::sort(all_vnames_uniq.begin(), all_vnames_uniq.end());
-        all_vnames_uniq.erase(std::unique(all_vnames_uniq.begin(), all_vnames_uniq.end()),
-                              all_vnames_uniq.end());
-        
+        std::vector<std::string> all_vnames_uniq = get_dvnames();
         std::vector<std::string> p_vnames = p_.get_vnames();
         all_vnames_uniq.insert(all_vnames_uniq.end(), p_vnames.begin(), p_vnames.end());
         return all_vnames_uniq;
@@ -152,14 +146,19 @@ namespace ESMCI{
     }
 
     template<typename CType>
-    std::vector<std::vector<std::string> > TwoDVIDPoly<CType>::get_dvnames(void ) const
+    std::vector<std::string> TwoDVIDPoly<CType>::get_dvnames(void ) const
     {
-      std::vector<std::vector<std::string> > dp_vnames;
+      std::vector<std::string> all_vnames_uniq;
       for(typename std::vector<MVIDLPoly<CType> >::const_iterator citer = dps_.cbegin();
-            citer != dps_.cend(); ++citer){
-        dp_vnames.push_back((*citer).get_vnames());
+          citer != dps_.cend(); ++citer){
+        std::vector<std::string> tmp_dp_vnames = (*citer).get_vnames();
+        all_vnames_uniq.insert(all_vnames_uniq.end(),
+          tmp_dp_vnames.begin(), tmp_dp_vnames.end());
       }
-      return dp_vnames;
+      std::sort(all_vnames_uniq.begin(), all_vnames_uniq.end());
+      all_vnames_uniq.erase(std::unique(all_vnames_uniq.begin(), all_vnames_uniq.end()),
+                            all_vnames_uniq.end());
+      return all_vnames_uniq;
     }
 
     template<typename CType>
@@ -392,6 +391,46 @@ namespace ESMCI{
 
       res.dps_ = rhs.dps_;
       return res;
+    }
+
+    template<typename CType>
+    bool operator==(const TwoDVIDPoly<CType> &lhs, const TwoDVIDPoly<CType> &rhs)
+    {
+      /* Compare only coeffs of the poly */
+      std::vector<CType> lhs_p_coeffs = lhs.p_.get_coeffs();
+      std::vector<CType> rhs_p_coeffs = rhs.p_.get_coeffs();
+      if(lhs_p_coeffs.size() != rhs_p_coeffs.size()){
+        return false;
+      }
+
+      for(typename std::vector<CType>::const_iterator
+            citer_lhs = lhs_p_coeffs.cbegin(), citer_rhs = rhs_p_coeffs.cbegin();
+            (citer_lhs != lhs_p_coeffs.cend()) && (citer_rhs != rhs_p_coeffs.cend());
+            ++citer_lhs, ++citer_rhs){
+        if(*citer_lhs != *citer_rhs){
+          return false;
+        }
+      }
+
+      /* Compare variable and dep variable names */
+      std::vector<std::string> lhs_vnames = lhs.get_dvnames();
+      std::vector<std::string> rhs_vnames = rhs.get_dvnames();
+      if(lhs_vnames.size() != rhs_vnames.size()){
+        return false;
+      }
+
+      std::sort(lhs_vnames.begin(), lhs_vnames.end());
+      std::sort(rhs_vnames.begin(), rhs_vnames.end());
+      for(typename std::vector<std::string>::const_iterator
+          citer_lhs = lhs_vnames.cbegin(), citer_rhs = rhs_vnames.cbegin();
+          (citer_lhs != lhs_vnames.cend()) && (citer_rhs != rhs_vnames.cend());
+          ++citer_lhs, ++citer_rhs){
+        if(*citer_lhs != *citer_rhs){
+          return false;
+        }
+      }
+
+      return true;
     }
 
   } // namespace MapperUtil
