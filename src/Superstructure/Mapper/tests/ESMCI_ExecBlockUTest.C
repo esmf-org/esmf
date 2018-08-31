@@ -83,9 +83,11 @@ int main(int argc, char *argv[])
     eblock.add_comp_phase(comp1);
     eblock.add_comp_phase(comp2);
 
-    has_scaling_func = eblock.get_scaling_function(sfunc);
+    ESMCI::MapperUtil::MVIDLPoly<float> sfunc_cfunc;
+    has_scaling_func = eblock.get_scaling_function(sfunc, sfunc_cfunc);
     if(has_scaling_func){
-      std::cout << sfunc << "\n";
+      std::cout << "Scaling function : " << sfunc << "\n";
+      std::cout << "Scaling constraint function : " << sfunc_cfunc << "\n";
     }
     else{
       rc = ESMF_FAILURE;

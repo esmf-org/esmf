@@ -43,6 +43,7 @@ namespace ESMCI{
         T get_wtime(void ) const;
         bool get_scaling_function(UVIDPoly<T> &f);
         bool get_scaling_function(UVIDPoly<T> &f, std::vector<MVIDLPoly<T> >&constraint_funcs);
+        bool get_scaling_function(UVIDPoly<T> &f, MVIDLPoly<T> &constraint_func);
         template<typename U>
         friend std::ostream &operator<<(std::ostream &ostr, const ExecBlock<U> &exec_block);
       private:
@@ -53,6 +54,7 @@ namespace ESMCI{
         bool sfunc_is_valid_;
         UVIDPoly<T> sfunc_;
         std::vector<MVIDLPoly<T> > sfunc_cfuncs_;
+        MVIDLPoly<T> sfunc_cfunc_;
         int exec_id_;
     };
 
@@ -372,6 +374,18 @@ namespace ESMCI{
             MVIDLPoly<T> sfunc_cfunc(sfunc_cfunc_coeffs);
             sfunc_cfunc.set_vnames(sfunc_cfunc_vnames);
             sfunc_cfuncs_.push_back(sfunc_cfunc);
+
+            /* Cumulative constraint function - provides dependency between
+             * e1 = Sum(kixi)
+             */
+            std::vector<T> sfunc_ccfunc_coeffs;
+            sfunc_ccfunc_coeffs.push_back(ratio);
+            sfunc_ccfunc_coeffs.push_back(0);
+            std::vector<std::string> sfunc_ccfunc_vnames;
+            sfunc_ccfunc_vnames.push_back((*citer).first);
+            MVIDLPoly<T> sfunc_ccfunc(sfunc_ccfunc_coeffs);
+            sfunc_ccfunc.set_vnames(sfunc_ccfunc_vnames);
+            sfunc_cfunc_ = sfunc_cfunc_ + sfunc_ccfunc;
           }
         }
       }
@@ -393,6 +407,23 @@ namespace ESMCI{
 
       f = sfunc_;
       constraint_funcs = sfunc_cfuncs_;
+
+      return true;
+    }
+
+    template<typename T>
+    bool ExecBlock<T>::get_scaling_function(UVIDPoly<T> &f,
+          MVIDLPoly<T> &constraint_func)
+    {
+      if(!sfunc_is_valid_){
+        bool ret = get_scaling_function(f);
+        if(!ret){
+          return ret;
+        }
+      }
+
+      f = sfunc_;
+      constraint_func = sfunc_cfunc_;
 
       return true;
     }
