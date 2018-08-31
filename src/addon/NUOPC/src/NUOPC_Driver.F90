@@ -58,6 +58,7 @@ module NUOPC_Driver
     integer                           :: modelCount
     ! - static references to child components
     type(ESMF_GridComp), pointer      :: modelComp(:)
+    type(ESMF_Clock),    pointer      :: initClock(:)
     type(ESMF_State),    pointer      :: modelIS(:), modelES(:)
     type(ESMF_PtrInt1D), pointer      :: modelPetLists(:)
     type(ESMF_CplComp),  pointer      :: connectorComp(:,:)
@@ -471,6 +472,7 @@ module NUOPC_Driver
     allocate(is%wrap%modelPetLists(0:is%wrap%modelCount), &
       is%wrap%connectorPetLists(0:is%wrap%modelCount,0:is%wrap%modelCount), &
       is%wrap%modelComp(0:is%wrap%modelCount), &
+      is%wrap%initClock(0:is%wrap%modelCount), &
       is%wrap%modelIS(0:is%wrap%modelCount), &
       is%wrap%modelES(0:is%wrap%modelCount), &
       is%wrap%connectorComp(0:is%wrap%modelCount,0:is%wrap%modelCount), &
@@ -714,6 +716,8 @@ module NUOPC_Driver
       call NUOPC_RunElementAdd(is%wrap%runSeq(1), i=i, j=-1, phase=1, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! Store a reference if the clock to be used during model initialize
+      is%wrap%initClock(i) = is%wrap%runSeq(1)%clock
     enddo
 
     ! now the component labels are available -> create States with Namespace
@@ -989,7 +993,7 @@ module NUOPC_Driver
               return  ! bail out
             call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
               importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i),&
-              clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+              clock=is%wrap%initClock(i), phase=phase, userRc=localrc, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg="NUOPC Incompatible: "//&
               "Failed calling phase "// &
               trim(adjustl(pLabel))//" Initialize for modelComp "// &
@@ -1748,7 +1752,7 @@ module NUOPC_Driver
           return  ! bail out
         call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
           importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-          clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+          clock=is%wrap%initClock(i), phase=phase, userRc=localrc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase '"// &
           trim(adjustl(pLabel))//"' Initialize for modelComp "// &
           trim(adjustl(iString))//": "//trim(compName), &
@@ -2024,7 +2028,7 @@ module NUOPC_Driver
           ! attempt to make the actual call to initialize for model i
           call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
             importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-            clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+            clock=is%wrap%initClock(i), phase=phase, userRc=localrc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase "// &
             trim(adjustl(pString))//" Initialize for modelComp "// &
             trim(adjustl(iString))//": "//trim(compName), &
@@ -2260,21 +2264,6 @@ module NUOPC_Driver
     ! determine the correct run sequence index for the current runPhase    
     runSeqIndex = is%wrap%runPhaseToRunSeqMap(runPhase)
     
-#if 0
-!DON'T do this anymore, because now use a separate clock instance on _all_
-!levels of the Run Sequence!
-!
-!CONDITIONALLY re-enabled as to allow for those cases that do not use
-!Ingestion routines...
-    if (.not.ESMF_ClockIsCreated(is%wrap%runSeq(runSeqIndex)%clock)) then
-      ! alias the component's internalClock in this runPhase run sequence
-      call NUOPC_RunSequenceSet(is%wrap%runSeq(runSeqIndex), internalClock, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-    endif
-#endif
-
     if (btest(verbosity,12)) then
       call ESMF_LogWrite(trim(name)//": begin -------> RunSequence.", &
         ESMF_LOGMSG_INFO, rc=rc)
@@ -2313,13 +2302,14 @@ module NUOPC_Driver
         loopIteration = runElement%runSeq%loopIteration
         if ((loopLevel/=loopLevelPrev).or.(levelMember/=levelMemberPrev).or.&
           (loopIteration/=loopIterationPrev)) then
+          ! found a time loop event -> need to log
           ! update the "Prev' variables
           loopLevelPrev = loopLevel
           levelMemberPrev = levelMember
           loopIterationPrev = loopIteration
           ! write iteration info to Log
           write(msgString,"(A,I4,A,I4,A,I4)") &
-            trim(name)//": RunSequence loopLevel=", &
+            trim(name)//": RunSequence event loopLevel=", &
             runElement%runSeq%loopLevel, "  levelMember=", &
             runElement%runSeq%levelMember, "  loopIteration=", &
             runElement%runSeq%loopIteration
@@ -2827,7 +2817,7 @@ module NUOPC_Driver
 
     ! deallocate lists inside the internal state
     deallocate(is%wrap%modelPetLists, is%wrap%connectorPetLists, &
-      is%wrap%modelComp, is%wrap%modelIS, is%wrap%modelES, &
+      is%wrap%modelComp, is%wrap%initClock, is%wrap%modelIS, is%wrap%modelES, &
       is%wrap%connectorComp, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
@@ -3617,6 +3607,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! Store a reference to the first runClock under which this model is called
+    ! during RunSequence execution, in order to use it for model initialize
+    is%wrap%initClock(iComp) = is%wrap%runSeq(slot)%clock
+    
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -4391,6 +4385,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical                                         :: needDriverTopLoop
     type(NUOPC_FreeFormat), target                  :: freeFormatTemp
     type(NUOPC_FreeFormat), pointer                 :: freeFormatPtr
+    integer                                         :: aSec, bSec
+    character(len=160)                              :: msgString
+    character(len=80)                               :: aString, bString
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -4631,13 +4628,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             endif
             haveTimeStep = .false. ! reset
             if (index(tempString,"*") == 2) then
-              ! a wildcard indicating that the time will be set explicitly
-              !TODO: use the correct wildcard rules, depending on the level
-              call ESMF_ClockGet(internalClock, timeStep=timeStep, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
-                file=trim(name)//":"//FILENAME)) &
-                return  ! bail out
+              ! a wildcard indicating to default the timeStep to the parent
+              ! timeStep. It may later be reset by user code during Driver
+              ! initialization
+              if (slotStack(level)==0) then
+                call ESMF_ClockGet(internalClock, timeStep=timeStep, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, &
+                  file=trim(name)//":"//FILENAME)) &
+                  return  ! bail out
+              else
+                call ESMF_ClockGet(is%wrap%runSeq(slotStack(level))%clock, &
+                  timeStep=timeStep, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, &
+                  file=trim(name)//":"//FILENAME)) &
+                  return  ! bail out
+              endif
               haveTimeStep = .true. ! set
             else
               ! assume that what follows the "@" is actually a number
@@ -4651,6 +4658,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 file=trim(name)//":"//FILENAME)) &
                 return  ! bail out
               haveTimeStep = .true. ! set
+            endif
+            ! see if timeStep and runDuration are compatible
+            if (haveTimeStep .and. haveRunDuration) then
+              if (ceiling(runDuration/timeStep) /= floor(runDuration/timeStep)) then
+                call ESMF_TimeIntervalGet(timeStep, s=aSec, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, &
+                  file=FILENAME)) &
+                  return  ! bail out
+                call ESMF_TimeIntervalGet(runDuration, s=bSec, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, &
+                  file=FILENAME)) &
+                  return  ! bail out
+                write (aString, *) aSec
+                write (bString, *) bSec
+                write (msgString,"(A)") "timeStep="//&
+                  trim(adjustl(aString))//&
+                  "s is not a divisor of runDuration="//&
+                  trim(adjustl(bString))//"s"
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg=msgString, &
+                  line=__LINE__, &
+                  file=FILENAME, &
+                  rcToReturn=rc)
+                return  ! bail out
+              endif
             endif
             if (slot==1) then
               ! this is the top time-loop, runClock is alias to driver clock
