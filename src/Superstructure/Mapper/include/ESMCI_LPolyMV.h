@@ -219,6 +219,41 @@ namespace ESMCI{
         return res;
       }
 
+      // FIXME : Get rid of these special checks
+      if(lhs_coeffs.size() == 1){
+        std::vector<CType> res_coeffs;
+        std::vector<std::string> res_vnames;
+        if(rhs_coeffs.size() > 0){
+          res_coeffs = rhs.get_coeffs();
+          res_vnames = rhs.get_vnames();
+          res_coeffs[res_coeffs.size()-1] += lhs_coeffs[0];
+        }
+        else{
+          res_coeffs = lhs.get_coeffs();
+          res_vnames = lhs.get_vnames();
+        }
+        MVIDLPoly<CType> res(res_coeffs);
+        res.set_vnames(res_vnames);
+        return res;
+      }
+
+      if(rhs_coeffs.size() == 1){
+        std::vector<CType> res_coeffs;
+        std::vector<std::string> res_vnames;
+        if(lhs_coeffs.size() > 0){
+          res_coeffs = lhs.get_coeffs();
+          res_vnames = lhs.get_vnames();
+          res_coeffs[res_coeffs.size()-1] += rhs_coeffs[0];
+        }
+        else{
+          res_coeffs = rhs.get_coeffs();
+          res_vnames = rhs.get_vnames();
+        }
+        MVIDLPoly<CType> res(res_coeffs);
+        res.set_vnames(res_vnames);
+        return res;
+      }
+
       // Info on whether rhs coeff already included in the result
       std::vector<bool> rhs_coeffs_in_res(rhs_vnames.size(), false);
 
@@ -280,6 +315,13 @@ namespace ESMCI{
       return plhs + rhs;
     }
 
+    template<typename CLType, typename CRType>
+    MVIDLPoly<CLType> operator+(const MVIDLPoly<CLType> &lhs, const CRType &rhs)
+    {
+      MVIDLPoly<CLType> prhs(static_cast<CLType>(rhs));
+      return lhs + prhs;
+    }
+
     template<typename CType>
     MVIDLPoly<CType> operator-(const MVIDLPoly<CType> &lhs, const MVIDLPoly<CType> &rhs)
     {
@@ -289,6 +331,41 @@ namespace ESMCI{
       std::vector<std::string> lhs_vnames = lhs.get_vnames();
       std::vector<CType> rhs_coeffs = rhs.get_coeffs();
       std::vector<std::string> rhs_vnames = rhs.get_vnames();
+
+      // FIXME : Get rid of these special checks
+      if(lhs_coeffs.size() == 1){
+        std::vector<CType> res_coeffs;
+        std::vector<std::string> res_vnames;
+        if(rhs_coeffs.size() > 0){
+          res_coeffs = rhs.get_coeffs();
+          res_vnames = rhs.get_vnames();
+          res_coeffs[res_coeffs.size()-1] -= lhs_coeffs[0];
+        }
+        else{
+          res_coeffs = lhs.get_coeffs();
+          res_vnames = lhs.get_vnames();
+        }
+        MVIDLPoly<CType> res(res_coeffs);
+        res.set_vnames(res_vnames);
+        return res;
+      }
+
+      if(rhs_coeffs.size() == 1){
+        std::vector<CType> res_coeffs;
+        std::vector<std::string> res_vnames;
+        if(lhs_coeffs.size() > 0){
+          res_coeffs = lhs.get_coeffs();
+          res_vnames = lhs.get_vnames();
+          res_coeffs[res_coeffs.size()-1] -= rhs_coeffs[0];
+        }
+        else{
+          res_coeffs = rhs.get_coeffs();
+          res_vnames = rhs.get_vnames();
+        }
+        MVIDLPoly<CType> res(res_coeffs);
+        res.set_vnames(res_vnames);
+        return res;
+      }
 
       // Info on whether rhs coeff already included in the result
       std::vector<bool> rhs_coeffs_in_res(rhs_vnames.size(), false);
@@ -349,6 +426,13 @@ namespace ESMCI{
     {
       MVIDLPoly<CRType> plhs(static_cast<CRType>(lhs));
       return plhs - rhs;
+    }
+
+    template<typename CLType, typename CRType>
+    MVIDLPoly<CLType> operator-(const MVIDLPoly<CLType> &lhs, const CRType &rhs)
+    {
+      MVIDLPoly<CLType> prhs(static_cast<CLType>(rhs));
+      return lhs - prhs;
     }
 
     template<typename CType>

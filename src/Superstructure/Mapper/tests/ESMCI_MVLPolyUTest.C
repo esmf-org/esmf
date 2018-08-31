@@ -41,6 +41,21 @@ int main(int argc, char *argv[])
   ESMC_Test((p4 == p4_exp), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   ESMCI::MapperUtil::MVIDLPoly<float> p5 = {1.0, 2.0, 3.0, 4.0};
+  float c = 4.0;
+  ESMCI::MapperUtil::MVIDLPoly<float> p5_plus_c = p5 + c;
+  ESMCI::MapperUtil::MVIDLPoly<float> p5_plus_c_exp = {1.0, 2.0, 3.0, 8.0};
+  strncpy(name, "Polynomial Addition with constant UTest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial Addition with constant test failed", ESMF_MAX_STRLEN);
+
+  ESMC_Test((p5_plus_c == p5_plus_c_exp), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  ESMCI::MapperUtil::MVIDLPoly<float> p5_min_c = p5 - c;
+  ESMCI::MapperUtil::MVIDLPoly<float> p5_min_c_exp = {1.0, 2.0, 3.0, 0.0};
+  strncpy(name, "Polynomial Subtraction with constant UTest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Polynomial Subtraction with constant test failed", ESMF_MAX_STRLEN);
+
+  ESMC_Test((p5_min_c == p5_min_c_exp), name, failMsg, &result, __FILE__, __LINE__, 0);
+
   ESMCI::MapperUtil::MVIDLPoly<float> p6 = p1 + p5;
   ESMCI::MapperUtil::MVIDLPoly<float> p6_exp = {2.0, 4.0, 3.0, 8.0};
   //std::cout << "(" << p1 << ")+(" << p5 << ")=" << p6 << "\n";
