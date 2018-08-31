@@ -711,7 +711,7 @@ module NUOPC_RunSequenceDef
     
     if (.not.associated(runElement%next)) then
       ! "ENDDO" element
-#if 1
+#if 0
       print *, "found ENDDO element"
 #endif
       ! advance the clock and check for stop time
@@ -741,7 +741,7 @@ module NUOPC_RunSequenceDef
       endif
     else
       ! "LINK" element
-#if 1
+#if 0
       print *, "found LINK element"
 #endif
       if (associated(runSeq(i)%stack)) then
@@ -762,16 +762,12 @@ module NUOPC_RunSequenceDef
           forceCurrTime=.true., rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
-call ESMF_ClockPrint(clock, options="currTime", preString="LevelMember=1: ", rc=rc)
       else
         ! follow-on members checkset Clocks, forcing to previous member currTime
-call ESMF_ClockPrint(runElement%runSeq%prevMemberClock, options="currTime", preString="LevelMember>1 prevMemberClock: ", rc=rc)
-        
         call ESMF_ClockGet(runElement%runSeq%prevMemberClock, &
           currTime=currTime, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME)) return  ! bail out
-call ESMF_ClockPrint(runElement%runSeq%clock, options="currTime", preString="LevelMember>1 parentLevelClock: ", rc=rc)
         call NUOPC_CheckSetClock(setClock=clock, &
           checkClock=runElement%runSeq%clock, setStartTimeToCurrent=.true., &
           currTime=currTime, forceCurrTime=.true., rc=rc)

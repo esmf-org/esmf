@@ -4616,7 +4616,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ! a runDuration is present
               haveRunDuration = .true.
               read(tempString(colonIndex+1:len_trim(tempString)), *) seconds
-#if 1
+#if 0
               print *, "found runDuration indicator: ", seconds
 #endif
               call ESMF_TimeIntervalSet(runDuration, s_r8=seconds, rc=rc)
@@ -4649,7 +4649,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             else
               ! assume that what follows the "@" is actually a number
               read(tempString(2:len(tempString)), *) seconds
-#if 1
+#if 0
               print *, "found timeStep indicator: ", seconds
 #endif
               call ESMF_TimeIntervalSet(timeStep, s_r8=seconds, rc=rc)

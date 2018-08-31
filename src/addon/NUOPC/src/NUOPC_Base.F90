@@ -811,8 +811,6 @@ module NUOPC_Base
       file=FILENAME)) &
       return  ! bail out
     
-call ESMF_TimePrint(stopTime, preString="setCheck() setClock.stopTime:", rc=rc)
-    
     if (forceCurrTimeOpt) then
       ! force the checkCurrTime on the setClock
       call ESMF_ClockSet(setClock, currTime=checkCurrTime, rc=rc)
