@@ -375,7 +375,7 @@ program ESMF_NUOPC_UTest
     "  testComp1", &
     "  testComp2", &
     "@"/
-  runSeqFF = NUOPC_FreeFormatCreate(runSequence, rc=rc)
+  runSeqFF = NUOPC_FreeFormatCreate(stringList=runSequence, rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !------------------------------------------------------------------------
 
