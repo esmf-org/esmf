@@ -118,153 +118,6 @@ namespace ESMCI{
       std::vector<int> &cfuncs_vivals)
     {
       if(opt_alg_ == LBAL_ALG_MIN_IDLE_TIME){
-        /* The constraint functions are the square of the idle times between the
-         * pairs of execution blocks
-         * The idle time between a pair of execution blocks is obtained by 
-         * finding the difference between the scaling functions of the two
-         * execution blocks
-         * The contraint functions also include the relationship between the
-         * number of pets (variables) used by the execution blocks
-         */
-        std::vector<std::pair<std::string, int> > eblock_vnames_and_ivals;
-        for(typename std::vector<std::vector<ExecBlock<T> > >::iterator citer = 
-              pexec_blocks.begin(); citer != pexec_blocks.end(); ++citer){
-          assert(!(*citer).empty());
-          typename std::vector<ExecBlock<T> >::iterator citer_exec_block_list = 
-            (*citer).begin();
-          std::vector<std::string> exec_block_list_vnames;
-          int exec_block_list_npets = 0;
-          UVIDPoly<T> sfunc_first_exec_block;
-          std::vector<MVIDLPoly<T> > sfunc_cfuncs_first_exec_block;
-          int first_exec_block_npets = 0;
-          if(citer_exec_block_list != (*citer).end()){
-            bool ret = citer_exec_block_list->get_scaling_function(
-                                        sfunc_first_exec_block,
-                                        sfunc_cfuncs_first_exec_block);
-            if(!ret){
-              /* Not enough data to get a scaling function */
-              return ret;
-            }
-            first_exec_block_npets = citer_exec_block_list->get_npets();
-            exec_block_list_npets += first_exec_block_npets;
-            ++citer_exec_block_list;
-          }
-          else{
-            /* Zero execution blocks in the list, we need at least two parallel
-             * execution blocks in a list to minimize idle time between the 
-             * parallel execution blocks. Ignore this list.
-             */
-            continue;
-          }
-          if(citer_exec_block_list != (*citer).end()){
-            /* Add all constraint functions for the first execution block */
-            for(typename std::vector<MVIDLPoly<T> >::const_iterator cfunc_citer = 
-                  sfunc_cfuncs_first_exec_block.cbegin();
-                  cfunc_citer != sfunc_cfuncs_first_exec_block.cend();
-                  ++cfunc_citer){
-              mvidlp_cfuncs.push_back(*cfunc_citer);
-              /*
-              std::vector<std::string> sfunc_cfuncs_first_exec_block_vnames =
-                (*cfunc_citer).get_vnames();
-              for(std::vector<std::string>::const_iterator citer_vnames = 
-                    sfunc_cfuncs_first_exec_block_vnames.cbegin();
-                    citer_vnames != sfunc_cfuncs_first_exec_block_vnames.cend();
-                    ++citer_vnames){
-                cfuncs_vnames.push_back(*citer_vnames);
-              }
-              */
-            }
-            /* Add variable names to cfunc_vnames */
-            std::vector<std::string> sfunc_first_exec_block_vnames = 
-              sfunc_first_exec_block.get_vnames();
-            assert(sfunc_first_exec_block_vnames.size() == 1);
-            eblock_vnames_and_ivals.push_back(
-              std::pair<std::string, int>(sfunc_first_exec_block_vnames[0],
-                                          first_exec_block_npets));
-            exec_block_list_vnames.push_back(sfunc_first_exec_block_vnames[0]);
-            /* At least two execution blocks are available
-             * Find constraint functions for pairs consisting of the first
-             * execution block and the ith execution block
-             */
-            for(;citer_exec_block_list != (*citer).end(); ++citer_exec_block_list){
-              UVIDPoly<T> sfunc_iexec_block;
-              std::vector<MVIDLPoly<T> > sfunc_cfuncs_iexec_block;
-              bool ret = citer_exec_block_list->get_scaling_function(
-                                    sfunc_iexec_block,
-                                    sfunc_cfuncs_iexec_block);
-              if(!ret){
-                /* Not enough data for getting a scaling function */
-                return ret;
-              }
-              int iexec_block_npets = citer_exec_block_list->get_npets();
-              std::vector<std::string> sfunc_iexec_block_vnames = 
-                sfunc_iexec_block.get_vnames();
-              assert(sfunc_iexec_block_vnames.size() == 1);
-              eblock_vnames_and_ivals.push_back(
-                std::pair<std::string, int>(sfunc_iexec_block_vnames[0],
-                                            iexec_block_npets));
-              exec_block_list_vnames.push_back(sfunc_iexec_block_vnames[0]);
-              exec_block_list_npets += citer_exec_block_list->get_npets();
-              for(typename std::vector<MVIDLPoly<T> >::const_iterator cfunc_citer = 
-                    sfunc_cfuncs_iexec_block.cbegin();
-                    cfunc_citer != sfunc_cfuncs_iexec_block.cend();
-                    ++cfunc_citer){
-                mvidlp_cfuncs.push_back(*cfunc_citer);
-                /*
-                std::vector<std::string> sfunc_cfuncs_iexec_block_vnames =
-                  (*cfunc_citer).get_vnames();
-                for(std::vector<std::string>::const_iterator citer_vnames = 
-                      sfunc_cfuncs_iexec_block_vnames.cbegin();
-                      citer_vnames != sfunc_cfuncs_iexec_block_vnames.cend();
-                      ++citer_vnames){
-                  cfuncs_vnames.push_back(*citer_vnames);
-                }
-                */
-              }
-
-              /* Find idle time function */
-              std::vector<std::string> twodvid_sfunc_vnames;
-              twodvid_sfunc_vnames.push_back(sfunc_first_exec_block_vnames[0]);
-              twodvid_sfunc_vnames.push_back(sfunc_iexec_block_vnames[0]);
-
-              TwoDVIDPoly<T> twodvid_sfunc_first_exec_block(sfunc_first_exec_block,
-                              twodvid_sfunc_vnames);
-              TwoDVIDPoly<T> twodvid_sfunc_iexec_block(sfunc_iexec_block,
-                              twodvid_sfunc_vnames);
-              TwoDVIDPoly<T> idle_time_func = twodvid_sfunc_iexec_block -
-                                              twodvid_sfunc_first_exec_block;
-
-              /* Add the square of the idle time function as a constraint */
-              TwoDVIDPoly<T> idle_time_func_sq = idle_time_func * idle_time_func;
-              twodvidp_cfuncs.push_back(idle_time_func_sq);
-
-            }
-            assert(exec_block_list_vnames.size() == (*citer).size());
-            /* Also add the constraint that Sum(ei) - C = 0 */
-            std::vector<T> final_constraint_coeffs((*citer).size(), 1);
-            final_constraint_coeffs.push_back(
-              static_cast<T>(-1) * exec_block_list_npets);
-            MVIDLPoly<T> final_cfunc(final_constraint_coeffs);
-            final_cfunc.set_vnames(exec_block_list_vnames);
-
-            mvidlp_cfuncs.push_back(final_cfunc);
-          }
-          else{
-            /* Only one execution block in the list, we need at least two parallel
-             * execution blocks in a list to minimize idle time between the 
-             * parallel execution blocks. Ignore this list.
-             */
-            continue;
-          }
-        }
-
-        /* Get unique list of variable names by removing dups */
-        /*
-        std::sort(cfunc_vnames.begin(), cfunc_vnames.end());
-        cfunc_vnames.erase(std::unique(cfunc_vnames.begin(), cfunc_vnames.end()),
-          cfunc_vnames.end());
-        */
-
         /* Create the list of variable names and ivals, component info
          * variables and values are added first, in the order they are
          * stored in the load balancer. Then variable names and ivals
@@ -286,12 +139,114 @@ namespace ESMCI{
           cfuncs_vnames.push_back(cinfo_sfunc_vnames[0]);
           cfuncs_vivals.push_back((*citer).get_npets());
         }
+        std::vector<T> cfunc_template_coeffs(cfuncs_vnames.size()+1, static_cast<T>(0));
+        MVIDLPoly<T> cfunc_template(cfunc_template_coeffs);
+        cfunc_template.set_vnames(cfuncs_vnames);
+        /* The constraint functions are the square of the idle times between the
+         * pairs of execution blocks
+         * The idle time between a pair of execution blocks is obtained by 
+         * finding the difference between the scaling functions of the two
+         * execution blocks
+         * The contraint functions also include the relationship between the
+         * number of pets (variables) used by the execution blocks
+         */
+        std::vector<std::pair<std::string, int> > eblock_vnames_and_ivals;
+        for(typename std::vector<std::vector<ExecBlock<T> > >::iterator iter = 
+              pexec_blocks.begin(); iter != pexec_blocks.end(); ++iter){
+          /* Each (*citer) is a list of parallel execution blocks */
+          assert(!(*iter).empty());
+          /* At least two parallel execution blocks are needed for calculating
+           * idle time functions
+           */
+          if((*iter).size() < 2){
+            continue;
+          }
+          int exec_block_list_npets = 0;
+          MVIDLPoly<T> exec_block_list_cfunc;
+          for(typename std::vector<ExecBlock<T> >::iterator iter_exec_block_list = 
+              (*iter).begin(); iter_exec_block_list != (*iter).end();
+              ++iter_exec_block_list){
+            if(std::distance(iter_exec_block_list, (*iter).end()) < 2){
+              /* No more pairs of execution blocks available in the list */
+              break;
+            }
+            /* Get the scaling function and constraints for the first exec block */
+            UVIDPoly<T> sfunc_first_exec_block;
+            std::vector<std::string> sfunc_first_exec_block_vnames;
+            MVIDLPoly<T> sfunc_cfunc_first_exec_block;
+            bool ret = iter_exec_block_list->get_scaling_function(
+                                          sfunc_first_exec_block,
+                                          sfunc_cfunc_first_exec_block);
+            if(!ret){
+              /* Not enough data to get a scaling function */
+              return ret;
+            }
+            exec_block_list_npets += iter_exec_block_list->get_npets();
+            exec_block_list_cfunc = exec_block_list_cfunc + sfunc_cfunc_first_exec_block;
+            sfunc_first_exec_block_vnames = sfunc_first_exec_block.get_vnames();
+            assert(sfunc_first_exec_block_vnames.size() == 1);
+
+            /* For all possible combinations of execution block pairs find the
+             * idle time square -> one set of constraint functions
+             */
+            for(typename std::vector<ExecBlock<T> >::iterator next_iter = 
+              iter_exec_block_list + 1; next_iter != (*iter).end(); ++next_iter){
+              UVIDPoly<T> sfunc_iexec_block;
+              std::vector<std::string> sfunc_iexec_block_vnames;
+              MVIDLPoly<T> sfunc_cfunc_iexec_block;
+              bool ret = next_iter->get_scaling_function(
+                                            sfunc_iexec_block,
+                                            sfunc_cfunc_iexec_block);
+              if(!ret){
+                /* Not enough data to get a scaling function */
+                return ret;
+              }
+              sfunc_iexec_block_vnames = sfunc_iexec_block.get_vnames();
+              assert(sfunc_iexec_block_vnames.size() == 1);
+
+              /* Find idle time function */
+              std::vector<std::string> twodvid_sfunc_vnames;
+              twodvid_sfunc_vnames.push_back(sfunc_first_exec_block_vnames[0]);
+              twodvid_sfunc_vnames.push_back(sfunc_iexec_block_vnames[0]);
+
+              TwoDVIDPoly<T> twodvid_sfunc_first_exec_block(sfunc_first_exec_block,
+                              twodvid_sfunc_vnames);
+              TwoDVIDPoly<T> twodvid_sfunc_iexec_block(sfunc_iexec_block,
+                              twodvid_sfunc_vnames);
+              TwoDVIDPoly<T> idle_time_func = twodvid_sfunc_iexec_block -
+                                              twodvid_sfunc_first_exec_block;
+              MVIDLPoly<T> idle_time_dfunc_first_exec_block =
+                cfunc_template + sfunc_cfunc_first_exec_block;
+              MVIDLPoly<T> idle_time_dfunc_iexec_block =
+                cfunc_template + sfunc_cfunc_iexec_block;
+              std::vector<MVIDLPoly<T> > idle_time_dfuncs;
+              idle_time_dfuncs.push_back(idle_time_dfunc_first_exec_block);
+              idle_time_dfuncs.push_back(idle_time_dfunc_iexec_block);
+
+              /* Add the square of the idle time function as a constraint */
+              TwoDVIDPoly<T> idle_time_func_sq = idle_time_func * idle_time_func;
+              idle_time_func_sq.set_dfuncs(idle_time_dfuncs);
+              twodvidp_cfuncs.push_back(idle_time_func_sq);
+
+            }
+          }
+          /* Final constraint Sum(ei) - C = 0
+           * This is computed by adding up the cumulative dependent
+           * functions for each ei
+           */
+          exec_block_list_cfunc = exec_block_list_cfunc - 
+                                    static_cast<T>(exec_block_list_npets);
+          mvidlp_cfuncs.push_back(exec_block_list_cfunc);
+        }
+
+        /*
         for(std::vector<std::pair<std::string, int> >::const_iterator citer = 
               eblock_vnames_and_ivals.cbegin();
               citer != eblock_vnames_and_ivals.cend(); ++citer){
           cfuncs_vnames.push_back((*citer).first);
           cfuncs_vivals.push_back((*citer).second);
         }
+        */
 
         return (!twodvidp_cfuncs.empty());
       }
