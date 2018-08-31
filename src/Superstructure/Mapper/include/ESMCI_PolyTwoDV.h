@@ -45,6 +45,7 @@ namespace ESMCI{
         void set_coeffs(std::initializer_list<CType> coeffs);
         void set_dfuncs(const std::vector<MVIDLPoly<CType> > &dps);
         std::vector<MVIDLPoly<CType> > get_dfuncs(void ) const;
+        MVIDLPoly<CType> get_dfunc(void ) const;
         void set_cs_info(const PolyCSInfo<CType> &csinfo);
         std::vector<CType> get_coeffs(void ) const;
         std::vector<std::vector<CType> > get_dcoeffs(void ) const;
@@ -81,6 +82,7 @@ namespace ESMCI{
       private:
         TwoVIDPoly<CType> p_;
         std::vector<MVIDLPoly<CType> > dps_;
+        MVIDLPoly<CType> dp_;
         bool has_dep_vfunc_;
     };  // class TwoDVIDPoly
 
@@ -177,13 +179,31 @@ namespace ESMCI{
     void TwoDVIDPoly<CType>::set_dfuncs(const std::vector<MVIDLPoly<CType> > &dps)
     {
       dps_ = dps;
-      has_dep_vfunc_ = true;
+      if(!dps_.empty()){
+        typename std::vector<MVIDLPoly<CType> >::const_iterator citer = dps.cbegin();
+        //std::cout << "Dep func : " << *citer << "\n";
+        MVIDLPoly<CType> dp = *citer;
+        ++citer;
+        for(;citer != dps.cend(); ++citer){
+          //std::cout << "Dep func : " << *citer << "\n";
+          dp = dp + (*citer);
+        }
+        dp_ = dp;
+        //std::cout << "Dep cumulative func : " << dp_ << "\n";
+        has_dep_vfunc_ = true;
+      }
     }
 
     template<typename CType>
     std::vector<MVIDLPoly<CType> > TwoDVIDPoly<CType>::get_dfuncs(void ) const
     {
       return dps_;
+    }
+
+    template<typename CType>
+    MVIDLPoly<CType> TwoDVIDPoly<CType>::get_dfunc(void ) const
+    {
+      return dp_;
     }
 
     template<typename CType>
@@ -298,6 +318,7 @@ namespace ESMCI{
         res.p_ = pd;
       }
       res.dps_ = dps_;
+      res.dp_ = dp_;
       res.has_dep_vfunc_ = has_dep_vfunc_;
       return res;
     }
@@ -328,6 +349,7 @@ namespace ESMCI{
       assert(lhs.dps_.size() == rhs.dps_.size());
 
       res.dps_ = lhs.dps_;
+      res.dp_ = lhs.dp_;
       return res;
     }
 
@@ -340,6 +362,7 @@ namespace ESMCI{
       res.p_ = lhs + rhs.p_;
 
       res.dps_ = rhs.dps_;
+      res.dp_ = rhs.dp_;
       return res;
     }
 
@@ -353,6 +376,7 @@ namespace ESMCI{
       assert(lhs.dps_.size() == rhs.dps_.size());
 
       res.dps_ = lhs.dps_;
+      res.dp_ = lhs.dp_;
       return res;
     }
 
@@ -365,6 +389,7 @@ namespace ESMCI{
       res.p_ = lhs - rhs.p_;
 
       res.dps_ = rhs.dps_;
+      res.dp_ = rhs.dp_;
       return res;
     }
 
@@ -378,6 +403,7 @@ namespace ESMCI{
       assert(lhs.dps_.size() == rhs.dps_.size());
 
       res.dps_ = lhs.dps_;
+      res.dp_ = lhs.dp_;
       return res;
     }
 
@@ -390,6 +416,7 @@ namespace ESMCI{
       res.p_ = lhs * rhs.p_;
 
       res.dps_ = rhs.dps_;
+      res.dp_ = rhs.dp_;
       return res;
     }
 
