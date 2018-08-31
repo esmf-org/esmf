@@ -4544,7 +4544,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     
     ! Finish up setting the appropriate slotCount
     slotCount = slotCount / 2     ! divide by two because double counted "@"
-    slotCount = max(slotCount, 1) ! at least one slot
+    
+    ! sanity check
+    if (slotCount < 1) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="RunSequence at this point must have at least one time slot.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
 
     ! allocate the slotStack
     allocate(slotStack(slotCount))
@@ -4590,7 +4598,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       elseif (tokenCount == 1) then
         ! either a model or a time step indicator
         if (index(trim(tokenList(1)),"@") == 1) then
-          ! time step indicator
+          ! found a time step indicator
           tempString=trim(tokenList(1))
           if (len_trim(tempString) > 1) then
             ! entering new time loop level
@@ -4630,10 +4638,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 line=__LINE__, &
                 file=trim(name)//":"//FILENAME)) &
                 return  ! bail out
-              haveTimeStep = .true. ! reset
+              haveTimeStep = .true. ! set
             else
               ! assume that what follows the "@" is actually a number
-              haveTimeStep = .true. ! reset
               read(tempString(2:len(tempString)), *) seconds
 #if 1
               print *, "found timeStep indicator: ", seconds
@@ -4643,6 +4650,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 line=__LINE__, &
                 file=trim(name)//":"//FILENAME)) &
                 return  ! bail out
+              haveTimeStep = .true. ! set
             endif
             if (slot==1) then
               ! this is the top time-loop, runClock is alias to driver clock
@@ -4676,8 +4684,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             level = level - 1
           endif
         else
-          ! model
-          slot = max(slot, 1) ! model outside of a time loop
+          ! found a model
           call NUOPC_DriverAddRunElement(driver, slot=slot, &
             compLabel=trim(tokenList(1)), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
