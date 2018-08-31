@@ -227,7 +227,7 @@ program ESMF_NUOPC_UTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_TimeSet(startTime, s = 0, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_TimeSet(stopTime, s = 60, rc=rc)
+  call ESMF_TimeSet(stopTime, s = 3600, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call ESMF_TimeIntervalSet(timeStep, s = 1800, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
