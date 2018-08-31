@@ -758,11 +758,11 @@ module NUOPC_Base
     ! local variables
     type(ESMF_Time)           :: checkCurrTime, currTime, stopTime, startTime
     type(ESMF_TimeInterval)   :: checkTimeStep, timeStep
-    integer                   :: checkTimeStepSec, timeStepSec
+    integer                   :: aSec, bSec
     type(ESMF_Direction_Flag) :: direction
     type(ESMF_Time)           :: setTime
     character(len=160)        :: msgString
-    character(len=20)         :: aSecString, bSecString
+    character(len=80)         :: aString, bString
 
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -781,8 +781,21 @@ module NUOPC_Base
     
     ! ensure the current times match between checkClock and setClock
     if (currTime /= checkCurrTime) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="setClock and checkClock do not match in current time!", &
+      call ESMF_TimeGet(currTime, timeStringISOFrac=aString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      call ESMF_TimeGet(checkCurrTime, timeStringISOFrac=bString, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      write (msgString,"(A)") "setClock currTime="//&
+        trim(adjustl(aString))//&
+        " is not the same as checkClock currTime="//&
+        trim(adjustl(bString))
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg=msgString, &
         line=__LINE__, &
         file=FILENAME, &
         rcToReturn=rc)
@@ -791,22 +804,22 @@ module NUOPC_Base
     
     ! ensure that the check timestep is a multiple of the internal one
     if (ceiling(checkTimeStep/timeStep) /= floor(checkTimeStep/timeStep)) then
-      call ESMF_TimeIntervalGet(checkTimeStep, s=checkTimeStepSec, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, s=aSec, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
-      call ESMF_TimeIntervalGet(timeStep, s=timeStepSec, rc=rc)
+      call ESMF_TimeIntervalGet(checkTimeStep, s=bSec, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME)) &
         return  ! bail out
-      write (aSecString, *) checkTimeStepSec
-      write (bSecString, *) timeStepSec
-      write (msgString,"(A)") "checkClock timeStep="//&
-        trim(adjustl(aSecString))//&
-        "s is not a multiple of setClock timeStep="//&
-        trim(adjustl(bSecString))//"s."
+      write (aString, *) aSec
+      write (bString, *) bSec
+      write (msgString,"(A)") "setClock timeStep="//&
+        trim(adjustl(aString))//&
+        "s is not a divisor of checkClock timeStep="//&
+        trim(adjustl(bString))//"s"
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg=msgString, &
         line=__LINE__, &
         file=FILENAME, &
