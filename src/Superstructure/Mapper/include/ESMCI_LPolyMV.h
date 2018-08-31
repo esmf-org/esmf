@@ -209,6 +209,16 @@ namespace ESMCI{
       std::vector<CType> rhs_coeffs = rhs.get_coeffs();
       std::vector<std::string> rhs_vnames = rhs.get_vnames();
 
+      if(lhs_coeffs.size() == 0){
+        MVIDLPoly<CType> res = rhs;
+        return res;
+      }
+
+      if(rhs_coeffs.size() == 0){
+        MVIDLPoly<CType> res = lhs;
+        return res;
+      }
+
       // Info on whether rhs coeff already included in the result
       std::vector<bool> rhs_coeffs_in_res(rhs_vnames.size(), false);
 
