@@ -797,6 +797,7 @@ module NUOPC_Base
     
     ! deal with optional arguments
     if (present(currTime)) checkCurrTime = currTime
+    forceCurrTimeOpt = .false.  ! default
     if (present(forceCurrTime)) forceCurrTimeOpt = forceCurrTime
 
     ! set the new stopTime of the setClock
