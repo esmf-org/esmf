@@ -4388,6 +4388,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                                         :: aSec, bSec
     character(len=160)                              :: msgString
     character(len=80)                               :: aString, bString
+    logical                                         :: zeroSkip
+    integer                                         :: zeroSkipLevel
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -4572,12 +4574,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     level = 0
     slot = 0
     slotHWM = 0
+    zeroSkip = .false.
     do i=1, lineCount
       call NUOPC_FreeFormatGetLine(freeFormatPtr, line=i, &
         tokenCount=tokenCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+      if (allocated(tokenList)) deallocate(tokenList) ! for zeroSkip cycle case
       allocate(tokenList(tokenCount))
       call NUOPC_FreeFormatGetLine(freeFormatPtr, line=i, tokenList=tokenList, &
         rc=rc)
@@ -4600,16 +4604,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           if (len_trim(tempString) > 1) then
             ! entering new time loop level
             level = level + 1
-            slotStack(level)=slot
-            slot = slotHWM + 1
-            slotHWM = slotHWM + 1
-            if (slot>1) then
-              ! Insert the link to a new slot
-              call NUOPC_DriverAddRunElement(driver, slot=slotStack(level), &
-                linkSlot=slot, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            endif
+            if (zeroSkip) cycle ! go to next line ---^
             colonIndex = index(tempString,":")
             haveRunDuration = .false. ! reset
             if (colonIndex>0) then
@@ -4625,6 +4620,22 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 file=trim(name)//":"//FILENAME)) &
                 return  ! bail out
               tempString = tempString(1:colonIndex-1) ! truncate at ":"
+              ! if runDuration comes in at zero, then skip to end of time loop
+              if (abs(seconds)<=tiny(seconds)) then
+                zeroSkip = .true.
+                zeroSkipLevel = level
+                cycle ! go to next line ---^
+              endif
+            endif
+            slotStack(level)=slot
+            slot = slotHWM + 1
+            slotHWM = slotHWM + 1
+            if (slot>1) then
+              ! Insert the link to a new slot
+              call NUOPC_DriverAddRunElement(driver, slot=slotStack(level), &
+                linkSlot=slot, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
             haveTimeStep = .false. ! reset
             if (index(tempString,"*") == 2) then
@@ -4712,11 +4723,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else
+            if (zeroSkip) then
+              if (level==zeroSkipLevel) zeroSkip = .false.
+              level = level - 1
+              cycle ! go to next line ---^
+            endif
             ! exiting time loop level
             slot = slotStack(level)
             level = level - 1
           endif
         else
+          if (zeroSkip) cycle ! go to next line ---^
           ! found a model
           call NUOPC_DriverAddRunElement(driver, slot=slot, &
             compLabel=trim(tokenList(1)), rc=rc)
@@ -4726,6 +4743,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return  ! bail out
         endif
       elseif (tokenCount == 2) then
+        if (zeroSkip) cycle ! go to next line ---^
         ! a model with a specific phase label
         call NUOPC_DriverAddRunElement(driver, slot=slot, &
           compLabel=trim(tokenList(1)), phaseLabel=trim(tokenList(2)), rc=rc)
@@ -4734,6 +4752,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           file=trim(name)//":"//FILENAME)) &
           return  ! bail out
       elseif ((tokenCount == 3) .or. (tokenCount == 4)) then
+        if (zeroSkip) cycle ! go to next line ---^
         ! a connector if the second element is "->"
         if (trim(tokenList(2)) /= "->") then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -4755,6 +4774,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       deallocate(tokenList)
     enddo
     ! clean-up
+    if (allocated(tokenList)) deallocate(tokenList) ! for zeroSkip cycle case
     deallocate(slotStack)
 
     if (needDriverTopLoop) then
