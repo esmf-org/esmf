@@ -24,15 +24,15 @@ The {\tt StandardName} Attribute of these entries complies with the Climate and 
 \subsubsection{Custom Field Dictionary}
 \label{fd:custom}
 
-The default NUOPC Field Dictionary can be replaced by a custom NUOPC Field Dictionary by calling the {\tt NUOPC\_FieldDictionarySetup()} method to read in a properly-formatted YAML file. This feature is intended to improve the interoperability between codes that use the NUOPC Layer, as it allows the broader scientific community to contribute to and upkeep a common NUOPC Field Dictionary file that may be shared among different Earth System Models. At this time, an initial version of the NUOPC Field Dictionary file is available through the Earth System Community Modeling Portal (ESCOMP), a GitHub repository: \htmladdnormallink{https://github.com/ESCOMP}{https://github.com/ESCOMP}.
+The default NUOPC Field Dictionary can be replaced by a custom NUOPC Field Dictionary by calling the {\tt NUOPC\_FieldDictionarySetup()} method to read in a properly-formatted YAML file. This feature is intended to improve the interoperability between codes that use the NUOPC Layer, as it allows the broader scientific community to contribute to the growth and upkeep of a common NUOPC Field Dictionary file that can be shared among different Earth System Models. At this time, an initial version of the NUOPC Field Dictionary file is available through the dedicated GitHub repository: \htmladdnormallink{https://github.com/ESCOMP/NUOPCFieldDictionary}{https://github.com/ESCOMP/NUOPCFieldDictionary}, hosted on the Earth System Community Modeling Portal (\htmladdnormallink{ESCOMP}{https://github.com/ESCOMP}).
 
-A custom NUOPC Field Dictionary is codified in YAML as a YAML map ({\tt key:\ value}) with only one key:~{\tt field\_dictionary}. The value associated to this key is itself a YAML map that should include the mandatory keyword {\tt entries} (pointing to the complete set of dictionary entries) and it may include the optional keywords: {\tt version\_number, last\_modified, institution, contact, source}, and {\tt description}. These optional keywords are intended to hold information about the file itself and are currently ignored by the NUOPC Layer.
+A custom NUOPC Field Dictionary is codified in YAML as a YAML map (an unordered association of unique keys to values) with only one key:~{\tt field\_dictionary}. The value associated with this key is itself a YAML map that should include the mandatory key {\tt entries} (pointing to the complete set of dictionary entries), and it may include the optional keys: {\tt version\_number}, {\tt last\_modified}, {\tt institution}, {\tt contact}, {\tt source}, and {\tt description}. These optional keys are intended to hold information about the file itself and are currently ignored by the NUOPC Layer.
 
 Entries in the NUOPC Field dictionary are organized as YAML lists of maps. List items under the {\tt entries} keyword must be indented and marked by a hyphen ({\tt -}).
 
-A dictionary entry fully defines a Field if it includes both the {\tt standard\_name} and {\tt canonical\_units} keywords. This entry can also include a brief narrative describing the Field as the value of optional keyword {\tt description}, which is currently ignored by the NUOPC Layer.
+A dictionary entry fully defines a Field if it includes both the {\tt standard\_name} and {\tt canonical\_units} keys and their associated values. This entry may also include a brief narrative describing the Field as the value of optional key {\tt description}, which is currently ignored by the NUOPC Layer.
 
-Synonyms can be defined by adding separate entries that include both the {\tt alias} keyword, which points to a single synonym (YAML scalar, {\it e.g.\/} {\tt alias:~<name>}) or to a comma-separated list of synonyms within square brackets (YAML flow sequence, {\it e.g.\/} {\tt alias:~[ <name1>, <name2>, ... ]}), and the {\tt standard\_name} keyword to point to the original Field name to be substituted. The original Field name must be fully defined in the dictionary file. While adding one {\tt alias} keyword to a Field definition dictionary entry is allowed and will be parsed by the NUOPC Layer, it is recommended that all synonyms be included as {\it separate} entries.
+Synonyms can be defined by adding separate entries that include both the {\tt alias} key, associated with either a single synonym (YAML scalar, {\it e.g.\/} {\tt alias:~<name>}) or a comma-separated list of synonyms within square brackets (YAML flow sequence, {\it e.g.\/} {\tt alias:~[<name1>, <name2>, ...]}), and the {\tt standard\_name} key associated with the original Field name to be substituted. The original Field name must be fully defined in the dictionary file. While adding one {\tt alias} keyword to a Field definition dictionary entry is allowed and will be parsed by the NUOPC Layer, it is recommended that all synonyms be included as {\it separate} entries.
 
 A custom NUOPC Field dictionary sample file is included below.
 % this is included from src/Infrastructure/IO/tests/fd.yaml
@@ -42,9 +42,9 @@ field_dictionary:
     version_number: 0.0.1
     last_modified:  2018-03-14T11:01:19Z
     institution:    National ESPC, CSC & MCL Working Groups
-    contact:        xfd@noaa.gov
+    contact:        esmf_support@list.woc.noaa.gov
 
-    source:         https://github.com/ESCOMP
+    source:         https://github.com/ESCOMP/NUOPCFieldDictionary
     description:    Community-based dictionary for shared coupling fields
 
     entries:
