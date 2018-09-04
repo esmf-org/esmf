@@ -55,10 +55,10 @@ program ESMF_ProfileUTest
   type(ESMF_VM) :: vm
   type(ESMF_GridComp) :: gridcomp
 
-  integer                 :: funit
-  integer                 :: ioerr
-  character(ESMF_MAXSTR)  :: line
-  character(ESMF_MAXSTR)  :: filename
+  !integer                 :: funit
+  !integer                 :: ioerr
+  !character(ESMF_MAXSTR)  :: line
+  !character(ESMF_MAXSTR)  :: filename
   
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
