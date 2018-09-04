@@ -166,10 +166,6 @@ namespace ESMCI{
           for(typename std::vector<ExecBlock<T> >::iterator iter_exec_block_list = 
               (*iter).begin(); iter_exec_block_list != (*iter).end();
               ++iter_exec_block_list){
-            if(std::distance(iter_exec_block_list, (*iter).end()) < 2){
-              /* No more pairs of execution blocks available in the list */
-              break;
-            }
             /* Get the scaling function and constraints for the first exec block */
             UVIDPoly<T> sfunc_first_exec_block;
             std::vector<std::string> sfunc_first_exec_block_vnames;
@@ -183,9 +179,14 @@ namespace ESMCI{
             }
             exec_block_list_npets += iter_exec_block_list->get_npets();
             exec_block_list_cfunc = exec_block_list_cfunc + sfunc_cfunc_first_exec_block;
+            std::cout << "Cumulative cfunc : " << sfunc_cfunc_first_exec_block << " : Number of PETs in cur exec block : " << iter_exec_block_list->get_npets() << "\n";
             sfunc_first_exec_block_vnames = sfunc_first_exec_block.get_vnames();
             assert(sfunc_first_exec_block_vnames.size() == 1);
 
+            if(std::distance(iter_exec_block_list, (*iter).end()) < 2){
+              /* No more pairs of execution blocks available in the list */
+              break;
+            }
             /* For all possible combinations of execution block pairs find the
              * idle time square -> one set of constraint functions
              */
