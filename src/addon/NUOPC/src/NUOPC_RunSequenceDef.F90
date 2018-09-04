@@ -53,7 +53,13 @@ module NUOPC_RunSequenceDef
   type NUOPC_RunSequence
     type(ESMF_Clock)                :: clock  ! time loop information
     type(NUOPC_RunElement), pointer :: first  ! first element of sequence
+    ! - run-time members
     type(NUOPC_RunElement), pointer :: stack  ! run-time stack element pointer
+    integer                         :: loopLevel
+    integer                         :: loopIteration
+    integer                         :: levelMember
+    integer                         :: levelChildren
+    type(ESMF_Clock)                :: prevMemberClock
   end type
   
 !==============================================================================
@@ -329,8 +335,12 @@ module NUOPC_RunSequenceDef
       nullify(runElement%next)  ! terminal element
       ! hook up runElement to runSeqNew
       runSeqNew(i)%first => runElement
-      ! initialize stack member
+      ! initialize run-time members
       nullify(runSeqNew(i)%stack)
+      runSeqNew(i)%loopLevel = -1
+      runSeqNew(i)%loopIteration = -1
+      runSeqNew(i)%levelMember = -1
+      runSeqNew(i)%levelChildren = -1
     enddo
     
     ! deallocate the incoming runSeq
@@ -408,15 +418,14 @@ module NUOPC_RunSequenceDef
 !BOPI
 ! !IROUTINE: NUOPC_RunSequenceIterate - Iterate through a RunSequence
 ! !INTERFACE:
-  function NUOPC_RunSequenceIterate(runSeq, runSeqIndex, runElement, loopFlag, rc)
+  function NUOPC_RunSequenceIterate(runSeq, runSeqIndex, runElement, rc)
 ! !RETURN VALUE:
     logical :: NUOPC_RunSequenceIterate
 ! !ARGUMENTS:
-    type(NUOPC_RunSequence), pointer      :: runSeq(:)
-    integer,                 intent(in)   :: runSeqIndex
-    type(NUOPC_RunElement),  pointer      :: runElement
-    logical, optional,       intent(out)  :: loopFlag
-    integer, optional,       intent(out)  :: rc
+    type(NUOPC_RunSequence), pointer     :: runSeq(:)
+    integer,                 intent(in)  :: runSeqIndex
+    type(NUOPC_RunElement),  pointer     :: runElement
+    integer, optional,       intent(out) :: rc
 ! !DESCRIPTION:
 !   Iterate through the RunSequence that is in position {\tt runSeqIndex} in the
 !   {\tt runSeq} vector. If {\tt runElement} comes in {\em unassociated}, the
@@ -430,9 +439,6 @@ module NUOPC_RunSequenceDef
 !
 !   The returned {\tt runElement} is only valid for a function return value of 
 !   {\tt .true.}.
-!
-!   The {\tt loopFlag} argument is set to {\tt .true.} if the forward step 
-!   looped back to the beginning of the RunSequence, {\tt .false.} otherwise.
 !EOPI
   !-----------------------------------------------------------------------------
     type(ESMF_Clock)  :: clock
@@ -460,6 +466,11 @@ module NUOPC_RunSequenceDef
           "be associated", line=__LINE__, file=FILENAME, rcToReturn=rc)
         return  ! bail out
       endif
+      ! set the loop and level members for top level
+      runSeq(runSeqIndex)%loopLevel=1
+      runSeq(runSeqIndex)%loopIteration=1
+      runSeq(runSeqIndex)%levelMember=1
+      runSeq(runSeqIndex)%levelChildren=0
       ! check the clock
       clock = runSeq(runSeqIndex)%clock
       clockIsStopTime = ESMF_ClockIsStopTime(clock, rc=rc)
@@ -477,7 +488,6 @@ module NUOPC_RunSequenceDef
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=FILENAME)) return  ! bail out
             ! advance to next time step
-!print *, "silly time loop"
             call ESMF_ClockAdvance(clock, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
@@ -498,8 +508,7 @@ module NUOPC_RunSequenceDef
     endif
     
     ! runElement may be a control element (either LINK or ENDDO)
-    NUOPC_RunSequenceIterate = NUOPC_RunSequenceCtrl(runSeq, runElement, &
-      loopFlag=loopFlag, rc=rc)
+    NUOPC_RunSequenceIterate = NUOPC_RunSequenceCtrl(runSeq, runElement, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME)) return  ! bail out
     
@@ -645,23 +654,21 @@ module NUOPC_RunSequenceDef
 !BOPI
 ! !IROUTINE: NUOPC_RunSequenceCtrl - Recursive iterator through a RunSequence
 ! !INTERFACE:
-  recursive logical function NUOPC_RunSequenceCtrl(runSeq, runElement, &
-    loopFlag, rc) &
+  recursive logical function NUOPC_RunSequenceCtrl(runSeq, runElement, rc) &
 ! !ARGUMENTS:
     result(NUOPC_RunSequenceCtrlResult)
-    type(NUOPC_RunSequence), pointer     :: runSeq(:)
-    type(NUOPC_RunElement),  pointer     :: runElement
-    logical, optional,       intent(out) :: loopFlag
-    integer, optional,       intent(out) :: rc
+    type(NUOPC_RunSequence), pointer       :: runSeq(:)
+    type(NUOPC_RunElement),  pointer       :: runElement
+    integer, optional,       intent(out)   :: rc
 ! !DESCRIPTION:
 !EOP
   !-----------------------------------------------------------------------------
     type(ESMF_Clock)  :: clock
     logical           :: clockIsStopTime
     integer           :: i
+    type(ESMF_Time)   :: currTime
     
     NUOPC_RunSequenceCtrlResult = .false. ! initialize to safe return value
-    if (present(loopFlag)) loopFlag=.false.
 
     ! sanity checks
     if (.not.associated(runSeq)) then
@@ -697,12 +704,16 @@ module NUOPC_RunSequenceDef
         "runSeq", line=__LINE__, file=FILENAME, rcToReturn=rc)
       return
     endif
+    
+    ! reference the clock of the correct RunSequence slot
+    ! for ENDDO this does not change clock on left hand side, for LINK it does
     clock = runSeq(i)%clock
     
     if (.not.associated(runElement%next)) then
       ! "ENDDO" element
-      if (present(loopFlag)) loopFlag=.true.
-!print *, "found ENDDO element"
+#if 0
+      print *, "found ENDDO element"
+#endif
       ! advance the clock and check for stop time
       call ESMF_ClockAdvance(clock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -721,26 +732,56 @@ module NUOPC_RunSequenceDef
           nullify(runSeq(i)%stack)  ! for recursive link detection
         endif
       else
-        ! start back at the top of sequence
+        ! loop back to start of same run sequence slot
         runElement => runSeq(i)%first  ! first element in next iteration
+        ! increment the iteration counter
+        runSeq(i)%loopIteration = runSeq(i)%loopIteration + 1
+        ! reset the children counter
+        runSeq(i)%levelChildren = 0
       endif
     else
       ! "LINK" element
-!print *, "found LINK element"
+#if 0
+      print *, "found LINK element"
+#endif
       if (associated(runSeq(i)%stack)) then
         ! detected recursive link
         call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="recursive link detected",&
           line=__LINE__, file=FILENAME, rcToReturn=rc)
         return
       endif
-      ! check and set time keeping conditions between clocks
-      call NUOPC_CheckSetClock(setClock=clock, &
-        checkClock=runElement%runSeq%clock, setStartTimeToCurrent=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
-      ! follow the link
+      ! set the linked RunSequence level index one higher than current one
+      runSeq(i)%loopLevel = runElement%runSeq%loopLevel + 1
+      ! set the linked RunSequence member index
+      runElement%runSeq%levelChildren = runElement%runSeq%levelChildren + 1
+      runSeq(i)%levelMember = runElement%runSeq%levelChildren
+      if (runSeq(i)%levelMember==1) then
+        ! first level member checksets Clock, forcing to upper level currTime
+        call NUOPC_CheckSetClock(setClock=clock, &
+          checkClock=runElement%runSeq%clock, setStartTimeToCurrent=.true., &
+          forceCurrTime=.true., rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      else
+        ! follow-on members checkset Clocks, forcing to previous member currTime
+        call ESMF_ClockGet(runElement%runSeq%prevMemberClock, &
+          currTime=currTime, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+        call NUOPC_CheckSetClock(setClock=clock, &
+          checkClock=runElement%runSeq%clock, setStartTimeToCurrent=.true., &
+          currTime=currTime, forceCurrTime=.true., rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME)) return  ! bail out
+      endif
+      ! set the prevMemberClock in case more level members follow-on
+      runElement%runSeq%prevMemberClock = runSeq(i)%clock
+      ! reset the linked RunSequence iteration and levelChildren counters
+      runSeq(i)%loopIteration = 1
+      runSeq(i)%levelChildren = 0
+      ! put the next element in the current level onto the new levels stack
       runSeq(i)%stack => runElement%next  ! set stack pointer for return
-      ! start at the top of sequence
+      ! follow the link: start at the top of linked sequence
       runElement => runSeq(i)%first  ! first element in next iteration
     endif
     

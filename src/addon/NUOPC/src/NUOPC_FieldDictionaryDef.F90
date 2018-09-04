@@ -21,18 +21,14 @@ module NUOPC_FieldDictionaryDef
   
   private
 
-  ! public constants
-  public NUOPC_FieldDictionaryEntryLen
-  integer, parameter :: NUOPC_FieldDictionaryEntryLen = 256
-
   ! public types
   public NUOPC_FieldDictionaryEntryS, NUOPC_FieldDictionaryEntry
 
   type NUOPC_FieldDictionaryEntryS
-    character(NUOPC_FieldDictionaryEntryLen)          :: standardName
-    character(NUOPC_FieldDictionaryEntryLen)          :: canonicalUnits
-    character(NUOPC_FieldDictionaryEntryLen), pointer :: connectedOptions(:)
-    character(NUOPC_FieldDictionaryEntryLen), pointer :: synonyms(:)
+    character(ESMF_MAXSTR)          :: standardName
+    character(ESMF_MAXSTR)          :: canonicalUnits
+    character(ESMF_MAXSTR), pointer :: connectedOptions(:)
+    character(ESMF_MAXSTR), pointer :: synonyms(:)
   end type
   
   type NUOPC_FieldDictionaryEntry
@@ -663,18 +659,15 @@ module NUOPC_FieldDictionaryDef
 
       else
 
-        read(freeFormat % stringList(i), *, iostat=stat) keyString, valueString
-        if (stat /= 0) then
-          call ESMF_LogSetError(ESMF_RC_CANNOT_GET, &
-            msg="Error reading from FreeFormat object", &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)
-          exit freeform_input
-        end if
+        call getKeyValue(freeFormat % stringList(i), &
+          keyString, valueString, localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, &
+          msg="Error reading from FreeFormat object", &
+          line=__LINE__, file=FILENAME, &
+          rcToReturn=rc)) exit freeform_input
 
         select case (trim(keyString))
-          case ("canonicalUnits:")
+          case ("canonicalUnits")
             if (len_trim(canonicalUnits) > 0) then
               call ESMF_LogSetError(ESMF_RC_DUP_NAME, &
                 msg="Invalid FreeFormat object: canonicalUnits", &
@@ -684,7 +677,7 @@ module NUOPC_FieldDictionaryDef
               exit freeform_input
             end if
             canonicalUnits = valueString
-          case ("standardName:","synonym:")
+          case ("standardName","synonym")
             nameCount = nameCount + 1
             if (nameCount > size(standardNames)) then
               allocate(tmpList(size(standardNames)), stat=stat)
@@ -736,6 +729,43 @@ module NUOPC_FieldDictionaryDef
         msg="deallocating internal workspace", &
         line=__LINE__, file=FILENAME, rcToReturn=rc)
      end if
+
+  contains
+
+    subroutine getKeyValue(string, keyString, valueString, rc)
+      character(len=*), intent(in)    :: string
+      character(len=*), intent(inout) :: keyString
+      character(len=*), intent(inout) :: valueString
+      integer,          intent(out)   :: rc
+
+      integer :: ic, lenString
+
+      rc = ESMF_SUCCESS
+
+      keyString   = ""
+      valueString = ""
+
+      ic = index(string, ":")
+      if (ic > 2) then
+        keyString = adjustl(string(1:ic-1))
+      else
+        call ESMF_LogSetError(ESMF_RC_NOT_FOUND, &
+          msg="key not found", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)
+        return
+      end if
+
+      lenString = len_trim(string)
+      if (ic < lenString) then
+        valueString = adjustl(string(ic+1:lenString))
+      else
+        call ESMF_LogSetError(ESMF_RC_NOT_FOUND, &
+          msg="value not found", &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)
+        return
+      end if
+
+    end subroutine getKeyValue
 
   end subroutine
   !-----------------------------------------------------------------------------
@@ -809,9 +839,9 @@ module NUOPC_FieldDictionaryDef
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    integer                                           :: i, k, j, stat
-    type(NUOPC_FieldDictionaryEntry)                  :: fdEntry
-    character(NUOPC_FieldDictionaryEntryLen), pointer :: synonyms(:)
+    integer                           :: i, k, j, stat
+    type(NUOPC_FieldDictionaryEntry)  :: fdEntry
+    character(ESMF_MAXSTR), pointer   :: synonyms(:)
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -870,55 +900,58 @@ module NUOPC_FieldDictionaryDef
     
     if (present(rc)) rc = ESMF_SUCCESS
 
-#define USE_FREE_FORMAT_DEFAULT_FD_off
-!TODO: Cannot switch over to the FreeFormatFD approach until we solve:
-!TODO: (1) The canonical units are not correctly ingested.
-!TODO: (2) The ProTex extension needs to handle processing the FreeFormatFD
-!TODO:     so it shows up in the NUOPC reference manual as table.
-#ifdef USE_FREE_FORMAT_DEFAULT_FD
+!   The following definition of the default FD is pulled into the NUOPC RefDoc
+!   via ProTex. Modify with care.
+!
+!BOLTFD l l
+! ":{\bf StandardName}"
+! ":{\bf CanonicalUnits}"
     freeFormatFD = NUOPC_FreeFormatCreate(stringList=(/ &
-"standardName:                          air_pressure_at_sea_level", &
-"canonicalUnits:                                               Pa", &
-"----------------------------------------------------------------", &
-"standardName:               magnitude_of_surface_downward_stress", &
-"canonicalUnits:                                               Pa", &
-"----------------------------------------------------------------", &
-"standardName:                                 precipitation_flux", &
-"canonicalUnits:                                       kg m-2 s-1", &
-"----------------------------------------------------------------", &
-"standardName:                 sea_surface_height_above_sea_level", &
-"canonicalUnits:                                                m", &
-"----------------------------------------------------------------", &
-"standardName:                               sea_surface_salinity", &
-"canonicalUnits:                                             1e-3", &
-"----------------------------------------------------------------", &
-"standardName:                            sea_surface_temperature", &
-"canonicalUnits:                                                K", &
-"----------------------------------------------------------------", &
-"standardName:                   surface_downward_eastward_stress", &
-"canonicalUnits:                                               Pa", &
-"----------------------------------------------------------------", &
-"standardName:                  surface_downward_heat_flux_in_air", &
-"canonicalUnits:                                            W m-2", &
-"----------------------------------------------------------------", &
-"standardName:                  surface_downward_northward_stress", &
-"canonicalUnits:                                               Pa", &
-"----------------------------------------------------------------", &
-"standardName:                        surface_downward_water_flux", &
-"canonicalUnits:                                       kg m-2 s-1", &
-"----------------------------------------------------------------", &
-"standardName:                surface_eastward_sea_water_velocity", &
-"canonicalUnits:                                            m s-1", &
-"----------------------------------------------------------------", &
-"standardName:                 surface_net_downward_longwave_flux", &
-"canonicalUnits:                                            W m-2", &
-"----------------------------------------------------------------", &
-"standardName:                surface_net_downward_shortwave_flux", &
-"canonicalUnits:                                            W m-2", &
-"----------------------------------------------------------------", &
-"standardName:               surface_northward_sea_water_velocity", &
-"canonicalUnits:                                            m s-1", &
-"----------------------------------------------------------------"/), &
+!BOLTCFD
+      "standardName:                          air_pressure_at_sea_level", &
+      "canonicalUnits:                                               Pa", &
+      "----------------------------------------------------------------", &
+      "standardName:               magnitude_of_surface_downward_stress", &
+      "canonicalUnits:                                               Pa", &
+      "----------------------------------------------------------------", &
+      "standardName:                                 precipitation_flux", &
+      "canonicalUnits:                                       kg m-2 s-1", &
+      "----------------------------------------------------------------", &
+      "standardName:                 sea_surface_height_above_sea_level", &
+      "canonicalUnits:                                                m", &
+      "----------------------------------------------------------------", &
+      "standardName:                               sea_surface_salinity", &
+      "canonicalUnits:                                             1e-3", &
+      "----------------------------------------------------------------", &
+      "standardName:                            sea_surface_temperature", &
+      "canonicalUnits:                                                K", &
+      "----------------------------------------------------------------", &
+      "standardName:                   surface_downward_eastward_stress", &
+      "canonicalUnits:                                               Pa", &
+      "----------------------------------------------------------------", &
+      "standardName:                  surface_downward_heat_flux_in_air", &
+      "canonicalUnits:                                            W m-2", &
+      "----------------------------------------------------------------", &
+      "standardName:                  surface_downward_northward_stress", &
+      "canonicalUnits:                                               Pa", &
+      "----------------------------------------------------------------", &
+      "standardName:                        surface_downward_water_flux", &
+      "canonicalUnits:                                       kg m-2 s-1", &
+      "----------------------------------------------------------------", &
+      "standardName:                surface_eastward_sea_water_velocity", &
+      "canonicalUnits:                                            m s-1", &
+      "----------------------------------------------------------------", &
+      "standardName:                 surface_net_downward_longwave_flux", &
+      "canonicalUnits:                                            W m-2", &
+      "----------------------------------------------------------------", &
+      "standardName:                surface_net_downward_shortwave_flux", &
+      "canonicalUnits:                                            W m-2", &
+      "----------------------------------------------------------------", &
+      "standardName:               surface_northward_sea_water_velocity", &
+      "canonicalUnits:                                            m s-1", &
+      "----------------------------------------------------------------"/), &
+!EOLTCFD
+!EOLTFD
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
@@ -930,125 +963,6 @@ module NUOPC_FieldDictionaryDef
       file=FILENAME)) &
       return  ! bail out
 
-#else
-
-!BOLT l l
-! "{\bf StandardName}"
-! "{\bf CanonicalUnits}"
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "air_pressure_at_sea_level", &
-      canonicalUnits    = "Pa", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "magnitude_of_surface_downward_stress", &
-      canonicalUnits    = "Pa", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "precipitation_flux", &
-      canonicalUnits    = "kg m-2 s-1", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "sea_surface_height_above_sea_level", &
-      canonicalUnits    = "m", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "sea_surface_salinity", &
-      canonicalUnits    = "1e-3", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "sea_surface_temperature", &
-      canonicalUnits    = "K", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_eastward_sea_water_velocity", &
-      canonicalUnits    = "m s-1", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_downward_eastward_stress", &
-      canonicalUnits    = "Pa", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_downward_heat_flux_in_air", &
-      canonicalUnits    = "W m-2", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_downward_water_flux", &
-      canonicalUnits    = "kg m-2 s-1", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_downward_northward_stress", &
-      canonicalUnits    = "Pa", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_net_downward_shortwave_flux", &
-      canonicalUnits    = "W m-2", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_net_downward_longwave_flux", &
-      canonicalUnits    = "W m-2", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!BOTL
-    call NUOPC_FieldDictionaryAddEntryI(fieldDictionary, &
-      standardName      = "surface_northward_sea_water_velocity", &
-      canonicalUnits    = "m s-1", &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
-!EOTL
-!EOLT
-#endif
   end subroutine
   !-----------------------------------------------------------------------------
 
