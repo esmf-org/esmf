@@ -13,21 +13,28 @@ TESTS_BUILD = \
 		$(ESMF_TESTDIR)/ESMF_TraceClkMonoSyncUTest \
 		$(ESMF_TESTDIR)/ESMF_TraceUTest \
 		$(ESMF_TESTDIR)/ESMF_TraceIOUTest \
-		$(ESMF_TESTDIR)/ESMF_TraceMPIUTest 
+		$(ESMF_TESTDIR)/ESMF_TraceMPIUTest \
+                $(ESMF_TESTDIR)/ESMC_TraceRegionUTest \
+		$(ESMF_TESTDIR)/ESMF_ProfileUTest 
+
 
 TESTS_RUN = \
 		RUN_ESMF_TraceUTest \
 		RUN_ESMF_TraceClkMonoUTest \
 		RUN_ESMF_TraceClkMonoSyncUTest \
 		RUN_ESMF_TraceIOUTest \
-		RUN_ESMF_TraceMPIUTest 
+		RUN_ESMF_TraceMPIUTest \
+                RUN_ESMF_TraceRegionUTest \
+		RUN_ESMF_ProfileUTest	
 
 TESTS_RUN_UNI = \
 		RUN_ESMF_TraceUTestUNI \
 		RUN_ESMF_TraceClkMonoUTestUNI \
 		RUN_ESMF_TraceClkMonoSyncUTestUNI \
 		RUN_ESMF_TraceIOUTestUNI \
-		RUN_ESMF_TraceMPIUTestUNI 
+		RUN_ESMF_TraceMPIUTestUNI \
+		RUN_ESMF_TraceRegionUTestUNI \
+		RUN_ESMF_ProfileUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -99,11 +106,32 @@ RUN_ESMF_TraceIOUTestUNI:
 
 RUN_ESMF_TraceMPIUTest:
 	rm -rf $(ESMF_TESTDIR)/traceout
-	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceMPI NP=4 $(ESMF_TESTTRACE_TARGET) 
+	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=TraceMPI NP=4 $(ESMF_TESTTRACE_TARGET) 
 
 RUN_ESMF_TraceMPIUTestUNI:
 	rm -rf $(ESMF_TESTDIR)/traceout
-	env ESMF_RUNTIME_TRACE=ON $(MAKE) TNAME=TraceMPI NP=1 $(ESMF_TESTTRACE_TARGET)
+	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=TraceMPI NP=1 $(ESMF_TESTTRACE_TARGET)
+
+# --- TraceRegionUTest
+
+RUN_ESMF_TraceRegionUTest:
+	$(MAKE) TNAME=TraceRegion NP=4 ctest
+
+RUN_ESMF_TraceRegionUTestUNI:
+	$(MAKE) TNAME=TraceRegion NP=1 ctest
+
+
+# --- ProfileUTest
+ESMF_ProfileUTest.o: ESMF_SimpleCompB.o
+ESMF_UTEST_Profile_OBJS = ESMF_SimpleCompB.o
+
+RUN_ESMF_ProfileUTest:
+	rm -rf $(ESMF_TESTDIR)/traceout
+	env ESMF_RUNTIME_PROFILE=ON ESMF_RUNTIME_PROFILE_PETLIST="0 3" ESMF_RUNTIME_PROFILE_OUTPUT="TEXT BINARY" $(MAKE) TNAME=Profile NP=4 ftest
+
+RUN_ESMF_ProfileUTestUNI:
+	rm -rf $(ESMF_TESTDIR)/traceout
+	env ESMF_RUNTIME_PROFILE=ON $(MAKE) TNAME=Profile NP=1 ftest
 
 
 ifneq ($(ESMF_OS),Darwin)

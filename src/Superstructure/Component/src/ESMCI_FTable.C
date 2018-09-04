@@ -1780,28 +1780,29 @@ int FTable::callVFuncPtr(
         //if tracing enabled, turn on compliance checker
         if (!complianceCheckFlag) {
           envVar = VM::getenv("ESMF_RUNTIME_TRACE");    
-          if (envVar != NULL){
+          if (envVar != NULL) {
             string value(envVar);
-
-            if (value.find("on")!=string::npos ||
-                value.find("ON")!=string::npos) {
-
-              complianceCheckFlag = true;
-
-              //if component-level tracing is off, do not
-              //hook in compliance checker
-              envVar = VM::getenv("ESMF_RUNTIME_TRACE_COMPONENT");
-              if (envVar != NULL) {
-                string valueComponent(envVar);
-                if (valueComponent.find("off")!=string::npos ||
-                    valueComponent.find("OFF")!=string::npos) {
-                  complianceCheckFlag = false;
-                }
-              }
+            complianceCheckFlag |= value.find("on")!=string::npos;  // turn on
+            complianceCheckFlag |= value.find("ON")!=string::npos;  // turn on
+          }
+          envVar = VM::getenv("ESMF_RUNTIME_PROFILE");    
+          if (envVar != NULL) {
+            string value(envVar);
+            complianceCheckFlag |= value.find("on")!=string::npos;  // turn on
+            complianceCheckFlag |= value.find("ON")!=string::npos;  // turn on
+          }  
+          if (complianceCheckFlag) {
+            //if component-level tracing is off, do not
+            //hook in compliance checker
+            envVar = VM::getenv("ESMF_RUNTIME_TRACE_COMPONENT");
+            if (envVar != NULL) {
+              string value(envVar);
+              complianceCheckFlag &= value.find("off")==string::npos;  // turn off
+              complianceCheckFlag &= value.find("OFF")==string::npos;  // turn off
             }
           }
         }
-        
+              
         if (complianceCheckFlag){
           int registerIcUserRc;
 

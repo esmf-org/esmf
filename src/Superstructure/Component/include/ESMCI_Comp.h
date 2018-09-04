@@ -79,7 +79,7 @@ class Comp{
     static int getComplianceCheckerDepth(int *depth);
     static int getComplianceCheckerJSON(int *jsonIsOn);
     static int getComplianceCheckerText(int *textIsOn);
-    static int getComplianceCheckerTrace(int *traceIsOn);
+    static int getComplianceCheckerTrace(int *traceIsOn, int *profileIsOn);
 };
 
 class GridComp:public Comp{

@@ -15,6 +15,10 @@
 
 #include <string.h>
 #include "ESMCI_Comp.h"
+#include <esmftrc.h>
+
+#define TO_VOID_PTR(_value)           static_cast<void *>(_value)
+#define FROM_VOID_PTR(_type, _value)  static_cast<_type *>(_value)
 
 #define ESMF_CLOCK_REALTIME       1
 #define ESMF_CLOCK_MONOTONIC      2
@@ -23,6 +27,11 @@
 #define TRACE_WRAP_NONE    0  /* no wrappers */
 #define TRACE_WRAP_DYNAMIC 1  /* dynamic linker does wrapping */
 #define TRACE_WRAP_STATIC  2  /* wrappers statically compiled in */
+
+#define TRACE_REGIONTYPE_PHASE 0
+#define TRACE_REGIONTYPE_USER  1
+
+#define NODENAME_LEN 100      /* string length of compute node hostname */
 
 #if (!defined ESMF_OS_Darwin || defined ESMF_NO_DLFCN)
 extern "C" {
@@ -38,10 +47,22 @@ extern "C" {
 #endif
 
 namespace ESMCI { 
-  void TraceOpen(std::string trace_dir, int *rc);
+
+  struct esmftrc_platform_filesys_ctx {
+    struct esmftrc_default_ctx ctx;
+    FILE *fh;
+    int stream_id;
+    char nodename[NODENAME_LEN];
+    uint64_t latch_ts;  /* latched timestamp */
+  };
+
+  void TraceInitializeClock(int *rc);
+  uint64_t TraceGetClock(void *data);
+  void TraceClockLatch(struct esmftrc_platform_filesys_ctx *ctx);
+  void TraceClockUnlatch(struct esmftrc_platform_filesys_ctx *ctx);
+  void TraceOpen(std::string trace_dir, int *profileToLog, int *rc);
   void TraceClose(int *rc);
   bool TraceInitialized();
-  bool TraceIsEnabledForPET(int *rc);
   std::string TraceGetMetadataString();
   int TraceMapVmId(VMId *vmid, int *rc);
 
@@ -71,16 +92,16 @@ namespace ESMCI {
   ////////////////////////////////
 
   void TraceEventPhaseEnter(int *ep_vmid, int *ep_baseid, 
-			    int *ep_method, int *ep_phase);
+			    int *ep_method, int *ep_phase, int *rc);
   void TraceEventPhaseExit(int *ep_vmid, int *ep_baseid, 
-			   int *ep_method, int *ep_phase);
+			   int *ep_method, int *ep_phase, int *rc);
   void TraceEventPhasePrologueEnter(int *ep_vmid, int *ep_baseid, 
                                     int *ep_method, int *ep_phase);
   void TraceEventPhaseEpilogueExit(int *ep_vmid, int *ep_baseid, 
                                     int *ep_method, int *ep_phase);
   
-  void TraceEventRegionEnter(std::string name);
-  void TraceEventRegionExit(std::string name);
+  void TraceEventRegionEnter(std::string name, int *rc);
+  void TraceEventRegionExit(std::string name, int *rc);
   
   void TraceEventComponentInfo(Comp *comp, int *ep_vmid, int *ep_baseid,
                                const char *ep_name,
@@ -89,6 +110,7 @@ namespace ESMCI {
   void TraceEventMemInfo();
   void TraceEventClock(int *ep_year, int *ep_month, int *ep_day,
                        int *ep_hour, int *ep_minute, int *ep_second);
+
 }
 
 #endif

@@ -14,3 +14,9 @@ If the config.yaml file changes, then run the following to
 generate the new interfaces.
 
 $ barectf -c src -H include -m include config.yaml
+
+After this, run the following command to generate the file
+src/ESMCI_TraceMetadata.C which writes out the metadata
+file in the trace output directory at runtime.
+
+$ python gen_trace_metadata.py

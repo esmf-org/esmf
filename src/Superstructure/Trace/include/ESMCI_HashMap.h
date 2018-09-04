@@ -21,6 +21,9 @@
 #include "ESMCI_HashNode.h"
 #include "ESMCI_KeyHash.h"
 #include <cstddef>
+#include <vector>
+
+using std::vector;
 
 namespace ESMCI {
   // Hash map class template
@@ -50,6 +53,18 @@ namespace ESMCI {
       }
     }
 
+    vector<HashNode<K, V> *> getEntries() const {
+      vector<HashNode<K, V> *> entries;
+      for (size_t i = 0; i < tableSize; ++i) {
+        HashNode<K, V> *entry = table[i];
+        while (entry != NULL) {
+          entries.push_back(entry);
+          entry = entry->getNext();
+        }
+      }
+      return entries;
+    }
+    
     bool get(const K &key, V &value)
     {
       unsigned long hashValue = hashFunc(key);
@@ -95,6 +110,20 @@ namespace ESMCI {
       }
     }
 
+    bool reverse(const V &value, K &key) {
+      for (unsigned long i=0; i < tableSize; i++) {
+        HashNode<K, V> *entry = table[i];
+        while (entry != NULL && entry->getValue() != value) {
+          entry = entry->getNext();
+        }
+        if (entry != NULL) {
+          key = entry->getKey();
+          return true;
+        }
+      }
+      return false;
+    }
+    
     void remove(const K &key)
     {
       unsigned long hashValue = hashFunc(key);

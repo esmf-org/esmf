@@ -33,6 +33,12 @@ metadata:
     int64:
       $inherit: uint8
       signed: true
+    double:
+      class: float
+      size:
+        exp: 11
+        mant: 53
+      align: 64
     clock-int:
       $inherit: uint64
       property-mappings:
@@ -46,6 +52,12 @@ metadata:
             - initialize
             - run
             - finalize
+    enum_type_region:
+        class: enum
+        value-type: uint8
+        members:
+           - comp_phase
+           - user_defined
     event_type_phase:
         class: struct
         fields:
@@ -71,7 +83,7 @@ metadata:
       description: System clock
       $return-ctype: uint64_t
   env:
-    esmf_trace_version: '0.5'
+    esmf_trace_version: '0.6'
   trace:
     byte-order: le
     uuid: auto
@@ -128,6 +140,11 @@ metadata:
                 class: struct
                 fields:
                     id: uint16
+                    type: enum_type_region
+                    vmid: uint16
+                    baseid: uint16
+                    method: enum_type_method
+                    phase: uint8
                     name:
                         class: string
         regionid_enter:
@@ -158,35 +175,47 @@ metadata:
                     hour: uint8
                     minute: uint8
                     second: uint8
-        ioopen:
-            payload-type:
-                class: struct
-                fields:
-                    filename:
-                        class: string
-                    time: uint64
-        ioread:
-            payload-type:
-                class: struct
-                fields:
-                    bytes: uint32
-                    time: uint64
-        iowrite:
-            payload-type:
-                class: struct
-                fields:
-                    bytes: uint32
-                    time: uint64
-        mpibarrier:
-            payload-type:
-                class: struct
-                fields:
-                    count: uint32
-                    time: uint64
+#        ioopen:
+#            payload-type:
+#                class: struct
+#                fields:
+#                    filename:
+#                        class: string
+#                    time: uint64
+#        ioread:
+#            payload-type:
+#                class: struct
+#                fields:
+#                    bytes: uint32
+#                    time: uint64
+#        iowrite:
+#            payload-type:
+#                class: struct
+#                fields:
+#                    bytes: uint32
+#                    time: uint64
+#        mpibarrier:
+#            payload-type:
+#                class: struct
+#                fields:
+#                    count: uint32
+#                    time: uint64
         mpiwait:
             payload-type:
                 class: struct
                 fields:
                     count: uint32
                     time: uint64
-                    
+        region_profile:
+            payload-type:
+                class: struct
+                fields:
+                    id: uint16
+                    parentid: uint16
+                    total: uint64
+                    self: uint64
+                    count: uint32
+                    max: uint64
+                    min: uint64
+                    mean: double
+                    stddev: double

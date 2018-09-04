@@ -217,76 +217,7 @@ program ESMF_TraceMPIUTest
   ! sleep to ensure files can be re-opened
   call ESMF_VMWtimeDelay(5.0_ESMF_KIND_R8, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Verify trace metadata exists"
-  write(failMsg, *) "Trace metadata does not exist"
 
-  call ESMF_UtilIOUnitGet(funit, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  
-  ioerr = 0
-  if (localPet == 0) then   
-     open (unit=funit, file="traceout/metadata", status="old", &
-          action="read", iostat=ioerr )
-     if (ioerr /= 0) then
-        close(funit)
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-     endif
-  endif
-  call ESMF_Test((ioerr == 0), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Read trace metadata file"
-  write(failMsg, *) "I/O error reading trace metadata file"
-
-  ioerr = 0
-  if (localPet == 0) then
-     read(funit, '(A)', iostat=ioerr) line
-     if (ioerr /= 0) then
-        close(funit)
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-     else
-        close(funit)
-     endif
-  endif
-  call ESMF_Test((ioerr == 0), name, failMsg, result, ESMF_SRCLINE)
-  !------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Validate trace metadata header"
-  write(failMsg, *) "Invalid header"
-
-  if (localPet == 0) then
-     call ESMF_Test((trim(line) == "/* CTF 1.8 */"), name, failMsg, result, ESMF_SRCLINE)
-  else
-     call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
-  endif
-  !------------------------------------------------------------------------
-
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(name, *) "Verify trace stream file exists"
-  write(failMsg, *) "Trace stream file does not exist"
-    
-  write (filename, '(A,I1)') "traceout/esmf_stream_000", localPet
-  print *, "Attempt to open trace file: ", trim(filename)
-  open (unit=funit, file=trim(filename), status="old", &
-       action="read", iostat=ioerr)
-  if (ioerr /= 0) then
-     print *, "IO error = ", ioerr
-  endif
-  call ESMF_Test((ioerr == 0), name, failMsg, result, ESMF_SRCLINE)
-  close(funit)
-  !------------------------------------------------------------------------
-  
-  
   !-----------------------------------------------------------------------------
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------

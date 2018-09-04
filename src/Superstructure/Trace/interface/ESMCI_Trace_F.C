@@ -19,11 +19,12 @@ extern "C" {
   void FTN_X(c_esmftrace_open)
      (                          
       const char *trace_dir,
+      int *profileToLog,
       int *rc,
       ESMCI_FortranStrLenArg nlen)  //strlen for trace_dir
   {
     string dirname = string(trace_dir, ESMC_F90lentrim(trace_dir, nlen));
-    ESMCI::TraceOpen(dirname, rc);
+    ESMCI::TraceOpen(dirname, profileToLog, rc);
   }
 
   void FTN_X(c_esmftrace_close)(int *rc)
@@ -46,14 +47,12 @@ extern "C" {
 
   void FTN_X(c_esmftrace_phase_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
-    ESMCI::TraceEventPhaseEnter(vmid, baseid, method, phase);
-    if (rc != NULL) *rc = ESMF_SUCCESS;
+    ESMCI::TraceEventPhaseEnter(vmid, baseid, method, phase, rc);
   }
 
   void FTN_X(c_esmftrace_phase_exit)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
-    ESMCI::TraceEventPhaseExit(vmid, baseid, method, phase);
-    if (rc != NULL) *rc = ESMF_SUCCESS;
+    ESMCI::TraceEventPhaseExit(vmid, baseid, method, phase, rc);
   }
 
   void FTN_X(c_esmftrace_phase_prologue_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)
@@ -98,14 +97,12 @@ extern "C" {
   void FTN_X(c_esmftrace_region_enter)(const char *name, int *rc, ESMCI_FortranStrLenArg nlen) {
     //TODO: optimize trim by not creating string object
     string cname = string(name, ESMC_F90lentrim(name, nlen));
-    ESMCI::TraceEventRegionEnter(cname);
-    if (rc != NULL) *rc = ESMF_SUCCESS;
+    ESMCI::TraceEventRegionEnter(cname, rc);
   }
 
   void FTN_X(c_esmftrace_region_exit)(const char *name, int *rc, ESMCI_FortranStrLenArg nlen) {
     string cname = string(name, ESMC_F90lentrim(name, nlen));
-    ESMCI::TraceEventRegionExit(cname);
-    if (rc != NULL) *rc = ESMF_SUCCESS;
+    ESMCI::TraceEventRegionExit(cname, rc);
   }
 
   void FTN_X(c_esmftrace_mem_info)(int *rc) {

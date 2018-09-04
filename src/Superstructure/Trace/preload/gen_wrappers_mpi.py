@@ -150,7 +150,9 @@ template_preload_mpi = """
 
 #ifdef ESMF_PGIVERSION_MAJOR
 /* required for RTLD_NEXT */
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #endif
 
 #include <dlfcn.h>

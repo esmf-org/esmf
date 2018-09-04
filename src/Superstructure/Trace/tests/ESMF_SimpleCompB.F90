@@ -13,7 +13,7 @@
 ! Supporting code for Trace unit tests.
 !
 
-module SimpleComp
+module SimpleCompB
 
   use ESMF
   implicit none
@@ -74,4 +74,4 @@ contains
       
   end subroutine Finalize 
 
-end module SimpleComp
+end module SimpleCompB
