@@ -103,11 +103,18 @@ namespace ESMCI{
       std::pair<int, int> comp_pet_range = comp_info.get_pet_range();
       std::pair<T, T> comp_time_intvl = comp_info.get_time_interval();
 
-      pet_range_.first = std::min(pet_range_.first, comp_pet_range.first);
-      pet_range_.second = std::max(pet_range_.second, comp_pet_range.second);
+      if(comp_phases_.size() > 1){
+        pet_range_.first = std::min(pet_range_.first, comp_pet_range.first);
+        pet_range_.second = std::max(pet_range_.second, comp_pet_range.second);
 
-      time_intvl_.first = std::min(time_intvl_.first, comp_time_intvl.first);
-      time_intvl_.second = std::max(time_intvl_.second, comp_time_intvl.second);   
+        time_intvl_.first = std::min(time_intvl_.first, comp_time_intvl.first);
+        time_intvl_.second = std::max(time_intvl_.second, comp_time_intvl.second);
+      }
+      else{
+        // comp_phases_.size() == 1, first comp phase added to the exec block
+        pet_range_ = comp_pet_range;
+        time_intvl_ = comp_time_intvl;
+      }
     }
 
     template<typename T>
