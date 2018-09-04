@@ -34,7 +34,7 @@ TESTS_RUN_UNI = \
 		RUN_ESMF_TraceIOUTestUNI \
 		RUN_ESMF_TraceMPIUTestUNI \
 		RUN_ESMF_TraceRegionUTestUNI \
-		RUN_ESMF_ProfileUTest
+		RUN_ESMF_ProfileUTestUNI
 
 include ${ESMF_DIR}/makefile
 
