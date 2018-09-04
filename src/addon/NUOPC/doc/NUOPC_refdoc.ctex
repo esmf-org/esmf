@@ -80,9 +80,7 @@
 \subsection{Field Dictionary}
 #ifdef STANDALONE
 \input{NUOPC_FieldDictionary}
-\input{NUOPC_FieldDictionaryDef_fapi}
 #elif defined(CONSTITUENT)
-\input{../addon/NUOPC/doc/NUOPC_FieldDictionaryDef_fapi}
 \input{../addon/NUOPC/doc/NUOPC_FieldDictionary}
 #endif
 

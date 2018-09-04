@@ -9,65 +9,16 @@ The NUOPC Layer provides a number of default entries in the Field Dictionary, as
 
 In alternative, a new NUOPC Field Dictionary can be setup by reading its content from a custom file in \htmladdnormallink{YAML 1.2 language}{http://yaml.org/spec/1.2/spec.html}. See section \ref{fd:custom} for details.
 
+%/////////////////////////////////////////////////////////////
+
 \subsubsection{Default Field Dictionary}
 \label{fd:default}
 
 A default NUOPC Field Dictionary is preloaded by the NUOPC Layer at start-up, and consists of the entries show in the table below.
 The {\tt StandardName} Attribute of these entries complies with the Climate and Forecast (CF) conventions \htmladdnormallink{guidelines}{http://cfconventions.org/Data/cf-standard-names/docs/guidelines.html}.
 
-\vspace{4ex}
-%/////////////////////////////////////////////////////////////
-\begin{tabular}{|l|l|}
-\hline \hline
-   {\bf StandardName}
- & {\bf CanonicalUnits}
-\\ \hline \hline
+\input{NUOPC_FieldDictionaryDef_fapi}
 
-
-                             air\_pressure\_at\_sea\_level
- &                                                Pa
-\\ \hline
-                  magnitude\_of\_surface\_downward\_stress
- &                                                Pa
-\\ \hline
-                                    precipitation\_flux
- &                                        kg m-2 s-1
-\\ \hline
-                    sea\_surface\_height\_above\_sea\_level
- &                                                 m
-\\ \hline
-                                  sea\_surface\_salinity
- &                                              1e-3
-\\ \hline
-                               sea\_surface\_temperature
- &                                                 K
-\\ \hline
-                      surface\_downward\_eastward\_stress
- &                                                Pa
-\\ \hline
-                     surface\_downward\_heat\_flux\_in\_air
- &                                             W m-2
-\\ \hline
-                     surface\_downward\_northward\_stress
- &                                                Pa
-\\ \hline
-                           surface\_downward\_water\_flux
- &                                        kg m-2 s-1
-\\ \hline
-                   surface\_eastward\_sea\_water\_velocity
- &                                             m s-1
-\\ \hline
-                    surface\_net\_downward\_longwave\_flux
- &                                             W m-2
-\\ \hline
-                   surface\_net\_downward\_shortwave\_flux
- &                                             W m-2
-\\ \hline
-                  surface\_northward\_sea\_water\_velocity
- &                                             m s-1
-\\ \hline
-\hline
-\end{tabular}
 %/////////////////////////////////////////////////////////////
 
 \subsubsection{Custom Field Dictionary}
