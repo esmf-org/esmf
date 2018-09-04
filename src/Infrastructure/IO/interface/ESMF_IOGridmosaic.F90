@@ -139,8 +139,8 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, tileFilePath, rc)
     integer   :: ncid, varid
     integer   :: i, j, nvars, attlen
     integer   :: ntiles, ncontacts
-    character(len=ESMF_MAXSTR) :: attstr
-    character(len=ESMF_MAXSTR) :: mosaicname
+    character(len=128) :: attstr
+    character(len=128) :: mosaicname
     character(len=ESMF_MAXPATHLEN) :: tempname
     integer            :: strlen
     character(len=1), allocatable :: temptilenames(:,:)

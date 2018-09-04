@@ -722,19 +722,23 @@ module NUOPC_Base
 !BOP
 ! !IROUTINE: NUOPC_CheckSetClock - Check a Clock for compatibility and set its values
 ! !INTERFACE:
-  subroutine NUOPC_CheckSetClock(setClock, checkClock, setStartTimeToCurrent, rc)
+  subroutine NUOPC_CheckSetClock(setClock, checkClock, setStartTimeToCurrent, &
+    currTime, forceCurrTime, rc)
 ! !ARGUMENTS:
     type(ESMF_Clock),        intent(inout)         :: setClock
     type(ESMF_Clock),        intent(in)            :: checkClock
     logical,                 intent(in),  optional :: setStartTimeToCurrent
+    type(ESMF_Time),         intent(in),  optional :: currTime
+    logical,                 intent(in),  optional :: forceCurrTime
     integer,                 intent(out), optional :: rc
 ! !DESCRIPTION:
-!   Compare {\tt setClock} to {\tt checkClock} to ensure they match in
-!   their current fime. Further ensure that the timeStep of {\tt checkClock}
+!   By default compare {\tt setClock} to {\tt checkClock} to ensure they match
+!   in their current time. Further ensure that the timeStep of {\tt checkClock}
 !   is a multiple of the timeStep of {\tt setClock}. If both conditions are 
 !   satisfied then the stopTime of the {\tt setClock} is set one 
-!   {\tt checkClock} timeStep ahead of the current time. The direction of the
-!   clock is considered.
+!   {\tt checkClock} timeStep, or {\tt setClock} runDuration, ahead of the
+!   current time, which ever is shorter. The direction of {\tt checkClock}
+!   is considered when setting the stopTime.
 !
 !   By default the startTime of the {\tt setClock} is not modified. However, if
 !   {\tt setStartTimeToCurrent == .true.} the startTime of {\tt setClock} is set
@@ -749,6 +753,13 @@ module NUOPC_Base
 !   \item[{[setStartTimeToCurrent]}]
 !     If {\tt .true.} then also set the startTime in {\tt setClock} according to
 !     the startTime in {\tt checkClock}. The default is {\tt .false.}.
+!   \item[{[currTime]}]
+!     If provided, use {\tt currTime} instead of {\tt checkClock} when checking
+!     or setting the current time of {\tt setClock}.
+!   \item[{[forceCurrTime]}]
+!     If {\tt .true.} then do {\em not} check the current time of the
+!     {\tt setClock}, but instead force it to align with the {\tt checkClock},
+!     or {\tt currTime}, if it was provided. The default is {\tt .false.}.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -756,12 +767,23 @@ module NUOPC_Base
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
-    type(ESMF_Time)           :: checkCurrTime, currTime, stopTime, startTime
-    type(ESMF_TimeInterval)   :: checkTimeStep, timeStep
+    type(ESMF_Time)           :: checkCurrTime, setCurrTime, actCurrTime
+    type(ESMF_Time)           :: stopTime, startTime
+    type(ESMF_TimeInterval)   :: checkTimeStep, timeStep, runDuration
+    integer                   :: aSec, bSec
     type(ESMF_Direction_Flag) :: direction
-    type(ESMF_Time)           :: setTime
+    character(len=160)        :: msgString
+    character(len=80)         :: aString, bString
+    logical                   :: forceCurrTimeOpt
 
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    call ESMF_ClockGet(setClock, currTime=setCurrTime, timeStep=timeStep, &
+      runDuration=runDuration, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME)) &
+      return  ! bail out
     
     call ESMF_ClockGet(checkClock, currTime=checkCurrTime, &
       timeStep=checkTimeStep, direction=direction, rc=rc)
@@ -770,38 +792,19 @@ module NUOPC_Base
       file=FILENAME)) &
       return  ! bail out
     
-    call ESMF_ClockGet(setClock, currTime=currTime, timeStep=timeStep, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME)) &
-      return  ! bail out
+    ! Make sure to use the correct runDuration
+    if (runDuration > checkTimeStep) runDuration = checkTimeStep
     
-    ! ensure the current times match between checkClock and setClock
-    if (currTime /= checkCurrTime) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="setClock and checkClock do not match in current time!", &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
-    endif
-    
-    ! ensure that the check timestep is a multiple of the internal one
-    if (ceiling(checkTimeStep/timeStep) /= floor(checkTimeStep/timeStep))&
-      then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="checkClock timestep is not multiple of setClock timestep!", &
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-      return  ! bail out
-    endif
-    
+    ! deal with optional arguments
+    if (present(currTime)) checkCurrTime = currTime
+    forceCurrTimeOpt = .false.  ! default
+    if (present(forceCurrTime)) forceCurrTimeOpt = forceCurrTime
+
     ! set the new stopTime of the setClock
     if (direction==ESMF_DIRECTION_FORWARD) then
-      stopTime = currTime + checkTimeStep
+      stopTime = checkCurrTime + runDuration
     else
-      stopTime = currTime - checkTimeStep
+      stopTime = checkCurrTime - runDuration
     endif
     call ESMF_ClockSet(setClock, stopTime=stopTime, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -809,20 +812,72 @@ module NUOPC_Base
       file=FILENAME)) &
       return  ! bail out
     
-   ! conditionally set startTime of the setClock
-   if (present(setStartTimeToCurrent)) then
-      if (setStartTimeToCurrent) then
-        call ESMF_ClockGet(checkClock, currTime=setTime, rc=rc)
+    if (forceCurrTimeOpt) then
+      ! force the checkCurrTime on the setClock
+      call ESMF_ClockSet(setClock, currTime=checkCurrTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+    else
+      ! ensure the current time on setClock matches check
+      if (setCurrTime /= checkCurrTime) then
+        call ESMF_TimeGet(setCurrTime, timeStringISOFrac=aString, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
-        call ESMF_ClockSet(setClock, startTime=setTime, rc=rc)
+        call ESMF_TimeGet(checkCurrTime, timeStringISOFrac=bString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, &
+          file=FILENAME)) &
+          return  ! bail out
+        write (msgString,"(A)") "setClock currTime="//&
+          trim(adjustl(aString))//&
+          " is not the same as checkCurrTime="//&
+          trim(adjustl(bString))
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg=msgString, &
+          line=__LINE__, &
+          file=FILENAME, &
+          rcToReturn=rc)
+        return  ! bail out
+      endif
+    endif
+    
+    ! conditionally set startTime of the setClock
+    if (present(setStartTimeToCurrent)) then
+      if (setStartTimeToCurrent) then
+        call ESMF_ClockSet(setClock, startTime=checkCurrTime, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
           file=FILENAME)) &
           return  ! bail out
       endif
+    endif
+    
+    ! ensure that the check timestep is a multiple of the internal one
+    if (ceiling(runDuration/timeStep) /= floor(runDuration/timeStep)) then
+      call ESMF_TimeIntervalGet(timeStep, s=aSec, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      call ESMF_TimeIntervalGet(runDuration, s=bSec, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME)) &
+        return  ! bail out
+      write (aString, *) aSec
+      write (bString, *) bSec
+      write (msgString,"(A)") "setClock timeStep="//&
+        trim(adjustl(aString))//&
+        "s is not a divisor of runDuration="//&
+        trim(adjustl(bString))//"s"
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg=msgString, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
     endif
     
   end subroutine
@@ -1509,11 +1564,11 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)                    :: attrList(19)
-    character(NUOPC_FieldDictionaryEntryLen)  :: tempString
-    logical                                   :: accepted
-    integer                                   :: i
-    type(NUOPC_FieldDictionaryEntry)          :: fdEntry
+    character(ESMF_MAXSTR)            :: attrList(19)
+    character(ESMF_MAXSTR)            :: tempString
+    logical                           :: accepted
+    integer                           :: i
+    type(NUOPC_FieldDictionaryEntry)  :: fdEntry
     
     if (present(rc)) rc = ESMF_SUCCESS
 

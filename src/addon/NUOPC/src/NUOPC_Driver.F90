@@ -58,6 +58,7 @@ module NUOPC_Driver
     integer                           :: modelCount
     ! - static references to child components
     type(ESMF_GridComp), pointer      :: modelComp(:)
+    type(ESMF_Clock),    pointer      :: initClock(:)
     type(ESMF_State),    pointer      :: modelIS(:), modelES(:)
     type(ESMF_PtrInt1D), pointer      :: modelPetLists(:)
     type(ESMF_CplComp),  pointer      :: connectorComp(:,:)
@@ -471,6 +472,7 @@ module NUOPC_Driver
     allocate(is%wrap%modelPetLists(0:is%wrap%modelCount), &
       is%wrap%connectorPetLists(0:is%wrap%modelCount,0:is%wrap%modelCount), &
       is%wrap%modelComp(0:is%wrap%modelCount), &
+      is%wrap%initClock(0:is%wrap%modelCount), &
       is%wrap%modelIS(0:is%wrap%modelCount), &
       is%wrap%modelES(0:is%wrap%modelCount), &
       is%wrap%connectorComp(0:is%wrap%modelCount,0:is%wrap%modelCount), &
@@ -676,6 +678,12 @@ module NUOPC_Driver
 
     deallocate(compList, petLists)
 
+    ! query Component for its Clock (set during specialization)
+    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    
     ! initialize the default Run Sequence...
     nullify(is%wrap%runSeq) ! initialize
     is%wrap%runPhaseToRunSeqMap = 0 ! initialize
@@ -685,6 +693,11 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
+    ! set the upper most slot runClock as alias of Driver internalClock
+    call NUOPC_RunSequenceSet(is%wrap%runSeq(1), internalClock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! map run phase 1 to first run sequence element
     is%wrap%runPhaseToRunSeqMap(1) = 1
     
@@ -703,6 +716,8 @@ module NUOPC_Driver
       call NUOPC_RunElementAdd(is%wrap%runSeq(1), i=i, j=-1, phase=1, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      ! Store a reference if the clock to be used during model initialize
+      is%wrap%initClock(i) = is%wrap%runSeq(1)%clock
     enddo
 
     ! now the component labels are available -> create States with Namespace
@@ -747,12 +762,6 @@ module NUOPC_Driver
       endif
     enddo
       
-    ! query Component for its Clock (set during specialization)
-    call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) &
-      return  ! bail out
-    
     ! -> NUOPC Initialize Sequence requires presence of InitP0 for every 
     ! -> Model and Connector component, where they must set the
     ! -> "InitializePhaseMap" metadata.
@@ -984,7 +993,7 @@ module NUOPC_Driver
               return  ! bail out
             call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
               importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i),&
-              clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+              clock=is%wrap%initClock(i), phase=phase, userRc=localrc, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg="NUOPC Incompatible: "//&
               "Failed calling phase "// &
               trim(adjustl(pLabel))//" Initialize for modelComp "// &
@@ -1743,7 +1752,7 @@ module NUOPC_Driver
           return  ! bail out
         call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
           importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-          clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+          clock=is%wrap%initClock(i), phase=phase, userRc=localrc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase '"// &
           trim(adjustl(pLabel))//"' Initialize for modelComp "// &
           trim(adjustl(iString))//": "//trim(compName), &
@@ -2019,7 +2028,7 @@ module NUOPC_Driver
           ! attempt to make the actual call to initialize for model i
           call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
             importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-            clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+            clock=is%wrap%initClock(i), phase=phase, userRc=localrc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase "// &
             trim(adjustl(pString))//" Initialize for modelComp "// &
             trim(adjustl(iString))//": "//trim(compName), &
@@ -2118,7 +2127,7 @@ module NUOPC_Driver
     character(*), parameter         :: rName="Run"
     integer                         :: localrc
     type(type_InternalState)        :: is
-    type(ESMF_Clock)                :: internalClock
+    type(ESMF_Clock)                :: internalClock, activeClock
     logical                         :: existflag
     integer                         :: i, j, phase, runPhase, runSeqIndex
     character(ESMF_MAXSTR)          :: iString, jString, pLabel
@@ -2127,12 +2136,14 @@ module NUOPC_Driver
     type(ESMF_State)                :: imState, exState
     character(ESMF_MAXSTR)          :: name, compName, profileString
     integer                         :: verbosity, profiling
-    integer                         :: runElementCounter, runLoopCounter
+    integer                         :: runElementCounter
     integer                         :: runElementCounterMax
     real(ESMF_KIND_R8)              :: timeBase, timeStart, timeStop
     real(ESMF_KIND_R8)              :: timeSum(1000)  ! room for 1000 elements
-    logical                         :: loopFlag, firstFlag
     integer                         :: indentCount
+    integer                         :: loopLevel, loopLevelPrev
+    integer                         :: levelMember, levelMemberPrev
+    integer                         :: loopIteration, loopIterationPrev
 
     rc = ESMF_SUCCESS
 
@@ -2167,9 +2178,6 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-    ! initialize
-    runLoopCounter=1
-
     ! conditionally output info to Log file
     if (btest(verbosity,9)) then
       call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_RUN, &
@@ -2197,9 +2205,9 @@ module NUOPC_Driver
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       runElementCounter=0
-      write (msgString, "( A, ES16.8, A, I6, '/', I6 )" ) &
+      write (msgString, "( A, ES16.8, A, I6)" ) &
         "RunProfile time=   ", timeStart-timeBase, &
-        "   runLoop/runElement=", runLoopCounter, runElementCounter
+        "   runElement=", runElementCounter
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2208,6 +2216,8 @@ module NUOPC_Driver
     endif  
     
     ! set the driverClock member in the internal state
+    ! this is the incoming clock from the parent driver
+    ! do this in alignment with model and mediator components
     is%wrap%driverClock = clock
     
     ! SPECIALIZE required: label_SetRunClock
@@ -2254,12 +2264,6 @@ module NUOPC_Driver
     ! determine the correct run sequence index for the current runPhase    
     runSeqIndex = is%wrap%runPhaseToRunSeqMap(runPhase)
     
-    ! alias the component's internalClock in this runPhase run sequence
-    call NUOPC_RunSequenceSet(is%wrap%runSeq(runSeqIndex), internalClock, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    
     if (btest(verbosity,12)) then
       call ESMF_LogWrite(trim(name)//": begin -------> RunSequence.", &
         ESMF_LOGMSG_INFO, rc=rc)
@@ -2273,27 +2277,43 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
+    
+    ! initialize "Prev" variables
+    loopLevelPrev = 0
+    levelMemberPrev = 0
+    loopIterationPrev = 0
 
-    firstFlag = .true.
     ! use RunSequence iterator to execute the actual time stepping loop
     nullify(runElement) ! prepare runElement for iterator use
     do while (NUOPC_RunSequenceIterate(is%wrap%runSeq, runSeqIndex, &
-      runElement, loopFlag=loopFlag, rc=rc))
+      runElement, rc=rc))
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      
-      if (loopFlag) then
-        ! increment the loop counter
-        runLoopCounter=runLoopCounter+1
+
+      if (.not.ESMF_ClockEQAlias(activeClock,runElement%runSeq%clock)) then
+        ! set activeClock
+        activeClock = runElement%runSeq%clock
       endif
 
-      if (firstFlag .or. loopFlag) then
-        firstFlag = .false. ! reset
-        if (btest(verbosity,12)) then
-          write(msgString,"(A,I6)") &
-            trim(name)//": RunSequence iteration #", runLoopCounter
-          call ESMF_ClockPrint(internalClock, options="currTime", &
+      if (btest(verbosity,12)) then
+        loopLevel = runElement%runSeq%loopLevel
+        levelMember = runElement%runSeq%levelMember
+        loopIteration = runElement%runSeq%loopIteration
+        if ((loopLevel/=loopLevelPrev).or.(levelMember/=levelMemberPrev).or.&
+          (loopIteration/=loopIterationPrev)) then
+          ! found a time loop event -> need to log
+          ! update the "Prev' variables
+          loopLevelPrev = loopLevel
+          levelMemberPrev = levelMember
+          loopIterationPrev = loopIteration
+          ! write iteration info to Log
+          write(msgString,"(A,I4,A,I4,A,I4)") &
+            trim(name)//": RunSequence event loopLevel=", &
+            runElement%runSeq%loopLevel, "  levelMember=", &
+            runElement%runSeq%levelMember, "  loopIteration=", &
+            runElement%runSeq%loopIteration
+          call ESMF_ClockPrint(activeClock, options="currTime", &
             preString=trim(msgString)//", current time: ", &
             unit=timeString, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2305,17 +2325,9 @@ module NUOPC_Driver
         endif
       endif
       
-      if (btest(profiling,0)) then
-        if (loopFlag) then
-          ! reset
-          runElementCounter = 0
-        endif
-      endif
-      
       ! now interpret and act on the current runElement
       i = runElement%i
       phase = runElement%phase
-      internalClock = runElement%runSeq%clock
       if (runElement%j >= 0) then
         ! connector component: i -> j
         j = runElement%j
@@ -2345,10 +2357,9 @@ module NUOPC_Driver
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
             runElementCounter=runElementCounter+1
-            write (msgString, "( A40,A,ES16.8,A,I6,'/',I6 )" ) &
+            write (msgString, "( A40,A,ES16.8)" ) &
               trim(profileString), &
-              " time=", timeStart-timeBase, &
-              "   runLoop/runElement=", runLoopCounter, runElementCounter
+              " time=", timeStart-timeBase
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2360,7 +2371,7 @@ module NUOPC_Driver
 #endif    
           call ESMF_GridCompRun(is%wrap%modelComp(i), &
             importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-            clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+            clock=activeClock, phase=phase, userRc=localrc, rc=rc)
 #ifdef NUOPC_DRIVER_TRACE
           call ESMF_TraceRegionExit("NUOPC_Driver:GridComp:Callthrough")
 #endif
@@ -2381,10 +2392,9 @@ module NUOPC_Driver
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
-            write (msgString, "( A40,A,ES16.8,A,I6,'/',I6,A,ES16.8)" ) &
+            write (msgString, "( A40,A,ES16.8,A,ES16.8)" ) &
               trim(profileString), &
               " time=", timeStop-timeBase, &
-              "   runLoop/runElement=", runLoopCounter, runElementCounter, &
               "   diffTime=", timeStop-timeStart
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2411,9 +2421,8 @@ module NUOPC_Driver
       call ESMF_LogSet(indentCount=indentCount-2, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      write(msgString,"(A,I6)") &
-        trim(name)//": end <--------- RunSequence, total iterations: ", &
-        runLoopCounter
+      write(msgString,"(A)") &
+        trim(name)//": end <--------- RunSequence"
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2450,8 +2459,7 @@ module NUOPC_Driver
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      write (msgString, *) "  total number of loops executed:   ", &
-        runLoopCounter
+      write (msgString, *) "  total number of loops executed:   "
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2519,10 +2527,9 @@ module NUOPC_Driver
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
             runElementCounter=runElementCounter+1
-            write (msgString, "( A40,A,ES16.8,A,I6,'/',I6 )" ) &
+            write (msgString, "( A40,A,ES16.8)" ) &
               trim(profileString), &
-              " time=", timeStart-timeBase, &
-              "   runLoop/runElement=", runLoopCounter, runElementCounter
+              " time=", timeStart-timeBase
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -2534,7 +2541,7 @@ module NUOPC_Driver
 #endif          
           call ESMF_CplCompRun(is%wrap%connectorComp(i,j), &
             importState=imState, exportState=exState, &
-            clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+            clock=activeClock, phase=phase, userRc=localrc, rc=rc)
 #ifdef NUOPC_DRIVER_TRACE
           call ESMF_TraceRegionExit("NUOPC_Driver:CplComp:Callthrough")
 #endif
@@ -2557,10 +2564,9 @@ module NUOPC_Driver
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
-            write (msgString, "( A40,A,ES16.8,A,I6,'/',I6,A,ES16.8)" ) &
+            write (msgString, "( A40,A,ES16.8,A,ES16.8)" ) &
               trim(profileString), &
               " time=", timeStop-timeBase, &
-              "   runLoop/runElement=", runLoopCounter, runElementCounter, &
               "   diffTime=", timeStop-timeStart
             call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2811,7 +2817,7 @@ module NUOPC_Driver
 
     ! deallocate lists inside the internal state
     deallocate(is%wrap%modelPetLists, is%wrap%connectorPetLists, &
-      is%wrap%modelComp, is%wrap%modelIS, is%wrap%modelES, &
+      is%wrap%modelComp, is%wrap%initClock, is%wrap%modelIS, is%wrap%modelES, &
       is%wrap%connectorComp, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
       msg="Deallocation of internal state memory failed.", &
@@ -3601,6 +3607,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! Store a reference to the first runClock under which this model is called
+    ! during RunSequence execution, in order to use it for model initialize
+    is%wrap%initClock(iComp) = is%wrap%runSeq(slot)%clock
+    
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -4268,7 +4278,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     autoAddConnectors, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                           :: driver
-    type(NUOPC_FreeFormat), intent(in)            :: freeFormat
+    type(NUOPC_FreeFormat), intent(in), target    :: freeFormat
     logical,                intent(in),  optional :: autoAddConnectors
     integer,                intent(out), optional :: rc 
 !
@@ -4360,16 +4370,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=NUOPC_FreeFormatLen), allocatable :: tokenList(:)
     integer, allocatable                            :: slotStack(:)
     character(len=NUOPC_FreeFormatLen)              :: tempString
-    type(ESMF_TimeInterval)                         :: timeStep
-    type(ESMF_Clock)                                :: internalClock, subClock
+    type(ESMF_TimeInterval)                         :: timeStep, runDuration
+    type(ESMF_Clock)                                :: internalClock, runClock
     integer                                         :: level, slot, slotHWM
-    integer                                         :: slotCount
+    integer                                         :: slotCount, topLoops
+    integer                                         :: colonIndex
+    logical                                         :: haveTimeStep
+    logical                                         :: haveRunDuration
     real(ESMF_KIND_R8)                              :: seconds
     logical                                         :: optAutoAddConnectors
     type(ESMF_CplComp)                              :: conn
     integer                                         :: verbosity, vInherit
     character(len=10)                               :: vString
-
+    logical                                         :: needDriverTopLoop
+    type(NUOPC_FreeFormat), target                  :: freeFormatTemp
+    type(NUOPC_FreeFormat), pointer                 :: freeFormatPtr
+    integer                                         :: aSec, bSec
+    character(len=160)                              :: msgString
+    character(len=80)                               :: aString, bString
+    logical                                         :: zeroSkip
+    integer                                         :: zeroSkipLevel
+    
     if (present(rc)) rc = ESMF_SUCCESS
     
     optAutoAddConnectors = .false. ! default
@@ -4394,7 +4415,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       return  ! bail out
     
     ! determine slotCount and potentially automatically add connectors
+    ! also detect if a driver top loop is needed
     slotCount = 0
+    level = 0
+    topLoops = 0
+    needDriverTopLoop = .false.
     do i=1, lineCount
       call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
         rc=rc)
@@ -4409,57 +4434,126 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         return  ! bail out
       if (tokenCount == 1) then
         if (index(trim(tokenList(1)),"@") == 1) then
+          ! start or end of a time loop
           slotCount = slotCount + 1
+          if (len_trim(tokenList(1))>1) then
+            ! start of a time loop
+            if (level==0) topLoops = topLoops + 1 ! count top loop
+            level = level + 1
+          else
+            ! end of a time loop
+            level = level - 1
+          endif
+        else
+          ! some other element
+          if (level==0) needDriverTopLoop = .true.  ! element outside top loop
         endif
-      elseif (optAutoAddConnectors .and. &
-        ((tokenCount == 3) .or. (tokenCount == 4))) then
-        ! a connector if the second element is "->"
-        if (trim(tokenList(2)) /= "->") then
-          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="Configuration line incorrectly formatted.", &
-            line=__LINE__, &
-            file=trim(name)//":"//FILENAME, rcToReturn=rc)
-          return  ! bail out
-        endif
-        ! determine whether this connector component already exists
-        call NUOPC_DriverGetCplComp(driver, srcCompLabel=trim(tokenList(1)), &
-          dstCompLabel=trim(tokenList(3)), comp=conn, relaxedflag=.true., rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-          return  ! bail out
-        if (.not.ESMF_CplCompIsCreated(conn)) then
-          ! this is a new connector component that needs to be added to driver
-          call NUOPC_DriverAddComp(driver, &
-            srcCompLabel=trim(tokenList(1)), dstCompLabel=trim(tokenList(3)), &
-            compSetServicesRoutine=cplSS, comp=conn, rc=rc)
+      else
+        if (level==0) needDriverTopLoop = .true.  ! element outside top loop
+        if (optAutoAddConnectors .and. &
+          ((tokenCount == 3) .or. (tokenCount == 4))) then
+          ! a connector if the second element is "->"
+          if (trim(tokenList(2)) /= "->") then
+            call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+              msg="Configuration line incorrectly formatted.", &
+              line=__LINE__, &
+              file=trim(name)//":"//FILENAME, rcToReturn=rc)
+            return  ! bail out
+          endif
+          ! determine whether this connector component already exists
+          call NUOPC_DriverGetCplComp(driver, srcCompLabel=trim(tokenList(1)), &
+            dstCompLabel=trim(tokenList(3)), comp=conn, relaxedflag=.true., rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          ! automatically created connectors inherit lower 8-bit
-          ! of parent's verbosity setting
-          vInherit = ibits(verbosity,0,8)
-          write(vString,"(I10)") vInherit
-          call NUOPC_CompAttributeSet(conn, name="Verbosity", &
-            value=vString, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
-          ! optionally additional options
-          if (tokenCount == 4) then
-            ! there are additional connection options specified
-            ! -> set as Attribute for now on the connector object
-            call ESMF_AttributeSet(conn, name="ConnectionOptions", &
-              value=trim(tokenList(4)), rc=rc)
+          if (.not.ESMF_CplCompIsCreated(conn)) then
+            ! this is a new connector component that needs to be added to driver
+            call NUOPC_DriverAddComp(driver, &
+              srcCompLabel=trim(tokenList(1)), dstCompLabel=trim(tokenList(3)), &
+              compSetServicesRoutine=cplSS, comp=conn, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
+            ! automatically created connectors inherit lower 8-bit
+            ! of parent's verbosity setting
+            vInherit = ibits(verbosity,0,8)
+            write(vString,"(I10)") vInherit
+            call NUOPC_CompAttributeSet(conn, name="Verbosity", &
+              value=vString, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+            ! optionally additional options
+            if (tokenCount == 4) then
+              ! there are additional connection options specified
+              ! -> set as Attribute for now on the connector object
+              call ESMF_AttributeSet(conn, name="ConnectionOptions", &
+                value=trim(tokenList(4)), rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+            endif
           endif
         endif
       endif
       deallocate(tokenList)
     enddo
-    slotCount = slotCount / 2     ! divide by two because double counted "@"
-    slotCount = max(slotCount, 1) ! at least one slot
 
+    ! sanity check
+    if (mod(slotCount,2)/=0) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="RunSequence has unbalanced '@' tokens.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+
+    ! OR together the already set needDriverTopLoop, with topLoops condition
+    if (topLoops>1) needDriverTopLoop = .true.
+
+    ! Conditionally add driver top loop level
+    if (needDriverTopLoop) then
+      ! add slots to hold the driver top loop
+      lineCount = lineCount + 2
+      slotCount = slotCount + 2
+      ! make a copy of the incoming FreeFormat object, then add 2 '@' lines
+      freeFormatTemp = NUOPC_FreeFormatCreate(freeFormat, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      ! add at the beginning
+      call NUOPC_FreeFormatAdd(freeFormatTemp, stringList=(/"@*"/), line=1, &
+        rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      ! add at the end
+      call NUOPC_FreeFormatAdd(freeFormatTemp, stringList=(/"@"/), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      ! now start using the modified FreeFormat object
+      freeFormatPtr => freeFormatTemp
+    else
+      ! keep using the unmodified incoming FreeFormat object
+      freeFormatPtr => freeFormat
+    endif
+    
+    ! Finish up setting the appropriate slotCount
+    slotCount = slotCount / 2     ! divide by two because double counted "@"
+    
+    ! sanity check
+    if (slotCount < 1) then
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+        msg="RunSequence at this point must have at least one time slot.", &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME, rcToReturn=rc)
+      return  ! bail out
+    endif
+
+    ! allocate the slotStack
     allocate(slotStack(slotCount))
 
     ! Replace the default RunSequence with a customized one
@@ -4476,17 +4570,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
+    ! actual ingestion of run sequence, constructing NUOPC representation
     level = 0
     slot = 0
     slotHWM = 0
+    zeroSkip = .false.
     do i=1, lineCount
-      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenCount=tokenCount, &
-        rc=rc)
+      call NUOPC_FreeFormatGetLine(freeFormatPtr, line=i, &
+        tokenCount=tokenCount, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
+      if (allocated(tokenList)) deallocate(tokenList) ! for zeroSkip cycle case
       allocate(tokenList(tokenCount))
-      call NUOPC_FreeFormatGetLine(freeFormat, line=i, tokenList=tokenList, &
+      call NUOPC_FreeFormatGetLine(freeFormatPtr, line=i, tokenList=tokenList, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -4502,11 +4599,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       elseif (tokenCount == 1) then
         ! either a model or a time step indicator
         if (index(trim(tokenList(1)),"@") == 1) then
-          ! time step indicator
+          ! found a time step indicator
           tempString=trim(tokenList(1))
-          if (len(trim(tempString)) > 1) then
+          if (len_trim(tempString) > 1) then
             ! entering new time loop level
             level = level + 1
+            if (zeroSkip) cycle ! go to next line ---^
+            colonIndex = index(tempString,":")
+            haveRunDuration = .false. ! reset
+            if (colonIndex>0) then
+              ! a runDuration is present
+              haveRunDuration = .true.
+              read(tempString(colonIndex+1:len_trim(tempString)), *) seconds
+#if 0
+              print *, "found runDuration indicator: ", seconds
+#endif
+              call ESMF_TimeIntervalSet(runDuration, s_r8=seconds, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, &
+                file=trim(name)//":"//FILENAME)) &
+                return  ! bail out
+              tempString = tempString(1:colonIndex-1) ! truncate at ":"
+              ! if runDuration comes in at zero, then skip to end of time loop
+              if (abs(seconds)<=tiny(seconds)) then
+                zeroSkip = .true.
+                zeroSkipLevel = level
+                cycle ! go to next line ---^
+              endif
+            endif
             slotStack(level)=slot
             slot = slotHWM + 1
             slotHWM = slotHWM + 1
@@ -4517,46 +4637,104 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
-            if (index(trim(tokenList(1)),"*") == 2) then
-              ! a wildcard indicating that the time will be set explicitly
-            else
-              ! assume that what follows the "@' is actually a number
-              read(tempString(2:len(tempString)), *) seconds
-              print *, "found time step indicator: ", seconds
-              call ESMF_TimeIntervalSet(timeStep, s_r8=seconds, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
-                file=trim(name)//":"//FILENAME)) &
-                return  ! bail out
-              if (slot==1) then
-                ! Set the timeStep of the internalClock
-                call ESMF_ClockSet(internalClock, timeStep=timeStep, rc=rc)
+            haveTimeStep = .false. ! reset
+            if (index(tempString,"*") == 2) then
+              ! a wildcard indicating to default the timeStep to the parent
+              ! timeStep. It may later be reset by user code during Driver
+              ! initialization
+              if (slotStack(level)==0) then
+                call ESMF_ClockGet(internalClock, timeStep=timeStep, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, &
                   file=trim(name)//":"//FILENAME)) &
                   return  ! bail out
               else
-                ! Insert the link to a new slot, and set the timeStep
-                subClock = ESMF_ClockCreate(internalClock, rc=rc)  ! make a copy first
+                call ESMF_ClockGet(is%wrap%runSeq(slotStack(level))%clock, &
+                  timeStep=timeStep, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-                call ESMF_ClockSet(subClock, timeStep=timeStep, rc=rc)
+                  line=__LINE__, &
+                  file=trim(name)//":"//FILENAME)) &
+                  return  ! bail out
+              endif
+              haveTimeStep = .true. ! set
+            else
+              ! assume that what follows the "@" is actually a number
+              read(tempString(2:len(tempString)), *) seconds
+#if 0
+              print *, "found timeStep indicator: ", seconds
+#endif
+              call ESMF_TimeIntervalSet(timeStep, s_r8=seconds, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, &
+                file=trim(name)//":"//FILENAME)) &
+                return  ! bail out
+              haveTimeStep = .true. ! set
+            endif
+            ! see if timeStep and runDuration are compatible
+            if (haveTimeStep .and. haveRunDuration) then
+              if (ceiling(runDuration/timeStep) /= floor(runDuration/timeStep)) then
+                call ESMF_TimeIntervalGet(timeStep, s=aSec, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-                call NUOPC_DriverSetRunSequence(driver, slot=slot, &
-                  clock=subClock, rc=rc)
+                  line=__LINE__, &
+                  file=FILENAME)) &
+                  return  ! bail out
+                call ESMF_TimeIntervalGet(runDuration, s=bSec, rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                  line=__LINE__, &
+                  file=FILENAME)) &
+                  return  ! bail out
+                write (aString, *) aSec
+                write (bString, *) bSec
+                write (msgString,"(A)") "timeStep="//&
+                  trim(adjustl(aString))//&
+                  "s is not a divisor of runDuration="//&
+                  trim(adjustl(bString))//"s"
+                call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg=msgString, &
+                  line=__LINE__, &
+                  file=FILENAME, &
+                  rcToReturn=rc)
+                return  ! bail out
               endif
             endif
+            if (slot==1) then
+              ! this is the top time-loop, runClock is alias to driver clock
+              runClock = internalClock
+            else
+              ! create a new Clock for this slot, starting as driver clock copy
+              runClock = ESMF_ClockCreate(internalClock, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
+            if (haveTimeStep) then
+              ! set timeStep
+              call ESMF_ClockSet(runClock, timeStep=timeStep, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
+            if (haveRunDuration) then
+              ! set runDuration
+              call ESMF_ClockSet(runClock, runDuration=runDuration, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
+            ! set runClock 
+            call NUOPC_DriverSetRunSequence(driver, slot=slot, clock=runClock, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           else
+            if (zeroSkip) then
+              if (level==zeroSkipLevel) zeroSkip = .false.
+              level = level - 1
+              cycle ! go to next line ---^
+            endif
             ! exiting time loop level
             slot = slotStack(level)
             level = level - 1
           endif
         else
-          ! model
-          slot = max(slot, 1) ! model outside of a time loop
+          if (zeroSkip) cycle ! go to next line ---^
+          ! found a model
           call NUOPC_DriverAddRunElement(driver, slot=slot, &
             compLabel=trim(tokenList(1)), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4565,6 +4743,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return  ! bail out
         endif
       elseif (tokenCount == 2) then
+        if (zeroSkip) cycle ! go to next line ---^
         ! a model with a specific phase label
         call NUOPC_DriverAddRunElement(driver, slot=slot, &
           compLabel=trim(tokenList(1)), phaseLabel=trim(tokenList(2)), rc=rc)
@@ -4573,6 +4752,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           file=trim(name)//":"//FILENAME)) &
           return  ! bail out
       elseif ((tokenCount == 3) .or. (tokenCount == 4)) then
+        if (zeroSkip) cycle ! go to next line ---^
         ! a connector if the second element is "->"
         if (trim(tokenList(2)) /= "->") then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -4594,8 +4774,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       deallocate(tokenList)
     enddo
     ! clean-up
+    if (allocated(tokenList)) deallocate(tokenList) ! for zeroSkip cycle case
     deallocate(slotStack)
-    
+
+    if (needDriverTopLoop) then
+      ! destroy the temporary FreeFormat object copy
+      call NUOPC_FreeFormatDestroy(freeFormatTemp, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+    endif
+
   end subroutine
   !-----------------------------------------------------------------------------
 

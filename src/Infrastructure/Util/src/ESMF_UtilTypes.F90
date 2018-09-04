@@ -68,7 +68,7 @@
       integer, parameter :: ESMF_SUCCESS = 0, ESMF_FAILURE = -1
 
 ! General non-specific string length
-      integer, parameter :: ESMF_MAXSTR = 128
+      integer, parameter :: ESMF_MAXSTR = 256
 
 ! Maximum length of a file name, including its path.
       integer, parameter :: ESMF_MAXPATHLEN = 1024

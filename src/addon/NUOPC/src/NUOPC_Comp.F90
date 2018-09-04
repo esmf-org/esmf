@@ -368,7 +368,7 @@ module NUOPC_Comp
       endif
     enddo
     
-    freeFormat = NUOPC_FreeFormatCreate(stringList, rc=rc)
+    freeFormat = NUOPC_FreeFormatCreate(stringList=stringList, rc=rc)
     
     deallocate(stringList, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &
@@ -467,7 +467,7 @@ module NUOPC_Comp
       endif
     enddo
     
-    freeFormat = NUOPC_FreeFormatCreate(stringList, rc=rc)
+    freeFormat = NUOPC_FreeFormatCreate(stringList=stringList, rc=rc)
     
     deallocate(stringList, stat=stat)
     if (ESMF_LogFoundDeallocError(statusToCheck=stat, &

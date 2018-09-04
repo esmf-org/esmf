@@ -208,10 +208,10 @@ ARG:
         $eoe_string = '!EOE';
         $bot_string = '!BOT';
         $eot_string = '!EOT';
-        $bolt_string = '!BOLT';
-        $eolt_string = '!EOLT';
-        $botl_string = '!BOTL';
-        $eotl_string = '!EOTL';
+        $boltfd_string = '!BOLTFD';
+        $eoltfd_string = '!EOLTFD';
+        $boltcfd_string = '!BOLTCFD';
+        $eoltcfd_string = '!EOLTCFD';
 #}#   end if
 
      if ( $opt_A ) {            # ADA
@@ -389,38 +389,6 @@ LINE:
            next LINE;
 }#      end if
 
-#       Beginning of latex longtable
-#       ---------------------
-        if ($Fld[1] eq $bolt_string) {
-           print " ";
-           print "%/////////////////////////////////////////////////////////////";
-           shift @Fld;
-           $_ = join('|', @Fld);
-           print "\\begin{longtable}{|$_|}";
-           $table = 1;
-           $tableline = 0;
-           $tableelement = 0;
-           next LINE;
-}#      end if
-
-#       Beginning of latex table line
-#       ---------------------
-        if ($Fld[1] eq $botl_string) {
-           if (!$tableline&&$tableelement){printf "\\\\";}
-           if (!$tableline){printf " \\hline \\hline\n\n";}
-           print " ";
-           $tableelement = 0;
-           $tableline++;
-           next LINE;
-}#      end if
-
-#       End of latex table line
-#       -------------------
-        if ($Fld[1] eq $eotl_string) {
-           print "\\\\ \\hline";
-           next LINE;
-}#      end if
-
 #       End of latex table
 #       -------------------
         if ($Fld[1] eq $eot_string) {
@@ -432,14 +400,45 @@ LINE:
            next LINE;
 }#      end if
 
-#       End of latex longtable
+#       Beginning of fd latex longtable
+#       ---------------------
+        if ($Fld[1] eq $boltfd_string) {
+           print " ";
+           print "%/////////////////////////////////////////////////////////////";
+           shift @Fld;
+           $_ = join('|', @Fld);
+           print "\\begin{longtable}{|$_|}";
+           $fdtable = 1;
+           $tableline = 0;
+           $tableelement = 0;
+           next LINE;
+}#      end if
+
+#       End of fd latex longtable
 #       -------------------
-        if ($Fld[1] eq $eolt_string) {
+        if ($Fld[1] eq $eoltfd_string) {
            print "\\hline";
            print "\\end{longtable}";
            print "%/////////////////////////////////////////////////////////////";
            print " ";
-           $table = 0;
+           $fdtable = 0;
+           next LINE;
+}#      end if
+
+#       Beginning of fd latex longtable contents
+#       ---------------------
+        if ($Fld[1] eq $boltcfd_string) {
+           if (!$tableline&&$tableelement){printf "\\\\";}
+           if (!$tableline){printf " \\hline \\hline\n\n";}
+           print " ";
+           $tableelement = 0;
+           $tableline++;
+           next LINE;
+}#      end if
+
+#       End of fd latex longtable contents
+#       -------------------
+        if ($Fld[1] eq $eoltcfd_string) {
            next LINE;
 }#      end if
 
@@ -825,6 +824,26 @@ KEY:       foreach $key ( @keys ) {
             if ($tableelement) { printf " & ";} else { printf "   ";}
             print $Fldt[2]; 
             $tableelement++;
+        }
+        next LINE;
+}#  end if
+
+#   latex table for NUOPC Field Dictionary: pick out the quotations
+#   ------------------------------------
+    if ($fdtable) {
+        s/_/\\_/g;                         # Replace "_" with "\_"
+        @Fldt = split('"', $_, 9999);
+        if ($Fldt[2]) { 
+            @Fldtt = split(':', $Fldt[2], 9999);
+            if ($Fldtt[2]) { 
+              if (!$tableline&&!$tableelement){print "\\hline \\hline";}
+              if ($tableelement) { printf " & ";} else { printf "   ";}
+              print $Fldtt[2]; 
+              $tableelement++;
+            }else{
+              print "\\\\ \\hline";
+              $tableelement = 0;
+            }
         }
         next LINE;
 }#  end if
