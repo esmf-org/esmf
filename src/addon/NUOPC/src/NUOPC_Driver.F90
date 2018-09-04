@@ -4283,52 +4283,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-! Ingest the run sequence from a FreeFormat object. Every line in 
-! {\tt freeFormat} corresponds to either a single run sequence element, or 
-! contains the time step information of a loop. The default of 
-! {\tt autoAddConnectors} is {\tt .false.}, which means that all components
-! referenced in the {\tt freeFormat} run sequence, including connectors, must
-! already be available as child components of the {\tt driver} component, or
-! else an error will be returned. When {\tt autoAddConnectors}
-! is set to {\tt .true.}, connector components encountered in the run sequence
-! that are no already present in the {\tt driver} will be added automatically.
-! The default {\tt NUOPC\_Connector} implementation will be used for all
-! automatically added connector instances.
+! Ingest the run sequence from a FreeFormat object and replace the 
+! run sequence currently held by the driver. Every line in 
+! {\tt freeFormat} corresponds to either a component run sequence element, or 
+! is part of a time loop defintion.
 !
-! Time loops in the run sequence start with a line in {\tt freeFormat} that
-! begins with the $@$ symbol, followed by the timestep in seconds. A line with
-! a single $@$ symbol closes the time loop. A simple example for a loop with 
-! 1 hour timestep:
-!
-! \begin{verbatim}
-!   @3600
-!     ...
-!     ...
-!   @
-! \end{verbatim}
-! Time loops can be nested.
-!
-! Each time loop has its own associated clock object. NUOPC manages these clock
-! objects, i.e. their creation and destruction, as well as {\tt startTime}, 
-! {\tt endTime}, {\tt timeStep} adjustments during the execution. The outer 
-! most time loop of the run sequence is a special case. It uses the driver 
-! clock itself. Therefore startTime and endTime of the driver clock determine
-! the absolute start and end of the run sequence.
-!
-! The wildcard syntax "@*" at the start of a time loop, allows the timestep
-! to be omitted. This means that the timestep for a specific time loop must
-! be explicitly set in the associated clock object. For the outermost time
-! loop this is easily accomplished by setting the {\tt timeStep} of the 
-! driver clock.
-!
-! The lines between the time loop markers define the sequence in which the
-! run methods of the components are called. Note that components will execute 
+! Component run sequence elements define the run method of a single component.
+! The lines are interpreted sequentially, however, components will execute 
 ! concurrently as long as this is not prevented by data-dependencies or
 ! overlapping petLists.
 !
-! Each line specifies the precise
-! run method phase for a single component instance. For model, mediator, and 
-! driver components the format is this:
+! Each line specifies the precise run method phase for a single component 
+! instance. For model, mediator, and driver components the format is this:
 !
 ! \begin{verbatim}
 !   compLabel [phaseLabel]
@@ -4336,7 +4302,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! Here {\tt compLabel} is the label by which the component instance is known to
 ! the driver. It is optionally followed a {\tt phaseLabel} identifying a
 ! specific run phase. An example of calling the run phase of the ATM instance 
-! that contains the fast processes:
+! that contains the "fast" processes, and is labeled {\tt fast}:
 !
 ! \begin{verbatim}
 !   ATM fast
@@ -4344,7 +4310,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! By default, i.e. without {\tt phaseLabel}, the first
 ! registered run method of the component is used.
 !
-! The format for connector components is different. It is defined like this:
+! The format for connector components is different. It looks like this:
 !
 ! \begin{verbatim}
 !   srcCompLabel -> dstCompLabel [connectionOptions]
@@ -4352,7 +4318,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! A connector instance is uniquely known by the two components it connects, 
 ! i.e. by {\tt srcCompLabel} and {\tt dstCompLabel}. The syntax requires that
 ! the token {\tt ->} be specified between source and destination. Optionally
-! {\tt connectionOptions} can be supplied using the same format discussed 
+! {\tt connectionOptions} can be supplied using the format discussed 
 ! under section \ref{connection_options}. An example of executing the connector
 ! instance that transfers fields from the ATM component to the OCN component,
 ! using redistribution for remapping:
@@ -4361,6 +4327,103 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   ATM -> OCN :remapMethod=redist
 ! \end{verbatim}
 !
+! By default {\tt autoAddConnectors} is {\tt .false.}, which means that all 
+! components referenced in the {\tt freeFormat} run sequence, including 
+! connectors, must already be available as child components of the {\tt driver}
+! component. An error will be returned if this is not the case. 
+! However, when {\tt autoAddConnectors} is set to {\tt .true.}, connector
+! components encountered in the run sequence that are no already present in 
+! the {\tt driver} will be added automatically. The default 
+! {\tt NUOPC\_Connector} implementation is used for all automatically added
+! connector instances.
+!
+! Lines that contain a time loop definition have the general format:
+!
+! \begin{verbatim}
+!   @{timeStep|*}[:runDuration]
+!     ...
+!     ...
+!   @
+! \end{verbatim}
+! Both {\tt timeStep} and {\tt runDuration} are numbers in units of seconds.
+! Time loops can be nested and concatenated.
+!
+! A wildcard "*" character can be specified in place of an actual {\tt timeStep}
+! number. In this case the {\tt timeStep} of the associated run clock object
+! is set to be equal to the {\tt timeStep} of the time loop one level up in the
+! loop nesting hierarchy.
+! If a wildcard time step is used for a single outer time loop in the run
+! sequence, then the associated run clock is identical to the driver clock and
+! must be set explicitly by the driver code, or its parent component.
+!
+! The {\tt runDuration} specification is optional. If omitted, the duration of
+! the associated run clock is set to the {\tt timeStep} of the time loop one
+! level up in the loop nesting hierarchy. This ensures that for a single
+! nested time loop, the loop returns to the parent loop level at the appropriate 
+! time.
+!
+! A simple example of a single time loop with one hour timestep:
+!
+! \begin{verbatim}
+!   @3600
+!     ...
+!     ...
+!   @
+! \end{verbatim}
+! Each time loop has its own associated clock object. NUOPC manages these clock
+! objects, i.e. their creation and destruction, as well as {\tt startTime}, 
+! {\tt endTime}, {\tt timeStep} adjustments during the execution. The outer 
+! most time loop of the run sequence is a special case. It uses the driver 
+! clock itself. If a single outer most loop is defined in the run sequence
+! provided by {\tt freeFormat}, this loop becomes the driver loop level 
+! directly. Therefore, setting the {\tt timeStep} or {\tt runDuration} for
+! the outer most time loop results modifiying the driver clock itself.
+! However, for cases with concatenated loops on the upper level of 
+! the run sequence in {\tt freeFormat}, a single outer loop is added
+! automatically during ingestion, and the driver clock is used for this loop 
+! instead.
+!
+! A more complex run sequence example, that shows component run
+! sequence elements outside of time loops, a nested time loop, time step 
+! wildcards, explicit duration specifications, and concatenated time loops:
+! 
+! \begin{verbatim}
+!   @100:800
+!     ATM -> OCN
+!     OCN -> ATM
+!     ATM
+!     OCN
+!     @*
+!       OCN -> EXTOCN
+!       EXTOCN
+!     @
+!   @
+!   ATM -> EXTATM
+!   EXTATM
+!   @100:1000
+!     ATM -> OCN
+!     OCN -> ATM
+!     ATM
+!     OCN
+!   @
+! \end{verbatim}
+! Here the {\tt timeStep} of the first time loop is explicitly chosen at
+! $100s$. The {\tt runDuration} is explicitly set to $800s$. The first time
+! loop steps the current time forward for $800s$, for each iteration executing
+! ATM-OCN coupling, followed by the nested loop that calls the 
+! {\tt OCN -> EXTOCN} and {\tt EXTOCN} components. The nested loop uses a 
+!  wildcard {\tt timeStep} and therefore is
+! identical to the parent loop level {\tt timeStep} of $100s$. The nested
+! {\tt runDuration} is not specified and therefore also defaults to the parent
+! time step of $100s$. In other words, the nested loop is executed exactly once
+! for every parent loop iteration.
+!
+! After $800s$ the first time loop is exited, and followed by explicit calls to
+! {\tt ATM -> EXTAMT} and {\tt EXTATM} components. Finally the second time loop
+! is entered for another $1000s$ {\tt runDuration}. The {\tt timeStep} is again
+! explicitly set to $100s$. The second time loop only implements ATM-OCN
+! coupling, and no coupling to EXTOCN is implemented. Finally, after $1800s$
+! the sequence returns to the driver level loop.
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
