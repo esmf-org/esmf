@@ -45,6 +45,8 @@ contains
       integer, intent(out):: rc
       
       print *, "Inside Init"
+
+      rc = ESMF_SUCCESS
       
     end subroutine Init
 
@@ -55,6 +57,8 @@ contains
       integer, intent(out):: rc
       
       print *, "Inside Run"
+
+      rc = ESMF_SUCCESS
       
     end subroutine Run
 
@@ -64,8 +68,10 @@ contains
       type(ESMF_Clock):: clock
       integer, intent(out):: rc
       
-    print *, "Inside Finalize"
-    
+      print *, "Inside Finalize"
+
+      rc = ESMF_SUCCESS
+      
   end subroutine Finalize 
 
 end module SimpleCompB
