@@ -3563,7 +3563,7 @@ module NUOPC_Base
       file=FILENAME)) &
       return  ! bail out
 
-    call NUOPC_SetTimestamp(state, time=time, rc=rc)
+    call NUOPC_SetTimestamp(state, time=time, selective=selective, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME)) &
