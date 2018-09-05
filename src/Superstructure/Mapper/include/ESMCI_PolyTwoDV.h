@@ -350,6 +350,7 @@ namespace ESMCI{
 
       res.dps_ = lhs.dps_;
       res.dp_ = lhs.dp_;
+      res.has_dep_vfunc_ = lhs.has_dep_vfunc_;
       return res;
     }
 
@@ -363,6 +364,7 @@ namespace ESMCI{
 
       res.dps_ = rhs.dps_;
       res.dp_ = rhs.dp_;
+      res.has_dep_vfunc_ = rhs.has_dep_vfunc_;
       return res;
     }
 
@@ -377,6 +379,7 @@ namespace ESMCI{
 
       res.dps_ = lhs.dps_;
       res.dp_ = lhs.dp_;
+      res.has_dep_vfunc_ = lhs.has_dep_vfunc_;
       return res;
     }
 
@@ -390,6 +393,7 @@ namespace ESMCI{
 
       res.dps_ = rhs.dps_;
       res.dp_ = rhs.dp_;
+      res.has_dep_vfunc_ = rhs.has_dep_vfunc_;
       return res;
     }
 
@@ -404,6 +408,7 @@ namespace ESMCI{
 
       res.dps_ = lhs.dps_;
       res.dp_ = lhs.dp_;
+      res.has_dep_vfunc_ = lhs.has_dep_vfunc_;
       return res;
     }
 
@@ -417,6 +422,7 @@ namespace ESMCI{
 
       res.dps_ = rhs.dps_;
       res.dp_ = rhs.dp_;
+      res.has_dep_vfunc_ = rhs.has_dep_vfunc_;
       return res;
     }
 
