@@ -48,6 +48,10 @@ namespace ESMCI{
         friend Matrix<U> operator-(const Matrix<U> &lhs, const Matrix<U> &rhs);
         template<typename U>
         friend Matrix<U> operator*(const Matrix<U> &lhs, const Matrix<U> &rhs);
+        template<typename U, typename V>
+        friend Matrix<U> operator*(const Matrix<U> &lhs, const V &rhs);
+        template<typename U, typename V>
+        friend Matrix<V> operator*(const U &lhs, const Matrix<V> &rhs);
         template<typename U>
         friend std::ostream& operator<<(std::ostream &ostr, const Matrix<U> &m);
       private:
@@ -348,6 +352,21 @@ namespace ESMCI{
       assert(ret == ESMF_SUCCESS);
 
       return res;
+    }
+
+    template<typename U, typename V>
+    Matrix<U> operator*(const Matrix<U> &lhs, const V &rhs)
+    {
+      Matrix<U> res = lhs;
+      std::transform(res.data_.begin(), res.data_.end(),
+                      res.data_.begin(),
+                      std::bind1st(std::multiplies<U>(), static_cast<U>(rhs)));
+      return res;
+    }
+    template<typename U, typename V>
+    Matrix<V> operator*(const U &lhs, const Matrix<V> &rhs)
+    {
+      return rhs * lhs;
     }
 
     template<typename T>
