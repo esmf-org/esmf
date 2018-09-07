@@ -118,6 +118,7 @@ namespace ESMCI{
       std::vector<int> &cfuncs_vivals)
     {
       if(opt_alg_ == LBAL_ALG_MIN_IDLE_TIME){
+        const float DAMP_CONST = 1.0;
         /* Create the list of variable names and ivals, component info
          * variables and values are added first, in the order they are
          * stored in the load balancer. Then variable names and ivals
@@ -227,7 +228,7 @@ namespace ESMCI{
               /* Add the square of the idle time function as a constraint */
               TwoDVIDPoly<T> idle_time_func_sq = idle_time_func * idle_time_func;
               idle_time_func_sq.set_dfuncs(idle_time_dfuncs);
-              twodvidp_cfuncs.push_back(idle_time_func_sq);
+              twodvidp_cfuncs.push_back(DAMP_CONST * idle_time_func_sq);
 
             }
           }
@@ -237,6 +238,7 @@ namespace ESMCI{
            */
           exec_block_list_cfunc = exec_block_list_cfunc - 
                                     static_cast<T>(exec_block_list_npets);
+          //mvidlp_cfuncs.push_back(DAMP_CONST * exec_block_list_cfunc);
           mvidlp_cfuncs.push_back(exec_block_list_cfunc);
         }
 
@@ -322,8 +324,10 @@ namespace ESMCI{
           tmp_cfuncs_vivals.push_back(static_cast<T>(*citer));
         }
         /* Use the solver to optimize the number of PETs */
+        const int SOLVER_MAX_ITERS = 100;
         SESolver<T> solver(cfuncs_vnames, tmp_cfuncs_vivals,
                             twodvidp_cfuncs, mvidlp_cfuncs);
+        solver.set_niters(SOLVER_MAX_ITERS);
         typename SESolver<T>::UConstraintValGenerator uc_vgen;
         std::vector<T> new_pets = solver.minimize(uc_vgen);
         for(int i=0; i<ncomps; i++){

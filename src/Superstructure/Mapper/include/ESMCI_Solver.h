@@ -384,6 +384,7 @@ namespace ESMCI{
           Feval = Feval_with_last_row;
         }
 
+        const T DAMP_CONST = static_cast<T>(0.01);
         if(sc_type == SOL_UNDER_CONSTRAINED){
           int nv_in_solver = static_cast<int>(all_funcs.size());
           std::vector<int> X_uc_dims = {nv_in_solver, 1};
@@ -394,12 +395,12 @@ namespace ESMCI{
           Matrix<T> Xj_uc(X_uc_dims, Xj_uc_data);
           Matrix<T> Xi_uc(X_uc_dims, Xi_uc_data);
 
-          Xj_uc = Xi_uc - Jinv * Feval;
+          Xj_uc = Xi_uc - Jinv * Feval * DAMP_CONST;
           std::vector<T> Xj_uc_vals = Xj_uc.get_data();
           Xj = Matrix<T>(Xi_dims, uc_vgen.get_vals(Xj_uc_vals));
         }
         else{
-          Xj = Xi - Jinv * Feval;
+          Xj = Xi - Jinv * Feval * DAMP_CONST;
         }
         //std::cout << "Xj = \n" << Xj << "\n";
         Xi = Xj;
