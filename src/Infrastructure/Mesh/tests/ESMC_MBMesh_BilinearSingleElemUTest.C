@@ -595,6 +595,9 @@ int main(int argc, char *argv[]) {
   // pent mesh bilinear cartesian
   // --------------------------------------------------------------------------
 
+  // build a mesh
+  mesh_pent_single = create_mesh_pent_single(rc, cart);
+
   // build a pointlist
   pl_quad_single = create_pointlist_for_quad_single(rc, cart);
 
