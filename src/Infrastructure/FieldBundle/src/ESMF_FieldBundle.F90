@@ -6047,16 +6047,15 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
            call c_ESMC_AttributeLink(bp%base, grid, linkChange, status)
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc))  return
-    ! TODO: Check with Ryan if locstream will work with c_ESMC_AttributeLink()
-    !    else if (geomtype == ESMF_GEOMTYPE_LOCSTREAM)) then
-    !       call ESMF_GeomBaseGet(bp%geombase, locstream=locstream, rc=localrc)
-    !       if (ESMF_LogFoundError(localrc, &
-    !            ESMF_ERR_PASSTHRU, &
-    !            ESMF_CONTEXT, rcToReturn=rc)) return
-    !       linkChange = ESMF_TRUE
-    !       call c_ESMC_AttributeLink(bp%base, locstream, linkChange, status)
-    !       if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
-    !            ESMF_CONTEXT, rcToReturn=rc))  return
+        else if (geomtype == ESMF_GEOMTYPE_LOCSTREAM) then
+           call ESMF_GeomBaseGet(bp%geombase, locstream=locstream, rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+           linkChange = ESMF_TRUE
+           call c_ESMC_AttributeLink(bp%base, locstream, linkChange, status)
+           if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc))  return
         endif
      endif
 
