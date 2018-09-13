@@ -53,6 +53,7 @@ namespace ESMCI{
          */
         class LoadBalancerBackupInfo{
           public:
+            LoadBalancerBackupInfo();
             LoadBalancerBackupInfo(
               const std::vector<int> &opt_npets,
               const std::vector<std::pair<int, int> > &opt_pet_ranges,
@@ -60,16 +61,25 @@ namespace ESMCI{
             void get_info(std::vector<int> &opt_npets,
                   std::vector<std::pair<int, int> > &opt_pet_ranges,
                   T &opt_wtime) const;
+            void set_info(const std::vector<int> &opt_npets,
+                  const std::vector<std::pair<int, int> > &opt_pet_ranges,
+                  T opt_wtime);
             bool operator<(const LoadBalancerBackupInfo &other_info) const;
+            bool operator==(const LoadBalancerBackupInfo &other_info) const;
+            bool is_valid(void ) const;
           private:
+            bool is_valid_;
             std::vector<int> opt_npets_;
             std::vector<std::pair<int, int> > opt_pet_ranges_;
             T opt_wtime_;
+            T opt_wtime_pred_err_;
         }; // class LoadBalancerBackupInfo
 
         std::vector<CompInfo<T> > comp_infos_;
         LoadBalancerAlg opt_alg_;
-        std::priority_queue<LoadBalancerBackupInfo> backup_infos_;
+        std::vector<LoadBalancerBackupInfo> backup_infos_;
+        LoadBalancerBackupInfo optimal_info_;
+        void update_backup_info(const std::vector<CompInfo<T> > &comp_infos);
         bool get_constraint_funcs(
           std::vector<std::vector<ExecBlock<T> > > &pexec_blocks,
           std::vector<TwoDVIDPoly<T> > &twodvidp_cfuncs,
@@ -107,6 +117,7 @@ namespace ESMCI{
     {
       assert(comp_infos_.empty() || (comp_infos_.size() == comp_infos.size()));
       comp_infos_ = comp_infos;
+      update_backup_info(comp_infos);
     }
 
     template<typename T>
@@ -352,7 +363,17 @@ namespace ESMCI{
 
       //std::cout << "Saving npets = " << opt_npets[0] << "\n";
       LoadBalancerBackupInfo backup_info(opt_npets, opt_pet_ranges, opt_wtime);
-      backup_infos_.push(backup_info);
+      backup_infos_.push_back(backup_info);
+
+      /* Find and store the minimal backup info */
+      if(optimal_info_.is_valid()){
+        if(backup_info < optimal_info_){
+          optimal_info_ = backup_info;
+        }
+      }
+      else{
+        optimal_info_ = backup_info;
+      }
       return true;
     }
 
@@ -361,12 +382,69 @@ namespace ESMCI{
                     std::vector<std::pair<int, int> > &opt_pet_ranges,
                     T &opt_wtime)
     {
-      if(backup_infos_.empty()){
-        return false;
+      if(optimal_info_.is_valid()){
+        optimal_info_.get_info(opt_npets, opt_pet_ranges, opt_wtime);
+        return true;
       }
 
-      backup_infos_.top().get_info(opt_npets, opt_pet_ranges, opt_wtime);
-      return true;
+      return false;
+    }
+
+    template<typename T>
+    void LoadBalancer<T>::update_backup_info(
+      const std::vector<CompInfo<T> > &comp_infos)
+    {
+      if(backup_infos_.empty()){
+        return;
+      }
+
+      std::vector<int> comp_npets;
+      std::vector<std::pair<int, int> > comp_pet_ranges;
+      T min_app_wtime = static_cast<T>(0);
+      T max_app_wtime = static_cast<T>(0);
+      for(typename std::vector<CompInfo<T> >::const_iterator citer = comp_infos.cbegin();
+          citer != comp_infos.cend(); ++citer){
+        comp_npets.push_back((*citer).get_npets());
+        std::pair<T, T> comp_time_intvl = (*citer).get_time_interval();
+        if(min_app_wtime != 0){
+          min_app_wtime = std::min(min_app_wtime, comp_time_intvl.first);
+        }
+        else{
+          min_app_wtime = comp_time_intvl.first;
+        }
+
+        if(max_app_wtime != 0){
+          max_app_wtime = std::max(max_app_wtime, comp_time_intvl.second);
+        }
+        else{
+          max_app_wtime = comp_time_intvl.second;
+        }
+        // Ignoring pet range for now
+      }
+
+      T app_wtime = max_app_wtime - min_app_wtime;
+      assert(app_wtime > static_cast<T>(0));
+      LoadBalancerBackupInfo app_info(comp_npets, comp_pet_ranges, app_wtime);
+      /* We usually end up updating the last entry in backup_infos_ */
+      for(typename std::vector<LoadBalancerBackupInfo>::reverse_iterator riter =
+            backup_infos_.rbegin();
+          riter != backup_infos_.rend(); ++riter){
+        if(app_info == *riter){
+          (*riter).set_info(comp_npets, comp_pet_ranges, app_wtime);
+          break;
+        }
+      }
+      if(app_info < optimal_info_){
+        optimal_info_ = app_info;
+      }
+    }
+
+    template<typename T>
+    LoadBalancer<T>::LoadBalancerBackupInfo::LoadBalancerBackupInfo():
+      is_valid_(false),
+      opt_wtime_(static_cast<T>(0)),
+      opt_wtime_pred_err_(static_cast<T>(0))
+    {
     }
 
     template<typename T>
@@ -374,9 +452,11 @@ namespace ESMCI{
       const std::vector<int> &opt_npets,
       const std::vector<std::pair<int, int> > &opt_pet_ranges,
       T opt_wtime):
+        is_valid_(true),
         opt_npets_(opt_npets),
         opt_pet_ranges_(opt_pet_ranges),
-        opt_wtime_(opt_wtime)
+        opt_wtime_(opt_wtime),
+        opt_wtime_pred_err_(static_cast<T>(0))
     {
     }
 
@@ -384,7 +464,19 @@ namespace ESMCI{
     bool LoadBalancer<T>::LoadBalancerBackupInfo::operator<(
       const LoadBalancerBackupInfo &other_info) const
     {
-      return (opt_wtime_ > other_info.opt_wtime_);
+      assert(is_valid_ && other_info.is_valid_);
+      return (opt_wtime_ < other_info.opt_wtime_);
+    }
+
+    template<typename T>
+    bool LoadBalancer<T>::LoadBalancerBackupInfo::operator==(
+      const LoadBalancerBackupInfo &other_info) const
+    {
+      if(!is_valid_ || !other_info.is_valid_){
+        return false;
+      }
+      return ((opt_npets_ == other_info.opt_npets_) &&
+              (opt_pet_ranges_ == other_info.opt_pet_ranges_));
     }
 
     template<typename T>
@@ -393,9 +485,32 @@ namespace ESMCI{
       std::vector<std::pair<int, int> > &opt_pet_ranges,
       T &opt_wtime) const
     {
+      assert(is_valid_);
       opt_npets = opt_npets_;
       opt_pet_ranges = opt_pet_ranges_;
       opt_wtime = opt_wtime_;
+    }
+
+    template<typename T>
+    void LoadBalancer<T>::LoadBalancerBackupInfo::set_info(
+      const std::vector<int> &opt_npets,
+      const std::vector<std::pair<int, int> > &opt_pet_ranges,
+      T opt_wtime)
+    {
+      opt_npets_ = opt_npets;
+      opt_pet_ranges_ = opt_pet_ranges;
+      /* Store the latest prediction error */
+      opt_wtime_pred_err_ = opt_wtime_ - opt_wtime;
+      //std::cout << "Solution app walltime prediction error = "
+      //  << opt_wtime_pred_err_ << "\n";
+      opt_wtime_ = opt_wtime;
+      is_valid_ = true;
+    }
+
+    template<typename T>
+    bool LoadBalancer<T>::LoadBalancerBackupInfo::is_valid(void ) const
+    {
+      return is_valid_;
     }
 
   } // MapperUtil
