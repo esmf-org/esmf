@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
   char name[ESMF_MAX_STRLEN];
   char failMsgNPetsNeg[ESMF_MAX_STRLEN];
   char failMsgSolnDiv[ESMF_MAX_STRLEN];
-  const int MAX_ITER = 10;
+  const int MAX_ITER = 100;
 
   ESMC_TestStart(__FILE__, __LINE__, 0);
 
