@@ -257,18 +257,45 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Grid creation from file with default RegDecomp Test"
+  write(name, *) "Grid creation from file ESMF_FILEFORMAT_SCRIP with default RegDecomp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  grid=ESMF_GridCreate('data/T42_grid.nc',ESMF_FILEFORMAT_SCRIP,rc=localrc)
+  grid=ESMF_GridCreate('data/T42_grid.nc',ESMF_FILEFORMAT_SCRIP,rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Grid creation from file with non-default RegDecomp Test"
+  write(name, *) "Grid creation from file ESMF_FILEFORMAT_SCRIP with custom RegDecomp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   grid=ESMF_GridCreate('data/T42_grid.nc',ESMF_FILEFORMAT_SCRIP, &
-    regDecomp=(/2,2/), rc=localrc)
+    regDecomp=(/2,2/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Grid creation from file ESMF_FILEFORMAT_SCRIP with custom RegDecomp < petCount Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  grid=ESMF_GridCreate('data/T42_grid.nc',ESMF_FILEFORMAT_SCRIP, &
+    regDecomp=(/2,2/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Grid creation from file ESMF_FILEFORMAT_GRIDSPEC with custom RegDecomp Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  grid=ESMF_GridCreate('data/horizontal_grid.tile6.nc', &
+    ESMF_FILEFORMAT_GRIDSPEC, regDecomp=(/2,2/), rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Grid creation from file ESMF_FILEFORMAT_GRIDSPEC with custom RegDecomp < petCount Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  grid=ESMF_GridCreate('data/horizontal_grid.tile6.nc', &
+    ESMF_FILEFORMAT_GRIDSPEC, regDecomp=(/2,1/), rc=rc)
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
   !-----------------------------------------------------------------------------
