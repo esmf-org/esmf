@@ -434,7 +434,14 @@ namespace ESMCI{
           break;
         }
       }
-      if(app_info < optimal_info_){
+      if(app_info == optimal_info_){
+        /* The backup infos are already updated, pick a new minimum/optimal */
+        typename std::vector<LoadBalancerBackupInfo>::iterator min_iter =
+          std::min_element(backup_infos_.begin(), backup_infos_.end());
+        /* Backup infos is not empty() - see first check in the function */
+        optimal_info_ = *min_iter;
+      }
+      else if(app_info < optimal_info_){
         optimal_info_ = app_info;
       }
     }
