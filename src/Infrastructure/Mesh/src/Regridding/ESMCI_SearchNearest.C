@@ -109,26 +109,24 @@ struct SearchData {
       sd->closest_coord[2]=src_pnt[2];
 
     } else if (dist2 == sd->closest_dist2) {
-      // In ParSearchNearest, this can happen when sd->closest_src_node is NULL
-      // so check for that first.
-      if (sd->closest_src_id != SN_BAD_ID) {
-        // If exactly the same distance chose the point with the smallest id
-        // (To make things consistent when running on different numbers of procs)
-        //mvr   if (*this_id < *(sd->closest_src_id)) {
-        if (this_pt->id < sd->closest_src_id) {
-          sd->closest_src_id=this_pt->id;
-        }
-      } else { // If there is no closest yet, then just use the one you found.
+
+      // If there wasn't a closer point or if the new point has a smaller id, 
+      // then use the new point instead
+      if ((sd->closest_src_id == SN_BAD_ID) ||
+          (this_pt->id < sd->closest_src_id))  {
+        
+        // Change to new id
         sd->closest_src_id=this_pt->id;
+        
+        // Change to new point
+        sd->closest_coord[0]=src_pnt[0];
+        sd->closest_coord[1]=src_pnt[1];
+        sd->closest_coord[2]=src_pnt[2];
+
+        // Don't need to change the closest_dist2  because at exactly the same dist   
+        
+        // Don't need to adjust the min-max box because at exactly the same dist
       }
-
-      // Don't need to change the closest_dist2  because at exactly the same dist
-
-      // Don't need to adjust the min-max box because at exactly the same dist
-
-      sd->closest_coord[0]=src_pnt[0];
-      sd->closest_coord[1]=src_pnt[1];
-      sd->closest_coord[2]=src_pnt[2];
     }
 
     // Don't know if this is the closest, so search further

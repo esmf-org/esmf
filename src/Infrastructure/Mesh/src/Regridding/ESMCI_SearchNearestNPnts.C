@@ -237,6 +237,7 @@ struct SearchData {
       max_dist2=pnts[max_num_pnts-1].dist2;
     }
 
+#if 0
     // DEBUG
     if (snn_debug) {
       printf(" nnf2: dst_id=%d :: ",573);
@@ -245,6 +246,7 @@ struct SearchData {
       }
       printf("\n");
     }
+#endif
 
     // return was_added status
     return was_added;
@@ -309,24 +311,6 @@ struct SearchData {
 
     // Don't know if this is the closest, so search further
     return 0;
-
-#if 0
-      // DO WE STILL NEED THIS????
-    } else if (dist2 == sd->closest_dist2) {
-      // In ParSearchNearest, this can happen when sd->closest_src_node is NULL
-      // so check for that first.
-      if (sd->closest_src_id != SN_BAD_ID) {
-        // If exactly the same distance chose the point with the smallest id
-        // (To make things consistent when running on different numbers of procs)
-        //mvr   if (*this_id < *(sd->closest_src_id)) {
-        if (this_pt->id < sd->closest_src_id) {
-          sd->closest_src_id=this_pt->id;
-        }
-      } else { // If there is no closest yet, then just use the one you found.
-        sd->closest_src_id=this_pt->id;
-      }
-#endif
-
   }
 
 
@@ -397,12 +381,8 @@ struct SearchData {
     // Get the new search box
     sd.get_search_min_max(pmin,pmax);
 
-    if (pnt_id == 573) snn_debug=true;
-
     // Find closest source node to this destination node
     tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
-
-    if (pnt_id == 573) snn_debug=false;
 
     // If we've found a nearest source point, then add to the search results list...
     if (sd.num_valid_pnts > 0) {
