@@ -79,6 +79,7 @@ namespace ESMCI{
         void set_coeffs(const std::vector<CType>& coeffs); 
         void set_coeffs(std::initializer_list<CType> coeffs);
         void set_cs_info(const PolyCSInfo<CType> &csinfo);
+        PolyCSInfo<CType> get_cs_info(void ) const;
         std::vector<CType> get_coeffs(void ) const;
         CType eval(const std::vector<CType> &vvals) const;
       private:
@@ -147,6 +148,7 @@ namespace ESMCI{
       
       vnames_.push_back("x");
       vnames_.push_back("y");
+      csinfo_ = uvpoly.get_cs_info();
     }
 
     /* Create a two variable polynomial from a univariate polynomial
@@ -200,6 +202,7 @@ namespace ESMCI{
           ncoeffs_in_cur_deg = cur_deg+1;
         }
       }
+      csinfo_ = uvpoly.get_cs_info();
     }
 
     template<typename CType>
@@ -242,6 +245,12 @@ namespace ESMCI{
     }
 
     template<typename CType>
+    inline PolyCSInfo<CType> TwoVIDPoly<CType>::get_cs_info(void ) const
+    {
+      return csinfo_;
+    }
+
+    template<typename CType>
     inline std::vector<CType> TwoVIDPoly<CType>::get_coeffs(void ) const
     {
       return coeffs_;
@@ -249,7 +258,7 @@ namespace ESMCI{
 
     /* Evaluate a polynomial */
     template<typename CType>
-    inline CType TwoVIDPoly<CType>::eval(const std::vector<CType> &vvals) const
+    inline CType TwoVIDPoly<CType>::eval(const std::vector<CType> &orig_vvals) const
     {
       CType res = 0;
       int cur_deg = max_deg_;
@@ -257,6 +266,7 @@ namespace ESMCI{
       int cur_ydeg = 0;
       int ncoeffs_in_cur_deg=cur_deg+1;
 
+      std::vector<CType> vvals = csinfo_.center_and_scale(orig_vvals);
       assert(vvals.size() == 2);
       for(typename std::vector<CType>::const_iterator citer = coeffs_.cbegin();
           citer != coeffs_.cend(); ++citer){
