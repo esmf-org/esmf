@@ -304,9 +304,14 @@ namespace ESMCI{
         sc_type = SOL_UNDER_CONSTRAINED;
         int nvars_in_solver = static_cast<int>(all_funcs.size());
         jvnames.erase(jvnames.begin() + nvars_in_solver, jvnames.end());
+        std::cout << "SOL_UNDER_CONSTRAINED\n";
       }
       else if(all_funcs.size() > vnames_.size()){
         sc_type = SOL_OVER_CONSTRAINED;
+        std::cout << "SOL_OVER_CONSTRAINED\n";
+      }
+      else{
+        std::cout << "SOL_NORMAL_CONSTRAINED\n";
       }
 
       /* C = Sum of all input variables */
@@ -340,31 +345,12 @@ namespace ESMCI{
          */
         //bool needs_last_row = (vnames_.size() > static_cast<size_t>(J_dims[0])) ?
         //                      true : false;
-        bool needs_last_row = false;
-        if(needs_last_row){
-          assert(vnames_.size() == static_cast<size_t>(J_dims[0]) + 1);
-          J_dims[0] += 1;
-          for(int i=0; i<ncols; i++){
-            J_data.push_back(1);
-          }
-
-          Matrix<T> J_with_last_rones(J_dims, J_data); 
-          std::cout << "vnames sz = " << vnames_.size() << "\n";
-          for(int i=0; i<J_dims.size(); i++){
-            std::cout << J_dims[i] << ", ";
-          }
-          std::cout << "\n";
-          std::cout << " Jacobian : \n" << J_with_last_rones << "\n";
-          Jinv = J_with_last_rones.inv();
+        if((sc_type == SOL_OVER_CONSTRAINED) ||
+            (sc_type == SOL_UNDER_CONSTRAINED)){
+          Jinv = J.pinv();
         }
         else{
-          if((sc_type == SOL_OVER_CONSTRAINED) ||
-              (sc_type == SOL_UNDER_CONSTRAINED)){
-            Jinv = J.pinv();
-          }
-          else{
-            Jinv = J.inv();
-          }
+          Jinv = J.inv();
         }
 
         Matrix<T> Feval = SESolverUtils::eval_funcs(all_funcs, vnames_, Xi.get_data());
@@ -373,16 +359,6 @@ namespace ESMCI{
          * variables need to remain constant (see variable C above,
          * i.e., Sum (Xi) - C = 0)
          */
-        if(needs_last_row){
-          std::vector<T> Feval_data = Feval.get_data();
-          std::vector<int> Feval_dims = Feval.get_dims();
-          Feval_dims[0] += 1;
-          std::vector<T> Xi_data = Xi.get_data();
-          T Ci = std::accumulate(Xi_data.cbegin(), Xi_data.cend(), 0);
-          Feval_data.push_back(Ci - C);
-          Matrix<T> Feval_with_last_row(Feval_dims, Feval_data);
-          Feval = Feval_with_last_row;
-        }
 
         const T DAMP_CONST = static_cast<T>(0.01);
         if(sc_type == SOL_UNDER_CONSTRAINED){
