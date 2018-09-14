@@ -5350,7 +5350,7 @@ int Grid::getStaggerDistgrid(
                                                          staggerEdgeLWidthIntInt, 
                                                          staggerEdgeUWidthIntInt, 
                                                          NULL,
-                                                         connListWPoles, NULL, true,
+                                                         connListWPoles, NULL, NULL, true,
                                                          &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                           &rc)) return rc;
@@ -5430,7 +5430,7 @@ int Grid::getStaggerDistgrid(
                                                            staggerEdgeLWidthIntInt, 
                                                            staggerEdgeUWidthIntInt, 
                                                            NULL,
-                                                           emptyConnListII, NULL, true,
+                                                           emptyConnListII, NULL, NULL, true,
                                                            &localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                             &rc)) return rc;
@@ -5443,7 +5443,7 @@ int Grid::getStaggerDistgrid(
                                                            staggerEdgeLWidthIntInt, 
                                                            staggerEdgeUWidthIntInt, 
                                                            NULL,
-                                                           NULL, NULL, true,
+                                                           NULL, NULL, NULL, true,
                                                            &localrc);
           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                             &rc)) return rc;
@@ -10385,7 +10385,7 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
     *distgrid_nopole=DistGrid::create(distgrid,
                                       (InterArray<int> *)NULL, (InterArray<int> *)NULL,
                                       (ESMC_IndexFlag *)NULL, (InterArray<int> *)NULL, 
-                                      NULL, true, &localrc);
+                                      NULL, NULL, true, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
        rc)) return; 
     return;
@@ -10404,7 +10404,7 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
     *distgrid_nopole=DistGrid::create(distgrid,
                                    (InterArray<int> *)NULL, (InterArray<int> *)NULL,
                                       (ESMC_IndexFlag *)NULL, (InterArray<int> *)NULL, 
-                                   NULL, true, &localrc);
+                                   NULL, NULL, true, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
                                       rc)) return; 
 
@@ -10469,7 +10469,7 @@ void _create_nopole_distgrid(DistGrid *distgrid, DistGrid **distgrid_nopole, int
  *distgrid_nopole=DistGrid::create(distgrid,
                                    (InterArray<int> *)NULL, (InterArray<int> *)NULL,
                                    (ESMC_IndexFlag *)NULL, newConnListII, 
-                                   NULL, true, &localrc);
+                                   NULL, NULL, true, &localrc);
  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
      rc)) return; 
 

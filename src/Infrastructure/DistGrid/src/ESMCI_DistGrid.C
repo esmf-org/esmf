@@ -110,6 +110,7 @@ DistGrid *DistGrid::create(
   InterArray<int> *lastExtra,           // (in)
   ESMC_IndexFlag *indexflag,            // (in)
   InterArray<int> *connectionList,      // (in)
+  DELayout *delayout,                   // (in)
   VM *vm,                               // (in)
   bool actualFlag,                      // (in)
   int *rc                               // (out) return code
@@ -142,11 +143,30 @@ DistGrid *DistGrid::create(
   DistGrid *distgrid = NULL;  // initialize
   try{
     
-  DELayout *delayout = NULL;
-  
-  if (actualFlag && (!vm || (vm==VM::getCurrent()))){
-    // only use DELayout of incoming DistGrid if not creating for another VM
-    delayout = dg->delayout;
+  // check incoming dg argument
+  if (dg==NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "The 'dg' argument must not be a NULL pointer", ESMC_CONTEXT, rc);
+    return ESMC_NULL_POINTER;
+  }
+
+  // deal with incoming delayout argument
+  if (delayout == ESMC_NULL_POINTER){
+    // delayout is not being passed in explicitly
+    if (actualFlag && (!vm || (vm==VM::getCurrent()))){
+      // use DELayout of incoming DistGrid if not creating for another VM
+      delayout = dg->delayout;
+    }
+  }else{
+    // delayout is being passed in explicitly
+    if (!(actualFlag && (!vm || (vm==VM::getCurrent())))){
+      // create a DELayout from incoming DELauyout on new VM.
+      //TODO: must be implemented
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+        "Creation of DELayout from DELayout not yet available.", 
+        ESMC_CONTEXT, rc);
+      return ESMC_NULL_POINTER;
+    }
   }
   
   if (present(firstExtra) || present(lastExtra) || indexflag ||

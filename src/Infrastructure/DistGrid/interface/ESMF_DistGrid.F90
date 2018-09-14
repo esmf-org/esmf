@@ -653,7 +653,7 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDG(distgrid, keywordEnforcer, &
-    firstExtra, lastExtra, indexflag, connectionList, vm, rc)
+    firstExtra, lastExtra, indexflag, connectionList, delayout, vm, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDG
@@ -665,6 +665,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, target,               intent(in),  optional :: lastExtra(:)
     type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
+    type(ESMF_DELayout),           intent(in),  optional :: delayout
     type(ESMF_VM),                 intent(in),  optional :: vm
     integer,                       intent(out), optional :: rc
 !
@@ -675,6 +676,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[6.3.0r] Added argument {\tt vm} to support object creation on a
 !               different VM than that of the current context.
+! \item[8.0.0] Added argument {\tt delayout} to support changing the layout of
+!              DEs across PETs.
 ! \end{description}
 ! \end{itemize}
 !
@@ -716,7 +719,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[connectionList]}]
 !          If present, override the connections of the incoming {\tt distgrid}.
 !          See section \ref{api:DistGridConnectionSet} for the associated Set()
-!          method. By default use the connections definded in {\tt distgrid}.
+!          method. By default use the connections defined in {\tt distgrid}.
+!     \item[{[delayout]}]
+!          If present, override the DELayout of the incoming {\tt distgrid}.
+!          By default use the DELayout defined in {\tt distgrid}.
 !     \item[{[vm]}]
 !          If present, the DistGrid object and the DELayout object
 !          are created on the specified {\tt ESMF\_VM} object. The 
@@ -761,7 +767,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateDG(dg, distgrid, firstExtraAux, &
-      lastExtraAux, indexflag, connectionListAux, vm, localrc)
+      lastExtraAux, indexflag, connectionListAux, delayout, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -798,7 +804,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDGT(distgrid, firstExtraPTile, &
-    lastExtraPTile, keywordEnforcer, indexflag, connectionList, vm, rc)
+    lastExtraPTile, keywordEnforcer, indexflag, connectionList, delayout, vm, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDGT
@@ -810,6 +816,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
+    type(ESMF_DELayout),           intent(in),  optional :: delayout
     type(ESMF_VM),                 intent(in),  optional :: vm
     integer,                       intent(out), optional :: rc
 !
@@ -820,6 +827,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[6.3.0r] Added argument {\tt vm} to support object creation on a
 !               different VM than that of the current context.
+! \item[8.0.0] Added argument {\tt delayout} to support changing the layout of
+!              DEs across PETs.
 ! \end{description}
 ! \end{itemize}
 !
@@ -861,7 +870,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item[{[connectionList]}]
 !          If present, override the connections of the incoming {\tt distgrid}.
 !          See section \ref{api:DistGridConnectionSet} for the associated Set()
-!          method. By default use the connections definded in {\tt distgrid}.
+!          method. By default use the connections defined in {\tt distgrid}.
+!     \item[{[delayout]}]
+!          If present, override the DELayout of the incoming {\tt distgrid}.
+!          By default use the DELayout defined in {\tt distgrid}.
 !     \item[{[vm]}]
 !          If present, the DistGrid object and the DELayout object
 !          are created on the specified {\tt ESMF\_VM} object. The 
@@ -906,7 +918,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateDG(dg, distgrid, firstExtraAux, &
-      lastExtraAux, indexflag, connectionListAux, vm, localrc)
+      lastExtraAux, indexflag, connectionListAux, delayout, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       

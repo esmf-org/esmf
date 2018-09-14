@@ -5955,9 +5955,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
        ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! create the final grid from intermediate grid by replacing DistGrid
     ESMF_GridCreateFrmNCFileDG = ESMF_GridCreateCopyFromNewDG(grid, distGrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    ! destroy the intermediate grid
+    call ESMF_GridDestroy(grid, noGarbage=.true., rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (present(rc)) rc=ESMF_SUCCESS
     return
@@ -5974,7 +5979,7 @@ end function ESMF_GridCreateFrmNCFileDG
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
      function ESMF_GridCreateFrmNCFile(filename, fileformat, regDecomp, keywordEnforcer, &
-       decompflag, isSphere, polekindflag, addCornerStagger, addUserArea, indexflag, &
+       decompflag, delayout, isSphere, polekindflag, addCornerStagger, addUserArea, indexflag, &
        addMask, varname, coordNames, rc)
 
 ! !RETURN VALUE:
@@ -5987,6 +5992,7 @@ end function ESMF_GridCreateFrmNCFileDG
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(in),  optional  :: regDecomp(:)
     type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
+    type(ESMF_DELayout),    intent(in),  optional  :: delayout
     logical,                intent(in),  optional  :: isSphere
     type(ESMF_PoleKind_Flag),  intent(in),  optional :: polekindflag(2)
     logical,                intent(in),  optional  :: addCornerStagger
@@ -6030,6 +6036,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      section~\ref{const:decompflag} for a full description of the
 !      possible options. Note that currently the option
 !      {\tt ESMF\_DECOMP\_CYCLIC} isn't supported in Grid creation.
+! \item[{[delayout]}]
+!      The DELayout that determines DE layout of DEs across PETs. The default is to create a default
+!      DELayout with the correct number of DEs according to the {\tt regDecomp}. See the documentation of
+!      the {\tt ESMF\_DELayoutCreate()} method for details about the default DELayout.
 ! \item[{[isSphere]}]
 !      If .true., create a periodic Grid. If .false., create a regional Grid. Defaults to .true.
 ! \item[{[polekindflag]}]
@@ -6070,6 +6080,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
     type(ESMF_Grid) :: grid
+    type(ESMF_DistGrid) :: dgOld, dgNew
     integer         :: localrc
     logical         :: localIsSphere, localAddCorner
     type(ESMF_Decomp_Flag) :: localDEcompFlag(2)
@@ -6142,6 +6153,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 isSphere=localIsSphere, polekindflag=polekindflag, &
                 addCornerStagger=localAddCorner, &
                 addUserArea=addUserArea, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
         ! Warning about user area in GridSpec
         if (present(addUserArea)) then
@@ -6162,12 +6175,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 addCornerStagger=localAddCorner, &
                 addMask=addMask, varname=varname, coordNames=coordNames, &
                 rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         else
           grid = ESMF_GridCreateFrmGridspec(trim(filename), regDecompLocal, &
                 localIndexFlag, decompflag=localDEcompflag, &
                 isSphere=localIsSphere, polekindflag=polekindflag, &
                 addCornerStagger=localAddCorner, &
                 coordNames = coordNames, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
         endif
     else
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
@@ -6175,10 +6192,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)
         return
     endif
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-       ESMF_CONTEXT, rcToReturn=rc)) return
 
     ESMF_GridCreateFrmNCFile = grid
+
+    if (present(delayout)) then
+      ! query the DistGrid from the newly created grid
+      call ESMF_GridGet(grid, distgrid=dgOld, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! create new DistGrid using specified DELayout
+      dgNew = ESMF_DistGridCreate(dgOld, delayout=delayout, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! create the final grid from intermediate grid by replacing DistGrid
+      ESMF_GridCreateFrmNCFile = ESMF_GridCreateCopyFromNewDG(grid, dgNew, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      ! destroy the intermediate grid
+      call ESMF_GridDestroy(grid, noGarbage=.true., rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     if (present(rc)) rc=ESMF_SUCCESS
     return
@@ -23438,7 +23472,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       call ESMF_VMGetCurrent(vm, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
-      call ESMF_VMGet(vm, petCount=npet, rc=rc)
+      call ESMF_VMGet(vm, petCount=npet, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
 

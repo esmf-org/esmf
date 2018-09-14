@@ -127,7 +127,7 @@ namespace ESMCI {
     static DistGrid *create(DistGrid *dg,
       InterArray<int> *firstExtra, InterArray<int> *lastExtra, 
       ESMC_IndexFlag *indexflag, InterArray<int> *connectionList, 
-      VM *vm=NULL, bool actualFlag=true, int *rc=NULL);
+      DELayout *delayout=NULL, VM *vm=NULL, bool actualFlag=true, int *rc=NULL);
     static DistGrid *create(InterArray<int> *minIndex,
       InterArray<int> *maxIndex, InterArray<int> *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount,

@@ -46,7 +46,8 @@ extern "C" {
   void FTN_X(c_esmc_distgridcreatedg)(ESMCI::DistGrid **ptr, 
     ESMCI::DistGrid **dg, ESMCI::InterArray<int> *firstExtra,
     ESMCI::InterArray<int> *lastExtra, ESMC_IndexFlag *indexflag,
-    ESMCI::InterArray<int> *connectionList, ESMCI::VM **vm, int *rc){
+    ESMCI::InterArray<int> *connectionList, ESMCI::DELayout **delayout, 
+    ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreatedg()"
     // Initialize return code; assume routine not implemented
@@ -66,11 +67,24 @@ extern "C" {
     printf("c_esmc_distgridcreatedg(): opt_vm=%p, actualFlag=%d\n", 
       opt_vm, actualFlag);
 #endif
+    ESMCI::DELayout *opt_delayout;
+    if (ESMC_NOT_PRESENT_FILTER(delayout) == ESMC_NULL_POINTER)
+      opt_delayout = NULL;
+    else{
+      opt_delayout = *delayout;
+    }
+    // ensure 'dg' argument is valid to be dereferenced
+    if (ESMC_NOT_PRESENT_FILTER(dg) == ESMC_NULL_POINTER){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+        "The 'dg' argument must not be a NULL pointer",
+        ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+      return; // bail out
+    }
     // all PETs call into the C++ create(), but the actualFlag identifies PETs
     // that are expected to create actual DistGrid objects
     *ptr = ESMCI::DistGrid::create(*dg, firstExtra, lastExtra,
-      ESMC_NOT_PRESENT_FILTER(indexflag), connectionList, opt_vm, actualFlag,
-      &localrc);
+      ESMC_NOT_PRESENT_FILTER(indexflag), connectionList, opt_delayout, 
+      opt_vm, actualFlag, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
