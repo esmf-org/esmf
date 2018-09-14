@@ -263,6 +263,7 @@ namespace ESMCI{
         for(int jr=0; jr<ir; jr++){
           std::vector<int> pcol;
           std::vector<ExecBlock<T> > exec_blocks;
+          int first_eblock_col = -1;
           for(int kc=0; kc < tem_ncols; kc++){
             bool has_potential_kc = false;
             int rkc = jr;
@@ -286,10 +287,13 @@ namespace ESMCI{
                 pcol.push_back(kc);
               }
             }
+            if(pcol.empty()){
+              first_eblock_col = kc;
+            }
           }
           if(pcol.size() > 1){
             partition_cols.push_back(pcol);
-            int prev_col = -1;
+            int prev_col = first_eblock_col;
             for(int ipcol=0; ipcol < static_cast<int>(pcol.size()); ipcol++){
               /* Find comp infos in range [prev_col+1, pcol[i]] in the row
                * range [jr, ir)
