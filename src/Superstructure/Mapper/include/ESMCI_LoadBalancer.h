@@ -163,6 +163,7 @@ namespace ESMCI{
          * number of pets (variables) used by the execution blocks
          */
         std::vector<std::pair<std::string, int> > eblock_vnames_and_ivals;
+        std::vector<MVIDLPoly<T> > exec_block_list_cfuncs;
         for(typename std::vector<std::vector<ExecBlock<T> > >::iterator iter = 
               pexec_blocks.begin(); iter != pexec_blocks.end(); ++iter){
           /* Each (*citer) is a list of parallel execution blocks */
@@ -250,7 +251,21 @@ namespace ESMCI{
           exec_block_list_cfunc = exec_block_list_cfunc - 
                                     static_cast<T>(exec_block_list_npets);
           //mvidlp_cfuncs.push_back(DAMP_CONST * exec_block_list_cfunc);
-          mvidlp_cfuncs.push_back(exec_block_list_cfunc);
+          //mvidlp_cfuncs.push_back(exec_block_list_cfunc);
+          exec_block_list_cfuncs.push_back(exec_block_list_cfunc);
+        }
+
+        /* Add up all cumulative constraint functions from exec blocks
+         * and add as the final constraint function for the solver
+         */
+        if(!exec_block_list_cfuncs.empty()){
+          MVIDLPoly<T> final_constraint = cfunc_template;
+          for(typename std::vector<MVIDLPoly<T> >::iterator
+                  iter = exec_block_list_cfuncs.begin();
+                iter != exec_block_list_cfuncs.end(); ++iter){
+            final_constraint = final_constraint + *iter;
+          }
+          mvidlp_cfuncs.push_back(final_constraint);
         }
 
         /*
