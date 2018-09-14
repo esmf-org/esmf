@@ -4,6 +4,7 @@
 #include <string>
 #include <queue>
 #include <vector>
+#include <set>
 #include <algorithm>
 #include <functional>
 #include <iostream>
@@ -154,6 +155,7 @@ namespace ESMCI{
         std::vector<T> cfunc_template_coeffs(cfuncs_vnames.size()+1, static_cast<T>(0));
         MVIDLPoly<T> cfunc_template(cfunc_template_coeffs);
         cfunc_template.set_vnames(cfuncs_vnames);
+        std::set<TwoDVIDPoly<T> > utwodvidp_cfuncs;
         /* The constraint functions are the square of the idle times between the
          * pairs of execution blocks
          * The idle time between a pair of execution blocks is obtained by 
@@ -240,8 +242,7 @@ namespace ESMCI{
               /* Add the square of the idle time function as a constraint */
               TwoDVIDPoly<T> idle_time_func_sq = idle_time_func * idle_time_func;
               idle_time_func_sq.set_dfuncs(idle_time_dfuncs);
-              twodvidp_cfuncs.push_back(DAMP_CONST * idle_time_func_sq);
-
+              utwodvidp_cfuncs.insert(DAMP_CONST * idle_time_func_sq);
             }
           }
           /* Final constraint Sum(ei) - C = 0
@@ -253,6 +254,12 @@ namespace ESMCI{
           //mvidlp_cfuncs.push_back(DAMP_CONST * exec_block_list_cfunc);
           //mvidlp_cfuncs.push_back(exec_block_list_cfunc);
           exec_block_list_cfuncs.push_back(exec_block_list_cfunc);
+        }
+
+        /* Add all exec block constraint functions */
+        for(typename std::set<TwoDVIDPoly<T> >::iterator iter = utwodvidp_cfuncs.begin();
+              iter != utwodvidp_cfuncs.end(); ++iter){
+          twodvidp_cfuncs.push_back(*iter);
         }
 
         /* Add up all cumulative constraint functions from exec blocks
