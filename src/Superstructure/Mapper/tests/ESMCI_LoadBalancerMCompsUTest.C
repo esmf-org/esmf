@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cstring>
+#include <algorithm>
 #include "ESMCI_Poly.h"
 #include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyTwoV.h"
@@ -95,12 +96,13 @@ int main(int argc, char *argv[])
     float opt_wtime;
     bool opt_pets_available = lb.optimize(opt_npets, opt_pet_ranges, opt_wtime);
     std::cout << "Optimized time : " << opt_wtime << "\n";
-    std::cout << "Optimized pet list : ";
+    std::cout << "Optimized pet list : (";
     for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
         citer != opt_npets.cend(); ++citer){
       std::cout << *citer << ", ";
     }
-    std::cout << "\n";
+    std::cout << " ) = " << std::accumulate(opt_npets.begin(), opt_npets.end(), 0);
+    std::cout << " pets\n";
     if(!opt_pets_available){
       /* The solution has converged or solver no longer works for the case */
       lb.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
