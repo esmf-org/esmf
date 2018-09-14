@@ -369,7 +369,8 @@ namespace ESMCI{
            */
           for(std::vector<std::pair<std::string, int> >::const_iterator citer = 
                 comp_phase_npets.cbegin(); citer != comp_phase_npets.cend(); ++citer){
-            T ratio = (pet_range_.second - pet_range_.first + 1)/(*citer).second;
+            int eblock_npets = pet_range_.second - pet_range_.first + 1;
+            T ratio = static_cast<T>(eblock_npets)/static_cast<T>((*citer).second);
             std::vector<T> sfunc_cfunc_coeffs;
             sfunc_cfunc_coeffs.push_back(1);
             sfunc_cfunc_coeffs.push_back(static_cast<T>(-1) * ratio);
@@ -386,7 +387,7 @@ namespace ESMCI{
              * e1 = Sum(kixi)
              */
             std::vector<T> sfunc_ccfunc_coeffs;
-            sfunc_ccfunc_coeffs.push_back(ratio);
+            sfunc_ccfunc_coeffs.push_back(ratio/comp_phase_npets.size());
             sfunc_ccfunc_coeffs.push_back(0);
             std::vector<std::string> sfunc_ccfunc_vnames;
             sfunc_ccfunc_vnames.push_back((*citer).first);
