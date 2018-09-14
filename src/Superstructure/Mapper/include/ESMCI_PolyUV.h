@@ -53,6 +53,7 @@ namespace ESMCI{
         void set_coeffs(const std::vector<CType>& coeffs); 
         void set_coeffs(std::initializer_list<CType> coeffs);
         void set_cs_info(const PolyCSInfo<CType> &csinfo);
+        PolyCSInfo<CType> get_cs_info(void ) const;
         std::vector<CType> get_coeffs(void ) const;
         CType eval(const std::vector<CType> &vvals) const;
         CType eval(const CType &vval) const;
@@ -122,6 +123,12 @@ namespace ESMCI{
     inline void UVIDPoly<CType>::set_cs_info(const PolyCSInfo<CType> &csinfo)
     {
       csinfo_ = csinfo;
+    }
+
+    template<typename CType>
+    inline PolyCSInfo<CType> UVIDPoly<CType>::get_cs_info(void ) const
+    {
+      return csinfo_;
     }
 
     template<typename CType>
