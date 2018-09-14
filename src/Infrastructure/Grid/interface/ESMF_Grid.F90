@@ -6846,6 +6846,7 @@ end function ESMF_GridCreateFrmScrip
     integer, pointer :: minind(:,:)
     type(ESMF_CoordSys_Flag) :: coordsys
     character (len=256) :: units
+    integer :: decnt
    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -7097,7 +7098,11 @@ end function ESMF_GridCreateFrmScrip
                   ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-        if (mod(PetNo, regDecomp(1)) == 0) then
+        call ESMF_GridGet(grid, localDECount=decnt, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+        if (decnt > 0) then
+         if ( mod(PetNo, regDecomp(1)) == 0) then
            call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7129,16 +7134,17 @@ end function ESMF_GridCreateFrmScrip
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
            endif
-        endif
-        ! convert to kilometer if the units is "meters"
-        if (units(1:1) .eq. 'm') then
-           loncoord2D(:,:) = loncoord2D(:,:) * 1.d-3
-           latcoord2D(:,:) = latcoord2D(:,:) * 1.d-3
-           if (localAddCornerStagger) then
-              cornerlon3D(:,:,:) = cornerlon3D(:,:,:) * 1.d-3
-              cornerlat3D(:,:,:) = cornerlat3D(:,:,:) * 1.d-3
+           ! convert to kilometer if the units is "meters"
+           if (units(1:1) .eq. 'm') then
+             loncoord2D(:,:) = loncoord2D(:,:) * 1.d-3
+             latcoord2D(:,:) = latcoord2D(:,:) * 1.d-3
+             if (localAddCornerStagger) then
+                cornerlon3D(:,:,:) = cornerlon3D(:,:,:) * 1.d-3
+                cornerlat3D(:,:,:) = cornerlat3D(:,:,:) * 1.d-3
+             endif
            endif
         endif
+
         ! Set coordinate tables -  Put Corners into coordinates
         localStaggerLoc = ESMF_STAGGERLOC_CENTER
 
@@ -7205,8 +7211,8 @@ end function ESMF_GridCreateFrmScrip
               enddo
            enddo
            deallocate(recvbuf)
+         endif
         endif
-
         ! Add coordinates at the corner stagger location
         if (localAddCornerStagger) then
            call ESMF_GridGet(grid,tile=1,staggerloc=ESMF_STAGGERLOC_CORNER, &
@@ -7230,6 +7236,7 @@ end function ESMF_GridCreateFrmScrip
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
 
+           if (decnt > 0) then
            if (mod(PetNo, regDecomp(1)) == 0) then
               ! Get the x dimension of every local array
               allocate(dims1(regDecomp(1)-1))
@@ -7314,6 +7321,7 @@ end function ESMF_GridCreateFrmScrip
                 enddo
                 deallocate(recvbuf)
             endif  ! end if (mod(PetNo, RegDecomp(1))==0)
+            endif
         endif  ! end if (AddCornerStagger)
      endif  ! end if ndims = 2
 
