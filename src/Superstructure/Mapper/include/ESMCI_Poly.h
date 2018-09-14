@@ -223,6 +223,18 @@ namespace ESMCI{
     {
       return(!(val == poly));
     }
+
+    /* This is a custom < so that algos that want to compute equality
+     * between two polys work
+     * Here,
+     * poly_a < poly_b iff poly_a != poly_b
+     */
+    template<typename CType, typename DType>
+    bool operator<(const GenPoly<CType, DType> &lpoly,
+      const GenPoly<CType, DType> &rpoly)
+    {
+      return (lpoly != rpoly);
+    }
   } // namespace MapperUtil
 } // namespace ESMCI
 
