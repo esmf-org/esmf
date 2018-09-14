@@ -82,9 +82,8 @@ if (ESMF_IMErrS(fget(var),__LINE__,ESMF_FILENAME,ESMF_METHOD,rc=rcvar)) return
 if (ESMF_IMErrS(fget(var),__LINE__,ESMF_FILENAME,"?",rc=rcvar)) return
 
 
-#define ESMF_INIT_C_PAD   char isInit[8]; 
-
 #else
+
 
 #define ESMF_INIT_GET(var) 0
 
@@ -104,8 +103,6 @@ if (ESMF_IMErrS(fget(var),__LINE__,ESMF_FILENAME,"?",rc=rcvar)) return
 #define ESMF_INIT_CHECK_DEEP_SHORT(fget,var, rcvar) 
 #define ESMF_INIT_CHECK_SHALLOW(fget,var, rcvar) 
 #define ESMF_INIT_CHECK_SHALLOW_SHORT(fget,var, rcvar)
-
-#define ESMF_INIT_C_PAD 
 
 #endif
 
