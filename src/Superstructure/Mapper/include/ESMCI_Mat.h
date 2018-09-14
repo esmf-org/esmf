@@ -191,6 +191,7 @@ namespace ESMCI{
       int ret = LAPACK_Minv(res.dims_[0], res.get_data_by_ref());
       //assert(ret == ESMF_SUCCESS);
       if(ret != ESMF_SUCCESS){
+        std::cerr << "Finding matrix inv failed for : \n" << *this << "\n";
         std::string err_msg("LAPACK routine to find inv failed");
         throw std::runtime_error(err_msg);
       }
@@ -280,6 +281,22 @@ namespace ESMCI{
       return res;
     }
 
+    template<typename U, typename V>
+    Matrix<U> operator+(const Matrix<U> &lhs, const V &rhs)
+    {
+      Matrix<U> res = lhs;
+      std::transform(res.data_.begin(), res.data_.end(),
+                      res.data_.begin(),
+                      std::bind1st(std::plus<U>(), static_cast<U>(rhs)));
+      return res;
+    }
+
+    template<typename U, typename V>
+    Matrix<V> operator+(const U &lhs, const Matrix<V> &rhs)
+    {
+      return rhs + lhs;
+    }
+
     template<typename T>
     Matrix<T> operator-(const Matrix<T> &lhs, const Matrix<T> &rhs)
     {
@@ -288,6 +305,16 @@ namespace ESMCI{
       Matrix<T> res = lhs;
       std::transform(res.data_.begin(), res.data_.end(), rhs.data_.begin(),
                       res.data_.begin(), std::minus<T>());
+      return res;
+    }
+
+    template<typename U, typename V>
+    Matrix<U> operator-(const Matrix<U> &lhs, const V &rhs)
+    {
+      Matrix<U> res = lhs;
+      std::transform(res.data_.begin(), res.data_.end(),
+                      res.data_.begin(),
+                      std::bind1st(std::minus<U>(), static_cast<U>(rhs)));
       return res;
     }
 
