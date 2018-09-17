@@ -6053,7 +6053,7 @@ call ESMF_LogWrite("Aft ESMF_IOWrite", ESMF_LOGMSG_INFO, rc=rc)
                 ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
            linkChange = ESMF_TRUE
-           call c_ESMC_AttributeLink(bp%base, locstream, linkChange, status)
+           call c_ESMC_AttributeLink(bp%base, locstream%lstypep%base, linkChange, status)
            if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc))  return
         endif
