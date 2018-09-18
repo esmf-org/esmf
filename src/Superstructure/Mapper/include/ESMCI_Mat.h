@@ -175,6 +175,47 @@ namespace ESMCI{
       return ESMF_SUCCESS;
     }
 
+    /* Calculate the inverse of the matrix using LAPACK */
+    inline int LAPACK_Minv(int m, double *A)
+    {
+      lapack_int n = static_cast<lapack_int>(m);
+      lapack_int *ipiv = (lapack_int *)calloc(n+1, sizeof(lapack_int));
+      lapack_int info;
+      /* Calculate LU decomposition of the matrix */
+      info = LAPACKE_dgetrf(LAPACK_ROW_MAJOR, n, n, A, n, ipiv);
+      /* info == 0 => success */
+      if(info < 0){
+        std::cout << "LAPACKE_dgetrf failed, the "
+          << -info << "th arg in input array, A[" << -info << "] = "
+          << A[-info] << " is invalid\n";
+        return ESMF_FAILURE;
+      }
+      else if(info > 0){
+        std::cout << "LAPACKE_dgetrf failed, the U["
+          << info << "," << info << "] = 0, U is singular and div by zero can occur"
+          << " if used to solve a system of equations\n";
+        return ESMF_FAILURE;
+      }
+      /* Calculate the inverse of the matrix */
+      info = LAPACKE_dgetri(LAPACK_ROW_MAJOR, n, A, n, ipiv);
+      /* info == 0 => success */
+      if(info < 0){
+        std::cout << "LAPACKE_dgetri failed, the "
+          << -info << "th arg in input array, A[" << -info << "] = "
+          << A[-info] << " is invalid\n";
+        return ESMF_FAILURE;
+      }
+      else if(info > 0){
+        std::cout << "LAPACKE_dgetri failed, the U["
+          << info << "," << info << "] = 0, the matrix is singular and its inverse "
+          << "cannot be computed\n";
+        return ESMF_FAILURE;
+      }
+      free(ipiv);
+
+      return ESMF_SUCCESS;
+    }
+
     /* Calculate the inverse of the matrix */
     template<typename T>
     Matrix<T> Matrix<T>::inv(void ) const
@@ -326,6 +367,18 @@ namespace ESMCI{
     {
       /* cblas_sgemm has no return code ! */
       cblas_sgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
+                  m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+      return ESMF_SUCCESS;
+    }
+
+    /* Multiply two matrices using BLAS
+     */
+    inline int BLAS_Mmult(int m, int n, int k, int alpha,
+                          const double *A, int lda, const double *B, int ldb,
+                          int beta, double *C, int ldc)
+    {
+      /* cblas_sgemm has no return code ! */
+      cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans,
                   m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
       return ESMF_SUCCESS;
     }
