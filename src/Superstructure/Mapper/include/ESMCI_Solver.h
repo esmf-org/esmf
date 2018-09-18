@@ -36,10 +36,16 @@ namespace ESMCI{
         void set_funcs(const std::vector<TwoVIDPoly<T> > &funcs);
         void set_funcs(const std::vector<TwoDVIDPoly<T> > &dfuncs);
         void set_funcs(const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs);
+        void scale_and_center_funcs(const std::vector<T> &vals);
         void set_niters(int niters);
-        std::vector<T> minimize(const UConstraintValGenerator &uc_vgen) const;
+        std::vector<T> minimize(const UConstraintValGenerator &uc_vgen);
 
       private:
+        enum Sol_Constraint_type{
+          SOL_UNDER_CONSTRAINED,
+          SOL_NORMAL_CONSTRAINED,
+          SOL_OVER_CONSTRAINED
+        };
         static const int DEFAULT_NITERS = 10;
         int niters_;
         std::vector<std::string> vnames_;
@@ -102,16 +108,30 @@ namespace ESMCI{
       mvid_lpoly_funcs_ = mvid_lpoly_funcs;
     }
 
-    template<typename T>
-    inline void SESolver<T>::set_niters(int niters)
-    {
-      niters_ = niters;
-    }
-
     /* Some utils used by the solver is included in a separate 
      * namespace
      */
     namespace SESolverUtils{
+      template<typename T>
+      inline T feval(const GenPoly<T, int> &f,
+        const std::vector<T> &vals, const std::vector<std::string> &vnames)
+      {
+        std::vector<T> fvals;
+        std::vector<std::string> fvnames = f.get_vnames();
+        std::size_t i = 0;
+        assert(vals.size() == vnames.size());
+        for(std::vector<std::string>::const_iterator vnames_iter = vnames.cbegin();
+              vnames_iter != vnames.cend(); ++vnames_iter, i++){
+          for(std::vector<std::string>::const_iterator fvnames_iter = fvnames.cbegin();
+                fvnames_iter != fvnames.cend(); ++fvnames_iter){
+            if(*vnames_iter == *fvnames_iter){
+              fvals.push_back(vals[i]);
+            }
+          }
+        }
+        return f.eval(fvals);
+      }
+
       /* Calculate the Jacobian for the user constraints 
        * specified via funcs wrt the variables specified in vnames
        * Each row, i, in the Jacobian is the partial derivative
@@ -268,17 +288,185 @@ namespace ESMCI{
         Matrix<T> res(dims, res_data);
         return res;
       }
+
+      /* Reshape solution so that all Xi > 0 and Sum(Xi) = Xi_exp_sum */
+      template<typename T>
+      void reshape_solution(std::vector<T> Xi, T Xi_exp_sum)
+      {
+        for(typename std::vector<T>::iterator iter = Xi.begin();
+              iter != Xi.end(); ++iter){
+          if(*iter < static_cast<T>(1)){
+            *iter = 1;
+          }
+        }
+
+        T Xi_sum = std::accumulate(Xi.begin(), Xi.end(), static_cast<T>(0));
+        for(typename std::vector<T>::iterator iter = Xi.begin();
+              iter != Xi.end(); ++iter){
+          *iter = (*iter / Xi_sum) * Xi_exp_sum;
+        }
+      }
+
+      template<typename T>
+      void reshape_solution(T *Xi, std::size_t Xi_sz, T Xi_exp_sum)
+      {
+        for(std::size_t i=0; i<Xi_sz; i++){
+          if(Xi[i] < static_cast<T>(1)){
+            Xi[i] = 1;
+          }
+        }
+
+        T Xi_sum = std::accumulate(Xi, Xi+Xi_sz, static_cast<T>(0));
+        for(std::size_t i=0; i<Xi_sz; i++){
+          Xi[i] = (Xi[i] / Xi_sum) * Xi_exp_sum;
+          if(Xi[i] < static_cast<T>(1)){
+            Xi[i] = 1;
+          }
+        }
+      }
     } // SESolverUtils
+
+    /* Scale and center the constraint functions based on vals */
+    template<typename T>
+    inline void SESolver<T>::scale_and_center_funcs(const std::vector<T> &vals)
+    {
+      std::vector<T> fevals;
+      for(typename std::vector<TwoVIDPoly<T> >::const_iterator iter = funcs_.cbegin();
+          iter != funcs_.cend(); ++iter){
+        T val = SESolverUtils::feval(*iter, vals, vnames_);
+        if(val == 0){
+          /* FIXME: Is this a correct strategy ? */
+          /* Use the constant value in the equation as the func value */
+          std::vector<T> zvals(vals.size(), static_cast<T>(0));
+          val = SESolverUtils::feval(*iter, zvals, vnames_);
+        }
+        fevals.push_back(val);
+      }
+      for(typename std::vector<TwoDVIDPoly<T> >::const_iterator iter = dfuncs_.cbegin();
+          iter != dfuncs_.cend(); ++iter){
+        T val = SESolverUtils::feval(*iter, vals, vnames_);
+        if(val == 0){
+          /* FIXME: Is this a correct strategy ? */
+          /* Use the constant value in the equation as the func value */
+          std::vector<T> zvals(vals.size(), static_cast<T>(0));
+          val = SESolverUtils::feval(*iter, zvals, vnames_);
+        }
+        fevals.push_back(val);
+      }
+      for(typename std::vector<MVIDLPoly<T> >::const_iterator iter = mvid_lpoly_funcs_.cbegin();
+          iter != mvid_lpoly_funcs_.cend(); ++iter){
+        T val = SESolverUtils::feval(*iter, vals, vnames_);
+        if(val == 0){
+          /* FIXME: Is this a correct strategy ? */
+          /* Use the constant value in the equation as the func value */
+          std::vector<T> zvals(vals.size(), static_cast<T>(0));
+          val = SESolverUtils::feval(*iter, zvals, vnames_);
+        }
+        fevals.push_back(val);
+      }
+
+      if(fevals.size() > 1){
+        /* Find mean and standard deviation */
+        T init_val = static_cast<T>(0);
+        T mean = init_val;
+        T stddev = init_val;
+
+        mean = std::accumulate(fevals.begin(), fevals.end(), init_val)/fevals.size();
+
+        std::vector<T> fevals_minus_mean_sq(fevals.size(), 0);
+        typename std::vector<T>::iterator fmms_vals_iter = fevals_minus_mean_sq.begin();
+        for(typename std::vector<T>::const_iterator
+              fevals_citer = fevals.cbegin();
+              (fevals_citer != fevals.cend())
+                && (fmms_vals_iter != fevals_minus_mean_sq.end());
+              ++fevals_citer, ++fmms_vals_iter){
+          *fmms_vals_iter = (*fevals_citer - mean) * (*fevals_citer - mean);
+        }
+        T fevals_minus_mean_sq_sum =
+          std::accumulate(fevals_minus_mean_sq.begin(), fevals_minus_mean_sq.end(),
+            init_val);
+        stddev =
+          sqrt(fevals_minus_mean_sq_sum/static_cast<T>(fevals_minus_mean_sq.size()-1));
+
+        T scale = (stddev != 0) ? stddev : 1;
+
+        /* Scale function coefficients so that all functions are centered around
+         * mean and have a standard deviation of 1
+         */
+        typename std::vector<T>::const_iterator fevals_iter = fevals.cbegin();
+        for(typename std::vector<TwoVIDPoly<T> >::iterator iter = funcs_.begin();
+            (iter != funcs_.end()) && (fevals_iter != fevals.cend());
+              ++iter, ++fevals_iter){
+          T sc_ratio;
+          std::vector<T> coeffs = (*iter).get_coeffs();
+          if((*fevals_iter != 0) && (*fevals_iter != mean)){
+            sc_ratio = ((*fevals_iter - mean)/scale)/(*fevals_iter);
+          }
+          else{
+            sc_ratio = static_cast<T>(-1) * (mean/scale);
+          }
+          assert(sc_ratio != 0);
+          for(typename std::vector<T>::iterator coeff_iter = coeffs.begin();
+                coeff_iter != coeffs.end(); ++coeff_iter){
+            *coeff_iter = (*coeff_iter) * sc_ratio;
+          }
+          (*iter).set_coeffs(coeffs);
+        }
+        for(typename std::vector<TwoDVIDPoly<T> >::iterator iter = dfuncs_.begin();
+            (iter != dfuncs_.end()) && (fevals_iter != fevals.cend());
+            ++iter, ++fevals_iter){
+          T sc_ratio;
+          std::vector<T> coeffs = (*iter).get_coeffs();
+          if((*fevals_iter != 0) && (*fevals_iter != mean)){
+            sc_ratio = ((*fevals_iter - mean)/scale)/(*fevals_iter);
+          }
+          else{
+            sc_ratio = static_cast<T>(-1) * (mean/scale);
+          }
+          assert(sc_ratio != 0);
+          for(typename std::vector<T>::iterator coeff_iter = coeffs.begin();
+                coeff_iter != coeffs.end(); ++coeff_iter){
+            *coeff_iter = (*coeff_iter) * sc_ratio;
+          }
+          std::cout << "UnScaled dfunc : " << *iter << "\n";
+          (*iter).set_coeffs(coeffs);
+          std::cout << "Scaled dfunc : " << *iter << "\n";
+        }
+        for(typename std::vector<MVIDLPoly<T> >::iterator
+              iter = mvid_lpoly_funcs_.begin();
+            (iter != mvid_lpoly_funcs_.end()) && (fevals_iter != fevals.cend());
+            ++iter, ++fevals_iter){
+          T sc_ratio;
+          std::vector<T> coeffs = (*iter).get_coeffs();
+          if((*fevals_iter != 0) && (*fevals_iter != mean)){
+            sc_ratio = ((*fevals_iter - mean)/scale)/(*fevals_iter);
+          }
+          else{
+            sc_ratio = static_cast<T>(-1) * (mean/scale);
+          }
+          assert(sc_ratio != 0);
+          for(typename std::vector<T>::iterator coeff_iter = coeffs.begin();
+                coeff_iter != coeffs.end(); ++coeff_iter){
+            *coeff_iter = (*coeff_iter) * sc_ratio;
+          }
+          std::cout << "UnScaled mvid_lpoly_func : " << *iter << "\n";
+          (*iter).set_coeffs(coeffs);
+          std::cout << "Scaled mvid_lpoly_func : " << *iter << "\n";
+        }
+      }
+    }
+
+    template<typename T>
+    inline void SESolver<T>::set_niters(int niters)
+    {
+      niters_ = niters;
+    }
+
 
     template<typename T>
     std::vector<T> SESolver<T>::minimize(
-      const UConstraintValGenerator &uc_vgen) const
+      const UConstraintValGenerator &uc_vgen)
     {
-      enum Sol_Constraint_type{
-        SOL_UNDER_CONSTRAINED,
-        SOL_NORMAL_CONSTRAINED,
-        SOL_OVER_CONSTRAINED
-      };
       Sol_Constraint_type sc_type = SOL_NORMAL_CONSTRAINED;
       std::vector<int> Xi_dims = {static_cast<int>(vnames_.size()), 1};
       Matrix<T> Xi(Xi_dims, init_vals_);
@@ -332,9 +520,13 @@ namespace ESMCI{
        * Xj => The next (after one iteration) value of Xi
        */
       for(int i=0; i<niters_; i++){
+        Matrix<T> Feval = SESolverUtils::eval_funcs(all_funcs, vnames_, Xi.get_data());
+        std::cout << "Feval :\n";
+        std::cout << Feval << "\n";
+
         Matrix<T> J = SESolverUtils::eval_jacobian(JF, vnames_, Xi.get_data());
-        //std::cout << "Jacobian :\n";
-        //std::cout << J << "\n";
+        std::cout << "Jacobian :\n";
+        std::cout << J << "\n";
         int ncols = vnames_.size();
         std::vector<T> J_data = J.get_data();
         std::vector<int> J_dims = J.get_dims();
@@ -353,7 +545,6 @@ namespace ESMCI{
           Jinv = J.inv();
         }
 
-        Matrix<T> Feval = SESolverUtils::eval_funcs(all_funcs, vnames_, Xi.get_data());
         /* If there are more variables than functions we add a last row.
          * The last row corresponds to a constraint that the sum of the input
          * variables need to remain constant (see variable C above,
@@ -379,6 +570,10 @@ namespace ESMCI{
           Xj = Xi - Jinv * Feval * DAMP_CONST;
         }
         //std::cout << "Xj = \n" << Xj << "\n";
+        // Reset -ve values of Xi, and ensure that Sum(Xi) = C
+        T *Xj_data = Xj.get_data_by_ref();
+        SESolverUtils::reshape_solution(Xj_data, vnames_.size(), C);
+        //scale_and_center_funcs(Xj.get_data());
         Xi = Xj;
       }
   
