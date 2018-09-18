@@ -2967,13 +2967,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     dimCount = size(minIndexPTile)
     if (dimCount /= size(maxIndexPTile)) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
-          msg="- size(minIndexPTile) must match size(maxIndexPTile)", &
+          msg="size(minIndexPTile) must match size(maxIndexPTile)", &
           ESMF_CONTEXT, rcToReturn=rc)
       return
     endif
     if (arbDim < 1 .or. arbDim > dimCount+1) then
       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_VALUE, &
-        msg="- arbDim out of range", &
+        msg="arbDim out of range", &
         ESMF_CONTEXT, rcToReturn=rc)
       return
     endif

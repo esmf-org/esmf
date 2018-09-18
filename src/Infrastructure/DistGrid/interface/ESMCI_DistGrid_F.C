@@ -319,18 +319,18 @@ extern "C" {
       // minIndexPDimPTile was provided -> do some error checking
       if ((minIndexPDimPTile)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- minIndexPDimPTile array must be of rank 2", ESMC_CONTEXT, rc);
+          "minIndexPDimPTile array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((minIndexPDimPTile)->extent[0] < (*ptr)->getDimCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of minIndexPDimPTile array must be of size 'dimCount'",
+          "1st dim of minIndexPDimPTile array must be of size 'dimCount'",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((minIndexPDimPTile)->extent[1] < (*ptr)->getTileCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dim of minIndexPDimPTile array must be of size 'tileCount'",
+          "2nd dim of minIndexPDimPTile array must be of size 'tileCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -350,18 +350,18 @@ extern "C" {
       // maxIndexPDimPTile was provided -> do some error checking
       if ((maxIndexPDimPTile)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- maxIndexPDimPTile array must be of rank 2", ESMC_CONTEXT, rc);
+          "maxIndexPDimPTile array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((maxIndexPDimPTile)->extent[0] < (*ptr)->getDimCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of maxIndexPDimPTile array must be of size 'dimCount'",
+          "1st dim of maxIndexPDimPTile array must be of size 'dimCount'",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((maxIndexPDimPTile)->extent[1] < (*ptr)->getTileCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dim of maxIndexPDimPTile array must be of size 'tileCount'",
+          "2nd dim of maxIndexPDimPTile array must be of size 'tileCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -381,12 +381,12 @@ extern "C" {
       // elementCountPTile was provided -> do some error checking
       if ((elementCountPTile)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- elementCountPTile array must be of rank 1", ESMC_CONTEXT, rc);
+          "elementCountPTile array must be of rank 1", ESMC_CONTEXT, rc);
         return;
       }
       if ((elementCountPTile)->extent[0] < (*ptr)->getTileCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of elementCountPTile array must be of size 'tileCount'",
+          "1st dim of elementCountPTile array must be of size 'tileCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -406,18 +406,18 @@ extern "C" {
       // minIndexPDimPDe was provided -> do some error checking
       if ((minIndexPDimPDe)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- minIndexPDimPDe array must be of rank 2", ESMC_CONTEXT, rc);
+          "minIndexPDimPDe array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((minIndexPDimPDe)->extent[0] < (*ptr)->getDimCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of minIndexPDimPDe array must be of size 'dimCount'",
+          "1st dim of minIndexPDimPDe array must be of size 'dimCount'",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((minIndexPDimPDe)->extent[1] < (*ptr)->getDELayout()->getDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dim of minIndexPDimPDe array must be of size 'deCount'",
+          "2nd dim of minIndexPDimPDe array must be of size 'deCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -437,18 +437,18 @@ extern "C" {
       // maxIndexPDimPDe was provided -> do some error checking
       if ((maxIndexPDimPDe)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- maxIndexPDimPDe array must be of rank 2", ESMC_CONTEXT, rc);
+          "maxIndexPDimPDe array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((maxIndexPDimPDe)->extent[0] < (*ptr)->getDimCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of maxIndexPDimPDe array must be of size 'dimCount'",
+          "1st dim of maxIndexPDimPDe array must be of size 'dimCount'",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((maxIndexPDimPDe)->extent[1] < (*ptr)->getDELayout()->getDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dim of maxIndexPDimPDe array must be of size 'deCount'",
+          "2nd dim of maxIndexPDimPDe array must be of size 'deCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -468,12 +468,12 @@ extern "C" {
       // elementCountPDe was provided -> do some error checking
       if ((elementCountPDe)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- elementCountPDe array must be of rank 1", ESMC_CONTEXT, rc);
+          "elementCountPDe array must be of rank 1", ESMC_CONTEXT, rc);
         return;
       }
       if ((elementCountPDe)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of elementCountPDe array must be of size 'deCount'",
+          "1st dim of elementCountPDe array must be of size 'deCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -493,12 +493,12 @@ extern "C" {
       // tileListPDe was provided -> do some error checking
       if ((tileListPDe)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- tileListPDe array must be of rank 1", ESMC_CONTEXT, rc);
+          "tileListPDe array must be of rank 1", ESMC_CONTEXT, rc);
         return;
       }
       if ((tileListPDe)->extent[0] < (*ptr)->getDELayout()->getDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of tileListPDe array must be of size 'deCount'",
+          "1st dim of tileListPDe array must be of size 'deCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -511,19 +511,19 @@ extern "C" {
       // indexCountPDimPDe was provided -> do some error checking
       if ((indexCountPDimPDe)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- indexCountPDimPDe array must be of rank 2", ESMC_CONTEXT, rc);
+          "indexCountPDimPDe array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((indexCountPDimPDe)->extent[0] < (*ptr)->getDimCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of indexCountPDimPDe array must be of size 'dimCount'",
+          "1st dim of indexCountPDimPDe array must be of size 'dimCount'",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((indexCountPDimPDe)->extent[1] <
         (*ptr)->getDELayout()->getDeCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dim of indexCountPDimPDe array must be of size 'deCount'",
+          "2nd dim of indexCountPDimPDe array must be of size 'deCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -543,12 +543,12 @@ extern "C" {
       // collocationPDim was provided -> do some error checking
       if ((collocationPDim)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- collocationPDim array must be of rank 1", ESMC_CONTEXT, rc);
+          "collocationPDim array must be of rank 1", ESMC_CONTEXT, rc);
         return;
       }
       if ((collocationPDim)->extent[0] < (*ptr)->getDimCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of collocationPDim array must be of size 'dimCount'",
+          "1st dim of collocationPDim array must be of size 'dimCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -561,18 +561,18 @@ extern "C" {
       // connectionList was provided -> do some error checking
       if ((connectionList)->dimCount != 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- connectionList array must be of rank 2", ESMC_CONTEXT, rc);
+          "connectionList array must be of rank 2", ESMC_CONTEXT, rc);
         return;
       }
       if ((connectionList)->extent[0] < 2*((*ptr)->getDimCount()) + 2){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dim of connectionList array must be of size '2*dimCount + 2'",
+          "1st dim of connectionList array must be of size '2*dimCount + 2'",
           ESMC_CONTEXT, rc);
         return;
       }
       if ((connectionList)->extent[1] < (*ptr)->getConnectionCount()){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 2nd dim of connectionList array must be of size 'connectionCount'",
+          "2nd dim of connectionList array must be of size 'connectionCount'",
           ESMC_CONTEXT, rc);
         return;
       }
@@ -602,7 +602,7 @@ extern "C" {
     int localDeCount = (*ptr)->getDELayout()->getLocalDeCount();
     if (localDe < 0 || localDe > localDeCount-1){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
-        "- Specified local DE out of bounds", ESMC_CONTEXT,
+        "Specified local DE out of bounds", ESMC_CONTEXT,
         ESMC_NOT_PRESENT_FILTER(rc));
       return;
     }
@@ -618,7 +618,7 @@ extern "C" {
         if (collocationTable[i]==collocation) break;
       if (i==diffCollocationCount){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
-          "- specified collocation not valid", ESMC_CONTEXT,
+          "specified collocation not valid", ESMC_CONTEXT,
           ESMC_NOT_PRESENT_FILTER(rc));
         return;
       }
@@ -671,14 +671,14 @@ extern "C" {
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
       if ((indexList)->dimCount != 1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
-          "- indexList array must be of rank 1", ESMC_CONTEXT, rc);
+          "indexList array must be of rank 1", ESMC_CONTEXT, rc);
         return;
       }
       if ((indexList)->extent[0] <
         ((*ptr)->getIndexCountPDimPDe())[(*ptr)->getDELayout()->
         getLocalDeToDeMap()[localDe] * (*ptr)->getDimCount()+dim]){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "- 1st dimension of indexList array size insufficiently",
+          "1st dimension of indexList array size insufficiently",
           ESMC_CONTEXT, rc);
         return;
       }
