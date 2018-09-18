@@ -543,7 +543,7 @@ module ESMF_BaseMod
 
 !
 ! !DESCRIPTION:
-!     Return the vm of any type in the system.
+!     Return the VMId of any type in the system.
 !
 !     The arguments are:
 !     \begin{description}
