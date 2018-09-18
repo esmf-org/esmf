@@ -150,14 +150,24 @@ DistGrid *DistGrid::create(
     return ESMC_NULL_POINTER;
   }
 
+#if 0
+  {
+    std::stringstream debugmsg;
+    debugmsg << "DistGrid::create(): DELayout " << delayout;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+  
   // deal with incoming delayout argument
-  if (delayout == ESMC_NULL_POINTER){
+  bool delayoutPresent=false; // init
+  if (delayout==NULL){
     // delayout is not being passed in explicitly
     if (actualFlag && (!vm || (vm==VM::getCurrent()))){
       // use DELayout of incoming DistGrid if not creating for another VM
       delayout = dg->delayout;
     }
   }else{
+    delayoutPresent=true;  // set
     // delayout is being passed in explicitly
     if (!(actualFlag && (!vm || (vm==VM::getCurrent())))){
       // create a DELayout from incoming DELauyout on new VM.
@@ -169,8 +179,16 @@ DistGrid *DistGrid::create(
     }
   }
   
-  if (present(firstExtra) || present(lastExtra) || indexflag ||
-    present(connectionList) || vm || !actualFlag){
+#if 0
+  {
+    std::stringstream debugmsg;
+    debugmsg << "DistGrid::create(): 2nd DELayout " << delayout;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
+  if (delayoutPresent || present(firstExtra) || present(lastExtra) || 
+    indexflag || present(connectionList) || vm || !actualFlag){
    if (actualFlag){
     // creating a new DistGrid from the existing one considering additional info
     // prepare for internal InterArray usage

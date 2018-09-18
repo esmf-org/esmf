@@ -1238,6 +1238,16 @@ Array *Array::create(
     return ESMC_NULL_POINTER;
   }
   const DELayout *delayout = distgrid->getDELayout();
+#if 0
+  {
+    std::stringstream debugmsg;
+    debugmsg << "Array::create(): DELayout" << delayout << " localDeCount=" 
+      << delayout->getLocalDeCount() << " localDeToDeMap()=" 
+      << delayout->getLocalDeToDeMap() << " : " 
+      << *delayout->getLocalDeToDeMap();
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   int dimCount = distgrid->getDimCount();
   // check if distgridToArrayMap was provided and matches rest of arguments
   vector<int> distgridToArrayMapArrayV(dimCount);

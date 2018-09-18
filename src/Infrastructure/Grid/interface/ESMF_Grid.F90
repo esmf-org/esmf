@@ -2835,6 +2835,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
        ! TODO: NEED TO MAKE SURE INCOMING DistGrid HAS SAME MinIndex, MaxIndex AS EXISTING
        !       Grid's DistGrid
+       ! -> use the ESMF_DISTGRIDMATCH_INDEXSPACE match level once available!!!
 
 #if 0
        if (present(name)) &
@@ -3112,6 +3113,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
+#if 0
+        call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG before coord RedistStore()",&
+          ESMF_LOGMSG_INFO)
+#endif
+
        ! Redist between ArrayBundles
 !       call ESMF_ArrayBundleRedistStore(srcAB, dstAB, routehandle=routehandle, rc=localrc)
 !       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3135,6 +3141,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
              ESMF_CONTEXT, rcToReturn=rc)) return
        enddo
+
+#if 0
+        call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG after coord RedistStore()",&
+          ESMF_LOGMSG_INFO)
+#endif
 
        ! Fill the replicated dimension Arrays from the 2D redist data
        do k=1, dimCount*nStaggers
@@ -3246,6 +3257,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                   ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
 
+#if 0
+        call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG before item RedistStore()",&
+          ESMF_LOGMSG_INFO)
+#endif
           ! Gerhard had a note that Arraybundle redist doesn't seem to always work
           ! so just do individual redists until you check with him
           !srcAB = ESMF_ArrayBundleCreate(arrayList=srcA(1:nStaggers), rc=localrc)
@@ -3273,6 +3288,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
           enddo
+#if 0
+        call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG after item RedistStore()",&
+          ESMF_LOGMSG_INFO)
+#endif
 
           ! Get rid of lists of arrays
           deallocate(srcA)
@@ -5956,7 +5975,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! create the final grid from intermediate grid by replacing DistGrid
-    ESMF_GridCreateFrmNCFileDG = ESMF_GridCreateCopyFromNewDG(grid, distGrid, rc=localrc)
+    ESMF_GridCreateFrmNCFileDG = ESMF_GridCreateCopyFromNewDG(grid, distGrid, &
+      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
     ! destroy the intermediate grid
@@ -6205,7 +6225,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! create the final grid from intermediate grid by replacing DistGrid
-      ESMF_GridCreateFrmNCFile = ESMF_GridCreateCopyFromNewDG(grid, dgNew, rc=localrc)
+      ESMF_GridCreateFrmNCFile = ESMF_GridCreateCopyFromNewDG(grid, dgNew, &
+        rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
       ! destroy the intermediate grid
@@ -7143,8 +7164,9 @@ end function ESMF_GridCreateFrmScrip
                 cornerlat3D(:,:,:) = cornerlat3D(:,:,:) * 1.d-3
              endif
            endif
+         endif
         endif
-
+        
         ! Set coordinate tables -  Put Corners into coordinates
         localStaggerLoc = ESMF_STAGGERLOC_CENTER
 
@@ -7152,19 +7174,20 @@ end function ESMF_GridCreateFrmScrip
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
-        ! Set longitude coordinate
-        call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=1, &
+        if (decnt > 0) then
+         ! Set longitude coordinate
+         call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=1, &
                      farrayptr=fptrlon, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
 
-        ! Set latitude coordinate
-        call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=2, &
+         ! Set latitude coordinate
+         call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=2, &
                      farrayptr=fptrlat, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (mod(PetNo, regDecomp(1)) == 0) then
+         if (mod(PetNo, regDecomp(1)) == 0) then
            allocate(dims(regdecomp(1)-1))
            do i=1, regDecomp(1)-1
               call ESMF_VMRecv(vm, recv, 1, PetNo+i)
@@ -7176,7 +7199,7 @@ end function ESMF_GridCreateFrmScrip
            call pack_and_send_float2D(vm, total, regDecomp(1), PetNo, latCoord2D, fptrlat, dims)
 
            deallocate(loncoord2D, latcoord2D, dims)
-        else
+         else
            localroot = (PetNo/regDecomp(1))*regDecomp(1)
            call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
                exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
