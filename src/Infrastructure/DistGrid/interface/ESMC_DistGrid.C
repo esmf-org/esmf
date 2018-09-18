@@ -78,9 +78,16 @@ int ESMC_DistGridPrint(ESMC_DistGrid distgrid){
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
   
+  // check input
+  if (distgrid.ptr == NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+    "- Not a valid ESMC_DistGrid object", ESMC_CONTEXT, &rc);
+    return rc;  // bail out
+  }
+  
   // typecast into ESMCI type
   ESMCI::DistGrid *dgp = (ESMCI::DistGrid *)(distgrid.ptr);
-
+  
   // call into ESMCI method  
   localrc = dgp->print();
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
@@ -98,6 +105,13 @@ int ESMC_DistGridDestroy(ESMC_DistGrid *distgrid){
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check input
+  if (distgrid->ptr == NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+    "- Not a valid ESMC_DistGrid object", ESMC_CONTEXT, &rc);
+    return rc;  // bail out
+  }
   
   // typecast into ESMCI type
   ESMCI::DistGrid *dgp = (ESMCI::DistGrid *)(distgrid->ptr);
