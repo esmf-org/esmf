@@ -105,18 +105,6 @@ int main(int argc, char *argv[])
     std::cout << " pets\n";
     if(!opt_pets_available){
       /* The solution has converged or solver no longer works for the case */
-      lb.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
-      std::cout << "Optimal Optimized time : " << opt_wtime << "\n";
-      std::cout << "Optimal Optimized pet list : ";
-      for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
-          citer != opt_npets.cend(); ++citer){
-        std::cout << *citer << ", ";
-      }
-      std::cout << "\n";
-      for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
-          citer != opt_npets.cend(); ++citer){
-        ESMC_Test((*citer > 0), name, failMsgNPetsNeg, &result, __FILE__, __LINE__, 0);
-      }
       break;
     }
     for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
@@ -161,6 +149,22 @@ int main(int argc, char *argv[])
     comp_info_store->add_comp_info(comp_infos[2]);
 
     lb.set_lb_info(comp_infos);
+  }
+
+  std::vector<int> opt_npets;
+  std::vector<std::pair<int, int> > opt_pet_ranges;
+  float opt_wtime;
+  lb.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
+  std::cout << "Optimal Optimized time : " << opt_wtime << "\n";
+  std::cout << "Optimal Optimized pet list : ";
+  for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
+      citer != opt_npets.cend(); ++citer){
+    std::cout << *citer << ", ";
+  }
+  std::cout << "\n";
+  for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
+      citer != opt_npets.cend(); ++citer){
+    ESMC_Test((*citer > 0), name, failMsgNPetsNeg, &result, __FILE__, __LINE__, 0);
   }
 
   ESMCI::MapperUtil::CompInfoStore<float>::finalize();
