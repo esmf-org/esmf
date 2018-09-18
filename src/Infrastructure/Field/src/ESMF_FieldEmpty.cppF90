@@ -3308,7 +3308,8 @@ subroutine ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, &
   ! local variables @\
   mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fpointer @\
   integer                        :: localrc, i, j, count @\
-  integer                        :: memDimCount, fieldDimCount, fieldUngriddedDimCount @\
+  integer                        :: memDimCount, fieldUngriddedDimCount @\
+  integer                        :: fieldDimCount, localDeCount @\
   integer                        :: gridDimCount, gridDimCount_norep  @\
   integer                        :: grid_repdimcount @\
   integer                        :: elementCount  @\
@@ -3347,7 +3348,7 @@ subroutine ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, &
   ! number of ungridded Field dimensions, @\
   ! and number of undistributed Field Dimensions @\
   call ESMF_GeomBaseGet(geombase, dimCount=gridDimCount, & @\
-        distgridToGridMap=distgridToGridMap, & @\
+        distgridToGridMap=distgridToGridMap, localDeCount=localDeCount, & @\
         distgrid=distgrid, indexflag=g_indexflag, rc=localrc) @\
   if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
@@ -3360,11 +3361,16 @@ subroutine ESMF_FieldEmptyCompGB##mrank##D##mtypekind(field, geombase, farray, &
       return @\
   endif @\
 @\
-  call ESMF_DistGridGet(distgrid, localDe=0, elementCount=elementCount, & @\
-    rc=localrc) @\
-  if (ESMF_LogFoundError(localrc, & @\
+  elementCount = 0 ! default to assuming no elements @\
+  if (localDeCount==1) then @\
+    call ESMF_DistGridGet(distgrid, localDe=0, elementCount=elementCount, & @\
+      rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
+  elseif (localDeCount>1) then @\
+    !TODO: error out because not supported @\
+  endif @\
 @\
   if (elementCount > 0) then @\
     ! The following use of fptr is a bit of trickery to get all F90 @\
@@ -3875,15 +3881,15 @@ subroutine ESMF_FieldEmptyCompGBPtr##mrank##D##mtypekind(field, geombase, farray
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
 @\
-  if (localDeCount == 0) then @\
-    ! no localDE -> cannot ask DistGrid -> set elementCount to zero directly @\
-    elementCount = 0 @\
-  else @\
+  elementCount = 0 ! default to assuming no elements @\
+  if (localDeCount==1) then @\
     call ESMF_DistGridGet(distgrid, localDe=0, elementCount=elementCount, & @\
       rc=localrc) @\
     if (ESMF_LogFoundError(localrc, & @\
       ESMF_ERR_PASSTHRU, & @\
       ESMF_CONTEXT, rcToReturn=rc)) return @\
+  elseif (localDeCount>1) then @\
+    !TODO: error out because not supported @\
   endif @\
 @\
   if (elementCount > 0) then @\
