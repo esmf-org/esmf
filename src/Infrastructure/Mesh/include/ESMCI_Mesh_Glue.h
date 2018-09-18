@@ -30,6 +30,7 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
+#include "ESMCI_Array.h"
 
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/Legacy/ESMCI_MeshRead.h"
@@ -67,7 +68,10 @@ void ESMCI_meshaddnodes(Mesh **meshpp, int *num_nodes, int *nodeId,
 void ESMCI_meshwrite(Mesh **meshpp, char *fname, int *rc,
                      ESMCI_FortranStrLenArg nlen);
 
-
+void ESMCI_meshwritewarrays(Mesh **meshpp, char *fname, ESMCI_FortranStrLenArg nlen,
+                            int num_nodeArrays, ESMCI::Array **nodeArrays, 
+                            int num_elemArrays, ESMCI::Array **elemArrays, 
+                            int *rc);
 
 void ESMCI_meshaddelements(Mesh **meshpp,
                                               int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,

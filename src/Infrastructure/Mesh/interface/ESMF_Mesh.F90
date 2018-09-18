@@ -164,6 +164,7 @@ module ESMF_MeshMod
 
   public ESMF_MeshCreate
   public ESMF_MeshWrite
+  public ESMF_MeshWriteVTK
   public ESMF_MeshAddNodes
   public ESMF_MeshAddElements
   public ESMF_MeshDestroy
@@ -5170,7 +5171,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !ARGUMENTS:
     type(ESMF_Mesh), intent(in)                   :: mesh
     character (len=*), intent(in)                 :: filename
-    integer,                intent(out), optional :: rc
+    integer,          intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !   Write a mesh to VTK file.
@@ -5218,6 +5219,90 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = localrc
 
   end subroutine ESMF_MeshWrite
+!------------------------------------------------------------------------------
+
+
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_MeshWriteVTK()"
+!BOPI
+! !IROUTINE: ESMF_MeshWriteVTK - Write a Mesh to a VTK file
+!
+! !INTERFACE:
+    subroutine ESMF_MeshWriteVTK(mesh, filename, &
+         nodeArray1, nodeArray2, nodeArray3, &
+         elemArray1, elemArray2, elemArray3, &
+         rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Mesh), intent(in)            :: mesh
+      character (len=*), intent(in)          :: filename
+      type(ESMF_Array), intent(in), optional  :: nodeArray1
+      type(ESMF_Array), intent(in), optional  :: nodeArray2
+      type(ESMF_Array), intent(in), optional  :: nodeArray3
+      type(ESMF_Array), intent(in), optional  :: elemArray1
+      type(ESMF_Array), intent(in), optional  :: elemArray2
+      type(ESMF_Array), intent(in), optional  :: elemArray3
+      integer,          intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Write a mesh to VTK file.
+!
+!   \begin{description}
+!   \item [mesh]
+!         The mesh.
+!   \item[filename]
+!         The name of the output file.
+!   \item[{[nodeArray1-3]}]
+!         Arrays built on the node location of the mesh
+!   \item[{[elemArray1-3]}]
+!         Arrays built on the element location of the mesh
+!   \item [{[rc]}]
+!         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Check init status of arguments
+    ESMF_INIT_CHECK_DEEP(ESMF_MeshGetInit, mesh, rc)
+
+    ! If mesh has been freed then exit
+    if (mesh%isCMeshFreed) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh internals have been freed", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
+
+    ! If mesh has been freed then exit
+    if (.not. mesh%isFullyCreated) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
+                 msg="- the mesh has not been fully created", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+       return
+    endif
+
+   write(*,*) "BOB in MWV ",present(nodeArray1)
+
+    call C_ESMC_MeshWriteVTK(mesh%this, filename, &
+         nodeArray1, nodeArray2, nodeArray3, & 
+         elemArray1, elemArray2, elemArray3, & 
+         localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(rc)) rc = localrc
+
+  end subroutine ESMF_MeshWriteVTK
 !------------------------------------------------------------------------------
 
 

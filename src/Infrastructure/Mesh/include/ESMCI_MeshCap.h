@@ -91,6 +91,11 @@
     void meshwrite(char *fname, int *rc,
                    ESMCI_FortranStrLenArg nlen);
 
+    void meshwritewarrays(char *fname, ESMCI_FortranStrLenArg nlen,
+                                   int num_nodeArrays, ESMCI::Array **nodeArrays, 
+                                   int num_elemArrays, ESMCI::Array **elemArrays, 
+                                   int *rc);
+
     void meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                          int *_areaPresent, double *elemArea,
                          int *_coordsPresent, double *elemCoords,

@@ -706,6 +706,32 @@ void MeshCap::meshwrite(char *fname, int *rc,
   }
 }
 
+void MeshCap::meshwritewarrays(char *fname, ESMCI_FortranStrLenArg nlen,
+                               int num_nodeArrays, ESMCI::Array **nodeArrays, 
+                               int num_elemArrays, ESMCI::Array **elemArrays, 
+                               int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshwritewarrays()"
+
+  printf("nna=%d\n",num_nodeArrays);
+
+
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_meshwritewarrays(&mesh, 
+                           fname, nlen,
+                           num_nodeArrays, nodeArrays, 
+                           num_elemArrays, elemArrays, 
+                           rc);
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+          "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
+
 void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                               int *_areaPresent, double *elemArea,
                               int *_coordsPresent, double *elemCoords,
