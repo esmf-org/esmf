@@ -1360,6 +1360,7 @@
       call ESMF_VMIdCreate (vmid_temp, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_VMIdPrint (vmid_temp, rc=rc)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -1371,7 +1372,6 @@
       call ESMF_VMIdDestroy (vmid_temp, rc=rc)
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_VMIdPrint (vmid_temp)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -1383,7 +1383,7 @@
       call c_esmc_getvmid (grid, vmid_temp, rc)
       call ESMF_Test((rc == ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_VMIdPrint (vmid_temp)
+      call ESMF_VMIdPrint (vmid_temp, rc=rc)
 
       !------------------------------------------------------------------------
       !EX_UTest
