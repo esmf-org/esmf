@@ -78,6 +78,16 @@ namespace ESMCI{
       g_.add_edge(from, to);
     }
 
+    RunSeqDGraph::vertex_key RunSeqDGraph::add_root(const std::string &comp_name, const std::string &phase_name, int line_num, int iter_num)
+    {
+      vertex_key v = g_.add_root(RunSeqDGraph::RunSeqDGraphNode(comp_name, phase_name, line_num, iter_num));
+      g_.get_val(v).set_vertex_key(v);
+      // Cache the first instance of this component (ignoring phase etc) in the 
+      // dependency graph
+      first_comp_instances_.insert(std::make_pair(comp_name, v));
+      return v;
+    }
+
     bool RunSeqDGraph::has_dependency(const std::string &comp_name, const std::string &parent_comp_name)
     {
       std::map<std::string, DGraph<RunSeqDGraphNode>::vertex_key>::iterator comp_viter = first_comp_instances_.find(comp_name);
