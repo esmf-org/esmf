@@ -60,6 +60,7 @@ namespace ESMCI{
         vertex_iterator begin(void ) const;
         vertex_iterator end(void ) const;
         void print_to_file(const std::string &fname) const;
+        DGraph<T> inverse(void ) const;
       private:
         class GraphNode{
           public:
@@ -457,6 +458,49 @@ namespace ESMCI{
           }
         }
       }
+    }
+
+    template<typename T>
+    DGraph<T> DGraph<T>::inverse(void ) const
+    {
+      DGraph<T> g = *this;
+      for(typename std::vector<GraphNode>::iterator iter = g.nodes_.begin();
+          iter != g.nodes_.cend(); ++iter){
+        if((*iter).is_valid()){
+          /* Cache input and output edges for the node */
+          std::vector<vertex_key> onodes;
+          std::vector<vertex_key> inodes;
+          for(typename GraphNode::vertex_key_iterator oiter = (*iter).obegin();
+                oiter != (*iter).oend(); ++oiter){
+            onodes.push_back(*oiter);
+          }
+          for(typename GraphNode::vertex_key_iterator iiter = (*iter).ibegin();
+                iiter != (*iter).iend(); ++iiter){
+            inodes.push_back(*iiter);
+          }
+
+          /* Delete input and output edges for the node */
+          for(std::vector<vertex_key>::const_iterator citer = onodes.cbegin();
+                citer != onodes.cend(); ++citer){
+            (*iter).rem_oedge(*citer);
+          }
+          for(std::vector<vertex_key>::const_iterator citer = inodes.cbegin();
+                citer != inodes.cend(); ++citer){
+            (*iter).rem_iedge(*citer);
+          }
+
+          /* Add outgoing edges as incoming and vice versa */
+          for(std::vector<vertex_key>::const_iterator citer = onodes.cbegin();
+                citer != onodes.cend(); ++citer){
+            (*iter).add_iedge(*citer);
+          }
+          for(std::vector<vertex_key>::const_iterator citer = inodes.cbegin();
+                citer != inodes.cend(); ++citer){
+            (*iter).add_oedge(*citer);
+          }
+        }
+      }
+      return g;
     }
 
     template<typename T>

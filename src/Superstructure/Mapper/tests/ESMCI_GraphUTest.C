@@ -167,6 +167,7 @@ int main(int argc, char *argv[])
     //ESMCI::MapperUtil::DGraph_BFS(tree, vis, tree_vids[0]);
     //std::cout << "\n";
     tree.print_to_file("./BinaryTree.dot");
+    tree.inverse().print_to_file("./BinaryTreeInverse.dot");
   }
   catch(...){
     rc = ESMF_FAILURE;
@@ -267,6 +268,7 @@ int main(int argc, char *argv[])
     }
 
     gbenzene.print_to_file("./BenzeneGraph.dot");
+    gbenzene.inverse().print_to_file("./BenzeneGraphInverse.dot");
     ESMCI::MapperUtil::DGraph<Element>::ColorMap cmap = gbenzene.create_color_map();
     ESMCI::MapperUtil::PrintDGraphVisitor<Element> vis(gbenzene, cmap);
     std::cout << "Nodes (BFS): ";
