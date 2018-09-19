@@ -78,6 +78,16 @@ program ESMF_IOCompUTest
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  ! check if ESMF was built with NetCDF support
+  !-----------------------------------------------------------------------------
+#ifdef ESMF_NETCDF
+  write(6,'(2x,"INFO",2x,"ESMF was built with NetCDF support")')
+#else
+  write(6,'(2x,"INFO",2x,"ESMF was built WITHOUT NetCDF support")')
+#endif
+  !-----------------------------------------------------------------------------
+
   !------------------------------------------------------------------------
   ! Part 1 - Test I/O for Fields on cubed sphere grid
   !------------------------------------------------------------------------
@@ -132,46 +142,72 @@ program ESMF_IOCompUTest
 
   !------------------------------------------------------------------------
 
+#ifdef ESMF_NETCDF
   ! -- post test validation
   call IOCompUTestCompare(fieldInp, fieldOut, maxdiffI4, maxdiffR4, maxdiffR8, rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Compare read vs. written ESMF_TYPEKIND_I4 Field center values"
   write(failMsg, *) "Maximum difference found: ",maxdiffI4
+#ifdef ESMF_NETCDF
   call ESMF_Test((maxdiffI4(1).eq.0), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., "SKIP: "//name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Compare read vs. written ESMF_TYPEKIND_I4 Field edge1 values"
   write(failMsg, *) "Maximum difference found: ",maxdiffI4
+#ifdef ESMF_NETCDF
   call ESMF_Test((maxdiffI4(2).eq.0), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., "SKIP: "//name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Compare read vs. written ESMF_TYPEKIND_I4 Field edge2 values"
   write(failMsg, *) "Maximum difference found: ",maxdiffI4
+#ifdef ESMF_NETCDF
   call ESMF_Test((maxdiffI4(3).eq.0), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., "SKIP: "//name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Compare read vs. written ESMF_TYPEKIND_I4 Field corner values"
   write(failMsg, *) "Maximum difference found: ",maxdiffI4
+#ifdef ESMF_NETCDF
   call ESMF_Test((maxdiffI4(4).eq.0), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., "SKIP: "//name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Compare read vs. written ESMF_TYPEKIND_R4 Field values"
   write(failMsg, *) "Maximum difference found: ",maxdiffR4
+#ifdef ESMF_NETCDF
   call ESMF_Test((maxdiffR4(5).lt.epsR4), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., "SKIP: "//name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Compare read vs. written ESMF_TYPEKIND_R8 Field values"
   write(failMsg, *) "Maximum difference found: ",maxdiffR8
+#ifdef ESMF_NETCDF
   call ESMF_Test((maxdiffR8(6).lt.epsR8), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., "SKIP: "//name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   ! clean up
@@ -244,46 +280,72 @@ program ESMF_IOCompUTest
 
   !------------------------------------------------------------------------
 
+#ifdef ESMF_NETCDF
   ! -- post test validation
   call IOCompUTestCompare(fieldInp, fieldOut, maxdiffI4, maxdiffR4, maxdiffR8, rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Compare read vs. written ESMF_TYPEKIND_I4 Field center values"
   write(failMsg, *) "Maximum difference found: ",maxdiffI4
+#ifdef ESMF_NETCDF
   call ESMF_Test((maxdiffI4(1).eq.0), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., "SKIP: "//name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Compare read vs. written ESMF_TYPEKIND_I4 Field edge1 values"
   write(failMsg, *) "Maximum difference found: ",maxdiffI4
+#ifdef ESMF_NETCDF
   call ESMF_Test((maxdiffI4(2).eq.0), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., "SKIP: "//name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Compare read vs. written ESMF_TYPEKIND_I4 Field edge2 values"
   write(failMsg, *) "Maximum difference found: ",maxdiffI4
+#ifdef ESMF_NETCDF
   call ESMF_Test((maxdiffI4(3).eq.0), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., "SKIP: "//name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Compare read vs. written ESMF_TYPEKIND_I4 Field corner values"
   write(failMsg, *) "Maximum difference found: ",maxdiffI4
+#ifdef ESMF_NETCDF
   call ESMF_Test((maxdiffI4(4).eq.0), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., "SKIP: "//name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Compare read vs. written ESMF_TYPEKIND_R4 Field values"
   write(failMsg, *) "Maximum difference found: ",maxdiffR4
+#ifdef ESMF_NETCDF
   call ESMF_Test((maxdiffR4(5).lt.epsR4), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., "SKIP: "//name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Compare read vs. written ESMF_TYPEKIND_R8 Field values"
   write(failMsg, *) "Maximum difference found: ",maxdiffR8
+#ifdef ESMF_NETCDF
   call ESMF_Test((maxdiffR8(6).lt.epsR8), name, failMsg, result, ESMF_SRCLINE)
+#else
+  call ESMF_Test(.true., "SKIP: "//name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   ! clean up      
@@ -335,14 +397,14 @@ contains
 
     select case (igrid)
       case (1)
-        write(6,'("INFO  Create Cubed Sphere Grid")')
+        write(6,'(2x,"INFO  Create Cubed Sphere Grid")')
         grid = ESMF_GridCreateCubedSphere(tilesize=96, &
           staggerlocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
           name='fcst_grid', rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=__FILE__)) return
       case (2)
-        write(6,'("INFO  Create Regular Spherical Grid")')
+        write(6,'("2x,INFO  Create Regular Spherical Grid")')
         grid = ESMF_GridCreate1PeriDim(maxIndex=(/360, 180/), &
           coordSys=ESMF_COORDSYS_SPH_DEG, coordDep1=(/1,2/), coordDep2=(/1,2/), &
           indexflag=ESMF_INDEX_GLOBAL, name='fcst_grid', rc=rc)
