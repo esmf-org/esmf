@@ -143,6 +143,40 @@ int main(int argc, char *argv[])
   ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   rc = ESMF_SUCCESS;
+  try{
+    ESMCI::MapperUtil::DGraph<int> tree;
+    std::vector<ESMCI::MapperUtil::DGraph<int>::vertex_key> tree_vids;
+    tree_vids.push_back(tree.add_node(0));
+    tree_vids.push_back(tree.add_node(1));
+    tree_vids.push_back(tree.add_node(2));
+    tree_vids.push_back(tree.add_node(3));
+    tree_vids.push_back(tree.add_node(4));
+    tree_vids.push_back(tree.add_node(5));
+    tree_vids.push_back(tree.add_node(6));
+
+    tree.add_edge(tree_vids[1], tree_vids[0]);
+    tree.add_edge(tree_vids[2], tree_vids[0]);
+    tree.add_edge(tree_vids[3], tree_vids[1]);
+    tree.add_edge(tree_vids[4], tree_vids[1]);
+    tree.add_edge(tree_vids[5], tree_vids[2]);
+    tree.add_edge(tree_vids[6], tree_vids[2]);
+
+    ESMCI::MapperUtil::DGraph<int>::ColorMap cmap = tree.create_color_map();
+    //ESMCI::MapperUtil::PrintDGraphVisitor<int> vis(tree, cmap);
+    //std::cout << "Nodes : ";
+    //ESMCI::MapperUtil::DGraph_BFS(tree, vis, tree_vids[0]);
+    //std::cout << "\n";
+    tree.print_to_file("./BinaryTree.dot");
+  }
+  catch(...){
+    rc = ESMF_FAILURE;
+  }
+
+  strncpy(name, "Tree create test", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "Tree create test failed", ESMF_MAX_STRLEN);
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  rc = ESMF_SUCCESS;
   bfs_has_dups = false;
   bfs_found_all_nodes = false;
   dfs_has_dups = false;
