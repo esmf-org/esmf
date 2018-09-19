@@ -88,6 +88,11 @@ namespace ESMCI{
       return v;
     }
 
+    void RunSeqDGraph::inverse(void )
+    {
+      g_ = g_.inverse();
+    }
+
     bool RunSeqDGraph::has_dependency(const std::string &comp_name, const std::string &parent_comp_name)
     {
       std::map<std::string, DGraph<RunSeqDGraphNode>::vertex_key>::iterator comp_viter = first_comp_instances_.find(comp_name);

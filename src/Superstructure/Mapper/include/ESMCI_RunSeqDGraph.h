@@ -36,6 +36,7 @@ namespace ESMCI{
         vertex_key add_node(const std::string &comp_name, const std::string &phase_name, int line_num, int iter_num);
         void add_edge(const vertex_key &from, const vertex_key &to);
         vertex_key add_root(const std::string &comp_name, const std::string &phase_name, int line_num, int iter_num);
+        void inverse(void );
         bool has_dependency(const std::string &child_comp_name, const std::string &parent_comp_name);
         bool has_dependency(const std::string &child_comp_name, const std::vector<std::string> &parent_comp_names);
         void fuse_merge_phases(void );
