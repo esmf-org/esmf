@@ -54,6 +54,7 @@ namespace ESMCI{
         void add_edge(const vertex_key &from, const vertex_key &to);
         void rem_edge(const vertex_key &from, const vertex_key &to);
         std::vector<vertex_key> get_neighbors(const vertex_key &v) const;
+        std::vector<vertex_key> get_parents(const vertex_key &v) const;
         T &get_val(const vertex_key &v);
         std::size_t size(void ) const;
         ColorMap create_color_map(void ) const;
@@ -77,6 +78,7 @@ namespace ESMCI{
             vertex_key_iterator obegin(void ) const;
             vertex_key_iterator oend(void ) const;
             std::vector<vertex_key> get_neighbors(void ) const;
+            std::vector<vertex_key> get_parents(void ) const;
             bool has_neighbors(void ) const;
             bool is_valid(void ) const;
             void mark_invalid(void );
@@ -294,6 +296,12 @@ namespace ESMCI{
     }
 
     template<typename T>
+    std::vector<typename DGraph<T>::vertex_key> DGraph<T>::GraphNode::get_parents(void ) const
+    {
+      return iedges_;
+    }
+
+    template<typename T>
     bool DGraph<T>::GraphNode::has_neighbors(void ) const
     {
       return !(oedges_.empty());
@@ -413,6 +421,18 @@ namespace ESMCI{
     {
       if(is_valid(v)){
         return nodes_[v].get_neighbors();
+      }
+      else{
+        std::vector<typename DGraph<T>::vertex_key> tmp_vec;
+        return tmp_vec;
+      }
+    }
+
+    template<typename T>
+    std::vector<typename DGraph<T>::vertex_key> DGraph<T>::get_parents(const vertex_key &v) const
+    {
+      if(is_valid(v)){
+        return nodes_[v].get_parents();
       }
       else{
         std::vector<typename DGraph<T>::vertex_key> tmp_vec;
