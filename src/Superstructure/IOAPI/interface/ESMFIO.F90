@@ -703,7 +703,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     else if (typekind == ESMF_TYPEKIND_R8) then
 
-      call ESMF_FieldGet(field, localDe=lde, farrayPtr=fp_r8, rc=localrc)
+      call ESMF_FieldGet(field, localDe=lde, farrayPtr=fp_r8, &
+        exclusiveLBound=elb, exclusiveUBound=eub, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
 
