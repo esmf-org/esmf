@@ -10,7 +10,7 @@ namespace ESMCI{
   namespace MapperUtil{
 
     // RunSeqDGraphNode functions
-    RunSeqDGraph::RunSeqDGraphNode::RunSeqDGraphNode(const std::string &comp_name, const std::string &phase_name, int line_num, int iter_num):comp_name_(comp_name),phase_name_(phase_name),line_num_(line_num),iter_num_(iter_num)
+    RunSeqDGraph::RunSeqDGraphNode::RunSeqDGraphNode(const std::string &comp_name, const std::string &phase_name, int line_num, int iter_num):comp_name_(comp_name),phase_name_(phase_name),line_num_(line_num),iter_num_(iter_num),vkey_(INVALID_VERTEX_KEY)
     {
     }
 
@@ -39,6 +39,18 @@ namespace ESMCI{
       return iter_num_;
     }
 
+    void RunSeqDGraph::RunSeqDGraphNode::set_vertex_key(const vertex_key &vkey)
+    {
+      vkey_ = vkey;
+    }
+
+    RunSeqDGraph::RunSeqDGraphNode::vertex_key
+      RunSeqDGraph::RunSeqDGraphNode::get_vertex_key(void ) const
+    {
+      assert(vkey_ != INVALID_VERTEX_KEY);
+      return vkey_;
+    }
+
     std::ostream& operator<<(std::ostream &ostr, const RunSeqDGraph::RunSeqDGraphNode &node)
     {
       ostr << "("
@@ -54,6 +66,7 @@ namespace ESMCI{
     RunSeqDGraph::vertex_key RunSeqDGraph::add_node(const std::string &comp_name, const std::string &phase_name, int line_num, int iter_num)
     {
       vertex_key v = g_.add_node(RunSeqDGraph::RunSeqDGraphNode(comp_name, phase_name, line_num, iter_num));
+      g_.get_val(v).set_vertex_key(v);
       // Cache the first instance of this component (ignoring phase etc) in the 
       // dependency graph
       first_comp_instances_.insert(std::make_pair(comp_name, v));

@@ -15,19 +15,24 @@ namespace ESMCI{
       public:
         class RunSeqDGraphNode{
           public:
+            typedef DGraph<RunSeqDGraphNode>::vertex_key vertex_key;
             RunSeqDGraphNode(const std::string &comp_name, const std::string &phase_name, int line_num, int iter_num);
             std::string get_comp_name(void ) const;
             std::string get_phase_name(void ) const;
             void set_phase_name(const std::string &phase_name);
             int get_line_num(void ) const;
             int get_iter_num(void ) const;
+            void set_vertex_key(const vertex_key &vkey);
+            vertex_key get_vertex_key(void ) const;
           private:
+            const int INVALID_VERTEX_KEY = -1;
             const std::string comp_name_;
             std::string phase_name_;
             const int line_num_;
             const int iter_num_;
+            vertex_key vkey_;
         };
-        typedef DGraph<RunSeqDGraphNode>::vertex_key vertex_key;
+        typedef RunSeqDGraphNode::vertex_key vertex_key;
         vertex_key add_node(const std::string &comp_name, const std::string &phase_name, int line_num, int iter_num);
         void add_edge(const vertex_key &from, const vertex_key &to);
         bool has_dependency(const std::string &child_comp_name, const std::string &parent_comp_name);
