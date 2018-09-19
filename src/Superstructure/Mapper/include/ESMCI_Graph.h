@@ -61,6 +61,7 @@ namespace ESMCI{
         vertex_iterator end(void ) const;
         void print_to_file(const std::string &fname) const;
         DGraph<T> inverse(void ) const;
+        vertex_key add_root(const T& val);
       private:
         class GraphNode{
           public:
@@ -76,6 +77,7 @@ namespace ESMCI{
             vertex_key_iterator obegin(void ) const;
             vertex_key_iterator oend(void ) const;
             std::vector<vertex_key> get_neighbors(void ) const;
+            bool has_neighbors(void ) const;
             bool is_valid(void ) const;
             void mark_invalid(void );
             std::string to_string(void ) const;
@@ -292,6 +294,12 @@ namespace ESMCI{
     }
 
     template<typename T>
+    bool DGraph<T>::GraphNode::has_neighbors(void ) const
+    {
+      return !(oedges_.empty());
+    }
+
+    template<typename T>
     bool DGraph<T>::GraphNode::is_valid(void ) const
     {
       return is_valid_;
@@ -465,7 +473,7 @@ namespace ESMCI{
     {
       DGraph<T> g = *this;
       for(typename std::vector<GraphNode>::iterator iter = g.nodes_.begin();
-          iter != g.nodes_.cend(); ++iter){
+          iter != g.nodes_.end(); ++iter){
         if((*iter).is_valid()){
           /* Cache input and output edges for the node */
           std::vector<vertex_key> onodes;
@@ -501,6 +509,29 @@ namespace ESMCI{
         }
       }
       return g;
+    }
+
+    template<typename T>
+    typename DGraph<T>::vertex_key DGraph<T>::add_root(const T &val)
+    {
+      nodes_.push_back(GraphNode(val));
+      nvalid_nodes_++;
+
+      vertex_key val_vkey = nodes_.size() - 1;
+      vertex_key node_vkey = 0;
+      /* This new node is the root for all the existing roots */
+      for(typename std::vector<GraphNode>::iterator iter = nodes_.begin();
+          iter != nodes_.end(); ++iter, node_vkey++){
+        if(node_vkey == val_vkey){
+          break;
+        }
+        if((*iter).is_valid() && !((*iter).has_neighbors())){
+          (*iter).add_oedge(val_vkey);
+          nodes_[val_vkey].add_iedge(node_vkey);
+        }
+      }
+
+      return val_vkey;
     }
 
     template<typename T>
