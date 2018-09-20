@@ -36,6 +36,8 @@ namespace ESMCI{
         void set_funcs(const std::vector<TwoVIDPoly<T> > &funcs);
         void set_funcs(const std::vector<TwoDVIDPoly<T> > &dfuncs);
         void set_funcs(const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs);
+        void set_reshape_funcs(const std::vector<MVIDLPoly<T> >
+          &reshape_mvid_lpoly_funcs);
         void scale_and_center_funcs(const std::vector<T> &vals);
         void set_niters(int niters);
         std::vector<T> minimize(const UConstraintValGenerator &uc_vgen);
@@ -53,6 +55,9 @@ namespace ESMCI{
         std::vector<TwoVIDPoly<T> > funcs_;
         std::vector<TwoDVIDPoly<T> > dfuncs_;
         std::vector<MVIDLPoly<T> > mvid_lpoly_funcs_;
+        std::vector<MVIDLPoly<T> > reshape_mvid_lpoly_funcs_;
+        
+        void reshape_solution(T *val, std::size_t val_sz); 
     }; //class SESolver
 
 
@@ -106,6 +111,13 @@ namespace ESMCI{
     inline void SESolver<T>::set_funcs(const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs)
     {
       mvid_lpoly_funcs_ = mvid_lpoly_funcs;
+    }
+
+    template<typename T>
+    inline void SESolver<T>::set_reshape_funcs(const std::vector<MVIDLPoly<T> >
+      &reshape_mvid_lpoly_funcs)
+    {
+      reshape_mvid_lpoly_funcs_ = reshape_mvid_lpoly_funcs;
     }
 
     /* Some utils used by the solver is included in a separate 
@@ -289,41 +301,6 @@ namespace ESMCI{
         return res;
       }
 
-      /* Reshape solution so that all Xi > 0 and Sum(Xi) = Xi_exp_sum */
-      template<typename T>
-      void reshape_solution(std::vector<T> Xi, T Xi_exp_sum)
-      {
-        for(typename std::vector<T>::iterator iter = Xi.begin();
-              iter != Xi.end(); ++iter){
-          if(*iter < static_cast<T>(1)){
-            *iter = 1;
-          }
-        }
-
-        T Xi_sum = std::accumulate(Xi.begin(), Xi.end(), static_cast<T>(0));
-        for(typename std::vector<T>::iterator iter = Xi.begin();
-              iter != Xi.end(); ++iter){
-          *iter = (*iter / Xi_sum) * Xi_exp_sum;
-        }
-      }
-
-      template<typename T>
-      void reshape_solution(T *Xi, std::size_t Xi_sz, T Xi_exp_sum)
-      {
-        for(std::size_t i=0; i<Xi_sz; i++){
-          if(Xi[i] < static_cast<T>(1)){
-            Xi[i] = 1;
-          }
-        }
-
-        T Xi_sum = std::accumulate(Xi, Xi+Xi_sz, static_cast<T>(0));
-        for(std::size_t i=0; i<Xi_sz; i++){
-          Xi[i] = (Xi[i] / Xi_sum) * Xi_exp_sum;
-          if(Xi[i] < static_cast<T>(1)){
-            Xi[i] = 1;
-          }
-        }
-      }
     } // SESolverUtils
 
     /* Scale and center the constraint functions based on vals */
@@ -571,8 +548,10 @@ namespace ESMCI{
         }
         //std::cout << "Xj = \n" << Xj << "\n";
         // Reset -ve values of Xi, and ensure that Sum(Xi) = C
+        std::cout << "Xj before shaping = \n" << Xj << "\n";
         T *Xj_data = Xj.get_data_by_ref();
-        SESolverUtils::reshape_solution(Xj_data, vnames_.size(), C);
+        reshape_solution(Xj_data, vnames_.size());
+        std::cout << "Xj after shaping \n" << Xj << "\n";
         //scale_and_center_funcs(Xj.get_data());
         Xi = Xj;
       }
@@ -581,6 +560,152 @@ namespace ESMCI{
 
       return Xj.get_data();
     }
+
+    /* Reshape solution so that all Xi > 0 and Sum(Xi) = Xi_exp_sum */
+    template<typename T>
+    void SESolver<T>::reshape_solution(T *Xi, std::size_t Xi_sz)
+    {
+      assert(Xi_sz == vnames_.size());
+      assert(Xi_sz == init_vals_.size());
+
+      for(std::size_t i=0; i<Xi_sz; i++){
+        if(Xi[i] < static_cast<T>(1)){
+          Xi[i] = 1;
+        }
+      }
+
+      if(!reshape_mvid_lpoly_funcs_.empty()){
+        for(typename std::vector<MVIDLPoly<T> >::iterator
+              iter = reshape_mvid_lpoly_funcs_.begin();
+              iter != reshape_mvid_lpoly_funcs_.end(); ++iter){
+          std::vector<int> Xi_needs_reshape;
+          std::vector<std::string> reshape_fvnames = (*iter).get_vnames();
+          std::size_t i=0;
+          for(std::vector<std::string>::const_iterator citer = vnames_.cbegin();
+              (citer != vnames_.cend()) && (i < Xi_sz); ++citer, i++){
+            for(std::vector<std::string>::const_iterator
+                  reshape_citer = reshape_fvnames.cbegin();
+                  reshape_citer != reshape_fvnames.cend(); ++reshape_citer){
+              if(*citer == *reshape_citer){
+                Xi_needs_reshape.push_back(i);
+              }
+            }
+          }
+
+          T Xi_exp_sum = static_cast<T>(0);
+          T Xi_sum = static_cast<T>(0);
+          for(std::vector<int>::const_iterator citer = Xi_needs_reshape.cbegin();
+                citer != Xi_needs_reshape.cend(); ++citer){
+            Xi_exp_sum += init_vals_[*citer];
+            Xi_sum += Xi[*citer];
+          }
+          assert(Xi_exp_sum > 0);
+          assert(Xi_sum > 0);
+          for(std::vector<int>::const_iterator citer = Xi_needs_reshape.cbegin();
+                citer != Xi_needs_reshape.cend(); ++citer){
+            Xi[*citer] = (Xi[*citer] / Xi_sum) * Xi_exp_sum;
+            if(Xi[*citer] < static_cast<T>(1)){
+              Xi[*citer] = 1;
+            }
+          }
+        }
+      }
+      else{
+        T Xi_exp_sum = std::accumulate(init_vals_.cbegin(), init_vals_.cend(), 0);
+
+        T Xi_sum = std::accumulate(Xi, Xi+Xi_sz, static_cast<T>(0));
+        for(std::size_t i=0; i<Xi_sz; i++){
+          Xi[i] = (Xi[i] / Xi_sum) * Xi_exp_sum;
+          if(Xi[i] < static_cast<T>(1)){
+            Xi[i] = 1;
+          }
+        }
+      }
+    }
+
+    /* Reshape solution so that all Xi > 0 and Sum(Xi) = Xi_exp_sum */
+    /*
+    template<typename T>
+    void SESolver<T>::reshape_solution(T *Xi, std::size_t Xi_sz)
+    {
+      assert(Xi_sz == vnames_.size());
+      assert(Xi_sz == init_vals_.size());
+
+      for(std::size_t i=0; i<Xi_sz; i++){
+        if(Xi[i] < static_cast<T>(1)){
+          Xi[i] = 1;
+        }
+      }
+
+      if(!reshape_mvid_lpoly_funcs_.empty()){
+        for(typename std::vector<MVIDLPoly<T> >::iterator
+              iter = reshape_mvid_lpoly_funcs_.begin();
+              iter != reshape_mvid_lpoly_funcs_.end(); ++iter){
+          std::vector<T> new_fvvals, orig_fvvals;
+          std::vector<int> Xi_needs_reshape;
+          std::vector<std::string> reshape_fvnames = (*iter).get_vnames();
+          std::size_t i=0;
+          for(std::vector<std::string>::const_iterator citer = vnames_.cbegin();
+              (citer != vnames_.cend()) && (i < Xi_sz); ++citer, i++){
+            for(std::vector<std::string>::const_iterator
+                  reshape_citer = reshape_fvnames.cbegin();
+                  reshape_citer != reshape_fvnames.cend(); ++reshape_citer){
+              if(*citer == *reshape_citer){
+                new_fvvals.push_back(Xi[i]);
+                orig_fvvals.push_back(init_vals_[i]);
+                Xi_needs_reshape.push_back(i);
+              }
+            }
+          }
+          T reshape_ratio = static_cast<T>(1.0);
+          MVIDLPoly<T> func = *iter;
+          std::vector<T> func_coeffs = func.get_coeffs();
+          assert(!func_coeffs.empty());
+          func_coeffs[func_coeffs.size()-1] = static_cast<T>(0);
+          func.set_coeffs(func_coeffs);
+
+          T reshape_new_feval = func_coeffs.eval(new_fvvals);
+          if(reshape_new_feval <= 0){
+            continue;
+          }
+          T reshape_orig_feval = func.eval(orig_fvvals);
+          if(reshape_orig_feval == 0){
+            reshape_ratio = orig_fvvals_const_coeff/reshape_new_feval;
+          }
+          else{
+            reshape_ratio = (orig_fvvals_const_coeff + reshape_orig_feval)/reshape_new_feval;
+          }
+          if(reshape_ratio > 0){
+            reshape_ratio = static_cast<T>(1.0)/reshape_ratio;
+          }
+          if(reshape_ratio < 0){
+            reshape_ratio *= static_cast<T>(-1);
+          }
+          for(std::vector<int>::const_iterator citer = Xi_needs_reshape.cbegin();
+                citer != Xi_needs_reshape.cend(); ++citer){
+            Xi[*citer] *= reshape_ratio;
+          }
+        }
+      }
+      else{
+        T Xi_exp_sum = std::accumulate(init_vals_.cbegin(), init_vals_.cend(), 0);
+
+        T Xi_sum = std::accumulate(Xi, Xi+Xi_sz, static_cast<T>(0));
+        for(std::size_t i=0; i<Xi_sz; i++){
+          Xi[i] = (Xi[i] / Xi_sum) * Xi_exp_sum;
+          if(Xi[i] < static_cast<T>(1)){
+            Xi[i] = 1;
+          }
+        }
+      }
+      for(std::size_t i=0; i<Xi_sz; i++){
+        if(Xi[i] < static_cast<T>(1)){
+          Xi[i] = 1;
+        }
+      }
+
+    }
+    */
 
   } // namespace MapperUtil
 } // namespace ESMCI
