@@ -6,13 +6,13 @@ namespace ESMCI{
 
   Mapper::Mapper(ESMCI::VM &vm):vm_(vm), lbal_max_iters_(DEFAULT_LBAL_MAX_ITERS)
   {
-    comp_info_store_ = MapperUtil::CompInfoStore<float>::get_instance();
+    comp_info_store_ = MapperUtil::CompInfoStore<double>::get_instance();
   }
 
   Mapper::Mapper(ESMCI::VM &vm, const std::string &rseq_fname)
     :vm_(vm), lbal_max_iters_(DEFAULT_LBAL_MAX_ITERS), rseq_fname_(rseq_fname)
   {
-    comp_info_store_ = MapperUtil::CompInfoStore<float>::get_instance();
+    comp_info_store_ = MapperUtil::CompInfoStore<double>::get_instance();
 
     /* Create a run sequence dependency graph by reading the run sequence */
     int rc = MapperUtil::CreateDGraphFromRSeq(rseq_fname_, rseq_dgraph_);
@@ -21,10 +21,10 @@ namespace ESMCI{
   }
 
   void Mapper::set_comp_info(
-        const std::vector<MapperUtil::CompInfo<float> > &comp_infos)
+        const std::vector<MapperUtil::CompInfo<double> > &comp_infos)
   {
     comp_infos_ = comp_infos;
-    for(std::vector<MapperUtil::CompInfo<float> >::const_iterator citer = 
+    for(std::vector<MapperUtil::CompInfo<double> >::const_iterator citer = 
           comp_infos.cbegin(); citer != comp_infos.cend(); ++citer){
       comp_info_store_->add_comp_info(*citer);
     }
@@ -73,14 +73,14 @@ namespace ESMCI{
 
   bool Mapper::optimize(std::vector<int> &opt_npets,
                         std::vector<std::pair<int, int> > &opt_pet_ranges,
-                        float &opt_wtime)
+                        double &opt_wtime)
   {
     if(use_rseq_dgraph_dep_){
-      std::vector<std::vector<MapperUtil::CompInfo<float> > > opt_layouts;
+      std::vector<std::vector<MapperUtil::CompInfo<double> > > opt_layouts;
       get_rseq_opt_layouts(opt_layouts);
       if(use_load_balancer_){
         bool opt_pets_available = false;
-        for(std::vector<std::vector<MapperUtil::CompInfo<float> > >::const_iterator
+        for(std::vector<std::vector<MapperUtil::CompInfo<double> > >::const_iterator
               citer_list = opt_layouts.cbegin();
               citer_list != opt_layouts.cend(); ++citer_list){
           lb_.set_lb_info(*citer_list);
@@ -108,14 +108,22 @@ namespace ESMCI{
 
   Mapper::~Mapper()
   {
-    MapperUtil::CompInfoStore<float>::finalize();
+    MapperUtil::CompInfoStore<double>::finalize();
   }
 
+  /* Analyse dependency graph and generate different layouts */
   void Mapper::get_rseq_opt_layouts(
-    std::vector<std::vector<MapperUtil::CompInfo<float> > > &opt_layouts)
+    std::vector<std::vector<MapperUtil::CompInfo<double> > > &opt_layouts)
   {
-    /* Analyse dependency graph and generate different layouts */
+    /* Add the current layout */
     opt_layouts.push_back(comp_infos_);
+
+    assert(!comp_infos_.empty());
+
+    std::vector<MapperUtil::CompInfo<double> > rseq_opt_layout = 
+      rseq_dgraph_.get_opt_layout(comp_infos_);
+
+    opt_layouts.push_back(rseq_opt_layout);
   }
 
 } // namespace ESMCI
