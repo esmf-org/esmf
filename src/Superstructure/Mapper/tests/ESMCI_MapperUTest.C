@@ -20,21 +20,21 @@ int main(int argc, char *argv[])
   ESMC_TestStart(__FILE__, __LINE__, 0);
 
   int ncomps = 3;
-  ESMCI::MapperUtil::UVIDPoly<float> pcomp1, pcomp2, pcomp3;
-  std::vector<float> pcomp1_xvals = {3600.0, 7200.0, 14400.0, 28800.0};
-  std::vector<float> pcomp1_yvals = {1273.542, 819.700, 426.051, 290.470};
+  ESMCI::MapperUtil::UVIDPoly<double> pcomp1, pcomp2, pcomp3;
+  std::vector<double> pcomp1_xvals = {3600.0, 7200.0, 14400.0, 28800.0};
+  std::vector<double> pcomp1_yvals = {1273.542, 819.700, 426.051, 290.470};
 
-  std::vector<float> pcomp2_xvals = {2368, 4096, 8064, 21120};
-  std::vector<float> pcomp2_yvals = {959.630, 605.206, 324.372, 236.945};
+  std::vector<double> pcomp2_xvals = {2368, 4096, 8064, 21120};
+  std::vector<double> pcomp2_yvals = {959.630, 605.206, 324.372, 236.945};
 
-  std::vector<float> pcomp3_xvals = {1600, 4096, 8192, 9600};
-  std::vector<float> pcomp3_yvals = {756.506, 399.585, 270.775, 227.472};
+  std::vector<double> pcomp3_xvals = {1600, 4096, 8192, 9600};
+  std::vector<double> pcomp3_yvals = {756.506, 399.585, 270.775, 227.472};
 
   int max_deg = 2;
   rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, pcomp1_xvals, pcomp1_yvals, pcomp1);
   assert(rc == 0);
   std::cout << "pcomp1 = " << pcomp1 << "\n";
-  for(std::vector<float>::const_iterator citer1 = pcomp1_xvals.cbegin(),
+  for(std::vector<double>::const_iterator citer1 = pcomp1_xvals.cbegin(),
       citer2 = pcomp1_yvals.cbegin();
       (citer1 != pcomp1_xvals.cend()) && (citer2 != pcomp1_yvals.cend());
       ++citer1, ++citer2){
@@ -55,17 +55,17 @@ int main(int argc, char *argv[])
     comp_pet_ranges[0].second - comp_pet_ranges[0].first + 1,
     comp_pet_ranges[1].second - comp_pet_ranges[1].first + 1
                             };
-  std::vector<std::pair<float, float> > comp_time_intvls = {
-    std::pair<float, float>(0, pcomp1.eval(comp_npets[0])),
-    std::pair<float, float>(0, pcomp2.eval(comp_npets[1]))
+  std::vector<std::pair<double, double> > comp_time_intvls = {
+    std::pair<double, double>(0, pcomp1.eval(comp_npets[0])),
+    std::pair<double, double>(0, pcomp2.eval(comp_npets[1]))
                                                             };
 
-  ESMCI::MapperUtil::CompInfo<float> comp0("comp0", "run",
+  ESMCI::MapperUtil::CompInfo<double> comp0("comp0", "run",
                                       comp_pet_ranges[0], comp_time_intvls[0]);
-  ESMCI::MapperUtil::CompInfo<float> comp1("comp1", "run",
+  ESMCI::MapperUtil::CompInfo<double> comp1("comp1", "run",
                                       comp_pet_ranges[1], comp_time_intvls[1]);
 
-  std::vector<ESMCI::MapperUtil::CompInfo<float> > comp_infos = {
+  std::vector<ESMCI::MapperUtil::CompInfo<double> > comp_infos = {
                                                                   comp0,
                                                                   comp1
                                                                 };
@@ -74,15 +74,16 @@ int main(int argc, char *argv[])
   strncpy(failMsgSolnDiv, "Mapper test failed (solution diverging, idle time increasing)", ESMF_MAX_STRLEN);
 
   ESMCI::VM vm;
-  ESMCI::Mapper mapper(vm);
+  ESMCI::Mapper mapper(vm, "./TwoCompMapperTestRunSeq.txt");
 
   mapper.add_opt_method(ESMCI::Mapper::MAPPER_OPT_MIN_IDLE_TIME);
+  mapper.add_opt_method(ESMCI::Mapper::MAPPER_OPT_USE_RSEQ_CONN_DEP);
 
   for(int i=0; i<MAX_ITER; i++){
     std::cout << "Load Balancer iter : " << i << "\n";
     std::vector<int> opt_npets;
     std::vector<std::pair<int, int> > opt_pet_ranges;
-    float opt_wtime;
+    double opt_wtime;
 
     mapper.set_comp_info(comp_infos);
 
