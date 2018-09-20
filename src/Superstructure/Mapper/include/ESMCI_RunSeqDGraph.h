@@ -4,9 +4,11 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <list>
 #include <iostream>
 #include "ESMCI_Graph.h"
 #include "ESMCI_GraphUtils.h"
+#include "ESMCI_CompInfo.h"
 
 namespace ESMCI{
   namespace MapperUtil{
@@ -41,6 +43,8 @@ namespace ESMCI{
         bool has_dependency(const std::string &child_comp_name, const std::vector<std::string> &parent_comp_names);
         void fuse_merge_phases(void );
         void print_to_file(const std::string &fname) const;
+        std::vector<CompInfo<double> > get_opt_layout(
+          const std::vector<CompInfo<double> > &comp_infos);
       private:
         class RunSeqDGraphCompDetector : public DGraphVisitor<RunSeqDGraphNode>{
           public:
@@ -60,8 +64,46 @@ namespace ESMCI{
           private:
             DGraph<RunSeqDGraphNode> &g_;
         };
+        class RunSeqDGraphLayoutGenerator : public DGraphPVisitor<RunSeqDGraphNode>{
+          public:
+            RunSeqDGraphLayoutGenerator(
+              DGraph<RunSeqDGraphNode> &g,
+              DGraph<RunSeqDGraphNode> &g_inv,
+              DGraph<RunSeqDGraphNode>::ColorMap &cmap,
+              int npets);
+            void on_node(const typename DGraph<RunSeqDGraphNode>::vertex_key &v, 
+              const typename DGraph<RunSeqDGraphNode>::vertex_key &pv,
+              RunSeqDGraphNode &val, RunSeqDGraphNode &pval);
+            // FIXME: Ideally we should templatize the class
+            std::vector<CompInfo<double> > get_optimal_layout(void);
+          private:
+            typedef struct comp_rc_info_{
+              int row;
+              int scol;
+              int ecol;
+            } comp_rc_info_t;
+            class CompInfoComparator{
+              public:
+                  CompInfoComparator(std::map<std::string,
+                    comp_rc_info_t> &cidx);
+                  bool operator()(const CompInfo<double> &a,
+                                  const CompInfo<double> &b);
+              private:
+                  std::map<std::string, comp_rc_info_t> &cidx_;
+            };
+            DGraph<RunSeqDGraphNode> &g_;
+            DGraph<RunSeqDGraphNode> &g_inv_;
+            std::string invisible_node_comp_name_;
+            int npets_;
+            // FIXME: Ideally we should templatize the class
+            std::vector<std::vector<CompInfo<double> > > comp_infos_;
+            std::map<std::string, comp_rc_info_t > comp_infos_idx_;
+            std::list<RunSeqDGraphNode> comps_with_missing_parents_;
+        };
         DGraph<RunSeqDGraphNode> g_;
         std::map<std::string, DGraph<RunSeqDGraphNode>::vertex_key > first_comp_instances_;
+        static void get_invisible_root_node_info(std::string &comp_name,
+          std::string &phase_name, int &line_num, int &iter_num);
     };
 
   } // namespace MapperUtil
