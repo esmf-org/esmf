@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <cmath>
 #include "ESMCI_Poly.h"
 #include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyTwoV.h"
@@ -301,6 +302,39 @@ namespace ESMCI{
         return res;
       }
 
+      /* Used to sort an array of indices to a vector */
+      template<typename T>
+      class CmpIndexByVal{
+        public:
+          CmpIndexByVal(const std::vector<T> &arr);
+          CmpIndexByVal(const T *arr, std::size_t arr_sz);
+          bool operator()(const std::size_t &idx_a, const std::size_t &idx_b) const;
+        private:
+          const T *arr_;
+          std::size_t arr_sz_;
+      };
+
+      template<typename T>
+      CmpIndexByVal<T>::CmpIndexByVal(const std::vector<T> &arr):
+        arr_(&arr[0]), arr_sz_(arr.size())
+      {
+      }
+
+      template<typename T>
+      CmpIndexByVal<T>::CmpIndexByVal(const T *arr, std::size_t arr_sz):
+        arr_(arr), arr_sz_(arr_sz)
+      {
+      }
+
+      template<typename T>
+      bool CmpIndexByVal<T>::operator()(const std::size_t &idx_a,
+            const std::size_t &idx_b) const
+      {
+        assert((idx_a >= 0) && (idx_a < arr_sz_));
+        assert((idx_b >= 0) && (idx_b < arr_sz_));
+        return (arr_[idx_a] < arr_[idx_b]);
+      }
+
     } // SESolverUtils
 
     /* Scale and center the constraint functions based on vals */
@@ -570,7 +604,7 @@ namespace ESMCI{
 
       for(std::size_t i=0; i<Xi_sz; i++){
         if(Xi[i] < static_cast<T>(1)){
-          Xi[i] = 1;
+          Xi[i] = static_cast<T>(1);
         }
       }
 
@@ -599,13 +633,15 @@ namespace ESMCI{
             Xi_exp_sum += init_vals_[*citer];
             Xi_sum += Xi[*citer];
           }
+          //T tol = 1.0;
+          //assert((Xi_exp_sum - Xi_sum) < tol);
           assert(Xi_exp_sum > 0);
           assert(Xi_sum > 0);
           for(std::vector<int>::const_iterator citer = Xi_needs_reshape.cbegin();
                 citer != Xi_needs_reshape.cend(); ++citer){
             Xi[*citer] = (Xi[*citer] / Xi_sum) * Xi_exp_sum;
             if(Xi[*citer] < static_cast<T>(1)){
-              Xi[*citer] = 1;
+              Xi[*citer] = static_cast<T>(1);
             }
           }
         }
@@ -617,10 +653,59 @@ namespace ESMCI{
         for(std::size_t i=0; i<Xi_sz; i++){
           Xi[i] = (Xi[i] / Xi_sum) * Xi_exp_sum;
           if(Xi[i] < static_cast<T>(1)){
-            Xi[i] = 1;
+            Xi[i] = static_cast<T>(1);
           }
         }
       }
+
+      /* Turn all doubles into ints in Xi */
+      for(std::size_t i=0; i<Xi_sz; i++){
+        Xi[i] = static_cast<int>(Xi[i]);
+      }
+
+      T C_exp = std::accumulate(init_vals_.cbegin(), init_vals_.cend(), 0);
+      T C = std::accumulate(Xi, Xi+Xi_sz, static_cast<T>(0));
+      int rem = static_cast<int>(C_exp - C);
+
+      if(rem != 0){
+        /* Process array from smallest to largest, use an array of indices
+         * instead of sorting the array itself, since we need to maintain
+         * the ordering in Xi
+         */
+        std::vector<std::size_t> Xi_idx(Xi_sz, 0);
+        for(std::size_t i=0; i<Xi_sz; i++){
+          Xi_idx[i] = i;
+        }
+        SESolverUtils::CmpIndexByVal<T> cmp(Xi, Xi_sz);
+        std::sort(Xi_idx.begin(), Xi_idx.end(), cmp);
+
+        /* Note rem can be -ve or +ve */
+        int cur_rem = rem;
+        for(std::vector<std::size_t>::const_iterator idx_iter = Xi_idx.cbegin();
+              idx_iter != Xi_idx.cend(); ++idx_iter){
+          int ntry_rem = static_cast<int>(static_cast<T>(rem) * Xi[*idx_iter]/C);
+          if(ntry_rem != 0){
+            if(abs(ntry_rem) >= static_cast<int>(Xi[*idx_iter])){
+              /* Leave at least one PET for the component */
+              cur_rem -= static_cast<int>(Xi[*idx_iter]) - 1;
+              Xi[*idx_iter] = 1;
+            }
+            else{
+              cur_rem -= ntry_rem;
+              Xi[*idx_iter] += ntry_rem;
+            }
+          }
+          else{
+            /* Ignore */
+            continue;
+          }
+        }
+        if(cur_rem != 0){
+          /* Use the largest Xi to fix the remaining */
+          Xi[Xi_idx[Xi_idx.size()-1]] += cur_rem;
+        }
+      }
+
     }
 
     /* Reshape solution so that all Xi > 0 and Sum(Xi) = Xi_exp_sum */
