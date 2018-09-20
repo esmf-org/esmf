@@ -85,6 +85,7 @@ namespace ESMCI{
           std::vector<std::vector<ExecBlock<T> > > &pexec_blocks,
           std::vector<TwoDVIDPoly<T> > &twodvidp_cfuncs,
           std::vector<MVIDLPoly<T> > &mvidlp_cfuncs,
+          std::vector<MVIDLPoly<T> > &reshape_mvidlp_cfuncs,
           std::vector<std::string> &cfuncs_vnames,
           std::vector<int> &cfuncs_vivals);
     }; //class LoadBalancer
@@ -126,6 +127,7 @@ namespace ESMCI{
       std::vector<std::vector<ExecBlock<T> > > &pexec_blocks,
       std::vector<TwoDVIDPoly<T> > &twodvidp_cfuncs,
       std::vector<MVIDLPoly<T> > &mvidlp_cfuncs,
+      std::vector<MVIDLPoly<T> > &reshape_mvidlp_cfuncs,
       std::vector<std::string> &cfuncs_vnames,
       std::vector<int> &cfuncs_vivals)
     {
@@ -254,6 +256,7 @@ namespace ESMCI{
           //mvidlp_cfuncs.push_back(DAMP_CONST * exec_block_list_cfunc);
           //mvidlp_cfuncs.push_back(exec_block_list_cfunc);
           exec_block_list_cfuncs.push_back(exec_block_list_cfunc);
+          reshape_mvidlp_cfuncs.push_back(exec_block_list_cfunc);
         }
 
         /* Add all exec block constraint functions */
@@ -304,6 +307,7 @@ namespace ESMCI{
     {
       std::vector<TwoDVIDPoly<T> > twodvidp_cfuncs;
       std::vector<MVIDLPoly<T> > mvidlp_cfuncs;
+      std::vector<MVIDLPoly<T> > reshape_mvidlp_cfuncs;
       std::vector<std::string> cfuncs_vnames;
       std::vector<int> cfuncs_vivals;
 
@@ -337,6 +341,7 @@ namespace ESMCI{
                                         pexec_blocks,
                                         twodvidp_cfuncs,
                                         mvidlp_cfuncs,
+                                        reshape_mvidlp_cfuncs,
                                         cfuncs_vnames, cfuncs_vivals);
       }
 
@@ -360,6 +365,7 @@ namespace ESMCI{
         const int SOLVER_MAX_ITERS = 1000;
         SESolver<T> solver(cfuncs_vnames, tmp_cfuncs_vivals,
                             twodvidp_cfuncs, mvidlp_cfuncs);
+        solver.set_reshape_funcs(reshape_mvidlp_cfuncs);
         solver.scale_and_center_funcs(tmp_cfuncs_vivals);
         solver.set_niters(SOLVER_MAX_ITERS);
         typename SESolver<T>::UConstraintValGenerator uc_vgen;
