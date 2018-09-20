@@ -6770,7 +6770,7 @@ end function ESMF_GridCreateFrmScrip
 ! !ARGUMENTS:
     character(len=*),      intent(in)             :: grid_filename
     integer,               intent(in)             :: regDecomp(:)
-    type(ESMF_Index_Flag), intent(in)      :: Indexflag
+    type(ESMF_Index_Flag), intent(in)      :: indexflag
     type(ESMF_KeywordEnforcer), optional :: keywordEnforcer ! must use keywords below
     type(ESMF_Decomp_Flag), intent(in),   optional:: decompflag(:)
     logical,                intent(in),  optional  :: addMask
@@ -6868,6 +6868,17 @@ end function ESMF_GridCreateFrmScrip
     type(ESMF_CoordSys_Flag) :: coordsys
     character (len=256) :: units
     integer :: decnt
+    integer, pointer                           :: minIndexPDe(:,:)
+    integer, pointer                           :: maxIndexPDe(:,:)
+    integer                                    :: start(2), count(2)
+    logical                                    :: isGlobal
+    real(kind=ESMF_KIND_R8),  pointer          :: lonPtr(:,:), latPtr(:,:)
+    integer                                    :: localDe, deCount, s
+    integer                                    :: sizex, sizey
+    type(ESMF_StaggerLoc)                      :: staggerLocList(1)
+    type(ESMF_DELayout)                        :: delayout
+    integer, allocatable                       :: demap(:)
+    
    
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -6912,7 +6923,87 @@ end function ESMF_GridCreateFrmScrip
           end if
           localAddMask = .true.
         endif
-     endif
+    endif
+     
+#if 1
+
+    call ESMF_GridspecQueryTileSize(grid_filename, sizex, sizey, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+        
+    print *, "sizex, sizey = ", sizex, sizey
+
+    call ESMF_GridspecQueryTileGlobal(trim(grid_filename), isGlobal, rc=localrc)
+
+    if (isGlobal) then
+      grid = ESMF_GridCreate1PeriDim(regDecomp, decompFlagLocal, &
+        minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
+        indexflag=indexflag, &
+        coordSys=ESMF_COORDSYS_SPH_DEG, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    else
+      grid = ESMF_GridCreateNoPeriDim(regDecomp, decompFlagLocal, &
+        minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
+        indexflag=indexflag, &
+        coordSys=ESMF_COORDSYS_SPH_DEG, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+    call ESMF_GridGet(grid, distgrid=distgrid, localDECount=decnt, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    deCount = regDecomp(1)*regDecomp(2)
+    allocate(minIndexPDe(2,deCount), maxIndexPDe(2,deCount))
+    call ESMF_DistgridGet(distgrid, minIndexPDe=minIndexPDe, maxIndexPDe = maxIndexPDe, &
+                          delayout=delayout, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    allocate(demap(0:decnt-1))
+    call ESMF_DELayoutGet(delayout, localDeToDeMap=demap, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    staggerLocList(1) = ESMF_STAGGERLOC_CENTER
+!    if (present(staggerLocList)) then
+       do s=1, size(staggerLocList)
+          call ESMF_GridAddCoord(grid, staggerloc=staggerLocList(s), rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+          do localDe = 0,decnt-1
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                staggerloc=staggerLocList(s), farrayPtr=lonPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+             start(1)=minIndexPDe(1,demap(localDe)+1)
+             start(2)=minIndexPDe(2,demap(localDe)+1)
+             count=ubound(lonPtr)-lbound(lonPtr)+1
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                staggerloc=staggerLocList(s), farrayPtr=latPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             ! Generate glocal edge coordinates and local center coordinates
+             ! need to adjust the count???
+             call ESMF_GridSpecReadStagger(trim(grid_filename),sizex, sizey, lonPtr, latPtr, &
+                staggerLoc=staggerLocList(s), &
+                start=start, count=count, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+         ESMF_CONTEXT, rcToReturn=rc)) return
+         enddo
+       enddo
+!    endif
+
+    deallocate(minIndexPDe, maxIndexPDe, demap)
+
+
+
+#else
 
     ! Get the grid rank and dimensions from the GridSpec file on PET 0, broadcast the
     ! data to all the PETs
@@ -7424,7 +7515,7 @@ end function ESMF_GridCreateFrmScrip
            deallocate(maskbuf)
         endif
     endif
-
+#endif
     ESMF_GridCreateFrmGridspec = grid
 
     if (present(rc)) rc=ESMF_SUCCESS
