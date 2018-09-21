@@ -320,15 +320,19 @@ namespace ESMCI{
       std::vector<T> comp_stimes;
       int total_pets = 0;
       T total_stime = static_cast<T>(0);
+
+      std::vector<int> orig_npets;
       for(typename std::vector<CompInfo<T> >::const_iterator citer = comp_infos_.cbegin();
           citer != comp_infos_.cend(); ++citer){
         int compi_npets = (*citer).get_npets();
+        orig_npets.push_back(compi_npets);
         T compi_stime = (*citer).get_stime();
         comp_npets.push_back(compi_npets);
         comp_stimes.push_back(compi_stime);
         total_pets += compi_npets;
         total_stime += compi_stime;
       }
+      assert(orig_npets.size() == opt_npets.size());
 
       /* Find the multiple pairs of execution blocks for the component
        * infos
@@ -377,6 +381,15 @@ namespace ESMCI{
             return false;
           }
           opt_wtimes[i] = static_cast<T>(comp_stimes[i]/opt_npets[i]);
+        }
+
+        std::vector<int> npets_diff(orig_npets.size());
+        std::transform(orig_npets.cbegin(), orig_npets.cend(), opt_npets.cbegin(),
+          npets_diff.begin(), std::minus<int>());
+        if(std::count(npets_diff.cbegin(), npets_diff.cend(), 0) == npets_diff.size()){
+          /* The solver has converged */
+          std::cout << "LoadBalancer: solver has converged\n";
+          return false;
         }
       }
 

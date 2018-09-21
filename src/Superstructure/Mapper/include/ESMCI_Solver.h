@@ -483,6 +483,8 @@ namespace ESMCI{
       Matrix<T> Xi(Xi_dims, init_vals_);
       std::vector<T> Xj_init_vals(vnames_.size(), 0);
       Matrix<T> Xj(Xi_dims, Xj_init_vals);
+      /* Zero matrix */
+      const Matrix<T> XZ(Xi_dims, Xj_init_vals);
 
       std::vector<const GenPoly<T, int> *> all_funcs;
       for(typename std::vector<TwoVIDPoly<T> >::const_iterator iter = funcs_.cbegin();
@@ -587,7 +589,14 @@ namespace ESMCI{
         reshape_solution(Xj_data, vnames_.size());
         std::cout << "Xj after shaping \n" << Xj << "\n";
         //scale_and_center_funcs(Xj.get_data());
+        Matrix<T> Xi_diff = Xi - Xj;
         Xi = Xj;
+        /* The solution should at least change by 1 PET for the solver to continue */
+        double TOL = 0.99;
+        if(Xi_diff.equals(XZ, TOL)){
+          std::cout << "Solver has converged...\n";
+          break;
+        }
       }
   
       SESolverUtils::free_jacobian(JF);
