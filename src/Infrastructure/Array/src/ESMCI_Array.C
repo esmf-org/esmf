@@ -4023,10 +4023,10 @@ int Array::gather(
       ArrayElement arrayElement(this, i, false, false, false);
       arrayElement.setSkipDim(0); // next() will skip ahead to next contig. line
       // loop over all elements in exclusive region for this DE and memcpy data
-      int sendBufferIndex = 0;  // reset
+      long unsigned int sendBufferIndex = 0;  // reset
       while(arrayElement.isWithin()){
         // copy this element from excl. region into the contiguous sendBuffer
-        int linearIndex = arrayElement.getLinearIndex();
+        long unsigned int linearIndex = arrayElement.getLinearIndex();
         // contiguous data copy in 1st dim
         memcpy(sendBuffer[i]+sendBufferIndex*dataSize,
           larrayBaseAddr+linearIndex*dataSize, contigLength*dataSize);
@@ -4163,10 +4163,10 @@ int Array::gather(
         if (contigFlagPDimPDe[de*dimCount])
           multiDimIndexLoop.setSkipDim(0); // contiguous data in first dimension
         // loop over all elements in exclusive region for this DE
-        int recvBufferIndex = 0;  // reset
+        long unsigned int recvBufferIndex = 0;  // reset
         while(multiDimIndexLoop.isWithin()){
           // determine linear index for this element into array
-          int linearIndex = 0;  // reset
+          long unsigned int linearIndex = 0;  // reset
           for (int jj=rank-1; jj>=0; jj--){
             linearIndex *= counts[jj];  // first time zero o.k.
             int j = arrayToDistGridMap[jj];// j is dimIndex bas 1, or 0 f tensor
@@ -4509,10 +4509,10 @@ int Array::scatter(
         if (contigFlagPDimPDe[de*dimCount])
           multiDimIndexLoop.setSkipDim(0); // contiguous data in first dimension
         // loop over all elements in exclusive region for this DE
-        int sendBufferIndex = 0;  // reset
+        long unsigned int sendBufferIndex = 0;  // reset
         while(multiDimIndexLoop.isWithin()){
           // determine linear index for this element into array
-          int linearIndex = 0;  // reset
+          long unsigned int linearIndex = 0;  // reset
           for (int jj=rank-1; jj>=0; jj--){
             linearIndex *= counts[jj];  // first time zero o.k.
             int j = arrayToDistGridMap[jj];// j is dimIndex bas 1, or 0 f tensor
@@ -4649,10 +4649,10 @@ int Array::scatter(
       ArrayElement arrayElement(this, i, false, false, false);
       arrayElement.setSkipDim(0); // next() will skip ahead to next contig. line
       // loop over all elements in exclusive region for this DE and memcpy data
-      int recvBufferIndex = 0;  // reset
+      long unsigned int recvBufferIndex = 0;  // reset
       while(arrayElement.isWithin()){
         // copy this element from the contiguous recvBuffer into excl. region
-        int linearIndex = arrayElement.getLinearIndex();
+        long unsigned int linearIndex = arrayElement.getLinearIndex();
         // since the data in the recvBuffer was constructed to be contiguous
         // wrt data layout on destination DE -> contiguous data copy in 1st dim
         memcpy(larrayBaseAddr+linearIndex*dataSize,
