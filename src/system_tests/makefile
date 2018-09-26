@@ -37,6 +37,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldRegridOverlap \
             ESMF_FieldRegridMesh \
             ESMF_FieldRegridMeshToMesh \
+            ESMF_FieldLSRedistArb2Arb \
             ESMF_FieldLSSMM \
             ESMF_FieldMeshSMM \
             ESMF_TransferGrid \
