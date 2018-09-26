@@ -75,6 +75,7 @@
   public ESMF_GridspecReadTile
   public ESMF_GridspecReadStagger
   public ESMF_GridspecReadMosaic
+  public ESMF_GridspecQueryTileFile
   public ESMF_GridspecQueryTileSize
   public ESMF_GridspecQueryTileGlobal
   public ESMF_MosaicDestroy
@@ -412,6 +413,66 @@ subroutine ESMF_GridspecReadMosaic(filename, mosaic, tileFilePath, rc)
 #endif
 
 end subroutine ESMF_GridspecReadMosaic
+
+! -------------------------- ESMF-private method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridspecQueryTileFile"
+subroutine ESMF_GridspecQueryTileFile(filename, isSupergrid, rc)
+
+    character(len=*), intent(in)     :: filename
+    logical, intent(out)             :: isSupergrid
+    integer, intent(out), optional   :: rc
+
+#ifdef ESMF_NETCDF
+    integer :: ncid, nvars, attlen, i
+    integer :: ncStatus
+    character(len=128) :: attstr
+
+    if (present(rc)) rc=ESMF_SUCCESS
+
+    ! Check if the file contain a dummy variable with the standard_name
+    ! attribute set to grid_tile_spec
+
+    ncStatus = nf90_open(path=filename, mode=nf90_nowrite, ncid=ncid)
+    if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, &
+        filename, &
+        rc)) return
+    ncStatus = nf90_inquire(ncid, nVariables=nvars)
+    if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, &
+        filename, &
+        rc)) return
+    isSupergrid = .false.
+    do i=1,nvars
+       ! Check its standard_name attribute
+       ncStatus = nf90_inquire_attribute(ncid, i, 'standard_name', len=attlen)
+       if (ncStatus == nf90_noerr) then
+          ncStatus = nf90_get_att(ncid, i, 'standard_name', values=attstr)
+          if (attstr(1:attlen) .eq. 'grid_tile_spec') then
+            isSupergrid = .true.
+          endif
+       endif
+       if (isSupergrid) exit
+     enddo
+     ncStatus = nf90_close(ncid)
+    if (CDFCheckError (ncStatus, &
+        ESMF_METHOD,  &
+        ESMF_SRCLINE, &
+        filename, &
+        rc)) return
+#else       
+
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, & 
+                 msg="- ESMF_NETCDF not defined when lib was compiled", & 
+                 ESMF_CONTEXT, rcToReturn=rc) 
+    return
+#endif
+
+end subroutine ESMF_GridSpecQueryTileFile
+
 
 ! -------------------------- ESMF-private method -------------------------------
 #undef  ESMF_METHOD

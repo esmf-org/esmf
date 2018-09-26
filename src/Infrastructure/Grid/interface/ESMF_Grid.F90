@@ -52,6 +52,7 @@
       use ESMF_IOGridmosaicMod
       use ESMF_IOUtilMod
       use ESMF_UtilCubedSphereMod
+      use ESMF_IOFileTypeCheckMod
 
 #ifdef ESMF_NETCDF
       use netcdf
@@ -5761,7 +5762,7 @@ end subroutine pack_and_send_int2D
 ! !ARGUMENTS:
 
     character(len=*),       intent(in)             :: filename
-    type(ESMF_FileFormat_Flag), intent(in)         :: fileformat
+    type(ESMF_FileFormat_Flag), intent(in), optional :: fileformat
     type(ESMF_DistGrid),    intent(in)             :: distgrid
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: isSphere
@@ -5789,10 +5790,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[filename]
 !     The NetCDF Grid filename.
-! \item[fileformat]
+! \item[{[fileformat]}]
 !     The file format.  The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP} and {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
 !     If it is the SCRIP format, the dimension {\tt grid\_rank} in the file has to be equal to 2.
-!      Please see section~\ref{const:fileformatflag} for a detailed description of the options.
+!      Please see section~\ref{const:fileformatflag} for a detailed description of the options.  
+!      If not specified, the file type will be detected automatically.
 ! \item[distGrid]
 !      A distGrid defines how the grid is distributed
 ! \item[{[isSphere]}]
@@ -5845,6 +5847,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer         :: srcrank
     integer, pointer:: griddims(:)
     type(ESMF_Index_Flag) :: localIndexFlag
+    type(ESMF_FileFormat_Flag)  :: localFileformat
 
     if (present(rc)) rc=ESMF_FAILURE
 
@@ -5858,6 +5861,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, &
                            ESMF_ERR_PASSTHRU, &
                            ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(fileformat)) then
+       localFileformat = fileformat
+    else
+       call ESMF_FileTypeCheck(filename, localFileformat, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     if (present(indexflag)) then
         localIndexFlag = indexflag
@@ -5878,17 +5890,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     allocate(griddims(2))
     if (PetNo == 0) then
-       if (fileFormat == ESMF_FILEFORMAT_SCRIP) then
+       if (localFileformat == ESMF_FILEFORMAT_SCRIP) then
            call ESMF_ScripInq(filename, grid_dims=griddims, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
-        elseif (fileFormat == ESMF_FILEFORMAT_GRIDSPEC) then
+        elseif (localFileformat == ESMF_FILEFORMAT_GRIDSPEC) then
            if (present(coordNames)) then
               call ESMF_GridspecInq(filename, srcrank, griddims, coord_names=coordNames, rc=localrc)
            else
               call ESMF_GridspecInq(filename, srcrank, griddims, rc=localrc)
            endif
+           if (ESMF_LogFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        elseif (localFileformat == ESMF_FILEFORMAT_TILE) then
+           ! this returns the size of the center stagger, not the supergrid
+           call ESMF_GridSpecQueryTileSize(filename, griddims(1),griddims(2), rc=localrc)
            if (ESMF_LogFoundError(localrc, &
                                      ESMF_ERR_PASSTHRU, &
                                      ESMF_CONTEXT, rcToReturn=rc)) return
@@ -5933,13 +5951,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     localDEcompFlag(:) = ESMF_DECOMP_BALANCED
 
-    if (fileformat == ESMF_FILEFORMAT_SCRIP) then
+    if (localFileformat == ESMF_FILEFORMAT_SCRIP) then
         grid = ESMF_GridCreateFrmScrip(trim(filename), (/xpart,ypart/), &
                 localIndexFlag, decompflag=localDEcompflag, &
                 isSphere=localIsSphere, polekindflag=polekindflag, &
                 addCornerStagger=localAddCorner, &
                 addUserArea=addUserArea, rc=localrc)
-    else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
+    else if (localfileformat == ESMF_FILEFORMAT_GRIDSPEC .or. &
+             localfileformat == ESMF_FILEFORMAT_TILE) then
+        ! Right now, we call ESMF_GridCreateFrmGridspec() for both supergrid
+        ! or regular CF Grid, eventually we will separate it into two routines
         ! Warning about user area in GridSpec
         if (present(addUserArea)) then
            if (addUserArea) then
@@ -5998,7 +6019,7 @@ end function ESMF_GridCreateFrmNCFileDG
 
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
-     function ESMF_GridCreateFrmNCFile(filename, fileformat, regDecomp, keywordEnforcer, &
+     function ESMF_GridCreateFrmNCFile(filename, fileformat, keywordEnforcer, regDecomp, &
        decompflag, delayout, isSphere, polekindflag, addCornerStagger, addUserArea, indexflag, &
        addMask, varname, coordNames, rc)
 
@@ -6007,21 +6028,21 @@ end function ESMF_GridCreateFrmNCFileDG
 !
 ! !ARGUMENTS:
 
-    character(len=*),       intent(in)             :: filename
-    type(ESMF_FileFormat_Flag), intent(in)         :: fileformat
+    character(len=*),       intent(in)                :: filename
+    type(ESMF_FileFormat_Flag), intent(in), optional  :: fileformat
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    integer,                intent(in),  optional  :: regDecomp(:)
-    type(ESMF_Decomp_Flag), intent(in),  optional  :: decompflag(:)
-    type(ESMF_DELayout),    intent(in),  optional  :: delayout
-    logical,                intent(in),  optional  :: isSphere
-    type(ESMF_PoleKind_Flag),  intent(in),  optional :: polekindflag(2)
-    logical,                intent(in),  optional  :: addCornerStagger
-    logical,                intent(in),  optional  :: addUserArea
-    type(ESMF_Index_Flag),  intent(in),  optional  :: indexflag
-    logical,                intent(in),  optional  :: addMask
-    character(len=*),       intent(in),  optional  :: varname
-    character(len=*),       intent(in),  optional  :: coordNames(:)
-    integer,                intent(out), optional  :: rc
+    integer,                intent(in),  optional     :: regDecomp(:)
+    type(ESMF_Decomp_Flag), intent(in),  optional     :: decompflag(:)
+    type(ESMF_DELayout),    intent(in),  optional     :: delayout
+    logical,                intent(in),  optional     :: isSphere
+    type(ESMF_PoleKind_Flag),  intent(in),  optional  :: polekindflag(2)
+    logical,                intent(in),  optional     :: addCornerStagger
+    logical,                intent(in),  optional     :: addUserArea
+    type(ESMF_Index_Flag),  intent(in),  optional     :: indexflag
+    logical,                intent(in),  optional     :: addMask
+    character(len=*),       intent(in),  optional     :: varname
+    character(len=*),       intent(in),  optional     :: coordNames(:)
+    integer,                intent(out), optional     :: rc
 
 ! !DESCRIPTION:
 ! This function creates a {\tt ESMF\_Grid} object using the grid definition from
@@ -6039,10 +6060,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item[filename]
 !     The NetCDF Grid filename.
-! \item[fileformat]
+! \item[{[fileformat]}]
 !     The file format.  The valid options are {\tt ESMF\_FILEFORMAT\_SCRIP} and {\tt ESMF\_FILEFORMAT\_GRIDSPEC}.
 !     If it is the SCRIP format, the dimension {\tt grid\_rank} in the file has to be equal to 2.
-!      Please see section~\ref{const:fileformatflag} for a detailed description of the options.
+!     Please see section~\ref{const:fileformatflag} for a detailed
+!     description of the options. If not specified, the filetype will be automatically detected.
 ! \item[{[regDecomp]}]
 !      A 2 element array specifying how the grid is decomposed.
 !      Each entry is the number of decounts for that dimension.
@@ -6108,6 +6130,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Index_Flag) :: localIndexFlag
     type(ESMF_VM) :: vm
     integer :: PetCnt
+    type(ESMF_FileFormat_Flag)  :: localFileformat
 
     if (present(rc)) rc=ESMF_FAILURE
 
@@ -6121,6 +6144,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call ESMF_VMGet(vm, petCount=PetCnt, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (present(fileformat)) then
+       localFileformat = fileformat
+    else
+       call ESMF_FileTypeCheck(filename, localFileformat, rc=localrc)
+       if (ESMF_LogFoundError(localrc, &
+              ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     if (present(RegDecomp)) then
       if (size(RegDecomp,1) > 2) then
@@ -6167,7 +6199,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
         localIndexFlag = ESMF_INDEX_DELOCAL
     endif
-    if (fileformat == ESMF_FILEFORMAT_SCRIP) then
+    if (localfileformat == ESMF_FILEFORMAT_SCRIP) then
         grid = ESMF_GridCreateFrmScrip(trim(filename), regDecompLocal, &
                 localIndexFlag, decompflag=localDEcompflag, &
                 isSphere=localIsSphere, polekindflag=polekindflag, &
@@ -6175,7 +6207,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 addUserArea=addUserArea, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
-    else if (fileformat == ESMF_FILEFORMAT_GRIDSPEC) then
+    else if (localfileformat == ESMF_FILEFORMAT_GRIDSPEC .or. &
+             localfileformat == ESMF_FILEFORMAT_TILE) then
+        ! Right now, we call ESMF_GridCreateFrmGridspec() for both supergrid
+        ! or regular CF Grid, eventually we will separate it into two routines
         ! Warning about user area in GridSpec
         if (present(addUserArea)) then
            if (addUserArea) then
@@ -6872,10 +6907,11 @@ end function ESMF_GridCreateFrmScrip
     integer, pointer                           :: maxIndexPDe(:,:)
     integer                                    :: start(2), count(2)
     logical                                    :: isGlobal
+    logical                                    :: isSupergrid
     real(kind=ESMF_KIND_R8),  pointer          :: lonPtr(:,:), latPtr(:,:)
     integer                                    :: localDe, deCount, s
     integer                                    :: sizex, sizey
-    type(ESMF_StaggerLoc)                      :: staggerLocList(1)
+    type(ESMF_StaggerLoc), allocatable         :: staggerLocList(:)
     type(ESMF_DELayout)                        :: delayout
     integer, allocatable                       :: demap(:)
     
@@ -6925,89 +6961,93 @@ end function ESMF_GridCreateFrmScrip
         endif
     endif
      
-#if 1
-
-    call ESMF_GridspecQueryTileSize(grid_filename, sizex, sizey, rc=localrc)
+    call ESMF_GridspecQueryTileFile(grid_filename, isSupergrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
+
+    if (isSupergrid) then
+      call ESMF_GridspecQueryTileSize(grid_filename, sizex, sizey, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
         
-    print *, "sizex, sizey = ", sizex, sizey
-
-    call ESMF_GridspecQueryTileGlobal(trim(grid_filename), isGlobal, rc=localrc)
-
-    if (isGlobal) then
-      grid = ESMF_GridCreate1PeriDim(regDecomp, decompFlagLocal, &
-        minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
-        indexflag=indexflag, &
-        coordSys=ESMF_COORDSYS_SPH_DEG, &
-        rc=localrc)
+      call ESMF_GridspecQueryTileGlobal(trim(grid_filename), isGlobal, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    else
-      grid = ESMF_GridCreateNoPeriDim(regDecomp, decompFlagLocal, &
-        minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
-        indexflag=indexflag, &
-        coordSys=ESMF_COORDSYS_SPH_DEG, &
-        rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) return
-    endif
+          ESMF_CONTEXT, rcToReturn=rc)) return
 
-    call ESMF_GridGet(grid, distgrid=distgrid, localDECount=decnt, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (isGlobal) then
+        grid = ESMF_GridCreate1PeriDim(regDecomp, decompFlagLocal, &
+          minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
+          indexflag=indexflag, &
+          coordSys=ESMF_COORDSYS_SPH_DEG, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      else
+        grid = ESMF_GridCreateNoPeriDim(regDecomp, decompFlagLocal, &
+          minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
+          indexflag=indexflag, &
+          coordSys=ESMF_COORDSYS_SPH_DEG, &
+          rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
+      endif
+
+      call ESMF_GridGet(grid, distgrid=distgrid, localDECount=decnt, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
 
-    deCount = regDecomp(1)*regDecomp(2)
-    allocate(minIndexPDe(2,deCount), maxIndexPDe(2,deCount))
-    call ESMF_DistgridGet(distgrid, minIndexPDe=minIndexPDe, maxIndexPDe = maxIndexPDe, &
+      deCount = regDecomp(1)*regDecomp(2)
+      allocate(minIndexPDe(2,deCount), maxIndexPDe(2,deCount))
+      call ESMF_DistgridGet(distgrid, minIndexPDe=minIndexPDe, maxIndexPDe = maxIndexPDe, &
                           delayout=delayout, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
     
-    allocate(demap(0:decnt-1))
-    call ESMF_DELayoutGet(delayout, localDeToDeMap=demap, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+      allocate(demap(0:decnt-1))
+      call ESMF_DELayoutGet(delayout, localDeToDeMap=demap, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return
     
-    staggerLocList(1) = ESMF_STAGGERLOC_CENTER
-!    if (present(staggerLocList)) then
-       do s=1, size(staggerLocList)
-          call ESMF_GridAddCoord(grid, staggerloc=staggerLocList(s), rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      if (localAddCornerStagger) then
+      	 allocate(staggerLocList(2))
+         staggerLocList(1) = ESMF_STAGGERLOC_CENTER
+         staggerLocList(2) = ESMF_STAGGERLOC_CORNER
+      else
+      	 allocate(staggerLocList(1))
+         staggerLocList(1) = ESMF_STAGGERLOC_CENTER
+      endif      
+      do s=1, size(staggerLocList)
+         call ESMF_GridAddCoord(grid, staggerloc=staggerLocList(s), rc=localrc)
+         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-          do localDe = 0,decnt-1
-             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+         do localDe = 0,decnt-1
+           call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
                 staggerloc=staggerLocList(s), farrayPtr=lonPtr, rc=localrc)
-             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-             start(1)=minIndexPDe(1,demap(localDe)+1)
-             start(2)=minIndexPDe(2,demap(localDe)+1)
-             count=ubound(lonPtr)-lbound(lonPtr)+1
-             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+           start(1)=minIndexPDe(1,demap(localDe)+1)
+           start(2)=minIndexPDe(2,demap(localDe)+1)
+           count=ubound(lonPtr)-lbound(lonPtr)+1
+           call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
                 staggerloc=staggerLocList(s), farrayPtr=latPtr, rc=localrc)
-             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-             ! Generate glocal edge coordinates and local center coordinates
-             ! need to adjust the count???
-             call ESMF_GridSpecReadStagger(trim(grid_filename),sizex, sizey, lonPtr, latPtr, &
+           ! Generate glocal edge coordinates and local center coordinates
+           ! need to adjust the count???
+           call ESMF_GridSpecReadStagger(trim(grid_filename),sizex, sizey, lonPtr, latPtr, &
                 staggerLoc=staggerLocList(s), &
                 start=start, count=count, rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-         ESMF_CONTEXT, rcToReturn=rc)) return
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
          enddo
-       enddo
-!    endif
-
-    deallocate(minIndexPDe, maxIndexPDe, demap)
-
-
-
-#else
-
-    ! Get the grid rank and dimensions from the GridSpec file on PET 0, broadcast the
-    ! data to all the PETs
-    if (PetNo == 0) then
+      enddo
+      deallocate(minIndexPDe, maxIndexPDe, demap, staggerLocList)
+    else  ! a regular CF Grid file containing center stagger 
+   
+      ! Get the grid rank and dimensions from the GridSpec file on PET 0, broadcast the
+      ! data to all the PETs
+      if (PetNo == 0) then
         call ESMF_GridspecInq(grid_filename, ndims, gridims, coord_names=coordNames, &
                 dimids=dimids, coordids = coordids, units=units, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7030,7 +7070,7 @@ end function ESMF_GridCreateFrmScrip
         call ESMF_VMBroadcast(vm, msgbuf, 8, 0, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
            ESMF_CONTEXT, rcToReturn=rc)) return
-    else
+      else
         call ESMF_VMBroadcast(vm, msgbuf, 8, 0, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7048,38 +7088,38 @@ end function ESMF_GridCreateFrmScrip
           units = "kilometers"
           coordsys = ESMF_COORDSYS_CART
         endif
-    endif
+      endif
 
-    if (localIsSphere .and. coordsys == ESMF_COORDSYS_CART) then
-       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+      if (localIsSphere .and. coordsys == ESMF_COORDSYS_CART) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
             msg="- A global grid cannot use Cartisian coordinates", &
             ESMF_CONTEXT, rcToReturn=rc)
-       return
-    endif      
-    ! Create Grid based on the input distgrid
-    gridEdgeLWidth=(/0,0/)
-    if (localIsSphere) then
-       gridEdgeUWidth=(/0,1/)
-    else
-       gridEdgeUWidth=(/1,1/)
-    endif
+        return
+      endif      
+      ! Create Grid based on the input distgrid
+      gridEdgeLWidth=(/0,0/)
+      if (localIsSphere) then
+        gridEdgeUWidth=(/0,1/)
+      else
+        gridEdgeUWidth=(/1,1/)
+      endif
 
-    ! only parallelize the code if ndims == 2, so separate the code based on ndums
-    if (ndims == 1) then
+      ! only parallelize the code if ndims == 2, so separate the code based on ndums
+      if (ndims == 1) then
         if (PetNo == 0) then
-        ! Get coordinate info from the GridSpec file, if in radians, convert to degrees
+          ! Get coordinate info from the GridSpec file, if in radians, convert to degrees
           if (localAddCornerStagger) then
              allocate(loncoord1D(gridims(1)), latcoord1D(gridims(2)))
              allocate(cornerlon2D(2,gridims(1)), cornerlat2D(2, gridims(2)))
              call ESMF_GridspecGetVar1D(grid_filename, coordids, loncoord1D, latcoord1D,&
                                     cornerlon=cornerlon2D, cornerlat=cornerlat2D, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
           else
              allocate(loncoord1D(gridims(1)), latcoord1D(gridims(2)))
              call ESMF_GridspecGetVar1D(grid_filename, coordids, loncoord1D, latcoord1D,&
                                     rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
           endif
           ! convert to kilometer if the units is "meters"
@@ -7190,7 +7230,7 @@ end function ESMF_GridCreateFrmScrip
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
         endif
-    elseif (ndims==2) then
+      elseif (ndims==2) then
         if (localIsSphere) then
            grid = ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=gridims, &
                   regDecomp=regDecomp, &
@@ -7436,26 +7476,26 @@ end function ESMF_GridCreateFrmScrip
                 deallocate(recvbuf)
             endif  ! end if (mod(PetNo, RegDecomp(1))==0)
             endif
-        endif  ! end if (AddCornerStagger)
-     endif  ! end if ndims = 2
+         endif  ! end if (AddCornerStagger)
+      endif  ! end if ndims = 2
 
 
-    ! Only add mask if localAddMask = .TRUE.
-    ! This code is common whether it is ndims=1 or ndims=2
-    if (localAddMask) then
-       call ESMF_GridAddItem(grid, staggerloc=localStaggerLoc, &
+      ! Only add mask if localAddMask = .TRUE.
+      ! This code is common whether it is ndims=1 or ndims=2
+      if (localAddMask) then
+        call ESMF_GridAddItem(grid, staggerloc=localStaggerLoc, &
                         itemflag = ESMF_GRIDITEM_MASK, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                         ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_GridGetItem(grid, staggerloc=localStaggerLoc,  &
+        call ESMF_GridGetItem(grid, staggerloc=localStaggerLoc,  &
                         itemflag=ESMF_GRIDITEM_MASK, farrayptr=fptrmask, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                         ESMF_CONTEXT, rcToReturn=rc)) return
-       call ESMF_GridGet(grid, localStaggerLoc, 0, exclusiveLBound=lbnd, &
+        call ESMF_GridGet(grid, localStaggerLoc, 0, exclusiveLBound=lbnd, &
                   exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
 
-       ! Check if we want to extract mask from a data variable
-       if (mod(PetNo, regDecomp(1)) == 0) then
+        ! Check if we want to extract mask from a data variable
+        if (mod(PetNo, regDecomp(1)) == 0) then
            call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7469,41 +7509,41 @@ end function ESMF_GridCreateFrmScrip
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
               dims(i)=recv(1)
-          enddo
-          call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
+           enddo
+           call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
               exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
-          total(1)=gridims(1)
-          allocate(varBuffer(total(1),total(2)),mask2D(total(1),total(2)))
-          mask2D(:,:) = 1
-          call ESMF_GridspecGetVarByName(grid_filename, varname, dimids, &
+           total(1)=gridims(1)
+           allocate(varBuffer(total(1),total(2)),mask2D(total(1),total(2)))
+           mask2D(:,:) = 1
+           call ESMF_GridspecGetVarByName(grid_filename, varname, dimids, &
                                 varBuffer, missing_value = missing_value, &
                                 start=minind(:,PetNo+1), count=total, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
-          do i=1,size(varBuffer,2)
-            do j=1,size(varBuffer,1)
-              if (varBuffer(j,i) == missing_value) then
+           do i=1,size(varBuffer,2)
+             do j=1,size(varBuffer,1)
+               if (varBuffer(j,i) == missing_value) then
                  mask2D(j,i)=0
-              endif
-            enddo
-          enddo
-          call pack_and_send_int2D(vm, total, regDecomp(1), PetNo, mask2D, fptrmask, dims)
-          deallocate(varBuffer)
-          deallocate(mask2D)
-          deallocate(dims)
-          deallocate(minind)
-       else
-          call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
+               endif
+             enddo
+           enddo
+           call pack_and_send_int2D(vm, total, regDecomp(1), PetNo, mask2D, fptrmask, dims)
+           deallocate(varBuffer)
+           deallocate(mask2D)
+           deallocate(dims)
+           deallocate(minind)
+        else
+           call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
               exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
 
-          localroot = (PetNo/regDecomp(1))*regDecomp(1)
-          ! First, send the xdim of the local array to the localroot
-          call ESMF_VMSend(vm, total, 1, localroot)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           localroot = (PetNo/regDecomp(1))*regDecomp(1)
+           ! First, send the xdim of the local array to the localroot
+           call ESMF_VMSend(vm, total, 1, localroot)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-          allocate(maskbuf(total(1)*total(2)))
-          call ESMF_VMRecv(vm, maskbuf, total(1)*total(2), localroot, rc=localrc)
-          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           allocate(maskbuf(total(1)*total(2)))
+           call ESMF_VMRecv(vm, maskbuf, total(1)*total(2), localroot, rc=localrc)
+           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
            k=1
            do i=lbnd(2),ubnd(2)
@@ -7514,8 +7554,9 @@ end function ESMF_GridCreateFrmScrip
            enddo
            deallocate(maskbuf)
         endif
+      endif
     endif
-#endif
+
     ESMF_GridCreateFrmGridspec = grid
 
     if (present(rc)) rc=ESMF_SUCCESS
@@ -30630,6 +30671,7 @@ subroutine ESMF_OutputScripGridFile(filename, grid, rc)
 #endif
 end subroutine ESMF_OutputScripGridFile
 
+#if 0
 !-----------------------------------------------------------------------
 !
 !  check CDF file error code
@@ -30674,5 +30716,6 @@ function CDFCheckError (ncStatus, module, fileName, lineNo, errmsg, rc)
 end function CDFCheckError
 
 #undef  ESMF_METHOD
+#endif
 
 end module ESMF_GridMod

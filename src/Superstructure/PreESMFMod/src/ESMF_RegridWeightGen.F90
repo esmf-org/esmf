@@ -46,6 +46,7 @@ module ESMF_RegridWeightGenMod
   use ESMF_IOScripMod
   use ESMF_IOGridspecMod
   use ESMF_IOUGridMod
+  use ESMF_IOGridmosaicMod
   use ESMF_IOFileTypeCheckMod
   use ESMF_RHandleMod
   use ESMF_LocStreamMod
@@ -716,6 +717,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Use LocStream if the source file format is SCRIP and the regridmethod is nearest-neighbor
     if ((localSrcFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
+         localSrcFileType /= ESMF_FILEFORMAT_TILE .and. &
          localSrcFileType /= ESMF_FILEFORMAT_MOSAIC ) .and. &
         (localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_STOD .or. &
         localRegridMethod == ESMF_REGRIDMETHOD_NEAREST_DTOS)) then
@@ -723,6 +725,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     ! Use LocStream if the dest file format is SCRIP and the regridmethod is non-conservative
     if ((localDstFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
+         localSrcFileType /= ESMF_FILEFORMAT_TILE .and. &
          localDstFileType /= ESMF_FILEFORMAT_MOSAIC) .and. &
         (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) .and. &
         (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
@@ -732,11 +735,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Only set useSrcMask to false if srcMissingvalue is not given and the file type is
     ! either GRIDSPEC or UGRID, same for useDstMask
     if ((.not. srcMissingvalue) .and. (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
-         localSrcFileType == ESMF_FILEFORMAT_MOSAIC)) &
+         localSrcFileType == ESMF_FILEFORMAT_MOSAIC .or. &
+         localSrcFileType == ESMF_FILEFORMAT_TILE)) &
       useSrcMask = .false.
 
     if ((.not. dstMissingvalue) .and. (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
-         localDstFileType == ESMF_FILEFORMAT_MOSAIC)) &
+         localDstFileType == ESMF_FILEFORMAT_MOSAIC .or. &
+         localSrcFileType == ESMF_FILEFORMAT_TILE)) &
       useDstMask = .false.
 
     ! Should I have only PetNO=0 to open the file and find out the size?
@@ -768,7 +773,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-              srcIsReg = .true.
+        srcIsReg = .true.
+        srcrank = 2
+      elseif (localSrcFileType == ESMF_FILEFORMAT_TILE) then
+           ! this returns the size of the center stagger, not the supergrid
+           call ESMF_GridSpecQueryTileSize(srcfile, srcdims(1),srcdims(2), rc=localrc)
+           if (ESMF_LogFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
+        srcIsReg = .true.
         srcrank = 2
       elseif (localSrcFileType == ESMF_FILEFORMAT_MOSAIC) then
         srcIsMosaic = .true.
@@ -800,6 +813,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
+        dstrank = 2
+        dstIsReg = .true.
+      elseif (localDstFileType == ESMF_FILEFORMAT_TILE) then
+        ! this returns the size of the center stagger, not the supergrid
+        call ESMF_GridSpecQueryTileSize(dstfile, dstdims(1),dstdims(2), rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+                                     ESMF_ERR_PASSTHRU, &
+                                     ESMF_CONTEXT, rcToReturn=rc)) return
         dstrank = 2
         dstIsReg = .true.
       elseif (localDstFileType == ESMF_FILEFORMAT_MOSAIC) then
@@ -871,6 +892,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (srcMissingValue) then
            print *, "    Use the missing values of variable '", trim(srcMissingvalueVar),"' as the mask"
        endif
+      elseif (localSrcFileType == ESMF_FILEFORMAT_TILE) then
+        print *, "  Source File is in GRIDSPEC TILE format"
       else
         print *, "  Source File is in GRIDSPEC MOSAIC format"
       endif
@@ -909,6 +932,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (dstMissingValue) then
            print *, "    Use the missing value of '", trim(dstMissingvalueVar),"' as the mask"
         endif   
+      elseif (localDstFileType == ESMF_FILEFORMAT_TILE) then
+        print *, "  Destination File is in GRIDSPEC TILE format"
       else
         print *, "  Destination File is in GRIDSPEC MOSAIC format"
       endif
@@ -1105,25 +1130,26 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-    elseif (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+    elseif (localSrcFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
+    	   localSrcFileType == ESMF_FILEFORMAT_TILE) then
        if (useSrcCoordVar) then
            if (srcMissingValue) then
-              srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
+              srcGrid = ESMF_GridCreate(srcfile, regDecomp=(/xpart,ypart/), &
                         addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
                         addMask=.true., varname=trim(srcMissingvalueVar), isSphere=srcIsSphere, &
                         coordNames = srcCoordinateVars, rc=localrc)
            else
-             srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
+             srcGrid = ESMF_GridCreate(srcfile, regDecomp=(/xpart,ypart/), &
                         addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
              isSphere=srcIsSphere, coordNames = srcCoordinateVars,rc=localrc)
            endif
         else
            if (srcMissingValue) then
-             srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
+             srcGrid = ESMF_GridCreate(srcfile, regDecomp=(/xpart,ypart/), &
                         addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
                         addMask=.true., varname=trim(srcMissingvalueVar), isSphere=srcIsSphere, rc=localrc)
            else
-              srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
+              srcGrid = ESMF_GridCreate(srcfile, regDecomp=(/xpart,ypart/), &
                         addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
               isSphere=srcIsSphere, rc=localrc)
            endif
@@ -1138,7 +1164,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (localSrcFileType == ESMF_FILEFORMAT_SCRIP) then
          if(srcIsReg) then
-           srcGrid = ESMF_GridCreate(srcfile, localSrcFileType, (/xpart,ypart/), &
+           srcGrid = ESMF_GridCreate(srcfile, regDecomp=(/xpart,ypart/), &
                             addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
                             isSphere=srcIsSphere, addUserArea =localUserAreaFlag, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
@@ -1248,10 +1274,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        if (ESMF_LogFoundError(localrc, &
               ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-    elseif (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC) then
+    elseif (localDstFileType == ESMF_FILEFORMAT_GRIDSPEC .or. &
+         localDstFileType == ESMF_FILEFORMAT_TILE) then
        if (useDstCoordVar) then
           if (dstMissingValue) then
-             dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
+             dstGrid = ESMF_GridCreate(dstfile, regDecomp=(/xpart,ypart/), &
                         addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
                         addMask=.true., varname=trim(dstMissingvalueVar), isSphere=dstIsSphere, &
                         coordNames = dstCoordinateVars, rc=localrc)
@@ -1259,7 +1286,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                  ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rcToReturn=rc)) return
           else
-             dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
+             dstGrid = ESMF_GridCreate(dstfile, regDecomp=(/xpart,ypart/), &
                           addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
                           isSphere=dstIsSphere, coordNames=dstCoordinateVars, rc=localrc)
              if (ESMF_LogFoundError(localrc, &
@@ -1268,14 +1295,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
       else
           if (dstMissingValue) then
-             dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
+             dstGrid = ESMF_GridCreate(dstfile, regDecomp=(/xpart,ypart/), &
                         addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
                         addMask=.true., varname=trim(dstMissingvalueVar), isSphere=dstIsSphere, rc=localrc)
              if (ESMF_LogFoundError(localrc, &
                  ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rcToReturn=rc)) return
           else
-              dstGrid = ESMF_GridCreate(dstfile, localDstFileType, (/xpart,ypart/), &
+              dstGrid = ESMF_GridCreate(dstfile, regDecomp=(/xpart,ypart/), &
                               addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
                               isSphere=dstIsSphere, rc=localrc)
               if (ESMF_LogFoundError(localrc, &
@@ -1290,7 +1317,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
     elseif (localDstFileType == ESMF_FILEFORMAT_SCRIP) then
         if (dstIsReg) then
-           dstGrid = ESMF_GridCreate(dstfile, localDstFileType,(/xpart, ypart/), &
+           dstGrid = ESMF_GridCreate(dstfile, regDecomp=(/xpart, ypart/), &
                      addCornerStagger=addCorners, indexflag=ESMF_INDEX_GLOBAL, &
                      isSphere=dstIsSphere, addUserArea = localUserAreaFlag, rc=localrc)
            if (ESMF_LogFoundError(localrc, &
