@@ -575,10 +575,11 @@ end subroutine ESMF_GridSpecQueryTileGlobal
 ! -------------------------- ESMF-private method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridspecQueryTileSize"
-subroutine ESMF_GridspecQueryTileSize(filename, nx, ny, rc)
+subroutine ESMF_GridspecQueryTileSize(filename, nx, ny, units, rc)
 
     character(len=*), intent(in)     :: filename
     integer, intent(out)             :: nx, ny
+    character(len=*), intent(out), optional    :: units
     integer, intent(out), optional   :: rc
 
 #ifdef ESMF_NETCDF
@@ -586,6 +587,7 @@ subroutine ESMF_GridspecQueryTileSize(filename, nx, ny, rc)
     integer :: ncStatus
     integer :: ndims, dimids(2)
     character(len=128) :: attstr
+    character(len=1024) :: errmsg
 
     if (present(rc)) rc=ESMF_SUCCESS
 
@@ -633,6 +635,29 @@ subroutine ESMF_GridspecQueryTileSize(filename, nx, ny, rc)
             ! return the dimension of the center grid
             nx = (nx-1)/2
             ny = (ny-1)/2
+
+            ! find out units attribute
+            if (present(units)) then
+              ncStatus = nf90_inquire_attribute(ncid, i, "units", len=attlen)
+              errmsg ="attribute units for coordinate variable" //" in "//trim(filename)
+              if (CDFCheckError (ncStatus, &
+                  ESMF_METHOD,  &
+                  ESMF_SRCLINE, &
+                  errmsg, &
+                  rc)) return
+              ncStatus = nf90_get_att(ncid, i, 'units',attstr)
+              if (CDFCheckError (ncStatus, &
+                  ESMF_METHOD,  &
+                  ESMF_SRCLINE, &
+                  errmsg, &
+                  rc)) return
+              if (attstr(1:6) .eq. 'degree') then 
+                 units = 'degrees'
+              elseif (attstr(1:6) .eq. 'radian') then
+                 units = 'radians'
+              endif
+            endif
+
             goto 20
          endif
        endif
@@ -780,7 +805,7 @@ subroutine ESMF_GridspecReadTile(filename, nx, ny, centerLon, centerLat, cornerL
                  ESMF_CONTEXT, rcToReturn=rc) 
               return
             endif
-            
+               
             if (present(start) .and. present(count)) then
                ! read a block instead of the entire array
                count1=count*2+1
