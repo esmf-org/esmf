@@ -96,6 +96,17 @@ namespace ESMCI{
         double tol_;
     };
 
+    template<typename T, typename CompInfoIterator>
+    class CompInfoIterCmpBySTimePet{
+      public:
+        CompInfoIterCmpBySTimePet();
+        CompInfoIterCmpBySTimePet(double tol);
+        bool operator()(const CompInfoIterator &a,
+          const CompInfoIterator &b) const;
+      private:
+        double tol_;
+    };
+
     template<typename T>
     inline CompInfo<T>::CompInfo(
               const std::string &comp_name,
@@ -305,6 +316,33 @@ namespace ESMCI{
       std::pair<int, int> b_pet_range = b->get_pet_range();
       std::pair<T, T> a_time_intvl = a->get_time_interval();
       std::pair<T, T> b_time_intvl = b->get_time_interval();
+      if(std::abs(a_time_intvl.first - b_time_intvl.first) <= tol_){
+        return (a_pet_range.first < b_pet_range.first);
+      }
+      else{
+        return (a_time_intvl.first < b_time_intvl.first);
+      }
+    }
+
+    template<typename T, typename CompInfoIterator>
+    inline CompInfoIterCmpBySTimePet<T, CompInfoIterator>::CompInfoIterCmpBySTimePet():tol_(0)
+    {
+    }
+
+    template<typename T, typename CompInfoIterator>
+    inline CompInfoIterCmpBySTimePet<T, CompInfoIterator>::CompInfoIterCmpBySTimePet(double tol):tol_(tol)
+    {
+    }
+
+    template<typename T, typename CompInfoIterator>
+    inline bool CompInfoIterCmpBySTimePet<T, CompInfoIterator>::operator()(
+                  const CompInfoIterator &a,
+                  const CompInfoIterator &b) const
+    {
+      std::pair<int, int> a_pet_range = (*a).get_pet_range();
+      std::pair<int, int> b_pet_range = (*b).get_pet_range();
+      std::pair<T, T> a_time_intvl = (*a).get_time_interval();
+      std::pair<T, T> b_time_intvl = (*b).get_time_interval();
       if(std::abs(a_time_intvl.first - b_time_intvl.first) <= tol_){
         return (a_pet_range.first < b_pet_range.first);
       }
