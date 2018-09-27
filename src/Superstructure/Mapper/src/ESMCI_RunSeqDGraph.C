@@ -157,7 +157,7 @@ namespace ESMCI{
         min_pet = std::min(min_pet, (*citer).get_pet_range().first);
         max_pet = std::max(max_pet, (*citer).get_pet_range().second);
       }
-      int npets = max_pet - min_pet;
+      int npets = max_pet - min_pet + 1;
       assert(npets > 0);
 
       /* Create a copy of the dep graph and process it to get a layout */
@@ -224,6 +224,7 @@ namespace ESMCI{
         std::pair<double, double> opt_time_intvl = (*opt_iter).get_time_interval();
         int row_comp = static_cast<int>(opt_time_intvl.first);
         double opt_start_time = row_start_times[row_comp];
+        opt_time_intvl.first = opt_start_time;
         opt_time_intvl.second += opt_start_time;
         (*opt_iter).set_time_interval(opt_time_intvl);
       }
