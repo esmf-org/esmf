@@ -298,7 +298,7 @@ namespace ESMCI{
     template<typename T>
     std::vector<typename DGraph<T>::vertex_key> DGraph<T>::GraphNode::get_parents(void ) const
     {
-      return iedges_;
+      return oedges_;
     }
 
     template<typename T>
