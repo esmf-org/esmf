@@ -21,6 +21,7 @@
 #include "ESMCI_CompInfoUtils.h"
 #include "ESMCI_ExecBlock.h"
 #include "ESMCI_ExecBlockUtils.h"
+#include "ESMCI_ExecSim.h"
 
 namespace ESMCI{
   namespace MapperUtil{
@@ -80,6 +81,7 @@ namespace ESMCI{
         LoadBalancerAlg opt_alg_;
         std::vector<LoadBalancerBackupInfo> backup_infos_;
         LoadBalancerBackupInfo optimal_info_;
+        void add_backup_info(const LoadBalancerBackupInfo &backup_info);
         void update_backup_info(const std::vector<CompInfo<T> > &comp_infos);
         bool get_constraint_funcs(
           std::vector<std::vector<ExecBlock<T> > > &pexec_blocks,
@@ -88,6 +90,11 @@ namespace ESMCI{
           std::vector<MVIDLPoly<T> > &reshape_mvidlp_cfuncs,
           std::vector<std::string> &cfuncs_vnames,
           std::vector<int> &cfuncs_vivals);
+        void get_pet_layout(const std::vector<int> &opt_npets,
+          std::vector<std::pair<int, int> > &opt_pet_range,
+          T &opt_wtime);
+        T get_wtime(std::vector<std::pair<int, int> > &new_pet_ranges) const;
+          
     }; //class LoadBalancer
 
     template<typename T>
@@ -293,6 +300,117 @@ namespace ESMCI{
       return false;
     }
 
+    template<typename T>
+    void LoadBalancer<T>::get_pet_layout(const std::vector<int> &opt_npets,
+            std::vector<std::pair<int, int> > &opt_pet_range,
+            T &opt_wtime)
+    {
+      assert(comp_infos_.size() == opt_npets.size());
+
+      opt_pet_range.resize(opt_npets.size());
+
+      std::vector<typename std::vector<CompInfo<T> >::const_iterator> comp_info_iters;
+      int i=0;
+      for(typename std::vector<CompInfo<T> >::const_iterator citer = comp_infos_.cbegin();
+        citer != comp_infos_.cend(); ++citer, i++){
+        comp_info_iters.push_back(citer);
+        /* Start with current value for the PET range */
+        opt_pet_range[i] = (*citer).get_pet_range();
+      }
+      CompInfoIterCmpBySTimePet<T, typename std::vector<CompInfo<T> >::const_iterator> cmp;
+      std::sort(comp_info_iters.begin(), comp_info_iters.end(), cmp);
+
+      for(typename std::vector<typename std::vector<CompInfo<T> >::const_iterator>::const_iterator
+        comp_info_iter_iter = comp_info_iters.cbegin();
+        comp_info_iter_iter != comp_info_iters.cend();
+        ++comp_info_iter_iter){
+        std::size_t comp_opt_pos = std::distance(comp_infos_.cbegin(), *comp_info_iter_iter);
+        /* Modify PET range end for this comp_info.
+         * Then modify the start PETs for all comps with a start time within the
+         * range of this component
+         */
+        opt_pet_range[comp_opt_pos].second =
+          opt_pet_range[comp_opt_pos].first + opt_npets[comp_opt_pos] - 1;
+
+        std::pair<T, T> comp_time_intvl = (*(*comp_info_iter_iter)).get_time_interval();
+        std::pair<int, int> comp_pet_range =
+          (*(*comp_info_iter_iter)).get_pet_range();
+
+        /* The change in the number of PETs, apply this to start PET for comps
+         * with a start time within the range of this component
+         */
+        int npet_change =
+          (opt_pet_range[comp_opt_pos].second - opt_pet_range[comp_opt_pos].first + 1) - 
+          (*(*comp_info_iter_iter)).get_npets();
+        for(typename std::vector<typename std::vector<CompInfo<T> >::const_iterator>::const_iterator
+          rem_comp_info_iter_iter = comp_info_iter_iter + 1;
+          rem_comp_info_iter_iter != comp_info_iters.cend();
+          ++rem_comp_info_iter_iter){
+
+          std::size_t rem_comp_opt_pos =
+            std::distance(comp_infos_.cbegin(), *rem_comp_info_iter_iter);
+          std::pair<T, T> rem_comp_time_intvl =
+            (*(*rem_comp_info_iter_iter)).get_time_interval();
+          std::pair<int, int> rem_comp_pet_range =
+            (*(*rem_comp_info_iter_iter)).get_pet_range();
+
+          if(rem_comp_time_intvl.first > comp_time_intvl.second){
+            /* No more comps to modify */
+            break;
+          }
+          else{
+            /* Modify the start PET */
+            opt_pet_range[rem_comp_opt_pos].first += npet_change;
+          }
+        }
+      }
+
+      opt_wtime = get_wtime(opt_pet_range);
+    }
+
+    template<typename T>
+    T LoadBalancer<T>::get_wtime(std::vector<std::pair<int, int> > &new_pet_ranges) const
+    {
+      CompInfoStore<T> *cinfo_store = CompInfoStore<T>::get_instance();
+      assert(cinfo_store);
+
+      std::vector<CompInfo<T> > comp_infos(comp_infos_);
+      assert(comp_infos.size() == new_pet_ranges.size());
+
+      std::vector<T> comp_info_wtimes;
+      typename std::vector<CompInfo<T> >::iterator citer = comp_infos.begin();
+      std::vector<std::pair<int, int> >::iterator piter = new_pet_ranges.begin();
+      for(;(citer != comp_infos.end()) && (piter != new_pet_ranges.end());
+              ++citer, ++piter){
+        int new_npets = (*piter).second - (*piter).first + 1;
+        assert(new_npets > 0);
+
+        UVIDPoly<T> comp_sfunc;
+        bool has_sfunc = cinfo_store->get_scaling_function(*citer, comp_sfunc);
+        if(has_sfunc){
+          T new_wtime = comp_sfunc.eval(new_npets);
+          comp_info_wtimes.push_back(new_wtime);
+        }
+        else{
+          /* Assume linear scaling */
+          std::pair<int, int> old_pet_range = (*citer).get_pet_range();
+          int old_npets = old_pet_range.second - old_pet_range.first + 1;
+          assert(old_npets > 0);
+
+          std::pair<T, T> old_time_intvl = (*citer).get_time_interval();
+          T old_wtime = old_time_intvl.second - old_time_intvl.first;
+          assert(old_wtime > static_cast<T>(0));
+
+          T new_wtime =
+            old_wtime * (static_cast<T>(old_npets)/static_cast<T>(new_npets));
+          comp_info_wtimes.push_back(new_wtime);
+        }
+        (*citer).set_pet_range(*piter);
+      }
+      assert(comp_info_wtimes.size() == comp_infos.size());
+      return MapperSimRun(comp_infos, comp_info_wtimes);
+    }
+
     /* Optimize the user specified PET list by redistributing
      * PETs between the different components such that it
      * reduces the idle time between the different components
@@ -325,11 +443,12 @@ namespace ESMCI{
       for(typename std::vector<CompInfo<T> >::const_iterator citer = comp_infos_.cbegin();
           citer != comp_infos_.cend(); ++citer){
         int compi_npets = (*citer).get_npets();
+        std::pair<int, int> pet_range = (*citer).get_pet_range();
         orig_npets.push_back(compi_npets);
         T compi_stime = (*citer).get_stime();
         comp_npets.push_back(compi_npets);
         comp_stimes.push_back(compi_stime);
-        total_pets += compi_npets;
+        total_pets = std::max(total_pets, pet_range.second);
         total_stime += compi_stime;
       }
       assert(orig_npets.size() == opt_npets.size());
@@ -393,6 +512,7 @@ namespace ESMCI{
         }
       }
 
+      /*
       typename std::vector<T>::iterator opt_wtime_iter = std::max_element(
                                                   opt_wtimes.begin(), opt_wtimes.end());
       if(opt_wtime_iter != opt_wtimes.end()){
@@ -402,10 +522,13 @@ namespace ESMCI{
         opt_wtime = static_cast<T>(0);
         return false;
       }
+      */
+      get_pet_layout(opt_npets, opt_pet_ranges, opt_wtime);
 
       //std::cout << "Saving npets = " << opt_npets[0] << "\n";
       LoadBalancerBackupInfo backup_info(opt_npets, opt_pet_ranges, opt_wtime);
-      backup_infos_.push_back(backup_info);
+      //backup_infos_.push_back(backup_info);
+      add_backup_info(backup_info);
 
       /* Find and store the minimal backup info */
       if(optimal_info_.is_valid()){
@@ -433,6 +556,20 @@ namespace ESMCI{
     }
 
     template<typename T>
+    void LoadBalancer<T>::add_backup_info(
+      const LoadBalancerBackupInfo &backup_info)
+    {
+      for(typename std::vector<LoadBalancerBackupInfo>::iterator iter = backup_infos_.begin();
+            iter != backup_infos_.end(); ++iter){
+        if(*iter == backup_info){
+          *iter = backup_info;
+          return;
+        }
+      }
+      backup_infos_.push_back(backup_info);
+    }
+
+    template<typename T>
     void LoadBalancer<T>::update_backup_info(
       const std::vector<CompInfo<T> > &comp_infos)
     {
@@ -447,6 +584,7 @@ namespace ESMCI{
       for(typename std::vector<CompInfo<T> >::const_iterator citer = comp_infos.cbegin();
           citer != comp_infos.cend(); ++citer){
         comp_npets.push_back((*citer).get_npets());
+        comp_pet_ranges.push_back((*citer).get_pet_range());
         std::pair<T, T> comp_time_intvl = (*citer).get_time_interval();
         if(min_app_wtime != 0){
           min_app_wtime = std::min(min_app_wtime, comp_time_intvl.first);
@@ -550,8 +688,8 @@ namespace ESMCI{
       opt_pet_ranges_ = opt_pet_ranges;
       /* Store the latest prediction error */
       opt_wtime_pred_err_ = opt_wtime_ - opt_wtime;
-      //std::cout << "Solution app walltime prediction error = "
-      //  << opt_wtime_pred_err_ << "\n";
+      std::cout << "Solution app walltime prediction error = "
+        << opt_wtime_pred_err_ << "\n";
       opt_wtime_ = opt_wtime;
       is_valid_ = true;
     }
