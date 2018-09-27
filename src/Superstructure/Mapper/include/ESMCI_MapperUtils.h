@@ -29,5 +29,6 @@
 #include "ESMCI_CompInfo.h"
 #include "ESMCI_ExecBlock.h"
 #include "ESMCI_ExecBlockUtils.h"
+#include "ESMCI_ExecSim.h"
 
 #endif // ESMCI_MapperUtils_H
