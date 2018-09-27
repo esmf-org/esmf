@@ -38,6 +38,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldRegridMesh \
             ESMF_FieldRegridMeshToMesh \
             ESMF_FieldLSRedistArb2Arb \
+            ESMF_FieldLSRedistArb2ArbUngrdDim \
             ESMF_FieldLSSMM \
             ESMF_FieldMeshSMM \
             ESMF_TransferGrid \
