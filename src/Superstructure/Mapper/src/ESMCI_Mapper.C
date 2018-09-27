@@ -106,6 +106,13 @@ namespace ESMCI{
     return false;
   }
 
+  bool Mapper::get_optimal(std::vector<int> &opt_npets,
+                        std::vector<std::pair<int, int> > &opt_pet_ranges,
+                        double &opt_wtime)
+  {
+    return lb_.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
+  }
+
   Mapper::~Mapper()
   {
     MapperUtil::CompInfoStore<double>::finalize();

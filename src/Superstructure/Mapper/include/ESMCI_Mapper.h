@@ -32,6 +32,9 @@ namespace ESMCI{
       bool optimize(std::vector<int> &opt_npets,
                     std::vector<std::pair<int, int> > &opt_pet_ranges,
                     double &opt_wtime);
+      bool get_optimal(std::vector<int> &opt_npets,
+                    std::vector<std::pair<int, int> > &opt_pet_ranges,
+                    double &opt_wtime);
       ~Mapper();
     private:
       ESMCI::VM &vm_;

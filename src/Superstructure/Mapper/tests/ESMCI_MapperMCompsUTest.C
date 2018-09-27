@@ -161,6 +161,19 @@ int main(int argc, char *argv[])
     comp_infos[3].set_time_interval(comp_time_intvls[3]);
 
   }
+  std::vector<int> opt_npets;
+  std::vector<std::pair<int, int> > opt_pet_ranges;
+  double opt_wtime;
+
+  bool opt_pets_available = mapper.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
+  assert(opt_pets_available);
+  std::cout << "Optimal time : " << opt_wtime << "\n";
+  std::cout << "Optimal pet list : ";
+  for(std::vector<int>::const_iterator citer = opt_npets.cbegin();
+      citer != opt_npets.cend(); ++citer){
+    std::cout << *citer << ", ";
+  }
+  std::cout << "\n";
 
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }
