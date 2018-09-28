@@ -95,20 +95,20 @@ module user_model2
     if ( de_id .eq. 0 ) then
         allocate(indexList(6))
         allocate(tmp_data(2,6,4))
-        allocate(hum_data(2,6,4))
+        allocate(hum_data(1,6,4))
         allocate(prs_data(2,6,4))
         indexList = (/1,2,3,4,5,6/)
         tmp_data(1:2,1:6,1:4) = 0
-        hum_data(1:2,1:6,1:4) = 0
+        hum_data(1:1,1:6,1:4) = 0
         prs_data(1:2,1:6,1:4) = 0
     elseif ( de_id .eq. 1 ) then
         allocate(indexList(10))
         allocate(tmp_data(2,10,4))
-        allocate(hum_data(2,10,4))
+        allocate(hum_data(1,10,4))
         allocate(prs_data(2,10,4))
         indexList = (/7,8,9,10,11,12,13,14,15,16/)
         tmp_data(1:2,1:10,1:4) = 0
-        hum_data(1:2,1:10,1:4) = 0
+        hum_data(1:1,1:10,1:4) = 0
         prs_data(1:2,1:10,1:4) = 0
     endif
 
@@ -211,7 +211,7 @@ module user_model2
     call ESMF_FieldGet(field, localDe=0, farrayPtr=fptr, &
           exclusiveLBound=exlb, exclusiveUBound=exub, rc=rc)
     if(rc/=ESMF_SUCCESS) return
-    do i = exlb(1), exub(1)
+    do i = exlb(2), exub(2)
           if(fptr(1,i,1) .ne. indexList(i)*1*1) then
             print *, de_id, "ERROR temp ", indexList(i), " val(1,i,1) =", fptr(1,i,1)
             rc = ESMF_FAILURE
@@ -253,7 +253,7 @@ module user_model2
     call ESMF_FieldGet(field, localDe=0, farrayPtr=fptr, &
           exclusiveLBound=exlb, exclusiveUBound=exub, rc=rc)
     if(rc/=ESMF_SUCCESS) return
-    do i = exlb(1), exub(1)
+    do i = exlb(2), exub(2)
           if(fptr(1,i,1) .ne. indexList(i)*10*1) then
             print *, de_id, "ERROR humd ", indexList(i), " val(1,i,1) =", fptr(1,i,1)
             rc = ESMF_FAILURE
@@ -270,22 +270,6 @@ module user_model2
             print *, de_id, "ERROR humd ", indexList(i), " val(1,i,4) =", fptr(1,i,4)
             rc = ESMF_FAILURE
           endif
-          if(fptr(2,i,1) .ne. 10*1) then
-            print *, de_id, "ERROR humd ", indexList(i), " val(2,i,1) =", fptr(2,i,1)
-            rc = ESMF_FAILURE
-          endif
-          if(fptr(2,i,2) .ne. 10*2) then
-            print *, de_id, "ERROR humd ", indexList(i), " val(2,i,2) =", fptr(2,i,2)
-            rc = ESMF_FAILURE
-          endif
-          if(fptr(2,i,3) .ne. 10*3) then
-            print *, de_id, "ERROR humd ", indexList(i), " val(2,i,3) =", fptr(2,i,3)
-            rc = ESMF_FAILURE
-          endif
-          if(fptr(2,i,4) .ne. 10*4) then
-            print *, de_id, "ERROR humd ", indexList(i), " val(2,i,4) =", fptr(2,i,4)
-            rc = ESMF_FAILURE
-          endif
     enddo
 
     nullify(fptr)
@@ -295,7 +279,7 @@ module user_model2
     call ESMF_FieldGet(field, localDe=0, farrayPtr=fptr, &
           exclusiveLBound=exlb, exclusiveUBound=exub, rc=rc)
     if(rc/=ESMF_SUCCESS) return
-    do i = exlb(1), exub(1)
+    do i = exlb(2), exub(2)
           if(fptr(1,i,1) .ne. indexList(i)*100*1) then
             print *, de_id, "ERROR pres ", indexList(i), " val(1,i,1) =", fptr(1,i,1)
             rc = ESMF_FAILURE

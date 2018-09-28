@@ -96,7 +96,7 @@ module user_model1
     if ( de_id .eq. 0 ) then
         allocate(indexList(4))
         allocate(tmp_data(2,4,4))
-        allocate(hum_data(2,4,4))
+        allocate(hum_data(1,4,4))
         allocate(prs_data(2,4,4))
         indexList = (/1,2,3,4/)
         tmp_data(1,1:4,1) = indexList(1:4)*1*1
@@ -115,10 +115,6 @@ module user_model1
         tmp_data(2,1:4,2) = 1*2
         tmp_data(2,1:4,3) = 1*3
         tmp_data(2,1:4,4) = 1*4
-        hum_data(2,1:4,1) = 10*1
-        hum_data(2,1:4,2) = 10*2
-        hum_data(2,1:4,3) = 10*3
-        hum_data(2,1:4,4) = 10*4
         prs_data(2,1:4,1) = 100*1
         prs_data(2,1:4,2) = 100*2
         prs_data(2,1:4,3) = 100*3
@@ -126,7 +122,7 @@ module user_model1
     elseif ( de_id .eq. 1 ) then
         allocate(indexList(6))
         allocate(tmp_data(2,6,4))
-        allocate(hum_data(2,6,4))
+        allocate(hum_data(1,6,4))
         allocate(prs_data(2,6,4))
         indexList = (/5,6,7,8,9,10/)
         tmp_data(1,1:6,1) = indexList(1:6)*1*1
@@ -145,10 +141,6 @@ module user_model1
         tmp_data(2,1:6,2) = 1*2
         tmp_data(2,1:6,3) = 1*3
         tmp_data(2,1:6,4) = 1*4
-        hum_data(2,1:6,1) = 10*1
-        hum_data(2,1:6,2) = 10*2
-        hum_data(2,1:6,3) = 10*3
-        hum_data(2,1:6,4) = 10*4
         prs_data(2,1:6,1) = 100*1
         prs_data(2,1:6,2) = 100*2
         prs_data(2,1:6,3) = 100*3
@@ -156,7 +148,7 @@ module user_model1
     elseif ( de_id .eq. 2 ) then
         allocate(indexList(0))
         allocate(tmp_data(2,0,4))
-        allocate(hum_data(2,0,4))
+        allocate(hum_data(1,0,4))
         allocate(prs_data(2,0,4))
 !        indexList = null
 !        tmp_data() = null
@@ -165,7 +157,7 @@ module user_model1
     elseif ( de_id .eq. 3 ) then
         allocate(indexList(6))
         allocate(tmp_data(2,6,4))
-        allocate(hum_data(2,6,4))
+        allocate(hum_data(1,6,4))
         allocate(prs_data(2,6,4))
         indexList = (/11,12,13,14,15,16/)
         tmp_data(1,1:6,1) = indexList(1:6)*1*1
@@ -184,10 +176,6 @@ module user_model1
         tmp_data(2,1:6,2) = 1*2
         tmp_data(2,1:6,3) = 1*3
         tmp_data(2,1:6,4) = 1*4
-        hum_data(2,1:6,1) = 10*1
-        hum_data(2,1:6,2) = 10*2
-        hum_data(2,1:6,3) = 10*3
-        hum_data(2,1:6,4) = 10*4
         prs_data(2,1:6,1) = 100*1
         prs_data(2,1:6,2) = 100*2
         prs_data(2,1:6,3) = 100*3
