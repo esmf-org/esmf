@@ -2978,6 +2978,7 @@ contains
     end if
 
     if (present (text)) then
+#if 0
       call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
       call ESMF_VMBarrier (vm)
       if (mypet == 0) then
@@ -2987,12 +2988,19 @@ contains
         call ESMF_UtilIOUnitflush (ESMF_UtilIOStdout)
       end if
       call ESMF_VMBarrier (vm)
+#else
+      call ESMF_LogWrite(trim(text), ESMF_LOGMSG_INFO, rc=rc)
+#endif
     end if
 
     if (present (multitext)) then
+#if 0
       write (ESMF_UtilIOStdout,*) multitext
       call ESMF_UtilIOUnitFlush (ESMF_UtilIOStdout)
       call ESMF_VMBarrier (vm)
+#else
+      call ESMF_LogWrite(trim(multitext), ESMF_LOGMSG_INFO, rc=rc)
+#endif
     end if
 
     if (localask) then
