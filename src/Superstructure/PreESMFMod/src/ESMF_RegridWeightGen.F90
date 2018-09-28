@@ -725,7 +725,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
     ! Use LocStream if the dest file format is SCRIP and the regridmethod is non-conservative
     if ((localDstFileType /= ESMF_FILEFORMAT_GRIDSPEC .and. &
-         localSrcFileType /= ESMF_FILEFORMAT_TILE .and. &
+         localDstFileType /= ESMF_FILEFORMAT_TILE .and. &
          localDstFileType /= ESMF_FILEFORMAT_MOSAIC) .and. &
         (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE) .and. &
         (localRegridMethod /= ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
