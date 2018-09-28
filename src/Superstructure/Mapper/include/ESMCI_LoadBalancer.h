@@ -41,11 +41,15 @@ namespace ESMCI{
         LoadBalancer();
         LoadBalancer(const std::vector<CompInfo<T> > &comp_infos);
         LoadBalancerAlg set_opt_method(const LoadBalancerAlg &opt_alg);
-        void set_lb_info(const std::vector<CompInfo<T> > &comp_infos);
+        void set_lb_info(const std::vector<CompInfo<T> > &comp_infos,
+              bool is_user_info = false);
         bool optimize(std::vector<int> &opt_npets,
                     std::vector<std::pair<int, int> > &opt_pet_ranges,
                     T &opt_wtime);
         bool get_optimal(std::vector<int> &opt_npets,
+                    std::vector<std::pair<int, int> > &opt_pet_ranges,
+                    T &opt_wtime);
+        bool get_next_optimal_candidate(std::vector<int> &opt_npets,
                     std::vector<std::pair<int, int> > &opt_pet_ranges,
                     T &opt_wtime);
       private:
@@ -79,10 +83,12 @@ namespace ESMCI{
 
         std::vector<CompInfo<T> > comp_infos_;
         LoadBalancerAlg opt_alg_;
-        std::vector<LoadBalancerBackupInfo> backup_infos_;
-        LoadBalancerBackupInfo optimal_info_;
-        void add_backup_info(const LoadBalancerBackupInfo &backup_info);
-        void update_backup_info(const std::vector<CompInfo<T> > &comp_infos);
+        /* Backup infos related to execution results from user */
+        std::vector<LoadBalancerBackupInfo> ex_backup_infos_;
+        /* Backup infos related to possible candidates for user */
+        std::vector<LoadBalancerBackupInfo> candidate_backup_infos_;
+        void update_ex_backup_info(const std::vector<CompInfo<T> > &comp_infos);
+        void update_candidate_backup_info(const LoadBalancerBackupInfo &cand_backup_info);
         bool get_constraint_funcs(
           std::vector<std::vector<ExecBlock<T> > > &pexec_blocks,
           std::vector<TwoDVIDPoly<T> > &twodvidp_cfuncs,
@@ -122,11 +128,14 @@ namespace ESMCI{
     /* Set execution info for the load balancer
      */
     template<typename T>
-    inline void LoadBalancer<T>::set_lb_info(const std::vector<CompInfo<T> > &comp_infos)
+    inline void LoadBalancer<T>::set_lb_info(const std::vector<CompInfo<T> > &comp_infos,
+      bool is_user_info)
     {
       assert(comp_infos_.empty() || (comp_infos_.size() == comp_infos.size()));
       comp_infos_ = comp_infos;
-      update_backup_info(comp_infos);
+      if(is_user_info){
+        update_ex_backup_info(comp_infos);
+      }
     }
 
     template<typename T>
@@ -528,17 +537,8 @@ namespace ESMCI{
       //std::cout << "Saving npets = " << opt_npets[0] << "\n";
       LoadBalancerBackupInfo backup_info(opt_npets, opt_pet_ranges, opt_wtime);
       //backup_infos_.push_back(backup_info);
-      add_backup_info(backup_info);
+      update_candidate_backup_info(backup_info);
 
-      /* Find and store the minimal backup info */
-      if(optimal_info_.is_valid()){
-        if(backup_info < optimal_info_){
-          optimal_info_ = backup_info;
-        }
-      }
-      else{
-        optimal_info_ = backup_info;
-      }
       return true;
     }
 
@@ -547,8 +547,8 @@ namespace ESMCI{
                     std::vector<std::pair<int, int> > &opt_pet_ranges,
                     T &opt_wtime)
     {
-      if(optimal_info_.is_valid()){
-        optimal_info_.get_info(opt_npets, opt_pet_ranges, opt_wtime);
+      if(!ex_backup_infos_.empty()){
+        ex_backup_infos_.front().get_info(opt_npets, opt_pet_ranges, opt_wtime);
         return true;
       }
 
@@ -556,27 +556,24 @@ namespace ESMCI{
     }
 
     template<typename T>
-    void LoadBalancer<T>::add_backup_info(
-      const LoadBalancerBackupInfo &backup_info)
+    bool LoadBalancer<T>::get_next_optimal_candidate(std::vector<int> &opt_npets,
+                    std::vector<std::pair<int, int> > &opt_pet_ranges,
+                    T &opt_wtime)
     {
-      for(typename std::vector<LoadBalancerBackupInfo>::iterator iter = backup_infos_.begin();
-            iter != backup_infos_.end(); ++iter){
-        if(*iter == backup_info){
-          *iter = backup_info;
-          return;
-        }
+      if(!candidate_backup_infos_.empty()){
+        candidate_backup_infos_.front().get_info(opt_npets, opt_pet_ranges, opt_wtime);
+        /* FIXME: Should we invert the ordering instead and just pop_back() */
+        candidate_backup_infos_.erase(candidate_backup_infos_.begin());
+        return true;
       }
-      backup_infos_.push_back(backup_info);
+
+      return false;
     }
 
     template<typename T>
-    void LoadBalancer<T>::update_backup_info(
+    void LoadBalancer<T>::update_ex_backup_info(
       const std::vector<CompInfo<T> > &comp_infos)
     {
-      if(backup_infos_.empty()){
-        return;
-      }
-
       std::vector<int> comp_npets;
       std::vector<std::pair<int, int> > comp_pet_ranges;
       T min_app_wtime = static_cast<T>(0);
@@ -606,23 +603,42 @@ namespace ESMCI{
       assert(app_wtime > static_cast<T>(0));
       LoadBalancerBackupInfo app_info(comp_npets, comp_pet_ranges, app_wtime);
       /* We usually end up updating the last entry in backup_infos_ */
-      for(typename std::vector<LoadBalancerBackupInfo>::reverse_iterator riter =
-            backup_infos_.rbegin();
-          riter != backup_infos_.rend(); ++riter){
-        if(app_info == *riter){
-          (*riter).set_info(comp_npets, comp_pet_ranges, app_wtime);
+      bool found_info = false;
+      for(typename std::vector<LoadBalancerBackupInfo>::iterator iter =
+            ex_backup_infos_.begin();
+          iter != ex_backup_infos_.end(); ++iter){
+        if(app_info == *iter){
+          (*iter).set_info(comp_npets, comp_pet_ranges, app_wtime);
+          found_info = true;
           break;
         }
       }
-      if(app_info == optimal_info_){
-        /* The backup infos are already updated, pick a new minimum/optimal */
-        typename std::vector<LoadBalancerBackupInfo>::iterator min_iter =
-          std::min_element(backup_infos_.begin(), backup_infos_.end());
-        /* Backup infos is not empty() - see first check in the function */
-        optimal_info_ = *min_iter;
+      if(!found_info){
+        typename std::vector<LoadBalancerBackupInfo>::iterator iter
+          = std::lower_bound(ex_backup_infos_.begin(),
+              ex_backup_infos_.end(), app_info);
+        ex_backup_infos_.insert(iter, app_info);
       }
-      else if(app_info < optimal_info_){
-        optimal_info_ = app_info;
+    }
+
+    template<typename T>
+    void LoadBalancer<T>::update_candidate_backup_info(
+      const LoadBalancerBackupInfo &cand_backup_info)
+    {
+      bool found_info = false;
+      for(typename std::vector<LoadBalancerBackupInfo>::iterator iter =
+            candidate_backup_infos_.begin();
+            iter != candidate_backup_infos_.end(); ++iter){
+        if(cand_backup_info == *iter){
+          *iter = cand_backup_info;
+          found_info = true;
+        }
+      }
+      if(!found_info){
+        typename std::vector<LoadBalancerBackupInfo>::iterator iter
+          = std::lower_bound(candidate_backup_infos_.begin(),
+              candidate_backup_infos_.end(), cand_backup_info);
+        candidate_backup_infos_.insert(iter, cand_backup_info);
       }
     }
 

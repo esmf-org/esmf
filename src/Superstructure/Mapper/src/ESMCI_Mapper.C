@@ -18,6 +18,7 @@ namespace ESMCI{
     int rc = MapperUtil::CreateDGraphFromRSeq(rseq_fname_, rseq_dgraph_);
     /* FIXME: Throw an exception instead */
     assert(rc == ESMF_SUCCESS);
+    rseq_dgraph_.print_to_file("./RSeqDgraph.dot");
   }
 
   void Mapper::set_comp_info(
@@ -28,6 +29,7 @@ namespace ESMCI{
           comp_infos.cbegin(); citer != comp_infos.cend(); ++citer){
       comp_info_store_->add_comp_info(*citer);
     }
+    lb_.set_lb_info(comp_infos_, true);
   }
 
   void Mapper::add_constraint(const MapperConstraint &constraint)
@@ -79,24 +81,30 @@ namespace ESMCI{
       std::vector<std::vector<MapperUtil::CompInfo<double> > > opt_layouts;
       get_rseq_opt_layouts(opt_layouts);
       if(use_load_balancer_){
-        bool opt_pets_available = false;
         for(std::vector<std::vector<MapperUtil::CompInfo<double> > >::const_iterator
               citer_list = opt_layouts.cbegin();
               citer_list != opt_layouts.cend(); ++citer_list){
           lb_.set_lb_info(*citer_list);
-          bool opt_pets_available = lb_.optimize(opt_npets, opt_pet_ranges, opt_wtime);
+          lb_.optimize(opt_npets, opt_pet_ranges, opt_wtime);
         }
-        lb_.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
+        bool opt_pets_available = lb_.get_next_optimal_candidate(opt_npets,
+                                    opt_pet_ranges, opt_wtime);
+        if(!opt_pets_available){
+          return lb_.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
+        }
+        return true;
       }
       else{
         /* Find the layout with the min opt_wtime among opt_layouts */
         assert(0);
       }
-      return true;
+      return false;
     }
     else if(use_load_balancer_){
       lb_.set_lb_info(comp_infos_);
-      bool opt_pets_available = lb_.optimize(opt_npets, opt_pet_ranges, opt_wtime);
+      lb_.optimize(opt_npets, opt_pet_ranges, opt_wtime);
+      bool opt_pets_available = lb_.get_next_optimal_candidate(opt_npets,
+                                  opt_pet_ranges, opt_wtime);
       if(!opt_pets_available){
         lb_.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
       }
