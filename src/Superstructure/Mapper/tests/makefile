@@ -22,6 +22,7 @@ TESTS_BUILD   =	$(ESMF_TESTDIR)/ESMCI_PolyUTest \
                 $(ESMF_TESTDIR)/ESMCI_LoadBalancerUTest \
                 $(ESMF_TESTDIR)/ESMCI_MapperUTest \
                 $(ESMF_TESTDIR)/ESMCI_MapperMCompsUTest \
+                $(ESMF_TESTDIR)/ESMCI_MapperMCompsDepUTest \
                 $(ESMF_TESTDIR)/ESMCI_LoadBalancerMCompsUTest
 
 TESTS_RUN     =
@@ -41,6 +42,7 @@ TESTS_RUN_UNI =	RUN_ESMCI_PolyUTestUNI \
                 RUN_ESMCI_LoadBalancerUTestUNI \
                 RUN_ESMCI_MapperUTestUNI \
                 RUN_ESMCI_MapperMCompsUTestUNI \
+                RUN_ESMCI_MapperMCompsDepUTestUNI \
                 RUN_ESMCI_LoadBalancerMCompsUTestUNI
 
 
@@ -67,6 +69,9 @@ ESMCI_UTEST_Mapper_OBJS = ../src/ESMCI_Mapper.o ../src/ESMCI_RunSeqDGraph.o ../s
 
 ESMCI_MapperMCompsUTest.o: ../src/ESMCI_Mapper.o ../src/ESMCI_RunSeqDGraph.o ../src/ESMCI_RunSeqUtils.o ../src/ESMCI_GraphDotUtils.o
 ESMCI_UTEST_MapperMComps_OBJS = ../src/ESMCI_Mapper.o ../src/ESMCI_RunSeqDGraph.o ../src/ESMCI_RunSeqUtils.o ../src/ESMCI_GraphDotUtils.o
+
+ESMCI_MapperMCompsDepUTest.o: ../src/ESMCI_Mapper.o ../src/ESMCI_RunSeqDGraph.o ../src/ESMCI_RunSeqUtils.o ../src/ESMCI_GraphDotUtils.o
+ESMCI_UTEST_MapperMCompsDep_OBJS = ../src/ESMCI_Mapper.o ../src/ESMCI_RunSeqDGraph.o ../src/ESMCI_RunSeqUtils.o ../src/ESMCI_GraphDotUtils.o
 
 #       
 #       
@@ -119,6 +124,9 @@ RUN_ESMCI_MapperUTestUNI:
 
 RUN_ESMCI_MapperMCompsUTestUNI:
 	$(MAKE) TNAME=MapperMComps NP=1 ctest
+
+RUN_ESMCI_MapperMCompsDepUTestUNI:
+	$(MAKE) TNAME=MapperMCompsDep NP=1 ctest
 
 RUN_ESMCI_LoadBalancerMCompsUTestUNI:
 	$(MAKE) TNAME=LoadBalancerMComps NP=1 ctest
