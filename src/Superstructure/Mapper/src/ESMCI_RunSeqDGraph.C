@@ -210,12 +210,14 @@ namespace ESMCI{
       *row_start_times_iter = 0.0;
       ++row_start_times_iter;
       double prev_start_time = 0.0;
+      const double TIME_INTVL_BTW_ROWS = 1.0;
       for(std::vector<double>::const_iterator
             row_max_times_citer = row_max_times.cbegin();
             (row_max_times_citer != row_max_times.cend()) &&
             (row_start_times_iter != row_start_times.end());
             ++row_max_times_citer, ++row_start_times_iter){
-        *row_start_times_iter = prev_start_time + *row_max_times_citer;
+        *row_start_times_iter = prev_start_time + *row_max_times_citer +
+                                TIME_INTVL_BTW_ROWS;
         prev_start_time = *row_start_times_iter;
       }
 
