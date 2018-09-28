@@ -29,6 +29,8 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldRedistBlk2Blk \
             ESMF_FieldRedistBlk2Arb \
             ESMF_FieldRedistArb2Arb \
+            ESMF_FieldBundleLSRedistArb2Arb \
+            ESMF_FieldBundleLSRedistArb2ArbUngrdDim \
             ESMF_FieldBundleRedistBlk2Blk \
             ESMF_FieldBundleRedistBlk2Arb \
             ESMF_FieldBundleRedistArb2Arb \

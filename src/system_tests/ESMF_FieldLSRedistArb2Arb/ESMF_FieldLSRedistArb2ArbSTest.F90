@@ -13,11 +13,12 @@
 ! System test FieldLSRedistArb2Arb.
 !   FieldRedist test.  2 components and 1 coupler, one-way coupling.
 !                 The first component has a location stream with
-!                 a Field whose data is set to constant value 1
+!                 a Field whose data is set to index based values
 !                 and then transformed to the second component through
 !                 FieldRedist operation. The destination field builds upon
-!                 a location stream. The transformed data is then compared
-!                 to predetermined result.
+!                 a location stream with a different distribution. The
+!                 transformed data is then compared to predetermined
+!                 results.
 !
 !\begin{verbatim}
 

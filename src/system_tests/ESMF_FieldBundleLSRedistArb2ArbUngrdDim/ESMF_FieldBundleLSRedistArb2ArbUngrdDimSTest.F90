@@ -1,7 +1,7 @@
 ! $Id$
 !
-! System test code FieldLSRedistArb2ArbUngrdDim
-!  Description on Sourceforge under System Test #?????
+! System test code FieldBundleLSRedistArb2ArbUngrdDim
+!  Description on Sourceforge under System Test #XXXXX
 
 !-------------------------------------------------------------------------
 !ESMF_MULTI_PROC_SYSTEM_TEST        String used by test script to count system tests.
@@ -10,21 +10,23 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test FieldLSRedistArb2ArbUngrdDim.
-!   FieldRedist test.  2 components and 1 coupler, one-way coupling.
+! System test FieldBundleLSRedistArb2ArbUngrdDim.
+!   FieldBundleRedist test  
+!                 2 components and 1 coupler, one-way coupling.
 !                 The first component has a location stream with
-!                 a Field whose data is set to index based or constant
-!                 values. The first and third dimensions of the field are
-!                 ungridded. The data is then transformed to the second
-!                 component through the FieldRedist operation. The
-!                 destination field builds upon a location stream with
-!                 a different distribution. The transformed data is then
-!                 compared to predetermined result.
+!                 3 fields whose data is set to global index based
+!                 values or constant values. The first and thrid 
+!                 dimensions of each field are ungridded. The data is
+!                 transformed to the second component through the
+!                 FieldBundleRedist operation. The destination fields
+!                 build upon a location stream with a different 
+!                 distribution. The transformed data is then compared
+!                 to predetermined result.
 !
 !\begin{verbatim}
 
-    program ESMF_FieldLSRedistArb2ArbUngrdDimSTest
-#define ESMF_METHOD "program ESMF_FieldLSRedistArb2ArbUngrdDimSTest"
+    program ESMF_FieldBundleLSRedistArb2ArbUngrdDimSTest
+#define ESMF_METHOD "program ESMF_FieldBundleLSRedistArb2ArbUngrdDimSTest"
 
 #include "ESMF.h"
 
@@ -69,9 +71,9 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "-------------------------------------------------- "
-    print *, "Start of System Test FieldLSRedistArb2ArbUngrdDim:"
-    print *, "-------------------------------------------------- "
+    print *, "-------------------------------------------------------- "
+    print *, "Start of System Test FieldBundleLSRedistArb2ArbUngrdDim:"
+    print *, "-------------------------------------------------------- "
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -80,7 +82,7 @@
 !-------------------------------------------------------------------------
 !
     ! Initialize framework and get back default global VM
-    call ESMF_Initialize(vm=vm, defaultlogfilename="FieldLSRedistArb2ArbUngrdDimSTest.Log", &
+    call ESMF_Initialize(vm=vm, defaultlogfilename="FieldBundleLSRedistArb2ArbUngrdDimSTest.Log", &
                         logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) &
@@ -367,17 +369,17 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10  print *, "System Test FieldLSRedistArb2ArbUngrdDim complete."
+10  print *, "System Test FieldBundleLSRedistArb2ArbUngrdDim complete."
 
 
     ! Normal ESMF Test output
     write(failMsg, *) "System Test failure"
-    write(testname, *) "System Test FieldLSRedistArb2ArbUngrdDim: LocStream based FieldRedist"
+    write(testname, *) "System Test FieldBundleLSRedistArb2ArbUngrdDim: LocStream based FieldBundleRedist"
 
     if (rc .ne. ESMF_SUCCESS) then
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
-        write(finalMsg, *) "SUCCESS: LocStream based FieldRedist test finished correctly."
+        write(finalMsg, *) "SUCCESS: LocStream based FieldBundleRedist test finished correctly."
       else
         write(finalMsg, *) "System Test did not succeed.  Error code ", rc
       endif
@@ -394,7 +396,7 @@
 
     call ESMF_Finalize(rc=rc)
 
-    end program ESMF_FieldLSRedistArb2ArbUngrdDimSTest
+    end program ESMF_FieldBundleLSRedistArb2ArbUngrdDimSTest
 
 !\end{verbatim}
 
