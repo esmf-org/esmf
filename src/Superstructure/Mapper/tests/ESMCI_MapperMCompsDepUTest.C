@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     comp_pet_ranges[2].second - comp_pet_ranges[2].first + 1,
     comp_pet_ranges[3].second - comp_pet_ranges[3].first + 1
                             };
-  double delay = 0.01;
+  double delay = 1.0;
   std::vector<std::pair<double, double> > comp_time_intvls = {
     std::pair<double, double>(0, pcomp1.eval(comp_npets[0])),
     std::pair<double, double>(0, pcomp2.eval(comp_npets[1])),
@@ -83,6 +83,8 @@ int main(int argc, char *argv[])
   comp_time_intvls[3].first = comp_time_intvls[2].second + delay;
   comp_time_intvls[3].second += comp_time_intvls[3].first;
 
+  std::cout << "Stacked config, execution time = "
+    << comp_time_intvls[3].second << " s\n";
   ESMCI::MapperUtil::CompInfo<double> comp0("comp0", "run",
                                       comp_pet_ranges[0], comp_time_intvls[0]);
   ESMCI::MapperUtil::CompInfo<double> comp1("comp1", "run",
