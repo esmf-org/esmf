@@ -269,7 +269,7 @@ contains
 
     logical, parameter :: debug = .false.
     logical, parameter :: meminfo = .false.
-    logical, parameter :: trace = .true.
+    logical, parameter :: trace = .false.
 
     localrc = ESMF_RC_NOT_IMPL
 
