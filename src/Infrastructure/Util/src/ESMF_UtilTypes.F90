@@ -880,7 +880,7 @@
         ESMF_FILEFORMAT_CFGRID = ESMF_FileFormat_Flag(6), &
         ESMF_FILEFORMAT_GRIDSPEC = ESMF_FileFormat_Flag(6), &
         ESMF_FILEFORMAT_MOSAIC = ESMF_FileFormat_Flag(7), &
-        ESMF_FILEFORMAT_TILE = ESMF_FileFormat_Flag(7)
+        ESMF_FILEFORMAT_TILE = ESMF_FileFormat_Flag(8)
 
 
 !------------------------------------------------------------------------------
