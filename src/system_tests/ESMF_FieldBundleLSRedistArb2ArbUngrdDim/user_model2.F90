@@ -21,10 +21,17 @@ module user_model2
     
   public userm2_register
 
-  ! global data
+  ! variable data arrays
   integer(ESMF_KIND_I4), allocatable, save :: tmp_data(:,:,:)
   integer(ESMF_KIND_I4), allocatable, save :: hum_data(:,:,:)
   integer(ESMF_KIND_I4), allocatable, save :: prs_data(:,:,:)
+
+  ! index lists
+  integer :: index_list0(6)  = (/1,7,3,8,5,6/)
+  integer :: index_list1(10) = (/2,4,9,10,11,12,13,14,15,18/)
+!  integer :: index_list0(6)  = (/1,2,3,5,5,6/)
+!  integer :: index_list1(10) = (/7,8,9,10,11,12,13,14,15,16/)
+
 
   contains
 
@@ -72,6 +79,7 @@ module user_model2
     type(ESMF_LocStream)   :: locs
     type(ESMF_Field)       :: field(3)
     type(ESMF_FieldBundle) :: fieldbundle
+    integer                :: icount
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -93,23 +101,29 @@ module user_model2
     endif
 
     if ( de_id .eq. 0 ) then
-        allocate(indexList(6))
-        allocate(tmp_data(2,6,4))
-        allocate(hum_data(1,6,4))
-        allocate(prs_data(2,6,4))
-        indexList = (/1,2,3,4,5,6/)
-        tmp_data(1:2,1:6,1:4) = 0
-        hum_data(1:1,1:6,1:4) = 0
-        prs_data(1:2,1:6,1:4) = 0
+        icount = size(index_list0)
+        allocate(indexList(icount))
+        allocate(tmp_data(2,icount,4))
+        allocate(hum_data(1,icount,4))
+        allocate(prs_data(2,icount,4))
+!        indexList = (/1,2,3,4,5,6/)
+        indexList = index_list0
     elseif ( de_id .eq. 1 ) then
-        allocate(indexList(10))
-        allocate(tmp_data(2,10,4))
-        allocate(hum_data(1,10,4))
-        allocate(prs_data(2,10,4))
-        indexList = (/7,8,9,10,11,12,13,14,15,16/)
-        tmp_data(1:2,1:10,1:4) = 0
-        hum_data(1:1,1:10,1:4) = 0
-        prs_data(1:2,1:10,1:4) = 0
+        icount = size(index_list1)
+        allocate(indexList(icount))
+        allocate(tmp_data(2,icount,4))
+        allocate(hum_data(1,icount,4))
+        allocate(prs_data(2,icount,4))
+!        indexList = (/7,8,9,10,11,12,13,14,15,16/)
+        indexList = index_list1
+    endif
+
+    print *, de_id, "indexList = ", indexList
+
+    if (icount .gt. 0) then
+        tmp_data(:,:,:) = 0
+        hum_data(:,:,:) = 0
+        prs_data(:,:,:) = 0
     endif
 
     ! Add "temperature" "humidity" "pressure" fields to the export state.

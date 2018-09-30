@@ -21,10 +21,20 @@ module user_model1
     
   public userm1_register
 
-  ! global data
+  ! variable data arrays
   integer(ESMF_KIND_I4), allocatable, save :: tmp_data(:,:,:)
   integer(ESMF_KIND_I4), allocatable, save :: hum_data(:,:,:)
   integer(ESMF_KIND_I4), allocatable, save :: prs_data(:,:,:)
+
+  ! index lists
+  integer :: index_list0(4) = (/1,3,5,7/)
+  integer :: index_list1(6) = (/2,4,6,8,9,10/)
+  integer :: index_list2(0)
+  integer :: index_list3(6) = (/11,12,13,14,15,18/)
+!  integer :: index_list0(4) = (/1,2,3,5/)
+!  integer :: index_list1(6) = (/5,6,7,8,9,10/)
+!  integer :: index_list2(0)
+!  integer :: index_list3(6) = (/11,12,13,14,15,16/)
 
   contains
 
@@ -73,6 +83,7 @@ module user_model1
     type(ESMF_LocStream)   :: locs
     type(ESMF_Field)       :: field(3)
     type(ESMF_FieldBundle) :: fieldbundle
+    integer                :: icount
     
     ! Initialize return code
     rc = ESMF_SUCCESS
@@ -94,92 +105,58 @@ module user_model1
     endif
 
     if ( de_id .eq. 0 ) then
-        allocate(indexList(4))
-        allocate(tmp_data(2,4,4))
-        allocate(hum_data(1,4,4))
-        allocate(prs_data(2,4,4))
-        indexList = (/1,2,3,4/)
-        tmp_data(1,1:4,1) = indexList(1:4)*1*1
-        tmp_data(1,1:4,2) = indexList(1:4)*1*2
-        tmp_data(1,1:4,3) = indexList(1:4)*1*3
-        tmp_data(1,1:4,4) = indexList(1:4)*1*4
-        hum_data(1,1:4,1) = indexList(1:4)*10*1
-        hum_data(1,1:4,2) = indexList(1:4)*10*2
-        hum_data(1,1:4,3) = indexList(1:4)*10*3
-        hum_data(1,1:4,4) = indexList(1:4)*10*4
-        prs_data(1,1:4,1) = indexList(1:4)*100*1
-        prs_data(1,1:4,2) = indexList(1:4)*100*2
-        prs_data(1,1:4,3) = indexList(1:4)*100*3
-        prs_data(1,1:4,4) = indexList(1:4)*100*4
-        tmp_data(2,1:4,1) = 1*1
-        tmp_data(2,1:4,2) = 1*2
-        tmp_data(2,1:4,3) = 1*3
-        tmp_data(2,1:4,4) = 1*4
-        prs_data(2,1:4,1) = 100*1
-        prs_data(2,1:4,2) = 100*2
-        prs_data(2,1:4,3) = 100*3
-        prs_data(2,1:4,4) = 100*4
+        icount = size(index_list0)
+        allocate(indexList(icount))
+        allocate(tmp_data(2,icount,4))
+        allocate(hum_data(1,icount,4))
+        allocate(prs_data(2,icount,4))
+        indexList = index_list0
     elseif ( de_id .eq. 1 ) then
-        allocate(indexList(6))
-        allocate(tmp_data(2,6,4))
-        allocate(hum_data(1,6,4))
-        allocate(prs_data(2,6,4))
-        indexList = (/5,6,7,8,9,10/)
-        tmp_data(1,1:6,1) = indexList(1:6)*1*1
-        tmp_data(1,1:6,2) = indexList(1:6)*1*2
-        tmp_data(1,1:6,3) = indexList(1:6)*1*3
-        tmp_data(1,1:6,4) = indexList(1:6)*1*4
-        hum_data(1,1:6,1) = indexList(1:6)*10*1
-        hum_data(1,1:6,2) = indexList(1:6)*10*2
-        hum_data(1,1:6,3) = indexList(1:6)*10*3
-        hum_data(1,1:6,4) = indexList(1:6)*10*4
-        prs_data(1,1:6,1) = indexList(1:6)*100*1
-        prs_data(1,1:6,2) = indexList(1:6)*100*2
-        prs_data(1,1:6,3) = indexList(1:6)*100*3
-        prs_data(1,1:6,4) = indexList(1:6)*100*4
-        tmp_data(2,1:6,1) = 1*1
-        tmp_data(2,1:6,2) = 1*2
-        tmp_data(2,1:6,3) = 1*3
-        tmp_data(2,1:6,4) = 1*4
-        prs_data(2,1:6,1) = 100*1
-        prs_data(2,1:6,2) = 100*2
-        prs_data(2,1:6,3) = 100*3
-        prs_data(2,1:6,4) = 100*4
+        icount = size(index_list1)
+        allocate(indexList(icount))
+        allocate(tmp_data(2,icount,4))
+        allocate(hum_data(1,icount,4))
+        allocate(prs_data(2,icount,4))
+        indexList = index_list1
     elseif ( de_id .eq. 2 ) then
-        allocate(indexList(0))
-        allocate(tmp_data(2,0,4))
-        allocate(hum_data(1,0,4))
-        allocate(prs_data(2,0,4))
-!        indexList = null
-!        tmp_data() = null
-!        hum_data() = null
-!        prs_data() = null
+        icount = size(index_list2)
+        allocate(indexList(icount))
+        allocate(tmp_data(2,icount,4))
+        allocate(hum_data(1,icount,4))
+        allocate(prs_data(2,icount,4))
+        indexList = index_list2
     elseif ( de_id .eq. 3 ) then
-        allocate(indexList(6))
-        allocate(tmp_data(2,6,4))
-        allocate(hum_data(1,6,4))
-        allocate(prs_data(2,6,4))
-        indexList = (/11,12,13,14,15,16/)
-        tmp_data(1,1:6,1) = indexList(1:6)*1*1
-        tmp_data(1,1:6,2) = indexList(1:6)*1*2
-        tmp_data(1,1:6,3) = indexList(1:6)*1*3
-        tmp_data(1,1:6,4) = indexList(1:6)*1*4
-        hum_data(1,1:6,1) = indexList(1:6)*10*1
-        hum_data(1,1:6,2) = indexList(1:6)*10*2
-        hum_data(1,1:6,3) = indexList(1:6)*10*3
-        hum_data(1,1:6,4) = indexList(1:6)*10*4
-        prs_data(1,1:6,1) = indexList(1:6)*100*1
-        prs_data(1,1:6,2) = indexList(1:6)*100*2
-        prs_data(1,1:6,3) = indexList(1:6)*100*3
-        prs_data(1,1:6,4) = indexList(1:6)*100*4
-        tmp_data(2,1:6,1) = 1*1
-        tmp_data(2,1:6,2) = 1*2
-        tmp_data(2,1:6,3) = 1*3
-        tmp_data(2,1:6,4) = 1*4
-        prs_data(2,1:6,1) = 100*1
-        prs_data(2,1:6,2) = 100*2
-        prs_data(2,1:6,3) = 100*3
-        prs_data(2,1:6,4) = 100*4
+        icount = size(index_list3)
+        allocate(indexList(icount))
+        allocate(tmp_data(2,icount,4))
+        allocate(hum_data(1,icount,4))
+        allocate(prs_data(2,icount,4))
+        indexList = index_list3
+    endif
+
+    print *, de_id, "indexList = ", indexList
+
+    if (icount .gt. 0) then
+        tmp_data(1,:,1) = indexList(:)*1*1
+        tmp_data(1,:,2) = indexList(:)*1*2
+        tmp_data(1,:,3) = indexList(:)*1*3
+        tmp_data(1,:,4) = indexList(:)*1*4
+        hum_data(1,:,1) = indexList(:)*10*1
+        hum_data(1,:,2) = indexList(:)*10*2
+        hum_data(1,:,3) = indexList(:)*10*3
+        hum_data(1,:,4) = indexList(:)*10*4
+        prs_data(1,:,1) = indexList(:)*100*1
+        prs_data(1,:,2) = indexList(:)*100*2
+        prs_data(1,:,3) = indexList(:)*100*3
+        prs_data(1,:,4) = indexList(:)*100*4
+        tmp_data(2,:,1) = 1*1
+        tmp_data(2,:,2) = 1*2
+        tmp_data(2,:,3) = 1*3
+        tmp_data(2,:,4) = 1*4
+        prs_data(2,:,1) = 100*1
+        prs_data(2,:,2) = 100*2
+        prs_data(2,:,3) = 100*3
+        prs_data(2,:,4) = 100*4
     endif
 
     ! Add "temperature" "humidity" "pressure" fields to the export state.
