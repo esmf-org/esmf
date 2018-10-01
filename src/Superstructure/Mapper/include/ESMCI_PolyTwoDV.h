@@ -83,6 +83,7 @@ namespace ESMCI{
         TwoVIDPoly<CType> p_;
         std::vector<MVIDLPoly<CType> > dps_;
         MVIDLPoly<CType> dp_;
+        std::vector<std::string> dps_vnames_;
         bool has_dep_vfunc_;
     };  // class TwoDVIDPoly
 
@@ -150,17 +151,7 @@ namespace ESMCI{
     template<typename CType>
     std::vector<std::string> TwoDVIDPoly<CType>::get_dvnames(void ) const
     {
-      std::vector<std::string> all_vnames_uniq;
-      for(typename std::vector<MVIDLPoly<CType> >::const_iterator citer = dps_.cbegin();
-          citer != dps_.cend(); ++citer){
-        std::vector<std::string> tmp_dp_vnames = (*citer).get_vnames();
-        all_vnames_uniq.insert(all_vnames_uniq.end(),
-          tmp_dp_vnames.begin(), tmp_dp_vnames.end());
-      }
-      std::sort(all_vnames_uniq.begin(), all_vnames_uniq.end());
-      all_vnames_uniq.erase(std::unique(all_vnames_uniq.begin(), all_vnames_uniq.end()),
-                            all_vnames_uniq.end());
-      return all_vnames_uniq;
+      return dps_vnames_;
     }
 
     template<typename CType>
@@ -179,7 +170,9 @@ namespace ESMCI{
     void TwoDVIDPoly<CType>::set_dfuncs(const std::vector<MVIDLPoly<CType> > &dps)
     {
       dps_ = dps;
+      dps_vnames_.clear();
       if(!dps_.empty()){
+        std::vector<std::string> all_vnames_uniq;
         typename std::vector<MVIDLPoly<CType> >::const_iterator citer = dps.cbegin();
         //std::cout << "Dep func : " << *citer << "\n";
         MVIDLPoly<CType> dp = *citer;
@@ -187,10 +180,20 @@ namespace ESMCI{
         for(;citer != dps.cend(); ++citer){
           //std::cout << "Dep func : " << *citer << "\n";
           dp = dp + (*citer);
+
+          std::vector<std::string> tmp_dp_vnames = (*citer).get_vnames();
+          all_vnames_uniq.insert(all_vnames_uniq.end(),
+            tmp_dp_vnames.begin(), tmp_dp_vnames.end());
         }
         dp_ = dp;
         //std::cout << "Dep cumulative func : " << dp_ << "\n";
         has_dep_vfunc_ = true;
+
+        /* Find and cache the unique dependent function variable names */
+        std::sort(all_vnames_uniq.begin(), all_vnames_uniq.end());
+        all_vnames_uniq.erase(std::unique(all_vnames_uniq.begin(), all_vnames_uniq.end()),
+                              all_vnames_uniq.end());
+        dps_vnames_ = all_vnames_uniq;
       }
     }
 
@@ -319,6 +322,7 @@ namespace ESMCI{
       }
       res.dps_ = dps_;
       res.dp_ = dp_;
+      res.dps_vnames_ = dps_vnames_;
       res.has_dep_vfunc_ = has_dep_vfunc_;
       return res;
     }
@@ -350,6 +354,7 @@ namespace ESMCI{
 
       res.dps_ = lhs.dps_;
       res.dp_ = lhs.dp_;
+      res.dps_vnames_ = lhs.dps_vnames_;
       res.has_dep_vfunc_ = lhs.has_dep_vfunc_;
       return res;
     }
@@ -364,6 +369,7 @@ namespace ESMCI{
 
       res.dps_ = rhs.dps_;
       res.dp_ = rhs.dp_;
+      res.dps_vnames_ = rhs.dps_vnames_;
       res.has_dep_vfunc_ = rhs.has_dep_vfunc_;
       return res;
     }
@@ -379,6 +385,7 @@ namespace ESMCI{
 
       res.dps_ = lhs.dps_;
       res.dp_ = lhs.dp_;
+      res.dps_vnames_ = lhs.dps_vnames_;
       res.has_dep_vfunc_ = lhs.has_dep_vfunc_;
       return res;
     }
@@ -393,6 +400,7 @@ namespace ESMCI{
 
       res.dps_ = rhs.dps_;
       res.dp_ = rhs.dp_;
+      res.dps_vnames_ = rhs.dps_vnames_;
       res.has_dep_vfunc_ = rhs.has_dep_vfunc_;
       return res;
     }
@@ -408,6 +416,7 @@ namespace ESMCI{
 
       res.dps_ = lhs.dps_;
       res.dp_ = lhs.dp_;
+      res.dps_vnames_ = lhs.dps_vnames_;
       res.has_dep_vfunc_ = lhs.has_dep_vfunc_;
       return res;
     }
@@ -422,6 +431,7 @@ namespace ESMCI{
 
       res.dps_ = rhs.dps_;
       res.dp_ = rhs.dp_;
+      res.dps_vnames_ = rhs.dps_vnames_;
       res.has_dep_vfunc_ = rhs.has_dep_vfunc_;
       return res;
     }
