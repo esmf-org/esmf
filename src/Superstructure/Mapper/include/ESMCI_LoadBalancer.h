@@ -499,7 +499,7 @@ namespace ESMCI{
           tmp_cfuncs_vivals.push_back(static_cast<T>(*citer));
         }
         /* Use the solver to optimize the number of PETs */
-        const int SOLVER_MAX_ITERS = 1000;
+        const int SOLVER_MAX_ITERS = 100;
         SESolver<T> solver(cfuncs_vnames, tmp_cfuncs_vivals,
                             twodvidp_cfuncs, mvidlp_cfuncs);
         solver.set_reshape_funcs(reshape_mvidlp_cfuncs);
