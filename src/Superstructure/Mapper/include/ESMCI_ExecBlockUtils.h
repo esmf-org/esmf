@@ -256,7 +256,7 @@ namespace ESMCI{
         }
       }
 
-      print_time_extent_matrix(tem);
+      // print_time_extent_matrix(tem);
 
       std::vector<std::vector<int> > partition_cols;
       for(int ir=tem_nrows-1; ir>=0; ir--){
@@ -316,15 +316,15 @@ namespace ESMCI{
         }
       }
 
-      std::cout << "Partition col list : \n";
+      //std::cout << "Partition col list : \n";
       for(std::vector<std::vector<int> >::const_iterator citer = partition_cols.cbegin();
           citer != partition_cols.cend(); ++citer){
         std::vector<int> pcol(*citer);
         for(std::vector<int>::const_iterator citer2 = pcol.cbegin();
             citer2 != pcol.cend(); ++citer2){
-          std::cout << *citer2 << ", ";
+          //std::cout << *citer2 << ", ";
         }
-        std::cout << "\n";
+        //std::cout << "\n";
       }
 
       return (pexec_blocks.size() > 0);
