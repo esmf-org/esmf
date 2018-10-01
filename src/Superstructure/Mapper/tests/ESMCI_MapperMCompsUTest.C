@@ -55,9 +55,9 @@ int main(int argc, char *argv[])
 //  std::vector<int> npets = {2048, 4096, 8192};
   std::vector<std::pair<int, int> > comp_pet_ranges = {
                                                         std::pair<int, int>(0, 999),
-                                                        std::pair<int, int>(1000, 2999),
-                                                        std::pair<int, int>(3000, 3499),
-                                                        std::pair<int, int>(3500, 3999)
+                                                        std::pair<int, int>(1000, 1999),
+                                                        std::pair<int, int>(2000, 2999),
+                                                        std::pair<int, int>(3000, 3999)
                                                         };
   std::vector<int> comp_npets = {
     comp_pet_ranges[0].second - comp_pet_ranges[0].first + 1,
@@ -71,6 +71,15 @@ int main(int argc, char *argv[])
     std::pair<double, double>(0, pcomp3.eval(comp_npets[2])),
     std::pair<double, double>(0, pcomp4.eval(comp_npets[3]))
                                                             };
+
+  double app_non_opt_wtime = 0.0;
+  for(std::vector<std::pair<double, double> >::const_iterator
+        iter = comp_time_intvls.cbegin();
+        iter != comp_time_intvls.cend(); ++iter){
+    app_non_opt_wtime = std::max(app_non_opt_wtime, (*iter).second);
+  }
+  std::cout << "Initial (non-optimized) app run time = " <<
+    app_non_opt_wtime << " s\n";
 
   ESMCI::MapperUtil::CompInfo<double> comp0("comp0", "run",
                                       comp_pet_ranges[0], comp_time_intvls[0]);
