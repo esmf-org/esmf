@@ -446,6 +446,7 @@ namespace ESMCI{
       std::vector<int> comp_npets;
       std::vector<T> comp_stimes;
       int total_pets = 0;
+      int max_pet = 0;
       T total_stime = static_cast<T>(0);
 
       std::vector<int> orig_npets;
@@ -457,7 +458,8 @@ namespace ESMCI{
         T compi_stime = (*citer).get_stime();
         comp_npets.push_back(compi_npets);
         comp_stimes.push_back(compi_stime);
-        total_pets = std::max(total_pets, pet_range.second);
+        max_pet = std::max(max_pet, pet_range.second);
+        total_pets += compi_npets;
         total_stime += compi_stime;
       }
       assert(orig_npets.size() == opt_npets.size());
@@ -482,6 +484,9 @@ namespace ESMCI{
           opt_npets[i] = static_cast<int>(total_pets * comp_stimes[i] / total_stime);
           if(opt_npets[i] <= 0){
             return false;
+          }
+          if(opt_npets[i] > max_pet + 1){
+            opt_npets[i] = max_pet + 1;
           }
           opt_wtimes[i] = static_cast<T>(comp_stimes[i]/opt_npets[i]);
         }
