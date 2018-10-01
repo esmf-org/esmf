@@ -167,8 +167,8 @@ namespace ESMCI{
             TwoVIDPoly<T> *pdf = new TwoVIDPoly<T>();
             int ret = FindPDerivative(funcs[i], vnames[j], *pdf);
             assert(ret == 0);
-            std::cout << "d(" << funcs[i] << ")/d" << vnames[j].c_str()
-                      << " = " << *pdf << "\n";
+            //std::cout << "d(" << funcs[i] << ")/d" << vnames[j].c_str()
+            //          << " = " << *pdf << "\n";
             JFrow.push_back(pdf);
           }
           JF.push_back(JFrow);
@@ -179,8 +179,8 @@ namespace ESMCI{
             TwoDVIDPoly<T> *pdf = new TwoDVIDPoly<T>();
             int ret = FindPDerivative(dfuncs[i], vnames[j], *pdf);
             assert(ret == 0);
-            std::cout << "d(" << dfuncs[i] << ")/d" << vnames[j].c_str()
-                      << " = " << *pdf << "\n";
+            //std::cout << "d(" << dfuncs[i] << ")/d" << vnames[j].c_str()
+            //          << " = " << *pdf << "\n";
             JFrow.push_back(pdf);
           }
           JF.push_back(JFrow);
@@ -191,8 +191,8 @@ namespace ESMCI{
             MVIDLPoly<T> *pdf = new MVIDLPoly<T>();
             int ret = FindPDerivative(mvid_lpoly_funcs[i], vnames[j], *pdf);
             assert(ret == 0);
-            std::cout << "d(" << mvid_lpoly_funcs[i] << ")/d" << vnames[j].c_str()
-                      << " = " << *pdf << "\n";
+            //std::cout << "d(" << mvid_lpoly_funcs[i] << ")/d" << vnames[j].c_str()
+            //          << " = " << *pdf << "\n";
             JFrow.push_back(pdf);
           }
           JF.push_back(JFrow);
@@ -439,9 +439,9 @@ namespace ESMCI{
                 coeff_iter != coeffs.end(); ++coeff_iter){
             *coeff_iter = (*coeff_iter) * sc_ratio;
           }
-          std::cout << "UnScaled dfunc : " << *iter << "\n";
+          //std::cout << "UnScaled dfunc : " << *iter << "\n";
           (*iter).set_coeffs(coeffs);
-          std::cout << "Scaled dfunc : " << *iter << "\n";
+          //std::cout << "Scaled dfunc : " << *iter << "\n";
         }
         for(typename std::vector<MVIDLPoly<T> >::iterator
               iter = mvid_lpoly_funcs_.begin();
@@ -460,9 +460,9 @@ namespace ESMCI{
                 coeff_iter != coeffs.end(); ++coeff_iter){
             *coeff_iter = (*coeff_iter) * sc_ratio;
           }
-          std::cout << "UnScaled mvid_lpoly_func : " << *iter << "\n";
+          //std::cout << "UnScaled mvid_lpoly_func : " << *iter << "\n";
           (*iter).set_coeffs(coeffs);
-          std::cout << "Scaled mvid_lpoly_func : " << *iter << "\n";
+          //std::cout << "Scaled mvid_lpoly_func : " << *iter << "\n";
         }
       }
     }
@@ -534,12 +534,12 @@ namespace ESMCI{
        */
       for(int i=0; i<niters_; i++){
         Matrix<T> Feval = SESolverUtils::eval_funcs(all_funcs, vnames_, Xi.get_data());
-        std::cout << "Feval :\n";
-        std::cout << Feval << "\n";
+        //std::cout << "Feval :\n";
+        //std::cout << Feval << "\n";
 
         Matrix<T> J = SESolverUtils::eval_jacobian(JF, vnames_, Xi.get_data());
-        std::cout << "Jacobian :\n";
-        std::cout << J << "\n";
+        //std::cout << "Jacobian :\n";
+        //std::cout << J << "\n";
         int ncols = vnames_.size();
         std::vector<T> J_data = J.get_data();
         std::vector<int> J_dims = J.get_dims();
@@ -582,12 +582,11 @@ namespace ESMCI{
         else{
           Xj = Xi - Jinv * Feval * DAMP_CONST;
         }
-        //std::cout << "Xj = \n" << Xj << "\n";
         // Reset -ve values of Xi, and ensure that Sum(Xi) = C
-        std::cout << "Xj before shaping = \n" << Xj << "\n";
+        //std::cout << "Xj before shaping = \n" << Xj << "\n";
         T *Xj_data = Xj.get_data_by_ref();
         reshape_solution(Xj_data, vnames_.size());
-        std::cout << "Xj after shaping \n" << Xj << "\n";
+        //std::cout << "Xj after shaping \n" << Xj << "\n";
         //scale_and_center_funcs(Xj.get_data());
         Matrix<T> Xi_diff = Xi - Xj;
         Xi = Xj;
