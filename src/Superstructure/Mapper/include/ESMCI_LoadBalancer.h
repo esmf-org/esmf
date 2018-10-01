@@ -212,7 +212,7 @@ namespace ESMCI{
             }
             exec_block_list_npets += iter_exec_block_list->get_npets();
             exec_block_list_cfunc = exec_block_list_cfunc + sfunc_cfunc_first_exec_block;
-            std::cout << "Cumulative cfunc : " << sfunc_cfunc_first_exec_block << " : Number of PETs in cur exec block : " << iter_exec_block_list->get_npets() << "\n";
+            //std::cout << "Cumulative cfunc : " << sfunc_cfunc_first_exec_block << " : Number of PETs in cur exec block : " << iter_exec_block_list->get_npets() << "\n";
             sfunc_first_exec_block_vnames = sfunc_first_exec_block.get_vnames();
             assert(sfunc_first_exec_block_vnames.size() == 1);
 
