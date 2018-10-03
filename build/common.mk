@@ -246,6 +246,9 @@ ifndef ESMF_ACC_SOFTWARE_STACK
 export ESMF_ACC_SOFTWARE_STACK = none
 endif
 
+ifndef ESMF_CXXSTD
+export ESMF_CXXSTD = default
+endif
 
 #-------------------------------------------------------------------------------
 # For some variables having the literal string "default" is ok; 
@@ -1600,6 +1603,20 @@ endif
 #-------------------------------------------------------------------------------
 ifeq ($(ESMF_TESTWITHTHREADS),ON)
 ESMF_CPPFLAGS       += -DESMF_TESTWITHTHREADS
+endif
+
+#-------------------------------------------------------------------------------
+# Add C++ standard string to compile options if the non-default is chosen.
+# Dependencies requiring a specific C++ standard should update the standard here
+#-------------------------------------------------------------------------------
+ifneq ($(ESMF_YAMLCPP),)
+ifeq ($(ESMF_CXXSTD),default)
+ESMF_CXXSTD = 11
+endif
+endif
+
+ifneq ($(ESMF_CXXSTD),default)
+ESMF_CXXCOMPILEOPTS  += -std=c++$(ESMF_CXXSTD)
 endif
 
 #-------------------------------------------------------------------------------

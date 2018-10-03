@@ -129,9 +129,3 @@ ESMF_SL_LIBS_TO_MAKE  =
 # TODO: WebService testing is robust enough to work on all systems.
 #
 ESMF_NOWEBSERVTESTING = TRUE
-
-############################################################
-# Add compile options required by external libraries
-ifneq ($(ESMF_YAMLCPP),)
-ESMF_CXXCOMPILEOPTS  += -qlanglvl=c++11
-endif

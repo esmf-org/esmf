@@ -119,6 +119,7 @@ endif
 	-@echo "ESMF_PTHREADS:          $(ESMF_PTHREADS)"
 	-@echo "ESMF_OPENMP:            $(ESMF_OPENMP)"
 	-@echo "ESMF_OPENACC:           $(ESMF_OPENACC)"
+	-@echo "ESMF_CXXSTD:            $(ESMF_CXXSTD)"
 	-@echo "ESMF_ARRAY_LITE:        $(ESMF_ARRAY_LITE)"
 	-@echo "ESMF_NO_INTEGER_1_BYTE: $(ESMF_NO_INTEGER_1_BYTE)"
 	-@echo "ESMF_NO_INTEGER_2_BYTE: $(ESMF_NO_INTEGER_2_BYTE)"
