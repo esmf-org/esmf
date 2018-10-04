@@ -214,6 +214,16 @@ namespace ESMCI{
         }
       }
 
+      template<typename T>
+      class StrIntCmp{
+        public:
+          bool operator()(const std::pair<std::string, T> &a,
+                        const std::pair<std::string, T> &b) const
+          {
+            return a.first < b.first;
+          }
+      };
+
       /* Evaluate the Jacobian, j, using values of variables
        * provided in vvals (& corresponding to vnames)
        * Each value in index i of vvals is the value of the variable
@@ -232,6 +242,14 @@ namespace ESMCI{
         int ncols = vnames.size();
 
         assert(vnames.size() == vvals.size());
+        std::vector<std::pair<std::string, T> > vinfos;
+        for(std::size_t i=0; i<vnames.size(); i++){
+          vinfos.push_back(
+            std::pair<std::string, T>(vnames[i], vvals[i]));
+        }
+        StrIntCmp<T> cmp;
+        std::sort(vinfos.begin(), vinfos.end(), cmp);
+
         std::vector<T> res_data;
         for(typename std::vector<std::vector<GenPoly<T, int> *> >::const_iterator
               jciter = j.cbegin(); jciter != j.cend(); ++jciter){
@@ -244,6 +262,15 @@ namespace ESMCI{
             std::vector<T> pvvals;
             for(std::vector<std::string>::const_iterator pvciter = pvnames.cbegin();
                 pvciter != pvnames.cend(); ++pvciter){
+              std::pair<std::string, T> pvinfo(*pvciter, static_cast<T>(0));
+              typename std::vector<std::pair<std::string, T> >::iterator vinfos_iter
+                = std::lower_bound(vinfos.begin(), vinfos.end(), pvinfo);
+              if(vinfos_iter != vinfos.end()){
+                if((*vinfos_iter).first == *pvciter){
+                  pvvals.push_back((*vinfos_iter).second);
+                }
+              }
+              /*
               int i=0;
               for(std::vector<std::string>::const_iterator vciter = vnames.cbegin();
                 vciter != vnames.cend(); ++vciter, i++){
@@ -251,6 +278,7 @@ namespace ESMCI{
                   pvvals.push_back(vvals[i]);
                 }
               }
+              */
             }
             res_data.push_back(pp->eval(pvvals));
           }
