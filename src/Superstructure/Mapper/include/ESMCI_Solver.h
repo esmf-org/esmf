@@ -224,6 +224,49 @@ namespace ESMCI{
           }
       };
 
+      template<typename T>
+      void map_fv2gv(
+        const std::vector<std::vector<GenPoly<T, int> *> > &j,
+        const std::vector<std::string> &gvnames,
+        std::vector<std::vector<std::vector<std::size_t > > > &j_map_fv2gv)
+      {
+        std::vector<std::pair<std::string, T> > vinfos;
+        for(std::size_t i=0; i<gvnames.size(); i++){
+          vinfos.push_back(
+            std::pair<std::string, T>(gvnames[i], i));
+        }
+        StrIntCmp<std::size_t> cmp;
+        std::sort(vinfos.begin(), vinfos.end(), cmp);
+
+        for(typename std::vector<std::vector<GenPoly<T, int> *> >::const_iterator
+              jciter = j.cbegin(); jciter != j.cend(); ++jciter){
+          std::vector<GenPoly<T, int> *> jrow = *jciter;
+          std::vector<std::vector<std::size_t > > jrow_map_fv2gv;
+          for(typename std::vector<GenPoly<T, int> *>::const_iterator
+              jrciter = jrow.cbegin(); jrciter != jrow.cend(); ++jrciter){
+            GenPoly<T, int> *pp = *jrciter;
+            assert(pp);
+            std::vector<std::size_t > func_map_fv2gv;
+            std::vector<std::string> pvnames = pp->get_vnames();
+            std::vector<T> pvvals;
+            for(std::vector<std::string>::const_iterator pvciter = pvnames.cbegin();
+                pvciter != pvnames.cend(); ++pvciter){
+              std::pair<std::string, T> pvinfo(*pvciter, static_cast<T>(0));
+              typename std::vector<std::pair<std::string, T> >::iterator vinfos_iter
+                = std::lower_bound(vinfos.begin(), vinfos.end(), pvinfo);
+              if(vinfos_iter != vinfos.end()){
+                if((*vinfos_iter).first == *pvciter){
+                  func_map_fv2gv.push_back((*vinfos_iter).second);
+                }
+              }
+            }
+            assert(!func_map_fv2gv.empty());
+            jrow_map_fv2gv.push_back(func_map_fv2gv);
+          }
+          j_map_fv2gv.push_back(jrow_map_fv2gv);
+        }
+      }
+
       /* Evaluate the Jacobian, j, using values of variables
        * provided in vvals (& corresponding to vnames)
        * Each value in index i of vvals is the value of the variable
@@ -236,49 +279,43 @@ namespace ESMCI{
       Matrix<T> eval_jacobian(
         const std::vector<std::vector<GenPoly<T, int> *> > &j,
         const std::vector<std::string> &vnames,
-        const std::vector<T> &vvals)
+        const std::vector<T> &vvals,
+        const std::vector<std::vector<std::vector<size_t> > > &j_map_fv2gv)
       {
         int nrows = j.size();
         int ncols = vnames.size();
 
         assert(vnames.size() == vvals.size());
-        std::vector<std::pair<std::string, T> > vinfos;
-        for(std::size_t i=0; i<vnames.size(); i++){
-          vinfos.push_back(
-            std::pair<std::string, T>(vnames[i], vvals[i]));
-        }
-        StrIntCmp<T> cmp;
-        std::sort(vinfos.begin(), vinfos.end(), cmp);
+        assert(j.size() == j_map_fv2gv.size());
 
         std::vector<T> res_data;
-        for(typename std::vector<std::vector<GenPoly<T, int> *> >::const_iterator
-              jciter = j.cbegin(); jciter != j.cend(); ++jciter){
+        typename std::vector<std::vector<GenPoly<T, int> *> >::const_iterator
+          jciter = j.cbegin();
+        typename std::vector<std::vector<std::vector<std::size_t> > >::const_iterator
+          j_map_fv2gv_citer = j_map_fv2gv.cbegin();
+        for(; (jciter != j.cend()) && (j_map_fv2gv_citer != j_map_fv2gv.cend());
+              ++jciter, ++j_map_fv2gv_citer){
           std::vector<GenPoly<T, int> *> jrow = *jciter;
-          for(typename std::vector<GenPoly<T, int> *>::const_iterator
-              jrciter = jrow.cbegin(); jrciter != jrow.cend(); ++jrciter){
+          std::vector<std::vector<std::size_t> > jrow_map_fv2gv = *j_map_fv2gv_citer;
+          typename std::vector<GenPoly<T, int> *>::const_iterator
+            jrciter = jrow.cbegin();
+          typename std::vector<std::vector<std::size_t > >::const_iterator 
+            jrow_map_fv2gv_citer = jrow_map_fv2gv.cbegin();
+          for(; (jrciter != jrow.cend()) 
+                  && (jrow_map_fv2gv_citer != jrow_map_fv2gv.cend());
+                ++jrciter, ++jrow_map_fv2gv_citer){
             GenPoly<T, int> *pp = *jrciter;
+            std::vector<std::size_t > func_map_fv2gv = *jrow_map_fv2gv_citer;
             assert(pp);
             std::vector<std::string> pvnames = pp->get_vnames();
             std::vector<T> pvvals;
-            for(std::vector<std::string>::const_iterator pvciter = pvnames.cbegin();
-                pvciter != pvnames.cend(); ++pvciter){
-              std::pair<std::string, T> pvinfo(*pvciter, static_cast<T>(0));
-              typename std::vector<std::pair<std::string, T> >::iterator vinfos_iter
-                = std::lower_bound(vinfos.begin(), vinfos.end(), pvinfo);
-              if(vinfos_iter != vinfos.end()){
-                if((*vinfos_iter).first == *pvciter){
-                  pvvals.push_back((*vinfos_iter).second);
-                }
-              }
-              /*
-              int i=0;
-              for(std::vector<std::string>::const_iterator vciter = vnames.cbegin();
-                vciter != vnames.cend(); ++vciter, i++){
-                if(*vciter == *pvciter){
-                  pvvals.push_back(vvals[i]);
-                }
-              }
-              */
+            for(std::vector<std::size_t>::const_iterator func_map_fv2gv_iter = 
+                  func_map_fv2gv.cbegin();
+                  func_map_fv2gv_iter != func_map_fv2gv.cend();
+                  ++func_map_fv2gv_iter){
+              assert((*func_map_fv2gv_iter >= 0) &&
+                      (*func_map_fv2gv_iter < vvals.size()));
+              pvvals.push_back(vvals[*func_map_fv2gv_iter]);
             }
             res_data.push_back(pp->eval(pvvals));
           }
@@ -287,6 +324,48 @@ namespace ESMCI{
         std::vector<int> dims = {nrows, ncols};
         Matrix<T> res(dims, res_data);
         return res;
+      }
+
+      /* Map function variables to global variables
+       * Each function has an associated vector of indices that map from
+       * the function variables to the global variables
+       */
+      template<typename T>
+      void map_fv2gv(const std::vector<const GenPoly<T, int> *>& funcs,
+        const std::vector<std::string> &gvnames,
+        std::vector<std::vector<std::size_t> > &funcs_map_fv2gv)
+      {
+        assert(funcs_map_fv2gv.empty());
+
+        std::vector<std::pair<std::string, T> > vinfos;
+        for(std::size_t i=0; i<gvnames.size(); i++){
+          vinfos.push_back(
+            std::pair<std::string, T>(gvnames[i], i));
+        }
+        StrIntCmp<std::size_t> cmp;
+        std::sort(vinfos.begin(), vinfos.end(), cmp);
+
+        for(typename std::vector<const GenPoly<T, int> *>::const_iterator
+              cfiter = funcs.cbegin(); cfiter != funcs.cend(); ++cfiter){
+          const GenPoly<T, int> *pp = *cfiter;
+          std::vector<std::string> pvnames = pp->get_vnames();
+          std::vector<T> pvvals;
+          std::vector<std::size_t > func_map_fv2gv;
+          for(std::vector<std::string>::const_iterator pvciter = pvnames.cbegin();
+              pvciter != pvnames.cend(); ++pvciter){
+            std::pair<std::string, T> pvinfo(*pvciter, static_cast<T>(0));
+            typename std::vector<std::pair<std::string, T> >::iterator vinfos_iter
+              = std::lower_bound(vinfos.begin(), vinfos.end(), pvinfo);
+            if(vinfos_iter != vinfos.end()){
+              if((*vinfos_iter).first == *pvciter){
+                pvvals.push_back((*vinfos_iter).second);
+                func_map_fv2gv.push_back((*vinfos_iter).second);
+              }
+            }
+          }
+          assert(!func_map_fv2gv.empty());
+          funcs_map_fv2gv.push_back(func_map_fv2gv);
+        }
       }
 
       /* Evaluate a vector of functions, funcs, using values of
@@ -300,46 +379,31 @@ namespace ESMCI{
       template<typename T>
       Matrix<T> eval_funcs(const std::vector<const GenPoly<T, int> *>& funcs,
         const std::vector<std::string> &vnames,
-        const std::vector<T> &vvals)
+        const std::vector<T> &vvals,
+        const std::vector<std::vector<std::size_t> > &funcs_map_fv2gv)
       {
         int nrows = funcs.size();
         int ncols = 1;
         std::vector<T> res_data;
 
+        assert(funcs.size() == funcs_map_fv2gv.size());
         assert(vnames.size() == vvals.size());
-        std::vector<std::pair<std::string, T> > vinfos;
-        for(std::size_t i=0; i<vnames.size(); i++){
-          vinfos.push_back(
-            std::pair<std::string, T>(vnames[i], vvals[i]));
-        }
-        StrIntCmp<T> cmp;
-        std::sort(vinfos.begin(), vinfos.end(), cmp);
 
-        for(typename std::vector<const GenPoly<T, int> *>::const_iterator
-              cfiter = funcs.cbegin(); cfiter != funcs.cend(); ++cfiter){
+        typename std::vector<const GenPoly<T, int> *>::const_iterator
+          cfiter = funcs.cbegin();
+        typename std::vector<std::vector<std::size_t> >::const_iterator
+          funcs_map_citer = funcs_map_fv2gv.cbegin();
+        for(;(cfiter != funcs.cend()) && (funcs_map_citer != funcs_map_fv2gv.cend());
+              ++cfiter, ++funcs_map_citer){
           const GenPoly<T, int> *pp = *cfiter;
-          std::vector<std::string> pvnames = pp->get_vnames();
+          std::vector<std::size_t> func_map_fv2gv = *funcs_map_citer;
           std::vector<T> pvvals;
-          for(std::vector<std::string>::const_iterator pvciter = pvnames.cbegin();
-              pvciter != pvnames.cend(); ++pvciter){
-            std::pair<std::string, T> pvinfo(*pvciter, static_cast<T>(0));
-            typename std::vector<std::pair<std::string, T> >::iterator vinfos_iter
-              = std::lower_bound(vinfos.begin(), vinfos.end(), pvinfo);
-            if(vinfos_iter != vinfos.end()){
-              if((*vinfos_iter).first == *pvciter){
-                pvvals.push_back((*vinfos_iter).second);
-              }
-            }
-            /*
-            int i=0;
-            for(std::vector<std::string>::const_iterator vciter = vnames.cbegin();
-              vciter != vnames.cend(); ++vciter, i++){
-              if(*vciter == *pvciter){
-                pvvals.push_back(vvals[i]);
-              }
-            }
-            */
+          for(std::vector<std::size_t>::const_iterator citer = func_map_fv2gv.cbegin();
+                citer != func_map_fv2gv.cend(); ++citer){
+            assert((*citer >= 0) && (*citer < vvals.size()));
+            pvvals.push_back(vvals[*citer]);
           }
+
           res_data.push_back(pp->eval(pvvals));
         }
 
@@ -568,6 +632,12 @@ namespace ESMCI{
       std::vector<std::vector<GenPoly<T, int> *> > JF =
         SESolverUtils::calc_jacobian(jvnames, funcs_, dfuncs_, mvid_lpoly_funcs_);
 
+      std::vector<std::vector<std::vector<std::size_t > > > JF_map_fv2gv;
+      SESolverUtils::map_fv2gv(JF, vnames_, JF_map_fv2gv);
+
+      std::vector<std::vector<std::size_t > > eval_funcs_map_fv2gv;
+      SESolverUtils::map_fv2gv(all_funcs, vnames_, eval_funcs_map_fv2gv);
+
       /* Solve for new values of Xi such that we minimize the user 
        * specified constraints (specified via funcs_ )
        * A basic Newton Raphson solver solving the eqn:
@@ -579,11 +649,13 @@ namespace ESMCI{
        * Xj => The next (after one iteration) value of Xi
        */
       for(int i=0; i<niters_; i++){
-        Matrix<T> Feval = SESolverUtils::eval_funcs(all_funcs, vnames_, Xi.get_data());
+        Matrix<T> Feval = SESolverUtils::eval_funcs(all_funcs,
+          vnames_, Xi.get_data(), eval_funcs_map_fv2gv);
         //std::cout << "Feval :\n";
         //std::cout << Feval << "\n";
 
-        Matrix<T> J = SESolverUtils::eval_jacobian(JF, vnames_, Xi.get_data());
+        Matrix<T> J = SESolverUtils::eval_jacobian(JF,
+          vnames_, Xi.get_data(), JF_map_fv2gv);
         //std::cout << "Jacobian :\n";
         //std::cout << J << "\n";
         int ncols = vnames_.size();
