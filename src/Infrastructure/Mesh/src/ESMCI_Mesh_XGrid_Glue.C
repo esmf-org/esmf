@@ -105,6 +105,11 @@ void ESMCI_xgridregrid_create(Mesh **meshsrcpp, Mesh **meshdstpp,
       for (UInt j = 0; j < wcol.size(); ++j) {
         UInt twoi = 2*i;
         const WMat::Entry &wc = wcol[j];
+
+	if (wc.value > 1.1) {
+	//	if (w.id == 60665) {
+	  printf("BOB: BIG WEIGHTS d_id=%d s_id=%d w=%f \n",w.id,wc.id,wc.value);
+	}
         
         // Construct factor list entry
         iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;

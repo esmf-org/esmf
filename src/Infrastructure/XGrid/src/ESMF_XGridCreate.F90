@@ -1048,6 +1048,8 @@ function ESMF_XGridCreate(keywordEnforcer, &
              ESMF_CONTEXT, rcToReturn=rc)) return
       endif
       
+      nentries=0
+#if 0
       ! Now the reverse direction
       call c_esmc_xgridregrid_create(mesh, meshAt(i), &
         tmpmesh, compute_midmesh, &
@@ -1058,6 +1060,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
       allocate(xgtype%sparseMatX2A(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatX2A(i)%factorList(nentries))
       if(nentries .ge. 1) then
@@ -1079,7 +1082,9 @@ function ESMF_XGridCreate(keywordEnforcer, &
     enddo
 
     ! now do the B side
+
     do i = 1, ngrid_b
+#if 0
       call c_esmc_xgridregrid_create(meshBt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
@@ -1089,6 +1094,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
       allocate(xgtype%sparseMatB2X(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatB2X(i)%factorList(nentries))
       if(nentries .ge. 1) then
@@ -1109,6 +1115,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       endif
     
       ! Now the reverse direction
+#if 0
       call c_esmc_xgridregrid_create(mesh, meshBt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
@@ -1118,6 +1125,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+#endif
       allocate(xgtype%sparseMatX2B(i)%factorIndexList(2,nentries))
       allocate(xgtype%sparseMatX2B(i)%factorList(nentries))
       if(nentries .ge. 1) then

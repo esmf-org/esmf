@@ -43,7 +43,7 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
  * @param[in] zz Zoltan structure
  */
 void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
-  std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct * zz);
+			       std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct * zz, int s_id=-1, int d_id=-1);
 
 /**
  *\brief compute intersecting cell and nodes from a polygon
@@ -56,7 +56,7 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
  * @param[out] sintd_cells vector to allocated intersecting cells
  */
 void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
-  std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells);
+		     std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, int s_id=-1, int d_id=-1);
 
 /**
  *\brief compute mesh in the middle from meshes on side A and B
@@ -228,13 +228,16 @@ struct polygon{
   typedef std::vector<xpoint>::const_reverse_iterator const_reverse_iterator;
   typedef std::vector<xpoint>::reverse_iterator reverse_iterator;
 
+  // BOB DEBUG
+  int id;
+
   std::vector<xpoint> points;
-  polygon(){}
-  polygon(const std::list<xpoint> & that) {
+polygon(): id(-1) {}
+polygon(const std::list<xpoint> & that): id(-1) {
     points.resize(that.size());
     std::copy(that.begin(), that.end(), points.begin());
   }
-  polygon(const std::vector<xpoint> & that) {
+polygon(const std::vector<xpoint> & that): id(-1) {
     points.resize(that.size());
     std::copy(that.begin(), that.end(), points.begin());
   }

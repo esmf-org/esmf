@@ -397,9 +397,13 @@ double great_circle_area(int n, double *pnts) {
     sum += tri_area(pnt0, pnt1, pnt2);
   }
 
+  // BOB DEBUG
+  if (sum < 1.0E-16) sum=0.0;
+
   // return area
   return sum;
 }
+
 
 
 
@@ -866,12 +870,12 @@ bool is_smashed_quad3D(int num_p, double *p) {
 #define MAX_W3PTVID_STR_LEN 1000
     char new_filename[MAX_W3PTVID_STR_LEN];
     
-    if (((double)strlen(filename))+log10((double)id)+1.0 > ((double)MAX_W3PTVID_STR_LEN)) {
+    if (((double)strlen(filename))+log10((double)(id+1))+1.0 > ((double)MAX_W3PTVID_STR_LEN)) {
        printf("ERROR: filename too long!!!\n");
        return;
     }
 
-    sprintf(new_filename,"%s%d",filename,id);
+    sprintf(new_filename,"%s%dx",filename,id);
 
     write_3D_poly_woid_to_vtk(new_filename,num_p,p);
 
@@ -990,6 +994,30 @@ void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
   // here the points are 2D and the polygon is counter-clockwise
   // returns true if the point is in the polygon (including on the edge), and
   // false otherwise
+#define PIP_OLD_WAY
+#ifndef PIP_OLD_WAY
+template <class GEOM>
+  bool is_pnt_in_poly(int num_p, double *p, double *pnt) {
+  
+  // Loop through polygon                    
+  for (int i=0; i<num_p; i++) {
+    double *pntip0=GEOM::getPntAt(p,i);
+    double *pntip1=GEOM::getPntAt(p,(i+1)%num_p);
+
+    // Calc cross product                                                             
+    double cross;
+    cross=GEOM::turn(pntip0,pntip1,pnt);
+
+    //    if (mathutil_debug) printf("%d turn=%30.27f\n",i,cross);
+
+    if (cross <= 0.0) {
+      return false;
+    }
+  }
+
+  return true;
+}
+#else 
 template <class GEOM>
   bool is_pnt_in_poly(int num_p, double *p, double *pnt) {
   
@@ -1010,7 +1038,13 @@ template <class GEOM>
     double cross;
     cross=GEOM::turn(v01,v0p,pntip0);
 
-    //    printf("%d pnt0=%f %f turn=%f\n",i,pntip0[0],pntip0[1],cross);
+    //    if (mathutil_debug) printf("%d turn=%30.27E \n",i,cross);
+
+    // Calc cross product                                                             
+    double new_cross;
+    new_cross=GEOM::turn(pntip0,pntip1,pnt);
+
+    //    if (mathutil_debug) printf("%d newturn=%30.27E \n",i,new_cross);
 
     if (cross <= 0.0) {
       return false;
@@ -1019,6 +1053,8 @@ template <class GEOM>
 
   return true;
 }
+#endif
+
 
 // Create instances for supported geometries, otherwise would have to put template
 // in include file
@@ -1125,17 +1161,36 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
       double cross;
       cross=GEOM::turn(v12,v10,pntip1);
 
+      //      if (mathutil_debug) printf("%d %d %d cross=%30.27E \n",ti[clip_ind[0]],ti[clip_ind[1]],ti[clip_ind[2]],cross);
+
+      // Calc cross product                                                             
+      double new_cross;
+      new_cross=GEOM::turn(pntip0,pntip1,pntip2);
+
+      //      if (mathutil_debug) printf("%d %d %d new_cross=%30.27E \n",ti[clip_ind[0]],ti[clip_ind[1]],ti[clip_ind[2]],new_cross);
+
       // Find the maximum left turn to clip
       // to give good triangles
-      if (cross > 0.0) {
+      // BOB: Make this slightly less than 0.0 to take care of very long thin triangles where the calc of the cross
+      //      might not be accurate due to numerical issue. These will then have a high dot and should be clipped out fairly quickly. 
+      if (cross > -1.0E-15) {
         double dot;
-        dot=GEOM::dot(v12,v10);
-        //printf("%d dot=%f max=%f \n",i,dot,max_clip_dot);
+        dot=GEOM::dot(v12,v10); 
+
+        // len
+        double l_v12=sqrt(GEOM::dot(v12,v12)); 
+        double l_v10=sqrt(GEOM::dot(v10,v10)); 
+
+        // divide by len
+	if (l_v12*l_v10 != 0.0) {
+	  dot=dot/(l_v12*l_v10);
+	}
+
+	//        if (mathutil_debug) printf("%d %d %d dot=%f max=%f \n",ti[clip_ind[0]],ti[clip_ind[1]],ti[clip_ind[2]],dot,max_clip_dot);
         if (dot > max_clip_dot) {
           bool is_ear_b=is_ear<GEOM>(num_t, td, clip_ind);
-          //printf("%d  is_ear_b=%d \n",i,is_ear_b);
+	  //	  if (mathutil_debug) printf("%d %d %d is_ear=%d \n",ti[clip_ind[0]],ti[clip_ind[1]],ti[clip_ind[2]],is_ear_b);
           if (is_ear_b) {
-          //          if (is_ear<GEOM>(num_t, td, clip_ind)) {
             max_clip_dot=dot;
             max_clip_ind[0]=clip_ind[0];
             max_clip_ind[1]=clip_ind[1];
@@ -1152,8 +1207,13 @@ int triangulate_poly(int num_p, double *p, double *td, int *ti, int *tri_ind) {
       tri_ind[pos_tri_ind]=ti[max_clip_ind[0]];
       tri_ind[pos_tri_ind+1]=ti[max_clip_ind[1]];
       tri_ind[pos_tri_ind+2]=ti[max_clip_ind[2]];
-      pos_tri_ind +=3;
       
+      //      if (mathutil_debug) {
+      //	printf("tri=%d :: %d %d %d \n",pos_tri_ind/3,tri_ind[pos_tri_ind],tri_ind[pos_tri_ind+1],tri_ind[pos_tri_ind+2]);
+      //}
+      
+      pos_tri_ind +=3;
+
       // remove triangle from polygon and collapse arrays
       for (int j=max_clip_ind[1]+1; j<num_t; j++) {
         GEOM::copy(GEOM::getPntAt(td,j-1),GEOM::getPntAt(td,j));

@@ -253,7 +253,9 @@ struct GEOM_SPH2D3D {
 
   // direction of turn between vectors a and b, starting both starting from point p
   // based on cross product
-  static double turn(double *a, double *b, double *p) {return p[0]*(a[1]*b[2]-a[2]*b[1])+p[1]*(a[2]*b[0]-a[0]*b[2])+p[2]*(a[0]*b[1]-a[1]*b[0]);}
+  //  static double turn(double *a, double *b, double *p) {return p[0]*(a[1]*b[2]-a[2]*b[1])+p[1]*(a[2]*b[0]-a[0]*b[2])+p[2]*(a[0]*b[1]-a[1]*b[0]);}
+
+  static double turn(double *a, double *b, double *p) {return (p[0]*a[1]*b[2]+p[1]*a[2]*b[0]+p[2]*a[0]*b[1])-(p[0]*a[2]*b[1]+p[1]*a[0]*b[2]+p[2]*a[1]*b[0]);}
 
   // Used as an approximation of sharpness of angle between two vectors
   static double dot(double *a, double *b) {return a[0]*b[0]+a[1]*b[1]+a[2]*b[2];}

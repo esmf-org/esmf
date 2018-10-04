@@ -49,6 +49,8 @@ namespace ESMCI {
 
  bool debug=false;
   
+  int global_src_id=-1;
+  int global_dst_id=-1;
 
   //////////////// BEGIN CALC 2D 2D  WEIGHTS ////////////////
   
@@ -252,10 +254,12 @@ namespace ESMCI {
         }
       }
 
-      if(midmesh || res_map)
+      if(midmesh || res_map) {
         compute_sintd_nodes_cells(sintd_areas[i],
-          num_sintd_nodes, sintd_coords, 2, 2,
-          sintd_nodes, sintd_cells, zz);
+				  num_sintd_nodes, sintd_coords, 2, 2,
+				  sintd_nodes, sintd_cells, zz);
+      }
+
 
       // append result to a multi-map index-ed by passive mesh element for merging optimization
       if(res_map){
@@ -1010,6 +1014,7 @@ void norm_poly3D(int num_p, double *p) {
 	continue;
       }
 
+
       // Get rid of degenerate edges
       remove_0len_edges3D(&num_dst_nodes, dst_coords);
       
@@ -1111,10 +1116,23 @@ void norm_poly3D(int num_p, double *p) {
         }
       }
 
-      if(midmesh || res_map)
+      if(midmesh || res_map) {
         compute_sintd_nodes_cells(sintd_areas[i],
-          num_sintd_nodes, sintd_coords, 2, 3, 
-          sintd_nodes, sintd_cells, zz);
+				  num_sintd_nodes, sintd_coords, 2, 3, 
+				  sintd_nodes, sintd_cells, zz,src_elem->get_id(),dst_elem->get_id());
+#if 0
+	if ((src_elem->get_id() == 6642) && 
+	    ((dst_elem->get_id() == 38262) || (dst_elem->get_id() == 38263))) {
+	      
+	      printf("%d# BOBXGC %d s_id=%d d_id=%d \n",Par::Rank(),sintd_cells->size(),src_elem->get_id(),dst_elem->get_id());
+	      
+	      write_3D_poly_to_vtk("xgc_sintdelem",dst_elem->get_id(),num_sintd_nodes, sintd_coords);
+	      write_3D_poly_to_vtk("xgc_srcelem",src_elem->get_id(),num_src_nodes, src_coords);
+	      write_3D_poly_to_vtk("xgc_dstelem",dst_elem->get_id(),num_dst_nodes, dst_coords);
+	}
+#endif
+      }
+
 
       // append result to a multi-map index-ed by passive mesh element for merging optimization
       if(res_map){
@@ -1233,6 +1251,12 @@ void norm_poly3D(int num_p, double *p) {
       *valid=1;
 
 #if 0
+	if (global_src_id==3972) {
+	  printf("BOB: WGT CALC SINTD dst=%d src=%d area=%g\n",global_dst_id,global_src_id,*sintd_area);	
+	  write_3D_poly_to_vtk("sintdelem",global_dst_id,num_sintd_nodes, sintd_coords);
+	}
+#endif
+#if 0
       if(midmesh || res_map)
         compute_sintd_nodes_cells(sintd_areas[i],
           num_sintd_nodes, sintd_coords, 2, 2,
@@ -1315,6 +1339,8 @@ void norm_poly3D(int num_p, double *p) {
 
  /* XMRKX */
 
+    double tot=0.0;
+
     // Loop intersecting and computing areas of intersection
     for (int i=0; i<dst_elems.size(); i++) {
       const MeshObj *dst_elem = dst_elems[i];
@@ -1361,6 +1387,7 @@ void norm_poly3D(int num_p, double *p) {
         continue;
       }
 
+
       // See if dst cell concave
       bool is_concave=false;
       if (num_src_nodes > 3) {
@@ -1371,6 +1398,16 @@ void norm_poly3D(int num_p, double *p) {
         
         if (left_turn && right_turn) is_concave=true;
       }
+
+
+	// BOB DEBUG
+	global_dst_id=dst_elem->get_id();
+
+#if 0
+	if (global_src_id == 3972) {
+	  printf("BOB: WGT CALC dst=%d is_concave=%d\n",global_dst_id,is_concave);	
+	}
+#endif
 
       // If not concave, calculate intersection and intersection area for 1
       if (!is_concave) {
@@ -1383,6 +1420,16 @@ void norm_poly3D(int num_p, double *p) {
                                                            midmesh, 
                                                            sintd_nodes, 
                                                            sintd_cells, res_map, zz);
+
+#if 0
+
+	if (global_dst_id == 59955) {
+	  tot += sintd_area;
+          printf("BOB: WGT CALC dst=%d src=%d valid=%d darea=%g sintd_area=%g tot=%g \n",global_dst_id,global_src_id,valid,dst_area,sintd_area,tot);	
+	  write_3D_poly_to_vtk("dstelem",global_dst_id, num_dst_nodes, dst_coords);
+	  write_3D_poly_to_vtk("srcelem",global_src_id, num_src_nodes, src_coords);
+	}
+#endif
       
         // Set output based on validity
         if (valid==1) {
@@ -1577,6 +1624,14 @@ void norm_poly3D(int num_p, double *p) {
       if (left_turn && right_turn) is_concave=true;
     }
 
+    // BOB DEBUG
+    global_src_id=src_elem->get_id();
+
+#if 0
+    if (global_src_id == 3972){
+      printf("BOB: WGT CALC src=%d is_concave=%d\n",global_src_id,is_concave);	
+    }
+#endif
 
     // If not concave then just call into the lower level
     if (!is_concave) {
@@ -1710,6 +1765,7 @@ void norm_poly3D(int num_p, double *p) {
 
     // Loop calculating weights
     for (int i=0; i<dst_elems.size(); i++) {
+
       if ((*valid)[i]==1) {
 
         // calc weight
@@ -1721,6 +1777,7 @@ void norm_poly3D(int num_p, double *p) {
         
         // return weight
         (*wgts)[i]=weight;
+
       }
     }
 

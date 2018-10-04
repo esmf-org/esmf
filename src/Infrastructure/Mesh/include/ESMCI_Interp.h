@@ -210,6 +210,8 @@ public:
   int interp_method;
 };
 
+ void calc_max_overlap(Mesh &mesh, double &max_overlap, int &max_overlap_src_id, int &max_overlap_dst_id);
+
 } // namespace
 
 #endif /*ESMC_INTERP_H_*/

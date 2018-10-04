@@ -123,11 +123,15 @@ class sintd_node_equal{
 
 // sintd_cell represents the intersection cell
 class sintd_cell {
+
   private:
     // nodes enclosing this cell
     double area;
     std::vector<sintd_node *> nodes;
   public:
+
+    int s_id, d_id; // DEBUG
+
     sintd_cell(double _area, const std::vector<sintd_node *> & _nodes) : 
       area(_area), nodes(_nodes) {}
 

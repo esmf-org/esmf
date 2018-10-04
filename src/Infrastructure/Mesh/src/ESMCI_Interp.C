@@ -1558,6 +1558,20 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
                                         struct Zoltan_Struct * zz, bool set_dst_status, WMat &dst_status) {
   Trace __trace("calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, SearchResult &sres, IWeights &iw)");
 
+#if 0
+  if (midmesh) {
+    double max_overlap;
+    int max_overlap_sid;
+    int max_overlap_did;
+
+    //  calc_max_overlap(srcmesh, max_overlap, max_overlap_sid, max_overlap_did);
+    //printf("%d# Src Mesh: max_overlap=%f sid=%d did=%d \n",Par::Rank(),max_overlap,max_overlap_sid,max_overlap_did);
+
+    calc_max_overlap(dstmesh, max_overlap, max_overlap_sid, max_overlap_did);
+    printf("%d# Dst Mesh: max_overlap_area=%E sid=%d did=%d \n",Par::Rank(),max_overlap,max_overlap_sid,max_overlap_did);
+  }
+#endif
+
   // Get src coord field
   MEField<> *src_cfield = srcmesh.GetCoordField();
 
@@ -1791,6 +1805,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
       
       // Put weights into row column and then add
        for (int i=0; i<sr.elems.size(); i++) {
+
         if (valid[i]==1) {
 
           // Calculate dest user area adjustment
@@ -1798,10 +1813,15 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
           if (dst_area_field) {
              const MeshObj &dst_elem = *(sr.elems[i]);
             double *area=dst_area_field->data(dst_elem);
-            if (*area==0.0) Throw() << "0.0 user area in destination grid";
+            if (*area==0.0) Throw() << "0.0 user area in destination grid. elem id="<<dst_elem.get_id();
             dst_user_area_adj=dst_areas[i]/(*area);
           }
 
+#if 0
+          if (sr.elems[i]->get_id()==59955) {
+	    printf("did=%d d_area=%E sid=%d sintd_area=%E s/a=%E w=%E sf2=%E\n",sr.elems[i]->get_id(),dst_areas[i],sr.elem->get_id(),areas[i],areas[i]/dst_areas[i],wgts[i],src_frac2);
+	  }
+#endif
           // Set col info
           IWeights::Entry col(sr.elem->get_id(), 0, 
                               src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
@@ -1818,7 +1838,6 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
 
   if(midmesh != 0)
     compute_midmesh(sintd_nodes, sintd_cells, 2, 3, midmesh);
-
 }
 
 
@@ -2150,6 +2169,206 @@ void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, Searc
 }
 
 
+
+#if 1
+  // This assumes that mesh is a rendezvous mesh or is serial
+  void calc_max_overlap(Mesh &mesh, double &max_overlap, int &max_overlap_src_id, int &max_overlap_dst_id) {
+  Trace __trace("calc_max_overlap(Mesh &mesh, double &max_overlap, int &max_overlap_id)");
+
+  // Calc search results
+  SearchResult sres;
+  OctSearchElems(mesh, ESMCI_UNMAPPEDACTION_IGNORE, mesh, ESMCI_UNMAPPEDACTION_IGNORE, 1e-8, sres);
+
+
+  // Get a bunch of fields
+  MEField<> *src_cfield = mesh.GetCoordField();
+  MEField<> *dst_cfield = mesh.GetCoordField();
+  MEField<> *dst_mask_field = mesh.GetField("elem_mask");
+  MEField<> *src_mask_field = mesh.GetField("elem_mask");
+  MEField<> *dst_area_field = mesh.GetField("elem_area");
+  MEField<> *src_area_field = mesh.GetField("elem_area");
+  MEField<> * src_frac2_field = mesh.GetField("elem_frac2");
+  MEField<> * dst_frac2_field = mesh.GetField("elem_frac2");
+
+  // Declare vectors to hold weight and auxilary information
+  std::vector<int> valid;
+  std::vector<double> wgts;
+  std::vector<double> areas;
+  std::vector<double> dst_areas;
+
+  // Temporary buffers for concave case, 
+  // so there isn't lots of reallocation
+  std::vector<int> tmp_valid;
+  std::vector<double> tmp_areas;
+  std::vector<double> tmp_dst_areas;
+
+  // Find maximum number of dst elements in search results
+  int max_num_dst_elems=0;
+  SearchResult::iterator sb = sres.begin(), se = sres.end();
+  for (; sb != se; sb++) {
+    // NOTE: sr.elem is a src element and sr.elems is a list of dst elements
+    Search_result &sr = **sb;
+
+    // If there are no associated dst elements then skip it
+    if (sr.elems.size() > max_num_dst_elems) max_num_dst_elems=sr.elems.size();
+  }
+
+
+  // Allocate space for weight calc output arrays
+  valid.resize(max_num_dst_elems,0);
+  wgts.resize(max_num_dst_elems,0.0);
+  areas.resize(max_num_dst_elems,0.0);
+  dst_areas.resize(max_num_dst_elems,0.0);
+
+  // Get dimension
+  int sdim=mesh.spatial_dim();
+  int pdim=mesh.parametric_dim();
+
+  // Temporary storage
+  std::vector<sintd_node *> tmp_nodes;  
+  std::vector<sintd_cell *> tmp_cells;  
+
+  // Init variables
+  int loc_max_sid=-1;
+  int loc_max_did=-1;
+  double loc_max_overlap=0.0; 
+  double loc_tot_overlap_area=0.0;
+
+  int num_big_overlap=0;
+
+  // Loop through search results
+  for (sb = sres.begin(); sb != se; sb++) {
+    
+    // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
+    Search_result &sr = **sb;
+
+    // If there are no associated dst elements then skip it
+    if (sr.elems.size() == 0) continue;
+
+    // If this source element is masked then skip it
+    if (src_mask_field) {
+        const MeshObj &src_elem = *sr.elem;
+        double *msk=src_mask_field->data(src_elem);
+        if (*msk>0.5) {
+          continue; 
+        }
+    }
+
+    // If this source element is creeped out during merging then skip it
+    double src_frac2=1.0;
+    if(src_frac2_field){
+      const MeshObj &src_elem = *sr.elem;
+      src_frac2=*(double *)(src_frac2_field->data(src_elem));
+      if (src_frac2 == 0.0) continue; 
+    }
+
+    // Declare src_elem_area
+    double src_elem_area;
+
+
+    // Get weights depending on dimension
+    if (pdim==2) {
+      if (sdim==2) {
+	calc_1st_order_weights_2D_2D_cart(sr.elem,src_cfield,
+					  sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
+					  &src_elem_area, &valid, &wgts, &areas, &dst_areas,
+					  &tmp_valid, &tmp_areas, &tmp_dst_areas,
+					  (Mesh *)NULL, &tmp_nodes, &tmp_cells, 0, (struct Zoltan_Struct *)NULL);
+      } else if (sdim==3) {
+	calc_1st_order_weights_2D_3D_sph(sr.elem,src_cfield,
+					 sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
+					 &src_elem_area, &valid, &wgts, &areas, &dst_areas,
+					 &tmp_valid, &tmp_areas, &tmp_dst_areas,
+					 (Mesh *)NULL, &tmp_nodes, &tmp_cells, 0, (struct Zoltan_Struct *)NULL);
+    }
+    } else if (pdim==3) {
+      if (sdim==3) {
+	calc_1st_order_weights_3D_3D_cart(sr.elem,src_cfield,
+					  sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
+					  &src_elem_area, &valid, &wgts, &areas, &dst_areas,
+					  (Mesh *)NULL, &tmp_nodes, &tmp_cells, 0, (struct Zoltan_Struct *)NULL);
+      } else {
+	Throw() << "Meshes with parametric dim == 3, but spatial dim !=3 not supported for conservative regridding";
+    }
+    } else {
+      Throw() << "Meshes with parametric dimension != 2 or 3 not supported for conservative regridding";
+    }
+
+
+    // Invalidate masked destination elements
+    if (dst_mask_field) {
+      for (int i=0; i<sr.elems.size(); i++) {
+        const MeshObj &dst_elem = *sr.elems[i];
+        double *msk=dst_mask_field->data(dst_elem);
+        if (*msk>0.5) {
+          valid[i]=0;
+        }
+      }
+    }
+    // Invalidate creeped out dst element
+    if(dst_frac2_field){
+      for (int i=0; i<sr.elems.size(); i++) {
+        const MeshObj &dst_elem = *sr.elems[i];
+        double *dst_frac2=dst_frac2_field->data(dst_elem);
+        if (*dst_frac2 == 0.0){
+          valid[i] = 0;
+        }
+      }
+    }
+
+    // For this search result figure out max overlap w/ id
+    for (int i=0; i<sr.elems.size(); i++) {
+      // Only do valide
+      if (valid[i]==1) {
+
+	// Skip the same elem 
+	if (sr.elem->get_id() == sr.elems[i]->get_id()) continue;
+
+	// Skip if src area is 0.0 
+	if (src_elem_area == 0.0) continue;
+
+	// Compute overlap fraction
+	//double overlap= areas[i]/src_elem_area;
+	double overlap= areas[i];
+
+	loc_tot_overlap_area += areas[i];
+
+	if (overlap > 1.0E-6) {
+	 num_big_overlap++;
+	}
+
+	// Update max
+	if (overlap > loc_max_overlap) {
+	  loc_max_sid=sr.elem->get_id();
+	  loc_max_did=sr.elems[i]->get_id();
+	  loc_max_overlap=overlap;
+	}
+      }
+    }
+  }
+
+  // Sum max overlap
+  int tot_num_big_overlap=0;
+  MPI_Allreduce(&num_big_overlap,&tot_num_big_overlap,1,MPI_INT,MPI_SUM,Par::Comm());
+
+  // Sum max overlap
+  double tot_overlap_area=0.0;
+  MPI_Allreduce(&loc_tot_overlap_area,&tot_overlap_area,1,MPI_DOUBLE,MPI_SUM,Par::Comm());
+
+  if (Par::Rank() == 0) {
+    printf("BOB: num overlap >1.0E-6 = %d \n",tot_num_big_overlap);
+    printf("BOB: total overlap area = %E \n",tot_overlap_area);
+  }
+
+  // Get the max over all processors
+
+  // Output local max for now
+  max_overlap=loc_max_overlap;
+  max_overlap_src_id=loc_max_sid;
+  max_overlap_dst_id=loc_max_did;
+}
+
+#endif
 
 void calc_nearest_mat_serial(PointList *srcpointlist, PointList *dstpointlist, SearchResult &sres, IWeights &iw) {
   Trace __trace("calc_nearest_mat_serial(PointList *srcpointlist, PointList *dstpointlist, SearchResult &sres, IWeights &iw)");
@@ -2725,6 +2944,15 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
      
       // Only put it in if it's locally owned
       if (!GetAttr(dst_elem).is_locally_owned()) continue;
+#if 0
+     if (tot > 1.1) {
+       printf("DST BIG FRAC dst_id=%d frac=%f \n",dst_elem.get_id(),tot);
+     }
+
+     if (tot < 0.9) {
+       printf("DST SMALL FRAC dst_id=%d frac=%f \n",dst_elem.get_id(),tot);
+     }
+#endif
 
       // Since weights with no mask should add up to 1.0
       // fraction is tot
@@ -2747,7 +2975,10 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
     *f=0.0;
    }
 
+
    // Go through weights calculating and setting frac
+   int num_big_frac=0;
+   int num_little_frac=0;
    WMat::WeightMap::iterator wi = src_frac.begin_row(), we = src_frac.end_row();
    for (; wi != we; ++wi) {
      const WMat::Entry &w = wi->first;
@@ -2778,10 +3009,36 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
      // Only put it in if it's locally owned
      if (!GetAttr(src_elem).is_locally_owned()) continue;
 
+#if 0
+     if (tot > 1.1) {
+       printf("SRC BIG FRAC src_id=%d frac=%f \n",src_elem.get_id(),tot);
+     }
+
+     if (tot < 0.9) {
+       printf("SRC SMALL FRAC src_id=%d frac=%f \n",src_elem.get_id(),tot);
+     }
+#endif
+
+     if (tot > 1.1) num_big_frac++;
+     if (tot < (1.0-1.0E-6)) num_little_frac++;
+
      // Since weights with no mask should add up to 1.0
      // fraction is tot
      *frac=tot;
    } // for wi
+
+   // Sum 
+   int tot_num_big_frac=0;
+   MPI_Allreduce(&num_big_frac,&tot_num_big_frac,1,MPI_INT,MPI_SUM,Par::Comm());
+
+   int tot_num_little_frac=0;
+   MPI_Allreduce(&num_little_frac,&tot_num_little_frac,1,MPI_INT,MPI_SUM,Par::Comm());
+
+
+   if (Par::Rank() == 0) {
+     printf("BOB: num frac >1.1 = %d \n",tot_num_big_frac);
+     printf("BOB: num frac <1.0-1.0E-6 = %d \n",tot_num_little_frac);
+   }
 
   }
 

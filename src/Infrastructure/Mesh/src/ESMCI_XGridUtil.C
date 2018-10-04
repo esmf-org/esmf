@@ -38,6 +38,7 @@
 #endif
 
 #include <algorithm>
+#include <set>
 
 #include <ESMCI_VM.h>
 #include "ESMCI_Macros.h"
@@ -78,6 +79,10 @@ inline xvector operator /(const xvector & v, const double ratio){
   return xvector(v.c[0]/ratio, v.c[1]/ratio, v.c[2]/ratio);
 }
 
+  bool xgu_debug=false;
+
+
+
 double polygon::area(int sdim) const {
   double split_area = 0.;
   if(sdim == 2){
@@ -90,14 +95,91 @@ double polygon::area(int sdim) const {
     double * coords = new double[sdim * points.size()];
     polygon_to_coords(*this, sdim, coords);
     split_area = great_circle_area(points.size(), coords);
-    delete[] coords;
+
+    double ccw_sense = 0.;
+    int np = points.size(); 
+    for(int i = 0; i < np; i++) {
+      double *p0=coords+3*i;
+      double *p1=coords+3*((i+1)%np);
+      double *p2=coords+3*((i+2)%np);
+
+      // vector from 1 to 0
+      double v10[3];
+      MU_SUB_VEC3D(v10,p0,p1);
+
+      // vector from 1 to 2
+      double v12[3];
+      MU_SUB_VEC3D(v12,p2,p1);
+
+      // normal point
+      double up1[3];
+      double div_len=1.0/MU_LEN_VEC3D(p1);
+      MU_MULT_BY_SCALAR_VEC3D(up1,p1,div_len);
+
+      // Calculate angle
+      double angle=calc_angle<GEOM_SPH2D3D>(v12, v10, up1);
+
+      // Don't count if too close to call
+      if (std::abs(angle) < 1.0E-15) continue;
+      if (std::abs(M_PI-std::abs(angle)) < 1.0E-15) continue;
+
+      // reverse angle so more drastic rotation are bigger
+      if (angle < 0.0) angle=-M_PI-angle;
+      if (angle > 0.0) angle=M_PI-angle;
+
+      // Sum
+      ccw_sense += angle;
+    }
+
+#if 0
+    // great_circle_area does not take CCW sense into account
+    // dot of the radial normal with polygon normal gives a sense if the points are CCW arranged
+    double ccw_sense_old = 0.;
+    for(int i = 0; i < np-2; i++) {
+      ccw_sense_old += dot(cross(points[(i+1)%np]-points[i], points[(i+2)%np]-points[(i+1)%np]), points[i]);
+    }
 
     // great_circle_area does not take CCW sense into account
     // dot of the radial normal with polygon normal gives a sense if the points are CCW arranged
-    int np = points.size(); double ccw_sense = 0.;
-    for(int i = 0; i < np-2; i++)
+    double ccw_sense_old2 = 0.;
+    for(int i = 0; i < np; i++) {
+      ccw_sense_old2 += dot(cross(points[(i+1)%np]-points[i], points[(i+2)%np]-points[(i+1)%np]), points[i]);
+    }
+
+    if ((ccw_sense>0) && (ccw_sense_old<=0.0)) {
+      static int out=0;
+      printf("ccw=%20.17f ccw_old=%20.17f ccw_old2=%20.17f area=%E %d# out=%d\n",ccw_sense,ccw_sense_old,ccw_sense_old2,split_area,Par::Rank(),out);
+      char fname[100];
+      sprintf(fname,"ccw_out_%dp",Par::Rank());
+      write_3D_poly_to_vtk(fname,out,np,coords);	    
+      out++;
+    }
+
+    delete[] coords;
+
+#endif
+
+#if 0
+    // great_circle_area does not take CCW sense into account
+    // dot of the radial normal with polygon normal gives a sense if the points are CCW arranged
+    int np = points.size(); 
+    double ccw_sense = 0.;
+    for(int i = 0; i < np-2; i++) {
       ccw_sense += dot(cross(points[(i+1)%np]-points[i], points[(i+2)%np]-points[(i+1)%np]), points[i]);
+    }
+
+#endif
+
+
+    if (xgu_debug) {
+      printf("ccw_sense=%30.27f \n",ccw_sense);
+    }
+
     return (ccw_sense > 0)? split_area: (-split_area);
+
+    // BOB 
+    //    return (ccw_sense > 1.0E-14)? split_area: (-split_area);
+
   }
   return split_area;
 }
@@ -237,7 +319,9 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   double plane[9];
   double plane_p[2];
   double t,u;
-  double epsilon = 1.e-15;
+  // BOB Try larger
+  //  double epsilon = 1.e-15;
+  double epsilon = 3.e-15;
   inbound = -1;
 
   // Load points defining plane into variable (these are supposed to be in counterclockwise order)
@@ -254,6 +338,10 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   // Intersect the segment with the plane
   if(!intersect_tri_with_line(plane, a1, a2, plane_p, &t))
      return false;
+
+  if (xgu_debug) {
+    printf("   on sub  t=%30.27E \n",t);
+  }
 
   //if( (t < 0) || (t > 1) )
   if( (t < -epsilon) || (t > (1+epsilon)) )
@@ -274,6 +362,10 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   if(!intersect_tri_with_line(plane, q1, q2, plane_p, &u))
      return false;
 
+ if (xgu_debug) {
+    printf("   on clip u=%30.27E \n",u);
+  }
+
   if( (u < -epsilon) || (u > (1+epsilon)) )
     return false;
 
@@ -283,7 +375,15 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
 
   // The two planes are coincidental
   double coincident = metric(cross(cross(xvector(a1,3), xvector(a2,3)), cross(xvector(q1,3), xvector(q2,3))));
+
+  if (xgu_debug) {
+    bool coin=(coincident < 1.e-15);
+    printf("   coincident=%d val=%30.27E \n",coin,coincident);
+  }
+
+  // BOB: JUST IGNORNING INTERSECTION DOESN'T SEEM TO WORK, SO TRY NOT RETURNING
   if(coincident < 1.e-15) return false;
+  
 
   double sense = dot(cross(v1,v2), cross(v1,p1));
   //if(std::abs(sense) < epsilon) return false;
@@ -294,6 +394,10 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   intersect[2]=q1[2] + u*(q2[2]-q1[2]);
   double norm = xvector(intersect[0], intersect[1], intersect[2]).metric();
   for(int i = 0; i < 3; i ++) intersect[i] /= norm;
+
+
+
+
 
   inbound = 1;  // default is outbound when intersection happens
   // sense of inbound: (v1 x v2).(v1 x p1) > 0
@@ -516,9 +620,71 @@ bool check_angle_sum(int sdim, int n, const double * const p, const double * con
   else return false;
 }
 
+#if 1
 // return value: 0 -> outside, 1 -> inside, 2 -> on edge
 unsigned int walk_polygon(int sdim, int n, const double * const p, const double * const point)
 {
+
+  bool on_edge=false;
+
+  for(int i = 0; i < n; i++) {
+      const double *p0=p+3*i;
+      const double *p1=p+3*((i+1)%n);
+
+      // vector from 0 to 1
+      double v01[3];
+      MU_SUB_VEC3D(v01,p1,p0);
+
+      // If too short, not enough info, so go onto next
+      if (MU_LENSQ_VEC3D(v01) < 1.0E-30) {
+	continue;
+      }
+
+      // vector from 0 to point
+      double v0p[3];
+      MU_SUB_VEC3D(v0p,point,p0);
+
+      // If close to point, then count as on edge
+      if (MU_LENSQ_VEC3D(v0p) < 1.0E-30) {
+	on_edge=true;
+	continue;
+      }
+
+      // normal point
+      double up0[3];
+      double div_len=1.0/MU_LEN_VEC3D(p0);
+      MU_MULT_BY_SCALAR_VEC3D(up0,p,div_len);
+
+      // Calculate angle
+      double angle=calc_angle<GEOM_SPH2D3D>(v01, v0p, up0);
+
+      // Don't count if too close to call
+      if (std::abs(angle) < 1.0E-15) {
+	on_edge=true;
+	continue;
+      }
+
+      if (std::abs(M_PI-std::abs(angle)) < 1.0E-15) {
+	on_edge=true;
+	continue;
+      }
+
+      // If negative then outside, so report that and leave
+      if (angle < 0.0) return 0;
+  }
+
+  // Do output
+  if (on_edge) return 2;
+  else return 1;
+}
+
+#else
+// return value: 0 -> outside, 1 -> inside, 2 -> on edge
+unsigned int walk_polygon(int sdim, int n, const double * const p, const double * const point)
+{
+
+  bool on_edge=false;
+
   // if point is always on left hand side (sense > 0) of polygon during CCW walk, then it's inside
   unsigned int r = 2;
   for(int i = 0; i < n; i ++){
@@ -534,14 +700,21 @@ unsigned int walk_polygon(int sdim, int n, const double * const p, const double 
     //double sense = dot(xvector(p+i*sdim, sdim), 
     //                  cross((xvector(p+((i+1)%n)*sdim, sdim)-xvector(p+i*sdim, sdim)),
     //                        (xvector(point, sdim)-xvector(p+i*sdim, sdim)))); 
-                       
-    if(std::abs(sense) < 1.e-15)      // consider the point on edge if sense is really small, use the other point to determine if it's truely inside or not.
-      return 2;
-    if(sense < 0.) 
-      return 0;
+   
+    // BOB: just because it's in line with one edge doesn't mean that it's on an edge.
+    // if(std::abs(sense) < 1.e-15)      // consider the point on edge if sense is really small, use the other point to determine if it's truely inside or not.
+    //  return 2;
+    //    if(sense < 0.) 
+    //      return 0;
+
+    if(std::abs(sense) < 1.0E-15) on_edge=true;
+    if (sense < -1.0E-15) return 0;
   }
-  return 1;
+  if (on_edge) return 2;
+  else return 1;
 }
+#endif
+
 
 /**
  *\brief                    test if a point is inside of a polygon, *on edge point* is considered not inside.
@@ -687,11 +860,17 @@ void add_polygon_to_vector(int sdim, const polygon & nodal_poly, std::vector<pol
   delete[] coords;
 }
 
+
+
 // Assume a counter clock wise order of points in p and q
 int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, double *q, 
   std::vector<polygon> & difference){
 
   static unsigned int count = 0;
+
+  if (xgu_debug) {
+    printf("In weiler: Beg\n");
+  }
 
   // return if the subject polygon is empty
   if(num_p < 3) return 0;
@@ -716,9 +895,15 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     return 0;
   }
 
+  if (xgu_debug) {
+    printf("In weiler: past initial setup and error checking\n");
+  }
+
   if(true){ // Check if the two polygons are the same
     // The number of p and q points have to be the same
     if(num_p == num_q ) {
+
+
       // 1. Find the two points on p and q with smallest arc length distance
       int qj = 0; int pi = 0;
       for(int i = 0; i < num_p; i ++){
@@ -750,15 +935,44 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       }
 
       if(identical){
-        difference.push_back(polygon(pnodes));
-        if(count ++ < 10) {
-          dump_polygon(polygon(pnodes), true);
-          dump_polygon(polygon(qnodes), true);
-        }
+
+      if (xgu_debug) {
+	printf("In weiler: identical polygons.\n");
+      }
+
+	// BOB DEBUG
+        //difference.push_back(polygon(pnodes));
+        //if(count ++ < 10) {
+        //  dump_polygon(polygon(pnodes), true);
+        //  dump_polygon(polygon(qnodes), true);
+        //}
         return 0;
       }
     }
   }
+
+  // Calculate some overlap relationships
+  //// Also used later...
+  bool s_contains_c = false, c_contains_s = false;
+  bool neither_contains_others_nodes=disjoint(pdim, sdim, pnodes, qnodes, s_contains_c, c_contains_s);
+
+  if (xgu_debug) {
+    printf(" s_contains_c=%d c_contains_s=%d nco=%d \n",s_contains_c,c_contains_s,neither_contains_others_nodes); 
+  }
+
+  // BOB: If clip contains subject and is convex, then the entire subject has been clipped away, so leave.
+  if (c_contains_s) {
+
+    // Detect which turns clip polygon contains
+    bool left_turn = false;
+    bool right_turn = false;
+    if (sdim==2) rot_2D_2D_cart(num_q, q, &left_turn, &right_turn);
+    else if (sdim==3) rot_2D_3D_sph(num_q, q, &left_turn, &right_turn);
+
+    // If only one direction of turns, then it's convex
+    if ((!right_turn && left_turn) || (right_turn && !left_turn)) return 0;
+  }
+
   
   //double * sintd_coords = new double[120]; int num_sintd_nodes; 
   //double * tmp_coords=new double[120];
@@ -792,6 +1006,9 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       double *q2 = (qnodes[(j+1)%num_q].c); 
       double *q3 = (qnodes[(j+2)%num_q].c);
 
+  if (xgu_debug) {
+    printf("In weiler: intersecting subject %d %d with clip %d %d \n",i,(i+1)%num_p,j,(j+1)%num_q);
+  }
       bool result = false;
       if(sdim == 2)
         result = line_intersect_2D_2D(p1, p2, q1, q2, intersect, inbound, on_p_seg, on_q_seg);
@@ -799,6 +1016,9 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
         result = line_intersect_2D_3D(p1, p2, q1, q2, q3, intersect, inbound, on_p_seg, on_q_seg);
       }
 
+  if (xgu_debug) {
+    printf(" => result=%d inbound=%d\n ",result,(inbound&2));
+  }
       if(result){
 
         insert_intersect(pdim, sdim, final_pnodes, pnodes, i, intersect, n_inter, inbound);
@@ -810,6 +1030,11 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     }
   }
   delete [] intersect;
+
+
+    if (xgu_debug) {
+      printf("In weiler: before retally:  n_inter=%d num_inbinter=%d\n",n_inter,num_inbinter);
+    }
 
   // reTally the number of num_inbinter, because intersection points can be coincidental
   n_inter = 0;
@@ -824,6 +1049,11 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     }
   }
 
+  if (xgu_debug) {
+    printf("In weiler: after retally:  n_inter=%d num_inbinter=%d\n",n_inter,num_inbinter);
+  }
+
+
   // First, handle the corner cases, no intersect, no inbound point or odd number of inter/inbound point
   // p: subject, q: clip
   // No intersection points => a) p and q are disjoint, return p 
@@ -831,17 +1061,47 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
   //                           c) p contains q, return concave polygon
   assert(num_inbinter <= n_inter);
   if(n_inter == 0 || num_inbinter == 0 || (n_inter == num_inbinter && num_inbinter%2)) {
+
+    if (xgu_debug) {
+      printf("In weiler: inside n_inter == 0 block: n_inter=%d num_inbinter=%d\n",n_inter,num_inbinter);
+    }
     xpoint p_centroid = polygon(pnodes).centroid(sdim);
     xpoint q_centroid = polygon(qnodes).centroid(sdim);
-    bool s_contains_c = false, c_contains_s = false;
-    if(disjoint(pdim, sdim, pnodes, qnodes, s_contains_c, c_contains_s)){
-      difference.push_back(polygon(pnodes));
-      return 0;
+
+    // Calculate some overlap relationships
+    // BOB: now calculated above
+    // bool s_contains_c = false, c_contains_s = false;
+    //bool neither_contains_others_nodes=disjoint(pdim, sdim, pnodes, qnodes, s_contains_c, c_contains_s);
+
+    // If there are 1 or fewer intersections and neither contains the points of one another then
+    // they are disjoint. (If they had more intersections then there could still be overlap
+    // (e.g. two triangles overlapping to form a 6 pointed star). 
+    // BOB   if((n_inter <=1) && neither_contains_others_nodes){
+    if((n_inter <= 1) && neither_contains_others_nodes && !point_in_poly(pdim, sdim, qnodes, p_centroid)) {
+	difference.push_back(polygon(pnodes));
+	if (xgu_debug) {
+	  printf("In weiler: inside n_inter == 0 block: Disjoint\n");
+	}
+	return 0;
+      }
+    if (xgu_debug) {
+      printf("In weiler: inside n_inter == 0 H1\n");
     }
+
     if(c_contains_s && n_inter == 0 && point_in_poly(pdim, sdim, qnodes, p_centroid) ) return 0; 
+
+    if (xgu_debug) {
+      printf("In weiler: inside n_inter == 0 H2\n");
+    }
+
     if(s_contains_c && n_inter == 0 && point_in_poly(pdim, sdim, pnodes, q_centroid) ){
       assert(pnodes.size() == final_pnodes.size());
       assert(qnodes.size() == final_qnodes.size());
+
+      if (xgu_debug) {
+	printf("In weiler p contains q\n");
+      }
+
       // 1. Find the two points on p and q with smallest arc length distance
       int qj = 0; int pi = 0;
       for(int i = 0; i < num_p; i ++){
@@ -880,6 +1140,46 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       //dump_polygon(polygon(r_plist), true);
       //dump_polygon(polygon(r_qlist), true);
 
+#if 0
+      if (xgu_debug) {
+	double pcoords[300];
+	polygon_to_coords(polygon(r_plist), sdim, pcoords);
+	write_3D_poly_to_vtk("r_plist",0,r_plist.size(),pcoords);
+	polygon_to_coords(polygon(r_qlist), sdim, pcoords);
+	write_3D_poly_to_vtk("r_qlist",0,r_qlist.size(),pcoords);
+      }
+#endif
+
+      // Resulting polygon       
+      std::vector<xpoint> res_polygon; 
+
+      // Push p nodes on first 
+      for (int i=0; i<r_plist.size(); i++) {
+	res_polygon.push_back(r_plist[i]);
+      }
+
+      // Push first p node on again
+      res_polygon.push_back(r_plist[0]);
+
+      // Push first qnode on
+      res_polygon.push_back(r_qlist[0]);
+
+      // Push q nodes on in backwards order including first 1 node.
+      for (int i=r_qlist.size()-1; i>-1; i--) {
+	res_polygon.push_back(r_qlist[i]);
+      }
+
+      // Add to output
+      add_polygon_to_vector(sdim, polygon(res_polygon), difference);
+
+      if (xgu_debug) {
+	printf("In weiler p contains q diff.size()=%d\n",difference.size());
+      }
+
+      // leave
+      return 0;
+
+#if 0
       unsigned int prev_i = 0; unsigned int next_i = r_plist.size(); bool coincident = false; double ppos; double qpos;
       xpoint jpm1;                       // j'-1 intersection point
       bool start = false;
@@ -915,7 +1215,11 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
             res_polygon.push_back(r_qlist[j]);              // j
             //dump_polygon(polygon(res_polygon), true);       // debug
             //difference.push_back(polygon(res_polygon));     // Append this polygon to the result
-            add_polygon_to_vector(sdim, polygon(pnodes), difference);
+
+            // BOB DEBUG
+	    // ORIG  add_polygon_to_vector(sdim, polygon(pnodes), difference);
+	    add_polygon_to_vector(sdim, polygon(res_polygon), difference);
+
             break;                                          // Go on to the next q vertex in j loop
           } 
         }
@@ -928,14 +1232,29 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       res_polygon.push_back(r_plist[0]);              //  !! different from common vertex
       //dump_polygon(polygon(res_polygon), true);       // debug
       //difference.push_back(polygon(res_polygon));     // Append this polygon to the result
-      add_polygon_to_vector(sdim, polygon(pnodes), difference);
+
+      // BOB DEBUG
+      // ORIG add_polygon_to_vector(sdim, polygon(pnodes), difference);
+      add_polygon_to_vector(sdim, polygon(res_polygon), difference);
       
       delete[] intersect;
       return 0;
+#endif
+
     }
+
+    if (xgu_debug) {
+      printf("In weiler: inside n_inter == 0 H3\n");
+    }
+
     // This is a special case when difference polygon is ring shaped concave polygon
     // Subject polygon contains clipping polygon with 1 common vertex
     if(s_contains_c && n_inter == 1){
+
+      if (xgu_debug) {
+	printf("In weiler: p contains q, but intersect at 1 point \n");
+      }
+
       //// 0. subject and clip polygons only intersect at their common vertex
       //if(pnodes.size() != final_pnodes.size() || qnodes.size() != final_qnodes.size()){
       //  std::cout << pnodes.size() << ' ' << final_pnodes.size() << std::endl;
@@ -956,6 +1275,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       if(left_turn && right_turn) return 1; // clip polygon is concave
       rot_2D_3D_sph(num_q, q, &left_turn, &right_turn);
       if(left_turn && right_turn) return 2; // subject polygon is concave
+
 
       // 2. Find the common vertex in *qit and *pit
       // p -> subject; q -> clip
@@ -1031,7 +1351,9 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
               res_polygon.push_back(r_qlist[j]);              // j
               //dump_polygon(polygon(res_polygon), true);       // debug
               //difference.push_back(polygon(res_polygon));     // Append this polygon to the result
-              add_polygon_to_vector(sdim, polygon(pnodes), difference);
+	      // BOB DEBUG
+	      // ORIG  add_polygon_to_vector(sdim, polygon(pnodes), difference);
+	      add_polygon_to_vector(sdim, polygon(res_polygon), difference);
               break;                                          // Go on to the next q vertex in j loop
             } 
           }
@@ -1043,13 +1365,22 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
           res_polygon.push_back(r_plist[k]);
         //dump_polygon(polygon(res_polygon), true);       // debug
         //difference.push_back(polygon(res_polygon));     // Append this polygon to the result
-        add_polygon_to_vector(sdim, polygon(pnodes), difference);
-        
+	// BOB DEBUG
+	// ORIG  add_polygon_to_vector(sdim, polygon(pnodes), difference);
+	add_polygon_to_vector(sdim, polygon(res_polygon), difference);
         delete[] intersect;
         return 0;
     }
+
+    if (xgu_debug) {
+      printf("In weiler: inside n_inter == 0 End\n");
+    }
   }
 
+
+  if (xgu_debug) {
+    printf("In weiler: after degenerate cases\n");
+  }
 
   // At this point, we know we have a 'cliping' scenario to deal with
   if(false){ // debug: dump final lists
@@ -1065,6 +1396,10 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
 
   // Phase 2, compute difference
   {
+    
+    if (xgu_debug) {
+      printf("In weiler: regular clipping \n");
+    }
 
     unsigned int npts = 0;  // number of inbound points used from p(subject) list
     bool done = false;
@@ -1076,9 +1411,18 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     bool on_subject = true;
     bool start = false;
     while(! done){
+
+      if (xgu_debug) {
+	printf("In weiler: loop top label=%c inter=%d ibnd=%d\n",it->label,it->intersection,it->inbound);
+      }
       
       // completed a loop, save this polygon
       if(it->visited && on_subject) {
+
+	if (xgu_debug) {
+	  printf("In weiler: save what's in nodes: nodes.size=%d\n",nodes.size());
+	}
+
         std::list<xpoint>::iterator tmpit = it;
         // clear visited attributes
         for(it = final_pnodes.begin(); it != final_pnodes.end(); ++it) it->visited = false;
@@ -1094,11 +1438,69 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
         if(sdim == 2) remove_0len_edges2D(&num_nodes, coords);
         if(sdim == 3) remove_0len_edges3D(&num_nodes, coords);
     
+	if (xgu_debug) {
+	  printf("In weiler: save what's in nodes: after proc. num_nodes=%d\n",num_nodes);
+	}
         if(num_nodes >=3){
+
+	  // ORIGINAL
+#if 0
           polygon res_poly;
           coords_to_polygon(num_nodes, coords, sdim, res_poly);
-          if(res_poly.area(sdim) > 0)
+          double area=res_poly.area(sdim);
+	  if (xgu_debug) {
+	    static int out=0;
+	    printf("In weiler: save what's in nodes: area=%30.27f vtk out=%d\n",area,out);
+	    write_3D_poly_to_vtk("poly_out",out,num_nodes,coords);	    
+	    out++;
+	  }
+	  if(area > 0) {
+	    //if(res_poly.area(sdim) > 0) {
+	    if (xgu_debug) {
+	      printf("In weiler: save what's in nodes: actually adding poly to diff. \n");
+	    }
             difference.push_back(res_poly);
+	  }
+#endif
+	  // REVERSE BAD POLYS
+#if 0
+          polygon area_poly;
+          coords_to_polygon(num_nodes, coords, sdim, area_poly);
+          double area=area_poly.area(sdim);
+
+	  if (std::abs(area) > 1.0E-15) {
+      	    if (area < 0.0) {
+	      if (xgu_debug) {
+	    	printf("In weiler: save what's in nodes: reversing coords. \n");
+	      }
+	      reverse_coord(sdim, num_nodes, coords);
+	    }
+	    polygon res_poly;
+	    coords_to_polygon(num_nodes, coords, sdim, res_poly);
+            difference.push_back(res_poly);
+	  }
+#endif
+
+	  // REJECT REALLY SMALL POLYS AND REVERSED POLYS
+#if 1
+          polygon res_poly;
+          coords_to_polygon(num_nodes, coords, sdim, res_poly);
+          double area=res_poly.area(sdim);
+	  if (xgu_debug) {
+	    static int out=0;
+	    printf("In weiler: save what's in nodes: area=%30.27f vtk out=%d\n",area,out);
+	    //	    write_3D_poly_to_vtk("poly_out",out,num_nodes,coords);	    
+	    out++;
+	  }
+	  if(area > 1.0E-15) {
+	    //if(res_poly.area(sdim) > 0) {
+	    if (xgu_debug) {
+	      printf("In weiler: save what's in nodes: actually adding poly to diff. \n");
+	    }
+            difference.push_back(res_poly);
+	  }
+#endif
+
         }
         delete[] coords;
 
@@ -1112,6 +1514,9 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
 
       // if after a traverse, all inbound intersection points are used, then exit
       if(!start && npts == num_inbinter){
+	if (xgu_debug) {
+	  printf("In weiler: rc: Exiting! \n");
+	}
         done = true;
         continue;
       }
@@ -1122,6 +1527,11 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
       //   if(star loop) save, mark
       //   move to the next subject polygon node;
       if(on_subject){
+
+	if (xgu_debug) {
+	  printf("In weiler: on subject\n");
+	}
+
         if(it->intersection && it->inbound & 2){
           if(!start){ // if this inbound node has been visited in previous loop, continue on subject polygon
             std::vector<xpoint>::iterator it_tmp = std::find(visited_inbnodes.begin(), visited_inbnodes.end(), *it);
@@ -1134,7 +1544,12 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
           visited_inbnodes.push_back(*it);
           start = true;
           it->visited = true;
+
+	if (xgu_debug) {
+	  printf("In weiler: H1 adding node=%d (label=%c inter=%d ibnd=%d) \n",nodes.size(),it->label,it->intersection,it->inbound);
+	}
           nodes.push_back(*it);
+
           it = std::find(final_qnodes.begin(), final_qnodes.end(), *it);
           if(it == final_qnodes.end()) Throw() << "it must be on final qnodes list\n";
           it->visited = true; // mark intersection point on q list at the same time
@@ -1142,21 +1557,34 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
           else --it;
           npts ++;
           on_subject = false;
-        }
-        else{
+        } else{
           if(start) {
             it->visited = true;
+
+	if (xgu_debug) {
+	  printf("In weiler: H2 adding node=%d (label=%c inter=%d ibnd=%d) \n",nodes.size(),it->label,it->intersection,it->inbound);
+	}
             nodes.push_back(*it);
           }
           if(it == --final_pnodes.end()) it = final_pnodes.begin();
           else ++it;
         }
       }else{
+
+	if (xgu_debug) {
+	  printf("In weiler: NOT on subject\n");
+	}
+
         // if q is an intersection, save q, mark it visited, switch to p(subject) list
         // and move to next subject polygon node
         // else move to the previous clip polygon node, save, mark visited, 
         if(it->intersection){
           it->visited = true;
+
+	if (xgu_debug) {
+	  printf("In weiler: H3 adding node=%d (label=%c inter=%d ibnd=%d) \n",nodes.size(),it->label,it->intersection,it->inbound);
+	}
+
           nodes.push_back(*it);
           it = std::find(final_pnodes.begin(), final_pnodes.end(), *it);
           if(it == final_pnodes.end()) Throw() << "it must be on final pnodes list\n";
@@ -1167,6 +1595,10 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
         }else{
           if(start) {
             it->visited = true;
+
+	if (xgu_debug) {
+	  printf("In weiler: H4 adding node=%d (label=%c inter=%d ibnd=%d) \n",nodes.size(),it->label,it->intersection,it->inbound);
+	}
             nodes.push_back(*it);
           }
           if(it == final_qnodes.begin()) it = --final_qnodes.end();
@@ -1177,10 +1609,65 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
   }
 
   return 0;
-
 }
 
 
+  class UC {
+  public:
+    std::vector<UInt> ids;
+
+    bool operator < (const UC & that) const{
+      if (ids.size() < that.ids.size()) return true;
+      if (ids.size() > that.ids.size()) return false;
+      // now we can assume that the sizes are equal
+
+      for(int i = 0; i < ids.size(); i ++){
+	if(ids[i] < that.ids[i]) return true;
+	if(ids[i] > that.ids[i]) return false;
+      }
+      return false;
+    };
+  };
+
+  void unique_cell_list(std::vector<sintd_cell *> & sintd_cells) {
+
+    // Structure for tracking unique list of cell ids
+    std::set<UC> unique_cell_ids; 
+    
+    // New list of unique cells
+    std::vector<sintd_cell *>  unique_cells;
+    
+    // Loop through cells
+    for (int i=0; i<sintd_cells.size(); i++) {
+      
+      // Get number of edges in cell
+      int num_edges = sintd_cells[i]->num_edges();
+      
+      // Add ids to tmp_uc
+      UC tmp_uc;
+      tmp_uc.ids.reserve(num_edges);
+      for(int in = 0; in < num_edges; in ++){
+	tmp_uc.ids.push_back(sintd_cells[i]->operator[](in)->get_node()->get_id());
+      }
+      
+      // Sort ids
+      std::sort(tmp_uc.ids.begin(), tmp_uc.ids.end());
+      
+      // Insert into set also checking for uniqueness
+      std::pair<std::set<UC>::iterator,bool> ret;
+      ret=unique_cell_ids.insert(tmp_uc);
+      
+      // ret.second is true if tmp_uc wasn't in the set, so add to list
+      if (ret.second) {
+	unique_cells.push_back(sintd_cells[i]);
+      }
+    }
+    
+    // Put unique list back into original
+    sintd_cells.clear(); sintd_cells.reserve(unique_cells.size());
+    sintd_cells.insert(sintd_cells.begin(),unique_cells.begin(),unique_cells.end());
+  } 
+  
 void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_cell *> & sintd_cells, int pdim, int sdim, Mesh *midmesh){
 
   // Debug
@@ -1273,6 +1760,9 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     }
   }
 
+  // Reduce cell list to just unique cells
+  //  unique_cell_list(sintd_cells);
+
   // collect all the unique intersection cells ? shouldn't need to do this
   //std::stable_sort(sintd_cells.begin(), sintd_cells.end());
   //sintd_cells.erase(unique(sintd_cells.begin(), sintd_cells.end()), sintd_cells.end());
@@ -1303,6 +1793,33 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     for(int in = 0; in < num_edges; in ++){
       nodes.push_back(sintd_cells[i]->operator[](in)->get_node());
     }
+
+
+    int cell_gid=i+offset+1;
+
+#if 0
+    if ((cell_gid == 124796) || (cell_gid == 124797)) {
+      printf("%d# %d BOBXGC s_id=%d d_id=%d cell id=%d node ids=",Par::Rank(),i,
+	     sintd_cells[i]->s_id,sintd_cells[i]->d_id,
+	     cell_gid);
+      for (int j=0; j<nodes.size(); ++j) {
+	printf(" %d ",nodes[j]->get_id());
+      }
+      printf("\n");
+    }
+#endif
+
+#if 1
+    if ((cell_gid == 59955) || (cell_gid == 59955)) {
+      printf("%d# %d BOBMM s_id=%d d_id=%d cell id=%d node ids=",Par::Rank(),i,
+	     sintd_cells[i]->s_id,sintd_cells[i]->d_id,
+	     cell_gid);
+      for (int j=0; j<nodes.size(); ++j) {
+	printf(" %d ",nodes[j]->get_id());
+      }
+      printf("\n");
+    }
+#endif
 
     meshmid.add_element(cell, nodes, num_edges, sintd_cells[i]->get_topo(sdim, pdim));
     elem_list[i] = cell;
@@ -1361,7 +1878,7 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
 
 // Compute cells of middle mesh based on clipping results
 void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
-  std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct * zz){
+			       std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct * zz, int s_id, int d_id){
 
   // bubble up the nodes and cells
   // cross reference the nodes and cells
@@ -1413,12 +1930,12 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
   }
 
   construct_sintd(area, num_sintd_nodes, sintd_coords, pdim, sdim, 
-    sintd_nodes, sintd_cells);
+		  sintd_nodes, sintd_cells, s_id, d_id);
 
 }
 
 void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
-  std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells){
+		     std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, int s_id, int d_id){
 
   // Get rid of degenerate edges
   if(sdim == 2)
@@ -1465,6 +1982,8 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
 
       // every cell keeps track of the nodes enclosing it
       sintd_cell * cell = new sintd_cell(split_area, cell_nodes);
+      cell->s_id=s_id;
+      cell->d_id=d_id;
       sintd_cells->push_back(cell);
 
       for(int in = 0; in < 3; in ++)
@@ -1564,6 +2083,8 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
 
     // every cell keeps track of the nodes enclosing it
     sintd_cell * cell = new sintd_cell(area, cell_nodes);
+    cell->s_id=s_id;
+    cell->d_id=d_id;
     sintd_cells->push_back(cell);
 
     // every node associated with this genesis cell refers to it
