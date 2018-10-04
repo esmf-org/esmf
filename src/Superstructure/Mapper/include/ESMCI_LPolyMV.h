@@ -158,6 +158,15 @@ namespace ESMCI{
       assert(vvals.size() < coeffs_.size());
 
       CType res = 0;
+
+      std::size_t i=0;
+      for(; i < vvals.size(); i++){
+        res += coeffs_[i] * vvals[i];
+      }
+      for(; i < coeffs_.size(); i++){
+        res += coeffs_[i];
+      }
+      /*
       typename std::vector<CType>::const_iterator coeffs_iter = coeffs_.cbegin();
       typename std::vector<CType>::const_iterator vvals_iter = vvals.cbegin();
       for(;(coeffs_iter != coeffs_.cend()) && (vvals_iter != vvals.cend());
@@ -168,6 +177,7 @@ namespace ESMCI{
       for(;coeffs_iter != coeffs_.cend(); ++coeffs_iter){
         res += *coeffs_iter;
       }
+      */
 
       return res;
     }
