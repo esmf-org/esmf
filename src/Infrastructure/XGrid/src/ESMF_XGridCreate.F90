@@ -1049,7 +1049,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       endif
       
       nentries=0
-#if 0
+#ifndef BOB_DEBUG
       ! Now the reverse direction
       call c_esmc_xgridregrid_create(mesh, meshAt(i), &
         tmpmesh, compute_midmesh, &
@@ -1084,7 +1084,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     ! now do the B side
 
     do i = 1, ngrid_b
-#if 0
+#ifndef BOB_DEBUG
       call c_esmc_xgridregrid_create(meshBt(i), mesh, &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &
@@ -1115,7 +1115,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
       endif
     
       ! Now the reverse direction
-#if 0
+#ifndef BOB_DEBUG
       call c_esmc_xgridregrid_create(mesh, meshBt(i), &
         tmpmesh, compute_midmesh, &
         ESMF_REGRIDMETHOD_CONSERVE, &

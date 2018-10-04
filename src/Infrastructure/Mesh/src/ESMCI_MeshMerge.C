@@ -663,7 +663,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
       }
 
 
-#define DEBUG_DST_ID 3795
+#define DEBUG_DST_ID 0
 #if 1
 	if (elem.get_id() == DEBUG_DST_ID) {
 	  printf("%d# dst_id=%d Starting clipping\n",Par::Rank(),elem.get_id());

@@ -3034,11 +3034,12 @@ void Interp::operator()(int fpair_num, IWeights &iw, bool set_dst_status, WMat &
    int tot_num_little_frac=0;
    MPI_Allreduce(&num_little_frac,&tot_num_little_frac,1,MPI_INT,MPI_SUM,Par::Comm());
 
-
+#if 0
    if (Par::Rank() == 0) {
      printf("BOB: num frac >1.1 = %d \n",tot_num_big_frac);
      printf("BOB: num frac <1.0-1.0E-6 = %d \n",tot_num_little_frac);
    }
+#endif
 
   }
 
