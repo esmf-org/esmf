@@ -307,6 +307,14 @@ namespace ESMCI{
         std::vector<T> res_data;
 
         assert(vnames.size() == vvals.size());
+        std::vector<std::pair<std::string, T> > vinfos;
+        for(std::size_t i=0; i<vnames.size(); i++){
+          vinfos.push_back(
+            std::pair<std::string, T>(vnames[i], vvals[i]));
+        }
+        StrIntCmp<T> cmp;
+        std::sort(vinfos.begin(), vinfos.end(), cmp);
+
         for(typename std::vector<const GenPoly<T, int> *>::const_iterator
               cfiter = funcs.cbegin(); cfiter != funcs.cend(); ++cfiter){
           const GenPoly<T, int> *pp = *cfiter;
@@ -314,6 +322,15 @@ namespace ESMCI{
           std::vector<T> pvvals;
           for(std::vector<std::string>::const_iterator pvciter = pvnames.cbegin();
               pvciter != pvnames.cend(); ++pvciter){
+            std::pair<std::string, T> pvinfo(*pvciter, static_cast<T>(0));
+            typename std::vector<std::pair<std::string, T> >::iterator vinfos_iter
+              = std::lower_bound(vinfos.begin(), vinfos.end(), pvinfo);
+            if(vinfos_iter != vinfos.end()){
+              if((*vinfos_iter).first == *pvciter){
+                pvvals.push_back((*vinfos_iter).second);
+              }
+            }
+            /*
             int i=0;
             for(std::vector<std::string>::const_iterator vciter = vnames.cbegin();
               vciter != vnames.cend(); ++vciter, i++){
@@ -321,6 +338,7 @@ namespace ESMCI{
                 pvvals.push_back(vvals[i]);
               }
             }
+            */
           }
           res_data.push_back(pp->eval(pvvals));
         }
