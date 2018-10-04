@@ -295,23 +295,23 @@ namespace ESMCI{
           j_map_fv2gv_citer = j_map_fv2gv.cbegin();
         for(; (jciter != j.cend()) && (j_map_fv2gv_citer != j_map_fv2gv.cend());
               ++jciter, ++j_map_fv2gv_citer){
-          std::vector<GenPoly<T, int> *> jrow = *jciter;
-          std::vector<std::vector<std::size_t> > jrow_map_fv2gv = *j_map_fv2gv_citer;
+          //std::vector<GenPoly<T, int> *> jrow = *jciter;
+          //std::vector<std::vector<std::size_t> > jrow_map_fv2gv = *j_map_fv2gv_citer;
           typename std::vector<GenPoly<T, int> *>::const_iterator
-            jrciter = jrow.cbegin();
+            jrciter = (*jciter).cbegin();
           typename std::vector<std::vector<std::size_t > >::const_iterator 
-            jrow_map_fv2gv_citer = jrow_map_fv2gv.cbegin();
-          for(; (jrciter != jrow.cend()) 
-                  && (jrow_map_fv2gv_citer != jrow_map_fv2gv.cend());
+            jrow_map_fv2gv_citer = (*j_map_fv2gv_citer).cbegin();
+          for(; (jrciter != (*jciter).cend()) 
+                  && (jrow_map_fv2gv_citer != (*j_map_fv2gv_citer).cend());
                 ++jrciter, ++jrow_map_fv2gv_citer){
             GenPoly<T, int> *pp = *jrciter;
-            std::vector<std::size_t > func_map_fv2gv = *jrow_map_fv2gv_citer;
+            //std::vector<std::size_t > func_map_fv2gv = *jrow_map_fv2gv_citer;
             assert(pp);
             std::vector<std::string> pvnames = pp->get_vnames();
             std::vector<T> pvvals;
             for(std::vector<std::size_t>::const_iterator func_map_fv2gv_iter = 
-                  func_map_fv2gv.cbegin();
-                  func_map_fv2gv_iter != func_map_fv2gv.cend();
+                  (*jrow_map_fv2gv_citer).cbegin();
+                  func_map_fv2gv_iter != (*jrow_map_fv2gv_citer).cend();
                   ++func_map_fv2gv_iter){
               assert((*func_map_fv2gv_iter >= 0) &&
                       (*func_map_fv2gv_iter < vvals.size()));
@@ -396,10 +396,11 @@ namespace ESMCI{
         for(;(cfiter != funcs.cend()) && (funcs_map_citer != funcs_map_fv2gv.cend());
               ++cfiter, ++funcs_map_citer){
           const GenPoly<T, int> *pp = *cfiter;
-          std::vector<std::size_t> func_map_fv2gv = *funcs_map_citer;
+          //std::vector<std::size_t> func_map_fv2gv = *funcs_map_citer;
           std::vector<T> pvvals;
-          for(std::vector<std::size_t>::const_iterator citer = func_map_fv2gv.cbegin();
-                citer != func_map_fv2gv.cend(); ++citer){
+          for(std::vector<std::size_t>::const_iterator citer = 
+                (*funcs_map_citer).cbegin();
+                citer != (*funcs_map_citer).cend(); ++citer){
             assert((*citer >= 0) && (*citer < vvals.size()));
             pvvals.push_back(vvals[*citer]);
           }
