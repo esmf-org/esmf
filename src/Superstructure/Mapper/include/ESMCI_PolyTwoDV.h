@@ -234,6 +234,7 @@ namespace ESMCI{
     {
       if(has_dep_vfunc_){
         std::vector<CType> p_vvals;
+        p_vvals.reserve(dps_.size());
         for(typename std::vector<MVIDLPoly<CType> >::const_iterator citer = dps_.cbegin();
               citer != dps_.cend(); ++citer){
           p_vvals.push_back((*citer).eval(vvals));

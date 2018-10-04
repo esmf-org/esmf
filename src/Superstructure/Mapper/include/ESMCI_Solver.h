@@ -289,6 +289,7 @@ namespace ESMCI{
         assert(j.size() == j_map_fv2gv.size());
 
         std::vector<T> res_data;
+        res_data.reserve(j.size() * vnames.size());
         typename std::vector<std::vector<GenPoly<T, int> *> >::const_iterator
           jciter = j.cbegin();
         typename std::vector<std::vector<std::vector<std::size_t> > >::const_iterator
@@ -309,6 +310,7 @@ namespace ESMCI{
             assert(pp);
             std::vector<std::string> pvnames = pp->get_vnames();
             std::vector<T> pvvals;
+            pvvals.reserve(pvnames.size());
             for(std::vector<std::size_t>::const_iterator func_map_fv2gv_iter = 
                   (*jrow_map_fv2gv_citer).cbegin();
                   func_map_fv2gv_iter != (*jrow_map_fv2gv_citer).cend();
@@ -389,6 +391,7 @@ namespace ESMCI{
         assert(funcs.size() == funcs_map_fv2gv.size());
         assert(vnames.size() == vvals.size());
 
+        res_data.reserve(funcs.size());
         typename std::vector<const GenPoly<T, int> *>::const_iterator
           cfiter = funcs.cbegin();
         typename std::vector<std::vector<std::size_t> >::const_iterator
