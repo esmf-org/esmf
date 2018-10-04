@@ -162,7 +162,7 @@ int main(int argc, char *argv[]) {
   int map_type = MB_MAP_TYPE_CART_APPROX;
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_disable_UTest
   // call rendezvous between mesh and pointlist
   MBMesh *mesh_rend=NULL;
   PointList *pl_rend=NULL;
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
   //rc = mesh_print(mesh_rend);
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_disable_UTest
   rc = ESMF_SUCCESS;
   strcpy(name, "Validate pointlist rendezvous");
   strcpy(failMsg, "pointlist rendezvous incorrect");
