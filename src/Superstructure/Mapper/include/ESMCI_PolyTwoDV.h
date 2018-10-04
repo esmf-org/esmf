@@ -141,10 +141,7 @@ namespace ESMCI{
         return p_.get_vnames();
       }
       else{
-        std::vector<std::string> all_vnames_uniq = get_dvnames();
-        //std::vector<std::string> p_vnames = p_.get_vnames();
-        //all_vnames_uniq.insert(all_vnames_uniq.end(), p_vnames.begin(), p_vnames.end());
-        return all_vnames_uniq;
+        return get_dvnames();
       }
     }
 
