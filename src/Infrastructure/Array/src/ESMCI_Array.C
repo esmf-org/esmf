@@ -9516,8 +9516,6 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
         ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
       }
     }
-
-
 #endif
 
     // construct send elements
@@ -9567,6 +9565,35 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
           linIndexContigBlockList.push_back(block);
         }
       }
+#ifdef ASMM_STORE_LOG_on
+      {
+        std::stringstream msg;
+        msg << "ASMM_STORE_LOG:" << __LINE__ << " sendnbDiffDe=" << i <<
+          " linIndexContigBlockList.size()=" << linIndexContigBlockList.size();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
+
+#ifdef MSG_DEFLATE_DEBUG
+// debug
+      for (int k=0; k<linIndexContigBlockList.size(); k++){
+        sprintf(msg, "linIndexContigBlockList[%d]: linIndex=%d, "
+          "linIndexCount=%d", k, linIndexContigBlockList[k].linIndex,
+          linIndexContigBlockList[k].linIndexCount);
+ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+
+      }
+#endif
+
+#ifdef ASMM_STORE_LOG_on_disabled
+      fprintf(asmm_store_log_fp, "gjt: sendnbElement localPet %d, dstPet %d, "
+        "vectorLength=%d\n", localPet, dstPet, vectorLength);
+      for (int k=0; k<linIndexContigBlockList.size(); k++){
+        fprintf(asmm_store_log_fp, "linIndexContigBlockList[%d]: linIndex=%d, "
+          "linIndexCount=%d\n", k, linIndexContigBlockList[k].linIndex,
+          linIndexContigBlockList[k].linIndexCount);
+      }
+#endif
       // intermediate buffer (in case it is needed)
       int qwords = (sendnbPartnerDeCount[i] * dataSizeSrc) / 8;
       if ((sendnbPartnerDeCount[i] * dataSizeSrc) % 8)
@@ -9593,31 +9620,11 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       sendnbVector[ii].partnerDeDataCount = deflator.size();
       sendnbVector[ii].vectorFlag = vectorFlag;
       sendnbVector[ii].srcInfoTable.swap(srcInfoTable[i]);
-      sendnbVector[ii].linIndexContigBlockList = linIndexContigBlockList;
+      sendnbVector[ii].linIndexContigBlockList.swap(linIndexContigBlockList);
       sendnbVector[ii].bufferInfo = (char **)xxe->getBufferInfoPtr();
       sendnbVector[ii].localPet = localPet;
       sendnbVector[ii].petCount = petCount;
 
-#ifdef MSG_DEFLATE_DEBUG
-// debug
-      for (int k=0; k<linIndexContigBlockList.size(); k++){
-        sprintf(msg, "linIndexContigBlockList[%d]: linIndex=%d, "
-          "linIndexCount=%d", k, linIndexContigBlockList[k].linIndex,
-          linIndexContigBlockList[k].linIndexCount);
-ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-
-      }
-#endif
-
-#ifdef ASMM_STORE_LOG_on_disabled
-      fprintf(asmm_store_log_fp, "gjt: sendnbElement localPet %d, dstPet %d, "
-        "vectorLength=%d\n", localPet, dstPet, vectorLength);
-      for (int k=0; k<linIndexContigBlockList.size(); k++){
-        fprintf(asmm_store_log_fp, "linIndexContigBlockList[%d]: linIndex=%d, "
-          "linIndexCount=%d\n", k, linIndexContigBlockList[k].linIndex,
-          linIndexContigBlockList[k].linIndexCount);
-      }
-#endif
     } // for i - sendnbDiffPartnerDeCount
     // garbage collection
     delete [] sendnbPartnerDeList;
