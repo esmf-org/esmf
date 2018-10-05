@@ -308,9 +308,9 @@ namespace ESMCI{
             GenPoly<T, int> *pp = *jrciter;
             //std::vector<std::size_t > func_map_fv2gv = *jrow_map_fv2gv_citer;
             assert(pp);
-            std::vector<std::string> pvnames = pp->get_vnames();
+            //std::vector<std::string> pvnames = pp->get_vnames();
             std::vector<T> pvvals;
-            pvvals.reserve(pvnames.size());
+            //pvvals.reserve(pvnames.size());
             for(std::vector<std::size_t>::const_iterator func_map_fv2gv_iter = 
                   (*jrow_map_fv2gv_citer).cbegin();
                   func_map_fv2gv_iter != (*jrow_map_fv2gv_citer).cend();
