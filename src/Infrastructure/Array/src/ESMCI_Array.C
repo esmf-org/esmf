@@ -8982,8 +8982,18 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   VM::logMemInfo(std::string("ASMMStoreNbVectors2.0"));
 #endif
 
+#define ASMM_STORE_LOG_on // TODO: remove after debug!!!
+    
   // determine recv pattern for all localDEs on dst side
   for (int j=0; j<dstLocalDeCount; j++){
+#ifdef ASMM_STORE_LOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " j=" << j <<
+        " dstLocalDeElementCount[j]=" << dstLocalDeElementCount[j];
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     vector<int> index2Ref;
     index2Ref.reserve(dstLocalDeElementCount[j]); // good guess
     int localDeFactorCount = 0; // reset
@@ -8997,16 +9007,19 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       }
     }
 
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors2.1"));
+#endif
+
 #ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9a);   //gjt - profile
 #endif
 
-#define ASMM_STORE_LOG_on // TODO: remove after debug!!!
-    
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
-      msg << "ASMM_STORE_LOG:" << __LINE__ << " iCount=" << iCount <<
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " j=" << j <<
+        " iCount=" << iCount <<
         " localDeFactorCount=" << localDeFactorCount;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
@@ -9046,6 +9059,16 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       msg << "ASMM_STORE_LOG:" << __LINE__ << " recvnbDiffPartnerDeCount="
         << recvnbDiffPartnerDeCount;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      for (int i=0; i<recvnbDiffPartnerDeCount; i++){
+        msg.str("");  // clear
+        msg << "ASMM_STORE_LOG:" << __LINE__ << " recvnbPartnerDeCount[" << i <<
+          "]=" << recvnbPartnerDeCount[i];
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+      msg.str("");  // clear
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " sizeof(DstInfo)="
+        << sizeof(ArrayHelper::DstInfo<SeqIndex<DIT>,SeqIndex<SIT> >);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
 
@@ -9067,14 +9090,19 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     }
     // alignment char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
     int qwords = (localDeFactorCount * dataSizeFactors) / 8;
-    if ((localDeFactorCount * dataSizeFactors) % 8)
-      ++qwords;
+    if ((localDeFactorCount * dataSizeFactors) % 8) ++qwords;
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors3.1"));
+#endif
     char *localDeFactorBuffer = (char *)(new double[qwords]);
     localrc = xxe->storeData(localDeFactorBuffer, qwords*8); // XXE garbage
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9c1);   //gjt - profile
+#endif
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors3.2"));
 #endif
     for (int i=0; i<localDeFactorCount; i++){
       int partnerDeListIndex = partnerDeRef[i];
@@ -9100,13 +9128,18 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
         (void *)(localDeFactorBufferEntry);
     }
 
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors3.3"));
+#endif
     // garbage collection
     delete [] dstInfoTableInit;
     delete [] index2Ref2;
     delete [] factorIndexRef;
     delete [] partnerDeRef;
 
-
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors3.4"));
+#endif
     // force vectors out of scope by swapping with empty vector, to free memory
     vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > ().swap(dstLinSeqVect[j]);
   
@@ -9246,15 +9279,23 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       }
       ++kk;
 
+#define MSG_DEFLATE_DEBUG
 #ifdef MSG_DEFLATE_DEBUG
-char msg[160];
-      for (int k=0; k<kk; k++){
-
-sprintf(msg, "recv: deflator[%d]: index=%d, bufferIndex=%d, seqIndex=%d",
-  k, deflator[k].index, dstInfoTable[i][deflator[k].index].bufferIndex,
-deflator[k].seqIndex.decompSeqIndex);
-ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-
+      {
+        std::stringstream msg;
+        msg << "ASMM_STORE_LOG:" << __LINE__ <<
+          " recv: deflator: kk=" << kk;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#if 0
+        for (int k=0; k<deflator.size(); k++){
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ <<
+            " recv: deflator[" << k << "]: index=" << deflator[k].index <<
+            ", bufferIndex=" << dstInfoTable[i][deflator[k].index].bufferIndex
+            << ", seqIndex=" << deflator[k].seqIndex.decompSeqIndex;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        }
+#endif
       }
 #endif
 
@@ -9266,8 +9307,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
       // large contiguous 1st level receive buffer
       int qwords = (recvnbPartnerDeCount[i] * dataSizeSrc) / 8;
-      if ((recvnbPartnerDeCount[i] * dataSizeSrc) % 8)
-        ++qwords;
+      if ((recvnbPartnerDeCount[i] * dataSizeSrc) % 8) ++qwords;
       char *buffer = (char *)(new double[qwords]);
       // store buffer information in BufferInfo for XXE buffer control
       localrc = xxe->storeBufferInfo(buffer,
@@ -9299,6 +9339,10 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
       
     } // for i - recvnbDiffPartnerDeCount
+
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors5.1"));
+#endif
 
     // garbage collection
     delete [] recvnbPartnerDeList;
@@ -9396,8 +9440,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
     }
     // alignment char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
     int qwords = (localDeFactorCount * dataSizeFactors) / 8;
-    if ((localDeFactorCount * dataSizeFactors) % 8)
-      ++qwords;
+    if ((localDeFactorCount * dataSizeFactors) % 8) ++qwords;
     char *localDeFactorBuffer = (char *)(new double[qwords]);
     localrc = xxe->storeData(localDeFactorBuffer, qwords*8); // XXE garbage
     if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -9536,13 +9579,20 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       deflator.erase(unique(deflator.begin(),deflator.end()),deflator.end());
 
 #ifdef MSG_DEFLATE_DEBUG
-char msg[160];
-      for (int k=0; k<deflator.size(); k++){
-
-sprintf(msg, "send: deflator[%d]: index=%d, seqIndex=%d",
-  k, deflator[k].index,
-deflator[k].seqIndex.decompSeqIndex);
-ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+      {
+        std::stringstream msg;
+        msg << "ASMM_STORE_LOG:" << __LINE__ <<
+          " send: after erase: deflator.size()=" << deflator.size();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#if 0
+        for (int k=0; k<deflator.size(); k++){
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ <<
+            " send: deflator[" << k << "]: index=" << deflator[k].index <<
+            ", seqIndex=" << deflator[k].seqIndex.decompSeqIndex;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        }
+#endif
       }
 #endif
 
@@ -9575,13 +9625,16 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
 
 #ifdef MSG_DEFLATE_DEBUG
-// debug
-      for (int k=0; k<linIndexContigBlockList.size(); k++){
-        sprintf(msg, "linIndexContigBlockList[%d]: linIndex=%d, "
-          "linIndexCount=%d", k, linIndexContigBlockList[k].linIndex,
-          linIndexContigBlockList[k].linIndexCount);
-ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-
+      {
+        std::stringstream msg;
+        for (int k=0; k<linIndexContigBlockList.size(); k++){
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ <<
+            " linIndexContigBlockList[" << k << "]: linIndex=" << 
+            linIndexContigBlockList[k].linIndex << " linIndexCount=" <<
+            linIndexContigBlockList[k].linIndexCount;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        }
       }
 #endif
 
@@ -9596,8 +9649,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
       // intermediate buffer (in case it is needed)
       int qwords = (sendnbPartnerDeCount[i] * dataSizeSrc) / 8;
-      if ((sendnbPartnerDeCount[i] * dataSizeSrc) % 8)
-        ++qwords;
+      if ((sendnbPartnerDeCount[i] * dataSizeSrc) % 8) ++qwords;
       char *buffer = (char *)(new double[qwords]);
       // store buffer information in BufferInfo for XXE buffer control
       localrc = xxe->storeBufferInfo(buffer,
@@ -9656,14 +9708,18 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #ifdef FORCE_SHRINK_AFTER_SORT_on
   // shrink size of recvnbVector to where it was before sort
   // may come at a performance hit
-  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > > recvnbV = recvnbVector;
+  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > >
+    recvnbV = recvnbVector;
   recvnbV.swap(recvnbVector);
-  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > > ().swap(recvnbV);
+  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > >
+    ().swap(recvnbV);
   // shrink size of sendnbVector to where it was before sort
   // may come at a performance hit
-  vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > > sendnbV = sendnbVector;
+  vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > >
+    sendnbV = sendnbVector;
   sendnbV.swap(sendnbVector);
-  vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > > ().swap(sendnbV);
+  vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > >
+    ().swap(sendnbV);
 #endif
 
 #ifdef ASMM_STORE_MEMLOG_on
