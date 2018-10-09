@@ -4,13 +4,13 @@
 
 namespace ESMCI{
 
-  Mapper::Mapper(ESMCI::VM &vm):vm_(vm), lbal_max_iters_(DEFAULT_LBAL_MAX_ITERS)
+  Mapper::Mapper(ESMCI::VM &vm):vm_(vm), use_load_balancer_(true), use_rseq_dgraph_dep_(false), lbal_max_iters_(DEFAULT_LBAL_MAX_ITERS)
   {
     comp_info_store_ = MapperUtil::CompInfoStore<double>::get_instance();
   }
 
   Mapper::Mapper(ESMCI::VM &vm, const std::string &rseq_fname)
-    :vm_(vm), lbal_max_iters_(DEFAULT_LBAL_MAX_ITERS), rseq_fname_(rseq_fname)
+    :vm_(vm), use_load_balancer_(true), use_rseq_dgraph_dep_(true), lbal_max_iters_(DEFAULT_LBAL_MAX_ITERS), rseq_fname_(rseq_fname)
   {
     comp_info_store_ = MapperUtil::CompInfoStore<double>::get_instance();
 
