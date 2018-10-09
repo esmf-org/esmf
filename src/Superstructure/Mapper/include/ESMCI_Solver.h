@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <functional>
 #include <cmath>
+#include <numeric>
 #include "ESMCI_Poly.h"
 #include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyTwoV.h"

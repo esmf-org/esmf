@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <numeric>
 #include <initializer_list>
 #include <complex.h>
 #include <cblas.h>

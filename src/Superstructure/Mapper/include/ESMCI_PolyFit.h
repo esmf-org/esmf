@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cmath>
 #include <algorithm>
+#include <numeric>
 #include <complex.h>
 #include "lapacke.h"
 #include "ESMCI_Poly.h"
