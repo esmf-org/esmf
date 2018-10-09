@@ -248,6 +248,10 @@ ifndef ESMF_CXXSTD
 export ESMF_CXXSTD = default
 endif
 
+ifndef ESMF_CXXSTD_FLAG
+export ESMF_CXXSTD_FLAG = default
+endif
+
 #-------------------------------------------------------------------------------
 # For some variables having the literal string "default" is ok; 
 # for others, look for this string and override it.
@@ -1613,8 +1617,18 @@ ESMF_CXXSTD = 11
 endif
 endif
 
+# Set the default C++ compiler flag if it is not overloaded.
+ifeq ($(ESMF_CXXSTD_FLAG),default)
 ifneq ($(ESMF_CXXSTD),default)
-ESMF_CXXCOMPILEOPTS  += -std=c++$(ESMF_CXXSTD)
+ESMF_CXXSTD_FLAG = -std=c++$(ESMF_CXXSTD)
+endif
+endif
+
+# Append to the compiler options giving precedence to the C++ standard flag
+ifneq ($(ESMF_CXXSTD),default)
+ESMF_CXXCOMPILEOPTS  += $(ESMF_CXXSTD_FLAG)
+else ifneq ($(ESMF_CXXSTD_FLAG),default)
+ESMF_CXXCOMPILEOPTS  += $(ESMF_CXXSTD_FLAG)
 endif
 
 #-------------------------------------------------------------------------------
