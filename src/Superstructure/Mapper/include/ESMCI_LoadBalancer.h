@@ -519,7 +519,9 @@ namespace ESMCI{
         std::vector<int> npets_diff(orig_npets.size());
         std::transform(orig_npets.cbegin(), orig_npets.cend(), opt_npets.cbegin(),
           npets_diff.begin(), std::minus<int>());
-        if(std::count(npets_diff.cbegin(), npets_diff.cend(), 0) == npets_diff.size()){
+        if(static_cast<std::size_t> (
+              std::count(npets_diff.cbegin(), npets_diff.cend(), 0))
+               == npets_diff.size()){
           /* The solver has converged */
           std::cout << "LoadBalancer: solver has converged\n";
           return false;
