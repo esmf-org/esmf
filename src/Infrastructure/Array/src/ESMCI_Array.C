@@ -16,7 +16,7 @@
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
 #define ASMM_STORE_MEMLOG_on
-#define ASMM_STORE_TUNELOG_off
+#define ASMM_STORE_TUNELOG_on
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_DUMPSMM_off
 
@@ -7998,7 +7998,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   double *t8, double *t9, double *t10, double *t11,
 #endif
   vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > > &sendnbVector, // inout
-  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > > &recvnbVector  // inout
+  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > > &recvnbVector, // inout
+  bool srcTermProcessingZero  
   );
 
 
@@ -8610,6 +8611,11 @@ malloc_trim(0);
   VM::logMemInfo(std::string("ASMMStore4.2"));
 #endif
 
+  // prepare srcTermProcessingZero
+  bool srcTermProcessingZero = false;
+  if (srcTermProcessingArg && *srcTermProcessingArg==0)
+    srcTermProcessingZero = true;
+  
   // tansform "run distribution" into nb-vectors
   vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > > sendnbVector;
   vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > > recvnbVector;
@@ -8622,7 +8628,8 @@ malloc_trim(0);
 #ifdef ASMM_STORE_TIMING_on
     &t8, &t9, &t10, &t11,
 #endif
-    sendnbVector, recvnbVector
+    sendnbVector, recvnbVector,
+    srcTermProcessingZero
   );
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
@@ -8813,7 +8820,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   double *t8, double *t9, double *t10, double *t11,
 #endif
   vector<ArrayHelper::SendnbElement<SeqIndex<SIT>,SeqIndex<DIT> > > &sendnbVector, // inout
-  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > > &recvnbVector  // inout
+  vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > > &recvnbVector, // inout
+  bool srcTermProcessingZero
   ){
 //
 // !DESCRIPTION:
@@ -9305,14 +9313,18 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
         dstInfoTable[i][k].bufferIndex = k;
       int kk = dstInfoTable[i].size();
 #endif
+      // determine buffer size needed
+      int neededBufferSize = recvnbPartnerDeCount[i]; // default to largest
+      if (srcTermProcessingZero)
+        neededBufferSize = kk; // deflated size okay
       // large contiguous 1st level receive buffer
-      int qwords = (recvnbPartnerDeCount[i] * dataSizeSrc) / 8;
-      if ((recvnbPartnerDeCount[i] * dataSizeSrc) % 8) ++qwords;
+      int qwords = (neededBufferSize * dataSizeSrc) / 8;
+      if ((neededBufferSize * dataSizeSrc) % 8) ++qwords;
       char *buffer = (char *)(new double[qwords]);
       // store buffer information in BufferInfo for XXE buffer control
       localrc = xxe->storeBufferInfo(buffer,
-        recvnbPartnerDeCount[i] * dataSizeSrc,
-        recvnbPartnerDeCount[i] * dataSizeSrc / vectorLength);
+        neededBufferSize * dataSizeSrc,
+        neededBufferSize * dataSizeSrc / vectorLength);
       if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       // prepare DE/PET info
@@ -9647,14 +9659,18 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
           linIndexContigBlockList[k].linIndexCount);
       }
 #endif
+      // determine buffer size needed
+      int neededBufferSize = sendnbPartnerDeCount[i]; // default to largest
+      if (srcTermProcessingZero)
+        neededBufferSize = deflator.size(); // deflated size okay
       // intermediate buffer (in case it is needed)
-      int qwords = (sendnbPartnerDeCount[i] * dataSizeSrc) / 8;
-      if ((sendnbPartnerDeCount[i] * dataSizeSrc) % 8) ++qwords;
+      int qwords = (neededBufferSize * dataSizeSrc) / 8;
+      if ((neededBufferSize * dataSizeSrc) % 8) ++qwords;
       char *buffer = (char *)(new double[qwords]);
       // store buffer information in BufferInfo for XXE buffer control
       localrc = xxe->storeBufferInfo(buffer,
-        sendnbPartnerDeCount[i] * dataSizeSrc,
-        sendnbPartnerDeCount[i] * dataSizeSrc / vectorLength);
+        neededBufferSize * dataSizeSrc,
+        neededBufferSize * dataSizeSrc / vectorLength);
       if (ESMC_LogDefault.MsgFoundError(localrc,
         ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
       // prepare DE/PET info
