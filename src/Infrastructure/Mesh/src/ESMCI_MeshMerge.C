@@ -547,7 +547,7 @@ void sew_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh){
 
 }
 
-  extern xgu_debug;
+  extern bool xgu_debug;
 
 // srcmesh: original src (clip) mesh    (in)
 // dstmesh: original dst (subject) mesh    (in)

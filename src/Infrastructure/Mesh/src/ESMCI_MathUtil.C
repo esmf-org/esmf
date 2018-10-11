@@ -934,6 +934,80 @@ void rot_2D_2D_cart(int num_p, double *p, bool *left_turn, bool *right_turn) {
 
 
 
+void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
+
+  // Define Cross product                                                                                                                   
+#define CROSS_PRODUCT3D(out,a,b) out[0]=a[1]*b[2]-a[2]*b[1]; out[1]=a[2]*b[0]-a[0]*b[2]; out[2]=a[0]*b[1]-a[1]*b[0];
+#define DOT_PRODUCT3D(a,b) a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+#define TOL 1.0E-17
+
+  // init flags                                                            
+  *left_turn=false;
+  *right_turn=false;
+
+  // Loop through polygon                    
+  for (int i=0; i<num_p; i++) {
+    double *pntip0=p+3*i;
+    double *pntip1=p+3*((i+1)%num_p);
+    double *pntip2=p+3*((i+2)%num_p);
+
+    // vector from pntip1 to pnti0         
+    double v10[3];
+    v10[0]=pntip0[0]-pntip1[0];
+    v10[1]=pntip0[1]-pntip1[1];
+    v10[2]=pntip0[2]-pntip1[2];
+
+    // Make unit vector
+    // BOB: TODO: need to also do this to rot_2D_2D
+    double u_v10[3];
+    double v10_len=MU_LEN_VEC3D(v10);
+    if (v10_len > 0.0) {
+      double div_len=1.0/v10_len;
+      MU_MULT_BY_SCALAR_VEC3D(u_v10,v10,div_len);
+    } else {
+      continue; // Can't determine direction
+    }
+
+    // vector from pntip1 to pnti2               
+    double v12[3];
+    v12[0]=pntip2[0]-pntip1[0];
+    v12[1]=pntip2[1]-pntip1[1];
+    v12[2]=pntip2[2]-pntip1[2];
+
+    // Make unit vector
+    // BOB: TODO: need to also do this to rot_2D_2D
+    double u_v12[3];
+    double v12_len=MU_LEN_VEC3D(v12);
+    if (v12_len > 0.0) {
+      double div_len=1.0/v12_len;
+      MU_MULT_BY_SCALAR_VEC3D(u_v12,v12,div_len);
+    } else {
+      continue; // Can't determine direction
+    }   
+
+    // Calc cross product   
+    double cross[3];
+    CROSS_PRODUCT3D(cross,u_v12,u_v10);
+
+    // dot cross product with vector from center of sphere
+    // to middle point (pntip1)
+    double dir=DOT_PRODUCT3D(cross,pntip1);
+
+    // Interpret direction
+    if (dir > TOL) {
+      *left_turn=true;
+    } else if (dir < -TOL) {
+      *right_turn=true;
+    }
+  }
+
+  // If no turns default to left
+  if (!(*right_turn) && !(*left_turn)) *left_turn=true;
+
+#undef CROSS_PRODUCT3D
+#undef TOL
+
+}
 
 void rot_2D_3D_sph(int num_p, double *p, bool *left_turn, bool *right_turn) {
 
