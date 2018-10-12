@@ -6780,6 +6780,7 @@ namespace ArrayHelper{
     int partnerDeDataCount;
     int sendnbIndex;
     bool vectorFlag;  // control vectorization
+    int vectorLength;
     vector<SrcInfo<IT1, IT2> > srcInfoTable;
     vector<LinIndexContigBlock> linIndexContigBlockList;
     int localPet;
@@ -6818,7 +6819,6 @@ namespace ArrayHelper{
     int rc = ESMC_RC_NOT_IMPL;              // final return code
     int tag = 0;  // no need for special tags - messages are ordered to match
     int j = srcLocalDe;
-    int vectorLength = srcInfoTable.begin()->vectorLength;  // store time vLen
     if (srcTermProcessing==0){
       // do all the processing on the dst side
       int count = linIndexContigBlockList.size();
@@ -7131,7 +7131,6 @@ namespace ArrayHelper{
     int rc = ESMC_RC_NOT_IMPL;              // final return code
     int tag = 0;  // no need for special tags - messages are ordered to match
     int j = srcLocalDe;
-    int vectorLength = srcInfoTable.begin()->vectorLength;  // store time vLen
     if (srcTermProcessing==0){
       // do all the processing on the dst side
       int count = linIndexContigBlockList.size();
@@ -7439,7 +7438,6 @@ namespace ArrayHelper{
     int rc = ESMC_RC_NOT_IMPL;              // final return code
     int tag = 0;  // no need for special tags - messages are ordered to match
     int j = srcLocalDe;
-    int vectorLength = srcInfoTable.begin()->vectorLength;  // store time vLen
     // determine recv side bufferItemCount according to srcTermProcessing
     int dstBufferItemCount = 0; // reset
     if (srcTermProcessing == 0)
@@ -9312,8 +9310,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #endif
       // determine buffer size needed
       int neededBufferSize = recvnbPartnerDeCount[i]; // default to largest
-      if (srcTermProcessingZero)
-        neededBufferSize = kk; // deflated size okay
+      if (srcTermProcessingZero){
+        // only need a buffer large enough to hold the deflated size
+        neededBufferSize = kk;
+      }
       // large contiguous 1st level receive buffer
       int qwords = (neededBufferSize * dataSizeSrc) / 8;
       if ((neededBufferSize * dataSizeSrc) % 8) ++qwords;
@@ -9706,8 +9706,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #endif
       // determine buffer size needed
       int neededBufferSize = sendnbPartnerDeCount[i]; // default to largest
-      if (srcTermProcessingZero)
-        neededBufferSize = deflator.size(); // deflated size okay
+      if (srcTermProcessingZero){
+        // only need a buffer large enough to hold the deflated size
+        neededBufferSize = deflator.size();
+      }
       // intermediate buffer (in case it is needed)
       int qwords = (neededBufferSize * dataSizeSrc) / 8;
       if ((neededBufferSize * dataSizeSrc) % 8) ++qwords;
@@ -9732,7 +9734,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       sendnbVector[ii].srcLocalDe = j;
       sendnbVector[ii].partnerDeDataCount = deflator.size();
       sendnbVector[ii].vectorFlag = vectorFlag;
+      sendnbVector[ii].vectorLength = vectorLength;
       sendnbVector[ii].srcInfoTable.swap(srcInfoTable[i]);
+      if (srcTermProcessingZero){
+        // the srcInfoTable is no longer needed under this condition
+        vector<ArrayHelper::SrcInfo<SeqIndex<SIT>,SeqIndex<DIT> > > 
+        ().swap(sendnbVector[ii].srcInfoTable);
+      }
       sendnbVector[ii].linIndexContigBlockList.swap(linIndexContigBlockList);
       sendnbVector[ii].bufferInfo = (char **)xxe->getBufferInfoPtr();
       sendnbVector[ii].localPet = localPet;
@@ -11240,7 +11248,7 @@ int Array::sparseMatMul(
   // basis, i.e. it depends on each individual operation whether, and how the
   // vectorLength argument is used.
   // On those PETs that don't call in with srcArray nor dstArray (unusual case,
-  // but possible and supported!), the vectorLenght will be left at 0. In the
+  // but possible and supported!), the vectorLength will be left at 0. In the
   // other cases (i.e. srcArray and/or dstArray are present) it is assumed that
   // the vectorLength can be determined from which ever Array is present (first
   // see about srcArray, and then dstArray. Last one present will set). This is
@@ -14073,7 +14081,7 @@ void *ESMC_newArrayScatterThread(
   int elementSize = blockSize / laLength[0];
 #if (VERBOSITY > 9)
   for (int i=0; i<rank; i++)
-    printf("gjt in ESMC_newArrayScatter(THREAD): de=%d, laLenght[%d] = %d\n",
+    printf("gjt in ESMC_newArrayScatter(THREAD): de=%d, laLength[%d] = %d\n",
       de, i, laLength[i]);
   printf("gjt in ESMC_newArrayScatter(THREAD): elementSize = %d\n",
     elementSize);
