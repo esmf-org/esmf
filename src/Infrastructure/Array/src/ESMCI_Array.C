@@ -8951,9 +8951,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   }
 #endif
 
-
-
-
   try{
 
 #ifdef ASMM_STORE_MEMLOG_on
@@ -9381,6 +9378,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   
   // determine send pattern for all localDEs on src side
   for (int j=0; j<srcLocalDeCount; j++){
+#ifdef ASMM_STORE_LOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " j=" << j <<
+        " srcLocalDeElementCount[j]=" << srcLocalDeElementCount[j];
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     vector<int> index2Ref;
     index2Ref.reserve(srcLocalDeElementCount[j]); // good guess
     int localDeFactorCount = 0; // reset
@@ -9394,6 +9399,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       }
     }
     
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors6.1"));
+#endif
+
 #ifdef ASMM_STORE_LOG_on
     {
       std::stringstream msg;
@@ -9437,6 +9446,16 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       msg << "ASMM_STORE_LOG:" << __LINE__ << " sendnbDiffPartnerDeCount="
         << sendnbDiffPartnerDeCount;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      for (int i=0; i<sendnbDiffPartnerDeCount; i++){
+        msg.str("");  // clear
+        msg << "ASMM_STORE_LOG:" << __LINE__ << " sendnbPartnerDeCount[" << i <<
+          "]=" << sendnbPartnerDeCount[i];
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+      msg.str("");  // clear
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " sizeof(SrcInfo)="
+        << sizeof(ArrayHelper::SrcInfo<SeqIndex<DIT>,SeqIndex<SIT> >);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
 #ifdef ASMM_STORE_MEMLOG_on
@@ -9450,13 +9469,23 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       srcInfoTable[i].resize(sendnbPartnerDeCount[i]);
       srcInfoTableInit[i] = 0;   // reset
     }
-    // alignment char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
-    int qwords = (localDeFactorCount * dataSizeFactors) / 8;
-    if ((localDeFactorCount * dataSizeFactors) % 8) ++qwords;
-    char *localDeFactorBuffer = (char *)(new double[qwords]);
-    localrc = xxe->storeData(localDeFactorBuffer, qwords*8); // XXE garbage
-    if (ESMC_LogDefault.MsgFoundError(localrc,
-      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+    char *localDeFactorBuffer;
+    if (!srcTermProcessingZero){
+      // need factors on the SEND side
+      // alignment char *localDeFactorBuffer = new char[localDeFactorCount * dataSizeFactors];
+      int qwords = (localDeFactorCount * dataSizeFactors) / 8;
+      if ((localDeFactorCount * dataSizeFactors) % 8) ++qwords;
+#ifdef ASMM_STORE_MEMLOG_on
+      VM::logMemInfo(std::string("ASMMStoreNbVectors7.1"));
+#endif
+      localDeFactorBuffer = (char *)(new double[qwords]);
+      localrc = xxe->storeData(localDeFactorBuffer, qwords*8); // XXE garbage
+      if (ESMC_LogDefault.MsgFoundError(localrc,
+        ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+#ifdef ASMM_STORE_MEMLOG_on
+      VM::logMemInfo(std::string("ASMMStoreNbVectors7.2"));
+#endif
+    }
     for (int i=0; i<localDeFactorCount; i++){
       int partnerDeListIndex = partnerDeRef[i];
       int index2 = srcInfoTableInit[partnerDeListIndex]++;
@@ -9473,19 +9502,32 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
         srcInfoTable[partnerDeListIndex][index2].partnerSeqIndex.setTensor(
           srcInfoTable[partnerDeListIndex][index2].seqIndex.getTensor());
       }
-      char *localDeFactorBufferEntry = localDeFactorBuffer + i*dataSizeFactors;
-      memcpy(localDeFactorBufferEntry,
-        srcLinSeqVect[j][index2Ref2[i]].factorList[factorIndexRef[i]]
-        .factor, dataSizeFactors);
-      srcInfoTable[partnerDeListIndex][index2].factor =
-        (void *)(localDeFactorBufferEntry);
+      if (!srcTermProcessingZero){
+        // copy the factors to keep on SEND side
+        char *localDeFactorBufferEntry = localDeFactorBuffer + i*dataSizeFactors;
+        memcpy(localDeFactorBufferEntry,
+          srcLinSeqVect[j][index2Ref2[i]].factorList[factorIndexRef[i]]
+          .factor, dataSizeFactors);
+        srcInfoTable[partnerDeListIndex][index2].factor =
+          (void *)(localDeFactorBufferEntry);
+      }else{
+        srcInfoTable[partnerDeListIndex][index2].factor = NULL;
+      }
     }
+
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors7.3"));
+#endif
 
     // garbage collection
     delete [] srcInfoTableInit;
     delete [] index2Ref2;
     delete [] factorIndexRef;
     delete [] partnerDeRef;
+
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors7.4"));
+#endif
 
     // force vectors out of scope by swapping with empty vector, to free memory
     vector<AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > > ().swap(srcLinSeqVect[j]);
@@ -9659,6 +9701,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
           linIndexContigBlockList[k].linIndexCount);
       }
 #endif
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors9.0.1"));
+#endif
       // determine buffer size needed
       int neededBufferSize = sendnbPartnerDeCount[i]; // default to largest
       if (srcTermProcessingZero)
@@ -9694,6 +9739,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       sendnbVector[ii].petCount = petCount;
 
     } // for i - sendnbDiffPartnerDeCount
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors9.1"));
+#endif
     // garbage collection
     delete [] sendnbPartnerDeList;
     delete [] sendnbPartnerDeCount;
