@@ -57,6 +57,7 @@
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_IO.h"
+#include "ESMCI_TraceRegion.h"
 
 #ifdef ASMM_STORE_DUMPSMM_on
 extern "C" {
@@ -5241,6 +5242,7 @@ int Array::redistStore(
   ESMC_TypeKind_Flag srcIndexTK = srcArray->getDistGrid()->getIndexTK();
   ESMC_TypeKind_Flag dstIndexTK = dstArray->getDistGrid()->getIndexTK();
 
+  ESMCI_REGION_ENTER("ESMCI::Array::tRedistStore", localrc)
   if (srcIndexTK==ESMC_TYPEKIND_I4 && dstIndexTK==ESMC_TYPEKIND_I4){
     // call into the actual store method
     localrc = tRedistStore<ESMC_I4,ESMC_I4>(
@@ -5260,7 +5262,8 @@ int Array::redistStore(
       "Type option not supported", ESMC_CONTEXT, &rc);
     return rc;
   }
-
+  ESMCI_REGION_EXIT("ESMCI::Array::tRedistStore", localrc)
+  
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;
