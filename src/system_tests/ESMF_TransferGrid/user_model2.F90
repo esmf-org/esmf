@@ -66,6 +66,7 @@ module user_model2
     rc = ESMF_SUCCESS
 
     print *, "User Comp2 Register starting"
+    call ESMF_LogWrite (msg='User Comp2 Register starting', logmsgFlag=ESMF_LOGMSG_TRACE)
 
     ! Register the callback routines.
 
@@ -85,6 +86,7 @@ module user_model2
       userRoutine=user_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
+    call ESMF_LogWrite (msg='User Comp2 Register complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "Registered Initialize, Run, and Finalize routines"
     print *, "User Comp2 Register returning"
     
@@ -108,6 +110,7 @@ module user_model2
     rc = ESMF_SUCCESS
 
     print *, "User Comp2 Init phase=1 starting"
+    call ESMF_LogWrite (msg='User Comp2 Init phase=1 starting', logmsgFlag=ESMF_LOGMSG_TRACE)
 
     ! Create the destination Field and add it to the import State
     field = ESMF_FieldEmptyCreate(name="dstField", rc=rc)
@@ -115,6 +118,7 @@ module user_model2
     call ESMF_StateAdd(importState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
+    call ESMF_LogWrite (msg='User Comp2 Init phase=1 complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Comp2 Init phase=1 returning"
 
   end subroutine user_initP1
@@ -155,6 +159,7 @@ module user_model2
     rc = ESMF_SUCCESS
 
     print *, "User Comp2 Init phase=2 starting"
+    call ESMF_LogWrite (msg='User Comp2 Init phase=2 starting', logmsgFlag=ESMF_LOGMSG_TRACE)
 
     ! Access Field with shared Grid that is available in the importState
     call ESMF_StateGet(importState, "dstField", field, rc=rc)
@@ -176,6 +181,7 @@ module user_model2
     ! TODO: to be re-created on the changed DistGrid, and swapped out in the 
     ! TODO: Field.
    
+    call ESMF_LogWrite (msg='User Comp2 Init phase=2 complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Comp2 Init phase=2 returning"
 
   end subroutine user_initP2
@@ -200,6 +206,7 @@ module user_model2
     rc = ESMF_SUCCESS
 
     print *, "User Comp2 Init phase=3 starting"
+    call ESMF_LogWrite (msg='User Comp2 Init phase=3 starting', logmsgFlag=ESMF_LOGMSG_TRACE)
 
     ! Access Field with shared Grid that is available in the importState
     call ESMF_StateGet(importState, "dstField", field, rc=rc)
@@ -209,6 +216,7 @@ module user_model2
     call ESMF_FieldEmptyComplete(field, typekind=ESMF_TYPEKIND_R8, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
+    call ESMF_LogWrite (msg='User Comp2 Init phase=3 complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Comp2 Init phase=3 returning"
 
   end subroutine user_initP3
@@ -230,7 +238,8 @@ module user_model2
     rc = ESMF_SUCCESS
 
     print *, "User Comp2 Run starting"
-    
+    call ESMF_LogWrite (msg='User Comp2 Run starting', logmsgFlag=ESMF_LOGMSG_TRACE)
+
     ! Access the Field
     call ESMF_StateGet(importState, "dstField", field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -238,7 +247,8 @@ module user_model2
     ! Print the Field
     call ESMF_FieldPrint(field, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    
+
+    call ESMF_LogWrite (msg='User Comp2 Run complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Comp2 Run returning"
 
   end subroutine user_run
@@ -257,7 +267,7 @@ module user_model2
     rc = ESMF_SUCCESS
 
     print *, "User Comp2 Final starting"
-
+    call ESMF_LogWrite (msg='User Comp2 Final start/complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Comp2 Final returning"
 
   end subroutine user_final
