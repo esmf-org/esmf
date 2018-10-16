@@ -5902,13 +5902,13 @@ template<typename T> bool operator<(SeqIndexTensor<T> a, SeqIndexTensor<T> b){
 
 
 //-----------------------------------------------------------------------------
-template<typename T> bool operator==(SeqIndex<T> a, SeqIndex<T> b){
+template<typename T> bool operator==(SeqIndexLite<T> a, SeqIndexLite<T> b){
   return (a.decompSeqIndex == b.decompSeqIndex);
 }
-template<typename T> bool operator!=(SeqIndex<T> a, SeqIndex<T> b){
+template<typename T> bool operator!=(SeqIndexLite<T> a, SeqIndexLite<T> b){
   return (a.decompSeqIndex != b.decompSeqIndex);
 }
-template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b){
+template<typename T> bool operator<(SeqIndexLite<T> a, SeqIndexLite<T> b){
   return (a.decompSeqIndex < b.decompSeqIndex);
 }
 //-----------------------------------------------------------------------------
@@ -8581,7 +8581,6 @@ template<typename SIT, typename DIT>
   if (dstArray->tensorCount) undistributedDimsPresent = true;
 
 malloc_trim(0);
-  
   
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.1"));

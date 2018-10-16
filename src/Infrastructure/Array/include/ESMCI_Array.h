@@ -58,6 +58,10 @@ namespace ESMCI {
   template<typename SIT, typename DIT> class SparseMatrix;
 
   // class definitions
+  
+//TODO: Figure out how to have code use correct SeqIndex structure automatic.
+//TODO: For now just hard-code the use of one or the other via CPP definition.
+#define SeqIndexTensor SeqIndex
 
   //============================================================================
   template<typename T> struct SeqIndexTensor{
@@ -68,10 +72,10 @@ namespace ESMCI {
       tensorSeqIndex = -1;  // invalidate
     }
     void print(){
-      printf("SeqIndex: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
+      printf("SeqIndexTensor: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
     }
     void fprint(std::FILE *fp){
-      fprintf(fp, "SeqIndex: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
+      fprintf(fp, "SeqIndexTensor: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
     }
     bool valid(){
       if (decompSeqIndex == -1) return false; // invalid seqIndex
@@ -86,14 +90,14 @@ namespace ESMCI {
     int getTensor(){
       return tensorSeqIndex;
     }
-  };  // struct seqIndex
+  };  // struct seqIndexTensor
   template<typename T> bool operator==(SeqIndexTensor<T> a, SeqIndexTensor<T> b);
   template<typename T> bool operator!=(SeqIndexTensor<T> a, SeqIndexTensor<T> b);
   template<typename T> bool operator<(SeqIndexTensor<T> a, SeqIndexTensor<T> b);
 
-  template<typename T> struct SeqIndex{
+  template<typename T> struct SeqIndexLite{
     T decompSeqIndex;
-    SeqIndex(){
+    SeqIndexLite(){
       decompSeqIndex = -1;  // invalidate
     }
     void print(){
@@ -115,10 +119,10 @@ namespace ESMCI {
     int getTensor(){
       return 1; // dummy
     }
-  };  // struct seqIndex
-  template<typename T> bool operator==(SeqIndex<T> a, SeqIndex<T> b);
-  template<typename T> bool operator!=(SeqIndex<T> a, SeqIndex<T> b);
-  template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b);
+  };  // struct seqIndexLite
+  template<typename T> bool operator==(SeqIndexLite<T> a, SeqIndexLite<T> b);
+  template<typename T> bool operator!=(SeqIndexLite<T> a, SeqIndexLite<T> b);
+  template<typename T> bool operator<(SeqIndexLite<T> a, SeqIndexLite<T> b);
 
   template<typename T> class SeqInd{
     int n;  // number of components in sequence index
