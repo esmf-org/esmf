@@ -1701,10 +1701,10 @@ endif
 # MPT implementations do not pick up LD_PRELOAD
 # so we pass a small script to each MPI task
 ifneq (,$(findstring mpich,$(ESMF_COMM)))
-ESMF_PRELOAD_SH = ./preload.sh
+ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
 endif
 ifeq ($(ESMF_COMM),mpi)
-ESMF_PRELOAD_SH = ./preload.sh
+ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
 endif
 
 endif
