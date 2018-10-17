@@ -734,7 +734,8 @@ namespace ESMCI {
     for (int e = 0; e < num_elems; ++e) {
 
       // Get/deduce the element topology
-      const EntityType et = get_entity_type(pdim, 
+      const EntityType et = get_entity_type(pdim, elemType[e]);
+
 
 
 
