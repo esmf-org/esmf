@@ -62,8 +62,8 @@
       !type(ESMF_UtilConfig) :: config_get
       !character(ESMF_MAXSTR) :: name_set, name_get
 
-      type(ESMF_Shallow) :: s
-      type(ESMF_Deep) :: d
+      type(ESMF_Shallow)  :: sObj
+      type(ESMF_Deep)     :: dObj
 
 
 !-------------------------------------------------------------------------------
@@ -83,42 +83,41 @@
 #ifdef ESMF_INITMACROS_ON
       !NEX_UTest
       ! Shallow type test
-      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ShallowGetInitVal,ESMF_ShallowInit,s)
       write(name,*) "Testing ESMF_INIT_CHECK_SET_SHALLOW"
       write(failMsg,*) "Did not initialize value"
-      call ESMF_Test((s%num .eq. 4), name, failMsg, result, ESMF_SRCLINE)
+      ESMF_INIT_CHECK_SET_SHALLOW(ESMF_ShallowGetInitVal,ESMF_ShallowInit,sObj)
+      call ESMF_Test((sObj%num .eq. 4), name, failMsg, result, ESMF_SRCLINE)
 
 
       !NEX_UTest
       ! Deep type tests     
       !! Test Undefined Check
-      call DeepTest(d,rc)
       write(name,*) "Testing undefined object in ESMF_INIT_CHECK_DEEP"
       write(failMsg,*) "Did not recognize undefined state"
+      call DeepTest(d=dObj,rc=rc)
       call ESMF_Test((rc .eq. ESMF_RC_OBJ_NOT_CREATED),name,failMsg, &
                  result,ESMF_SRCLINE)
 
       !NEX_UTest
       !! Test Created Check
-      d=ESMF_DeepCreate()
-      call DeepTest(d,rc)
       write(name,*) "Testing created object in ESMF_INIT_CHECK_DEEP"
       write(failMsg,*) "Did not recognize created state"
+      dObj=ESMF_DeepCreate(val=7)
+      call DeepTest(d=dObj,rc=rc)
       call ESMF_Test((rc .eq. ESMF_SUCCESS),name,failMsg, &
                      result,ESMF_SRCLINE)         
 
       !NEX_UTest
       !! Test Deleted Check
-      call ESMF_DeepDestroy(d)
-      call DeepTest(d,rc)
       write(name,*) "Testing deleted object in ESMF_INIT_CHECK_DEEP"
       write(failMsg,*) "Did not recognize deleted state"
+      call ESMF_DeepDestroy(d=dObj)
+      call DeepTest(d=dObj,rc=rc)
       call ESMF_Test((rc .eq. ESMF_RC_OBJ_DELETED),name,failMsg, &
                 result,ESMF_SRCLINE)
 
 #ifdef ESMF_TESTEXHAUSTIVE
-
-
+      ! Currently no exhaustive tests
 #endif
 
 #endif

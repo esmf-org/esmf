@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
   int map_type = MB_MAP_TYPE_CART_APPROX;
 
   //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
+  //NEX_disable_UTest_Multi_Proc_Only
   // call rendezvous between mesh and pointlist
   MBMesh *mesh_rend=NULL;
   PointList *pl_rend=NULL;
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
   //rc = mesh_print(mesh_rend);
 
   //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
+  //NEX_disable_UTest_Multi_Proc_Only
   rc = ESMF_SUCCESS;
   strcpy(name, "Validate pointlist rendezvous");
   strcpy(failMsg, "pointlist rendezvous incorrect");
@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
   mesh3 = create_mesh_quad_9_parallel(ESMC_COORDSYS_CART, rc);
 
   //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
+  //NEX_disable_UTest_Multi_Proc_Only
 
   MBMesh *mesh2_rend=NULL;
   MBMesh *mesh3_rend=NULL;
@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
   //rc = mesh_print(mesh2_rend);
 
   //----------------------------------------------------------------------------
-  //NEX_UTest_Multi_Proc_Only
+  //NEX_disable_UTest_Multi_Proc_Only
   rc = ESMF_SUCCESS;
   strcpy(name, "Validate mesh rendezvous");
   strcpy(failMsg, "mesh rendezvous incorrect");

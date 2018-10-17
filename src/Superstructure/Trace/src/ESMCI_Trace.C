@@ -369,7 +369,7 @@ namespace ESMCI {
 #ifndef ESMF_NO_DLFCN
     void *preload_lib = dlopen(NULL, RTLD_LAZY);
     if (preload_lib == NULL) {
-      ESMC_LogDefault.Write("ESMF Tracing could not open shared library containing instrumentation.", ESMC_LOGMSG_WARN);
+      ESMC_LogDefault.Write("ESMF Tracing/Profiling could not open shared library containing instrumentation.", ESMC_LOGMSG_WARN);
     }
     else {
       notify_wrappers = (int (*)(int)) dlsym(preload_lib, "c_esmftrace_notify_wrappers");
@@ -377,7 +377,7 @@ namespace ESMCI {
         wrappersPresent = notify_wrappers(1);
       }
       else {
-        ESMC_LogDefault.Write("ESMF Tracing could not load dynamic instrumentation functions.", ESMC_LOGMSG_WARN);
+        ESMC_LogDefault.Write("ESMF Tracing/Profiling could not load dynamic instrumentation functions.", ESMC_LOGMSG_WARN);
       }
     }
 #else
@@ -386,14 +386,16 @@ namespace ESMCI {
     
     if (wrappersPresent != TRACE_WRAP_NONE) {
       stringstream logMsg;
-      logMsg << "ESMF Tracing enabled with "; 
+      logMsg << "ESMF Tracing/Profiling enabled with "; 
       if (wrappersPresent == TRACE_WRAP_DYNAMIC) {
         logMsg << "DYNAMIC";
       }
       else if (wrappersPresent == TRACE_WRAP_STATIC) {
         logMsg << "STATIC";
       }
-      logMsg << " instrumentation. This option should only be used for profiling applications and NOT for production runs.";
+      logMsg << " instrumentation.";
+      ESMC_LogDefault.Write(logMsg.str().c_str(), ESMC_LOGMSG_INFO);
+      logMsg.str("  This option should only be used for profiling applications and NOT for production runs.");
       ESMC_LogDefault.Write(logMsg.str().c_str(), ESMC_LOGMSG_INFO);
     } 
   }
@@ -433,7 +435,8 @@ namespace ESMCI {
     }
 
     //determine if profiling is turned on for this PET
-    profileLocalPet = ProfileIsEnabledForPET(globalvm->getLocalPet(), &localrc);
+    //if tracing is enabled, automatically turn on profiling
+    profileLocalPet = traceLocalPet || ProfileIsEnabledForPET(globalvm->getLocalPet(), &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, 
          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
       profileLocalPet = false;
@@ -442,6 +445,8 @@ namespace ESMCI {
 
     //determine output method for profiling, if enabled
     if (profileLocalPet) {
+      //always output binary if tracing is enabled
+      if (traceLocalPet) profileOutputToBinary = true;
       char const *envProfileOutput = VM::getenv("ESMF_RUNTIME_PROFILE_OUTPUT");
       if (envProfileOutput != NULL && strlen(envProfileOutput) > 0) {
         string profileOutput(envProfileOutput);

@@ -102,7 +102,7 @@ who will be checking code into the main ESMF repository.
 All design and code reviews are telecons held with the JST. 
 Telecons are scheduled with the Core Team Manager, put on the ESMF
 calendar on the home page of the ESMF website, and announced on the
-esmf\_jst@list.woc.noaa.gov list.
+esmf\_jst@cgd.ucar.edu list.
 
 \subsubsection{Telecon Etiquette}
 
@@ -112,7 +112,7 @@ especially first-timers. Please don't put the telecon on hold (we sometimes
 get telecon-stopping music or beeps this way).
 
 Within a week or so after the telecon, the host (the developer if it's a design
-or code review) is expected to send out a summary to esmf\_jst@list.woc.noaa.gov
+or code review) is expected to send out a summary to esmf\_jst@cgd.ucar.edu
 with the date of the call, the participants, and notes or conclusions.
 
 \subsubsection{Design Reviews}
@@ -209,15 +209,15 @@ existing code base.
 
 \begin{enumerate}
 \item Both core and contributors should test on at least three compilers before commit.
-\item For core team developers, a mail should go out to esmf\_core@list.woc.noaa.gov
+\item For core team developers, a mail should go out to esmf\_core@cgd.ucar.edu
 before check-in for very large commits and for commits that will break the
-HEAD. For contributors a mail should go out to esmf\_core@list.woc.noaa.gov before
+HEAD. For contributors a mail should go out to esmf\_core@cgd.ucar.edu before
 ANY commit.
 \item No code commits should be made between 0.00 and 4:00 Mountain Time. During
 this time the regression tests scripts are checking out code and any commits 
 will lead to inconsistent test results which are hard to interpret.
 \item Core team developers can be set up to receive email from SourceForge
-for every check-in, by writing esmf\_support@list.woc.noaa.gov with the request.
+for every check-in, by writing esmf\_support@ucar.edu with the request.
 \end{enumerate}
 
 To accomplish the first item on the list after a commit of source code, an email can be sent
@@ -227,14 +227,14 @@ builds and installs ESMF with four compilers: g95, gfortran, lahey, and nag, wit
 ESMF\_BOPT set to "g" and "O".
 
 When the test is started an email with the subject "ESMF\_Test\_Builds\_Pluto\_started",
-is sent to esmf\_core@list.woc.noaa.gov, with a time stamp in the body of the message.
+is sent to esmf\_core@cgd.ucar.edu, with a time stamp in the body of the message.
 If a test is already running, an email, with the subject "ESMF\_Test\_Builds\_Pluto\_not\_started",
 is sent with "Test not started, a test is already running." in the body.
 The test that is running will run to completion, a new test will NOT be queued up. A new
 "Run\_ESMF\_Test\_Build" email must be sent when the running test is completed.
 
 When the test is completed an email, "ESMF\_Test\_Builds\_Pluto" with the test results is sent to 
-esmf-test@lists.sourceforge.net, esmf\_test@list.woc.noaa.gov.
+esmf-test@lists.sourceforge.net, esmf\_test@cgd.ucar.edu.
 The test results will also appear in the Regression Test webpage under "ESMF\_Test\_Builds"
 link towards the top of the page.
 
@@ -270,7 +270,7 @@ identifying problems and notifying the appropriate developers, and
 collecting and sending out Release Notes and Known Bugs.
 
 ESMF releases are announced
-on the esmf\_jst@list.woc.noaa.gov mailing list and are posted on the ESMF
+on the esmf\_jst@cgd.ucar.edu mailing list and are posted on the ESMF
 website.  Source code is available for download from the ESMF
 website and from the main ESMF SourceForge site.
 

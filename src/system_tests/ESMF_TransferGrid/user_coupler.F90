@@ -69,7 +69,8 @@ module user_coupler
     rc = ESMF_SUCCESS
 
     print *, "User Coupler Register starting"
-    
+    call ESMF_LogWrite (msg='User Coupler starting', logmsgFlag=ESMF_LOGMSG_TRACE)
+
     ! Register the callback routines.
     call ESMF_CplCompSetEntryPoint(comp, methodflag=ESMF_METHOD_INITIALIZE, &
       userRoutine=user_initP1, phase=1, rc=rc)
@@ -88,6 +89,7 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     print *, "Registered Initialize, Run, and Finalize routines"
+    call ESMF_LogWrite (msg='User Coupler Register complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Coupler Register returning"
 
   end subroutine
@@ -122,6 +124,7 @@ module user_coupler
     rc = ESMF_SUCCESS
 
     print *, "User Coupler Init phase=1 starting"
+    call ESMF_LogWrite (msg='User Coupler Init phase=1 starting', logmsgFlag=ESMF_LOGMSG_TRACE)
 
     ! Need to reconcile import and export states
     call ESMF_StateReconcile(importState, rc=rc)
@@ -168,6 +171,7 @@ module user_coupler
     call ESMF_FieldEmptySet(dstField, grid=dstGrid, vm=dstVM, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
+    call ESMF_LogWrite (msg='User Coupler Init phase=1 complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Coupler Init phase=1 returning"
    
   end subroutine user_initP1
@@ -198,6 +202,7 @@ module user_coupler
     rc = ESMF_SUCCESS
 
     print *, "User Coupler Init phase=2 starting"
+    call ESMF_LogWrite (msg='User Coupler Init phase=2 starting', logmsgFlag=ESMF_LOGMSG_TRACE)
 
     ! Need to re-reconcile import and export states
     call ESMF_StateReconcile(importState, rc=rc)
@@ -230,6 +235,7 @@ module user_coupler
     call ESMF_FieldEmptySet(dstField, grid=dstGrid, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
         
+    call ESMF_LogWrite (msg='User Coupler Init phase=2 complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Coupler Init phase=2 returning"
    
   end subroutine user_initP2
@@ -257,14 +263,21 @@ module user_coupler
     rc = ESMF_SUCCESS
 
     print *, "User Coupler Init phase=3 starting"
+    call ESMF_LogWrite (msg='User Coupler Init phase=3 starting', logmsgFlag=ESMF_LOGMSG_TRACE)
 
     ! Re-reconcile import and export states, just in case something changed
+    call ESMF_LogWrite (msg='User Coupler Init phase=3 Reconcile importState',  &
+        logmsgFlag=ESMF_LOGMSG_TRACE)
     call ESMF_StateReconcile(importState, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
+    call ESMF_LogWrite (msg='User Coupler Init phase=3 Reconcile exportState',  &
+        logmsgFlag=ESMF_LOGMSG_TRACE)
     call ESMF_StateReconcile(exportState, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
     ! Access source, final, and destination Fields
+    call ESMF_LogWrite (msg='User Coupler Init phase=3 access Fields',  &
+        logmsgFlag=ESMF_LOGMSG_TRACE)
     call ESMF_StateGet(importState, "srcField", srcField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateGet(importState, "finalField", finalField, rc=rc)
@@ -273,7 +286,11 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
     
     ! Precompute the Redist operation, give it a name and keep it in importState
+    call ESMF_LogWrite (msg='User Coupler Init phase=3 FieldRegridStore srcField->dstField',  &
+        logmsgFlag=ESMF_LOGMSG_TRACE)
     call ESMF_FieldRedistStore(srcField, dstField, routehandle=rh, rc=rc)
+    call ESMF_LogWrite (msg='User Coupler Init phase=3 FieldRegridStore srcField->dstField complete',  &
+        logmsgFlag=ESMF_LOGMSG_TRACE)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_RouteHandleSet(rh, name="Redist", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -281,13 +298,18 @@ module user_coupler
     if (rc/=ESMF_SUCCESS) return ! bail out
         
     ! Precompute the Regrid operation, give it a name and keep it in importState
+    call ESMF_LogWrite (msg='User Coupler Init phase=3 FieldRegridStore dstField->finalField',  &
+        logmsgFlag=ESMF_LOGMSG_TRACE)
     call ESMF_FieldRegridStore(dstField, finalField, routehandle=rh, rc=rc)
+    call ESMF_LogWrite (msg='User Coupler Init phase=3 FieldRegridStore dstField->finalField complete',  &
+        logmsgFlag=ESMF_LOGMSG_TRACE)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_RouteHandleSet(rh, name="Regrid", rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     call ESMF_StateAdd(importState, (/rh/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
         
+    call ESMF_LogWrite (msg='User Coupler Init phase=3 complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Coupler Init phase=3 returning"
    
   end subroutine user_initP3
@@ -310,7 +332,8 @@ module user_coupler
     rc = ESMF_SUCCESS
 
     print *, "User Coupler Run starting"
-  
+    call ESMF_LogWrite (msg='User Coupler Run starting', logmsgFlag=ESMF_LOGMSG_TRACE)
+
     ! Access source, final, and destination Fields
     call ESMF_StateGet(importState, "srcField", srcField, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
@@ -335,6 +358,7 @@ module user_coupler
     call ESMF_FieldRedist(dstField, finalField, routehandle=rh, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     
+    call ESMF_LogWrite (msg='User Coupler Run complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Coupler Run returning"
 
   end subroutine user_run
@@ -351,7 +375,7 @@ module user_coupler
     rc = ESMF_SUCCESS
 
     print *, "User Coupler Final starting"
-
+    call ESMF_LogWrite (msg='User Coupler Final start/complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Coupler Final returning"
   
   end subroutine user_final

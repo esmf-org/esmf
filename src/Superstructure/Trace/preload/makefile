@@ -33,8 +33,15 @@ endif
 
 tracelib_preload: preload.o preload_io.o preload_mpi.o wrappers.o wrappers_io.o wrappers_mpi.o
 	$(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX) $^ $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) $(ESMF_TRACE_ESMFLIB)
-
-#	$(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX) $^ $(ESMF_SL_LIBLIBS) $(ESMF_TRACE_ESMFLIB)
+	$(MAKE) build_preload_script
 
 tracelib_static: wrappers_io.o wrappers_mpi.o wrappers.o
 	$(ESMF_AR) $(ESMF_ARCREATEFLAGS) $(ESMF_LDIR)/libesmftrace_static.a $^
+
+build_preload_script:
+	-@cd $(ESMF_LIBDIR)
+	-@echo "#!/bin/sh" > $(ESMF_PRELOADSCRIPT)
+	-@echo "# Script to preload ESMF dynamic trace library" >> $(ESMF_PRELOADSCRIPT)
+	-@echo 'env LD_PRELOAD="$$LD_PRELOAD $(ESMF_TRACE_LDPRELOAD)" $$*' >> $(ESMF_PRELOADSCRIPT)
+	chmod 755 $(ESMF_PRELOADSCRIPT)
+

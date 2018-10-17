@@ -237,9 +237,7 @@ export ESMF_ETCDIR = default
 endif
 
 ifndef ESMF_MOAB
-#TODO: reactivate MOAB once issues from August2018 commit resolved.
-#export ESMF_MOAB = default
-export ESMF_MOAB = OFF
+export ESMF_MOAB = default
 endif
 
 ifndef ESMF_ACC_SOFTWARE_STACK
@@ -1692,11 +1690,29 @@ endif
 
 ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
 ESMF_TRACE_LDPRELOAD := $(ESMF_LIBDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)
+ESMF_PRELOADSCRIPT = $(ESMF_LIBDIR)/preload.sh
+
+ifneq ($(ESMF_OS),Darwin)
+ESMF_ENV_PRELOAD = LD_PRELOAD
+else
+ESMF_ENV_PRELOAD = DYLD_INSERT_LIBRARIES
 endif
+
+# MPT implementations do not pick up LD_PRELOAD
+# so we pass a small script to each MPI task
+ifneq (,$(findstring mpich,$(ESMF_COMM)))
+ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
+endif
+ifeq ($(ESMF_COMM),mpi)
+ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
+endif
+
+endif
+
 ESMF_TRACE_STATICLINKLIBS := -lesmftrace_static
 
 ESMF_TRACE_WRAPPERS_IO  := write writev pwrite read open
-ESMF_TRACE_WRAPPERS_MPI := MPI_Barrier MPI_Wait
+ESMF_TRACE_WRAPPERS_MPI := MPI_Allreduce MPI_Barrier MPI_Wait
 ESMF_TRACE_WRAPPERS_MPI += mpi_allgather_ mpi_allgather__ mpi_allgatherv_ mpi_allgatherv__
 ESMF_TRACE_WRAPPERS_MPI += mpi_allreduce_ mpi_allreduce__ mpi_alltoall_ mpi_alltoall__
 ESMF_TRACE_WRAPPERS_MPI += mpi_alltoallv_ mpi_alltoallv__ mpi_alltoallw_ mpi_alltoallw__
@@ -3005,6 +3021,36 @@ ftest:
 	  $(ESMF_MPIRUN) -np $(NP) $(ESMF_TOOLRUN) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
 	fi ; \
 	cat ./PET*$(TNAME)UTest.Log > ./ESMF_$(TNAME)UTest.Log ; \
+	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
+
+
+# same as ftest target above, except turns on profiling
+# region timings appear at the end of the log files and a trace is generated
+ftest_profile: 
+	-@cd $(ESMF_TESTDIR) ; \
+	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
+	$(ESMF_RM) -rf ./ESMF_$(TNAME)UTest_traceout ; \
+	echo env ESMF_RUNTIME_TRACE=ON $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1\> ./ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
+	env ESMF_RUNTIME_TRACE=ON $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
+	cat ./PET*$(TNAME)UTest.Log > ./ESMF_$(TNAME)UTest.Log ; \
+	$(ESMF_MV) ./traceout ./ESMF_$(TNAME)UTest_traceout ; \
+	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
+
+# same as ftest_profile target above, except also uses
+# LD_PRELOAD to override MPI/IO symbols and time them
+ftest_profile_preload: 
+	-@cd $(ESMF_TESTDIR) ; \
+	$(ESMF_RM) ./PET*$(TNAME)UTest.Log ; \
+	$(ESMF_RM) -rf ./ESMF_$(TNAME)UTest_traceout ; \
+	if [ -z $(ESMF_PRELOAD_SH) ] ; then \
+	  echo env ESMF_RUNTIME_TRACE=ON $(ESMF_ENV_PRELOAD)=$(ESMF_TRACE_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1\> ./ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
+	  env ESMF_RUNTIME_TRACE=ON $(ESMF_ENV_PRELOAD)=$(ESMF_TRACE_LDPRELOAD) $(ESMF_MPIRUN) -np $(NP) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
+	else \
+	  echo env ESMF_RUNTIME_TRACE=ON $(ESMF_MPIRUN) -np $(NP) $(ESMF_PRELOAD_SH) ./ESMF_$(TNAME)UTest 1\> ./ESMF_$(TNAME)UTest.stdout 2\>\&1 ; \
+	  env ESMF_RUNTIME_TRACE=ON $(ESMF_MPIRUN) -np $(NP) $(ESMF_PRELOAD_SH) ./ESMF_$(TNAME)UTest 1> ./ESMF_$(TNAME)UTest.stdout 2>&1 ; \
+	fi ; \
+	cat ./PET*$(TNAME)UTest.Log > ./ESMF_$(TNAME)UTest.Log ; \
+	$(ESMF_MV) ./traceout ./ESMF_$(TNAME)UTest_traceout ; \
 	$(ESMF_RM) ./PET*$(TNAME)UTest.Log
 
 htest:

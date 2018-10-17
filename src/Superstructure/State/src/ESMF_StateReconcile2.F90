@@ -1039,8 +1039,8 @@ contains
     end if
 
     if (needs_count /= ubound (vm_ids, 1)) then
-      print *, ESMF_METHOD, ': pet', mypet,  &
-          ':: WARNING - size mismatch between needs_count and vm_ids', needs_count, ubound (vm_ids, 1)
+      write (errstring, '(a,i0,a,i0)') 'size mismatch: needs_count = ', needs_count, ', vm_ids =', ubound (vm_ids, 1)
+      call ESMF_LogWrite (msg=errstring, logmsgFlag=ESMF_LOGMSG_ERROR, ESMF_CONTEXT)
       if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, msg='needs_count /= ubound (vm_ids, 1)', &
           ESMF_CONTEXT,  &
           rcToReturn=rc)) return
@@ -2401,6 +2401,7 @@ contains
     integer :: lbufsize
     integer :: pass
 
+    character(ESMF_MAXSTR) :: errstring
     integer :: i
     integer :: mypet, npets, pet
 
@@ -2417,9 +2418,10 @@ contains
 ! Sanity check: siwrap and needs list must be the same size.
 
     if (ubound (siwrap, 1) /= ubound (needs_list, 1)) then
-      print *, ESMF_METHOD,  &
-          ': error - siwrap ubound =', ubound (siwrap, 1),  &
-          '/= needs_list =', ubound (needs_list, 1)
+      write (errstring, '(a,i0,a,i0)')  &
+          'siwrap ubound =', ubound (siwrap, 1),  &
+          '/= needs_list ubound =', ubound (needs_list, 1)
+      call ESMF_LogWrite (msg=errstring, logmsgFlag=ESMF_LOGMSG_ERROR, ESMF_CONTEXT)
       if (ESMF_LogFoundError(ESMF_RC_INTNRL_INCONS, &
           msg="ubound (siwrap) /= ubound (needs_list)", &
           ESMF_CONTEXT,  &
