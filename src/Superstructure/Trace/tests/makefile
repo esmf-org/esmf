@@ -41,7 +41,7 @@ include ${ESMF_DIR}/makefile
 DIRS        =
 
 CLEANDIRS   =
-CLEANFILES  = $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout $(PRELOADSCRIPT)
+CLEANFILES  = $(TESTS_BUILD) $(ESMF_TESTDIR)/traceout
 CLOBBERDIRS =
 
 ESMF_TESTTRACE_TARGET = ftest_profile
