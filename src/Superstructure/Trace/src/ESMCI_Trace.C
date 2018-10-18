@@ -657,11 +657,11 @@ namespace ESMCI {
       }
       name.insert(0, prefix);
       
-      snprintf(strbuf, STATLINE, "%-35s %-6lu %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f %-6lu",
-               name.c_str(), rn->getCount(), rn->getTotal()*NANOS_TO_MILLIS,
-               rn->getSelfTime()*NANOS_TO_MILLIS, rn->getMean()*NANOS_TO_MILLIS,
-               rn->getMin()*NANOS_TO_MILLIS, rn->getMax()*NANOS_TO_MILLIS,
-               rn->getTotalMPI()*NANOS_TO_MILLIS, rn->getCountMPI());
+      snprintf(strbuf, STATLINE, "%-50s %-6lu %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f",
+               name.c_str(), rn->getCount(), rn->getTotal()*NANOS_TO_SECS,
+               rn->getSelfTime()*NANOS_TO_SECS, rn->getMean()*NANOS_TO_SECS,
+               rn->getMin()*NANOS_TO_SECS, rn->getMax()*NANOS_TO_SECS,
+               rn->getTotalMPI()*NANOS_TO_SECS);
       if (printToLog) {
         ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
       }
@@ -685,8 +685,8 @@ namespace ESMCI {
     ofstream ofs;
     int localrc;
     char strbuf[STATLINE];
-    snprintf(strbuf, STATLINE, "%-35s %-6s %-11s %-11s %-11s %-11s %-11s %-11s %-6s",
-             "Region", "Count", "Total (ms)", "Self (ms)", "Mean (ms)", "Min (ms)", "Max (ms)", "MPI (ms)", "MPI#");
+    snprintf(strbuf, STATLINE, "%-50s %-6s %-11s %-11s %-11s %-11s %-11s %-11s",
+             "Region", "Count", "Total (s)", "Self (s)", "Mean (s)", "Min (s)", "Max (s)", "MPI (s)");
 
     if (printToLog) {
       ESMC_LogDefault.Write("**************** Region Timings *******************", ESMC_LOGMSG_INFO);

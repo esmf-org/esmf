@@ -26,6 +26,7 @@ using std::sort;
 namespace ESMCI {
 
   static const float NANOS_TO_MILLIS = 1 / 1000.0 / 1000.0;  /* conversion factor */
+  static const float NANOS_TO_SECS = 1 / 1000.0 / 1000.0 / 1000.0;
   
   class RegionNode {
     
