@@ -110,6 +110,7 @@ DistGrid *DistGrid::create(
   InterArray<int> *lastExtra,           // (in)
   ESMC_IndexFlag *indexflag,            // (in)
   InterArray<int> *connectionList,      // (in)
+  bool balanceflag,                     // (in)
   DELayout *delayout,                   // (in)
   VM *vm,                               // (in)
   bool actualFlag,                      // (in)
@@ -187,7 +188,32 @@ DistGrid *DistGrid::create(
   }
 #endif
 
-  if (delayoutPresent || present(firstExtra) || present(lastExtra) || 
+  if (balanceflag){
+    // for now assume very simple conditions, or else error out
+    // that is why this is it's own high level branch to balance
+    if (delayoutPresent || present(firstExtra) || present(lastExtra) || 
+      indexflag || present(connectionList) || vm || !actualFlag){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+        "Cannot balance DistGrid creation under these conditions.", 
+        ESMC_CONTEXT, rc);
+      return ESMC_NULL_POINTER;
+    }
+    // create a DistGrid that uses default decomposition to balance index space
+    int *dimCountInterArray = new int[2];
+    dimCountInterArray[0] = dg->getDimCount();
+    dimCountInterArray[1] = dg->getTileCount();
+    InterArray<int> *minIndex =
+      new InterArray<int>((int*)(dg->getMinIndexPDimPTile()), 2,
+      dimCountInterArray);
+    InterArray<int> *maxIndex =
+      new InterArray<int>((int*)(dg->getMaxIndexPDimPTile()), 2,
+      dimCountInterArray);
+    delete [] dimCountInterArray;
+    distgrid = ESMCI::DistGrid::create(minIndex, maxIndex, NULL, NULL, 
+      0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc, dg->indexTK);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+  }else if (delayoutPresent || present(firstExtra) || present(lastExtra) || 
     indexflag || present(connectionList) || vm || !actualFlag){
    if (actualFlag){
     // creating a new DistGrid from the existing one considering additional info
@@ -952,6 +978,7 @@ DistGrid *DistGrid::create(
   }
   
   if (delayout){
+    //TODO: rethink the logic here, seems that "delayout" could be passed in!
     // reset the delayoutCreator flag in the src DistGrid, because the newly
     // created DistGrid will now point to the same DELayout by reference
     // -> leave it up to ESMF automatic garbage collection to clean up the

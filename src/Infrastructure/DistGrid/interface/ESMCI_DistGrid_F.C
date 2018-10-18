@@ -46,8 +46,8 @@ extern "C" {
   void FTN_X(c_esmc_distgridcreatedg)(ESMCI::DistGrid **ptr, 
     ESMCI::DistGrid **dg, ESMCI::InterArray<int> *firstExtra,
     ESMCI::InterArray<int> *lastExtra, ESMC_IndexFlag *indexflag,
-    ESMCI::InterArray<int> *connectionList, ESMCI::DELayout **delayout, 
-    ESMCI::VM **vm, int *rc){
+    ESMCI::InterArray<int> *connectionList, ESMC_Logical *balanceflag,
+    ESMCI::DELayout **delayout, ESMCI::VM **vm, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_distgridcreatedg()"
     // Initialize return code; assume routine not implemented
@@ -80,11 +80,15 @@ extern "C" {
         ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
       return; // bail out
     }
+    // convert to bool
+    bool balanceflagOpt = false;  // default
+    if (ESMC_NOT_PRESENT_FILTER(balanceflag) != ESMC_NULL_POINTER)
+      if (*balanceflag == ESMF_TRUE) balanceflagOpt = true;
     // all PETs call into the C++ create(), but the actualFlag identifies PETs
     // that are expected to create actual DistGrid objects
     *ptr = ESMCI::DistGrid::create(*dg, firstExtra, lastExtra,
-      ESMC_NOT_PRESENT_FILTER(indexflag), connectionList, opt_delayout, 
-      opt_vm, actualFlag, &localrc);
+      ESMC_NOT_PRESENT_FILTER(indexflag), connectionList, 
+      balanceflagOpt, opt_delayout, opt_vm, actualFlag, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out
     // return successfully
