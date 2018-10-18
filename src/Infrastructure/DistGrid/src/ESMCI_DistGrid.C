@@ -36,6 +36,7 @@
 #include "ESMCI_Base.h" 
 #include "ESMCI_VM.h"
 #include "ESMCI_DELayout.h"
+#include "ESMCI_Array.h"
 #include "ESMCI_LogErr.h"
 
 using namespace std;
@@ -154,7 +155,8 @@ DistGrid *DistGrid::create(
 #if 0
   {
     std::stringstream debugmsg;
-    debugmsg << "DistGrid::create(): DELayout " << delayout;
+    debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+      " DELayout " << delayout;
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
@@ -183,7 +185,8 @@ DistGrid *DistGrid::create(
 #if 0
   {
     std::stringstream debugmsg;
-    debugmsg << "DistGrid::create(): 2nd DELayout " << delayout;
+    debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+      " 2nd DELayout " << delayout;
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
@@ -209,10 +212,171 @@ DistGrid *DistGrid::create(
       new InterArray<int>((int*)(dg->getMaxIndexPDimPTile()), 2,
       dimCountInterArray);
     delete [] dimCountInterArray;
-    distgrid = ESMCI::DistGrid::create(minIndex, maxIndex, NULL, NULL, 
-      0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc, dg->indexTK);
+    distgrid = DistGrid::create(minIndex, maxIndex, NULL, NULL, 0, 0,
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc, dg->indexTK);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    // determine whether the incoming DG holds any arbitrary sequence indices
+    VM *currentVM = VM::getCurrent();
+    int localArbSeqFlag = 0; // initialize
+    int allArbSeqFlag;
+    if (dg->delayout->getLocalDeCount() && 
+      (dg->getArbSeqIndexList(0, 1)!=NULL)) localArbSeqFlag = 1;
+    currentVM->allreduce(&localArbSeqFlag, &allArbSeqFlag, 1, vmI4, vmSUM);
+#if 0
+    {
+      std::stringstream debugmsg;
+      debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+        " allArbSeqFlag = " << allArbSeqFlag;
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    if (allArbSeqFlag > 0){
+      // there are arbitrary sequence indices that need to be redisted
+      if (dg->getDimCount() != 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+          "Redist of arb. sequence indices currently only supported for 1D.", 
+          ESMC_CONTEXT, rc);
+        return ESMC_NULL_POINTER;
+      }
+      // create an Array on the incoming DistGrid's arbitary sequence allocs
+      vector<LocalArray *> larrayListV(dg->delayout->getLocalDeCount());
+      LocalArray **larrayList = &larrayListV[0];
+      int **elementCount = (int **)dg->getElementCountPCollPLocalDe();
+      vector<void *> keepArbPtr(dg->delayout->getLocalDeCount());
+      for (int i=0; i<dg->delayout->getLocalDeCount(); i++){
+        keepArbPtr[i] = (void *)dg->getArbSeqIndexList(i, 1, &localrc);
+#if 0
+        {
+          std::stringstream debugmsg;
+          debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+            " keepArbPtr[i] = " << keepArbPtr[i];
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          for (int j=0; j<75; j++){
+            debugmsg.str("");  // clear
+            debugmsg << "DistGrid::create(fromDG): " << ((int *)keepArbPtr[i])[j];
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          }
+        }
+#endif
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+        larrayList[i] = LocalArray::create(dg->indexTK, 1,
+          &(elementCount[0][i]), keepArbPtr[i], DATA_COPY, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+        // disable arbitrary sequence indices temporarily for canoncial Redist
+        localrc = dg->setArbSeqIndex(NULL, i, 1);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      }
+      Array *srcArbSeqArray = Array::create(larrayList,
+        dg->delayout->getLocalDeCount(), dg, DATA_REF, NULL, NULL, NULL,
+          NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      void **baseAddrList;
+#if 0
+      baseAddrList = srcArbSeqArray->getLarrayBaseAddrList();
+      for (int i=0; i<dg->delayout->getLocalDeCount(); i++){
+        {
+          std::stringstream debugmsg;
+          debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+            " getTotalElementCountPLocalDe[i] = " << 
+            srcArbSeqArray->getTotalElementCountPLocalDe()[i] <<
+            " baseAddrList[i] = " << baseAddrList[i] <<
+            " keepArbPtr[i] = " << keepArbPtr[i];
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          for (int j=0; j<srcArbSeqArray->getTotalElementCountPLocalDe()[i]; j++){
+            debugmsg.str("");  // clear
+            debugmsg << "DistGrid::create(fromDG): " << ((int *)baseAddrList[i])[j]
+              << " - " << ((int *)keepArbPtr[i])[j];
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          }
+        }
+      }
+#endif
+      // create an Array on new DistGrid to hold arbitrary sequence indices
+      ArraySpec arrayspec;
+      arrayspec.set(1, dg->indexTK);
+      Array *dstArbSeqArray = Array::create(&arrayspec, distgrid, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      // Redist srcArbSeqArray -> dstArbSeqArray
+      RouteHandle *rh;
+      localrc = Array::redistStore(srcArbSeqArray, dstArbSeqArray, &rh);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      localrc = Array::redist(srcArbSeqArray, dstArbSeqArray, &rh);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      localrc = Array::redistRelease(rh);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      // restore the arbitrary sequence indices on the incoming DG
+      for (int i=0; i<dg->delayout->getLocalDeCount(); i++){
+        localrc = dg->setArbSeqIndex(keepArbPtr[i], i, 1);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      }
+      // set the arbitrary sequence indices on the outgoing DG
+      baseAddrList = dstArbSeqArray->getLarrayBaseAddrList();
+      for (int i=0; i<distgrid->delayout->getLocalDeCount(); i++){
+#if 0
+        {
+          std::stringstream debugmsg;
+          debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+            " getTotalElementCountPLocalDe[i] = " << 
+            dstArbSeqArray->getTotalElementCountPLocalDe()[i] <<
+            " baseAddrList[i] = " << baseAddrList[i];
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          for (int j=0; j<dstArbSeqArray->getTotalElementCountPLocalDe()[i]; j++){
+            debugmsg.str("");  // clear
+            debugmsg << "DistGrid::create(fromDG): " << ((int *)baseAddrList[i])[j];
+            ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+          }
+        }
+#endif
+        if (dg->indexTK == ESMC_TYPEKIND_I1){
+          InterArray<ESMC_I1> arbSeqIndex((ESMC_I1 *)baseAddrList[i],
+            dstArbSeqArray->getTotalElementCountPLocalDe()[i]);
+          localrc = distgrid->setArbSeqIndex(&arbSeqIndex, i, 1);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+        }else if (dg->indexTK == ESMC_TYPEKIND_I2){
+          InterArray<ESMC_I2> arbSeqIndex((ESMC_I2 *)baseAddrList[i],
+            dstArbSeqArray->getTotalElementCountPLocalDe()[i]);
+          localrc = distgrid->setArbSeqIndex(&arbSeqIndex, i, 1);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+        }else if (dg->indexTK == ESMC_TYPEKIND_I4){
+          InterArray<ESMC_I4> arbSeqIndex((ESMC_I4 *)baseAddrList[i],
+            dstArbSeqArray->getTotalElementCountPLocalDe()[i]);
+          localrc = distgrid->setArbSeqIndex(&arbSeqIndex, i, 1);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+        }else if (dg->indexTK == ESMC_TYPEKIND_I8){
+          InterArray<ESMC_I8> arbSeqIndex((ESMC_I8 *)baseAddrList[i],
+            dstArbSeqArray->getTotalElementCountPLocalDe()[i]);
+          localrc = distgrid->setArbSeqIndex(&arbSeqIndex, i, 1);
+          if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+            ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+        }else{
+          // error condition, indexTK not supported
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+            "Unsupported DistGrid indexTK", ESMC_CONTEXT, rc);
+          return NULL;
+        }
+      }
+      // clean-up
+      localrc = Array::destroy(&srcArbSeqArray, true);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      localrc = Array::destroy(&dstArbSeqArray, true);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    }
   }else if (delayoutPresent || present(firstExtra) || present(lastExtra) || 
     indexflag || present(connectionList) || vm || !actualFlag){
    if (actualFlag){
@@ -683,8 +847,12 @@ DistGrid *DistGrid::create(
        (dg->getArbSeqIndexList(0, 1)!=NULL)) localArbSeqFlag = 1;
      currentVM->allreduce(&localArbSeqFlag, &allArbSeqFlag, 1, vmI4, vmSUM);
 #if 0
-     sprintf(msgString, "DGfromDG: allArbSeqFlag = %d", allArbSeqFlag);
-     ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+     {
+        std::stringstream debugmsg;
+        debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+          " allArbSeqFlag = " << allArbSeqFlag;
+        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+     }
 #endif
      // now allArbSeqFlag > 0 means that there are provider DistGrid DEs that
      // hold arbitrary sequence index allocations that need to be sent to
@@ -5774,6 +5942,68 @@ template<typename T> int DistGrid::setArbSeqIndex(
   memcpy(arbSeqIndexListPCollPLocalDe[collocationIndex][localDe],
     arbSeqIndex->array, sizeOfType*arbSeqIndex->extent[0]);
   
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::setArbSeqIndex()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::unsetArbSeqIndex
+//
+// !INTERFACE:
+//
+int DistGrid::setArbSeqIndex(
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  void *ptr,                    // in
+  int localDe,                  // in  - local DE = {0, ..., localDeCount-1}
+  int collocation               // in
+  ){
+//
+// !DESCRIPTION:
+//    Unset the array of arbitrary indices
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+#define DEBUGPRINTS____disable
+#ifdef DEBUGPRINTS
+  char msg[160];
+  sprintf(msg, "setArbSeqIndex: localDe=%d, collocation=%d", localDe, 
+    collocation);
+  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+#endif
+  
+  // check input
+  int localDeCount = delayout->getLocalDeCount();
+  if (localDe < 0 || localDe > localDeCount-1){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "Specified local DE out of bounds", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  int collocationIndex;
+  for (collocationIndex=0; collocationIndex<diffCollocationCount;
+    collocationIndex++)
+    if (collocationTable[collocationIndex] == collocation) break;
+  if (collocationIndex==diffCollocationCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+      "Specified collocation not found", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+  arbSeqIndexListPCollPLocalDe[collocationIndex][localDe] = ptr;
+    
   // return successfully
   rc = ESMF_SUCCESS;
   return rc;

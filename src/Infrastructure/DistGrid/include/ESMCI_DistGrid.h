@@ -224,6 +224,7 @@ namespace ESMCI {
       const;
     template<typename T> int setArbSeqIndex(InterArray<T> *arbSeqIndex, 
       int localDe, int collocation);
+    int setArbSeqIndex(void *ptr, int localDe, int collocation);
     int setCollocationPDim(InterArray<int> *collocationPDim);
     // fill()
     template<typename T> int fillSeqIndexList(InterArray<T> *seqIndexList,

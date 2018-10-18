@@ -363,7 +363,7 @@ namespace ESMCI {
     // MPI_OFFSET. Instead of int64_t, an alternative is to use MPI_offset,
     // however, this may run into issues with MPIUNI.
     int constructFileMap(int64_t *fileMapList, int mapListSize,
-                         int localDe, int64_t unmap_val = 0) const;
+                         int localDe, int64_t unmap_val=0) const;
     // serialize() and deserialize()
     int serialize(char *buffer, int *length, int *offset,
       const ESMC_AttReconcileFlag &attreconflag,
@@ -389,14 +389,14 @@ namespace ESMCI {
       bool *finishedflag=NULL, bool *cancelledflag=NULL, bool checkflag=false);
     static int haloRelease(RouteHandle *routehandle);
     static int redistStore(Array *srcArray, Array *dstArray,
-      RouteHandle **routehandle, InterArray<int> *srcToDstTransposeMap,
-      ESMC_TypeKind_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL,
-      bool ignoreUnmatched=false, int *pipelineDepthArg = NULL);
+      RouteHandle **routehandle, InterArray<int> *srcToDstTransposeMap=NULL,
+      ESMC_TypeKind_Flag typekindFactor=ESMF_NOKIND, void *factor=NULL,
+      bool ignoreUnmatched=false, int *pipelineDepthArg=NULL);
     template<typename SIT, typename DIT>
       static int tRedistStore(Array *srcArray, Array *dstArray,
-      RouteHandle **routehandle, InterArray<int> *srcToDstTransposeMap,
-      ESMC_TypeKind_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL,
-      bool ignoreUnmatched=false, int *pipelineDepthArg = NULL);
+      RouteHandle **routehandle, InterArray<int> *srcToDstTransposeMap=NULL,
+      ESMC_TypeKind_Flag typekindFactor=ESMF_NOKIND, void *factor=NULL,
+      bool ignoreUnmatched=false, int *pipelineDepthArg=NULL);
     static int redist(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
       bool *finishedflag=NULL, bool *cancelledflag=NULL,
@@ -407,13 +407,13 @@ namespace ESMCI {
       RouteHandle **routehandle,
       std::vector<SparseMatrix<SIT,DIT> > const &sparseMatrix,
       bool haloFlag=false, bool ignoreUnmatched=false,
-      int *srcTermProcessingArg = NULL, int *pipelineDepthArg = NULL);
+      int *srcTermProcessingArg=NULL, int *pipelineDepthArg=NULL);
     template<typename SIT, typename DIT>
       static int tSparseMatMulStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle,
       std::vector<SparseMatrix<SIT,DIT> > const &sparseMatrix,
       bool haloFlag=false, bool ignoreUnmatched=false,
-      int *srcTermProcessingArg = NULL, int *pipelineDepthArg = NULL);
+      int *srcTermProcessingArg=NULL, int *pipelineDepthArg=NULL);
     static int sparseMatMul(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
       bool *finishedflag=NULL, bool *cancelledflag=NULL,
