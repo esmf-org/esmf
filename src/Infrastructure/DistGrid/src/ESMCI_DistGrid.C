@@ -240,7 +240,9 @@ DistGrid *DistGrid::create(
         return ESMC_NULL_POINTER;
       }
       // create an Array on the incoming DistGrid's arbitary sequence allocs
-      vector<LocalArray *> larrayListV(dg->delayout->getLocalDeCount());
+      int larrayCount = dg->delayout->getLocalDeCount();
+      if (larrayCount==0) larrayCount=1;  // there must be one element
+      vector<LocalArray *> larrayListV(larrayCount);
       LocalArray **larrayList = &larrayListV[0];
       int **elementCount = (int **)dg->getElementCountPCollPLocalDe();
       vector<void *> keepArbPtr(dg->delayout->getLocalDeCount());
@@ -270,9 +272,16 @@ DistGrid *DistGrid::create(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }
+      if (dg->delayout->getLocalDeCount() == 0){
+        // need to prepare a dummy LocalArray object
+        larrayList[0] = LocalArray::create(dg->indexTK, 1,
+          &(elementCount[0][0]), NULL, DATA_NONE, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      }
       Array *srcArbSeqArray = Array::create(larrayList,
-        dg->delayout->getLocalDeCount(), dg, DATA_REF, NULL, NULL, NULL,
-          NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc);
+        larrayCount, dg, DATA_REF, NULL, NULL, NULL,
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       void **baseAddrList;
