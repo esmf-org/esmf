@@ -229,6 +229,37 @@ namespace ESMCI {
     size_t getCountMPI() const {
       return _count_mpi;
     }
+
+    ////// MERGING ///////
+    void merge(const RegionNode &other) {
+
+      size_t old_count = _count;
+      double old_mean = _mean;
+         
+      _count += other.getCount();
+      _total += other.getTotal();
+      if (_min > other.getMin()) {
+	_min = other.getMin();
+      }
+      if (_max < other.getMax()) {
+	_max = other.getMax();
+      }
+
+      //weighted average
+      _mean = ((old_count * old_mean) + (other.getMean() * other.getCount())) / _count;
+
+      double old_mean_sq = old_mean * old_mean;
+      double other_mean_sq = other.getMean() * other.getMean();
+      double merge_mean_sq = _mean * _mean;
+      double old_var = _variance / (old_count - 1.0);
+      double other_var = other._variance / (other.getCount() - 1.0);
+      _variance = ((old_var + old_mean_sq - merge_mean_sq) * (old_count - 1.0) +
+		   (other_var + other_mean_sq - merge_mean_sq) * (other.getCount() - 1.0));     
+
+      //TODO: deal with child nodes
+      
+    }
+
     
   private:
 

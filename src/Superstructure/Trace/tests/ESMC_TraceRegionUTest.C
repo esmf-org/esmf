@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <iostream>
+#include <cmath>
 
 // ESMF header
 #include "ESMC.h"
@@ -33,6 +34,16 @@
 //EOP
 //-----------------------------------------------------------------------------
 
+static int eqltol(double a, double b) {
+  //printf("abs(a-b): a=%f, b=%f,  a-b=%f, abs(a-b)=%f\n", a, b, a-b, std::abs(a-b));
+  if (std::abs(a - b) < .00000001) {    
+    return 1;
+  }
+  else {
+    return 0;
+  }
+}
+
 int main(void){
 
   char name[80];
@@ -45,6 +56,18 @@ int main(void){
   ESMC_TestStart(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Tolerance test 1");
+  strcpy(failMsg, "Tolerance off");
+  ESMC_Test(!eqltol(1.01, 1.02), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Tolerance test 2");
+  strcpy(failMsg, "Tolerance off");
+  ESMC_Test(eqltol(5.0, 5.00000000001), name, failMsg, &result, __FILE__, __LINE__, 0);
+  
   ESMCI::RegionNode rootNode(0);
   
   uint64_t enters[] = {0, 100, 200, 300, 400, 500, 600, 700, 800, 900};
@@ -79,7 +102,7 @@ int main(void){
   double mean = total / 10.0;
   strcpy(name, "Region mean");
   snprintf(failMsg, 80, "Mean did not match: expected %f, but got %f", mean, rootNode.getMean());
-  ESMC_Test((abs(rootNode.getMean() - mean) < .0000001), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(eqltol(rootNode.getMean(), mean), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
   //----------------------------------------------------------------------------
@@ -113,9 +136,90 @@ int main(void){
   
   strcpy(name, "Region standard deviation");
   snprintf(failMsg, 80, "Std dev did not match: expected %f, but got %f", rstddev, rootNode.getStdDev());
-  ESMC_Test((abs(rootNode.getStdDev()-rstddev) < .0000001), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test(eqltol(rootNode.getStdDev(), rstddev), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
+  //----------------------------------------------------------------------------
+  ESMCI::RegionNode nodeA(0);
+  ESMCI::RegionNode nodeB(0);
+
+  uint64_t ins[] = {0, 10, 20, 0, 10, 30, 40};
+  uint64_t outs[] =  {5, 12, 30, 4, 22, 40, 48}; 
+
+  for (int i=0; i<3; i++) {
+    nodeA.entered(ins[i]); nodeA.exited(outs[i]);
+  }
+
+  for (int i=3; i<7; i++) {
+    nodeB.entered(ins[i]); nodeB.exited(outs[i]);
+  }
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Region mean");
+  snprintf(failMsg, 80, "Region mean: expected %f, but got %f", ((5+2+10)/3.0), nodeA.getMean());
+  ESMC_Test( eqltol(((5+2+10)/3.0), nodeA.getMean()), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Region mean");
+  snprintf(failMsg, 80, "Region mean: expected %f, but got %f", ((4+12+10+8)/4.0), nodeB.getMean());
+  ESMC_Test( eqltol(((4+12+10+8)/4.0), nodeB.getMean()), name, failMsg, &result, __FILE__, __LINE__, 0);
+     
+  //merge B into A, combining statistics
+  nodeA.merge(nodeB);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Merge total");
+  snprintf(failMsg, 80, "Merge total: expected %f, but got %f", (5+2+10+4+12+10+8), nodeA.getTotal());
+  ESMC_Test((5+2+10+4+12+10+8)==nodeA.getTotal(), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Merge count");
+  snprintf(failMsg, 80, "Merge count: expected %f, but got %f", 7, nodeA.getCount());
+  ESMC_Test(7==nodeA.getCount(), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Merge min");
+  snprintf(failMsg, 80, "Merge min: expected %f, but got %f", 2, nodeA.getMin());
+  ESMC_Test(2==nodeA.getMin(), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Merge max");
+  snprintf(failMsg, 80, "Merge max: expected %f, but got %f", 12, nodeA.getMax());
+  ESMC_Test(12==nodeA.getMax(), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Merge mean");
+  snprintf(failMsg, 80, "Merge mean: expected %f, but got %f", (5+2+10+4+12+10+8)/7.0, nodeA.getMean());
+  ESMC_Test((5+2+10+4+12+10+8)/7.0==nodeA.getMean(), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_IGNORE_UTest
+  
+  rstddev = 0.0;
+  rmean = 0.0;
+  rm2 = 0.0;
+  rvariance = 0.0;
+  
+  for (int i = 0; i < 7; i++) {
+    double delta = (outs[i] - ins[i]) - rmean;
+    rmean += delta / (i+1);
+    rm2 += delta * ((outs[i] - ins[i]) - rmean);
+    rvariance = rm2 / (i+1);
+  }
+  rstddev = sqrt(rvariance);
+
+  //strcpy(name, "Merge stddev");
+  //snprintf(failMsg, 80, "Merge stddev: expected %f, but got %f", rstddev, nodeA.getStdDev());
+  //ESMC_Test(eqltol(rstddev, nodeA.getStdDev()), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
