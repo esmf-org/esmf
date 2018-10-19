@@ -375,12 +375,13 @@ LocalArray *LocalArray::create(
     return ESMC_NULL_POINTER;
   }
 
+  // ensure docopy option is supported
   if (docopy == DATA_REF){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
       "DATA_REF is not supported through this interface!", ESMC_CONTEXT, rc);
     return ESMC_NULL_POINTER;
   }
-  
+
   // construct LocalArray internals, allocate memory for data
   localrc = a->construct(true, docopy, tk, rank, FROM_CPLUSPLUS, true,
     NULL, NULL, NULL, counts, base_addr, NULL);
@@ -438,6 +439,13 @@ LocalArray *LocalArray::create(
   }catch(...){
     // allocation error
     ESMC_LogDefault.AllocError(ESMC_CONTEXT, rc);  
+    return ESMC_NULL_POINTER;
+  }
+
+  // ensure docopy option is supported
+  if (docopy == DATA_REF){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+      "DATA_REF is not supported through this interface!", ESMC_CONTEXT, rc);
     return ESMC_NULL_POINTER;
   }
 

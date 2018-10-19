@@ -1714,7 +1714,7 @@ Array *Array::create(
     }
     // allocate LocalArray object with specific undistLBound and undistUBound
     larrayList[i] = LocalArray::create(typekind, rank, &temp_counts[0],
-      &temp_larrayLBound[0], &temp_larrayUBound[0], NULL, DATA_REF, &localrc);
+      &temp_larrayLBound[0], &temp_larrayUBound[0], NULL, DATA_NONE, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
   }
@@ -1847,7 +1847,7 @@ Array *Array::create(
         const int *temp_counts = arrayIn->larrayList[i]->getCounts();
         arrayOut->larrayList[i] =
           LocalArray::create(typekind, rank, &(temp_counts[rmLeadingTensors]),
-            NULL, NULL, NULL, DATA_REF, &localrc);
+            NULL, NULL, NULL, DATA_NONE, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
           arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -2049,7 +2049,7 @@ Array *Array::create(
         }
         arrayOut->larrayList[i] =
           LocalArray::create(typekind, rank, &(counts[0]),
-            NULL, NULL, NULL, DATA_REF, &localrc);
+            NULL, NULL, NULL, DATA_NONE, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
           arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
