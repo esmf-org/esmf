@@ -515,14 +515,11 @@ namespace ESMCI {
    ndir.Create(0, (UInt*) NULL, (UInt *)NULL);
  }
 
-
  // Assign node owners
  set_node_owners(output_mesh, ndir);
 
-
   // Set node data indexes
  set_node_data_indices(output_mesh, num_node_gids, node_gids);
-
 
   // Assume Contexts
   output_mesh->AssumeContexts(*src_mesh);
@@ -848,6 +845,23 @@ namespace ESMCI {
 
       // Set owner
       node.set_owner(src_gids_proc[i]);
+
+      // Setup for changing attribute
+      const Context &ctxt = GetMeshObjContext(node);
+      Context newctxt(ctxt);
+
+      // Set OWNED_ID appropriately
+      if (src_gids_proc[i]==Par::Rank()) {
+        newctxt.set(Attr::OWNED_ID);
+      } else {
+        newctxt.clear(Attr::OWNED_ID);
+      }
+
+      // If attribute has changed change in node
+      if (newctxt != ctxt) {
+        Attr attr(GetAttr(node), newctxt);
+        output_mesh->update_obj(&node, attr);
+      }
     }
   }
 
@@ -998,6 +1012,23 @@ namespace ESMCI {
 
       // Set owner
       node.set_owner(owner[i]);
+
+      // Setup for changing attribute
+      const Context &ctxt = GetMeshObjContext(node);
+      Context newctxt(ctxt);
+
+      // Set OWNED_ID appropriately
+      if (owner[i]==Par::Rank()) {
+        newctxt.set(Attr::OWNED_ID);
+      } else {
+        newctxt.clear(Attr::OWNED_ID);
+      }
+
+      // If attribute has changed change in node
+      if (newctxt != ctxt) {
+        Attr attr(GetAttr(node), newctxt);
+        output_mesh->update_obj(&node, attr);
+      }
      }
   }
 
