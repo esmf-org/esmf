@@ -52,7 +52,9 @@
 #include <map>
 #include <algorithm>
 #include <sstream>
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
 #include <malloc.h>
+#endif
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
@@ -8593,7 +8595,9 @@ template<typename SIT, typename DIT>
   if (srcArray->tensorCount) undistributedDimsPresent = true;
   if (dstArray->tensorCount) undistributedDimsPresent = true;
 
-malloc_trim(0);
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+  malloc_trim(0);
+#endif
   
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.1"));
@@ -8658,8 +8662,9 @@ malloc_trim(0);
   vector<vector<AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > > >().swap(srcLinSeqVect);
   vector<vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > >().swap(dstLinSeqVect);
 
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
   malloc_trim(0);
-  vm->barrier();  //TODO: only for debugging
+#endif
   
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.4"));
@@ -9187,7 +9192,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     VM::logMemInfo(std::string("ASMMStoreNbVectors4.0"));
 #endif
     
-    malloc_trim(0);
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+  malloc_trim(0);
+#endif
     
 #ifdef ASMM_STORE_MEMLOG_on
     VM::logMemInfo(std::string("ASMMStoreNbVectors4.1"));
@@ -9418,7 +9425,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   VMK::wtime(t9);   //gjt - profile
 #endif
 
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
   malloc_trim(0);
+#endif
   
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreNbVectors6.0"));
@@ -9584,7 +9593,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     VM::logMemInfo(std::string("ASMMStoreNbVectors8.0"));
 #endif
     
-    malloc_trim(0);
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+  malloc_trim(0);
+#endif
     
 #ifdef ASMM_STORE_MEMLOG_on
     VM::logMemInfo(std::string("ASMMStoreNbVectors8.1"));
@@ -10201,7 +10212,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         vectorLength, xxe);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
       malloc_trim(0);
+#endif
 #if 0
       // optimize the XXE entire stream
       localrc = xxe->optimize();
@@ -10367,7 +10380,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         vectorLength, xxe);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
       malloc_trim(0);
+#endif
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.2"));
 #endif
@@ -10510,7 +10525,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
   
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
   malloc_trim(0);
+#endif
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.1"));
