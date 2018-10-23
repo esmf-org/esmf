@@ -9333,7 +9333,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       }
       ++kk;
 
-#define MSG_DEFLATE_DEBUG
+#define MSG_DEFLATE_DEBUG_off
 #ifdef MSG_DEFLATE_DEBUG
       {
         std::stringstream msg;
@@ -9767,7 +9767,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #ifdef MSG_DEFLATE_DEBUG
         {
           std::stringstream msg;
-          for (int k=0; k<linIndexContigBlockList.size(); k++){
+          for (unsigned k=0; k<linIndexContigBlockList.size(); k++){
             msg.str("");  // clear
             msg << "ASMM_STORE_LOG:" << __LINE__ <<
               " linIndexContigBlockList[" << k << "]: linIndex=" << 
