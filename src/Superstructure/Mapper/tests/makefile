@@ -56,9 +56,7 @@ CLOBBERDIRS =
 
 DIRS        = 
 
-ESMF_CXXCOMPILEOPTS += -std=c++11 -I/home/jayeshkrishna/parvis/lapack-3.4.2 -I/home/jayeshkrishna/parvis/lapack-3.4.2/lapacke/include -I/home/jayeshkrishna/parvis/CBLAS/include
-
-ESMF_CXXLINKLIBS += -L/home/jayeshkrishna/parvis/lapack-3.4.2 -llapacke -llapack /home/jayeshkrishna/parvis/CBLAS/lib/cblas_LINUX.a -L/home/jayeshkrishna/parvis/BLAS -lblas_LINUX 
+ESMF_CXXCOMPILEOPTS += -std=c++11
 
 ESMCI_GraphUTest.o: ../src/ESMCI_GraphDotUtils.o
 ESMCI_UTEST_Graph_OBJS = ../src/ESMCI_GraphDotUtils.o
