@@ -142,14 +142,17 @@ program ESMF_ArrayRedistEx
 ! The transferability of RouteHandles between Array pairs can greatly reduce
 ! the number of communication store calls needed.
 ! In a typical application Arrays are often defined on the same decomposition,
-! typically leading to congruent distributed dimensions. However, these Arrays
-! do not always have the same shape or size in the undistributed dimensions.
+! typically leading to congruent distributed dimensions. For these Arrays, while
+! they may not have the same shape or size in the undistributed dimensions,
+! RouteHandles are reusable.
 !
 ! For the current case, the {\tt redistHandle} was precomputed for simple 2D
 ! Arrays without undistributed dimensions. The RouteHandle transferability
 ! rule allows us to use this same RouteHandle to redistribute between two 
 ! 3D Array that are built on the same 2D DistGrid, but have an undistributed
-! dimension that has a smaller stride than the distributed dimensions.
+! dimension. Note that the undistributed dimension does not have to be in the
+! same position on source and destination. Here the undistributed dimension is
+! in position 2 for {\tt srcArray1}, and in position 1 for {\tt dstArray1}.
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec3d, typekind=ESMF_TYPEKIND_R8, rank=3, rc=rc)
@@ -157,7 +160,7 @@ program ESMF_ArrayRedistEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   srcArray1 = ESMF_ArrayCreate(arrayspec=arrayspec3d, distgrid=srcDistgrid, &
-    distgridToArrayMap=(/2,3/), undistLBound=(/1/), undistUBound=(/10/), rc=rc)
+    distgridToArrayMap=(/1,3/), undistLBound=(/1/), undistUBound=(/10/), rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
@@ -177,9 +180,10 @@ program ESMF_ArrayRedistEx
 ! The following variation of the code shows that the same RouteHandle can be
 ! applied to an Array pair where the number of undistributed dimensions does
 ! not match between source and destination Array. Here we prepare a source
-! Array with two undistributed dimensions that multiply out to 2x5=10 
-! undistributed elements. The destination array is the same as before with 
-! only a single leading undistributed dimension of size 10.
+! Array with {\em two} undistributed dimensions, in position 1 and 3, that 
+! multiply out to 2x5=10 undistributed elements. The destination array is the
+! same as before with only a {\em single} undistributed dimension in position 1
+! of size 10.
 !EOE
 !BOC
   call ESMF_ArraySpecSet(arrayspec4d, typekind=ESMF_TYPEKIND_R8, rank=4, rc=rc)
@@ -187,7 +191,7 @@ program ESMF_ArrayRedistEx
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
   srcArray2 = ESMF_ArrayCreate(arrayspec=arrayspec4d, distgrid=srcDistgrid, &
-    distgridToArrayMap=(/3,4/), undistLBound=(/1,1/), undistUBound=(/2,5/), &
+    distgridToArrayMap=(/2,4/), undistLBound=(/1,1/), undistUBound=(/2,5/), &
     rc=rc)
 !EOC
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
