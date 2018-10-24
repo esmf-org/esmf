@@ -2378,6 +2378,11 @@ void VM::getObject(
 
     ESMC_Base *fobject_temp = matchTable_Objects[i][it];
 
+    ESMC_Status baseStatus = (fobject_temp)->ESMC_BaseGetBaseStatus();
+    ESMC_Status     Status = (fobject_temp)->ESMC_BaseGetStatus();
+    if ((baseStatus != ESMF_STATUS_READY) || (Status != ESMF_STATUS_READY))
+      continue;
+
     int ID = (fobject_temp)->ESMC_BaseGetID();
 
     if (debug)

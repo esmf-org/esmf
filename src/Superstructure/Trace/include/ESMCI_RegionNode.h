@@ -15,35 +15,56 @@
 #include <vector>
 #include <math.h>
 #include <algorithm>
+#include <string>
 
 #include "ESMCI_LogErr.h"
 
 #define UINT64T_BIG 18446744073709551615ULL
+#define REGION_MAX_COUNT 65500
 
 using std::vector;
 using std::sort;
+using std::string;
 
 namespace ESMCI {
 
-  static const float NANOS_TO_MILLIS = 1 / 1000.0 / 1000.0;  /* conversion factor */
+  /* conversion factors */
+  static const float NANOS_TO_MILLIS = 1 / 1000.0 / 1000.0;
   static const float NANOS_TO_SECS = 1 / 1000.0 / 1000.0 / 1000.0;
   
   class RegionNode {
     
   public:
         
-  RegionNode(RegionNode *parent, uint16_t id, bool isUserRegion):
-    _parent(parent), _id(id), _isUserRegion(isUserRegion),
+  RegionNode(RegionNode *parent, bool isUserRegion):
+    _parent(parent), _id(next_region_id()), _isUserRegion(isUserRegion),
       _count(0), _total(0), _min(UINT64T_BIG), _max(0),
       _mean(0.0), _variance(0.0), _last_entered(0),
       _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {}
     
-  RegionNode(uint16_t id):
-    _parent(NULL), _id(id), _isUserRegion(false),
+  RegionNode():
+    _parent(NULL), _id(next_region_id()), _isUserRegion(false),
       _count(0), _total(0), _min(UINT64T_BIG), _max(0),
       _mean(0.0), _variance(0.0), _last_entered(0),
       _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {}
 
+  RegionNode(RegionNode *parent, RegionNode *toClone):
+    _parent(parent), _id(next_region_id()),
+      _isUserRegion(toClone->isUserRegion()),
+      _count(toClone->getCount()), _total(toClone->getTotal()),
+      _min(toClone->getMin()), _max(toClone->getMax()),
+      _mean(toClone->getMean()), _variance(toClone->_variance),
+      _last_entered(0), _time_mpi_start(0),
+      _time_mpi(toClone->getTotalMPI()),
+      _count_mpi(toClone->getCountMPI()),
+      _name(toClone->getName())  {
+
+      //deep clone children
+      for (unsigned i = 0; i < toClone->_children.size(); i++) {
+	addChild(toClone->_children.at(i));
+      }
+    }
+            
     ~RegionNode() {
       while (!_children.empty()) {
         RegionNode *toDel = _children.back();
@@ -87,6 +108,7 @@ namespace ESMCI {
       return _isUserRegion;
     }
 
+    /*
     RegionNode *getOrAddChild(int id) {
       return getOrAddChild(id, false);
     }
@@ -102,7 +124,42 @@ namespace ESMCI {
       _children.push_back(newNode);
       return newNode;
     }
+    */
 
+    RegionNode *addChild() {
+      return addChild(false);
+    }
+    
+    RegionNode *addChild(bool isUserRegion) {
+      RegionNode *newNode = new RegionNode(this, isUserRegion);
+      _children.push_back(newNode);
+      return newNode;
+    }
+
+    RegionNode *addChild(RegionNode *toClone) {
+      RegionNode *newNode = new RegionNode(this, toClone);
+      _children.push_back(newNode);
+      return newNode;
+    }
+    
+    RegionNode *getChild(uint16_t id) {
+      for (unsigned i = 0; i < _children.size(); i++) {
+        if (_children.at(i)->getId() == id) {
+          return _children.at(i);
+        }
+      }
+      return NULL;
+    }
+    
+    RegionNode *getChild(string name) {
+      for (unsigned i = 0; i < _children.size(); i++) {
+        if (_children.at(i)->getName() == name) {
+          return _children.at(i);
+        }
+      }
+      return NULL;
+    }
+        
     void entered(uint64_t ts) {
       _last_entered = ts;
     }
@@ -230,6 +287,15 @@ namespace ESMCI {
       return _count_mpi;
     }
 
+    void setName(string name) {
+      _name = name;
+    }
+
+    string getName() const {
+      return _name;
+    }
+
+    
     ////// MERGING ///////
     void merge(const RegionNode &other) {
 
@@ -256,18 +322,38 @@ namespace ESMCI {
       _variance = ((old_var + old_mean_sq - merge_mean_sq) * (old_count - 1.0) +
 		   (other_var + other_mean_sq - merge_mean_sq) * (other.getCount() - 1.0));     
 
-      //TODO: deal with child nodes
-      
+      //recursively merge child nodes
+      mergeChildren(other);
     }
 
     
   private:
+
+    void mergeChildren(const RegionNode &other) {
+      for (unsigned i = 0; i < other._children.size(); i++) {
+	RegionNode *child = getChild(other._children.at(i)->getName());
+	if (child != NULL) {
+	  child->merge(*(other._children.at(i)));
+	}
+	else {
+	  child = addChild(other._children.at(i));
+	}
+      }     
+    }
 
     struct RegionNodeCompare {
       bool operator()(const RegionNode* l, const RegionNode* r) {
         return *l > *r;
       }
     };
+
+    static uint16_t next_region_id() {
+      static uint16_t next = 1;
+      if (next > REGION_MAX_COUNT) {
+	return 0;
+      }
+      return next++;
+    } 
     
     RegionNode *_parent;
     uint16_t _id;
@@ -287,6 +373,8 @@ namespace ESMCI {
     uint64_t _time_mpi_start;
     uint64_t _time_mpi;
     size_t _count_mpi;
+
+    string _name;
     
   };
 
