@@ -15,7 +15,7 @@
 
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
-#define ASMM_STORE_MEMLOG_off
+#define ASMM_STORE_MEMLOG_on
 #define ASMM_STORE_TUNELOG_off
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_DUMPSMM_off
@@ -27,7 +27,7 @@
 
 //==============================================================================
 // Set OPTION!!!
-#define SMMSLSQV_OPTION 2
+#define SMMSLSQV_OPTION 3
 // OPTION 1 - Use sparseMatMulStoreLinSeqVect() (i.e. old) for all cases
 // OPTION 2 - Use sparseMatMulStoreLinSeqVect_new() for halo, old all other
 // OPTION 3 - Use sparseMatMulStoreLinSeqVect_new() for all cases
