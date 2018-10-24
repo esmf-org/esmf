@@ -1627,16 +1627,15 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !DESCRIPTION:
 ! \begin{sloppypar}
 ! Create an {\tt ESMF\_Array} object from existing {\tt ESMF\_LocalArray}
-! objects. The decomposition and distribution is @\
-! specified by the {\tt distgrid} argument. Each PET must issue this call @\
-! with identical arguments in order to create a consistent Array object. @\
-! The only exception is the {\tt localarrayList} argument which will be @
-! different on each PET. The local arrays provided must be dimensioned @
-! according to @\
-! the DE-local total region. Bounds of the exclusive regions are set as @\
-! specified in the {\tt distgrid} argument. Bounds for Array dimensions @\
-! that are not distributed can be chosen freely using the @\
-! {\tt undistLBound} and {\tt undistUBound} arguments. @\
+! objects. The decomposition and distribution is
+! specified by the {\tt distgrid} argument. Each PET must issue this call
+! with identical arguments in order to create a consistent Array object.
+! The only exception is the {\tt localarrayList} argument which will be
+! different on each PET. The local arrays provided must be dimensioned
+! according to the DE-local total region. Bounds of the exclusive regions 
+! are set as specified in the {\tt distgrid} argument. Bounds for Array
+! dimensions that are not distributed can be chosen freely using the
+! {\tt undistLBound} and {\tt undistUBound} arguments.
 ! \end{sloppypar}
 !
 ! This interface is able to handle multiple DEs per PET.

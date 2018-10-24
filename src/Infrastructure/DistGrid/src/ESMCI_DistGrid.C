@@ -173,7 +173,7 @@ DistGrid *DistGrid::create(
     delayoutPresent=true;  // set
     // delayout is being passed in explicitly
     if (!(actualFlag && (!vm || (vm==VM::getCurrent())))){
-      // create a DELayout from incoming DELauyout on new VM.
+      // create a DELayout from incoming DELayout on new VM.
       //TODO: must be implemented
       ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
         "Creation of DELayout from DELayout not yet available.", 
