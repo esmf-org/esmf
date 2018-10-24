@@ -46,7 +46,7 @@ namespace ESMCI{
         void set_dfuncs(const std::vector<MVIDLPoly<CType> > &dps);
         std::vector<MVIDLPoly<CType> > get_dfuncs(void ) const;
         MVIDLPoly<CType> get_dfunc(void ) const;
-        void set_cs_info(const PolyCSInfo<CType> &csinfo);
+        void set_cs_infos(const std::vector<PolyCSInfo<CType> > &csinfos);
         std::vector<CType> get_coeffs(void ) const;
         std::vector<std::vector<CType> > get_dcoeffs(void ) const;
         CType eval(const std::vector<CType> &vvals) const;
@@ -207,9 +207,9 @@ namespace ESMCI{
     }
 
     template<typename CType>
-    void TwoDVIDPoly<CType>::set_cs_info(const PolyCSInfo<CType> &csinfo)
+    void TwoDVIDPoly<CType>::set_cs_infos(const std::vector<PolyCSInfo<CType> > &csinfos)
     {
-      p_.set_cs_info(csinfo);
+      p_.set_cs_infos(csinfos);
     }
 
     template<typename CType>

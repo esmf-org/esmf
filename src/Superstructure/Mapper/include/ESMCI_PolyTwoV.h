@@ -78,26 +78,28 @@ namespace ESMCI{
         std::vector<std::string> get_vnames(void ) const; 
         void set_coeffs(const std::vector<CType>& coeffs); 
         void set_coeffs(std::initializer_list<CType> coeffs);
-        void set_cs_info(const PolyCSInfo<CType> &csinfo);
-        PolyCSInfo<CType> get_cs_info(void ) const;
+        void set_cs_infos(const std::vector<PolyCSInfo<CType> > &csinfos);
+        bool has_cs_info(void ) const;
+        std::vector<PolyCSInfo<CType> > get_cs_infos(void ) const;
         std::vector<CType> get_coeffs(void ) const;
         CType eval(const std::vector<CType> &vvals) const;
       private:
         int max_deg_;
         std::vector<CType> coeffs_;
         std::vector<std::string> vnames_;
-        PolyCSInfo<CType> csinfo_;
+        std::vector<PolyCSInfo<CType> > csinfos_;
+        bool has_cs_info_;
     }; // class TwoVIDPoly
 
     template<typename CType>
-    inline TwoVIDPoly<CType>::TwoVIDPoly()
+    inline TwoVIDPoly<CType>::TwoVIDPoly(): has_cs_info_(false)
     {
       vnames_.push_back("x");
       vnames_.push_back("y");
     }
 
     template<typename CType>
-    inline TwoVIDPoly<CType>::TwoVIDPoly(const CType &coeff)
+    inline TwoVIDPoly<CType>::TwoVIDPoly(const CType &coeff): has_cs_info_(false)
     {
       coeffs_.push_back(coeff);
       max_deg_ = TwoVIDPolyUtil::get_max_deg(coeffs_.size());
@@ -106,7 +108,7 @@ namespace ESMCI{
     }
 
     template<typename CType>
-    inline TwoVIDPoly<CType>::TwoVIDPoly(const std::vector<CType>& coeffs):coeffs_(coeffs)
+    inline TwoVIDPoly<CType>::TwoVIDPoly(const std::vector<CType>& coeffs):coeffs_(coeffs), has_cs_info_(false)
     {
       max_deg_ = TwoVIDPolyUtil::get_max_deg(coeffs_.size());
       vnames_.push_back("x");
@@ -114,7 +116,7 @@ namespace ESMCI{
     }
 
     template<typename CType>
-    inline TwoVIDPoly<CType>::TwoVIDPoly(std::initializer_list<CType> coeffs):coeffs_(coeffs.begin(), coeffs.end())
+    inline TwoVIDPoly<CType>::TwoVIDPoly(std::initializer_list<CType> coeffs):coeffs_(coeffs.begin(), coeffs.end()), has_cs_info_(false)
     {
       max_deg_ = TwoVIDPolyUtil::get_max_deg(coeffs_.size());
       vnames_.push_back("x");
@@ -123,7 +125,7 @@ namespace ESMCI{
 
     /* Create a two variable polynomial from a univariate polynomial */
     template<typename CType>
-    inline TwoVIDPoly<CType>::TwoVIDPoly(const UVIDPoly<CType> &uvpoly)
+    inline TwoVIDPoly<CType>::TwoVIDPoly(const UVIDPoly<CType> &uvpoly): has_cs_info_(false)
     {
       max_deg_ = uvpoly.get_max_deg();
 
@@ -131,6 +133,8 @@ namespace ESMCI{
       int ncoeffs_in_cur_deg=cur_deg+1;
 
       std::vector<CType> uvpoly_coeffs = uvpoly.get_coeffs();
+      std::vector<std::string> uvpoly_vnames = uvpoly.get_vnames();
+      assert(uvpoly_vnames.size() == 1);
 
       for(typename std::vector<CType>::const_iterator citer = uvpoly_coeffs.cbegin();
           citer != uvpoly_coeffs.cend(); ++citer){
@@ -146,9 +150,15 @@ namespace ESMCI{
         ncoeffs_in_cur_deg = cur_deg+1;
       }
       
-      vnames_.push_back("x");
+      vnames_.push_back(uvpoly_vnames[0]);
       vnames_.push_back("y");
-      csinfo_ = uvpoly.get_cs_info();
+      //csinfo_ = uvpoly.get_cs_info();
+      if(uvpoly.has_cs_info()){
+        csinfos_.push_back(uvpoly.get_cs_info());
+        PolyCSInfo<CType> dummy_csinfo;
+        csinfos_.push_back(dummy_csinfo);
+        has_cs_info_ = true;
+      }
     }
 
     /* Create a two variable polynomial from a univariate polynomial
@@ -159,7 +169,8 @@ namespace ESMCI{
      */
     template<typename CType>
     inline TwoVIDPoly<CType>::TwoVIDPoly(const UVIDPoly<CType> &uvpoly,
-              const std::vector<std::string> &vnames):vnames_(vnames)
+              const std::vector<std::string> &vnames):
+                vnames_(vnames), has_cs_info_(false)
     {
       max_deg_ = uvpoly.get_max_deg();
 
@@ -202,7 +213,18 @@ namespace ESMCI{
           ncoeffs_in_cur_deg = cur_deg+1;
         }
       }
-      csinfo_ = uvpoly.get_cs_info();
+      //csinfo_ = uvpoly.get_cs_info();
+      if(uvpoly.has_cs_info()){
+        PolyCSInfo<CType> dummy_csinfo;
+        if(is_x_var){
+          csinfos_.push_back(uvpoly.get_cs_info());
+          csinfos_.push_back(dummy_csinfo);
+        }
+        else{
+          csinfos_.push_back(dummy_csinfo);
+          csinfos_.push_back(uvpoly.get_cs_info());
+        }
+      }
     }
 
     template<typename CType>
@@ -239,15 +261,21 @@ namespace ESMCI{
     }
 
     template<typename CType>
-    inline void TwoVIDPoly<CType>::set_cs_info(const PolyCSInfo<CType> &csinfo)
+    inline void TwoVIDPoly<CType>::set_cs_infos(
+      const std::vector<PolyCSInfo<CType> > &csinfos)
     {
-      csinfo_ = csinfo;
+      csinfos_ = csinfos;
     }
 
     template<typename CType>
-    inline PolyCSInfo<CType> TwoVIDPoly<CType>::get_cs_info(void ) const
+    inline bool TwoVIDPoly<CType>::has_cs_info(void ) const
     {
-      return csinfo_;
+      return has_cs_info_;
+    }
+    template<typename CType>
+    inline std::vector<PolyCSInfo<CType> > TwoVIDPoly<CType>::get_cs_infos(void ) const
+    {
+      return csinfos_;
     }
 
     template<typename CType>
@@ -266,8 +294,12 @@ namespace ESMCI{
       int cur_ydeg = 0;
       int ncoeffs_in_cur_deg=cur_deg+1;
 
-      std::vector<CType> vvals = csinfo_.center_and_scale(orig_vvals);
-      assert(vvals.size() == 2);
+      assert(orig_vvals.size() == 2);
+      std::vector<CType> vvals(orig_vvals);
+      if(has_cs_info_){
+        vvals[0] = csinfos_[0].center_and_scale(orig_vvals[0]);
+        vvals[1] = csinfos_[1].center_and_scale(orig_vvals[1]);
+      }
       for(typename std::vector<CType>::const_iterator citer = coeffs_.cbegin();
           citer != coeffs_.cend(); ++citer){
 
@@ -369,6 +401,15 @@ namespace ESMCI{
       TwoVIDPoly<CType> res(res_coeffs);
 
       res.set_vnames(lhs_vnames);
+      if(lhs.has_cs_info()){
+        if(rhs.has_cs_info()){
+          assert(lhs.get_cs_infos() == rhs.get_cs_infos());
+        }
+        res.set_cs_infos(lhs.get_cs_infos());
+      }
+      else if(rhs.has_cs_info()){
+        res.set_cs_infos(rhs.get_cs_infos());
+      }
 
       return res;
     }
@@ -411,6 +452,16 @@ namespace ESMCI{
       TwoVIDPoly<CType> res(res_coeffs);
 
       res.set_vnames(lhs_vnames);
+      if(lhs.has_cs_info()){
+        if(rhs.has_cs_info()){
+          assert(lhs.get_cs_infos() == rhs.get_cs_infos());
+        }
+        res.set_cs_infos(lhs.get_cs_infos());
+      }
+      else if(rhs.has_cs_info()){
+        res.set_cs_infos(rhs.get_cs_infos());
+      }
+
 
       return res;
     }
@@ -536,6 +587,16 @@ namespace ESMCI{
       TwoVIDPoly<CType> res(res_coeffs);
 
       res.set_vnames(lhs_vnames);
+      if(lhs.has_cs_info()){
+        if(rhs.has_cs_info()){
+          assert(lhs.get_cs_infos() == rhs.get_cs_infos());
+        }
+        res.set_cs_infos(lhs.get_cs_infos());
+      }
+      else if(rhs.has_cs_info()){
+        res.set_cs_infos(rhs.get_cs_infos());
+      }
+
       return res;
     }
 

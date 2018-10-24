@@ -54,6 +54,7 @@ namespace ESMCI{
         void set_coeffs(const std::vector<CType>& coeffs); 
         void set_coeffs(std::initializer_list<CType> coeffs);
         void set_cs_info(const PolyCSInfo<CType> &csinfo);
+        bool has_cs_info(void ) const;
         std::vector<CType> get_coeffs(void ) const;
         CType eval(const std::vector<CType> &vvals) const;
         CType eval(const CType &vval) const;
@@ -61,6 +62,7 @@ namespace ESMCI{
         std::vector<CType> coeffs_;
         std::vector<std::string> vnames_;
         PolyCSInfo<CType> csinfo_;
+        bool has_cs_info_;
     }; // class MVIDLPoly
 
     namespace MVIDLPolyUtil{
@@ -81,27 +83,27 @@ namespace ESMCI{
 
 
     template<typename CType>
-    inline MVIDLPoly<CType>::MVIDLPoly()
+    inline MVIDLPoly<CType>::MVIDLPoly(): has_cs_info_(false)
     {
       vnames_.push_back("x");
     }
 
     template<typename CType>
-    inline MVIDLPoly<CType>::MVIDLPoly(const CType &coeff)
+    inline MVIDLPoly<CType>::MVIDLPoly(const CType &coeff): has_cs_info_(false)
     {
       coeffs_.push_back(coeff);
       vnames_.push_back("x");
     }
 
     template<typename CType>
-    inline MVIDLPoly<CType>::MVIDLPoly(const std::vector<CType>& coeffs):coeffs_(coeffs)
+    inline MVIDLPoly<CType>::MVIDLPoly(const std::vector<CType>& coeffs):coeffs_(coeffs), has_cs_info_(false)
     {
       assert(coeffs.size() > 0);
       vnames_ = MVIDLPolyUtil::append_int2str(std::string("x"), 0, coeffs.size()-1);
     }
 
     template<typename CType>
-    inline MVIDLPoly<CType>::MVIDLPoly(std::initializer_list<CType> coeffs):coeffs_(coeffs.begin(), coeffs.end())
+    inline MVIDLPoly<CType>::MVIDLPoly(std::initializer_list<CType> coeffs):coeffs_(coeffs.begin(), coeffs.end()), has_cs_info_(false)
     {
       assert(coeffs.size() > 0);
       vnames_ = MVIDLPolyUtil::append_int2str(std::string("x"), 0, coeffs.size()-1);
@@ -142,6 +144,7 @@ namespace ESMCI{
     inline void MVIDLPoly<CType>::set_cs_info(const PolyCSInfo<CType> &csinfo)
     {
       csinfo_ = csinfo;
+      has_cs_info_ = true;
     }
 
     template<typename CType>
@@ -156,6 +159,9 @@ namespace ESMCI{
     {
       assert(vvals.size() == vnames_.size());
       assert(vvals.size() < coeffs_.size());
+
+      /* We don't need cs infos right now for this poly */
+      assert(!has_cs_info_);
 
       CType res = 0;
 

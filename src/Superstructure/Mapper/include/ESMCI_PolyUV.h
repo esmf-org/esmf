@@ -53,6 +53,7 @@ namespace ESMCI{
         void set_coeffs(const std::vector<CType>& coeffs); 
         void set_coeffs(std::initializer_list<CType> coeffs);
         void set_cs_info(const PolyCSInfo<CType> &csinfo);
+        bool has_cs_info(void ) const;
         PolyCSInfo<CType> get_cs_info(void ) const;
         std::vector<CType> get_coeffs(void ) const;
         CType eval(const std::vector<CType> &vvals) const;
@@ -61,29 +62,30 @@ namespace ESMCI{
         std::vector<CType> coeffs_;
         std::vector<std::string> vnames_;
         PolyCSInfo<CType> csinfo_;
+        bool has_cs_info_;
     }; // class UVIDPoly
 
     template<typename CType>
-    inline UVIDPoly<CType>::UVIDPoly()
+    inline UVIDPoly<CType>::UVIDPoly():has_cs_info_(false)
     {
       vnames_.push_back("x");
     }
 
     template<typename CType>
-    inline UVIDPoly<CType>::UVIDPoly(const CType &coeff)
+    inline UVIDPoly<CType>::UVIDPoly(const CType &coeff):has_cs_info_(false)
     {
       coeffs_.push_back(coeff);
       vnames_.push_back("x");
     }
 
     template<typename CType>
-    inline UVIDPoly<CType>::UVIDPoly(const std::vector<CType>& coeffs):coeffs_(coeffs)
+    inline UVIDPoly<CType>::UVIDPoly(const std::vector<CType>& coeffs):coeffs_(coeffs), has_cs_info_(false)
     {
       vnames_.push_back("x");
     }
 
     template<typename CType>
-    inline UVIDPoly<CType>::UVIDPoly(std::initializer_list<CType> coeffs):coeffs_(coeffs.begin(), coeffs.end())
+    inline UVIDPoly<CType>::UVIDPoly(std::initializer_list<CType> coeffs):coeffs_(coeffs.begin(), coeffs.end()), has_cs_info_(false)
     {
       vnames_.push_back("x");
     }
@@ -123,6 +125,13 @@ namespace ESMCI{
     inline void UVIDPoly<CType>::set_cs_info(const PolyCSInfo<CType> &csinfo)
     {
       csinfo_ = csinfo;
+      has_cs_info_ = true;
+    }
+
+    template<typename CType>
+    inline bool UVIDPoly<CType>::has_cs_info(void ) const
+    {
+      return has_cs_info_;
     }
 
     template<typename CType>
@@ -142,7 +151,8 @@ namespace ESMCI{
     inline CType UVIDPoly<CType>::eval(const std::vector<CType> &vvals) const
     {
       assert(vvals.size() == 1);
-      std::vector<CType> sc_vvals = csinfo_.center_and_scale(vvals);
+      std::vector<CType> sc_vvals = 
+        (has_cs_info_) ? csinfo_.center_and_scale(vvals) : vvals;
 
       CType res = 0;
       std::size_t cur_deg = coeffs_.size() - 1;
@@ -209,6 +219,16 @@ namespace ESMCI{
       std::reverse(res_coeffs.begin(), res_coeffs.end());
       UVIDPoly<CType> res(res_coeffs);
 
+      if(lhs.has_cs_info()){
+        if(rhs.has_cs_info()){
+          assert(lhs.get_cs_info() == rhs.get_cs_info());
+        }
+        res.set_cs_info(lhs.get_cs_info());
+      }
+      else if(rhs.has_cs_info()){
+        res.set_cs_info(rhs.get_cs_info());
+      }
+
       return res;
     }
 
@@ -243,6 +263,16 @@ namespace ESMCI{
       }
       std::reverse(res_coeffs.begin(), res_coeffs.end());
       UVIDPoly<CType> res(res_coeffs);
+
+      if(lhs.has_cs_info()){
+        if(rhs.has_cs_info()){
+          assert(lhs.get_cs_info() == rhs.get_cs_info());
+        }
+        res.set_cs_info(lhs.get_cs_info());
+      }
+      else if(rhs.has_cs_info()){
+        res.set_cs_info(rhs.get_cs_info());
+      }
 
       return res;
     }
@@ -279,6 +309,17 @@ namespace ESMCI{
         UVIDPoly<CType> tmp_res(tmp_res_coeffs);
         res = res + tmp_res;
       }
+
+      if(lhs.has_cs_info()){
+        if(rhs.has_cs_info()){
+          assert(lhs.get_cs_info() == rhs.get_cs_info());
+        }
+        res.set_cs_info(lhs.get_cs_info());
+      }
+      else if(rhs.has_cs_info()){
+        res.set_cs_info(rhs.get_cs_info());
+      }
+
       return res;
     }
 

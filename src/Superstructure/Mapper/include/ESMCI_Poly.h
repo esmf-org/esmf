@@ -26,6 +26,7 @@ namespace ESMCI{
         void center_and_scale(T &val) const;
         std::vector<T> center_and_scale(const std::vector<T> &vals) const;
         void center_and_scale(std::vector<T> &vals) const;
+        bool operator==(const PolyCSInfo<T> &other) const;
       private:
         T mean_;
         T stddev_;
@@ -94,6 +95,12 @@ namespace ESMCI{
       }
     }
 
+    template<typename T>
+    bool PolyCSInfo<T>::operator==(const PolyCSInfo<T> &other) const
+    {
+      return ((mean_ == other.mean_) && (stddev_ == other.stddev_));
+    }
+
     /* The generic polynomial class
      * This class is abstract and is extended to implement
      * univariable/ 2 variable polynomials
@@ -105,7 +112,7 @@ namespace ESMCI{
         virtual void set_coeffs(const std::vector<CType>& coeffs) = 0;
         virtual void set_coeffs(std::initializer_list<CType> coeffs) = 0;
         virtual void set_vnames(const std::vector<std::string> &vnames) = 0;
-        virtual void set_cs_info(const PolyCSInfo<CType> &csinfo) = 0;
+        //virtual void set_cs_info(const PolyCSInfo<CType> &csinfo) = 0;
         virtual std::vector<std::string> get_vnames(void ) const = 0;
         virtual void set_degs(const std::vector<std::vector<DType> >& degs) = 0;
         virtual int get_max_deg(void ) const = 0;
