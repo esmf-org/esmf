@@ -16,13 +16,24 @@
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
 #define ASMM_STORE_MEMLOG_off
-#define ASMM_STORE_TUNELOG_on
+#define ASMM_STORE_TUNELOG_off
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_DUMPSMM_off
 
 #define ASMM_EXEC_INFO_off
 #define ASMM_EXEC_TIMING_off
 #define ASMM_EXEC_PROFILE_off
+
+
+//==============================================================================
+// Set OPTION!!!
+#define SMMSLSQV_OPTION 2
+// OPTION 1 - Use sparseMatMulStoreLinSeqVect() (i.e. old) for all cases
+// OPTION 2 - Use sparseMatMulStoreLinSeqVect_new() for halo, old all other
+// OPTION 3 - Use sparseMatMulStoreLinSeqVect_new() for all cases
+//==============================================================================
+
+
 //==============================================================================
 //
 // Array class implementation (body) file
@@ -7830,7 +7841,13 @@ namespace ArrayHelper{
 template<typename IT> struct FactorElement{
   char factor[8]; // large enough for R8 and I8
   IT partnerSeqIndex;
+#if (SMMSLSQV_OPTION==2 || SMMSLSQV_OPTION==3)
   int partnerDe;
+#endif
+#if (SMMSLSQV_OPTION==1 || SMMSLSQV_OPTION==2)
+  vector<int> partnerDE;  //TODO: remove this once 
+  // sparseMatMulStoreLinSeqVect.h has been reworked or removed!!!!
+#endif
 };
 template<typename IT>
   bool operator==(FactorElement<IT> a, FactorElement<IT> b){
@@ -7996,6 +8013,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   VM *vm,                                 // in
   DELayout *srcDelayout,                  // in
   DELayout *dstDelayout,                  // in
+#if (SMMSLSQV_OPTION==2)
+  bool haloFlag,                          // in //TODO: remove when no longer needed
+#endif
   bool tensorMixFlag,                     // in
   int srcTensorContigLength,              // in
   int dstTensorContigLength,              // in
@@ -8499,12 +8519,6 @@ template<typename SIT, typename DIT>
   VM::logMemInfo(std::string("ASMMStore2.0a"));
 #endif
 
-  // Set OPTION!!!
-#define SMMSLSQV_OPTION 3
-  // OPTION 1 - Use sparseMatMulStoreLinSeqVect() for all cases
-  // OPTION 2 - Use sparseMatMulStoreLinSeqVect_new() for halo, old all other
-  // OPTION 3 - Use sparseMatMulStoreLinSeqVect_new() for all cases
-
 #if (SMMSLSQV_OPTION==1)
 
 //  localrc = sparseMatMulStoreLinSeqVect_new(vm,
@@ -8641,6 +8655,9 @@ template<typename SIT, typename DIT>
   vector<ArrayHelper::RecvnbElement<SeqIndex<DIT>,SeqIndex<SIT> > > recvnbVector;
   localrc = sparseMatMulStoreNbVectors(vm,
     srcArray->delayout, dstArray->delayout,
+#if (SMMSLSQV_OPTION==2)
+    haloFlag,         //TODO: remove when no longer needed
+#endif
     tensorMixFlag, srcTensorContigLength, dstTensorContigLength,
     typekindFactors, typekindSrc, typekindDst,
     srcLocalDeElementCount, dstLocalDeElementCount,
@@ -8826,6 +8843,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   VM *vm,                                 // in
   DELayout *srcDelayout,                  // in
   DELayout *dstDelayout,                  // in
+#if (SMMSLSQV_OPTION==2)
+  bool haloFlag,                          // in //TODO: remove when no longer needed
+#endif
   bool tensorMixFlag,                     // in
   int srcTensorContigLength,              // in
   int dstTensorContigLength,              // in
@@ -9070,8 +9090,19 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     for (int i=0; i<iCount; i++){
       unsigned factorCount = dstLinSeqVect[j][index2Ref[i]].factorList.size();
       for (unsigned k=0; k<factorCount; k++){
-        int partnerDe =
-          dstLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe;
+        int partnerDe;
+#if (SMMSLSQV_OPTION==1)
+          partnerDe = dstLinSeqVect[j][index2Ref[i]].factorList[k].partnerDE[0];
+#endif
+#if (SMMSLSQV_OPTION==3)
+          partnerDe = dstLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe;
+#endif
+#if (SMMSLSQV_OPTION==2)
+          if (haloFlag)
+            partnerDe = dstLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe;
+          else
+            partnerDe = dstLinSeqVect[j][index2Ref[i]].factorList[k].partnerDE[0];
+#endif
         int kk;
         for (kk=0; kk<recvnbDiffPartnerDeCount; kk++)
           if (recvnbPartnerDeList[kk]==partnerDe) break;
@@ -9479,8 +9510,19 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     for (int i=0; i<iCount; i++){
       unsigned factorCount = srcLinSeqVect[j][index2Ref[i]].factorList.size();
       for (unsigned k=0; k<factorCount; k++){
-        int partnerDe =
-          srcLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe;
+        int partnerDe;
+#if (SMMSLSQV_OPTION==1)
+          partnerDe = srcLinSeqVect[j][index2Ref[i]].factorList[k].partnerDE[0];
+#endif
+#if (SMMSLSQV_OPTION==3)
+          partnerDe = srcLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe;
+#endif
+#if (SMMSLSQV_OPTION==2)
+          if (haloFlag)
+            partnerDe = srcLinSeqVect[j][index2Ref[i]].factorList[k].partnerDe;
+          else
+            partnerDe = srcLinSeqVect[j][index2Ref[i]].factorList[k].partnerDE[0];
+#endif
         int kk;
         for (kk=0; kk<sendnbDiffPartnerDeCount; kk++)
           if (sendnbPartnerDeList[kk]==partnerDe) break;
