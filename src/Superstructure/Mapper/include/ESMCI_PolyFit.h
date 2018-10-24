@@ -97,55 +97,12 @@ namespace ESMCI{
       }
 
       template<typename VType>
-      VType GetMean(const std::vector<VType> &vals)
-      {
-        if(vals.size() == 0){
-          return 0;
-        }
-        VType init_val = 0;
-        VType sum = std::accumulate(vals.cbegin(), vals.cend(), init_val);
-        return sum/vals.size();
-      }
-
-      /* In the pair returned the first one is the mean and the second is
-       * the sample standard deviation
-       */ 
-      template<typename VType>
-      std::pair<VType, VType> GetMeanAndStdDev(const std::vector<VType> &vals)
-      {
-
-        assert(vals.size() > 0);
-
-        if(vals.size() == 1){
-          return std::pair<VType, VType>(vals[0], 0);
-        }
-
-        /* Find sample mean */
-        VType mean = GetMean(vals);
-        typename std::vector<VType> vals_minus_mean_sq(vals.size(), 0);
-        typename std::vector<VType>::const_iterator citer = vals.cbegin();
-        for(typename std::vector<VType>::iterator iter = vals_minus_mean_sq.begin();
-            (iter != vals_minus_mean_sq.end()) &&
-            (citer != vals.cend()); ++iter, ++citer){
-          *iter = (*citer - mean) * (*citer - mean);
-        }
-        VType init_val = 0;
-        VType sum = std::accumulate(vals_minus_mean_sq.cbegin(),
-                      vals_minus_mean_sq.cend(), init_val);
-        /* Find the sample standard deviation */
-        VType stddev = sqrt(sum/(vals.size() - 1));
-
-        return std::pair<VType, VType>(mean, stddev);
-      }
-
-      template<typename VType>
       PolyCSInfo<VType> CenterAndScale(std::vector<VType> &vals)
       {
-        PolyCSInfo<VType> csinfo = GetMeanAndStdDev(vals);
+        PolyCSInfo<VType> csinfo = PolyCSInfo<VType>::create_poly_csinfo(vals);
         csinfo.center_and_scale(vals);
         return csinfo;
       }
-
     } // namespace PolyFitUtil
 
     /* Fit a polynomial of degree, max_deg, on a 2D user data set with xvalues

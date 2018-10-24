@@ -9,9 +9,55 @@
 #include <cassert>
 //#include <cstdlib>
 #include <cmath>
+#include <numeric>
 
 namespace ESMCI{
   namespace MapperUtil{
+
+    namespace PolyCSInfoUtil{
+      template<typename VType>
+      VType GetMean(const std::vector<VType> &vals)
+      {
+        if(vals.size() == 0){
+          return 0;
+        }
+        VType init_val = 0;
+        VType sum = std::accumulate(vals.cbegin(), vals.cend(), init_val);
+        return sum/vals.size();
+      }
+
+      /* In the pair returned the first one is the mean and the second is
+       * the sample standard deviation
+       */ 
+      template<typename VType>
+      std::pair<VType, VType> GetMeanAndStdDev(const std::vector<VType> &vals)
+      {
+
+        assert(vals.size() > 0);
+
+        if(vals.size() == 1){
+          return std::pair<VType, VType>(vals[0], 0);
+        }
+
+        /* Find sample mean */
+        VType mean = GetMean(vals);
+        typename std::vector<VType> vals_minus_mean_sq(vals.size(), 0);
+        typename std::vector<VType>::const_iterator citer = vals.cbegin();
+        for(typename std::vector<VType>::iterator iter = vals_minus_mean_sq.begin();
+            (iter != vals_minus_mean_sq.end()) &&
+            (citer != vals.cend()); ++iter, ++citer){
+          *iter = (*citer - mean) * (*citer - mean);
+        }
+        VType init_val = 0;
+        VType sum = std::accumulate(vals_minus_mean_sq.cbegin(),
+                      vals_minus_mean_sq.cend(), init_val);
+        /* Find the sample standard deviation */
+        VType stddev = sqrt(sum/(vals.size() - 1));
+
+        return std::pair<VType, VType>(mean, stddev);
+      }
+
+    } //namespace PolyCSInfoUtil
 
     /* Polynomial center and scale info */
     template<typename T>
@@ -27,6 +73,7 @@ namespace ESMCI{
         std::vector<T> center_and_scale(const std::vector<T> &vals) const;
         void center_and_scale(std::vector<T> &vals) const;
         bool operator==(const PolyCSInfo<T> &other) const;
+        static PolyCSInfo<T> create_poly_csinfo(const std::vector<T> &vals);
       private:
         T mean_;
         T stddev_;
@@ -101,6 +148,12 @@ namespace ESMCI{
       return ((mean_ == other.mean_) && (stddev_ == other.stddev_));
     }
 
+    template<typename T>
+    PolyCSInfo<T> PolyCSInfo<T>::create_poly_csinfo(const std::vector<T> &vals)
+    {
+      PolyCSInfo<T> csinfo = PolyCSInfoUtil::GetMeanAndStdDev(vals);
+      return csinfo;
+    }
     /* The generic polynomial class
      * This class is abstract and is extended to implement
      * univariable/ 2 variable polynomials
