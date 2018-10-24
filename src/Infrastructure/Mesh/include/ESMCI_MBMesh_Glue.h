@@ -88,6 +88,10 @@ void MBMesh_turnoffelemmask(void **mbmpp, int *rc);
 void MBMesh_turnonnodemask(void **meshpp, ESMCI::InterArray<int> *maskValuesArg,  int *rc);
 void MBMesh_turnoffnodemask(void **meshpp, int *rc);
 
+EntityType get_entity_type(int pdim, int etype);
+
+int ElemType2NumNodes(int pdim, int sdim, int etype);
+
 #if 0
 
 

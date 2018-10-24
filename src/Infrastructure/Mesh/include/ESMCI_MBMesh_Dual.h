@@ -14,7 +14,7 @@
 
 #if defined ESMF_MOAB
 
-#include <Mesh/include/Legacy/ESMCI_MBMesh.h>
+#include <Mesh/include/ESMCI_MBMesh.h>
 
 
 namespace ESMCI {

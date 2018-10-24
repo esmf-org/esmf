@@ -57,7 +57,7 @@ void MBMesh_create(void **mbmpp,
                       ESMC_CoordSys_Flag *coordSys, int *rc)
 {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshcreate()"
+#define ESMC_METHOD "MBMesh_create()"
 
   // Init output
   *mbmpp=NULL;
@@ -409,7 +409,7 @@ EntityType get_entity_type(int pdim, int etype) {
 // TODO: Put this someplace to share with other GLUE code
 // Get the number of nodes from the element type
  // Get the element topology
-static int ElemType2NumNodes(int pdim, int sdim, int etype) {
+int ElemType2NumNodes(int pdim, int sdim, int etype) {
   if (pdim==2) {
     return etype;
   } else if (pdim==3) {

@@ -24,6 +24,8 @@
 #include <string>
 #include <ostream>
 #include <iterator>
+#include <vector>
+
 #include "ESMCI_Macros.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
@@ -42,7 +44,7 @@
 
 
 using namespace ESMCI;
-
+using namespace std;
 
 #define ESMF
 #define ESMC_METHOD "MBMesh::func()"
@@ -60,44 +62,43 @@ MBMesh::~MBMesh() {
   if (verts != NULL) delete [] verts;
 } 
 
-MBMesh::CreateGhost() {
+void MBMesh::CreateGhost() {
+
+  int merr, localrc;
 
   Interface *mb = this->mesh;
 
-  MPI_Comm comm;
-  comm = MPI_COMM_WORLD;
-
-  int merr;
+  // Do this for now instead of initiating mesh parallel stuff
+  // TODO: MAYBE EVENTUALLY PUT THIS INTO MBMesh???
+  MPI_Comm mpi_comm;
+  mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
 
   // Get the ParallelComm instance
-  ParallelComm* pcomm = new ParallelComm(mb, comm);
+  ParallelComm* pcomm = new ParallelComm(mb, mpi_comm);
   int nprocs = pcomm->proc_config().proc_size();
   int rank = pcomm->proc_config().proc_rank();
 
   Range shared_ents;
   // Get entities shared with all other processors
   merr = pcomm->get_shared_entities(-1, shared_ents);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-      moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  MBMESH_CHECK_ERR(merr, localrc);
   
   // Filter shared entities with not not_owned, which means owned
   Range owned_entities;
   merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-      moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  MBMESH_CHECK_ERR(merr, localrc);
 
 
   unsigned int nums[4] = {0}; // to store the owned entities per dimension
   for (int i = 0; i < 4; i++)
     nums[i] = (int)owned_entities.num_of_dimension(i);
+  
   vector<int> rbuf(nprocs*4, 0);
-  MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, comm);
+  MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, mpi_comm);
   // Print the stats gathered:
-  if (0 == global_rank) {
+  if (0 == rank) {
     for (int i = 0; i < nprocs; i++)
       cout << " Shared, owned entities on proc " << i << ": " << rbuf[4*i] << " verts, " <<
           rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << endl;
@@ -110,34 +111,25 @@ MBMesh::CreateGhost() {
                                      1, // int num_layers
                                      0, // int addl_ents
                                      true);// bool store_remote_handles
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-      moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  MBMESH_CHECK_ERR(merr, localrc);
 
 
   // Repeat the reports, after ghost exchange
   shared_ents.clear();
   owned_entities.clear();
   merr = pcomm->get_shared_entities(-1, shared_ents);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-      moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  MBMESH_CHECK_ERR(merr, localrc);
 
-  rval = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
-  if (merr != MB_SUCCESS) {
-    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-      moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-  }
+  merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
+  MBMESH_CHECK_ERR(merr, localrc);
 
   // Find out how many shared entities of each dimension are owned on this processor
   for (int i = 0; i < 4; i++)
     nums[i] = (int)owned_entities.num_of_dimension(i);
 
   // Gather the statistics on processor 0
-  MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, comm);
-  if (0 == global_rank) {
+  MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, mpi_comm);
+  if (0 == rank) {
     cout << " \n\n After exchanging one ghost layer: \n";
     for (int i = 0; i < nprocs; i++) {
       cout << " Shared, owned entities on proc " << i << ": " << rbuf[4*i] << " verts, " <<
