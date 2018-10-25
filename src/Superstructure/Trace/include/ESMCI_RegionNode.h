@@ -35,7 +35,13 @@ namespace ESMCI {
   class RegionNode {
     
   public:
-        
+
+  RegionNode(RegionNode *parent, uint16_t id, bool isUserRegion):
+    _parent(parent), _id(id), _isUserRegion(isUserRegion),
+      _count(0), _total(0), _min(UINT64T_BIG), _max(0),
+      _mean(0.0), _variance(0.0), _last_entered(0),
+      _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {}
+    
   RegionNode(RegionNode *parent, bool isUserRegion):
     _parent(parent), _id(next_region_id()), _isUserRegion(isUserRegion),
       _count(0), _total(0), _min(UINT64T_BIG), _max(0),
@@ -141,7 +147,7 @@ namespace ESMCI {
       _children.push_back(newNode);
       return newNode;
     }
-    
+
     RegionNode *getChild(uint16_t id) {
       for (unsigned i = 0; i < _children.size(); i++) {
         if (_children.at(i)->getId() == id) {
@@ -149,6 +155,18 @@ namespace ESMCI {
         }
       }
       return NULL;
+    }
+
+    RegionNode *getOrAddChild(uint16_t id, bool isUserRegion) {
+      for (unsigned i = 0; i < _children.size(); i++) {
+        if (_children.at(i)->getId() == id) {
+          return _children.at(i);
+        }
+      }
+      //no match found
+      RegionNode *newNode = new RegionNode(this, id, isUserRegion);
+      _children.push_back(newNode);
+      return newNode;
     }
     
     RegionNode *getChild(string name) {
