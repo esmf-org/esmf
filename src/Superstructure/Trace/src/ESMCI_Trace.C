@@ -905,7 +905,7 @@ namespace ESMCI {
         }
       }
       else {
-	currentRegionNode = currentRegionNode->getChild(regionId);
+	currentRegionNode = currentRegionNode->getOrAddChild(regionId, false);
       }
 
       TraceClockLatch(traceCtx);  /* lock in time on clock */
@@ -1007,7 +1007,7 @@ namespace ESMCI {
         }
       }
       else {
-	currentRegionNode = currentRegionNode->getChild(regionId);
+	currentRegionNode = currentRegionNode->getOrAddChild(regionId, true);
       }
 
       TraceClockLatch(traceCtx);
