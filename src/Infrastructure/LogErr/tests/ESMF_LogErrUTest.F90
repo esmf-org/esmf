@@ -83,6 +83,7 @@
       logical :: was_found
       logical :: flush_flag
       logical :: highRes_flag
+      logical :: noPrefix_flag
       logical :: trace_flag
       type(ESMF_LogMsg_Flag), pointer :: logabort_flags(:)
       character(2) :: tooshortstr
@@ -127,18 +128,16 @@
       call ESMF_LogOpen(log1, "Log_Test_File", rc=rc)
       write(name, *) "Open Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
 
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Test Log Open
       logkindflag = ESMF_LOGKIND_SINGLE
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_LogOpen(log5, "Single_Log_File", logkindflag=logkindflag,  rc=rc)
+      filename = 'Single_log_File.' // my_pet_char
+      call ESMF_LogOpen(log5, filename=filename, logkindflag=logkindflag,  rc=rc)
       write(name, *) "Open ESMF_LOGKIND_SINGLE Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
-
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -146,9 +145,46 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       call ESMF_LogWrite(log=log5, msg="Log Single Msg",logmsgFlag=ESMF_LOGMSG_INFO, &
                          rc=rc)
-      write(name, *) "Write to Single Log Test"
+      write(name, *) "Write to Single Log Test with prefixes"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test default noPrefix flag
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogGet (log5, noPrefix=noPrefix_flag, &
+                         rc=rc)
+      write(name, *) "Get default noPrefix Test"
+      call ESMF_Test(rc == ESMF_SUCCESS .and. .not. noprefix_flag,  &
+          name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test set of noPrefix
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogSet (log5, noPrefix=.true., &
+                         rc=rc)
+      write(name, *) "Set noPrefix Test"
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test get non-default noPrefix
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogGet (log5, noPrefix=noPrefix_flag, &
+                         rc=rc)
+      write(name, *) "Get non-default noPrefix Test"
+      call ESMF_Test(rc == ESMF_SUCCESS .and. noprefix_flag,  &
+          name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test Log Write
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogWrite(log=log5, msg="Log Single Msg - no timestamp",  &
+                         rc=rc)
+      write(name, *) "Write to Single Log Test without timestamp"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -158,7 +194,14 @@
       call ESMF_LogOpen(log5, "None_Log_File", logkindflag=logkindflag,  rc=rc)
       write(name, *) "Open ESMF_LOGKIND_NONE Log of opened file Test"
       call ESMF_Test((rc.eq.ESMF_RC_FILE_OPEN), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test Log Close
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogClose (log5, rc=rc)
+      write(name, *) "Log Close Test"
+      call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -168,7 +211,6 @@
       call ESMF_LogOpen(log7, "None_Log_File", logkindflag=logkindflag,  rc=rc)
       write(name, *) "Open ESMF_LOGKIND_NONE Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -178,7 +220,6 @@
                          rc=rc)
       write(name, *) "Use of separate log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -187,7 +228,6 @@
       call ESMF_LogClose(log1, rc=rc)
       write(name, *) "Close Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
 
        ! -----------------------------------------------------------------------
        ! ESMF_LogFoundNetCDFError Testing
@@ -254,7 +294,6 @@
       call ESMF_LogClose(log4, rc=rc)
       write(name, *) "Close Log File of never opened file Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -271,7 +310,6 @@
       call ESMF_LogWrite(msg="Log Write 2",logmsgFlag=ESMF_LOGMSG_INFO,rc=rc)
       write(name, *) "Use of default log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -705,7 +743,6 @@
       call ESMF_LogWrite(log=log2, msg=random_string,logmsgFlag=ESMF_LOGMSG_INFO,rc=rc)
       write(name, *) "Write to log file Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -722,7 +759,6 @@
       call ESMF_LogClose(log2, rc=rc)
       write(name, *) "Close Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -731,7 +767,6 @@
       call ESMF_LogClose(log2, rc=rc)
       write(name, *) "Close a closed Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
 
       !------------------------------------------------------------------------
       ! Verify that the file can be opened with Fortran IO
