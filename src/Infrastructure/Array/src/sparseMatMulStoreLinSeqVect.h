@@ -760,8 +760,7 @@ template<typename IT1, typename IT2>
     virtual int messageSize(int srcPet, int dstPet)const{
       return 2 * sizeof(int) * messageSizeCount(srcPet, dstPet);
     }
-    virtual void messagePrepare(int srcPet, 
-      int dstPet, char *buffer)const{
+    virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const{
       IT seqIndMin = seqIndexInterval[dstPet].min;
       IT seqIndMax = seqIndexInterval[dstPet].max;
       IT seqIndCount = seqIndexInterval[dstPet].count;
@@ -2030,7 +2029,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     std::stringstream msg;
     msg << "dstSeqIndexInterval[localPet].count=" <<
       dstSeqIndexInterval[localPet].count <<
-      " dstTensorElementCountEff=" << srcTensorElementCountEff;
+      " dstTensorElementCountEff=" << dstTensorElementCountEff;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
