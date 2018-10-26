@@ -53,6 +53,7 @@
       !LOCAL VARIABLES:
       type(ESMF_Log) :: log1, log5, log7, log_moe
       type(ESMF_LogKind_Flag) :: logkindflag
+      character(ESMF_MAXPATHLEN) :: filename
       character(4) :: my_pet_char
       integer :: my_pet, num_pets
       character(1) :: pet_char
@@ -64,7 +65,7 @@
       real :: r1
       logical :: is_error
       character(ESMF_MAXSTR) :: msg_type
-      character(ESMF_MAXPATHLEN) :: filename, pet_filename
+      character(ESMF_MAXPATHLEN) :: pet_filename
       integer :: ran_num, rc2, k, i
       integer :: ioerr
       integer :: datetime_commbuf(8)
