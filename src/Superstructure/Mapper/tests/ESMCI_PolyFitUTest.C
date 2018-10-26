@@ -3,12 +3,13 @@
 #include <cmath>
 #include "ESMCI_Poly.h"
 #include "ESMCI_PolyUV.h"
+#include "ESMCI_PolyTwoDV.h"
 #include "ESMCI_PolyFit.h"
 #include "ESMC_Test.h"
 
 int main(int argc, char *argv[])
 {
-  const int ESMF_MAX_STRLEN = 128;
+  const int ESMF_MAX_STRLEN = 256;
   char name[ESMF_MAX_STRLEN];
   char failMsg[ESMF_MAX_STRLEN];
   int rc = 0, result = 0;
@@ -121,6 +122,48 @@ int main(int argc, char *argv[])
       std::cout << "Expected value = " << *citer2 << ", Eval value = " << p5.eval(*citer1) << ", tol = " << tol << "\n";
       test_success = false;
       break;
+    }
+  }
+  ESMC_Test(test_success, name, failMsg, &result, __FILE__, __LINE__, 0); 
+  
+//  std::vector<float> x1vals = {1800, 3600, 7200, 14400};
+//  std::vector<float> x2vals = {800, 600, 200, 4400};
+//  std::vector<float> y1vals = {1273.542, 819.708, 426.051, 290.470};
+  std::vector<float> x1vals = {2, 5, 3.1, 9, 11.2};
+  std::vector<float> x2vals = {5, 2, 5.0, 12, 19.3};
+  std::vector<float> y1vals;
+  ESMCI::MapperUtil::TwoVIDPoly<float> p6_to_fit = {9.1, 1.2, 3.4, 2.1, 2.2, 5};
+  for(std::vector<float>::const_iterator citer1 = x1vals.cbegin(),
+        citer2 = x2vals.cbegin();
+      (citer1 != x1vals.cend()) && (citer2 != x2vals.cend());
+      ++citer1, ++citer2){
+    std::vector<float> p6_to_fit_vvals = {*citer1, *citer2};
+    y1vals.push_back(p6_to_fit.eval(p6_to_fit_vvals));
+  }
+
+  strncpy(name, "2 Degree 2 Var Poly fit Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "2 Degree 2 Var Poly fit Utest failed", ESMF_MAX_STRLEN);
+  ESMCI::MapperUtil::TwoDVIDPoly<float> p6;
+  max_deg = 2;
+  rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, x1vals, x2vals, y1vals, p6);
+  std::cout << p6 << std::endl;
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  strncpy(name, "2 Degree 2 Var Poly fit Accuracy Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "2 Degree 2 Var Poly fit Utest Accuracy failed", ESMF_MAX_STRLEN);
+  test_success = true;
+  tol = 100;
+  for(std::vector<float>::const_iterator citer1 = x1vals.cbegin(),
+      citer2 = x2vals.cbegin(),
+      citer3 = y1vals.cbegin();
+      (citer1 != x1vals.cend()) && (citer2 != x2vals.cend()) && (citer3 != y1vals.cend());
+      ++citer1, ++citer2, ++citer3){
+    //std::cout << "p5(" << *citer1 << ") = " << p5.eval(*citer1)
+    //          << " : " << *citer2 << "\n"; 
+    std::vector<float> p6_vvals = {*citer1, *citer2};
+    if(fabs(*citer3 - p6.eval(p6_vvals)) > tol){
+      std::cout << "Expected value = " << *citer3 << ", Eval value = " << p6.eval(p6_vvals) << ", tol = " << tol << "\n";
+      test_success = false;
+      //break;
     }
   }
   ESMC_Test(test_success, name, failMsg, &result, __FILE__, __LINE__, 0); 
