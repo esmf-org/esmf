@@ -265,6 +265,7 @@ namespace ESMCI{
       const std::vector<PolyCSInfo<CType> > &csinfos)
     {
       csinfos_ = csinfos;
+      has_cs_info_ = true;
     }
 
     template<typename CType>
