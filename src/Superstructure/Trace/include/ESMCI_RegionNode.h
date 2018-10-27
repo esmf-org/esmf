@@ -16,6 +16,7 @@
 #include <math.h>
 #include <algorithm>
 #include <string>
+#include <stdexcept>
 
 #include "ESMCI_LogErr.h"
 
@@ -36,20 +37,23 @@ namespace ESMCI {
     
   public:
         
-  RegionNode(RegionNode *parent, bool isUserRegion):
-    _parent(parent), _id(next_region_id()), _isUserRegion(isUserRegion),
+  RegionNode(RegionNode *parent, uint16_t local_id, bool isUserRegion):
+    _parent(parent), _global_id(next_global_id()),
+      _local_id(local_id), _isUserRegion(isUserRegion),
       _count(0), _total(0), _min(UINT64T_BIG), _max(0),
       _mean(0.0), _variance(0.0), _last_entered(0),
       _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {}
     
   RegionNode():
-    _parent(NULL), _id(next_region_id()), _isUserRegion(false),
+    _parent(NULL), _global_id(next_global_id()),
+      _local_id(0), _isUserRegion(false),
       _count(0), _total(0), _min(UINT64T_BIG), _max(0),
       _mean(0.0), _variance(0.0), _last_entered(0),
       _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {}
-
+        
   RegionNode(RegionNode *parent, RegionNode *toClone):
-    _parent(parent), _id(next_region_id()),
+    _parent(parent), _global_id(next_global_id()),
+      _local_id(toClone->getLocalId()),
       _isUserRegion(toClone->isUserRegion()),
       _count(toClone->getCount()), _total(toClone->getTotal()),
       _min(toClone->getMin()), _max(toClone->getMax()),
@@ -72,9 +76,9 @@ namespace ESMCI {
         delete toDel;
       }
     }
-
+    
     bool operator==(const RegionNode &other) const {
-      return _id == other._id;
+      return _global_id == other._global_id;
     }
     
     bool operator!=(const RegionNode &other) const {
@@ -88,18 +92,22 @@ namespace ESMCI {
     bool operator>(const RegionNode &rhs) const {
       return getTotal() > rhs.getTotal();
     }
+
+    uint16_t getLocalId() const {
+      return _local_id;
+    }
     
-    uint16_t getId() const {
-      return _id;
+    uint16_t getGlobalId() const {
+      return _global_id;
     }
     
     RegionNode *getParent() const {
       return _parent;
     }
 
-    uint16_t getParentId() const {
+    uint16_t getParentGlobalId() const {
       if (_parent != NULL)
-        return _parent->getId();
+        return _parent->getGlobalId();
       else
         return 0;
     } 
@@ -108,43 +116,51 @@ namespace ESMCI {
       return _isUserRegion;
     }
 
-    /*
-    RegionNode *getOrAddChild(int id) {
-      return getOrAddChild(id, false);
+    
+    RegionNode *getOrAddChild(uint16_t local_id, bool &wasAdded) {
+      return getOrAddChild(local_id, false, wasAdded);
     }
 
-    RegionNode *getOrAddChild(int id, bool isUserRegion) {
+    RegionNode *getOrAddChild(uint16_t local_id, bool isUserRegion, bool &wasAdded) {
       for (unsigned i = 0; i < _children.size(); i++) {
-        if (_children.at(i)->getId() == id) {
+        if (_children.at(i)->getLocalId() == local_id) {
+          wasAdded = false;
           return _children.at(i);
         }
       }
       //no match found
-      RegionNode *newNode = new RegionNode(this, id, isUserRegion);
+      RegionNode *newNode = new RegionNode(this, local_id, isUserRegion);
       _children.push_back(newNode);
+      wasAdded = true;
       return newNode;
     }
-    */
-
-    RegionNode *addChild() {
-      return addChild(false);
-    }
     
+
+    /* used by TESTING only */
+    RegionNode *addChild(string name) {
+      RegionNode *newNode = new RegionNode(this, 0, true);
+      _children.push_back(newNode);
+      newNode->setName(name);
+      return newNode;
+    }
+   
+    /*
     RegionNode *addChild(bool isUserRegion) {
       RegionNode *newNode = new RegionNode(this, isUserRegion);
       _children.push_back(newNode);
       return newNode;
     }
-
+    */
+    
     RegionNode *addChild(RegionNode *toClone) {
       RegionNode *newNode = new RegionNode(this, toClone);
       _children.push_back(newNode);
       return newNode;
     }
     
-    RegionNode *getChild(uint16_t id) {
+    RegionNode *getChild(uint16_t local_id) {
       for (unsigned i = 0; i < _children.size(); i++) {
-        if (_children.at(i)->getId() == id) {
+        if (_children.at(i)->getLocalId() == local_id) {
           return _children.at(i);
         }
       }
@@ -203,7 +219,7 @@ namespace ESMCI {
 
         //TODO: replace with name
         //snprintf(strname, 50, "%d,%d,%d,%d", _vmid, _baseid, _method, _phase);
-        snprintf(strname, 10, "%d", _id);
+        snprintf(strname, 10, "%d", _global_id);
         std::string name(strname);
         name.insert(0, prefix);
         
@@ -326,6 +342,151 @@ namespace ESMCI {
       mergeChildren(other);
     }
 
+    char *serialize() {
+      size_t bufferSize = serializeSize();
+      char *buffer = (char *) malloc(bufferSize);
+      if (buffer==NULL) {
+        throw std::bad_alloc();
+      }
+      size_t offset = 0;
+      memset(buffer, 0, bufferSize);
+      serializeLocal(buffer, &offset, bufferSize);
+      return buffer;
+    }
+
+    /*
+     * serialize the object to the byte array
+     * and update offset to the end of the serialized object
+     */
+    void serializeLocal(char *buffer, size_t *offset, size_t bufferSize) {
+      
+      //align offset at 8 bytes
+      if (*offset % 8 > 0) {
+        *offset += (8 - (*offset % 8));
+      }
+
+      if (*offset + localSerializeSize() > bufferSize) {
+        throw std::runtime_error("Buffer too small to serialize trace region");
+      }
+
+      memcpy(buffer+(*offset), (const void *) &_global_id, sizeof(_global_id));
+      *offset += sizeof(_global_id);
+
+      memcpy(buffer+(*offset), (const void *) &_local_id, sizeof(_local_id));
+      *offset += sizeof(_local_id);
+
+      memcpy(buffer+(*offset), (const void *) &_total, sizeof(_total));
+      *offset += sizeof(_total);
+
+      memcpy(buffer+(*offset), (const void *) &_count, sizeof(_count));
+      *offset += sizeof(_count);
+
+      memcpy(buffer+(*offset), (const void *) &_min, sizeof(_min));
+      *offset += sizeof(_min);
+      
+      memcpy(buffer+(*offset), (const void *) &_max, sizeof(_max));
+      *offset += sizeof(_max);
+
+      memcpy(buffer+(*offset), (const void *) &_mean, sizeof(_mean));
+      *offset += sizeof(_mean);
+
+      memcpy(buffer+(*offset), (const void *) &_variance, sizeof(_variance));
+      *offset += sizeof(_variance);
+
+      int userRegion = 0;
+      if (_isUserRegion) userRegion = 1;
+
+      memcpy(buffer+(*offset), (const void *) &userRegion, sizeof(userRegion));
+      *offset += sizeof(userRegion);
+
+      size_t nameSize = strlen(_name.c_str()) + 1;
+      memcpy(buffer+(*offset), (const void *) &nameSize, sizeof(nameSize));
+      *offset += sizeof(nameSize);
+
+      if (nameSize > 0) {
+        memcpy(buffer+(*offset), (const void *) _name.c_str(), nameSize);
+        *offset += nameSize;
+      }
+      
+      
+    }
+    
+    void deserializeLocal(char *buffer, size_t offset, size_t bufferSize) {
+      
+      if (offset + localSerializeSize() > bufferSize) {
+        throw std::runtime_error("Buffer too small to deserialize trace region");
+      }
+      
+      memcpy( (void *) &_global_id, buffer+offset, sizeof(_global_id) );
+      offset += sizeof(_global_id);
+
+      memcpy( (void *) &_local_id, buffer+offset, sizeof(_local_id) );
+      offset += sizeof(_local_id);
+
+      memcpy( (void *) &_total, buffer+offset, sizeof(_total) );
+      offset += sizeof(_total);
+
+      memcpy( (void *) &_count, buffer+offset, sizeof(_count) );
+      offset += sizeof(_count);
+
+      memcpy( (void *) &_min, buffer+offset, sizeof(_min) );
+      offset += sizeof(_min);
+
+      memcpy( (void *) &_max, buffer+offset, sizeof(_max) );
+      offset += sizeof(_max);
+
+      memcpy( (void *) &_mean, buffer+offset, sizeof(_mean) );
+      offset += sizeof(_mean);
+
+      memcpy( (void *) &_variance, buffer+offset, sizeof(_variance) );
+      offset += sizeof(_variance);
+
+      int userRegion = 0;
+      memcpy( (void *) &userRegion, buffer+offset, sizeof(userRegion) );
+      offset += sizeof(userRegion);
+      _isUserRegion = (userRegion == 1);
+
+      size_t nameSize = 0;
+      memcpy( (void *) &nameSize, buffer+offset, sizeof(nameSize) );
+      offset += sizeof(nameSize);
+
+      if (nameSize > 0) {
+        char *copyName = (char *) malloc(nameSize);
+        if (copyName == NULL) throw std::bad_alloc();
+        
+        memcpy( (void *) copyName, buffer+offset, nameSize );
+        offset += nameSize;
+        _name = string(copyName);
+        free(copyName);
+      }
+      
+            
+    }
+
+    /*
+     * returns length required to serialize this object
+     */
+    size_t localSerializeSize() {
+      size_t localSize =
+        sizeof(_global_id) +
+        sizeof(_local_id) + 
+        sizeof(_total) +
+        sizeof(_count) +
+        sizeof(_min) +
+        sizeof(_max) +
+        sizeof(_mean) +
+        sizeof(_variance) +
+        sizeof(int) + // isUserRegion flag
+        sizeof(size_t) +  // records length of name
+        strlen(_name.c_str());  // length of name
+      if (localSize % 8 > 0) {
+        //take alignment into account
+        localSize += 8 - (localSize % 8);
+      }
+      return localSize;
+    }
+    
+
     
   private:
 
@@ -341,22 +502,39 @@ namespace ESMCI {
       }     
     }
 
+    /*
+     * returns size to serialize entire tree
+     */
+    size_t serializeSize() {
+      size_t size = localSerializeSize();
+      for (unsigned i = 0; i < _children.size(); i++) {
+      	size += _children.at(i)->serializeSize();
+      }
+      return size;
+    }
+    
     struct RegionNodeCompare {
       bool operator()(const RegionNode* l, const RegionNode* r) {
         return *l > *r;
       }
     };
 
-    static uint16_t next_region_id() {
+    static uint16_t next_global_id() {
       static uint16_t next = 1;
       if (next > REGION_MAX_COUNT) {
-	return 0;
+	throw std::range_error("Out of space for trace regions");
       }
       return next++;
     } 
     
     RegionNode *_parent;
-    uint16_t _id;
+    uint16_t _global_id;
+
+    //allows each node to be referenced by
+    //an integer (for speed) or string (by name)
+    uint16_t _local_id;
+    string _name;
+
     bool _isUserRegion;
    
     vector<RegionNode *> _children;
@@ -374,7 +552,7 @@ namespace ESMCI {
     uint64_t _time_mpi;
     size_t _count_mpi;
 
-    string _name;
+    
     
   };
 
