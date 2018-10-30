@@ -31,7 +31,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
 # not quite ready for primetime
                # $(ESMF_TESTDIR)/ESMC_MBMesh_DualUTest \
 
-# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshMOABGhostUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshMOABGhostUTest
 
 TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MeshUTest \
