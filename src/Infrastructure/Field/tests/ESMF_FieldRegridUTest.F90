@@ -63,9 +63,27 @@
  
 #ifdef ESMF_TESTEXHAUSTIVE
 
+call ESMF_MeshSetMOAB(.true.)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test regrid with masks
+      write(failMsg, *) "Test unsuccessful"
+      write(name, *) "Regrid from Mesh to Mesh On Cell Centers"
+
+      ! initialize 
+      rc=ESMF_SUCCESS
+      
+      ! do test
+       call test_regridMeshToMeshCenter(rc)
+
+      ! return result
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
 
 ! This #if surrounds all the tests to enable turning on just one test
-#if 1
+#if 0
      !------------------------------------------------------------------------
         !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -630,7 +648,7 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-
+#if 0
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
@@ -647,7 +665,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-
+#endif
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test really coarse regrid
@@ -18354,7 +18372,7 @@ write(*,*) "LOCALRC=",localrc
      !! if error is too big report an error
      if (relErr > 0.0001) then
         correct=.false.
-        !write(*,*) localPet,"::",i1,farrayPtr1D(i1),xfarrayPtr1D(i1)
+        write(*,*) localPet,"::",i1,farrayPtr1D(i1),xfarrayPtr1D(i1)
      endif
   enddo
 

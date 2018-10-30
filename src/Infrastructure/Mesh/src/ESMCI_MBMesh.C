@@ -36,6 +36,8 @@
 #include "moab/ParallelComm.hpp"
 #include "MBParallelConventions.h"
 
+#include "VM/include/ESMC_VM.h"
+
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -70,8 +72,14 @@ void MBMesh::CreateGhost() {
 
   // Do this for now instead of initiating mesh parallel stuff
   // TODO: MAYBE EVENTUALLY PUT THIS INTO MBMesh???
+  ESMC_VM vm;
+  vm = ESMC_VMGetCurrent(&localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
+
+  int localPet, petCount;
   MPI_Comm mpi_comm;
-  mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
+  localrc = ESMC_VMGet(vm, &localPet, &petCount, NULL, &mpi_comm, NULL, NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
 
@@ -80,6 +88,18 @@ void MBMesh::CreateGhost() {
   int nprocs = pcomm->proc_config().proc_size();
   int rank = pcomm->proc_config().proc_rank();
 
+  // get the root set handle
+  EntityHandle root_set = mb->get_root_set();
+  
+  Range range_ent;
+  merr=mb->get_entities_by_dimension(root_set,this->sdim,range_ent);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+  merr = pcomm->resolve_shared_ents(root_set, range_ent, this->sdim, 1);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+// #define DEBUG_MOAB_GHOST_EXCHANGE
+#ifdef DEBUG_MOAB_GHOST_EXCHANGE
   Range shared_ents;
   // Get entities shared with all other processors
   merr = pcomm->get_shared_entities(-1, shared_ents);
@@ -89,12 +109,12 @@ void MBMesh::CreateGhost() {
   Range owned_entities;
   merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
   MBMESH_CHECK_ERR(merr, localrc);
-
-
+    
   unsigned int nums[4] = {0}; // to store the owned entities per dimension
   for (int i = 0; i < 4; i++)
+    // nums[i] = (nt)shared_ents.num_of_dimension(i);
     nums[i] = (int)owned_entities.num_of_dimension(i);
-  
+    
   vector<int> rbuf(nprocs*4, 0);
   MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, mpi_comm);
   // Print the stats gathered:
@@ -103,30 +123,55 @@ void MBMesh::CreateGhost() {
       cout << " Shared, owned entities on proc " << i << ": " << rbuf[4*i] << " verts, " <<
           rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << endl;
   }
+#endif
 
   // Now exchange 1 layer of ghost elements, using vertices as bridge
   // (we could have done this as part of reading process, using the PARALLEL_GHOSTS read option)
-  merr = pcomm->exchange_ghost_cells(3, // int ghost_dim
+  merr = pcomm->exchange_ghost_cells(this->sdim, // int ghost_dim
                                      0, // int bridge_dim
                                      1, // int num_layers
                                      0, // int addl_ents
                                      true);// bool store_remote_handles
   MBMESH_CHECK_ERR(merr, localrc);
 
+  vector<Tag> tags;
+  tags.push_back(this->gid_tag);
+  tags.push_back(this->orig_pos_tag);
+  tags.push_back(this->owner_tag);
+  if (this->has_node_orig_coords) tags.push_back(this->node_orig_coords_tag);
+  if (this->has_node_mask) {
+    tags.push_back(this->node_mask_tag);
+    tags.push_back(this->node_mask_val_tag);
+  }
+  if (this->has_elem_frac) tags.push_back(this->elem_frac_tag);
+  if (this->has_elem_mask) {
+    tags.push_back(this->elem_mask_tag);
+    tags.push_back(this->elem_mask_val_tag);
+  }
+  if (this->has_elem_area) tags.push_back(this->elem_area_tag);
+  // if (this->has_elem_coords) tags.push_back(this->elem_coords_tag);
+  // if (this->has_elem_orig_coords) tags.push_back(this->elem_orig_coords_tag);
+  
+  pcomm->set_debug_verbosity(4);
 
+  merr = pcomm->exchange_tags(tags, tags, range_ent);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+#ifdef DEBUG_MOAB_GHOST_EXCHANGE
   // Repeat the reports, after ghost exchange
   shared_ents.clear();
   owned_entities.clear();
   merr = pcomm->get_shared_entities(-1, shared_ents);
   MBMESH_CHECK_ERR(merr, localrc);
-
+  
   merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
   MBMESH_CHECK_ERR(merr, localrc);
-
+  
   // Find out how many shared entities of each dimension are owned on this processor
   for (int i = 0; i < 4; i++)
+    // nums[i] = (int)shared_ents.num_of_dimension(i);
     nums[i] = (int)owned_entities.num_of_dimension(i);
-
+  
   // Gather the statistics on processor 0
   MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, mpi_comm);
   if (0 == rank) {
@@ -136,7 +181,7 @@ void MBMesh::CreateGhost() {
           rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << endl;
     }
   }
-
+#endif
 
 }
 

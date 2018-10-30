@@ -21,7 +21,7 @@ namespace ESMCI {
 
 class MBMesh;
 
- void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh);
+ void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc);
 
 #endif
 

@@ -2023,6 +2023,9 @@ extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
 void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *rc) {
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh_createnodedistgrid()"
+
   // Declare id vectors
   std::vector<int> ngids;
 
@@ -2053,7 +2056,7 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
 
     // MOAB error
     int merr;
-
+  
     // Loop vertices
     // NOTE: this is looping through the original order of the vertices, so
     //       I DON'T need to sort by orig_pos
@@ -2145,7 +2148,6 @@ void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
 
   // MOAB error
   int merr;
-
 
   // Get a range containing all elements
   Range range_elem;

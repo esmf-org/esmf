@@ -29,7 +29,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
                $(ESMF_TESTDIR)/ESMF_MeshUTest
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MBMesh_DualUTest
+TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshMOABGhostUTest
 
 TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MeshUTest \
@@ -188,7 +188,7 @@ RUN_ESMC_MBMesh_DualUTestUNI:
 	$(MAKE) TNAME=MBMesh_Dual NP=1 ctest
 
 RUN_ESMC_MBMesh_DualUTest:
-	$(MAKE) TNAME=MBMesh_Dual NP=1 ctest
+	$(MAKE) TNAME=MBMesh_Dual NP=4 ctest
 
 RUN_ESMC_MBMesh_DualParUTest:
 	$(MAKE) TNAME=MBMesh_DualPar NP=4 ctest

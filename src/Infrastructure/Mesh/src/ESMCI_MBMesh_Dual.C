@@ -86,7 +86,7 @@ namespace ESMCI {
   // Create a dual of the input Mesh 
   // This adds ghostcells to the input mesh, 
   // it also creates ghostcells for the dual mesh
-  void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh) {
+  void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc) {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "MBMeshDual()"
@@ -154,11 +154,38 @@ namespace ESMCI {
     }
 #endif 
 
+  // // Get a range containing all elements
+  // Range range_elems;
+  // merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->sdim,range_elems);
+  // MBMESH_CHECK_ERR(merr, localrc);
+  // 
+  // for(Range::iterator it=range_elems.begin(); it !=range_elems.end(); it++) {
+  //   const EntityHandle *elem=&(*it);
+  // 
+  //     // Get element id
+  //     int elem_id;
+  //     merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
+  //     MBMESH_CHECK_ERR(merr, localrc);
+  //     printf("PET%d: 1111 source element number %d\n", localPet, elem_id);
+  // }
+
     // TODO: add elem mask fields and mask_val fields   
     src_mesh->CreateGhost();
     
-    // TODO: incorporate sendfields into ghostcomm from moab mesh
-    // src_mesh->GhostComm().SendFields(num_snd, snd, rcv);
+  // Get a range containing all elements
+  Range range_elems2;
+  merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->sdim,range_elems2);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+  // for(Range::iterator it=range_elems2.begin(); it !=range_elems2.end(); it++) {
+  //   const EntityHandle *elem=&(*it);
+  // 
+  //     // Get element id
+  //     int elem_id;
+  //     merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
+  //     MBMESH_CHECK_ERR(merr, localrc);
+  //     printf("PET%d: 2222 source element number %d\n", localPet, elem_id);
+  // }
 
     // If src_mesh is split, add newly created ghost elements to split_to_orig map
     if (src_mesh->is_split) add_ghost_elems_to_split_orig_id_map(src_mesh);
@@ -177,6 +204,16 @@ namespace ESMCI {
     throw localrc;  // bail out with exception
   // dual_mesh = dynamic_cast<MBMesh *> (dmp);
   dual_mesh = (MBMesh *) (dmp);
+
+  // set some flags that are normally set in the addnodes and addelements calls
+  dual_mesh->has_node_orig_coords = false;
+  dual_mesh->has_node_mask = false;
+  dual_mesh->has_elem_frac = false;
+  dual_mesh->has_elem_mask = false;
+  dual_mesh->has_elem_area = false;
+  dual_mesh->has_elem_coords = false;
+  dual_mesh->has_elem_orig_coords = false;
+  // is_split too?
 
   // Get a range containing all elements
   Range range_elem;
@@ -255,7 +292,6 @@ namespace ESMCI {
     merr = src_mesh->mesh->get_adjacencies(node, 1, sdim, false, adjs);
     MBMESH_CHECK_ERR(merr, localrc);
     num_node_elems = adjs.size();
-    printf("ESMCI_MBMesh_Dual: moab::get_adjacencies returns %d\n", num_node_elems);
     
     // If less than 3 (a triangle) then don't make an element
     if (num_node_elems < 3) continue;
@@ -327,8 +363,6 @@ namespace ESMCI {
     int owner;
     merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, node, 1, &owner);
     MBMESH_CHECK_ERR(merr, localrc);
-
-
     elemOwner[num_elems]=owner;
 
     // printf("%d# eId=%d eT=%d ::",Par::Rank(),elemId[num_elems],elemType[num_elems]);
@@ -375,13 +409,14 @@ namespace ESMCI {
 /////////////////////////////////// BIG CHANGES ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-
   // Iterate through all src elements creating nodes
-  EntityHandle **nodes=NULL;
+  EntityHandle *nodes=NULL;
   if (num_nodes>0) {
-    nodes=new EntityHandle *[num_nodes];
-    dual_mesh->verts=*nodes;
+    nodes=new EntityHandle[num_nodes];
+    dual_mesh->verts=nodes;
   }
+  dual_mesh->num_verts = num_nodes;
+
   
   pos=0;
   int data_index=0;
@@ -428,32 +463,33 @@ namespace ESMCI {
         MBMESH_CHECK_ERR(merr, localrc);
 
         // Add vertex
-        printf("ESMC_MBMesh_Dual: coords of new node [%f, %f, %f]\n", c[0], c[1], c[2]);
         EntityHandle new_node = 0;
         merr=dual_mesh->mesh->create_vertex(c,new_node);
         MBMESH_CHECK_ERR(merr, localrc);
-        nodes[data_index] = &new_node;
+        nodes[data_index] = new_node;
+
+        // printf("PET %d add vertex %d at [%f,%f,%f]\n", localPet, elem_id, c[0], c[1], c[2]);
 
         // Set Ids
-        merr=dual_mesh->mesh->tag_set_data(dual_mesh->gid_tag, nodes[data_index], 
+        merr=dual_mesh->mesh->tag_set_data(dual_mesh->gid_tag, &new_node, 
           1, &elem_id);
         MBMESH_CHECK_ERR(merr, localrc);
 
         // Set Owners
         merr=dual_mesh->mesh->tag_set_data(dual_mesh->owner_tag, 
-          nodes[data_index], 1, &owner);
+          &new_node, 1, &owner);
         MBMESH_CHECK_ERR(merr, localrc);
 
         // Set orig_pos
         merr=dual_mesh->mesh->tag_set_data(dual_mesh->orig_pos_tag, 
-          nodes[data_index], 1, &data_index);
+          &new_node, 1, &data_index);
         MBMESH_CHECK_ERR(merr, localrc);
 
         // Set original coords
         if (dual_mesh->has_node_orig_coords) {
           // Set original coords
           merr=dual_mesh->mesh->tag_set_data(dual_mesh->node_orig_coords_tag, 
-            nodes[data_index], 1, c);
+            &new_node, 1, c);
           MBMESH_CHECK_ERR(merr, localrc);
         }
         
@@ -486,11 +522,11 @@ namespace ESMCI {
           
           // set the elem mask value in the node mask
           merr=dual_mesh->mesh->tag_set_data(dual_mesh->node_mask_tag, 
-            nodes[data_index], 1, &elem_mask);
+            &new_node, 1, &elem_mask);
           MBMESH_CHECK_ERR(merr, localrc);
 
           merr=dual_mesh->mesh->tag_set_data(dual_mesh->node_mask_val_tag, 
-            nodes[data_index], 1, &elem_mask_val);
+            &new_node, 1, &elem_mask_val);
           MBMESH_CHECK_ERR(merr, localrc);
         }
         
@@ -618,17 +654,18 @@ namespace ESMCI {
         // More than 4 side, split
         if (elemType[e]>4) {
 
+          printf("IN SPLIT CODE\n");
           // Get coordinates
           int crd_pos=0;
           for (int i=0; i<elemType[e]; i++) {
-            EntityHandle *node=nodes[elemConn[conn_pos+i]];
+            EntityHandle node=nodes[elemConn[conn_pos+i]];
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// node coords ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
             double crd[3];
-            merr = dual_mesh->mesh->get_coords(node, 1, crd);
+            merr = dual_mesh->mesh->get_coords(&node, 1, crd);
             MBMESH_CHECK_ERR(merr, localrc);
             
             //double *crd=dm_node_coord->data(*node);
@@ -777,6 +814,8 @@ namespace ESMCI {
       merr=dual_mesh->mesh->create_element(etype,elem_verts,num_elem_verts,new_elem);
       MBMESH_CHECK_ERR(merr, localrc);
 
+      // printf("PET %d add an element with %d verts\n", localPet, num_elem_verts);
+
        // Set global id
       merr=dual_mesh->mesh->tag_set_data(dual_mesh->gid_tag, &new_elem, 1, elemId+e);
       MBMESH_CHECK_ERR(merr, localrc);
@@ -823,6 +862,9 @@ printf("    PET %d - parallel sharing\n", localPet);
     
     // Output 
     *_dual_mesh=dual_mesh;
+    
+    localrc = ESMF_SUCCESS;
+    *rc = localrc;
     }
 
 

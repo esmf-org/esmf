@@ -83,12 +83,26 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   //NEX_UTest
   MBMesh *mesh_quad = NULL;
-  mesh_quad = create_mesh_quad(rc);
+  mesh_quad = create_mesh_quad_9_parallel_dual(ESMC_COORDSYS_CART, rc);
   if (!mesh_quad) rc = ESMC_RC_PTR_NULL;
   
   MBMesh *mesh_quad_dual = NULL;
-  MBMeshDual(mesh_quad, &mesh_quad_dual);
+  MBMeshDual(mesh_quad, &mesh_quad_dual, &rc);
   if (!mesh_quad_dual) rc = ESMC_RC_PTR_NULL;
+
+  // Range range_elem;
+  // rc = mesh_quad_dual->mesh->get_entities_by_dimension(0,mesh_quad_dual->sdim,range_elem);
+  // printf("dual mesh elem num = %d\n", range_elem.size());
+
+  // void *mbptr = (void *) mesh_quad;
+  // int len = 12; char fname[len];
+  // sprintf(fname, "mesh_quad_%d", localPet);
+  // MBMesh_write(&mbptr, fname, &rc, len);
+  // 
+  // void *mbptrd = (void *) mesh_quad_dual;
+  // int lend = 17; char fnamed[lend];
+  // sprintf(fnamed, "mesh_quad_dual_%d", localPet);
+  // MBMesh_write(&mbptrd, fnamed, &rc, lend);
 
 #else
   rc = ESMF_SUCCESS;
