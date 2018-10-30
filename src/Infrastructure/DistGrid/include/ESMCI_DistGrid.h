@@ -47,6 +47,7 @@ namespace ESMCI {
     DECOMP_RESTFIRST, DECOMP_RESTLAST, DECOMP_CYCLIC, DECOMP_SYMMEDGEMAX};
 
   enum DistGridMatch_Flag {DISTGRIDMATCH_INVALID=0, DISTGRIDMATCH_NONE,
+    DISTGRIDMATCH_INDEXSPACE, DISTGRIDMATCH_TOPOLOGY, DISTGRIDMATCH_DECOMP, 
     DISTGRIDMATCH_EXACT, DISTGRIDMATCH_ALIAS};
 
   // classes
@@ -79,7 +80,8 @@ namespace ESMCI {
                                   // [elementCountPCollPLocalDe(localDe)]
     int *collocationPDim;         // collocation [dimCount]
     int diffCollocationCount;     // number different seqIndex collocations
-    int *collocationTable;        // collocation in packed format [dimCount]
+    int *collocationTable;        // collocation in packed format 
+                                  // [diffCollocationCount]
     int **elementCountPCollPLocalDe; // number of elements 
                                   // [diffCollocationCount][localDeCount]
     int *regDecomp;               // regular decomposition descriptor

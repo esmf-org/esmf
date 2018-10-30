@@ -3746,33 +3746,26 @@ DistGridMatch_Flag DistGrid::match(
     return matchResult;
   }
   
-  // go through all members of DistGrid and compare
+  // current match level:
+  matchResult = DISTGRIDMATCH_NONE;
+  
+  // any test bailing with current match level:
   int dimCount1 = distgrid1->dimCount;
   int dimCount2 = distgrid2->dimCount;
   if (dimCount1 != dimCount2){
-    matchResult = DISTGRIDMATCH_NONE;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
   int tileCount1 = distgrid1->tileCount;
   int tileCount2 = distgrid2->tileCount;
   if (tileCount1 != tileCount2){
-    matchResult = DISTGRIDMATCH_NONE;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
-  int deCount1 = distgrid1->delayout->getDeCount();
-  int deCount2 = distgrid2->delayout->getDeCount();
-  if (deCount1 != deCount2){
-    matchResult = DISTGRIDMATCH_NONE;
-    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
-    return matchResult;
-  }
-  int *int1 = distgrid1->minIndexPDimPTile;
-  int *int2 = distgrid2->minIndexPDimPTile;
+  int const* int1 = distgrid1->minIndexPDimPTile;
+  int const* int2 = distgrid2->minIndexPDimPTile;
   for (int i=0; i<dimCount1*tileCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -3781,7 +3774,6 @@ DistGridMatch_Flag DistGrid::match(
   int2 = distgrid2->maxIndexPDimPTile;
   for (int i=0; i<dimCount1*tileCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -3790,16 +3782,46 @@ DistGridMatch_Flag DistGrid::match(
   ESMC_I8 *long2 = distgrid2->elementCountPTile;
   for (int i=0; i<tileCount1; i++){
     if (long1[i] != long2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
+  }
+
+  // current match level:
+  matchResult = DISTGRIDMATCH_INDEXSPACE;
+  
+  // any test bailing with current match level:
+  int connectionCount1 = distgrid1->getConnectionCount();
+  int connectionCount2 = distgrid2->getConnectionCount();
+  if (connectionCount1 != connectionCount2){
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  int *const* intP1 = distgrid1->getConnectionList();
+  int *const* intP2 = distgrid2->getConnectionList();
+  for (int i=0; i<connectionCount1; i++){
+    for (int j=0; j<2*dimCount1+2; j++){
+      if (intP1[i][j] != intP2[i][j]){
+        if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+        return matchResult;
+      }
+    }
+  }
+
+  // current match level:
+  matchResult = DISTGRIDMATCH_TOPOLOGY;
+  
+  // any test bailing with current match level:
+  int deCount1 = distgrid1->delayout->getDeCount();
+  int deCount2 = distgrid2->delayout->getDeCount();
+  if (deCount1 != deCount2){
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
   }
   int1 = distgrid1->minIndexPDimPDe;
   int2 = distgrid2->minIndexPDimPDe;
   for (int i=0; i<dimCount1*deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -3808,7 +3830,6 @@ DistGridMatch_Flag DistGrid::match(
   int2 = distgrid2->maxIndexPDimPDe;
   for (int i=0; i<dimCount1*deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -3817,7 +3838,6 @@ DistGridMatch_Flag DistGrid::match(
   long2 = distgrid2->elementCountPDe;
   for (int i=0; i<deCount1; i++){
     if (long1[i] != long2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -3826,7 +3846,6 @@ DistGridMatch_Flag DistGrid::match(
   int2 = distgrid2->tileListPDe;
   for (int i=0; i<deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -3835,14 +3854,126 @@ DistGridMatch_Flag DistGrid::match(
   int2 = distgrid2->contigFlagPDimPDe;
   for (int i=0; i<dimCount1*deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
   }
+  int1 = distgrid1->indexCountPDimPDe;
+  int2 = distgrid2->indexCountPDimPDe;
+  for (int i=0; i<dimCount1*deCount1; i++){
+    if (int1[i] != int2[i]){
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  int ldeCount1 = distgrid1->delayout->getLocalDeCount();
+  int ldeCount2 = distgrid2->delayout->getLocalDeCount();
+  if (ldeCount1 != ldeCount2){
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  intP1 = distgrid1->indexListPDimPLocalDe;
+  intP2 = distgrid2->indexListPDimPLocalDe;
+  for (int i=0; i<ldeCount1; i++){
+    for (int j=0; j<dimCount1; j++){
+      if (intP1[i][j] != intP2[i][j]){
+        if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+        return matchResult;
+      }
+    }
+  }
   
-  // return successfully indicating match
+  // current match level:
+  matchResult = DISTGRIDMATCH_DECOMP;
+  
+  // any test bailing with current match level:
+  int diffCollCount1 = distgrid1->getDiffCollocationCount();
+  int diffCollCount2 = distgrid2->getDiffCollocationCount();
+  if (diffCollCount1 != diffCollCount2){
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  int1 = distgrid1->getCollocationTable();
+  int2 = distgrid2->getCollocationTable();
+  for (int i=0; i<diffCollCount1; i++){
+    if (int1[i] != int2[i]){
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  int1 = distgrid1->getCollocationPDim();
+  int2 = distgrid2->getCollocationPDim();
+  for (int i=0; i<dimCount1; i++){
+    if (int1[i] != int2[i]){
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  intP1 = distgrid1->getElementCountPCollPLocalDe();
+  intP2 = distgrid2->getElementCountPCollPLocalDe();
+  for (int i=0; i<diffCollCount1; i++){
+    for (int j=0; j<ldeCount1; j++){
+      if (intP1[i][j] != intP2[i][j]){
+        if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+        return matchResult;
+      }
+    }
+  }
+  ESMC_TypeKind_Flag itk1 = distgrid1->getIndexTK();
+  ESMC_TypeKind_Flag itk2 = distgrid2->getIndexTK();
+  if (itk1 != itk2){
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  for (int i=0; i<diffCollCount1; i++){
+    for (int j=0; j<ldeCount1; j++){
+      void const *arb1 = distgrid1->getArbSeqIndexList(j, i);
+      void const *arb2 = distgrid2->getArbSeqIndexList(j, i);
+      if (arb1!=NULL && arb2!=NULL){
+        if (itk1==ESMC_TYPEKIND_I1){
+          ESMC_I1 const *arb1T = (ESMC_I1 const *)arb1;
+          ESMC_I1 const *arb2T = (ESMC_I1 const *)arb2;
+          for (int k=0; k<intP1[i][j]; k++){
+            if (arb1T[k] != arb2T[k]){
+              if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+              return matchResult;
+            }
+          }
+        }else if (itk1==ESMC_TYPEKIND_I2){
+          ESMC_I2 const *arb1T = (ESMC_I2 const *)arb1;
+          ESMC_I2 const *arb2T = (ESMC_I2 const *)arb2;
+          for (int k=0; k<intP1[i][j]; k++){
+            if (arb1T[k] != arb2T[k]){
+              if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+              return matchResult;
+            }
+          }
+        }else if (itk1==ESMC_TYPEKIND_I4){
+          ESMC_I4 const *arb1T = (ESMC_I4 const *)arb1;
+          ESMC_I4 const *arb2T = (ESMC_I4 const *)arb2;
+          for (int k=0; k<intP1[i][j]; k++){
+            if (arb1T[k] != arb2T[k]){
+              if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+              return matchResult;
+            }
+          }
+        }else if (itk1==ESMC_TYPEKIND_I8){
+          ESMC_I8 const *arb1T = (ESMC_I8 const *)arb1;
+          ESMC_I8 const *arb2T = (ESMC_I8 const *)arb2;
+          for (int k=0; k<intP1[i][j]; k++){
+            if (arb1T[k] != arb2T[k]){
+              if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+              return matchResult;
+            }
+          }
+        }
+      }
+    }
+  }
+  // reached exact match level
   matchResult = DISTGRIDMATCH_EXACT;
+
+  // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
   return matchResult;
 }

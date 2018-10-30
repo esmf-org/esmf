@@ -2811,7 +2811,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_STAGGERLOC), allocatable :: srcStaggers(:)
        type(ESMF_Array), allocatable :: srcA(:), dstA(:)
        type(ESMF_Array), allocatable :: srcA2D(:), dstA2D(:)
-       type(ESMF_DistGrid):: dg
+       type(ESMF_DistGrid):: dg, oldDistGrid
        type(ESMF_TypeKind_Flag):: tk
        integer:: atodMap(1), k
        real(ESMF_KIND_R8), pointer:: farrayPtr(:), farrayPtr2d(:,:)
@@ -2824,6 +2824,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer                  :: arbDimCount, arrayDimCount, dgDimCount
        integer, allocatable     :: minIndex(:), maxIndex(:), indexArray(:,:)
        character(len=160)       :: msgString
+       type(ESMF_DistGridMatch_Flag) :: dgMatch
 
 
        ! Initialize return code; assume failure until success is certain
@@ -2834,9 +2835,19 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
        ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
 
-       ! TODO: NEED TO MAKE SURE INCOMING DistGrid HAS SAME MinIndex, MaxIndex AS EXISTING
-       !       Grid's DistGrid
-       ! -> use the ESMF_DISTGRIDMATCH_INDEXSPACE match level once available!!!
+       ! Check that the new DistGrid defines the same indexspace as the old DistGrid
+       call ESMF_GridGet(grid, distgrid=oldDistGrid, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       dgMatch = ESMF_DistGridMatch(distgrid, oldDistGrid, rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+       if (dgMatch < ESMF_DISTGRIDMATCH_INDEXSPACE) then
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+                 msg="Old and new DistGrids must cover the same index space.", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+         return
+       endif
 
 #if 0
        if (present(name)) &
@@ -7009,11 +7020,11 @@ end function ESMF_GridCreateFrmScrip
           ESMF_CONTEXT, rcToReturn=rc)) return
     
       if (localAddCornerStagger) then
-      	 allocate(staggerLocList(2))
+         allocate(staggerLocList(2))
          staggerLocList(1) = ESMF_STAGGERLOC_CENTER
          staggerLocList(2) = ESMF_STAGGERLOC_CORNER
       else
-      	 allocate(staggerLocList(1))
+         allocate(staggerLocList(1))
          staggerLocList(1) = ESMF_STAGGERLOC_CENTER
       endif      
       do s=1, size(staggerLocList)

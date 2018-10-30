@@ -20,12 +20,23 @@ The type of this flag is:
 
 The valid values are:
 \begin{description}
-\item [ESMF\_DISTGRIDMATCH\_INVALID:] Indicates a non-valid matching level.
+\item [ESMF\_DISTGRIDMATCH\_INVALID:] Indicates a non-valid matching level. One
+  or both DistGrid objects are invalid.
 \item [ESMF\_DISTGRIDMATCH\_NONE:] The lowest valid level of DistGrid matching. 
-  This indicates that the DistGrid variables don't match at any of the higher
+  This indicates that the DistGrid objects don't match at any of the higher
   levels.
-\item [ESMF\_DISTGRIDMATCH\_EXACT:] All the DistGrid pieces except the name
-  match between the two DistGrid variables. 
+\item [ESMF\_DISTGRIDMATCH\_INDEXSPACE:] The index space covered by the two
+  DistGrid objects is identical. However, differences between the two objects
+  prevents a higher matching level.
+\item [ESMF\_DISTGRIDMATCH\_TOPOLOGY:] The topology (i.e. index space and 
+  connections) defined by the two DistGrid objects is identical. However, 
+  differences between the two objects prevents a higher matching level.
+\item [ESMF\_DISTGRIDMATCH\_DECOMP:] The index space decomposition defined by
+   the two DistGrid objects is identical. However, differences between the two
+   objects prevents a higher matching level.
+\item [ESMF\_DISTGRIDMATCH\_EXACT:] The two DistGrid objects match in all 
+  aspects, including sequence indices. The only aspect that may differ between
+  the two objects is their name.
 \item [ESMF\_DISTGRIDMATCH\_ALIAS:] Both DistGrid variables are aliases to the
   exact same DistGrid object in memory.
 \end{description}
