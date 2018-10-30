@@ -20,7 +20,6 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearEdgeCases3DUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_CreateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_CreateParUTest \
-               $(ESMF_TESTDIR)/ESMC_MBMesh_DualUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousParUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_SearchUTest \
@@ -29,7 +28,10 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
                $(ESMF_TESTDIR)/ESMF_MeshUTest
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshMOABGhostUTest
+# not quite ready for primetime
+               # $(ESMF_TESTDIR)/ESMC_MBMesh_DualUTest \
+
+# TESTS_BUILD   = $(ESMF_TESTDIR)/ESMC_MeshMOABGhostUTest
 
 TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MeshUTest \

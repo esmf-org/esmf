@@ -40,8 +40,6 @@ TESTS_BUILD   = \
 		$(ESMF_TESTDIR)/ESMF_FieldHaloUTest \
 		$(ESMF_TESTDIR)/ESMF_FieldSMMFromFileUTest
 
-TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_FieldRegridUTest
-
 TESTS_RUN     = \
 		RUN_ESMC_FieldUTest \
 		RUN_ESMC_FieldRegridUTest \

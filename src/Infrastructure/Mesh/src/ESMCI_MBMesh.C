@@ -150,7 +150,7 @@ void MBMesh::CreateGhost() {
   }
   if (this->has_elem_area) tags.push_back(this->elem_area_tag);
   // if (this->has_elem_coords) tags.push_back(this->elem_coords_tag);
-  // if (this->has_elem_orig_coords) tags.push_back(this->elem_orig_coords_tag);
+  if (this->has_elem_orig_coords) tags.push_back(this->elem_orig_coords_tag);
   
   pcomm->set_debug_verbosity(4);
 

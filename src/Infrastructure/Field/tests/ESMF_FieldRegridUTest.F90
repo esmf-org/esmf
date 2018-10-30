@@ -63,10 +63,13 @@
  
 #ifdef ESMF_TESTEXHAUSTIVE
 
+! this is for testing development of the dual mesh feature with MBMesh
+!    will remove at the end of this development cycle
+#if 0
 call ESMF_MeshSetMOAB(.true.)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !EX_disable_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid from Mesh to Mesh On Cell Centers"
@@ -81,9 +84,10 @@ call ESMF_MeshSetMOAB(.true.)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
+#endif
 
 ! This #if surrounds all the tests to enable turning on just one test
-#if 0
+#if 1
      !------------------------------------------------------------------------
         !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -648,7 +652,6 @@ call ESMF_MeshSetMOAB(.true.)
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-#if 0
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
@@ -665,7 +668,6 @@ call ESMF_MeshSetMOAB(.true.)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-#endif
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test really coarse regrid
@@ -18372,7 +18374,7 @@ write(*,*) "LOCALRC=",localrc
      !! if error is too big report an error
      if (relErr > 0.0001) then
         correct=.false.
-        write(*,*) localPet,"::",i1,farrayPtr1D(i1),xfarrayPtr1D(i1)
+        !write(*,*) localPet,"::",i1,farrayPtr1D(i1),xfarrayPtr1D(i1)
      endif
   enddo
 

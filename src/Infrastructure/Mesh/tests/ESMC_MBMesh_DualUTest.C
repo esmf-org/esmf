@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 #if defined ESMF_MOAB
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_disable_UTest
   MBMesh *mesh_quad = NULL;
   mesh_quad = create_mesh_quad_9_parallel_dual(ESMC_COORDSYS_CART, rc);
   if (!mesh_quad) rc = ESMC_RC_PTR_NULL;
