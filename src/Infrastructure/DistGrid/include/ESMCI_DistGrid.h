@@ -220,17 +220,17 @@ namespace ESMCI {
     // get/set arb sequence indices
     int *const *getElementCountPCollPLocalDe()
       const {return elementCountPCollPLocalDe;}
-    void const *getArbSeqIndexList(int localDe, int collocation, int *rc=NULL)
+    void const *getArbSeqIndexList(int localDe, int collocation=1, int *rc=NULL)
       const;
     template<typename T> int setArbSeqIndex(InterArray<T> *arbSeqIndex, 
-      int localDe, int collocation);
-    int setArbSeqIndex(void *ptr, int localDe, int collocation);
+      int localDe, int collocation=1);
+    int setArbSeqIndex(void *ptr, int localDe, int collocation=1);
     int setCollocationPDim(InterArray<int> *collocationPDim);
     // fill()
     template<typename T> int fillSeqIndexList(InterArray<T> *seqIndexList,
-      int localDe, int collocation) const;
+      int localDe, int collocation=1) const;
     int fillSeqIndexList(std::vector<int> &seqIndexList, int localDe,
-      int collocation) const;
+      int collocation=1) const;
     int fillIndexListPDimPDe(int *indexList, int de, int dim,
       VMK::commhandle **commh, int rootPet, VM *vm=NULL) const;
     // misc.
