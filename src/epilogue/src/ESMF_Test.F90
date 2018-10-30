@@ -808,6 +808,8 @@ exclusion_loop:  &
           return
       endif
 
+      call ESMF_LogSet (flush=.true.)
+
       ! get test start time
       call cpu_time(start_time)
 

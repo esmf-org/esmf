@@ -125,9 +125,10 @@ namespace ESMCI {
    public:
     // create() and destroy()
     static DistGrid *create(DistGrid *dg,
-      InterArray<int> *firstExtra, InterArray<int> *lastExtra, 
-      ESMC_IndexFlag *indexflag, InterArray<int> *connectionList, 
-      DELayout *delayout=NULL, VM *vm=NULL, bool actualFlag=true, int *rc=NULL);
+      InterArray<int> *firstExtra, InterArray<int> *lastExtra,
+      ESMC_IndexFlag *indexflag, InterArray<int> *connectionList,
+      bool balanceFlag, DELayout *delayout=NULL, VM *vm=NULL,
+      bool actualFlag=true, int *rc=NULL);
     static DistGrid *create(InterArray<int> *minIndex,
       InterArray<int> *maxIndex, InterArray<int> *regDecomp, 
       Decomp_Flag *decompflag, int decompflagCount,
@@ -223,6 +224,7 @@ namespace ESMCI {
       const;
     template<typename T> int setArbSeqIndex(InterArray<T> *arbSeqIndex, 
       int localDe, int collocation);
+    int setArbSeqIndex(void *ptr, int localDe, int collocation);
     int setCollocationPDim(InterArray<int> *collocationPDim);
     // fill()
     template<typename T> int fillSeqIndexList(InterArray<T> *seqIndexList,
