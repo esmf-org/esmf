@@ -135,7 +135,6 @@ namespace ESMCI {
       return newNode;
     }
     
-
     /* used by TESTING only */
     RegionNode *addChild(string name) {
       RegionNode *newNode = new RegionNode(this, 0, true);
@@ -144,14 +143,6 @@ namespace ESMCI {
       return newNode;
     }
    
-    /*
-    RegionNode *addChild(bool isUserRegion) {
-      RegionNode *newNode = new RegionNode(this, isUserRegion);
-      _children.push_back(newNode);
-      return newNode;
-    }
-    */
-    
     RegionNode *addChild(RegionNode *toClone) {
       RegionNode *newNode = new RegionNode(this, toClone);
       _children.push_back(newNode);
@@ -342,15 +333,26 @@ namespace ESMCI {
       mergeChildren(other);
     }
 
+    // total number of nodes in tree
+    int size() {
+      int s=1; //this node
+      for (unsigned i = 0; i < _children.size(); i++) {
+	s += _children.at(i)->size();
+      }
+      return s;
+    }
+    
     char *serialize() {
       size_t bufferSize = serializeSize();
+      bufferSize += sizeof(int);
+      
       char *buffer = (char *) malloc(bufferSize);
       if (buffer==NULL) {
         throw std::bad_alloc();
       }
       size_t offset = 0;
       memset(buffer, 0, bufferSize);
-      serializeLocal(buffer, &offset, bufferSize);
+      serialize(buffer, &offset, bufferSize, true);
       return buffer;
     }
 
@@ -358,7 +360,7 @@ namespace ESMCI {
      * serialize the object to the byte array
      * and update offset to the end of the serialized object
      */
-    void serializeLocal(char *buffer, size_t *offset, size_t bufferSize) {
+    char *serialize(char *buffer, size_t *offset, size_t bufferSize, bool recursive) {
       
       //align offset at 8 bytes
       if (*offset % 8 > 0) {
@@ -371,6 +373,10 @@ namespace ESMCI {
 
       memcpy(buffer+(*offset), (const void *) &_global_id, sizeof(_global_id));
       *offset += sizeof(_global_id);
+
+      uint16_t parentId = getParentGlobalId();
+      memcpy(buffer+(*offset), (const void *) &parentId, sizeof(parentId));
+      *offset += sizeof(parentId);
 
       memcpy(buffer+(*offset), (const void *) &_local_id, sizeof(_local_id));
       *offset += sizeof(_local_id);
@@ -407,8 +413,15 @@ namespace ESMCI {
         memcpy(buffer+(*offset), (const void *) _name.c_str(), nameSize);
         *offset += nameSize;
       }
-      
-      
+
+      // serialize children recusively
+      if (recursive) {
+        for (unsigned i = 0; i < _children.size(); i++) {
+          _children.at(i)->serialize(buffer, offset, bufferSize, recursive);
+        }
+      }
+
+      return buffer;
     }
     
     void deserializeLocal(char *buffer, size_t offset, size_t bufferSize) {
@@ -420,6 +433,10 @@ namespace ESMCI {
       memcpy( (void *) &_global_id, buffer+offset, sizeof(_global_id) );
       offset += sizeof(_global_id);
 
+      uint16_t parentId = 0;
+      memcpy( (void *) &parentId, buffer+offset, sizeof(parentId) );
+      offset += sizeof(parentId);
+      
       memcpy( (void *) &_local_id, buffer+offset, sizeof(_local_id) );
       offset += sizeof(_local_id);
 
@@ -469,6 +486,7 @@ namespace ESMCI {
     size_t localSerializeSize() {
       size_t localSize =
         sizeof(_global_id) +
+        sizeof(_global_id) + // parent id
         sizeof(_local_id) + 
         sizeof(_total) +
         sizeof(_count) +

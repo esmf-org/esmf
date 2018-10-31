@@ -409,7 +409,7 @@ int main(void){
   
    
   //----------------------------------------------------------------------------
-  strcpy(name, "Serialize/deserialize region node");
+  strcpy(name, "Serialize/deserialize single region node");
  
   ESMCI::RegionNode *ser = new ESMCI::RegionNode(NULL, 989, true);
   ser->setName("serialize_this_region_1234");
@@ -421,10 +421,9 @@ int main(void){
   char *sbuf = (char *) malloc(bufsize);
   size_t offset = 0;
 
-  //void serializeLocal(char *buffer, size_t *offset, size_t bufferSize) {
-  ser->serializeLocal(sbuf, &offset, bufsize);
+  ser->serialize(sbuf, &offset, bufsize, false);
 
-  printf("offset after serializeLocal: %lu\n", offset);
+  //printf("offset after serializeLocal: %lu\n", offset);
   
   ESMCI::RegionNode *des = new ESMCI::RegionNode();
   des->deserializeLocal(sbuf, 0, bufsize);
@@ -443,6 +442,11 @@ int main(void){
   //NEX_UTest
   snprintf(failMsg, 80, "Deserialize total");
   ESMC_Test(ser->getTotal()==des->getTotal(), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Deserialize self time");
+  ESMC_Test(ser->getSelfTime()==des->getSelfTime(), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -479,8 +483,41 @@ int main(void){
   snprintf(failMsg, 80, "Deserialize name: %s, %s", ser->getName().c_str(), des->getName().c_str());
   ESMC_Test(ser->getName()==des->getName(), name, failMsg, &result, __FILE__, __LINE__, 0);
 
-  std::cout << ser->getName() << "\n";
-  std::cout << des->getName() << "\n";
+  delete ser, des;
+  
+  //----------------------------------------------------------------------------
+  strcpy(name, "Serialize/deserialize region tree");  
+
+  ESMCI::RegionNode *serParent = new ESMCI::RegionNode(NULL, 800, true);
+  ESMCI::RegionNode *serChild1;
+  ESMCI::RegionNode *serChild2;
+  ESMCI::RegionNode *serChild2a;
+
+  serParent->setName("serParent");
+  serParent->entered(10);
+  serChild1 = serParent->addChild("child1");
+  serChild1->entered(20);   serChild1->exited(27);
+  serChild1->entered(30);   serChild1->exited(45);
+  serChild2 = serParent->addChild("child2");
+  serChild2->entered(55);   serChild2->exited(67);
+  serChild2->entered(88);   serChild2->exited(105);
+  serChild2->entered(109);  serChild2->exited(127);
+  serChild2a = serChild2->addChild("child2a");
+  serChild2a->entered(200); serChild2a->exited(305);
+  serParent->exited(333);
+
+  //char *treeBuffer = serParent->serialize();
+  //free(treeBuffer);
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  //snprintf(failMsg, 80, "Deserialize name: %s, %s", ser->getName().c_str(), des->getName().c_str());
+  //ESMC_Test(ser->getName()==des->getName(), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+
+
+  
+  delete serParent;
   
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
