@@ -741,9 +741,8 @@ module NUOPC_FreeFormatDef
     
     ! loop over lines
     if (associated(freeFormat%stringList)) then
-print *, 'NUOPC_FreeFormatPrint:'
       do i=1, freeFormat%count
-        print *, trim (freeFormat%stringList(i))
+        print *, trim(freeFormat%stringList(i))
       enddo
     endif
 

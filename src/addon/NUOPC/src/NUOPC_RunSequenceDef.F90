@@ -277,7 +277,7 @@ module NUOPC_RunSequenceDef
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     else
-      print *, trim (msgString)
+      print *, trim(msgString)
     endif
 
   end subroutine
@@ -547,7 +547,7 @@ module NUOPC_RunSequenceDef
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
-        write (*,"(A)") trim (msgString)
+        write (*,"(A)") trim(msgString)
       endif
       write (msgString,"(A)") "::"
       if (logflagL) then
@@ -555,7 +555,7 @@ module NUOPC_RunSequenceDef
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
-        write (*,"(A)") trim (msgString)
+        write (*,"(A)") trim(msgString)
       endif
     else
       write (msgString,"(A)") "runSeq::"
@@ -564,7 +564,7 @@ module NUOPC_RunSequenceDef
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
-        write (*,"(A)") trim (msgString)
+        write (*,"(A)") trim(msgString)
       endif
       searchElement => runSeq%first
       do while (associated(searchElement%next))
@@ -582,7 +582,7 @@ module NUOPC_RunSequenceDef
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
-        write (*,"(A)") trim (msgString)
+        write (*,"(A)") trim(msgString)
       endif
     endif
 
@@ -622,7 +622,7 @@ module NUOPC_RunSequenceDef
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
-        write (*,"(A)") trim (msgString)
+        write (*,"(A)") trim(msgString)
       endif
       call NUOPC_RunSequenceSinglePrint(runSeq(i), logflag)
     enddo
