@@ -140,7 +140,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     to worry about providing them. Also, note that ESMF does not alter
 !     the command line arguments, so that if the user obtains them they will
 !     be as specified on the command line (including those which MPICH would
-!     normally strip out). 
+!     normally strip out).
+!
+!     {\tt ESMF\_Initialize()} supports running ESMF inside a user MPI program.
+!     Details of this feature are discussed under the VM example 
+!     \ref{vm_inside_user_mpi}. It is not necessary that all MPI ranks are
+!     handed to ESMF. Section \ref{vm_nesting_esmf} shows how an MPI
+!     communicator can be used to execute ESMF on a subset of MPI ranks.
+!     Finally {\tt ESMF\_Initialize()} supports running multiple concurrent
+!     instances of ESMF under the same user MPI program. This feature is
+!     discussed under \ref{vm_multi_instance_esmf}.
 !
 !     By default, {\tt ESMF\_Initialize()} will open multiple error log files,
 !     one per processor.  This is very useful for debugging purpose.  However,
@@ -181,6 +190,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \item [{[mpiCommunicator]}]
 !           MPI communicator defining the group of processes on which the
 !           ESMF application is running.
+!           See section \ref{vm_nesting_esmf} and \ref{vm_multi_instance_esmf}
+!           for details.
 !           If not specified, defaults to {\tt MPI\_COMM\_WORLD}.
 !     \item [{[ioUnitLBound]}]
 !           Lower bound for Fortran unit numbers used within the ESMF library.

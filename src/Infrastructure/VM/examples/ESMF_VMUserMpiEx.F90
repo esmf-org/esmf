@@ -18,6 +18,7 @@
 !BOE
 !
 ! \subsubsection{Nesting ESMF inside a user MPI application}
+! \label{vm_inside_user_mpi}
 !
 ! \begin{sloppypar}
 ! It is possible to nest an ESMF application inside a user application that 

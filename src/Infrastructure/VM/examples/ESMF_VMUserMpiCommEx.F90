@@ -18,6 +18,7 @@
 !BOE
 !
 ! \subsubsection{Nesting ESMF inside a user MPI application on a subset of MPI ranks}
+! \label{vm_nesting_esmf}
 !
 ! \begin{sloppypar}
 ! The previous example demonstrated that it is possible to nest an ESMF 

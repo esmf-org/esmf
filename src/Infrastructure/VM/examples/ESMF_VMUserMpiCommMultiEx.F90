@@ -18,6 +18,7 @@
 !BOE
 !
 ! \subsubsection{Multiple concurrent instances of ESMF under separate MPI communicators}
+! \label{vm_multi_instance_esmf}
 !
 ! \begin{sloppypar}
 ! Multiple instances of ESMF can run concurrently under the same user main 
