@@ -40,6 +40,7 @@
 
 #include "ESMCI_VMKernel.h"    // inherit from ESMCI::VMK class
 #include "ESMCI_Util.h"
+#include "ESMCI_LogErr.h"
 
 #include <string>
 #include <map>
@@ -131,7 +132,8 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static void getCurrentGarbageInfo(int *, int *); // garbage info current VM
     static void logCurrentGarbageInfo(std::string prefix); // garbage info
     static void getMemInfo(int *virtMemPet, int *physMemPet);   // memory info
-    static void logMemInfo(std::string prefix);   // memory info
+    static void logMemInfo(std::string prefix,
+      ESMCI::LogErr *log=&ESMC_LogDefault);   // memory info
     static int getBaseIDAndInc(VMId *vmID);
     static void addObject(ESMC_Base *, VMId *vmID);
     static void rmObject(ESMC_Base *);
