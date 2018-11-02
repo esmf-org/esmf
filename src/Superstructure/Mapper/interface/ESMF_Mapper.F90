@@ -339,7 +339,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_MapperGet - Get info from the mapper regarding a component
 
 ! !INTERFACE:
-  subroutine ESMF_MapperGetCompInfo(mapper, compNameLen, compName, phaseNameLen, phaseName, keywordEnforcer, npets, start_pet, end_pet, rc)
+  subroutine ESMF_MapperGetCompInfo(mapper, compNameLen, compName, phaseNameLen, phaseName, keywordEnforcer, npets, startPet, endPet, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Mapper), intent(in) :: mapper
@@ -349,8 +349,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(len=*), intent(in) :: phaseName
     type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,              intent(out), optional :: npets
-    integer,              intent(out), optional :: start_pet
-    integer,              intent(out), optional :: end_pet
+    integer,              intent(out), optional :: startPet
+    integer,              intent(out), optional :: endPet
     integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -372,14 +372,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
   !-----------------------------------------------------------------------------    
-    integer :: localrc, lnpets, lstart_pet, lend_pet
+    integer :: localrc, lnpets, lstartPet, lendPet
     ! Call the C entry point
     call c_ESMC_MapperGetCompInfo(mapper,&
           compNameLen, compName, phaseNameLen, phaseName,&
-          lstart_pet, lend_pet,&
+          lstartPet, lendPet,&
           localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT,&
           rcToReturn=rc)) return
+
+    if(present(startPet)) startPet = lstartPet
+    if(present(endPet)) endPet = lendPet
 
     if (present(rc)) rc = localrc
   end subroutine
