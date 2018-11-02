@@ -36,6 +36,82 @@ extern "C"{
             config_fname, status);
   }
 
+  void FTN_X(c_esmc_mappersetconstraints)(Mapper **ptr, int *status)
+  {
+    int local_status = ESMC_RC_NOT_IMPL;
+    if(status){
+      *status = local_status;
+    }
+  }
+
+  void FTN_X(c_esmc_mappersetcompconstraints)(Mapper **ptr,
+    int *comp_name_len,
+    const char *comp_name,
+    int *phase_name_len,
+    const char *phase_name,
+    int *status,
+    ESMCI_FortranStrLenArg comp_name_l,
+    ESMCI_FortranStrLenArg phase_name_l)
+  {
+    int local_status = ESMC_RC_NOT_IMPL;
+    if(status){
+      *status = local_status;
+    }
+  }
+
+  void FTN_X(c_esmc_mapperoptimize)(Mapper **ptr,
+              int *opt_threshold_reached, int *status)
+  {
+    int local_status = ESMC_RC_NOT_IMPL;
+    if(status){
+      *status = local_status;
+    }
+  }
+
+  void FTN_X(c_esmc_mapperprint)(Mapper **ptr, int *status)
+  {
+    int local_status = ESMC_RC_NOT_IMPL;
+    if(status){
+      *status = local_status;
+    }
+  }
+
+  void FTN_X(c_esmc_mappersetcompinfo)(Mapper **ptr,
+    int *comp_name_len,
+    const char *comp_name,
+    int *phase_name_len,
+    const char *phase_name,
+    int *comp_pet_range_start,
+    int *comp_pet_range_end,
+    double *comp_time_intvl_start,
+    double *comp_time_intvl_end,
+    int *status,
+    ESMCI_FortranStrLenArg comp_name_l,
+    ESMCI_FortranStrLenArg phase_name_l)
+  {
+    int local_status = ESMC_RC_NOT_IMPL;
+    if(status){
+      *status = local_status;
+    }
+  }
+
+  void FTN_X(c_esmc_mappergetcompinfo)(Mapper **ptr,
+    int *comp_name_len,
+    const char *comp_name,
+    int *phase_name_len,
+    const char *phase_name,
+    int *comp_pet_range_start,
+    int *comp_pet_range_end,
+    int *status,
+    ESMCI_FortranStrLenArg comp_name_l,
+    ESMCI_FortranStrLenArg phase_name_l)
+  {
+    int local_status = ESMC_RC_NOT_IMPL;
+    if(status){
+      *status = local_status;
+    }
+  }
+
   void FTN_X(c_esmc_mapperdestroy)(Mapper **ptr,
                                     int *status)
   {

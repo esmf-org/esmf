@@ -56,6 +56,45 @@ ESMC_Mapper ESMC_MapperCreate(ESMC_VM vm,
   return mapper;
 }
 
+int ESMC_MapperSetConstraints(ESMC_Mapper mapper)
+{
+  return ESMC_RC_NOT_IMPL;
+}
+
+int ESMC_MapperSetCompConstraints(ESMC_Mapper mapper,
+      int comp_name_len, const char *comp_name,
+      int phase_name_len, const char *phase_name)
+{
+  return ESMC_RC_NOT_IMPL;
+}
+
+int ESMC_MapperOptimize(ESMC_Mapper mapper, int *opt_threshold_reached)
+{
+  return ESMC_RC_NOT_IMPL;
+}
+
+int ESMC_MapperPrint(ESMC_Mapper mapper)
+{
+  return ESMC_RC_NOT_IMPL;
+}
+
+int ESMC_MapperSetCompInfo(ESMC_Mapper mapper,
+      int comp_name_len, const char *comp_name,
+      int phase_name_len, const char *phase_name,
+      int comp_pet_range_start, int comp_pet_range_end,
+      double comp_time_intvl_start, double comp_time_intvl_end)
+{
+  return ESMC_RC_NOT_IMPL;
+}
+
+int ESMC_MapperGetCompInfo(ESMC_Mapper mapper,
+      int comp_name_len, const char *comp_name,
+      int phase_name_len, const char *phase_name,
+      int *comp_pet_range_start, int *comp_pet_range_end)
+{
+  return ESMC_RC_NOT_IMPL;
+}
+
 int ESMC_MapperDestroy(ESMC_Mapper mapper)
 {
   if(mapper.ptr != NULL){

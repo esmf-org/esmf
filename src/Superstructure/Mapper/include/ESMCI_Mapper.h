@@ -57,6 +57,16 @@ namespace ESMCI{
 // The C interfaces
 extern "C"{
   ESMCI::Mapper *ESMCI_MapperCreate(ESMCI::VM *vm,  int config_fname_len, const char *config_fname, int *rc);
+  int ESMCI_MapperSetCompInfo(ESMCI::Mapper *mapper,
+        int comp_name_len, const char *comp_name,
+        int phase_name_len, const char *phase_name,
+        int comp_pet_range_start, int comp_pet_range_end,
+        double comp_time_intvl_start, double comp_time_intvl_end);
+  int ESMCI_MapperOptimize(ESMCI::Mapper *mapper, int *opt_threshold_reached);
+  int ESMCI_MapperGetCompInfo(ESMCI::Mapper *mapper,
+        int comp_name_len, const char *comp_name,
+        int phase_name_len, const char *phase_name,
+        int *comp_pet_range_start, int *comp_pet_range_end);
   int ESMCI_MapperDestroy(ESMCI::Mapper *mapper);
 } // extern "C"
 

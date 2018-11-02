@@ -61,7 +61,7 @@ module ESMF_MapperUtilMod
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 ! - ESMF-public methods:
-   public ESMF_MapperCollect          ! Collect details from a component
+   public ESMF_MapperSetCompInfo          ! Collect details from a component
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
@@ -82,20 +82,25 @@ contains
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_MapperCollect()"
+#define ESMF_METHOD "ESMF_MapperSetCompInfo()"
 !BOP
-! !IROUTINE: ESMF_MapperCollect - Collect all info from the component
+! !IROUTINE: ESMF_MapperSetCompInfo - Collect all info from the component
 
 ! !INTERFACE:
-  subroutine ESMF_MapperCollect(mapper, gComp, gCompInfo, keywordEnforcer, wtime, rc)
+  subroutine ESMF_MapperSetCompInfo(mapper, comp_name_len, comp_name, phase_name_len, phase_name, pet_range_start, pet_range_end, time_intvl_start, time_intvl_end, keywordEnforcer, rc)
 !
 !
 ! !ARGUMENTS:
     type(ESMF_Mapper) :: mapper
-    type(ESMF_GridComp) :: gComp
-    type(ESMF_MapperCompInfo) :: gCompInfo
-type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    double precision, intent(in), optional :: wtime
+    integer, intent(in) :: comp_name_len
+    character(len=*), intent(in) :: comp_name
+    integer, intent(in) :: phase_name_len
+    character(len=*), intent(in) :: phase_name
+    integer, intent(in) :: pet_range_start
+    integer, intent(in) :: pet_range_end
+    real(ESMF_KIND_R8), intent(in) :: time_intvl_start
+    real(ESMF_KIND_R8), intent(in) :: time_intvl_end
+    type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -105,22 +110,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \begin{description}
 !   \item[{[mapper]}]
 !     The mapper class;
-!   \item[{[gComp]}]
-!     The ESMF grid component being queried
-!   \item[{[gCompInfo]}]
-!     Mapper component info object associated with the ESMF grid component 
-!     being queried
-!   \item[{[wtime]}]
-!     Wallclock time elapsed for this component;
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
   !-----------------------------------------------------------------------------    
-    if(present(wtime)) then
-      gCompInfo%compInfop%optInfo%curElapsedWallClockTime = wtime
-    end if
+
+    integer :: localrc = ESMF_RC_NOT_IMPL
+
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ! Call the C entry point
+    call c_ESMC_MapperSetCompInfo(mapper,&
+          comp_name_len, comp_name,&
+          phase_name_len, phase_name,&
+          pet_range_start, pet_range_end,&
+          time_intvl_start, time_intvl_end,&
+          localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, ESMF_CONTEXT,&
+          rcToReturn=rc)) return
+
     if (present(rc)) rc = ESMF_SUCCESS
   end subroutine
 !------------------------------------------------------------------------------
