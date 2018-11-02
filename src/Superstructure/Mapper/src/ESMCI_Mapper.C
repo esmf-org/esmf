@@ -188,18 +188,21 @@ extern "C"{
   }
 
   int ESMCI_MapperSetCompInfo(ESMCI::Mapper *mapper,
-        int comp_name_len, const char *comp_name,
-        int phase_name_len, const char *phase_name,
+        int comp_name_len, const char *ccomp_name,
+        int phase_name_len, const char *cphase_name,
         int comp_pet_range_start, int comp_pet_range_end,
         double comp_time_intvl_start, double comp_time_intvl_end)
   {
+    std::string comp_name(ccomp_name, ccomp_name+comp_name_len);
+    std::string phase_name(cphase_name, cphase_name+phase_name_len);
+
     ESMCI::MapperUtil::CompInfo<double> comp_info(
       comp_name, phase_name,
       std::pair<int, int>(comp_pet_range_start, comp_pet_range_end),
       std::pair<double, double>(comp_time_intvl_start, comp_time_intvl_end));
 
-    std::string comp_infos_map_key = std::string((comp_name_len > 0) ? comp_name : "") +
-                                      std::string((phase_name_len > 0) ? phase_name : "");
+    std::string comp_infos_map_key = comp_name + phase_name;
+    std::cout << "Comp info map key : " << comp_infos_map_key.c_str() << "\n";
     std::map<std::string, ESMCI::MapperUtil::CompInfo<double> >::iterator
       map_iter = ESMCI::MapperStaticInfo::comp_infos_map.find(comp_infos_map_key);
     if(map_iter == ESMCI::MapperStaticInfo::comp_infos_map.end()){
@@ -231,7 +234,11 @@ extern "C"{
     std::vector<int> opt_npets;
     std::vector<std::pair<int, int> > opt_pet_ranges;
     double opt_wtime;
-    (*mapper).optimize(opt_npets, opt_pet_ranges, opt_wtime);
+    bool opt_pets_available =
+      (*mapper).optimize(opt_npets, opt_pet_ranges, opt_wtime);
+    if(opt_threshold_reached){
+      *opt_threshold_reached = (opt_pets_available) ? 0 : 1;
+    }
 
     int i=0;
     for(std::vector<ESMCI::MapperUtil::CompInfo<double> >::iterator
@@ -255,12 +262,13 @@ extern "C"{
   }
 
   int ESMCI_MapperGetCompInfo(ESMCI::Mapper *mapper,
-        int comp_name_len, const char *comp_name,
-        int phase_name_len, const char *phase_name,
+        int comp_name_len, const char *ccomp_name,
+        int phase_name_len, const char *cphase_name,
         int *comp_pet_range_start, int *comp_pet_range_end)
   {
-    std::string comp_infos_map_key = std::string((comp_name_len > 0) ? comp_name : "") +
-                                    std::string((phase_name_len > 0) ? phase_name : "");
+    std::string comp_name(ccomp_name, ccomp_name+comp_name_len);
+    std::string phase_name(cphase_name, cphase_name+phase_name_len);
+    std::string comp_infos_map_key = comp_name + phase_name;
     ESMCI::MapperUtil::CompInfo<double> comp_info =
       ESMCI::MapperStaticInfo::comp_infos_map.at(comp_infos_map_key);
     
