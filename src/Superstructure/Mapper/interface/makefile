@@ -2,8 +2,8 @@
 
 ALL: build_here 
 
-SOURCEC	  = ESMCI_RunSeqDGraph.C ESMCI_GraphDotUtils.C ESMCI_RunSeqUtils.C ESMCI_Mapper.C
-SOURCEF	  = 
+SOURCEC	  = ESMC_Mapper.C ESMCI_Mapper_F.C
+SOURCEF	  = ESMF_Mapper.F90 ESMF_MapperUtil.F90
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
@@ -11,7 +11,7 @@ OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix _fapi.tex, $(basename $(AUTOGEN)))
 
 LIBBASE	  = libesmf
-LOCDIR	  = src/Superstructure/Mapper/src
+LOCDIR	  = src/Superstructure/Mapper/interface
 
 CLEANDIRS   =
 CLEANFILES  = $(AUTOGEN) $(addprefix ../doc/, $(TEXFILES) )

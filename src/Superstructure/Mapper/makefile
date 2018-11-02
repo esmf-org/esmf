@@ -15,7 +15,7 @@ include ${ESMF_DIR}/makefile
 # example/test code, or documents which need to be generated.
 
 #DIRS	  = src doc examples tests
-DIRS	  = src tests
+DIRS	  = src interface tests
 
 CLEANDIRS   =
 CLEANFILES  =

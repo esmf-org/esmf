@@ -54,4 +54,11 @@ namespace ESMCI{
 
 } //namespace ESMCI
 
+// The C interfaces
+extern "C"{
+  ESMCI::Mapper *ESMCI_MapperCreate(ESMCI::VM *vm,  int config_fname_len, const char *config_fname, int *rc);
+  int ESMCI_MapperDestroy(ESMCI::Mapper *mapper);
+} // extern "C"
+
+
 #endif // ESMCI_Mapper_H

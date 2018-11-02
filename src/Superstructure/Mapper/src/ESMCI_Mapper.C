@@ -142,3 +142,29 @@ namespace ESMCI{
   }
 
 } // namespace ESMCI
+
+extern "C"{
+
+  ESMCI::Mapper *ESMCI_MapperCreate(ESMCI::VM *vm, int config_fname_len,
+    const char *config_fname, int *rc)
+  {
+    if(rc){
+      *rc = ESMF_SUCCESS;
+    }
+    if(config_fname_len == 0){
+      return new ESMCI::Mapper(*vm);
+    }
+    else{
+      return new ESMCI::Mapper(*vm, config_fname); 
+    }
+  }
+  
+  int ESMCI_MapperDestroy(ESMCI::Mapper *mapper)
+  {
+    if(mapper){
+      delete mapper;
+    }
+    return ESMF_SUCCESS;
+  }
+
+} // extern "C"

@@ -72,8 +72,6 @@
     type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_MapperCompInfo) :: comp1Info, comp2Info
-    type(ESMF_MapperExecutionBlock) :: execBlock
-    type(ESMF_MapperExecutionBlock), dimension(:), allocatable :: tmpExecBlocks
     double precision :: comp1_start, comp1_end, comp2_start, comp2_end;
     double precision :: run_loop_start, run_loop_end
     double precision :: comp1_wtime, comp2_wtime, run_loop_wtime
@@ -281,17 +279,8 @@
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  allocate(tmpExecBlocks(0))
-  execBlock = ESMF_MapperExecutionBlockCreate(mapper,&
-                      (/comp1Info, comp2Info/),&
-                      tmpExecBlocks, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
   ! Set mapper constraints
-  call ESMF_MapperSetConstraints(mapper, rootExecBlock=execBlock,&
-    rc=localrc)
+  call ESMF_MapperSetConstraints(mapper, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -664,12 +653,6 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
     call ESMF_CplCompDestroy(cpl, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-
-    call ESMF_MapperExecutionBlockDestroy(mapper, execBlock,&
-      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
