@@ -113,7 +113,7 @@ void MBMesh_create(void **mbmpp,
 
     // Default value
     int int_def_val = 0;
-    double dbl_def_val = 0.0;
+    double dbl_def_val[3] = {0.0, 0.0, 0.0};
 
      // Setup global id tag
     int_def_val=0;
@@ -142,8 +142,8 @@ void MBMesh_create(void **mbmpp,
     // Setup node_orig_coord tag
     mbmp->has_node_orig_coords=false;
     if (*coordSys != ESMC_COORDSYS_CART) {
-      dbl_def_val=-1.0;
-      merr=moab_mesh->tag_get_handle("node_orig_coords", *sdim, MB_TYPE_DOUBLE, mbmp->node_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+      dbl_def_val[0]=dbl_def_val[1]=dbl_def_val[2]=-1.0;
+      merr=moab_mesh->tag_get_handle("node_orig_coords", *sdim, MB_TYPE_DOUBLE, mbmp->node_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
       if (merr != MB_SUCCESS) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                          moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
@@ -621,11 +621,11 @@ void MBMesh_addelements(void **mbmpp,
     int localrc;
 
     // Do this for now instead of initing mesh parallel stuff
-     // TODO: MAYBE EVENTUALLY PUT THIS INTO MBMesh???
-     MPI_Comm mpi_comm;
-     {
-      int localrc;
-      int rc;
+    // TODO: MAYBE EVENTUALLY PUT THIS INTO MBMesh???
+    MPI_Comm mpi_comm;
+    {
+    int localrc;
+    int rc;
       mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
         throw localrc;  // bail out with exception
@@ -718,13 +718,14 @@ printf("    PET %d - register elem tags\n", localPet);
 
     // Register element tags
     int     int_def_val=-1.0;
-    double  dbl_def_val= 0.0;
+    double  dbl_def_val[3]= {0.0, 0.0, 0.0};
+    double  dbl_def_val_one= 0.0;
 
     //// Register the frac field
     mbmp->has_elem_frac=false;
     if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
 
-      merr=moab_mesh->tag_get_handle("elem_frac", 1, MB_TYPE_DOUBLE, mbmp->elem_frac_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+      merr=moab_mesh->tag_get_handle("elem_frac", 1, MB_TYPE_DOUBLE, mbmp->elem_frac_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val_one);
       if (merr != MB_SUCCESS) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                          moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
@@ -777,7 +778,7 @@ printf("    PET %d - elem masking\n", localPet);
     mbmp->has_elem_area=false;
     if (areaPresent == 1) { // if areas exist
 
-      merr=moab_mesh->tag_get_handle("elem_area", 1, MB_TYPE_DOUBLE, mbmp->elem_area_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+      merr=moab_mesh->tag_get_handle("elem_area", 1, MB_TYPE_DOUBLE, mbmp->elem_area_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val_one);
       if (merr != MB_SUCCESS) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                          moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
@@ -797,7 +798,7 @@ printf("    PET %d - elem coords\n", localPet);
     if (elemCoordsPresent == 1) { // if coords exist
 
       // Add element coords field
-      merr=moab_mesh->tag_get_handle("elem_coords", mbmp->sdim, MB_TYPE_DOUBLE, mbmp->elem_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+      merr=moab_mesh->tag_get_handle("elem_coords", mbmp->sdim, MB_TYPE_DOUBLE, mbmp->elem_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
        if (merr != MB_SUCCESS) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                          moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
@@ -805,7 +806,7 @@ printf("    PET %d - elem coords\n", localPet);
 
       // If not cartesian then add original coordinates field
       if (coordSys != ESMC_COORDSYS_CART) {
-        merr=moab_mesh->tag_get_handle("elem_orig_coords", orig_sdim, MB_TYPE_DOUBLE, mbmp->elem_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+        merr=moab_mesh->tag_get_handle("elem_orig_coords", orig_sdim, MB_TYPE_DOUBLE, mbmp->elem_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
         if (merr != MB_SUCCESS) {
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                            moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;

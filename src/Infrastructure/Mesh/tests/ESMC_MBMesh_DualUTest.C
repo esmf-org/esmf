@@ -24,6 +24,7 @@
 #if defined ESMF_MOAB
 
 #include "ESMC_MBMeshTestUtilMBMesh.C"
+#include "ESMC_MBMeshTestUtilPL.C"
 
 // other headers
 #include "ESMCI_MBMesh.h"
@@ -53,6 +54,7 @@ int main(int argc, char *argv[]) {
   char failMsg[80];
   int result = 0;
   int rc;
+  int merr;
   int localPet, petCount;
   ESMC_VM vm;
 
@@ -81,7 +83,7 @@ int main(int argc, char *argv[]) {
 #if defined ESMF_MOAB
 
   //----------------------------------------------------------------------------
-  //NEX_disable_UTest
+  //NEX_UTest
   MBMesh *mesh_quad = NULL;
   mesh_quad = create_mesh_quad_9_parallel_dual(ESMC_COORDSYS_CART, rc);
   if (!mesh_quad) rc = ESMC_RC_PTR_NULL;
@@ -90,20 +92,35 @@ int main(int argc, char *argv[]) {
   MBMeshDual(mesh_quad, &mesh_quad_dual, &rc);
   if (!mesh_quad_dual) rc = ESMC_RC_PTR_NULL;
 
-  // Range range_elem;
-  // rc = mesh_quad_dual->mesh->get_entities_by_dimension(0,mesh_quad_dual->sdim,range_elem);
-  // printf("dual mesh elem num = %d\n", range_elem.size());
+  Range range_quad;
+  merr=mesh_quad_dual->mesh->get_entities_by_dimension(0,
+    mesh_quad_dual->pdim,range_quad);
+  if (merr != MB_SUCCESS) rc = ESMF_FAILURE;
 
-  // void *mbptr = (void *) mesh_quad;
-  // int len = 12; char fname[len];
-  // sprintf(fname, "mesh_quad_%d", localPet);
-  // MBMesh_write(&mbptr, fname, &rc, len);
+  void *mbptr = (void *) mesh_quad;
+  int len = 12; char fname[len];
+  sprintf(fname, "mesh_quad_%d", localPet);
+  MBMesh_write(&mbptr, fname, &rc, len);
+  
+  void *mbptrd = (void *) mesh_quad_dual;
+  int lend = 17; char fnamed[lend];
+  sprintf(fnamed, "mesh_quad_dual_%d", localPet);
+  MBMesh_write(&mbptrd, fnamed, &rc, lend);
+  
+  
+  // force weight generation to a pointlist
+  // // build a pointlist
+  // PointList *pl_quad_par;
+  // pl_quad_par = create_pointlist_for_quad_parallel(rc);
   // 
-  // void *mbptrd = (void *) mesh_quad_dual;
-  // int lend = 17; char fnamed[lend];
-  // sprintf(fnamed, "mesh_quad_dual_%d", localPet);
-  // MBMesh_write(&mbptrd, fnamed, &rc, lend);
-
+  // vector<double> weights;
+  // bool cart = false;
+  // 
+  // weight_gen(mesh_quad_dual, pl_quad_par, weights, cart);
+  
+  // clean up
+  delete mesh_quad;
+  delete mesh_quad_dual;
 #else
   rc = ESMF_SUCCESS;
 #endif
@@ -111,63 +128,50 @@ int main(int argc, char *argv[]) {
   strcpy(failMsg, "Mesh creation failed");
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
 
-//   //----------------------------------------------------------------------------
-//   //NEX_disable_UTest
-// 
-// #if defined ESMF_MOAB
-//   Range range_quad;
-//   Interface *mb_mesh_quad=mesh_quad->mesh;
-//   int merr_quad=mb_mesh_quad->get_entities_by_dimension(0,mesh_quad->pdim,range_quad);
-//   if (merr_quad != MB_SUCCESS) rc = ESMF_FAILURE;
-// 
-//   // clean up
-//   delete mesh_quad;
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-// 
-//   strcpy(name, "get_entities");
-//   strcpy(failMsg, "Cannot get entities");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // --------------------------------------------------------------------------
-//   // get entities from meshes created with spherical quadrilaterals
-//   // --------------------------------------------------------------------------
-// #if defined ESMF_MOAB
-// 
-//   //----------------------------------------------------------------------------
-//   //NEX_disable_UTest
-//   MBMesh *mesh_quad_sph;
-//   mesh_quad_sph = create_mesh_quad_sph(rc);
-//   if (!mesh_quad_sph) rc = ESMC_RC_PTR_NULL;
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-//   strcpy(name, "Spherical quadrilaterals mesh creation");
-//   strcpy(failMsg, "Mesh creation failed");
-//   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   //----------------------------------------------------------------------------
-//   //NEX_disable_UTest
-// 
-// #if defined ESMF_MOAB
-//   Range range_quad_sph;
-//   Interface *mb_mesh_quad_sph=mesh_quad_sph->mesh;
-//   int merr_quad_sph=mb_mesh_quad_sph->get_entities_by_dimension(0,mesh_quad_sph->pdim,range_quad_sph);
-//   if (merr_quad_sph != MB_SUCCESS) rc = ESMF_FAILURE;
-//   // clean up
-//   delete mesh_quad_sph;
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-// 
-//   strcpy(name, "get_entities");
-//   strcpy(failMsg, "Cannot get entities");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   // --------------------------------------------------------------------------
-//   // get entities from meshes created with triangles
-//   // --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // get entities from meshes created with spherical quadrilaterals
+  // --------------------------------------------------------------------------
+#if defined ESMF_MOAB
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  MBMesh *mesh_quad_sph = NULL;
+  mesh_quad_sph = create_mesh_quad_sph(rc);
+  if (!mesh_quad_sph) rc = ESMC_RC_PTR_NULL;
+
+  MBMesh *mesh_quad_sph_dual = NULL;
+  MBMeshDual(mesh_quad_sph, &mesh_quad_sph_dual, &rc);
+  if (!mesh_quad_sph_dual) rc = ESMC_RC_PTR_NULL;
+
+  Range range_quad_sph;
+  merr = mesh_quad_sph_dual->mesh->get_entities_by_dimension(0,
+    mesh_quad_sph_dual->pdim,range_quad_sph);
+  if (merr != MB_SUCCESS) rc = ESMF_FAILURE;
+
+  // void *mbptr = (void *) mesh_quad_sph;
+  // int len = 12; char fname[len];
+  // sprintf(fname, "mesh_quad_%d", localPet);
+  // MBMesh_write(&mbptr, fname, &rc, len);
+  // 
+  // void *mbptrd = (void *) mesh_quad_sph_dual;
+  // int lend = 17; char fnamed[lend];
+  // sprintf(fnamed, "mesh_quad_dual_%d", localPet);
+  // MBMesh_write(&mbptrd, fnamed, &rc, lend);
+
+  // clean up
+  delete mesh_quad_sph;
+  delete mesh_quad_sph_dual;
+
+#else
+  rc = ESMF_SUCCESS;
+#endif
+  strcpy(name, "Spherical quadrilaterals mesh creation");
+  strcpy(failMsg, "Mesh creation failed");
+  ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  // --------------------------------------------------------------------------
+  // get entities from meshes created with triangles
+  // --------------------------------------------------------------------------
 // #if defined ESMF_MOAB
 // 
 //   //----------------------------------------------------------------------------
@@ -175,32 +179,32 @@ int main(int argc, char *argv[]) {
 //   MBMesh *mesh_tri;
 //   mesh_tri = create_mesh_tri(rc);
 //   if (!mesh_tri) rc = ESMC_RC_PTR_NULL;
+// 
+//   MBMesh *mesh_tri_dual = NULL;
+//   MBMeshDual(mesh_tri, &mesh_tri_dual, &rc);
+//   if (!mesh_tri_dual) rc = ESMC_RC_PTR_NULL;
+// 
+//   Range range_tri;
+//   merr=mesh_tri_dual->mesh->get_entities_by_dimension(0,mesh_tri_dual->pdim,range_tri);
+//   if (merr != MB_SUCCESS) rc = ESMF_FAILURE;
+// 
+//   void *mbptr = (void *) mesh_tri;
+//   int len = 12; char fname[len];
+//   sprintf(fname, "mesh_tri_%d", localPet);
+//   MBMesh_write(&mbptr, fname, &rc, len);
+// 
+//   void *mbptrd = (void *) mesh_tri_dual;
+//   int lend = 17; char fnamed[lend];
+//   sprintf(fnamed, "mesh_tri_dual_%d", localPet);
+//   MBMesh_write(&mbptrd, fnamed, &rc, lend);
+// 
 // #else
 //   rc = ESMF_SUCCESS;
 // #endif
 //   strcpy(name, "Triangles mesh creation");
 //   strcpy(failMsg, "Mesh creation failed");
 //   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
-//   //----------------------------------------------------------------------------
-//   //NEX_disable_UTest
-// 
-// #if defined ESMF_MOAB
-//   Range range_tri;
-//   Interface *mb_mesh_tri=mesh_tri->mesh;
-//   int merr_tri=mb_mesh_tri->get_entities_by_dimension(0,mesh_tri->pdim,range_tri);
-//   if (merr_tri != MB_SUCCESS) rc = ESMF_FAILURE;
-// 
-//   // clean up
-//   delete mesh_tri;
-// #else
-//   rc = ESMF_SUCCESS;
-// #endif
-// 
-//   strcpy(name, "get_entities");
-//   strcpy(failMsg, "Cannot get entities");
-//   ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
-// 
+
 //   // --------------------------------------------------------------------------
 //   // get entities from meshes created with spherical triangles
 //   // --------------------------------------------------------------------------

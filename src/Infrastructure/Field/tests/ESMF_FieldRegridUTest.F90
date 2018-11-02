@@ -65,7 +65,7 @@
 
 ! this is for testing development of the dual mesh feature with MBMesh
 !    will remove at the end of this development cycle
-#if 0
+#if 1
 call ESMF_MeshSetMOAB(.true.)
 
       !------------------------------------------------------------------------
@@ -78,7 +78,10 @@ call ESMF_MeshSetMOAB(.true.)
       rc=ESMF_SUCCESS
       
       ! do test
-       call test_regridMeshToMeshCenter(rc)
+      call test_regridMeshToMeshCenter(rc)
+      
+      ! remove this later, it is here to protect hang
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -87,7 +90,7 @@ call ESMF_MeshSetMOAB(.true.)
 #endif
 
 ! This #if surrounds all the tests to enable turning on just one test
-#if 1
+#if 0
      !------------------------------------------------------------------------
         !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -18374,7 +18377,7 @@ write(*,*) "LOCALRC=",localrc
      !! if error is too big report an error
      if (relErr > 0.0001) then
         correct=.false.
-        !write(*,*) localPet,"::",i1,farrayPtr1D(i1),xfarrayPtr1D(i1)
+        ! write(*,*) localPet,"::",i1,farrayPtr1D(i1),xfarrayPtr1D(i1)
      endif
   enddo
 

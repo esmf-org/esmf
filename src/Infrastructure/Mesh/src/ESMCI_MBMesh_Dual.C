@@ -284,15 +284,16 @@ namespace ESMCI {
     //if (!GetAttr(node).is_locally_owned()) continue;
     
     
-    // TODO: get_adjacencies from moab untested!!!!
+
     // Get number of elems
     int num_node_elems=0;
     // get_num_elems_around_node(&node, &num_node_elems);
+    // pdim instead of sdim here, for spherical cases
     vector<EntityHandle> adjs;
-    merr = src_mesh->mesh->get_adjacencies(node, 1, sdim, false, adjs);
+    merr = src_mesh->mesh->get_adjacencies(node, 1, pdim, false, adjs);
     MBMESH_CHECK_ERR(merr, localrc);
     num_node_elems = adjs.size();
-    
+        
     // If less than 3 (a triangle) then don't make an element
     if (num_node_elems < 3) continue;
     
@@ -372,16 +373,23 @@ namespace ESMCI {
 
     //    printf("Elem id=%d max=%d num=%d :: ",node.get_id(),max_num_node_elems,num_elems_around_node_ids);
 
+#if DEBUG_CONNECTIVITY
+    printf("PET %d, elem %d, nodes [", localPet, elem_id);
+    for (int i = 0; i < num_elems_around_node_ids; ++i)
+      printf("%d,", elems_around_node_ids[i]);
+    printf("]\n");
+#endif
+
     // Loop elements attached to node and build connection list
     for (int i=0; i<num_elems_around_node_ids; i++) {
 
       // Get elem id
-      int elem_id=elems_around_node_ids[i];
+      int elem_id2=elems_around_node_ids[i];
       
       // printf(" %d ",elem_id);
 
       // Get index of this element
-      int node_index=id_to_index[elem_id];
+      int node_index=id_to_index[elem_id2];
       
       // Record that this node was used
       nodes_used[node_index]=1;
@@ -398,6 +406,12 @@ namespace ESMCI {
 
     // printf("\n");
   }
+  
+#if DEBUG_CONNECTIVITY
+  printf("PET %d: elemConn[", localPet);
+  for (int i = 0; i < conn_pos; ++i) printf("%d,", elemConn[i]);
+  printf("]\n");
+#endif
 
   // Free tmp arrays
   if (tmp_mdss != NULL) delete [] tmp_mdss;
@@ -654,7 +668,6 @@ namespace ESMCI {
         // More than 4 side, split
         if (elemType[e]>4) {
 
-          printf("IN SPLIT CODE\n");
           // Get coordinates
           int crd_pos=0;
           for (int i=0; i<elemType[e]; i++) {
@@ -771,6 +784,15 @@ namespace ESMCI {
 #endif
     }   
 
+#if DEBUG_CONNECTIVITY
+    printf("PET %d verts [", localPet);
+    for (int i=0; i<dual_mesh->num_verts; ++i) {
+      int nid;
+      merr=dual_mesh->mesh->tag_get_data(dual_mesh->gid_tag, &dual_mesh->verts[i], 1, &nid);
+      printf("%d, ", nid);
+    }
+    printf("]\n");
+#endif
 
     // Now loop the elements and add them to the mesh.
     int cur_conn = 0;
@@ -798,7 +820,7 @@ namespace ESMCI {
       for (int n = 0; n < num_elem_verts; ++n) {
 
         // Get 0-based vert index
-        int vert_index=elemConn[cur_conn]-1;
+        int vert_index=elemConn[cur_conn];
 
         // Setup connectivity list
         elem_verts[n] = dual_mesh->verts[vert_index];

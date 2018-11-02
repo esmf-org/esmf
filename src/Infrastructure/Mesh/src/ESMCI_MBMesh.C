@@ -96,6 +96,8 @@ void MBMesh::CreateGhost() {
   MBMESH_CHECK_ERR(merr, localrc);
 
   merr = pcomm->resolve_shared_ents(root_set, range_ent, this->sdim, 1);
+  // tried this to use the custom tag, was causing a segv so went back to default gid
+  // merr = pcomm->resolve_shared_ents(root_set, this->sdim, 1, &this->gid_tag);
   MBMESH_CHECK_ERR(merr, localrc);
 
 // #define DEBUG_MOAB_GHOST_EXCHANGE
@@ -149,10 +151,10 @@ void MBMesh::CreateGhost() {
     tags.push_back(this->elem_mask_val_tag);
   }
   if (this->has_elem_area) tags.push_back(this->elem_area_tag);
-  // if (this->has_elem_coords) tags.push_back(this->elem_coords_tag);
+  if (this->has_elem_coords) tags.push_back(this->elem_coords_tag);
   if (this->has_elem_orig_coords) tags.push_back(this->elem_orig_coords_tag);
   
-  pcomm->set_debug_verbosity(4);
+  // pcomm->set_debug_verbosity(4);
 
   merr = pcomm->exchange_tags(tags, tags, range_ent);
   MBMESH_CHECK_ERR(merr, localrc);

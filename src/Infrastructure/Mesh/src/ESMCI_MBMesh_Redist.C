@@ -20,6 +20,7 @@
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
 #include <Mesh/include/Legacy/ESMCI_SparseMsg.h>
 
+#include <Mesh/include/ESMCI_MBMesh_Glue.h>
 
 #include <limits>
 #include <iostream>
@@ -79,8 +80,15 @@ void create_mbmesh_redist_elem(MBMesh *src_mesh,
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
 
+#ifdef DEBUG
+  void *mbptr = (void *) src_mesh;
+  int len = 12; char fname[len];
+  sprintf(fname, "srcmesh_%dm", localPet);
+  MBMesh_write(&mbptr, fname, &localrc, len);
+#endif
+
 #if 0
-  // Debug print of elem to proc list
+  // Debug print of elem to proc lcist
   for (int i=0; i<elem_to_proc_list->size(); i++) {
     EntityHandle eh=(*elem_to_proc_list)[i].eh;
     int proc=(*elem_to_proc_list)[i].proc;
@@ -556,7 +564,8 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     // num verts
      int num_verts;
     const EntityHandle *verts;
-    merr=src_mesh->mesh->get_connectivity(eh,verts,num_verts); // NEED TO PASS IN corners_only = true???
+    // TODO: do we need to pass in corners_only = true?
+    merr=src_mesh->mesh->get_connectivity(eh,verts,num_verts);
     if (merr != MB_SUCCESS) {
       Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
     }
@@ -574,7 +583,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
 
     if (src_mesh->has_node_mask) {
       // Only pack mask field (not mask_val), since that's the only one needed for rend. 
-      size += sizeof(int);
+      size += num_verts*sizeof(int);
     }
 
     // output size
@@ -601,7 +610,8 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
      // Get number of verts and vert list 
     int num_verts;
     const EntityHandle *verts;
-    merr=src_mesh->mesh->get_connectivity(elem,verts,num_verts); // NEED TO PASS IN corners_only = true???
+    // TODO: do we need to pass in corners_only = true?
+    merr=src_mesh->mesh->get_connectivity(elem,verts,num_verts); 
     if (merr != MB_SUCCESS) {
       Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
     }
@@ -619,7 +629,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
 
       // Pack into buffer
       *((int *)(buff+off))=vert_gid;
-      off +=sizeof(int);        
+      off +=sizeof(int);
 
       if (src_mesh->has_node_mask) {
         // Get dst node mask 
@@ -681,7 +691,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
 
     // Mask Size
     if (out_mesh->has_node_mask) {
-      size += sizeof(int);
+      size += num_verts*sizeof(int);
     }
 
      // return size
@@ -807,7 +817,8 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
       // Set elem mask 
       merr=out_mesh->mesh->tag_set_data(out_mesh->elem_mask_tag, &new_elem, 1, &masked);
       if (merr != MB_SUCCESS) {
-        Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
       }
     }
 
@@ -981,7 +992,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
 
     SparseMsg comm;
 
-    // RLO: construct a per proc list of location in pl to be sent to procs
+    // construct a per proc list of location in pl to be sent to procs
     //      also mark which points are moving
     std::vector<int> proc_counts;
     proc_counts.resize(petCount,0);
@@ -995,7 +1006,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
         idx_list[pb->proc].push_back(pb->loc);
     }
 
-    // RLO: construct lists used to set up the communication pattern
+    // construct lists used to set up the communication pattern
     int sdim = pl->get_coord_dim();
     int snd_size=(sdim+1)*sizeof(double); // buffer item size
     int num_snd_procs=0;
@@ -1012,7 +1023,6 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
         idx_list2.push_back(idx_list[i]); // dense version of idx_list
       }
     }
-
 
     // Setup pattern and sizes
     if (num_snd_procs >0) {
@@ -1035,7 +1045,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
         // Get index of node
         int loc=idx_list2[i][j];
 
-        // RLO: coordinates and gid of point
+        // coordinates and gid of point
         const double *pnt = pl->get_coord_ptr(loc);
         int this_id = pl->get_id(loc);
 
@@ -1128,7 +1138,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
         ip++;
       }
     }
-    //RLO: pointer magic
+    // pointer magic
     *out_pl = pl_rend;
   }
 

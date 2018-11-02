@@ -134,15 +134,15 @@ MBMesh* create_mesh_quad_9_parallel_dual2(ESMC_CoordSys_Flag coordsys, int &rc) 
     num_node = 9;
     num_elem = 4;
 
-    nodeId[0]=10;
-    nodeId[1]=20;
-    nodeId[2]=30;
-    nodeId[3]=50;
-    nodeId[4]=60;
-    nodeId[5]=70;
-    nodeId[6]=90;
-    nodeId[7]=100;
-    nodeId[8]=110;
+    nodeId[0]=1;
+    nodeId[1]=2;
+    nodeId[2]=3;
+    nodeId[3]=5;
+    nodeId[4]=6;
+    nodeId[5]=7;
+    nodeId[6]=9;
+    nodeId[7]=10;
+    nodeId[8]=11;
 
     nodeCoord[0]=1.0;nodeCoord[1]=1.0;
     nodeCoord[2]=1.5;nodeCoord[3]=1.0;
@@ -243,7 +243,7 @@ MBMesh* create_mesh_quad_9_parallel_dual2(ESMC_CoordSys_Flag coordsys, int &rc) 
     elemType[4]=ESMC_MESHELEMTYPE_QUAD;
 
     elemConn[0]=1;elemConn[1]=2;elemConn[2]=4;elemConn[3]=3;
-    elemConn[4]=3;elemConn[5]=4;elemConn[6]=6;elemConn[7]=5;
+    elemConn[4]=3;elemConn[5]=4;elemConn[6]=8;elemConn[7]=7;
     elemConn[8]=5;elemConn[9]=6;elemConn[10]=10;elemConn[11]=9;
     elemConn[12]=6;elemConn[13]=7;elemConn[14]=11;elemConn[15]=10;
     elemConn[16]=7;elemConn[17]=8;elemConn[18]=12;elemConn[19]=11;
@@ -341,34 +341,35 @@ int main(void){
   vector<Tag> tags;
   if (mbmesh->has_elem_coords) tags.push_back(mbmesh->elem_coords_tag);
   
-  
-  std::ostringstream ent_str;
-  ent_str << "mesh." <<pcomm->rank() << ".vtk";
-  mbmesh->mesh->write_mesh(ent_str.str().c_str());
    
   pcomm->set_debug_verbosity(4);
 
   merr = pcomm->exchange_tags(tags, tags, range_ent);
   MBMESH_CHECK_ERR(merr, rc);
+  
+    std::ostringstream ent_str;
+    ent_str << "mesh." <<pcomm->rank() << ".vtk";
+    mbmesh->mesh->write_mesh(ent_str.str().c_str());
+    
 #endif
 
-  // MBMesh *mesh_quad_dual = NULL;
-  // MBMeshDual(mbmesh, &mesh_quad_dual, &rc);
-  // if (!mesh_quad_dual) rc = ESMC_RC_PTR_NULL;
+  MBMesh *mesh_quad_dual = NULL;
+  MBMeshDual(mbmesh, &mesh_quad_dual, &rc);
+  if (!mesh_quad_dual) rc = ESMC_RC_PTR_NULL;
 
   // Range range_elem;
   // rc = mesh_quad_dual->mesh->get_entities_by_dimension(0,mesh_quad_dual->sdim,range_elem);
   // printf("dual mesh elem num = %d\n", range_elem.size());
 
-  // void *mbptr = (void *) mbmesh;
-  // int len = 12; char fname[len];
-  // sprintf(fname, "mesh_quad_%d", localPet);
-  // MBMesh_write(&mbptr, fname, &rc, len);
-  // 
-  // void *mbptrd = (void *) mesh_quad_dual;
-  // int lend = 17; char fnamed[lend];
-  // sprintf(fnamed, "mesh_quad_dual_%d", localPet);
-  // MBMesh_write(&mbptrd, fnamed, &rc, lend);
+  void *mbptr = (void *) mbmesh;
+  int len = 12; char fname[len];
+  sprintf(fname, "mesh_quad_%d", localPet);
+  MBMesh_write(&mbptr, fname, &rc, len);
+  
+  void *mbptrd = (void *) mesh_quad_dual;
+  int lend = 17; char fnamed[lend];
+  sprintf(fnamed, "mesh_quad_dual_%d", localPet);
+  MBMesh_write(&mbptrd, fnamed, &rc, lend);
 
 #else
   rc = ESMF_SUCCESS;
