@@ -38,9 +38,9 @@ extern "C"{
 
   void FTN_X(c_esmc_mappersetconstraints)(Mapper **ptr, int *status)
   {
-    int local_status = ESMC_RC_NOT_IMPL;
+    int lstatus = ESMC_RC_NOT_IMPL;
     if(status){
-      *status = local_status;
+      *status = lstatus;
     }
   }
 
@@ -53,26 +53,31 @@ extern "C"{
     ESMCI_FortranStrLenArg comp_name_l,
     ESMCI_FortranStrLenArg phase_name_l)
   {
-    int local_status = ESMC_RC_NOT_IMPL;
+    int lstatus = ESMC_RC_NOT_IMPL;
     if(status){
-      *status = local_status;
+      *status = lstatus;
     }
   }
 
   void FTN_X(c_esmc_mapperoptimize)(Mapper **ptr,
               int *opt_threshold_reached, int *status)
   {
-    int local_status = ESMC_RC_NOT_IMPL;
+    int lstatus = ESMC_RC_NOT_IMPL;
+    int lopt_threshold_reached;
+    lstatus = ESMCI_MapperOptimize(*ptr, &lopt_threshold_reached);
+    if(opt_threshold_reached){
+      *opt_threshold_reached = lopt_threshold_reached;
+    }
     if(status){
-      *status = local_status;
+      *status = lstatus;
     }
   }
 
   void FTN_X(c_esmc_mapperprint)(Mapper **ptr, int *status)
   {
-    int local_status = ESMC_RC_NOT_IMPL;
+    int lstatus = ESMC_RC_NOT_IMPL;
     if(status){
-      *status = local_status;
+      *status = lstatus;
     }
   }
 
@@ -89,9 +94,16 @@ extern "C"{
     ESMCI_FortranStrLenArg comp_name_l,
     ESMCI_FortranStrLenArg phase_name_l)
   {
-    int local_status = ESMC_RC_NOT_IMPL;
+    int lstatus = ESMC_RC_NOT_IMPL;
+    lstatus = ESMCI_MapperSetCompInfo(*ptr,
+                    *comp_name_len, comp_name,
+                    *phase_name_len, phase_name,
+                    *comp_pet_range_start,
+                    *comp_pet_range_end,
+                    *comp_time_intvl_start,
+                    *comp_time_intvl_end);
     if(status){
-      *status = local_status;
+      *status = lstatus;
     }
   }
 
@@ -106,19 +118,31 @@ extern "C"{
     ESMCI_FortranStrLenArg comp_name_l,
     ESMCI_FortranStrLenArg phase_name_l)
   {
-    int local_status = ESMC_RC_NOT_IMPL;
+    int lstatus = ESMC_RC_NOT_IMPL;
+    int lcomp_pet_range_start, lcomp_pet_range_end;
+
+    lstatus = ESMCI_MapperGetCompInfo(*ptr,
+                *comp_name_len, comp_name,
+                *phase_name_len, phase_name,
+                &lcomp_pet_range_start, &lcomp_pet_range_end);
+    if(comp_pet_range_start){
+      *comp_pet_range_start = lcomp_pet_range_start;
+    }
+    if(comp_pet_range_end){
+      *comp_pet_range_end = lcomp_pet_range_end;
+    }
     if(status){
-      *status = local_status;
+      *status = lstatus;
     }
   }
 
   void FTN_X(c_esmc_mapperdestroy)(Mapper **ptr,
                                     int *status)
   {
-    int local_status;
-    local_status = ESMCI_MapperDestroy(*ptr);
+    int lstatus;
+    lstatus = ESMCI_MapperDestroy(*ptr);
     if(status){
-      *status = local_status;
+      *status = lstatus;
     }
   }
 
