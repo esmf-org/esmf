@@ -7,7 +7,6 @@
 
   implicit none
   public user_comp_recreate
-  public printCompInfo
 
   abstract interface
     subroutine compSetVMInterface(gridcomp, rc)
@@ -29,43 +28,17 @@
 
   contains
 
-  subroutine printCompInfo(mapper, compInfo, rc)
-    type(ESMF_Mapper), intent(in)    :: mapper
-    type(ESMF_MapperCompInfo), intent(in)     :: compInfo
-    integer,             intent(out)          :: rc
-
-    integer, dimension(:), allocatable      :: petList
-    integer :: npets
-
-    call ESMF_MapperGet(mapper, compInfo, npets=npets, rc=rc)
-    if(rc  /= ESMF_SUCCESS) then
-      print *, "Getting comp info from mapper failed"
-      return
-    end if
-
-    allocate(petlist(npets))
-
-    call ESMF_MapperGet(mapper, compInfo, petList=petList, rc=rc)
-    if(rc  /= ESMF_SUCCESS) then
-      print *, "Getting comp petlist from mapper failed"
-      return
-    end if
-
-    print *, "Optimized pet list : ", petList
-
-    rc = ESMF_SUCCESS
-  end subroutine
-
-  subroutine user_comp_recreate(gComp, compSetVM, compReg, gCompInfo, mapper, rc)
+  subroutine user_comp_recreate(gComp, compSetVM, compReg, startPet, endPet, mapper, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp), intent(inout)        :: gComp
     procedure(compSetVMInterface) :: compSetVM
     procedure(compRegInterface) :: compReg
-    type(ESMF_MapperCompInfo), intent(in)     :: gCompInfo
+    integer, intent(in) :: startPet
+    integer, intent(in) :: endPet
     type(ESMF_Mapper), intent(in)    :: mapper
     integer,             intent(out)          :: rc
 
-    integer :: localrc, userrc
+    integer :: localrc, userrc, i
     integer, dimension(:), allocatable      :: petlist
     integer :: npets
     character(len=ESMF_MAXSTR) :: cname
@@ -85,19 +58,22 @@
       return
     end if
 
-    call ESMF_MapperGet(mapper, gCompInfo, npets=npets, rc=rc)
-    if(rc  /= ESMF_SUCCESS) then
-      print *, "Getting comp info from mapper failed"
-      return
-    end if
-
+    !call ESMF_MapperGet(mapper, gCompInfo, npets=npets, rc=rc)
+    !if(rc  /= ESMF_SUCCESS) then
+    !  print *, "Getting comp info from mapper failed"
+    !  return
+    !end if
+    npets = endPet - startPet + 1;
     allocate(petlist(npets))
+    do i=1,npets
+      petlist(i) = startPet + i - 1
+    end do
 
-    call ESMF_MapperGet(mapper, gCompInfo, petList=petlist, rc=rc)
-    if(rc  /= ESMF_SUCCESS) then
-      print *, "Getting comp petlist from mapper failed"
-      return
-    end if
+    !call ESMF_MapperGet(mapper, gCompInfo, petList=petlist, rc=rc)
+    !if(rc  /= ESMF_SUCCESS) then
+    !  print *, "Getting comp petlist from mapper failed"
+    !  return
+    !end if
 
     print *, "Recreating gComp : petlist = ", petList
     gComp = ESMF_GridCompCreate(name=cname, petList=petList, rc=rc)

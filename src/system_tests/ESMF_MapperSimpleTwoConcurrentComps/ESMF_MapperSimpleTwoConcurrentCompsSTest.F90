@@ -65,14 +65,15 @@
     integer :: pet_id, npets, rc, localrc, userrc
     integer :: npets_comp1, npets_comp2, npets_cpl
     integer :: petlist_start_comp1, petlist_start_comp2, petlist_start_cpl
+    integer :: petlist_end_comp1, petlist_end_comp2, petlist_end_cpl
     integer :: i, j
     integer, dimension(:), allocatable :: petlist_comp1, petlist_comp2, petlist_cpl
-    character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
+    character(len=ESMF_MAXSTR) :: comp1_name, comp2_name, cplname
+    character(len=ESMF_MAXSTR) :: comp1_phase_name, comp2_phase_name
     type(ESMF_VM):: vm
     type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
-    type(ESMF_MapperCompInfo) :: comp1Info, comp2Info
-    double precision :: comp1_start, comp1_end, comp2_start, comp2_end;
+    real(ESMF_KIND_R8) :: comp1_start, comp1_end, comp2_start, comp2_end;
     double precision :: run_loop_start, run_loop_end
     double precision :: comp1_wtime, comp2_wtime, run_loop_wtime
     type(ESMF_CplComp) :: cpl
@@ -148,8 +149,11 @@
         petlist_start_comp1 = 0
         petlist_start_comp2 = npets_comp1
       end if
+      petlist_end_comp1 = petlist_start_comp1 + npets_comp1 - 1;
+      petlist_end_comp2 = petlist_start_comp2 + npets_comp2 - 1;
       npets_cpl = npets
       petlist_start_cpl = 0
+      petlist_end_cpl = petlist_start_cpl + npets_cpl - 1;
 
       allocate(petlist_comp1(npets_comp1))
       allocate(petlist_comp2(npets_comp2))
@@ -172,19 +176,19 @@
       
 
     ! Create the 2 model components and coupler
-    cname1 = "user model 1"
-    comp1 = ESMF_GridCompCreate(name=cname1, petList=petlist_comp1, rc=localrc)
+    comp1_name = "user model 1"
+    comp1 = ESMF_GridCompCreate(name=comp1_name, petList=petlist_comp1, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    !print *, "Created component ", trim(cname1), "rc =", rc
+    !print *, "Created component ", trim(comp1_name), "rc =", rc
 
-    cname2 = "user model 2"
-    comp2 = ESMF_GridCompCreate(name=cname2, petList=petlist_comp2, rc=localrc)
+    comp2_name = "user model 2"
+    comp2 = ESMF_GridCompCreate(name=comp2_name, petList=petlist_comp2, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    !print *, "Created component ", trim(cname2), "rc =", rc
+    !print *, "Created component ", trim(comp2_name), "rc =", rc
 
     cplname = "user one-way coupler"
     cpl = ESMF_CplCompCreate(name=cplname, petList=petlist_cpl, rc=localrc)
@@ -198,7 +202,8 @@
     deallocate(petlist_cpl)
     !print *, "Comp Creates finished"
 
-  mapper = ESMF_MapperCreate(vm, configFile="./runseq.txt", rc=localrc)
+  !mapper = ESMF_MapperCreate(vm, configFile="./runseq.txt", rc=localrc)
+  mapper = ESMF_MapperCreate(vm, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -269,21 +274,11 @@
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  comp1Info = ESMF_MapperCompInfoCreate(mapper, (/comp1/), rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
-  comp2Info = ESMF_MapperCompInfoCreate(mapper, (/comp2/), rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
   ! Set mapper constraints
-  call ESMF_MapperSetConstraints(mapper, rc=localrc)
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  !call ESMF_MapperSetConstraints(mapper, rc=localrc)
+  !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+  !  ESMF_CONTEXT, rcToReturn=rc)) &
+  !  call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
 
 !-------------------------------------------------------------------------
@@ -400,6 +395,8 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
+    comp1_phase_name = "run"
+    comp2_phase_name = "run"
     do while (.not. ESMF_ClockIsStopTime(clocks(CPL_IDX), rc=localrc))
 
       print *, "PET ", pet_id, " starting time step..."
@@ -432,7 +429,7 @@
       if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-      comp1_end = MPI_Wtime() - comp1_start
+      comp1_end = MPI_Wtime()
 
       ! Uncomment the following calls to ESMF_GridCompWait() to sequentialize
       ! comp1, comp2 and the coupler. The following ESMF_GridCompWait() calls
@@ -498,7 +495,7 @@
       if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-      comp2_end = MPI_Wtime() - comp2_start
+      comp2_end = MPI_Wtime()
 
       run_loop_end = MPI_Wtime() - run_loop_start
       call MPI_Allreduce(comp1_end, comp1_wtime, 1, MPI_DOUBLE_PRECISION,&
@@ -514,36 +511,65 @@
       print *, "comp2 = ", comp2_wtime, "s"
       print *, "run loop = ", run_loop_wtime, "s"
 
+      print *, "Setting comp infos..."
       ! Contact mapper
-      call ESMF_MapperCollect(mapper, comp1, comp1Info, wtime=comp1_wtime,&
-        rc=localrc)
+      call ESMF_MapperSetCompInfo(mapper,&
+            len_trim(comp1_name), comp1_name,&
+            len_trim(comp1_phase_name), comp1_phase_name,&
+            petlist_start_comp1, petlist_end_comp1,&      
+            comp1_start, comp1_end,&
+            rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
       
-      call ESMF_MapperCollect(mapper, comp2, comp2Info, wtime=comp2_wtime,&
-        rc=localrc)
+      call ESMF_MapperSetCompInfo(mapper,&
+            len_trim(comp2_name), comp2_name,&
+            len_trim(comp2_phase_name), comp2_phase_name,&
+            petlist_start_comp2, petlist_end_comp2,&      
+            comp2_start, comp2_end,&
+            rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
+      
+      print *, "Optimizing PET layouts using mapper..."
       ! Optimize using the mapper
       call ESMF_MapperOptimize(mapper, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
+      print *, "Retrieving optimized PET layouts from mapper..."
+      ! Contact mapper
+      call ESMF_MapperGetCompInfo(mapper,&
+            len_trim(comp1_name), comp1_name,&
+            len_trim(comp1_phase_name), comp1_phase_name,&
+            startPet=petlist_start_comp1, endPet=petlist_end_comp1,&      
+            rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=localrc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      
+      call ESMF_MapperGetCompInfo(mapper,&
+            len_trim(comp2_name), comp2_name,&
+            len_trim(comp2_phase_name), comp2_phase_name,&
+            startPet=petlist_start_comp2, endPet=petlist_end_comp2,&      
+            rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=localrc)) &
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      
+      print *, "Recreating components..."
       ! Recreate the components using info from mapper
       call user_comp_recreate(comp1, userm1_setvm, userm1_register,&
-        comp1Info, mapper, localrc)
-      call printCompInfo(mapper, comp1Info, localrc)
+        petlist_start_comp1, petlist_end_comp1, mapper, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
       call user_comp_recreate(comp2, userm2_setvm, userm2_register,&
-        comp2Info, mapper, localrc)
-      call printCompInfo(mapper, comp2Info, localrc)
+        petlist_start_comp2, petlist_end_comp2, mapper, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=localrc)) &
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -653,18 +679,6 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
     call ESMF_CplCompDestroy(cpl, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-
-    call ESMF_MapperCompInfoDestroy(mapper, comp1Info,&
-      rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-
-    call ESMF_MapperCompInfoDestroy(mapper, comp2Info,&
-      rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
