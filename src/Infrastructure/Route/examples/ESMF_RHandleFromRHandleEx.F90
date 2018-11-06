@@ -304,14 +304,14 @@ program ESMF_RHandleFromRHandleEx
 ! {\tt ESMF\_FieldRegridStore()}. 
 ! \end{sloppypar}
 !
-! The exception to this rule is when creating a duplicate RouteHandle from an
+! One exception to this rule is when creating a duplicate RouteHandle from an
 ! existing RouteHandle object. In this case the {\tt ESMF\_RouteHandleCreate()}
 ! method is used explicitly. While this method allows to create a duplicate 
 ! RouteHandle on the exact same set of PETs as the original RouteHandle, the 
-! real purpose of duplication is that of being able to transfer a precomputed
-! RouteHandle to a different set of PETs. This is an efficient way to reduce
-! the time spent in Store() calls, if the same communication pattern repeats
-! for multiple components.
+! real purpose of duplication is the transfer of a precomputed RouteHandle to a
+! different set of PETs. This is an efficient way to reduce the total time
+! spent in Store() calls, for situations where the same communication pattern
+! repeats for multiple components.
 !
 ! This example demonstrates the transfer of a RouteHandle from one set of PETs
 ! to another by first introducing three components. Component A is defined

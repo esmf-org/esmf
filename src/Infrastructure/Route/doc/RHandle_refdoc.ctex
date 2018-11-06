@@ -79,12 +79,14 @@
 %TODO: document non-blocking options
 \input{ESMF_RHandleBitForBitEx_fapi}
 \input{ESMF_RHandleFromRHandleEx_fapi}
+\input{ESMF_RHandleFromFileEx_fapi}
 \input{ESMF_RHandleReusabilityEx_fapi}
 \input{ESMF_RHandleDynamicMaskingEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Route/doc/RHandle_usage}
 \input{../Infrastructure/Route/doc/ESMF_RHandleBitForBitEx_fapi}
 \input{../Infrastructure/Route/doc/ESMF_RHandleFromRHandleEx_fapi}
+\input{../Infrastructure/Route/doc/ESMF_RHandleFromFileEx_fapi}
 \input{../Infrastructure/Route/doc/ESMF_RHandleReusabilityEx_fapi}
 \input{../Infrastructure/Route/doc/ESMF_RHandleDynamicMaskingEx_fapi}
 #endif
