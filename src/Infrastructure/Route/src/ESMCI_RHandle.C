@@ -400,7 +400,7 @@ RouteHandle *RouteHandle::create(
 //
 // !DESCRIPTION:
 //  Allocate memory for a new RouteHandle object and initialize it.
-//  Then copy internals of incoming 'rh' into the newly create object.
+//  Then read the RouteHandle from file.
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -1002,10 +1002,7 @@ int RouteHandle::write(
       &rc)) throw rc;
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
-#ifdef ESMF_MPIUNI
-#else    
     MPI_Comm comm = vm->getMpi_c();
-#endif
     
     // access the XXE as a stream
     XXE *xxe = (XXE *)getStorage();
@@ -1099,6 +1096,7 @@ int RouteHandle::write(
       localrc = MPI_File_write(fh, displacements, petCount, MPI_UNSIGNED_LONG,
         MPI_STATUS_IGNORE);
       if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+      delete [] displacements;  // garbage collection
     }
     
     localrc = MPI_File_set_view(fh, disp, MPI_BYTE, MPI_BYTE, "native",
