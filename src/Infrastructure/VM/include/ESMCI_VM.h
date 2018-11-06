@@ -139,7 +139,7 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static void rmObject(ESMC_Base *);
     static void addFObject(void **fobject, int objectID, VMId *vmID);
     static void getObject(void **fobject, int objectID, VMId *vmID, int type,
-        bool *obj_found, int *rc);
+      bool *obj_found, int *rc);
     static void rmFObject(void **fobject);
     static void printMatchTable(void);
     static char const *getenv(char const *name);
@@ -150,9 +150,13 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     int recvVMId(VMId *vmid, int source);
     int bcastVMId(VMId **vmid, int count, int root);
     int allgathervVMId(VMId **sendvmid, int  sendcount,
-                       VMId **recvvmid, int *recvcounts, int *recvoffsets);
+      VMId **recvvmid, int *recvcounts, int *recvoffsets);
     int alltoallvVMId(VMId **sendvmid, int *sendcounts, int *sendoffsets,
-                      VMId **recvvmid, int *recvcounts, int *recvoffsets);
+      VMId **recvvmid, int *recvcounts, int *recvoffsets);
+    // MPI error handler
+    static bool MPIError(int mpiErrorToCheck,
+      int LINE, const std::string &FILE, const std::string &method,
+      int *rcToReturn=NULL);
     // performance timers API
     void timerReset(std::string timer){
       std::map<std::string, VMTimer>::iterator t = timers.find(timer);

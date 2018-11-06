@@ -17,11 +17,16 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
+#include <string>
+
 #include "ESMCI_Macros.h"
 #include "ESMCI_RHandle.h"
 #include "ESMCI_F90Interface.h"
 #include "ESMCI_DELayout.h"
 #include "ESMCI_LogErr.h"
+
+using namespace std;
+
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -61,6 +66,22 @@ extern "C" {
     // call into C++
     *ptr = ESMCI::RouteHandle::create(*rh, originPetList, targetPetList,
       &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+  void FTN_X(c_esmc_routehandlecreatefile)(ESMCI::RouteHandle **ptr, 
+    char *file, int *rc, ESMCI_FortranStrLenArg file_l){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandlecreatefile()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    string fileName(file, ESMC_F90lentrim(file, file_l));
+    // call into C++
+    *ptr = ESMCI::RouteHandle::create(fileName, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
     // return successfully
@@ -178,6 +199,21 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+  void FTN_X(c_esmc_routehandleprint)(ESMCI::RouteHandle **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_routehandleprint()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    // call into C++
+    localrc = (*ptr)->print();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc))) return;
+    fflush (stdout);
+    // return successfully
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
   void FTN_X(c_esmc_routehandlevalidate)(ESMCI::RouteHandle **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_routehandlevalidate()"
@@ -192,17 +228,18 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-  void FTN_X(c_esmc_routehandleprint)(ESMCI::RouteHandle **ptr, int *rc){
+  void FTN_X(c_esmc_routehandlewrite)(ESMCI::RouteHandle **ptr, char *file,
+    int *rc, ESMCI_FortranStrLenArg file_l){
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_routehandleprint()"
+#define ESMC_METHOD "c_esmc_routehandlewrite()"
     // Initialize return code; assume routine not implemented
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     int localrc = ESMC_RC_NOT_IMPL;
+    string fileName(file, ESMC_F90lentrim(file, file_l));
     // call into C++
-    localrc = (*ptr)->print();
+    localrc = (*ptr)->write(fileName);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       ESMC_NOT_PRESENT_FILTER(rc))) return;
-    fflush (stdout);
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }

@@ -534,7 +534,56 @@ program ESMF_RouteHandleUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleWrite()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_RouteHandleWrite(rh1, fileName="testWrite.RH", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleDestroy()"
+  write(failMsg, *) "RouteHandleDestroy failed"
+  call ESMF_RouteHandleDestroy(rh1, noGarbage=.true., rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleCreate(from file)"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rh2 = ESMF_RouteHandleCreate(fileName="testWrite.RH", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Apply the read in Routehandle"
+  write(failMsg, *) "ESMF_FieldRedist failed"
+  call ESMF_FieldRedist(srcField=fieldA, dstField=fieldB1, &
+    routehandle=rh2, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleDestroy() for the read in Routehandle"
+  write(failMsg, *) "RouteHandleDestroy failed"
+  call ESMF_RouteHandleDestroy(rh2, noGarbage=.true., rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
   ! Prepare to test create RH from RH
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create RouteHandle for the original petList"
+  write(failMsg, *) "RouteHandleCreate failed"
+  call ESMF_FieldRedistStore(srcField=fieldA, dstField=fieldB1, &
+    routehandle=rh1, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
   ! construct originPetList
   allocate(originPetList(size(petListA)+size(petListB1)))
   originPetList(1:size(petListA)) = petListA(:)
@@ -594,11 +643,13 @@ program ESMF_RouteHandleUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleDestroy() for the copied Routehandle"
+  write(failMsg, *) "RouteHandleDestroy failed"
   call ESMF_RouteHandleDestroy(rh2, noGarbage=.true., rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, &
-    file=__FILE__)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
   call ESMF_GridCompFinalize(compA, exportState=stateAB1, userRc=urc, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &

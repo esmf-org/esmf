@@ -3012,4 +3012,41 @@ void VM::timerLog(
 }
 //-----------------------------------------------------------------------------
 
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::MPIError()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::MPIError - Check for MPI error and log if true
+//
+// !INTERFACE:
+bool VM::MPIError(
+//
+// !ARGUMENTS:
+//
+  int mpiErrorToCheck,
+  int LINE, 
+  const std::string &FILE,
+  const std::string &method,
+  int *rcToReturn){
+//
+// !DESCRIPTION:
+//   Check for MPI error and log if an error is found
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  if (mpiErrorToCheck != MPI_SUCCESS){
+    char mpierr[MPI_MAX_ERROR_STRING];
+    int resultlen;
+    MPI_Error_string(mpiErrorToCheck, mpierr, &resultlen);
+    char msg[20+resultlen];
+    sprintf(msg, "Caught MPI error: %s", mpierr);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg,
+      LINE, FILE, method, rcToReturn);
+    return true;
+  }
+  return false;
+}
+//-----------------------------------------------------------------------------
+
 } // namespace ESMCI
