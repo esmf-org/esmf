@@ -4599,6 +4599,7 @@ end function ESMF_MeshEmptyCreate
                    elementDistgridIsPresent, elementDistgrid, &
                    numOwnedNodes, ownedNodeCoords, &
                    numOwnedElements, ownedElemCoords, &
+                   elemMaskArray, elemAreaArray, &
                    isMemFreed, coordSys, status, rc)
 !
 ! !RETURN VALUE:
@@ -4616,6 +4617,8 @@ end function ESMF_MeshEmptyCreate
     integer,                  intent(out), optional :: numOwnedElements
     real(ESMF_KIND_R8),       intent(out), optional :: ownedElemCoords(:)
     logical,                  intent(out), optional :: isMemFreed
+    type(ESMF_Array),         intent(inout), optional :: elemMaskArray
+    type(ESMF_Array),         intent(inout), optional :: elemAreaArray
     type(ESMF_CoordSys_Flag), intent(out), optional :: coordSys
     type(ESMF_MeshStatus_Flag),intent(out), optional :: status
     integer,                  intent(out), optional :: rc
@@ -4664,6 +4667,12 @@ end function ESMF_MeshEmptyCreate
 ! with the elements in the {\tt elementDistgrid} returned by this call, and hence with a Field built on the
 ! center of {\tt mesh}. The size of the input array should be the spatial dim of {\tt mesh} times
 ! {\tt numOwnedElements}.
+! \item [{[elemMaskArray]}]
+! The mask information for elements put into an ESMF Array. The ESMF Array must be build on a DistGrid which
+! matches the elementDistgrid. 
+! \item [{[elemAreaArray]}]
+! The area information for elements put into an ESMF Array. The ESMF Array must be build on a DistGrid which
+! matches the elementDistgrid. 
 ! \item [{[isMemFreed]}]
 ! Indicates if the coordinate and connection memory been freed from {\tt mesh}. If so, it
 ! can no longer be used as part of an {\tt ESMF\_FieldRegridStore()} call.
@@ -4679,6 +4688,12 @@ end function ESMF_MeshEmptyCreate
 !EOP
     integer  :: localrc
     logical  :: isCreated
+    integer, parameter :: maxElemArrays=2
+    integer            :: numElemArrays=0
+    type(ESMF_Pointer) :: elemArrays(maxElemArrays)
+    integer :: infoTypeElemArrays(maxElemArrays)
+    integer,parameter :: infoTypeElem_Mask=1
+    integer,parameter :: infoTypeElem_Area=2
 
     ! Init local rc
     localrc = ESMF_SUCCESS
@@ -4698,6 +4713,8 @@ end function ESMF_MeshEmptyCreate
             present(ownedNodeCoords) .or. &
             present(numOwnedElements) .or. &
             present(ownedElemCoords) .or. &
+            present(elemMaskArray) .or. &
+            present(elemAreaArray) .or. &
             present(coordSys)) then
 
           call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
@@ -4828,12 +4845,63 @@ end function ESMF_MeshEmptyCreate
        elementDistgrid = mesh%element_distgrid
     endif
 
-
     ! Get number owned nodes
     if (present(numOwnedNodes)) numOwnedNodes =mesh%numOwnedNodes
 
     ! Get number owned elements
     if (present(numOwnedElements)) numOwnedElements =mesh%numOwnedElements
+
+    ! Get elem mask information
+    if (present(elemMaskArray)) then
+
+       ! Make sure mesh is initialized
+       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, elemMaskArray, rc)
+
+       ! Set number of elem info request
+       numElemArrays=numElemArrays+1
+
+       ! Load info type
+       infoTypeElemArrays(numElemArrays)=infoTypeElem_Mask
+
+       ! Load Array 
+       call ESMF_ArrayGetThis(elemMaskArray,elemArrays(numElemArrays),rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return      
+    endif
+
+
+    ! Get elem area information
+    if (present(elemAreaArray)) then
+
+       ! Make sure mesh is initialized
+       ESMF_INIT_CHECK_DEEP(ESMF_ArrayGetInit, elemAreaArray, rc)
+
+       ! Set number of elem info request
+       numElemArrays=numElemArrays+1
+
+       ! Load info type
+       infoTypeElemArrays(numElemArrays)=infoTypeElem_Area
+
+       ! Load Array 
+       call ESMF_ArrayGetThis(elemAreaArray,elemArrays(numElemArrays),rc=localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return      
+    endif
+
+
+    ! Get mask or area info for elems
+    if (numElemArrays .gt. 0) then
+
+       ! Make call to get info
+       call C_ESMC_GetElemInfoIntoArray(mesh, &
+            mesh%element_distgrid, &
+            numElemArrays, &
+            infoTypeElemArrays, &
+            elemArrays, &
+            localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return      
+    endif
 
     ! Get freed status
     if (present(isMemFreed)) then

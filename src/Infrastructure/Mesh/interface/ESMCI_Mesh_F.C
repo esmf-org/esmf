@@ -30,6 +30,9 @@
 #include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/ESMCI_ClumpPnts.h"
 #include "Mesh/include/Legacy/ESMCI_ParEnv.h"
+#include "ESMCI_Distgrid.h"
+#include "ESMCI_Array.h"
+
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
@@ -523,6 +526,25 @@ extern "C" void FTN_X(c_esmc_meshcreatefromgrid)(MeshCap **meshpp,
   }
 
 } // meshcreate
+
+
+extern "C" void FTN_X(c_esmc_geteleminfointoarray)(MeshCap **meshpp, 
+                                                   DistGrid **elemDistgrid, 
+                                                   int *numElemArrays, 
+                                                   int *infoTypeElemArrays, 
+                                                   Array **elemArrays, 
+                                                   int *rc)
+{
+
+  (*meshpp)->geteleminfointoarray(*elemDistgrid, 
+                                  *numElemArrays, 
+                                  infoTypeElemArrays,
+                                  elemArrays, 
+                                  rc);
+
+}
+
+
 
 
 #if 0

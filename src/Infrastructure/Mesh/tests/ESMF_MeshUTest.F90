@@ -68,6 +68,9 @@ program ESMF_MeshUTest
   type(ESMF_ArraySpec) :: arrayspec
   type(ESMF_Field)  ::  field, areaField
   type(ESMF_Field)  ::  nodeField, elemField
+  type(ESMF_Field)  ::  maskField
+  type(ESMF_Array)  ::  maskArray
+  type(ESMF_Array)  ::  areaArray
   logical :: isMemFreed
   integer :: bufCount, offset
   character, pointer :: buf(:)
@@ -75,6 +78,8 @@ program ESMF_MeshUTest
   real(ESMF_KIND_R8), pointer :: pntList(:)
    real(ESMF_KIND_R8), pointer :: elemAreas(:)
   real(ESMF_KIND_R8), pointer :: fieldAreaPtr(:)
+  real(ESMF_KIND_R8), pointer :: areaPtr(:)
+  integer(ESMF_KIND_I4), pointer :: maskPtr(:)
   integer, pointer :: petList(:)
   integer :: spatialDim, parametricDim, cu(1),cl(1)
   logical:: meshBool
@@ -2457,6 +2462,111 @@ endif
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
 #endif
 
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test Get of element mask and area info"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  ! initialize check variables
+  correct=.true.
+  rc=ESMF_SUCCESS
+
+  ! Create Test mesh
+  call createTestMeshSphDeg(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Create Mask Field
+  maskField = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_I4, &
+       meshloc=ESMF_MESHLOC_ELEMENT, &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get mask Array
+  call ESMF_FieldGet(maskField, array=maskArray, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Create Area Field
+  areaField = ESMF_FieldCreate(mesh, ESMF_TYPEKIND_R8, &
+       meshloc=ESMF_MESHLOC_ELEMENT, &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Get Array
+  call ESMF_FieldGet(areaField, array=areaArray, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+
+  ! Get mask info
+  call ESMF_MeshGet(mesh, &
+       elemMaskArray=maskArray, & 
+       elemAreaArray=areaArray, &
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! get pointer to mask
+  call ESMF_FieldGet(maskField, 0, maskPtr,       & 
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+  ! Check mask output
+  if (petCount .eq. 1) then
+     if (maskPtr(1) .ne. 0) correct=.false.
+     if (maskPtr(2) .ne. 1) correct=.false.
+     if (maskPtr(3) .ne. 1) correct=.false.
+     if (maskPtr(4) .ne. 2) correct=.false.
+  else if (petCount .eq. 4) then
+     if (localPet .eq. 0) then
+        if (maskPtr(1) .ne. 0) correct=.false.
+     else if (localPet .eq. 1) then
+        if (maskPtr(1) .ne. 1) correct=.false.
+     else if (localPet .eq. 2) then
+        if (maskPtr(1) .ne. 1) correct=.false.
+     else if (localPet .eq. 3) then
+        if (maskPtr(1) .ne. 2) correct=.false.
+     endif
+  endif
+
+  ! get pointer to area
+  call ESMF_FieldGet(areaField, 0, areaPtr,       & 
+       rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE 
+
+  ! Check area output
+  if (petCount .eq. 1) then
+     if (areaPtr(1) .ne. 7.0) correct=.false.
+     if (areaPtr(2) .ne. 8.0) correct=.false.
+     if (areaPtr(3) .ne. 9.0) correct=.false.
+     if (areaPtr(4) .ne. 10.0) correct=.false.
+  else if (petCount .eq. 4) then
+     if (localPet .eq. 0) then
+        if (areaPtr(1) .ne. 7.0) correct=.false.
+     else if (localPet .eq. 1) then
+        if (areaPtr(1) .ne. 8.0) correct=.false.
+     else if (localPet .eq. 2) then
+        if (areaPtr(1) .ne. 9.0) correct=.false.
+     else if (localPet .eq. 3) then
+        if (areaPtr(1) .ne. 10.0) correct=.false.
+     endif
+  endif
+
+  ! Destroy the mask Field
+  call ESMF_FieldDestroy(maskField, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE  
+
+  ! Destroy the area Field
+  call ESMF_FieldDestroy(areaField, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE  
+
+  ! Get rid of Mesh
+  call ESMF_MeshDestroy(mesh, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test(((rc .eq. ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+
   !------------------------------------------------------------------------
   ! TODO: "Activate once the mesh is fully created. ESMF_MeshWrite is not meant
   !  to be called until then".
@@ -2810,6 +2920,8 @@ subroutine createTestMeshSphDeg(mesh, rc)
   integer :: numNodes, numOwnedNodes, numOwnedNodesTst
   integer :: numElems,numOwnedElemsTst
   integer, pointer :: elemIds(:),elemTypes(:),elemConn(:)
+  integer, pointer :: elemMask(:)
+  real(ESMF_KIND_R8), pointer :: elemArea(:)
   integer :: petCount, localPet
   type(ESMF_VM) :: vm
 
@@ -2825,7 +2937,6 @@ subroutine createTestMeshSphDeg(mesh, rc)
      rc=ESMF_FAILURE
      return
   endif
-
 
   ! Setup mesh info depending on the 
   ! number of PETs
@@ -2865,6 +2976,14 @@ subroutine createTestMeshSphDeg(mesh, rc)
       !! elem types
       allocate(elemTypes(numElems))
       elemTypes=ESMF_MESHELEMTYPE_QUAD
+
+      !! elem mask
+      allocate(elemMask(numElems))
+      elemMask=(/0,1,1,2/)
+
+      !! elem area
+      allocate(elemArea(numElems))
+      elemArea=(/7.0,8.0,9.0,10.0/)
 
       !! elem conn
       allocate(elemConn(numElems*4))
@@ -2906,6 +3025,15 @@ subroutine createTestMeshSphDeg(mesh, rc)
        allocate(elemTypes(numElems))
        elemTypes=ESMF_MESHELEMTYPE_QUAD
 
+
+      !! elem mask
+      allocate(elemMask(numElems))
+      elemMask=(/0/)
+
+      !! elem area
+      allocate(elemArea(numElems))
+      elemArea=(/7.0/)
+
        !! elem conn
        allocate(elemConn(numElems*4))
        elemConn=(/1,2,4,3/)
@@ -2940,6 +3068,14 @@ subroutine createTestMeshSphDeg(mesh, rc)
        allocate(elemTypes(numElems))
        elemTypes=ESMF_MESHELEMTYPE_QUAD
 
+      !! elem mask
+      allocate(elemMask(numElems))
+      elemMask=(/1/)
+
+      !! elem area
+      allocate(elemArea(numElems))
+      elemArea=(/8.0/)
+
        !! elem conn
        allocate(elemConn(numElems*4))
        elemConn=(/1,2,4,3/)
@@ -2969,6 +3105,14 @@ subroutine createTestMeshSphDeg(mesh, rc)
        !! elem ids
        allocate(elemIds(numElems))
        elemIds=(/3/) 
+
+      !! elem mask
+      allocate(elemMask(numElems))
+      elemMask=(/1/)
+
+      !! elem area
+      allocate(elemArea(numElems))
+      elemArea=(/9.0/)
 
        !! elem type
        allocate(elemTypes(numElems))
@@ -3008,6 +3152,14 @@ subroutine createTestMeshSphDeg(mesh, rc)
        allocate(elemTypes(numElems))
        elemTypes=ESMF_MESHELEMTYPE_QUAD
 
+       !! elem mask
+       allocate(elemMask(numElems))
+       elemMask=(/2/)
+
+      !! elem area
+      allocate(elemArea(numElems))
+      elemArea=(/10.0/)
+
        !! elem conn
        allocate(elemConn(numElems*4))
        elemConn=(/1,2,4,3/)  
@@ -3020,6 +3172,7 @@ subroutine createTestMeshSphDeg(mesh, rc)
         nodeIds=nodeIds, nodeCoords=nodeCoords, &
         nodeOwners=nodeOwners, elementIds=elemIds,&
         elementTypes=elemTypes, elementConn=elemConn, &
+        elementMask=elemMask, elementArea=elemArea, &
         coordSys=ESMF_COORDSYS_SPH_DEG, rc=rc)
    if (rc /= ESMF_SUCCESS) return
 
@@ -3031,6 +3184,7 @@ subroutine createTestMeshSphDeg(mesh, rc)
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
+   deallocate(elemMask)
    deallocate(elemConn)
 
 end subroutine createTestMeshSphDeg
