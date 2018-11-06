@@ -8,14 +8,16 @@ LOCDIR	  = src/Infrastructure/ArrayBundle/tests
 
 .NOTPARALLEL:
 TESTS_BUILD   = $(ESMF_TESTDIR)/ESMF_ArrayBundleCreateUTest \
+                $(ESMF_TESTDIR)/ESMF_ArrayBundleRedistUTest \
                 $(ESMF_TESTDIR)/ESMF_ArrayBundleIOUTest
 
 
 TESTS_RUN     = RUN_ESMF_ArrayBundleCreateUTest \
+                RUN_ESMF_ArrayBundleRedistUTest \
                 RUN_ESMF_ArrayBundleIOUTest
 
-TESTS_RUN_UNI = RUN_ESMF_ArrayBundleCreateUTestUNI
-
+TESTS_RUN_UNI = RUN_ESMF_ArrayBundleCreateUTestUNI \
+                RUN_ESMF_ArrayBundleRedistUTestUNI
 
 include ${ESMF_DIR}/makefile
 
@@ -34,6 +36,12 @@ RUN_ESMF_ArrayBundleCreateUTest:
 
 RUN_ESMF_ArrayBundleCreateUTestUNI:
 	$(MAKE) TNAME=ArrayBundleCreate NP=1 ftest
+
+RUN_ESMF_ArrayBundleRedistUTest:
+	$(MAKE) TNAME=ArrayBundleRedist NP=4 ftest
+
+RUN_ESMF_ArrayBundleRedistUTestUNI:
+	$(MAKE) TNAME=ArrayBundleRedist NP=1 ftest
 
 RUN_ESMF_ArrayBundleIOUTest:
 	$(MAKE) TNAME=ArrayBundleIO NP=4 ftest
