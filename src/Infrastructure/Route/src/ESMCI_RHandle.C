@@ -419,18 +419,26 @@ RouteHandle *RouteHandle::create(
     MPI_Comm comm = vm->getMpi_c();
     
     // open the file
+#ifdef ESMF_MPIUNI
+    FILE *fp=fopen(file.c_str(), "rb");
+#else
     MPI_File fh;
     localrc = MPI_File_open(comm, file.c_str(), 
       MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
 
     // read the header start
     char header[30];
     sprintf(header, "ESMF_RouteHandle file v%04d", 1); // version 1
     char headerIn[30];
+#ifdef ESMF_MPIUNI
+    fread(headerIn, strlen(header), sizeof(char), fp);
+#else
     localrc = MPI_File_read(fh, headerIn, strlen(header), MPI_CHAR,
       MPI_STATUS_IGNORE);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
     if (strncmp(headerIn, header, strlen(header)) != 0){
       // did not find the expected header start
       ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
@@ -441,8 +449,12 @@ RouteHandle *RouteHandle::create(
     
     // read and check petCount
     int petCountIn;
+#ifdef ESMF_MPIUNI
+    fread(&petCountIn, 1, sizeof(int), fp);
+#else
     localrc = MPI_File_read(fh, &petCountIn, 1, MPI_INT, MPI_STATUS_IGNORE);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
     if (petCountIn != petCount){
       // did not find the expected petCount
       stringstream msg;
@@ -465,10 +477,19 @@ RouteHandle *RouteHandle::create(
     }
 
     // set the htype
+#ifdef ESMF_MPIUNI
+    fread(&(routehandle->htype), 1, sizeof(int), fp);
+#else
     localrc = MPI_File_read(fh, &(routehandle->htype), 1, MPI_INT,
       MPI_STATUS_IGNORE);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
-
+#endif
+    
+#ifdef ESMF_MPIUNI
+    // for mpiuni, read streamiSize instead of displacment
+    unsigned long size;
+    fread(&size, 1, sizeof(unsigned long), fp);
+#else
     // each PET reads its local displacement
     unsigned long disp;
     localrc = MPI_File_seek(fh, localPet*sizeof(disp), MPI_SEEK_CUR);
@@ -492,12 +513,20 @@ RouteHandle *RouteHandle::create(
     localrc = MPI_File_set_view(fh, disp, MPI_BYTE, MPI_BYTE, "native",
       MPI_INFO_NULL);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
     
-    // read the streami string from file
+    // read the streami string from file and close
     char *readMsg = new char[size];
+#ifdef ESMF_MPIUNI
+    fread(readMsg, size, sizeof(char), fp);
+    fclose(fp);
+#else
     localrc = MPI_File_read(fh, readMsg, size, MPI_BYTE, MPI_STATUS_IGNORE);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
-
+    localrc = MPI_File_close(&fh);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
+    
     // setup streami from string
     stringstream *xxeStreami = new stringstream;  // explicit mem management
     xxeStreami->str(string(readMsg, size));
@@ -973,7 +1002,10 @@ int RouteHandle::write(
       &rc)) throw rc;
     int petCount = vm->getPetCount();
     int localPet = vm->getLocalPet();
+#ifdef ESMF_MPIUNI
+#else    
     MPI_Comm comm = vm->getMpi_c();
+#endif
     
     // access the XXE as a stream
     XXE *xxe = (XXE *)getStorage();
@@ -985,21 +1017,32 @@ int RouteHandle::write(
     delete xxeStreami;  // garbage collection
     
     // open the file
+#ifdef ESMF_MPIUNI
+    FILE *fp=fopen(file.c_str(), "wb");
+#else
     MPI_File fh;
     localrc = MPI_File_open(comm, file.c_str(), 
       MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
-    
     // make sure that if file existed before, size is reset
     localrc = MPI_File_set_size(fh, 0);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
   
     // write the file header
+#ifdef ESMF_MPIUNI
+#else    
     unsigned long *displacements; // only root will use this
     MPI_Offset headDisp;  // only root will use this
+#endif
     if (localPet==0){
       char header[30];
       sprintf(header, "ESMF_RouteHandle file v%04d", 1); // version 1
+#ifdef ESMF_MPIUNI
+      fwrite(header, strlen(header), sizeof(char), fp);
+      fwrite(&petCount, 1, sizeof(int), fp);
+      fwrite(&htype, 1, sizeof(int), fp);
+#else
       localrc = MPI_File_write(fh, header, strlen(header), MPI_CHAR,
         MPI_STATUS_IGNORE);
       if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
@@ -1007,9 +1050,12 @@ int RouteHandle::write(
       if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
       localrc = MPI_File_write(fh, &htype, 1, MPI_INT, MPI_STATUS_IGNORE);
       if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
       
       // later versions may add header info here
       
+#ifdef ESMF_MPIUNI
+#else      
       // query the current file position (where displacements will be written)
       MPI_Offset offsetKeep;
       localrc = MPI_File_get_position(fh, &offsetKeep);
@@ -1031,8 +1077,13 @@ int RouteHandle::write(
       // reset root position back to where to write displacements
       localrc = MPI_File_seek(fh, offsetKeep, MPI_SEEK_SET);
       if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
     }
  
+#ifdef ESMF_MPIUNI
+    // for mpiuni, write streamiSize instead of displacment
+    fwrite(&writeStreamiSize, 1, sizeof(unsigned long), fp);
+#else
     // scan across PETs to determine the local displacement (with header)
     unsigned long disp;
     MPI_Scan(&writeStreamiSize, &disp, 1, MPI_UNSIGNED_LONG, MPI_SUM, comm);
@@ -1053,15 +1104,20 @@ int RouteHandle::write(
     localrc = MPI_File_set_view(fh, disp, MPI_BYTE, MPI_BYTE, "native",
       MPI_INFO_NULL);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
     
+    // write the actual stream and close
+#ifdef ESMF_MPIUNI
+    fwrite(writeStreamiStr.data(), writeStreamiSize, sizeof(char), fp);
+    fclose(fp);
+#else
     localrc = MPI_File_write(fh, writeStreamiStr.data(), writeStreamiSize, 
       MPI_BYTE, MPI_STATUS_IGNORE);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
-  
-    // close the file
     localrc = MPI_File_close(&fh);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
-
+#endif
+    
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
