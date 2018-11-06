@@ -49,7 +49,7 @@ program ESMF_ArrayBundleRedistUTest
 
   !LOCAL VARIABLES:
   type(ESMF_VM)                 :: vm
-  integer                       :: petCount
+  integer                       :: petCount, i
   type(ESMF_DistGrid)           :: srcDG, dstDG
   type(ESMF_Array), allocatable :: srcArrayList(:), dstArrayList(:)
   type(ESMF_ArrayBundle)        :: srcAB, dstAB
@@ -128,6 +128,62 @@ program ESMF_ArrayBundleRedistUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
+  write(name, *) "RouteHandleWrite Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_RouteHandleWrite(rh, fileName="abRedistTest.RH", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ArrayBundleRedist Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleRedistStore(srcAB, dstAB, routehandle=rh, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "RouteHandleWrite Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_RouteHandleWrite(rh, fileName="abRedistTest.RH", rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ArrayBundleRedistRelease Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleRedistRelease(rh, noGarbage=.true., rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "RouteHandleCreate(from file) Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rh = ESMF_RouteHandleCreate(fileName="abRedistTest.RH", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ArrayBundleRedist after reading Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleRedistStore(srcAB, dstAB, routehandle=rh, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "ArrayBundleRedistRelease after reading Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArrayBundleRedistRelease(rh, noGarbage=.true., rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !------------------------------------------------------------------------
+  !NEX_UTest
   write(name, *) "Destroy src ArrayBundle Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayBundleDestroy(srcAB, rc=rc)
@@ -145,7 +201,18 @@ program ESMF_ArrayBundleRedistUTest
 
   !------------------------------------------------------------------------
   ! cleanup helper data objects
-  
+  do i=1, size(srcArrayList)
+    call ESMF_ArrayDestroy(srcArrayList(i), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  enddo
+  deallocate(srcArrayList)
+  do i=1, size(dstArrayList)
+    call ESMF_ArrayDestroy(dstArrayList(i), rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  enddo
+  deallocate(dstArrayList)
   
 10 continue
   !------------------------------------------------------------------------
