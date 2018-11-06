@@ -143,6 +143,11 @@
     void meshfindpnt(int *unmappedaction, int *dimPnts, int *numPnts,
                      double *pnts, int *pets, int *rc);
 
+    void geteleminfointoarray(DistGrid *elemDistgrid, 
+                                   int numElemArrays,
+                                   int *infoTypeElemArrays, 
+                                   Array **elemArrays, 
+                                   int *rc);
 
     void getlocalcoords(double *nodeCoord, int *_orig_sdim, int *rc);
 
