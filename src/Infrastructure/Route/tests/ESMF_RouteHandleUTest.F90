@@ -109,7 +109,7 @@ program ESMF_RouteHandleUTest
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Proc_Only
+  !NEX_UTest
   write(name, *) "Test RouteHandleIsCreated()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isCreated = ESMF_RouteHandleIsCreated(rh1, rc=rc)
@@ -117,14 +117,14 @@ program ESMF_RouteHandleUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Proc_Only
+  !NEX_UTest
   write(name, *) "Test RouteHandleIsCreated() return value"
   write(failMsg, *) "Incorrect return value"
   call ESMF_Test((.not.isCreated), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Proc_Only
+  !NEX_UTest
   write(name, *) "Create RouteHandle"
   write(failMsg, *) "RouteHandleCreate failed"
   call ESMF_FieldRedistStore(srcField=fieldA, dstField=fieldB, &
@@ -133,7 +133,7 @@ program ESMF_RouteHandleUTest
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Proc_Only
+  !NEX_UTest
   write(name, *) "Test RouteHandleIsCreated()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   isCreated = ESMF_RouteHandleIsCreated(rh1, rc=rc)
@@ -141,14 +141,14 @@ program ESMF_RouteHandleUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Proc_Only
+  !NEX_UTest
   write(name, *) "Test RouteHandleIsCreated() return value"
   write(failMsg, *) "Incorrect return value"
   call ESMF_Test((isCreated), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Proc_Only
+  !NEX_UTest
   write(name, *) "Test RouteHandleWrite()"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_RouteHandleWrite(rh1, fileName="testWrite.RH", rc=rc)
@@ -156,7 +156,7 @@ program ESMF_RouteHandleUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Proc_Only
+  !NEX_UTest
   write(name, *) "Test RouteHandleDestroy()"
   write(failMsg, *) "RouteHandleDestroy failed"
   call ESMF_RouteHandleDestroy(rh1, noGarbage=.true., rc=rc)
@@ -164,7 +164,7 @@ program ESMF_RouteHandleUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Proc_Only
+  !NEX_UTest
   write(name, *) "Test RouteHandleCreate(from file)"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   rh2 = ESMF_RouteHandleCreate(fileName="testWrite.RH", rc=rc)
@@ -172,7 +172,7 @@ program ESMF_RouteHandleUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Proc_Only
+  !NEX_UTest
   write(name, *) "Apply the read in Routehandle"
   write(failMsg, *) "ESMF_FieldRedist failed"
   call ESMF_FieldRedist(srcField=fieldA, dstField=fieldB, &
@@ -181,7 +181,7 @@ program ESMF_RouteHandleUTest
   !-----------------------------------------------------------------------------
 
   !-----------------------------------------------------------------------------
-  !NEX_UTest_Proc_Only
+  !NEX_UTest
   write(name, *) "Test RouteHandleDestroy() for the read in Routehandle"
   write(failMsg, *) "RouteHandleDestroy failed"
   call ESMF_RouteHandleDestroy(rh2, noGarbage=.true., rc=rc)
