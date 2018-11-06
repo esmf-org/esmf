@@ -2465,7 +2465,7 @@ endif
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Test Get of element mask and area info"
+  write(name, *) "Test get of element mask and area info"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   ! initialize check variables

@@ -2675,7 +2675,6 @@ void ESMCI_geteleminfointoarray(Mesh *mesh,
         if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
             throw localrc;
 
-#if 0
         // Make sure that incoming Array distgrids match element distgrid
         for (int i=0; i<numElemArrays; i++) {
 
@@ -2684,14 +2683,13 @@ void ESMCI_geteleminfointoarray(Mesh *mesh,
           if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL)) throw localrc;
 
           // Complain if it doesn't match sufficiently
-          if (matchflag != DISTGRIDMATCH_EXACT) {
+          if ((matchflag != DISTGRIDMATCH_EXACT) && (matchflag != DISTGRIDMATCH_ALIAS)) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
-                                          " element information Array DistGrid doesn't match Mesh element DistGrid.",
+                                          " DistGrid in element information Array doesn't match Mesh element DistGrid.",
                                           ESMC_CONTEXT, &localrc);
             throw localrc;
           }
         }
-#endif
 
         // Get the fields, Arrays for the various types of info
         MEField<> *elem_mask_field=NULL; 
