@@ -423,7 +423,7 @@ RouteHandle *RouteHandle::create(
     FILE *fp=fopen(file.c_str(), "rb");
 #else
     MPI_File fh;
-    localrc = MPI_File_open(comm, file.c_str(), 
+    localrc = MPI_File_open(comm, (char*)file.c_str(), 
       MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
 #endif
@@ -510,7 +510,7 @@ RouteHandle *RouteHandle::create(
     size -= disp;
     
     // set the PET specific view
-    localrc = MPI_File_set_view(fh, disp, MPI_BYTE, MPI_BYTE, "native",
+    localrc = MPI_File_set_view(fh, disp, MPI_BYTE, MPI_BYTE, (char*)"native",
       MPI_INFO_NULL);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
 #endif
@@ -1018,7 +1018,7 @@ int RouteHandle::write(
     FILE *fp=fopen(file.c_str(), "wb");
 #else
     MPI_File fh;
-    localrc = MPI_File_open(comm, file.c_str(), 
+    localrc = MPI_File_open(comm, (char*)file.c_str(), 
       MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
     // make sure that if file existed before, size is reset
@@ -1045,7 +1045,7 @@ int RouteHandle::write(
       if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
       localrc = MPI_File_write(fh, &petCount, 1, MPI_INT, MPI_STATUS_IGNORE);
       if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
-      localrc = MPI_File_write(fh, &htype, 1, MPI_INT, MPI_STATUS_IGNORE);
+      localrc = MPI_File_write(fh, (void*)&htype, 1, MPI_INT, MPI_STATUS_IGNORE);
       if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
 #endif
       
@@ -1099,7 +1099,7 @@ int RouteHandle::write(
       delete [] displacements;  // garbage collection
     }
     
-    localrc = MPI_File_set_view(fh, disp, MPI_BYTE, MPI_BYTE, "native",
+    localrc = MPI_File_set_view(fh, disp, MPI_BYTE, MPI_BYTE, (char*)"native",
       MPI_INFO_NULL);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
 #endif
@@ -1109,8 +1109,8 @@ int RouteHandle::write(
     fwrite(writeStreamiStr.data(), writeStreamiSize, sizeof(char), fp);
     fclose(fp);
 #else
-    localrc = MPI_File_write(fh, writeStreamiStr.data(), writeStreamiSize, 
-      MPI_BYTE, MPI_STATUS_IGNORE);
+    localrc = MPI_File_write(fh, (void*)writeStreamiStr.data(),
+      writeStreamiSize, MPI_BYTE, MPI_STATUS_IGNORE);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
     localrc = MPI_File_close(&fh);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
