@@ -30,7 +30,7 @@
 #include "Mesh/include/ESMCI_MeshCap.h"
 #include "Mesh/include/ESMCI_ClumpPnts.h"
 #include "Mesh/include/Legacy/ESMCI_ParEnv.h"
-#include "ESMCI_Distgrid.h"
+#include "ESMCI_DistGrid.h"
 #include "ESMCI_Array.h"
 
 //-----------------------------------------------------------------------------
