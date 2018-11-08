@@ -1236,7 +1236,7 @@ bool RouteHandle::isCompatible(
   //TODO: fingerprinting here is that RHs also function for a large class of
   //TODO: compatible Arrays. This is especially true now that 
   //TODO: super-vectorization is implemented!
-  bool srcMatch = Array::match(srcArrayArg, srcArray, &localrc);
+  bool srcMatch = Array::matchBool(srcArrayArg, srcArray, &localrc);
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
 
   std::stringstream debugmsg;

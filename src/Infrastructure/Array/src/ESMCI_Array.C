@@ -2262,7 +2262,7 @@ int Array::copy(
 
   try{
 
-    if (!match(this, arrayIn)){
+    if (!matchBool(this, arrayIn)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "Arrays must match for data copy", ESMC_CONTEXT, &rc);
       return rc;
@@ -3092,12 +3092,74 @@ template<>
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Array::match()"
+#define ESMC_METHOD "ESMCI::Array::isRHCompatible()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::match
+// !IROUTINE:  ESMCI::Array::isRHCompatible
 //
 // !INTERFACE:
-bool Array::match(
+bool Array::isRHCompatible(
+//
+// !RETURN VALUE:
+//    bool according to match
+//
+// !ARGUMENTS:
+//
+  Array const *array,     // in - Array to compare to
+  int *rc                 // (out) return code
+  )const{
+//
+// !DESCRIPTION:
+//    Determine whether a RouteHandle computed for this Array could also be
+//    applied to the {\tt array} argument.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+#define DEBUGLOG
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // initialize return value
+  bool result = false;
+
+  // return with errors for NULL pointer
+  if (array == NULL){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to Array", ESMC_CONTEXT, rc);
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    return result;
+  }
+
+  // return successfully indicating RH compatibility
+  result = true;
+#ifdef DEBUGLOG
+  {
+    std::stringstream msg;
+    msg << ESMC_METHOD": " << __LINE__ << " return";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+  return result;
+#undef DEBUGLOG
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::matchBool()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::matchBool
+//
+// !INTERFACE:
+bool Array::matchBool(
 //
 // !RETURN VALUE:
 //    bool according to match
@@ -3109,6 +3171,8 @@ bool Array::match(
   int *rc                                 // (out) return code
   ){
 //
+//TODO: Remove or rename according to below. See where it is used and how!
+//
 //TODO: 1) rename this method to compatible()
 //TODO: 2) consider compatible: distributed dims match,
 //TODO:    and strictly compatible: distributed and undistributed dims match.
@@ -3118,6 +3182,7 @@ bool Array::match(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+#define DEBUGLOG
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
@@ -3129,11 +3194,25 @@ bool Array::match(
   if (array1 == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "Not a valid pointer to Array", ESMC_CONTEXT, rc);
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     return matchResult;
   }
   if (array2 == NULL){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "Not a valid pointer to Array", ESMC_CONTEXT, rc);
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     return matchResult;
   }
 
@@ -3142,6 +3221,13 @@ bool Array::match(
     // pointers are identical -> nothing more to check
     matchResult = true;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     return matchResult;
   }
 
@@ -3149,11 +3235,25 @@ bool Array::match(
   if (array1->typekind != array2->typekind){
     matchResult = false;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     return matchResult;
   }
   if (array1->rank != array2->rank){
     matchResult = false;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     return matchResult;
   }
 
@@ -3164,6 +3264,13 @@ bool Array::match(
     rc)) return rc;
   if (matchResult==false){
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     return matchResult;
   }
 
@@ -3171,11 +3278,25 @@ bool Array::match(
   if (array1->tensorCount != array2->tensorCount){
     matchResult = false;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     return matchResult;
   }
   if (array1->tensorElementCount != array2->tensorElementCount){
     matchResult = false;
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return";
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     return matchResult;
   }
   int localDeCount = array1->getDistGrid()->getDELayout()->getLocalDeCount();
@@ -3185,16 +3306,32 @@ bool Array::match(
     if (int1[i] != int2[i]){
       matchResult = false;
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return";
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
       return matchResult;
     }
   }
 
   // return successfully indicating match
   matchResult = true;
+#ifdef DEBUGLOG
+  {
+    std::stringstream msg;
+    msg << ESMC_METHOD": " << __LINE__ << " return";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
   return matchResult;
+#undef DEBUGLOG
 }
 //-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

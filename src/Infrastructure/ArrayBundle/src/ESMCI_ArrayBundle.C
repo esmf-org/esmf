@@ -11,7 +11,7 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_ArrayBundle.C"
 //==============================================================================
-#define AB_REDISTSTORE_LOG_off
+#define AB_REDISTSTORE_LOG_on
 //==============================================================================
 //
 // ArrayBundle class implementation (body) file
@@ -650,7 +650,7 @@ int ArrayBundle::haloStore(
       Array *array = arrayVector[i];
       // search if there was an earlier entry that is compatible
       for (int j=i-1; j>=0; j--){
-        bool match = Array::match(array, arrayVector[j], &localrc);
+        bool match = Array::matchBool(array, arrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         if (match){
@@ -917,10 +917,10 @@ int ArrayBundle::redistStore(
       Array *dstArray = dstArrayVector[i];
       // search if there was an earlier entry that is compatible
       for (int j=i-1; j>=0; j--){
-        bool srcMatch = Array::match(srcArray, srcArrayVector[j], &localrc);
+        bool srcMatch = Array::matchBool(srcArray, srcArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-        bool dstMatch = Array::match(dstArray, dstArrayVector[j], &localrc);
+        bool dstMatch = Array::matchBool(dstArray, dstArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         if (srcMatch && dstMatch){
@@ -968,12 +968,13 @@ int ArrayBundle::redistStore(
       if (matchList[i] < i){
         // src/dst Array pair matches previous pair in ArrayBundle
 #ifdef AB_REDISTSTORE_LOG_on
-    {
-      std::stringstream msg;
-      msg << "AB_REDISTSTORE_LOG:" << __LINE__ << " pair #" << i <<
-        " does NOT require precompute!";
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-    }
+        {
+          std::stringstream msg;
+          msg << "AB_REDISTSTORE_LOG:" << __LINE__ << " pair #" << i <<
+            " does NOT require precompute! Found match with pair #" << 
+            matchList[i];
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        }
 #endif
         // append the xxeSub to the xxe object with RRA offset info
         localrc = xxe->appendXxeSub(0x0, xxeSub[matchList[i]], rraShift,
@@ -983,12 +984,12 @@ int ArrayBundle::redistStore(
       }else{
         // src/dst Array pair does _not_ match any previous pair in ArrayBundle
 #ifdef AB_REDISTSTORE_LOG_on
-    {
-      std::stringstream msg;
-      msg << "AB_REDISTSTORE_LOG:" << __LINE__ << " pair #" << i <<
-        " DOES require precompute!";
-      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-    }
+        {
+          std::stringstream msg;
+          msg << "AB_REDISTSTORE_LOG:" << __LINE__ << " pair #" << i <<
+            " DOES require precompute!";
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        }
 #endif
         RouteHandle *rh;
         localrc = Array::redistStore(srcArray, dstArray, &rh,
@@ -1233,10 +1234,10 @@ int ArrayBundle::sparseMatMulStore(
       Array *dstArray = dstArrayVector[i];
       // search if there was an earlier entry that is compatible
       for (int j=i-1; j>=0; j--){
-        bool srcMatch = Array::match(srcArray, srcArrayVector[j], &localrc);
+        bool srcMatch = Array::matchBool(srcArray, srcArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-        bool dstMatch = Array::match(dstArray, dstArrayVector[j], &localrc);
+        bool dstMatch = Array::matchBool(dstArray, dstArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         if (srcMatch && dstMatch){
