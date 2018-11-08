@@ -650,7 +650,7 @@ int ArrayBundle::haloStore(
       Array *array = arrayVector[i];
       // search if there was an earlier entry that is compatible
       for (int j=i-1; j>=0; j--){
-        bool match = Array::matchBool(array, arrayVector[j], &localrc);
+        bool match = array->isRHCompatible(arrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         if (match){
@@ -917,10 +917,10 @@ int ArrayBundle::redistStore(
       Array *dstArray = dstArrayVector[i];
       // search if there was an earlier entry that is compatible
       for (int j=i-1; j>=0; j--){
-        bool srcMatch = Array::matchBool(srcArray, srcArrayVector[j], &localrc);
+        bool srcMatch = srcArray->isRHCompatible(srcArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-        bool dstMatch = Array::matchBool(dstArray, dstArrayVector[j], &localrc);
+        bool dstMatch = dstArray->isRHCompatible(dstArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         if (srcMatch && dstMatch){
@@ -1234,10 +1234,10 @@ int ArrayBundle::sparseMatMulStore(
       Array *dstArray = dstArrayVector[i];
       // search if there was an earlier entry that is compatible
       for (int j=i-1; j>=0; j--){
-        bool srcMatch = Array::matchBool(srcArray, srcArrayVector[j], &localrc);
+        bool srcMatch = srcArray->isRHCompatible(srcArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
-        bool dstMatch = Array::matchBool(dstArray, dstArrayVector[j], &localrc);
+        bool dstMatch = dstArray->isRHCompatible(dstArrayVector[j], &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, &rc)) return rc;
         if (srcMatch && dstMatch){

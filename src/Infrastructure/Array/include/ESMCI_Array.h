@@ -151,6 +151,7 @@ namespace ESMCI {
                                       // entry of 0 indicates undistributed dim
     int *distgridToPackedArrayMap;    // [dimCount] - entries are basis 1
                                       // entry of 0 indicates replicated dim
+                                      // distr. Array dims as 1, 2, 3, .. only
     int *contiguousFlag;              // [localDeCount]
     int *exclusiveElementCountPDe;    // [deCount] number of elements in
                                       // exclusive region only considering

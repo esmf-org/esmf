@@ -93,7 +93,7 @@ program ESMF_ArrayBundleRedistUTest
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
-  allocate(srcArrayList(7))
+  allocate(srcArrayList(11))
   ! - 1
   srcArrayList(1) = ESMF_ArrayCreate(srcDG, ESMF_TYPEKIND_R8, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -117,7 +117,7 @@ program ESMF_ArrayBundleRedistUTest
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   ! - 4
   srcArrayList(4) = ESMF_ArrayCreate(srcDG, ESMF_TYPEKIND_R8, &
-    undistLBound=(/1/), undistUBound=(/10/), distgridToArrayMap=(/2,3/), rc=rc)
+    distgridToArrayMap=(/2,3/), undistLBound=(/1/), undistUBound=(/10/), rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call fillArray(srcArrayList(4), scale=4., rc=rc)
@@ -125,7 +125,7 @@ program ESMF_ArrayBundleRedistUTest
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   ! - 5
   srcArrayList(5) = ESMF_ArrayCreate(srcDG, ESMF_TYPEKIND_R4, &
-    undistLBound=(/1/), undistUBound=(/10/), distgridToArrayMap=(/1,3/), rc=rc)
+    distgridToArrayMap=(/1,3/), undistLBound=(/1/), undistUBound=(/10/), rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call fillArray(srcArrayList(5), scale=5., rc=rc)
@@ -133,7 +133,7 @@ program ESMF_ArrayBundleRedistUTest
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   ! - 6
   srcArrayList(6) = ESMF_ArrayCreate(srcDG, ESMF_TYPEKIND_R8, &
-    undistLBound=(/1/), undistUBound=(/10/), distgridToArrayMap=(/1,2/), rc=rc)
+    distgridToArrayMap=(/1,2/), undistLBound=(/1/), undistUBound=(/10/), rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call fillArray(srcArrayList(6), scale=6., rc=rc)
@@ -141,11 +141,45 @@ program ESMF_ArrayBundleRedistUTest
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   ! - 7
   srcArrayList(7) = ESMF_ArrayCreate(srcDG, ESMF_TYPEKIND_R8, &
-    undistLBound=(/1,1/), undistUBound=(/3,4/), distgridToArrayMap=(/2,4/), &
-    rc=rc)
+    distgridToArrayMap=(/2,4/), undistLBound=(/1,1/), undistUBound=(/3,4/), rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   call fillArray(srcArrayList(7), scale=7., rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  ! - 8
+  srcDG = ESMF_DistGridCreate(minIndex=(/1,1,1/), maxIndex=(/30,50,23/), &
+    regDecomp=(/1,petCount,1/), rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  srcArrayList(8) = ESMF_ArrayCreate(srcDG, ESMF_TYPEKIND_R8, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call fillArray(srcArrayList(8), scale=8., rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  ! - 9
+  srcArrayList(9) = ESMF_ArrayCreate(srcDG, ESMF_TYPEKIND_R8, &
+    distgridToArrayMap=(/2,1,3/), rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call fillArray(srcArrayList(9), scale=9., rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  ! - 10
+  srcArrayList(10) = ESMF_ArrayCreate(srcDG, ESMF_TYPEKIND_R8, &
+    distgridToArrayMap=(/1,2,4/), undistLBound=(/1/), undistUBound=(/1/), rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call fillArray(srcArrayList(10), scale=10., rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  ! - 11
+  srcArrayList(11) = ESMF_ArrayCreate(srcDG, ESMF_TYPEKIND_R8, &
+    totalLWidth=(/0,3,1/), totalUWidth=(/1,0,5/), rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call fillArray(srcArrayList(11), scale=11., rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
@@ -159,7 +193,7 @@ program ESMF_ArrayBundleRedistUTest
       line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   enddo
   !------------------------------------------------------------------------
-  allocate(dstArrayList(7))
+  allocate(dstArrayList(11))
   ! - 1
   dstArrayList(1) = ESMF_ArrayCreate(dstDG, ESMF_TYPEKIND_R8, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -190,6 +224,22 @@ program ESMF_ArrayBundleRedistUTest
   ! - 7
   dstArrayList(7) = ESMF_ArrayCreate(dstDG, ESMF_TYPEKIND_R8, &
     undistLBound=(/1/), undistUBound=(/12/), distgridToArrayMap=(/1,3/), rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  ! - 8
+  dstArrayList(8) = ESMF_ArrayCreate(dstDG, ESMF_TYPEKIND_R8, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  ! - 9
+  dstArrayList(9) = ESMF_ArrayCreate(dstDG, ESMF_TYPEKIND_R8, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  ! - 10
+  dstArrayList(10) = ESMF_ArrayCreate(dstDG, ESMF_TYPEKIND_R8, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  ! - 11
+  dstArrayList(11) = ESMF_ArrayCreate(dstDG, ESMF_TYPEKIND_R8, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
@@ -276,18 +326,11 @@ program ESMF_ArrayBundleRedistUTest
 
   !------------------------------------------------------------------------
   ! scramble the data in the src arrays
-  call fillArray(srcArrayList(1), scale=10., rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call fillArray(srcArrayList(2), scale=10., rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call fillArray(srcArrayList(3), scale=10., rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call fillArray(srcArrayList(4), scale=10., rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  do i=1, size(srcArrayList)
+    call fillArray(srcArrayList(i), scale=-99., rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  enddo
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -334,18 +377,11 @@ program ESMF_ArrayBundleRedistUTest
 
   !------------------------------------------------------------------------
   ! scramble the data in the dst arrays
-  call fillArray(dstArrayList(1), scale=10., rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call fillArray(dstArrayList(2), scale=10., rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call fillArray(dstArrayList(3), scale=10., rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call fillArray(dstArrayList(4), scale=10., rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  do i=1, size(dstArrayList)
+    call fillArray(dstArrayList(i), scale=-99., rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  enddo
   !------------------------------------------------------------------------
 
   !------------------------------------------------------------------------
@@ -496,7 +532,7 @@ program ESMF_ArrayBundleRedistUTest
       call ESMF_ArrayGet(array, farrayPtr=fptr4d, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      do l=lbound(fptr4d,4),ubound(fptr4d,3)
+      do l=lbound(fptr4d,4),ubound(fptr4d,4)
       do k=lbound(fptr4d,3),ubound(fptr4d,3)
       do j=lbound(fptr4d,2),ubound(fptr4d,2)
       do i=lbound(fptr4d,1),ubound(fptr4d,1)
@@ -561,7 +597,7 @@ program ESMF_ArrayBundleRedistUTest
       call ESMF_ArrayGet(array, farrayPtr=fptr4d, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      do l=lbound(fptr4d,4),ubound(fptr4d,3)
+      do l=lbound(fptr4d,4),ubound(fptr4d,4)
       do k=lbound(fptr4d,3),ubound(fptr4d,3)
       do j=lbound(fptr4d,2),ubound(fptr4d,2)
       do i=lbound(fptr4d,1),ubound(fptr4d,1)
@@ -604,10 +640,10 @@ program ESMF_ArrayBundleRedistUTest
     integer             :: rc
     !-----------------------------------------
     type(ESMF_TypeKind_Flag) :: tk
+    dataMatchArrays = .true.
     call ESMF_ArrayGet(array1, typekind=tk, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
-    dataMatchArrays = .true.
     if (tk==ESMF_TYPEKIND_R8) then
       dataMatchArrays = dataMatchR8(array1, array2, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -630,10 +666,23 @@ program ESMF_ArrayBundleRedistUTest
     real(ESMF_KIND_R8), pointer   :: fptr2d1(:,:), fptr2d2(:,:)
     real(ESMF_KIND_R8), pointer   :: fptr3d1(:,:,:), fptr3d2(:,:,:)
     real(ESMF_KIND_R8), pointer   :: fptr4d1(:,:,:,:), fptr4d2(:,:,:,:)
-    integer                       :: rank, i, j, k, l
+    integer                       :: rank, dimCount
+    integer                       :: i, j, k, l
+    integer, allocatable          :: arrayToDistGridMap(:)
+    integer, allocatable          :: distgridToPackedArrayMap(:)
+    integer, allocatable          :: exclusiveLBound(:,:), exclusiveUBound(:,:)
+    integer                       :: lb(4), ub(4)
     character(len=160)            :: msg
     dataMatchR8 = .true.  ! initialize
-    call ESMF_ArrayGet(array1, rank=rank, rc=rc)
+    call ESMF_ArrayGet(array1, rank=rank, dimCount=dimCount, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+    allocate(arrayToDistGridMap(rank))
+    allocate(distgridToPackedArrayMap(dimCount))
+    allocate(exclusiveLBound(dimCount,1),exclusiveUBound(dimCount,1))
+    call ESMF_ArrayGet(array1, arrayToDistGridMap=arrayToDistGridMap, &
+      distgridToPackedArrayMap=distgridToPackedArrayMap, &
+      exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
     if (rank == 1) then
@@ -643,7 +692,20 @@ program ESMF_ArrayBundleRedistUTest
       call ESMF_ArrayGet(array2, farrayPtr=fptr1d2, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      do i=lbound(fptr1d1,1),ubound(fptr1d1,1)
+      do i=1, rank
+        j = arrayToDistGridMap(i)
+        if (j==0) then
+          ! undistributed dim
+          lb(i) = lbound(fptr1d1,i)
+          ub(i) = ubound(fptr1d1,i)
+        else
+          ! distributed dim
+          k = distgridToPackedArrayMap(j)
+          lb(i) = exclusiveLBound(k,1)
+          ub(i) = exclusiveUBound(k,1)
+        endif
+      enddo
+      do i=lb(1),ub(1)
         diff = abs(fptr1d1(i) - fptr1d2(i))
         if (diff > 1.d-10) then
           dataMatchR8 = .false.
@@ -658,8 +720,22 @@ program ESMF_ArrayBundleRedistUTest
       call ESMF_ArrayGet(array2, farrayPtr=fptr2d2, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      do j=lbound(fptr2d1,2),ubound(fptr2d1,2)
-      do i=lbound(fptr2d1,1),ubound(fptr2d1,1)
+      do i=1, rank
+        j = arrayToDistGridMap(i)
+        if (j==0) then
+          ! undistributed dim
+          lb(i) = lbound(fptr2d1,i)
+          ub(i) = ubound(fptr2d1,i)
+        else
+          ! distributed dim
+          ! distributed dim
+          k = distgridToPackedArrayMap(j)
+          lb(i) = exclusiveLBound(k,1)
+          ub(i) = exclusiveUBound(k,1)
+        endif
+      enddo
+      do j=lb(2),ub(2)
+      do i=lb(1),ub(1)
         diff = abs(fptr2d1(i,j) - fptr2d2(i,j))
         if (diff > 1.d-10) then
           dataMatchR8 = .false.
@@ -675,9 +751,22 @@ program ESMF_ArrayBundleRedistUTest
       call ESMF_ArrayGet(array2, farrayPtr=fptr3d2, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      do k=lbound(fptr3d1,3),ubound(fptr3d1,3)
-      do j=lbound(fptr3d1,2),ubound(fptr3d1,2)
-      do i=lbound(fptr3d1,1),ubound(fptr3d1,1)
+      do i=1, rank
+        j = arrayToDistGridMap(i)
+        if (j==0) then
+          ! undistributed dim
+          lb(i) = lbound(fptr3d1,i)
+          ub(i) = ubound(fptr3d1,i)
+        else
+          ! distributed dim
+          k = distgridToPackedArrayMap(j)
+          lb(i) = exclusiveLBound(k,1)
+          ub(i) = exclusiveUBound(k,1)
+        endif
+      enddo
+      do k=lb(3),ub(3)
+      do j=lb(2),ub(2)
+      do i=lb(1),ub(1)
         diff = abs(fptr3d1(i,j,k) - fptr3d2(i,j,k))
         if (diff > 1.d-10) then
           dataMatchR8 = .false.
@@ -694,10 +783,24 @@ program ESMF_ArrayBundleRedistUTest
       call ESMF_ArrayGet(array2, farrayPtr=fptr4d2, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=__FILE__)) return
-      do l=lbound(fptr4d1,4),ubound(fptr4d1,4)
-      do k=lbound(fptr4d1,3),ubound(fptr4d1,3)
-      do j=lbound(fptr4d1,2),ubound(fptr4d1,2)
-      do i=lbound(fptr4d1,1),ubound(fptr4d1,1)
+      do i=1, rank
+        j = arrayToDistGridMap(i)
+        if (j==0) then
+          ! undistributed dim
+          lb(i) = lbound(fptr4d1,i)
+          ub(i) = ubound(fptr4d1,i)
+        else
+          ! distributed dim
+          ! distributed dim
+          k = distgridToPackedArrayMap(j)
+          lb(i) = exclusiveLBound(k,1)
+          ub(i) = exclusiveUBound(k,1)
+        endif
+      enddo
+      do l=lb(4),ub(4)
+      do k=lb(3),ub(3)
+      do j=lb(2),ub(2)
+      do i=lb(1),ub(1)
         diff = abs(fptr4d1(i,j,k,l) - fptr4d2(i,j,k,l))
         if (diff > 1.d-10) then
           dataMatchR8 = .false.
@@ -710,6 +813,8 @@ program ESMF_ArrayBundleRedistUTest
       enddo
       enddo
     endif
+    deallocate(arrayToDistGridMap)
+    deallocate(exclusiveLBound,exclusiveUBound)
   end function
 
   function dataMatchR4(array1, array2, rc)
@@ -718,34 +823,160 @@ program ESMF_ArrayBundleRedistUTest
     type(ESMF_Array)    :: array2
     integer             :: rc
     !-----------------------------------------
-    real(ESMF_KIND_R4), pointer   :: fptr1(:,:), fptr2(:,:)
     real(ESMF_KIND_R4)            :: diff
-    integer                       :: i, j, rank
+    real(ESMF_KIND_R4), pointer   :: fptr1d1(:), fptr1d2(:)
+    real(ESMF_KIND_R4), pointer   :: fptr2d1(:,:), fptr2d2(:,:)
+    real(ESMF_KIND_R4), pointer   :: fptr3d1(:,:,:), fptr3d2(:,:,:)
+    real(ESMF_KIND_R4), pointer   :: fptr4d1(:,:,:,:), fptr4d2(:,:,:,:)
+    integer                       :: rank, dimCount
+    integer                       :: i, j, k, l
+    integer, allocatable          :: arrayToDistGridMap(:)
+    integer, allocatable          :: distgridToPackedArrayMap(:)
+    integer, allocatable          :: exclusiveLBound(:,:), exclusiveUBound(:,:)
+    integer                       :: lb(4), ub(4)
     character(len=160)            :: msg
     dataMatchR4 = .true.  ! initialize
-    call ESMF_ArrayGet(array1, rank=rank, rc=rc)
+    call ESMF_ArrayGet(array1, rank=rank, dimCount=dimCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=__FILE__)) return
-    if (rank /= 2) then
-      ! for now only rank 2 arrays are checked
-      return
+    allocate(arrayToDistGridMap(rank))
+    allocate(distgridToPackedArrayMap(dimCount))
+    allocate(exclusiveLBound(dimCount,1),exclusiveUBound(dimCount,1))
+    call ESMF_ArrayGet(array1, arrayToDistGridMap=arrayToDistGridMap, &
+      distgridToPackedArrayMap=distgridToPackedArrayMap, &
+      exclusiveLBound=exclusiveLBound, exclusiveUBound=exclusiveUBound, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=__FILE__)) return
+    if (rank == 1) then
+      call ESMF_ArrayGet(array1, farrayPtr=fptr1d1, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      call ESMF_ArrayGet(array2, farrayPtr=fptr1d2, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      do i=1, rank
+        j = arrayToDistGridMap(i)
+        if (j==0) then
+          ! undistributed dim
+          lb(i) = lbound(fptr1d1,i)
+          ub(i) = ubound(fptr1d1,i)
+        else
+          ! distributed dim
+          k = distgridToPackedArrayMap(j)
+          lb(i) = exclusiveLBound(k,1)
+          ub(i) = exclusiveUBound(k,1)
+        endif
+      enddo
+      do i=lb(1),ub(1)
+        diff = abs(fptr1d1(i) - fptr1d2(i))
+        if (diff > 1.d-10) then
+          dataMatchR4 = .false.
+          write(msg,*) "Found data mismatch at (",i,"), diff=", diff
+          call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+        endif
+      enddo
+    else if (rank == 2) then
+      call ESMF_ArrayGet(array1, farrayPtr=fptr2d1, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      call ESMF_ArrayGet(array2, farrayPtr=fptr2d2, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      do i=1, rank
+        j = arrayToDistGridMap(i)
+        if (j==0) then
+          ! undistributed dim
+          lb(i) = lbound(fptr2d1,i)
+          ub(i) = ubound(fptr2d1,i)
+        else
+          ! distributed dim
+          ! distributed dim
+          k = distgridToPackedArrayMap(j)
+          lb(i) = exclusiveLBound(k,1)
+          ub(i) = exclusiveUBound(k,1)
+        endif
+      enddo
+      do j=lb(2),ub(2)
+      do i=lb(1),ub(1)
+        diff = abs(fptr2d1(i,j) - fptr2d2(i,j))
+        if (diff > 1.d-10) then
+          dataMatchR4 = .false.
+          write(msg,*) "Found data mismatch at (",i,",",j,"), diff=", diff
+          call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+        endif
+      enddo
+      enddo
+    else if (rank == 3) then
+      call ESMF_ArrayGet(array1, farrayPtr=fptr3d1, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      call ESMF_ArrayGet(array2, farrayPtr=fptr3d2, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      do i=1, rank
+        j = arrayToDistGridMap(i)
+        if (j==0) then
+          ! undistributed dim
+          lb(i) = lbound(fptr3d1,i)
+          ub(i) = ubound(fptr3d1,i)
+        else
+          ! distributed dim
+          k = distgridToPackedArrayMap(j)
+          lb(i) = exclusiveLBound(k,1)
+          ub(i) = exclusiveUBound(k,1)
+        endif
+      enddo
+      do k=lb(3),ub(3)
+      do j=lb(2),ub(2)
+      do i=lb(1),ub(1)
+        diff = abs(fptr3d1(i,j,k) - fptr3d2(i,j,k))
+        if (diff > 1.d-10) then
+          dataMatchR4 = .false.
+          write(msg,*) "Found data mismatch at (",i,",",j,",",k,"), diff=", diff
+          call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+        endif
+      enddo
+      enddo
+      enddo
+    else if (rank == 4) then
+      call ESMF_ArrayGet(array1, farrayPtr=fptr4d1, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      call ESMF_ArrayGet(array2, farrayPtr=fptr4d2, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=__FILE__)) return
+      do i=1, rank
+        j = arrayToDistGridMap(i)
+        if (j==0) then
+          ! undistributed dim
+          lb(i) = lbound(fptr4d1,i)
+          ub(i) = ubound(fptr4d1,i)
+        else
+          ! distributed dim
+          ! distributed dim
+          k = distgridToPackedArrayMap(j)
+          lb(i) = exclusiveLBound(k,1)
+          ub(i) = exclusiveUBound(k,1)
+        endif
+      enddo
+      do l=lb(4),ub(4)
+      do k=lb(3),ub(3)
+      do j=lb(2),ub(2)
+      do i=lb(1),ub(1)
+        diff = abs(fptr4d1(i,j,k,l) - fptr4d2(i,j,k,l))
+        if (diff > 1.d-10) then
+          dataMatchR4 = .false.
+          write(msg,*) &
+            "Found data mismatch at (",i,",",j,",",k,",",l,"), diff=", diff
+          call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+        endif
+      enddo
+      enddo
+      enddo
+      enddo
     endif
-    call ESMF_ArrayGet(array1, farrayPtr=fptr1, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    call ESMF_ArrayGet(array2, farrayPtr=fptr2, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=__FILE__)) return
-    do j=lbound(fptr1,2),ubound(fptr1,2)
-    do i=lbound(fptr1,1),ubound(fptr1,1)
-      diff = abs(fptr1(i,j) - fptr2(i,j))
-      if (diff > 1.e-6) then
-        dataMatchR4 = .false.
-        write(msg,*) "Found data mismatch at (",i,",",j,"), diff=", diff
-        call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
-      endif
-    enddo
-    enddo
+    deallocate(arrayToDistGridMap)
+    deallocate(exclusiveLBound,exclusiveUBound)
   end function
-  
+
 end program ESMF_ArrayBundleRedistUTest
