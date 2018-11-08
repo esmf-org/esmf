@@ -3114,7 +3114,7 @@ bool Array::isRHCompatible(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-#define DEBUGLOG
+#undef DEBUGLOG
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
@@ -3285,7 +3285,7 @@ bool Array::matchBool(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-#define DEBUGLOG
+#undef DEBUGLOG
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
