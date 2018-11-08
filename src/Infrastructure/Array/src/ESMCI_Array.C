@@ -1826,10 +1826,13 @@ Array *Array::create(
     int tensorCount =
       arrayOut->tensorCount = arrayIn->tensorCount - rmLeadingTensors;
     // determine leading tensor elements
-    int leadingTensorElementCount = 1;
-    for (int i=0; i<rmLeadingTensors; i++)
-      leadingTensorElementCount *=
-        arrayIn->undistUBound[i] - arrayIn->undistLBound[i] + 1;
+    int leadingTensorElementCount = 0;
+    if (rmLeadingTensors){
+      leadingTensorElementCount = 1;
+      for (int i=0; i<rmLeadingTensors; i++)
+        leadingTensorElementCount *=
+          arrayIn->undistUBound[i] - arrayIn->undistLBound[i] + 1;
+    }
     arrayOut->tensorElementCount =
       arrayIn->tensorElementCount - leadingTensorElementCount;
     if (arrayOut->tensorElementCount==0) arrayOut->tensorElementCount=1;
