@@ -137,12 +137,17 @@ namespace ESMCI {
     
     /* used by TESTING only */
     RegionNode *addChild(string name) {
-      RegionNode *newNode = new RegionNode(this, 0, true);
-      _children.push_back(newNode);
+      RegionNode *newNode = addChild();
       newNode->setName(name);
       return newNode;
     }
-   
+
+    RegionNode *addChild() {
+      RegionNode *newNode = new RegionNode(this, 0, true);
+      _children.push_back(newNode);
+      return newNode;
+    }
+    
     RegionNode *addChild(RegionNode *toClone) {
       RegionNode *newNode = new RegionNode(this, toClone);
       _children.push_back(newNode);
@@ -334,17 +339,23 @@ namespace ESMCI {
     }
 
     // total number of nodes in tree
-    int size() {
-      int s=1; //this node
+    size_t size() {
+      size_t s=1; //this node
       for (unsigned i = 0; i < _children.size(); i++) {
 	s += _children.at(i)->size();
       }
       return s;
     }
     
-    char *serialize() {
+    char *serialize(size_t *bufSize) {
       size_t bufferSize = serializeSize();
-      bufferSize += sizeof(int);
+      bufferSize += sizeof(size_t);
+      if (bufferSize % 8 > 0) {
+        bufferSize += (8 - (bufferSize % 8));
+      }
+      *bufSize = bufferSize;      
+
+      //std::cout << "computed buffer size needed = " << bufferSize << "\n";
       
       char *buffer = (char *) malloc(bufferSize);
       if (buffer==NULL) {
@@ -352,6 +363,12 @@ namespace ESMCI {
       }
       size_t offset = 0;
       memset(buffer, 0, bufferSize);
+
+      //first integer is number of nodes
+      size_t nodeCount = size();
+      memcpy(buffer, (const void *) &nodeCount, sizeof(nodeCount));
+      offset += sizeof(nodeCount);
+      
       serialize(buffer, &offset, bufferSize, true);
       return buffer;
     }
@@ -368,6 +385,7 @@ namespace ESMCI {
       }
 
       if (*offset + localSerializeSize() > bufferSize) {
+        //std::cout << "buffer too small: " << *offset + localSerializeSize() << " : " << bufferSize;
         throw std::runtime_error("Buffer too small to serialize trace region");
       }
 
@@ -423,61 +441,127 @@ namespace ESMCI {
 
       return buffer;
     }
-    
-    void deserializeLocal(char *buffer, size_t offset, size_t bufferSize) {
-      
-      if (offset + localSerializeSize() > bufferSize) {
-        throw std::runtime_error("Buffer too small to deserialize trace region");
+
+    /* deserialize from root of tree */
+    void deserialize(char *buffer, size_t bufferSize) {
+      size_t offset = 0;
+      size_t totalNodes = 0;
+            
+      if (sizeof(totalNodes) > bufferSize) {
+        throw std::runtime_error("Buffer size too small when deserializing trace region.");
       }
       
-      memcpy( (void *) &_global_id, buffer+offset, sizeof(_global_id) );
-      offset += sizeof(_global_id);
+      memcpy( (void *) &totalNodes, buffer, sizeof(totalNodes) );
+      offset += sizeof(totalNodes);
 
-      uint16_t parentId = 0;
-      memcpy( (void *) &parentId, buffer+offset, sizeof(parentId) );
-      offset += sizeof(parentId);
+      //sanity check
+      if (totalNodes > 10000000) {
+        throw std::runtime_error("Unexpected node count when deserializing trace region.");
+      }
+
+      if (totalNodes > 0) {
+        deserializeLocal(buffer, &offset, bufferSize);
+        size_t completed = 1;
+        deserializeChildren(buffer, &offset, bufferSize, totalNodes, &completed);
+      }
+    }
+
+   
+    void deserializeChildren(char *buffer, size_t *offset, size_t bufferSize,
+                             size_t totalNodes, size_t *completed) {
+
+      while (*completed < totalNodes) {
+
+        //align offset at 8 bytes
+        if (*offset % 8 > 0) {
+          *offset += (8 - (*offset % 8));
+        }
+        
+        if (*offset + localSerializeSize() > bufferSize) {
+          throw std::runtime_error("Buffer too small to deserialize trace region");
+        }
+        
+        //look ahead at parent id of next node
+        uint16_t global_id = 0;
+        uint16_t parent_id = 0;
+
+        memcpy( (void *) &global_id, buffer+(*offset), sizeof(global_id) );
+        memcpy( (void *) &parent_id, buffer+(*offset)+sizeof(global_id), sizeof(parent_id) );
+
+        //std::cout << "working on: " << *completed << " of " << totalNodes << " my id = " << getGlobalId() << " parent id = " << parent_id << "\n";        
+        
+        //check to see if next node is my child
+        if (parent_id == getGlobalId()) {
+          RegionNode *child = addChild(); //add empty child
+          child->deserializeLocal(buffer, offset, bufferSize);
+          *completed = *completed + 1;
+          child->deserializeChildren(buffer, offset, bufferSize, totalNodes, completed);
+        }
+        else {
+          return;
+        }
+      }
       
-      memcpy( (void *) &_local_id, buffer+offset, sizeof(_local_id) );
-      offset += sizeof(_local_id);
+    }
+    
+    void deserializeLocal(char *buffer, size_t *offset, size_t bufferSize) { 
 
-      memcpy( (void *) &_total, buffer+offset, sizeof(_total) );
-      offset += sizeof(_total);
+      //align offset at 8 bytes
+      if (*offset % 8 > 0) {
+        *offset += (8 - (*offset % 8));
+      }
+      
+      if (*offset + localSerializeSize() > bufferSize) {
+        throw std::runtime_error("Buffer too small to deserialize trace region");
+      }
+            
+      memcpy( (void *) &_global_id, buffer+(*offset), sizeof(_global_id) );
+      *offset += sizeof(_global_id);
+      
+      uint16_t parentId = 0;
+      memcpy( (void *) &parentId, buffer+(*offset), sizeof(parentId) );
+      *offset += sizeof(parentId);
+      
+      memcpy( (void *) &_local_id, buffer+(*offset), sizeof(_local_id) );
+      *offset += sizeof(_local_id);
+      
+      memcpy( (void *) &_total, buffer+(*offset), sizeof(_total) );
+      *offset += sizeof(_total);
+      
+      memcpy( (void *) &_count, buffer+(*offset), sizeof(_count) );
+      *offset += sizeof(_count);
 
-      memcpy( (void *) &_count, buffer+offset, sizeof(_count) );
-      offset += sizeof(_count);
+      memcpy( (void *) &_min, buffer+(*offset), sizeof(_min) );
+      *offset += sizeof(_min);
 
-      memcpy( (void *) &_min, buffer+offset, sizeof(_min) );
-      offset += sizeof(_min);
+      memcpy( (void *) &_max, buffer+(*offset), sizeof(_max) );
+      *offset += sizeof(_max);
 
-      memcpy( (void *) &_max, buffer+offset, sizeof(_max) );
-      offset += sizeof(_max);
+      memcpy( (void *) &_mean, buffer+(*offset), sizeof(_mean) );
+      *offset += sizeof(_mean);
 
-      memcpy( (void *) &_mean, buffer+offset, sizeof(_mean) );
-      offset += sizeof(_mean);
-
-      memcpy( (void *) &_variance, buffer+offset, sizeof(_variance) );
-      offset += sizeof(_variance);
+      memcpy( (void *) &_variance, buffer+(*offset), sizeof(_variance) );
+      *offset += sizeof(_variance);
 
       int userRegion = 0;
-      memcpy( (void *) &userRegion, buffer+offset, sizeof(userRegion) );
-      offset += sizeof(userRegion);
+      memcpy( (void *) &userRegion, buffer+(*offset), sizeof(userRegion) );
+      *offset += sizeof(userRegion);
       _isUserRegion = (userRegion == 1);
 
       size_t nameSize = 0;
-      memcpy( (void *) &nameSize, buffer+offset, sizeof(nameSize) );
-      offset += sizeof(nameSize);
+      memcpy( (void *) &nameSize, buffer+(*offset), sizeof(nameSize) );
+      *offset += sizeof(nameSize);
 
       if (nameSize > 0) {
         char *copyName = (char *) malloc(nameSize);
         if (copyName == NULL) throw std::bad_alloc();
         
-        memcpy( (void *) copyName, buffer+offset, nameSize );
-        offset += nameSize;
+        memcpy( (void *) copyName, buffer+(*offset), nameSize );
+        *offset += nameSize;
         _name = string(copyName);
         free(copyName);
       }
-      
-            
+                  
     }
 
     /*
@@ -496,7 +580,7 @@ namespace ESMCI {
         sizeof(_variance) +
         sizeof(int) + // isUserRegion flag
         sizeof(size_t) +  // records length of name
-        strlen(_name.c_str());  // length of name
+        strlen(_name.c_str()) + 1;  // length of name
       if (localSize % 8 > 0) {
         //take alignment into account
         localSize += 8 - (localSize % 8);

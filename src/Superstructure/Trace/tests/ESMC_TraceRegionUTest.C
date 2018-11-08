@@ -46,12 +46,12 @@ static int eqltol(double a, double b) {
 
 static int matches(ESMCI::RegionNode *rn1, ESMCI::RegionNode *rn2) {
   if (rn1 != NULL && rn2 != NULL &&
-    rn1->getTotal() == rn2->getTotal() &&
-    rn1->getCount() == rn2->getCount() &&
-    rn1->getMin() == rn2->getMin() &&
-    rn1->getMax() == rn2->getMax() &&
-    rn1->getName() == rn2->getName() &&
-    rn1->getStdDev() == rn2->getStdDev() &&
+      rn1->getTotal() == rn2->getTotal() &&
+      rn1->getCount() == rn2->getCount() &&
+      rn1->getMin() == rn2->getMin() &&
+      rn1->getMax() == rn2->getMax() &&
+      rn1->getName() == rn2->getName() &&
+      rn1->getStdDev() == rn2->getStdDev() &&
       rn1->getMean() == rn2->getMean()) {
     return 1;
   }
@@ -59,6 +59,25 @@ static int matches(ESMCI::RegionNode *rn1, ESMCI::RegionNode *rn2) {
     return 0;
   }
 }
+
+static int treeMatch(ESMCI::RegionNode *rn1, ESMCI::RegionNode *rn2) {
+  if (matches(rn1, rn2) == 0) {
+    //std::cout << "match failed: " << rn1->getName() << " : " << rn2->getName();
+    return 0;
+  }
+  if (rn1->getGlobalId() != rn2->getGlobalId()) return 0;
+  if (rn1->getParentGlobalId() != rn2->getParentGlobalId()) return 0;
+  if (rn1->getLocalId() != rn2->getLocalId()) return 0;
+  if (rn1->getChildren().size() != rn2->getChildren().size()) {
+    //std::cout << "match child size failed: " << rn1->getChildren().size() << " : " << rn2->getChildren().size();
+    return 0;
+  }
+  for (unsigned i=0; i < rn1->getChildren().size(); i++) {
+    if (treeMatch(rn1->getChildren().at(i), rn2->getChildren().at(i)) == 0) return 0;
+  }
+  return 1;
+}
+
 
 int main(void){
 
@@ -426,8 +445,10 @@ int main(void){
   //printf("offset after serializeLocal: %lu\n", offset);
   
   ESMCI::RegionNode *des = new ESMCI::RegionNode();
-  des->deserializeLocal(sbuf, 0, bufsize);
-
+  offset = 0;
+  des->deserializeLocal(sbuf, &offset, bufsize);
+  free(sbuf);
+  
   //----------------------------------------------------------------------------
   //NEX_UTest
   snprintf(failMsg, 80, "Deserialize global id");
@@ -490,8 +511,11 @@ int main(void){
 
   ESMCI::RegionNode *serParent = new ESMCI::RegionNode(NULL, 800, true);
   ESMCI::RegionNode *serChild1;
+  ESMCI::RegionNode *serChild1a;
   ESMCI::RegionNode *serChild2;
   ESMCI::RegionNode *serChild2a;
+  ESMCI::RegionNode *serChild2a1;
+  ESMCI::RegionNode *serChild2a2;
 
   serParent->setName("serParent");
   serParent->entered(10);
@@ -503,21 +527,55 @@ int main(void){
   serChild2->entered(88);   serChild2->exited(105);
   serChild2->entered(109);  serChild2->exited(127);
   serChild2a = serChild2->addChild("child2a");
-  serChild2a->entered(200); serChild2a->exited(305);
-  serParent->exited(333);
+  serChild2a->entered(200); 
+  serChild2a1 = serChild2a->addChild("child2a1");
+  serChild2a1->entered(201); serChild2a1->exited(204);
+  serChild2a2 = serChild2a->addChild("child2a2");
+  serChild2a2->entered(205); serChild2a1->exited(210);
+  serChild2a->exited(305);
+  serChild1->entered(310);
+  serChild1a = serParent->addChild("child1a");
+  serChild1a->entered(315); serChild1a->exited(413);
+  serChild1->exited(900);
+  serParent->exited(1000);
 
-  //char *treeBuffer = serParent->serialize();
-  //free(treeBuffer);
+  size_t treeBufSize = 0;
+  char *treeBuffer = serParent->serialize(&treeBufSize);
+
+  //std::cout << "treeBufSize after serialize = " << treeBufSize;
+
+  ESMCI::RegionNode *desParent = new ESMCI::RegionNode(NULL, 1, false);
+  desParent->deserialize(treeBuffer, treeBufSize);
+    
+  free(treeBuffer);
   
   //----------------------------------------------------------------------------
   //NEX_UTest
-  //snprintf(failMsg, 80, "Deserialize name: %s, %s", ser->getName().c_str(), des->getName().c_str());
-  //ESMC_Test(ser->getName()==des->getName(), name, failMsg, &result, __FILE__, __LINE__, 0);
+  snprintf(failMsg, 80, "Deserialized root node does not match");
+  ESMC_Test(matches(desParent, serParent), name, failMsg, &result, __FILE__, __LINE__, 0);
 
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Deserialized tree does not match");
+  ESMC_Test(treeMatch(desParent, serParent), name, failMsg, &result, __FILE__, __LINE__, 0);
 
+  //----------------------------------------------------------------------------
+  strcpy(name, "Merge deserialized tree");
 
-  
-  delete serParent;
+  //merge the two back together, essentially a merge with itself
+  serParent->merge(*desParent);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Unexpected deserialized merge: count");
+  ESMC_Test(serParent->getCount() == 2, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Unexpected deserialized merge: total");
+  ESMC_Test(serParent->getTotal() == (1000-10)*2, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  delete serParent, desParent;
   
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
