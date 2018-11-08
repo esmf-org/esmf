@@ -169,9 +169,22 @@ namespace ESMCI {
   //     printf("PET%d: 1111 source element number %d\n", localPet, elem_id);
   // }
 
+
+  // {void *mbptr = (void *) src_mesh;
+  // int len = 12; char fname[len];
+  // sprintf(fname, "meshsrc_%d", Par::Rank());
+  // MBMesh_write(&mbptr, fname, rc, len);}
+
+
     // TODO: add elem mask fields and mask_val fields   
     src_mesh->CreateGhost();
     
+    
+  // {void *mbptr = (void *) src_mesh;
+  // int len = 12; char fname[len];
+  // sprintf(fname, "meshdual_%d", Par::Rank());
+  // MBMesh_write(&mbptr, fname, rc, len);}
+
   // Get a range containing all elements
   Range range_elems2;
   merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->sdim,range_elems2);
@@ -234,6 +247,7 @@ namespace ESMCI {
     // Translate id if split
     if ((src_mesh->is_split) && (elem_id > src_mesh->max_non_split_id)) {
       std::map<int,int>::iterator soi =  src_mesh->split_to_orig_id.find(elem_id);
+      printf("PET %d split elem id %d\n", Par::Rank(), elem_id);
       if (soi != src_mesh->split_to_orig_id.end()) {
         elem_id=soi->second;
       } else {
@@ -473,7 +487,8 @@ namespace ESMCI {
 
         // get coords of this element to put onto the new node
         double c[3];
-        merr = src_mesh->mesh->get_coords(elem, 1, c);
+        // merr = src_mesh->mesh->get_coords(elem, 1, c);
+        merr=src_mesh->mesh->tag_get_data(src_mesh->elem_coords_tag, elem, 1, c);
         MBMESH_CHECK_ERR(merr, localrc);
 
         // Add vertex
@@ -679,6 +694,8 @@ namespace ESMCI {
 
             double crd[3];
             merr = dual_mesh->mesh->get_coords(&node, 1, crd);
+            // merr=src_mesh->mesh->tag_get_data(dual_mesh->node_orig_coords_tag, 
+            //           &node, 1, crd);
             MBMESH_CHECK_ERR(merr, localrc);
             
             //double *crd=dm_node_coord->data(*node);
@@ -881,7 +898,38 @@ printf("    PET %d - parallel sharing\n", localPet);
 
     // Resolve object sharing like in Mesh->Commit()
     pcomm->resolve_shared_ents(0, dual_mesh->pdim, dual_mesh->pdim-1);
-    
+
+    // get the root set handle
+    // EntityHandle root_set = dual_mesh->mesh->get_root_set();
+    // 
+    // Range range_ent;
+    // merr=dual_mesh->mesh->get_entities_by_dimension(root_set, dual_mesh->pdim, range_ent);
+    // MBMESH_CHECK_ERR(merr, localrc);
+    // 
+    // merr = pcomm->resolve_shared_ents(root_set, range_ent, dual_mesh->pdim, 1);
+    // MBMESH_CHECK_ERR(merr, localrc);
+    // 
+    // vector<Tag> tags;
+    // tags.push_back(dual_mesh->gid_tag);
+    // tags.push_back(dual_mesh->orig_pos_tag);
+    // tags.push_back(dual_mesh->owner_tag);
+    // if (dual_mesh->has_node_orig_coords) tags.push_back(dual_mesh->node_orig_coords_tag);
+    // if (dual_mesh->has_node_mask) {
+    //   tags.push_back(dual_mesh->node_mask_tag);
+    //   tags.push_back(dual_mesh->node_mask_val_tag);
+    // }
+    // if (dual_mesh->has_elem_frac) tags.push_back(dual_mesh->elem_frac_tag);
+    // if (dual_mesh->has_elem_mask) {
+    //   tags.push_back(dual_mesh->elem_mask_tag);
+    //   tags.push_back(dual_mesh->elem_mask_val_tag);
+    // }
+    // if (dual_mesh->has_elem_area) tags.push_back(dual_mesh->elem_area_tag);
+    // if (dual_mesh->has_elem_coords) tags.push_back(dual_mesh->elem_coords_tag);
+    // if (dual_mesh->has_elem_orig_coords) tags.push_back(dual_mesh->elem_orig_coords_tag);
+    // 
+    // merr = pcomm->exchange_tags(tags, tags, range_ent);
+    // MBMESH_CHECK_ERR(merr, localrc);
+
     // Output 
     *_dual_mesh=dual_mesh;
     
@@ -1014,6 +1062,8 @@ void mb_triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tr
     // NOTE: Mostly treat as 3D to avoid lots of if (sdim=...)
     double center[3];
     double nc[3];
+    // merr=mesh->mesh->tag_get_data(mesh->node_orig_coords_tag, 
+    //           node, 1, nc);
     merr = mesh->mesh->get_coords(node, 1, nc);
     MBMESH_CHECK_ERR(merr, localrc);
     
@@ -1066,7 +1116,8 @@ void mb_triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tr
       // Check if max id if so switch max id and coordinates 
       if (elem_id > max_elem_id) {
         double ec[3];
-        merr = mesh->mesh->get_coords(elem, 1, ec);
+        merr=mesh->mesh->tag_get_data(mesh->elem_coords_tag, elem, 1, ec);
+        // merr = mesh->mesh->get_coords(elem, 1, ec);
         MBMESH_CHECK_ERR(merr, localrc);
         double tmp_coords[3];
         tmp_coords[0]=ec[0];
@@ -1131,7 +1182,8 @@ void mb_triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tr
       // NOTE: Mostly treat as 3D to avoid lots of if (sdim=...)
       double vcurr[3];
       double ec[3];
-      merr = mesh->mesh->get_coords(elem, 1, ec);
+      merr=mesh->mesh->tag_get_data(mesh->elem_coords_tag, elem, 1, ec);
+      // merr = mesh->mesh->get_coords(elem, 1, ec);
       MBMESH_CHECK_ERR(merr, localrc);
       vcurr[0]=ec[0];
         vcurr[1]=ec[1];

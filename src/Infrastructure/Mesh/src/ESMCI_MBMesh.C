@@ -31,7 +31,9 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
+
 #include "Mesh/include/ESMCI_MBMesh.h"
+#include "Mesh/include/ESMCI_MBMesh_Glue.h"
 
 #include "moab/ParallelComm.hpp"
 #include "MBParallelConventions.h"
@@ -92,10 +94,10 @@ void MBMesh::CreateGhost() {
   EntityHandle root_set = mb->get_root_set();
   
   Range range_ent;
-  merr=mb->get_entities_by_dimension(root_set,this->sdim,range_ent);
+  merr=mb->get_entities_by_dimension(root_set,this->pdim,range_ent);
   MBMESH_CHECK_ERR(merr, localrc);
 
-  merr = pcomm->resolve_shared_ents(root_set, range_ent, this->sdim, 1);
+  merr = pcomm->resolve_shared_ents(root_set, range_ent, this->pdim, 1);
   // tried this to use the custom tag, was causing a segv so went back to default gid
   // merr = pcomm->resolve_shared_ents(root_set, this->sdim, 1, &this->gid_tag);
   MBMESH_CHECK_ERR(merr, localrc);
@@ -129,7 +131,7 @@ void MBMesh::CreateGhost() {
 
   // Now exchange 1 layer of ghost elements, using vertices as bridge
   // (we could have done this as part of reading process, using the PARALLEL_GHOSTS read option)
-  merr = pcomm->exchange_ghost_cells(this->sdim, // int ghost_dim
+  merr = pcomm->exchange_ghost_cells(this->pdim, // int ghost_dim
                                      0, // int bridge_dim
                                      1, // int num_layers
                                      0, // int addl_ents
@@ -158,6 +160,13 @@ void MBMesh::CreateGhost() {
 
   merr = pcomm->exchange_tags(tags, tags, range_ent);
   MBMESH_CHECK_ERR(merr, localrc);
+
+  {void *mbptr = (void *) this;
+  int rc;
+  int len = 12; char fname[len];
+  sprintf(fname, "meshdual_%d", localPet);
+  MBMesh_write(&mbptr, fname, &rc, len);}
+
 
 #ifdef DEBUG_MOAB_GHOST_EXCHANGE
   // Repeat the reports, after ghost exchange

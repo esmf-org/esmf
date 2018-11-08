@@ -245,7 +245,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
                         set_dst_status, dst_status))
         Throw() << "Online regridding error" << std::endl;
     }
-    
+
 // #define BILINEAR_WEIGHTS
 #ifdef BILINEAR_WEIGHTS
   cout << endl << "Bilinear Weight Matrix" << endl;
@@ -680,6 +680,7 @@ bool all_mbmesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_i
     while ((wi != we) && (wi->first.id < id)) {
       wi++;
     }
+    // printf("PET %d pointlist point %d, node id %d start %d end %d\n", Par::Rank(), i, id, wt_id, wi->first.id);
 
     // If we're at the end of the weights then exit saying we don't have
     // all of them

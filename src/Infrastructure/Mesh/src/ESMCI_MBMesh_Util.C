@@ -477,6 +477,9 @@ ESMCI::PointList *MBMesh_to_PointList(MBMesh *mesh, ESMC_MeshLoc_Flag meshLoc, E
     }
   }
 
+  // sort the pointlist
+  plp->sort_by_id();
+
   if (rc!=NULL) *rc=ESMF_SUCCESS;
   return plp;
 

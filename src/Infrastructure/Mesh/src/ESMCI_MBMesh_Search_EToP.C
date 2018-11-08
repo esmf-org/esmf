@@ -48,6 +48,7 @@
 #include <Mesh/include/ESMCI_MBMesh_Search_EToP.h>
 #include <Mesh/include/ESMCI_MBMesh_Util.h>
 #include <Mesh/include/ESMCI_MBMesh_Mapping.h>
+#include <Mesh/include/ESMCI_MBMesh_Glue.h>
 
 // for moab Element mappings 
 #include "moab/ElemEvaluator.hpp"
@@ -56,6 +57,14 @@
 //#include "ElemUtil.hpp"
 
 using std::vector;
+
+
+// #define DEBUG_MASK
+// #define DEBUG_PCOORDS
+// #define DEBUG_SEARCH
+// #define DEBUG_SEARCH_RESULTS
+
+
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -169,6 +178,10 @@ static void populate_box_elems(OTree *box,
       if (sdim >2) max[2] = bounding_box.getMax()[2] + btol;
       else  max[2] = btol;
 
+  int srid; MBMesh_get_gid(mbmp, sr->src_elem, &srid);
+#ifdef DEBUG_SEARCH
+  printf("PET %d elem %d pmin/max [%f, %f], [%f, %f] \n",  Par::Rank(), srid, min[0], min[1], max[0], max[1]);
+#endif
       // Add element to search tree
       box->add(min, max, (void*)sr);
     }
@@ -188,6 +201,10 @@ static int found_func(void *c, void *y) {
   int srid; MBMesh_get_gid(si->mesh, sr->src_elem, &srid);
   int siid; MBMesh_get_gid(si->mesh, si->elem, &siid);
 
+#ifdef DEBUG_SEARCH
+  if (si->snr.dst_gid == 6) printf("PET %d Search against %d\n", Par::Rank(), srid);
+#endif
+
   // from search.c
   // if we already have a source element, continue if this element has a smaller id
   if (si->is_in && (srid > siid)) return 0;
@@ -202,7 +219,6 @@ static int found_func(void *c, void *y) {
 
 // Setup for source masks, if used
   
-// #define DEBUG_MASK
 #ifdef DEBUG_MASK
   printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMesh_SEARCH_ETOP ~~~~~~~~~~~~~~~\n");
   printf("ESMCI_MBMESH_BILINEAR_TEST - elem %d has_node_mask == %s\n", srid, si->mesh->has_node_mask ? "true" : "false");
@@ -300,7 +316,6 @@ static int found_func(void *c, void *y) {
     throw(err.c_str());
   }
 
-// #define DEBUG_PCOORDS
 #ifdef DEBUG_PCOORDS
   printf("\n~~~~~~~~~~ DEBUG - ESMCI_MBMesh_SEARCH_ETOP - PCOORDS ~~~~~~~\n");
   printf("Elem %d: ", srid);
@@ -310,7 +325,7 @@ static int found_func(void *c, void *y) {
       printf("%f, ", coords[i*nd+j]);
     }
     printf("], ");
-  }
+  }coords
   printf("\nNode %d: [", si->snr.dst_gid);
   for (int i=0; i < nd; ++i)
     printf("%f, ", si->coords[i]);
@@ -385,6 +400,9 @@ static int found_func(void *c, void *y) {
     si->dist = dist;
   }
   
+#ifdef DEBUG_SEARCH
+  printf("PET %d investigated %d .. keep searching\n", Par::Rank(), siid);
+#endif
   // Mark that something is in struct
   si->investigated=true;
 
@@ -441,6 +459,18 @@ void MBMesh_Search_EToP(MBMesh *mbmAp,
 #define ESMC_METHOD "ESMCI_MBMesh_Search_EToP"
 
   Trace __trace("MBMesh_Search_EToP()");
+
+#ifdef DEBUG_SEARCH
+  std::cout << "PET " << Par::Rank() << " MBMesh_Search_EToP, stol =" << stol << std::endl;
+  
+  // int rc;
+  // void *mbptr = (void *) mbmAp;
+  // int len = 12; char fname[len];
+  // sprintf(fname, "meshsearch_%d", Par::Rank());
+  // MBMesh_write(&mbptr, fname, &rc, len);
+
+#endif
+
 
   // MOAB error
   int merr;
@@ -547,6 +577,9 @@ void MBMesh_Search_EToP(MBMesh *mbmAp,
 
     // The point coordinates.
     si.coords[0] = pnt_crd[0]; si.coords[1] = pnt_crd[1]; si.coords[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
+#ifdef DEBUG_SEARCH
+    if (si.snr.dst_gid == 9) printf("PET %d Found  pmin/max [%f, %f], [%f, %f] \n", Par::Rank(), pmin[0], pmin[1], pmax[0], pmax[1]);
+#endif
 
     box->runon(pmin, pmax, found_func, (void*)&si);
 
@@ -566,9 +599,8 @@ void MBMesh_Search_EToP(MBMesh *mbmAp,
 
       // this is the new method
       again.push_back(loc);
-// #define DEBUG_SEARCH
 #ifdef DEBUG_SEARCH
-printf("again add node %d\n", pnt_id);
+printf("PET %d again add node %d\n", Par::Rank(), pnt_id);
 #endif
     } else {
       if (si.elem_masked) {
@@ -617,11 +649,12 @@ printf("again add node %d\n", pnt_id);
           sr.dst_nodes.push_back(si.snr);
           tmp_sr.insert(sri, sr);
         } else {
-          // std::cout << "second choice" << std::endl;
           std::vector<etop_sr> &r
             = const_cast<std::vector<etop_sr>&>(sri->dst_nodes);
           r.push_back(si.snr);
-          //std::cout << "size=" << sri->nodes.size() << std::endl;
+#ifdef DEBUG_SEARCH
+          std::cout << "PET " << Par::Rank() << " SECOND CHOICE, gid =" << sri->dst_nodes[sri->dst_nodes.size()-1].dst_gid << std::endl;
+#endif
         }
       }
     }
@@ -634,16 +667,14 @@ printf("again add node %d\n", pnt_id);
 
     for (; si != se; ++si) {
       result.push_back(new MBMesh_Search_EToP_Result(*si));
-#ifdef DEBUG_SEARCH
+#ifdef DEBUG_SEARCH_RESULTS
 int id;
-merr=mbmAp->mesh->tag_get_data(mbmAp->gid_tag, si->src_elem, 1, &id);
-if (merr != MB_SUCCESS)
-  if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-printf("results: add elem %d with nodes: ", id);
+merr=mbmAp->mesh->tag_get_data(mbmAp->gid_tag, &si->src_elem, 1, &id);
+printf("PET %d results: add elem %d with nodes: ", Par::Rank(), id);
 for (int i = 0; i < si->dst_nodes.size(); ++i)
   printf("%d, ", si->dst_nodes[i].dst_gid);
 printf("\n");
+
 #endif
     }
   }
@@ -681,9 +712,6 @@ printf("\n");
       }
     } else {
 
-#ifdef DEBUG_SEARCH
-printf("\n++++++++++++++++++ Calling SEARCH again ++++++++++++++++++++++++++\n");
-#endif
     MBMesh_Search_EToP(mbmAp, mbmBp, unmappedaction,
                        map_type, stol*1e2, result, set_dst_status, dst_status, &again, box);
     }

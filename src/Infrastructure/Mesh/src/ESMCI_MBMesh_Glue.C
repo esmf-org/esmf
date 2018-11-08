@@ -24,6 +24,7 @@
 #include <string>
 #include <ostream>
 #include <iterator>
+#include <vector>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_F90Interface.h"
@@ -1272,6 +1273,7 @@ printf("    PET %d - addelems\n", localPet);
           moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
       }
 
+      printf("\n");
        // Set global id
       merr=moab_mesh->tag_set_data(mbmp->gid_tag, &new_elem, 1, elemId+e);
       if (merr != MB_SUCCESS) {
@@ -1372,6 +1374,37 @@ printf("    PET %d - parallel sharing\n", localPet);
 
     // setup parallel comm //
     ParallelComm *pcomm= new ParallelComm(moab_mesh, mpi_comm);
+
+    // // get the root set handle
+    // EntityHandle root_set = moab_mesh->get_root_set();
+    // 
+    // Range range_ent;
+    // merr=moab_mesh->get_entities_by_dimension(root_set,mbmp->pdim,range_ent);
+    // MBMESH_CHECK_ERR(merr, localrc);
+    // 
+    // merr = pcomm->resolve_shared_ents(root_set, range_ent, mbmp->pdim, 1);
+    // MBMESH_CHECK_ERR(merr, localrc);
+    // 
+    // std::vector<Tag> tags;
+    // tags.push_back(mbmp->gid_tag);
+    // tags.push_back(mbmp->orig_pos_tag);
+    // tags.push_back(mbmp->owner_tag);
+    // if (mbmp->has_node_orig_coords) tags.push_back(mbmp->node_orig_coords_tag);
+    // if (mbmp->has_node_mask) {
+    //   tags.push_back(mbmp->node_mask_tag);
+    //   tags.push_back(mbmp->node_mask_val_tag);
+    // }
+    // if (mbmp->has_elem_frac) tags.push_back(mbmp->elem_frac_tag);
+    // if (mbmp->has_elem_mask) {
+    //   tags.push_back(mbmp->elem_mask_tag);
+    //   tags.push_back(mbmp->elem_mask_val_tag);
+    // }
+    // if (mbmp->has_elem_area) tags.push_back(mbmp->elem_area_tag);
+    // if (mbmp->has_elem_coords) tags.push_back(mbmp->elem_coords_tag);
+    // if (mbmp->has_elem_orig_coords) tags.push_back(mbmp->elem_orig_coords_tag);
+    // 
+    // merr = pcomm->exchange_tags(tags, tags, range_ent);
+    // MBMESH_CHECK_ERR(merr, localrc);
 
     // Resolve object sharing like in Mesh->Commit()
     pcomm->resolve_shared_ents(0, mbmp->pdim, mbmp->pdim-1);
