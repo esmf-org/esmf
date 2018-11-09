@@ -5601,14 +5601,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! If mesh has been freed then exit
-    if (.not. mesh%isFullyCreated) then
+    if (mesh%status .ne. ESMF_MESHSTATUS_COMPLETE) then
        call ESMF_LogSetError(rcToCheck=ESMF_RC_OBJ_WRONG, &
                  msg="- the mesh has not been fully created", &
                  ESMF_CONTEXT, rcToReturn=rc)
        return
     endif
-
-   write(*,*) "BOB in MWV ",present(nodeArray1)
 
     call C_ESMC_MeshWriteVTK(mesh%this, filename, &
          nodeArray1, nodeArray2, nodeArray3, & 
