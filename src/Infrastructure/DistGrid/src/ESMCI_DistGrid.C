@@ -219,9 +219,13 @@ DistGrid *DistGrid::create(
     // determine whether the incoming DG holds any arbitrary sequence indices
     VM *currentVM = VM::getCurrent();
     int localArbSeqFlag = 0; // initialize
+    if (dg->delayout->getLocalDeCount()){
+      void const *arbSeq=dg->getArbSeqIndexList(0, 1, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+         ESMC_CONTEXT, rc)) throw localrc;
+      if (arbSeq!=NULL) localArbSeqFlag = 1;
+    }
     int allArbSeqFlag;
-    if (dg->delayout->getLocalDeCount() && 
-      (dg->getArbSeqIndexList(0, 1)!=NULL)) localArbSeqFlag = 1;
     currentVM->allreduce(&localArbSeqFlag, &allArbSeqFlag, 1, vmI4, vmSUM);
 #if 0
     {
@@ -821,12 +825,15 @@ DistGrid *DistGrid::create(
    // should error out if collocationCount is not 1 cannot handle that yet
    
    if (dg->delayout->getLocalDeCount() > 0){
-     for (int i=0; i<dg->delayout->getLocalDeCount(); i++)
-       sprintf(msgString, "DGfromDG: incoming DG localDe=%d=>%d, elementCount=%d, "
+     for (int i=0; i<dg->delayout->getLocalDeCount(); i++){
+        void const *arbSeq=dg->getArbSeqIndexList(i, 1, &localrc)
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) throw localrc;
+        sprintf(msgString, "DGfromDG: incoming DG localDe=%d=>%d, elementCount=%d, "
          "arbSeqIndexList=%p", i, dg->delayout->getLocalDeToDeMap()[i],
-         dg->getElementCountPCollPLocalDe()[0][i],
-         dg->getArbSeqIndexList(i, 1));
-     ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+         dg->getElementCountPCollPLocalDe()[0][i], arbSeq);
+        ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+      }
    }
 #endif
 
@@ -851,9 +858,13 @@ DistGrid *DistGrid::create(
      // first check if the provider DistGrid DEs are holding arbitrary 
      // sequence index allocations.
      int localArbSeqFlag = 0; // initialize
+     if (dg->delayout->getLocalDeCount()){
+       void const *arbSeq=dg->getArbSeqIndexList(0, 1, &localrc);
+       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) throw localrc;
+       if (arbSeq!=NULL) localArbSeqFlag = 1;
+     }
      int allArbSeqFlag;
-     if (dg->delayout->getLocalDeCount() && 
-       (dg->getArbSeqIndexList(0, 1)!=NULL)) localArbSeqFlag = 1;
      currentVM->allreduce(&localArbSeqFlag, &allArbSeqFlag, 1, vmI4, vmSUM);
 #if 0
      {
@@ -983,13 +994,17 @@ DistGrid *DistGrid::create(
            // same PET holds DE for provider and acceptor -> local copy
            itemCount = dg->getElementCountPCollPLocalDe()[0][providerLDe];
            arbSeqIndex = new int[itemCount];
-           memcpy(arbSeqIndex, dg->getArbSeqIndexList(providerLDe,1),
-             sizeof(int)*itemCount);
+           void const *arbSeq=dg->getArbSeqIndexList(providerLDe, 1, &localrc);
+           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+             ESMC_CONTEXT, rc)) throw localrc;
+           memcpy(arbSeqIndex, arbSeq, sizeof(int)*itemCount);
          }else if (localPet==providerPet){
            // provider side
            itemCount = dg->getElementCountPCollPLocalDe()[0][providerLDe];
-           currentVM->send(dg->getArbSeqIndexList(providerLDe,1), 
-             sizeof(int)*itemCount, acceptorPet);
+           void const *arbSeq=dg->getArbSeqIndexList(providerLDe, 1, &localrc);
+           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+             ESMC_CONTEXT, rc)) throw localrc;
+           currentVM->send(arbSeq, sizeof(int)*itemCount, acceptorPet);
          }else if (localPet==acceptorPet){
            // acceptor side
            itemCount = distgrid->getElementCountPCollPLocalDe()[0][acceptorLDe];
@@ -4116,10 +4131,18 @@ DistGridMatch_Flag DistGrid::match(
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
+  int const *collocationTable1 = distgrid1->getCollocationTable();
+  int const *collocationTable2 = distgrid2->getCollocationTable();
   for (int i=0; i<diffCollCount1; i++){
     for (int j=0; j<ldeCount1; j++){
-      void const *arb1 = distgrid1->getArbSeqIndexList(j, i);
-      void const *arb2 = distgrid2->getArbSeqIndexList(j, i);
+      void const *arb1 = distgrid1->getArbSeqIndexList(j, collocationTable1[i],
+        &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return DISTGRIDMATCH_INVALID;
+      void const *arb2 = distgrid2->getArbSeqIndexList(j, collocationTable2[i],
+        &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return DISTGRIDMATCH_INVALID;
       if (arb1!=NULL && arb2!=NULL){
         if (itk1==ESMC_TYPEKIND_I1){
           ESMC_I1 const *arb1T = (ESMC_I1 const *)arb1;
