@@ -15,6 +15,8 @@
 #include <Mesh/include/Legacy/ESMCI_MeshObjTopo.h>
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
 #include <Mesh/include/Legacy/ESMCI_IOField.h>
+#include "ESMCI_Array.h"
+#include "ESMCI_LocalArray.h"
 
 #include <iostream>
 #include <fstream>
@@ -82,6 +84,129 @@ const MeshObjTopo *Vtk2Topo(UInt sdim, UInt vtk_type) {
 
 }
 
+  // Get node to array data index map
+  //// TODO: This will work for Meshes without custom distgrids. However, to 
+  ////        be  completely general. We need to loop through the distgrid getting the sequence
+  ////        indices and create a map from those to where in the localDE, index space we are in the array. 
+void get_node_to_array_index_map(const Mesh &mesh, std::map<MeshObj::id_type, int> &gid_to_index) {
+
+  UInt nnodes = mesh.num_nodes();
+
+  std::vector<std::pair<int,int> > gids;
+
+  Mesh::const_iterator ni = mesh.node_begin(), ne = mesh.node_end();
+  for (; ni != ne; ++ni) {
+
+    const MeshObj &node = *ni;
+
+    if (!GetAttr(node).is_locally_owned()) continue;
+
+    int idx = node.get_data_index();
+
+    gids.push_back(std::make_pair(idx, node.get_id()));
+
+  }
+
+  std::sort(gids.begin(), gids.end());
+
+  gid_to_index.clear();
+  for (UInt i = 0; i < gids.size(); ++i) {
+    gid_to_index[gids[i].second]=i;
+  }
+}
+
+// Write mesh data to stream, taking into account the correct typeid
+template<typename T, typename iter>
+static void append_data_from_Array(iter ni, iter ne, std::map<MeshObj::id_type, int> gid_to_index, 
+                        ESMCI::Array *array, std::ofstream &out) {
+
+  // Write header
+  out << "LOOKUP_TABLE default" << std::endl;
+
+  // Get local DE count
+  int localDECount=array->getDELayout()->getLocalDeCount();
+
+  // If there are no local DEs, then leave
+  if (localDECount == 0) return;
+
+  // If there is greater than 1 local DE, then complain
+  if (localDECount > 1) Throw() << "this call currently can't handle > 1 localDE per PET";
+
+
+  // Complain if the array has more than rank 1
+  if (array->getRank() != 1) Throw() << "this call currently can't handle Array rank != 1";
+
+
+  // Get local Array
+  int localDE=0; // for now just 0
+  LocalArray *localArray=(array->getLocalarrayList())[localDE];
+  
+  // Get localDE lower bound
+  int lbound=(array->getComputationalLBound())[localDE]; // (assumes array rank is 1)
+
+  printf("BOB: array lbound=%d\n",lbound);
+
+
+  // Loop writing out data in Array that corresponds to nodes
+  for (; ni != ne; ++ni) {
+    const MeshObj &obj=*ni;
+
+    // If it's not owned write out 0
+    if (!GetAttr(obj).is_locally_owned()) {
+
+      // Get 0 of this type
+      T d=(T)0;
+
+      // Write it out
+      out << d << " ";
+
+      // Go to next item in loop
+      continue;
+    }
+
+    // Get index from id
+    std::map<MeshObj::id_type,int>::iterator mi = gid_to_index.find(obj.get_id());
+    if (mi == gid_to_index.end()) {
+      Throw() << "object id not found.";
+    }
+    int index=mi->second+lbound; // TODO: FIX THIS TO BE + some lower bound INSTEAD OF 1
+
+    // Get data
+    T d;
+    localArray->getDataInternal(&index, &d);
+    printf("id=%d index=%d data=%f\n",obj.get_id(),index,d);
+
+    // Write data
+    out << d << " ";
+  }
+}
+
+template<typename iter>
+static void write_data_from_Array(iter ni, iter ne, std::map<MeshObj::id_type, int> &gid_to_index, 
+                                    ESMCI::Array *array, const std::string &vname, std::ofstream &out) {
+
+
+
+
+  // Get Array data type
+  ESMC_TypeKind_Flag typekind=array->getTypekind();
+    
+  printf("BOB: HERE! tk=%d \n",typekind);
+
+  // Output based on type
+  if (typekind == ESMC_TYPEKIND_R8) {
+    out << "SCALARS " << vname << " double 1" << std::endl;
+    append_data_from_Array<ESMC_R8>(ni, ne, gid_to_index, array, out);
+  } else if (typekind == ESMC_TYPEKIND_I4) {
+    out << "SCALARS " << vname << " int 1" << std::endl;
+    append_data_from_Array<ESMC_I4>(ni, ne, gid_to_index, array, out);
+  } else if (typekind == ESMC_TYPEKIND_R4) {
+    out << "SCALARS " << vname << " float 1" << std::endl;
+    append_data_from_Array<ESMC_R4>(ni, ne, gid_to_index, array, out);
+  } else {
+    std::cout << "Unknown data type, skipping " << std::endl;
+  }
+}
 
 // Write mesh data to stream, taking into account the correct typeid
 template<typename T, typename iter, typename FIELD>
@@ -120,10 +245,12 @@ static void write_data(iter ni, iter ne, const FIELD &llf, const std::string &vn
   }
 }
 
-void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
-  Trace __trace("WriteVTKMesh(const Mesh &mesh, const std::string &filename)");
+  void WriteVTKMesh(const Mesh &mesh, const std::string &filename,
+                    int num_nodeArrays, ESMCI::Array **nodeArrays, 
+                    int num_elemArrays, ESMCI::Array **elemArrays) {
+    Trace __trace("WriteVTKMesh(const Mesh &mesh, const std::string &filename)");
 
-  std::ofstream out(filename.c_str(), std::ios::out);
+    std::ofstream out(filename.c_str(), std::ios::out);
 
   out << "# vtk DataFile Version 3.0" << std::endl;
   out << "This file was generated by ESMC " << std::endl;
@@ -306,6 +433,37 @@ void WriteVTKMesh(const Mesh &mesh, const std::string &filename) {
      }// fields
 
   } // node vars
+
+
+  // Now Arrays stored on nodes
+  {
+
+    // Get map from node index to index in Array
+    std::map<MeshObj::id_type, int> gid_to_index;
+    get_node_to_array_index_map(mesh, gid_to_index);
+
+
+    // Loop over Arrays to be output
+    for (int i=0; i<num_nodeArrays; i++) {
+
+      // Generate name
+      char buf[512];
+      std::sprintf(buf, "nodeArray%d_%s",i+1,nodeArrays[i]->getName());
+      std::string vname(buf);
+
+      // Write data to file
+      write_data_from_Array(mesh.node_begin(), mesh.node_end(), gid_to_index, nodeArrays[i], vname, out);
+    }
+
+  } // Arrays stored on nodes
+
+
+  // Now Arrays stored on elems
+  {
+
+    if (num_elemArrays != 0) Throw() << "writing an Array located on elements is currently not supported.";
+
+  } // Arrays stored on elems
 
 }
 
