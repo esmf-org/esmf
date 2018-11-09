@@ -163,6 +163,13 @@ program ESMF_RouteHandleUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  ! delay for file to be available on disk
+  call ESMF_VMWtimeDelay(10.d0, rc=rc)  ! wait for 30s
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
   !-----------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "Test RouteHandleCreate(from file)"
