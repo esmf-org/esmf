@@ -22,7 +22,7 @@
 
 // ESMF Test header
 #include "ESMC_Test.h"
-
+#include "ESMCI_VM.h"
 #include "ESMCI_RegionNode.h"
 
 //==============================================================================
@@ -576,6 +576,96 @@ int main(void){
   ESMC_Test(serParent->getTotal() == (1000-10)*2, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   delete serParent, desParent;
+
+
+  //----------------------------------------------------------------------------
+  // test sending serialized region tree over MPI
+  strcpy(name, "Gather serialized tree on root PET");
+  
+  int localrc;
+  ESMCI::VM *globalvm = ESMCI::VM::getGlobal(&localrc);
+  int localPet = globalvm->getLocalPet();
+  int petCount = globalvm->getPetCount();
+  
+  treeBufSize = 0;
+  
+  serParent = new ESMCI::RegionNode(NULL, 800, true);
+  serParent->setName("serParent");
+  serParent->entered(10);
+  serChild1 = serParent->addChild("child1");
+  serChild1->entered(20);   serChild1->exited(27);
+  serChild1->entered(30);   serChild1->exited(45);
+  serChild2 = serParent->addChild("child2");
+  serChild2->entered(55);   serChild2->exited(67);
+  serChild2->entered(88);   serChild2->exited(105);
+  serChild2->entered(109);  serChild2->exited(127);
+  serChild2a = serChild2->addChild("child2a");
+  serChild2a->entered(200); 
+  serChild2a1 = serChild2a->addChild("child2a1");
+  serChild2a1->entered(201); serChild2a1->exited(204);
+  serChild2a2 = serChild2a->addChild("child2a2");
+  serChild2a2->entered(205); serChild2a1->exited(210);
+  serChild2a->exited(305);
+  serChild1->entered(310);
+  serChild1a = serParent->addChild("child1a");
+  serChild1a->entered(315); serChild1a->exited(413);
+  serChild1->exited(900);
+  serParent->exited(1000);
+
+  int matched[petCount-1];
+  
+  if (localPet > 0) {
+    
+    treeBuffer = serParent->serialize(&treeBufSize);
+
+    //std::cout << "sent buffer size: " << treeBufSize;
+    
+    //send size of buffer
+    globalvm->send((void *) &treeBufSize, sizeof(treeBufSize), 0);
+    //send buffer itself
+    globalvm->send((void *) treeBuffer, treeBufSize, 0); 
+
+    free(treeBuffer);
+  }
+  else if (localPet == 0) {
+
+    for (int p=1; p<petCount; p++) {
+
+      treeBufSize = 0;
+      globalvm->recv((void *) &treeBufSize, sizeof(treeBufSize), p);
+      //std::cout << "received treeBufSize = " << treeBufSize << " from pet " << p << "\n";
+
+      treeBuffer = (char *) malloc(treeBufSize);
+      memset(treeBuffer, 0, treeBufSize);
+    
+      globalvm->recv(treeBuffer, treeBufSize, p);
+
+      desParent = new ESMCI::RegionNode(NULL, 1, false);
+      desParent->deserialize(treeBuffer, treeBufSize);
+
+      matched[p-1] = treeMatch(serParent, desParent);
+
+      delete desParent;
+      free(treeBuffer);
+    }
+  }
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Deserialized tree 1 received on root PET does not match");
+  ESMC_Test((localPet > 0 || matched[0]), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Deserialized tree 2 received on root PET does not match");
+  ESMC_Test((localPet > 0 || matched[1]), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Deserialized tree 3 received on root PET does not match");
+  ESMC_Test((localPet > 0 || matched[2]), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  delete serParent;
   
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
