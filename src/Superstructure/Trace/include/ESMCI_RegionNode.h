@@ -348,12 +348,12 @@ namespace ESMCI {
     }
     
     char *serialize(size_t *bufSize) {
-      size_t bufferSize = serializeSize();
-      bufferSize += sizeof(size_t);
+      size_t bufferSize = sizeof(size_t); // node count
       if (bufferSize % 8 > 0) {
         bufferSize += (8 - (bufferSize % 8));
       }
-      *bufSize = bufferSize;      
+      serializeSize(&bufferSize);
+      if (bufSize != NULL) *bufSize = bufferSize;      
 
       //std::cout << "computed buffer size needed = " << bufferSize << "\n";
       
@@ -378,17 +378,22 @@ namespace ESMCI {
      * and update offset to the end of the serialized object
      */
     char *serialize(char *buffer, size_t *offset, size_t bufferSize, bool recursive) {
-      
+
       //align offset at 8 bytes
       if (*offset % 8 > 0) {
         *offset += (8 - (*offset % 8));
       }
 
       if (*offset + localSerializeSize() > bufferSize) {
-        //std::cout << "buffer too small: " << *offset + localSerializeSize() << " : " << bufferSize;
-        throw std::runtime_error("Buffer too small to serialize trace region");
+        std::stringstream errMsg;
+        errMsg << "Buffer too small to serialize trace region: ";
+        errMsg << "buffer size = " << bufferSize;
+        errMsg << " expected: " << (*offset + localSerializeSize());
+        throw std::runtime_error(errMsg.str());
       }
 
+      //std::cout << "serialize new record offset: " << *offset << "\n";      
+      
       memcpy(buffer+(*offset), (const void *) &_global_id, sizeof(_global_id));
       *offset += sizeof(_global_id);
 
@@ -476,19 +481,23 @@ namespace ESMCI {
         if (*offset % 8 > 0) {
           *offset += (8 - (*offset % 8));
         }
-        
-        if (*offset + localSerializeSize() > bufferSize) {
-          throw std::runtime_error("Buffer too small to deserialize trace region");
-        }
-        
+
         //look ahead at parent id of next node
         uint16_t global_id = 0;
         uint16_t parent_id = 0;
-
+        
+        if (*offset + sizeof(global_id) + sizeof(parent_id) > bufferSize) {
+          std::stringstream errMsg;
+          errMsg << "Buffer too small to deserialize trace region: ";
+          errMsg << "buffer size = " << bufferSize;
+          errMsg << " expected: " << (*offset + sizeof(global_id) + sizeof(parent_id));
+          throw std::runtime_error(errMsg.str());
+        }
+        
         memcpy( (void *) &global_id, buffer+(*offset), sizeof(global_id) );
         memcpy( (void *) &parent_id, buffer+(*offset)+sizeof(global_id), sizeof(parent_id) );
 
-        //std::cout << "working on: " << *completed << " of " << totalNodes << " my id = " << getGlobalId() << " parent id = " << parent_id << "\n";        
+        //std::cout << "working at offset: " << *offset << " my id = " << getGlobalId() << " parent id = " << parent_id << "\n";        
         
         //check to see if next node is my child
         if (parent_id == getGlobalId()) {
@@ -510,11 +519,20 @@ namespace ESMCI {
       if (*offset % 8 > 0) {
         *offset += (8 - (*offset % 8));
       }
-      
+
+      //the check below is meaningless because
+      //we don't yet know the size of the region name (dynamic)
+      /*
       if (*offset + localSerializeSize() > bufferSize) {
-        throw std::runtime_error("Buffer too small to deserialize trace region");
+        std::stringstream errMsg;
+        errMsg << "Buffer too small to deserialize local trace region: ";
+        errMsg << "buffer size = " << bufferSize;
+        errMsg << " expected: " << (*offset + localSerializeSize());
+        throw std::runtime_error(errMsg.str());
       }
-            
+      */
+      //std::cout << "DEserialize new record offset: " << *offset << "\n";      
+      
       memcpy( (void *) &_global_id, buffer+(*offset), sizeof(_global_id) );
       *offset += sizeof(_global_id);
       
@@ -566,6 +584,7 @@ namespace ESMCI {
 
     /*
      * returns length required to serialize this object
+     * does not taking 8 byte alignment into account
      */
     size_t localSerializeSize() {
       size_t localSize =
@@ -581,10 +600,6 @@ namespace ESMCI {
         sizeof(int) + // isUserRegion flag
         sizeof(size_t) +  // records length of name
         strlen(_name.c_str()) + 1;  // length of name
-      if (localSize % 8 > 0) {
-        //take alignment into account
-        localSize += 8 - (localSize % 8);
-      }
       return localSize;
     }
     
@@ -607,12 +622,14 @@ namespace ESMCI {
     /*
      * returns size to serialize entire tree
      */
-    size_t serializeSize() {
-      size_t size = localSerializeSize();
-      for (unsigned i = 0; i < _children.size(); i++) {
-      	size += _children.at(i)->serializeSize();
+    void serializeSize(size_t *offset) {
+      if (*offset % 8 > 0) {
+        *offset += (8 - (*offset % 8));
       }
-      return size;
+      *offset += localSerializeSize();
+      for (unsigned i = 0; i < _children.size(); i++) {
+      	_children.at(i)->serializeSize(offset);
+      }      
     }
     
     struct RegionNodeCompare {

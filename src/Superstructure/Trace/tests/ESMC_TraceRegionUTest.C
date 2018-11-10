@@ -315,8 +315,6 @@ int main(void){
   ESMC_Test((5+2+10+4+12+10+8)/7.0==nodeA.getMean(), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
-  //NEX_IGNORE_UTest
-  
   rstddev = 0.0;
   rmean = 0.0;
   rm2 = 0.0;
@@ -333,7 +331,6 @@ int main(void){
   //strcpy(name, "Merge stddev");
   //snprintf(failMsg, 80, "Merge stddev: expected %f, but got %f", rstddev, nodeA.getStdDev());
   //ESMC_Test(eqltol(rstddev, nodeA.getStdDev()), name, failMsg, &result, __FILE__, __LINE__, 0);
-
 
   //----------------------------------------------------------------------------
    
@@ -436,7 +433,7 @@ int main(void){
   ser->entered(200); ser->exited(298);
   ser->entered(500); ser->exited(523);
 
-  size_t bufsize = ser->localSerializeSize();
+  size_t bufsize = ser->localSerializeSize() + 8;
   char *sbuf = (char *) malloc(bufsize);
   size_t offset = 0;
 
@@ -542,7 +539,7 @@ int main(void){
   size_t treeBufSize = 0;
   char *treeBuffer = serParent->serialize(&treeBufSize);
 
-  //std::cout << "treeBufSize after serialize = " << treeBufSize;
+  std::cout << "treeBufSize after serialize = " << treeBufSize;
 
   ESMCI::RegionNode *desParent = new ESMCI::RegionNode(NULL, 1, false);
   desParent->deserialize(treeBuffer, treeBufSize);
@@ -653,17 +650,17 @@ int main(void){
   //----------------------------------------------------------------------------
   //NEX_UTest
   snprintf(failMsg, 80, "Deserialized tree 1 received on root PET does not match");
-  ESMC_Test((localPet > 0 || matched[0]), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((petCount == 1 || localPet > 0 || matched[0]), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
   snprintf(failMsg, 80, "Deserialized tree 2 received on root PET does not match");
-  ESMC_Test((localPet > 0 || matched[1]), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((petCount == 1 || localPet > 0 || matched[1]), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
   snprintf(failMsg, 80, "Deserialized tree 3 received on root PET does not match");
-  ESMC_Test((localPet > 0 || matched[2]), name, failMsg, &result, __FILE__, __LINE__, 0);
+  ESMC_Test((petCount == 1 || localPet > 0 || matched[2]), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   delete serParent;
   

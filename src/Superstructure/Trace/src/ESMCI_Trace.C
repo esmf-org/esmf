@@ -93,6 +93,7 @@ namespace ESMCI {
   static bool profileOutputToLog = false;    // output to EMSF log?
   static bool profileOutputToFile = false;   // output to text file?
   static bool profileOutputToBinary = false; // output to binary trace?
+  static bool profileOutputGather = false;   // output aggregate profile on root PET?
   
   static uint16_t next_local_id() {
     static uint16_t next = 1;
@@ -459,6 +460,12 @@ namespace ESMCI {
              (profileOutput.find("Binary") != string::npos) ) {
           profileOutputToBinary = true;
         }
+        if ( (profileOutput.find("GATHER") != string::npos) ||
+             (profileOutput.find("gather") != string::npos) ||
+             (profileOutput.find("Gather") != string::npos) ) {
+          printf("set output to gather\n");
+          profileOutputGather = true;
+        }
       }
       else {
         // if not specified, default is to output text
@@ -627,6 +634,29 @@ namespace ESMCI {
   }
 
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::populateRegionNames()"  
+  static void populateRegionNames(RegionNode *rn) {
+    if (rn == NULL) return;
+
+    string name("UNKNOWN");
+    if (rn->isUserRegion()) {
+      bool present = userRegionMap.reverse(rn->getLocalId(), name);
+      if (!present) {
+        name = "UNKNOWN_USER_REGION";
+      }
+    }
+    else {
+      name = getPhaseNameFromRegionId(rn->getLocalId());
+      if (name.length() == 0) name = "UNKNOWN_ESMF_PHASE";
+    }
+    rn->setName(name);
+    
+    for (unsigned i = 0; i < rn->getChildren().size(); i++) {
+      populateRegionNames(rn->getChildren().at(i));
+    }    
+  }
+  
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::printProfile()"  
 #define STATLINE 256
   static void printProfile(RegionNode *rn, bool printToLog, string prefix, ofstream &ofs, int *rc) {
@@ -637,18 +667,7 @@ namespace ESMCI {
       char strname[50];
       char strbuf[STATLINE];
 
-      //snprintf(strname, 10, "%d", rn->getId());
-      string name("UNKNOWN");
-      if (rn->isUserRegion()) {
-        bool present = userRegionMap.reverse(rn->getLocalId(), name);
-        if (!present) {
-          name = "UNKNOWN_USER_REGION";
-        }
-      }
-      else {
-        name = getPhaseNameFromRegionId(rn->getLocalId());
-        if (name.length() == 0) name = "UNKNOWN";
-      }
+      string name = rn->getName();
       name.insert(0, prefix);
       
       snprintf(strbuf, STATLINE, "%-50s %-6lu %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f",
@@ -672,7 +691,7 @@ namespace ESMCI {
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::printProfile()"  
-  static void printProfile(bool printToLog, int *rc) {
+  static void printProfile(RegionNode *rn, bool printToLog, string filename, int *rc) {
 
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
@@ -687,17 +706,7 @@ namespace ESMCI {
       ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
     }
     else {
-      VM *globalvm = VM::getGlobal(&localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
-           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
-        return;
-
-      stringstream fname;
-      fname << (globalvm->getPetCount() - 1);
-      int width = fname.str().length();
-      fname.str("");
-      fname << "esmf_profile." << std::setfill('0') << std::setw(width) << globalvm->getLocalPet();
-      ofs.open(fname.str().c_str(), ofstream::trunc);
+      ofs.open(filename.c_str(), ofstream::trunc);
       if (ofs.is_open() && !ofs.fail()) {
         ofs << strbuf << "\n";
       }
@@ -707,7 +716,7 @@ namespace ESMCI {
         return;
       }
     }
-    printProfile(&rootRegionNode, printToLog, "", ofs, &localrc);
+    printProfile(rn, printToLog, "", ofs, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, "Error writing profile output file", 
          ESMC_CONTEXT, rc))
       return;
@@ -735,11 +744,106 @@ namespace ESMCI {
       AddRegionProfilesToTrace(rn->getChildren().at(i));
     }
   }
+
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GatherRegions()"
+  static void GatherRegions(int *rc) {
+    
+    int localrc;
+    VM *globalvm = VM::getGlobal(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+      return;
+
+    char *serializedTree = NULL;
+    size_t bufferSize = 0;
+    
+    if (profileLocalPet && globalvm->getLocalPet() > 0) {
+      std::cout << "serialize from pet: " << globalvm->getLocalPet() << "\n";
+      try {
+        serializedTree = rootRegionNode.serialize(&bufferSize);
+      }
+      catch(std::exception& e) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                      e.what(), ESMC_CONTEXT, rc);
+        return;                 
+      }
+      std::cout << "sending profile from pet: " << globalvm->getLocalPet() << " (" << bufferSize << ")" << "\n";
+      //send size of buffer
+      globalvm->send((void *) &bufferSize, sizeof(bufferSize), 0);
+      //send buffer itself
+      globalvm->send((void *) serializedTree, bufferSize, 0);
+      
+      free(serializedTree);
+    }
+    else if (globalvm->getLocalPet() == 0) {
+
+      //clone root
+      ESMCI::RegionNode *aggNode = new ESMCI::RegionNode(NULL, &rootRegionNode);
+      
+      for (int p=1; p<globalvm->getPetCount(); p++) {
+
+        if (ProfileIsEnabledForPET(p, &localrc) || TraceIsEnabledForPET(p, &localrc)) {
+
+          bufferSize = 0;
+          globalvm->recv((void *) &bufferSize, sizeof(bufferSize), p);
+          std::cout << "receive profile from pet: " << p << " (" << bufferSize << ")" << "\n";
+          
+          serializedTree = (char *) malloc(bufferSize);
+          if (serializedTree == NULL) {
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE,
+                                        "Error allocating memory when gather profiled regions", 
+                                        ESMC_CONTEXT, rc);
+          return;
+          }
+          memset(serializedTree, 0, bufferSize);
+
+          globalvm->recv(serializedTree, bufferSize, p);
+          
+          ESMCI::RegionNode *desNode = new ESMCI::RegionNode(NULL, 1, false);
+          try {
+            desNode->deserialize(serializedTree, bufferSize);
+          }
+          catch(std::exception& e) {
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          e.what(), ESMC_CONTEXT, rc);
+            return;                 
+          }
+
+          //merge statistics
+          aggNode->merge(*desNode);
+          
+          delete desNode;
+
+          free(serializedTree);
+        }
+        else if (ESMC_LogDefault.MsgFoundError(localrc, 
+                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {         
+          return;
+        }
+        
+      }
+
+      //now we have received and merged
+      //profiles from all other PETs     
+      printProfile(aggNode, false, "ESMF_Profile.txt", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
+           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+        return;     
+
+      delete aggNode;
+    }
+        
+  }
+
+
   
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceClose()"
   void TraceClose(int *rc) {
 
+    int localrc;
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     
     // allow calling multiple times, only closes
@@ -748,15 +852,45 @@ namespace ESMCI {
       traceInitialized = false;
       FinalizeWrappers();
 
+      if (profileOutputToLog || profileOutputToFile || profileOutputGather) {
+        populateRegionNames(&rootRegionNode);
+      }
+
       if (profileOutputToLog) {
-        printProfile(true, rc);
+        printProfile(&rootRegionNode, true, "", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, 
+             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+          return;     
       }
+
       if (profileOutputToFile) {
-        printProfile(false, rc);
+        VM *globalvm = VM::getGlobal(&localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, 
+             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+          return;
+
+        stringstream fname;
+        fname << (globalvm->getPetCount() - 1);
+        int width = fname.str().length();
+        fname.str("");
+        fname << "ESMF_Profile." << std::setfill('0') << std::setw(width) << globalvm->getLocalPet();
+
+        printProfile(&rootRegionNode, false, fname.str(), &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, 
+             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+          return;     
       }
+
       if (profileOutputToBinary) {
         AddRegionProfilesToTrace(&rootRegionNode);
       }
+
+      if (profileOutputGather) {
+        GatherRegions(&localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, 
+           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+          return;
+      }      
       
       if (traceCtx != NULL) { 
         if (traceLocalPet || profileOutputToBinary) {
@@ -784,7 +918,8 @@ namespace ESMCI {
     
   }
 
-   
+
+  
   ///////////////////// I/O Tracing //////////////////
 
   //static std::string openFilename;
@@ -1009,7 +1144,7 @@ namespace ESMCI {
       }
 
       bool added;
-      currentRegionNode = currentRegionNode->getOrAddChild(local_id, added);
+      currentRegionNode = currentRegionNode->getOrAddChild(local_id, true, added);
 
       //add region to trace output
       if (added && (traceLocalPet || profileOutputToBinary)) {

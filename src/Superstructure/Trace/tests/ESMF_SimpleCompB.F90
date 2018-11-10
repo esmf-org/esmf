@@ -55,8 +55,40 @@ contains
       type(ESMF_State):: istate, estate
       type(ESMF_Clock):: clock
       integer, intent(out):: rc
+
+      integer :: i, j, k
+      character(len=64) :: name, name2
       
-      print *, "Inside Run"
+      
+      call ESMF_TraceRegionEnter("my_run", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      
+      !print *, "Inside Run"
+
+      ! do i=1,25
+      !   write(name, "(A25,I2)") "region_with_longer_name_", i
+      !   call ESMF_TraceRegionEnter(trim(name), rc=rc)
+      !   if (rc /= ESMF_SUCCESS) return
+
+      !   ! waste some time
+      !   k=1
+      !   do j=1,i*10000
+      !     k=k+1
+      !     if (mod(k, 10000) == 0) then
+      !       write(name2, "(A13,I6)") "inner_region_", k
+      !       call ESMF_TraceRegionEnter(trim(name2), rc=rc)
+      !       if (rc /= ESMF_SUCCESS) return
+      !       call ESMF_TraceRegionExit(trim(name2), rc=rc)
+      !       if (rc /= ESMF_SUCCESS) return
+      !     endif
+      !   enddo
+
+      !   call ESMF_TraceRegionExit(trim(name), rc=rc)
+      !   if (rc /= ESMF_SUCCESS) return        
+      ! enddo      
+
+      call ESMF_TraceRegionExit("my_run", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
 
       rc = ESMF_SUCCESS
       
