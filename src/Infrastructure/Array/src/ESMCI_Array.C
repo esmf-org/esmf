@@ -27,7 +27,7 @@
 
 //==============================================================================
 // Set OPTION!!!
-#define SMMSLSQV_OPTION 2
+#define SMMSLSQV_OPTION 3
 // OPTION 1 - Use sparseMatMulStoreLinSeqVect() (i.e. old) for all cases
 // OPTION 2 - Use sparseMatMulStoreLinSeqVect_new() for halo, old all other
 // OPTION 3 - Use sparseMatMulStoreLinSeqVect_new() for all cases
