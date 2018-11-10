@@ -2835,19 +2835,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
        ESMF_INIT_CHECK_DEEP_SHORT(ESMF_GridGetInit, grid, rc)
 
-       ! Check that the new DistGrid defines the same indexspace as the old DistGrid
+       ! Get the old DistGrid
        call ESMF_GridGet(grid, distgrid=oldDistGrid, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
-       dgMatch = ESMF_DistGridMatch(distgrid, oldDistGrid, rc=localrc)
-       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-       if (dgMatch < ESMF_DISTGRIDMATCH_INDEXSPACE) then
-         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
-                 msg="Old and new DistGrids must cover the same index space.", &
-                 ESMF_CONTEXT, rcToReturn=rc)
-         return
-       endif
 
 #if 0
        if (present(name)) &
@@ -2889,6 +2880,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG no-arb grid", &
             ESMF_LOGMSG_INFO)
 #endif
+          ! make sure new DistGrid covers the same index space as old DistGrid
+          dgMatch = ESMF_DistGridMatch(distgrid, oldDistGrid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (dgMatch < ESMF_DISTGRIDMATCH_INDEXSPACE) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+              msg="Old and new DistGrids must cover the same index space.", &
+              ESMF_CONTEXT, rcToReturn=rc)
+            return
+          endif
           ! Create New Grid
           newGrid=ESMF_GridCreate(name=name, &
             coordTypeKind=coordTypeKind, &
@@ -2911,6 +2912,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           call ESMF_LogWrite("ESMF_GridCreateCopyFromNewDG arb grid", &
             ESMF_LOGMSG_INFO)
 #endif
+          ! make sure new DistGrid has as many elements as old DistGrid
+          dgMatch = ESMF_DistGridMatch(distgrid, oldDistGrid, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+          if (dgMatch < ESMF_DISTGRIDMATCH_ELEMENTCOUNT) then
+            call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_SIZE, &
+              msg="Old and new DistGrids must cover the same index space.", &
+              ESMF_CONTEXT, rcToReturn=rc)
+            return
+          endif
           ! Two branches here:
           !
           ! If the dimCount of the DistGrid equals the dimCount of the old grid, then a

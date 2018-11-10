@@ -3056,8 +3056,8 @@ void c_esmc_grid_get_from_proto(ESMCI::Grid **_grid,
 
     // Check if Grids match
     bool match=ESMCI::Grid::match(*ptr1,*ptr2, &localrc);
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-                  ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc));
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                  ESMC_CONTEXT, ESMC_NOT_PRESENT_FILTER(rc))) return;
 
     // Return result
     if (match) *matchResult=1;

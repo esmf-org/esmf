@@ -390,6 +390,63 @@ void ESMCI_meshwrite(Mesh **meshpp, char *fname, int *rc,
 
 }
 
+void ESMCI_meshwritewarrays(Mesh **meshpp, char *fname, ESMCI_FortranStrLenArg nlen,
+                            int num_nodeArrays, ESMCI::Array **nodeArrays, 
+                            int num_elemArrays, ESMCI::Array **elemArrays, 
+                            int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI_meshwritewarrays()"
+
+  try {
+
+  // Initialize the parallel environment for mesh (if not already done)
+    {
+ int localrc;
+ int rc;
+  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
+ if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+   throw localrc;  // bail out with exception
+    }
+
+    char *filename = ESMC_F90toCstring(fname, nlen);
+
+    printf("mg: nna=%d\n",num_nodeArrays);
+
+
+    WriteMesh(**meshpp, filename, 
+              num_nodeArrays, nodeArrays, 
+              num_elemArrays, elemArrays);
+
+    delete [] filename;
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT,rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+
+}
+
+
 // Get the element topology
 const MeshObjTopo *ElemType2Topo(int pdim, int sdim, int etype) {
 #undef  ESMC_METHOD
