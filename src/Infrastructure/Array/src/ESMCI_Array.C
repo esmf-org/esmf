@@ -8263,7 +8263,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(VM *vm,
   vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector,
   const int *dstLocalDeTotalElementCount,
   char **rraList, int rraCount, RouteHandle **routehandle,
-  bool undistributedDimsPresent,
+  bool undistributedElementsPresent,
 #ifdef ASMM_STORE_TIMING_on
   double *t12pre, double *t12, double *t13, double *t14,
 #endif
@@ -8821,10 +8821,10 @@ template<typename SIT, typename DIT>
     dstLocalDeTotalElementCount[i] =
       dstArray->totalElementCountPLocalDe[i] * dstArray->tensorElementCount;
 
-  // determine if there are undistributed dims present in either src or dst
-  bool undistributedDimsPresent = false;
-  if (srcArray->tensorCount) undistributedDimsPresent = true;
-  if (dstArray->tensorCount) undistributedDimsPresent = true;
+  // determine if there are undistributed elements present in either src or dst
+  bool undistributedElementsPresent = false;
+  if (srcTensorLength>1) undistributedElementsPresent = true;
+  if (dstTensorLength>1) undistributedElementsPresent = true;
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.1"));
@@ -8890,7 +8890,7 @@ template<typename SIT, typename DIT>
     sendnbVector, recvnbVector,
     dstLocalDeTotalElementCount,
     rraList, rraCount, routehandle,
-    undistributedDimsPresent,
+    undistributedElementsPresent,
 #ifdef ASMM_STORE_TIMING_on
     &t12pre, &t12, &t13, &t14,
 #endif
@@ -10001,7 +10001,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   char **rraList,                         // in
   int rraCount,                           // in
   RouteHandle **routehandle,              // inout - handle to precomputed comm
-  bool undistributedDimsPresent,          // in
+  bool undistributedElementsPresent,      // in
 #ifdef ASMM_STORE_TIMING_on
   double *t12pre, double *t12, double *t13, double *t14,
 #endif
@@ -10056,7 +10056,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   xxe->typekind[1] = typekindSrc;
   xxe->typekind[2] = typekindDst;
   // set the superVectorOkay flag
-  xxe->superVectorOkay = !undistributedDimsPresent; // super-vector if no undist
+  xxe->superVectorOkay = !undistributedElementsPresent; // if no undistr. elemts
   // prepare XXE type variables
   XXE::TKId elementTK;
   switch (typekindDst){
@@ -11664,8 +11664,18 @@ void Array::superVecParam(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+#undef DEBUGLOG
   bool arrayFlag = false;
   if (array != ESMC_NULL_POINTER) arrayFlag = true;
+
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " superVectorOkay=" <<
+        superVectorOkay;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
 
   superVecSizeUnd[0]=-1;  // initialize with disabled super vector support
   superVecSizeUnd[1]=1;
@@ -11686,12 +11696,12 @@ void Array::superVecParam(
       vectorLength *= array->sizeSuperUndist[i];
     else
       vectorLength = array->sizeSuperUndist[0];
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "vectorLength=" << vectorLength;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " vectorLength=" << vectorLength;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
   }
 
@@ -11701,35 +11711,39 @@ void Array::superVecParam(
     int i;
     for (i=0; i<array->rank-array->tensorCount; i++){
       superVecSizeUnd[i] = array->sizeSuperUndist[i];
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "superVecSizeUnd[i="<<i<<"]=" << superVecSizeUnd[i];
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " superVecSizeUnd[i="<<i<<"]=" <<
+        superVecSizeUnd[i];
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
       for (int j=0; j<localDeCount; j++)
         superVecSizeDis[i][j] =
           array->sizeDist[j*(array->rank - array->tensorCount)+i];
     }
     superVecSizeUnd[i] = array->sizeSuperUndist[i];
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "superVecSizeUnd[i="<<i<<"]=" << superVecSizeUnd[i];
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " superVecSizeUnd[i="<<i<<"]=" <<
+        superVecSizeUnd[i];
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
   }
   if (superVecSizeUnd[1]==1 && superVecSizeUnd[2]==1)
     superVecSizeUnd[0]=-1;  // turn off super vectorization, simple vector ok
-#ifdef DEBUGGING
+#ifdef DEBUGLOG
   {
-    std::stringstream debugmsg;
-    debugmsg << "superVecSizeUnd[0]=" << superVecSizeUnd[0];
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    std::stringstream msg;
+    msg << ESMC_METHOD": " << __LINE__ << " superVecSizeUnd[0]=" <<
+      superVecSizeUnd[0];
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
+#undef DEBUGLOG
 }
 //-----------------------------------------------------------------------------
 

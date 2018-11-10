@@ -93,7 +93,7 @@ program ESMF_ArrayBundleRedistUTest
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
-  allocate(srcArrayList(13))
+  allocate(srcArrayList(15))
   ! - 1
   srcArrayList(1) = ESMF_ArrayCreate(srcDG, ESMF_TYPEKIND_R8, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -200,6 +200,25 @@ program ESMF_ArrayBundleRedistUTest
   call fillArray(srcArrayList(13), scale=13., rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  ! - 14
+  srcArrayList(14) = ESMF_ArrayCreate(srcDG, ESMF_TYPEKIND_R4, &
+    totalLWidth=(/3/), totalUWidth=(/5/), &
+    distgridToArrayMap=(/2/), undistLBound=(/1,1/), undistUBound=(/1,1/), &
+    rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call fillArray(srcArrayList(14), scale=14., rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  ! - 15
+  srcArrayList(15) = ESMF_ArrayCreate(srcDG, ESMF_TYPEKIND_R4, &
+    totalLWidth=(/3/), totalUWidth=(/5/), &
+    distgridToArrayMap=(/2/), undistLBound=(/1,1/), undistUBound=(/1,4/), rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call fillArray(srcArrayList(15), scale=15., rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
   allocate(checkArrayList(size(srcArrayList)))
   do i=1, size(checkArrayList)
@@ -211,7 +230,7 @@ program ESMF_ArrayBundleRedistUTest
       line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   enddo
   !------------------------------------------------------------------------
-  allocate(dstArrayList(13))
+  allocate(dstArrayList(15))
   ! - 1
   dstArrayList(1) = ESMF_ArrayCreate(dstDG, ESMF_TYPEKIND_R8, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -270,6 +289,16 @@ program ESMF_ArrayBundleRedistUTest
   ! - 13
   dstArrayList(13) = ESMF_ArrayCreate(dstDG, ESMF_TYPEKIND_R4, &
     distgridToArrayMap=(/2/), undistLBound=(/1,1/), undistUBound=(/2,4/), rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  ! - 14
+  dstArrayList(14) = ESMF_ArrayCreate(dstDG, ESMF_TYPEKIND_R4, &
+    undistLBound=(/1,1/), undistUBound=(/1,1/), rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  ! - 15
+  dstArrayList(15) = ESMF_ArrayCreate(dstDG, ESMF_TYPEKIND_R4, &
+    undistLBound=(/1,1/), undistUBound=(/1,4/), rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, file=__FILE__)) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   !------------------------------------------------------------------------
