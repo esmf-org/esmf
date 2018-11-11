@@ -1083,6 +1083,7 @@
       integer :: id_temp
       type(ESMF_VMId) :: vmid_temp
       type(ESMF_Logical) :: object_found
+      type(ESMF_Log)  :: log
 
       logical :: tf
 
@@ -1422,6 +1423,53 @@
       call ESMF_Test((rc == ESMF_SUCCESS), &
           name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! ESMF_VMLogMemInfo()
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Write VMLogMemInfo into the default log w/o prefix"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMLogMemInfo(rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! ESMF_VMLogMemInfo()
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Write VMLogMemInfo into the default log w/ prefix"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMLogMemInfo(prefix="TestPrefix", rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      call ESMF_LogOpen(log, filename="vmLogMemInfo.log", appendflag=.false., &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! ESMF_VMLogMemInfo()
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Write VMLogMemInfo into custom log w/o prefix"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMLogMemInfo(log=log, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! ESMF_VMLogMemInfo()
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Write VMLogMemInfo into custom log w/ prefix"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMLogMemInfo(prefix="TestPrefix", log=log, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      call ESMF_LogClose(log, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      
 #endif
       call ESMF_TestEnd(ESMF_SRCLINE)
 

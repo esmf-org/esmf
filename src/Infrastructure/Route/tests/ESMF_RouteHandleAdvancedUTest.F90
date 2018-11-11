@@ -10,10 +10,6 @@
 !
 !==============================================================================
 
-!==============================================================================
-!ESMF_MULTI_PROC_EXAMPLE        String used by test script to count examples.
-!==============================================================================
-
 module compAmod
   use ESMF
   implicit none
@@ -57,7 +53,7 @@ module compAmod
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    grid = ESMF_GridCreate1PeriDimUfrm(maxIndex=(/180, 160/), &
+    grid = ESMF_GridCreate1PeriDimUfrm(maxIndex=(/360, 160/), &
       minCornerCoord=(/0._ESMF_KIND_R8, -80._ESMF_KIND_R8/), &
       maxCornerCoord=(/360._ESMF_KIND_R8, 80._ESMF_KIND_R8/), &
       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
@@ -171,7 +167,7 @@ module compBmod
       line=__LINE__, &
       file=__FILE__)) &
       return  ! bail out
-    grid = ESMF_GridCreate1PeriDimUfrm(maxIndex=(/180, 160/), &
+    grid = ESMF_GridCreate1PeriDimUfrm(maxIndex=(/360, 160/), &
       minCornerCoord=(/0._ESMF_KIND_R8, -80._ESMF_KIND_R8/), &
       maxCornerCoord=(/360._ESMF_KIND_R8, 80._ESMF_KIND_R8/), &
       staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
@@ -235,21 +231,101 @@ module compBmod
 
 end module compBmod
 
-
 !-------------------------------------------------------------------------------
 
+#ifndef ESMF_NO_DYNMASKOVERLOAD
 
-program ESMF_RHandleFromRHandleEx
-#include "ESMF.h"
-
+module dynMaskmod
   use ESMF
-  use ESMF_TestMod
+  implicit none
+  private
+  public dynMaskR4R4R4
+  public dynMaskR4R4R4V
+  public dynMaskR4R8R4V
+  
+ contains
+ 
+  subroutine dynMaskR4R4R4(dynamicMaskList, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
+    type(ESMF_DynamicMaskElementR4R4R4), pointer        :: dynamicMaskList(:)
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicDstMaskValue
+    integer,                       intent(out)          :: rc
+    ! dummy routine for unit test that does nothing
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+
+  subroutine dynMaskR4R4R4V(dynamicMaskList, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
+    type(ESMF_DynamicMaskElementR4R4R4V), pointer       :: dynamicMaskList(:)
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicDstMaskValue
+    integer,                       intent(out)          :: rc
+    ! dummy routine for unit test that does nothing
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+ 
+  subroutine dynMaskR4R8R4V(dynamicMaskList, dynamicSrcMaskValue, &
+    dynamicDstMaskValue, rc)
+    type(ESMF_DynamicMaskElementR4R8R4V), pointer       :: dynamicMaskList(:)
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicSrcMaskValue
+    real(ESMF_KIND_R4),            intent(in), optional :: dynamicDstMaskValue
+    integer,                       intent(out)          :: rc
+    ! dummy routine for unit test that does nothing
+    ! return successfully
+    rc = ESMF_SUCCESS
+  end subroutine
+ 
+end module dynMaskmod
+
+#endif
+
+!------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+
+program ESMF_RouteHandleAdvancedUTest
+
+!------------------------------------------------------------------------------
+ 
+#include "ESMF.h"
+#include "ESMF_Macros.inc"
+
+!==============================================================================
+!BOP
+! !PROGRAM: ESMF_RouteHandleAdvancedUTest
+!                  - This unit test file verifies Route methods.
+!
+! !DESCRIPTION:
+!
+! The code in this file drives F90 Route unit tests.
+! The companion file ESMF\_Route.F90 contains the definitions for the
+! Route methods.
+!
+!-----------------------------------------------------------------------------
+! !USES:
+  use ESMF_TestMod     ! test methods
+  use ESMF
+
   use compAmod, only: ssA => SetServices
   use compBmod, only: ssB => SetServices
-  
+#ifndef ESMF_NO_DYNMASKOVERLOAD  
+  use dynMaskmod
+#endif
+
   implicit none
-  
-  ! local variables
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+  character(*), parameter :: version = &
+    '$Id$'
+!------------------------------------------------------------------------------
+
+  ! cumulative result: count failures; no failures equals "all pass"
+  integer :: result = 0
+
+  ! individual test result code
   integer                 :: rc, urc
   type(ESMF_VM)           :: vm
   integer                 :: i
@@ -260,63 +336,24 @@ program ESMF_RHandleFromRHandleEx
   type(ESMF_GridComp)     :: compA, compB1, compB2
   type(ESMF_Field)        :: fieldA, fieldB1, fieldB2
   type(ESMF_RouteHandle)  :: rh1, rh2
-  
-  integer(ESMF_KIND_I4), pointer :: testArray(:)
+  logical                 :: isCreated
+  type(ESMF_DynamicMask)  :: dynamicMask
 
-
-  ! result code
-  integer :: finalrc, result
-  character(ESMF_MAXSTR) :: testname
+  ! individual test failure message
   character(ESMF_MAXSTR) :: failMsg
-  
-  
-  finalrc = ESMF_SUCCESS
+  character(ESMF_MAXSTR) :: name
 
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
+  call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  write(failMsg, *) "Example failure"
-  write(testname, *) "Example ESMF_RHandleFromRHandleEx"
-
-!-------------------------------------------------------------------------
-!-------------------------------------------------------------------------
-
-  call ESMF_Initialize(vm=vm, defaultlogfilename="RHandleFromRHandleEx.Log", &
-    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  call ESMF_VMGet(vm, petCount=petCount, rc=rc)
-  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  
-  if (petCount < 4) then
-    finalrc = ESMF_FAILURE
-    goto 10
-  endif
-  
-!BOE
-! \subsubsection{Creating a RouteHandle from an existing RouteHandle -- 
-! Transfer to a different set of PETs}
-! \label{RH:RHfromRH}
-!
-! \begin{sloppypar}
-! Typically a RouteHandle object is created indirectly, i.e. without explicitly
-! calling the {\tt ESMF\_RouteHandleCreate()} method. The RouteHandle
-! object is a byproduct of calling communication Store() methods like 
-! {\tt ESMF\_FieldRegridStore()}. 
-! \end{sloppypar}
-!
-! One exception to this rule is when creating a duplicate RouteHandle from an
-! existing RouteHandle object. In this case the {\tt ESMF\_RouteHandleCreate()}
-! method is used explicitly. While this method allows to create a duplicate 
-! RouteHandle on the exact same set of PETs as the original RouteHandle, the 
-! real purpose of duplication is the transfer of a precomputed RouteHandle to a
-! different set of PETs. This is an efficient way to reduce the total time
-! spent in Store() calls, for situations where the same communication pattern
-! repeats for multiple components.
-!
-! This example demonstrates the transfer of a RouteHandle from one set of PETs
-! to another by first introducing three components. Component A is defined
-! on the first half of available PETs.
-!EOE
+  call ESMF_VMGetGlobal(vm, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
   stateAB1 = ESMF_StateCreate(rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -330,7 +367,12 @@ program ESMF_RHandleFromRHandleEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-!BOC
+  call ESMF_VMGet(vm, petCount=petCount, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
   petCountA = petCount/2  ! component A gets half the PETs
 
   allocate(petListA(petCountA))
@@ -338,18 +380,7 @@ program ESMF_RHandleFromRHandleEx
     petListA(i) = i-1 ! PETs are base 0
   enddo
   
-  compA = ESMF_GridCompCreate(petList=petListA, rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, &
-    file=__FILE__)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!EOC
-
-!BOE
-! The other two components, B1 and B2, split the remaining PETs evenly.
-!EOE
-
-!BOC
+  ! split the remaining PETs evenly between component B + C
   petCountR = petCount - petCountA
   petCountB1 = petCountR / 2
   
@@ -363,6 +394,12 @@ program ESMF_RHandleFromRHandleEx
     petListB2(i) = petCountA + petCountB1 + i-1 ! PETs are base 0
   enddo
 
+  compA = ESMF_GridCompCreate(petList=petListA, rc=rc)
+  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    line=__LINE__, &
+    file=__FILE__)) &
+    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  
   compB1 = ESMF_GridCompCreate(petList=petListB1, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -374,7 +411,6 @@ program ESMF_RHandleFromRHandleEx
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!EOC
 
   call ESMF_GridCompSetServices(compA, ssA, userRc=urc, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -466,70 +502,119 @@ program ESMF_RHandleFromRHandleEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-!BOE
-! Skipping all of the standard superstructure code, assume that {\tt fieldA}
-! has been created by component A, has been reconciled across all PETs via
-! a StateReconcile() call, and accessed via a StateGet(). The same is true for
-! {\tt fieldB1} and {\tt fieldB2} from components B1 and B2, respectively.
-!
-! Now the RouteHandle {\tt rh1} for a Redist operation is precomputed between 
-! {\tt fieldA} and {\tt fieldB1}.
-!EOE
-
-!BOC
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create RouteHandle for the original petList"
+  write(failMsg, *) "RouteHandleCreate failed"
   call ESMF_FieldRedistStore(srcField=fieldA, dstField=fieldB1, &
     routehandle=rh1, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleIsCreated()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  isCreated = ESMF_RouteHandleIsCreated(rh1, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleIsCreated() return value"
+  write(failMsg, *) "Incorrect return value"
+  call ESMF_Test((isCreated), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleGet()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_RouteHandleGet(rh1, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleWrite()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_RouteHandleWrite(rh1, fileName="testWrite.RH", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleDestroy()"
+  write(failMsg, *) "RouteHandleDestroy failed"
+  call ESMF_RouteHandleDestroy(rh1, noGarbage=.true., rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  ! delay for file to be available on disk
+  call ESMF_VMWtimeDelay(10.d0, rc=rc)  ! wait for 30s
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!EOC
+  
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleCreate(from file)"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  rh2 = ESMF_RouteHandleCreate(fileName="testWrite.RH", rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
-!BOE
-! The communication pattern stored in {\tt rh1} is between the PETs associated
-! with component A and those associated with component B1. Now component B2 is
-! simply a second instance of the same component code as B1, but on a different
-! set of PETs. The {\tt ESMF\_RouteHandleCreate()} method can be used to 
-! transfer {\tt rh1} to the set of PETs that is consistent with fieldA to 
-! fieldB2 communication.
-!
-! In order to transfer a RouteHandle to a different set of PETs, the 
-! {\tt originPetList} and {\tt targetPetList} must be constructed. The
-! {\tt originPetList} is the union of source and destination PETs (in that
-! order) for which {\tt rh1} was explicitly computed via the Store() call:
-!EOE
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Apply the read in Routehandle"
+  write(failMsg, *) "ESMF_FieldRedist failed"
+  call ESMF_FieldRedist(srcField=fieldA, dstField=fieldB1, &
+    routehandle=rh2, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
-!BOC
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleDestroy() for the read in Routehandle"
+  write(failMsg, *) "RouteHandleDestroy failed"
+  call ESMF_RouteHandleDestroy(rh2, noGarbage=.true., rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+  ! Prepare to test create RH from RH
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create RouteHandle for the original petList"
+  write(failMsg, *) "RouteHandleCreate failed"
+  call ESMF_FieldRedistStore(srcField=fieldA, dstField=fieldB1, &
+    routehandle=rh1, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  ! construct originPetList
   allocate(originPetList(size(petListA)+size(petListB1)))
   originPetList(1:size(petListA)) = petListA(:)
   originPetList(size(petListA)+1:) = petListB1(:)
-!EOC
-
-!BOE
-! The {\tt targetPetList} is the union of source and destination PETs (in that
-! order) for which the target RouteHandle (i.e. {\tt rh2}) will be defined:
-!EOE
-
-!BOC
+  ! construct targetPetList
   allocate(targetPetList(size(petListA)+size(petListB2)))
   targetPetList(1:size(petListA)) = petListA(:)
   targetPetList(size(petListA)+1:) = petListB2(:)
-!EOC
 
-!BOE
-! Now the new RouteHandle {\tt rh2} can be created easily from the exising 
-! RouteHandle {\tt rh1}, suppling the origin and target petLists.
-!EOE
-
-!BOC
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Transfer RouteHandle to a different petList"
+  write(failMsg, *) "RouteHandleCreate failed"
   rh2 = ESMF_RouteHandleCreate(rh1, originPetList=originPetList, &
     targetPetList=targetPetList, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  deallocate(originPetList, targetPetList)
+  !-----------------------------------------------------------------------------
+
+  call ESMF_RouteHandlePrint(rh1, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!EOC
-  deallocate(originPetList, targetPetList)
 
   call ESMF_FieldFill(fieldA, dataFillScheme="sincos", rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -547,47 +632,31 @@ program ESMF_RHandleFromRHandleEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-!BOE
-! The new RouteHandle {\tt rh2} is completely independent of the original
-! RouteHandle. In fact, it is perfectly fine to destroy (or release) {\tt rh1} 
-! while holding on to {\tt rh2}.
-!EOE
-
-!BOC
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleDestroy()"
+  write(failMsg, *) "RouteHandleDestroy failed"
   call ESMF_RouteHandleDestroy(rh1, noGarbage=.true., rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, &
-    file=__FILE__)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!EOC
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
-!BOE
-! Finally the {\tt rh2} object can be used to redistribute data from 
-! {\tt fieldA} to {\tt fieldB2}. 
-!EOE
-
-!BOC
+  ! apply the RH
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Apply the copied Routehandle"
+  write(failMsg, *) "ESMF_FieldRedist failed"
   call ESMF_FieldRedist(srcField=fieldA, dstField=fieldB2, &
     routehandle=rh2, rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, &
-    file=__FILE__)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
-!EOC
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
-!BOE
-! The communication pattern held by {\tt rh2}
-! is idential to what whould have been created by an explicit 
-! {\tt ESMF\_FieldRedistStore()} call. However, the 
-! {\tt ESMF\_RouteHandleCreate()} call used to create {\tt rh2} from {\tt rh1}
-! is much faster than the full RedistStore() operation.
-!EOE
-
+  !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test RouteHandleDestroy() for the copied Routehandle"
+  write(failMsg, *) "RouteHandleDestroy failed"
   call ESMF_RouteHandleDestroy(rh2, noGarbage=.true., rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, &
-    file=__FILE__)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
 
   call ESMF_GridCompFinalize(compA, exportState=stateAB1, userRc=urc, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -599,16 +668,6 @@ program ESMF_RHandleFromRHandleEx
     file=__FILE__)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
-  call ESMF_GridCompFinalize(compB1, importState=stateAB1, userRc=urc, rc=rc)
-  if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, &
-    file=__FILE__)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(rcToCheck=urc, msg=ESMF_LOGERR_PASSTHRU, &
-    line=__LINE__, &
-    file=__FILE__)) &
-    call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    
   call ESMF_GridCompFinalize(compB2, importState=stateAB2, userRc=urc, rc=rc)
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
@@ -653,18 +712,48 @@ program ESMF_RHandleFromRHandleEx
   deallocate(petListB1)
   deallocate(petListB2)
 
+#ifndef ESMF_NO_DYNMASKOVERLOAD
+
+ !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test ESMF_DynamicMaskSetR4R4R4()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DynamicMaskSetR4R4R4(dynamicMask, &
+    dynamicMaskRoutine=dynMaskR4R4R4, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+ !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test ESMF_DynamicMaskSetR4R4R4V()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DynamicMaskSetR4R4R4V(dynamicMask, &
+    dynamicMaskRoutine=dynMaskR4R4R4V, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+
+ !-----------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Test ESMF_DynamicMaskSetR4R8R4V()"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_DynamicMaskSetR4R8R4V(dynamicMask, &
+    dynamicMaskRoutine=dynMaskR4R8R4V, rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  !-----------------------------------------------------------------------------
+  
+#else
+
+  write(name, *) "Dummy test to satisfy scripts for ESMF_NO_DYNMASKOVERLOAD"
+  write(failMsg, *) "Did not succeed" 
+  do i=1,3
+    call ESMF_Test((.true.), name, failMsg, result, ESMF_SRCLINE)
+  enddo
+
+#endif
+
+  !------------------------------------------------------------------------
 10 continue
+  call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
+  !------------------------------------------------------------------------
 
-  ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-  ! file that the scripts grep for.
-  call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
-
-  call ESMF_Finalize(rc=rc)
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
-  if (finalrc==ESMF_SUCCESS) then
-    print *, "PASS: ESMF_RHandleFromRHandleEx.F90"
-  else
-    print *, "FAIL: ESMF_RHandleFromRHandleEx.F90"
-  endif
-
-end program
+end program ESMF_RouteHandleAdvancedUTest

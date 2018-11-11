@@ -5231,10 +5231,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMLogMemInfo - Log memory info for this PET
 
 ! !INTERFACE:
-  subroutine ESMF_VMLogMemInfo(prefix, rc)
+  subroutine ESMF_VMLogMemInfo(prefix, log, rc)
 !
 ! !ARGUMENTS:
     character (len=*),    intent(in),   optional  :: prefix
+    type(ESMF_Log),       intent(inout),optional  :: log
     integer, intent(out),               optional  :: rc           
 !
 ! !DESCRIPTION:
@@ -5242,6 +5243,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
+!   \item [{[prefix]}]
+!     String to prefix the memory info message. Default is no prefix.
+!   \item [{[log]}] !TODO: BROKEN!!!
+!     {\tt ESMF\_Log} object that can be used instead of the default Log.
+!     Default is to use the default log.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5255,7 +5261,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface.
-    call c_esmc_vmlogmeminfo(prefix, localrc)
+    call c_esmc_vmlogmeminfo(prefix, log, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

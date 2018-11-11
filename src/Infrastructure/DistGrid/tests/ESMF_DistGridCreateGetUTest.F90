@@ -797,8 +797,8 @@ program ESMF_DistGridCreateGetUTest
   !------------------------------------------------------------------------
   !NEX_UTest
   write(name, *) "DistGridMatch() - different DistGrids - matchResult"
-  write(failMsg, *) "matchResult not ESMF_DISTGRIDMATCH_NONE"
-  call ESMF_Test(matchResult==ESMF_DISTGRIDMATCH_NONE, name, failMsg, result, ESMF_SRCLINE)
+  write(failMsg, *) "matchResult not ESMF_DISTGRIDMATCH_ELEMENTCOUNT"
+  call ESMF_Test(matchResult==ESMF_DISTGRIDMATCH_ELEMENTCOUNT, name, failMsg, result, ESMF_SRCLINE)
   
   !------------------------------------------------------------------------
   !NEX_UTest

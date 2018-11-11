@@ -52,77 +52,40 @@ namespace ESMCI {
 
 namespace ESMCI {
 
+  // constants and enums
+
+  enum ArrayMatch_Flag {ARRAYMATCH_INVALID=0, ARRAYMATCH_NONE,
+    ARRAYMATCH_EXACT, ARRAYMATCH_ALIAS};
+
   // classes and structs
 
   template<typename T> struct SeqIndex;
   template<typename SIT, typename DIT> class SparseMatrix;
 
   // class definitions
-  
-//TODO: Figure out how to have code use correct SeqIndex structure automatic.
-//TODO: For now just hard-code the use of one or the other via CPP definition.
-#define SeqIndexTensor SeqIndex
 
   //============================================================================
-  template<typename T> struct SeqIndexTensor{
+  template<typename T> struct SeqIndex{
     T decompSeqIndex;
     int tensorSeqIndex;
-    SeqIndexTensor(){
+    SeqIndex(){
       decompSeqIndex = -1;  // invalidate
       tensorSeqIndex = -1;  // invalidate
     }
     void print(){
-      printf("SeqIndexTensor: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
+      printf("SeqIndex: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
     }
     void fprint(std::FILE *fp){
-      fprintf(fp, "SeqIndexTensor: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
+      fprintf(fp, "SeqIndex: (%d, %d)\n", decompSeqIndex, tensorSeqIndex);
     }
     bool valid(){
       if (decompSeqIndex == -1) return false; // invalid seqIndex
       return true;  // otherwise valid
     }
-    void incrementTensor(){
-      ++tensorSeqIndex;
-    }
-    void setTensor(int tensorSeqIndex_){
-      tensorSeqIndex = tensorSeqIndex_;
-    }
-    int getTensor(){
-      return tensorSeqIndex;
-    }
-  };  // struct seqIndexTensor
-  template<typename T> bool operator==(SeqIndexTensor<T> a, SeqIndexTensor<T> b);
-  template<typename T> bool operator!=(SeqIndexTensor<T> a, SeqIndexTensor<T> b);
-  template<typename T> bool operator<(SeqIndexTensor<T> a, SeqIndexTensor<T> b);
-
-  template<typename T> struct SeqIndexLite{
-    T decompSeqIndex;
-    SeqIndexLite(){
-      decompSeqIndex = -1;  // invalidate
-    }
-    void print(){
-      printf("SeqIndexLite: (%d)\n", decompSeqIndex);
-    }
-    void fprint(std::FILE *fp){
-      fprintf(fp, "SeqIndexLite: (%d)\n", decompSeqIndex);
-    }
-    bool valid(){
-      if (decompSeqIndex == -1) return false; // invalid seqIndex
-      return true;  // otherwise valid
-    }
-    void incrementTensor(){
-      // no-op
-    }
-    void setTensor(int tensorSeqIndex_){
-      // no-op
-    }
-    int getTensor(){
-      return 1; // dummy
-    }
-  };  // struct seqIndexLite
-  template<typename T> bool operator==(SeqIndexLite<T> a, SeqIndexLite<T> b);
-  template<typename T> bool operator!=(SeqIndexLite<T> a, SeqIndexLite<T> b);
-  template<typename T> bool operator<(SeqIndexLite<T> a, SeqIndexLite<T> b);
+  };  // struct seqIndex
+  template<typename T> bool operator==(SeqIndex<T> a, SeqIndex<T> b);
+  template<typename T> bool operator!=(SeqIndex<T> a, SeqIndex<T> b);
+  template<typename T> bool operator<(SeqIndex<T> a, SeqIndex<T> b);
 
   template<typename T> class SeqInd{
     int n;  // number of components in sequence index
@@ -188,6 +151,7 @@ namespace ESMCI {
                                       // entry of 0 indicates undistributed dim
     int *distgridToPackedArrayMap;    // [dimCount] - entries are basis 1
                                       // entry of 0 indicates replicated dim
+                                      // distr. Array dims as 1, 2, 3, .. only
     int *contiguousFlag;              // [localDeCount]
     int *exclusiveElementCountPDe;    // [deCount] number of elements in
                                       // exclusive region only considering
@@ -391,7 +355,10 @@ namespace ESMCI {
     int setName(const char* name){return ESMC_BaseSetName(name, "Array");}
     int setName(const std::string &name){return ESMC_BaseSetName(name.c_str(), "Array");}
     // misc.
-    static bool match(Array const *array1, Array const *array2, int *rc=NULL);
+    bool isRHCompatible(Array const *array, int *rc=NULL)const;
+    static ArrayMatch_Flag match(Array const *array1, Array const *array2,
+      int *rc=NULL);
+    static bool matchBool(Array const *array1, Array const *array2, int *rc=NULL);
     int read(const std::string &file, const std::string &variableName,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int write(const std::string &file, const std::string &variableName,
@@ -595,9 +562,9 @@ namespace ESMCI {
           }else{
             // increment the tensorSeqIndex
             if (indexTK==ESMC_TYPEKIND_I4)
-              ((SeqIndex<ESMC_I4>*)seqIndex)->incrementTensor();
+              ((SeqIndex<ESMC_I4>*)seqIndex)->tensorSeqIndex++;
             else if (indexTK==ESMC_TYPEKIND_I8)
-              ((SeqIndex<ESMC_I8>*)seqIndex)->incrementTensor();
+              ((SeqIndex<ESMC_I8>*)seqIndex)->tensorSeqIndex++;
           }
         }
       }

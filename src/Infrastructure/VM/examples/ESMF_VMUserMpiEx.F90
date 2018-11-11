@@ -18,6 +18,7 @@
 !BOE
 !
 ! \subsubsection{Nesting ESMF inside a user MPI application}
+! \label{vm_inside_user_mpi}
 !
 ! \begin{sloppypar}
 ! It is possible to nest an ESMF application inside a user application that 
@@ -68,36 +69,39 @@ program ESMF_VMUserMpiEx
   finalrc = ESMF_SUCCESS
 #ifndef ESMF_MPIUNI     
 !BOC
-  call MPI_Init(ierr)
   ! User code initializes MPI.
+  call MPI_Init(ierr)
 !EOC
   if (ierr/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #endif
 !BOC
-  call ESMF_Initialize(defaultlogfilename="VMUserMpiEx.Log", &
-                    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
   ! ESMF_Initialize() does not call MPI_Init() if it finds MPI initialized.
+  call ESMF_Initialize(defaultlogfilename="VMUserMpiEx.Log", &
+    logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
   if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+
+!BOC
+  ! Use ESMF here...
+!EOC
 
   ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
   ! file that the scripts grep for.
   call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
 !BOC
+  ! Calling ESMF_Finalize() with endflag=ESMF_END_KEEPMPI instructs ESMF
+  ! to keep MPI active.
   call ESMF_Finalize(endflag=ESMF_END_KEEPMPI, rc=rc)
-  ! Calling with endflag=ESMF_END_KEEPMPI instructs ESMF_Finalize() to keep
-  ! MPI active.
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 #ifndef ESMF_MPIUNI     
 !BOC
-  call MPI_Finalize(ierr)
   ! It is the responsibility of the outer user code to finalize MPI.
+  call MPI_Finalize(ierr)
 !EOC
   if (ierr/=0) finalrc = ESMF_FAILURE
 #endif
-
 
   ! print result
   if (finalrc==ESMF_SUCCESS) then

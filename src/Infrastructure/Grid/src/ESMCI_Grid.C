@@ -10030,7 +10030,8 @@ bool Grid::match(
     for (int j=0; j<grid1->dimCount; j++) {
       if (grid1->coordArrayList[i][j] != ESMC_NULL_POINTER &&
       grid2->coordArrayList[i][j] != ESMC_NULL_POINTER) {
-    bool arraymatch=Array::match(grid1->coordArrayList[i][j], grid2->coordArrayList[i][j],&localrc);
+    bool arraymatch=Array::matchBool(grid1->coordArrayList[i][j],
+      grid2->coordArrayList[i][j],&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
     ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return false;
     if (!arraymatch) {
@@ -10103,7 +10104,8 @@ bool Grid::match(
     for (int j=0; j<ESMC_GRIDITEM_COUNT; j++) {
       if (grid1->itemArrayList[i][j] != ESMC_NULL_POINTER &&
       grid2->itemArrayList[i][j] != ESMC_NULL_POINTER) {
-    bool arraymatch=Array::match(grid1->itemArrayList[i][j], grid2->itemArrayList[i][j],&localrc);
+    bool arraymatch=Array::matchBool(grid1->itemArrayList[i][j],
+      grid2->itemArrayList[i][j],&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc,
               ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return false;
     if (!arraymatch) {

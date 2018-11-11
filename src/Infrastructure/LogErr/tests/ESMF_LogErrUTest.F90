@@ -59,6 +59,7 @@
       character(1) :: pet_char
       type(ESMF_VM):: vm
       logical :: ele, hasNc
+      logical :: noPrefix_flag
 
 #ifdef ESMF_TESTEXHAUSTIVE
       character(ESMF_MAXSTR) :: pet_num
@@ -84,7 +85,6 @@
       logical :: was_found
       logical :: flush_flag
       logical :: highRes_flag
-      logical :: noPrefix_flag
       logical :: trace_flag
       type(ESMF_LogMsg_Flag), pointer :: logabort_flags(:)
       character(2) :: tooshortstr
