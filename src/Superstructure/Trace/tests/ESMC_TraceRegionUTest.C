@@ -84,8 +84,6 @@ int main(void){
   char name[80];
   char failMsg[80];
   int result = 0;
-  int rc;
-  int userRc;
   
   //----------------------------------------------------------------------------
   ESMC_TestStart(__FILE__, __LINE__, 0);

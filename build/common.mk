@@ -1706,6 +1706,9 @@ endif
 ifeq ($(ESMF_COMM),mpi)
 ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
 endif
+ifeq ($(ESMF_COMM),mpt)
+ESMF_PRELOAD_SH = $(ESMF_PRELOADSCRIPT)
+endif
 
 endif
 
