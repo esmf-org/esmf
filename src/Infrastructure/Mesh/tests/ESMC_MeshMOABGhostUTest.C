@@ -281,6 +281,24 @@ MBMesh* create_mesh_quad_9_parallel_dual2(ESMC_CoordSys_Flag coordsys, int &rc) 
 
 MBMesh* create_mesh_ph_parallel(ESMC_CoordSys_Flag coordsys, int &rc) {
 
+//
+//  2.5        8        10 --------11
+//          /     \   /            |
+//  2.1   7         9              12
+//        |         |      5       /
+//        |    4    |            /
+//        |         |          /
+//  1.0   4 ------- 5 ------- 6
+//        |         |  \   3  |
+//        |    1    |    \    |
+//        |         |  2   \  |
+// -0.1   1 ------- 2 ------- 3
+//
+//      -0.1       1.0       2.1   2.5 
+// 
+//        Node Id labels at corners
+//       Element Id labels in centers
+
   // Get parallel information
   int localPet, petCount;
   ESMC_VM vm;

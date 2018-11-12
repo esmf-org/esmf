@@ -161,11 +161,11 @@ void MBMesh::CreateGhost() {
   merr = pcomm->exchange_tags(tags, tags, range_ent);
   MBMESH_CHECK_ERR(merr, localrc);
 
-  {void *mbptr = (void *) this;
-  int rc;
-  int len = 12; char fname[len];
-  sprintf(fname, "meshdual_%d", localPet);
-  MBMesh_write(&mbptr, fname, &rc, len);}
+  // {void *mbptr = (void *) this;
+  // int rc;
+  // int len = 12; char fname[len];
+  // sprintf(fname, "meshdual_%d", localPet);
+  // MBMesh_write(&mbptr, fname, &rc, len);}
 
 
 #ifdef DEBUG_MOAB_GHOST_EXCHANGE

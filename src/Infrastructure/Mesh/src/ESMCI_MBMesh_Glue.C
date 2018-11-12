@@ -1273,7 +1273,6 @@ printf("    PET %d - addelems\n", localPet);
           moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
       }
 
-      printf("\n");
        // Set global id
       merr=moab_mesh->tag_set_data(mbmp->gid_tag, &new_elem, 1, elemId+e);
       if (merr != MB_SUCCESS) {

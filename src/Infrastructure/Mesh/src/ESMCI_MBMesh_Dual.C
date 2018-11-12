@@ -247,7 +247,7 @@ namespace ESMCI {
     // Translate id if split
     if ((src_mesh->is_split) && (elem_id > src_mesh->max_non_split_id)) {
       std::map<int,int>::iterator soi =  src_mesh->split_to_orig_id.find(elem_id);
-      printf("PET %d split elem id %d\n", Par::Rank(), elem_id);
+      // printf("PET %d split elem id %d\n", Par::Rank(), elem_id);
       if (soi != src_mesh->split_to_orig_id.end()) {
         elem_id=soi->second;
       } else {
