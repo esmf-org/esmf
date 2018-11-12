@@ -2028,7 +2028,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     std::stringstream msg;
     msg << "dstSeqIndexInterval[localPet].count=" <<
       dstSeqIndexInterval[localPet].count <<
-      " dstTensorElementCountEff=" << srcTensorElementCountEff;
+      " dstTensorElementCountEff=" << dstTensorElementCountEff;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   }
 #endif

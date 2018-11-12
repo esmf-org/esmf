@@ -63,6 +63,9 @@
 #include <map>
 #include <algorithm>
 #include <sstream>
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+#include <malloc.h>
+#endif
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
@@ -8095,8 +8098,8 @@ template<typename IT>
 
 // AssociationElement
 template<typename IT1, typename IT2> struct AssociationElement{
-  SeqIndex<IT1> seqIndex;
   vector<FactorElement<IT2> > factorList;
+  SeqIndex<IT1> seqIndex;
   int linIndex;
 };
 template<typename IT1, typename IT2>
@@ -8807,6 +8810,10 @@ template<typename SIT, typename DIT>
   if (srcTensorLength>1) undistributedElementsPresent = true;
   if (dstTensorLength>1) undistributedElementsPresent = true;
 
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+  malloc_trim(0);
+#endif
+  
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.1"));
 #endif
@@ -8862,6 +8869,10 @@ template<typename SIT, typename DIT>
   vector<vector<AssociationElement<SIT,DIT> > >().swap(srcLinSeqVect);
   vector<vector<AssociationElement<DIT,SIT> > >().swap(dstLinSeqVect);
 
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+  malloc_trim(0);
+#endif
+  
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.4"));
 #endif
@@ -9252,11 +9263,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
-    int *index2Ref2 = new int[localDeFactorCount];  // large enough
-    int *factorIndexRef = new int[localDeFactorCount];  // large enough
-    int *partnerDeRef = new int[localDeFactorCount];  // large enough
-    vector<int> recvnbPartnerDeList(localDeFactorCount);  // large enough
-    vector<int> recvnbPartnerDeCount(localDeFactorCount);  // large enough
+    int *index2Ref2 = new int[localDeFactorCount];            // large enough
+    int *factorIndexRef = new int[localDeFactorCount];        // large enough
+    int *partnerDeRef = new int[localDeFactorCount];          // large enough
+    int *recvnbPartnerDeList = new int[localDeFactorCount];   // large enough
+    int *recvnbPartnerDeCount = new  int[localDeFactorCount]; // large enough
     int recvnbDiffPartnerDeCount = 0; // reset
     int count = 0; // reset
     for (int i=0; i<iCount; i++){
@@ -9322,7 +9333,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     // invert the look-up direction
     vector<vector<ArrayHelper::DstInfo<DIT,SIT> > >
       dstInfoTable(recvnbDiffPartnerDeCount);
-    vector<int> dstInfoTableInit(recvnbDiffPartnerDeCount);
+    int *dstInfoTableInit = new int[recvnbDiffPartnerDeCount];
     for (int i=0; i<recvnbDiffPartnerDeCount; i++){
       dstInfoTable[i].resize(recvnbPartnerDeCount[i]);
       dstInfoTableInit[i] = 0;   // reset
@@ -9335,6 +9346,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     localrc = xxe->storeData(localDeFactorBuffer, qwords*8); // XXE garbage
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
+#ifdef ASMM_STORE_MEMLOG_on
+      VM::logMemInfo(std::string("ASMMStoreNbVectors3.1"));
+#endif
 #ifdef ASMM_STORE_TIMING_on
       VMK::wtime(&t9c1);   //gjt - profile
 #endif
@@ -9369,11 +9383,29 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #ifdef ASMM_STORE_MEMLOG_on
     VM::logMemInfo(std::string("ASMMStoreNbVectors3.3"));
 #endif
-
-      // garbage collection
+    // garbage collection
+    delete [] dstInfoTableInit;
     delete [] index2Ref2;
     delete [] factorIndexRef;
     delete [] partnerDeRef;
+
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors3.4"));
+#endif
+    // force vectors out of scope by swapping with empty vector, to free memory
+    vector<AssociationElement<DIT,SIT> > ().swap(dstLinSeqVect[j]);
+  
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors4.0"));
+#endif
+    
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+  malloc_trim(0);
+#endif
+    
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors4.1"));
+#endif
 
 #ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9c2);   //gjt - profile
@@ -9397,15 +9429,21 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       for (int i=0; i<recvnbDiffPartnerDeCount; i++){
         sort(dstInfoTable[i].begin(), dstInfoTable[i].end(),
           ArrayHelper::vectorOrderDstInfo<DIT,SIT>);
-#ifdef ASMM_STORE_LOG_on_disabled
-        for (int k=0; k<dstInfoTable[i].size(); k++)
-          fprintf(asmm_store_log_fp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
-            ".partnerSeqIndex = %d/%d, .factor = %p\n", i, k,
-            dstInfoTable[i][k].seqIndex.decompSeqIndex,
-            dstInfoTable[i][k].seqIndex.tensorSeqIndex,
-            dstInfoTable[i][k].partnerSeqIndex.decompSeqIndex,
-            dstInfoTable[i][k].partnerSeqIndex.tensorSeqIndex,
-            dstInfoTable[i][k].factor);
+#ifdef ASMM_STORE_LOG_on
+        {
+          std::stringstream msg;
+          for (int k=0; k<dstInfoTable[i].size(); k++){
+            msg.str("");  // clear
+            msg << "ASMM_STORE_LOG:" << __LINE__ <<
+              " dstInfoTable[" << i << "][" << k << "].seqIndex = "
+              << dstInfoTable[i][k].seqIndex.decompSeqIndex << "/"
+              << dstInfoTable[i][k].seqIndex.tensorSeqIndex << ", "
+              << dstInfoTable[i][k].partnerSeqIndex.decompSeqIndex << "/"
+              << dstInfoTable[i][k].partnerSeqIndex.tensorSeqIndex
+              << " .factor = " << dstInfoTable[i][k].factor;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          }
+        }
 #endif
         // vectorize -> deflate dstInfoTable
         typename vector<ArrayHelper::DstInfo<DIT,SIT> >::iterator rangeStart =
@@ -9552,13 +9590,17 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       recvnbElement.bufferInfo = (char **)xxe->getBufferInfoPtr();
       recvnbElement.partnerDeDataCount = kk;
       recvnbElement.vectorFlag = vectorFlag;
-      recvnbElement.dstInfoTable = dstInfoTable[i];
+      recvnbElement.dstInfoTable.swap(dstInfoTable[i]);
       recvnbElement.localPet = localPet;
       recvnbElement.petCount = petCount;
       recvnbVector.push_back(recvnbElement);
-#ifdef ASMM_STORE_LOG_on_disabled
-      fprintf(asmm_store_log_fp, "gjt: recvnbElement localPet %d, srcPet %d, "
-        "vectorLength=%d\n", localPet, srcPet, vectorLength);
+#ifdef ASMM_STORE_LOG_on
+      {
+        std::stringstream msg;
+        msg << "ASMM_STORE_LOG:" << __LINE__ << " recvnbElement srcPet="
+          << srcPet << " vectorLength=" << vectorLength;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
 #endif
     } // for i - recvnbDiffPartnerDeCount
 
@@ -9566,6 +9608,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     VM::logMemInfo(std::string("ASMMStoreNbVectors5.1"));
 #endif
 
+    // garbage collection
+    delete [] recvnbPartnerDeList;
+    delete [] recvnbPartnerDeCount;
+      
 #ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9e);   //gjt - profile
 //    printf("gjt - profile for PET %d, j-loop %d:\n"
@@ -9579,10 +9625,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   VMK::wtime(t9);   //gjt - profile
 #endif
 
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+  malloc_trim(0);
+#endif
+  
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreNbVectors6.0"));
 #endif
-
+  
   // determine send pattern for all localDEs on src side
   for (int j=0; j<srcLocalDeCount; j++){
 #ifdef ASMM_STORE_LOG_on
@@ -9605,10 +9655,24 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
         ++iCount; // increment counter
       }
     }
-    int *index2Ref2 = new int[localDeFactorCount];  // large enough
-    int *factorIndexRef = new int[localDeFactorCount];  // large enough
-    int *partnerDeRef = new int[localDeFactorCount];  // large enough
-    int *sendnbPartnerDeList = new int[localDeFactorCount];  // large enough
+    
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors6.1"));
+#endif
+
+#ifdef ASMM_STORE_LOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " iCount=" << iCount <<
+        " localDeFactorCount=" << localDeFactorCount;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    
+    int *index2Ref2 = new int[localDeFactorCount];            // large enough
+    int *factorIndexRef = new int[localDeFactorCount];        // large enough
+    int *partnerDeRef = new int[localDeFactorCount];          // large enough
+    int *sendnbPartnerDeList = new int[localDeFactorCount];   // large enough
     int *sendnbPartnerDeCount = new int[localDeFactorCount];  // large enough
     int sendnbDiffPartnerDeCount = 0; // reset
     int count = 0; // reset
@@ -9644,10 +9708,31 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
         ++count;
       }
     }
+#ifdef ASMM_STORE_LOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " sendnbDiffPartnerDeCount="
+        << sendnbDiffPartnerDeCount;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      for (int i=0; i<sendnbDiffPartnerDeCount; i++){
+        msg.str("");  // clear
+        msg << "ASMM_STORE_LOG:" << __LINE__ << " sendnbPartnerDeCount[" << i <<
+          "]=" << sendnbPartnerDeCount[i];
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+      msg.str("");  // clear
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " sizeof(SrcInfo)="
+        << sizeof(ArrayHelper::SrcInfo<SeqIndex<DIT>,SeqIndex<SIT> >);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors7.0"));
+#endif
     // invert the look-up direction
     vector<vector<ArrayHelper::SrcInfo<SIT,DIT> > >
       srcInfoTable(sendnbDiffPartnerDeCount);
-    vector<int> srcInfoTableInit(sendnbDiffPartnerDeCount);
+    int *srcInfoTableInit = new int[sendnbDiffPartnerDeCount];
     for (int i=0; i<sendnbDiffPartnerDeCount; i++){
       srcInfoTable[i].resize(sendnbPartnerDeCount[i]);
       srcInfoTableInit[i] = 0;   // reset
@@ -9656,6 +9741,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     int qwords = (localDeFactorCount * dataSizeFactors) / 8;
     if ((localDeFactorCount * dataSizeFactors) % 8)
       ++qwords;
+#ifdef ASMM_STORE_MEMLOG_on
+      VM::logMemInfo(std::string("ASMMStoreNbVectors7.1"));
+#endif
     char *localDeFactorBuffer = (char *)(new double[qwords]);
     localrc = xxe->storeData(localDeFactorBuffer, qwords*8); // XXE garbage
     if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -9685,10 +9773,34 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
         (void *)(localDeFactorBufferEntry);
     }
 
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors7.3"));
+#endif
+
     // garbage collection
+    delete [] srcInfoTableInit;
     delete [] index2Ref2;
     delete [] factorIndexRef;
     delete [] partnerDeRef;
+
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors7.4"));
+#endif
+
+    // force vectors out of scope by swapping with empty vector, to free memory
+    vector<AssociationElement<SIT,DIT> > ().swap(srcLinSeqVect[j]);
+  
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors8.0"));
+#endif
+    
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+  malloc_trim(0);
+#endif
+    
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors8.1"));
+#endif
 
     // sort each "sendnbDiffPartnerDeCount group" (opposite of dst)
     if (!vectorFlag){
@@ -9747,16 +9859,20 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       }
     }
 
-#ifdef ASMM_STORE_LOG_on_disabled
-    // print:
-    for (int i=0; i<sendnbDiffPartnerDeCount; i++)
-      for (int k=0; k<srcInfoTable[i].size(); k++)
-        fprintf(asmm_store_log_fp, "srcInfoTable[%d][%d].seqIndex = %d/%d, "
-          ".partnerSeqIndex[][] = %d/%d\n", i, k,
-          srcInfoTable[i][k].seqIndex.decompSeqIndex,
-          srcInfoTable[i][k].seqIndex.tensorSeqIndex,
-          srcInfoTable[i][k].partnerSeqIndex.decompSeqIndex,
-          srcInfoTable[i][k].partnerSeqIndex.tensorSeqIndex);
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors9.0"));
+#endif
+
+#ifdef ASMM_STORE_LOG_on
+    {
+      std::stringstream msg;
+      for (int i=0; i<sendnbDiffPartnerDeCount; i++){
+        msg.str("");  // clear
+        msg << "ASMM_STORE_LOG:" << __LINE__ << " srcInfoTable[" << i <<
+          "].size()=" << srcInfoTable[i].size();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+    }
 #endif
 
     // construct send elements
@@ -9775,13 +9891,20 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       deflator.erase(unique(deflator.begin(),deflator.end()),deflator.end());
 
 #ifdef MSG_DEFLATE_DEBUG
-char msg[160];
-      for (int k=0; k<deflator.size(); k++){
-
-sprintf(msg, "send: deflator[%d]: index=%d, seqIndex=%d",
-  k, deflator[k].index,
-deflator[k].seqIndex.decompSeqIndex);
-ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+      {
+        std::stringstream msg;
+        msg << "ASMM_STORE_LOG:" << __LINE__ <<
+          " send: after erase: deflator.size()=" << deflator.size();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#if 0
+        for (int k=0; k<deflator.size(); k++){
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ <<
+            " send: deflator[" << k << "]: index=" << deflator[k].index <<
+            ", seqIndex=" << deflator[k].seqIndex.decompSeqIndex;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        }
+#endif
       }
 #endif
 
@@ -9829,31 +9952,36 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       sendnbElement.srcLocalDe = j;
       sendnbElement.partnerDeDataCount = deflator.size();
       sendnbElement.vectorFlag = vectorFlag;
-      sendnbElement.srcInfoTable = srcInfoTable[i];
-      sendnbElement.linIndexContigBlockList = linIndexContigBlockList;
+      sendnbElement.srcInfoTable.swap(srcInfoTable[i]);
+      sendnbElement.linIndexContigBlockList.swap(linIndexContigBlockList);
       sendnbElement.bufferInfo = (char **)xxe->getBufferInfoPtr();
       sendnbElement.localPet = localPet;
       sendnbElement.petCount = petCount;
       sendnbVector.push_back(sendnbElement);
 
-#ifdef MSG_DEFLATE_DEBUG
-// debug
-      for (int k=0; k<linIndexContigBlockList.size(); k++){
-        sprintf(msg, "linIndexContigBlockList[%d]: linIndex=%d, "
-          "linIndexCount=%d", k, linIndexContigBlockList[k].linIndex,
-          linIndexContigBlockList[k].linIndexCount);
-ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-
+#ifdef ASMM_STORE_LOG_on
+      {
+        std::stringstream msg;
+        msg << "ASMM_STORE_LOG:" << __LINE__ << " sendnbElement dstPet="
+          << dstPet << " vectorLength=" << vectorLength;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        for (int k=0; k<sendnbVector[ii].linIndexContigBlockList.size(); k++){
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " linIndexContigBlockList["
+            << k << "]: linIndex=" << 
+            sendnbVector[ii].linIndexContigBlockList[k].linIndex <<
+            ", linIndexCount=" << 
+            sendnbVector[ii].linIndexContigBlockList[k].linIndexCount;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        }
       }
 #endif
-
-#ifdef ASMM_STORE_LOG_on_disabled
-      fprintf(asmm_store_log_fp, "gjt: sendnbElement localPet %d, dstPet %d, "
-        "vectorLength=%d\n", localPet, dstPet, vectorLength);
-      for (int k=0; k<linIndexContigBlockList.size(); k++){
-        fprintf(asmm_store_log_fp, "linIndexContigBlockList[%d]: linIndex=%d, "
-          "linIndexCount=%d\n", k, linIndexContigBlockList[k].linIndex,
-          linIndexContigBlockList[k].linIndexCount);
+#ifdef ASMM_STORE_LOG_on
+      {
+        std::stringstream msg;
+        msg << "ASMM_STORE_LOG:" << __LINE__ << " sendnbElement dstPet="
+          << dstPet << " vectorLength=" << vectorLength;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
       }
 #endif
     } // for i - sendnbDiffPartnerDeCount
@@ -10042,7 +10170,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-#define SMMSTOREENCODEXXEINFO_off
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
@@ -10174,18 +10301,19 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 
   if (srcTermProcessingArg && *srcTermProcessingArg >= 0){
     // use the provided srcTermProcessing
-#ifdef SMMSTOREENCODEXXEINFO_on
+#ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "srcTermProcessingArg = %d was provided -> do not tune",
-      *srcTermProcessingArg);
+    sprintf(msg, "ASMM_STORE_TUNELOG: %d srcTermProcessingArg = %d"
+      " was provided -> do not tune", __LINE__, *srcTermProcessingArg);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     srcTermProcessingOpt = *srcTermProcessingArg;
   }else{
     // optimize srcTermProcessing
-#ifdef SMMSTOREENCODEXXEINFO_on
+#ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "srcTermProcessingArg was NOT provided -> tuning...");
+    sprintf(msg, "ASMM_STORE_TUNELOG: %d srcTermProcessingArg was NOT"
+      " provided -> tuning...", __LINE__);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
 #ifdef WORKAROUND_NONBLOCKPROGRESSBUG
@@ -10209,6 +10337,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         vectorLength, xxe);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+      malloc_trim(0);
+#endif
 #if 0
       // optimize the XXE entire stream
       localrc = xxe->optimize();
@@ -10296,9 +10427,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       // new high vote found
       srcTermProcessingOpt = srcTermProcessingOptList[petCount-1];
     }
-#ifdef SMMSTOREENCODEXXEINFO_on
-    sprintf(msg, "... finished tuning, found srcTermProcessingOpt = %d",
-      srcTermProcessingOpt);
+#ifdef ASMM_STORE_TUNELOG_on
+    sprintf(msg, "ASMM_STORE_TUNELOG: %d ... finished tuning, found"
+      " srcTermProcessingOpt = %d", __LINE__, srcTermProcessingOpt);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     if (srcTermProcessingArg) *srcTermProcessingArg = srcTermProcessingOpt;
@@ -10345,18 +10476,19 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 
   if (pipelineDepthArg && *pipelineDepthArg >= 0){
     // use the provided pipelineDepthArg
-#ifdef SMMSTOREENCODEXXEINFO_on
+#ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "pipelineDepthArg = %d was provided -> do not tune",
-      *pipelineDepthArg);
+    sprintf(msg, "ASMM_STORE_TUNELOG: %d pipelineDepthArg = %d was provided"
+      " -> do not tune", __LINE__, *pipelineDepthArg);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     pipelineDepthOpt = *pipelineDepthArg;
   }else{
     // optimize pipeline depth
-#ifdef SMMSTOREENCODEXXEINFO_on
+#ifdef ASMM_STORE_TUNELOG_on
     char msg[160];
-    sprintf(msg, "pipelineDepthArg was NOT provided -> tuning...");
+    sprintf(msg, "ASMM_STORE_TUNELOG: %d pipelineDepthArg was NOT provided"
+      " -> tuning...", __LINE__);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     for (int pipelineDepth=1; pipelineDepth<=petCount; pipelineDepth*=2){
@@ -10373,6 +10505,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
         vectorLength, xxe);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+      malloc_trim(0);
+#endif
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.2"));
 #endif
@@ -10477,7 +10612,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       // new high vote found
       pipelineDepthOpt = pipelineDepthOptList[petCount-1];
     }
-#ifdef SMMSTOREENCODEXXEINFO_on
+#ifdef ASMM_STORE_TUNELOG_on
     sprintf(msg, "... finished tuning, found pipelineDepthOpt = %d",
       pipelineDepthOpt);
     ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
@@ -10514,6 +10649,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     vectorLength, xxe);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
+  
+#if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+  malloc_trim(0);
+#endif
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.1"));
