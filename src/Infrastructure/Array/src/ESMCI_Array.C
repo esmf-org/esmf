@@ -8272,46 +8272,15 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(VM *vm,
   );
 
 
-template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
-  VM *vm,                                 // in
-  Array *srcArray, Array *dstArray,       // in
-  vector<SparseMatrix<SIT,DIT> >const &sparseMatrix,// in - sparse matrix vector
-  bool haloFlag,                          // in
-  bool ignoreUnmatched,                   // in
-  bool tensorMixFlag,                     // in
-  int const factorListCount,              // in
-  vector<bool> &factorPetFlag,            // in
-  ESMC_TypeKind_Flag typekindFactors,     // in
-  int const srcLocalDeCount,              // in
-  int const dstLocalDeCount,              // in
-  int srcElementCount,                    // in
-  int dstElementCount,                    // in
-  const int *srcLocalDeElementCount,      // in
-  const int *dstLocalDeElementCount,      // in
-  vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect, // inout
-  vector<vector<AssociationElement<DIT,SIT> > >&dstLinSeqVect  // inout
-  );
+//-----------------------------------------------------------------------------
+#if (SMMSLSQV_OPTION==1 || SMMSLSQV_OPTION==2)
+#include "sparseMatMulStoreLinSeqVect.h"
+#endif
 
-
-template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
-  VM *vm,                                 // in
-  Array *srcArray, Array *dstArray,       // in
-  vector<SparseMatrix<SIT,DIT> >const &sparseMatrix,// in - sparse matrix vector
-  bool haloFlag,                          // in
-  bool ignoreUnmatched,                   // in
-  bool tensorMixFlag,                     // in
-  int const factorListCount,              // in
-  vector<bool> &factorPetFlag,            // in
-  ESMC_TypeKind_Flag typekindFactors,     // in
-  int const srcLocalDeCount,              // in
-  int const dstLocalDeCount,              // in
-  int srcElementCount,                    // in
-  int dstElementCount,                    // in
-  const int *srcLocalDeElementCount,      // in
-  const int *dstLocalDeElementCount,      // in
-  vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect, // inout
-  vector<vector<AssociationElement<DIT,SIT> > >&dstLinSeqVect  // inout
-  );
+#if (SMMSLSQV_OPTION==2 || SMMSLSQV_OPTION==3)
+#include "sparseMatMulStoreLinSeqVect_new.h"
+#endif
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
@@ -9014,11 +8983,6 @@ template<typename SIT, typename DIT>
   return rc;
 }
 //-----------------------------------------------------------------------------
-
-
-#include "sparseMatMulStoreLinSeqVect_new.h"
-
-#include "sparseMatMulStoreLinSeqVect.h"
 
 
 //-----------------------------------------------------------------------------
