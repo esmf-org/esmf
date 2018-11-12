@@ -531,8 +531,8 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined ESMF_MOAB
   MBMesh *mbmesh = NULL;
-  // mbmesh = create_mesh_quad_9_parallel_dual2(ESMC_COORDSYS_CART, rc);
-  mbmesh = create_mesh_ph_parallel(ESMC_COORDSYS_CART, rc);
+  mbmesh = create_mesh_quad_9_parallel_dual2(ESMC_COORDSYS_CART, rc);
+  // mbmesh = create_mesh_ph_parallel(ESMC_COORDSYS_CART, rc);
   if (!mbmesh) rc = ESMC_RC_PTR_NULL;
 
 #define DEBUG_EXCHANGE_TAGS
@@ -548,6 +548,7 @@ int main(void){
   MBMESH_CHECK_ERR(merr, rc);
 
   merr = pcomm->resolve_shared_ents(0, range_ent, pdim, 1);
+  // pcomm->resolve_shared_ents(0, mbmesh->pdim, mbmesh->pdim-1);
   MBMESH_CHECK_ERR(merr, rc);
   
   void *mbptr = (void *) mbmesh;

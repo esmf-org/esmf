@@ -51,10 +51,10 @@
     integer :: result = 0
  
        ! individual test result code
-     integer :: rc = 1
+    integer :: rc = 1
 
     ! individual test failure message
-     character(ESMF_MAXSTR) :: failMsg
+    character(ESMF_MAXSTR) :: failMsg
     character(512) :: name
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -78,7 +78,7 @@ call ESMF_MeshSetMOAB(.true.)
       rc=ESMF_SUCCESS
       
       ! do test
-      call test_regridMeshToMeshCenter(rc)
+      call test_regridPHMeshToGrid(rc)
       
       ! remove this later, it is here to protect hang
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
