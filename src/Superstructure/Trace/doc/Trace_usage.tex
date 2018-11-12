@@ -10,6 +10,136 @@
 
 %\subsection{Use and Examples}
 
+\subsubsection{Output a Timing Profile to Text}
+\label{sec:BasicProfiling}
+
+ESMF profiling is disabled by default. To profile an application,
+set the {\tt ESMF\_RUNTIME\_PROFILE} variable to {\tt ON} prior
+to executing the application.  You do not need to recompile
+your code to enable profiling.
+
+\begin{verbatim}
+# csh shell
+$ setenv ESMF_RUNTIME_PROFILE ON
+
+# bash shell
+$ export ESMF_RUNTIME_PROFILE=ON
+
+# (from now on, only the csh shell version will be shown)
+\end{verbatim}
+
+Then execute the application in the usual way. At the end of
+the run the profile information will be available at the end
+of each PET log (if ESMF Logs are turned on) or in a set of
+separate files, one per PET, with names {\em ESMF\_Profile.XXX}
+where XXX is the PET number.  Below is an example timing
+profile.  Some regions are left out for brevity.
+
+\begin{verbatim}
+Region                                             Count  Total (s)   Self (s)    Mean (s)    Min (s)     Max (s)
+  [esm] RunPhase1                                  1      1.3629      0.6119      1.3629      1.3629      1.3629 
+    [OCN-TO-ATM] RunPhase1                         864    0.2441      0.2441      0.0003      0.0002      0.0252 
+    [ATM-TO-OCN] RunPhase1                         864    0.1775      0.1775      0.0002      0.0001      0.0129 
+    [OCN] RunPhase1                                864    0.1744      0.1744      0.0002      0.0002      0.0004 
+    [ATM] RunPhase1                                864    0.1550      0.1550      0.0002      0.0001      0.0004 
+  [esm] Init 1                                     1      0.9236      0.0139      0.9236      0.9236      0.9236 
+    [OCN-TO-ATM] IPDv05p6b                         1      0.5447      0.5447      0.5447      0.5447      0.5447 
+    [ATM-TO-OCN] IPDv05p6b                         1      0.3594      0.3594      0.3594      0.3594      0.3594 
+    [ATM] IPDv00p2                                 1      0.0014      0.0014      0.0014      0.0014      0.0014 
+    [OCN] IPDv00p2                                 1      0.0007      0.0007      0.0007      0.0007      0.0007 
+    [ATM] IPDv00p1                                 1      0.0003      0.0003      0.0003      0.0003      0.0003 
+  [esm] FinalizePhase1                             1      0.0010      0.0009      0.0010      0.0010      0.0010 
+    [ATM-TO-OCN] FinalizePhase1                    1      0.0001      0.0001      0.0001      0.0001      0.0001 
+    [OCN-TO-ATM] FinalizePhase1                    1      0.0000      0.0000      0.0000      0.0000      0.0000 
+    [ATM] FinalizePhase1                           1      0.0000      0.0000      0.0000      0.0000      0.0000 
+    [OCN] FinalizePhase1                           1      0.0000      0.0000      0.0000      0.0000      0.0000 
+\end{verbatim}
+
+A timed region is either an ESMF component phase (e.g., initialize,
+run, or finalize) or a user-defined region of code surrounded by calls to
+{\tt ESMF\_TraceRegionEnter()} and {\tt ESMF\_TraceRegionExit()}. (See
+section \ref{ex:TraceUserEx} for more information on instrumenting
+user-defined regions.)
+Regions are organized hierarchically with sub-regions nested.
+For example, in the profile above,
+the {\tt [OCN] RunPhase1} is a sub-region of {\tt [esm] RunPhase1} and is
+entirely contained inside that region. Regions with the same name may appear
+at multiple places in the hierarchy, and so would appear in multiple rows
+in the table.  The statistics in that row apply to that region at that
+location in the hierarchy. Component names appear in square brackets,
+e.g., {\tt [ATM]},  {\tt [OCN]}, and {\tt [ATM-TO-OCN]}.
+By default, timings are based on elapsed wall clock time and are collected
+on a per-PET basis. Therefore, regions timings may differ across PETs. Regions
+are sorted with the most expensive regions appearing at the top. The following
+describes the meaning of the statistics in each column:
+
+\begin{itemize}
+\item [{\tt Count}] the number of times the region is executed
+\item [{\tt Total}] the aggregate time spent in the region, inclusive of all sub-regions
+\item [{\tt Self}]  the aggregate time spend in the region, exclusive of all sub-regions
+\item [{\tt Mean}]  the average amount of time for one execution of the region
+\item [{\tt Min}]   time of the fastest execution of the region
+\item [{\tt Max}]   time of the slowest execution of the region
+\end{itemize}
+
+
+\subsubsection{Summarize Timings across Multiple PETs}
+\label{sec:SummaryProfiling}
+
+By default, separate timing profiles are generated for each PET
+in the application.  The per-PET profiles can be aggregated together
+and output to a single file, {\em ESMF\_Profile.txt}, by setting the
+{\tt ESMF\_RUNTIME\_PROFILE\_OUTPUT} environment variable as follows:
+
+\begin{verbatim}
+$ setenv ESMF_RUNTIME_PROFILE ON              # turn on profiling
+$ setenv ESMF_RUNTIME_PROFILE_OUTPUT SUMMARY  # specify summary output
+\end{verbatim}
+
+Note the {\tt ESMF\_RUNTIME\_PROFILE} environment variable must
+also be set to {\tt ON} since this controls all profiling capabilities.
+The {\em ESMF\_Profile.txt} file will contain a similar tree of
+timed regions, but aggregated across all PETs.  For example, the
+{\tt Total} column will contain the sum of all {\tt Total}s across
+all PETs that were profiled.  In other words, this is the sum of the
+total wall clock times across all PETs for each region. The {\tt Min}
+will contain the global minimum execution time of the region
+across all PETs and the {\tt Mean} will be the mean of all PET means.
+
+To output both the per-PET and summary timing profiles,
+set the {\tt ESMF\_RUNTIME\_PROFILE\_OUTPUT} environment variable as follows:
+
+\begin{verbatim}
+$ setenv ESMF_RUNTIME_PROFILE_OUTPUT "TEXT SUMMARY"
+\end{verbatim}
+
+
+\subsubsection{Limit the Set of Profiled PETs}
+\label{sec:LimitProfiling}
+
+By default, all PETs in an application are profiled. It may be desirable
+to only profile a subset of PETs to reduce the amount of output.
+An explicit list of PETs can be specified by setting the
+{\tt ESMF\_RUNTIME\_PROFILE\_PETLIST} environment variable.
+The syntax of this environment variable is to list
+PET numbers separated by spaces. PET ranges are also supported using
+the ``X-Y'' syntax where X < Y.
+For example:
+
+\begin{verbatim}
+# only profile PETs 0, 20, and 35 through 39
+$ setenv ESMF_RUNTIME_PROFILE_PETLIST "0 20 35-39"
+\end{verbatim}
+
+When used in conjunction with the {\tt SUMMARY} option above, the summarized
+profile will only aggregate over the specified set of PETs. The one exception is that
+PET 0 is always profiled if {\tt ESMF\_RUNTIME\_PROFILE=ON}, regardless of the
+{\tt ESMF\_RUNTIME\_TRACE\_PETLIST} setting.
+
+
+\subsubsection{Output a Detailed Trace for Analysis}
+
+
 ESMF tracing is disabled by default. To enable tracing, set the
 {\tt ESMF\_RUNTIME\_TRACE} environment variable to {\tt ON}. You
 do not need to recompile your code to enable tracing.
@@ -42,6 +172,13 @@ recommended to set this environment variable. The one exception is that
 PET 0 is always traced, regardless of the {\tt ESMF\_RUNTIME\_TRACE\_PETLIST}
 setting.
 
+ESMF's profiling and tracing options can be used together.  A typical
+use would be to set {\tt ESMF\_RUNTIME\_PROFILE=ON} for all PETs to
+capture summary timings, and set {\tt ESMF\_RUNTIME\_TRACE=ON} and
+{\tt ESMF\_RUNTIME\_TRACE\_PETLIST} to a subset of of PETs,
+such as the root PET of each ESMF component. This helps to keep trace
+sizes small while still providing timing summaries over all PETs.
+
 When tracing is enabled, {\tt phase\_enter} and {\tt phase\_exit} events will
 automatically be recorded for all initialize, run, and finalize phases of all
 Components in the application. To trace {\em only} user-instrumented regions (via
@@ -69,11 +206,12 @@ recommended unless needed. To turn on eager flushing use:
 $ setenv ESMF_RUNTIME_TRACE_FLUSH EAGER
 \end{verbatim}
 
-\subsubsection{Clocks}
+\subsubsection{Set the Clock used for Profiling/Tracing}
 \label{sec:TracingClocks}
 
 There are three options for the kind of clock to use to timestamp
-events. These options are controlled by setting the environment variable
+events when profiling/tracing an application.
+These options are controlled by setting the environment variable
 {\tt ESMF\_RUNTIME\_TRACE\_CLOCK}.
 \begin{itemize}
 \item [{\tt REALTIME}] The {\tt REALTIME} clock timestamps events with the current time on

@@ -18,16 +18,18 @@ program ESMF_TraceUserEx
 #include "ESMF.h"
 
 !BOE
-! \subsubsection{Tracing user-defined regions} \label{ex:TraceEx}
+! \subsubsection{Profiling/Tracing User-defined Code Regions} \label{ex:TraceUserEx}
 !
 ! This example illustrates how to manually instrument code with
-! entry and exit points for user-defined regions. Note that the
+! entry and exit points for user-defined code regions. Note that the
 ! API calls {\tt ESMF\_TraceRegionEnter} and {\tt ESMF\_TraceRegionExit}
 ! should always appear in pairs, wrapping a particular section
-! of code. The environment variable {\tt ESMF\_RUNTIME\_TRACE} must
-! be set to {\tt ON} to enable tracing. If not set, the calls to
+! of code. The environment variable {\tt ESMF\_RUNTIME\_TRACE} 
+! or {\tt ESMF\_RUNTIME\_PROFILE} must  
+! be set to {\tt ON} to enable these regions. If at least one is not set, the calls to
 ! {\tt ESMF\_TraceRegionEnter} and {\tt ESMF\_TraceRegionExit}
-! will simply return without writing any trace events.
+! will simply return immediately. For this reason, it is safe to
+! leave this instrumentation in application code, even when not being profiled.  
 !EOE
 
 

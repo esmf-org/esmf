@@ -93,7 +93,7 @@ namespace ESMCI {
   static bool profileOutputToLog = false;    // output to EMSF log?
   static bool profileOutputToFile = false;   // output to text file?
   static bool profileOutputToBinary = false; // output to binary trace?
-  static bool profileOutputGather = false;   // output aggregate profile on root PET?
+  static bool profileOutputSummary = false;   // output aggregate profile on root PET?
   
   static uint16_t next_local_id() {
     static uint16_t next = 1;
@@ -460,11 +460,10 @@ namespace ESMCI {
              (profileOutput.find("Binary") != string::npos) ) {
           profileOutputToBinary = true;
         }
-        if ( (profileOutput.find("GATHER") != string::npos) ||
-             (profileOutput.find("gather") != string::npos) ||
-             (profileOutput.find("Gather") != string::npos) ) {
-          printf("set output to gather\n");
-          profileOutputGather = true;
+        if ( (profileOutput.find("SUMMARY") != string::npos) ||
+             (profileOutput.find("summary") != string::npos) ||
+             (profileOutput.find("Summary") != string::npos) ) {
+          profileOutputSummary = true;
         }
       }
       else {
@@ -670,11 +669,10 @@ namespace ESMCI {
       string name = rn->getName();
       name.insert(0, prefix);
       
-      snprintf(strbuf, STATLINE, "%-50s %-6lu %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f",
+      snprintf(strbuf, STATLINE, "%-50s %-6lu %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f",
                name.c_str(), rn->getCount(), rn->getTotal()*NANOS_TO_SECS,
                rn->getSelfTime()*NANOS_TO_SECS, rn->getMean()*NANOS_TO_SECS,
-               rn->getMin()*NANOS_TO_SECS, rn->getMax()*NANOS_TO_SECS,
-               rn->getTotalMPI()*NANOS_TO_SECS);
+               rn->getMin()*NANOS_TO_SECS, rn->getMax()*NANOS_TO_SECS);
       if (printToLog) {
         ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
       }
@@ -698,8 +696,8 @@ namespace ESMCI {
     ofstream ofs;
     int localrc;
     char strbuf[STATLINE];
-    snprintf(strbuf, STATLINE, "%-50s %-6s %-11s %-11s %-11s %-11s %-11s %-11s",
-             "Region", "Count", "Total (s)", "Self (s)", "Mean (s)", "Min (s)", "Max (s)", "MPI (s)");
+    snprintf(strbuf, STATLINE, "%-50s %-6s %-11s %-11s %-11s %-11s %-11s",
+             "Region", "Count", "Total (s)", "Self (s)", "Mean (s)", "Min (s)", "Max (s)");
 
     if (printToLog) {
       ESMC_LogDefault.Write("**************** Region Timings *******************", ESMC_LOGMSG_INFO);
@@ -760,7 +758,7 @@ namespace ESMCI {
     size_t bufferSize = 0;
     
     if (profileLocalPet && globalvm->getLocalPet() > 0) {
-      std::cout << "serialize from pet: " << globalvm->getLocalPet() << "\n";
+      //std::cout << "serialize from pet: " << globalvm->getLocalPet() << "\n";
       try {
         serializedTree = rootRegionNode.serialize(&bufferSize);
       }
@@ -769,7 +767,7 @@ namespace ESMCI {
                                       e.what(), ESMC_CONTEXT, rc);
         return;                 
       }
-      std::cout << "sending profile from pet: " << globalvm->getLocalPet() << " (" << bufferSize << ")" << "\n";
+      //std::cout << "sending profile from pet: " << globalvm->getLocalPet() << " (" << bufferSize << ")" << "\n";
       //send size of buffer
       globalvm->send((void *) &bufferSize, sizeof(bufferSize), 0);
       //send buffer itself
@@ -788,7 +786,7 @@ namespace ESMCI {
 
           bufferSize = 0;
           globalvm->recv((void *) &bufferSize, sizeof(bufferSize), p);
-          std::cout << "receive profile from pet: " << p << " (" << bufferSize << ")" << "\n";
+          //std::cout << "receive profile from pet: " << p << " (" << bufferSize << ")" << "\n";
           
           serializedTree = (char *) malloc(bufferSize);
           if (serializedTree == NULL) {
@@ -852,7 +850,7 @@ namespace ESMCI {
       traceInitialized = false;
       FinalizeWrappers();
 
-      if (profileOutputToLog || profileOutputToFile || profileOutputGather) {
+      if (profileOutputToLog || profileOutputToFile || profileOutputSummary) {
         populateRegionNames(&rootRegionNode);
       }
 
@@ -885,7 +883,7 @@ namespace ESMCI {
         AddRegionProfilesToTrace(&rootRegionNode);
       }
 
-      if (profileOutputGather) {
+      if (profileOutputSummary) {
         GatherRegions(&localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, 
            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
