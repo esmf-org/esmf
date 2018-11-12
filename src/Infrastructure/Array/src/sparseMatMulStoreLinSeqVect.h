@@ -466,7 +466,7 @@ template<typename IT1, typename IT2>
       factorElementCounter += factorCount;
       for (int jj=0; jj<factorCount; jj++)
         partnerDeCounter +=
-          seqIndexFactorLookup[lookupIndex].factorList[jj].partnerDe.size();
+          seqIndexFactorLookup[lookupIndex].factorList[jj].partnerDE.size();
     }
   }
   int responseStreamSize = 
@@ -474,7 +474,7 @@ template<typename IT1, typename IT2>
     indexCounter*sizeof(IT1) +              // decompSeqIndex
     factorElementCounter*sizeof(IT2) +      // partnerSeqIndex.decompSeqIndex
     2*factorElementCounter*sizeof(int) +    // FactorElement members
-    partnerDeCounter*sizeof(int) +          // partnerDe elements
+    partnerDeCounter*sizeof(int) +          // partnerDE elements
     8*factorElementCounter;                 // FactorElement factor
   return responseStreamSize;
 }
@@ -511,11 +511,11 @@ template<typename IT1, typename IT2>
         *responseStreamInt++ = seqIndexFactorLookup[lookupIndex].factorList[k]
           .partnerSeqIndex.tensorSeqIndex;
         int size = seqIndexFactorLookup[lookupIndex]
-          .factorList[k].partnerDe.size();
+          .factorList[k].partnerDE.size();
         *responseStreamInt++ = size;
         for (int kk=0; kk<size; kk++)
           *responseStreamInt++ = seqIndexFactorLookup[lookupIndex]
-            .factorList[k].partnerDe[kk];
+            .factorList[k].partnerDE[kk];
         char *responseStreamChar = (char *)responseStreamInt;
         for (int kk=0; kk<8; kk++)
           *responseStreamChar++ =
@@ -551,9 +551,9 @@ template<typename IT1, typename IT2>
       element.factorList[jj].partnerSeqIndex.tensorSeqIndex =
         *responseStreamInt++;
       int size = *responseStreamInt++;
-      element.factorList[jj].partnerDe.resize(size);
+      element.factorList[jj].partnerDE.resize(size);
       for (int kk=0; kk<size; kk++)
-        element.factorList[jj].partnerDe[kk] = *responseStreamInt++;
+        element.factorList[jj].partnerDE[kk] = *responseStreamInt++;
       char *responseStreamChar = (char *)responseStreamInt;
       for (int kk=0; kk<8; kk++)
         element.factorList[jj].factor[kk] = *responseStreamChar++;
@@ -640,8 +640,8 @@ template<typename IT1, typename IT2>
           lookupIndex += (j->factorList[k]
             .partnerSeqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
         }
-        j->factorList[k].partnerDe.insert(
-          j->factorList[k].partnerDe.end(),
+        j->factorList[k].partnerDE.insert(
+          j->factorList[k].partnerDE.end(),
           seqIndexFactorLookupIn[lookupIndex].de.begin(),
           seqIndexFactorLookupIn[lookupIndex].de.end());
       }
@@ -697,7 +697,7 @@ template<typename IT1, typename IT2>
     int size = *responseStreamInt++;
     for (int j=0; j<size; j++){
       int de = *responseStreamInt++;
-      seqIndexFactorLookupOut[localLookupIndex].factorList[k].partnerDe
+      seqIndexFactorLookupOut[localLookupIndex].factorList[k].partnerDE
         .push_back(de);
     }
   }
@@ -2094,7 +2094,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
   VM::logMemInfo(std::string("ASMMStore2.17"));
 #endif
 
-  // fill partnerDe in srcSeqIndexFactorLookup using dstSeqIndexFactorLookup
+  // fill partnerDE in srcSeqIndexFactorLookup using dstSeqIndexFactorLookup
   {
     DD::FillPartnerDeInfo<DIT,SIT> *fillPartnerDeInfo =
       new DD::FillPartnerDeInfo<DIT,SIT>
@@ -2145,7 +2145,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
   VM::logMemInfo(std::string("ASMMStore2.19"));
 #endif
 
-  // fill partnerDe in dstSeqIndexFactorLookup using srcSeqIndexFactorLookup
+  // fill partnerDE in dstSeqIndexFactorLookup using srcSeqIndexFactorLookup
   {
     DD::FillPartnerDeInfo<SIT,DIT> *fillPartnerDeInfo =
       new DD::FillPartnerDeInfo<SIT,DIT>
@@ -2187,13 +2187,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     for (int j=0; j<i->factorCount; j++){
       fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
         "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
-        "\t\t.partnerDe = ", j,
+        "\t\t.partnerDE = ", j,
         i->factorList[j].partnerSeqIndex
         .decompSeqIndex);
       for (int jj=0;
-        jj<i->factorList[j].partnerDe.size(); jj++)
+        jj<i->factorList[j].partnerDE.size(); jj++)
         fprintf(asmm_store_log_fp, "%d, ",
-          i->factorList[j].partnerDe[jj]);
+          i->factorList[j].partnerDE[jj]);
       fprintf(asmm_store_log_fp, "\n");
       fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
         *((int *)i->factorList[j].factor));
@@ -2216,13 +2216,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     for (int j=0; j<i->factorCount; j++){
       fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
         "\t\t.partnerSeqIndex.decompSeqIndex = %d\n"
-        "\t\t.partnerDe = ", j,
+        "\t\t.partnerDE = ", j,
         i->factorList[j].partnerSeqIndex
         .decompSeqIndex);
       for (int jj=0;
-        jj<i->factorList[j].partnerDe.size(); jj++)
+        jj<i->factorList[j].partnerDE.size(); jj++)
         fprintf(asmm_store_log_fp, "%d, ",
-          i->factorList[j].partnerDe[jj]);
+          i->factorList[j].partnerDE[jj]);
       fprintf(asmm_store_log_fp, "\n");
       fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
         *((int *)i->factorList[j].factor));
@@ -2330,13 +2330,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
       for (int kk=0; kk<srcLinSeqVect[j][k].factorCount; kk++){
         fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
-          "\t\t.partnerDe = ", kk,
+          "\t\t.partnerDE = ", kk,
           srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
-          jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
+          jj<srcLinSeqVect[j][k].factorList[kk].partnerDE.size(); jj++)
           fprintf(asmm_store_log_fp, "%d, ",
-            srcLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
+            srcLinSeqVect[j][k].factorList[kk].partnerDE[jj]);
         fprintf(asmm_store_log_fp, "\n");
         fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
           *((int *)srcLinSeqVect[j][k].factorList[kk].factor));
@@ -2357,13 +2357,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
       for (int kk=0; kk<dstLinSeqVect[j][k].factorCount; kk++){
         fprintf(asmm_store_log_fp, "\tfactorList[%d]\n"
           "\t\t.partnerSeqIndex = %d/%d\n"
-          "\t\t.partnerDe = ", kk,
+          "\t\t.partnerDE = ", kk,
           dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.decompSeqIndex,
           dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex);
         for (int jj=0;
-          jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
+          jj<dstLinSeqVect[j][k].factorList[kk].partnerDE.size(); jj++)
           fprintf(asmm_store_log_fp, "%d, ",
-            dstLinSeqVect[j][k].factorList[kk].partnerDe[jj]);
+            dstLinSeqVect[j][k].factorList[kk].partnerDE[jj]);
         fprintf(asmm_store_log_fp, "\n");
         fprintf(asmm_store_log_fp, "\t\t.factor = %d\n",
           *((int *)dstLinSeqVect[j][k].factorList[kk].factor));
@@ -2374,7 +2374,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
   
   if (ignoreUnmatched){
     // If there are unmatched src or dst elements in the sparse matrix, they
-    // will have lead to FactorElement entries with a partnerDe.size()==0 here.
+    // will have lead to FactorElement entries with a partnerDE.size()==0 here.
     // Leaving them like that will lead to issues down the code, so that if
     // unmatched entries are to be supported, these FactorElements must be 
     // removed here.
@@ -2388,7 +2388,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
         for (typename vector<FactorElement<DIT> >::iterator
           fe=srcLinSeqVect[j][k].factorList.begin();
           fe!=srcLinSeqVect[j][k].factorList.end();){
-          if (fe->partnerDe.size() == 0){
+          if (fe->partnerDE.size() == 0){
             // eliminate this factorList entry
             fe = srcLinSeqVect[j][k].factorList.erase(fe);
           }else{
@@ -2403,7 +2403,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
         for (typename vector<FactorElement<SIT> >::iterator
           fe=dstLinSeqVect[j][k].factorList.begin();
           fe!=dstLinSeqVect[j][k].factorList.end();){
-          if (fe->partnerDe.size() == 0){
+          if (fe->partnerDE.size() == 0){
             // eliminate this factorList entry
             fe = dstLinSeqVect[j][k].factorList.erase(fe);
           }else{
@@ -2420,10 +2420,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
 
     if (haloFlag||ignoreUnmatched){
     // Phase IV below expects each FactorElement inside of srcLinSeqVect and
-    // dstLinSeqVect to only reference a single partnerDe (- only partnerDe[0]
+    // dstLinSeqVect to only reference a single partnerDE (- only partnerDE[0]
     // will be looked at!). Therefore transform FactorElements that have more
-    // than one partnerDe entry into multiple FactorElements where each only
-    // has a single partnerDe entry.
+    // than one partnerDE entry into multiple FactorElements where each only
+    // has a single partnerDE entry.
     // This condition can arise either with halos, or when allowing more
     // general redist conditions that ignore that src and dst are not perfectly
     // matched wrt seqIndices.
@@ -2431,19 +2431,19 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     for (int j=0; j<srcLocalDeCount; j++){
       for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
         for (unsigned kk=0; kk<srcLinSeqVect[j][k].factorList.size(); kk++){
-          if (srcLinSeqVect[j][k].factorList[kk].partnerDe.size() > 1){
+          if (srcLinSeqVect[j][k].factorList[kk].partnerDE.size() > 1){
             for (unsigned jj=1;
-              jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++){
-              // construct factorElement with one partnerDe entry
+              jj<srcLinSeqVect[j][k].factorList[kk].partnerDE.size(); jj++){
+              // construct factorElement with one partnerDE entry
               FactorElement<DIT> factorElement =
                 srcLinSeqVect[j][k].factorList[kk];
-              factorElement.partnerDe.resize(1);
-              factorElement.partnerDe[0] =
-                srcLinSeqVect[j][k].factorList[kk].partnerDe[jj];
+              factorElement.partnerDE.resize(1);
+              factorElement.partnerDE[0] =
+                srcLinSeqVect[j][k].factorList[kk].partnerDE[jj];
               srcLinSeqVect[j][k].factorList.push_back(factorElement);
             }
-            // erase all of the replicated partnerDe entries
-            srcLinSeqVect[j][k].factorList[kk].partnerDe.resize(1);
+            // erase all of the replicated partnerDE entries
+            srcLinSeqVect[j][k].factorList[kk].partnerDE.resize(1);
           }
         }
       }
@@ -2452,15 +2452,15 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     for (int j=0; j<dstLocalDeCount; j++){
       for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
         for (unsigned kk=0; kk<dstLinSeqVect[j][k].factorList.size(); kk++){
-          if (dstLinSeqVect[j][k].factorList[kk].partnerDe.size() > 1){
+          if (dstLinSeqVect[j][k].factorList[kk].partnerDE.size() > 1){
             for (unsigned jj=1;
-              jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++){
-              // construct factorElement with one partnerDe entry
+              jj<dstLinSeqVect[j][k].factorList[kk].partnerDE.size(); jj++){
+              // construct factorElement with one partnerDE entry
               FactorElement<SIT> factorElement =
                 dstLinSeqVect[j][k].factorList[kk];
-              factorElement.partnerDe.resize(1);
-              factorElement.partnerDe[0] =
-                dstLinSeqVect[j][k].factorList[kk].partnerDe[jj];
+              factorElement.partnerDE.resize(1);
+              factorElement.partnerDE[0] =
+                dstLinSeqVect[j][k].factorList[kk].partnerDE[jj];
               //TODO: It's certainly not correct to add up all the entries
               //TODO: from all of the halo elements in a backward HALO,
               //TODO: instead the average over all elements makes more sense.
@@ -2469,8 +2469,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
               //TODO: src side.
               dstLinSeqVect[j][k].factorList.push_back(factorElement);
             }
-            // erase all of the replicated partnerDe entries
-            dstLinSeqVect[j][k].factorList[kk].partnerDe.resize(1);
+            // erase all of the replicated partnerDE entries
+            dstLinSeqVect[j][k].factorList[kk].partnerDE.resize(1);
           }
         }
       }
@@ -2505,10 +2505,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
             << srcLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex;
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
           msg.str("");  // clear
-          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDe =";
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDE =";
           for (unsigned jj=0;
-            jj<srcLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-            msg << srcLinSeqVect[j][k].factorList[kk].partnerDe[jj] <<", ";
+            jj<srcLinSeqVect[j][k].factorList[kk].partnerDE.size(); jj++)
+            msg << srcLinSeqVect[j][k].factorList[kk].partnerDE[jj] <<", ";
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
           msg.str("");  // clear
           switch (typekindFactors){
@@ -2557,10 +2557,10 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
             << dstLinSeqVect[j][k].factorList[kk].partnerSeqIndex.tensorSeqIndex;
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
           msg.str("");  // clear
-          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDe =";
+          msg << "ASMM_STORE_LOG:" << __LINE__ << " \t\t.partnerDE =";
           for (unsigned jj=0;
-            jj<dstLinSeqVect[j][k].factorList[kk].partnerDe.size(); jj++)
-            msg << dstLinSeqVect[j][k].factorList[kk].partnerDe[jj] <<", ";
+            jj<dstLinSeqVect[j][k].factorList[kk].partnerDE.size(); jj++)
+            msg << dstLinSeqVect[j][k].factorList[kk].partnerDE[jj] <<", ";
           ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
           msg.str("");  // clear
           switch (typekindFactors){

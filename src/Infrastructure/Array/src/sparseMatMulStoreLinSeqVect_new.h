@@ -208,6 +208,7 @@
             // add the factor to the factorList of the dstLinSeqVect element
             FactorElement<SIT> element;
             element.partnerSeqIndex = response[iRes].srcSeqIndex;
+            element.partnerDe = -1;
             *(T *)(element.factor) = response[iRes].factor;
             itD->factorList.push_back(element);
             // move to the next response element
@@ -314,6 +315,9 @@
       typename list<ElementSort<SIT> >::iterator itS =
 #endif
         srcElementSort.begin();
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Enter FillLinSeqVect.handleLocal()"));
+#endif
       while ((itD != dstElementSort.end()) && (itS != srcElementSort.end())){
         if (itD->fep->partnerSeqIndex == itS->seqIndex){
           // a match means that both sides need to record this...
@@ -323,11 +327,11 @@
           element.seqIndex = itS->seqIndex;
           element.factorList.resize(1);
           element.factorList[0].partnerSeqIndex = itD->seqIndex;
-          element.factorList[0].partnerDe.push_back(itD->de);
+          element.factorList[0].partnerDe=itD->de;
           *(T*)(element.factorList[0].factor) = *(T*)(itD->fep->factor);
           srcLinSeqVect[itS->localDe].push_back(element);
           // dst side now knows partnerDe for a FactorElement
-          itD->fep->partnerDe.push_back(itS->de);
+          itD->fep->partnerDe=itS->de;
           // erase the satisfied dstElementSort element
           itD = dstElementSort.erase(itD);  // point to next the next element
           if (itD == dstElementSort.end()) break;
@@ -392,7 +396,7 @@
           element.seqIndex = itS->seqIndex;
           element.factorList.resize(1);
           element.factorList[0].partnerSeqIndex = request[iReq].seqIndex;
-          element.factorList[0].partnerDe.push_back(request[iReq].de);
+          element.factorList[0].partnerDe=request[iReq].de;
           *(T*)(element.factorList[0].factor) = request[iReq].factor;
           srcLinSeqVect[itS->localDe].push_back(element);
           // dst side now knows partnerDe for a FactorElement
@@ -433,7 +437,7 @@
         if (response[iRes].seqIndex == itD->fep->partnerSeqIndex){
           // a match means that this needs to be recorded in the itD
           // dst side now knows partnerDe for a FactorElement
-          itD->fep->partnerDe.push_back(response[iRes].de);
+          itD->fep->partnerDe=response[iRes].de;
           // erase the satisfied dstElementSort element
           itD = dstElementSort.erase(itD);  // point to next the next element
           // move forward in response stream
@@ -453,7 +457,7 @@
         }
       }
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("FillLinSeqVect.handleResponse()"));
+  VM::logMemInfo(std::string("Exit FillLinSeqVect.handleResponse()"));
 #endif
     }
     
@@ -786,6 +790,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
             element.seqIndex = seqIndex;
             element.factorList.resize(1);
             element.factorList[0].partnerSeqIndex = seqIndex;
+            element.factorList[0].partnerDe = -1;            
             memcpy(element.factorList[0].factor, factor, 8);
             dstLinSeqVect[i].push_back(element);
             // find the matching seqIndex range
@@ -1195,7 +1200,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
       typename vector<FactorElement<SIT> >::iterator it
         = itD->factorList.begin(); 
       while (it != itD->factorList.end()){
-        if ((it->partnerDe).size()==0)
+        if ((it->partnerDe)==-1)
           it = itD->factorList.erase(it);
         else
           ++it;
