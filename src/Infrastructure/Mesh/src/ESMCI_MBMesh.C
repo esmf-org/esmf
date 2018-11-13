@@ -85,22 +85,12 @@ void MBMesh::CreateGhost() {
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
 
-  // Get the ParallelComm instance
-  ParallelComm* pcomm = new ParallelComm(mb, mpi_comm);
-  int nprocs = pcomm->proc_config().proc_size();
-  int rank = pcomm->proc_config().proc_rank();
-
-  // get the root set handle
-  EntityHandle root_set = mb->get_root_set();
+  // get the indexed pcomm object from the interface
+  // pass index 0, it will the one created inside MBMesh_addelements
+  static ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
   
-  Range range_ent;
-  merr=mb->get_entities_by_dimension(root_set,this->pdim,range_ent);
-  MBMESH_CHECK_ERR(merr, localrc);
-
-  merr = pcomm->resolve_shared_ents(root_set, range_ent, this->pdim, 1);
-  // tried this to use the custom tag, was causing a segv so went back to default gid
-  // merr = pcomm->resolve_shared_ents(root_set, this->sdim, 1, &this->gid_tag);
-  MBMESH_CHECK_ERR(merr, localrc);
+  // this is called in MBMesh_addelements
+  // merr = pcomm->resolve_shared_ents(root_set, elems, this->pdim, 1);
 
 // #define DEBUG_MOAB_GHOST_EXCHANGE
 #ifdef DEBUG_MOAB_GHOST_EXCHANGE
@@ -138,34 +128,48 @@ void MBMesh::CreateGhost() {
                                      true);// bool store_remote_handles
   MBMESH_CHECK_ERR(merr, localrc);
 
-  vector<Tag> tags;
-  tags.push_back(this->gid_tag);
-  tags.push_back(this->orig_pos_tag);
-  tags.push_back(this->owner_tag);
-  if (this->has_node_orig_coords) tags.push_back(this->node_orig_coords_tag);
+  Range nodes;
+  merr=mb->get_entities_by_dimension(0, 0, nodes);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+  Range elems;
+  merr=mb->get_entities_by_dimension(0, this->pdim, elems);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+  vector<Tag> node_tags;
+  vector<Tag> elem_tags;
+  
+  node_tags.push_back(this->gid_tag);
+  node_tags.push_back(this->orig_pos_tag);
+  node_tags.push_back(this->owner_tag);
+  if (this->has_node_orig_coords) node_tags.push_back(this->node_orig_coords_tag);
   if (this->has_node_mask) {
-    tags.push_back(this->node_mask_tag);
-    tags.push_back(this->node_mask_val_tag);
+    node_tags.push_back(this->node_mask_tag);
+    node_tags.push_back(this->node_mask_val_tag);
   }
-  if (this->has_elem_frac) tags.push_back(this->elem_frac_tag);
+  
+  if (this->has_elem_frac) elem_tags.push_back(this->elem_frac_tag);
   if (this->has_elem_mask) {
-    tags.push_back(this->elem_mask_tag);
-    tags.push_back(this->elem_mask_val_tag);
+    elem_tags.push_back(this->elem_mask_tag);
+    elem_tags.push_back(this->elem_mask_val_tag);
   }
-  if (this->has_elem_area) tags.push_back(this->elem_area_tag);
-  if (this->has_elem_coords) tags.push_back(this->elem_coords_tag);
-  if (this->has_elem_orig_coords) tags.push_back(this->elem_orig_coords_tag);
+  if (this->has_elem_area) elem_tags.push_back(this->elem_area_tag);
+  if (this->has_elem_coords) elem_tags.push_back(this->elem_coords_tag);
+  if (this->has_elem_orig_coords) elem_tags.push_back(this->elem_orig_coords_tag);
   
   // pcomm->set_debug_verbosity(4);
 
-  merr = pcomm->exchange_tags(tags, tags, range_ent);
+  merr = pcomm->exchange_tags(node_tags, node_tags, nodes);
   MBMESH_CHECK_ERR(merr, localrc);
 
-  // {void *mbptr = (void *) this;
-  // int rc;
-  // int len = 12; char fname[len];
-  // sprintf(fname, "meshdual_%d", localPet);
-  // MBMesh_write(&mbptr, fname, &rc, len);}
+  merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+  {void *mbptr = (void *) this;
+  int rc;
+  int len = 12; char fname[len];
+  sprintf(fname, "meshdual_%d", localPet);
+  MBMesh_write(&mbptr, fname, &rc, len);}
 
 
 #ifdef DEBUG_MOAB_GHOST_EXCHANGE

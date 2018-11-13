@@ -531,60 +531,68 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined ESMF_MOAB
   MBMesh *mbmesh = NULL;
-  mbmesh = create_mesh_quad_9_parallel_dual2(ESMC_COORDSYS_CART, rc);
-  // mbmesh = create_mesh_ph_parallel(ESMC_COORDSYS_CART, rc);
+  // mbmesh = create_mesh_quad_9_parallel_dual2(ESMC_COORDSYS_CART, rc);
+  mbmesh = create_mesh_ph_parallel(ESMC_COORDSYS_CART, rc);
   if (!mbmesh) rc = ESMC_RC_PTR_NULL;
 
 #define DEBUG_EXCHANGE_TAGS
 #ifdef DEBUG_EXCHANGE_TAGS
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshMOABGhostUTest"
-  Interface *mb = mbmesh->mesh;
-  ParallelComm* pcomm = new ParallelComm(mb, mpi_comm);
   
-  Range range_ent;
-  int merr; int pdim = mbmesh->pdim;
-  merr=mb->get_entities_by_dimension(0,pdim,range_ent);
-  MBMESH_CHECK_ERR(merr, rc);
+  // get the indexed pcomm object from the interface
+  // pass index 0, it will the one created inside MBMesh_addelements
+  static ParallelComm *pcomm = ParallelComm::get_pcomm(mbmesh->mesh, 0);
 
-  merr = pcomm->resolve_shared_ents(0, range_ent, pdim, 1);
-  // pcomm->resolve_shared_ents(0, mbmesh->pdim, mbmesh->pdim-1);
-  MBMESH_CHECK_ERR(merr, rc);
+  int merr;
   
   void *mbptr = (void *) mbmesh;
   int len = 12; char fname[len];
   sprintf(fname, "mesh_%d", localPet);
   MBMesh_write(&mbptr, fname, &rc, len);
-
   
-  merr = pcomm->exchange_ghost_cells(pdim, // int ghost_dim
+  merr = pcomm->exchange_ghost_cells(mbmesh->pdim, // int ghost_dim
                                      0, // int bridge_dim
                                      1, // int num_layers
                                      0, // int addl_ents
                                      true);// bool store_remote_handles
   MBMESH_CHECK_ERR(merr, rc);
 
-  vector<Tag> tags;
-  tags.push_back(mbmesh->gid_tag);
-  tags.push_back(mbmesh->orig_pos_tag);
-  tags.push_back(mbmesh->owner_tag);
-  if (mbmesh->has_node_orig_coords) tags.push_back(mbmesh->node_orig_coords_tag);
-  if (mbmesh->has_node_mask) {
-    tags.push_back(mbmesh->node_mask_tag);
-    tags.push_back(mbmesh->node_mask_val_tag);
-  }
-  if (mbmesh->has_elem_frac) tags.push_back(mbmesh->elem_frac_tag);
-  if (mbmesh->has_elem_mask) {
-    tags.push_back(mbmesh->elem_mask_tag);
-    tags.push_back(mbmesh->elem_mask_val_tag);
-  }
-  if (mbmesh->has_elem_area) tags.push_back(mbmesh->elem_area_tag);
-  if (mbmesh->has_elem_coords) tags.push_back(mbmesh->elem_coords_tag);
-  if (mbmesh->has_elem_orig_coords) tags.push_back(mbmesh->elem_orig_coords_tag);  
-   
-  pcomm->set_debug_verbosity(4);
+  Range elems;
+  merr=mbmesh->mesh->get_entities_by_dimension(0, mbmesh->pdim, elems);
+  MBMESH_CHECK_ERR(merr, rc);
 
-  merr = pcomm->exchange_tags(tags, tags, range_ent);
+  Range nodes;
+  merr=mbmesh->mesh->get_entities_by_dimension(0, 0, nodes);
+  MBMESH_CHECK_ERR(merr, rc);
+
+  vector<Tag> node_tags;
+  vector<Tag> elem_tags;
+  
+  node_tags.push_back(mbmesh->gid_tag);
+  node_tags.push_back(mbmesh->orig_pos_tag);
+  node_tags.push_back(mbmesh->owner_tag);
+  if (mbmesh->has_node_orig_coords) node_tags.push_back(mbmesh->node_orig_coords_tag);
+  if (mbmesh->has_node_mask) {
+    node_tags.push_back(mbmesh->node_mask_tag);
+    node_tags.push_back(mbmesh->node_mask_val_tag);
+  }
+  
+  if (mbmesh->has_elem_frac) elem_tags.push_back(mbmesh->elem_frac_tag);
+  if (mbmesh->has_elem_mask) {
+    elem_tags.push_back(mbmesh->elem_mask_tag);
+    elem_tags.push_back(mbmesh->elem_mask_val_tag);
+  }
+  if (mbmesh->has_elem_area) elem_tags.push_back(mbmesh->elem_area_tag);
+  if (mbmesh->has_elem_coords) elem_tags.push_back(mbmesh->elem_coords_tag);
+  if (mbmesh->has_elem_orig_coords) elem_tags.push_back(mbmesh->elem_orig_coords_tag); 
+   
+  // pcomm->set_debug_verbosity(4);
+
+  merr = pcomm->exchange_tags(node_tags, node_tags, nodes);
+  MBMESH_CHECK_ERR(merr, rc);
+  
+  merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
   MBMESH_CHECK_ERR(merr, rc);
   
   std::ostringstream ent_str;
