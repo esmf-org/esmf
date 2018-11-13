@@ -8811,7 +8811,7 @@ template<typename SIT, typename DIT>
   if (dstTensorLength>1) undistributedElementsPresent = true;
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-  malloc_trim(0);
+//  malloc_trim(0);
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -8870,7 +8870,7 @@ template<typename SIT, typename DIT>
   vector<vector<AssociationElement<DIT,SIT> > >().swap(dstLinSeqVect);
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-  malloc_trim(0);
+//  malloc_trim(0);
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -9400,7 +9400,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #endif
     
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-  malloc_trim(0);
+//  malloc_trim(0);
 #endif
     
 #ifdef ASMM_STORE_MEMLOG_on
@@ -9590,6 +9590,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       recvnbElement.bufferInfo = (char **)xxe->getBufferInfoPtr();
       recvnbElement.partnerDeDataCount = kk;
       recvnbElement.vectorFlag = vectorFlag;
+//      recvnbElement.dstInfoTable = dstInfoTable[i];
       recvnbElement.dstInfoTable.swap(dstInfoTable[i]);
       recvnbElement.localPet = localPet;
       recvnbElement.petCount = petCount;
@@ -9626,7 +9627,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #endif
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-  malloc_trim(0);
+//  malloc_trim(0);
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -9795,7 +9796,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #endif
     
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-  malloc_trim(0);
+//  malloc_trim(0);
 #endif
     
 #ifdef ASMM_STORE_MEMLOG_on
@@ -9952,6 +9953,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       sendnbElement.srcLocalDe = j;
       sendnbElement.partnerDeDataCount = deflator.size();
       sendnbElement.vectorFlag = vectorFlag;
+//      sendnbElement.srcInfoTable = srcInfoTable[i];
+//      sendnbElement.linIndexContigBlockList = linIndexContigBlockList;
       sendnbElement.srcInfoTable.swap(srcInfoTable[i]);
       sendnbElement.linIndexContigBlockList.swap(linIndexContigBlockList);
       sendnbElement.bufferInfo = (char **)xxe->getBufferInfoPtr();
@@ -10338,7 +10341,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-      malloc_trim(0);
+//      malloc_trim(0);
 #endif
 #if 0
       // optimize the XXE entire stream
@@ -10506,7 +10509,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-      malloc_trim(0);
+//      malloc_trim(0);
 #endif
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.2"));
@@ -10651,7 +10654,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     &rc)) return rc;
   
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-  malloc_trim(0);
+//  malloc_trim(0);
 #endif
 
 #ifdef ASMM_STORE_MEMLOG_on
