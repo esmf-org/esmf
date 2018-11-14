@@ -960,6 +960,7 @@ template<typename IT1, typename IT2>
         return 0; // provoke MPI errors
     }
     virtual int messageSize(int srcPet, int dstPet)const{
+#define DEBUGGING
 #ifdef DEBUGGING
   {
     std::stringstream debugmsg;
@@ -1050,6 +1051,7 @@ template<typename IT1, typename IT2>
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
+#undef DEBUGGING
       return (2*sizeof(int)+sizeof(IT)+dataSizeFactors)
         * messageSizeCount(srcPet, dstPet);
     }
@@ -1135,6 +1137,26 @@ template<typename IT1, typename IT2>
         factorElement.partnerSeqIndex.decompSeqIndex = *itStream++;
         factorStream = (T *)itStream;
         *((T *)factorElement.factor) = *factorStream++;
+  {
+    std::stringstream msg;
+    msg << "fillSeqIndexFactorLookupFromStream: (srcPet=" 
+      << srcPet << " ,dstPet=" << dstPet << "): "
+      << " seqIndexFactorLookup.size()=" 
+      << SetupSeqIndexFactorLookup<IT>::seqIndexFactorLookup.size()
+      << " lookupIndex=" << lookupIndex;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+        
+#if 1
+  if (lookupIndex<0 ||
+    lookupIndex>SetupSeqIndexFactorLookup<IT>::seqIndexFactorLookup.size()){
+    int rc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "lookupIndex out of range", ESMC_CONTEXT, &rc);
+    throw rc;  // bail out with exception
+  }
+#endif  
+  
         SetupSeqIndexFactorLookup<IT>::
           seqIndexFactorLookup[lookupIndex].factorList.push_back(factorElement);
       }

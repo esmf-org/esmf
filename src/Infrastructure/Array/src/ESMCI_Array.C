@@ -15,7 +15,7 @@
 
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
-#define ASMM_STORE_MEMLOG_off
+#define ASMM_STORE_MEMLOG_on
 #define ASMM_STORE_TUNELOG_off
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_DUMPSMM_off
@@ -65,6 +65,7 @@
 #include <sstream>
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
 #include <malloc.h>
+#define WITH_MALLOC_TRIM
 #endif
 
 // include ESMF headers
@@ -8830,7 +8831,9 @@ template<typename SIT, typename DIT>
   if (dstTensorLength>1) undistributedElementsPresent = true;
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+#ifdef WITH_MALLOC_TRIM
   malloc_trim(0);
+#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -8886,7 +8889,9 @@ template<typename SIT, typename DIT>
   vector<vector<AssociationElement<DIT,SIT> > >().swap(dstLinSeqVect);
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+#ifdef WITH_MALLOC_TRIM
   malloc_trim(0);
+#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -9394,7 +9399,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     delete [] partnerDeRef;
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+#ifdef WITH_MALLOC_TRIM
   malloc_trim(0);
+#endif
 #endif
   
 #ifdef ASMM_STORE_TIMING_on
@@ -9601,7 +9608,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #endif
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+#ifdef WITH_MALLOC_TRIM
   malloc_trim(0);
+#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -9705,7 +9714,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     delete [] partnerDeRef;
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+#ifdef WITH_MALLOC_TRIM
   malloc_trim(0);
+#endif
 #endif
   
     // sort each "sendnbDiffPartnerDeCount group" (opposite of dst)
@@ -10228,7 +10239,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+#ifdef WITH_MALLOC_TRIM
   malloc_trim(0);
+#endif
 #endif
   
 #if 0
@@ -10396,7 +10409,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+#ifdef WITH_MALLOC_TRIM
   malloc_trim(0);
+#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -10542,7 +10557,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     &rc)) return rc;
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
+#ifdef WITH_MALLOC_TRIM
   malloc_trim(0);
+#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
