@@ -619,34 +619,43 @@ namespace ESMCI {
     
   }
 
-  static string getPhaseNameFromRegionId(uint16_t regionId) {
+  static string getPhaseNameFromPhaseId(ESMFPhaseId phaseId) {
+    ComponentInfo *ci = NULL;
+    bool present = componentInfoMap.get(phaseId.getESMFId(), ci);
+    if (present && ci != NULL) {
+      return ci->getPhaseName(phaseId);
+    }
+    return "";
+  }
+  
+  static string getRegionNameFromId(uint16_t local_id) {
     ESMFPhaseId phaseId;
-    bool present = phaseRegionMap.reverse(regionId, phaseId);
+    bool present = phaseRegionMap.reverse(local_id, phaseId);
     if (present) {
-      ComponentInfo *ci = NULL;
-      bool present = componentInfoMap.get(phaseId.getESMFId(), ci);
-      if (present && ci != NULL) {
-        return ci->getPhaseName(phaseId);
-      }
+      return getPhaseNameFromPhaseId(phaseId);
+    }
+    else {
+      string name;
+      present = userRegionMap.reverse(local_id, name);
+      if (present) return name;
     }
     return "";
   }
 
+    
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::populateRegionNames()"  
   static void populateRegionNames(RegionNode *rn) {
     if (rn == NULL) return;
 
-    string name("UNKNOWN");
-    if (rn->isUserRegion()) {
-      bool present = userRegionMap.reverse(rn->getLocalId(), name);
-      if (!present) {
+    string name = getRegionNameFromId(rn->getLocalId());
+    if (name.length() == 0) {
+      if (rn->isUserRegion()) {
         name = "UNKNOWN_USER_REGION";
       }
-    }
-    else {
-      name = getPhaseNameFromRegionId(rn->getLocalId());
-      if (name.length() == 0) name = "UNKNOWN_ESMF_PHASE";
+      else {
+        name = "UNKNOWN_ESMF_PHASE";
+      }
     }
     rn->setName(name);
     
@@ -1046,7 +1055,7 @@ namespace ESMCI {
                                             currentRegionNode->getGlobalId(),
                                             TRACE_REGIONTYPE_PHASE,
                                             *ep_vmid, *ep_baseid, *ep_method, *ep_phase,
-                                            getPhaseNameFromRegionId(local_id).c_str());
+                                            getRegionNameFromId(local_id).c_str());
       }
     
       TraceClockLatch(traceCtx);  /* lock in time on clock */
@@ -1075,7 +1084,7 @@ namespace ESMCI {
       uint16_t local_id = 0;
       ESMFPhaseId phaseId(ESMFId(*ep_vmid, *ep_baseid), *ep_method, *ep_phase);
       bool present = phaseRegionMap.get(phaseId, local_id);  /* should always be present */
-      if (!present) {
+      if (!present) { 
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
                                     "Trace region not properly nested", ESMC_CONTEXT, rc);
         TraceClockUnlatch(traceCtx);
@@ -1089,8 +1098,12 @@ namespace ESMCI {
 	return;
       }
       else if (currentRegionNode->getLocalId() != local_id) {
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-				      "Trace regions not properly nested", ESMC_CONTEXT, rc);
+        stringstream errMsg;
+        errMsg << "Trace regions not properly nested exiting from region: ";
+        errMsg << getRegionNameFromId(local_id);
+        errMsg << " Expected exit from: ";
+        errMsg << getRegionNameFromId(currentRegionNode->getLocalId());
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG, errMsg.str().c_str(), ESMC_CONTEXT, rc);
 	TraceClockUnlatch(traceCtx);
 	return;
       }
@@ -1188,8 +1201,12 @@ namespace ESMCI {
 	return;
       }
       else if (currentRegionNode->getLocalId() != local_id) {
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-				      "Trace regions not properly nested", ESMC_CONTEXT, rc);
+        stringstream errMsg;
+        errMsg << "Trace regions not properly nested exiting from region: ";
+        errMsg << getRegionNameFromId(local_id);
+        errMsg << " Expected exit from: ";
+        errMsg << getRegionNameFromId(currentRegionNode->getLocalId());
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG, errMsg.str().c_str(), ESMC_CONTEXT, rc);
 	TraceClockUnlatch(traceCtx);
 	return;
       }
