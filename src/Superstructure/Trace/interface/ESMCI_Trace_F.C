@@ -15,7 +15,9 @@ using std::string;
 static const char *const version = "$Id$";
 
 extern "C" {
-
+  
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_open()"
   void FTN_X(c_esmftrace_open)
      (                          
       const char *trace_dir,
@@ -27,15 +29,17 @@ extern "C" {
     ESMCI::TraceOpen(dirname, profileToLog, rc);
   }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_close()"
   void FTN_X(c_esmftrace_close)(int *rc)
   {
     ESMCI::TraceClose(rc);
   }
 
-  void FTN_X(c_esmftrace_mapvmid)(ESMCI::VMId **vmid, int *mappedId, int *rc)
-  {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmftrace_mapvmpid()"
+  void FTN_X(c_esmftrace_mapvmid)(ESMCI::VMId **vmid, int *mappedId, int *rc)
+  {
     if (mappedId!=NULL) {
       *mappedId = ESMCI::TraceMapVmId(*vmid, rc);
     }
@@ -45,16 +49,32 @@ extern "C" {
     }
   }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_phase_enter()"
   void FTN_X(c_esmftrace_phase_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
-    ESMCI::TraceEventPhaseEnter(vmid, baseid, method, phase, rc);
+    int localrc;
+    ESMCI::TraceEventPhaseEnter(vmid, baseid, method, phase, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc))
+      return;
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_phase_exit()"
   void FTN_X(c_esmftrace_phase_exit)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
-    ESMCI::TraceEventPhaseExit(vmid, baseid, method, phase, rc);
+    int localrc;
+    ESMCI::TraceEventPhaseExit(vmid, baseid, method, phase, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc))
+      return;
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_phase_prologue_enter()"
   void FTN_X(c_esmftrace_phase_prologue_enter)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
     ESMCI::TraceEventPhasePrologueEnter(vmid, baseid, method, phase);
@@ -73,12 +93,16 @@ extern "C" {
   //  if (rc != NULL) *rc = ESMF_SUCCESS;
   //}
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_epliogue_enter()"
   void FTN_X(c_esmftrace_phase_epilogue_exit)(int *vmid, int *baseid, int *method, int *phase, int *rc)
   {
     ESMCI::TraceEventPhaseEpilogueExit(vmid, baseid, method, phase);
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_component_info()"
   void FTN_X(c_esmftrace_component_info)(ESMCI::Comp *comp, int *vmid, int *baseid, const char *name,
                                          const char *attributeKeys, const char *attributeVals, int *rc,
                                          ESMCI_FortranStrLenArg nlen,  //name
@@ -94,33 +118,52 @@ extern "C" {
 
   }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_region_enter()"
   void FTN_X(c_esmftrace_region_enter)(const char *name, int *rc, ESMCI_FortranStrLenArg nlen) {
     //TODO: optimize trim by not creating string object
+    int localrc;
     string cname = string(name, ESMC_F90lentrim(name, nlen));
-    ESMCI::TraceEventRegionEnter(cname, rc);
+    ESMCI::TraceEventRegionEnter(cname, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc))
+      return;
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_region_exit()"
   void FTN_X(c_esmftrace_region_exit)(const char *name, int *rc, ESMCI_FortranStrLenArg nlen) {
+    int localrc;
     string cname = string(name, ESMC_F90lentrim(name, nlen));
-    ESMCI::TraceEventRegionExit(cname, rc);
+    ESMCI::TraceEventRegionExit(cname, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+                                      ESMC_CONTEXT, rc))
+      return;
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_mem_info()"
   void FTN_X(c_esmftrace_mem_info)(int *rc) {
     ESMCI::TraceEventMemInfo();
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_clock()"  
   void FTN_X(c_esmftrace_clock)(int *ep_year, int *ep_month, int *ep_day,
                                 int *ep_hour, int *ep_minute, int *ep_second, int *rc) {
     ESMCI::TraceEventClock(ep_year, ep_month, ep_day, ep_hour, ep_minute, ep_second);
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmftrace_getmpiwaitstats()"  
   /* These functions exposed only for use in unit tests. */
   void FTN_X(c_esmftracetest_getmpiwaitstats)(int *count, long long *time) {
     ESMCI::TraceTest_GetMPIWaitStats(count, time);
   }
-
 
   
 } // extern "C"
