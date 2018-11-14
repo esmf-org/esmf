@@ -81,6 +81,7 @@
 \input{ESMF_VMGetMPICommunicatorEx_fapi}
 \input{ESMF_VMUserMpiEx_fapi}
 \input{ESMF_VMUserMpiCommEx_fapi}
+\input{ESMF_VMUserMpiCommMultiEx_fapi}
 \input{ESMF_VMComponentEx_fapi}
 \input{ESMF_VMSendVMRecvEx_fapi}
 \input{ESMF_VMScatterVMGatherEx_fapi}
@@ -92,6 +93,7 @@
 \input{../Infrastructure/VM/doc/ESMF_VMGetMPICommunicatorEx_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMUserMpiEx_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMUserMpiCommEx_fapi}
+\input{../Infrastructure/VM/doc/ESMF_VMUserMpiCommMultiEx_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMComponentEx_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMSendVMRecvEx_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMScatterVMGatherEx_fapi}

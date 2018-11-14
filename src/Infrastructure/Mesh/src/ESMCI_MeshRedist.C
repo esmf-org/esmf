@@ -366,6 +366,9 @@ namespace ESMCI {
     // Register fields
     register_fields(src_mesh, output_mesh);
 
+    // Setup Sym communication for ghosting
+    output_mesh->build_sym_comm_rel(MeshObj::NODE);
+
     // Commit Mesh
     output_mesh->Commit();
 
@@ -512,20 +515,20 @@ namespace ESMCI {
    ndir.Create(0, (UInt*) NULL, (UInt *)NULL);
  }
 
-
  // Assign node owners
  set_node_owners(output_mesh, ndir);
 
-
   // Set node data indexes
  set_node_data_indices(output_mesh, num_node_gids, node_gids);
-
 
   // Assume Contexts
   output_mesh->AssumeContexts(*src_mesh);
 
   // Register fields
   register_fields(src_mesh, output_mesh);
+
+  // Setup Sym communication for ghosting
+  output_mesh->build_sym_comm_rel(MeshObj::NODE);
 
    // Commit Mesh
   output_mesh->Commit();
@@ -634,6 +637,8 @@ namespace ESMCI {
   // Register fields
   register_fields(src_mesh, output_mesh);
 
+  // Setup Sym communication for ghosting
+  output_mesh->build_sym_comm_rel(MeshObj::NODE);
 
    // Commit Mesh
   output_mesh->Commit();
@@ -834,7 +839,7 @@ namespace ESMCI {
       ndir.RemoteGID(0, (UInt *)NULL, (UInt *)NULL, (UInt *)NULL);
     }
 
-    // Loop setting owner and OWNER_ID
+    // Loop setting owner 
     for (int i=0; i<num_src_gids; i++) {
       MeshObj &node=*(nodes[i]);
 
@@ -1001,7 +1006,7 @@ namespace ESMCI {
      // printf("Last curr_pos=%d gids.size()=%d\n",curr_pos,gids.size());
 
 
-    // Loop setting owner and OWNER_ID
+    // Loop setting owner
      for (int i=0; i<gids.size(); i++) {
       MeshObj &node=*(nodes[i]);
 
@@ -1024,8 +1029,7 @@ namespace ESMCI {
         Attr attr(GetAttr(node), newctxt);
         output_mesh->update_obj(&node, attr);
       }
-    }
-
+     }
   }
 
 
@@ -1085,8 +1089,6 @@ namespace ESMCI {
       }
     }
   }
-
-
 
   // Register Fields on output mesh  from src_mesh
   void register_fields(Mesh *src_mesh, Mesh *output_mesh) {

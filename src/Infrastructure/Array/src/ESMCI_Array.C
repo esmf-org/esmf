@@ -23,6 +23,17 @@
 #define ASMM_EXEC_INFO_off
 #define ASMM_EXEC_TIMING_off
 #define ASMM_EXEC_PROFILE_off
+
+
+//==============================================================================
+// Set OPTION!!!
+#define SMMSLSQV_OPTION 2
+// OPTION 1 - Use sparseMatMulStoreLinSeqVect() (i.e. old) for all cases
+// OPTION 2 - Use sparseMatMulStoreLinSeqVect_new() for halo, old all other
+// OPTION 3 - Use sparseMatMulStoreLinSeqVect_new() for all cases
+//==============================================================================
+
+
 //==============================================================================
 //
 // Array class implementation (body) file
@@ -1713,7 +1724,7 @@ Array *Array::create(
     }
     // allocate LocalArray object with specific undistLBound and undistUBound
     larrayList[i] = LocalArray::create(typekind, rank, &temp_counts[0],
-      &temp_larrayLBound[0], &temp_larrayUBound[0], NULL, DATA_REF, &localrc);
+      &temp_larrayLBound[0], &temp_larrayUBound[0], NULL, DATA_NONE, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
   }
@@ -1815,10 +1826,13 @@ Array *Array::create(
     int tensorCount =
       arrayOut->tensorCount = arrayIn->tensorCount - rmLeadingTensors;
     // determine leading tensor elements
-    int leadingTensorElementCount = 1;
-    for (int i=0; i<rmLeadingTensors; i++)
-      leadingTensorElementCount *=
-        arrayIn->undistUBound[i] - arrayIn->undistLBound[i] + 1;
+    int leadingTensorElementCount = 0;
+    if (rmLeadingTensors){
+      leadingTensorElementCount = 1;
+      for (int i=0; i<rmLeadingTensors; i++)
+        leadingTensorElementCount *=
+          arrayIn->undistUBound[i] - arrayIn->undistLBound[i] + 1;
+    }
     arrayOut->tensorElementCount =
       arrayIn->tensorElementCount - leadingTensorElementCount;
     if (arrayOut->tensorElementCount==0) arrayOut->tensorElementCount=1;
@@ -1846,7 +1860,7 @@ Array *Array::create(
         const int *temp_counts = arrayIn->larrayList[i]->getCounts();
         arrayOut->larrayList[i] =
           LocalArray::create(typekind, rank, &(temp_counts[rmLeadingTensors]),
-            NULL, NULL, NULL, DATA_REF, &localrc);
+            NULL, NULL, NULL, DATA_NONE, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
           arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -2048,7 +2062,7 @@ Array *Array::create(
         }
         arrayOut->larrayList[i] =
           LocalArray::create(typekind, rank, &(counts[0]),
-            NULL, NULL, NULL, DATA_REF, &localrc);
+            NULL, NULL, NULL, DATA_NONE, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,
           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)){
           arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -2248,7 +2262,7 @@ int Array::copy(
 
   try{
 
-    if (!match(this, arrayIn)){
+    if (!matchBool(this, arrayIn)){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
         "Arrays must match for data copy", ESMC_CONTEXT, &rc);
       return rc;
@@ -3078,12 +3092,177 @@ template<>
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::Array::match()"
+#define ESMC_METHOD "ESMCI::Array::isRHCompatible()"
 //BOPI
-// !IROUTINE:  ESMCI::Array::match
+// !IROUTINE:  ESMCI::Array::isRHCompatible
 //
 // !INTERFACE:
-bool Array::match(
+bool Array::isRHCompatible(
+//
+// !RETURN VALUE:
+//    bool according to whether RHCompatible or not
+//
+// !ARGUMENTS:
+//
+  Array const *array,     // in - Array to compare to
+  int *rc                 // (out) return code
+  )const{
+//
+// !DESCRIPTION:
+//    Determine whether a RouteHandle computed for this Array could also be
+//    applied to the {\tt array} argument.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+#undef DEBUGLOG
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  // initialize return value
+  bool result = false;  // not RHCompatible
+
+  // return with errors for NULL pointer
+  if (array == NULL){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to Array", ESMC_CONTEXT, rc);
+    return result;
+  }
+
+  // identical Array pointers are obviously RHCompatible
+  if (this == array){
+    result = true;
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return result;
+  }
+
+  // require typekind match
+  if (typekind != array->typekind){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return result;
+  }
+
+  // require DISTGRIDMATCH_INDEXSPACE or higher
+  DistGridMatch_Flag dgMatch =
+    DistGrid::match(distgrid, array->getDistGrid(), &localrc);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return rc;
+  if (dgMatch < DISTGRIDMATCH_INDEXSPACE){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return result;
+  }
+
+  // require match of order and memory layout of distributed dimensions
+  int const *dgToPackedArrayMap = array->getDistGridToPackedArrayMap();
+  int const *exLBound = array->getExclusiveLBound();
+  int const *exUBound = array->getExclusiveUBound();
+  int const *toLBound = array->getTotalLBound();
+  int const *toUBound = array->getTotalUBound();
+  for (int i=0; i<distgrid->getDimCount(); i++){
+    int dim=distgridToPackedArrayMap[i];
+    if (dim != dgToPackedArrayMap[i]){
+      // found mismatch in order of distributed dimensions
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return result;
+    }
+    if (dim > 0){
+      --dim;  // switch to base 0 for inside this block
+      // not a replicated dimension -> check for memory layout match
+      const int redDimCount = rank - tensorCount;
+      for (int lde=0; lde<distgrid->getDELayout()->getLocalDeCount(); lde++){
+        int diff1 = exclusiveLBound[lde*redDimCount+dim]
+          -  totalLBound[lde*redDimCount+dim];
+        int diff2 = exLBound[lde*redDimCount+dim]-toLBound[lde*redDimCount+dim];
+        if (diff1 != diff2){
+          // found mismatch in memory layout of distributed dimension
+#ifdef DEBUGLOG
+          {
+            std::stringstream msg;
+            msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          }
+#endif
+          if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+          return result;
+        }
+        diff1 = exclusiveUBound[lde*redDimCount+dim]
+          -  totalUBound[lde*redDimCount+dim];
+        diff2 = exUBound[lde*redDimCount+dim]-toUBound[lde*redDimCount+dim];
+        if (diff1 != diff2){
+          // found mismatch in memory layout of distributed dimension
+#ifdef DEBUGLOG
+          {
+            std::stringstream msg;
+            msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          }
+#endif
+          if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+          return result;
+        }
+      }
+    }
+  }
+
+  // return successfully indicating RH compatibility
+  result = true;
+#ifdef DEBUGLOG
+  {
+    std::stringstream msg;
+    msg << ESMC_METHOD": " << __LINE__ << " return:" << result;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+  if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+  return result;
+#undef DEBUGLOG
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::matchBool()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::matchBool
+//
+// !INTERFACE:
+bool Array::matchBool(
 //
 // !RETURN VALUE:
 //    bool according to match
@@ -3095,6 +3274,8 @@ bool Array::match(
   int *rc                                 // (out) return code
   ){
 //
+//TODO: Remove or rename according to below. See where it is used and how!
+//
 //TODO: 1) rename this method to compatible()
 //TODO: 2) consider compatible: distributed dims match,
 //TODO:    and strictly compatible: distributed and undistributed dims match.
@@ -3104,6 +3285,7 @@ bool Array::match(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+#undef DEBUGLOG
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
@@ -3113,11 +3295,25 @@ bool Array::match(
 
   // return with errors for NULL pointer
   if (array1 == NULL){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "Not a valid pointer to Array", ESMC_CONTEXT, rc);
     return matchResult;
   }
   if (array2 == NULL){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "Not a valid pointer to Array", ESMC_CONTEXT, rc);
     return matchResult;
@@ -3127,6 +3323,13 @@ bool Array::match(
   if (array1 == array2){
     // pointers are identical -> nothing more to check
     matchResult = true;
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
@@ -3134,11 +3337,25 @@ bool Array::match(
   // check typekind, rank match
   if (array1->typekind != array2->typekind){
     matchResult = false;
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
   if (array1->rank != array2->rank){
     matchResult = false;
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
@@ -3149,6 +3366,13 @@ bool Array::match(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return rc;
   if (matchResult==false){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
@@ -3156,11 +3380,25 @@ bool Array::match(
   // compare Array members to ensure DE-local tiles are congruent
   if (array1->tensorCount != array2->tensorCount){
     matchResult = false;
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
   if (array1->tensorElementCount != array2->tensorElementCount){
     matchResult = false;
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
@@ -3170,6 +3408,13 @@ bool Array::match(
   for (int i=0; i<localDeCount; i++){
     if (int1[i] != int2[i]){
       matchResult = false;
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -3177,10 +3422,19 @@ bool Array::match(
 
   // return successfully indicating match
   matchResult = true;
+#ifdef DEBUGLOG
+  {
+    std::stringstream msg;
+    msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
   return matchResult;
+#undef DEBUGLOG
 }
 //-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -8009,7 +8263,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(VM *vm,
   vector<ArrayHelper::RecvnbElement<DIT,SIT> > &recvnbVector,
   const int *dstLocalDeTotalElementCount,
   char **rraList, int rraCount, RouteHandle **routehandle,
-  bool undistributedDimsPresent,
+  bool undistributedElementsPresent,
 #ifdef ASMM_STORE_TIMING_on
   double *t12pre, double *t12, double *t13, double *t14,
 #endif
@@ -8482,12 +8736,6 @@ template<typename SIT, typename DIT>
   VM::logMemInfo(std::string("ASMMStore2.0a"));
 #endif
 
-  // Set OPTION!!!
-#define SMMSLSQV_OPTION 2
-  // OPTION 1 - Use sparseMatMulStoreLinSeqVect() for all cases
-  // OPTION 2 - Use sparseMatMulStoreLinSeqVect_new() for halo, old all other
-  // OPTION 3 - Use sparseMatMulStoreLinSeqVect_new() for all cases
-
 #if (SMMSLSQV_OPTION==1)
 
 //  localrc = sparseMatMulStoreLinSeqVect_new(vm,
@@ -8573,10 +8821,10 @@ template<typename SIT, typename DIT>
     dstLocalDeTotalElementCount[i] =
       dstArray->totalElementCountPLocalDe[i] * dstArray->tensorElementCount;
 
-  // determine if there are undistributed dims present in either src or dst
-  bool undistributedDimsPresent = false;
-  if (srcArray->tensorCount) undistributedDimsPresent = true;
-  if (dstArray->tensorCount) undistributedDimsPresent = true;
+  // determine if there are undistributed elements present in either src or dst
+  bool undistributedElementsPresent = false;
+  if (srcTensorLength>1) undistributedElementsPresent = true;
+  if (dstTensorLength>1) undistributedElementsPresent = true;
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore4.1"));
@@ -8642,7 +8890,7 @@ template<typename SIT, typename DIT>
     sendnbVector, recvnbVector,
     dstLocalDeTotalElementCount,
     rraList, rraCount, routehandle,
-    undistributedDimsPresent,
+    undistributedElementsPresent,
 #ifdef ASMM_STORE_TIMING_on
     &t12pre, &t12, &t13, &t14,
 #endif
@@ -8935,9 +9183,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   }
 #endif
 
-
-
-
   try{
 
 #ifdef ASMM_STORE_MEMLOG_on
@@ -8964,6 +9209,17 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   bool vectorFlag = !(tensorMixFlag ||
     (srcTensorContigLength != dstTensorContigLength));
 
+#ifdef ASMM_STORE_LOG_on
+  {
+    std::stringstream msg;
+    msg << "ASMM_STORE_LOG:" << __LINE__ << " tensorMixFlag=" << tensorMixFlag
+      << " srcTensorContigLength=" << srcTensorContigLength
+      << " dstTensorContigLength=" << dstTensorContigLength
+      << " ==>> vectorFlag=" << vectorFlag;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
 #ifdef ASMM_STORE_TIMING_on
   double t9a, t9b, t9d, t9e; //gjt - profile
   double t9c1, t9c2; //gjt - profile
@@ -8976,8 +9232,16 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 
   // determine recv pattern for all localDEs on dst side
   for (int j=0; j<dstLocalDeCount; j++){
+#ifdef ASMM_STORE_LOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " j=" << j <<
+        " dstLocalDeElementCount[j]=" << dstLocalDeElementCount[j];
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     vector<int> index2Ref;
-    index2Ref.reserve(dstLocalDeElementCount[j]); // good guess for better perf
+    index2Ref.reserve(dstLocalDeElementCount[j]); // good guess
     int localDeFactorCount = 0; // reset
     int iCount = 0; // reset
     for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
@@ -8989,13 +9253,22 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
       }
     }
 
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreNbVectors2.1"));
+#endif
+
 #ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9a);   //gjt - profile
 #endif
 
-#ifdef ASMM_STORE_LOG_on_disabled
-fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
-  localDeFactorCount);
+#ifdef ASMM_STORE_LOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " j=" << j <<
+        " iCount=" << iCount <<
+        " localDeFactorCount=" << localDeFactorCount;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
     int *index2Ref2 = new int[localDeFactorCount];  // large enough
     int *factorIndexRef = new int[localDeFactorCount];  // large enough
@@ -9026,12 +9299,31 @@ fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
       }
     }
 
+#ifdef ASMM_STORE_LOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " recvnbDiffPartnerDeCount="
+        << recvnbDiffPartnerDeCount;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      for (int i=0; i<recvnbDiffPartnerDeCount; i++){
+        msg.str("");  // clear
+        msg << "ASMM_STORE_LOG:" << __LINE__ << " recvnbPartnerDeCount[" << i <<
+          "]=" << recvnbPartnerDeCount[i];
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+      msg.str("");  // clear
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " sizeof(DstInfo)="
+        << sizeof(ArrayHelper::DstInfo<SeqIndex<DIT>,SeqIndex<SIT> >);
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+
 #ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9b);   //gjt - profile
 #endif
 
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreNbVectors3.0"));
+    VM::logMemInfo(std::string("ASMMStoreNbVectors3.0"));
 #endif
 
     // invert the look-up direction
@@ -9051,7 +9343,10 @@ fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
     if (ESMC_LogDefault.MsgFoundError(localrc,
       ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, &rc)) return rc;
 #ifdef ASMM_STORE_TIMING_on
-    VMK::wtime(&t9c1);   //gjt - profile
+      VMK::wtime(&t9c1);   //gjt - profile
+#endif
+#ifdef ASMM_STORE_MEMLOG_on
+      VM::logMemInfo(std::string("ASMMStoreNbVectors3.2"));
 #endif
     for (int i=0; i<localDeFactorCount; i++){
       int partnerDeListIndex = partnerDeRef[i];
@@ -9079,7 +9374,7 @@ fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
     }
 
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreNbVectors4.0"));
+    VM::logMemInfo(std::string("ASMMStoreNbVectors3.3"));
 #endif
 
       // garbage collection
@@ -9139,13 +9434,14 @@ fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
             rangeStop++;
           }
 #ifdef ASMM_STORE_LOG_on
-  {
-    std::stringstream msg;
-    msg << "ASMM_STORE_LOG:" << __LINE__ << " dstTensorContigLength: "
-      << dstTensorContigLength << " vectorLength: " << vectorLength <<
-      " decompSeqIndex: " << decompSeqIndex;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-  }
+          {
+            std::stringstream msg;
+            msg << "ASMM_STORE_LOG:" << __LINE__ <<
+              " dstTensorContigLength: " << dstTensorContigLength << 
+              " vectorLength: " << vectorLength << " decompSeqIndex: " <<
+              decompSeqIndex;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          }
 #endif
           if ((rangeWrite != dstInfoTable[i].begin())
             && ((rangeWrite-1)->vectorLength != vectorLength)){
@@ -9168,21 +9464,19 @@ fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
     }
 
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreNbVectors5.0"));
+    VM::logMemInfo(std::string("ASMMStoreNbVectors5.0"));
 #endif
 
-#ifdef ASMM_STORE_LOG_on_disabled
-    // print:
-    fprintf(asmm_store_log_fp, "dstArray: %d, %d\n", j,
-      recvnbDiffPartnerDeCount);
-    for (int i=0; i<recvnbDiffPartnerDeCount; i++)
-      for (int k=0; k<dstInfoTable[i].size(); k++)
-        fprintf(asmm_store_log_fp, "dstInfoTable[%d][%d].seqIndex = %d/%d, "
-          ".partnerSeqIndex[][] = %d/%d\n", i, k,
-          dstInfoTable[i][k].seqIndex.decompSeqIndex,
-          dstInfoTable[i][k].seqIndex.tensorSeqIndex,
-          dstInfoTable[i][k].partnerSeqIndex.decompSeqIndex,
-          dstInfoTable[i][k].partnerSeqIndex.tensorSeqIndex);
+#ifdef ASMM_STORE_LOG_on
+    {
+      std::stringstream msg;
+      for (int i=0; i<recvnbDiffPartnerDeCount; i++){
+        msg.str("");  // clear
+        msg << "ASMM_STORE_LOG:" << __LINE__ << " dstInfoTable[" << i <<
+          "].size()=" << dstInfoTable[i].size();
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+    }
 #endif
 
 #ifdef ASMM_STORE_TIMING_on
@@ -9214,19 +9508,26 @@ fprintf(asmm_store_log_fp, "iCount: %d, localDeFactorCount: %d\n", iCount,
       ++kk;
 
 #ifdef MSG_DEFLATE_DEBUG
-char msg[160];
-      for (int k=0; k<kk; k++){
-
-sprintf(msg, "recv: deflator[%d]: index=%d, bufferIndex=%d, seqIndex=%d",
-  k, deflator[k].index, dstInfoTable[i][deflator[k].index].bufferIndex,
-deflator[k].seqIndex.decompSeqIndex);
-ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-
+      {
+        std::stringstream msg;
+        msg << "ASMM_STORE_LOG:" << __LINE__ <<
+          " recv: deflated count: kk=" << kk;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#if 0
+        for (int k=0; k<deflator.size(); k++){
+          msg.str("");  // clear
+          msg << "ASMM_STORE_LOG:" << __LINE__ <<
+            " recv: deflator[" << k << "]: index=" << deflator[k].index <<
+            ", bufferIndex=" << dstInfoTable[i][deflator[k].index].bufferIndex
+            << ", seqIndex=" << deflator[k].seqIndex.decompSeqIndex;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        }
+#endif
       }
 #endif
 
 #else
-      //todo: remove this initialization once the deflator works right!!!!!!
+      // do not consider deflation
       for (int k=0; k<dstInfoTable[i].size(); k++)
         dstInfoTable[i][k].bufferIndex = k;
       int kk = dstInfoTable[i].size();
@@ -9267,6 +9568,10 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
     } // for i - recvnbDiffPartnerDeCount
 
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors5.1"));
+#endif
+
 #ifdef ASMM_STORE_TIMING_on
     VMK::wtime(&t9e);   //gjt - profile
 //    printf("gjt - profile for PET %d, j-loop %d:\n"
@@ -9286,8 +9591,16 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 
   // determine send pattern for all localDEs on src side
   for (int j=0; j<srcLocalDeCount; j++){
+#ifdef ASMM_STORE_LOG_on
+    {
+      std::stringstream msg;
+      msg << "ASMM_STORE_LOG:" << __LINE__ << " j=" << j <<
+        " srcLocalDeElementCount[j]=" << srcLocalDeElementCount[j];
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     vector<int> index2Ref;
-    index2Ref.reserve(srcLocalDeElementCount[j]); // good guess for better perf
+    index2Ref.reserve(srcLocalDeElementCount[j]); // good guess
     int localDeFactorCount = 0; // reset
     int iCount = 0; // reset
     for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
@@ -9539,13 +9852,16 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
       }
 #endif
     } // for i - sendnbDiffPartnerDeCount
+#ifdef ASMM_STORE_MEMLOG_on
+    VM::logMemInfo(std::string("ASMMStoreNbVectors9.1"));
+#endif
     // garbage collection
     delete [] sendnbPartnerDeList;
     delete [] sendnbPartnerDeCount;
   } // for j - srcLocalDeCount
 
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreNbVectors7.0"));
+  VM::logMemInfo(std::string("ASMMStoreNbVectors10.0"));
 #endif
 
 #ifdef ASMM_STORE_TIMING_on
@@ -9562,7 +9878,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
   sort(sendnbVector.begin(), sendnbVector.end());
 
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreNbVectors7.1"));
+  VM::logMemInfo(std::string("ASMMStoreNbVectors10.1"));
 #endif
 
 #define FORCE_SHRINK_AFTER_SORT_on
@@ -9580,7 +9896,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
 
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreNbVectors7.2"));
+  VM::logMemInfo(std::string("ASMMStoreNbVectors10.2"));
 #endif
 
 #ifdef ASMM_STORE_COMMMATRIX_on
@@ -9625,7 +9941,7 @@ ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
 #endif
 
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreNbVectors8.0"));
+  VM::logMemInfo(std::string("ASMMStoreNbVectors11.0"));
 #endif
 
   }catch(int localrc){
@@ -9685,7 +10001,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   char **rraList,                         // in
   int rraCount,                           // in
   RouteHandle **routehandle,              // inout - handle to precomputed comm
-  bool undistributedDimsPresent,          // in
+  bool undistributedElementsPresent,      // in
 #ifdef ASMM_STORE_TIMING_on
   double *t12pre, double *t12, double *t13, double *t14,
 #endif
@@ -9740,7 +10056,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
   xxe->typekind[1] = typekindSrc;
   xxe->typekind[2] = typekindDst;
   // set the superVectorOkay flag
-  xxe->superVectorOkay = !undistributedDimsPresent; // super-vector if no undist
+  xxe->superVectorOkay = !undistributedElementsPresent; // if no undistr. elemts
   // prepare XXE type variables
   XXE::TKId elementTK;
   switch (typekindDst){
@@ -11026,7 +11342,7 @@ int Array::sparseMatMul(
   // basis, i.e. it depends on each individual operation whether, and how the
   // vectorLength argument is used.
   // On those PETs that don't call in with srcArray nor dstArray (unusual case,
-  // but possible and supported!), the vectorLenght will be left at 0. In the
+  // but possible and supported!), the vectorLength will be left at 0. In the
   // other cases (i.e. srcArray and/or dstArray are present) it is assumed that
   // the vectorLength can be determined from which ever Array is present (first
   // see about srcArray, and then dstArray. Last one present will set). This is
@@ -11348,8 +11664,18 @@ void Array::superVecParam(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+#undef DEBUGLOG
   bool arrayFlag = false;
   if (array != ESMC_NULL_POINTER) arrayFlag = true;
+
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " superVectorOkay=" <<
+        superVectorOkay;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
 
   superVecSizeUnd[0]=-1;  // initialize with disabled super vector support
   superVecSizeUnd[1]=1;
@@ -11370,12 +11696,12 @@ void Array::superVecParam(
       vectorLength *= array->sizeSuperUndist[i];
     else
       vectorLength = array->sizeSuperUndist[0];
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "vectorLength=" << vectorLength;
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " vectorLength=" << vectorLength;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
   }
 
@@ -11385,35 +11711,39 @@ void Array::superVecParam(
     int i;
     for (i=0; i<array->rank-array->tensorCount; i++){
       superVecSizeUnd[i] = array->sizeSuperUndist[i];
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "superVecSizeUnd[i="<<i<<"]=" << superVecSizeUnd[i];
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " superVecSizeUnd[i="<<i<<"]=" <<
+        superVecSizeUnd[i];
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
       for (int j=0; j<localDeCount; j++)
         superVecSizeDis[i][j] =
           array->sizeDist[j*(array->rank - array->tensorCount)+i];
     }
     superVecSizeUnd[i] = array->sizeSuperUndist[i];
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "superVecSizeUnd[i="<<i<<"]=" << superVecSizeUnd[i];
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " superVecSizeUnd[i="<<i<<"]=" <<
+        superVecSizeUnd[i];
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
   }
   if (superVecSizeUnd[1]==1 && superVecSizeUnd[2]==1)
     superVecSizeUnd[0]=-1;  // turn off super vectorization, simple vector ok
-#ifdef DEBUGGING
+#ifdef DEBUGLOG
   {
-    std::stringstream debugmsg;
-    debugmsg << "superVecSizeUnd[0]=" << superVecSizeUnd[0];
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    std::stringstream msg;
+    msg << ESMC_METHOD": " << __LINE__ << " superVecSizeUnd[0]=" <<
+      superVecSizeUnd[0];
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
+#undef DEBUGLOG
 }
 //-----------------------------------------------------------------------------
 
@@ -13859,7 +14189,7 @@ void *ESMC_newArrayScatterThread(
   int elementSize = blockSize / laLength[0];
 #if (VERBOSITY > 9)
   for (int i=0; i<rank; i++)
-    printf("gjt in ESMC_newArrayScatter(THREAD): de=%d, laLenght[%d] = %d\n",
+    printf("gjt in ESMC_newArrayScatter(THREAD): de=%d, laLength[%d] = %d\n",
       de, i, laLength[i]);
   printf("gjt in ESMC_newArrayScatter(THREAD): elementSize = %d\n",
     elementSize);

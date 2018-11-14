@@ -103,10 +103,11 @@ contains
 
 
    ! Deep type constructor function 
-   function ESMF_DeepCreate()
+   function ESMF_DeepCreate(val)
+       integer         :: val
        type(ESMF_Deep) :: ESMF_DeepCreate
 
-       ESMF_DeepCreate%num=7
+       ESMF_DeepCreate%num=val
 
        ESMF_INIT_SET_CREATED(ESMF_DeepCreate)
    end function ESMF_DeepCreate

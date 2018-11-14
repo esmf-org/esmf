@@ -2002,7 +2002,8 @@ void VM::logMemInfo(
 //
 // !ARGUMENTS:
 //
-  std::string prefix
+  std::string prefix,
+  ESMCI::LogErr *log
   ){
 //
 // !DESCRIPTION:
@@ -2026,7 +2027,7 @@ void VM::logMemInfo(
       int len = strlen(line);
       line[len-1] = '\0'; // replace the newline with null
       sprintf(msg, "%s - MemInfo: \t%s", prefix.c_str(), line);
-      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+      log->Write(msg, ESMC_LOGMSG_INFO);
     }
   }
   fclose(file);
@@ -2035,31 +2036,31 @@ void VM::logMemInfo(
   struct mallinfo m = mallinfo();
   info << "Non-mmapped space allocated (bytes):       \t" << m.arena;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
   info << "Space allocated in mmapped regions (bytes):\t" << m.hblkhd;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
   info << "Maximum total allocated space (bytes):     \t" << m.usmblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
   info << "Space in freed fastbin blocks (bytes):     \t" << m.fsmblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
   info << "Total allocated space (bytes):             \t" << m.uordblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
   info << "Total free space (bytes):                  \t" << m.fordblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
   info << "Top-most, releasable space (bytes):        \t" << m.keepcost;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   long total = 0; // init
   if (m.hblkhd>=0 && m.uordblks>=0){
     total = (long)m.hblkhd+(long)m.uordblks;
@@ -2068,7 +2069,7 @@ void VM::logMemInfo(
   info.str(""); // clear info
   info << "Total space in use, mmap + non-mmap (KiB): \t" << total;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   // access through malloc_stats()
   FILE *stderrOrig = stderr;
   char *buf;
@@ -2089,7 +2090,7 @@ void VM::logMemInfo(
   info.str(""); // clear info
   info << "Total space held (mmap + non-mmap) (KiB):  \t" << system;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   pos = malloc_stats_output.rfind("in use bytes     =");
   pos += 18;
   long in_use = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
@@ -2097,14 +2098,14 @@ void VM::logMemInfo(
   info.str(""); // clear info
   info << "Total space used (mmap + non-mmap) (KiB):  \t" << in_use;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   // output the wtime since execution start
   double wt;
   ESMCI::VMK::wtime(&wt);
   info.str(""); // clear info
   info << "Wall-clock time since execution start (s): \t" << wt;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   // unlock again
   vm->unlock();
 #endif
@@ -2377,6 +2378,11 @@ void VM::getObject(
   for (unsigned it=0; it<matchTable_Objects[i].size(); ++it){
 
     ESMC_Base *fobject_temp = matchTable_Objects[i][it];
+
+    ESMC_Status baseStatus = (fobject_temp)->ESMC_BaseGetBaseStatus();
+    ESMC_Status     Status = (fobject_temp)->ESMC_BaseGetStatus();
+    if ((baseStatus != ESMF_STATUS_READY) || (Status != ESMF_STATUS_READY))
+      continue;
 
     int ID = (fobject_temp)->ESMC_BaseGetID();
 
@@ -3003,6 +3009,43 @@ void VM::timerLog(
   timerMsg << "Timer '" << timer << "' accumulated time: "
     << t->second.taccu << " seconds in " << t->second.iters << " iterations.";
   ESMC_LogDefault.Write(timerMsg.str(), ESMC_LOGMSG_INFO);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::MPIError()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::MPIError - Check for MPI error and log if true
+//
+// !INTERFACE:
+bool VM::MPIError(
+//
+// !ARGUMENTS:
+//
+  int mpiErrorToCheck,
+  int LINE, 
+  const std::string &FILE,
+  const std::string &method,
+  int *rcToReturn){
+//
+// !DESCRIPTION:
+//   Check for MPI error and log if an error is found
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  if (mpiErrorToCheck != MPI_SUCCESS){
+    char mpierr[MPI_MAX_ERROR_STRING];
+    int resultlen;
+    MPI_Error_string(mpiErrorToCheck, mpierr, &resultlen);
+    char msg[20+resultlen];
+    sprintf(msg, "Caught MPI error: %s", mpierr);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg,
+      LINE, FILE, method, rcToReturn);
+    return true;
+  }
+  return false;
 }
 //-----------------------------------------------------------------------------
 

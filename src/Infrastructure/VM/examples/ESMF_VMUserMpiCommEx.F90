@@ -18,6 +18,7 @@
 !BOE
 !
 ! \subsubsection{Nesting ESMF inside a user MPI application on a subset of MPI ranks}
+! \label{vm_nesting_esmf}
 !
 ! \begin{sloppypar}
 ! The previous example demonstrated that it is possible to nest an ESMF 
@@ -47,7 +48,7 @@ program ESMF_VMUserMpiCommEx
 #ifndef ESMF_MPIUNI     
   integer:: ierr
 #endif
-  integer:: esmfComm1, esmfComm2, rank, size
+  integer:: esmfComm, rank
   ! result code
   integer :: finalrc, result
 
@@ -66,89 +67,70 @@ program ESMF_VMUserMpiCommEx
   finalrc = ESMF_SUCCESS
 #ifndef ESMF_MPIUNI     
 !BOC
-  call MPI_Init(ierr)
   ! User code initializes MPI.
+  call MPI_Init(ierr)
 !EOC
   if (ierr/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
-  call MPI_Comm_size(MPI_COMM_WORLD, size, ierr)
   ! User code determines the local rank.
+  call MPI_Comm_rank(MPI_COMM_WORLD, rank, ierr)
 !EOC
   if (ierr/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 !BOC
-  ! User code prepares MPI communicator "esmfComm" that only contains
-  ! rank 0 and 1.
+  ! User code prepares MPI communicator "esmfComm", that allows rank 0 and 1
+  ! to be grouped together.
   if (rank < 2) then
-    call MPI_COMM_SPLIT(MPI_COMM_WORLD, 0, 0, esmfComm1, ierr)
-    call MPI_COMM_SPLIT(MPI_COMM_WORLD, 1, 0, esmfComm2, ierr)
+    ! first communicator split with color=0
+    call MPI_Comm_split(MPI_COMM_WORLD, 0, 0, esmfComm, ierr)
   else
-    call MPI_COMM_SPLIT(MPI_COMM_WORLD, 1, 0, esmfComm1, ierr)
-    call MPI_COMM_SPLIT(MPI_COMM_WORLD, 0, 0, esmfComm2, ierr)
+    ! second communicator split with color=1
+    call MPI_Comm_split(MPI_COMM_WORLD, 1, 0, esmfComm, ierr)
   endif
 !EOC
   if (ierr/=0) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 #else
   rank = 0
-  size = 1
 #endif
 !BOC
   if (rank < 2) then
-    call ESMF_Initialize(mpiCommunicator=esmfComm1, &
-      defaultlogfilename="VMUserMpiCommEx1.Log", &
-      logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     ! Only call ESMF_Initialize() on rank 0 and 1, passing the prepared MPI
     ! communicator that spans these ranks.
+    call ESMF_Initialize(mpiCommunicator=esmfComm, &
+      defaultlogfilename="VMUserMpiCommEx.Log", &
+      logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
 !EOC
     if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+    
+!BOC
+    ! Use ESMF here...
+!EOC
+    
     ! user code only to execute on the local MPI communicator
     print *, "ESMF application on MPI rank:", rank
 
     ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
     ! file that the scripts grep for.
-    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, &
-      ESMF_SRCLINE, petCount=size)
+    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, ESMF_SRCLINE)
 
-    ! user code finalizes ESMF
 !BOC
+    ! Calling ESMF_Finalize() with endflag=ESMF_END_KEEPMPI instructs ESMF
+    ! to keep MPI active.
     call ESMF_Finalize(endflag=ESMF_END_KEEPMPI, rc=rc)
-    ! Finalize ESMF without finalizing MPI. The user application will call
-    ! MPI_Finalize() on all ranks.
 !EOC
     if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
   else
-    call ESMF_Initialize(mpiCommunicator=esmfComm1, &
-      defaultlogfilename="VMUserMpiCommEx2.Log", &
-      logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
-    ! The other ranks can also call ESMF_Initialize(), passing the other MPI
-    ! communicator that spans the remaining ranks.
+    ! Ranks 2 and above do non-ESMF work...
 !EOC
-    if (rc/=ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-    ! user code only to execute on the local MPI communicator
-    print *, "ESMF application on MPI rank:", rank
-
-    ! IMPORTANT: ESMF_STest() prints the PASS string and the # of processors in the log
-    ! file that the scripts grep for.
-    call ESMF_STest((finalrc.eq.ESMF_SUCCESS), testname, failMsg, result, &
-      ESMF_SRCLINE, petCount=size)
-
-    ! user code finalizes ESMF
-!BOC
-    call ESMF_Finalize(endflag=ESMF_END_KEEPMPI, rc=rc)
-    ! Finalize ESMF without finalizing MPI. The user application will call
-    ! MPI_Finalize() on all ranks.
-!EOC
-    if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC
   endif
 !EOC
 #ifndef ESMF_MPIUNI     
 !BOC
-  ! First free the MPI communicators.
-  call MPI_Comm_free(esmfComm1, ierr)
-  call MPI_Comm_free(esmfComm2, ierr)
-  ! Then user code finalizes MPI.
+  ! Free the MPI communicator before finalizing MPI.
+  call MPI_Comm_free(esmfComm, ierr)
+  
+  ! It is the responsibility of the outer user code to finalize MPI.
   call MPI_Finalize(ierr)
 !EOC
   if (ierr/=0) finalrc = ESMF_FAILURE

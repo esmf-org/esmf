@@ -138,6 +138,7 @@ type ESMF_LogEntry
     integer             ::  indentCount
     integer             ::  h,m,s,ms
     integer             ::  line
+    logical             ::  noprefix
     logical             ::  methodflag,lineflag,fileflag
     character, pointer  ::  msg(:)
     character(len=ESMF_MAXPATHLEN) ::  file
@@ -187,6 +188,7 @@ type ESMF_LogPrivate
     logical                                         ::  appendFlag = .true.
     integer                                         ::  indentCount = 0
     logical                                         ::  deferredOpenFlag = .false.
+    logical                                         ::  noprefix = .false.
 #else
     type(ESMF_LogEntry), dimension(:),pointer       ::  LOG_ENTRY
     type(ESMF_Logical)                              ::  FileIsOpen
@@ -199,6 +201,7 @@ type ESMF_LogPrivate
     integer                                         ::  indentCount
     logical                                         ::  appendflag
     logical                                         ::  deferredOpenFlag
+    logical                                         ::  noprefix
 #endif
     character(len=ESMF_MAXPATHLEN)                  ::  nameLogErrFile
     character(len=ESMF_MAXSTR)                      ::  petNumLabel
@@ -560,6 +563,7 @@ contains
        s%traceFlag = .false.
        s%deferredOpenFlag = .false.
        s%appendFlag = .true.
+       s%noprefix = .false.
        ESMF_INIT_SET_DEFINED(s)
     end subroutine ESMF_LogPrivateInit
 
@@ -949,18 +953,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           (alog%flushed == ESMF_FALSE) .AND. &
           (alog%dirty == ESMF_TRUE))  then
         do j=1, alog%fIndex-1
-          write (alog%unitNumber, '(2a,3i2.2,a,i3.3,5a)', advance='no')  &
-              alog%LOG_ENTRY(j)%d, " ", &
-              alog%LOG_ENTRY(j)%h, &
-              alog%LOG_ENTRY(j)%m, &
-              alog%LOG_ENTRY(j)%s, ".", &
-              alog%LOG_ENTRY(j)%ms, " ", &
-              alog%LOG_ENTRY(j)%lt, " ", &
-              trim(alog%petNumLabel), " "
+          if (.not. alog%LOG_ENTRY(j)%noprefix) then
+            write (alog%unitNumber, '(2a,3i2.2,a,i3.3,5a)', advance='no')  &
+                alog%LOG_ENTRY(j)%d, " ", &
+                alog%LOG_ENTRY(j)%h, &
+                alog%LOG_ENTRY(j)%m, &
+                alog%LOG_ENTRY(j)%s, ".", &
+                alog%LOG_ENTRY(j)%ms, " ", &
+                alog%LOG_ENTRY(j)%lt, " ", &
+                trim(alog%petNumLabel), " "
 
-          if (alog%LOG_ENTRY(j)%highResTimestampFlag) then
-            write (alog%unitNumber, '(f18.6,1x)', advance='no') alog%LOG_ENTRY(j)%highResTimestamp
-          end if
+            if (alog%LOG_ENTRY(j)%highResTimestampFlag) then
+              write (alog%unitNumber, '(f18.6,1x)', advance='no') alog%LOG_ENTRY(j)%highResTimestamp
+            end if
+          end if ! noprefix
 
           spaceflag = .false.
           if (alog%LOG_ENTRY(j)%fileflag) then
@@ -1525,7 +1531,8 @@ end function ESMF_LogFoundNetCDFError
                              flush,    &
                              logmsgAbort, logkindflag, &
                              maxElements, trace, fileName,  &
-                             highResTimestampFlag, indentCount, rc)
+                             highResTimestampFlag, indentCount,  &
+                             noPrefix, rc)
 !
 ! !ARGUMENTS:
 !
@@ -1539,6 +1546,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       character(*),            intent(out), optional :: fileName
       logical,                 intent(out), optional :: highResTimestampFlag
       integer,                 intent(out), optional :: indentCount
+      logical,                 intent(out), optional :: noPrefix
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1572,6 +1580,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            Current setting of the extended elapsed timestamp flag.
 !      \item [{[indentCount]}]
 !            Current setting of the leading white space padding.
+!      \item [{[noPrefix]}]
+!            Current setting of the message prefix enable/disable flag.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -1632,6 +1642,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
         if (present (indentCount)) then
           indentCount = alog%indentCount
+        endif
+        if (present (noPrefix)) then
+          noPrefix = alog%noPrefix
         endif
 
       ! Return an array with the current values.  If the user has not
@@ -1725,14 +1738,15 @@ end subroutine ESMF_LogInitialize
 
 ! !INTERFACE:
     subroutine ESMF_LogOpen(log, filename, keywordEnforcer,  &
-        appendflag, logkindflag, rc)
+        appendflag, logkindflag, noPrefix, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_Log),          intent(inout)         :: log
     character(len=*),        intent(in)            :: filename
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
-    logical,                 intent(in),  optional :: appendflag
-    type(ESMF_LogKind_Flag), intent(in),  optional :: logkindflag
+    logical,                 intent(in),  optional :: appendFlag
+    type(ESMF_LogKind_Flag), intent(in),  optional :: logkindFlag
+    logical,                 intent(in),  optional :: noPrefix
     integer,                 intent(out), optional :: rc
 
 !
@@ -1749,16 +1763,21 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            An {\tt ESMF\_Log} object.
 !      \item [filename]
 !            Name of log file to be opened.
-!      \item [{[appendflag]}]
+!      \item [{[appendFlag]}]
 !            If the log file exists, setting to {\tt .false.} will set the file position
 !            to the beginning of the file.  Otherwise, new records will be appended to the
 !            end of the file.  If not specified, defaults to {\tt .true.}.
-!      \item [{[logkindflag]}]
+!      \item [{[logkindFlag]}]
 !            Set the logkindflag. See section \ref{const:logkindflag} for a list of
 !            valid options.  When the {\tt ESMF\_LOGKIND\_MULTI\_ON\_ERROR} is selected,
 !            the log opening is deferred until a {\tt ESMF\_LogWrite} with log message of
 !            type {\tt ESMF\_LOGMSG\_ERROR} is written.
 !            If not specified, defaults to {\tt ESMF\_LOGKIND\_MULTI}.
+!      \item [{[noPrefix]}]
+!            Set the noPrefix flag.  If set to {\tt .false.}, log messages are prefixed
+!            with time stamps, message type, and PET number.  If set to {\tt .true.} the
+!            messages will be written without prefixes.  If not specified, defaults to
+!            {\tt .false.}.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -1847,6 +1866,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     alog%traceFlag = .false.
     alog%highResTimestampFlag = .false.
     alog%indentCount = 0
+    alog%noPrefix = .false.
 
   if(alog%logkindflag /= ESMF_LOGKIND_NONE) then
 
@@ -2096,7 +2116,8 @@ end subroutine ESMF_LogRc2Msg
     subroutine ESMF_LogSet(log, keywordEnforcer,  &
         flush,  &
         logmsgAbort, maxElements, logmsgList,  &
-        errorMask, trace, highResTimestampFlag, indentCount, rc)
+        errorMask, trace, highResTimestampFlag, indentCount,  &
+        noPrefix, rc)
 !
 ! !ARGUMENTS:
 !
@@ -2110,6 +2131,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       logical,                intent(in),    optional :: trace
       logical,                intent(in),    optional :: highResTimestampFlag
       integer,                intent(in),    optional :: indentCount
+      logical,                intent(in),    optional :: noPrefix
       integer,                intent(out),   optional :: rc
 
 !
@@ -2163,6 +2185,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !            to not add the additional timestamps.
 !      \item [{[indentCount]}]
 !            Number of leading white spaces.
+!      \item [{[noPrefix]}]
+!            If set to {\tt .false.}, log messages are prefixed with time stamps,
+!            message type and PET number.  If set to {\tt .true.} the messages will be
+!            written without the prefixes.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -2289,6 +2315,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       if (present (indentCount)) then
         alog%indentCount = indentCount
+      end if
+
+      if (present (noPrefix)) then
+        if (noPrefix .and. .not. isDefault) then
+          alog%noPrefix = noPrefix
+        else
+          call ESMF_LogWrite ('Can not set noPrefix on default Log', method=ESMF_METHOD, log=log)
+          if (present (rc)) rc = ESMF_RC_CANNOT_SET
+          return
+        end if
       end if
 
       if (present(rc)) then
@@ -2463,10 +2499,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !      \item [msg]
 !            User-provided message string.
-!      \item [logmsgFlag]
+!      \item [{[logmsgFlag]}]
 !            The type of message.  See Section~\ref{const:logmsgflag} for
-!            possible values.
-!      \item [logmsgList]
+!            possible values.  If not specified, the default is {\tt ESMF\_LOGMSG\_INFO}.
+!      \item [{[logmsgList]}]
 !            \apiDeprecatedArgWithReplacement{logmsgFlag}
 !      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
@@ -2537,12 +2573,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     argcase = argcase + merge (2, 0, present (logmsgList))
     select case (argcase)
     case (0)
-      write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-          ": Add required logmsgFlag argument."
-      if (present(rc)) then
-        rc=ESMF_RC_ARG_INCOMP
-      end if
-      return
+      local_logmsgflag = ESMF_LOGMSG_INFO
 
     case (1)
       local_logmsgflag = logmsgFlag
@@ -2618,6 +2649,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             return
           end if
         end if
+        alog%LOG_ENTRY(index)%noPrefix = alog%noPrefix
         alog%LOG_ENTRY(index)%highResTimestampFlag = alog%highResTimestampFlag
         alog%LOG_ENTRY(index)%indentCount = alog%indentCount
         alog%LOG_ENTRY(index)%methodflag = .FALSE.
@@ -2740,6 +2772,7 @@ end subroutine ESMF_LogWrite
     logEntryOut%ms   = logEntryIn%ms
     logEntryOut%line = logEntryIn%line
 
+    logEntryOut%noPrefix = logEntryIn%noPrefix
     logEntryOut%methodflag = logEntryIn%methodflag
     logEntryOut%lineflag   = logEntryIn%lineflag
     logEntryOut%fileflag   = logEntryIn%fileflag

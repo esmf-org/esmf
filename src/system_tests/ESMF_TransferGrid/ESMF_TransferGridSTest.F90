@@ -84,6 +84,8 @@ program ESMF_TransferGridSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
+  call ESMF_LogSet (flush=.true.)
+
   ! Get number of PETs we are running with
   call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -102,7 +104,7 @@ program ESMF_TransferGridSTest
   cname1 = "user model 1"
   ! use petList to define comp1 on PET 0,1,2,3
   comp1 = ESMF_GridCompCreate(name=cname1, petList=(/0,1,2,3/), rc=localrc)
-  print *, "Created component ", trim(cname1), "rc =", localrc
+  print *, "Created component ", trim(cname1), ", rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -110,7 +112,7 @@ program ESMF_TransferGridSTest
   cname2 = "user model 2"
   ! use petList to define comp2 on PET 4,5
   comp2 = ESMF_GridCompCreate(name=cname2, petList=(/4,5/), rc=localrc)
-  print *, "Created component ", trim(cname2), "rc =", localrc
+  print *, "Created component ", trim(cname2), ", rc =", localrc
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

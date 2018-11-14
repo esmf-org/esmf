@@ -29,6 +29,8 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldRedistBlk2Blk \
             ESMF_FieldRedistBlk2Arb \
             ESMF_FieldRedistArb2Arb \
+            ESMF_FieldBundleLSRedistArb2Arb \
+            ESMF_FieldBundleLSRedistArb2ArbUngrdDim \
             ESMF_FieldBundleRedistBlk2Blk \
             ESMF_FieldBundleRedistBlk2Arb \
             ESMF_FieldBundleRedistArb2Arb \
@@ -37,6 +39,8 @@ DIRS      = ESMF_CompCreate \
             ESMF_FieldRegridOverlap \
             ESMF_FieldRegridMesh \
             ESMF_FieldRegridMeshToMesh \
+            ESMF_FieldLSRedistArb2Arb \
+            ESMF_FieldLSRedistArb2ArbUngrdDim \
             ESMF_FieldLSSMM \
             ESMF_FieldMeshSMM \
             ESMF_TransferGrid \

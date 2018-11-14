@@ -60,6 +60,13 @@ program ESMF_FieldIOUTest
   type(ESMF_Field) :: field_att, field_ugd_att
   type(ESMF_Field) :: field_ug, field_ug2
 
+  type(ESMF_DistGrid) :: dg_debl
+  type(ESMF_DistGridConnection), allocatable :: connectionList(:)
+  type(ESMF_Grid) :: grid_debl
+  type(ESMF_Field) :: field_debl
+  integer, allocatable :: deBlockList(:,:,:)
+  integer :: idim_size, jdim_size
+
   real(ESMF_KIND_R8), pointer :: Farray_DE0_w(:,:) => null (), Farray_DE0_r(:,:) => null ()
   real(ESMF_KIND_R8), pointer :: Farray_DE1_w(:,:) => null (), Farray_DE1_r(:,:) => null ()
 
@@ -70,7 +77,7 @@ program ESMF_FieldIOUTest
   integer      :: localPet, petCount, tlb(2), tub(2)
   integer :: elem_tlb(1), elem_tub(1), elem_tc(1)
   integer :: tlb3(3), tub3(3), tlb4(3), tub4(3)
-  integer :: i,j, t, endtime, k
+  integer :: i, j, t, endtime, k
   logical :: failed
   real(ESMF_KIND_R8) :: Maxvalue, diff
 
@@ -816,7 +823,7 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
-
+!------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
@@ -824,6 +831,7 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_GridDestroy(grid_g, rc=rc)
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
 ! Multiple DEs per PET tests
@@ -1405,6 +1413,88 @@ program ESMF_FieldIOUTest
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
   call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
 #endif
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+! Write with Grid created using deBlockList
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create connectionList for deBlockList test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  idim_size=108
+  jdim_size=60
+
+  allocate (deBlockList(2, 2, petCount))
+
+  deBlockList(:,1,1) = (/1,1/)
+  deBlockList(:,2,1) = (/108,15/)
+  deBlockList(:,1,2) = (/1,16/)
+  deBlockList(:,2,2) = (/108,30/)
+  deBlockList(:,1,3) = (/1,31/)
+  deBlockList(:,2,3) = (/108,45/)
+  deBlockList(:,1,4) = (/1,46/)
+  deBlockList(:,2,4) = (/108,60/)
+
+  allocate(connectionList(1)) ! one connection
+
+  call ESMF_DistGridConnectionSet(connection=connectionList(1), &
+      tileIndexA=1, tileIndexB=1, positionVector=(/idim_size, 0/),  &
+      rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create DistGrid (from deBlockList) test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  dg_debl = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/idim_size,jdim_size/), &
+      indexflag=ESMF_INDEX_GLOBAL, &
+      deBlockList=deBlockList, connectionList=connectionList,  &
+      rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create Grid from DistGrid (from deBlockList) test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  grid_debl = ESMF_GridCreate(distGrid=dg_debl, &
+      indexflag=ESMF_INDEX_GLOBAL, &
+      coordSys=ESMF_COORDSYS_SPH_DEG, &
+      name="ATM:grid",  &
+      rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Create Field from Grid (from deBlockList)  test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  field_debl = ESMF_FieldCreate(name="field_3d_3dbl", grid=grid_debl, &
+      typekind=ESMF_TYPEKIND_R8, ungriddedLBound=(/1/), ungriddedUBound=(/50/),  &
+      rc=rc)
+  call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+!------------------------------------------------------------------------
+
+!------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
+  write(name, *) "Write Field (from deBlockList) test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_FieldWrite(field_debl,  &
+      filename="field_3d_debl.nc", overwrite=.true.,  &
+      rc=rc)
+#if (defined ESMF_PIO && ( defined ESMF_NETCDF || defined ESMF_PNETCDF))
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE)
+#endif
+
+  deallocate (deBlockList, connectionList)
+!------------------------------------------------------------------------
 
 !------------------------------------------------------------------------
 ! Destroy all Fields and cleanup
@@ -1448,10 +1538,16 @@ program ESMF_FieldIOUTest
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_FieldDestroy(elem_field, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_FieldDestroy(field_debl, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_GridDestroy(grid_debl, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   call ESMF_DistGridDestroy(elem_dg, rc=rc)
   if (rc /= ESMF_SUCCESS) countfail = countfail + 1
+  call ESMF_DistGridDestroy(dg_debl, rc=rc)
+  if (rc /= ESMF_SUCCESS) countfail = countfail + 1
   write(failMsg, *) "Did not return ESMF_SUCCESS"
-  write(name, *) "Destroying all Fields"
+  write(name, *) "Destroying all Fields, Grids, and DistGrids"
   call ESMF_Test(countfail == 0, name, failMsg, result, ESMF_SRCLINE)
 
   deallocate (exclusiveLBound, exclusiveUBound)

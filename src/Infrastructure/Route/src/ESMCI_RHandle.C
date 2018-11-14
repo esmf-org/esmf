@@ -31,10 +31,12 @@
 // include higher level, 3rd party or system headers
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 #include <sstream>
 
 // include ESMF headers
 #include "ESMCI_Macros.h"
+#include "ESMCI_VM.h"
 #include "ESMCI_Array.h"
 #include "ESMCI_ArrayBundle.h"
 
@@ -77,7 +79,7 @@ RouteHandle *RouteHandle::create(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
-  RouteHandle *routehandle;
+  RouteHandle *routehandle = NULL;
   try{
 
     // new object
@@ -87,21 +89,22 @@ RouteHandle *RouteHandle::create(
     localrc = routehandle->construct();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)){
-      routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
-      return NULL;
+      throw localrc;
     }
     
   }catch(int localrc){
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
-    routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    if (routehandle)
+      routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }catch(...){
     // allocation error
     ESMC_LogDefault.MsgAllocError("for new ESMCI::RouteHandle.", ESMC_CONTEXT, 
       rc);  
-    routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    if (routehandle)
+      routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
 
@@ -140,7 +143,7 @@ RouteHandle *RouteHandle::create(
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
   
-  RouteHandle *routehandle;
+  RouteHandle *routehandle = NULL;
   try{
     
     // sanity check the incoming petList arguments
@@ -153,8 +156,8 @@ RouteHandle *RouteHandle::create(
     if (sizePetList != sizeTargetPetList){
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_INCOMP,
         "Both petList arguments must specify the same number of PETs",
-        ESMC_CONTEXT, rc);
-      throw *rc;  // bail out with exception
+        ESMC_CONTEXT, &localrc);
+      throw localrc;  // bail out with exception
     }
     bool petMapping = false;  // default
     if (sizePetList>0)
@@ -163,7 +166,7 @@ RouteHandle *RouteHandle::create(
     // construct mapping vectors
     VM *vm = VM::getCurrent(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      rc)) throw *rc;
+      rc)) throw localrc;
     int petCount = vm->getPetCount();
     vector<int> originToTargetMap(petCount,-1);  // initialize to -1
     vector<int> targetToOriginMap(petCount,-1);  // initialize to -1
@@ -175,23 +178,23 @@ RouteHandle *RouteHandle::create(
           // this PET is out of bounds
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
             "PETs in originPetList must be between 0 and petCount-1",
-            ESMC_CONTEXT, rc);
-          throw *rc;  // bail out with exception
+            ESMC_CONTEXT, &localrc);
+          throw localrc;  // bail out with exception
         }
         if (targetPet<0 || targetPet>=petCount){
           // this PET is out of bounds
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
             "PETs in targetPetList must be between 0 and petCount-1",
-            ESMC_CONTEXT, rc);
-          throw *rc;  // bail out with exception
+            ESMC_CONTEXT, &localrc);
+          throw localrc;  // bail out with exception
         }
         // set up originToTargetMap
         if (originToTargetMap[originPet] != -1){
           // this same PET was already in the petList
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
             "There must be no duplicate PETs in the originPetList",
-            ESMC_CONTEXT, rc);
-          throw *rc;  // bail out with exception
+            ESMC_CONTEXT, &localrc);
+          throw localrc;  // bail out with exception
         }
         originToTargetMap[originPet] = targetPet;
         // set up targetToOriginMap
@@ -199,8 +202,8 @@ RouteHandle *RouteHandle::create(
           // this same PET was already in the petList
           ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
             "There must be no duplicate PETs in the targetPetList",
-            ESMC_CONTEXT, rc);
-          throw *rc;  // bail out with exception
+            ESMC_CONTEXT, &localrc);
+          throw localrc;  // bail out with exception
         }
         targetToOriginMap[targetPet] = originPet;
       }
@@ -213,7 +216,7 @@ RouteHandle *RouteHandle::create(
     localrc = routehandle->construct();
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)){
-      throw *rc;
+      throw localrc;
     }
     
     // copy the information from the incoming RH
@@ -263,7 +266,7 @@ RouteHandle *RouteHandle::create(
           targetToOriginMap[localPet], &recvCommH);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)){
-          throw *rc;
+          throw localrc;
         }
       }
       // prepare to send size of streami to target
@@ -273,7 +276,7 @@ RouteHandle *RouteHandle::create(
           originToTargetMap[localPet]);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)){
-          throw *rc;
+          throw localrc;
         }
       }
       // wait for receive
@@ -282,7 +285,7 @@ RouteHandle *RouteHandle::create(
         localrc = vm->commwait(&recvCommH);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)){
-          throw *rc;
+          throw localrc;
         }
       }
     
@@ -294,7 +297,7 @@ RouteHandle *RouteHandle::create(
           targetToOriginMap[localPet], &recvCommH);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)){
-          throw *rc;
+          throw localrc;
         }
       }
       // prepare to send streami to target
@@ -305,7 +308,7 @@ RouteHandle *RouteHandle::create(
           originToTargetMap[localPet]);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)){
-          throw *rc;
+          throw localrc;
         }
       }
       // wait for receive
@@ -314,7 +317,7 @@ RouteHandle *RouteHandle::create(
         localrc = vm->commwait(&recvCommH);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)){
-          throw *rc;
+          throw localrc;
         }
       }
     
@@ -360,15 +363,206 @@ RouteHandle *RouteHandle::create(
     // catch standard ESMF return code
     ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
-    routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    if (routehandle)
+      routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }catch(...){
     // allocation error
     ESMC_LogDefault.MsgAllocError("for new ESMCI::RouteHandle.", ESMC_CONTEXT, 
       rc);  
-    routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    if (routehandle)
+      routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
   }
+
+  // return successfully
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+  return routehandle;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::RouteHandle::create()"
+//BOP
+// !IROUTINE:  ESMCI::RouteHandle::create - Create a new RouteHandle from file
+//
+// !INTERFACE:
+RouteHandle *RouteHandle::create(
+//
+// !RETURN VALUE:
+//  pointer to newly allocated RouteHandle
+//
+// !ARGUMENTS:
+    const std::string &file,        // in  - name of file read in
+    int *rc) {                      // out - return code
+//
+// !DESCRIPTION:
+//  Allocate memory for a new RouteHandle object and initialize it.
+//  Then read the RouteHandle from file.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
+  
+  RouteHandle *routehandle = NULL;
+  try{
+    // access the current VM
+    VM *vm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc)) throw localrc;
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
+    MPI_Comm comm = vm->getMpi_c();
+    
+    // open the file
+#ifdef ESMF_MPIUNI
+    FILE *fp=fopen(file.c_str(), "rb");
+#else
+    MPI_File fh;
+    localrc = MPI_File_open(comm, (char*)file.c_str(), 
+      MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
+
+    // read the header start
+    char header[30];
+    sprintf(header, "ESMF_RouteHandle file v%04d", 1); // version 1
+    char headerIn[30];
+#ifdef ESMF_MPIUNI
+    fread(headerIn, strlen(header), sizeof(char), fp);
+#else
+    localrc = MPI_File_read(fh, headerIn, strlen(header), MPI_CHAR,
+      MPI_STATUS_IGNORE);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
+    if (strncmp(headerIn, header, strlen(header)) != 0){
+      // did not find the expected header start
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "This does not look like a known ESMF_RouteHandle file.", ESMC_CONTEXT,
+        &localrc);
+      throw localrc;
+    }
+    
+    // read and check petCount
+    int petCountIn;
+#ifdef ESMF_MPIUNI
+    fread(&petCountIn, 1, sizeof(int), fp);
+#else
+    localrc = MPI_File_read(fh, &petCountIn, 1, MPI_INT, MPI_STATUS_IGNORE);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
+    if (petCountIn != petCount){
+      // did not find the expected petCount
+      stringstream msg;
+      msg << "The petCount of the reading context is " << petCount <<
+        ", and must match the petCount in the RouteHandle file: " <<
+        petCountIn;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg.str(), ESMC_CONTEXT,
+        &localrc);
+      throw localrc;
+    }
+
+    // new RH object
+    routehandle = new RouteHandle;
+
+    // construct initial internals
+    localrc = routehandle->construct();
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)){
+      throw localrc;
+    }
+
+    // set the htype
+#ifdef ESMF_MPIUNI
+    fread(&(routehandle->htype), 1, sizeof(int), fp);
+#else
+    localrc = MPI_File_read(fh, &(routehandle->htype), 1, MPI_INT,
+      MPI_STATUS_IGNORE);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
+    
+#ifdef ESMF_MPIUNI
+    // for mpiuni, read streamiSize instead of displacment
+    unsigned long size;
+    fread(&size, 1, sizeof(unsigned long), fp);
+#else
+    // each PET reads its local displacement
+    unsigned long disp;
+    localrc = MPI_File_seek(fh, localPet*sizeof(disp), MPI_SEEK_CUR);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+    localrc = MPI_File_read(fh, &disp, 1, MPI_UNSIGNED_LONG, MPI_STATUS_IGNORE);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+    unsigned long size;
+    if (localPet<petCount-1){
+      localrc = MPI_File_read(fh, &size, 1, MPI_UNSIGNED_LONG,
+        MPI_STATUS_IGNORE);
+      if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+    }else{
+      MPI_Offset sizeHelp;
+      localrc = MPI_File_get_size(fh, &sizeHelp);
+      if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+      size = (unsigned long)sizeHelp;
+    }
+    size -= disp;
+    
+    // set the PET specific view
+    localrc = MPI_File_set_view(fh, disp, MPI_BYTE, MPI_BYTE, (char*)"native",
+      MPI_INFO_NULL);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
+    
+    // read the streami string from file and close
+    char *readMsg = new char[size];
+#ifdef ESMF_MPIUNI
+    fread(readMsg, size, sizeof(char), fp);
+    fclose(fp);
+#else
+    localrc = MPI_File_read(fh, readMsg, size, MPI_BYTE, MPI_STATUS_IGNORE);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+    localrc = MPI_File_close(&fh);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
+    
+    // setup streami from string
+    stringstream *xxeStreami = new stringstream;  // explicit mem management
+    xxeStreami->str(string(readMsg, size));
+    delete [] readMsg;
+    
+    // construct a new XXE object from streamified form
+    XXE *xxeNew;
+    if (xxeStreami){
+      // a valid streami is present on this PET
+      xxeNew = new XXE(*xxeStreami);
+    }else{
+      //TODO: flag this as an error
+    }
+    
+    // collect garbage
+    delete xxeStreami;
+    
+    // store the new XXE object in RH
+    routehandle->setStorage(xxeNew);
+
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      rc);
+    if (routehandle)
+      routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return NULL;
+  }catch(...){
+    // allocation error
+    ESMC_LogDefault.MsgAllocError("for new ESMCI::RouteHandle.", ESMC_CONTEXT, 
+      rc);  
+    if (routehandle)
+      routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
+    return NULL;
+  }
+
 
   // return successfully
   if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -778,6 +972,170 @@ int RouteHandle::print(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::RouteHandle::write()"
+//BOP
+// !IROUTINE:  ESMCI::RouteHandle::write - write RouteHandle to file
+//
+// !INTERFACE:
+int RouteHandle::write(
+//
+// !RETURN VALUE:
+//  int error return code
+//
+// !ARGUMENTS:
+  const std::string &file         // in    - name of file being written
+  )const{
+//
+// !DESCRIPTION:
+//  Write RouteHandle to file.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int localrc = ESMC_RC_NOT_IMPL;         // local return code
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  try{
+    // access the current VM
+    VM *vm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) throw rc;
+    int petCount = vm->getPetCount();
+    int localPet = vm->getLocalPet();
+    MPI_Comm comm = vm->getMpi_c();
+    
+    // access the XXE as a stream
+    XXE *xxe = (XXE *)getStorage();
+    stringstream *xxeStreami = new stringstream;  // explicit mem management
+    xxe->streamify(*xxeStreami);
+    // copy the contents of xxeStreami into a contiguous string
+    string writeStreamiStr = xxeStreami->str();
+    unsigned long writeStreamiSize = (unsigned long)writeStreamiStr.size();
+    delete xxeStreami;  // garbage collection
+    
+    // open the file
+#ifdef ESMF_MPIUNI
+    FILE *fp=fopen(file.c_str(), "wb");
+#else
+    MPI_File fh;
+    localrc = MPI_File_open(comm, (char*)file.c_str(), 
+      MPI_MODE_WRONLY | MPI_MODE_CREATE, MPI_INFO_NULL, &fh);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+    // make sure that if file existed before, size is reset
+    localrc = MPI_File_set_size(fh, 0);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
+  
+    // write the file header
+#ifdef ESMF_MPIUNI
+#else    
+    unsigned long *displacements; // only root will use this
+    MPI_Offset headDisp;  // only root will use this
+#endif
+    if (localPet==0){
+      char header[30];
+      sprintf(header, "ESMF_RouteHandle file v%04d", 1); // version 1
+#ifdef ESMF_MPIUNI
+      fwrite(header, strlen(header), sizeof(char), fp);
+      fwrite(&petCount, 1, sizeof(int), fp);
+      fwrite(&htype, 1, sizeof(int), fp);
+#else
+      localrc = MPI_File_write(fh, header, strlen(header), MPI_CHAR,
+        MPI_STATUS_IGNORE);
+      if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+      localrc = MPI_File_write(fh, &petCount, 1, MPI_INT, MPI_STATUS_IGNORE);
+      if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+      localrc = MPI_File_write(fh, (void*)&htype, 1, MPI_INT, MPI_STATUS_IGNORE);
+      if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
+      
+      // later versions may add header info here
+      
+#ifdef ESMF_MPIUNI
+#else      
+      // query the current file position (where displacements will be written)
+      MPI_Offset offsetKeep;
+      localrc = MPI_File_get_position(fh, &offsetKeep);
+      if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+      // write petCount many dummy displacements to finish header
+      displacements = new unsigned long[petCount];
+      localrc = MPI_File_write(fh, displacements, petCount, MPI_UNSIGNED_LONG,
+        MPI_STATUS_IGNORE);
+      if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+      // query the current file position (right after the header)
+      MPI_Offset offset;
+      localrc = MPI_File_get_position(fh, &offset);
+      if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+      // convert into a byte displacement
+      localrc = MPI_File_get_byte_offset(fh, offset, &headDisp);
+      if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+      // on root add the header displacment to the writeStreamiSize for all
+      writeStreamiSize += headDisp;
+      // reset root position back to where to write displacements
+      localrc = MPI_File_seek(fh, offsetKeep, MPI_SEEK_SET);
+      if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
+    }
+ 
+#ifdef ESMF_MPIUNI
+    // for mpiuni, write streamiSize instead of displacment
+    fwrite(&writeStreamiSize, 1, sizeof(unsigned long), fp);
+#else
+    // scan across PETs to determine the local displacement (with header)
+    unsigned long disp;
+    MPI_Scan(&writeStreamiSize, &disp, 1, MPI_UNSIGNED_LONG, MPI_SUM, comm);
+    if (localPet==0) writeStreamiSize -= headDisp; // correct back
+    disp -= writeStreamiSize;  // correct displacement from the inclusive scan
+
+    // gather all the displamements on the root PET for writing into the header
+    MPI_Gather(&disp, 1, MPI_UNSIGNED_LONG, displacements, 1, MPI_UNSIGNED_LONG,
+      0, comm);
+    
+    if (localPet==0){
+      // write the actual displacments into the header
+      localrc = MPI_File_write(fh, displacements, petCount, MPI_UNSIGNED_LONG,
+        MPI_STATUS_IGNORE);
+      if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+      delete [] displacements;  // garbage collection
+    }
+    
+    localrc = MPI_File_set_view(fh, disp, MPI_BYTE, MPI_BYTE, (char*)"native",
+      MPI_INFO_NULL);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
+    
+    // write the actual stream and close
+#ifdef ESMF_MPIUNI
+    fwrite(writeStreamiStr.data(), writeStreamiSize, sizeof(char), fp);
+    fclose(fp);
+#else
+    localrc = MPI_File_write(fh, (void*)writeStreamiStr.data(),
+      writeStreamiSize, MPI_BYTE, MPI_STATUS_IGNORE);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+    localrc = MPI_File_close(&fh);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
+    
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc);
+    return rc;
+  }catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "Caught exception", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::RouteHandle::optimize()"
 //BOP
 // !IROUTINE:  ESMCI::RouteHandle::optimize - optimize for communication pattern
@@ -878,7 +1236,7 @@ bool RouteHandle::isCompatible(
   //TODO: fingerprinting here is that RHs also function for a large class of
   //TODO: compatible Arrays. This is especially true now that 
   //TODO: super-vectorization is implemented!
-  bool srcMatch = Array::match(srcArrayArg, srcArray, &localrc);
+  bool srcMatch = Array::matchBool(srcArrayArg, srcArray, &localrc);
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
 
   std::stringstream debugmsg;

@@ -66,7 +66,7 @@ module user_model1
     rc = ESMF_SUCCESS
 
     print *, "User Comp1 Register starting"
-
+    call ESMF_LogWrite (msg='User Comp1 Register starting', logmsgFlag=ESMF_LOGMSG_TRACE)
     ! Register the callback routines.
 
     call ESMF_GridCompSetEntryPoint(comp, methodflag=ESMF_METHOD_INITIALIZE, &
@@ -85,6 +85,7 @@ module user_model1
       userRoutine=user_final, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
+    call ESMF_LogWrite (msg='User Comp1 Register complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "Registered Initialize, Run, and Finalize routines"
     print *, "User Comp1 Register returning"
     
@@ -112,6 +113,7 @@ module user_model1
     rc = ESMF_SUCCESS
 
     print *, "User Comp1 Init phase=1 starting"
+    call ESMF_LogWrite (msg='User Comp1 Init phase=1 starting', logmsgFlag=ESMF_LOGMSG_TRACE)
 
     ! Determine petCount
     call ESMF_GridCompGet(comp, vm=vm, rc=rc)
@@ -135,6 +137,7 @@ module user_model1
     call ESMF_StateAdd(exportState, (/field/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
    
+    call ESMF_LogWrite (msg='User Comp1 Init phase=1 complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Comp1 Init phase=1 returning"
 
   end subroutine user_initP1
@@ -161,6 +164,7 @@ module user_model1
     rc = ESMF_SUCCESS
 
     print *, "User Comp1 Init phase=2 starting"
+    call ESMF_LogWrite (msg='User Comp1 Init phase=2 starting', logmsgFlag=ESMF_LOGMSG_TRACE)
 
     ! Access the Field and its Grid in the exportState
     call ESMF_StateGet(exportState, "srcField", field=field, rc=rc)
@@ -186,6 +190,7 @@ module user_model1
     enddo
     enddo
    
+    call ESMF_LogWrite (msg='User Comp1 Init phase=2 complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Comp1 Init phase=2 returning"
 
   end subroutine user_initP2
@@ -210,6 +215,7 @@ module user_model1
     rc = ESMF_SUCCESS
 
     print *, "User Comp1 Init phase=3 starting"
+    call ESMF_LogWrite (msg='User Comp1 Init phase=3 starting', logmsgFlag=ESMF_LOGMSG_TRACE)
 
     ! Access the already created Field and its Grid in the exportState
     call ESMF_StateGet(exportState, "srcField", field=field, rc=rc)
@@ -226,6 +232,7 @@ module user_model1
     call ESMF_StateAdd(exportState, (/finalField/), rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
 
+    call ESMF_LogWrite (msg='User Comp1 Init phase=3 complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Comp1 Init phase=3 returning"
 
   end subroutine user_initP3
@@ -251,6 +258,7 @@ module user_model1
     rc = ESMF_SUCCESS
 
     print *, "User Comp1 Run starting"
+    call ESMF_LogWrite (msg='User Comp1 Run starting', logmsgFlag=ESMF_LOGMSG_TRACE)
 
     ! Access the Field in the exportState
     call ESMF_StateGet(exportState, "srcField", field=field, rc=rc)
@@ -287,6 +295,7 @@ module user_model1
     endif
 #endif
 
+    call ESMF_LogWrite (msg='User Comp1 Run complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Comp1 Run returning"
 
   end subroutine user_run
@@ -308,6 +317,7 @@ module user_model1
     rc = ESMF_SUCCESS
 
     print *, "User Comp1 Final starting"
+    call ESMF_LogWrite (msg='User Comp1 Final starting', logmsgFlag=ESMF_LOGMSG_TRACE)
 
     ! Access the Fields in the exportState
     call ESMF_StateGet(exportState, "srcField", field=field, rc=rc)
@@ -344,6 +354,7 @@ module user_model1
     enddo
     enddo
 
+    call ESMF_LogWrite (msg='User Comp1 Final complete', logmsgFlag=ESMF_LOGMSG_TRACE)
     print *, "User Comp1 Final returning"
 
   end subroutine user_final

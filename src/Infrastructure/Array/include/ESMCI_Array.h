@@ -52,6 +52,11 @@ namespace ESMCI {
 
 namespace ESMCI {
 
+  // constants and enums
+
+  enum ArrayMatch_Flag {ARRAYMATCH_INVALID=0, ARRAYMATCH_NONE,
+    ARRAYMATCH_EXACT, ARRAYMATCH_ALIAS};
+
   // classes and structs
 
   template<typename T> struct SeqIndex;
@@ -146,6 +151,7 @@ namespace ESMCI {
                                       // entry of 0 indicates undistributed dim
     int *distgridToPackedArrayMap;    // [dimCount] - entries are basis 1
                                       // entry of 0 indicates replicated dim
+                                      // distr. Array dims as 1, 2, 3, .. only
     int *contiguousFlag;              // [localDeCount]
     int *exclusiveElementCountPDe;    // [deCount] number of elements in
                                       // exclusive region only considering
@@ -349,7 +355,10 @@ namespace ESMCI {
     int setName(const char* name){return ESMC_BaseSetName(name, "Array");}
     int setName(const std::string &name){return ESMC_BaseSetName(name.c_str(), "Array");}
     // misc.
-    static bool match(Array const *array1, Array const *array2, int *rc=NULL);
+    bool isRHCompatible(Array const *array, int *rc=NULL)const;
+    static ArrayMatch_Flag match(Array const *array1, Array const *array2,
+      int *rc=NULL);
+    static bool matchBool(Array const *array1, Array const *array2, int *rc=NULL);
     int read(const std::string &file, const std::string &variableName,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int write(const std::string &file, const std::string &variableName,
@@ -363,7 +372,7 @@ namespace ESMCI {
     // MPI_OFFSET. Instead of int64_t, an alternative is to use MPI_offset,
     // however, this may run into issues with MPIUNI.
     int constructFileMap(int64_t *fileMapList, int mapListSize,
-                         int localDe, int64_t unmap_val = 0) const;
+                         int localDe, int64_t unmap_val=0) const;
     // serialize() and deserialize()
     int serialize(char *buffer, int *length, int *offset,
       const ESMC_AttReconcileFlag &attreconflag,
@@ -389,14 +398,14 @@ namespace ESMCI {
       bool *finishedflag=NULL, bool *cancelledflag=NULL, bool checkflag=false);
     static int haloRelease(RouteHandle *routehandle);
     static int redistStore(Array *srcArray, Array *dstArray,
-      RouteHandle **routehandle, InterArray<int> *srcToDstTransposeMap,
-      ESMC_TypeKind_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL,
-      bool ignoreUnmatched=false, int *pipelineDepthArg = NULL);
+      RouteHandle **routehandle, InterArray<int> *srcToDstTransposeMap=NULL,
+      ESMC_TypeKind_Flag typekindFactor=ESMF_NOKIND, void *factor=NULL,
+      bool ignoreUnmatched=false, int *pipelineDepthArg=NULL);
     template<typename SIT, typename DIT>
       static int tRedistStore(Array *srcArray, Array *dstArray,
-      RouteHandle **routehandle, InterArray<int> *srcToDstTransposeMap,
-      ESMC_TypeKind_Flag typekindFactor = ESMF_NOKIND, void *factor = NULL,
-      bool ignoreUnmatched=false, int *pipelineDepthArg = NULL);
+      RouteHandle **routehandle, InterArray<int> *srcToDstTransposeMap=NULL,
+      ESMC_TypeKind_Flag typekindFactor=ESMF_NOKIND, void *factor=NULL,
+      bool ignoreUnmatched=false, int *pipelineDepthArg=NULL);
     static int redist(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
       bool *finishedflag=NULL, bool *cancelledflag=NULL,
@@ -407,13 +416,13 @@ namespace ESMCI {
       RouteHandle **routehandle,
       std::vector<SparseMatrix<SIT,DIT> > const &sparseMatrix,
       bool haloFlag=false, bool ignoreUnmatched=false,
-      int *srcTermProcessingArg = NULL, int *pipelineDepthArg = NULL);
+      int *srcTermProcessingArg=NULL, int *pipelineDepthArg=NULL);
     template<typename SIT, typename DIT>
       static int tSparseMatMulStore(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle,
       std::vector<SparseMatrix<SIT,DIT> > const &sparseMatrix,
       bool haloFlag=false, bool ignoreUnmatched=false,
-      int *srcTermProcessingArg = NULL, int *pipelineDepthArg = NULL);
+      int *srcTermProcessingArg=NULL, int *pipelineDepthArg=NULL);
     static int sparseMatMul(Array *srcArray, Array *dstArray,
       RouteHandle **routehandle, ESMC_CommFlag commflag=ESMF_COMM_BLOCKING,
       bool *finishedflag=NULL, bool *cancelledflag=NULL,

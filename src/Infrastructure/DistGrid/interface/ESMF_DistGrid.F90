@@ -98,10 +98,14 @@ module ESMF_DistGridMod
   end type
 
   type(ESMF_DistGridMatch_Flag), parameter:: &
-    ESMF_DISTGRIDMATCH_INVALID  = ESMF_DistGridMatch_Flag(0), &
-    ESMF_DISTGRIDMATCH_NONE     = ESMF_DistGridMatch_Flag(1), &
-    ESMF_DISTGRIDMATCH_EXACT    = ESMF_DistGridMatch_Flag(2), &
-    ESMF_DISTGRIDMATCH_ALIAS    = ESMF_DistGridMatch_Flag(3)
+    ESMF_DISTGRIDMATCH_INVALID      = ESMF_DistGridMatch_Flag(0), &
+    ESMF_DISTGRIDMATCH_NONE         = ESMF_DistGridMatch_Flag(1), &
+    ESMF_DISTGRIDMATCH_ELEMENTCOUNT = ESMF_DistGridMatch_Flag(2), &
+    ESMF_DISTGRIDMATCH_INDEXSPACE   = ESMF_DistGridMatch_Flag(3), &
+    ESMF_DISTGRIDMATCH_TOPOLOGY     = ESMF_DistGridMatch_Flag(4), &
+    ESMF_DISTGRIDMATCH_DECOMP       = ESMF_DistGridMatch_Flag(5), &
+    ESMF_DISTGRIDMATCH_EXACT        = ESMF_DistGridMatch_Flag(6), &
+    ESMF_DISTGRIDMATCH_ALIAS        = ESMF_DistGridMatch_Flag(7)
     
 !------------------------------------------------------------------------------
 
@@ -111,7 +115,10 @@ module ESMF_DistGridMod
   public ESMF_Decomp_Flag, ESMF_DECOMP_BALANCED, ESMF_DECOMP_RESTFIRST, &
     ESMF_DECOMP_RESTLAST, ESMF_DECOMP_CYCLIC, ESMF_DECOMP_SYMMEDGEMAX
   public ESMF_DistGridMatch_Flag, ESMF_DISTGRIDMATCH_INVALID, &
-    ESMF_DISTGRIDMATCH_NONE, ESMF_DISTGRIDMATCH_EXACT, ESMF_DISTGRIDMATCH_ALIAS
+    ESMF_DISTGRIDMATCH_NONE, ESMF_DISTGRIDMATCH_ELEMENTCOUNT,&
+    ESMF_DISTGRIDMATCH_INDEXSPACE, ESMF_DISTGRIDMATCH_TOPOLOGY, &
+    ESMF_DISTGRIDMATCH_DECOMP, &
+    ESMF_DISTGRIDMATCH_EXACT, ESMF_DISTGRIDMATCH_ALIAS
   public ESMF_DistGridConnection  ! implemented in ESMF_DistGridConnectionMod
   
 !------------------------------------------------------------------------------
@@ -653,7 +660,8 @@ contains
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDG(distgrid, keywordEnforcer, &
-    firstExtra, lastExtra, indexflag, connectionList, delayout, vm, rc)
+    firstExtra, lastExtra, indexflag, connectionList, balanceflag, &
+    delayout, vm, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDG
@@ -665,6 +673,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, target,               intent(in),  optional :: lastExtra(:)
     type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
+    logical,                       intent(in),  optional :: balanceflag
     type(ESMF_DELayout),           intent(in),  optional :: delayout
     type(ESMF_VM),                 intent(in),  optional :: vm
     integer,                       intent(out), optional :: rc
@@ -677,7 +686,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.3.0r] Added argument {\tt vm} to support object creation on a
 !               different VM than that of the current context.
 ! \item[8.0.0] Added argument {\tt delayout} to support changing the layout of
-!              DEs across PETs.
+!              DEs across PETs.\newline
+!              Added argument {\tt balanceflag} to support rebalancing of the
+!              incoming DistGrids decomposition.
 ! \end{description}
 ! \end{itemize}
 !
@@ -720,6 +731,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          If present, override the connections of the incoming {\tt distgrid}.
 !          See section \ref{api:DistGridConnectionSet} for the associated Set()
 !          method. By default use the connections defined in {\tt distgrid}.
+!     \item[{[balanceflag]}]
+!          If set to {\tt .true}, rebalance the incoming {\tt distgrid}
+!          decompositon. The default is {\tt .false.}.
 !     \item[{[delayout]}]
 !          If present, override the DELayout of the incoming {\tt distgrid}.
 !          By default use the DELayout defined in {\tt distgrid}.
@@ -733,11 +747,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer               :: localrc            ! local return code
-    type(ESMF_DistGrid)   :: dg                 ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterArray) :: firstExtraAux      ! helper variable
-    type(ESMF_InterArray) :: lastExtraAux       ! helper variable
+    integer               :: localrc        ! local return code
+    type(ESMF_DistGrid)   :: dg             ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterArray) :: firstExtraAux  ! helper variable
+    type(ESMF_InterArray) :: lastExtraAux   ! helper variable
     type(ESMF_InterArray) :: connectionListAux  ! helper variable
+    type(ESMF_Logical)    :: opt_balanceflag    ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -762,12 +777,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Set default flags
+    opt_balanceflag = ESMF_FALSE
+    if (present(balanceflag)) opt_balanceflag = balanceflag
+
     ! Mark this DistGrid as invalid
     dg%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateDG(dg, distgrid, firstExtraAux, &
-      lastExtraAux, indexflag, connectionListAux, delayout, vm, localrc)
+      lastExtraAux, indexflag, connectionListAux, opt_balanceflag, &
+      delayout, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -804,7 +824,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_DistGridCreate()
   function ESMF_DistGridCreateDGT(distgrid, firstExtraPTile, &
-    lastExtraPTile, keywordEnforcer, indexflag, connectionList, delayout, vm, rc)
+    lastExtraPTile, keywordEnforcer, indexflag, connectionList, balanceflag, &
+    delayout, vm, rc)
 !         
 ! !RETURN VALUE:
     type(ESMF_DistGrid) :: ESMF_DistGridCreateDGT
@@ -816,6 +837,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_Index_Flag),         intent(in),  optional :: indexflag
     type(ESMF_DistGridConnection), intent(in),  optional :: connectionList(:)
+    logical,                       intent(in),  optional :: balanceflag
     type(ESMF_DELayout),           intent(in),  optional :: delayout
     type(ESMF_VM),                 intent(in),  optional :: vm
     integer,                       intent(out), optional :: rc
@@ -828,7 +850,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item[6.3.0r] Added argument {\tt vm} to support object creation on a
 !               different VM than that of the current context.
 ! \item[8.0.0] Added argument {\tt delayout} to support changing the layout of
-!              DEs across PETs.
+!              DEs across PETs.\newline
+!              Added argument {\tt balanceflag} to support rebalancing of the
+!              incoming DistGrids decomposition.
 ! \end{description}
 ! \end{itemize}
 !
@@ -871,6 +895,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !          If present, override the connections of the incoming {\tt distgrid}.
 !          See section \ref{api:DistGridConnectionSet} for the associated Set()
 !          method. By default use the connections defined in {\tt distgrid}.
+!     \item[{[balanceflag]}]
+!          If set to {\tt .true}, rebalance the incoming {\tt distgrid}
+!          decompositon. The default is {\tt .false.}.
 !     \item[{[delayout]}]
 !          If present, override the DELayout of the incoming {\tt distgrid}.
 !          By default use the DELayout defined in {\tt distgrid}.
@@ -884,11 +911,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    integer               :: localrc      ! local return code
-    type(ESMF_DistGrid)   :: dg           ! opaque pointer to new C++ DistGrid
-    type(ESMF_InterArray) :: firstExtraAux ! helper variable
-    type(ESMF_InterArray) :: lastExtraAux ! helper variable
-    type(ESMF_InterArray) :: connectionListAux ! helper variable
+    integer               :: localrc        ! local return code
+    type(ESMF_DistGrid)   :: dg             ! opaque pointer to new C++ DistGrid
+    type(ESMF_InterArray) :: firstExtraAux  ! helper variable
+    type(ESMF_InterArray) :: lastExtraAux   ! helper variable
+    type(ESMF_InterArray) :: connectionListAux  ! helper variable
+    type(ESMF_Logical)    :: opt_balanceflag    ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -913,12 +941,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Set default flags
+    opt_balanceflag = ESMF_FALSE
+    if (present(balanceflag)) opt_balanceflag = balanceflag
+
     ! Mark this DistGrid as invalid
     dg%this = ESMF_NULL_POINTER
 
     ! call into the C++ interface, which will sort out optional arguments
     call c_ESMC_DistGridCreateDG(dg, distgrid, firstExtraAux, &
-      lastExtraAux, indexflag, connectionListAux, delayout, vm, localrc)
+      lastExtraAux, indexflag, connectionListAux, opt_balanceflag, &
+      delayout, vm, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
@@ -3283,9 +3316,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterArray) :: deToTileMapAux         ! helper variable
     type(ESMF_InterArray) :: indexCountPDeAux       ! helper variable
     type(ESMF_InterArray) :: collocationAux         ! helper variable
-    type(ESMF_Logical)      :: regDecompFlagAux       ! helper variable
+    type(ESMF_Logical)    :: regDecompFlagAux       ! helper variable
     type(ESMF_InterArray) :: connectionListAux      ! helper variable
-    integer, pointer        :: farray2D(:,:)          ! helper variable
+    integer, pointer      :: farray2D(:,:)          ! helper variable
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL

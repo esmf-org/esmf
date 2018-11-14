@@ -287,6 +287,8 @@ module ESMF_RHandleMod
  
   public ESMF_RouteHandleValidate
   public ESMF_RouteHandlePrint
+
+  public ESMF_RouteHandleWrite
   
   public ESMF_RouteHandleOptimize
 
@@ -309,6 +311,7 @@ module ESMF_RHandleMod
   interface ESMF_RouteHandleCreate
     module procedure ESMF_RouteHandleCreateDef
     module procedure ESMF_RouteHandleCreateRH
+    module procedure ESMF_RouteHandleCreateFile
   end interface
 
   interface ESMF_RouteHandleGet
@@ -561,6 +564,65 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
 
   end function ESMF_RouteHandleCreateRH
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleCreateFile"
+!BOP
+! !IROUTINE: ESMF_RouteHandleCreate - Create a new RouteHandle from file
+
+! !INTERFACE:
+  ! Private name; call using ESMF_RouteHandleCreate()
+  function ESMF_RouteHandleCreateFile(fileName, keywordEnforcer, rc)
+!
+! !RETURN VALUE:
+    type(ESMF_RouteHandle) :: ESMF_RouteHandleCreateFile
+!
+! !ARGUMENTS:
+    character(*),           intent(in)            :: fileName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Create a new {\tt ESMF\_RouteHandle} object from a file.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[fileName]
+!     The name of the RouteHandle file.
+!   \item[{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+    type(ESMF_RouteHandle)  :: rhandle
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+    rhandle%this = ESMF_NULL_POINTER
+    ESMF_RouteHandleCreateFile = rhandle
+
+    ! Call C++ create code
+    call c_ESMC_RouteHandleCreateFile(rhandle, fileName, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set return values
+    ESMF_RouteHandleCreateFile = rhandle
+
+    ! Set init code
+    ESMF_INIT_SET_CREATED(ESMF_RouteHandleCreateFile)
+
+    ! Return successfully
+    if (present(rc)) rc = ESMF_SUCCESS
+
+  end function ESMF_RouteHandleCreateFile
 !------------------------------------------------------------------------------
 
 
@@ -1178,6 +1240,58 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_RouteHandleValidate
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleWrite"
+!BOP
+! !IROUTINE: ESMF_RouteHandleWrite - Write the RouteHandle to file
+
+! !INTERFACE:
+  subroutine ESMF_RouteHandleWrite(routehandle, fileName, keywordEnforcer, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_RouteHandle), intent(inout)         :: routehandle   
+    character(*),           intent(in)            :: fileName
+type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+    integer,                intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!   Write the RouteHandle to file. The generated file can then be used to
+!   re-create the same RouteHandle through via the 
+!   {\tt ESMF\_RouteHandleCreate(fileName=...)} method.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[routehandle] 
+!     The {\tt ESMF\_RouteHandle} to be written.
+!   \item[fileName]
+!     The name of the output file to which the RouteHandle is written.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+!------------------------------------------------------------------------------
+    integer                 :: localrc      ! local return code
+
+    ! initialize return code; assume routine not implemented
+    localrc = ESMF_RC_NOT_IMPL
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL
+
+    ESMF_INIT_CHECK_DEEP(ESMF_RouteHandleGetInit,routehandle,rc)
+
+    call c_ESMC_RouteHandleWrite(routehandle, fileName, localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Set return values
+    if (present(rc)) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_RouteHandleWrite
 !------------------------------------------------------------------------------
 
 

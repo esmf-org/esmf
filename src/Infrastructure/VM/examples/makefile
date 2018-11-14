@@ -11,6 +11,7 @@ EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_VMDefaultBasicsEx \
                     $(ESMF_EXDIR)/ESMF_VMGetMPICommunicatorEx \
                     $(ESMF_EXDIR)/ESMF_VMUserMpiEx \
                     $(ESMF_EXDIR)/ESMF_VMUserMpiCommEx \
+                    $(ESMF_EXDIR)/ESMF_VMUserMpiCommMultiEx \
                     $(ESMF_EXDIR)/ESMF_VMComponentEx \
                     $(ESMF_EXDIR)/ESMF_VMSendVMRecvEx \
                     $(ESMF_EXDIR)/ESMF_VMScatterVMGatherEx \
@@ -21,6 +22,7 @@ EXAMPLES_RUN      = run_ESMF_VMDefaultBasicsEx \
                     run_ESMF_VMGetMPICommunicatorEx \
                     run_ESMF_VMUserMpiEx \
                     run_ESMF_VMUserMpiCommEx \
+                    run_ESMF_VMUserMpiCommMultiEx \
                     run_ESMF_VMComponentEx \
                     run_ESMF_VMSendVMRecvEx \
                     run_ESMF_VMScatterVMGatherEx \
@@ -31,6 +33,7 @@ EXAMPLES_RUN_UNI  = run_ESMF_VMDefaultBasicsEx_uni \
                     run_ESMF_VMGetMPICommunicatorEx_uni \
                     run_ESMF_VMUserMpiEx_uni \
                     run_ESMF_VMUserMpiCommEx_uni \
+                    run_ESMF_VMUserMpiCommMultiEx_uni \
                     run_ESMF_VMComponentEx_uni \
                     run_ESMF_VMSendVMRecvEx_uni \
                     run_ESMF_VMScatterVMGatherEx_uni \
@@ -72,6 +75,12 @@ run_ESMF_VMUserMpiCommEx:
 
 run_ESMF_VMUserMpiCommEx_uni:
 	$(MAKE) EXNAME=VMUserMpiComm NP=1 exfrun
+
+run_ESMF_VMUserMpiCommMultiEx:
+	$(MAKE) EXNAME=VMUserMpiCommMulti NP=4 exfrun
+
+run_ESMF_VMUserMpiCommMultiEx_uni:
+	$(MAKE) EXNAME=VMUserMpiCommMulti NP=1 exfrun
 
 run_ESMF_VMComponentEx:
 	$(MAKE) EXNAME=VMComponent NP=4 exfrun

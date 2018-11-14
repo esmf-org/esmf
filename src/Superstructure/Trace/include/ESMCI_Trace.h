@@ -15,6 +15,7 @@
 
 #include <string.h>
 #include "ESMCI_Comp.h"
+#include "ESMCI_TraceRegion.h"
 #include <esmftrc.h>
 
 #define TO_VOID_PTR(_value)           static_cast<void *>(_value)
@@ -99,10 +100,6 @@ namespace ESMCI {
                                     int *ep_method, int *ep_phase);
   void TraceEventPhaseEpilogueExit(int *ep_vmid, int *ep_baseid, 
                                     int *ep_method, int *ep_phase);
-  
-  void TraceEventRegionEnter(std::string name, int *rc);
-  void TraceEventRegionExit(std::string name, int *rc);
-  
   void TraceEventComponentInfo(Comp *comp, int *ep_vmid, int *ep_baseid,
                                const char *ep_name,
                                std::string attributeKeys,
