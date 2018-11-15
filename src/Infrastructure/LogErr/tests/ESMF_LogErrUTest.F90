@@ -114,7 +114,7 @@
 
       call ESMF_LogWrite (msg="Pre-initialize message", rc=rc_preinit)
 
-      ! Start ESMf
+      ! Start ESMF
 
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -132,7 +132,7 @@
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Test pre-initialize LogWrite
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(failMsg, *) "Incorrectly returned ESMF_SUCCESS"
       write(name, *) "Pre-initialize LogWrite Test"
       call ESMF_Test((rc_preinit /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
