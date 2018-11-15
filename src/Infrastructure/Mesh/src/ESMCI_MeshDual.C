@@ -134,6 +134,14 @@ namespace ESMCI {
       num_snd++;
     }
 
+    // Load frac2 field
+    MEField<> *psf = src_mesh->GetField("elem_frac2");
+    if (psf != NULL) {
+      snd[num_snd]=psf;
+      rcv[num_snd]=psf;
+      num_snd++;
+    }
+
     // TODO: add elem mask fields and mask_val fields   
     src_mesh->CreateGhost();
     src_mesh->GhostComm().SendFields(num_snd, snd, rcv);
