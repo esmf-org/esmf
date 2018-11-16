@@ -13,6 +13,7 @@
 #include "ESMCI_Poly.h"
 #include "ESMCI_PolyUV.h"
 #include "ESMCI_PolyTwoV.h"
+#include "ESMCI_PolyTwoDV.h"
 
 namespace ESMCI{
   namespace MapperUtil{
