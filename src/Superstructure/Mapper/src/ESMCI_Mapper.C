@@ -1,4 +1,5 @@
 #include "ESMCI_Mapper.h"
+#include "ESMC_VM.h"
 #include <string>
 #include <vector>
 #include <map>
@@ -32,13 +33,29 @@ namespace ESMCI{
     };
   } // namespace MapperUtil
 
-  Mapper::Mapper(ESMCI::VM &vm):vm_(vm), use_load_balancer_(true), use_rseq_dgraph_dep_(false), lbal_max_iters_(DEFAULT_LBAL_MAX_ITERS)
+  Mapper::Mapper(ESMCI::VM &vm):vm_(vm), comm_(MPI_COMM_NULL), is_root_proc_(false), use_load_balancer_(true), use_rseq_dgraph_dep_(false), lbal_max_iters_(DEFAULT_LBAL_MAX_ITERS)
   {
     comp_info_store_ = MapperUtil::CompInfoStore<double>::get_instance();
+
+    /* FIXME: We need to get the communicator from VM, instead of using
+     * comm world
+     */
+    /* MPI_Comm comm = vm.getMpi_c();
+    if(comm == MPI_COMM_NULL){
+      comm = MPI_COMM_WORLD;
+    }
+    */
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Comm_dup(comm, &comm_);
+    int rank;
+    MPI_Comm_rank(comm_, &rank);
+    if(rank == ROOT_PROC){
+      is_root_proc_ = true;
+    }
   }
 
   Mapper::Mapper(ESMCI::VM &vm, const std::string &rseq_fname)
-    :vm_(vm), use_load_balancer_(true), use_rseq_dgraph_dep_(true), lbal_max_iters_(DEFAULT_LBAL_MAX_ITERS), rseq_fname_(rseq_fname)
+    :vm_(vm), comm_(MPI_COMM_NULL), is_root_proc_(false), use_load_balancer_(true), use_rseq_dgraph_dep_(true), lbal_max_iters_(DEFAULT_LBAL_MAX_ITERS), rseq_fname_(rseq_fname)
   {
     comp_info_store_ = MapperUtil::CompInfoStore<double>::get_instance();
 
@@ -47,6 +64,24 @@ namespace ESMCI{
     /* FIXME: Throw an exception instead */
     assert(rc == ESMF_SUCCESS);
     rseq_dgraph_.print_to_file("./RSeqDgraph.dot");
+    //int ret = ESMC_VMGet(vm, NULL, NULL, NULL, &comm_, NULL, NULL);
+    //assert(ret == ESMF_SUCCESS);
+    /* FIXME: We need to get the communicator from VM, instead of using
+     * comm world
+     */
+    /*
+    MPI_Comm comm = vm.getMpi_c();
+    if(comm == MPI_COMM_NULL){
+      comm = MPI_COMM_WORLD;
+    }
+    */
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Comm_dup(comm, &comm_);
+    int rank;
+    MPI_Comm_rank(comm_, &rank);
+    if(rank == ROOT_PROC){
+      is_root_proc_ = true;
+    }
   }
 
   void Mapper::set_comp_info(
@@ -105,53 +140,81 @@ namespace ESMCI{
                         std::vector<std::pair<int, int> > &opt_pet_ranges,
                         double &opt_wtime)
   {
-    if(use_rseq_dgraph_dep_){
-      std::vector<std::vector<MapperUtil::CompInfo<double> > > opt_layouts;
-      get_rseq_opt_layouts(opt_layouts);
-      if(use_load_balancer_){
-        for(std::vector<std::vector<MapperUtil::CompInfo<double> > >::const_iterator
-              citer_list = opt_layouts.cbegin();
-              citer_list != opt_layouts.cend(); ++citer_list){
-          lb_.set_lb_info(*citer_list);
-          lb_.optimize(opt_npets, opt_pet_ranges, opt_wtime);
+    bool retval = false;
+    if(is_root_proc_){
+      if(use_rseq_dgraph_dep_){
+        std::vector<std::vector<MapperUtil::CompInfo<double> > > opt_layouts;
+        get_rseq_opt_layouts(opt_layouts);
+        if(use_load_balancer_){
+          for(std::vector<std::vector<MapperUtil::CompInfo<double> > >::const_iterator
+                citer_list = opt_layouts.cbegin();
+                citer_list != opt_layouts.cend(); ++citer_list){
+            lb_.set_lb_info(*citer_list);
+            lb_.optimize(opt_npets, opt_pet_ranges, opt_wtime);
+          }
+          bool opt_pets_available = lb_.get_next_optimal_candidate(opt_npets,
+                                      opt_pet_ranges, opt_wtime);
+          if(!opt_pets_available){
+            retval =  lb_.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
+          }
+          else{
+            retval = true;
+          }
         }
+        else{
+          /* Find the layout with the min opt_wtime among opt_layouts */
+          assert(0);
+          retval = false;
+        }
+      }
+      else if(use_load_balancer_){
+        lb_.set_lb_info(comp_infos_);
+        lb_.optimize(opt_npets, opt_pet_ranges, opt_wtime);
         bool opt_pets_available = lb_.get_next_optimal_candidate(opt_npets,
                                     opt_pet_ranges, opt_wtime);
         if(!opt_pets_available){
-          return lb_.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
+          lb_.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
         }
-        return true;
-      }
-      else{
-        /* Find the layout with the min opt_wtime among opt_layouts */
-        assert(0);
-      }
-      return false;
-    }
-    else if(use_load_balancer_){
-      lb_.set_lb_info(comp_infos_);
-      lb_.optimize(opt_npets, opt_pet_ranges, opt_wtime);
-      bool opt_pets_available = lb_.get_next_optimal_candidate(opt_npets,
-                                  opt_pet_ranges, opt_wtime);
-      if(!opt_pets_available){
-        lb_.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
-      }
 
-      return true;
+        retval = true;
+      }
     }
-    return false;
+
+    // This can be removed later, but is useful in debugging
+    MPI_Bcast(&retval, 1, MPI_BYTE, ROOT_PROC, comm_);
+    if(!retval){
+      return retval;
+    }
+
+    sync_opt_info(opt_npets, opt_pet_ranges, opt_wtime);
+
+    return retval;
   }
 
   bool Mapper::get_optimal(std::vector<int> &opt_npets,
                         std::vector<std::pair<int, int> > &opt_pet_ranges,
                         double &opt_wtime)
   {
-    return lb_.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
+    int retval = false;
+    if(is_root_proc_){
+      retval = lb_.get_optimal(opt_npets, opt_pet_ranges, opt_wtime);
+    }
+
+    // This can be removed later, but is useful in debugging
+    MPI_Bcast(&retval, 1, MPI_BYTE, ROOT_PROC, comm_);
+    if(!retval){
+      return retval;
+    }
+
+    sync_opt_info(opt_npets, opt_pet_ranges, opt_wtime);
+
+    return retval;
   }
 
   Mapper::~Mapper()
   {
     MapperUtil::CompInfoStore<double>::finalize();
+    MPI_Comm_free(&comm_);
   }
 
   /* Analyse dependency graph and generate different layouts */
@@ -169,6 +232,50 @@ namespace ESMCI{
     opt_layouts.push_back(rseq_opt_layout);
   }
 
+  bool Mapper::sync_opt_info(std::vector<int> &opt_npets,
+                        std::vector<std::pair<int, int> > &opt_pet_ranges,
+                        double &opt_wtime)
+  {
+    int retval = false;
+    // Send opt PET info to non-root processes
+    int nopt_npets = static_cast<int>(opt_npets.size());
+    MPI_Bcast(&nopt_npets, 1, MPI_INT, ROOT_PROC, comm_);
+
+    std::vector<int> opt_pet_ranges_cbuf(2 * nopt_npets, 0);
+    if(is_root_proc_){
+      // Pack the ranges to send to a contiguous buffer
+      for(std::size_t i=0,j=0;
+          (i < opt_pet_ranges.size()) && (j < opt_pet_ranges_cbuf.size());
+          i++, j+=2){
+        opt_pet_ranges_cbuf[j] = opt_pet_ranges[i].first;
+        assert(j+1 < opt_pet_ranges_cbuf.size());
+        opt_pet_ranges_cbuf[j+1] = opt_pet_ranges[i].second;
+      }
+    }
+  
+    if(!is_root_proc_){
+      // Allocate mem to receive PET info from root process
+      opt_npets.resize(nopt_npets);
+      opt_pet_ranges.resize(nopt_npets);
+    }
+
+    MPI_Bcast(&(opt_npets[0]), nopt_npets, MPI_INT, ROOT_PROC, comm_);
+    MPI_Bcast(&(opt_pet_ranges_cbuf[0]), 2 * nopt_npets, MPI_INT, ROOT_PROC, comm_);
+
+    if(!is_root_proc_){
+      // UnPack the ranges from the contiguous buffer
+      for(std::size_t i=0,j=0;
+          (i < opt_pet_ranges.size()) && (j < opt_pet_ranges_cbuf.size());
+          i++, j+=2){
+        opt_pet_ranges[i].first = opt_pet_ranges_cbuf[j];
+        assert(j+1 < opt_pet_ranges_cbuf.size());
+        opt_pet_ranges[i].second = opt_pet_ranges_cbuf[j+1];
+      }
+    }
+    MPI_Bcast(&opt_wtime, 1, MPI_DOUBLE, ROOT_PROC, comm_);
+    return retval;
+  }
+
 } // namespace ESMCI
 
 extern "C"{
@@ -176,6 +283,7 @@ extern "C"{
   ESMCI::Mapper *ESMCI_MapperCreate(ESMCI::VM *vm, int config_fname_len,
     const char *config_fname, int *rc)
   {
+    assert(vm);
     if(rc){
       *rc = ESMF_SUCCESS;
     }

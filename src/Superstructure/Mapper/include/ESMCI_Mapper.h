@@ -3,6 +3,7 @@
 
 #include "ESMCI_VM.h"
 #include "ESMCI_MapperUtils.h"
+#include "mpi.h"
 
 namespace ESMCI{
 
@@ -38,6 +39,9 @@ namespace ESMCI{
       ~Mapper();
     private:
       ESMCI::VM &vm_;
+      MPI_Comm comm_;
+      bool is_root_proc_;
+      const int ROOT_PROC = 0;
       bool use_load_balancer_;
       bool use_rseq_dgraph_dep_;
       const int DEFAULT_LBAL_MAX_ITERS = 10;
@@ -50,6 +54,9 @@ namespace ESMCI{
 
       void get_rseq_opt_layouts(
         std::vector<std::vector<MapperUtil::CompInfo<double> > > &opt_layouts);
+      bool sync_opt_info(std::vector<int> &opt_npets,
+                    std::vector<std::pair<int, int> > &opt_pet_ranges,
+                    double &opt_wtime);
   };
 
 } //namespace ESMCI
