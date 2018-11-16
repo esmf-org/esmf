@@ -59,27 +59,60 @@
 
     implicit none
 
+    ! Dynamic Integer array type
+    type DIArray
+      integer, dimension(:), allocatable :: arr
+    end type
+
+    abstract interface
+      subroutine iuser_setvm(comp, rc)
+        use ESMF
+        type(ESMF_GridComp) :: comp
+        integer, intent(out) :: rc
+      end subroutine iuser_setvm
+      subroutine iuser_register(comp, rc)
+          use ESMF
+          type(ESMF_GridComp)  :: comp
+          integer, intent(out) :: rc
+      end subroutine iuser_register
+    end interface
+
+    type UModelFP
+      procedure(iuser_setvm), pointer, nopass :: puser_setvm
+      procedure(iuser_register), pointer, nopass :: puser_register
+    end type
+
+    integer, parameter :: NUM_UMODELS = 2
+    type(UModelFP) :: umodel_func_ptrs(NUM_UMODELS)
+
     ! Local variables
+    ! assert(NUM_COMPS > 0)
     integer, parameter :: NUM_COMPS = 2
     integer, parameter :: NUM_COMPS_PLUS_CPL = NUM_COMPS+1
     integer :: pet_id, npets, rc, localrc, userrc
-    integer :: npets_comp1, npets_comp2, npets_cpl
-    integer :: petlist_start_comp1, petlist_start_comp2, petlist_start_cpl
-    integer :: petlist_end_comp1, petlist_end_comp2, petlist_end_cpl
-    integer :: i, j
-    integer, dimension(:), allocatable :: petlist_comp1, petlist_comp2, petlist_cpl
-    character(len=ESMF_MAXSTR) :: comp1_name, comp2_name, cplname
-    character(len=ESMF_MAXSTR) :: comp1_phase_name, comp2_phase_name
+    integer :: npets_comps(NUM_COMPS)
+    integer :: npets_cpl
+    integer :: petlist_start_comps(NUM_COMPS)
+    integer :: petlist_start_cpl
+    integer :: petlist_end_comps(NUM_COMPS)
+    integer :: petlist_end_cpl
+    integer :: i, j, k
+    type(DIArray) :: petlist_comps(NUM_COMPS)
+    integer, dimension(:), allocatable :: petlist_cpl
+    character(len=ESMF_MAXSTR) :: comp_names(NUM_COMPS)
+    character(len=ESMF_MAXSTR) :: cplname
+    character(len=ESMF_MAXSTR) :: comp_phase_names(NUM_COMPS)
     type(ESMF_VM):: vm
-    type(ESMF_State) :: c1exp, c2imp
-    type(ESMF_GridComp) :: comp1, comp2
-    real(ESMF_KIND_R8) :: comp1_start, comp1_end, comp2_start, comp2_end;
+    type(ESMF_State) :: cexps(NUM_COMPS), cimps(NUM_COMPS)
+    type(ESMF_GridComp) :: comps(NUM_COMPS)
+    real(ESMF_KIND_R8) :: comp_starts(NUM_COMPS), comp_ends(NUM_COMPS)
     double precision :: run_loop_start, run_loop_end
-    double precision :: comp1_wtime, comp2_wtime, run_loop_wtime
+    double precision :: run_loop_wtime
+    double precision :: comp_wtimes(NUM_COMPS)
     type(ESMF_CplComp) :: cpl
 
     ! instantiate a clock, a calendar, and timesteps
-    !type(ESMF_Clock) :: clock_comp1, clock_comp2, clock_cpl
+    !type(ESMF_Clock) :: clock_comps(1), clock_comps(2), clock_cpl
     integer, parameter :: CPL_IDX = 1
     integer, parameter :: GCOMP_SIDX = 2
     type(ESMF_Clock) :: clocks(NUM_COMPS_PLUS_CPL)
@@ -97,6 +130,7 @@
     integer :: testresult = 0
     integer :: result = 0
 
+    character(ESMF_MAXSTR) :: tmpstr
     ! individual test name
     character(ESMF_MAXSTR) :: testname
 
@@ -111,6 +145,11 @@
     localrc = ESMF_SUCCESS
     rc = ESMF_SUCCESS
 
+! Set the model function ptrs
+    umodel_func_ptrs(1)%puser_setvm => userm1_setvm
+    umodel_func_ptrs(1)%puser_register => userm1_register
+    umodel_func_ptrs(2)%puser_setvm => userm2_setvm
+    umodel_func_ptrs(2)%puser_register => userm2_register
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !    Create section
@@ -131,42 +170,38 @@
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
       ! Check for correct number of PETs
-     !if ( npets < 8 ) then
-     !   call ESMF_LogSetError(ESMF_RC_ARG_BAD,&
-     !       msg="This system test does not run on fewer than 8 PETs.",&
-     !       ESMF_CONTEXT, rcToReturn=rc)
-     !   call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-     ! endif
-      if(npets == 1) then
-        ! Not concurrent anymore...
-        npets_comp1 = 1
-        npets_comp2 = 1
-        petlist_start_comp1 = 0
-        petlist_start_comp2 = 0
-      else
-        npets_comp1 = npets/2
-        npets_comp2 = npets - npets_comp1
-        petlist_start_comp1 = 0
-        petlist_start_comp2 = npets_comp1
-      end if
-      petlist_end_comp1 = petlist_start_comp1 + npets_comp1 - 1;
-      petlist_end_comp2 = petlist_start_comp2 + npets_comp2 - 1;
+     if ( npets < NUM_COMPS ) then
+        write(failMsg,'(A50I6A10)') "This system test does not run on fewer than ", NUM_COMPS, " PETs"
+        call ESMF_LogSetError(ESMF_RC_ARG_BAD,&
+            msg=failMsg,&
+            ESMF_CONTEXT, rcToReturn=rc)
+        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      endif
+      j = 0
+      do i=1,NUM_COMPS-1
+        npets_comps(i) = npets/NUM_COMPS
+        petlist_start_comps(i) = j
+        petlist_end_comps(i) = petlist_start_comps(i) + npets_comps(i) - 1
+        j = j + npets_comps(i)
+      end do
+      npets_comps(NUM_COMPS) = npets - (NUM_COMPS - 1) * (npets/NUM_COMPS)
+      petlist_start_comps(NUM_COMPS) = j
+      petlist_end_comps(NUM_COMPS) = petlist_start_comps(NUM_COMPS) +&
+                                      npets_comps(NUM_COMPS) - 1
       npets_cpl = npets
       petlist_start_cpl = 0
       petlist_end_cpl = petlist_start_cpl + npets_cpl - 1;
 
-      allocate(petlist_comp1(npets_comp1))
-      allocate(petlist_comp2(npets_comp2))
-      allocate(petlist_cpl(npets_cpl))
-      j = petlist_start_comp1
-      do i=1,npets_comp1
-        petlist_comp1(i) = j
-        j = j + 1
+      do i=1,NUM_COMPS
+        allocate(petlist_comps(i)%arr(npets_comps(i)))
       end do
-      j = petlist_start_comp2
-      do i=1,npets_comp2
-        petlist_comp2(i) = j
-        j = j + 1
+      allocate(petlist_cpl(npets_cpl))
+      do k=1,NUM_COMPS
+        j = petlist_start_comps(k)
+        do i=1,npets_comps(k)
+          petlist_comps(k)%arr(i) = j
+          j = j + 1
+        end do
       end do
       j = petlist_start_cpl
       do i=1,npets_cpl
@@ -174,21 +209,16 @@
         j = j + 1
       end do
       
-
-    ! Create the 2 model components and coupler
-    comp1_name = "user model 1"
-    comp1 = ESMF_GridCompCreate(name=comp1_name, petList=petlist_comp1, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    !print *, "Created component ", trim(comp1_name), "rc =", rc
-
-    comp2_name = "user model 2"
-    comp2 = ESMF_GridCompCreate(name=comp2_name, petList=petlist_comp2, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    !print *, "Created component ", trim(comp2_name), "rc =", rc
+    ! Create the N model components and coupler
+    do i=1,NUM_COMPS
+      write(tmpstr, '(A12I6)') "user model ", i
+      comp_names(i) = trim(tmpstr)
+      comps(i) = ESMF_GridCompCreate(name=comp_names(i), petList=petlist_comps(i)%arr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+      !print *, "Created component ", trim(comp_names(1)), "rc =", rc
+    end do
 
     cplname = "user one-way coupler"
     cpl = ESMF_CplCompCreate(name=cplname, petList=petlist_cpl, rc=localrc)
@@ -197,8 +227,9 @@
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
     !print *, "Created component ", trim(cplname), ", rc =", rc
 
-    deallocate(petlist_comp1)
-    deallocate(petlist_comp2)
+    do i=1,NUM_COMPS
+      deallocate(petlist_comps(i)%arr)
+    end do
     deallocate(petlist_cpl)
     !print *, "Comp Creates finished"
 
@@ -214,45 +245,30 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-  call ESMF_GridCompSetVM(comp1, userRoutine=userm1_setvm, &
-    userRc=userrc, rc=localrc)
-  print *, "Comp1 SetVM finished, rc= ", localrc, userrc
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  do i=1,NUM_COMPS
+    call ESMF_GridCompSetVM(comps(i),&
+      userRoutine=umodel_func_ptrs(mod(i-1,NUM_UMODELS)+1)%puser_setvm,&
+      userRc=userrc, rc=localrc)
+    print *, "Comp1 SetVM finished, rc= ", localrc, userrc
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+    if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  call ESMF_GridCompSetServices(comp1, userRoutine=userm1_register, &
-    userRc=userrc, rc=localrc)
-  print *, "Comp1 SetServices finished, rc= ", localrc, userrc
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+    call ESMF_GridCompSetServices(comps(i),&
+      userRoutine=umodel_func_ptrs(mod(i-1,NUM_UMODELS)+1)%puser_register,&
+      userRc=userrc, rc=localrc)
+    print *, "Comp1 SetServices finished, rc= ", localrc, userrc
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+    if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) &
+      call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
-  call ESMF_GridCompSetVM(comp2, userRoutine=userm2_setvm, &
-    userRc=userrc, rc=localrc)
-  print *, "Comp2 SetVM finished, rc= ", localrc, userrc
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
-  call ESMF_GridCompSetServices(comp2, userRoutine=userm2_register, &
-    userRc=userrc, rc=localrc)
-  print *, "Comp2 SetServices finished, rc= ", localrc, userrc
-  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-  if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-    ESMF_CONTEXT, rcToReturn=rc)) &
-    call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  end do
 
   call ESMF_CplCompSetVM(cpl, userRoutine=usercpl_setvm, &
     userRc=userrc, rc=localrc)
@@ -283,7 +299,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-!  Create and initialize clocks for comp1 and comp2.
+!  Create and initialize clocks for comps(1) and comps(2).
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
     ! initialize calendar to be Gregorian type
@@ -299,15 +315,12 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
-    call ESMF_TimeIntervalSet(timeSteps(GCOMP_SIDX), h=4, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-
-    call ESMF_TimeIntervalSet(timeSteps(GCOMP_SIDX+1), h=4, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+    do i=1,NUM_COMPS
+      call ESMF_TimeIntervalSet(timeSteps(GCOMP_SIDX+i-1), h=4, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+    end do
 
     ! initialize start time to 5/01/2003
     call ESMF_TimeSet(startTime, yy=2003, mm=5, dd=1, &
@@ -323,24 +336,21 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
-    ! initialize the clock for comp1 with the above values
+    ! initialize the clock for comps(1) with the above values
     clocks(CPL_IDX) = ESMF_ClockCreate(timeSteps(CPL_IDX), startTime, stopTime=stopTime, &
                              name="Cpl Clock 1", rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
-    clocks(GCOMP_SIDX) = ESMF_ClockCreate(timeSteps(GCOMP_SIDX), startTime, stopTime=stopTime, &
-                             name="Gcomp Clock 1", rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-
-    clocks(GCOMP_SIDX+1) = ESMF_ClockCreate(timeSteps(GCOMP_SIDX+1), startTime, stopTime=stopTime, &
-                             name="Gcomp Clock 2", rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+    do i=1,NUM_COMPS
+      write(tmpstr,"(A15I6)") "Gcomp Clock", i
+      clocks(GCOMP_SIDX+i-1) = ESMF_ClockCreate(timeSteps(GCOMP_SIDX+i-1), startTime, stopTime=stopTime, &
+                               name=tmpstr, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+    end do
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -348,12 +358,15 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    c1exp = ESMF_StateCreate(name="comp1 export",  &
+  do i=1,NUM_COMPS,2
+    write(tmpstr,"(A20I6)") "export comps", i
+    cexps(i) = ESMF_StateCreate(name=tmpstr,  &
                              stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clocks(GCOMP_SIDX), &
+    call ESMF_GridCompInitialize(comps(i), exportState=cexps(i),&
+       clock=clocks(GCOMP_SIDX+i-1), &
        userRC=userrc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
@@ -363,30 +376,39 @@
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
     !print *, "Comp 1 Initialize finished, rc =", rc
 
-    c2imp = ESMF_StateCreate(name="comp2 import",  &
-                             stateintent=ESMF_STATEINTENT_IMPORT, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clocks(GCOMP_SIDX+1), &
-       userRC=userrc, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-    !print *, "Comp 2 Initialize finished, rc =", rc
+    if((i+1) <= NUM_COMPS) then
+      write(tmpstr,"(A20I6)") "import comps", i+1
+      cimps(i+1) = ESMF_StateCreate(name=tmpstr,  &
+                               stateintent=ESMF_STATEINTENT_IMPORT, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+      call ESMF_GridCompInitialize(comps(i+1), importState=cimps(i+1),&
+         clock=clocks(GCOMP_SIDX+i), &
+         userRC=userrc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+      if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      !print *, "Comp 2 Initialize finished, rc =", rc
+    end if
+  end do
 
-    ! note that the coupler's import is comp1's export
-    call ESMF_CplCompInitialize(cpl, importState=c1exp, &
-      exportState=c2imp, clock=clocks(CPL_IDX), userRC=userrc, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+    ! note that the coupler's import is comps(1)'s export
+    do i=1,NUM_COMPS,2
+      if((i+1) <= NUM_COMPS) then
+        call ESMF_CplCompInitialize(cpl, importState=cexps(i), &
+          exportState=cimps(i+1), clock=clocks(CPL_IDX), userRC=userrc, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) &
+            call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) &
+            call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      end if
+    end do
     !print *, "Coupler Initialize finished, rc =", rc
 
 !-------------------------------------------------------------------------
@@ -395,18 +417,19 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    comp1_phase_name = "run"
-    comp2_phase_name = "run"
+    do i=1,NUM_COMPS
+      write(comp_phase_names(i),"(A15I6)") "comp phase run", i
+    end do
     do while (.not. ESMF_ClockIsStopTime(clocks(CPL_IDX), rc=localrc))
 
       print *, "PET ", pet_id, " starting time step..."
 
       run_loop_start = MPI_Wtime()
       ! Uncomment the following call to ESMF_GridCompWait() to sequentialize
-      ! comp1 and comp2. The following ESMF_GridCompWait() call will block
-      ! all PETs until comp2 has returned. Consequently comp1 will not be
-      ! run until comp2 has returned.
-      !call ESMF_GridCompWait(comp2, syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
+      ! comps(1) and comps(2). The following ESMF_GridCompWait() call will block
+      ! all PETs until comps(2) has returned. Consequently comps(1) will not be
+      ! run until comps(2) has returned.
+      !call ESMF_GridCompWait(comps(2), syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
       !print *, "Comp 2 Wait returned, rc =", localrc
       !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       !  ESMF_CONTEXT, rcToReturn=rc)) &
@@ -414,34 +437,36 @@
 
       ! Run the first component:
       ! After the first time thru the loop this will be running concurrently
-      ! with the second component since comp1 and comp2 are defined on
+      ! with the second component since comps(1) and comps(2) are defined on
       ! exclusive sets of PETs
-      !print *, "I am calling into GridCompRun(comp1)"
-      comp1_start = MPI_Wtime()
-      !call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clocks(GCOMP_SIDX), &
-      !  userRc=userrc, rc=localrc)
-      call ESMF_GridCompRun(comp1, clock=clocks(GCOMP_SIDX), &
-        userRc=userrc, rc=localrc)
-      print *, "Comp 1 Run returned, rc =", localrc
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-      if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-      comp1_end = MPI_Wtime()
+      do i=1,NUM_COMPS,2
+        !print *, "I am calling into GridCompRun(comps(1))"
+        comp_starts(i) = MPI_Wtime()
+        !call ESMF_GridCompRun(comps(1), exportState=cexps(1), clock=clocks(GCOMP_SIDX), &
+        !  userRc=userrc, rc=localrc)
+        call ESMF_GridCompRun(comps(i), clock=clocks(GCOMP_SIDX+i-1), &
+          userRc=userrc, rc=localrc)
+        print *, "Comp ", i, " Run returned, rc =", localrc
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        comp_ends(i) = MPI_Wtime()
+      end do
 
       ! Uncomment the following calls to ESMF_GridCompWait() to sequentialize
-      ! comp1, comp2 and the coupler. The following ESMF_GridCompWait() calls
-      ! will block all PETs until comp1 and comp2 have returned. Consequently
-      ! the coupler component will not be run until comp1 and comp2 have
+      ! comps(1), comps(2) and the coupler. The following ESMF_GridCompWait() calls
+      ! will block all PETs until comps(1) and comps(2) have returned. Consequently
+      ! the coupler component will not be run until comps(1) and comps(2) have
       ! returned.
-      !call ESMF_GridCompWait(comp1, syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
+      !call ESMF_GridCompWait(comps(1), syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
       !print *, "Comp 1 Wait returned, rc =", localrc
       !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       !  ESMF_CONTEXT, rcToReturn=rc)) &
       !  call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-      !call ESMF_GridCompWait(comp2, syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
+      !call ESMF_GridCompWait(comps(2), syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
       !print *, "Comp 2 Wait returned, rc =", localrc
       !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       !  ESMF_CONTEXT, rcToReturn=rc)) &
@@ -449,15 +474,15 @@
 
       ! Run the coupler:
       ! The coupler will run in "per-PET sequential" mode because it runs on
-      ! the union of all PETs. Depending on the per-PET runtime of comp1 and
-      ! comp2 some PETs may start/finish executing the coupler at different
+      ! the union of all PETs. Depending on the per-PET runtime of comps(1) and
+      ! comps(2) some PETs may start/finish executing the coupler at different
       ! times. There is no intrinsic inter PET synchronization in calling
       ! component methods via CompI/R/F(). However, collective communication
       ! calls contained in the user written coupler methods will indirectly
       ! lead to inter PET synchronization of the coupler component.
       !print *, "I am calling into CplCompRun(cpl)"
-      !call ESMF_CplCompRun(cpl, importState=c1exp, &
-      !  exportState=c2imp, clock=clocks(CPL_IDX), userRc=userrc, rc=localrc)
+      !call ESMF_CplCompRun(cpl, importState=cexps(1), &
+      !  exportState=cimps(2), clock=clocks(CPL_IDX), userRc=userrc, rc=localrc)
       call ESMF_CplCompRun(cpl,&
         clock=clocks(CPL_IDX), userRc=userrc, rc=localrc)
       !print *, "Coupler Run returned, rc =", localrc
@@ -469,69 +494,64 @@
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
       ! Uncomment the following call to ESMF_GridCompWait() to sequentialize
-      ! comp1 and comp2. The following ESMF_GridCompWait() call will block
-      ! all PETs until comp1 has returned. Consequently comp2 will not be
-      ! run until comp2 has returned.
-      !call ESMF_GridCompWait(comp1, syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
+      ! comps(1) and comps(2). The following ESMF_GridCompWait() call will block
+      ! all PETs until comps(1) has returned. Consequently comps(2) will not be
+      ! run until comps(2) has returned.
+      !call ESMF_GridCompWait(comps(1), syncflag=ESMF_SYNC_BLOCKING, rc=localrc)
       !print *, "Comp 1 Wait returned, rc =", localrc
       !if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       !  ESMF_CONTEXT, rcToReturn=rc)) &
       !  call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
       ! Run the second component:
-      ! Since comp1 and comp2 are defined on exclusive sets of PETs those PET
-      ! that are part of comp1 will not block in the following call but proceed
-      ! to the next loop increment, executing comp1 concurrently with comp2.
-      !print *, "I am calling into GridCompRun(comp2)"
-      comp2_start = MPI_Wtime()
-      !call ESMF_GridCompRun(comp2, importState=c2imp, clock=clocks(GCOMP_SIDX+1), &
-      !  userRc=userrc, rc=localrc)
-      call ESMF_GridCompRun(comp2, clock=clocks(GCOMP_SIDX+1), &
-        userRc=userrc, rc=localrc)
-      print *, "Comp 2 Run returned, rc =", localrc
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-      if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-      comp2_end = MPI_Wtime()
+      ! Since comps(1) and comps(2) are defined on exclusive sets of PETs those PET
+      ! that are part of comps(1) will not block in the following call but proceed
+      ! to the next loop increment, executing comps(1) concurrently with comps(2).
+      do i=2,NUM_COMPS,2
+        !print *, "I am calling into GridCompRun(comps(2))"
+        comp_starts(i) = MPI_Wtime()
+        !call ESMF_GridCompRun(comps(2), importState=cimps(2), clock=clocks(GCOMP_SIDX+1), &
+        !  userRc=userrc, rc=localrc)
+        call ESMF_GridCompRun(comps(i), clock=clocks(GCOMP_SIDX+i-1), &
+          userRc=userrc, rc=localrc)
+        print *, "Comp ", i, " Run returned, rc =", localrc
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+        comp_ends(2) = MPI_Wtime()
+      end do
 
       run_loop_end = MPI_Wtime() - run_loop_start
-      call MPI_Allreduce(comp1_end, comp1_wtime, 1, MPI_DOUBLE_PRECISION,&
-            MPI_MAX, MPI_COMM_WORLD, rc)
-
-      call MPI_Allreduce(comp2_end, comp2_wtime, 1, MPI_DOUBLE_PRECISION,&
-            MPI_MAX, MPI_COMM_WORLD, rc)
+      do i=1,NUM_COMPS
+        call MPI_Allreduce(comp_ends(i), comp_wtimes(i),&
+              1, MPI_DOUBLE_PRECISION,&
+              MPI_MAX, MPI_COMM_WORLD, rc)
+      end do
 
       call MPI_Allreduce(run_loop_end, run_loop_wtime, 1, MPI_DOUBLE_PRECISION,&
             MPI_MAX, MPI_COMM_WORLD, rc)
 
-      print *, "comp1 = ", comp1_wtime, "s"
-      print *, "comp2 = ", comp2_wtime, "s"
+      do i=1,NUM_COMPS
+        print *, "comps(", i, ") = ", comp_wtimes(i), "s"
+      end do
       print *, "run loop = ", run_loop_wtime, "s"
 
       print *, "Setting comp infos..."
-      ! Contact mapper
-      call ESMF_MapperSetCompInfo(mapper,&
-            len_trim(comp1_name), comp1_name,&
-            len_trim(comp1_phase_name), comp1_phase_name,&
-            petlist_start_comp1, petlist_end_comp1,&      
-            comp1_start, comp1_end,&
-            rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-      
-      call ESMF_MapperSetCompInfo(mapper,&
-            len_trim(comp2_name), comp2_name,&
-            len_trim(comp2_phase_name), comp2_phase_name,&
-            petlist_start_comp2, petlist_end_comp2,&      
-            comp2_start, comp2_end,&
-            rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      do i=1,NUM_COMPS
+        ! Contact mapper
+        call ESMF_MapperSetCompInfo(mapper,&
+              len_trim(comp_names(i)), comp_names(i),&
+              len_trim(comp_phase_names(i)), comp_phase_names(i),&
+              petlist_start_comps(i), petlist_end_comps(i),&      
+              comp_starts(i), comp_ends(i),&
+              rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      end do
       
       print *, "Optimizing PET layouts using mapper..."
       ! Optimize using the mapper
@@ -541,50 +561,37 @@
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
       print *, "Retrieving optimized PET layouts from mapper..."
-      ! Contact mapper
-      call ESMF_MapperGetCompInfo(mapper,&
-            len_trim(comp1_name), comp1_name,&
-            len_trim(comp1_phase_name), comp1_phase_name,&
-            startPet=petlist_start_comp1, endPet=petlist_end_comp1,&      
-            rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-      
-      call ESMF_MapperGetCompInfo(mapper,&
-            len_trim(comp2_name), comp2_name,&
-            len_trim(comp2_phase_name), comp2_phase_name,&
-            startPet=petlist_start_comp2, endPet=petlist_end_comp2,&      
-            rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      do i=1,NUM_COMPS
+        ! Contact mapper
+        call ESMF_MapperGetCompInfo(mapper,&
+              len_trim(comp_names(i)), comp_names(i),&
+              len_trim(comp_phase_names(i)), comp_phase_names(i),&
+              startPet=petlist_start_comps(i), endPet=petlist_end_comps(i),&      
+              rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      end do
       
       print *, "Recreating components..."
-      ! Recreate the components using info from mapper
-      call user_comp_recreate(comp1, userm1_setvm, userm1_register,&
-        petlist_start_comp1, petlist_end_comp1, mapper, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      do i=1,NUM_COMPS
+        ! Recreate the components using info from mapper
+        call user_comp_recreate(comps(i),&
+          umodel_func_ptrs(mod(i-1,NUM_UMODELS) + 1)%puser_setvm,&
+          umodel_func_ptrs(mod(i-1,NUM_UMODELS) + 1)%puser_register,&
+          petlist_start_comps(i), petlist_end_comps(i), mapper, localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=localrc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      end do
 
-      call user_comp_recreate(comp2, userm2_setvm, userm2_register,&
-        petlist_start_comp2, petlist_end_comp2, mapper, localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=localrc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-
-      call ESMF_ClockAdvance(clocks(GCOMP_SIDX), rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-      !call ESMF_ClockPrint(clock_comp1, rc=localrc)
-
-      call ESMF_ClockAdvance(clocks(GCOMP_SIDX+1), rc=localrc)
-      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-      !call ESMF_ClockPrint(clock_comp2, rc=localrc)
+      do i=1,NUM_COMPS
+        call ESMF_ClockAdvance(clocks(GCOMP_SIDX+i-1), rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+        !call ESMF_ClockPrint(clock_comps(1), rc=localrc)
+      end do
 
       call ESMF_ClockAdvance(clocks(CPL_IDX), rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -603,28 +610,32 @@
 !-------------------------------------------------------------------------
 !     Print result
 
-    call ESMF_GridCompFinalize(comp1, exportState=c1exp, clock=clocks(GCOMP_SIDX), &
-       userRc=userrc, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-    !print *, "Comp 1 Finalize finished, rc =", rc
+    do i=1,NUM_COMPS,2
+      call ESMF_GridCompFinalize(comps(i), exportState=cexps(i), clock=clocks(GCOMP_SIDX+i-1), &
+         userRc=userrc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+      if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      !print *, "Comp 1 Finalize finished, rc =", rc
+    end do
 
-    call ESMF_GridCompFinalize(comp2, importState=c2imp, clock=clocks(GCOMP_SIDX+1), &
-       userRc=userrc, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
-    !print *, "Comp 2 Finalize finished, rc =", rc
+    do i=2,NUM_COMPS,2
+      call ESMF_GridCompFinalize(comps(i), importState=cimps(i), clock=clocks(GCOMP_SIDX+i-1), &
+         userRc=userrc, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+      if (ESMF_LogFoundError(userrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+      !print *, "Comp 2 Finalize finished, rc =", rc
+    end do
 
-    call ESMF_CplCompFinalize(cpl, importState=c1exp, &
-      exportState=c2imp, clock=clocks(CPL_IDX), userRc=userrc, rc=localrc)
+    call ESMF_CplCompFinalize(cpl, importState=cexps(1), &
+      exportState=cimps(2), clock=clocks(CPL_IDX), userRc=userrc, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
@@ -644,40 +655,41 @@
 !-------------------------------------------------------------------------
 !     Clean up
 
-    call ESMF_StateDestroy(c1exp, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    call ESMF_StateDestroy(c2imp, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+    do i=1,NUM_COMPS,2
+      call ESMF_StateDestroy(cexps(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+    end do
+    do i=2,NUM_COMPS,2
+      call ESMF_StateDestroy(cimps(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+    end do
 
-    call ESMF_ClockDestroy(clocks(GCOMP_SIDX), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    call ESMF_ClockDestroy(clocks(GCOMP_SIDX+1), rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+    do i=1,NUM_COMPS
+      call ESMF_ClockDestroy(clocks(GCOMP_SIDX+i-1), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+    end do
     call ESMF_ClockDestroy(clocks(CPL_IDX), rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+
     call ESMF_CalendarDestroy(gregorianCalendar, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
-    call ESMF_GridCompDestroy(comp1, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    call ESMF_GridCompDestroy(comp2, rc=localrc)
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-        ESMF_CONTEXT, rcToReturn=rc)) &
-        call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+    do i=1,NUM_COMPS
+      call ESMF_GridCompDestroy(comps(i), rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) &
+          call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
+    end do
     call ESMF_CplCompDestroy(cpl, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
