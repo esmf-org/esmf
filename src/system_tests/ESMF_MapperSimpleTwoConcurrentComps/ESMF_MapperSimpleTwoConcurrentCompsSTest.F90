@@ -156,6 +156,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
+    print *, "ESMF_Initialize ..."
     ! Initialize framework and get back default global VM
     call ESMF_Initialize(vm=vm, defaultlogfilename="ConcurrentCompSTest.Log", &
                         logkindflag=ESMF_LOGKIND_MULTI, rc=localrc)
@@ -163,6 +164,7 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
+    print *, "ESMF_VMGet ..."
     ! Get number of PETs we are running with
     call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -177,6 +179,7 @@
             ESMF_CONTEXT, rcToReturn=rc)
         call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
       endif
+      print *, "Allocating PETs among components ..."
       j = 0
       do i=1,NUM_COMPS-1
         npets_comps(i) = npets/NUM_COMPS
@@ -209,6 +212,7 @@
         j = j + 1
       end do
       
+    print *, "Creating N model components..."
     ! Create the N model components and coupler
     do i=1,NUM_COMPS
       write(tmpstr, '(A12I6)') "user model ", i
@@ -217,7 +221,7 @@
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) &
           call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-      !print *, "Created component ", trim(comp_names(1)), "rc =", rc
+      print *, "Created component ", trim(comp_names(i)), "rc =", rc
     end do
 
     cplname = "user one-way coupler"
@@ -225,7 +229,7 @@
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
-    !print *, "Created component ", trim(cplname), ", rc =", rc
+    print *, "Created component ", trim(cplname), ", rc =", rc
 
     do i=1,NUM_COMPS
       deallocate(petlist_comps(i)%arr)
@@ -233,6 +237,7 @@
     deallocate(petlist_cpl)
     !print *, "Comp Creates finished"
 
+  print *, "Creating mapper...."
   !mapper = ESMF_MapperCreate(vm, configFile="./runseq.txt", rc=localrc)
   mapper = ESMF_MapperCreate(vm, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -245,6 +250,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
+  print *, "Registering components ..."
   do i=1,NUM_COMPS
     call ESMF_GridCompSetVM(comps(i),&
       userRoutine=umodel_func_ptrs(mod(i-1,NUM_UMODELS)+1)%puser_setvm,&
