@@ -1114,12 +1114,20 @@ int main(void){
   }
   }
   
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
   merr = pcomm->exchange_ghost_cells(mbmesh->pdim, // int ghost_dim
                                      0, // int bridge_dim
                                      1, // int num_layers
                                      0, // int addl_ents
                                      true);// bool store_remote_handles
   MBMESH_CHECK_ERR(merr, rc);
+
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   {
   Range shared_ents;
@@ -1147,13 +1155,9 @@ int main(void){
   }
   }
 
-  Range elems;
-  merr=mbmesh->mesh->get_entities_by_dimension(0, mbmesh->pdim, elems);
-  MBMESH_CHECK_ERR(merr, rc);
-
-  Range nodes;
-  merr=mbmesh->mesh->get_entities_by_dimension(0, 0, nodes);
-  MBMESH_CHECK_ERR(merr, rc);
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   vector<Tag> node_tags;
   vector<Tag> elem_tags;
@@ -1176,14 +1180,38 @@ int main(void){
   if (mbmesh->has_elem_coords) elem_tags.push_back(mbmesh->elem_coords_tag);
   if (mbmesh->has_elem_orig_coords) elem_tags.push_back(mbmesh->elem_orig_coords_tag); 
    
-  // pcomm->set_debug_verbosity(4);
+  pcomm->set_debug_verbosity(4);
+
+  Range nodes;
+  merr=mbmesh->mesh->get_entities_by_dimension(0, 0, nodes);
+  MBMESH_CHECK_ERR(merr, rc);
 
   merr = pcomm->exchange_tags(node_tags, node_tags, nodes);
   MBMESH_CHECK_ERR(merr, rc);
   
+  Range elems;
+  merr=mbmesh->mesh->get_entities_by_dimension(0, mbmesh->pdim, elems);
+  MBMESH_CHECK_ERR(merr, rc);
+
   merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
   MBMESH_CHECK_ERR(merr, rc);
+
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
+  
+  printf("%d# node_tags size %d [", Par::Rank(), node_tags.size());
+  for (int i=0; i< node_tags.size(); ++i)
+    printf("%d, ", node_tags[i]);
+  printf("]\n");
+
+  printf("%d# elem_tags size %d [", Par::Rank(), elem_tags.size());
+  for (int i=0; i< elem_tags.size(); ++i)
+    printf("%d, ", elem_tags[i]);
+  printf("]\n");
+
+
   {
   // Get a range containing all nodes
   Range range_node;
