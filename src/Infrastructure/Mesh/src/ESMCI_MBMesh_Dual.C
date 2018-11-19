@@ -43,10 +43,9 @@ using namespace moab;
 
 using namespace std;
 
-
-#define DEBUG_CONNECTIVITY
+// #define DEBUG_SPLIT
+// #define DEBUG_CONNECTIVITY
 // #define DEBUG_CONNECTIVITY_ADJACENCIES
-
 
 
 //-----------------------------------------------------------------------------
@@ -898,10 +897,6 @@ namespace ESMCI {
 
     // Set number of local elems
     dual_mesh->num_elems=num_elems;
-
-#ifdef DEBUG
-printf("    PET %d - parallel sharing\n", localPet);
-#endif
 
     //// Setup parallel sharing ///
 

@@ -51,6 +51,9 @@
 
 using namespace ESMCI;
 
+// #define DEBUG
+// #define DEBUG_MASK
+// #define DEBUG_OUTPUT
 
 
 void MBMesh_create(void **mbmpp,
@@ -281,7 +284,6 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
     }
 
     // Set mask information
-// #define DEBUG_MASK
 #ifdef DEBUG_MASK
     printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMesh_Glue mask ~~~~~~~~~~~~~~~\n");
 #endif
@@ -1365,27 +1367,10 @@ printf("    PET %d - addelems\n", localPet);
     // Set number of local elems
     mbmp->num_elems=num_elems;
 
-#ifdef DEBUG
-printf("    PET %d - parallel sharing\n", localPet);
-#endif
-
     //// Setup parallel sharing ///
 
     // setup parallel comm //
     ParallelComm *pcomm= new ParallelComm(moab_mesh, mpi_comm);
-
-    // Range elems;
-    // merr=moab_mesh->get_entities_by_dimension(0, mbmp->pdim, elems);
-    // if (merr != MB_SUCCESS) {
-    //   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-    //              moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    // }
-    // 
-    // merr = pcomm->resolve_shared_ents(0, elems, mbmp->pdim, 1);
-    // if (merr != MB_SUCCESS) {
-    //   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-    //              moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    // }
   
     Range elems;
     merr=mbmp->mesh->get_entities_by_dimension(0, mbmp->pdim, elems);

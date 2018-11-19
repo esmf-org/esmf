@@ -50,7 +50,9 @@
 using namespace ESMCI;
 using namespace std;
 
-#define DEBUG_ELEMS
+// #define DEBUG_WRITE_MESH
+// #define DEBUG_MOAB_GHOST_EXCHANGE
+
 
 #define ESMF
 #define ESMC_METHOD "MBMesh::func()"
@@ -91,16 +93,10 @@ void MBMesh::CreateGhost() {
   // pass index 0, it will the one created inside MBMesh_addelements
   static ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
   
-  Range elems;
-  merr=mb->get_entities_by_dimension(0, this->pdim, elems);
-  MBMESH_CHECK_ERR(merr, localrc);
-
-  // this is called in MBMesh_addelements
+  // this is already called in MBMesh_addelements
   // merr = pcomm->resolve_shared_ents(0, elems, this->pdim, this->pdim-1);
-  MBMESH_CHECK_ERR(merr, localrc);
-  
+  // MBMESH_CHECK_ERR(merr, localrc);
 
-// #define DEBUG_MOAB_GHOST_EXCHANGE
 #ifdef DEBUG_MOAB_GHOST_EXCHANGE
   Range shared_ents;
   // Get entities shared with all other processors
@@ -136,10 +132,6 @@ void MBMesh::CreateGhost() {
                                      true);// bool store_remote_handles
   MBMESH_CHECK_ERR(merr, localrc);
 
-  Range nodes;
-  merr=mb->get_entities_by_dimension(0, 0, nodes);
-  MBMESH_CHECK_ERR(merr, localrc);
-
   vector<Tag> node_tags;
   vector<Tag> elem_tags;
   
@@ -163,19 +155,27 @@ void MBMesh::CreateGhost() {
   
   // pcomm->set_debug_verbosity(4);
 
+  Range nodes;
+  merr=mb->get_entities_by_dimension(0, 0, nodes);
+  MBMESH_CHECK_ERR(merr, localrc);
+
   merr = pcomm->exchange_tags(node_tags, node_tags, nodes);
+  MBMESH_CHECK_ERR(merr, localrc);
+
+  Range elems;
+  merr=mb->get_entities_by_dimension(0, this->pdim, elems);
   MBMESH_CHECK_ERR(merr, localrc);
 
   merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
   MBMESH_CHECK_ERR(merr, localrc);
 
-
-  // {void *mbptr = (void *) this;
-  // int rc;
-  // int len = 12; char fname[len];
-  // sprintf(fname, "meshdual_%d", localPet);
-  // MBMesh_write(&mbptr, fname, &rc, len);}
-
+#ifdef DEBUG_WRITE_MESH
+  {void *mbptr = (void *) this;
+  int rc;
+  int len = 12; char fname[len];
+  sprintf(fname, "meshdual_%d", localPet);
+  MBMesh_write(&mbptr, fname, &rc, len);}
+#endif
 
 #ifdef DEBUG_MOAB_GHOST_EXCHANGE
   // Repeat the reports, after ghost exchange
