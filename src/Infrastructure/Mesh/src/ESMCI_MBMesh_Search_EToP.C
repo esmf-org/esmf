@@ -65,7 +65,6 @@ using std::vector;
 // #define DEBUG_SEARCH_RESULTS
 
 
-
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.

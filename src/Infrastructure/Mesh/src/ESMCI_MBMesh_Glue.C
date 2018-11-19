@@ -1374,28 +1374,25 @@ printf("    PET %d - parallel sharing\n", localPet);
     // setup parallel comm //
     ParallelComm *pcomm= new ParallelComm(moab_mesh, mpi_comm);
 
-    Range elems;
-    merr=moab_mesh->get_entities_by_dimension(0, mbmp->pdim, elems);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                 moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
-    
-    Range nodes;
-    merr=moab_mesh->get_entities_by_dimension(0, 0, nodes);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                 moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
-    
-    merr = pcomm->resolve_shared_ents(0, elems, mbmp->pdim, 1);
-    if (merr != MB_SUCCESS) {
-      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                 moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-    }
+    // Range elems;
+    // merr=moab_mesh->get_entities_by_dimension(0, mbmp->pdim, elems);
+    // if (merr != MB_SUCCESS) {
+    //   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+    //              moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    // }
+    // 
+    // merr = pcomm->resolve_shared_ents(0, elems, mbmp->pdim, 1);
+    // if (merr != MB_SUCCESS) {
+    //   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+    //              moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    // }
   
+    Range elems;
+    merr=mb->get_entities_by_dimension(0, mbmp->pdim, elems);
+    MBMESH_CHECK_ERR(merr, localrc);
+    
     // Resolve object sharing like in Mesh->Commit()
-    // pcomm->resolve_shared_ents(0, mbmp->pdim, mbmp->pdim-1);
+    pcomm->resolve_shared_ents(0, mbmp->pdim, mbmp->pdim-1);
 
 
  #if 0

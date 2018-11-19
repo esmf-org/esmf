@@ -11,6 +11,7 @@
 //
 //==============================================================================
 
+
 #include "ESMCI_Macros.h"
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
@@ -41,6 +42,12 @@ using namespace moab;
 #include <vector>
 
 using namespace std;
+
+
+#define DEBUG_CONNECTIVITY
+// #define DEBUG_CONNECTIVITY_ADJACENCIES
+
+
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -117,92 +124,67 @@ namespace ESMCI {
     Throw() <<" Creation of a dual mesh requires element coordinates. \n";
   }
 
-#if 0
-  // Add ghostcells to source mesh, because we need the surrounding 
-  // cells
-    int num_snd=0;
-    vector<Tag> snd,rcv;
-    
-    // Load coord field
-    Tag *psc = src_mesh->node_orig_coords_tag;
-    snd[num_snd]=psc;
-    rcv[num_snd]=psc;
-    num_snd++;
-
-    // Load element mask value field
-    Tag *psm = src_mesh->elem_mask_val_tag;
-    if (psm != NULL) {
-      snd[num_snd]=psm;
-      rcv[num_snd]=psm;
-      num_snd++;
-    }
-
-    // Load element mask field
-    Tag *psem = src_mesh->elem_mask_tag;
-    if (psem != NULL) {
-      snd[num_snd]=psem;
-      rcv[num_snd]=psem;
-      num_snd++;
-    }
-
-    // Load element coordinate field
-    Tag *psec = src_mesh->elem_coords_tag;
-    if (psec != NULL) {
-      snd[num_snd]=psec;
-      rcv[num_snd]=psec;
-      num_snd++;
-    }
-#endif 
-
-  // // Get a range containing all elements
-  // Range range_elems;
-  // merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->sdim,range_elems);
-  // MBMESH_CHECK_ERR(merr, localrc);
-  // 
-  // for(Range::iterator it=range_elems.begin(); it !=range_elems.end(); it++) {
-  //   const EntityHandle *elem=&(*it);
-  // 
-  //     // Get element id
-  //     int elem_id;
-  //     merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
-  //     MBMESH_CHECK_ERR(merr, localrc);
-  //     printf("PET%d: 1111 source element number %d\n", localPet, elem_id);
-  // }
-
-
-  // {void *mbptr = (void *) src_mesh;
-  // int len = 12; char fname[len];
-  // sprintf(fname, "meshsrc_%d", Par::Rank());
-  // MBMesh_write(&mbptr, fname, rc, len);}
-
-
-    // TODO: add elem mask fields and mask_val fields   
-    src_mesh->CreateGhost();
-    
-    
-  // {void *mbptr = (void *) src_mesh;
-  // int len = 12; char fname[len];
-  // sprintf(fname, "meshdual_%d", Par::Rank());
-  // MBMesh_write(&mbptr, fname, rc, len);}
+  // TODO: add elem mask fields and mask_val fields   
+  src_mesh->CreateGhost();
 
   // Get a range containing all elements
-  Range range_elems2;
-  merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->sdim,range_elems2);
+  Range range_elem;
+  merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->sdim,range_elem);
   MBMESH_CHECK_ERR(merr, localrc);
 
-  // for(Range::iterator it=range_elems2.begin(); it !=range_elems2.end(); it++) {
-  //   const EntityHandle *elem=&(*it);
-  // 
-  //     // Get element id
-  //     int elem_id;
-  //     merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
-  //     MBMESH_CHECK_ERR(merr, localrc);
-  //     printf("PET%d: 2222 source element number %d\n", localPet, elem_id);
-  // }
+  // {void *mbptr = (void *) src_mesh;
+  // int len = 16; char fname[len];
+  // sprintf(fname, "meshsrcghost_%d", Par::Rank());
+  // MBMesh_write(&mbptr, fname, rc, len);}
 
-    // If src_mesh is split, add newly created ghost elements to split_to_orig map
-    if (src_mesh->is_split) add_ghost_elems_to_split_orig_id_map(src_mesh);
+#ifdef DEBUG_CONNECTIVITY_ADJACENCIES
+  {
+  // Get a range containing all nodes
+  Range range_node;
+  merr=src_mesh->mesh->get_entities_by_dimension(0,0,range_node);
+  MBMESH_CHECK_ERR(merr, localrc);
 
+  for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
+    const EntityHandle *node=&(*it);
+    
+    // Only do local nodes
+    // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
+    // CAN END UP NOT MAKING AN ELEM AS A HOME FOR 
+    // A NODE THAT'S NEEDED ON ANOTHER PROC
+    //if (!GetAttr(node).is_locally_owned()) continue;
+    
+    // Get number of elems
+    int num_node_elems=0;
+    // get_num_elems_around_node(&node, &num_node_elems);
+    // pdim instead of sdim here, for spherical cases
+    Range adjs;
+    merr = src_mesh->mesh->get_adjacencies(node, 1, src_mesh->pdim, false, adjs);
+    MBMESH_CHECK_ERR(merr, localrc);
+    num_node_elems = adjs.size();
+
+    {int nid;
+    merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &nid);
+    MBMESH_CHECK_ERR(merr, localrc);
+    printf("%d# mesh node id %d, adjacencies %d [", Par::Rank(), nid, num_node_elems);
+    for(Range::iterator it=adjs.begin(); it !=adjs.end(); it++) {
+      const EntityHandle *elem=&(*it);
+      
+      // Get element id
+      int elem_id;
+      merr = src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
+      MBMESH_CHECK_ERR(merr, localrc);
+      
+      printf("%d, ", elem_id);
+    }
+    printf("]\n");}
+    
+  }
+  }
+#endif
+
+
+  // If src_mesh is split, add newly created ghost elements to split_to_orig map
+  if (src_mesh->is_split) add_ghost_elems_to_split_orig_id_map(src_mesh);
  
   // Get some useful info
   int sdim=src_mesh->sdim;
@@ -215,6 +197,7 @@ namespace ESMCI {
   MBMesh_create(&dmp, &pdim, &sdim, &cs, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
+
   // dual_mesh = dynamic_cast<MBMesh *> (dmp);
   dual_mesh = (MBMesh *) (dmp);
 
@@ -227,11 +210,6 @@ namespace ESMCI {
   dual_mesh->has_elem_coords = false;
   dual_mesh->has_elem_orig_coords = false;
   // is_split too?
-
-  // Get a range containing all elements
-  Range range_elem;
-  merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->sdim,range_elem);
-  MBMESH_CHECK_ERR(merr, localrc);
 
   // Iterate through all src elements counting the number and creating a map
   std::map<int,int> id_to_index;
@@ -266,6 +244,16 @@ namespace ESMCI {
     pos++;
   }
 
+#ifdef DEBUG_CONNECTIVITY
+  {printf("%d# idtoindex list [", Par::Rank());
+  std::map<int, int>::iterator it = id_to_index.begin();
+  while (it != id_to_index.end()) {
+    printf("%d, ", it->first);
+    it++;
+  }
+  printf("]\n");}
+#endif
+
   // Number of local nodes
   int num_nodes=pos;
 
@@ -297,17 +285,33 @@ namespace ESMCI {
     // A NODE THAT'S NEEDED ON ANOTHER PROC
     //if (!GetAttr(node).is_locally_owned()) continue;
     
-    
-
     // Get number of elems
     int num_node_elems=0;
     // get_num_elems_around_node(&node, &num_node_elems);
     // pdim instead of sdim here, for spherical cases
-    vector<EntityHandle> adjs;
+    Range adjs;
     merr = src_mesh->mesh->get_adjacencies(node, 1, pdim, false, adjs);
     MBMESH_CHECK_ERR(merr, localrc);
     num_node_elems = adjs.size();
-        
+
+#ifdef DEBUG_CONNECTIVITY_ADJACENCIES
+    {int nid;
+    merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &nid);
+    MBMESH_CHECK_ERR(merr, localrc);
+    printf("%d# mesh node id %d, adjacencies %d [", Par::Rank(), nid, num_node_elems);
+    for(Range::iterator it=adjs.begin(); it !=adjs.end(); it++) {
+      const EntityHandle *elem=&(*it);
+      
+      // Get element id
+      int elem_id;
+      merr = src_mesh->mesh->tag_get_data(src_mesh->gid_tag, elem, 1, &elem_id);
+      MBMESH_CHECK_ERR(merr, localrc);
+      
+      printf("%d, ", elem_id);
+    }
+    printf("]\n");}
+#endif
+    
     // If less than 3 (a triangle) then don't make an element
     if (num_node_elems < 3) continue;
     
@@ -320,6 +324,9 @@ namespace ESMCI {
     // Count number of connections
     max_num_elemConn += num_node_elems;
   }
+#ifdef DEBUG_CONNECTIVITY
+  printf("%d# max_num_elems %d max_num_elemConn %d\n", Par::Rank(), max_num_elems, max_num_elemConn);
+#endif
 
   // Create temp arrays for getting ordered elem ids
   MDSS *tmp_mdss=NULL;
@@ -379,16 +386,12 @@ namespace ESMCI {
     merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, node, 1, &owner);
     MBMESH_CHECK_ERR(merr, localrc);
     elemOwner[num_elems]=owner;
-
-    // printf("%d# eId=%d eT=%d ::",Par::Rank(),elemId[num_elems],elemType[num_elems]);
     
     // Next elem
     num_elems++;
 
-    //    printf("Elem id=%d max=%d num=%d :: ",node.get_id(),max_num_node_elems,num_elems_around_node_ids);
-
-#if DEBUG_CONNECTIVITY
-    printf("PET %d, elem %d, nodes [", localPet, elem_id);
+#ifdef DEBUG_CONNECTIVITY
+    printf("  %d# elem %d, nodes [", localPet, elem_id);
     for (int i = 0; i < num_elems_around_node_ids; ++i)
       printf("%d,", elems_around_node_ids[i]);
     printf("]\n");
@@ -400,8 +403,6 @@ namespace ESMCI {
       // Get elem id
       int elem_id2=elems_around_node_ids[i];
       
-      // printf(" %d ",elem_id);
-
       // Get index of this element
       int node_index=id_to_index[elem_id2];
       
@@ -411,9 +412,10 @@ namespace ESMCI {
       // Push connection
       elemConn[conn_pos]=node_index;
 
-      //double *ec=elem_coords->data(*elem);
-      //printf("[%d %f %f] ",elem_id,ec[0],ec[1]);
-  
+#ifdef DEBUG_CONNECTIVITY
+  printf("%d# %d of %d: eani %d -> id2i %d [%d]\n", localPet, i, num_elems_around_node_ids, elem_id2, node_index, conn_pos);
+#endif
+
       // Next connection
       conn_pos++;
     }
@@ -421,8 +423,8 @@ namespace ESMCI {
     // printf("\n");
   }
   
-#if DEBUG_CONNECTIVITY
-  printf("PET %d: elemConn[", localPet);
+#ifdef DEBUG_CONNECTIVITY
+  printf("%d# elemConn[", localPet);
   for (int i = 0; i < conn_pos; ++i) printf("%d,", elemConn[i]);
   printf("]\n");
 #endif
@@ -444,6 +446,13 @@ namespace ESMCI {
     dual_mesh->verts=nodes;
   }
   dual_mesh->num_verts = num_nodes;
+
+#ifdef DEBUG_CONNECTIVITY
+  {Range elemss;
+  merr=src_mesh->mesh->get_entities_by_dimension(0, src_mesh->sdim, elemss);
+  MBMESH_CHECK_ERR(merr, localrc);
+  printf("%d# range size = %d\n", localPet, elemss.size());}
+#endif
 
   
   pos=0;
@@ -471,7 +480,6 @@ namespace ESMCI {
       merr=src_mesh->mesh->tag_get_data(src_mesh->owner_tag, elem, 1, &owner);
       MBMESH_CHECK_ERR(merr, localrc);
 
-
       // Translate owner if split
       // (Interestingly we DON'T have to translate the owner for
       // split elems (in a rare example of not having to do extra work :-))
@@ -495,10 +503,11 @@ namespace ESMCI {
         EntityHandle new_node = 0;
         merr=dual_mesh->mesh->create_vertex(c,new_node);
         MBMESH_CHECK_ERR(merr, localrc);
-        nodes[data_index] = new_node;
+        nodes[pos] = new_node;
 
-        // printf("PET %d add vertex %d at [%f,%f,%f]\n", localPet, elem_id, c[0], c[1], c[2]);
-
+#ifdef DEBUG_CONNECTIVITY
+        printf("PET %d add vertex %d [%d] at [%f,%f,%f], owner %d\n", localPet, elem_id, pos, c[0], c[1], c[2], owner);
+#endif
         // Set Ids
         merr=dual_mesh->mesh->tag_set_data(dual_mesh->gid_tag, &new_node, 
           1, &elem_id);
@@ -611,6 +620,9 @@ namespace ESMCI {
     
     // Set maximum of non-split ids
     dual_mesh->max_non_split_id=global_max_id;
+#ifdef DEBUG_SPLIT
+    printf("%d# split elem max id %d\n", Par::Rank(), dual_mesh->max_non_split_id);
+#endif
 
     // Calc our range of extra elem ids
     beg_extra_ids=0;
@@ -622,7 +634,9 @@ namespace ESMCI {
     // Start 1 up from max
     beg_extra_ids=beg_extra_ids+global_max_id+1;
     
-    // printf("%d# beg_extra_ids=%d end=%d\n",Par::Rank(),beg_extra_ids,beg_extra_ids+num_extra_elem-1);
+#ifdef DEBUG_SPLIT
+    printf("%d# beg_extra_ids=%d end=%d\n",Par::Rank(),beg_extra_ids,beg_extra_ids+num_extra_elem-1);
+#endif
   }
 
 
@@ -664,121 +678,119 @@ namespace ESMCI {
       }
 #endif
 
-      // Allocate some temporary variables for splitting
-      double *polyCoords=new double[3*max_num_conn];
-      double *polyDblBuf=new double[3*max_num_conn];
-      int    *polyIntBuf=new int[max_num_conn];
-      int    *triInd=new int[3*(max_num_conn-2)];
-      double *triFrac=new double[max_num_conn-2];
+    // Allocate some temporary variables for splitting
+    double *polyCoords=new double[3*max_num_conn];
+    double *polyDblBuf=new double[3*max_num_conn];
+    int    *polyIntBuf=new int[max_num_conn];
+    int    *triInd=new int[3*(max_num_conn-2)];
+    double *triFrac=new double[max_num_conn-2];
 
-      // new id counter
-      int curr_extra_id=beg_extra_ids;
+    // new id counter
+    int curr_extra_id=beg_extra_ids;
 
-      // Loop through elems generating split elems if necessary
-      int conn_pos = 0;
-      int split_conn_pos = 0;
-      int split_elem_pos = 0;
-      for (int e = 0; e < num_elems; ++e) {
+    // Loop through elems generating split elems if necessary
+    int conn_pos = 0;
+    int split_conn_pos = 0;
+    int split_elem_pos = 0;
+    for (int e = 0; e < num_elems; ++e) {
 
-        // More than 4 side, split
-        if (elemType[e]>4) {
+      // More than 4 side, split
+      if (elemType[e]>4) {
 
-          // Get coordinates
-          int crd_pos=0;
-          for (int i=0; i<elemType[e]; i++) {
-            EntityHandle node=nodes[elemConn[conn_pos+i]];
+        // Get coordinates
+        int crd_pos=0;
+        for (int i=0; i<elemType[e]; i++) {
+          EntityHandle node=nodes[elemConn[conn_pos+i]];
 
-////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////// node coords ////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+#ifdef DEBUG_CONNECTIVITY
+          // get node id
+          int nid;
+          merr=dual_mesh->mesh->tag_get_data(dual_mesh->gid_tag, &node, 1, &nid);
+          MBMESH_CHECK_ERR(merr, localrc);
 
-            double crd[3];
-            merr = dual_mesh->mesh->get_coords(&node, 1, crd);
-            // merr=src_mesh->mesh->tag_get_data(dual_mesh->node_orig_coords_tag, 
-            //           &node, 1, crd);
-            MBMESH_CHECK_ERR(merr, localrc);
-            
-            //double *crd=dm_node_coord->data(*node);
-
-////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////// node coords ////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-            for (int j=0; j<sdim; j++) {
-              polyCoords[crd_pos]=crd[j];
-              crd_pos++;
-            }
-
-            //printf("%d# id=%d c=%d coord=%f %f \n",Par::Rank(),elemId[e],elemConn[conn_pos+i],polyCoords[crd_pos-2],polyCoords[crd_pos-1]);
-
-          }
-
-          // Triangulate polygon
-          mb_triangulate(sdim, elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
-                      triInd, triFrac); 
+          printf("PET %d node id %d of %d, node %d [%d]\n", Par::Rank(), nid, elemType[e], elemConn[conn_pos+i], conn_pos+i);
+#endif
+          double crd[3];
+          merr = dual_mesh->mesh->get_coords(&node, 1, crd);
+          MBMESH_CHECK_ERR(merr, localrc);
           
+          //double *crd=dm_node_coord->data(*node);
 
-          // Create split element list
-          int tI_pos=0;
-          for (int i=0; i<elemType[e]-2; i++) {
-            // First id is same, others are from new ids
-            if (i==0) {
-              elemId_wsplit[split_elem_pos]=elemId[e];
-              dual_mesh->split_id_to_frac[elemId[e]]=triFrac[i];
-            } else {
-              elemId_wsplit[split_elem_pos]=curr_extra_id;
-              dual_mesh->split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
-              dual_mesh->split_id_to_frac[curr_extra_id]=triFrac[i];
-              curr_extra_id++;
-            }
-
-            // Owner is the same
-            elemOwner_wsplit[split_elem_pos]=elemOwner[e];
-
-            // Type is triangle
-            elemType_wsplit[split_elem_pos]=3; 
-
-            // Set mask (if it exists)
-            //  if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
-
-            // Next split element
-            split_elem_pos++;
-
-            // Set triangle corners based on triInd
-            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos+triInd[tI_pos]];
-            elemConn_wsplit[split_conn_pos+1]=elemConn[conn_pos+triInd[tI_pos+1]];
-            elemConn_wsplit[split_conn_pos+2]=elemConn[conn_pos+triInd[tI_pos+2]];
-
-            //printf("%d eid=%d seid=%d %d %d %d %f\n",i,elemId[e],elemId_wsplit[split_elem_pos-1],elemConn_wsplit[split_conn_pos],elemConn_wsplit[split_conn_pos+1],elemConn_wsplit[split_conn_pos+2],triFrac[i]);
-            split_conn_pos +=3;
-            tI_pos +=3;
-
+          for (int j=0; j<sdim; j++) {
+            polyCoords[crd_pos]=crd[j];
+            crd_pos++;
           }
 
-          // Advance to next elemConn position 
-          conn_pos +=elemType[e];
+          //printf("%d# id=%d c=%d coord=%f %f \n",Par::Rank(),elemId[e],elemConn[conn_pos+i],polyCoords[crd_pos-2],polyCoords[crd_pos-1]);
 
-        } else { // just copy
-          elemId_wsplit[split_elem_pos]=elemId[e];
+        }
+
+        // Triangulate polygon
+        mb_triangulate(sdim, elemType[e], polyCoords, polyDblBuf, polyIntBuf, 
+                    triInd, triFrac); 
+        
+
+        // Create split element list
+        int tI_pos=0;
+        for (int i=0; i<elemType[e]-2; i++) {
+          // First id is same, others are from new ids
+          if (i==0) {
+            elemId_wsplit[split_elem_pos]=elemId[e];
+            dual_mesh->split_id_to_frac[elemId[e]]=triFrac[i];
+          } else {
+            elemId_wsplit[split_elem_pos]=curr_extra_id;
+            dual_mesh->split_to_orig_id[curr_extra_id]=elemId[e]; // Store map of split to original id
+            dual_mesh->split_id_to_frac[curr_extra_id]=triFrac[i];
+            curr_extra_id++;
+          }
+
+          // Owner is the same
           elemOwner_wsplit[split_elem_pos]=elemOwner[e];
-          elemType_wsplit[split_elem_pos]=elemType[e];
-          // if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
+
+          // Type is triangle
+          elemType_wsplit[split_elem_pos]=3; 
+
+          // Set mask (if it exists)
+          //  if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
+
+          // Next split element
           split_elem_pos++;
-          for (int i=0; i<elemType[e]; i++) {
-            elemConn_wsplit[split_conn_pos]=elemConn[conn_pos];
-            split_conn_pos++;
-            conn_pos++;
-          }
+
+          // Set triangle corners based on triInd
+          elemConn_wsplit[split_conn_pos]=elemConn[conn_pos+triInd[tI_pos]];
+          elemConn_wsplit[split_conn_pos+1]=elemConn[conn_pos+triInd[tI_pos+1]];
+          elemConn_wsplit[split_conn_pos+2]=elemConn[conn_pos+triInd[tI_pos+2]];
+
+          //printf("%d eid=%d seid=%d %d %d %d %f\n",i,elemId[e],elemId_wsplit[split_elem_pos-1],elemConn_wsplit[split_conn_pos],elemConn_wsplit[split_conn_pos+1],elemConn_wsplit[split_conn_pos+2],triFrac[i]);
+          split_conn_pos +=3;
+          tI_pos +=3;
+
+        }
+
+        // Advance to next elemConn position 
+        conn_pos +=elemType[e];
+
+      } else { // just copy
+        elemId_wsplit[split_elem_pos]=elemId[e];
+        elemOwner_wsplit[split_elem_pos]=elemOwner[e];
+        elemType_wsplit[split_elem_pos]=elemType[e];
+        // if (elemMaskIIArray !=NULL) elemMaskIIArray_wsplit[split_elem_pos]=elemMaskIIArray[e];
+        split_elem_pos++;
+        for (int i=0; i<elemType[e]; i++) {
+          elemConn_wsplit[split_conn_pos]=elemConn[conn_pos];
+          split_conn_pos++;
+          conn_pos++;
         }
       }
-      
-      
-      // Delete some temporary variables for splitting
-      if (polyCoords != NULL) delete [] polyCoords;
-      if (polyDblBuf != NULL) delete [] polyDblBuf;
-      if (polyIntBuf != NULL) delete [] polyIntBuf;
-      if (triInd != NULL) delete [] triInd;
-      if (triFrac !=NULL) delete [] triFrac;
+    }
+    
+    
+    // Delete some temporary variables for splitting
+    if (polyCoords != NULL) delete [] polyCoords;
+    if (polyDblBuf != NULL) delete [] polyDblBuf;
+    if (polyIntBuf != NULL) delete [] polyIntBuf;
+    if (triInd != NULL) delete [] triInd;
+    if (triFrac !=NULL) delete [] triFrac;
 
 
       // Delete original element information
@@ -801,7 +813,7 @@ namespace ESMCI {
 #endif
     }   
 
-#if DEBUG_CONNECTIVITY
+#ifdef DEBUG_CONNECTIVITY
     printf("PET %d verts [", localPet);
     for (int i=0; i<dual_mesh->num_verts; ++i) {
       int nid;
@@ -932,7 +944,7 @@ printf("    PET %d - parallel sharing\n", localPet);
 
     // Output 
     *_dual_mesh=dual_mesh;
-    
+
     localrc = ESMF_SUCCESS;
     *rc = localrc;
     }
@@ -1084,6 +1096,24 @@ void mb_triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tr
     merr = mesh->mesh->get_adjacencies(node, 1, sdim, false, range_elem);
     MBMESH_CHECK_ERR(merr, localrc);
     
+#ifdef DEBUG_CONNECTIVITY_ADJACENCIES
+    {int nid;
+    merr=mesh->mesh->tag_get_data(mesh->gid_tag, node, 1, &nid);
+    MBMESH_CHECK_ERR(merr, localrc);
+    printf("%d# unique algorithm - mesh node id %d, adjacencies %d [", Par::Rank(), nid, range_elem.size());
+    for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
+      const EntityHandle *elem=&(*it);
+      
+      // Get element id
+      int elem_id;
+      merr = mesh->mesh->tag_get_data(mesh->gid_tag, elem, 1, &elem_id);
+      MBMESH_CHECK_ERR(merr, localrc);
+      
+      printf("%d, ", elem_id);
+    }
+    printf("]\n");}
+#endif
+
     // // No elements so leave
     // if (el == node->Relations.end() || el->obj->get_type() != MeshObj::ELEMENT){
     //   *_num_ids=0;

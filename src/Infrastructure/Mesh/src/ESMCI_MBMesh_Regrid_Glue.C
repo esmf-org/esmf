@@ -117,7 +117,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
   // Old Regrid conserve turned off for now
   int regridConserve=ESMC_REGRID_CONSERVE_OFF;
 
-#define PROGRESSLOG_on
+#define PROGRESSLOG_off
 #define MEMLOG_off
 
 #ifdef PROGRESSLOG_on

@@ -22,6 +22,8 @@
 #include <Mesh/include/ESMCI_MBMesh_Util.h>
 #include <Mesh/include/ESMCI_MBMesh_Rendez_EtoP.h>
 
+#include <Mesh/include/Legacy/ESMCI_ParEnv.h>
+
 #include "ESMCI_PointList.h"
 
 #include <iostream>
@@ -36,6 +38,9 @@
 
 using std::vector;
 using std::iterator;
+
+// #define DEBUG_POINTLIST
+// #define DEBUG_WEIGHTS
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -76,6 +81,15 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
 
   // Get MOAB mesh
   Interface *mesh = srcmb->mesh;
+
+#ifdef DEBUG_POINTLIST
+  {printf("%d# POINTLIST(%d) [", Par::Rank(), dstpl->get_curr_num_pts());
+  for (int p = 0; p < dstpl->get_curr_num_pts(); ++p) {
+    const int *id = dstpl->get_id_ptr(p);
+    printf("%d, ", *id);
+  }
+  printf("]\n");}
+#endif
 
   // Find maximum number of dst nodes in search results
   unsigned int max_num_dst_nodes = 0;
@@ -164,12 +178,23 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
       IWeights::Entry row(db->dst_gid, 0, 0.0, gid);
       vector<IWeights::Entry> col;
       col.reserve(num_nodes);
+#ifdef DEBUG_WEIGHTS
+      printf("%d# row [%d, 0, 0.0, %d]\n", Par::Rank(), db->dst_gid, gid);
 
+      printf("%d# num nodes %d [%d] gids [", Par::Rank(), num_nodes, gids.size());
+      for(int i = 0; i < gids.size(); ++i) {
+        printf("%d, ", gids[i]);
+      }
+      printf("]\n");
+#endif
       // Loop over nodes of the element
       for(int i = 0; i<num_nodes; ++i) {
         col.push_back(IWeights::Entry(gids[i], 0, a[i], db->dst_gid));
+#ifdef DEBUG_WEIGHTS
+      printf("%d# col [%d, 0, %f, %d]\n", Par::Rank(), gids[i], a[i], db->dst_gid);
+#endif
       }
-      
+
       // insert the row
       iw.InsertRow(row, col);
     }
