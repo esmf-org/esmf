@@ -1084,15 +1084,35 @@ int main(void){
   // pass index 0, it will the one created inside MBMesh_addelements
   static ParallelComm *pcomm = ParallelComm::get_pcomm(mbmesh->mesh, 0);
   
-  Range elems;
-  merr=mbmesh->mesh->get_entities_by_dimension(0, mbmesh->pdim, elems);
-  MBMESH_CHECK_ERR(merr, rc);
-
   // this is called in MBMesh_addelements
-  merr = pcomm->resolve_shared_ents(0, elems, mbmesh->pdim, mbmesh->pdim-1);
+  // merr = pcomm->resolve_shared_ents(0, elems, mbmesh->pdim, mbmesh->pdim-1);
+  // MBMESH_CHECK_ERR(merr, rc);
+    
+  {
+  Range shared_ents;
+  // Get entities shared with all other processors
+  merr = pcomm->get_shared_entities(-1, shared_ents);
+  MBMESH_CHECK_ERR(merr, rc);
+  
+  // Filter shared entities with not not_owned, which means owned
+  Range owned_entities;
+  merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
   MBMESH_CHECK_ERR(merr, rc);
     
-
+  unsigned int nums[4] = {0}; // to store the owned entities per dimension
+  for (int i = 0; i < 4; i++)
+    // nums[i] = (nt)shared_ents.num_of_dimension(i);
+    nums[i] = (int)owned_entities.num_of_dimension(i);
+    
+  vector<int> rbuf(petCount*4, 0);
+  MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, mpi_comm);
+  // Print the stats gathered:
+  if (0 == localPet) {
+    for (int i = 0; i < petCount; i++)
+      cout << " Shared, owned entities on proc " << i << ": " << rbuf[4*i] << " verts, " <<
+          rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << endl;
+  }
+  }
   
   merr = pcomm->exchange_ghost_cells(mbmesh->pdim, // int ghost_dim
                                      0, // int bridge_dim
@@ -1101,7 +1121,33 @@ int main(void){
                                      true);// bool store_remote_handles
   MBMESH_CHECK_ERR(merr, rc);
 
-  // Range elems;
+  {
+  Range shared_ents;
+  // Get entities shared with all other processors
+  merr = pcomm->get_shared_entities(-1, shared_ents);
+  MBMESH_CHECK_ERR(merr, rc);
+  
+  // Filter shared entities with not not_owned, which means owned
+  Range owned_entities;
+  merr = pcomm->filter_pstatus(shared_ents, PSTATUS_NOT_OWNED, PSTATUS_NOT, -1, &owned_entities);
+  MBMESH_CHECK_ERR(merr, rc);
+    
+  unsigned int nums[4] = {0}; // to store the owned entities per dimension
+  for (int i = 0; i < 4; i++)
+    // nums[i] = (nt)shared_ents.num_of_dimension(i);
+    nums[i] = (int)owned_entities.num_of_dimension(i);
+    
+  vector<int> rbuf(petCount*4, 0);
+  MPI_Gather(nums, 4, MPI_INT, &rbuf[0], 4, MPI_INT, 0, mpi_comm);
+  // Print the stats gathered:
+  if (0 == localPet) {
+    for (int i = 0; i < petCount; i++)
+      cout << " Shared, owned entities on proc " << i << ": " << rbuf[4*i] << " verts, " <<
+          rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << endl;
+  }
+  }
+
+  Range elems;
   merr=mbmesh->mesh->get_entities_by_dimension(0, mbmesh->pdim, elems);
   MBMESH_CHECK_ERR(merr, rc);
 
@@ -1138,9 +1184,42 @@ int main(void){
   merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
   MBMESH_CHECK_ERR(merr, rc);
   
-  std::ostringstream ent_str;
-  ent_str << "mesh_ghost." <<pcomm->rank() << ".vtk";
-  mbmesh->mesh->write_mesh(ent_str.str().c_str());
+  {
+  // Get a range containing all nodes
+  Range range_node;
+  merr=mbmesh->mesh->get_entities_by_dimension(0,0,range_node);
+  MBMESH_CHECK_ERR(merr, rc);
+
+  printf("%d# node ids [", Par::Rank());
+  for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
+    const EntityHandle *node=&(*it);
+    
+    int nid;
+    merr=mbmesh->mesh->tag_get_data(mbmesh->gid_tag, node, 1, &nid);
+    MBMESH_CHECK_ERR(merr, rc);
+
+    printf("%d, ", nid);
+  }
+  printf("]  elem ids [");
+
+  Range range_elem;
+  merr=mbmesh->mesh->get_entities_by_dimension(0,mbmesh->pdim,range_elem);
+  MBMESH_CHECK_ERR(merr, rc);
+
+  for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
+    const EntityHandle *elem=&(*it);
+    
+    // Get element id
+    int elem_id;
+    merr = mbmesh->mesh->tag_get_data(mbmesh->gid_tag, elem, 1, &elem_id);
+    MBMESH_CHECK_ERR(merr, rc);
+    
+    printf("%d, ", elem_id);
+  }
+  printf("]\n");
+    
+  }
+
 
   {
   // Get a range containing all nodes
@@ -1151,12 +1230,6 @@ int main(void){
   for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
     const EntityHandle *node=&(*it);
     
-    // Only do local nodes
-    // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
-    // CAN END UP NOT MAKING AN ELEM AS A HOME FOR 
-    // A NODE THAT'S NEEDED ON ANOTHER PROC
-    //if (!GetAttr(node).is_locally_owned()) continue;
-    
     // Get number of elems
     int num_node_elems=0;
     // get_num_elems_around_node(&node, &num_node_elems);
@@ -1166,10 +1239,11 @@ int main(void){
     MBMESH_CHECK_ERR(merr, rc);
     num_node_elems = adjs.size();
 
-    {int nid;
+    int nid;
     merr=mbmesh->mesh->tag_get_data(mbmesh->gid_tag, node, 1, &nid);
     MBMESH_CHECK_ERR(merr, rc);
-    printf("%d# mesh node id %d, adjacencies %d [", Par::Rank(), nid, num_node_elems);
+    
+    printf("%d# node id %d, adjacencies %d [", Par::Rank(), nid, num_node_elems);
     for(Range::iterator it=adjs.begin(); it !=adjs.end(); it++) {
       const EntityHandle *elem=&(*it);
       
@@ -1180,11 +1254,16 @@ int main(void){
       
       printf("%d, ", elem_id);
     }
-    printf("]\n");}
+    printf("]\n");
     
   }
   }
   
+    std::ostringstream ent_str;
+    ent_str << "mesh_ghost." <<pcomm->rank() << ".vtk";
+    mbmesh->mesh->write_mesh(ent_str.str().c_str());
+
+
 #else
 
   MBMesh *mesh_dual = NULL;

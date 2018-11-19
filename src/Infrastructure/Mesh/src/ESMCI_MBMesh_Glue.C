@@ -1388,11 +1388,13 @@ printf("    PET %d - parallel sharing\n", localPet);
     // }
   
     Range elems;
-    merr=mb->get_entities_by_dimension(0, mbmp->pdim, elems);
+    merr=mbmp->mesh->get_entities_by_dimension(0, mbmp->pdim, elems);
     MBMESH_CHECK_ERR(merr, localrc);
     
     // Resolve object sharing like in Mesh->Commit()
-    pcomm->resolve_shared_ents(0, mbmp->pdim, mbmp->pdim-1);
+    // merr = pcomm->resolve_shared_ents(0, mbmp->pdim, mbmp->pdim-1);
+    merr = pcomm->resolve_shared_ents(0, elems, mbmp->pdim, mbmp->pdim-1);
+    MBMESH_CHECK_ERR(merr, localrc);
 
 
  #if 0
