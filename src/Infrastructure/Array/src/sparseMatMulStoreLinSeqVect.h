@@ -1,4 +1,5 @@
 //-----------------------------------------------------------------------------
+#undef DEBUGLOG
 
 namespace DD{
   
@@ -606,7 +607,7 @@ template<typename IT1, typename IT2>
         requestStreamClientInt[3*jj] = lookupIndex;
         requestStreamClientInt[3*jj+1] = localLookupIndex;
         requestStreamClientInt[3*jj+2] = k;
-#ifdef DEBUG
+#ifdef DEBUGLOG
         {
           std::stringstream debugmsg;
           debugmsg << "clientRequest()#" << __LINE__ 
@@ -969,15 +970,14 @@ template<typename IT1, typename IT2>
         return 0; // provoke MPI errors
     }
     virtual int messageSize(int srcPet, int dstPet)const{
-#define DEBUGGING
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "SetupSeqIndexFactorLookupStage1().messageSize(srcPet=" 
-      << srcPet << " ,dstPet=" << dstPet << "): " <<
-      sizeof(int) * messageSizeCount(srcPet, dstPet);
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
+#ifdef DEBUGLOG
+    {
+      std::stringstream debugmsg;
+      debugmsg << "SetupSeqIndexFactorLookupStage1().messageSize(srcPet=" 
+        << srcPet << " ,dstPet=" << dstPet << "): " <<
+        sizeof(int) * messageSizeCount(srcPet, dstPet);
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
       return sizeof(int) * messageSizeCount(srcPet, dstPet);
     }
@@ -1048,19 +1048,18 @@ template<typename IT1, typename IT2>
       int dataSizeFactors =
         ESMC_TypeKind_FlagSize(SetupSeqIndexFactorLookup<IT>::typekindFactors);
       //todo: reduce waste of bandwidth in case there are _not_ 4-comp ind.
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "SetupSeqIndexFactorLookupStage2().messageSize(srcPet=" 
-      << srcPet << " ,dstPet=" << dstPet << "): " <<
-      (2*sizeof(int)+sizeof(IT)+dataSizeFactors) 
-      * messageSizeCount(srcPet, dstPet)
-      << " from dataSizeFactors=" << dataSizeFactors << " messageSizeCount="
-      << messageSizeCount(srcPet, dstPet);
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
+#ifdef DEBUGLOG
+      {
+        std::stringstream debugmsg;
+        debugmsg << "SetupSeqIndexFactorLookupStage2().messageSize(srcPet=" 
+          << srcPet << " ,dstPet=" << dstPet << "): " <<
+          (2*sizeof(int)+sizeof(IT)+dataSizeFactors) 
+          * messageSizeCount(srcPet, dstPet)
+          << " from dataSizeFactors=" << dataSizeFactors
+          << " messageSizeCount=" << messageSizeCount(srcPet, dstPet);
+        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+      }
 #endif
-#undef DEBUGGING
       return (2*sizeof(int)+sizeof(IT)+dataSizeFactors)
         * messageSizeCount(srcPet, dstPet);
     }
@@ -1125,7 +1124,7 @@ template<typename IT1, typename IT2>
         if (SetupSeqIndexFactorLookup<IT>::tensorMixFlag)
           tensorSeqIndex = (int)seqInd.getIndex(1);  // set actual tensor seqIndex
         *intStream++ = lookupIndex;     // index into distr. dir lookup table
-#ifdef DEBUG
+#ifdef DEBUGLOG
         {
           std::stringstream debugmsg;
           debugmsg << "fillStream()#" << __LINE__ 
@@ -1156,26 +1155,25 @@ template<typename IT1, typename IT2>
         factorElement.partnerSeqIndex.decompSeqIndex = *itStream++;
         factorStream = (T *)itStream;
         *((T *)factorElement.factor) = *factorStream++;
-  {
-    std::stringstream msg;
-    msg << "fillSeqIndexFactorLookupFromStream: (srcPet=" 
-      << srcPet << " ,dstPet=" << dstPet << "): "
-      << " seqIndexFactorLookup.size()=" 
-      << SetupSeqIndexFactorLookup<IT>::seqIndexFactorLookup.size()
-      << " lookupIndex=" << lookupIndex;
-    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-  }
-        
-#if 1
-  if (lookupIndex<0 ||
-    lookupIndex>SetupSeqIndexFactorLookup<IT>::seqIndexFactorLookup.size()){
-    int rc;
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "lookupIndex out of range", ESMC_CONTEXT, &rc);
-    throw rc;  // bail out with exception
-  }
-#endif  
-  
+#ifdef DEBUGLOG
+        {
+          std::stringstream msg;
+          msg << "fillSeqIndexFactorLookupFromStream: (srcPet=" 
+            << srcPet << " ,dstPet=" << dstPet << "): "
+            << " seqIndexFactorLookup.size()=" 
+            << SetupSeqIndexFactorLookup<IT>::seqIndexFactorLookup.size()
+            << " lookupIndex=" << lookupIndex;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        }
+        if (lookupIndex<0 ||
+          lookupIndex >
+          (int)SetupSeqIndexFactorLookup<IT>::seqIndexFactorLookup.size()){
+          int rc;
+          ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+            "lookupIndex out of range", ESMC_CONTEXT, &rc);
+          throw rc;  // bail out with exception
+        }
+#endif
         SetupSeqIndexFactorLookup<IT>::
           seqIndexFactorLookup[lookupIndex].factorList.push_back(factorElement);
       }
@@ -1331,21 +1329,21 @@ cout << "dstSetupFlag=" << dstSetupFlag << " tensorSeqIndex=" <<
     vm->alltoall(&(seqIntervFactorListCountToPet.front()), sizeof(int),
       &(seqIntervFactorListCountFromPet.front()), sizeof(int), vmBYTE);
     
-#ifdef DEBUGGING
-  {
-    std::stringstream debugmsg;
-    debugmsg << "setupSeqIndexFactorLookup() seqIntervFactorListCountToPet=";
-    for (int i=0; i<seqIntervFactorListCountToPet.size(); i++)
-      debugmsg << seqIntervFactorListCountToPet[i] << ", ";
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
-  {
-    std::stringstream debugmsg;
-    debugmsg << "setupSeqIndexFactorLookup() seqIntervFactorListCountFromPet=";
-    for (int i=0; i<seqIntervFactorListCountFromPet.size(); i++)
-      debugmsg << seqIntervFactorListCountFromPet[i] << ", ";
-    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
-  }
+#ifdef DEBUGLOG
+    {
+      std::stringstream debugmsg;
+      debugmsg << "setupSeqIndexFactorLookup() seqIntervFactorListCountToPet=";
+      for (int i=0; i<seqIntervFactorListCountToPet.size(); i++)
+        debugmsg << seqIntervFactorListCountToPet[i] << ", ";
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    }
+    {
+      std::stringstream debugmsg;
+      debugmsg << "setupSeqIndexFactorLookup() seqIntervFactorListCountFromPet=";
+      for (int i=0; i<seqIntervFactorListCountFromPet.size(); i++)
+        debugmsg << seqIntervFactorListCountFromPet[i] << ", ";
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    }
 #endif
 
 #ifdef ASMM_STORE_MEMLOG_on
@@ -1582,12 +1580,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
   VMK::wtime(&t2);   //gjt - profile
 #endif
   
-//---DEBUG-------------------
-// return successfully
-//rc = ESMF_SUCCESS;
-//return rc;
-//---DEBUG-------------------
-  
   // find local srcSeqIndex Min/Max
   SIT srcSeqIndexMinMax[2]; // [0]=min, [1]=max
   srcSeqIndexMinMax[0] = srcSeqIndexMinMax[1] = -1; // visibly invalidate
@@ -1628,17 +1620,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.5"));
 #endif
-
-//---DEBUG-------------------
-//char msg[160];
-//sprintf(msg, "srcLocalDeCount=%d, srcLocalDeElementCount[0]=%d,"
-//  " sizeof(AssociationElement)=%d", srcLocalDeCount,
-//  srcLocalDeElementCount[0], sizeof(AssociationElement));
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-// return successfully
-//rc = ESMF_SUCCESS;
-//return rc;
-//---DEBUG-------------------
 
 #ifdef ASMM_STORE_LOG_on
   {
@@ -1720,17 +1701,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
   VM::logMemInfo(std::string("ASMMStore2.7"));
 #endif
 
-//---DEBUG-------------------
-//char msg[160];
-//sprintf(msg, "dstLocalDeCount=%d, dstLocalDeElementCount[0]=%d,"
-//  " sizeof(AssociationElement)=%d", dstLocalDeCount,
-//  dstLocalDeElementCount[0], sizeof(AssociationElement));
-//ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
-// return successfully
-//rc = ESMF_SUCCESS;
-//return rc;
-//---DEBUG-------------------
-
 #ifdef ASMM_STORE_LOG_on
   for (int i=0; i<petCount; i++)
   {
@@ -1744,12 +1714,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
 #ifdef ASMM_STORE_TIMING_on
   VMK::wtime(&t3);   //gjt - profile
 #endif
-
-//---DEBUG-------------------
-// return successfully
-//rc = ESMF_SUCCESS;
-//return rc;
-//---DEBUG-------------------
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStore2.8"));
@@ -2275,12 +2239,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
   VMK::wtime(&t6);   //gjt - profile
 #endif
   
-//---DEBUG-------------------
-// return successfully
-//rc = ESMF_SUCCESS;
-//return rc;
-//---DEBUG-------------------
-  
   //---------------------------------------------------------------------------
   // Phase III -> represent sparse matrix in "run distribution"
   //---------------------------------------------------------------------------
@@ -2636,13 +2594,6 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
   VMK::wtime(&t7);   //gjt - profile
 #endif
   
-//---DEBUG-------------------
-// return successfully
-//rc = ESMF_SUCCESS;
-//return rc;
-//---DEBUG-------------------
-  
-  
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVectXX.0"));
 #endif
@@ -2663,3 +2614,4 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
   return rc;
 }
 //-----------------------------------------------------------------------------
+#undef DEBUGLOG
