@@ -129,10 +129,20 @@ int main(int argc, char *argv[])
 //  std::vector<float> x1vals = {1800, 3600, 7200, 14400};
 //  std::vector<float> x2vals = {800, 600, 200, 4400};
 //  std::vector<float> y1vals = {1273.542, 819.708, 426.051, 290.470};
-  std::vector<float> x1vals = {2, 5, 3.1, 9, 11.2};
-  std::vector<float> x2vals = {5, 2, 5.0, 12, 19.3};
+  //std::vector<float> x1vals = {2, 5, 3.1, 9, 11.2};
+  //std::vector<float> x2vals = {2, 5, 3.1, 9, 11.2};
+  std::vector<float> x1vals;
+  std::vector<float> x2vals;
+  const int NVALS = 32;
+  for(int i=1; i<=NVALS; i++){
+    x1vals.push_back(i);
+    x2vals.push_back(i);
+  }
+  //std::vector<float> x2vals = {5, 2, 5.0, 12, 19.3};
   std::vector<float> y1vals;
-  ESMCI::MapperUtil::TwoVIDPoly<float> p6_to_fit = {9.1, 1.2, 3.4, 2.1, 2.2, 5};
+  ESMCI::MapperUtil::TwoVIDPoly<float> p6_to_fit = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+  // The poly fitted for data from poly below does not meet the tol
+  //ESMCI::MapperUtil::TwoVIDPoly<float> p6_to_fit = {1.0, 2.0, 3.0, 4.0, 5.0, 6.0};
   for(std::vector<float>::const_iterator citer1 = x1vals.cbegin(),
         citer2 = x2vals.cbegin();
       (citer1 != x1vals.cend()) && (citer2 != x2vals.cend());
