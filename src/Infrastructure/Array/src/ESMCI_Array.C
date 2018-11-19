@@ -15,7 +15,7 @@
 
 #define ASMM_STORE_LOG_off
 #define ASMM_STORE_TIMING_off
-#define ASMM_STORE_MEMLOG_off
+#define ASMM_STORE_MEMLOG_on
 #define ASMM_STORE_TUNELOG_off
 #define ASMM_STORE_COMMMATRIX_on
 #define ASMM_STORE_DUMPSMM_off
@@ -8811,7 +8811,14 @@ template<typename SIT, typename DIT>
   if (dstTensorLength>1) undistributedElementsPresent = true;
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-//  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -8870,7 +8877,14 @@ template<typename SIT, typename DIT>
   vector<vector<AssociationElement<DIT,SIT> > >().swap(dstLinSeqVect);
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-//  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -9400,9 +9414,16 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #endif
     
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-//  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
-    
+#endif
+  
 #ifdef ASMM_STORE_MEMLOG_on
     VM::logMemInfo(std::string("ASMMStoreNbVectors4.1"));
 #endif
@@ -9627,7 +9648,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #endif
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-//  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
@@ -9796,9 +9824,16 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #endif
     
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-//  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
-    
+#endif
+  
 #ifdef ASMM_STORE_MEMLOG_on
     VM::logMemInfo(std::string("ASMMStoreNbVectors8.1"));
 #endif
@@ -10341,8 +10376,16 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-//      malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
+#endif
+  
 #if 0
       // optimize the XXE entire stream
       localrc = xxe->optimize();
@@ -10509,8 +10552,16 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-//      malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
+#endif
+  
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE9.2"));
 #endif
@@ -10654,9 +10705,16 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     &rc)) return rc;
   
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-//  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
-
+#endif
+  
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreEncodeXXE10.1"));
 #endif

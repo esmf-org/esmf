@@ -135,7 +135,7 @@ void accessLookup(
       send1commhList[i] = NULL;
 //sprintf(msg, "posting nb-send to PET %d size=%d", i, requestFactor*localElementsPerIntervalCount[i]);
 //ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
-#ifdef WORKAROUND_NONBLOCKPROGRESSBUG
+#if (defined MUST_USE_BLOCKING_SEND || defined WORKAROUND_NONBLOCKPROGRESSBUG)
       vm->send(requestStreamClient[i],
         requestFactor*localElementsPerIntervalCount[i], i); 
 #else
@@ -176,7 +176,7 @@ void accessLookup(
 //sprintf(msg, "posting nb-send to PET %d size=%d", i, sizeof(int));
 //ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
 
-#ifdef WORKAROUND_NONBLOCKPROGRESSBUG
+#if (defined MUST_USE_BLOCKING_SEND || defined WORKAROUND_NONBLOCKPROGRESSBUG)
       vm->send(&(responseStreamSizeServer[i]), sizeof(int), i);
 #else
       vm->send(&(responseStreamSizeServer[i]), sizeof(int), i,
@@ -224,7 +224,7 @@ void accessLookup(
 //sprintf(msg, "posting nb-send to PET %d size=%d", i, responseStreamSize);
 //ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO); 
 
-#ifdef WORKAROUND_NONBLOCKPROGRESSBUG
+#if (defined MUST_USE_BLOCKING_SEND || defined WORKAROUND_NONBLOCKPROGRESSBUG)
         vm->send(responseStreamServer[i], responseStreamSize, i);
 #else
         vm->send(responseStreamServer[i], responseStreamSize, i,
@@ -264,7 +264,7 @@ void accessLookup(
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
     if (localElementsPerIntervalCount[i]>0){
       // localPet has elements that are located in interval of server Pet i
-#ifndef WORKAROUND_NONBLOCKPROGRESSBUG
+#if !(defined MUST_USE_BLOCKING_SEND || defined WORKAROUND_NONBLOCKPROGRESSBUG)
       // wait for send
       vm->commwait(&(send1commhList[i]));
 #endif
@@ -279,11 +279,11 @@ void accessLookup(
     int i = ii%petCount;  // fold back into [0,..,petCount-1] range
     int count = localIntervalPerPetCount[i];
     if (count>0){
-#ifndef WORKAROUND_NONBLOCKPROGRESSBUG
+#if !(defined MUST_USE_BLOCKING_SEND || defined WORKAROUND_NONBLOCKPROGRESSBUG)
       vm->commwait(&(send2commhList[i]));
 #endif
       if (responseStreamSizeServer[i]>0){
-#ifndef WORKAROUND_NONBLOCKPROGRESSBUG
+#if !(defined MUST_USE_BLOCKING_SEND || defined WORKAROUND_NONBLOCKPROGRESSBUG)
         vm->commwait(&(send3commhList[i]));
 #endif
         // garbage collection
@@ -606,6 +606,15 @@ template<typename IT1, typename IT2>
         requestStreamClientInt[3*jj] = lookupIndex;
         requestStreamClientInt[3*jj+1] = localLookupIndex;
         requestStreamClientInt[3*jj+2] = k;
+#ifdef DEBUG
+        {
+          std::stringstream debugmsg;
+          debugmsg << "clientRequest()#" << __LINE__ 
+            << " ,dstPet=" << dstPet
+            << "lookupIndex " << requestStreamClientInt[3*jj];
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+        }
+#endif
         ++jj; // increment counter
       }
     }
@@ -960,6 +969,7 @@ template<typename IT1, typename IT2>
         return 0; // provoke MPI errors
     }
     virtual int messageSize(int srcPet, int dstPet)const{
+#define DEBUGGING
 #ifdef DEBUGGING
   {
     std::stringstream debugmsg;
@@ -1050,6 +1060,7 @@ template<typename IT1, typename IT2>
     ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
+#undef DEBUGGING
       return (2*sizeof(int)+sizeof(IT)+dataSizeFactors)
         * messageSizeCount(srcPet, dstPet);
     }
@@ -1114,6 +1125,16 @@ template<typename IT1, typename IT2>
         if (SetupSeqIndexFactorLookup<IT>::tensorMixFlag)
           tensorSeqIndex = (int)seqInd.getIndex(1);  // set actual tensor seqIndex
         *intStream++ = lookupIndex;     // index into distr. dir lookup table
+#ifdef DEBUG
+        {
+          std::stringstream debugmsg;
+          debugmsg << "fillStream()#" << __LINE__ 
+            << " ,srcPet=" << srcPet 
+            << " ,dstPet=" << dstPet 
+            << " lookupIndex " << lookupIndex;
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+        }
+#endif
         *intStream++ = tensorSeqIndex;  // dummy tensorSeqIndex
         IT *itStream = (IT *)intStream;
         *itStream++ = seqIndex;         // seqIndex
@@ -1135,6 +1156,26 @@ template<typename IT1, typename IT2>
         factorElement.partnerSeqIndex.decompSeqIndex = *itStream++;
         factorStream = (T *)itStream;
         *((T *)factorElement.factor) = *factorStream++;
+  {
+    std::stringstream msg;
+    msg << "fillSeqIndexFactorLookupFromStream: (srcPet=" 
+      << srcPet << " ,dstPet=" << dstPet << "): "
+      << " seqIndexFactorLookup.size()=" 
+      << SetupSeqIndexFactorLookup<IT>::seqIndexFactorLookup.size()
+      << " lookupIndex=" << lookupIndex;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+        
+#if 1
+  if (lookupIndex<0 ||
+    lookupIndex>SetupSeqIndexFactorLookup<IT>::seqIndexFactorLookup.size()){
+    int rc;
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "lookupIndex out of range", ESMC_CONTEXT, &rc);
+    throw rc;  // bail out with exception
+  }
+#endif  
+  
         SetupSeqIndexFactorLookup<IT>::
           seqIndexFactorLookup[lookupIndex].factorList.push_back(factorElement);
       }
