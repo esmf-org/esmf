@@ -112,6 +112,76 @@ namespace ESMCI{
         const std::vector<T> &yvals,
         std::vector<T> &coeffs)
       {
+        int NCOEFFS_IN_2DEG_2VAR_POLY = 6;
+        assert(x1vals.size() == yvals.size());
+        assert(x2vals.size() == yvals.size());
+
+        assert(max_deg == 2);
+        // Using LAPACK to solve minimize || Ax - B ||
+        int num_obs = static_cast<int>(x1vals.size());
+        int NUM_ROWS_IN_A = num_obs;
+        const int NUM_COLS_IN_A = NCOEFFS_IN_2DEG_2VAR_POLY;
+        int NUM_ROWS_IN_B = num_obs;
+        const int NUM_COLS_IN_B = 1;
+
+        lapack_int info, m, n, lda, ldb, nrhs;
+        m = NUM_ROWS_IN_A;
+        n = NUM_COLS_IN_A;
+        lda = NUM_COLS_IN_A;
+        ldb = NUM_COLS_IN_B;
+        nrhs = NUM_COLS_IN_B;
+
+        T *A = (T *)calloc(NUM_ROWS_IN_A * NUM_COLS_IN_A, sizeof(T));
+        T *B = (T *)calloc(NUM_ROWS_IN_B * NUM_COLS_IN_B, sizeof(T));
+        assert(A && B);
+
+        for(int i=0; i<num_obs; i++){
+          A[i * NUM_COLS_IN_A + 0] =  x1vals[i] * x1vals[i];
+          A[i * NUM_COLS_IN_A + 1] =  x1vals[i] * x2vals[i];
+          A[i * NUM_COLS_IN_A + 2] =  x2vals[i] * x2vals[i];
+          A[i * NUM_COLS_IN_A + 3] =  x1vals[i];
+          A[i * NUM_COLS_IN_A + 4] =  x2vals[i];
+          A[i * NUM_COLS_IN_A + 5] =  1;
+          B[i] = yvals[i];
+        }
+
+        info = LAPACKE_Gels(LAPACK_ROW_MAJOR, 'N', m, n, nrhs, A, lda, B, ldb);
+        /* info == 0 is success */
+        if(info < 0){
+          std::cout << "LAPACKE_sgels failed, the " << -info
+            << "th arg in the input array, A[" << -info << "] ="
+            << A[-info] << " is invalid\n";
+          return ESMF_FAILURE;
+        }
+        else if(info > 0){
+          std::cout << "LAPACKE_sgels failed, the " << info
+            << "th diagonal element of the triangular factor of input array, A == 0, "
+            << "so A has no full rank and LES solution cannot be computed\n";
+          return ESMF_FAILURE;
+        }
+
+        coeffs.resize(NCOEFFS_IN_2DEG_2VAR_POLY);
+        /*
+         * We represent polynomials in the form :
+         * b3 * x1_sq + b5 * x1 * x2 + b4 * x2_sq + b1 * x1 + b2 * x2 + b0
+         */
+        coeffs[0] = B[0];
+        coeffs[1] = B[1];
+        coeffs[2] = B[2];
+        coeffs[3] = B[3];
+        coeffs[4] = B[4];
+        coeffs[5] = B[5];
+
+        return ESMF_SUCCESS;
+      }
+
+      template<typename T>
+      inline int LAPACK_Minimize_LSE_old(int max_deg,
+        const std::vector<T>& x1vals,
+        const std::vector<T>& x2vals,
+        const std::vector<T> &yvals,
+        std::vector<T> &coeffs)
+      {
         assert(x1vals.size() == yvals.size());
         assert(x2vals.size() == yvals.size());
 
