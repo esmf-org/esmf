@@ -1,7 +1,6 @@
 # miscelaneous #
 ################
 *~
-*.orig
 *.log
 ESMF_LogFile
 PET*.ESMF_Logfile
