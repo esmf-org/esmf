@@ -2755,7 +2755,26 @@ int VMK::commwait(commhandle **ch, status *status, int nanopause){
 #ifndef ESMF_NO_PTHREADS
           if (mpi_mutex_flag) pthread_mutex_lock(pth_mutex);
 #endif
+#ifdef DEBUG_WAIT
+          MPI_Status mpis;
+          localrc = MPI_Wait(&((*ch)->mpireq[i]), &mpis);
+          int canc;
+          MPI_Test_cancelled(&mpis, &canc);
+          int cnt;
+          MPI_Get_count(&mpis, MPI_BYTE, &cnt);
+          {
+            std::stringstream msg;
+            msg << "commwait: " << __LINE__
+              << " canc=" << canc
+              << " src=" << mpis.MPI_SOURCE
+              << " tag=" << mpis.MPI_TAG
+              << " cnt=" << cnt;
+            ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+          }
+#else
           localrc = MPI_Wait(&((*ch)->mpireq[i]), mpi_s);
+#endif
+
 #ifndef ESMF_NO_PTHREADS
           if (mpi_mutex_flag) pthread_mutex_unlock(pth_mutex);
 #endif
@@ -5433,8 +5452,12 @@ namespace ESMCI{
         if (size>0){
           sendBuffer[i] = new char[size];
           messagePrepare(localPet, i, sendBuffer[i]);
+#ifdef MUST_USE_BLOCKING_SEND
+          vmk->send(sendBuffer[i], size, i);
+#else
           sendCommhList[i] = NULL;
           vmk->send(sendBuffer[i], size, i, &(sendCommhList[i]));
+#endif
 #ifdef DEBUG_COMPAT_on
           {
             std::stringstream msg;
@@ -5466,7 +5489,6 @@ namespace ESMCI{
         int size = messageSize(i, localPet);
         if (size>0){
           vmk->commwait(&(recvCommhList[i]));   // wait for receive to finish
-          messageProcess(i, localPet, recvBuffer[i]);
 #ifdef DEBUG_COMPAT_on
           {
             std::stringstream msg;
@@ -5476,6 +5498,7 @@ namespace ESMCI{
             ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
           }
 #endif
+          messageProcess(i, localPet, recvBuffer[i]);
           delete [] recvBuffer[i];              // garbage collection
         }
       }
@@ -5486,7 +5509,9 @@ namespace ESMCI{
         // was sending message to Pet "i"
         int size = messageSize(localPet, i);
         if (size>0){
+#ifndef MUST_USE_BLOCKING_SEND
           vmk->commwait(&(sendCommhList[i]));   // wait for send to finish
+#endif
 #ifdef DEBUG_COMPAT_on
           {
             std::stringstream msg;
@@ -5556,7 +5581,11 @@ namespace ESMCI{
         // localPet acts as requester
         int sendRequestSize;
         generateRequest(responsePet, sendRequestBuffer, sendRequestSize);
+#ifdef MUST_USE_BLOCKING_SEND
+        vmk->send(&sendRequestSize, sizeof(int), responsePet);
+#else
         vmk->send(&sendRequestSize, sizeof(int), responsePet, &sendCommh1);
+#endif
         // localPet acts as responder
         vmk->commwait(&recvCommh1); // wait for valid recvRequestSize
 #ifdef DEBUG_COMPAT2_on
@@ -5583,8 +5612,12 @@ namespace ESMCI{
         }
         // localPet acts as requester
         if (sendRequestSize>0){
+#ifdef MUST_USE_BLOCKING_SEND
+          vmk->send(sendRequestBuffer, sendRequestSize, responsePet);
+#else
           vmk->send(sendRequestBuffer, sendRequestSize, responsePet,
             &sendCommh2);
+#endif
 #ifdef DEBUG_COMPAT2_on
           {
             std::stringstream msg;
@@ -5611,12 +5644,18 @@ namespace ESMCI{
           sendResponseBuffer = NULL; // detectable reset
           handleRequest(requestPet, recvBuffer1, recvRequestSize,
             sendResponseBuffer, sendResponseSize);
+#ifdef MUST_USE_BLOCKING_SEND
+          vmk->send(&sendResponseSize, sizeof(int), requestPet);
+#else
           vmk->send(&sendResponseSize, sizeof(int), requestPet, &sendCommh3);
+#endif
         }
         // localPet acts as requester
         if (sendRequestSize>0){
           vmk->commwait(&recvCommh2); // wait for valid recvResponseSize
+#ifndef MUST_USE_BLOCKING_SEND
           vmk->commwait(&sendCommh2); // wait to be done with sendRequestBuffer
+#endif
         }
 #ifdef DEBUG_COMPAT2_on
         {
@@ -5643,8 +5682,12 @@ namespace ESMCI{
         }
         // localPet acts as responder
         if (sendResponseSize>0){
+#ifdef MUST_USE_BLOCKING_SEND
+          vmk->send(sendResponseBuffer, sendResponseSize, requestPet);
+#else          
           vmk->send(sendResponseBuffer, sendResponseSize, requestPet,
             &sendCommh4);
+#endif
 #ifdef DEBUG_COMPAT2_on
           {
             std::stringstream msg;
@@ -5670,16 +5713,22 @@ namespace ESMCI{
           handleResponse(responsePet, recvBuffer2, recvResponseSize);
         }
         // localPet acts as requester
+#ifndef MUST_USE_BLOCKING_SEND
         vmk->commwait(&sendCommh1);
+#endif
         if (recvResponseSize>0){
           delete [] recvBuffer2;
         }
         // localPet acts as responder
         if (sendResponseSize>0){
+#ifndef MUST_USE_BLOCKING_SEND
           vmk->commwait(&sendCommh4);
+#endif
         }
         if (recvRequestSize>0){
+#ifndef MUST_USE_BLOCKING_SEND
           vmk->commwait(&sendCommh3);
+#endif
           if ((sendResponseBuffer != NULL) && (sendResponseBuffer!=recvBuffer1))
             delete [] sendResponseBuffer;
           delete [] recvBuffer1;

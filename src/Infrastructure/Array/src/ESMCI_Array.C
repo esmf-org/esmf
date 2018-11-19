@@ -65,7 +65,6 @@
 #include <sstream>
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
 #include <malloc.h>
-#define WITH_MALLOC_TRIM
 #endif
 
 // include ESMF headers
@@ -8831,8 +8830,13 @@ template<typename SIT, typename DIT>
   if (dstTensorLength>1) undistributedElementsPresent = true;
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifdef WITH_MALLOC_TRIM
-  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 #endif
   
@@ -8889,8 +8893,13 @@ template<typename SIT, typename DIT>
   vector<vector<AssociationElement<DIT,SIT> > >().swap(dstLinSeqVect);
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifdef WITH_MALLOC_TRIM
-  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 #endif
   
@@ -9399,8 +9408,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     delete [] partnerDeRef;
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifdef WITH_MALLOC_TRIM
-  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 #endif
   
@@ -9608,8 +9622,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #endif
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifdef WITH_MALLOC_TRIM
-  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 #endif
   
@@ -9714,8 +9733,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
     delete [] partnerDeRef;
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifdef WITH_MALLOC_TRIM
-  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 #endif
   
@@ -10239,8 +10263,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifdef WITH_MALLOC_TRIM
-  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 #endif
   
@@ -10409,8 +10438,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, &rc)) return rc;
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifdef WITH_MALLOC_TRIM
-  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 #endif
   
@@ -10557,8 +10591,13 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
     &rc)) return rc;
 
 #if (defined ESMF_OS_Linux || defined ESMF_OS_Unicos)
-#ifdef WITH_MALLOC_TRIM
-  malloc_trim(0);
+#ifndef MUST_NOTUSE_MALLOC_TRIM
+  {
+    int mtrim = malloc_trim(0);
+    std::stringstream msg;
+    msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 #endif
   
