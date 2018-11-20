@@ -2324,10 +2324,11 @@ void VM::getObject(
 //
 // !ARGUMENTS:
 //
-  void **fobject, // out - alias to object
-  int objectID,   // in - identifying ID
-  VMId *vmID,     // in - identifying vmID
-  int type,       // in - identifying object type
+  void **fobject,     // out - alias to object
+  int objectID,       // in - identifying ID
+  VMId *vmID,         // in - identifying vmID
+  const string &name, // in - identifying object name
+  int type,           // in - identifying object type (currently unused)
   bool *object_found, // out - true if found, false if not
   int *rc) {
 //
@@ -2348,6 +2349,7 @@ void VM::getObject(
   *fobject = NULL;          // assume not found
   *object_found = false;
 
+  // find VMId
 
   bool vmid_found = false;
   int i;
@@ -2370,14 +2372,16 @@ void VM::getObject(
     return;
   }
 
-  // match found
+  // Find ID
 
   // must lock/unlock for thread-safe access to std::vector
   VM *vm = getCurrent();
+  ESMC_Base *fobject_temp;
+  bool id_found = false;
   vm->lock();
   for (unsigned it=0; it<matchTable_Objects[i].size(); ++it){
 
-    ESMC_Base *fobject_temp = matchTable_Objects[i][it];
+    fobject_temp = matchTable_Objects[i][it];
 
     ESMC_Status baseStatus = (fobject_temp)->ESMC_BaseGetBaseStatus();
     ESMC_Status     Status = (fobject_temp)->ESMC_BaseGetStatus();
@@ -2389,12 +2393,24 @@ void VM::getObject(
     if (debug)
      std::cout << ESMC_METHOD << ": comparing ID " << ID << " to object ID " << objectID << std::endl;
     if (ID == objectID) {
-      *fobject = fobject_temp;
-      // TODO: Bump Base refCount?  Gerhard says not yet.
-      *object_found = true;
+      id_found = true;
       break;
     }
   }
+
+  // Compare name
+
+  if (id_found) {
+    if (debug)
+      std::cout << ESMC_METHOD << ": comparing requested name: " << name << " to: " <<
+          (fobject_temp)->ESMC_BaseGetName() << std::endl;
+    if (name == (fobject_temp)->ESMC_BaseGetName()) {
+      *fobject = fobject_temp;
+      // TODO: Bump Base refCount?  Gerhard says not yet.
+      *object_found = true;
+    }
+  }
+
   vm->unlock();
   if (rc) *rc = ESMF_SUCCESS;
 }

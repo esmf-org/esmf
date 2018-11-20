@@ -1078,13 +1078,14 @@ module ESMF_BaseMod
 ! !IROUTINE: ESMF_BaseDeserializeIDVMId - Deserialize from a buffer
 !
 ! !INTERFACE:
-  subroutine ESMF_BaseDeserializeIDVMId (buffer, offset, ID, VMId, rc)
+  subroutine ESMF_BaseDeserializeIDVMId (buffer, offset, ID, VMId, objname, rc)
 !
 ! !ARGUMENTS:
     character,       intent(in)    :: buffer(:)
     integer,         intent(in)    :: offset
     integer,         intent(out)   :: ID
     type(ESMF_VMId), intent(inout) :: VMId
+    character(*),    intent(out)   :: objname
     integer,         intent(out)   :: rc
 !
 ! !DESCRIPTION:
@@ -1114,7 +1115,7 @@ module ESMF_BaseMod
     rc = ESMF_RC_NOT_IMPL
 
     call c_ESMC_BaseDeserialize_idvmid(buffer, offset, &
-        ID, VMId, localrc)
+        ID, VMId, objname, localrc)
     if (ESMF_LogFoundError(localrc, &
         msg="Base ID/VMId inquiry", &
         ESMF_CONTEXT,  &

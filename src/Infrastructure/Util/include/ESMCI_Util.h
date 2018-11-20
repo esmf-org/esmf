@@ -172,6 +172,8 @@ size_t ESMC_F90lentrim (const char *src, ESMCI_FortranStrLenArg slen);
 char *ESMC_F90toCstring(const char *src, ESMCI_FortranStrLenArg slen);
 int  ESMC_F90toCstring(const char *src, ESMCI_FortranStrLenArg slen, char *dst, ESMCI_FortranStrLenArg dlen);
 int  ESMC_CtoF90string(const char *src, char *dst, ESMCI_FortranStrLenArg dlen);
+void ESMC_cxxtoF90string(const std::string &src, char *dst, int *rc, 
+                             /* hidden */ ESMCI_FortranStrLenArg dlen);
 extern "C" {
 void  FTN_X(esmf_f90tocstring)(const char *src, char *dst, int *rc, 
                              /* hidden */ ESMCI_FortranStrLenArg slen, ESMCI_FortranStrLenArg dlen);
