@@ -712,7 +712,8 @@ static const char *const version = "$Id$";
       const char *buffer,   // in - byte stream to read
       const int *offset,    // in - original offset
       int *ID,              // out - Object ID
-      ESMCI::VMId *vmID) {  // in/out - VMId
+      ESMCI::VMId *vmID,    // in/out - VMId
+      std::string &objname) { // out - base name
 //
 // !DESCRIPTION:
 //    Turn a stream of bytes into an object.  VMId is assumed to have the
@@ -748,6 +749,7 @@ static const char *const version = "$Id$";
     vmIDp++;
 
     cp = (char *)vmIDp;
+    objname = cp;
     cp += 3*ESMF_MAXSTR;
 
     ip = (int*)cp;
@@ -819,8 +821,10 @@ static const char *const version = "$Id$";
     for (int i=0; i<level; i++)
       std::cout << "->";
   }
-  std::cout << " Base name = " << baseName << std::endl;
-  std::cout << " Proxy     = " << ((proxyflag == ESMF_PROXYYES)?"yes":"no") << std::endl;
+  std::cout << " Base name    = " << baseName << std::endl;
+  std::cout << " Status: Base = " << ESMC_StatusString(baseStatus) << ", "
+      << " object = " << ESMC_StatusString(status) << std::endl;
+  std::cout << " Proxy        = " << ((proxyflag == ESMF_PROXYYES)?"yes":"no") << std::endl;
   if (options) {
     if (strcmp (options, "debug") == 0) {
       std::cout << " Base ID = " << ID << ", vmID:" << std::endl;
