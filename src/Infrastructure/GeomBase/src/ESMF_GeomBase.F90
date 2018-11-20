@@ -1505,7 +1505,7 @@ end subroutine ESMF_GeomBaseGet
 
     integer :: geomobj_len
 
-    logical, parameter :: ENABLE_SHARED_GRID_SUPPORT = .true.
+    logical, parameter :: ENABLE_SHARED_GRID_SUPPORT = .false.
 
     logical, parameter :: trace = .false.
     character(ESMF_MAXSTR) :: grid_name
