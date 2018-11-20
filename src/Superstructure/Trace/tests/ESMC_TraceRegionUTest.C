@@ -24,6 +24,7 @@
 #include "ESMC_Test.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_RegionNode.h"
+#include "ESMCI_RegionSummary.h"
 
 //==============================================================================
 //BOP
@@ -421,6 +422,164 @@ int main(void){
     
   delete nodeESM1, nodeESM2, nodeESM3;
   
+
+
+  //----------------------------------------------------------------------------
+  // Test region summarization
+   
+  //simulates PET0
+  nodeESM1 = new ESMCI::RegionNode();
+  nodeESM1->setName("ESM");
+  nodeESM1->entered(0);
+  nodeATM1 = nodeESM1->addChild("ATM");
+  nodeATM1->entered(20);  nodeATM1->exited(30);
+  nodeATM1->entered(40);  nodeATM1->exited(50);
+  nodeATM1->entered(60);  nodeATM1->exited(70);  //total == 30
+  nodeESM1->exited(99);
+
+  //simulates PET1
+  nodeESM2 = new ESMCI::RegionNode();
+  nodeESM2->setName("ESM");
+  nodeESM2->entered(0);
+  nodeATM2 = nodeESM2->addChild("ATM");
+  nodeATM2->entered(20);  nodeATM2->exited(22);
+  nodeATM2->entered(40);  nodeATM2->exited(42);
+  nodeATM2->entered(60);  nodeATM2->exited(62);  //total == 6
+  nodeESM2->exited(100);
+
+  //simulates PET2
+  nodeESM3 = new ESMCI::RegionNode();
+  nodeESM3->setName("ESM");
+  nodeESM3->entered(0);
+  nodeOCN3 = nodeESM3->addChild("OCN");
+  nodeOCN3->entered(20);
+  nodeOCNSUB3 = nodeOCN3->addChild("OCNSUB");
+  nodeOCNSUB3->entered(22); nodeOCNSUB3->exited(27);
+  nodeOCN3->exited(30);
+  nodeOCN3->entered(40);  nodeOCN3->exited(50);
+  nodeOCN3->entered(60);  nodeOCN3->exited(70);
+  nodeOCN3->entered(80);  nodeOCN3->exited(90);
+  nodeESM3->exited(101);
+
+  //summarize statistics
+  ESMCI::RegionSummary *regSum = new ESMCI::RegionSummary(NULL);
+  regSum->merge(*nodeESM1, 0);
+  regSum->merge(*nodeESM2, 1);
+  regSum->merge(*nodeESM3, 2);
+
+  strcpy(name, "Region summary tree");
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  ESMCI::RegionSummary *rsATM = regSum->getChild("ATM");
+  snprintf(failMsg, 80, "Summary child exists: ATM");
+  ESMC_Test(rsATM != NULL, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  ESMCI::RegionSummary *rsOCN = regSum->getChild("OCN");
+  snprintf(failMsg, 80, "Summary child exists: OCN");
+  ESMC_Test(rsOCN != NULL, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  ESMCI::RegionSummary *rsOCNSUB = rsOCN->getChild("OCNSUB");
+  snprintf(failMsg, 80, "Summary child exists: OCNSUB");
+  ESMC_Test(rsOCNSUB != NULL, name, failMsg, &result, __FILE__, __LINE__, 0);
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ESM count each");
+  ESMC_Test(regSum->getCountEach()==1, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ESM count match");
+  ESMC_Test(regSum->getCountsMatch(), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ESM total sum");
+  ESMC_Test(regSum->getTotalSum()==300, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ESM total min");
+  ESMC_Test(regSum->getTotalMin()==99, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ESM total min pet");
+  ESMC_Test(regSum->getTotalMinPet()==0, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ESM total max");
+  ESMC_Test(regSum->getTotalMax()==101, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ESM total max pet");
+  ESMC_Test(regSum->getTotalMaxPet()==2, name, failMsg, &result, __FILE__, __LINE__, 0);
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ESM total mean");
+  ESMC_Test(regSum->getTotalMean()==100, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summarized ATM count each: expected 3 but got %d", rsATM->getCountEach());
+  ESMC_Test(rsATM->getCountEach()==3, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ATM total min: expected 6 but got %d", rsATM->getTotalMin());
+  ESMC_Test(rsATM->getTotalMin()==6, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ATM total min pet");
+  ESMC_Test(rsATM->getTotalMinPet()==0, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ATM total max: expected 30 but got %d", rsATM->getTotalMax());
+  ESMC_Test(rsATM->getTotalMax()==30, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ATM total max pet: expected 1 but got %d", rsATM->getTotalMaxPet());
+  ESMC_Test(rsATM->getTotalMaxPet()==1, name, failMsg, &result, __FILE__, __LINE__, 0);
+  
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ATM total mean: expected %f but got %f", ((30+6)/2), rsATM->getTotalMean());
+  ESMC_Test(rsATM->getTotalMean()==((30+6)/2), name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ATM pet count: expected 2 but got %d", rsATM->getPetCount());
+  ESMC_Test(rsATM->getPetCount()==2, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summarized OCN count each: expected 4 but got %d", rsOCN->getCountEach());
+  ESMC_Test(rsOCN->getCountEach()==4, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary OCN pet count: expected 1 but got %d", rsOCN->getPetCount());
+  ESMC_Test(rsOCN->getPetCount()==1, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summarized OCNSUB total sum");
+  ESMC_Test(rsOCNSUB->getTotalSum()==5, name, failMsg, &result, __FILE__, __LINE__, 0);
+    
+
+  delete nodeESM1, nodeESM2, nodeESM3, regSum;
+
    
   //----------------------------------------------------------------------------
   strcpy(name, "Serialize/deserialize single region node");
