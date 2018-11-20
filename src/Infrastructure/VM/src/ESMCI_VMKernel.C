@@ -5403,7 +5403,7 @@ void sync_reset(shmsync *shms){
 //==============================================================================
 //==============================================================================
 
-#define DEBUG_COMPAT_on
+#define DEBUG_COMPAT_off
 
 namespace ESMCI{
   void ComPat::totalExchange(VMK *vmk){

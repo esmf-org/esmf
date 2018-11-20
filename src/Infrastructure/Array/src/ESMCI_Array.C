@@ -24,6 +24,7 @@
 #define ASMM_EXEC_TIMING_off
 #define ASMM_EXEC_PROFILE_off
 
+#define MALLOC_TRIM_REPORT_off
 
 //==============================================================================
 // Set OPTION!!!
@@ -8829,9 +8830,11 @@ template<typename SIT, typename DIT>
 #ifndef MUST_NOTUSE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
+#ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#endif
   }
 #endif
 #endif
@@ -8906,9 +8909,11 @@ template<typename SIT, typename DIT>
 #ifndef MUST_NOTUSE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
+#ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#endif
   }
 #endif
 #endif
@@ -9452,9 +9457,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #ifndef MUST_NOTUSE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
+#ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#endif
   }
 #endif
 #endif
@@ -9691,9 +9698,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #ifndef MUST_NOTUSE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
+#ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#endif
   }
 #endif
 #endif
@@ -9877,9 +9886,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
 #ifndef MUST_NOTUSE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
+#ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#endif
   }
 #endif
 #endif
@@ -10503,9 +10514,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 #ifndef MUST_NOTUSE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
+#ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#endif
   }
 #endif
 #endif
@@ -10679,9 +10692,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 #ifndef MUST_NOTUSE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
+#ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#endif
   }
 #endif
 #endif
@@ -10832,9 +10847,11 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 #ifndef MUST_NOTUSE_MALLOC_TRIM
   {
     int mtrim = malloc_trim(0);
+#ifdef MALLOC_TRIM_REPORT_on
     std::stringstream msg;
     msg << "malloc_trim(0)#" << __LINE__ << ": " << mtrim;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+#endif
   }
 #endif
 #endif
