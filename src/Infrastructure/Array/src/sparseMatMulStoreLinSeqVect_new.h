@@ -1,7 +1,7 @@
 #define STORELINSEQVECT_NEW_LOG_off
 #define STORELINSEQVECT_NEW_TIMERS_off
-#define STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
-#define CHUNK_COUNT 2
+#define STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_off
+#define CHUNK_COUNT 1
 //-----------------------------------------------------------------------------
 
   template<typename IT> struct SparseMatrixIndex{
