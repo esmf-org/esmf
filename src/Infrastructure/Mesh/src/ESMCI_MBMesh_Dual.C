@@ -897,43 +897,17 @@ namespace ESMCI {
 
     //// Setup parallel sharing ///
 
-    // setup parallel comm //
+    // setup parallel comm, destroyed in MBMesh destructor
     ParallelComm *pcomm= new ParallelComm(dual_mesh->mesh, mpi_comm);
-
+  
+    Range elems_dual;
+    merr=dual_mesh->mesh->get_entities_by_dimension(0, dual_mesh->pdim, elems_dual);
+    MBMESH_CHECK_ERR(merr, localrc);
+    
     // Resolve object sharing like in Mesh->Commit()
-    pcomm->resolve_shared_ents(0, dual_mesh->pdim, dual_mesh->pdim-1);
-
-    // get the root set handle
-    // EntityHandle root_set = dual_mesh->mesh->get_root_set();
-    // 
-    // Range range_ent;
-    // merr=dual_mesh->mesh->get_entities_by_dimension(root_set, dual_mesh->pdim, range_ent);
-    // MBMESH_CHECK_ERR(merr, localrc);
-    // 
-    // merr = pcomm->resolve_shared_ents(root_set, range_ent, dual_mesh->pdim, 1);
-    // MBMESH_CHECK_ERR(merr, localrc);
-    // 
-    // vector<Tag> tags;
-    // tags.push_back(dual_mesh->gid_tag);
-    // tags.push_back(dual_mesh->orig_pos_tag);
-    // tags.push_back(dual_mesh->owner_tag);
-    // if (dual_mesh->has_node_orig_coords) tags.push_back(dual_mesh->node_orig_coords_tag);
-    // if (dual_mesh->has_node_mask) {
-    //   tags.push_back(dual_mesh->node_mask_tag);
-    //   tags.push_back(dual_mesh->node_mask_val_tag);
-    // }
-    // if (dual_mesh->has_elem_frac) tags.push_back(dual_mesh->elem_frac_tag);
-    // if (dual_mesh->has_elem_mask) {
-    //   tags.push_back(dual_mesh->elem_mask_tag);
-    //   tags.push_back(dual_mesh->elem_mask_val_tag);
-    // }
-    // if (dual_mesh->has_elem_area) tags.push_back(dual_mesh->elem_area_tag);
-    // if (dual_mesh->has_elem_coords) tags.push_back(dual_mesh->elem_coords_tag);
-    // if (dual_mesh->has_elem_orig_coords) tags.push_back(dual_mesh->elem_orig_coords_tag);
-    // 
-    // merr = pcomm->exchange_tags(tags, tags, range_ent);
-    // MBMESH_CHECK_ERR(merr, localrc);
-
+    merr = pcomm->resolve_shared_ents(0, elems_dual, dual_mesh->pdim, dual_mesh->pdim-1);
+    MBMESH_CHECK_ERR(merr, localrc);
+  
     // Output 
     *_dual_mesh=dual_mesh;
 

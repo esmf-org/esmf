@@ -73,7 +73,7 @@ call ESMF_MeshSetMOAB(.true.)
       !EX_disable_UTest
       ! Test regrid with masks
       write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Regrid from Mesh to Mesh On Cell Centers"
+      write(name, *) "Regrid from Mesh containing pentagons and hexagons to Grid"
 
       ! initialize 
       rc=ESMF_SUCCESS
@@ -93,7 +93,7 @@ call ESMF_MeshSetMOAB(.true.)
 ! This #if surrounds all the tests to enable turning on just one test
 #if 1
      !------------------------------------------------------------------------
-        !EX_UTest
+      !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid between a 0 to 360 sphere and a -180 to 180 sphere"
@@ -883,7 +883,6 @@ call ESMF_MeshSetMOAB(.true.)
 !      call ESMF_LogFlush()
 !      call ESMF_UtilIOUnitFlush (6)
   
-
        !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks

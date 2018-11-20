@@ -1369,7 +1369,7 @@ printf("    PET %d - addelems\n", localPet);
 
     //// Setup parallel sharing ///
 
-    // setup parallel comm //
+    // setup parallel comm, destroyed in MBMesh destructor
     ParallelComm *pcomm= new ParallelComm(moab_mesh, mpi_comm);
   
     Range elems;

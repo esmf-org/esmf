@@ -63,18 +63,22 @@ MBMesh::MBMesh() : sdim(0),pdim(0),mesh(NULL),verts(NULL) {
 
 MBMesh::~MBMesh() {
 
+  // get the indexed pcomm object from the interface
+  // index 0 should return the one created inside MBMesh_addelements
+  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
+  delete pcomm;
+  
   // Get rid of MOAB mesh
   if (mesh != NULL) delete mesh;
 
   // Get rid of list of verts
   if (verts != NULL) delete [] verts;
+  
 } 
 
 void MBMesh::CreateGhost() {
 
   int merr, localrc;
-
-  Interface *mb = this->mesh;
 
   // Do this for now instead of initiating mesh parallel stuff
   // TODO: MAYBE EVENTUALLY PUT THIS INTO MBMesh???
@@ -91,7 +95,7 @@ void MBMesh::CreateGhost() {
 
   // get the indexed pcomm object from the interface
   // pass index 0, it will the one created inside MBMesh_addelements
-  static ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
+  ParallelComm *pcomm = ParallelComm::get_pcomm(this->mesh, 0);
   
   // this is already called in MBMesh_addelements
   // merr = pcomm->resolve_shared_ents(0, elems, this->pdim, this->pdim-1);
@@ -124,7 +128,6 @@ void MBMesh::CreateGhost() {
 #endif
 
   // Now exchange 1 layer of ghost elements, using vertices as bridge
-  // (we could have done this as part of reading process, using the PARALLEL_GHOSTS read option)
   merr = pcomm->exchange_ghost_cells(this->pdim, // int ghost_dim
                                      0, // int bridge_dim
                                      1, // int num_layers
@@ -159,14 +162,14 @@ void MBMesh::CreateGhost() {
   // pcomm->set_debug_verbosity(4);
 
   Range nodes;
-  merr=mb->get_entities_by_dimension(0, 0, nodes);
+  merr=this->mesh->get_entities_by_dimension(0, 0, nodes);
   MBMESH_CHECK_ERR(merr, localrc);
 
   merr = pcomm->exchange_tags(node_tags, node_tags, nodes);
   MBMESH_CHECK_ERR(merr, localrc);
 
   Range elems;
-  merr=mb->get_entities_by_dimension(0, this->pdim, elems);
+  merr=this->mesh->get_entities_by_dimension(0, this->pdim, elems);
   MBMESH_CHECK_ERR(merr, localrc);
 
   merr = pcomm->exchange_tags(elem_tags, elem_tags, elems);
