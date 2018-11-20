@@ -1069,11 +1069,11 @@ int main(void){
 #if defined ESMF_MOAB
   MBMesh *mbmesh = NULL;
   // mbmesh = create_mesh_quad_9_2(ESMC_COORDSYS_CART, rc);
-  mbmesh = create_mesh_quad_9_4(ESMC_COORDSYS_CART, rc);
-  // mbmesh = create_mesh_ph_4(ESMC_COORDSYS_CART, rc);
+  // mbmesh = create_mesh_quad_9_4(ESMC_COORDSYS_CART, rc);
+  mbmesh = create_mesh_ph_4(ESMC_COORDSYS_CART, rc);
   if (!mbmesh) rc = ESMC_RC_PTR_NULL;
 
-#define DEBUG_EXCHANGE_TAGS
+// #define DEBUG_EXCHANGE_TAGS
 #ifdef DEBUG_EXCHANGE_TAGS
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMC_MeshMOABGhostUTest"
@@ -1171,6 +1171,9 @@ int main(void){
     node_tags.push_back(mbmesh->node_mask_val_tag);
   }
   
+  elem_tags.push_back(mbmesh->gid_tag);
+  elem_tags.push_back(mbmesh->orig_pos_tag);
+  elem_tags.push_back(mbmesh->owner_tag);
   if (mbmesh->has_elem_frac) elem_tags.push_back(mbmesh->elem_frac_tag);
   if (mbmesh->has_elem_mask) {
     elem_tags.push_back(mbmesh->elem_mask_tag);
@@ -1180,7 +1183,7 @@ int main(void){
   if (mbmesh->has_elem_coords) elem_tags.push_back(mbmesh->elem_coords_tag);
   if (mbmesh->has_elem_orig_coords) elem_tags.push_back(mbmesh->elem_orig_coords_tag); 
    
-  pcomm->set_debug_verbosity(4);
+  // pcomm->set_debug_verbosity(4);
 
   Range nodes;
   merr=mbmesh->mesh->get_entities_by_dimension(0, 0, nodes);

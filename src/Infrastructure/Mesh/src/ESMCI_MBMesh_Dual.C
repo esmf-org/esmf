@@ -126,15 +126,12 @@ namespace ESMCI {
   // TODO: add elem mask fields and mask_val fields   
   src_mesh->CreateGhost();
 
-  // Get a range containing all elements
-  Range range_elem;
-  merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->sdim,range_elem);
-  MBMESH_CHECK_ERR(merr, localrc);
-
-  // {void *mbptr = (void *) src_mesh;
-  // int len = 16; char fname[len];
-  // sprintf(fname, "meshsrcghost_%d", Par::Rank());
-  // MBMesh_write(&mbptr, fname, rc, len);}
+#ifdef DEBUG_WRITE_MESH
+  {void *mbptr = (void *) src_mesh;
+  int len = 16; char fname[len];
+  sprintf(fname, "meshsrcghost_%d", Par::Rank());
+  MBMesh_write(&mbptr, fname, rc, len);}
+#endif
 
 #ifdef DEBUG_CONNECTIVITY_ADJACENCIES
   {
@@ -145,26 +142,15 @@ namespace ESMCI {
 
   for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
     const EntityHandle *node=&(*it);
-    
-    // Only do local nodes
-    // ALSO DO NON-LOCAL NODES, BECAUSE OTHERWISE YOU 
-    // CAN END UP NOT MAKING AN ELEM AS A HOME FOR 
-    // A NODE THAT'S NEEDED ON ANOTHER PROC
-    //if (!GetAttr(node).is_locally_owned()) continue;
-    
-    // Get number of elems
-    int num_node_elems=0;
-    // get_num_elems_around_node(&node, &num_node_elems);
-    // pdim instead of sdim here, for spherical cases
+
     Range adjs;
     merr = src_mesh->mesh->get_adjacencies(node, 1, src_mesh->pdim, false, adjs);
     MBMESH_CHECK_ERR(merr, localrc);
-    num_node_elems = adjs.size();
 
     {int nid;
     merr=src_mesh->mesh->tag_get_data(src_mesh->gid_tag, node, 1, &nid);
     MBMESH_CHECK_ERR(merr, localrc);
-    printf("%d# mesh node id %d, adjacencies %d [", Par::Rank(), nid, num_node_elems);
+    printf("%d# mesh node id %d, adjacencies %d [", Par::Rank(), nid, adjs.size());
     for(Range::iterator it=adjs.begin(); it !=adjs.end(); it++) {
       const EntityHandle *elem=&(*it);
       
@@ -184,7 +170,15 @@ namespace ESMCI {
 
   // If src_mesh is split, add newly created ghost elements to split_to_orig map
   if (src_mesh->is_split) add_ghost_elems_to_split_orig_id_map(src_mesh);
- 
+
+#ifdef DEBUG_SPLIT
+  printf("%d# split_to_orig_id map [", Par::Rank());
+  map<int, int>::iterator it=src_mesh->split_to_orig_id.begin();
+  for (it; it!=src_mesh->split_to_orig_id.end(); ++it)
+    printf("%d:%d, ", it->first, it->second);
+  printf("]\n");
+#endif
+
   // Get some useful info
   int sdim=src_mesh->sdim;
   int pdim=src_mesh->pdim;
@@ -211,6 +205,12 @@ namespace ESMCI {
   // is_split too?
 
   // Iterate through all src elements counting the number and creating a map
+
+  // Get a range containing all elements
+  Range range_elem;
+  merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->sdim,range_elem);
+  MBMESH_CHECK_ERR(merr, localrc);
+
   std::map<int,int> id_to_index;
   int pos=0;
   for(Range::iterator it=range_elem.begin(); it !=range_elem.end(); it++) {
@@ -224,10 +224,15 @@ namespace ESMCI {
     // Translate id if split
     if ((src_mesh->is_split) && (elem_id > src_mesh->max_non_split_id)) {
       std::map<int,int>::iterator soi =  src_mesh->split_to_orig_id.find(elem_id);
-      // printf("PET %d split elem id %d\n", Par::Rank(), elem_id);
+#ifdef DEBUG_SPLIT
+      printf("%d# split elem id %d > max_non_split_id %d\n", Par::Rank(), elem_id, src_mesh->max_non_split_id);
+#endif
       if (soi != src_mesh->split_to_orig_id.end()) {
         elem_id=soi->second;
       } else {
+#ifdef DEBUG_SPLIT
+        printf("%d# split elem id %d NOT FOUND\n", Par::Rank(), elem_id);
+#endif
         Throw() << "split elem id not found in map";
       }
     }
@@ -619,9 +624,6 @@ namespace ESMCI {
     
     // Set maximum of non-split ids
     dual_mesh->max_non_split_id=global_max_id;
-#ifdef DEBUG_SPLIT
-    printf("%d# split elem max id %d\n", Par::Rank(), dual_mesh->max_non_split_id);
-#endif
 
     // Calc our range of extra elem ids
     beg_extra_ids=0;
@@ -632,12 +634,7 @@ namespace ESMCI {
     
     // Start 1 up from max
     beg_extra_ids=beg_extra_ids+global_max_id+1;
-    
-#ifdef DEBUG_SPLIT
-    printf("%d# beg_extra_ids=%d end=%d\n",Par::Rank(),beg_extra_ids,beg_extra_ids+num_extra_elem-1);
-#endif
   }
-
 
 
   // Generate connectivity list with split elements
@@ -1310,7 +1307,7 @@ void mb_triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tr
       // It's split, so count this one     
       num_gids++;
     }
-     
+
     // Get list of split and orig element gids
     UInt *gids_split=NULL;
     UInt *gids_orig=NULL;
@@ -1378,7 +1375,7 @@ void mb_triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tr
     int owner;
     merr = mesh->mesh->tag_get_data(mesh->owner_tag, elem, 1, &owner);
     MBMESH_CHECK_ERR(merr, localrc);
-    if (owner != localPet) continue;
+    if (owner == localPet) continue;
 
     // Get element id
     int elem_id;
@@ -1407,7 +1404,7 @@ void mb_triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tr
     int owner;
     merr = mesh->mesh->tag_get_data(mesh->owner_tag, elem, 1, &owner);
     MBMESH_CHECK_ERR(merr, localrc);
-    if (owner != localPet) continue;
+    if (owner == localPet) continue;
 
     // Get element id
     int elem_id;

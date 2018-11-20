@@ -144,6 +144,9 @@ void MBMesh::CreateGhost() {
     node_tags.push_back(this->node_mask_val_tag);
   }
   
+  elem_tags.push_back(this->gid_tag);
+  elem_tags.push_back(this->orig_pos_tag);
+  elem_tags.push_back(this->owner_tag);
   if (this->has_elem_frac) elem_tags.push_back(this->elem_frac_tag);
   if (this->has_elem_mask) {
     elem_tags.push_back(this->elem_mask_tag);

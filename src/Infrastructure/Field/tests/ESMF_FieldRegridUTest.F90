@@ -63,10 +63,11 @@
  
 #ifdef ESMF_TESTEXHAUSTIVE
 
+call ESMF_MeshSetMOAB(.true.)
+
 ! this is for testing development of the dual mesh feature with MBMesh
 !    will remove at the end of this development cycle
-#if 1
-call ESMF_MeshSetMOAB(.true.)
+#if 0
 
       !------------------------------------------------------------------------
       !EX_disable_UTest
@@ -90,7 +91,7 @@ call ESMF_MeshSetMOAB(.true.)
 #endif
 
 ! This #if surrounds all the tests to enable turning on just one test
-#if 0
+#if 1
      !------------------------------------------------------------------------
         !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
