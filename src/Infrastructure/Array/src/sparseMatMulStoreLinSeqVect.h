@@ -11,7 +11,7 @@ namespace DD{
 
   template<typename IT> struct SeqIndexFactorLookup{
     vector<int> de;
-    vector<FactorElement<IT> > factorList;
+    vector<FactorElement<SeqIndex<IT> > > factorList;
     int factorCount;  //TODO: get rid of this and use factorList.size()
   public:
     SeqIndexFactorLookup(){
@@ -21,7 +21,8 @@ namespace DD{
   
   template<typename IT1, typename IT2> struct FillLinSeqVectInfo{
     Array const *array;
-    vector<vector<AssociationElement<IT1,IT2> > > &linSeqVect;
+    vector<vector<AssociationElement<SeqIndex<IT1>,SeqIndex<IT2> > > >
+      &linSeqVect;
     vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookup;
     int localPet;
     int localDeCount;
@@ -31,7 +32,8 @@ namespace DD{
     bool haloRimFlag;   // true indicates that halo rim instead of excl reg used
   public:
     FillLinSeqVectInfo(
-      vector<vector<AssociationElement<IT1,IT2> > > &linSeqVect_,
+      vector<vector<AssociationElement<SeqIndex<IT1>,SeqIndex<IT2> > > >
+        &linSeqVect_,
       vector<SeqIndexFactorLookup<IT1> > &seqIndexFactorLookup_
     ):
       // members that need to be set on this level because of reference
@@ -385,8 +387,8 @@ template<typename IT1, typename IT2>
   const int localPet = fillLinSeqVectInfo->localPet;
   const int localDeCount = fillLinSeqVectInfo->localDeCount;
   const int *localDeElementCount = fillLinSeqVectInfo->localDeElementCount;
-  vector<vector<AssociationElement<IT1,IT2> > > &linSeqVect =
-    fillLinSeqVectInfo->linSeqVect;
+  vector<vector<AssociationElement<SeqIndex<IT1>,SeqIndex<IT2> > > >
+    &linSeqVect = fillLinSeqVectInfo->linSeqVect;
   const Interval<IT1> *seqIndexInterval = fillLinSeqVectInfo->seqIndexInterval;
   const bool tensorMixFlag = fillLinSeqVectInfo->tensorMixFlag;
   vector<SeqIndexFactorLookup<IT1> > const &seqIndexFactorLookup =
@@ -410,7 +412,7 @@ template<typename IT1, typename IT2>
               lookupIndex += (seqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
             int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
             if (factorCount > 0){
-              AssociationElement<IT1,IT2> element;
+              AssociationElement<SeqIndex<IT1>,SeqIndex<IT2> > element;
               element.factorList =
                 seqIndexFactorLookup[lookupIndex].factorList;
               element.linIndex =
@@ -434,7 +436,7 @@ template<typename IT1, typename IT2>
             lookupIndex += (seqIndex.tensorSeqIndex - 1) * (int)seqIndCount;
           int factorCount = seqIndexFactorLookup[lookupIndex].factorCount;
           if (factorCount > 0){
-            AssociationElement<IT1,IT2> element;
+            AssociationElement<SeqIndex<IT1>,SeqIndex<IT2> > element;
             element.factorList = seqIndexFactorLookup[lookupIndex].factorList;
             element.linIndex = arrayElement.getLinearIndex();
             element.seqIndex = seqIndex;
@@ -530,8 +532,8 @@ template<typename IT1, typename IT2>
 template<typename IT1, typename IT2> 
   void clientProcess(FillLinSeqVectInfo<IT1,IT2> *fillLinSeqVectInfo, 
     char *responseStream, int responseStreamSize){
-  vector<vector<AssociationElement<IT1,IT2> > > &linSeqVect =
-    fillLinSeqVectInfo->linSeqVect;
+  vector<vector<AssociationElement<SeqIndex<IT1>,SeqIndex<IT2> > > >
+    &linSeqVect = fillLinSeqVectInfo->linSeqVect;
   // process responseStream and fill linSeqVect[][]
   int *responseStreamInt = (int *)responseStream;
   while ((char *)responseStreamInt != responseStream+responseStreamSize){
@@ -542,7 +544,7 @@ template<typename IT1, typename IT2>
     int tensorSeqIndex = *responseStreamInt++;
     int linIndex = *responseStreamInt++;
     int factorCount = *responseStreamInt++;
-    AssociationElement<IT1,IT2> element;
+    AssociationElement<SeqIndex<IT1>,SeqIndex<IT2> > element;
     element.factorList.resize(factorCount);
     for (int jj=0; jj<factorCount; jj++){
       IT2 *responseStreamIT2 = (IT2 *)responseStreamInt;
@@ -768,8 +770,7 @@ template<typename IT1, typename IT2>
     virtual int messageSize(int srcPet, int dstPet)const{
       return 2 * sizeof(int) * messageSizeCount(srcPet, dstPet);
     }
-    virtual void messagePrepare(int srcPet, 
-      int dstPet, char *buffer)const{
+    virtual void messagePrepare(int srcPet, int dstPet, char *buffer)const{
       IT seqIndMin = seqIndexInterval[dstPet].min;
       IT seqIndMax = seqIndexInterval[dstPet].max;
       IT seqIndCount = seqIndexInterval[dstPet].count;
@@ -1149,7 +1150,7 @@ template<typename IT1, typename IT2>
       for (int i=0; i<messageSizeCount(srcPet, dstPet); i++){
         intStream = (int *)factorStream;
         int lookupIndex = *intStream++;   // index into lookup table
-        FactorElement<IT> factorElement;
+        FactorElement<SeqIndex<IT> > factorElement;
         factorElement.partnerSeqIndex.tensorSeqIndex = *intStream++;
         IT *itStream = (IT *)intStream;
         factorElement.partnerSeqIndex.decompSeqIndex = *itStream++;
@@ -1198,7 +1199,7 @@ template<typename IT1, typename IT2>
           tensorSeqIndex = (int)seqInd.getIndex(1);  // set actual tensor seqIndex
         int lookupIndex = SetupSeqIndexFactorLookup<IT>::
           seqIntervFactorListLookupIndexToPet[localPet][i];
-        FactorElement<IT> factorElement;
+        FactorElement<SeqIndex<IT> > factorElement;
         factorElement.partnerSeqIndex.decompSeqIndex = seqIndex;
         factorElement.partnerSeqIndex.tensorSeqIndex = tensorSeqIndex;
         *((T *)factorElement.factor) = ((T *)SetupSeqIndexFactorLookup<IT>::
@@ -1508,8 +1509,8 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
   int dstElementCount,                    // in
   const int *srcLocalDeElementCount,      // in
   const int *dstLocalDeElementCount,      // in
-  vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect, // inout
-  vector<vector<AssociationElement<DIT,SIT> > >&dstLinSeqVect  // inout
+  vector<vector<AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > > >&srcLinSeqVect, // inout
+  vector<vector<AssociationElement<SeqIndex<DIT>,SeqIndex<SIT> > > >&dstLinSeqVect  // inout
   ){
 //
 // !DESCRIPTION:
@@ -2384,7 +2385,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     // Doing this for the src side
     for (int j=0; j<srcLocalDeCount; j++){
       for (unsigned k=0; k<srcLinSeqVect[j].size(); k++){
-        for (typename vector<FactorElement<DIT> >::iterator
+        for (typename vector<FactorElement<SeqIndex<DIT> > >::iterator
           fe=srcLinSeqVect[j][k].factorList.begin();
           fe!=srcLinSeqVect[j][k].factorList.end();){
           if (fe->partnerDE.size() == 0){
@@ -2399,7 +2400,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
     // Doing this for the dst side
     for (int j=0; j<dstLocalDeCount; j++){
       for (unsigned k=0; k<dstLinSeqVect[j].size(); k++){
-        for (typename vector<FactorElement<SIT> >::iterator
+        for (typename vector<FactorElement<SeqIndex<SIT> > >::iterator
           fe=dstLinSeqVect[j][k].factorList.begin();
           fe!=dstLinSeqVect[j][k].factorList.end();){
           if (fe->partnerDE.size() == 0){
@@ -2434,7 +2435,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
             for (unsigned jj=1;
               jj<srcLinSeqVect[j][k].factorList[kk].partnerDE.size(); jj++){
               // construct factorElement with one partnerDE entry
-              FactorElement<DIT> factorElement =
+              FactorElement<SeqIndex<DIT> > factorElement =
                 srcLinSeqVect[j][k].factorList[kk];
               factorElement.partnerDE.resize(1);
               factorElement.partnerDE[0] =
@@ -2455,7 +2456,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
             for (unsigned jj=1;
               jj<dstLinSeqVect[j][k].factorList[kk].partnerDE.size(); jj++){
               // construct factorElement with one partnerDE entry
-              FactorElement<SIT> factorElement =
+              FactorElement<SeqIndex<SIT> > factorElement =
                 dstLinSeqVect[j][k].factorList[kk];
               factorElement.partnerDE.resize(1);
               factorElement.partnerDE[0] =
