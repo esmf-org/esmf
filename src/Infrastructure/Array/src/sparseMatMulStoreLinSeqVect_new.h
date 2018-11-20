@@ -1,6 +1,7 @@
 #define STORELINSEQVECT_NEW_LOG_off
 #define STORELINSEQVECT_NEW_TIMERS_off
 #define STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
+#define CHUNK_COUNT 2
 //-----------------------------------------------------------------------------
 
   template<typename IT> struct SparseMatrixIndex{
@@ -320,7 +321,7 @@
         if (itD->fep->partnerSeqIndex == itS->seqIndex){
           // a match means that both sides need to record this...
           // src side now knows about a factor that needs to be added
-          FactorElement<SeqIndex<DIT> > factorElement;
+          FactorElement<DIT> factorElement;
           factorElement.partnerSeqIndex = itD->seqIndex;
           factorElement.partnerDe=itD->de;
           *(T*)(factorElement.factor) = *(T*)(itD->fep->factor);
@@ -398,7 +399,7 @@
         if (request[iReq].partnerSeqIndex == itS->seqIndex){
           // a match means that both sides need to record this...
           // src side now knows about a factor that needs to be added
-          FactorElement<SeqIndex<DIT> > factorElement;
+          FactorElement<DIT> factorElement;
           factorElement.partnerSeqIndex = request[iReq].seqIndex;
           factorElement.partnerDe=request[iReq].de;
           *(T*)(factorElement.factor) = request[iReq].factor;
@@ -1073,7 +1074,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.0"));
 #endif
 
-  int const nChunks = 2;
+  int const nChunks = CHUNK_COUNT;
   for (int chunk=0; chunk<nChunks; chunk++){
   
   // list of dst factor elements, sorted by partnerSeqIndex, i.e. src seqIndex
@@ -1271,7 +1272,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #endif
   for (itS=srcElementSort.begin(); itS!=srcElementSort.end(); ++itS){
     if (itS->factorList.size() > 0){
-      AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > element;
+      AssociationElement<SIT,DIT> element;
       element.linIndex = itS->linIndex;
       element.seqIndex = itS->seqIndex;
       element.factorList = itS->factorList;
