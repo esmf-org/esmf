@@ -492,8 +492,20 @@ RouteHandle *RouteHandle::create(
 #else
     // each PET reads its local displacement
     unsigned long disp;
+#define BUG_MPI_SEEK_CUR
+#ifdef BUG_MPI_SEEK_CUR
+    // some MPI implementations have a bug wrt MPI_SEEK_CUR in MPI_File_seek()
+    // work around this by using MPI_SEEK_SET instead.
+    MPI_Offset currOffset;
+    localrc = MPI_File_get_position(fh, &currOffset);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+    localrc = MPI_File_seek(fh, currOffset+localPet*sizeof(disp), MPI_SEEK_SET);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#else
+    // without the bug wrt MPI_SEEK_CUR, the code is more straight forward
     localrc = MPI_File_seek(fh, localPet*sizeof(disp), MPI_SEEK_CUR);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
     localrc = MPI_File_read(fh, &disp, 1, MPI_UNSIGNED_LONG, MPI_STATUS_IGNORE);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
     unsigned long size;
