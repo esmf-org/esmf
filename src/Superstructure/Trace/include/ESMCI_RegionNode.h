@@ -214,49 +214,6 @@ namespace ESMCI {
       _variance += delta * (val - _mean) ;
     }
 
-#define STATLINE 256
-    
-    void printProfile(bool printToLog) {
-      char strbuf[STATLINE];
-      snprintf(strbuf, STATLINE, "%-20s %-6s %-11s %-11s %-11s %-11s %-11s %-11s",
-               "Region", "Count", "Total (ms)", "Self (ms)", "Mean (ms)", "Min (ms)", "Max (ms)", "Std. Dev. (ms)");
-      if (printToLog) {
-        ESMC_LogDefault.Write("**************** Region Timings *******************", ESMC_LOGMSG_INFO);
-        ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
-      }
-      else {
-        std::cout << std::string(strbuf) << "\n";
-      }
-      printProfile(printToLog, "");
-    }
-
-    void printProfile(bool printToLog, std::string prefix) {
-      if (getParent() != NULL) {
-        char strname[50];
-        char strbuf[STATLINE];
-
-        //TODO: replace with name
-        //snprintf(strname, 50, "%d,%d,%d,%d", _vmid, _baseid, _method, _phase);
-        snprintf(strname, 10, "%d", _global_id);
-        std::string name(strname);
-        name.insert(0, prefix);
-        
-        snprintf(strbuf, STATLINE, "%-20s %-6lu %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f",
-                 name.c_str(), getCount(), getTotal()*NANOS_TO_MILLIS,
-                 getSelfTime()*NANOS_TO_MILLIS, getMean()*NANOS_TO_MILLIS,
-                 getMin()*NANOS_TO_MILLIS, getMax()*NANOS_TO_MILLIS, getStdDev()*NANOS_TO_MILLIS);
-        if (printToLog) {
-          ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
-        }
-        else {
-          std::cout << std::string(strbuf) << "\n";
-        }
-      } 
-      for (unsigned i = 0; i < _children.size(); i++) {
-        _children.at(i)->printProfile(printToLog, prefix + "  ");
-      }
-    }
-    
     uint64_t getTotal() const {
       return _total;
     }

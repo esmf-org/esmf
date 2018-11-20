@@ -664,11 +664,29 @@ namespace ESMCI {
       populateRegionNames(rn->getChildren().at(i));
     }    
   }
+
+  static size_t regionNamePadding(RegionSummary *rs, int depth) {
+    size_t maxSize = rs->getName().length() + (2*depth);
+    for (unsigned i = 0; i < rs->getChildren().size(); i++) {
+      size_t childSize = regionNamePadding(rs->getChildren().at(i), depth+1);
+      if (childSize > maxSize) maxSize = childSize; 
+    }
+    return maxSize;
+  }
+  
+  static size_t regionNamePadding(RegionNode *rn, int depth) {
+    size_t maxSize = rn->getName().length() + (2*depth);
+    for (unsigned i = 0; i < rn->getChildren().size(); i++) {
+      size_t childSize = regionNamePadding(rn->getChildren().at(i), depth+1);
+      if (childSize > maxSize) maxSize = childSize; 
+    }
+    return maxSize;
+  }  
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::printProfile()"  
-#define STATLINE 256
-  static void printProfile(RegionNode *rn, bool printToLog, string prefix, ofstream &ofs, int *rc) {
+#define STATLINE 512
+  static void printProfile(RegionNode *rn, bool printToLog, string prefix, ofstream &ofs, size_t namePadding, int *rc) {
 
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
@@ -676,8 +694,11 @@ namespace ESMCI {
       char strbuf[STATLINE];
       string name = rn->getName();
       name.insert(0, prefix);
+
+      stringstream fmt;
+      fmt << "%-" << namePadding << "s %-6lu %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f";
       
-      snprintf(strbuf, STATLINE, "%-50s %-6lu %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f",
+      snprintf(strbuf, STATLINE, fmt.str().c_str(),
                name.c_str(), rn->getCount(), rn->getTotal()*NANOS_TO_SECS,
                rn->getSelfTime()*NANOS_TO_SECS, rn->getMean()*NANOS_TO_SECS,
                rn->getMin()*NANOS_TO_SECS, rn->getMax()*NANOS_TO_SECS);
@@ -690,7 +711,7 @@ namespace ESMCI {
     }
     rn->sortChildren();
     for (unsigned i = 0; i < rn->getChildren().size(); i++) {
-      printProfile(rn->getChildren().at(i), printToLog, prefix + "  ", ofs, rc);
+      printProfile(rn->getChildren().at(i), printToLog, prefix + "  ", ofs, namePadding, rc);
     }
     if (rc!=NULL) *rc=ESMF_SUCCESS;
   }
@@ -703,8 +724,15 @@ namespace ESMCI {
 
     ofstream ofs;
     int localrc;
+
+    size_t namePadding = regionNamePadding(rn, 0)+1;
+    if (namePadding > 200) namePadding = 200;
+    
+    stringstream fmt;
+    fmt << "%-" << namePadding << "s %-6s %-11s %-11s %-11s %-11s %-11s";
+    
     char strbuf[STATLINE];
-    snprintf(strbuf, STATLINE, "%-50s %-6s %-11s %-11s %-11s %-11s %-11s",
+    snprintf(strbuf, STATLINE, fmt.str().c_str(),
              "Region", "Count", "Total (s)", "Self (s)", "Mean (s)", "Min (s)", "Max (s)");
 
     if (printToLog) {
@@ -722,7 +750,7 @@ namespace ESMCI {
         return;
       }
     }
-    printProfile(rn, printToLog, "", ofs, &localrc);
+    printProfile(rn, printToLog, "", ofs, namePadding, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, "Error writing profile output file", 
          ESMC_CONTEXT, rc))
       return;
@@ -732,10 +760,9 @@ namespace ESMCI {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
-
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::printSummaryProfile()"  
-  static void printSummaryProfile(RegionSummary *rs, bool printToLog, string prefix, ofstream &ofs, int *rc) {
+  static void printSummaryProfile(RegionSummary *rs, bool printToLog, string prefix, ofstream &ofs, size_t namePadding, int *rc) {
     
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
@@ -752,7 +779,10 @@ namespace ESMCI {
 	snprintf(countstr, 12, "%-8s", "MULTIPLE");
       }
 
-      snprintf(strbuf, STATLINE, "%-50s %-6lu %-8s %-11.4f %-11.4f %-7d %-11.4f %-7d",
+      stringstream fmt;
+      fmt << "%-" << namePadding << "s %-6lu %-8s %-11.4f %-11.4f %-7d %-11.4f %-7d";
+
+      snprintf(strbuf, STATLINE, fmt.str().c_str(),
                name.c_str(), rs->getPetCount(), countstr,
 	       rs->getTotalMean()*NANOS_TO_SECS,
 	       rs->getTotalMin()*NANOS_TO_SECS, rs->getTotalMinPet(),
@@ -766,7 +796,7 @@ namespace ESMCI {
     }
     rs->sortChildren();
     for (unsigned i = 0; i < rs->getChildren().size(); i++) {
-      printSummaryProfile(rs->getChildren().at(i), printToLog, prefix + "  ", ofs, rc);
+      printSummaryProfile(rs->getChildren().at(i), printToLog, prefix + "  ", ofs, namePadding, rc);
     }
     if (rc!=NULL) *rc=ESMF_SUCCESS;
   }
@@ -779,8 +809,15 @@ namespace ESMCI {
 
     ofstream ofs;
     int localrc;
+    
+    size_t namePadding = regionNamePadding(rs, 0)+1;
+    if (namePadding > 200) namePadding = 200;
+
+    stringstream fmt;
+    fmt << "%-" << namePadding << "s %-6s %-8s %-11s %-11s %-7s %-11s %-7s";
+    
     char strbuf[STATLINE];
-    snprintf(strbuf, STATLINE, "%-50s %-6s %-8s %-11s %-11s %-7s %-11s %-7s",
+    snprintf(strbuf, STATLINE, fmt.str().c_str(),
              "Region", "PETs", "Count", "Mean (s)", "Min (s)", "Min PET", "Max (s)", "Max PET");
 
     if (printToLog) {
@@ -798,7 +835,7 @@ namespace ESMCI {
         return;
       }
     }
-    printSummaryProfile(rs, printToLog, "", ofs, &localrc);
+    printSummaryProfile(rs, printToLog, "", ofs, namePadding, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, "Error writing profile output file", 
          ESMC_CONTEXT, rc))
       return;
