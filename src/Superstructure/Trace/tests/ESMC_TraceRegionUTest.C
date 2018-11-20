@@ -1,3 +1,5 @@
+
+
 // $Id$
 //
 // Earth System Modeling Framework
@@ -63,11 +65,20 @@ static int matches(ESMCI::RegionNode *rn1, ESMCI::RegionNode *rn2) {
 
 static int treeMatch(ESMCI::RegionNode *rn1, ESMCI::RegionNode *rn2) {
   if (matches(rn1, rn2) == 0) {
-    //std::cout << "match failed: " << rn1->getName() << " : " << rn2->getName();
+    std::cout << "statistics match failed: " << rn1->getName() << " : " << rn2->getName();
     return 0;
   }
-  if (rn1->getGlobalId() != rn2->getGlobalId()) return 0;
-  if (rn1->getParentGlobalId() != rn2->getParentGlobalId()) return 0;
+  if (rn1->getGlobalId() != rn2->getGlobalId()) {
+    std::cout << "global id match failed: " << rn1->getName() << " : " << rn2->getName();
+    return 0;
+  }
+  if (rn1->getParentGlobalId() != rn2->getParentGlobalId()) {
+    std::cout << "parent global id match failed: " << rn1->getName() << "(" << rn1->getParentGlobalId() << ")";
+    std::cout << " : " << rn2->getName() << "(" << rn2->getParentGlobalId() << ")\n";
+    std::cout << "left parent null == " << (rn1->getParent() == NULL) << "\n";
+    std::cout << "right parent null == " << (rn2->getParent() == NULL) << "\n";
+    return 0;
+  }
   if (rn1->getLocalId() != rn2->getLocalId()) return 0;
   if (rn1->getChildren().size() != rn2->getChildren().size()) {
     //std::cout << "match child size failed: " << rn1->getChildren().size() << " : " << rn2->getChildren().size();
@@ -435,6 +446,9 @@ int main(void){
   nodeATM1->entered(20);  nodeATM1->exited(30);
   nodeATM1->entered(40);  nodeATM1->exited(50);
   nodeATM1->entered(60);  nodeATM1->exited(70);  //total == 30
+  ESMCI::RegionNode *nodeMED1 = nodeESM1->addChild("MED");
+  nodeMED1->entered(71);  nodeMED1->exited(73);
+  nodeMED1->entered(75);  nodeMED1->exited(78);
   nodeESM1->exited(99);
 
   //simulates PET1
@@ -445,6 +459,8 @@ int main(void){
   nodeATM2->entered(20);  nodeATM2->exited(22);
   nodeATM2->entered(40);  nodeATM2->exited(42);
   nodeATM2->entered(60);  nodeATM2->exited(62);  //total == 6
+  ESMCI::RegionNode *nodeMED2 = nodeESM2->addChild("MED");
+  nodeMED2->entered(71);  nodeMED2->exited(75);
   nodeESM2->exited(100);
 
   //simulates PET2
@@ -483,10 +499,21 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+  ESMCI::RegionSummary *rsMED = regSum->getChild("MED");
+  snprintf(failMsg, 80, "Summary child exists: MED");
+  ESMC_Test(rsMED != NULL, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   ESMCI::RegionSummary *rsOCNSUB = rsOCN->getChild("OCNSUB");
   snprintf(failMsg, 80, "Summary child exists: OCNSUB");
   ESMC_Test(rsOCNSUB != NULL, name, failMsg, &result, __FILE__, __LINE__, 0);
   
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summary ESM pet count");
+  ESMC_Test(regSum->getPetCount()==3, name, failMsg, &result, __FILE__, __LINE__, 0);
+
   //----------------------------------------------------------------------------
   //NEX_UTest
   snprintf(failMsg, 80, "Summary ESM count each");
@@ -529,8 +556,18 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
+  snprintf(failMsg, 80, "Summarized MED counts should NOT match");
+  ESMC_Test(rsMED->getCountsMatch()==false, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
   snprintf(failMsg, 80, "Summarized ATM count each: expected 3 but got %d", rsATM->getCountEach());
   ESMC_Test(rsATM->getCountEach()==3, name, failMsg, &result, __FILE__, __LINE__, 0);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  snprintf(failMsg, 80, "Summarized ATM counts should match");
+  ESMC_Test(rsATM->getCountsMatch(), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -539,8 +576,8 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  snprintf(failMsg, 80, "Summary ATM total min pet");
-  ESMC_Test(rsATM->getTotalMinPet()==0, name, failMsg, &result, __FILE__, __LINE__, 0);
+  snprintf(failMsg, 80, "Summary ATM total min pet: expected 1 but got %d", rsATM->getTotalMinPet());
+  ESMC_Test(rsATM->getTotalMinPet()==1, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -549,8 +586,8 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  snprintf(failMsg, 80, "Summary ATM total max pet: expected 1 but got %d", rsATM->getTotalMaxPet());
-  ESMC_Test(rsATM->getTotalMaxPet()==1, name, failMsg, &result, __FILE__, __LINE__, 0);
+  snprintf(failMsg, 80, "Summary ATM total max pet: expected 0 but got %d", rsATM->getTotalMaxPet());
+  ESMC_Test(rsATM->getTotalMaxPet()==0, name, failMsg, &result, __FILE__, __LINE__, 0);
   
   //----------------------------------------------------------------------------
   //NEX_UTest
@@ -590,17 +627,12 @@ int main(void){
   ser->entered(200); ser->exited(298);
   ser->entered(500); ser->exited(523);
 
-  size_t bufsize = ser->localSerializeSize() + 8;
-  char *sbuf = (char *) malloc(bufsize);
-  size_t offset = 0;
-
-  ser->serialize(sbuf, &offset, bufsize, false);
-
+  size_t bufsize = 0;
+  char *sbuf = ser->serialize(&bufsize);
+  
   //printf("offset after serializeLocal: %lu\n", offset);
   
-  ESMCI::RegionNode *des = new ESMCI::RegionNode();
-  offset = 0;
-  des->deserializeLocal(sbuf, &offset, bufsize);
+  ESMCI::RegionNode *des = new ESMCI::RegionNode(sbuf, bufsize);
   free(sbuf);
   
   //----------------------------------------------------------------------------
@@ -696,11 +728,8 @@ int main(void){
   size_t treeBufSize = 0;
   char *treeBuffer = serParent->serialize(&treeBufSize);
 
-  std::cout << "treeBufSize after serialize = " << treeBufSize;
-
-  ESMCI::RegionNode *desParent = new ESMCI::RegionNode(NULL, 1, false);
-  desParent->deserialize(treeBuffer, treeBufSize);
-    
+  ESMCI::RegionNode *desParent = new ESMCI::RegionNode(treeBuffer, treeBufSize);
+      
   free(treeBuffer);
   
   //----------------------------------------------------------------------------
@@ -794,9 +823,8 @@ int main(void){
     
       globalvm->recv(treeBuffer, treeBufSize, p);
 
-      desParent = new ESMCI::RegionNode(NULL, 1, false);
-      desParent->deserialize(treeBuffer, treeBufSize);
-
+      desParent = new ESMCI::RegionNode(treeBuffer, treeBufSize);
+      
       matched[p-1] = treeMatch(serParent, desParent);
 
       delete desParent;

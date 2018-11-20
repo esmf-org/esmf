@@ -52,10 +52,9 @@ namespace ESMCI {
     }
 
     RegionSummary *addChild(string name) {
-      RegionSummary *newNode = new RegionSummary(*this);
+      RegionSummary *newNode = new RegionSummary(this);
       newNode->setName(name);
       _children.push_back(newNode);
-      std::cout << "Added child: " << name << " with pet count = " << newNode->getPetCount() << "\n";
       return newNode;
     }
 
@@ -156,15 +155,11 @@ namespace ESMCI {
      */
     void merge(const RegionNode &rn, int pet) {
 
-      std::cout << "Merging: " << rn.getName() << "\n";
-
       _pet_count++;
       if (_pet_count == 1) {
 	_count_each = rn.getCount();
-	std::cout << "count each = " << _count_each << "\n";      
       }
       else if (_count_each != rn.getCount()) {
-	std::cout << "count mismatch\n";      
 	_counts_match = false;
       }
          

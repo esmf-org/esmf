@@ -50,7 +50,29 @@ namespace ESMCI {
       _count(0), _total(0), _min(UINT64T_BIG), _max(0),
       _mean(0.0), _variance(0.0), _last_entered(0),
       _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {}
-        
+
+  RegionNode(bool nextGlobalId):
+    _parent(NULL), _global_id(0),
+      _local_id(0), _isUserRegion(false),
+      _count(0), _total(0), _min(UINT64T_BIG), _max(0),
+      _mean(0.0), _variance(0.0), _last_entered(0),
+      _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {      
+      if (nextGlobalId) {
+	_global_id = next_global_id();
+      }           
+    }
+
+  RegionNode(char *deserializeBuffer, size_t bufferSize):
+    _parent(NULL), _global_id(0),
+      _local_id(0), _isUserRegion(false),
+      _count(0), _total(0), _min(UINT64T_BIG), _max(0),
+      _mean(0.0), _variance(0.0), _last_entered(0),
+      _time_mpi_start(0), _time_mpi(0), _count_mpi(0) {
+      
+      deserialize(deserializeBuffer, bufferSize);
+      
+    }
+  
   RegionNode(RegionNode *parent, RegionNode *toClone):
     _parent(parent), _global_id(next_global_id()),
       _local_id(toClone->getLocalId()),
@@ -307,10 +329,8 @@ namespace ESMCI {
       return _name;
     }
 
-    
-    ////// MERGING ///////
     void merge(const RegionNode &other) {
-
+      
       size_t old_count = _count;
       double old_mean = _mean;
          
@@ -373,12 +393,14 @@ namespace ESMCI {
       return buffer;
     }
 
+  private:
+
     /*
      * serialize the object to the byte array
      * and update offset to the end of the serialized object
      */
     char *serialize(char *buffer, size_t *offset, size_t bufferSize, bool recursive) {
-
+      
       //align offset at 8 bytes
       if (*offset % 8 > 0) {
         *offset += (8 - (*offset % 8));
@@ -501,7 +523,9 @@ namespace ESMCI {
         
         //check to see if next node is my child
         if (parent_id == getGlobalId()) {
-          RegionNode *child = addChild(); //add empty child
+          RegionNode *child = new RegionNode(false);
+	  _children.push_back(child);
+	  child->_parent = this;
           child->deserializeLocal(buffer, offset, bufferSize);
           *completed = *completed + 1;
           child->deserializeChildren(buffer, offset, bufferSize, totalNodes, completed);
@@ -603,10 +627,6 @@ namespace ESMCI {
       return localSize;
     }
     
-
-    
-  private:
-
     void mergeChildren(const RegionNode &other) {
       for (unsigned i = 0; i < other._children.size(); i++) {
 	RegionNode *child = getChild(other._children.at(i)->getName());

@@ -41,6 +41,7 @@
 #include "ESMCI_VMKernel.h"
 #include "ESMCI_HashMap.h"
 #include "ESMCI_RegionNode.h"
+#include "ESMCI_RegionSummary.h"
 #include "ESMCI_ComponentInfo.h"
 #include "ESMCI_TraceUtil.h"
 #include <esmftrc.h>
@@ -672,9 +673,7 @@ namespace ESMCI {
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
     if (rn->getParent() != NULL) {
-      char strname[50];
       char strbuf[STATLINE];
-
       string name = rn->getName();
       name.insert(0, prefix);
       
@@ -732,6 +731,84 @@ namespace ESMCI {
     }
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
+
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::printSummaryProfile()"  
+  static void printSummaryProfile(RegionSummary *rs, bool printToLog, string prefix, ofstream &ofs, int *rc) {
+    
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+    if (rs->getParent() != NULL) {
+      char strbuf[STATLINE];
+      string name = rs->getName();
+      name.insert(0, prefix);
+      
+      char countstr[12];
+      if (rs->getCountsMatch()) {
+	snprintf(countstr, 12, "%-6lu", rs->getCountEach());
+      }
+      else {
+	snprintf(countstr, 12, "%-8s", "MULTIPLE");
+      }
+
+      snprintf(strbuf, STATLINE, "%-50s %-6lu %-8s %-11.4f %-11.4f %-7d %-11.4f %-7d",
+               name.c_str(), rs->getPetCount(), countstr,
+	       rs->getTotalMean()*NANOS_TO_SECS,
+	       rs->getTotalMin()*NANOS_TO_SECS, rs->getTotalMinPet(),
+	       rs->getTotalMax()*NANOS_TO_SECS, rs->getTotalMaxPet());
+      if (printToLog) {
+        ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
+      }
+      else {
+        ofs << strbuf << "\n";
+      }
+    }
+    rs->sortChildren();
+    for (unsigned i = 0; i < rs->getChildren().size(); i++) {
+      printSummaryProfile(rs->getChildren().at(i), printToLog, prefix + "  ", ofs, rc);
+    }
+    if (rc!=NULL) *rc=ESMF_SUCCESS;
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::printSummaryProfile()"  
+  static void printSummaryProfile(RegionSummary *rs, bool printToLog, string filename, int *rc) {
+
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+    ofstream ofs;
+    int localrc;
+    char strbuf[STATLINE];
+    snprintf(strbuf, STATLINE, "%-50s %-6s %-8s %-11s %-11s %-7s %-11s %-7s",
+             "Region", "PETs", "Count", "Mean (s)", "Min (s)", "Min PET", "Max (s)", "Max PET");
+
+    if (printToLog) {
+      ESMC_LogDefault.Write("**************** Region Timings *******************", ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
+    }
+    else {
+      ofs.open(filename.c_str(), ofstream::trunc);
+      if (ofs.is_open() && !ofs.fail()) {
+        ofs << strbuf << "\n";
+      }
+      else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error opening profile output file", 
+           ESMC_CONTEXT, rc);
+        return;
+      }
+    }
+    printSummaryProfile(rs, printToLog, "", ofs, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, "Error writing profile output file", 
+         ESMC_CONTEXT, rc))
+      return;
+    if (!printToLog) {
+      ofs.close();
+    }
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+
   
   static void AddRegionProfilesToTrace(RegionNode *rn) {
     
@@ -787,8 +864,13 @@ namespace ESMCI {
     else if (globalvm->getLocalPet() == 0) {
 
       //clone root
-      ESMCI::RegionNode *aggNode = new ESMCI::RegionNode(NULL, &rootRegionNode);
+      //ESMCI::RegionNode *aggNode = new ESMCI::RegionNode(NULL, &rootRegionNode);
+      ESMCI::RegionSummary *sumNode = new ESMCI::RegionSummary(NULL);
       
+      //first add my own timing tree to the summary
+      sumNode->merge(rootRegionNode, globalvm->getLocalPet());
+
+      //then gather from other PETs
       for (int p=1; p<globalvm->getPetCount(); p++) {
 
         if (ProfileIsEnabledForPET(p, &localrc) || TraceIsEnabledForPET(p, &localrc)) {
@@ -808,21 +890,19 @@ namespace ESMCI {
 
           globalvm->recv(serializedTree, bufferSize, p);
           
-          ESMCI::RegionNode *desNode = new ESMCI::RegionNode(NULL, 1, false);
+          
           try {
-            desNode->deserialize(serializedTree, bufferSize);
-          }
+	    ESMCI::RegionNode *desNode = new ESMCI::RegionNode(serializedTree, bufferSize);
+	    //merge statistics
+	    sumNode->merge(*desNode, p);
+	    delete desNode;
+	  }
           catch(std::exception& e) {
             ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
                                           e.what(), ESMC_CONTEXT, rc);
             return;                 
           }
-
-          //merge statistics
-          aggNode->merge(*desNode);
-          
-          delete desNode;
-
+	  
           free(serializedTree);
         }
         else if (ESMC_LogDefault.MsgFoundError(localrc, 
@@ -834,12 +914,12 @@ namespace ESMCI {
 
       //now we have received and merged
       //profiles from all other PETs     
-      printProfile(aggNode, false, "ESMF_Profile.txt", &localrc);
+      printSummaryProfile(sumNode, false, "ESMF_Profile.summary", &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, 
            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
         return;     
 
-      delete aggNode;
+      delete sumNode;
     }
         
   }
