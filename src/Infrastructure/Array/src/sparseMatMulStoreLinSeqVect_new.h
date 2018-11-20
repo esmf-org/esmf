@@ -254,14 +254,15 @@
     return (*(a.fep) < *(b.fep));
   }
 
-  template<typename IT> struct ElementSort{
-    SeqIndex<IT> seqIndex;
+  template<typename IT1, typename IT2> struct ElementSort{
+    SeqIndex<IT1> seqIndex;
     int linIndex;
     int localDe;
     int de;
+    vector <FactorElement<IT2> > factorList;
   };
-  template<typename IT> bool operator <
-    (ElementSort<IT> a, ElementSort<IT> b){
+  template<typename IT1, typename IT2> bool operator <
+    (ElementSort<IT1,IT2> a, ElementSort<IT1,IT2> b){
     return (a.seqIndex < b.seqIndex);
   }
   
@@ -278,27 +279,24 @@
     class FillLinSeqVect:public ComPat2{
     list<FactorElementSort<DIT,SIT> > &dstElementSort;
 #ifdef SRC_ELEMENT_SORT_VECTOR
-    vector<ElementSort<SIT> > &srcElementSort;
+    vector<ElementSort<SIT,DIT> > &srcElementSort;
 #else
-    list<ElementSort<SIT> > &srcElementSort;
+    list<ElementSort<SIT,DIT> > &srcElementSort;
 #endif
-    vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect;
     // members that are initialized internally:
     vector<MsgElement<DIT,SIT,T> > request;
    public:
     FillLinSeqVect(
       list<FactorElementSort<DIT,SIT> > &dstElementSort_,
 #ifdef SRC_ELEMENT_SORT_VECTOR
-      vector<ElementSort<SIT> > &srcElementSort_,
+      vector<ElementSort<SIT,DIT> > &srcElementSort_
 #else
-      list<ElementSort<SIT> > &srcElementSort_,
+      list<ElementSort<SIT,DIT> > &srcElementSort_
 #endif
-      vector<vector<AssociationElement<SIT,DIT> > >&srcLinSeqVect_
     ):
       // members that need to be set on this level because of reference
       dstElementSort(dstElementSort_),
-      srcElementSort(srcElementSort_),
-      srcLinSeqVect(srcLinSeqVect_)
+      srcElementSort(srcElementSort_)
     {
       request.resize(0);
     }
@@ -310,9 +308,9 @@
       typename list<FactorElementSort<DIT,SIT> >::iterator itD =
         dstElementSort.begin();
 #ifdef SRC_ELEMENT_SORT_VECTOR
-      typename vector<ElementSort<SIT> >::iterator itS =
+      typename vector<ElementSort<SIT,DIT> >::iterator itS =
 #else
-      typename list<ElementSort<SIT> >::iterator itS =
+      typename list<ElementSort<SIT,DIT> >::iterator itS =
 #endif
         srcElementSort.begin();
 #ifdef ASMM_STORE_MEMLOG_on
@@ -321,15 +319,12 @@
       while ((itD != dstElementSort.end()) && (itS != srcElementSort.end())){
         if (itD->fep->partnerSeqIndex == itS->seqIndex){
           // a match means that both sides need to record this...
-          // src side now knows about a srcLinSeqVect[][] element to be added
-          AssociationElement<SIT,DIT> element;
-          element.linIndex = itS->linIndex;
-          element.seqIndex = itS->seqIndex;
-          element.factorList.resize(1);
-          element.factorList[0].partnerSeqIndex = itD->seqIndex;
-          element.factorList[0].partnerDe=itD->de;
-          *(T*)(element.factorList[0].factor) = *(T*)(itD->fep->factor);
-          srcLinSeqVect[itS->localDe].push_back(element);
+          // src side now knows about a factor that needs to be added
+          FactorElement<SeqIndex<DIT> > factorElement;
+          factorElement.partnerSeqIndex = itD->seqIndex;
+          factorElement.partnerDe=itD->de;
+          *(T*)(factorElement.factor) = *(T*)(itD->fep->factor);
+          itS->factorList.push_back(factorElement);
           // dst side now knows partnerDe for a FactorElement
           itD->fep->partnerDe=itS->de;
           // erase the satisfied dstElementSort element
@@ -348,11 +343,17 @@
           ++itS;
         }
       }
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Exit FillLinSeqVect.handleLocal()"));
+#endif
     }
     
     virtual void generateRequest(int responsePet,
       char* &requestBuffer, int &requestSize){
       // called on every localPet for every responsePet != localPet
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Enter FillLinSeqVect.generateRequest()"));
+#endif
       unsigned size = dstElementSort.size();
       if (size != request.size()){
         // a new request must be constructed
@@ -370,35 +371,38 @@
       requestSize = size * sizeof(MsgElement<DIT,SIT,T>);
       requestBuffer = NULL;
       if (requestSize) requestBuffer = (char *)&(request[0]);
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Exit FillLinSeqVect.generateRequest()"));
+#endif
     }
     
     virtual void handleRequest(int requestPet,
       char *requestBuffer, int requestSize,
       char* &responseBuffer, int  &responseSize)const{
       // called on every localPet for every requestPet != localPet
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Enter FillLinSeqVect.handleRequest()"));
+#endif
       MsgElement<DIT,SIT,T> *request = (MsgElement<DIT,SIT,T> *)requestBuffer;
       int size = requestSize / sizeof(MsgElement<DIT,SIT,T>);
       // process the request and fill the response into the same buffer
       int iReq = 0; // request index
       int iRes = 0; // response index
 #ifdef SRC_ELEMENT_SORT_VECTOR
-      typename vector<ElementSort<SIT> >::iterator itS =
+      typename vector<ElementSort<SIT,DIT> >::iterator itS =
 #else
-      typename list<ElementSort<SIT> >::iterator itS =
+      typename list<ElementSort<SIT,DIT> >::iterator itS =
 #endif
         srcElementSort.begin();
       while ((iReq < size) && (itS != srcElementSort.end())){
         if (request[iReq].partnerSeqIndex == itS->seqIndex){
           // a match means that both sides need to record this...
-          // src side now knows about a srcLinSeqVect[][] element to be added
-          AssociationElement<SIT,DIT> element;
-          element.linIndex = itS->linIndex;
-          element.seqIndex = itS->seqIndex;
-          element.factorList.resize(1);
-          element.factorList[0].partnerSeqIndex = request[iReq].seqIndex;
-          element.factorList[0].partnerDe=request[iReq].de;
-          *(T*)(element.factorList[0].factor) = request[iReq].factor;
-          srcLinSeqVect[itS->localDe].push_back(element);
+          // src side now knows about a factor that needs to be added
+          FactorElement<SeqIndex<DIT> > factorElement;
+          factorElement.partnerSeqIndex = request[iReq].seqIndex;
+          factorElement.partnerDe=request[iReq].de;
+          *(T*)(factorElement.factor) = request[iReq].factor;
+          itS->factorList.push_back(factorElement);
           // dst side now knows partnerDe for a FactorElement
           // ... this means an element is added to the response
           request[iRes].seqIndex = itS->seqIndex;
@@ -422,11 +426,17 @@
       }
       responseSize = iRes * sizeof(MsgElement<DIT,SIT,T>);
       responseBuffer = requestBuffer;
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Exit FillLinSeqVect.handleRequest()"));
+#endif
     }
     
     virtual void handleResponse(int responsePet,
       char const *responseBuffer, int responseSize)const{
       // called on every localPet for every responsePet != localPet
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("Enter FillLinSeqVect.handleResponse()"));
+#endif
       MsgElement<DIT,SIT,T> *response =
         (MsgElement<DIT,SIT,T> *)responseBuffer;
       int size = responseSize / sizeof(MsgElement<DIT,SIT,T>);
@@ -790,7 +800,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
             element.seqIndex = seqIndex;
             element.factorList.resize(1);
             element.factorList[0].partnerSeqIndex = seqIndex;
-            element.factorList[0].partnerDe = -1;            
+            element.factorList[0].partnerDe = -1;
             memcpy(element.factorList[0].factor, factor, 8);
             dstLinSeqVect[i].push_back(element);
             // find the matching seqIndex range
@@ -985,45 +995,16 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.0"));
 #endif
   
-  // list of dst factor elements, sorted by partnerSeqIndex, i.e. src seqIndex
-  // use a list here, because elements will be removed during totalExchange()
-  list<FactorElementSort<DIT,SIT> > dstElementSort;
-  for (int i=0; i<dstLocalDeCount; i++){
-    for (unsigned j=0; j<dstLinSeqVect[i].size(); j++){
-      for (unsigned k=0; k<dstLinSeqVect[i][j].factorList.size(); k++){
-        dstElementSort.push_back(
-          FactorElementSort<DIT,SIT>(dstLinSeqVect[i][j].seqIndex, 
-            dstLocalDeToDeMap[i], &(dstLinSeqVect[i][j].factorList[k])));
-      }
-    }
-  }
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.1"));
-#endif
-  dstElementSort.sort();
-  
-#ifdef STORELINSEQVECT_NEW_TIMERS_on
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2a"));
-#endif
-  vm->timerReset("linIndex");
-  vm->timerReset("seqIndex");
-#endif  // TIMERS
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2"));
-#endif
-
     // Step2: setup the src side information, sorted by seqIndex
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
     vm->timerReset("construct_srcElementSort");
     vm->timerStart("construct_srcElementSort");
 #endif
 #ifdef SRC_ELEMENT_SORT_VECTOR
-  vector<ElementSort<SIT> > srcElementSort;
+  vector<ElementSort<SIT,DIT> > srcElementSort;
   srcElementSort.reserve(srcElementCount);
 #else
-  list<ElementSort<SIT> > srcElementSort;
+  list<ElementSort<SIT,DIT> > srcElementSort;
 #endif
   for (int i=0; i<srcLocalDeCount; i++){
     if (srcLocalDeElementCount[i]){
@@ -1036,7 +1017,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
         SeqIndex<SIT> seqIndex = arrayElement.getSequenceIndex<SIT>();
 //  vm->timerStop("seqIndex");
         // add element to srcElementSort
-        ElementSort<SIT> element;
+        ElementSort<SIT,DIT> element;
         element.seqIndex = seqIndex;
 //  vm->timerStart("linIndex");
         element.linIndex = arrayElement.getLinearIndex();
@@ -1068,14 +1049,14 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.3a"));
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.1a"));
 #endif
   vm->timerLog("linIndex");
   vm->timerLog("seqIndex");
 #endif  // TIMERS
   
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.3"));
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.1"));
 #endif
 #ifdef SRC_ELEMENT_SORT_VECTOR
   sort(srcElementSort.begin(), srcElementSort.end());
@@ -1084,24 +1065,59 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
 #endif
   
 #ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.4"));
-#endif
-  
-#ifdef ASMM_STORE_MEMLOG_on
-  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.0"));
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new2.2"));
 #endif
   
   // Step3: fill srcLinSeqVect
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.0"));
+#endif
+
+  int const nChunks = 2;
+  for (int chunk=0; chunk<nChunks; chunk++){
+  
+  // list of dst factor elements, sorted by partnerSeqIndex, i.e. src seqIndex
+  // Use a list here, because elements will be removed during totalExchange()
+  // and for this need constant complexity for frequent removal.
+  list<FactorElementSort<DIT,SIT> > dstElementSort;
+  for (int i=0; i<dstLocalDeCount; i++){
+    unsigned jChunk = dstLinSeqVect[i].size()/nChunks + 1;
+    for (unsigned j=chunk*jChunk; 
+      (j<dstLinSeqVect[i].size())&&(j<(chunk+1)*jChunk); j++){
+      for (unsigned k=0; k<dstLinSeqVect[i][j].factorList.size(); k++){
+        dstElementSort.push_back(
+          FactorElementSort<DIT,SIT>(dstLinSeqVect[i][j].seqIndex, 
+            dstLocalDeToDeMap[i], &(dstLinSeqVect[i][j].factorList[k])));
+      }
+    }
+  }
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.1"));
+#endif
+  dstElementSort.sort();
+  
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
-    vm->timerReset("fill_srcLinSeqVect");
-    vm->timerStart("fill_srcLinSeqVect");
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.2a"));
+#endif
+  vm->timerReset("linIndex");
+  vm->timerReset("seqIndex");
+#endif  // TIMERS
+  
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.2"));
+#endif
+
+#ifdef STORELINSEQVECT_NEW_TIMERS_on
+    vm->timerReset("fill_LinSeqVect");
+    vm->timerStart("fill_LinSeqVect");
 #endif
 
   switch (typekindFactors){
   case ESMC_TYPEKIND_R4:
     {
       FillLinSeqVect<SIT,DIT,ESMC_R4> 
-        fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+        fillLinSeqVect(dstElementSort, srcElementSort);
 #ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
       fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
 #else
@@ -1112,7 +1128,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   case ESMC_TYPEKIND_R8:
     {
       FillLinSeqVect<SIT,DIT,ESMC_R8> 
-        fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+        fillLinSeqVect(dstElementSort, srcElementSort);
 #ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
       fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
 #else
@@ -1123,7 +1139,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   case ESMC_TYPEKIND_I4:
     {
       FillLinSeqVect<SIT,DIT,ESMC_I4> 
-        fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+        fillLinSeqVect(dstElementSort, srcElementSort);
 #ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
       fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
 #else
@@ -1134,7 +1150,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   case ESMC_TYPEKIND_I8:
     {
       FillLinSeqVect<SIT,DIT,ESMC_I8> 
-        fillLinSeqVect(dstElementSort, srcElementSort, srcLinSeqVect);
+        fillLinSeqVect(dstElementSort, srcElementSort);
 #ifdef STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
       fillLinSeqVect.selectiveExchange(vm,responderPet,requesterPet);
 #else
@@ -1147,9 +1163,15 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   }
   
 #ifdef STORELINSEQVECT_NEW_TIMERS_on
-    vm->timerStop("fill_srcLinSeqVect");
-    vm->timerLog("fill_srcLinSeqVect");
+    vm->timerStop("fill_LinSeqVect");
+    vm->timerLog("fill_LinSeqVect");
 #endif
+    
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.3"));
+#endif
+
+  } // for-chunk
 
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new4.0"));
@@ -1232,39 +1254,33 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   vm->timerLog("cleanout_dstLinSeqVect");
 #endif
   
-#if 0
-  // not sure if maybe for general sparse matrix case, where the same src
-  // element goes to multiple dst elements, it may be better to combine
-  // srcLinSeqVect elements here? Need to do performance profiling for this.
-  //
-  // sort srcLinSeqVect
-  for (int i=0; i<srcLocalDeCount; i++)
-    sort(srcLinSeqVect[i].begin(), srcLinSeqVect[i].end());
-  // combine elements with the same seqIndex, using factorList
-  for (int i=0; i<srcLocalDeCount; i++){
-    typename vector<AssociationElement<SIT,DIT> >::iterator itS
-      = srcLinSeqVect[i].begin();
-    typename vector<AssociationElement<SIT,DIT> >::iterator itSS
-      = srcLinSeqVect[i].begin();
-    while (itS != srcLinSeqVect[i].end()){
-      if (itSS != itS){
-        // not the exact same element
-        if (itSS->seqIndex == itS->seqIndex){
-          // combine itS into itSS
-          itSS->factorList.push_back(itS->factorList[0]);
-          itS = srcLinSeqVect[i].erase(itS);
-        }else{
-          itSS = itS;
-        }
-      }else{
-        ++itS;
-      }
-    }
-  }
-#endif
-  
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new5.0"));
+#endif
+
+  // Construct srcLinSeqVect from srcElementSort
+  for (int i=0; i<srcLocalDeCount; i++){
+    if (srcLocalDeElementCount[i]){
+      srcLinSeqVect[i].reserve(srcLocalDeElementCount[i]);
+    }
+  }
+#ifdef SRC_ELEMENT_SORT_VECTOR
+  typename vector<ElementSort<SIT,DIT> >::iterator itS;
+#else
+  typename list<ElementSort<SIT,DIT> >::iterator itS;
+#endif
+  for (itS=srcElementSort.begin(); itS!=srcElementSort.end(); ++itS){
+    if (itS->factorList.size() > 0){
+      AssociationElement<SeqIndex<SIT>,SeqIndex<DIT> > element;
+      element.linIndex = itS->linIndex;
+      element.seqIndex = itS->seqIndex;
+      element.factorList = itS->factorList;
+      srcLinSeqVect[itS->localDe].push_back(element);
+    }
+  }
+  
+#ifdef ASMM_STORE_MEMLOG_on
+  VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new6.0"));
 #endif
   
 #ifdef ASMM_STORE_LOG_on
