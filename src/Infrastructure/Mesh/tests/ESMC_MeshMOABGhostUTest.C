@@ -19,6 +19,8 @@
 
 #if defined ESMF_MOAB
 
+#include "ESMC_MBMeshTestUtilMBMesh.C"
+
 #include "ESMCI_MBMesh_Glue.h"
 
 // other headers
@@ -98,8 +100,6 @@ MBMesh* create_mesh_quad_9_2(ESMC_CoordSys_Flag coordsys, int &rc) {
   }
   
   // Mesh variables
-  int pdim=2;
-  int sdim=2;
   int num_elem = 9;
   int num_node = 16;
 
@@ -125,6 +125,11 @@ MBMesh* create_mesh_quad_9_2(ESMC_CoordSys_Flag coordsys, int &rc) {
   elemType = (int *) malloc (num_elem * sizeof (int));
   elemConn = (int *) malloc (4*num_elem * sizeof (int));
   elemCoord = (double *) malloc (2*num_elem * sizeof (double));
+
+  int pdim=2;
+  int sdim=2;
+  // the MBMesh_create interface resets sdim to 3 in this case
+  if (coordsys != ESMC_COORDSYS_CART) sdim = 2;
 
   MBMesh *mesh = new MBMesh();
   void *meshp = static_cast<void *> (mesh);
@@ -215,6 +220,7 @@ MBMesh* create_mesh_quad_9_2(ESMC_CoordSys_Flag coordsys, int &rc) {
       elemConn[28]=10;elemConn[29]=11;elemConn[30]=15;elemConn[31]=14;
       elemConn[32]=11;elemConn[33]=12;elemConn[34]=16;elemConn[35]=15;
 
+
       elemCoord[0]=1.25;elemCoord[1]=1.25;
       elemCoord[2]=1.75;elemCoord[3]=1.25;
       elemCoord[4]=2.5;elemCoord[5]=1.25;
@@ -224,7 +230,7 @@ MBMesh* create_mesh_quad_9_2(ESMC_CoordSys_Flag coordsys, int &rc) {
       elemCoord[12]=1.25;elemCoord[13]=2.5;
       elemCoord[14]=1.75;elemCoord[15]=2.5;
       elemCoord[16]=2.5;elemCoord[17]=2.5;
-
+    
       numelemconn = 4*num_elem;
     
   } else if (petCount == 2) {
@@ -356,6 +362,25 @@ MBMesh* create_mesh_quad_9_2(ESMC_CoordSys_Flag coordsys, int &rc) {
     }
   }
 
+  double pid = 3.14159/16.0;
+  double r2d = 180.0/3.14159;
+  
+  if (coordsys == ESMC_COORDSYS_SPH_RAD) {
+    for (int i = 0; i < num_node*pdim; ++i) {
+      nodeCoord[i] *= pid;
+    }
+    for (int i = 0; i < num_elem*pdim; ++i) {
+      elemCoord[i] *= pid;
+    }
+  } else if (coordsys == ESMC_COORDSYS_SPH_DEG) {
+    for (int i = 0; i < num_node*pdim; ++i) {
+      nodeCoord[i] *= pid*r2d;
+    }
+    for (int i = 0; i < num_elem*pdim; ++i) {
+      elemCoord[i] *= pid*r2d;
+    }
+  }
+    
   MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
                   &coordsys, &sdim, &rc);
 
@@ -429,8 +454,6 @@ MBMesh* create_mesh_quad_9_4(ESMC_CoordSys_Flag coordsys, int &rc) {
   }
   
   // Mesh variables
-  int pdim=2;
-  int sdim=2;
   int num_elem = 9;
   int num_node = 16;
 
@@ -456,6 +479,11 @@ MBMesh* create_mesh_quad_9_4(ESMC_CoordSys_Flag coordsys, int &rc) {
   elemType = (int *) malloc (num_elem * sizeof (int));
   elemConn = (int *) malloc (4*num_elem * sizeof (int));
   elemCoord = (double *) malloc (2*num_elem * sizeof (double));
+
+  int pdim=2;
+  int sdim=2;
+  // the MBMesh_create interface resets sdim to 3 in this case
+  if (coordsys != ESMC_COORDSYS_CART) sdim = 2;
 
   MBMesh *mesh = new MBMesh();
   void *meshp = static_cast<void *> (mesh);
@@ -724,6 +752,23 @@ MBMesh* create_mesh_quad_9_4(ESMC_CoordSys_Flag coordsys, int &rc) {
     }
   }
 
+  double pid = 3.14159/16.0;
+  double r2d = 180.0/3.14159;
+  
+  if (coordsys == ESMC_COORDSYS_SPH_RAD) {
+    for (int i = 0; i < num_node*pdim; ++i) {
+      nodeCoord[i] *= pid;
+    }
+    for (int i = 0; i < num_elem*pdim; ++i) {
+      elemCoord[i] *= pid;
+    }
+  } else if (coordsys == ESMC_COORDSYS_SPH_DEG) {
+    for (int i = 0; i < num_node*pdim; ++i)
+      nodeCoord[i] *= pid*r2d;
+    for (int i = 0; i < num_elem*pdim; ++i)
+      elemCoord[i] *= pid*r2d;
+  }
+
   MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
                   &coordsys, &sdim, &rc);
 
@@ -783,8 +828,6 @@ MBMesh* create_mesh_ph_4(ESMC_CoordSys_Flag coordsys, int &rc) {
   }
   
   // Mesh variables
-  int pdim=2;
-  int sdim=2;
   int num_elem = 5;
   int num_node = 12;
 
@@ -810,6 +853,11 @@ MBMesh* create_mesh_ph_4(ESMC_CoordSys_Flag coordsys, int &rc) {
   elemType = (int *) malloc (num_elem * sizeof (int));
   elemConn = (int *) malloc (4*num_elem * sizeof (int));
   elemCoord = (double *) malloc (2*num_elem * sizeof (double));
+
+  int pdim=2;
+  int sdim=2;
+  // the MBMesh_create interface resets sdim to 3 in this case
+  if (coordsys != ESMC_COORDSYS_CART) sdim = 2;
 
   MBMesh *mesh = new MBMesh();
   void *meshp = static_cast<void *> (mesh);
@@ -1013,6 +1061,23 @@ MBMesh* create_mesh_ph_4(ESMC_CoordSys_Flag coordsys, int &rc) {
     }
   }
 
+  double pid = 3.14159/16.0;
+  double r2d = 180.0/3.14159;
+  
+  if (coordsys == ESMC_COORDSYS_SPH_RAD) {
+    for (int i = 0; i < num_node*pdim; ++i) {
+      nodeCoord[i] *= pid;
+    }
+    for (int i = 0; i < num_elem*pdim; ++i) {
+      elemCoord[i] *= pid;
+    }
+  } else if (coordsys == ESMC_COORDSYS_SPH_DEG) {
+    for (int i = 0; i < num_node*pdim; ++i)
+      nodeCoord[i] *= pid*r2d;
+    for (int i = 0; i < num_elem*pdim; ++i)
+      elemCoord[i] *= pid*r2d;
+  }
+
   MBMesh_addnodes(&meshp, &num_node, nodeId, nodeCoord, nodeOwner, NULL,
                   &coordsys, &sdim, &rc);
 
@@ -1068,10 +1133,16 @@ int main(void){
   strcpy(failMsg, "Did not return ESMF_SUCCESS");
 #if defined ESMF_MOAB
   MBMesh *mbmesh = NULL;
-  // mbmesh = create_mesh_quad_9_2(ESMC_COORDSYS_CART, rc);
-  // mbmesh = create_mesh_quad_9_4(ESMC_COORDSYS_CART, rc);
-  mbmesh = create_mesh_ph_4(ESMC_COORDSYS_CART, rc);
+  // mbmesh = create_mesh_quad_9_2(ESMC_COORDSYS_SPH_DEG, rc);
+  // mbmesh = create_mesh_quad_9_4(ESMC_COORDSYS_SPH_DEG, rc);
+  mbmesh = create_mesh_ph_4(ESMC_COORDSYS_SPH_DEG, rc);
+  // mbmesh = create_mesh_quad_sph(rc);
   if (!mbmesh) rc = ESMC_RC_PTR_NULL;
+
+  // void *mbptr = (void *) mbmesh;
+  // int len = 12; char fname[len];
+  // sprintf(fname, "mesh_%d", localPet);
+  // MBMesh_write(&mbptr, fname, &rc, len);
 
 // #define DEBUG_EXCHANGE_TAGS
 #ifdef DEBUG_EXCHANGE_TAGS
@@ -1296,7 +1367,6 @@ int main(void){
 
 
 #else
-
   MBMesh *mesh_dual = NULL;
   MBMeshDual(mbmesh, &mesh_dual, &rc);
   if (!mesh_dual) rc = ESMC_RC_PTR_NULL;
