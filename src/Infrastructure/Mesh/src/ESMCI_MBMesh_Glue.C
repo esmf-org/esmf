@@ -54,6 +54,9 @@ using namespace ESMCI;
 // #define DEBUG
 // #define DEBUG_MASK
 // #define DEBUG_OUTPUT
+// #define DEBUG_NODE_COORDS
+// #define DEBUG_ELEM_COORDS
+
 
 
 void MBMesh_create(void **mbmpp,
@@ -155,8 +158,6 @@ void MBMesh_create(void **mbmpp,
       mbmp->has_node_orig_coords=true;
     }
 
- /* XMRKX */
-
     // Set Moab Mesh
     mbmp->mesh=moab_mesh;
 
@@ -240,7 +241,9 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
       // Convert to cartesian
       ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim,
                                    nodeCoord+orig_sdim*n, cart_coords);
-
+#ifdef DEBUG_NODE_COORDS
+      printf("%d# node %d [%f, %f] - [%f,%f,%f]\n", localPet, nodeId[n], nodeCoord[orig_sdim*n+0], nodeCoord[orig_sdim*n+1], cart_coords[0],cart_coords[1],cart_coords[2]);
+#endif
       // Add vertex
       merr=moab_mesh->create_vertex(cart_coords,verts[n]);
       if (merr != MB_SUCCESS) {
@@ -356,7 +359,32 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
     printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMesh_Glue mask ~~~~~~~~~~~~~~~\n");
 #endif
 
- /* XMRKX */
+#ifdef DEBUG_NODE_COORDS
+  {
+    
+    
+    Range nodes;
+    merr=mbmp->mesh->get_entities_by_dimension(0, 0, nodes);
+    MBMESH_CHECK_ERR(merr, localrc);
+    
+    for(Range::iterator it=nodes.begin(); it !=nodes.end(); it++) {
+      const EntityHandle *node=&(*it);
+    
+      int nid;
+      merr=mbmp->mesh->tag_get_data(mbmp->gid_tag, node, 1, &nid);
+      MBMESH_CHECK_ERR(merr, localrc);
+      printf("MBMesh_addnodes node %d, [",nid);
+    
+      double c[3];
+      merr = mbmp->mesh->get_coords(node, 1, c);
+      MBMESH_CHECK_ERR(merr, localrc);
+    
+      for (int i=0; i<mbmp->sdim; ++i)
+        printf("%f, ", c[i]);
+      printf("]\n");
+    }
+  }
+#endif
 
   } catch(std::exception &x) {
     // catch Mesh exception return code
@@ -1337,10 +1365,16 @@ printf("    PET %d - addelems\n", localPet);
           }
 
           // Convert to Cartesian coords
-          double cart_coords[7]; // 7 is the maximum dimension of ESMF grids
-          ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim,
-                                       elemCoords, cart_coords);
+          double cart_coords[3]; // 7 is the maximum dimension of ESMF grids
 
+          // Init to 0.0 incase less than 3D
+          cart_coords[0]=0.0; cart_coords[1]=0.0; cart_coords[2]=0.0;
+
+          ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim,
+                                       elemCoords+orig_sdim*e, cart_coords);
+#ifdef DEBUG_ELEM_COORDS
+      printf("%d# elem %d [%f, %f] - [%f,%f,%f]\n", localPet, elemId[e], elemCoords[orig_sdim*e+0], elemCoords[orig_sdim*e+1], cart_coords[0],cart_coords[1],cart_coords[2]);
+#endif
           // Save Cartesian coords
           merr=moab_mesh->tag_set_data(mbmp->elem_coords_tag, &new_elem, 1,
                                        cart_coords);
@@ -1381,6 +1415,31 @@ printf("    PET %d - addelems\n", localPet);
     merr = pcomm->resolve_shared_ents(0, elems, mbmp->pdim, mbmp->pdim-1);
     MBMESH_CHECK_ERR(merr, localrc);
 
+
+#ifdef DEBUG_ELEM_COORDS
+  {
+    Range elems;
+    merr=mbmp->mesh->get_entities_by_dimension(0, mbmp->pdim, elems);
+    MBMESH_CHECK_ERR(merr, localrc);
+    
+    for(Range::iterator it=elems.begin(); it !=elems.end(); it++) {
+      const EntityHandle *elem=&(*it);
+    
+      int eid;
+      merr=mbmp->mesh->tag_get_data(mbmp->gid_tag, elem, 1, &eid);
+      MBMESH_CHECK_ERR(merr, localrc);
+      printf("getelems elem %d, [",eid);
+    
+      double c[3];
+      merr=mbmp->mesh->tag_get_data(mbmp->elem_coords_tag, elem, 1, c);
+      MBMESH_CHECK_ERR(merr, localrc);
+    
+      for (int i=0; i<mbmp->sdim; ++i)
+        printf("%f, ", c[i]);
+      printf("]\n");
+    }
+  }
+#endif
 
  #if 0
   // Time loops
