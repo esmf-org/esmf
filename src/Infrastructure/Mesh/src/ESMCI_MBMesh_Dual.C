@@ -187,7 +187,9 @@ namespace ESMCI {
   MBMesh *dual_mesh=NULL;
   void *dmp=NULL;
   ESMC_CoordSys_Flag cs = ESMC_COORDSYS_CART;
-  MBMesh_create(&dmp, &pdim, &sdim, &cs, &localrc);
+  if (src_mesh->sdim != src_mesh->orig_sdim) cs = ESMC_COORDSYS_SPH_DEG;
+  
+  MBMesh_create(&dmp, &pdim, &src_mesh->orig_sdim, &cs, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
 
@@ -208,7 +210,7 @@ namespace ESMCI {
 
   // Get a range containing all elements
   Range range_elem;
-  merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->sdim,range_elem);
+  merr=src_mesh->mesh->get_entities_by_dimension(0,src_mesh->pdim,range_elem);
   MBMESH_CHECK_ERR(merr, localrc);
 
   std::map<int,int> id_to_index;
@@ -453,7 +455,7 @@ namespace ESMCI {
 
 #ifdef DEBUG_CONNECTIVITY
   {Range elemss;
-  merr=src_mesh->mesh->get_entities_by_dimension(0, src_mesh->sdim, elemss);
+  merr=src_mesh->mesh->get_entities_by_dimension(0, src_mesh->pdim, elemss);
   MBMESH_CHECK_ERR(merr, localrc);
   printf("%d# range size = %d\n", localPet, elemss.size());}
 #endif
@@ -1059,7 +1061,7 @@ void mb_triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tr
 
     // Range of elements around a node
     Range range_elem;
-    merr = mesh->mesh->get_adjacencies(node, 1, sdim, false, range_elem);
+    merr = mesh->mesh->get_adjacencies(node, 1, pdim, false, range_elem);
     MBMESH_CHECK_ERR(merr, localrc);
     
 #ifdef DEBUG_CONNECTIVITY_ADJACENCIES
@@ -1256,7 +1258,7 @@ void mb_triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tr
 
     // Get a range containing all elements
     Range range_elem;
-    merr = mesh->mesh->get_entities_by_dimension(0, mesh->sdim, range_elem);
+    merr = mesh->mesh->get_entities_by_dimension(0, mesh->pdim, range_elem);
     MBMESH_CHECK_ERR(merr, localrc);
 
     // Get number of split elements
