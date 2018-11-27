@@ -427,27 +427,42 @@ void VMK::init(MPI_Comm mpiCommunicator){
   for (int i=0; i<ncores; i++){
     ssiid[i]=i;                 // hardcoded assumption of single-CPU SSIs
   }
+  ssiCount = ncores;
+  minSsiPetCount=1;
+  maxSsiPetCount=1;
 #else
+  int *temp_ssiPetCount = new int[ncores];
   long int *temp_ssiid = new long int[ncores];
   long hostid = gethostid();
   MPI_Allgather(&hostid, 1, MPI_LONG,
              temp_ssiid, 1, MPI_LONG, mpi_c);
   // now re-number the ssiid[] to go like 0, 1, 2, ...
-  int ssi_counter=0;
+  ssiCount=0;
   for (int i=0; i<ncores; i++){
     int j;
     for (j=0; j<i; j++)
       if (temp_ssiid[j] == temp_ssiid[i]) break;
     if (j==i){
       // new ssiid
-      ssiid[i]=ssi_counter;
-      ++ssi_counter;
+      ssiid[i]=ssiCount;
+      ++ssiCount;
+      temp_ssiPetCount[i] = 1;
     }else{
       // found previous ssiid
       ssiid[i]=ssiid[j];
+      temp_ssiPetCount[j]++;
     }
   }
   delete [] temp_ssiid;
+  minSsiPetCount=ncores;
+  maxSsiPetCount=0;
+  for (int i=0; i<ssiCount; i++){
+    if (temp_ssiPetCount[i] < minSsiPetCount)
+      minSsiPetCount = temp_ssiPetCount[i];
+    if (temp_ssiPetCount[i] > maxSsiPetCount)
+      maxSsiPetCount = temp_ssiPetCount[i];
+  }
+  delete [] temp_ssiPetCount;
 #endif
   // ESMCI::VMK pet -> core mapping
   lpid = new int[npets];
@@ -595,6 +610,8 @@ void VMK::construct(void *ssarg){
   ncpet = new int[npets];
   nadevs = new int[npets];
   cid = new int*[npets];
+  ssiCount=0;
+  int *temp_ssiPetCount = new int[npets];
   for (int i=0; i<npets; i++){
     lpid[i]=sarg->lpid[i];
     pid[i]=sarg->pid[i];
@@ -604,7 +621,26 @@ void VMK::construct(void *ssarg){
     cid[i] = new int[ncpet[i]];
     for (int k=0; k<ncpet[i]; k++)
       cid[i][k] = sarg->cid[i][k];
+    // determine ssiCount
+    int j;
+    for (j=0; j<i; j++)
+      if (ssiid[cid[j][0]] == ssiid[cid[i][0]]) break;
+    if (j==i){
+      // new ssiid found
+      ++ssiCount;
+      temp_ssiPetCount[i] = 1;
+    }else
+      temp_ssiPetCount[j]++;
   }
+  minSsiPetCount=npets;
+  maxSsiPetCount=0;
+  for (int i=0; i<ssiCount; i++){
+    if (temp_ssiPetCount[i] < minSsiPetCount)
+      minSsiPetCount = temp_ssiPetCount[i];
+    if (temp_ssiPetCount[i] > maxSsiPetCount)
+      maxSsiPetCount = temp_ssiPetCount[i];
+  }
+  delete [] temp_ssiPetCount;
   mpi_c = sarg->mpi_c;
   pth_mutex2 = sarg->pth_mutex2;
   pth_mutex = sarg->pth_mutex;

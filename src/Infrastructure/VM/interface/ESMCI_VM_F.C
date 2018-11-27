@@ -465,7 +465,8 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_vmget)(ESMCI::VM **ptr, int *localPet, int *petCount, 
-    int *peCount, int *mpiCommunicator, ESMC_Logical *pthreadsEnabledFlag,
+    int *peCount, int *ssiCount, int *minSsiPetCount, int *maxSsiPetCount,
+    int *mpiCommunicator, ESMC_Logical *pthreadsEnabledFlag,
     ESMC_Logical *openMPEnabledFlag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmget()"
@@ -483,6 +484,12 @@ extern "C" {
       for (int i=0; i<npets; i++)
         *peCount += (*ptr)->getNcpet(i);
     }
+    if (ESMC_NOT_PRESENT_FILTER(ssiCount) != ESMC_NULL_POINTER)
+      *ssiCount = (*ptr)->getSsiCount();
+    if (ESMC_NOT_PRESENT_FILTER(minSsiPetCount) != ESMC_NULL_POINTER)
+      *minSsiPetCount = (*ptr)->getMinSsiPetCount();
+    if (ESMC_NOT_PRESENT_FILTER(maxSsiPetCount) != ESMC_NULL_POINTER)
+      *maxSsiPetCount = (*ptr)->getMaxSsiPetCount();
     if (ESMC_NOT_PRESENT_FILTER(mpiCommunicator) != ESMC_NULL_POINTER){
       mpiCommTemp = (*ptr)->getMpi_c();
 #ifdef ESMF_DONT_HAVE_MPI_COMM_C2F
