@@ -2896,13 +2896,14 @@ module NUOPC_Driver
       end subroutine
     end interface
     interface
-      recursive subroutine compSetVMRoutine(gridcomp, rc)
+      recursive subroutine iface_compSetVMRoutine(gridcomp, rc)
         use ESMF
         implicit none
         type(ESMF_GridComp)        :: gridcomp ! must not be optional
         integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
+    procedure(iface_compSetVMRoutine),optional :: compSetVMRoutine
     integer,             intent(in),  optional :: petList(:)
     type(ESMF_GridComp), intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
@@ -2912,12 +2913,16 @@ module NUOPC_Driver
 ! component to a Driver. The component is created on the provided {\tt petList},
 ! or by default across all of the Driver PETs.
 !
-! The specified {\tt SetServices()} routine is called back immediately after the
-! new child component has been created internally. Very little around the
+! The specified {\tt compSetServicesRoutine()} is called back immediately after
+! the new child component has been created internally. Very little around the
 ! component is set up at that time (e.g. component attributes are not 
 ! available). The routine should therefore be very light weight, with the sole
 ! purpose of setting the entry points of the component -- typically by deriving 
 ! from a generic component followed by the appropriate specilizations.
+!
+! If provided, the {\tt compSetVMRoutine()} is called back before the 
+! {\tt compSetServicesRoutine()}. This allows the child component to set
+! aspects of its own VM, such as threading or the PE distribution among PETs.
 !
 ! The {\tt compLabel} must uniquely identify the child component within the
 ! context of the Driver component.
@@ -3012,14 +3017,16 @@ module NUOPC_Driver
       return  ! bail out
 
     ! Call the SetVM on the added component
-    call ESMF_GridCompSetVM(cmEntry%wrap%component, &
-      compSetVMRoutine, userRc=localrc, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
+    if (present(compSetVMRoutine)) then
+      call ESMF_GridCompSetVM(cmEntry%wrap%component, &
+        compSetVMRoutine, userRc=localrc, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
       
     ! add standard NUOPC GridComp Attribute Package to the modelComp
     call NUOPC_CompAttributeInit(cmEntry%wrap%component, kind="Model", rc=rc)
