@@ -7132,7 +7132,7 @@ contains
             ! Allocate serialization buffer
 
             buff_length = 1
-            allocate (buffer(buff_length))
+            allocate (buffer(0:buff_length-1))
             offset = 0
             call ESMF_FieldSerialize(field, buffer, buff_length, offset, &
                 inquireflag=ESMF_INQUIREONLY, rc=localrc)
@@ -7142,7 +7142,7 @@ contains
             deallocate (buffer)
 
             buff_length = offset
-            allocate (buffer(buff_length))
+            allocate (buffer(0:buff_length-1))
 
             ! call serialize and deserialize and verify again
 
