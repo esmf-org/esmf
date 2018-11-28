@@ -2896,14 +2896,14 @@ module NUOPC_Driver
       end subroutine
     end interface
     interface
-      recursive subroutine iface_compSetVMRoutine(gridcomp, rc)
+      recursive subroutine compSetVMRoutine(gridcomp, rc)
         use ESMF
         implicit none
         type(ESMF_GridComp)        :: gridcomp ! must not be optional
         integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
-    procedure(iface_compSetVMRoutine),optional :: compSetVMRoutine
+    optional                                   :: compSetVMRoutine
     integer,             intent(in),  optional :: petList(:)
     type(ESMF_GridComp), intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
