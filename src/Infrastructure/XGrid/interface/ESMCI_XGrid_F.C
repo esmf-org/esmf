@@ -274,4 +274,14 @@ extern "C" void FTN_X(c_esmc_xgrid_getfrac2)(Grid **gridpp,
                             rc);
 }
 
+
+// mesh set tmp xgrid info
+  void FTN_X(c_esmc_meshsetxgridinfo)(MeshCap **meshpp, int *side, int *ind, int *rc) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_meshsetxgridinfo()" 
+
+    (*meshpp)->set_xgrid_info(side,ind,rc);
+}
+
+
 } // end extern "C"

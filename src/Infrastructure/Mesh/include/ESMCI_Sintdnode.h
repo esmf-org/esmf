@@ -130,6 +130,10 @@ class sintd_cell {
     std::vector<sintd_node *> nodes;
   public:
 
+    // Index in Xgrid of Mesh
+    int side1_mesh_ind;
+    int side2_mesh_ind;
+
     int s_id, d_id; // DEBUG
 
     sintd_cell(double _area, const std::vector<sintd_node *> & _nodes) : 

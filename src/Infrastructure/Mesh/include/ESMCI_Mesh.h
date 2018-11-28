@@ -130,6 +130,11 @@ void resolve_cspec_delete_owners(UInt obj_type);
  // Save original dimension
  int orig_spatial_dim;
 
+ // Temp XGrid info
+ int side; // 1=A, 2=B, 3= middle
+ int ind; // which number grid on the side
+
+
   private:
 void assign_new_ids();
 CommReg *sghost;

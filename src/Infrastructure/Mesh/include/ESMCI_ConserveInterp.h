@@ -82,7 +82,7 @@ namespace ESMCI {
                                            std::vector<int> *valid, std::vector<double> *wgts, std::vector<double> *areas, std::vector<double> *dst_areas,
                                            std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
                                            Mesh * midmesh, std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, 
-                                           interp_mapp res_map, struct Zoltan_Struct * zz);
+					interp_mapp res_map, struct Zoltan_Struct * zz, MEField<> *src_side_field=NULL, MEField<> *dst_side_field=NULL);
 
   void calc_1st_order_weights_3D_3D_cart(const MeshObj *src_elem, MEField<> *src_cfield, 
                                            std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> *dst_mask_field, MEField<> * dst_frac2_field,

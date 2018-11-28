@@ -370,6 +370,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
     integer                       :: localElemCount, sdim, pdim
     type(ESMF_XGridGeomType_Flag), allocatable :: xggt_a(:), xggt_b(:)
     integer :: tileCount
+    integer :: side
     
 
     ! Initialize
@@ -765,6 +766,15 @@ function ESMF_XGridCreate(keywordEnforcer, &
            ESMF_CONTEXT, rcToReturn=rc) 
         return
       endif
+
+      ! Set temp xgrid info in mesh
+      side=1
+      call c_esmc_meshsetxgridinfo(meshAt(i), side, i, localrc)
+      if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Merge meshes
       if(i == 1) meshA = meshAt(i)
       if(i .ge. 2) then
         ! call into mesh merge with priority taken into account
@@ -845,6 +855,14 @@ function ESMF_XGridCreate(keywordEnforcer, &
         return
       endif
 
+      ! Set temp xgrid info in mesh
+      side=2
+      call c_esmc_meshsetxgridinfo(meshBt(i), side, i, localrc)
+      if (ESMF_LogFoundError(localrc, &
+           ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! Merge meshes
       if( i == 1) meshB = meshBt(i)
       ! call into mesh merge with priority taken into account
       ! meshBt is truncated(if necessary) and concatenated onto meshB 

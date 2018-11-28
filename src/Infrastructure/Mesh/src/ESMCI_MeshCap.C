@@ -1545,5 +1545,21 @@ MeshCap *MeshCap::meshcreate_easy_elems(int *pdim,
   return mc;
 } 
 
+void MeshCap::set_xgrid_info(int *side, int *ind, int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "set_xgrid_info()"
+ 
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    mesh->side=*side;
+    mesh->ind=*ind;
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+        "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
 
 

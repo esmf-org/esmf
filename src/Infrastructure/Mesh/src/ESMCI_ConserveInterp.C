@@ -901,12 +901,13 @@ void norm_poly3D(int num_p, double *p) {
   // Here valid and wghts need to be resized to the same size as dst_elems before being passed into 
   // this call. 
   void calc_1st_order_weights_2D_3D_sph_orig(const MeshObj *src_elem, MEField<> *src_cfield, 
-                                           std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,  
-                                           double *src_elem_area,
-                                           std::vector<int> *valid, std::vector<double> *wgts, 
-                                           std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out, 
-                                           Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, 
-                                           std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz) {
+					     std::vector<const MeshObj *> dst_elems, MEField<> *dst_cfield, MEField<> * dst_mask_field, MEField<> * dst_frac2_field,  
+					     double *src_elem_area,
+					     std::vector<int> *valid, std::vector<double> *wgts, 
+					     std::vector<double> *sintd_areas_out, std::vector<double> *dst_areas_out, 
+					     Mesh *midmesh, std::vector<sintd_node *> * sintd_nodes, 
+					     std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz, 
+					     MEField<> *src_side_field, MEField<> *dst_side_field) {
 
 
 // Maximum size for a supported polygon
@@ -1082,6 +1083,7 @@ void norm_poly3D(int num_p, double *p) {
       // calculate intersection area
       sintd_areas[i]=great_circle_area(num_sintd_nodes, sintd_coords); 
 
+
 #if 0
       // Get elem rotation
       bool left_turn;
@@ -1096,14 +1098,13 @@ void norm_poly3D(int num_p, double *p) {
             }
       }
 #endif
-
-      (*valid)[i]=1;
-
       // Invalidate masked destination elements
       if (dst_mask_field) {
          double *msk=dst_mask_field->data(*dst_elem);
         if (*msk>0.5) {
           (*valid)[i]=0;
+          (*wgts)[i]=0.0;
+          sintd_areas[i]=0.0;
           continue;
         }
       }
@@ -1112,14 +1113,57 @@ void norm_poly3D(int num_p, double *p) {
         double *dst_frac2=dst_frac2_field->data(*dst_elem);
         if (*dst_frac2 == 0.0){
           (*valid)[i] = 0;
+          (*wgts)[i]=0.0;
+          sintd_areas[i]=0.0;
           continue;
         }
       }
 
       if(midmesh || res_map) {
+
+        //// When we are making an XGrid if clipped piece is very
+        //// small part of original cells then skip. 
+#define XGRID_CLIP_TOL 1.0E-14
+
+      // Calc ratio of intersected part to source area
+      // (src_area == 0.0 is checked above)
+      double src_ratio=sintd_areas[i]/src_area;
+
+      // Calc ratio of intersected part to dst area
+      // (dst_area == 0.0 is checked above)
+      double dst_ratio=sintd_areas[i]/dst_areas[i];
+
+      // if intersected part is only a small piece of the src and dst, then skip
+      // (dst_areas[i] == 0.0 is checked above)
+      if ((src_ratio < XGRID_CLIP_TOL) && (dst_ratio < XGRID_CLIP_TOL)) {
+	(*valid)[i]=0;
+	(*wgts)[i]=0.0;
+        sintd_areas[i]=0.0;
+	continue;
+      }
+
+#undef XGRID_CLIP_TOL
+
+
+	//        printf("%d# BOB: BEG CC\n",Par::Rank());
+	// Set side information
+	int side1_ind=1; // default to 1
+	if (src_side_field) {
+	  double *side1_dbl=src_side_field->data(*src_elem);
+	  side1_ind=(int)(*side1_dbl+0.5);
+	} 
+	int side2_ind=1; // default to 1
+	if (dst_side_field) {
+	  double *side2_dbl=dst_side_field->data(*dst_elem);
+	  side2_ind=(int)(*side2_dbl+0.5);
+	} 
+        //printf("%d# BOB: END CC\n",Par::Rank());
+	  
         compute_sintd_nodes_cells(sintd_areas[i],
 				  num_sintd_nodes, sintd_coords, 2, 3, 
-				  sintd_nodes, sintd_cells, zz,src_elem->get_id(),dst_elem->get_id());
+				  sintd_nodes, sintd_cells, zz,src_elem->get_id(),dst_elem->get_id(),side1_ind, side2_ind);
+
+
 #if 0
 	if ((src_elem->get_id() == 6642) && 
 	    ((dst_elem->get_id() == 38262) || (dst_elem->get_id() == 38263))) {
@@ -1131,8 +1175,9 @@ void norm_poly3D(int num_p, double *p) {
 	      write_3D_poly_to_vtk("xgc_dstelem",dst_elem->get_id(),num_dst_nodes, dst_coords);
 	}
 #endif
-      }
 
+
+      }
 
       // append result to a multi-map index-ed by passive mesh element for merging optimization
       if(res_map){
@@ -1149,7 +1194,12 @@ void norm_poly3D(int num_p, double *p) {
         res_map->insert(std::make_pair(src_elem, new interp_res(dst_elem, num_sintd_nodes, num_src_nodes, num_dst_nodes, sdim, src_coords, dst_coords, 
           src_area, dst_areas[i], ((src_area == 0.)? 1.:sintd_areas[i]/src_area) ) ) ); 
       }
+
+      // Ok, we made it through all the checks, so mark this one valid and go onto next
+      (*valid)[i]=1;
+
     }
+
 
     if(res_map) return;     // not intended for weight calculation
 
@@ -1550,7 +1600,7 @@ void norm_poly3D(int num_p, double *p) {
                                            std::vector<int> *tmp_valid, std::vector<double> *tmp_sintd_areas_out, std::vector<double> *tmp_dst_areas_out,
                                            Mesh * midmesh, 
                                            std::vector<sintd_node *> * sintd_nodes, 
-                                         std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz) {
+					std::vector<sintd_cell *> * sintd_cells, interp_mapp res_map, struct Zoltan_Struct *zz, MEField<> *src_side_field, MEField<> *dst_side_field) {
 
     // Use original version if midmesh exists
     // TODO: Fei fix this
@@ -1562,7 +1612,7 @@ void norm_poly3D(int num_p, double *p) {
                                              sintd_areas_out, dst_areas_out,
                                              midmesh, 
                                              sintd_nodes, 
-                                             sintd_cells, res_map, zz);
+					    sintd_cells, res_map, zz, src_side_field, dst_side_field);
       
       return; 
     }

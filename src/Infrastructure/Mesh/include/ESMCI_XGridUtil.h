@@ -29,7 +29,7 @@ namespace ESMCI {
  * @param[out] midmesh mesh in the middle
  */
 void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_cell *> & sintd_cells, 
-  int pdim, int sdim, Mesh *midmesh);
+		     int pdim, int sdim, Mesh *midmesh, int side=-1);
 
 /**
  *\brief compute intersecting cell and nodes in parallel using zoltan structure to help spatial analysis
@@ -43,7 +43,7 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
  * @param[in] zz Zoltan structure
  */
 void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
-			       std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct * zz, int s_id=-1, int d_id=-1);
+			       std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct * zz, int s_id=-1, int d_id=-1, int side1_mesh_ind=-1, int side2_mesh_ind=-1);
 
 /**
  *\brief compute intersecting cell and nodes from a polygon
@@ -56,7 +56,7 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
  * @param[out] sintd_cells vector to allocated intersecting cells
  */
 void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
-		     std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, int s_id=-1, int d_id=-1);
+		     std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, int s_id=-1, int d_id=-1, int side1_mesh_ind=-1, int side2_mesh_ind=-1);
 
 /**
  *\brief compute mesh in the middle from meshes on side A and B

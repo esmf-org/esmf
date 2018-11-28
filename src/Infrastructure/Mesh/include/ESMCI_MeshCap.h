@@ -261,6 +261,9 @@
                         int *rc);
 
      static void destroy(MeshCap **mcpp,int *rc);
+
+     void set_xgrid_info(int *side, int *ind, int *rc);
+
   };
 
 } // namespace 

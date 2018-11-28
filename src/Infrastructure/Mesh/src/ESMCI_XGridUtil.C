@@ -395,10 +395,6 @@ bool line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double
   double norm = xvector(intersect[0], intersect[1], intersect[2]).metric();
   for(int i = 0; i < 3; i ++) intersect[i] /= norm;
 
-
-
-
-
   inbound = 1;  // default is outbound when intersection happens
   // sense of inbound: (v1 x v2).(v1 x p1) > 0
   //if(sense > 0. && (t>0 && t<1)) inbound = 2; // v1 going into v2 in CCW sense
@@ -1668,7 +1664,7 @@ int weiler_clip_difference(int pdim, int sdim, int num_p, double *p, int num_q, 
     sintd_cells.insert(sintd_cells.begin(),unique_cells.begin(),unique_cells.end());
   } 
   
-void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_cell *> & sintd_cells, int pdim, int sdim, Mesh *midmesh){
+  void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_cell *> & sintd_cells, int pdim, int sdim, Mesh *midmesh, int side){
 
   // Debug
   //if(false){
@@ -1716,6 +1712,7 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
   Mesh & meshmid = *midmesh;
   meshmid.set_parametric_dimension(pdim);
   meshmid.set_spatial_dimension(sdim);
+  meshmid.side=side;
   int rc;
   int me = VM::getCurrent(&rc)->getLocalPet();
 
@@ -1809,7 +1806,7 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     }
 #endif
 
-#if 1
+#if 0
     if ((cell_gid == 59955) || (cell_gid == 59955)) {
       printf("%d# %d BOBMM s_id=%d d_id=%d cell id=%d node ids=",Par::Rank(),i,
 	     sintd_cells[i]->s_id,sintd_cells[i]->d_id,
@@ -1838,6 +1835,22 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
   MEField<> *elem_centroid = meshmid.RegisterField("elem_centroid",
                      MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, sdim, true);
 
+  // Field to record original mesh ind per elem
+  MEField<> *side1_mesh_ind = NULL;
+  MEField<> *side2_mesh_ind = NULL;
+  if (side == 1) {
+    side1_mesh_ind = meshmid.RegisterField("side1_mesh_ind",
+					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+  } else if (side == 2) {
+    side2_mesh_ind = meshmid.RegisterField("side2_mesh_ind",
+					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+  } else if (side == 3) {
+    side1_mesh_ind = meshmid.RegisterField("side1_mesh_ind",
+					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);
+    side2_mesh_ind = meshmid.RegisterField("side2_mesh_ind",
+					   MEFamilyDG0::instance(), MeshObj::ELEMENT, ctxt, 1, true);  
+  } 
+
   // Finalize mesh
   meshmid.build_sym_comm_rel(MeshObj::NODE);
   //meshmid.build_sym_comm_rel(MeshObj::ELEMENT);
@@ -1858,6 +1871,20 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
     //std::cout << i << "th cell area: " << *area << "\n";
     double *centroid = elem_centroid->data(*(elem_list[i]));
     sintd_cells[i]->get_centroid(centroid, sdim, pdim);
+
+    if (side == 1) {
+      double *side1_mesh_ind_ptr = side1_mesh_ind->data(*(elem_list[i]));
+      *side1_mesh_ind_ptr=sintd_cells[i]->side1_mesh_ind;
+    } else if (side == 2) {
+      double *side2_mesh_ind_ptr = side2_mesh_ind->data(*(elem_list[i]));
+      *side2_mesh_ind_ptr=sintd_cells[i]->side2_mesh_ind;
+    } else if (side == 3) {
+      double *side1_mesh_ind_ptr = side1_mesh_ind->data(*(elem_list[i]));
+      *side1_mesh_ind_ptr=sintd_cells[i]->side1_mesh_ind;
+      double *side2_mesh_ind_ptr = side2_mesh_ind->data(*(elem_list[i]));
+      *side2_mesh_ind_ptr=sintd_cells[i]->side2_mesh_ind;
+    }
+
   }
 
   //char str[64]; memset(str, 0, 64);
@@ -1878,7 +1905,7 @@ void compute_midmesh(std::vector<sintd_node *> & sintd_nodes, std::vector<sintd_
 
 // Compute cells of middle mesh based on clipping results
 void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
-			       std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct * zz, int s_id, int d_id){
+			       std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, struct Zoltan_Struct * zz, int s_id, int d_id, int side1_mesh_ind, int side2_mesh_ind){
 
   // bubble up the nodes and cells
   // cross reference the nodes and cells
@@ -1930,12 +1957,13 @@ void compute_sintd_nodes_cells(double area, int num_sintd_nodes, double * sintd_
   }
 
   construct_sintd(area, num_sintd_nodes, sintd_coords, pdim, sdim, 
-		  sintd_nodes, sintd_cells, s_id, d_id);
+		  sintd_nodes, sintd_cells, s_id, d_id, side1_mesh_ind, side2_mesh_ind);
 
 }
 
 void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, int pdim, int sdim, 
-		     std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, int s_id, int d_id){
+		     std::vector<sintd_node *> * sintd_nodes, std::vector<sintd_cell *> * sintd_cells, int s_id, int d_id,
+		     int side1_mesh_ind, int side2_mesh_ind){
 
   // Get rid of degenerate edges
   if(sdim == 2)
@@ -1984,6 +2012,8 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
       sintd_cell * cell = new sintd_cell(split_area, cell_nodes);
       cell->s_id=s_id;
       cell->d_id=d_id;
+      cell->side1_mesh_ind=side1_mesh_ind;
+      cell->side2_mesh_ind=side2_mesh_ind;
       sintd_cells->push_back(cell);
 
       for(int in = 0; in < 3; in ++)
@@ -2085,6 +2115,8 @@ void construct_sintd(double area, int num_sintd_nodes, double * sintd_coords, in
     sintd_cell * cell = new sintd_cell(area, cell_nodes);
     cell->s_id=s_id;
     cell->d_id=d_id;
+    cell->side1_mesh_ind=side1_mesh_ind;
+    cell->side2_mesh_ind=side2_mesh_ind;
     sintd_cells->push_back(cell);
 
     // every node associated with this genesis cell refers to it

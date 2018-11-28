@@ -30,7 +30,8 @@
 #include <Mesh/include/ESMCI_XGridUtil.h>
 #include <ESMCI_VM.h>
 #include <PointList/include/ESMCI_PointList.h>
- 
+#include <Mesh/include/ESMCI_MeshRead.h> 
+
 #include <algorithm>
 #include <iterator>
 #include <ostream>
@@ -565,6 +566,12 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   int sdim=srcmesh.spatial_dim();
   int pdim=srcmesh.parametric_dim();
 
+  // figure out side
+  int side=srcmesh.side;
+  if (dstmesh.side != side) Throw() << "Meshes being merged should be on the same side of the XGrid.";
+  int side1_mesh_ind=0;
+  int side2_mesh_ind=0;
+
   int rc;
   unsigned int me = VM::getCurrent(&rc)->getLocalPet();
   unsigned int npet = VM::getCurrent(&rc)->getPetCount();
@@ -583,16 +590,45 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
   {
     const Mesh & mesh = srcmesh;
 
+    // Set mesh ind
+    if (side == 1) {
+      side1_mesh_ind=mesh.ind;
+      side2_mesh_ind=0;
+    } else if (side == 2) {
+      side1_mesh_ind=0;
+      side2_mesh_ind=mesh.ind;
+    } else {
+      printf("%d# MM BOB: 1 bad side = %d\n",Par::Rank(),side);
+    }
+
+    
+    // QQQ
     // Get mask and coord field
     MEField<> *mask_field = mesh.GetField("elem_mask");
     MEField<> &coord = *mesh.GetCoordField();
+
+    MEField<> *elem_frac2=mesh.GetField("elem_frac2");
+    if (!elem_frac2) Throw() << "Meshes involved in XGrid construction should have frac2 field";
 
     Mesh::const_iterator ei = mesh.elem_begin(), ee = mesh.elem_end();
     for (; ei != ee; ++ei) {
       const MeshObj &elem = *ei;
       if(elem.get_owner() != me) continue;
 
-      if(mask_field){ // do not sew an element if it's masked out
+      // BOB
+      // Set frac2 field based on mask
+      double *frac2=elem_frac2->data(elem);
+      *frac2=1.0; // Since this is priority mesh all it's frac2 should be 1.0
+      // Unless masked when they should be 0.0
+      if(mask_field){ 
+        double *msk=mask_field->data(elem);
+        if (*msk>0.5) {
+          *frac2=0.0;
+        }
+      }
+
+      // Do not sew an element if it's masked out
+      if(mask_field){ 
         double *msk=mask_field->data(elem);
         if (*msk>0.5) continue;
       }
@@ -621,7 +657,8 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
 	write_3D_poly_to_vtk("added_via_src",elem.get_id(),topo->num_nodes,cd);
       }
 
-      construct_sintd(res_poly.area(sdim), num_nodes, cd, pdim, sdim, &sintd_nodes, &sintd_cells, elem.get_id(),-4);
+      construct_sintd(res_poly.area(sdim), num_nodes, cd, pdim, sdim, &sintd_nodes, &sintd_cells, elem.get_id(),-4, side1_mesh_ind, side2_mesh_ind);
+
       ncells ++;
       delete[] cd;
 
@@ -635,6 +672,17 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
     MEField<> &clip_coord = *srcmesh.GetCoordField();
     MEField<> *elem_frac=mesh.GetField("elem_frac2");
     if (!elem_frac) Throw() << "Meshes involved in XGrid construction should have frac2 field";
+
+    // Set mesh ind
+    if (side == 1) {
+      side1_mesh_ind=mesh.ind;
+      side2_mesh_ind=0;
+    } else if (side == 2) {
+      side1_mesh_ind=0;
+      side2_mesh_ind=mesh.ind;
+    } else {
+      printf("%d# MM BOB: 2 bad side = %d\n",Par::Rank(),side);
+    }
 
     // Get mask field
     MEField<> *mask_field = mesh.GetField("elem_mask");
@@ -694,7 +742,7 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
         coords_to_polygon(subject_num_nodes, cd, sdim, res_poly);
 
         construct_sintd(res_poly.area(sdim), subject_num_nodes, cd, pdim, sdim, 
-			&sintd_nodes, &sintd_cells,-5,elem.get_id());
+			&sintd_nodes, &sintd_cells,-5,elem.get_id(), side1_mesh_ind, side2_mesh_ind);
         delete[] cd;
         ncells ++;
       }else{ 
@@ -709,16 +757,21 @@ void concat_meshes(const Mesh & srcmesh, const Mesh & dstmesh, Mesh & mergemesh,
         interp_map_range range = sres_map->equal_range(&elem);
         double fraction_deduction = 0.;
 
+#define XGRID_CLIP_TOL 1.0E-14
         // go through each src element that cuts into this dst element
         // Do a first cut compute total fraction reduction, if entire dst element
         // is clipped out, move onto the next dst element
-        for(interp_map_iter it = range.first; it != range.second; ++it)
+        for(interp_map_iter it = range.first; it != range.second; ++it) {
           fraction_deduction += it->second->fraction;
-        if(fraction_deduction >= 1.0){
+        }
+
+        // If the amount clipped out is within some tol of 1.0 (the whole thing)
+        if (fraction_deduction >= 1.0-XGRID_CLIP_TOL){
           double *f=elem_frac->data(elem);
           *f=0.;
           continue;
         }
+#undef XGRID_CLIP_TOL
 
         // Do spatial boolean math: difference, cut each intersected part off the dst mesh and 
         // triangulate the remaining polygon
@@ -1043,7 +1096,7 @@ if (ret == ESMCI_TP_SUCCESS) {
           polygon_to_coords(*res_it, sdim, poly_cd);
 	  // Having the id isn't very useful since it seems like it would always be the last source in the list
 	  //          construct_sintd(res_it->area(sdim), n_pts, poly_cd, pdim, sdim, &sintd_nodes, &sintd_cells,res_it->id,elem.get_id());
-          construct_sintd(res_it->area(sdim), n_pts, poly_cd, pdim, sdim, &sintd_nodes, &sintd_cells,-6,elem.get_id());
+          construct_sintd(res_it->area(sdim), n_pts, poly_cd, pdim, sdim, &sintd_nodes, &sintd_cells,-6,elem.get_id(),side1_mesh_ind, side2_mesh_ind);
 	  p++;
           delete [] poly_cd;
         }
@@ -1052,10 +1105,12 @@ if (ret == ESMCI_TP_SUCCESS) {
   } 
 
   // We now have all the genesis cells, compute the merged mesh
-  compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh);
+  compute_midmesh(sintd_nodes, sintd_cells, pdim, sdim, &mergemesh, side);
   //char str[64]; memset(str, 0, 64);
   //sprintf(str, "mergemesh.vtk.%d", me);
   //WriteVTKMesh(mergemesh, str);
+
+  WriteMesh(mergemesh, "MergedMesh");
 
 }
 

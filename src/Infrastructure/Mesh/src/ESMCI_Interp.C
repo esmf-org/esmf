@@ -1587,6 +1587,34 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
   MEField<> *src_area_field = srcmesh.GetField("elem_area");
 
 
+  // Get src and dst side fields
+  MEField<> *dst_side_field=dstmesh.GetField("side1_mesh_ind");
+  if (!dst_side_field) dst_side_field=dstmesh.GetField("side2_mesh_ind");
+
+  MEField<> *src_side_field=srcmesh.GetField("side1_mesh_ind");
+  if (!src_side_field) src_side_field=srcmesh.GetField("side2_mesh_ind");
+
+  // Figure out interpolation to XGrid information
+  MEField<> *src_xgrid_ind_field=NULL;
+  MEField<> *dst_xgrid_ind_field=NULL;
+  int other_side_ind=0;
+  if (srcmesh.side == 3) {
+    if (dstmesh.side==1) {
+      src_xgrid_ind_field=srcmesh.GetField("side1_mesh_ind");
+    } else if (dstmesh.side==2) {
+      src_xgrid_ind_field=srcmesh.GetField("side2_mesh_ind");
+    }    
+    other_side_ind=dstmesh.ind;
+  } else if (dstmesh.side == 3) {
+    if (srcmesh.side==1) {
+      dst_xgrid_ind_field=dstmesh.GetField("side1_mesh_ind");
+    } else if (srcmesh.side==2) {
+      dst_xgrid_ind_field=dstmesh.GetField("side2_mesh_ind");
+    }
+    other_side_ind=srcmesh.ind;
+  }
+
+
   // determine if we should use the dst_frac variable
   bool use_dst_frac=false;
   if (dst_area_field || src_area_field) use_dst_frac=true;
@@ -1611,6 +1639,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
   std::vector<double> tmp_areas;
   std::vector<double> tmp_dst_areas;
 
+
   // Find maximum number of dst elements in search results
   int max_num_dst_elems=0;
   SearchResult::iterator sb = sres.begin(), se = sres.end();
@@ -1622,7 +1651,6 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
     if (sr.elems.size() > max_num_dst_elems) max_num_dst_elems=sr.elems.size();
   }
 
-
   // Allocate space for weight calc output arrays
   valid.resize(max_num_dst_elems,0);
   wgts.resize(max_num_dst_elems,0.0);
@@ -1630,7 +1658,8 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
   dst_areas.resize(max_num_dst_elems,0.0);
 
   // Loop through search results
-  for (sb = sres.begin(); sb != se; sb++) {
+  int i=0;
+  for (sb = sres.begin(); sb != se; sb++,i++) {
     
     // NOTE: sr.elem is a dst element and sr.elems is a list of src elements
     Search_result &sr = **sb;
@@ -1660,6 +1689,19 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
       if (src_frac2 == 0.0) continue; 
     }
 
+    // If src is an exchange grid then skip parts that 
+    // don't involve current meshes
+    if (src_xgrid_ind_field) {
+      // Get side information from xgrid
+      double *src_xgrid_ind_dbl=src_xgrid_ind_field->data(*sr.elem);
+
+      // Convert to int rounding in case of floating point fuzziness
+      int src_xgrid_ind=static_cast<int>(*src_xgrid_ind_dbl+0.5);
+      
+      // If this cell of the exchange grid doesn't match the current mesh, skip
+      if (src_xgrid_ind != other_side_ind) continue;
+    }
+
     // Declare src_elem_area
     double src_elem_area;
 
@@ -1670,7 +1712,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
                                      sr.elems,dst_cfield,dst_mask_field, dst_frac2_field,
                                      &src_elem_area, &valid, &wgts, &areas, &dst_areas,
                                      &tmp_valid, &tmp_areas, &tmp_dst_areas,
-                                      midmesh, &tmp_nodes, &tmp_cells, 0, zz);
+				     midmesh, &tmp_nodes, &tmp_cells, 0, zz, src_side_field, dst_side_field);
 
     // Invalidate masked destination elements
     if (dst_mask_field) {
@@ -1691,6 +1733,23 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
           valid[i] = 0;
           continue;
         }
+      }
+    }
+
+    // If dst is an exchange grid then skip parts that 
+    // don't involve current meshes
+    if (dst_xgrid_ind_field) {
+      for (int i=0; i<sr.elems.size(); i++) {
+        const MeshObj &dst_elem = *sr.elems[i];
+
+        // Get side information from xgrid
+        double *dst_xgrid_ind_dbl=dst_xgrid_ind_field->data(dst_elem);
+
+        // Convert to int rounding in case of floating point fuzziness
+        int dst_xgrid_ind=static_cast<int>(*dst_xgrid_ind_dbl+0.5);
+      
+        // If this cell of the exchange grid doesn't match the current mesh, skip
+        if (dst_xgrid_ind != other_side_ind) valid[i]=0;
       }
     }
 
@@ -1801,11 +1860,10 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
           double *area=src_area_field->data(src_elem);
           src_user_area_adj=*area/src_elem_area;
       }
-
       
-      // Put weights into row column and then add
-       for (int i=0; i<sr.elems.size(); i++) {
-
+      // Adjust weights by user area
+      if (src_area_field || dst_area_field) {
+        for (int i=0; i<sr.elems.size(); i++) {
         if (valid[i]==1) {
 
           // Calculate dest user area adjustment
@@ -1817,6 +1875,40 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
             dst_user_area_adj=dst_areas[i]/(*area);
           }
 
+          // Multiply weights by user area adjustment
+          wgts[i] *= src_user_area_adj*dst_user_area_adj;
+        }
+       }
+      }
+
+
+      // Adjust weights by merge fraction if source is an XGrid.
+      // (Don't need to do if the destination is an XGrid, because
+      //  each Xgrid cell is entirely contained in one source grid cell).
+      if (srcmesh.side==3) {
+        if(dst_frac2_field){
+          for (int i=0; i<sr.elems.size(); i++) {
+            if (valid[i]==1) {
+              const MeshObj &dst_elem = *sr.elems[i];
+
+              // Calculate adjustment
+              double mrg_adjustment=1.0;
+              double *dst_frac2=dst_frac2_field->data(dst_elem);
+              if (*dst_frac2 != 0.0) mrg_adjustment=1.0/(*dst_frac2);
+              else mrg_adjustment=0.0;
+
+              // Multiply weights by mrg adjustment
+              wgts[i] *= mrg_adjustment;
+            }
+          }
+        }
+      }
+
+
+      // Put weights into row column and then add
+       for (int i=0; i<sr.elems.size(); i++) {
+
+        if (valid[i]==1) {
 #if 0
           if (sr.elems[i]->get_id()==59955) {
 	    printf("did=%d d_area=%E sid=%d sintd_area=%E s/a=%E w=%E sf2=%E\n",sr.elems[i]->get_id(),dst_areas[i],sr.elem->get_id(),areas[i],areas[i]/dst_areas[i],wgts[i],src_frac2);
@@ -1824,7 +1916,7 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
 #endif
           // Set col info
           IWeights::Entry col(sr.elem->get_id(), 0, 
-                              src_user_area_adj*dst_user_area_adj*src_frac2*wgts[i], 0);
+                              wgts[i], 0);
 
           // Set row info
           IWeights::Entry row(sr.elems[i]->get_id(), 0, 0.0, 0);
@@ -1832,12 +1924,16 @@ void calc_conserve_mat_serial_2D_3D_sph(Mesh &srcmesh, Mesh &dstmesh, Mesh *midm
           // Put weights into weight matrix
           iw.InsertRowMergeSingle(row, col);  
         }
-      }
+       }
+
     } // not generating mid mesh, need to compute weights
+
   } // for searchresult
 
-  if(midmesh != 0)
-    compute_midmesh(sintd_nodes, sintd_cells, 2, 3, midmesh);
+  if(midmesh != 0) {
+    compute_midmesh(sintd_nodes, sintd_cells, 2, 3, midmesh,3);
+  }
+
 }
 
 
@@ -2355,10 +2451,12 @@ void calc_conserve_mat_serial(Mesh &srcmesh, Mesh &dstmesh, Mesh *midmesh, Searc
   double tot_overlap_area=0.0;
   MPI_Allreduce(&loc_tot_overlap_area,&tot_overlap_area,1,MPI_DOUBLE,MPI_SUM,Par::Comm());
 
+#if 0
   if (Par::Rank() == 0) {
     printf("BOB: num overlap >1.0E-6 = %d \n",tot_num_big_overlap);
     printf("BOB: total overlap area = %E \n",tot_overlap_area);
   }
+#endif
 
   // Get the max over all processors
 
@@ -2774,8 +2872,7 @@ interp_method(imethod)
 	}
       }
     }
-   
- 
+    
     /*
     Par::Out() << "SrcRend **************" << std::endl;
     //grend.GetSrcRend().Print(Par::Out());
