@@ -422,6 +422,23 @@
 
 !------------------------------------------------------------------------------
 !
+!     ! Typed proxy flag
+
+!     ! WARNING: must match corresponding values in ../include/ESMC_Util.h
+
+      type ESMF_ProxyFlag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+      private
+          integer :: flag
+      end type
+
+      type(ESMF_ProxyFlag), parameter :: ESMF_PROXYYES = ESMF_ProxyFlag (1),  &
+                                         ESMF_PROXYNO  = ESMF_ProxyFlag (2)
+
+!------------------------------------------------------------------------------
+!
 !     ! Typed reduction operations
 
 !     ! WARNING: must match corresponding values in ../include/ESMC_Util.h
@@ -1011,6 +1028,9 @@
 
       public ESMF_InquireFlag
       public ESMF_INQUIREONLY, ESMF_NOINQUIRE
+
+      public ESMF_ProxyFlag
+      public ESMF_PROXYYES, ESMF_PROXYNO
 
       public ESMF_Direction_Flag, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE
 
