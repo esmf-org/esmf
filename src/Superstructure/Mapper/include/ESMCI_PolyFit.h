@@ -474,7 +474,7 @@ namespace ESMCI{
         x1vals_max = std::max(x1vals_max, *citer1);
         x2vals_max = std::max(x2vals_max, *citer2);
         std::vector<VType> ipoly_vals = {*citer1, *citer2};
-        VType yval = ipoly.eval(ipoly_vals);
+        VType yval = ipoly.deval(ipoly_vals);
         std::pair<typename std::map<VType,bool>::iterator, bool>
           yvals_map_iinfo = yvals_map.insert(std::make_pair(yval, true));
         /* Only insert unique yvals */
@@ -506,7 +506,7 @@ namespace ESMCI{
         while((x1vals_filler < x1vals_max) &&
               (x2vals_filler < x2vals_max)){
           std::vector<VType> ipoly_vals = {x1vals_filler, x2vals_filler};
-          VType yval = ipoly.eval(ipoly_vals);
+          VType yval = ipoly.deval(ipoly_vals);
           std::pair<typename std::map<VType,bool>::iterator, bool>
             yvals_map_iinfo = yvals_map.insert(std::make_pair(yval, true));
           /* Only insert unique yvals */
@@ -520,7 +520,7 @@ namespace ESMCI{
         }
         while(x1vals_filler < x1vals_max){
           std::vector<VType> ipoly_vals = {x1vals_filler, x2vals_filler};
-          VType yval = ipoly.eval(ipoly_vals);
+          VType yval = ipoly.deval(ipoly_vals);
           std::pair<typename std::map<VType,bool>::iterator, bool>
             yvals_map_iinfo = yvals_map.insert(std::make_pair(yval, true));
           /* Only insert unique yvals */
@@ -533,7 +533,7 @@ namespace ESMCI{
         }
         while(x2vals_filler < x2vals_max){
           std::vector<VType> ipoly_vals = {x1vals_filler, x2vals_filler};
-          VType yval = ipoly.eval(ipoly_vals);
+          VType yval = ipoly.deval(ipoly_vals);
           std::pair<typename std::map<VType,bool>::iterator, bool>
             yvals_map_iinfo = yvals_map.insert(std::make_pair(yval, true));
           /* Only insert unique yvals */
@@ -574,7 +574,7 @@ namespace ESMCI{
             (x2val > X2VALS_NDIST_FILLVALS_RANGE.first) &&
             (x2val < X2VALS_NDIST_FILLVALS_RANGE.second) ){
           std::vector<VType> ipoly_vals = {x1val, x2val};
-          VType yval = ipoly.eval(ipoly_vals);
+          VType yval = ipoly.deval(ipoly_vals);
           std::pair<typename std::map<VType,bool>::iterator, bool>
             yvals_map_iinfo = yvals_map.insert(std::make_pair(yval, true));
           /* Only insert unique yvals */
