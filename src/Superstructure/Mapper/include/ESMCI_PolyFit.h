@@ -597,13 +597,13 @@ namespace ESMCI{
 
     }
 
-    template<typename CType, typename VType>
+    template<typename CType>
     int PolyFit(PolyFitAlg alg, int max_deg,
           const TwoDVIDPoly<CType> &ipoly,
           TwoDVIDPoly<CType> &opoly)
     {
       int ret = ESMF_SUCCESS;
-      std::vector<VType> ux1vals, ux2vals;
+      std::vector<double> ux1vals, ux2vals;
 
       /* Add some common values for PET counts */
       ux1vals.push_back(64);
