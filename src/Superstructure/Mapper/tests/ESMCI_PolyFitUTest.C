@@ -178,5 +178,29 @@ int main(int argc, char *argv[])
   }
   ESMC_Test(test_success, name, failMsg, &result, __FILE__, __LINE__, 0); 
   
+  strncpy(name, "2 Degree 2 Var Poly fit with some xvals Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "2 Degree 2 Var Poly fit with some xvals Utest failed", ESMF_MAX_STRLEN);
+  ESMCI::MapperUtil::TwoDVIDPoly<float> p7;
+  max_deg = 2;
+  rc = ESMCI::MapperUtil::PolyFit(ESMCI::MapperUtil::POLY_FIT_LS_LAPACK, max_deg, p6, p7, x1vals, x2vals);
+  std::cout << p7 << std::endl;
+  ESMC_Test((rc == ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
+  strncpy(name, "2 Degree 2 Var Poly fit with some xvals Accuracy Utest", ESMF_MAX_STRLEN);
+  strncpy(failMsg, "2 Degree 2 Var Poly fit with some xvals Utest Accuracy failed", ESMF_MAX_STRLEN);
+  test_success = true;
+  tol = 100;
+  for(std::vector<float>::const_iterator citer1 = x1vals.cbegin(),
+      citer2 = x2vals.cbegin();
+      (citer1 != x1vals.cend()) && (citer2 != x2vals.cend());
+      ++citer1, ++citer2){
+    std::vector<float> p6_vvals = {*citer1, *citer2};
+    if(fabs(p7.eval(p6_vvals) - p6.eval(p6_vvals)) > tol){
+      std::cout << "Expected value = " <<  p6.eval(p6_vvals) << ", Eval value = " << p7.eval(p6_vvals) << ", tol = " << tol << "\n";
+      test_success = false;
+      //break;
+    }
+  }
+  ESMC_Test(test_success, name, failMsg, &result, __FILE__, __LINE__, 0); 
+  
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 }

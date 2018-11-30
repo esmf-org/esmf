@@ -4,10 +4,12 @@
 #include "ESMCI_Macros.h"
 #include <iostream>
 #include <vector>
+#include <map>
 #include <cassert>
 #include <cmath>
 #include <algorithm>
 #include <numeric>
+#include <random>
 #include <complex.h>
 #include "lapacke.h"
 #include "ESMCI_Poly.h"
@@ -444,6 +446,155 @@ namespace ESMCI{
       poly.set_cs_infos(csinfos);
 
       return ESMF_SUCCESS;
+    }
+
+    template<typename CType, typename VType>
+    int PolyFit(PolyFitAlg alg, int max_deg,
+          const TwoDVIDPoly<CType> &ipoly,
+          TwoDVIDPoly<CType> &opoly,
+          const std::vector<VType> &ux1vals,
+          const std::vector<VType> &ux2vals)
+    {
+      int ret = ESMF_SUCCESS;
+      std::vector<VType> yvals;
+      std::map<VType, bool> yvals_map;
+      std::vector<VType> x1vals;
+      std::vector<VType> x2vals;
+
+      assert(alg == POLY_FIT_LS_LAPACK);
+      assert(ux1vals.size() == ux2vals.size());
+      assert(ux1vals.size() > 0);
+
+      VType x1vals_max = 0;
+      VType x2vals_max = 0;
+      for(typename std::vector<VType>::const_iterator citer1 = ux1vals.cbegin(),
+          citer2 = ux2vals.cbegin();
+          (citer1 != ux1vals.cend()) && (citer2 != ux2vals.cend());
+          ++citer1, ++citer2){
+        x1vals_max = std::max(x1vals_max, *citer1);
+        x2vals_max = std::max(x2vals_max, *citer2);
+        std::vector<VType> ipoly_vals = {*citer1, *citer2};
+        VType yval = ipoly.eval(ipoly_vals);
+        std::pair<typename std::map<VType,bool>::iterator, bool>
+          yvals_map_iinfo = yvals_map.insert(std::make_pair(yval, true));
+        /* Only insert unique yvals */
+        if(yvals_map_iinfo.second){
+          yvals.push_back(yval);
+          x1vals.push_back(*citer1);
+          x2vals.push_back(*citer2);
+        }
+      }
+
+      /* Find avgs of x values from the user */
+      VType x1vals_sum = std::accumulate(x1vals.cbegin(), x1vals.cend(),
+                          static_cast<VType>(0));
+      assert(x1vals.size() > 0);
+      VType x1vals_avg = x1vals_sum / x1vals.size();
+      VType x2vals_sum = std::accumulate(x2vals.cbegin(), x2vals.cend(),
+                          static_cast<VType>(0));
+      assert(x2vals.size() > 0);
+      VType x2vals_avg = x2vals_sum / x2vals.size();
+
+      /* Add some values to cover the range from (2, 2) to 
+       * (x1vals_max, x2vals_max)
+       * - increasing exponentially
+       */
+      if(x1vals_max > 0){
+        const VType filler_multiplier = static_cast<VType>(2);
+        VType x1vals_filler = filler_multiplier;
+        VType x2vals_filler = filler_multiplier;
+        while((x1vals_filler < x1vals_max) &&
+              (x2vals_filler < x2vals_max)){
+          std::vector<VType> ipoly_vals = {x1vals_filler, x2vals_filler};
+          VType yval = ipoly.eval(ipoly_vals);
+          std::pair<typename std::map<VType,bool>::iterator, bool>
+            yvals_map_iinfo = yvals_map.insert(std::make_pair(yval, true));
+          /* Only insert unique yvals */
+          if(yvals_map_iinfo.second){
+            yvals.push_back(yval);
+            x1vals.push_back(x1vals_filler);
+            x2vals.push_back(x2vals_filler);
+          }
+          x1vals_filler *= filler_multiplier;
+          x2vals_filler *= filler_multiplier;
+        }
+        while(x1vals_filler < x1vals_max){
+          std::vector<VType> ipoly_vals = {x1vals_filler, x2vals_filler};
+          VType yval = ipoly.eval(ipoly_vals);
+          std::pair<typename std::map<VType,bool>::iterator, bool>
+            yvals_map_iinfo = yvals_map.insert(std::make_pair(yval, true));
+          /* Only insert unique yvals */
+          if(yvals_map_iinfo.second){
+            yvals.push_back(yval);
+            x1vals.push_back(x1vals_filler);
+            x2vals.push_back(x2vals_filler);
+          }
+          x1vals_filler *= filler_multiplier;
+        }
+        while(x2vals_filler < x2vals_max){
+          std::vector<VType> ipoly_vals = {x1vals_filler, x2vals_filler};
+          VType yval = ipoly.eval(ipoly_vals);
+          std::pair<typename std::map<VType,bool>::iterator, bool>
+            yvals_map_iinfo = yvals_map.insert(std::make_pair(yval, true));
+          /* Only insert unique yvals */
+          if(yvals_map_iinfo.second){
+            yvals.push_back(yval);
+            x1vals.push_back(x1vals_filler);
+            x2vals.push_back(x2vals_filler);
+          }
+          x2vals_filler *= filler_multiplier;
+        }
+      }
+      
+      /* Add NUM_NDIST_FILLVALS values that are normal distributed
+       * around the mean of the user provided xvals
+       * The stddev is assumed to be 1/3 of the mean
+       */
+      const int NUM_NDIST_FILLVALS = 100;
+      const int X1VALS_DEFAULT_SEED = 1234;
+      const int X2VALS_DEFAULT_SEED = 5678;
+      std::default_random_engine x1vals_generator(X1VALS_DEFAULT_SEED);
+      std::default_random_engine x2vals_generator(X2VALS_DEFAULT_SEED);
+      /* We only use vals in range (0, xvals_avg * 3) */
+      const std::pair<VType, VType>
+        X1VALS_NDIST_FILLVALS_RANGE(0, x1vals_avg * 3.0);
+      const std::pair<VType, VType>
+        X2VALS_NDIST_FILLVALS_RANGE(0, x2vals_avg * 3.0);
+      VType x1vals_stddev = x1vals_avg / 3.0;
+      VType x2vals_stddev = x2vals_avg / 3.0;
+      std::normal_distribution<VType>
+        x1vals_distribution(x1vals_avg, x1vals_stddev);
+      std::normal_distribution<VType>
+        x2vals_distribution(x2vals_avg, x2vals_stddev);
+      for(int i=0; i<NUM_NDIST_FILLVALS; i++){
+        VType x1val = x1vals_distribution(x1vals_generator);
+        VType x2val = x2vals_distribution(x2vals_generator);
+        if( (x1val > X1VALS_NDIST_FILLVALS_RANGE.first) &&
+            (x1val < X1VALS_NDIST_FILLVALS_RANGE.second) &&
+            (x2val > X2VALS_NDIST_FILLVALS_RANGE.first) &&
+            (x2val < X2VALS_NDIST_FILLVALS_RANGE.second) ){
+          std::vector<VType> ipoly_vals = {x1val, x2val};
+          VType yval = ipoly.eval(ipoly_vals);
+          std::pair<typename std::map<VType,bool>::iterator, bool>
+            yvals_map_iinfo = yvals_map.insert(std::make_pair(yval, true));
+          /* Only insert unique yvals */
+          if(yvals_map_iinfo.second){
+            yvals.push_back(yval);
+            x1vals.push_back(x1val);
+            x2vals.push_back(x2val);
+          }
+        }
+      }
+
+      opoly = ipoly;
+      ret = PolyFit(alg, max_deg, x1vals, x2vals, yvals, opoly);
+      if(ret != ESMF_SUCCESS){
+        std::cerr << "Approx fitting poly failed\n";
+        return ret;
+      }
+
+      return ret;
+
     }
 
   } //namespace MapperUtil
