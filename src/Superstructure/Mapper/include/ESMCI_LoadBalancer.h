@@ -262,12 +262,17 @@ namespace ESMCI{
               idle_time_func_sq.set_dfuncs(idle_time_dfuncs);
 
               TwoDVIDPoly<T> approx_2deg_idle_time_func_sq;
+              /* Using a 2nd deg polynomial approximation for the
+               * function so that the functions passed in to the
+               * solver are smoother (reduces the -ve PET values that
+               * we get back from the solver with 4th deg polynomials)
+               */
               const int APPROX_DEG = 2;
               int iret = PolyFit(POLY_FIT_LS_LAPACK, APPROX_DEG,
                             idle_time_func_sq,
                             approx_2deg_idle_time_func_sq);
-              //utwodvidp_cfuncs.insert(DAMP_CONST * approx_2deg_idle_time_func_sq);
-              utwodvidp_cfuncs.insert(DAMP_CONST * idle_time_func_sq);
+              utwodvidp_cfuncs.insert(DAMP_CONST * approx_2deg_idle_time_func_sq);
+              //utwodvidp_cfuncs.insert(DAMP_CONST * idle_time_func_sq);
             }
           }
           /* Final constraint Sum(ei) - C = 0
