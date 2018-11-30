@@ -597,6 +597,24 @@ namespace ESMCI{
 
     }
 
+    template<typename CType, typename VType>
+    int PolyFit(PolyFitAlg alg, int max_deg,
+          const TwoDVIDPoly<CType> &ipoly,
+          TwoDVIDPoly<CType> &opoly)
+    {
+      int ret = ESMF_SUCCESS;
+      std::vector<VType> ux1vals, ux2vals;
+
+      /* Add some common values for PET counts */
+      ux1vals.push_back(64);
+      ux1vals.push_back(256);
+      ux1vals.push_back(1024);
+      ux1vals.push_back(4096);
+      ux2vals = ux1vals;
+
+      ret = PolyFit(alg, max_deg, ipoly, opoly, ux1vals, ux2vals);
+      return ret;
+    }
   } //namespace MapperUtil
 } //namespace ESMCI
 
