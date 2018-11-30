@@ -49,7 +49,10 @@ namespace ESMCI{
         void set_cs_infos(const std::vector<PolyCSInfo<CType> > &csinfos);
         std::vector<CType> get_coeffs(void ) const;
         std::vector<std::vector<CType> > get_dcoeffs(void ) const;
+        /* Evaluate using independent variables */
         CType eval(const std::vector<CType> &vvals) const;
+        /* Evaluate using dependent variables */
+        CType deval(const std::vector<CType> &vvals) const;
         TwoDVIDPoly<CType> find_pd(const std::string &vname) const;
 
         template<typename T>
@@ -244,6 +247,12 @@ namespace ESMCI{
       else{
         return p_.eval(vvals);
       }
+    }
+
+    template<typename CType>
+    CType TwoDVIDPoly<CType>::deval(const std::vector<CType> &vvals) const
+    {
+      return p_.eval(vvals);
     }
 
     template<typename CType>
