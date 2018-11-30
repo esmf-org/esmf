@@ -78,8 +78,9 @@ enum ESMC_InquireFlag { ESMF_INQUIREONLY=ESMF_TRUE,
                         ESMF_NOINQUIRE=ESMF_FALSE};
 
 // proxy flag type
-enum ESMC_ProxyFlag { ESMF_PROXYYES=1,
-                      ESMF_PROXYNO};
+enum ESMC_ProxyFlag { ESMF_PROXYYES=1,  // Object is a proxy
+                      ESMF_PROXYNO,     // Object is not a proxy
+                      ESMF_PROXYANY};   // For queries
 
 // halostartregionflag type
 enum ESMC_HaloStartRegionFlag { ESMF_REGION_EXCLUSIVE=0,

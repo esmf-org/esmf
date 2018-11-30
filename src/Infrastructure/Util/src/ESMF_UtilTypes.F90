@@ -435,7 +435,8 @@
       end type
 
       type(ESMF_ProxyFlag), parameter :: ESMF_PROXYYES = ESMF_ProxyFlag (1),  &
-                                         ESMF_PROXYNO  = ESMF_ProxyFlag (2)
+                                         ESMF_PROXYNO  = ESMF_ProxyFlag (2),  &
+                                         ESMF_PROXYANY = ESMF_ProxyFlag (3)
 
 !------------------------------------------------------------------------------
 !
@@ -1030,7 +1031,7 @@
       public ESMF_INQUIREONLY, ESMF_NOINQUIRE
 
       public ESMF_ProxyFlag
-      public ESMF_PROXYYES, ESMF_PROXYNO
+      public ESMF_PROXYYES, ESMF_PROXYNO, ESMF_PROXYANY
 
       public ESMF_Direction_Flag, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE
 

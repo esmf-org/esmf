@@ -1505,7 +1505,7 @@ end subroutine ESMF_GeomBaseGet
 
     integer :: geomobj_len
 
-    logical, parameter :: ENABLE_SHARED_GRID_SUPPORT = .false.
+    logical, parameter :: ENABLE_SHARED_GRID_SUPPORT = .true.
 
     logical, parameter :: trace = .false.
     character(ESMF_MAXSTR) :: grid_name
@@ -1567,7 +1567,7 @@ end subroutine ESMF_GeomBaseGet
           if (trace)  &
               call ESMF_LogWrite (msg='searching for object: ' // objname_temp, ESMF_CONTEXT)
           call c_esmc_vmgetobject (grid_temp%this,  &
-              id_temp, vmid_temp,  objname_temp, ESMF_GEOMTYPE_GRID%type,  &
+              id_temp, vmid_temp,  objname_temp, ESMF_PROXYYES,  &
               object_found, localrc)
           if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
@@ -1585,9 +1585,6 @@ end subroutine ESMF_GeomBaseGet
             gbcp%grid = grid_temp
             gbcp%grid%isInit = ESMF_INIT_CREATED
             if (trace) then
-              !print *, ESMF_METHOD, ': Grid linked for sharing.'
-              !call ESMF_LogWrite (msg='Grid linked for sharing.', ESMF_CONTEXT)
-              !call ESMF_GridPrint (gbcp%grid)
               call ESMF_GridGet (gbcp%grid, name=grid_name, rc=localrc)
               if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &

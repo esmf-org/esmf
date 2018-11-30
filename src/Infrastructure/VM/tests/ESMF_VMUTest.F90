@@ -1402,7 +1402,7 @@
       write(name, *) "Obtain pointer to object via id/vmid lookup"
       write(failMsg, *) 'Can not access object'
       call c_esmc_vmgetobject (grid_temp,  &
-          id_temp, vmid_temp, "Grid", ESMF_GEOMTYPE_GRID%type,  &
+          id_temp, vmid_temp, "Grid", ESMF_PROXYNO,  &
           object_found, rc)
       grid_temp%isInit = ESMF_INIT_CREATED
       call ESMF_Test((rc == ESMF_SUCCESS), &

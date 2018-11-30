@@ -2328,13 +2328,16 @@ void VM::getObject(
   int objectID,       // in - identifying ID
   VMId *vmID,         // in - identifying vmID
   const string &name, // in - identifying object name
-  int type,           // in - identifying object type (currently unused)
+  ESMC_ProxyFlag proxyflag,  // in - proxy/non-proxy flag
   bool *object_found, // out - true if found, false if not
   int *rc) {
 //
 // !DESCRIPTION:
 //    Find and return a object in matchTable_FObjects list for a
 //    given ID/vmId.
+//
+//    If proxyflag is ESMF_PROXYYES, only match proxies.  Likewise, if
+//    ESMF_PROXYNO, only match non-proxies.  ESMF_PROXYANY matches any.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -2343,6 +2346,19 @@ void VM::getObject(
 
   // initialize return code; assume routine not implemented
   *rc = ESMC_RC_NOT_IMPL;   // final return code
+
+  switch (proxyflag) {
+    case ESMF_PROXYYES:
+    case ESMF_PROXYNO:
+    case ESMF_PROXYANY:
+      break;
+    default: {
+      *rc = ESMC_RC_ARG_BAD;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "- Bad proxyflag value", ESMC_CONTEXT, rc);
+      return;
+    }
+  }
 
   if (debug)
     std::cout << ESMC_METHOD << ": looking for object ID: " << objectID << std::endl;
@@ -2388,6 +2404,17 @@ void VM::getObject(
     if ((baseStatus != ESMF_STATUS_READY) || (Status != ESMF_STATUS_READY))
       continue;
 
+    switch (proxyflag) {
+      case ESMF_PROXYYES:
+        if ((fobject_temp)->ESMC_BaseGetProxyFlag() != ESMF_PROXYYES)
+          continue;
+      case ESMF_PROXYNO:
+        if ((fobject_temp)->ESMC_BaseGetProxyFlag() != ESMF_PROXYNO)
+          continue;
+      case ESMF_PROXYANY:
+        break;
+    }
+
     int ID = (fobject_temp)->ESMC_BaseGetID();
 
     if (debug)
@@ -2399,6 +2426,10 @@ void VM::getObject(
   }
 
   // Compare name
+
+  // TODO: In theory, VMId/ID should be sufficient to distinguish an object and the objects
+  // name shouldn't be needed.  However some tests (e.g., in ESMF_TransferGridSTest) have
+  // shown that further qualification is needed.  This needs to be investigated.
 
   if (id_found) {
     if (debug)
