@@ -9,10 +9,46 @@
 % Licensed under the University of Illinois-NCSA License.
 
 %\subsection{Description}
+\subsubsection{Profiling}
+\label{sec:Profiling}
+
+ESMF's built in {\em profiling} capability collects runtime statistics
+of an executing ESMF application through both automatic and manual code
+instrumentation. Timing information for all phases of all ESMF components
+executing in an application can be automatically collected using the
+{\tt ESMF\_RUNTIME\_PROFILE} environment variable (see below for settings).
+Additionally, arbitrary user-defined code regions can be timed by
+manually instrumenting code with special API calls.  Timing profiles
+of component phases and user-defined regions can be output in several
+different formats:
+\begin{itemize}
+\item in text at the end of ESMF Log files
+\item in separate text file, one per PET (if the ESMF Logs are turned off)
+\item in a single summary text file that aggregates timings over multiple PETs
+\item in a binary format for import into \htmladdnormallink{Cupid}{https://earthsystemcog.org/projects/cupid/} for detailed analysis
+\end{itemize}
+
+The following table lists important environment variables that control
+aspects of ESMF profiling.
+
+\begin{tabular} {|p{6cm}|p{8cm}|p{6cm}|p{6cm}|}
+     \hline\hline
+     {\bf Environment Variable} & {\bf Description} & {\bf Example Values} & {\bf Default}\\
+     \hline\hline
+     {\tt ESMF\_RUNTIME\_PROFILE} & Enable/disables all profiling functions & {\tt ON} or {\tt OFF} & {\tt OFF} \\
+     \hline\hline
+     {\tt ESMF\_RUNTIME\_PROFILE\_PETLIST} & Limits profiling to an explicit list of PETs & ``{\tt 0-9 50 99}'' & {\em profile all PETs}\\
+     \hline\hline
+     {\tt ESMF\_RUNTIME\_PROFILE\_OUTPUT} & Controls output format of profiles;  multiple can be specified in a space separated list & {\tt TEXT}, {\tt SUMMARY}, {\tt BINARY} & {\tt TEXT} \\
+     \hline\hline
+\end{tabular}
+
+
+\subsubsection{Tracing}
 \label{sec:Tracing}
 
-{\em Tracing} is a special kind of logging in which information about
-a program's execution is recorded so that it can later be analyzed. Trace
+Whereas profiling collects summary information from an application,
+{\em tracing} records a more detailed set of events for later analysis. Trace
 analysis can be used to understand what happened during a program's
 execution and is often used for diagnosing problems, debugging, and
 performance analysis.

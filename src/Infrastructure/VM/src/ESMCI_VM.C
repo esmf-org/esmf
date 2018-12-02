@@ -2002,7 +2002,8 @@ void VM::logMemInfo(
 //
 // !ARGUMENTS:
 //
-  std::string prefix
+  std::string prefix,
+  ESMCI::LogErr *log
   ){
 //
 // !DESCRIPTION:
@@ -2026,7 +2027,7 @@ void VM::logMemInfo(
       int len = strlen(line);
       line[len-1] = '\0'; // replace the newline with null
       sprintf(msg, "%s - MemInfo: \t%s", prefix.c_str(), line);
-      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+      log->Write(msg, ESMC_LOGMSG_INFO);
     }
   }
   fclose(file);
@@ -2035,31 +2036,31 @@ void VM::logMemInfo(
   struct mallinfo m = mallinfo();
   info << "Non-mmapped space allocated (bytes):       \t" << m.arena;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
   info << "Space allocated in mmapped regions (bytes):\t" << m.hblkhd;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
   info << "Maximum total allocated space (bytes):     \t" << m.usmblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
   info << "Space in freed fastbin blocks (bytes):     \t" << m.fsmblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
   info << "Total allocated space (bytes):             \t" << m.uordblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
   info << "Total free space (bytes):                  \t" << m.fordblks;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   info.str(""); // clear info
   info << "Top-most, releasable space (bytes):        \t" << m.keepcost;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   long total = 0; // init
   if (m.hblkhd>=0 && m.uordblks>=0){
     total = (long)m.hblkhd+(long)m.uordblks;
@@ -2068,7 +2069,7 @@ void VM::logMemInfo(
   info.str(""); // clear info
   info << "Total space in use, mmap + non-mmap (KiB): \t" << total;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   // access through malloc_stats()
   FILE *stderrOrig = stderr;
   char *buf;
@@ -2089,7 +2090,7 @@ void VM::logMemInfo(
   info.str(""); // clear info
   info << "Total space held (mmap + non-mmap) (KiB):  \t" << system;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   pos = malloc_stats_output.rfind("in use bytes     =");
   pos += 18;
   long in_use = strtol(malloc_stats_output.c_str()+pos, NULL, 10);
@@ -2097,14 +2098,14 @@ void VM::logMemInfo(
   info.str(""); // clear info
   info << "Total space used (mmap + non-mmap) (KiB):  \t" << in_use;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   // output the wtime since execution start
   double wt;
   ESMCI::VMK::wtime(&wt);
   info.str(""); // clear info
   info << "Wall-clock time since execution start (s): \t" << wt;
   sprintf(msg, "%s - MemInfo: %s", prefix.c_str(), info.str().c_str());
-  ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO);
+  log->Write(msg, ESMC_LOGMSG_INFO);
   // unlock again
   vm->unlock();
 #endif
@@ -2323,16 +2324,20 @@ void VM::getObject(
 //
 // !ARGUMENTS:
 //
-  void **fobject, // out - alias to object
-  int objectID,   // in - identifying ID
-  VMId *vmID,     // in - identifying vmID
-  int type,       // in - identifying object type
+  void **fobject,     // out - alias to object
+  int objectID,       // in - identifying ID
+  VMId *vmID,         // in - identifying vmID
+  const string &name, // in - identifying object name
+  ESMC_ProxyFlag proxyflag,  // in - proxy/non-proxy flag
   bool *object_found, // out - true if found, false if not
   int *rc) {
 //
 // !DESCRIPTION:
 //    Find and return a object in matchTable_FObjects list for a
 //    given ID/vmId.
+//
+//    If proxyflag is ESMF_PROXYYES, only match proxies.  Likewise, if
+//    ESMF_PROXYNO, only match non-proxies.  ESMF_PROXYANY matches any.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -2342,11 +2347,25 @@ void VM::getObject(
   // initialize return code; assume routine not implemented
   *rc = ESMC_RC_NOT_IMPL;   // final return code
 
+  switch (proxyflag) {
+    case ESMF_PROXYYES:
+    case ESMF_PROXYNO:
+    case ESMF_PROXYANY:
+      break;
+    default: {
+      *rc = ESMC_RC_ARG_BAD;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "- Bad proxyflag value", ESMC_CONTEXT, rc);
+      return;
+    }
+  }
+
   if (debug)
     std::cout << ESMC_METHOD << ": looking for object ID: " << objectID << std::endl;
   *fobject = NULL;          // assume not found
   *object_found = false;
 
+  // find VMId
 
   bool vmid_found = false;
   int i;
@@ -2369,31 +2388,60 @@ void VM::getObject(
     return;
   }
 
-  // match found
+  // Find ID
 
   // must lock/unlock for thread-safe access to std::vector
   VM *vm = getCurrent();
+  ESMC_Base *fobject_temp;
+  bool id_found = false;
   vm->lock();
   for (unsigned it=0; it<matchTable_Objects[i].size(); ++it){
 
-    ESMC_Base *fobject_temp = matchTable_Objects[i][it];
+    fobject_temp = matchTable_Objects[i][it];
 
     ESMC_Status baseStatus = (fobject_temp)->ESMC_BaseGetBaseStatus();
     ESMC_Status     Status = (fobject_temp)->ESMC_BaseGetStatus();
     if ((baseStatus != ESMF_STATUS_READY) || (Status != ESMF_STATUS_READY))
       continue;
 
+    switch (proxyflag) {
+      case ESMF_PROXYYES:
+        if ((fobject_temp)->ESMC_BaseGetProxyFlag() != ESMF_PROXYYES)
+          continue;
+      case ESMF_PROXYNO:
+        if ((fobject_temp)->ESMC_BaseGetProxyFlag() != ESMF_PROXYNO)
+          continue;
+      case ESMF_PROXYANY:
+        break;
+    }
+
     int ID = (fobject_temp)->ESMC_BaseGetID();
 
     if (debug)
      std::cout << ESMC_METHOD << ": comparing ID " << ID << " to object ID " << objectID << std::endl;
     if (ID == objectID) {
-      *fobject = fobject_temp;
-      // TODO: Bump Base refCount?  Gerhard says not yet.
-      *object_found = true;
+      id_found = true;
       break;
     }
   }
+
+  // Compare name
+
+  // TODO: In theory, VMId/ID should be sufficient to distinguish an object and the objects
+  // name shouldn't be needed.  However some tests (e.g., in ESMF_TransferGridSTest) have
+  // shown that further qualification is needed.  This needs to be investigated.
+
+  if (id_found) {
+    if (debug)
+      std::cout << ESMC_METHOD << ": comparing requested name: " << name << " to: " <<
+          (fobject_temp)->ESMC_BaseGetName() << std::endl;
+    if (name == (fobject_temp)->ESMC_BaseGetName()) {
+      *fobject = fobject_temp;
+      // TODO: Bump Base refCount?  Gerhard says not yet.
+      *object_found = true;
+    }
+  }
+
   vm->unlock();
   if (rc) *rc = ESMF_SUCCESS;
 }
@@ -3008,6 +3056,43 @@ void VM::timerLog(
   timerMsg << "Timer '" << timer << "' accumulated time: "
     << t->second.taccu << " seconds in " << t->second.iters << " iterations.";
   ESMC_LogDefault.Write(timerMsg.str(), ESMC_LOGMSG_INFO);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::VM::MPIError()"
+//BOPI
+// !IROUTINE:  ESMCI::VM::MPIError - Check for MPI error and log if true
+//
+// !INTERFACE:
+bool VM::MPIError(
+//
+// !ARGUMENTS:
+//
+  int mpiErrorToCheck,
+  int LINE, 
+  const std::string &FILE,
+  const std::string &method,
+  int *rcToReturn){
+//
+// !DESCRIPTION:
+//   Check for MPI error and log if an error is found
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  if (mpiErrorToCheck != MPI_SUCCESS){
+    char mpierr[MPI_MAX_ERROR_STRING];
+    int resultlen;
+    MPI_Error_string(mpiErrorToCheck, mpierr, &resultlen);
+    char msg[20+resultlen];
+    sprintf(msg, "Caught MPI error: %s", mpierr);
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg,
+      LINE, FILE, method, rcToReturn);
+    return true;
+  }
+  return false;
 }
 //-----------------------------------------------------------------------------
 

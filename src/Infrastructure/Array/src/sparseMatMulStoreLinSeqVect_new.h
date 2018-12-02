@@ -1,6 +1,7 @@
 #define STORELINSEQVECT_NEW_LOG_off
 #define STORELINSEQVECT_NEW_TIMERS_off
-#define STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_off
+#define STORELINSEQVECT_NEW_SELECTIVEEXCHANGE_on
+#define CHUNK_COUNT 1
 //-----------------------------------------------------------------------------
 
   template<typename IT> struct SparseMatrixIndex{
@@ -434,10 +435,10 @@
     
     virtual void handleResponse(int responsePet,
       char const *responseBuffer, int responseSize)const{
+      // called on every localPet for every responsePet != localPet
 #ifdef ASMM_STORE_MEMLOG_on
   VM::logMemInfo(std::string("Enter FillLinSeqVect.handleResponse()"));
 #endif
-      // called on every localPet for every responsePet != localPet
       MsgElement<DIT,SIT,T> *response =
         (MsgElement<DIT,SIT,T> *)responseBuffer;
       int size = responseSize / sizeof(MsgElement<DIT,SIT,T>);
@@ -1074,7 +1075,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
   VM::logMemInfo(std::string("ASMMStoreLinSeqVect_new3.0"));
 #endif
 
-  int const nChunks = 2;
+  int const nChunks = CHUNK_COUNT;
   for (int chunk=0; chunk<nChunks; chunk++){
   
   // list of dst factor elements, sorted by partnerSeqIndex, i.e. src seqIndex
@@ -1113,7 +1114,7 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect_new(
     vm->timerReset("fill_LinSeqVect");
     vm->timerStart("fill_LinSeqVect");
 #endif
-    
+
   switch (typekindFactors){
   case ESMC_TYPEKIND_R4:
     {

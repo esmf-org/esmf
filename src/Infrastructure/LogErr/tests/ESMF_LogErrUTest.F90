@@ -44,6 +44,7 @@
 
       ! test return codes
       integer :: rc, rcToReturn, desiredRc
+      integer :: rc_preinit
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
@@ -59,6 +60,7 @@
       character(1) :: pet_char
       type(ESMF_VM):: vm
       logical :: ele, hasNc
+      logical :: noPrefix_flag
 
 #ifdef ESMF_TESTEXHAUSTIVE
       character(ESMF_MAXSTR) :: pet_num
@@ -84,7 +86,6 @@
       logical :: was_found
       logical :: flush_flag
       logical :: highRes_flag
-      logical :: noPrefix_flag
       logical :: trace_flag
       type(ESMF_LogMsg_Flag), pointer :: logabort_flags(:)
       character(2) :: tooshortstr
@@ -109,6 +110,12 @@
 !------------------------------------------------------------------------------
       print *, "Starting LogErr Tests"
 
+      ! Pre-initialize test (per ticket #3614498)
+
+      call ESMF_LogWrite (msg="Pre-initialize message", rc=rc_preinit)
+
+      ! Start ESMF
+
       call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -121,6 +128,13 @@
       pet_char  = achar(my_pet + 48)
       ! Append to "PET"
       my_pet_char = "PET" // pet_char
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test pre-initialize LogWrite
+      write(failMsg, *) "Incorrectly returned ESMF_SUCCESS"
+      write(name, *) "Pre-initialize LogWrite Test"
+      call ESMF_Test((rc_preinit /= ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest

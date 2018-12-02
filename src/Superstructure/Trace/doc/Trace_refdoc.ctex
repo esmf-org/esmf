@@ -51,7 +51,7 @@
 
 #endif
 
-\section{Tracing Utility}
+\section{Profiling and Tracing}
 
 \subsection{Description}
 #ifdef STANDALONE

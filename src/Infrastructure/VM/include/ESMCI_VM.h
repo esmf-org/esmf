@@ -40,6 +40,7 @@
 
 #include "ESMCI_VMKernel.h"    // inherit from ESMCI::VMK class
 #include "ESMCI_Util.h"
+#include "ESMCI_LogErr.h"
 
 #include <string>
 #include <map>
@@ -131,13 +132,15 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     static void getCurrentGarbageInfo(int *, int *); // garbage info current VM
     static void logCurrentGarbageInfo(std::string prefix); // garbage info
     static void getMemInfo(int *virtMemPet, int *physMemPet);   // memory info
-    static void logMemInfo(std::string prefix);   // memory info
+    static void logMemInfo(std::string prefix,
+      ESMCI::LogErr *log=&ESMC_LogDefault);   // memory info
     static int getBaseIDAndInc(VMId *vmID);
     static void addObject(ESMC_Base *, VMId *vmID);
     static void rmObject(ESMC_Base *);
     static void addFObject(void **fobject, int objectID, VMId *vmID);
-    static void getObject(void **fobject, int objectID, VMId *vmID, int type,
-        bool *obj_found, int *rc);
+    static void getObject(void **fobject,
+      int objectID, VMId *vmID, const std::string &name, ESMC_ProxyFlag proxyflag,
+      bool *obj_found, int *rc);
     static void rmFObject(void **fobject);
     static void printMatchTable(void);
     static char const *getenv(char const *name);
@@ -148,9 +151,13 @@ class VM : public VMK {   // inherits from ESMCI::VMK class
     int recvVMId(VMId *vmid, int source);
     int bcastVMId(VMId **vmid, int count, int root);
     int allgathervVMId(VMId **sendvmid, int  sendcount,
-                       VMId **recvvmid, int *recvcounts, int *recvoffsets);
+      VMId **recvvmid, int *recvcounts, int *recvoffsets);
     int alltoallvVMId(VMId **sendvmid, int *sendcounts, int *sendoffsets,
-                      VMId **recvvmid, int *recvcounts, int *recvoffsets);
+      VMId **recvvmid, int *recvcounts, int *recvoffsets);
+    // MPI error handler
+    static bool MPIError(int mpiErrorToCheck,
+      int LINE, const std::string &FILE, const std::string &method,
+      int *rcToReturn=NULL);
     // performance timers API
     void timerReset(std::string timer){
       std::map<std::string, VMTimer>::iterator t = timers.find(timer);

@@ -1077,12 +1077,14 @@
       integer   :: id_value
       character :: key_value
 
-      type(ESMF_Grid) :: grid, grid_temp
-      type(ESMF_Pointer) :: grid_tempp
-      type(ESMF_Base) :: base
-      integer :: id_temp
-      type(ESMF_VMId) :: vmid_temp
-      type(ESMF_Logical) :: object_found
+      type(ESMF_Grid)     :: grid, grid_temp
+      type(ESMF_Pointer)  :: grid_tempp
+      type(ESMF_Base)     :: base
+      integer             :: id_temp, ssiCount, minSsiPetCount, maxSsiPetCount
+      type(ESMF_VMId)     :: vmid_temp
+      type(ESMF_Logical)  :: object_found
+      type(ESMF_Log)      :: log
+      character(len=80)   :: msg
 
       logical :: tf
 
@@ -1115,8 +1117,15 @@
       !NEX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Get Test"
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      call ESMF_VMGet(vm, petCount=npets, ssiCount=ssiCount, &
+        minSsiPetCount=minSsiPetCount, maxSsiPetCount=maxSsiPetCount, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      write(msg,*) "petCount=", npets, " ssiCount=", ssiCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+      write(msg,*) "minSsiPetCount=", minSsiPetCount, &
+        " maxSsiPetCount=", maxSsiPetCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -1393,7 +1402,7 @@
       write(name, *) "Obtain pointer to object via id/vmid lookup"
       write(failMsg, *) 'Can not access object'
       call c_esmc_vmgetobject (grid_temp,  &
-          id_temp, vmid_temp,  ESMF_GEOMTYPE_GRID%type,  &
+          id_temp, vmid_temp, "Grid", ESMF_PROXYNO,  &
           object_found, rc)
       grid_temp%isInit = ESMF_INIT_CREATED
       call ESMF_Test((rc == ESMF_SUCCESS), &
@@ -1422,6 +1431,53 @@
       call ESMF_Test((rc == ESMF_SUCCESS), &
           name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! ESMF_VMLogMemInfo()
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Write VMLogMemInfo into the default log w/o prefix"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMLogMemInfo(rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! ESMF_VMLogMemInfo()
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Write VMLogMemInfo into the default log w/ prefix"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMLogMemInfo(prefix="TestPrefix", rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      call ESMF_LogOpen(log, filename="vmLogMemInfo.log", appendflag=.false., &
+        rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! ESMF_VMLogMemInfo()
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Write VMLogMemInfo into custom log w/o prefix"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMLogMemInfo(log=log, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! ESMF_VMLogMemInfo()
+      ! WARNING: This is testing an INTERNAL method.  It is NOT
+      ! part of the supported ESMF user API!
+      write(name, *) "Write VMLogMemInfo into custom log w/ prefix"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_VMLogMemInfo(prefix="TestPrefix", log=log, rc=rc)
+      call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      call ESMF_LogClose(log, rc=rc)
+      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+      
 #endif
       call ESMF_TestEnd(ESMF_SRCLINE)
 

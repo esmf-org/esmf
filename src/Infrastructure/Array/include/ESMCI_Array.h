@@ -52,6 +52,11 @@ namespace ESMCI {
 
 namespace ESMCI {
 
+  // constants and enums
+
+  enum ArrayMatch_Flag {ARRAYMATCH_INVALID=0, ARRAYMATCH_NONE,
+    ARRAYMATCH_EXACT, ARRAYMATCH_ALIAS};
+
   // classes and structs
 
   template<typename T> struct SeqIndex;
@@ -188,6 +193,7 @@ namespace ESMCI {
                                       // entry of 0 indicates undistributed dim
     int *distgridToPackedArrayMap;    // [dimCount] - entries are basis 1
                                       // entry of 0 indicates replicated dim
+                                      // distr. Array dims as 1, 2, 3, .. only
     int *contiguousFlag;              // [localDeCount]
     int *exclusiveElementCountPDe;    // [deCount] number of elements in
                                       // exclusive region only considering
@@ -391,7 +397,10 @@ namespace ESMCI {
     int setName(const char* name){return ESMC_BaseSetName(name, "Array");}
     int setName(const std::string &name){return ESMC_BaseSetName(name.c_str(), "Array");}
     // misc.
-    static bool match(Array const *array1, Array const *array2, int *rc=NULL);
+    bool isRHCompatible(Array const *array, int *rc=NULL)const;
+    static ArrayMatch_Flag match(Array const *array1, Array const *array2,
+      int *rc=NULL);
+    static bool matchBool(Array const *array1, Array const *array2, int *rc=NULL);
     int read(const std::string &file, const std::string &variableName,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int write(const std::string &file, const std::string &variableName,

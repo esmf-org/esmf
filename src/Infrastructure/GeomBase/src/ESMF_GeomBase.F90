@@ -34,6 +34,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_VMMod
+      use ESMF_UtilMod
       use ESMF_UtilTypesMod
       use ESMF_InitMacrosMod    ! ESMF initializer macros
       use ESMF_LogErrMod        ! ESMF error handling
@@ -1499,15 +1500,15 @@ end subroutine ESMF_GeomBaseGet
     integer :: id_temp
     type(ESMF_VMId) :: vmid_temp
     type(ESMF_Grid) :: grid_temp
+    character(ESMF_MAXSTR) :: objname_temp
     type(ESMF_Logical) :: object_found
 
     integer :: geomobj_len
 
-type (ESMF_VM) :: vm
-integer :: mypet, npets
-integer :: i
-logical, parameter :: trace = .false.
-logical, parameter :: ENABLE_SHARED_GRID_SUPPORT = .false.
+    logical, parameter :: ENABLE_SHARED_GRID_SUPPORT = .true.
+
+    logical, parameter :: trace = .false.
+    character(ESMF_MAXSTR) :: grid_name
 
     ! Initialize return code; assume failure until success is certain
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1536,7 +1537,9 @@ logical, parameter :: ENABLE_SHARED_GRID_SUPPORT = .false.
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
     geomobj_len = transfer (buffer(offset:offset+3), geomobj_len)
-    if (trace) print *, ESMF_METHOD, ': deserialized geom object len =', geomobj_len
+    if (trace)  &
+        call ESMF_LogWrite (msg='deserialized geom object len =' //  &
+            ESMF_UtilStringInt2String (geomobj_len), ESMF_CONTEXT)
     offset = offset + 4
 
     ! Get info depending on type
@@ -1545,54 +1548,50 @@ logical, parameter :: ENABLE_SHARED_GRID_SUPPORT = .false.
        case (ESMF_GEOMTYPE_GRID%type) ! Grid
 
           ! Peek into the serialized Base to see if this Grid ID/VMId already exists
-          if (trace) then
-            call ESMF_VMGetCurrent (vm)
-            call ESMF_VMGet(vm, localPet=mypet)
-            print *, ESMF_METHOD, ': PET', mypet, ' is in shared grid test code'
-            !print *, 'matchtable on PET', mypet, ':'
-            !call c_esmc_vmprintmatchtable(vm)
-          end if
 
-          if (trace) print *, ESMF_METHOD, ': creating a VMId for peek'
+          if (trace) call ESMF_LogWrite (msg='creating a VMId for peek', ESMF_CONTEXT)
           call ESMF_VMIdCreate (vmid_temp, localrc)
           if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
-          if (trace) print *, ESMF_METHOD, ': deserialize the VMId for peek.  Offset =', offset
+          if (trace)  &
+              call ESMF_LogWrite (msg='deserialize the VMId for peek.  Offset =' // &
+                  ESMF_UtilStringInt2String (offset), ESMF_CONTEXT)
           offset_temp = offset
           call ESMF_BaseDeserializeIDVMId (buffer, offset_temp,  &
-                                 id_temp, vmid_temp, localrc)
+                                 id_temp, vmid_temp, objname_temp, localrc)
           if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
-          ! print '(1x,2a,i5)', ESMF_METHOD, ': peeked id =', id_temp
-          ! print *, ESMF_METHOD, ': peeked VMId:'
-          ! call ESMF_VMIdPrint (vmid_temp)
-
-          if (trace) print *, ESMF_METHOD, ': attempt to access object with temp id/vmID'
-          call c_esmc_vmgetobject (grid_temp,  &
-              id_temp, vmid_temp,  ESMF_GEOMTYPE_GRID%type,  &
+          if (trace)  &
+              call ESMF_LogWrite (msg='searching for object: ' // objname_temp, ESMF_CONTEXT)
+          call c_esmc_vmgetobject (grid_temp%this,  &
+              id_temp, vmid_temp,  objname_temp, ESMF_PROXYYES,  &
               object_found, localrc)
           if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
-          if (trace) print *, ESMF_METHOD, ': Destroy temp VMId'
+          if (trace) call ESMF_LogWrite (msg='Destroy temp VMId')
           call ESMF_VMIdDestroy (vmid_temp, localrc)
           if (ESMF_LogFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rcToReturn=rc)) return
 
-          if (trace) print *, ESMF_METHOD, ': PET', mypet, ' - shared object_found = ', object_found == ESMF_TRUE
+          if (trace) call ESMF_LogWrite (msg='shared object_found flag = ' //  &
+              merge (".true. ", ".false.", object_found == ESMF_TRUE))
           if (ENABLE_SHARED_GRID_SUPPORT .and. object_found == ESMF_TRUE) then
             gbcp%grid = grid_temp
-            if (trace)  &
-              print *, ESMF_METHOD, ': Grid linked for sharing.'
-            if (trace)  &
-              call ESMF_GridPrint (gbcp%grid)
-! TODO: (increment Base and/or VM refCount?, etc.  Gerhard says not yet.)
             gbcp%grid%isInit = ESMF_INIT_CREATED
+            if (trace) then
+              call ESMF_GridGet (gbcp%grid, name=grid_name, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rcToReturn=rc)) return
+              call ESMF_LogWrite (msg='Grid linked for sharing: ' // grid_name, ESMF_CONTEXT)
+            end if
+! TODO: (increment Base and/or VM refCount?, etc.  Gerhard says not yet.)
             offset = offset + geomobj_len
           else
             gbcp%grid=ESMF_GridDeserialize(buffer=buffer, &

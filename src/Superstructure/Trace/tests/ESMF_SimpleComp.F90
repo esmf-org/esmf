@@ -43,10 +43,22 @@ contains
       type(ESMF_State):: istate, estate
       type(ESMF_Clock):: clock
       integer, intent(out):: rc
+
+      rc = ESMF_SUCCESS
+      
+      call ESMF_TraceRegionEnter("user1", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      
+      call ESMF_TraceRegionEnter("user1a", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
       
       print *, "Inside Init"
 
-      rc = ESMF_SUCCESS
+      call ESMF_TraceRegionExit("user1a", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      call ESMF_TraceRegionExit("user1", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      
       
     end subroutine Init
 
@@ -55,10 +67,17 @@ contains
       type(ESMF_State):: istate, estate
       type(ESMF_Clock):: clock
       integer, intent(out):: rc
+
+      rc = ESMF_SUCCESS
+
+      call ESMF_TraceRegionEnter("user1a", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
       
       print *, "Inside Run"
 
-      rc = ESMF_SUCCESS
+      call ESMF_TraceRegionExit("user1a", rc=rc)
+      if (rc /= ESMF_SUCCESS) return
+      
       
     end subroutine Run
 

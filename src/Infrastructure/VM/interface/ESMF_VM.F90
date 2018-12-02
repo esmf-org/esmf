@@ -4697,8 +4697,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
-    petCount, peCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag,&
-    rc)
+    petCount, peCount, ssiCount, minSsiPetCount, maxSsiPetCount, &
+    mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)            :: vm
@@ -4706,6 +4706,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: localPet
     integer,            intent(out), optional :: petCount
     integer,            intent(out), optional :: peCount
+    integer,            intent(out), optional :: ssiCount
+    integer,            intent(out), optional :: minSsiPetCount
+    integer,            intent(out), optional :: maxSsiPetCount
     integer,            intent(out), optional :: mpiCommunicator
     logical,            intent(out), optional :: pthreadsEnabledFlag
     logical,            intent(out), optional :: openMPEnabledFlag
@@ -4714,6 +4717,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[7.0.0] Added arguments {\tt ssiCount}, {\tt minSsiPetCount}, and
+!   {\tt maxSsiPetCount} to provide access to information about how the
+!   VM is mapped across the single system images (typically synonymous to nodes)
+!   of the compute environment. This information is useful when 
+!   constructing custom petLists.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -4726,11 +4737,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[localPet]}]
 !        Upon return this holds the id of the PET that issued this call.
 !   \item[{[petCount]}]
-!        Upon return this holds the number of PETs in the specified 
-!        {\tt ESMF\_VM} object.
+!        Upon return this holds the number of PETs running under {\tt vm}.
 !   \item[{[peCount]}]
-!        Upon return this holds the number of PEs referenced by the specified
-!        {\tt ESMF\_VM} object.
+!        Upon return this holds the number of PEs referenced by {\tt vm}.
+!   \item[{[ssiCount]}]
+!        Upon return this holds the number of single system images referenced 
+!        by {\tt vm}.
+!   \item[{[minSsiPetCount]}]
+!        Upon return this holds the smallest number of PETs running in the same
+!        single system images under {\tt vm}.
+!   \item[{[axSsiPetCount]}]
+!        Upon return this holds the largest number of PETs running in the same
+!        single system images under {\tt vm}.
 !   \item[{[mpiCommunicator]}]
 !        Upon return this holds the MPI intra-communicator used by the 
 !        specified {\tt ESMF\_VM} object. This communicator may be used for
@@ -4769,8 +4787,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
 
     ! Call into the C++ interface.
-    call c_ESMC_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
-      pthreadsEnabledFlagArg, openMPEnabledFlagArg, localrc)
+    call c_ESMC_VMGet(vm, localPet, petCount, peCount, ssiCount, &
+      minSsiPetCount, maxSsiPetCount, mpiCommunicator, pthreadsEnabledFlagArg, &
+      openMPEnabledFlagArg, localrc)
     if (present (pthreadsEnabledFlag))  &
       pthreadsEnabledFlag = pthreadsEnabledFlagArg
     if (present (openMPEnabledFlag))  &
@@ -5231,10 +5250,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_VMLogMemInfo - Log memory info for this PET
 
 ! !INTERFACE:
-  subroutine ESMF_VMLogMemInfo(prefix, rc)
+  subroutine ESMF_VMLogMemInfo(prefix, log, rc)
 !
 ! !ARGUMENTS:
     character (len=*),    intent(in),   optional  :: prefix
+    type(ESMF_Log),       intent(inout),optional  :: log
     integer, intent(out),               optional  :: rc           
 !
 ! !DESCRIPTION:
@@ -5242,6 +5262,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !   The arguments are:
 !   \begin{description}
+!   \item [{[prefix]}]
+!     String to prefix the memory info message. Default is no prefix.
+!   \item [{[log]}] !TODO: BROKEN!!!
+!     {\tt ESMF\_Log} object that can be used instead of the default Log.
+!     Default is to use the default log.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5255,7 +5280,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Call into the C++ interface.
-    call c_esmc_vmlogmeminfo(prefix, localrc)
+    call c_esmc_vmlogmeminfo(prefix, log, localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

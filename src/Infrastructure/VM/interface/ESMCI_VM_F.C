@@ -465,7 +465,8 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_vmget)(ESMCI::VM **ptr, int *localPet, int *petCount, 
-    int *peCount, int *mpiCommunicator, ESMC_Logical *pthreadsEnabledFlag,
+    int *peCount, int *ssiCount, int *minSsiPetCount, int *maxSsiPetCount,
+    int *mpiCommunicator, ESMC_Logical *pthreadsEnabledFlag,
     ESMC_Logical *openMPEnabledFlag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmget()"
@@ -483,6 +484,12 @@ extern "C" {
       for (int i=0; i<npets; i++)
         *peCount += (*ptr)->getNcpet(i);
     }
+    if (ESMC_NOT_PRESENT_FILTER(ssiCount) != ESMC_NULL_POINTER)
+      *ssiCount = (*ptr)->getSsiCount();
+    if (ESMC_NOT_PRESENT_FILTER(minSsiPetCount) != ESMC_NULL_POINTER)
+      *minSsiPetCount = (*ptr)->getMinSsiPetCount();
+    if (ESMC_NOT_PRESENT_FILTER(maxSsiPetCount) != ESMC_NULL_POINTER)
+      *maxSsiPetCount = (*ptr)->getMaxSsiPetCount();
     if (ESMC_NOT_PRESENT_FILTER(mpiCommunicator) != ESMC_NULL_POINTER){
       mpiCommTemp = (*ptr)->getMpi_c();
 #ifdef ESMF_DONT_HAVE_MPI_COMM_C2F
@@ -1452,13 +1459,13 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_vmgetobject)(void **fobject, int *objectID, ESMCI::VMId **vmid,
-      int *type, ESMC_Logical *obj_found, int *rc){
+      const char *name_f, ESMC_ProxyFlag *proxyflag, ESMC_Logical *obj_found, int *rc,
+      ESMCI_FortranStrLenArg name_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgetobject()"
+    std::string name = std::string (name_f, ESMC_F90lentrim (name_f, name_l));
     bool found;
-// std::cout << ESMC_METHOD << ": looking for vmid:" << std::endl;
-// (*vmid)->print();
-    ESMCI::VM::getObject(fobject, *objectID, *vmid, *type, &found, rc);
+    ESMCI::VM::getObject(fobject, *objectID, *vmid, name, *proxyflag, &found, rc);
     *obj_found = (found)?ESMF_TRUE:ESMF_FALSE;
   }
     
@@ -1559,14 +1566,17 @@ extern "C" {
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
     
-  void FTN_X(c_esmc_vmlogmeminfo)(char *prefix, int *rc,
+  void FTN_X(c_esmc_vmlogmeminfo)(char *prefix, ESMCI::LogErr **log, int *rc,
     ESMCI_FortranStrLenArg prefix_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgetmeminfo()"
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     try{
       std::string prefixStr(prefix, prefix_l);
-      ESMCI::VM::logMemInfo(prefixStr);
+      if (ESMC_NOT_PRESENT_FILTER(log) != ESMC_NULL_POINTER)
+        ESMCI::VM::logMemInfo(prefixStr, *log);
+      else
+        ESMCI::VM::logMemInfo(prefixStr);
     }catch(int localrc){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc))

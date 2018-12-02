@@ -41,6 +41,7 @@
 #include "ESMCI_VMKernel.h"
 #include "ESMCI_HashMap.h"
 #include "ESMCI_RegionNode.h"
+#include "ESMCI_RegionSummary.h"
 #include "ESMCI_ComponentInfo.h"
 #include "ESMCI_TraceUtil.h"
 #include <esmftrc.h>
@@ -93,7 +94,16 @@ namespace ESMCI {
   static bool profileOutputToLog = false;    // output to EMSF log?
   static bool profileOutputToFile = false;   // output to text file?
   static bool profileOutputToBinary = false; // output to binary trace?
+  static bool profileOutputSummary = false;   // output aggregate profile on root PET?
   
+  static uint16_t next_local_id() {
+    static uint16_t next = 1;
+    if (next > REGION_MAX_COUNT) {
+      throw std::range_error("Out of space for trace regions");
+    }
+    return next++;
+  } 
+
   /*
     Timed regions are defined by either:
      1) a component phase represented by (vmid, baseid, method, phase), or
@@ -113,11 +123,11 @@ namespace ESMCI {
 
    */
 
-  static HashMap<string, int, REGION_HASHTABLE_SIZE, StringHashF> userRegionMap;
-  static HashMap<ESMFPhaseId, int, REGION_HASHTABLE_SIZE, ESMFPhaseHashF> phaseRegionMap;
+  static HashMap<string, uint16_t, REGION_HASHTABLE_SIZE, StringHashF> userRegionMap;
+  static HashMap<ESMFPhaseId, uint16_t, REGION_HASHTABLE_SIZE, ESMFPhaseHashF> phaseRegionMap;
   static HashMap<ESMFId, ComponentInfo *, REGION_HASHTABLE_SIZE, ESMFIdHashF> componentInfoMap;
 
-  static RegionNode rootRegionNode;
+  static RegionNode rootRegionNode(NULL, next_local_id(), false);
   static RegionNode *currentRegionNode = &rootRegionNode;
   
 #ifndef ESMF_NO_DLFCN
@@ -451,6 +461,11 @@ namespace ESMCI {
              (profileOutput.find("Binary") != string::npos) ) {
           profileOutputToBinary = true;
         }
+        if ( (profileOutput.find("SUMMARY") != string::npos) ||
+             (profileOutput.find("summary") != string::npos) ||
+             (profileOutput.find("Summary") != string::npos) ) {
+          profileOutputSummary = true;
+        }
       }
       else {
         // if not specified, default is to output text
@@ -605,49 +620,88 @@ namespace ESMCI {
     
   }
 
-  static string getPhaseNameFromRegionId(uint16_t regionId) {
+  static string getPhaseNameFromPhaseId(ESMFPhaseId phaseId) {
+    ComponentInfo *ci = NULL;
+    bool present = componentInfoMap.get(phaseId.getESMFId(), ci);
+    if (present && ci != NULL) {
+      return ci->getPhaseName(phaseId);
+    }
+    return "";
+  }
+  
+  static string getRegionNameFromId(uint16_t local_id) {
     ESMFPhaseId phaseId;
-    bool present = phaseRegionMap.reverse(regionId, phaseId);
+    bool present = phaseRegionMap.reverse(local_id, phaseId);
     if (present) {
-      ComponentInfo *ci = NULL;
-      bool present = componentInfoMap.get(phaseId.getESMFId(), ci);
-      if (present && ci != NULL) {
-        return ci->getPhaseName(phaseId);
-      }
+      return getPhaseNameFromPhaseId(phaseId);
+    }
+    else {
+      string name;
+      present = userRegionMap.reverse(local_id, name);
+      if (present) return name;
     }
     return "";
   }
 
+    
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::populateRegionNames()"  
+  static void populateRegionNames(RegionNode *rn) {
+    if (rn == NULL) return;
+
+    string name = getRegionNameFromId(rn->getLocalId());
+    if (name.length() == 0) {
+      if (rn->isUserRegion()) {
+        name = "UNKNOWN_USER_REGION";
+      }
+      else {
+        name = "UNKNOWN_ESMF_PHASE";
+      }
+    }
+    rn->setName(name);
+    
+    for (unsigned i = 0; i < rn->getChildren().size(); i++) {
+      populateRegionNames(rn->getChildren().at(i));
+    }    
+  }
+
+  static size_t regionNamePadding(RegionSummary *rs, int depth) {
+    size_t maxSize = rs->getName().length() + (2*depth);
+    for (unsigned i = 0; i < rs->getChildren().size(); i++) {
+      size_t childSize = regionNamePadding(rs->getChildren().at(i), depth+1);
+      if (childSize > maxSize) maxSize = childSize; 
+    }
+    return maxSize;
+  }
+  
+  static size_t regionNamePadding(RegionNode *rn, int depth) {
+    size_t maxSize = rn->getName().length() + (2*depth);
+    for (unsigned i = 0; i < rn->getChildren().size(); i++) {
+      size_t childSize = regionNamePadding(rn->getChildren().at(i), depth+1);
+      if (childSize > maxSize) maxSize = childSize; 
+    }
+    return maxSize;
+  }  
+  
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::printProfile()"  
-#define STATLINE 256
-  static void printProfile(RegionNode *rn, bool printToLog, string prefix, ofstream &ofs, int *rc) {
+#define STATLINE 512
+  static void printProfile(RegionNode *rn, bool printToLog, string prefix, ofstream &ofs, size_t namePadding, int *rc) {
 
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
     if (rn->getParent() != NULL) {
-      char strname[50];
       char strbuf[STATLINE];
-
-      //snprintf(strname, 10, "%d", rn->getId());
-      string name("UNKNOWN");
-      if (rn->isUserRegion()) {
-        bool present = userRegionMap.reverse(rn->getId(), name);
-        if (!present) {
-          name = "UNKNOWN_USER_REGION";
-        }
-      }
-      else {
-        name = getPhaseNameFromRegionId(rn->getId());
-        if (name.length() == 0) name = "UNKNOWN";
-      }
+      string name = rn->getName();
       name.insert(0, prefix);
+
+      stringstream fmt;
+      fmt << "%-" << namePadding << "s %-6lu %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f";
       
-      snprintf(strbuf, STATLINE, "%-50s %-6lu %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f %-11.4f",
+      snprintf(strbuf, STATLINE, fmt.str().c_str(),
                name.c_str(), rn->getCount(), rn->getTotal()*NANOS_TO_SECS,
                rn->getSelfTime()*NANOS_TO_SECS, rn->getMean()*NANOS_TO_SECS,
-               rn->getMin()*NANOS_TO_SECS, rn->getMax()*NANOS_TO_SECS,
-               rn->getTotalMPI()*NANOS_TO_SECS);
+               rn->getMin()*NANOS_TO_SECS, rn->getMax()*NANOS_TO_SECS);
       if (printToLog) {
         ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
       }
@@ -657,39 +711,36 @@ namespace ESMCI {
     }
     rn->sortChildren();
     for (unsigned i = 0; i < rn->getChildren().size(); i++) {
-      printProfile(rn->getChildren().at(i), printToLog, prefix + "  ", ofs, rc);
+      printProfile(rn->getChildren().at(i), printToLog, prefix + "  ", ofs, namePadding, rc);
     }
     if (rc!=NULL) *rc=ESMF_SUCCESS;
   }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::printProfile()"  
-  static void printProfile(bool printToLog, int *rc) {
+  static void printProfile(RegionNode *rn, bool printToLog, string filename, int *rc) {
 
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
     ofstream ofs;
     int localrc;
+
+    size_t namePadding = regionNamePadding(rn, 0)+1;
+    if (namePadding > 200) namePadding = 200;
+    
+    stringstream fmt;
+    fmt << "%-" << namePadding << "s %-6s %-11s %-11s %-11s %-11s %-11s";
+    
     char strbuf[STATLINE];
-    snprintf(strbuf, STATLINE, "%-50s %-6s %-11s %-11s %-11s %-11s %-11s %-11s",
-             "Region", "Count", "Total (s)", "Self (s)", "Mean (s)", "Min (s)", "Max (s)", "MPI (s)");
+    snprintf(strbuf, STATLINE, fmt.str().c_str(),
+             "Region", "Count", "Total (s)", "Self (s)", "Mean (s)", "Min (s)", "Max (s)");
 
     if (printToLog) {
       ESMC_LogDefault.Write("**************** Region Timings *******************", ESMC_LOGMSG_INFO);
       ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
     }
     else {
-      VM *globalvm = VM::getGlobal(&localrc);
-      if (ESMC_LogDefault.MsgFoundError(localrc, 
-           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
-        return;
-
-      stringstream fname;
-      fname << (globalvm->getPetCount() - 1);
-      int width = fname.str().length();
-      fname.str("");
-      fname << "esmf_profile." << std::setfill('0') << std::setw(width) << globalvm->getLocalPet();
-      ofs.open(fname.str().c_str(), ofstream::trunc);
+      ofs.open(filename.c_str(), ofstream::trunc);
       if (ofs.is_open() && !ofs.fail()) {
         ofs << strbuf << "\n";
       }
@@ -699,7 +750,7 @@ namespace ESMCI {
         return;
       }
     }
-    printProfile(&rootRegionNode, printToLog, "", ofs, &localrc);
+    printProfile(rn, printToLog, "", ofs, namePadding, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, "Error writing profile output file", 
          ESMC_CONTEXT, rc))
       return;
@@ -708,13 +759,100 @@ namespace ESMCI {
     }
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::printSummaryProfile()"  
+  static void printSummaryProfile(RegionSummary *rs, bool printToLog, string prefix, ofstream &ofs, size_t namePadding, int *rc) {
+    
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+    if (rs->getParent() != NULL) {
+      char strbuf[STATLINE];
+      string name = rs->getName();
+      name.insert(0, prefix);
+      
+      char countstr[12];
+      if (rs->getCountsMatch()) {
+	snprintf(countstr, 12, "%-6lu", rs->getCountEach());
+      }
+      else {
+	snprintf(countstr, 12, "%-8s", "MULTIPLE");
+      }
+
+      stringstream fmt;
+      fmt << "%-" << namePadding << "s %-6lu %-8s %-11.4f %-11.4f %-7d %-11.4f %-7d";
+
+      snprintf(strbuf, STATLINE, fmt.str().c_str(),
+               name.c_str(), rs->getPetCount(), countstr,
+	       rs->getTotalMean()*NANOS_TO_SECS,
+	       rs->getTotalMin()*NANOS_TO_SECS, rs->getTotalMinPet(),
+	       rs->getTotalMax()*NANOS_TO_SECS, rs->getTotalMaxPet());
+      if (printToLog) {
+        ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
+      }
+      else {
+        ofs << strbuf << "\n";
+      }
+    }
+    rs->sortChildren();
+    for (unsigned i = 0; i < rs->getChildren().size(); i++) {
+      printSummaryProfile(rs->getChildren().at(i), printToLog, prefix + "  ", ofs, namePadding, rc);
+    }
+    if (rc!=NULL) *rc=ESMF_SUCCESS;
+  }
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::printSummaryProfile()"  
+  static void printSummaryProfile(RegionSummary *rs, bool printToLog, string filename, int *rc) {
+
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+    ofstream ofs;
+    int localrc;
+    
+    size_t namePadding = regionNamePadding(rs, 0)+1;
+    if (namePadding > 200) namePadding = 200;
+
+    stringstream fmt;
+    fmt << "%-" << namePadding << "s %-6s %-8s %-11s %-11s %-7s %-11s %-7s";
+    
+    char strbuf[STATLINE];
+    snprintf(strbuf, STATLINE, fmt.str().c_str(),
+             "Region", "PETs", "Count", "Mean (s)", "Min (s)", "Min PET", "Max (s)", "Max PET");
+
+    if (printToLog) {
+      ESMC_LogDefault.Write("**************** Region Timings *******************", ESMC_LOGMSG_INFO);
+      ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
+    }
+    else {
+      ofs.open(filename.c_str(), ofstream::trunc);
+      if (ofs.is_open() && !ofs.fail()) {
+        ofs << strbuf << "\n";
+      }
+      else {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error opening profile output file", 
+           ESMC_CONTEXT, rc);
+        return;
+      }
+    }
+    printSummaryProfile(rs, printToLog, "", ofs, namePadding, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, "Error writing profile output file", 
+         ESMC_CONTEXT, rc))
+      return;
+    if (!printToLog) {
+      ofs.close();
+    }
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+
   
   static void AddRegionProfilesToTrace(RegionNode *rn) {
     
     esmftrc_default_trace_region_profile(
         esmftrc_platform_get_default_ctx(),
-	rn->getId(),
-	rn->getParentId(),
+	rn->getGlobalId(),
+	rn->getParentGlobalId(),
 	rn->getTotal(),
 	rn->getSelfTime(),
 	rn->getCount(),
@@ -727,11 +865,109 @@ namespace ESMCI {
       AddRegionProfilesToTrace(rn->getChildren().at(i));
     }
   }
+
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GatherRegions()"
+  static void GatherRegions(int *rc) {
+    
+    int localrc;
+    VM *globalvm = VM::getGlobal(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, 
+          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+      return;
+
+    char *serializedTree = NULL;
+    size_t bufferSize = 0;
+    
+    if (profileLocalPet && globalvm->getLocalPet() > 0) {
+      //std::cout << "serialize from pet: " << globalvm->getLocalPet() << "\n";
+      try {
+        serializedTree = rootRegionNode.serialize(&bufferSize);
+      }
+      catch(std::exception& e) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                      e.what(), ESMC_CONTEXT, rc);
+        return;                 
+      }
+      //std::cout << "sending profile from pet: " << globalvm->getLocalPet() << " (" << bufferSize << ")" << "\n";
+      //send size of buffer
+      globalvm->send((void *) &bufferSize, sizeof(bufferSize), 0);
+      //send buffer itself
+      globalvm->send((void *) serializedTree, bufferSize, 0);
+      
+      free(serializedTree);
+    }
+    else if (globalvm->getLocalPet() == 0) {
+
+      //clone root
+      //ESMCI::RegionNode *aggNode = new ESMCI::RegionNode(NULL, &rootRegionNode);
+      ESMCI::RegionSummary *sumNode = new ESMCI::RegionSummary(NULL);
+      
+      //first add my own timing tree to the summary
+      sumNode->merge(rootRegionNode, globalvm->getLocalPet());
+
+      //then gather from other PETs
+      for (int p=1; p<globalvm->getPetCount(); p++) {
+
+        if (ProfileIsEnabledForPET(p, &localrc) || TraceIsEnabledForPET(p, &localrc)) {
+
+          bufferSize = 0;
+          globalvm->recv((void *) &bufferSize, sizeof(bufferSize), p);
+          //std::cout << "receive profile from pet: " << p << " (" << bufferSize << ")" << "\n";
+          
+          serializedTree = (char *) malloc(bufferSize);
+          if (serializedTree == NULL) {
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_MEM_ALLOCATE,
+                                        "Error allocating memory when gather profiled regions", 
+                                        ESMC_CONTEXT, rc);
+          return;
+          }
+          memset(serializedTree, 0, bufferSize);
+
+          globalvm->recv(serializedTree, bufferSize, p);
+          
+          
+          try {
+	    ESMCI::RegionNode *desNode = new ESMCI::RegionNode(serializedTree, bufferSize);
+	    //merge statistics
+	    sumNode->merge(*desNode, p);
+	    delete desNode;
+	  }
+          catch(std::exception& e) {
+            ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          e.what(), ESMC_CONTEXT, rc);
+            return;                 
+          }
+	  
+          free(serializedTree);
+        }
+        else if (ESMC_LogDefault.MsgFoundError(localrc, 
+                   ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {         
+          return;
+        }
+        
+      }
+
+      //now we have received and merged
+      //profiles from all other PETs     
+      printSummaryProfile(sumNode, false, "ESMF_Profile.summary", &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, 
+           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+        return;     
+
+      delete sumNode;
+    }
+        
+  }
+
+
   
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceClose()"
   void TraceClose(int *rc) {
 
+    int localrc;
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
     
     // allow calling multiple times, only closes
@@ -740,15 +976,45 @@ namespace ESMCI {
       traceInitialized = false;
       FinalizeWrappers();
 
+      if (profileOutputToLog || profileOutputToFile || profileOutputSummary) {
+        populateRegionNames(&rootRegionNode);
+      }
+
       if (profileOutputToLog) {
-        printProfile(true, rc);
+        printProfile(&rootRegionNode, true, "", &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, 
+             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+          return;     
       }
+
       if (profileOutputToFile) {
-        printProfile(false, rc);
+        VM *globalvm = VM::getGlobal(&localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, 
+             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+          return;
+
+        stringstream fname;
+        fname << (globalvm->getPetCount() - 1);
+        int width = fname.str().length();
+        fname.str("");
+        fname << "ESMF_Profile." << std::setfill('0') << std::setw(width) << globalvm->getLocalPet();
+
+        printProfile(&rootRegionNode, false, fname.str(), &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, 
+             ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+          return;     
       }
+
       if (profileOutputToBinary) {
         AddRegionProfilesToTrace(&rootRegionNode);
       }
+
+      if (profileOutputSummary) {
+        GatherRegions(&localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, 
+           ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
+          return;
+      }      
       
       if (traceCtx != NULL) { 
         if (traceLocalPet || profileOutputToBinary) {
@@ -776,7 +1042,8 @@ namespace ESMCI {
     
   }
 
-   
+
+  
   ///////////////////// I/O Tracing //////////////////
 
   //static std::string openFilename;
@@ -882,38 +1149,38 @@ namespace ESMCI {
 
     if (traceLocalPet || profileLocalPet) {
     
-      int regionId = -1;
+      uint16_t local_id = 0;
       ESMFPhaseId phaseId(ESMFId(*ep_vmid, *ep_baseid), *ep_method, *ep_phase);
-      bool present = phaseRegionMap.get(phaseId, regionId);
+      bool present = phaseRegionMap.get(phaseId, local_id);
       if (!present) {
-	if (currentRegionNode == NULL) {
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-                                        "Trace regions not properly nested", ESMC_CONTEXT, rc);
-	  return;
-        }
-        currentRegionNode = currentRegionNode->addChild(false);
-	regionId = currentRegionNode->getId();
-        phaseRegionMap.put(phaseId, regionId);
-
-        //add definition to trace
-        if (traceLocalPet || profileOutputToBinary) {
-          esmftrc_default_trace_define_region(esmftrc_platform_get_default_ctx(),
-                                              regionId,
-                                              TRACE_REGIONTYPE_PHASE,
-                                              *ep_vmid, *ep_baseid, *ep_method, *ep_phase,
-                                              getPhaseNameFromRegionId(regionId).c_str());
-        }
-      }
-      else {
-	currentRegionNode = currentRegionNode->getChild(regionId);
+        local_id = next_local_id();
+        phaseRegionMap.put(phaseId, local_id);
       }
 
+      if (currentRegionNode == NULL) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+                                      "Trace regions not properly nested", ESMC_CONTEXT, rc);
+        return;
+      }
+
+      bool added;
+      currentRegionNode = currentRegionNode->getOrAddChild(local_id, added);
+
+      //add region to trace output
+      if (added && (traceLocalPet || profileOutputToBinary)) {
+        esmftrc_default_trace_define_region(esmftrc_platform_get_default_ctx(),
+                                            currentRegionNode->getGlobalId(),
+                                            TRACE_REGIONTYPE_PHASE,
+                                            *ep_vmid, *ep_baseid, *ep_method, *ep_phase,
+                                            getRegionNameFromId(local_id).c_str());
+      }
+    
       TraceClockLatch(traceCtx);  /* lock in time on clock */
       currentRegionNode->entered(traceCtx->latch_ts);
-
+      
       if (traceLocalPet) {
         esmftrc_default_trace_regionid_enter(esmftrc_platform_get_default_ctx(),
-                                             regionId);
+                                             currentRegionNode->getGlobalId());
       }
       TraceClockUnlatch(traceCtx);
 
@@ -931,33 +1198,38 @@ namespace ESMCI {
 
       TraceClockLatch(traceCtx);
     
-      int regionId = -1;
+      uint16_t local_id = 0;
       ESMFPhaseId phaseId(ESMFId(*ep_vmid, *ep_baseid), *ep_method, *ep_phase);
-      bool present = phaseRegionMap.get(phaseId, regionId);  /* should always be present */
-      if (!present) {
+      bool present = phaseRegionMap.get(phaseId, local_id);  /* should always be present */
+      if (!present) { 
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
                                     "Trace region not properly nested", ESMC_CONTEXT, rc);
         TraceClockUnlatch(traceCtx);
         return;
       }
 
-      if (traceLocalPet) {
-        esmftrc_default_trace_regionid_exit(esmftrc_platform_get_default_ctx(),
-                                            regionId);
-      }
-      
       if (currentRegionNode == NULL) {
 	ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
 				      "Trace regions not properly nested", ESMC_CONTEXT, rc);
 	TraceClockUnlatch(traceCtx);
 	return;
       }
-      else if (currentRegionNode->getId() != regionId) {
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-				      "Trace regions not properly nested", ESMC_CONTEXT, rc);
+      else if (currentRegionNode->getLocalId() != local_id) {
+        stringstream errMsg;
+        errMsg << "Trace regions not properly nested exiting from region: ";
+        errMsg << getRegionNameFromId(local_id);
+        errMsg << " Expected exit from: ";
+        errMsg << getRegionNameFromId(currentRegionNode->getLocalId());
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG, errMsg.str().c_str(), ESMC_CONTEXT, rc);
 	TraceClockUnlatch(traceCtx);
 	return;
       }
+
+      if (traceLocalPet) {
+        esmftrc_default_trace_regionid_exit(esmftrc_platform_get_default_ctx(),
+                                            currentRegionNode->getGlobalId());
+      }
+      
       currentRegionNode->exited(traceCtx->latch_ts);
       currentRegionNode = currentRegionNode->getParent();
       
@@ -983,61 +1255,60 @@ namespace ESMCI {
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceEventRegionEnter()"
   void TraceEventRegionEnter(std::string name, int *rc) {
-    
+
     if (traceLocalPet || profileLocalPet) {
-      int regionId = -1;
-      bool present = userRegionMap.get(name, regionId);
+      
+      uint16_t local_id = 0;
+      bool present = userRegionMap.get(name, local_id);
       if (!present) {
-	if (currentRegionNode == NULL) {
-          ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-                                        "Trace regions not properly nested", ESMC_CONTEXT, rc);
-	  return;
-        }
-        currentRegionNode = currentRegionNode->addChild(true);
-	regionId = currentRegionNode->getId();
-	userRegionMap.put(name, regionId);
-	
-        if (traceLocalPet || profileOutputToBinary) {
-          //add definition to trace          
-          esmftrc_default_trace_define_region(esmftrc_platform_get_default_ctx(),
-                                              regionId,
-                                              TRACE_REGIONTYPE_USER,
-                                              0, 0, 0, 0,
-                                              name.c_str());
-        }
-      }
-      else {
-	currentRegionNode = currentRegionNode->getChild(regionId);
+        local_id = next_local_id();
+        userRegionMap.put(name, local_id);
       }
 
-      TraceClockLatch(traceCtx);
+      if (currentRegionNode == NULL) {
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
+                                      "Trace regions not properly nested", ESMC_CONTEXT, rc);
+        return;
+      }
+
+      bool added;
+      currentRegionNode = currentRegionNode->getOrAddChild(local_id, true, added);
+
+      //add region to trace output
+      if (added && (traceLocalPet || profileOutputToBinary)) {
+        esmftrc_default_trace_define_region(esmftrc_platform_get_default_ctx(),
+                                            currentRegionNode->getGlobalId(),
+                                            TRACE_REGIONTYPE_USER,
+                                            0, 0, 0, 0,
+                                            name.c_str());
+      }
+    
+      TraceClockLatch(traceCtx);  /* lock in time on clock */
       currentRegionNode->entered(traceCtx->latch_ts);
+      
       if (traceLocalPet) {
         esmftrc_default_trace_regionid_enter(esmftrc_platform_get_default_ctx(),
-                                             regionId);
+                                             currentRegionNode->getGlobalId());
       }
       TraceClockUnlatch(traceCtx);
+
     }
     
-    if (rc!=NULL) *rc = ESMF_SUCCESS;
+    if (rc != NULL) *rc = ESMF_SUCCESS;
+    
   }
 
   void TraceEventRegionExit(std::string name, int *rc) {
 
     if (traceLocalPet || profileLocalPet) {
       TraceClockLatch(traceCtx);    
-      int regionId = -1;
-      bool present = userRegionMap.get(name, regionId);
+      uint16_t local_id = 0;
+      bool present = userRegionMap.get(name, local_id);
       if (!present) {
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
                                       "Trace region not properly nested", ESMC_CONTEXT, rc);
         TraceClockUnlatch(traceCtx);
         return;
-      }
-      
-      if (traceLocalPet) {
-        esmftrc_default_trace_regionid_exit(esmftrc_platform_get_default_ctx(),
-                                            regionId);
       }
 
       if (currentRegionNode == NULL) {
@@ -1046,12 +1317,22 @@ namespace ESMCI {
 	TraceClockUnlatch(traceCtx);
 	return;
       }
-      else if (currentRegionNode->getId() != regionId) {
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-				      "Trace regions not properly nested", ESMC_CONTEXT, rc);
+      else if (currentRegionNode->getLocalId() != local_id) {
+        stringstream errMsg;
+        errMsg << "Trace regions not properly nested exiting from region: ";
+        errMsg << getRegionNameFromId(local_id);
+        errMsg << " Expected exit from: ";
+        errMsg << getRegionNameFromId(currentRegionNode->getLocalId());
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG, errMsg.str().c_str(), ESMC_CONTEXT, rc);
 	TraceClockUnlatch(traceCtx);
 	return;
       }
+
+      if (traceLocalPet) {
+        esmftrc_default_trace_regionid_exit(esmftrc_platform_get_default_ctx(),
+                                            currentRegionNode->getGlobalId());
+      }
+      
       currentRegionNode->exited(traceCtx->latch_ts);
       currentRegionNode = currentRegionNode->getParent();
       
@@ -1059,7 +1340,7 @@ namespace ESMCI {
     }
     
     if (rc!=NULL) *rc = ESMF_SUCCESS;
- 
+  
   }
 
   //IPDv00p1=6||IPDv00p2=7||IPDv00p3=4||IPDv00p4=5::RunPhase1=1::FinalizePhase1=1

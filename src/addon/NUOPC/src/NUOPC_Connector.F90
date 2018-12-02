@@ -5121,8 +5121,10 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
         do while (associated(rhListE))
           ! test src grid match
           rhListMatch = &
-            ESMF_GridMatch(rhListE%srcGrid, srcGrid, globalflag=.true.) &
+            ESMF_GridMatch(rhListE%srcGrid, srcGrid, globalflag=.true., rc=rc) &
             >= ESMF_GRIDMATCH_EXACT
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #if 0
 write (msgString,*) trim(name)//": srcGrid Match for i=", i, " is: ", &
   rhListMatch
@@ -5131,8 +5133,10 @@ call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
           if (.not.rhListMatch) goto 123
           ! test dst grid match
           rhListMatch = &
-            ESMF_GridMatch(rhListE%dstGrid, dstGrid, globalflag=.true.) &
+            ESMF_GridMatch(rhListE%dstGrid, dstGrid, globalflag=.true., rc=rc) &
             >= ESMF_GRIDMATCH_EXACT
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #if 0
 write (msgString,*) trim(name)//": dstGrid Match for i=", i, " is: ", &
   rhListMatch

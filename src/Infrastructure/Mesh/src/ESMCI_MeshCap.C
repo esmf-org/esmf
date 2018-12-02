@@ -709,6 +709,32 @@ void MeshCap::meshwrite(char *fname, int *rc,
   }
 }
 
+void MeshCap::meshwritewarrays(char *fname, ESMCI_FortranStrLenArg nlen,
+                               int num_nodeArrays, ESMCI::Array **nodeArrays, 
+                               int num_elemArrays, ESMCI::Array **elemArrays, 
+                               int *rc) {
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::meshwritewarrays()"
+
+  printf("nna=%d\n",num_nodeArrays);
+
+
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_meshwritewarrays(&mesh, 
+                           fname, nlen,
+                           num_nodeArrays, nodeArrays, 
+                           num_elemArrays, elemArrays, 
+                           rc);
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+          "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
+
 void MeshCap::meshaddelements(int *_num_elems, int *elemId, int *elemType, InterArray<int> *_elemMaskII ,
                               int *_areaPresent, double *elemArea,
                               int *_coordsPresent, double *elemCoords,
@@ -964,14 +990,23 @@ void MeshCap::meshfindpnt(int *unmappedaction, int *dimPnts, int *numPnts,
 
 }
 
-void MeshCap::getlocalcoords(double *nodeCoord, int *_orig_sdim, int *rc)
+void MeshCap::geteleminfointoarray(DistGrid *elemDistgrid, 
+                                   int numElemArrays,
+                                   int *infoTypeElemArrays, 
+                                   Array **elemArrays, 
+                                   int *rc)
 {
 #undef ESMC_METHOD
-#define ESMC_METHOD "MeshCap::getlocalcoords()"
+#define ESMC_METHOD "MeshCap::geteleminfointoarray()"
 
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_getlocalcoords(&mesh, nodeCoord, _orig_sdim, rc);
+    ESMCI_geteleminfointoarray(mesh, 
+                               elemDistgrid, 
+                               numElemArrays,
+                               infoTypeElemArrays, 
+                               elemArrays, 
+                               rc);
   } else {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
        "- this functionality is not currently supported using MOAB",
@@ -997,6 +1032,24 @@ void MeshCap::getlocalelemcoords(double *elemCoord, int *_orig_sdim, int *rc)
 #endif
   }
 }
+
+void MeshCap::getlocalcoords(double *nodeCoord, int *_orig_sdim, int *rc)
+{
+#undef ESMC_METHOD
+#define ESMC_METHOD "MeshCap::getlocalcoords()"
+
+  // Call into func. depending on mesh type
+  if (is_esmf_mesh) {
+    ESMCI_getlocalcoords(&mesh, nodeCoord, _orig_sdim, rc);
+  } else {
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+       "- this functionality is not currently supported using MOAB",
+                                  ESMC_CONTEXT, rc);
+    return;
+  }
+}
+
+
 
 void MeshCap::meshgetarea(int *num_elem, double *elem_areas, int *rc) {
 #undef ESMC_METHOD

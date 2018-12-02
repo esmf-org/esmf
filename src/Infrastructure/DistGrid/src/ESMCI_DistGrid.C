@@ -219,9 +219,13 @@ DistGrid *DistGrid::create(
     // determine whether the incoming DG holds any arbitrary sequence indices
     VM *currentVM = VM::getCurrent();
     int localArbSeqFlag = 0; // initialize
+    if (dg->delayout->getLocalDeCount()){
+      void const *arbSeq=dg->getArbSeqIndexList(0, 1, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+         ESMC_CONTEXT, rc)) throw localrc;
+      if (arbSeq!=NULL) localArbSeqFlag = 1;
+    }
     int allArbSeqFlag;
-    if (dg->delayout->getLocalDeCount() && 
-      (dg->getArbSeqIndexList(0, 1)!=NULL)) localArbSeqFlag = 1;
     currentVM->allreduce(&localArbSeqFlag, &allArbSeqFlag, 1, vmI4, vmSUM);
 #if 0
     {
@@ -821,12 +825,15 @@ DistGrid *DistGrid::create(
    // should error out if collocationCount is not 1 cannot handle that yet
    
    if (dg->delayout->getLocalDeCount() > 0){
-     for (int i=0; i<dg->delayout->getLocalDeCount(); i++)
-       sprintf(msgString, "DGfromDG: incoming DG localDe=%d=>%d, elementCount=%d, "
+     for (int i=0; i<dg->delayout->getLocalDeCount(); i++){
+        void const *arbSeq=dg->getArbSeqIndexList(i, 1, &localrc)
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) throw localrc;
+        sprintf(msgString, "DGfromDG: incoming DG localDe=%d=>%d, elementCount=%d, "
          "arbSeqIndexList=%p", i, dg->delayout->getLocalDeToDeMap()[i],
-         dg->getElementCountPCollPLocalDe()[0][i],
-         dg->getArbSeqIndexList(i, 1));
-     ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+         dg->getElementCountPCollPLocalDe()[0][i], arbSeq);
+        ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+      }
    }
 #endif
 
@@ -851,9 +858,13 @@ DistGrid *DistGrid::create(
      // first check if the provider DistGrid DEs are holding arbitrary 
      // sequence index allocations.
      int localArbSeqFlag = 0; // initialize
+     if (dg->delayout->getLocalDeCount()){
+       void const *arbSeq=dg->getArbSeqIndexList(0, 1, &localrc);
+       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) throw localrc;
+       if (arbSeq!=NULL) localArbSeqFlag = 1;
+     }
      int allArbSeqFlag;
-     if (dg->delayout->getLocalDeCount() && 
-       (dg->getArbSeqIndexList(0, 1)!=NULL)) localArbSeqFlag = 1;
      currentVM->allreduce(&localArbSeqFlag, &allArbSeqFlag, 1, vmI4, vmSUM);
 #if 0
      {
@@ -983,13 +994,17 @@ DistGrid *DistGrid::create(
            // same PET holds DE for provider and acceptor -> local copy
            itemCount = dg->getElementCountPCollPLocalDe()[0][providerLDe];
            arbSeqIndex = new int[itemCount];
-           memcpy(arbSeqIndex, dg->getArbSeqIndexList(providerLDe,1),
-             sizeof(int)*itemCount);
+           void const *arbSeq=dg->getArbSeqIndexList(providerLDe, 1, &localrc);
+           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+             ESMC_CONTEXT, rc)) throw localrc;
+           memcpy(arbSeqIndex, arbSeq, sizeof(int)*itemCount);
          }else if (localPet==providerPet){
            // provider side
            itemCount = dg->getElementCountPCollPLocalDe()[0][providerLDe];
-           currentVM->send(dg->getArbSeqIndexList(providerLDe,1), 
-             sizeof(int)*itemCount, acceptorPet);
+           void const *arbSeq=dg->getArbSeqIndexList(providerLDe, 1, &localrc);
+           if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+             ESMC_CONTEXT, rc)) throw localrc;
+           currentVM->send(arbSeq, sizeof(int)*itemCount, acceptorPet);
          }else if (localPet==acceptorPet){
            // acceptor side
            itemCount = distgrid->getElementCountPCollPLocalDe()[0][acceptorLDe];
@@ -3719,6 +3734,7 @@ DistGridMatch_Flag DistGrid::match(
 //
 //EOPI
 //-----------------------------------------------------------------------------
+#undef DEBUGLOG
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;   // final return code
@@ -3728,11 +3744,25 @@ DistGridMatch_Flag DistGrid::match(
   
   // return with errors for NULL pointer
   if (distgrid1 == NULL){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "Not a valid pointer to DistGrid", ESMC_CONTEXT, rc);
     return matchResult;
   }
   if (distgrid2 == NULL){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
       "Not a valid pointer to DistGrid", ESMC_CONTEXT, rc);
     return matchResult;
@@ -3742,37 +3772,80 @@ DistGridMatch_Flag DistGrid::match(
   if (distgrid1 == distgrid2){
     // pointers are identical -> nothing more to check
     matchResult = DISTGRIDMATCH_ALIAS;
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
   
-  // go through all members of DistGrid and compare
+  // current match level:
+  matchResult = DISTGRIDMATCH_NONE;
+
+  // check if element counts match
+  ESMC_I8 elementCount1 = 0;
+  for (int i=0; i<distgrid1->tileCount; i++)
+    elementCount1 += distgrid1->elementCountPTile[i];
+  ESMC_I8 elementCount2 = 0;
+  for (int i=0; i<distgrid2->tileCount; i++)
+    elementCount2 += distgrid2->elementCountPTile[i];
+  if (elementCount1 != elementCount2){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+
+  // current match level:
+  matchResult = DISTGRIDMATCH_ELEMENTCOUNT;
+
+  // any test bailing with current match level:
   int dimCount1 = distgrid1->dimCount;
   int dimCount2 = distgrid2->dimCount;
   if (dimCount1 != dimCount2){
-    matchResult = DISTGRIDMATCH_NONE;
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
   int tileCount1 = distgrid1->tileCount;
   int tileCount2 = distgrid2->tileCount;
   if (tileCount1 != tileCount2){
-    matchResult = DISTGRIDMATCH_NONE;
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
     return matchResult;
   }
-  int deCount1 = distgrid1->delayout->getDeCount();
-  int deCount2 = distgrid2->delayout->getDeCount();
-  if (deCount1 != deCount2){
-    matchResult = DISTGRIDMATCH_NONE;
-    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
-    return matchResult;
-  }
-  int *int1 = distgrid1->minIndexPDimPTile;
-  int *int2 = distgrid2->minIndexPDimPTile;
+  int const* int1 = distgrid1->minIndexPDimPTile;
+  int const* int2 = distgrid2->minIndexPDimPTile;
   for (int i=0; i<dimCount1*tileCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -3781,7 +3854,13 @@ DistGridMatch_Flag DistGrid::match(
   int2 = distgrid2->maxIndexPDimPTile;
   for (int i=0; i<dimCount1*tileCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -3790,16 +3869,81 @@ DistGridMatch_Flag DistGrid::match(
   ESMC_I8 *long2 = distgrid2->elementCountPTile;
   for (int i=0; i<tileCount1; i++){
     if (long1[i] != long2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
+  }
+
+  // current match level:
+  matchResult = DISTGRIDMATCH_INDEXSPACE;
+  
+  // any test bailing with current match level:
+  int connectionCount1 = distgrid1->getConnectionCount();
+  int connectionCount2 = distgrid2->getConnectionCount();
+  if (connectionCount1 != connectionCount2){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  int *const* intP1 = distgrid1->getConnectionList();
+  int *const* intP2 = distgrid2->getConnectionList();
+  for (int i=0; i<connectionCount1; i++){
+    for (int j=0; j<2*dimCount1+2; j++){
+      if (intP1[i][j] != intP2[i][j]){
+        if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+#ifdef DEBUGLOG
+        {
+          std::stringstream msg;
+          msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        }
+#endif
+        return matchResult;
+      }
+    }
+  }
+
+  // current match level:
+  matchResult = DISTGRIDMATCH_TOPOLOGY;
+  
+  // any test bailing with current match level:
+  int deCount1 = distgrid1->delayout->getDeCount();
+  int deCount2 = distgrid2->delayout->getDeCount();
+  if (deCount1 != deCount2){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
   }
   int1 = distgrid1->minIndexPDimPDe;
   int2 = distgrid2->minIndexPDimPDe;
   for (int i=0; i<dimCount1*deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -3808,7 +3952,13 @@ DistGridMatch_Flag DistGrid::match(
   int2 = distgrid2->maxIndexPDimPDe;
   for (int i=0; i<dimCount1*deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -3817,7 +3967,13 @@ DistGridMatch_Flag DistGrid::match(
   long2 = distgrid2->elementCountPDe;
   for (int i=0; i<deCount1; i++){
     if (long1[i] != long2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -3826,7 +3982,13 @@ DistGridMatch_Flag DistGrid::match(
   int2 = distgrid2->tileListPDe;
   for (int i=0; i<deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
@@ -3835,16 +3997,235 @@ DistGridMatch_Flag DistGrid::match(
   int2 = distgrid2->contigFlagPDimPDe;
   for (int i=0; i<dimCount1*deCount1; i++){
     if (int1[i] != int2[i]){
-      matchResult = DISTGRIDMATCH_NONE;
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
       if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
       return matchResult;
     }
   }
+  int1 = distgrid1->indexCountPDimPDe;
+  int2 = distgrid2->indexCountPDimPDe;
+  for (int i=0; i<dimCount1*deCount1; i++){
+    if (int1[i] != int2[i]){
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  int ldeCount1 = distgrid1->delayout->getLocalDeCount();
+  int ldeCount2 = distgrid2->delayout->getLocalDeCount();
+  if (ldeCount1 != ldeCount2){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  intP1 = distgrid1->indexListPDimPLocalDe;
+  intP2 = distgrid2->indexListPDimPLocalDe;
+  for (int i=0; i<ldeCount1; i++){
+    for (int j=0; j<dimCount1; j++){
+      if (intP1[i][j] != intP2[i][j]){
+#ifdef DEBUGLOG
+        {
+          std::stringstream msg;
+          msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        }
+#endif
+        if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+        return matchResult;
+      }
+    }
+  }
   
-  // return successfully indicating match
+  // current match level:
+  matchResult = DISTGRIDMATCH_DECOMP;
+  
+  // any test bailing with current match level:
+  int diffCollCount1 = distgrid1->getDiffCollocationCount();
+  int diffCollCount2 = distgrid2->getDiffCollocationCount();
+  if (diffCollCount1 != diffCollCount2){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  int1 = distgrid1->getCollocationTable();
+  int2 = distgrid2->getCollocationTable();
+  for (int i=0; i<diffCollCount1; i++){
+    if (int1[i] != int2[i]){
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  int1 = distgrid1->getCollocationPDim();
+  int2 = distgrid2->getCollocationPDim();
+  for (int i=0; i<dimCount1; i++){
+    if (int1[i] != int2[i]){
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
+      if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+      return matchResult;
+    }
+  }
+  intP1 = distgrid1->getElementCountPCollPLocalDe();
+  intP2 = distgrid2->getElementCountPCollPLocalDe();
+  for (int i=0; i<diffCollCount1; i++){
+    for (int j=0; j<ldeCount1; j++){
+      if (intP1[i][j] != intP2[i][j]){
+#ifdef DEBUGLOG
+        {
+          std::stringstream msg;
+          msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+          ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+        }
+#endif
+        if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+        return matchResult;
+      }
+    }
+  }
+  ESMC_TypeKind_Flag itk1 = distgrid1->getIndexTK();
+  ESMC_TypeKind_Flag itk2 = distgrid2->getIndexTK();
+  if (itk1 != itk2){
+#ifdef DEBUGLOG
+    {
+      std::stringstream msg;
+      msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+      ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
+    if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+    return matchResult;
+  }
+  int const *collocationTable1 = distgrid1->getCollocationTable();
+  int const *collocationTable2 = distgrid2->getCollocationTable();
+  for (int i=0; i<diffCollCount1; i++){
+    for (int j=0; j<ldeCount1; j++){
+      void const *arb1 = distgrid1->getArbSeqIndexList(j, collocationTable1[i],
+        &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return DISTGRIDMATCH_INVALID;
+      void const *arb2 = distgrid2->getArbSeqIndexList(j, collocationTable2[i],
+        &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return DISTGRIDMATCH_INVALID;
+      if (arb1!=NULL && arb2!=NULL){
+        if (itk1==ESMC_TYPEKIND_I1){
+          ESMC_I1 const *arb1T = (ESMC_I1 const *)arb1;
+          ESMC_I1 const *arb2T = (ESMC_I1 const *)arb2;
+          for (int k=0; k<intP1[i][j]; k++){
+            if (arb1T[k] != arb2T[k]){
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
+              if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+              return matchResult;
+            }
+          }
+        }else if (itk1==ESMC_TYPEKIND_I2){
+          ESMC_I2 const *arb1T = (ESMC_I2 const *)arb1;
+          ESMC_I2 const *arb2T = (ESMC_I2 const *)arb2;
+          for (int k=0; k<intP1[i][j]; k++){
+            if (arb1T[k] != arb2T[k]){
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
+              if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+              return matchResult;
+            }
+          }
+        }else if (itk1==ESMC_TYPEKIND_I4){
+          ESMC_I4 const *arb1T = (ESMC_I4 const *)arb1;
+          ESMC_I4 const *arb2T = (ESMC_I4 const *)arb2;
+          for (int k=0; k<intP1[i][j]; k++){
+            if (arb1T[k] != arb2T[k]){
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
+              if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+              return matchResult;
+            }
+          }
+        }else if (itk1==ESMC_TYPEKIND_I8){
+          ESMC_I8 const *arb1T = (ESMC_I8 const *)arb1;
+          ESMC_I8 const *arb2T = (ESMC_I8 const *)arb2;
+          for (int k=0; k<intP1[i][j]; k++){
+            if (arb1T[k] != arb2T[k]){
+#ifdef DEBUGLOG
+      {
+        std::stringstream msg;
+        msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+        ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+      }
+#endif
+              if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
+              return matchResult;
+            }
+          }
+        }
+      }
+    }
+  }
+  // reached exact match level
   matchResult = DISTGRIDMATCH_EXACT;
+
+  // return successfully
+#ifdef DEBUGLOG
+  {
+    std::stringstream msg;
+    msg << ESMC_METHOD": " << __LINE__ << " return:" << matchResult;
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
   if (rc!=NULL) *rc = ESMF_SUCCESS; // bail out successfully
   return matchResult;
+#undef DEBUGLOG
 }
 //-----------------------------------------------------------------------------
 

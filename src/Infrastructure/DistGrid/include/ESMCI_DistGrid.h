@@ -47,6 +47,8 @@ namespace ESMCI {
     DECOMP_RESTFIRST, DECOMP_RESTLAST, DECOMP_CYCLIC, DECOMP_SYMMEDGEMAX};
 
   enum DistGridMatch_Flag {DISTGRIDMATCH_INVALID=0, DISTGRIDMATCH_NONE,
+    DISTGRIDMATCH_ELEMENTCOUNT, DISTGRIDMATCH_INDEXSPACE,
+    DISTGRIDMATCH_TOPOLOGY, DISTGRIDMATCH_DECOMP,
     DISTGRIDMATCH_EXACT, DISTGRIDMATCH_ALIAS};
 
   // classes
@@ -79,7 +81,8 @@ namespace ESMCI {
                                   // [elementCountPCollPLocalDe(localDe)]
     int *collocationPDim;         // collocation [dimCount]
     int diffCollocationCount;     // number different seqIndex collocations
-    int *collocationTable;        // collocation in packed format [dimCount]
+    int *collocationTable;        // collocation in packed format 
+                                  // [diffCollocationCount]
     int **elementCountPCollPLocalDe; // number of elements 
                                   // [diffCollocationCount][localDeCount]
     int *regDecomp;               // regular decomposition descriptor
@@ -220,17 +223,17 @@ namespace ESMCI {
     // get/set arb sequence indices
     int *const *getElementCountPCollPLocalDe()
       const {return elementCountPCollPLocalDe;}
-    void const *getArbSeqIndexList(int localDe, int collocation, int *rc=NULL)
+    void const *getArbSeqIndexList(int localDe, int collocation=1, int *rc=NULL)
       const;
     template<typename T> int setArbSeqIndex(InterArray<T> *arbSeqIndex, 
-      int localDe, int collocation);
-    int setArbSeqIndex(void *ptr, int localDe, int collocation);
+      int localDe, int collocation=1);
+    int setArbSeqIndex(void *ptr, int localDe, int collocation=1);
     int setCollocationPDim(InterArray<int> *collocationPDim);
     // fill()
     template<typename T> int fillSeqIndexList(InterArray<T> *seqIndexList,
-      int localDe, int collocation) const;
+      int localDe, int collocation=1) const;
     int fillSeqIndexList(std::vector<int> &seqIndexList, int localDe,
-      int collocation) const;
+      int collocation=1) const;
     int fillIndexListPDimPDe(int *indexList, int de, int dim,
       VMK::commhandle **commh, int rootPet, VM *vm=NULL) const;
     // misc.
