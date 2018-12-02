@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 #if defined ESMF_MOAB
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_disable_UTest
   MBMesh *mesh_quad = NULL;
   mesh_quad = create_mesh_quad_9_parallel_dual(ESMC_COORDSYS_CART, rc);
   if (!mesh_quad) rc = ESMC_RC_PTR_NULL;
@@ -96,27 +96,6 @@ int main(int argc, char *argv[]) {
   merr=mesh_quad_dual->mesh->get_entities_by_dimension(0,
     mesh_quad_dual->pdim,range_quad);
   if (merr != MB_SUCCESS) rc = ESMF_FAILURE;
-
-  void *mbptr = (void *) mesh_quad;
-  int len = 12; char fname[len];
-  sprintf(fname, "mesh_quad_%d", localPet);
-  MBMesh_write(&mbptr, fname, &rc, len);
-  
-  void *mbptrd = (void *) mesh_quad_dual;
-  int lend = 17; char fnamed[lend];
-  sprintf(fnamed, "mesh_quad_dual_%d", localPet);
-  MBMesh_write(&mbptrd, fnamed, &rc, lend);
-  
-  
-  // force weight generation to a pointlist
-  // // build a pointlist
-  // PointList *pl_quad_par;
-  // pl_quad_par = create_pointlist_for_quad_parallel(rc);
-  // 
-  // vector<double> weights;
-  // bool cart = false;
-  // 
-  // weight_gen(mesh_quad_dual, pl_quad_par, weights, cart);
   
   // clean up
   delete mesh_quad;
@@ -134,7 +113,7 @@ int main(int argc, char *argv[]) {
 #if defined ESMF_MOAB
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_disable_UTest
   MBMesh *mesh_quad_sph = NULL;
   mesh_quad_sph = create_mesh_quad_sph(rc);
   if (!mesh_quad_sph) rc = ESMC_RC_PTR_NULL;
@@ -147,16 +126,6 @@ int main(int argc, char *argv[]) {
   merr = mesh_quad_sph_dual->mesh->get_entities_by_dimension(0,
     mesh_quad_sph_dual->pdim,range_quad_sph);
   if (merr != MB_SUCCESS) rc = ESMF_FAILURE;
-
-  // void *mbptr = (void *) mesh_quad_sph;
-  // int len = 12; char fname[len];
-  // sprintf(fname, "mesh_quad_%d", localPet);
-  // MBMesh_write(&mbptr, fname, &rc, len);
-  // 
-  // void *mbptrd = (void *) mesh_quad_sph_dual;
-  // int lend = 17; char fnamed[lend];
-  // sprintf(fnamed, "mesh_quad_dual_%d", localPet);
-  // MBMesh_write(&mbptrd, fnamed, &rc, lend);
 
   // clean up
   delete mesh_quad_sph;
