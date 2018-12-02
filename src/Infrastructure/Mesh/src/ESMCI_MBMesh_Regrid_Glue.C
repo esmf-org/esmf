@@ -38,6 +38,7 @@
 #include "Mesh/include/ESMCI_MBMesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Conserve.h"
 #include "Mesh/include/ESMCI_MBMesh_Bilinear.h"
+#include "Mesh/include/ESMCI_MBMesh_Glue.h"
 
 #include <iostream>
 #include <vector>
@@ -267,6 +268,13 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
     cout << endl;
   }
   cout << endl;
+  
+  // void *mbptr = (void *) mbmsrcp;
+  // int len = 12; char fname[len];
+  // sprintf(fname, "mesh_%d", Par::Rank());
+  // MBMesh_write(&mbptr, fname, rc, len);
+
+
 #endif
 
     

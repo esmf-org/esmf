@@ -46,7 +46,8 @@ using namespace std;
 // #define DEBUG_SPLIT
 // #define DEBUG_CONNECTIVITY
 // #define DEBUG_CONNECTIVITY_ADJACENCIES
-
+// #define DEBUG_MASK
+// #define DEBUG_WRITE_MESH
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -585,6 +586,37 @@ namespace ESMCI {
 /////////////////////////////////// BIG CHANGES ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef DEBUG_MASK
+  if (dual_mesh->has_node_mask) {
+    Range nodes;
+    merr=dual_mesh->mesh->get_entities_by_dimension(0, 0, nodes);
+    MBMESH_CHECK_ERR(merr, localrc);
+
+    int num_verts = nodes.size();
+    int src_node_mask[num_verts];
+    int node_id[num_verts];
+
+  printf("%d# - has_node_mask == %s\n", Par::Rank(), dual_mesh->has_node_mask ? "true" : "false");
+
+    merr=dual_mesh->mesh->tag_get_data(dual_mesh->node_mask_val_tag, nodes, &src_node_mask);
+    MBMESH_CHECK_ERR(merr, localrc);
+
+    merr=dual_mesh->mesh->tag_get_data(dual_mesh->gid_tag, nodes, &node_id);
+    MBMESH_CHECK_ERR(merr, localrc);
+
+    printf("%d# src_node_id = [", Par::Rank());
+    for (int i = 0; i < num_verts; ++i)
+      printf("%d, ", node_id[i]);
+    printf("]\n");
+
+    printf("%d# src_node_mask = [", Par::Rank());
+    for (int i = 0; i < num_verts; ++i)
+      printf("%d, ", src_node_mask[i]);
+    printf("]\n");
+  }
+#endif
+
+
 
     // Check for Split 
     // Count the number of extra elements we need for splitting
@@ -909,7 +941,7 @@ namespace ESMCI {
     // Resolve object sharing like in Mesh->Commit()
     merr = pcomm->resolve_shared_ents(0, elems_dual, dual_mesh->pdim, dual_mesh->pdim-1);
     MBMESH_CHECK_ERR(merr, localrc);
-  
+
     // Output 
     *_dual_mesh=dual_mesh;
 

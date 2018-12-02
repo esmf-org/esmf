@@ -63,7 +63,7 @@
  
 #ifdef ESMF_TESTEXHAUSTIVE
 
-call ESMF_MeshSetMOAB(.true.)
+! call ESMF_MeshSetMOAB(.true.)
 
 ! this is for testing development of the dual mesh feature with MBMesh
 !    will remove at the end of this development cycle
@@ -80,7 +80,7 @@ call ESMF_MeshSetMOAB(.true.)
       
       ! do test
       call test_regridPHMeshToGrid(rc)
-      
+
       ! remove this later, it is here to protect hang
       if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
@@ -18321,6 +18321,9 @@ write(*,*) "LOCALRC=",localrc
    deallocate(elemConn)
 
 
+  call ESMF_MeshWrite(srcMesh, "srcmesh")
+  call ESMF_MeshWrite(dstMesh, "dstmesh")
+
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
@@ -26507,6 +26510,7 @@ write(*,*) "LOCALRC=",localrc
         !! if error is too big report an error
         if (abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))) > 0.0001) then
            correct=.false.
+           ! print *, "ERROR: ", abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))), " at [", farrayPtrXC(i1,i2), ", ", farrayPtrYC(i1,i2), "]"
         endif
      enddo
      enddo
@@ -26515,6 +26519,12 @@ write(*,*) "LOCALRC=",localrc
 
 
 #if 0
+  call ESMF_MeshWrite(srcMesh, filename="srcMesh", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
   ! Output Grid
   call ESMF_GridWriteVTK(dstGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="dstGrid", &
                          array1=dstArray, rc=localrc)

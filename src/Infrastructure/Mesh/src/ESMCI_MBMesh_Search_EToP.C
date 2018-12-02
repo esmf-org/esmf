@@ -179,7 +179,7 @@ static void populate_box_elems(OTree *box,
 
   int srid; MBMesh_get_gid(mbmp, sr->src_elem, &srid);
 #ifdef DEBUG_SEARCH
-  printf("PET %d elem %d pmin/max [%f, %f], [%f, %f] \n",  Par::Rank(), srid, min[0], min[1], max[0], max[1]);
+  printf("%d# elem %d pmin/max [%f, %f], [%f, %f] \n",  Par::Rank(), srid, min[0], min[1], max[0], max[1]);
 #endif
       // Add element to search tree
       box->add(min, max, (void*)sr);
@@ -201,7 +201,7 @@ static int found_func(void *c, void *y) {
   int siid; MBMesh_get_gid(si->mesh, si->elem, &siid);
 
 #ifdef DEBUG_SEARCH
-  if (si->snr.dst_gid == 6) printf("PET %d Search against %d\n", Par::Rank(), srid);
+  if (si->snr.dst_gid == 6) printf("%d# Search against %d [%d]\n", Par::Rank(), srid, siid);
 #endif
 
   // from search.c
@@ -217,17 +217,11 @@ static int found_func(void *c, void *y) {
   MBMesh_get_elem_coords(si->mesh, sr->src_elem, max_num_nodes, &num_nodes, coords);
 
 // Setup for source masks, if used
-  
-#ifdef DEBUG_MASK
-  printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMesh_SEARCH_ETOP ~~~~~~~~~~~~~~~\n");
-  printf("ESMCI_MBMESH_BILINEAR_TEST - elem %d has_node_mask == %s\n", srid, si->mesh->has_node_mask ? "true" : "false");
-#endif
 
   int localrc = 0;
   int merr = 0;
 
 #ifdef DEBUG_MASK
-
   if (si->mesh->has_node_mask) {
     Range nodes;
     merr=si->mesh->mesh->get_entities_by_dimension(0, 0, nodes);
@@ -236,15 +230,14 @@ static int found_func(void *c, void *y) {
     int num_verts = nodes.size();
     int src_node_mask[num_verts];
 
-  printf("ESMCI_MBMESH_BILINEAR_TEST - elem %d has_node_mask == %s\n", srid, si->mesh->has_node_mask ? "true" : "false");
-  printf("has_node_mask == %d\n", si->mesh->has_node_mask);
+  printf("%d# - elem %d has_node_mask == %s\n", Par::Rank(), srid, si->mesh->has_node_mask ? "true" : "false");
 
     merr=si->mesh->mesh->tag_get_data(si->mesh->node_mask_val_tag, nodes, &src_node_mask);
     if (merr != MB_SUCCESS)
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
 
-    printf("src_node_mask = [");
+    printf("%d# src_node_mask = [", Par::Rank());
     for (int i = 0; i < num_verts; ++i)
       printf("%d, ", src_node_mask[i]);
     printf("]\n");
@@ -274,12 +267,10 @@ static int found_func(void *c, void *y) {
         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
 
 #ifdef DEBUG_MASK
-  printf("Node %d ", si->snr.dst_gid);
-  printf("src_node_mask = [");
+  printf("%d# Node %d src_node_mask = [", Par::Rank(), si->snr.dst_gid);
   for (int i = 0; i < num_verts; ++i)
     printf("%d, ", src_node_mask[i]);
   printf("]\n");
-  printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMesh_SEARCH_ETOP ~~~~~~~~~~~~~~~\n");
 #endif
 
     // Set src mask status
@@ -290,6 +281,10 @@ static int found_func(void *c, void *y) {
       }
     }
   }
+
+    // Instead of the above, if this element is masked then skip altogether
+    // this prevents problems with bad coords in masked elements
+    if (!si->set_dst_status && elem_masked) return 0;
 
 
   MBMappingBase *map = NULL;
@@ -316,15 +311,14 @@ static int found_func(void *c, void *y) {
   }
 
 #ifdef DEBUG_PCOORDS
-  printf("\n~~~~~~~~~~ DEBUG - ESMCI_MBMesh_SEARCH_ETOP - PCOORDS ~~~~~~~\n");
-  printf("Elem %d: ", srid);
+  printf("%d# Pcoords - Elem %d: ", Par::Rank(), srid);
   for (int i = 0; i < num_nodes; ++i) {
     printf("[");
     for (int j = 0; j < nd; ++j) {
       printf("%f, ", coords[i*nd+j]);
     }
     printf("], ");
-  }coords
+  }
   printf("\nNode %d: [", si->snr.dst_gid);
   for (int i=0; i < nd; ++i)
     printf("%f, ", si->coords[i]);
@@ -365,7 +359,7 @@ static int found_func(void *c, void *y) {
   bool is_inside = map->is_in_cell(coords, si->coords, pcoords, &dist);
 
 #ifdef DEBUG_PCOORDS
-  printf("is inside = %s\n", is_inside ? "true" : "false");
+  printf("%d# is inside = %s\n", Par::Rank(), is_inside ? "true" : "false");
 #endif
 
   // if we're too far away don't even consider this as a fall back candidate
@@ -384,11 +378,10 @@ static int found_func(void *c, void *y) {
     si->elem_masked=elem_masked;
 
 #ifdef DEBUG_PCOORDS
-    printf("Node %d pcoords = [", si->snr.dst_gid);
+    printf("%d# Node %d pcoords = [", Par::Rank(), si->snr.dst_gid);
     for (int i = 0; i < nd; ++i)
       printf("%f, ", si->snr.pcoord[i]);
     printf("]\n");
-  printf("\n~~~~~~~~~~ DEBUG - ESMCI_MBMesh_SEARCH_ETOP - PCOORDS ~~~~~~~\n");
 #endif
 
   if (is_inside) {
@@ -400,7 +393,7 @@ static int found_func(void *c, void *y) {
   }
   
 #ifdef DEBUG_SEARCH
-  printf("PET %d investigated %d .. keep searching\n", Par::Rank(), siid);
+  printf("%d# investigated %d .. keep searching\n", Par::Rank(), siid);
 #endif
   // Mark that something is in struct
   si->investigated=true;
@@ -460,7 +453,7 @@ void MBMesh_Search_EToP(MBMesh *mbmAp,
   Trace __trace("MBMesh_Search_EToP()");
 
 #ifdef DEBUG_SEARCH
-  std::cout << "PET " << Par::Rank() << " MBMesh_Search_EToP, stol =" << stol << std::endl;
+  std::cout << Par::Rank() << "# MBMesh_Search_EToP, stol =" << stol << std::endl;
   
   // int rc;
   // void *mbptr = (void *) mbmAp;
@@ -577,7 +570,7 @@ void MBMesh_Search_EToP(MBMesh *mbmAp,
     // The point coordinates.
     si.coords[0] = pnt_crd[0]; si.coords[1] = pnt_crd[1]; si.coords[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
 #ifdef DEBUG_SEARCH
-    if (si.snr.dst_gid == 9) printf("PET %d Found  pmin/max [%f, %f], [%f, %f] \n", Par::Rank(), pmin[0], pmin[1], pmax[0], pmax[1]);
+    printf("%d# Point %d  pmin/max [%f, %f], [%f, %f] \n", Par::Rank(), pnt_id, pmin[0], pmin[1], pmax[0], pmax[1]);
 #endif
 
     box->runon(pmin, pmax, found_func, (void*)&si);
@@ -599,7 +592,7 @@ void MBMesh_Search_EToP(MBMesh *mbmAp,
       // this is the new method
       again.push_back(loc);
 #ifdef DEBUG_SEARCH
-printf("PET %d again add node %d\n", Par::Rank(), pnt_id);
+printf("%d# again add node %d\n", Par::Rank(), pnt_id);
 #endif
     } else {
       if (si.elem_masked) {
@@ -652,7 +645,7 @@ printf("PET %d again add node %d\n", Par::Rank(), pnt_id);
             = const_cast<std::vector<etop_sr>&>(sri->dst_nodes);
           r.push_back(si.snr);
 #ifdef DEBUG_SEARCH
-          std::cout << "PET " << Par::Rank() << " SECOND CHOICE, gid =" << sri->dst_nodes[sri->dst_nodes.size()-1].dst_gid << std::endl;
+          std::cout << Par::Rank() << "# SECOND CHOICE, gid =" << sri->dst_nodes[sri->dst_nodes.size()-1].dst_gid << std::endl;
 #endif
         }
       }
@@ -669,7 +662,7 @@ printf("PET %d again add node %d\n", Par::Rank(), pnt_id);
 #ifdef DEBUG_SEARCH_RESULTS
 int id;
 merr=mbmAp->mesh->tag_get_data(mbmAp->gid_tag, &si->src_elem, 1, &id);
-printf("PET %d results: add elem %d with nodes: ", Par::Rank(), id);
+printf("%d# results: add elem %d with nodes: ", Par::Rank(), id);
 for (int i = 0; i < si->dst_nodes.size(); ++i)
   printf("%d, ", si->dst_nodes[i].dst_gid);
 printf("\n");
