@@ -80,7 +80,7 @@ namespace ESMCI {
   class LocalArray{
 
    protected:
-    ESMC_TypeKind_Flag typekind;         // I1, I2, I4, I8, R4, R8
+    ESMC_TypeKind_Flag typekind;    // I1, I2, I4, I8, R4, R8
     int rank;                       // 1, 2, ..., ESMF_MAXDIM
     LocalArrayOrigin origin;        // create called from Fortran or C++?
     bool dealloc;                   // responsible for deallocation?

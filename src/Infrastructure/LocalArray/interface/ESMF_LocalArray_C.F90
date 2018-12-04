@@ -116,3 +116,28 @@ subroutine f_esmf_localarraycopyf90ptr(arrayInArg, arrayOutArg, rc)
   call ESMF_LocalArrayCopyF90Ptr(arrayIn, arrayOut, rc=rc)
   
 end subroutine f_esmf_localarraycopyf90ptr
+
+
+subroutine f_esmf_localarrayctof90(array, cptr, rank, typekind, counts, &
+  lbounds, ubounds, rc)
+  use ESMF_UtilTypesMod     ! ESMF base class
+  use ESMF_BaseMod          ! ESMF base class
+  use ESMF_LocalArrayMod
+  use ISO_C_BINDING
+  
+  implicit none
+
+  type(ESMF_LocalArray)     :: array
+  type(C_PTR)               :: cptr
+  integer                   :: rank
+  type(ESMF_TypeKind_Flag)  :: typekind
+  integer                   :: counts(rank)
+  integer                   :: lbounds(rank)
+  integer                   :: ubounds(rank)
+  integer                   :: rc
+
+  ! Beware - these args are not in the same order
+  call ESMF_LocalArrCToF90Ptr(array, cptr, counts, typekind, rank, &
+    lbounds, ubounds, rc=rc)
+end subroutine f_esmf_localarrayctof90
+
