@@ -328,18 +328,20 @@ namespace ESMCI {
       InterArray<int> *computationalLWidthArg,
       InterArray<int> *computationalUWidthArg,
       InterArray<int> *totalLWidthArg, InterArray<int> *totalUWidthArg,
-      ESMC_IndexFlag *indexflag, InterArray<int> *undistLBoundArg,
-      InterArray<int> *undistUBoundArg, int *rc);
+      ESMC_IndexFlag *indexflag,
+      InterArray<int> *undistLBoundArg, InterArray<int> *undistUBoundArg,
+      int *rc);
     static Array *create(ArraySpec *arrayspec, DistGrid *distgrid,
       InterArray<int> *distgridToArrayMap,
       InterArray<int> *computationalEdgeLWidthArg,
       InterArray<int> *computationalEdgeUWidthArg,
       InterArray<int> *computationalLWidthArg,
       InterArray<int> *computationalUWidthArg,
-      InterArray<int> *totalLWidthArg,
-      InterArray<int> *totalUWidthArg, ESMC_IndexFlag *indexflag,
-      InterArray<int> *distLBoundArg, InterArray<int> *undistLBoundArg,
-      InterArray<int> *undistUBoundArg, int *rc, VM *vm=NULL);
+      InterArray<int> *totalLWidthArg, InterArray<int> *totalUWidthArg,
+      ESMC_IndexFlag *indexflag, ESMC_Pin_Flag *pinflag,
+      InterArray<int> *distLBoundArg,
+      InterArray<int> *undistLBoundArg, InterArray<int> *undistUBoundArg,
+      int *rc, VM *vm=NULL);
     static Array *create(Array *array, int rmLeadingTensors=0, int *rc=NULL);
     static Array *create(Array *array, bool rmTensorFlag, int *rc=NULL);
     static int destroy(Array **array, bool noGarbage=false);

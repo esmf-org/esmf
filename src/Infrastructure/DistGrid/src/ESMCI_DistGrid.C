@@ -313,7 +313,7 @@ DistGrid *DistGrid::create(
       ArraySpec arrayspec;
       arrayspec.set(1, dg->indexTK);
       Array *dstArbSeqArray = Array::create(&arrayspec, distgrid, NULL, NULL,
-        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc);
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       // Redist srcArbSeqArray -> dstArbSeqArray

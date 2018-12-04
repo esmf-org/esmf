@@ -871,7 +871,7 @@ int Grid::addCoordArray(
                           (InterArray<int> *)ESMC_NULL_POINTER,
                           (InterArray<int> *)ESMC_NULL_POINTER,
                           (InterArray<int> *)ESMC_NULL_POINTER,
-                          &indexflag, staggerMemLBoundIntInt, 
+                          &indexflag, NULL, staggerMemLBoundIntInt, 
                           (InterArray<int> *)ESMC_NULL_POINTER,
                           (InterArray<int> *)ESMC_NULL_POINTER, 
                           &localrc);
@@ -1012,7 +1012,7 @@ int Grid::addCoordArrayArb(
                        (InterArray<int> *)ESMC_NULL_POINTER,
                        (InterArray<int> *)ESMC_NULL_POINTER,
                        (InterArray<int> *)ESMC_NULL_POINTER,
-                        ESMC_NULL_POINTER, NULL,
+                        ESMC_NULL_POINTER, NULL, NULL,
                        (InterArray<int> *)ESMC_NULL_POINTER,
                        (InterArray<int> *)ESMC_NULL_POINTER, 
             &localrc);
@@ -1298,7 +1298,7 @@ int Grid::addItemArray(
                           (InterArray<int> *)ESMC_NULL_POINTER,
                           (InterArray<int> *)ESMC_NULL_POINTER,
                           (InterArray<int> *)ESMC_NULL_POINTER,
-                          &indexflag, staggerMemLBoundIntInt, 
+                          &indexflag, NULL, staggerMemLBoundIntInt, 
                           (InterArray<int> *)ESMC_NULL_POINTER,
                           (InterArray<int> *)ESMC_NULL_POINTER, 
                           &localrc);
@@ -1460,7 +1460,7 @@ int Grid::addItemArrayArb(
                (InterArray<int> *)ESMC_NULL_POINTER,
                (InterArray<int> *)ESMC_NULL_POINTER,
                (InterArray<int> *)ESMC_NULL_POINTER,
-               &indexflag, NULL,
+               &indexflag, NULL, NULL,
                (InterArray<int> *)ESMC_NULL_POINTER,
                (InterArray<int> *)ESMC_NULL_POINTER, 
                &localrc);

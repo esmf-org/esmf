@@ -97,7 +97,8 @@ extern "C" {
     ESMCI::InterArray<int> *computationalUWidthArg, 
     ESMCI::InterArray<int> *totalLWidthArg,
     ESMCI::InterArray<int> *totalUWidthArg,
-    ESMC_IndexFlag *indexflag, ESMCI::InterArray<int> *undistLBoundArg,
+    ESMC_IndexFlag *indexflag, ESMC_Pin_Flag *pinflag,
+    ESMCI::InterArray<int> *undistLBoundArg,
     ESMCI::InterArray<int> *undistUBoundArg,
     char *name, int *len_name, ESMCI::VM **vm, int *rc,
     ESMCI_FortranStrLenArg name_l){
@@ -125,7 +126,8 @@ extern "C" {
       *ptr = ESMCI::Array::create(arrayspec, *distgrid, distgridToArrayMap,
         computationalEdgeLWidthArg, computationalEdgeUWidthArg,
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg,
-        totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag), NULL,
+        totalUWidthArg, ESMC_NOT_PRESENT_FILTER(indexflag), 
+        ESMC_NOT_PRESENT_FILTER(pinflag), NULL,
         undistLBoundArg, undistUBoundArg, &localrc, opt_vm);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         ESMC_NOT_PRESENT_FILTER(rc))) return; // bail out

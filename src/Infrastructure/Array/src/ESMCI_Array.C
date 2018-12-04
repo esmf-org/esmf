@@ -469,10 +469,10 @@ Array *Array::create(
 //
 // !ARGUMENTS:
 //
-  LocalArray **larrayListArg,                   // (in)
-  int larrayCount,                              // (in)
-  DistGrid *distgrid,                           // (in)
-  CopyFlag copyflag,                            // (in)
+  LocalArray      **larrayListArg,              // (in)
+  int             larrayCount,                  // (in)
+  DistGrid        *distgrid,                    // (in)
+  CopyFlag        copyflag,                     // (in)
   InterArray<int> *distgridToArrayMap,          // (in)
   InterArray<int> *computationalEdgeLWidthArg,  // (in)
   InterArray<int> *computationalEdgeUWidthArg,  // (in)
@@ -480,10 +480,10 @@ Array *Array::create(
   InterArray<int> *computationalUWidthArg,      // (in)
   InterArray<int> *totalLWidthArg,              // (in)
   InterArray<int> *totalUWidthArg,              // (in)
-  ESMC_IndexFlag *indexflagArg,                 // (in)
+  ESMC_IndexFlag  *indexflagArg,                // (in)
   InterArray<int> *undistLBoundArg,             // (in)
   InterArray<int> *undistUBoundArg,             // (in)
-  int *rc                                       // (out) return code
+  int             *rc                           // (out) return code
   ){
 //
 // !DESCRIPTION:
@@ -1208,8 +1208,8 @@ Array *Array::create(
 //
 // !ARGUMENTS:
 //
-  ArraySpec *arrayspec,                         // (in)
-  DistGrid *distgrid,                           // (in)
+  ArraySpec       *arrayspec,                   // (in)
+  DistGrid        *distgrid,                    // (in)
   InterArray<int> *distgridToArrayMap,          // (in)
   InterArray<int> *computationalEdgeLWidthArg,  // (in)
   InterArray<int> *computationalEdgeUWidthArg,  // (in)
@@ -1217,12 +1217,13 @@ Array *Array::create(
   InterArray<int> *computationalUWidthArg,      // (in)
   InterArray<int> *totalLWidthArg,              // (in)
   InterArray<int> *totalUWidthArg,              // (in)
-  ESMC_IndexFlag *indexflagArg,                 // (in)
+  ESMC_IndexFlag  *indexflagArg,                // (in)
+  ESMC_Pin_Flag   *pinflagArg,                  // (in)
   InterArray<int> *distLBoundArg,               // (in)
   InterArray<int> *undistLBoundArg,             // (in)
   InterArray<int> *undistUBoundArg,             // (in)
-  int *rc,                                      // (out) return code
-  VM *vm                                        // (in)
+  int             *rc,                          // (out) return code
+  VM              *vm                           // (in, optional)
   ){
 //
 // !DESCRIPTION:
@@ -1711,30 +1712,41 @@ Array *Array::create(
   vector<int> temp_counts(rank);
   vector<int> temp_larrayLBound(rank);
   vector<int> temp_larrayUBound(rank);
-  for (int i=0; i<localDeCount; i++){
-    int j=0;    // reset distributed index
-    int jjj=0;  // reset undistributed index
-    for (int jj=0; jj<rank; jj++){
-      if (arrayToDistGridMapArray[jj]){
-        // distributed dimension
-        temp_counts[jj] =
-          totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
-        temp_larrayLBound[jj] = totalLBound[i*redDimCount+j];
-        temp_larrayUBound[jj] = totalUBound[i*redDimCount+j];
-        ++j;
-      }else{
-        // non-distributed dimension
-        temp_counts[jj] = undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1;
-        temp_larrayLBound[jj] = undistLBoundArray[jjj];
-        temp_larrayUBound[jj] = undistUBoundArray[jjj];
-        ++jjj;
+  
+  ESMC_Pin_Flag pinflag = ESMF_PIN_DE_TO_PET; // default
+  if (pinflagArg) pinflag = *pinflagArg;
+
+  if (pinflag == ESMF_PIN_DE_TO_PET){
+    for (int i=0; i<localDeCount; i++){
+      int j=0;    // reset distributed index
+      int jjj=0;  // reset undistributed index
+      for (int jj=0; jj<rank; jj++){
+        if (arrayToDistGridMapArray[jj]){
+          // distributed dimension
+          temp_counts[jj] =
+            totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
+          temp_larrayLBound[jj] = totalLBound[i*redDimCount+j];
+          temp_larrayUBound[jj] = totalUBound[i*redDimCount+j];
+          ++j;
+        }else{
+          // non-distributed dimension
+          temp_counts[jj] = undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1;
+          temp_larrayLBound[jj] = undistLBoundArray[jjj];
+          temp_larrayUBound[jj] = undistUBoundArray[jjj];
+          ++jjj;
+        }
       }
+      // allocate LocalArray object with specific undistLBound and undistUBound
+      larrayList[i] = LocalArray::create(typekind, rank, &temp_counts[0],
+        &temp_larrayLBound[0], &temp_larrayUBound[0], NULL, DATA_NONE, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
     }
-    // allocate LocalArray object with specific undistLBound and undistUBound
-    larrayList[i] = LocalArray::create(typekind, rank, &temp_counts[0],
-      &temp_larrayLBound[0], &temp_larrayUBound[0], NULL, DATA_NONE, &localrc);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+  }else{
+    // no other pinning option yet implemented
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+      "Requested pinflag not yet implemented.", ESMC_CONTEXT, rc);
+    return ESMC_NULL_POINTER;
   }
 
   // call class constructor
