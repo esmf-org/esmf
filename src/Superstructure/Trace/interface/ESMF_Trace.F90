@@ -62,6 +62,7 @@ module ESMF_TraceMod
   
 ! - ESMF-internal - only for unit tests
   public ESMF_TraceTest_GetMPIWaitStats
+  public ESMF_TraceTest_CheckMPIRegion
   !EOPI
   
   interface ESMF_TracePhaseEnter
@@ -912,6 +913,24 @@ contains
     
   end subroutine ESMF_TraceTest_GetMPIWaitStats
 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TraceTest_CheckMPIRegion"
+!BOPI 
+! !IROUTINE: ESMF_TraceTest_CheckMPIRegion - MPI Statistics - for testing only
+! 
+! !INTERFACE: 
+  subroutine ESMF_TraceTest_CheckMPIRegion(name, exists, rc)
+! !ARGUMENTS: 
+    character(len=*), intent(in)       :: name
+    integer, intent(out)               :: exists
+    integer, intent(out), optional     :: rc
+!
+!EOPI
+!-------------------------------------------------------------------------------
 
+    if (present(rc)) rc = ESMF_SUCCESS 
+    call c_esmftracetest_checkmpiregion(name, exists)
+    
+  end subroutine ESMF_TraceTest_CheckMPIRegion
   
 end module

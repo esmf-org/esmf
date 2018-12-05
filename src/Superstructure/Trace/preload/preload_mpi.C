@@ -41,6 +41,34 @@ extern "C" {
    */
 
   
+    static int (*__real_ptr_MPI_Allgather)(ESMF_MPI_CONST void *sendbuf, int  sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm) = NULL;
+
+    int __real_MPI_Allgather(ESMF_MPI_CONST void *sendbuf, int  sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm) {
+      if (__real_ptr_MPI_Allgather == NULL) {
+        __real_ptr_MPI_Allgather = (int (*)(ESMF_MPI_CONST void *sendbuf, int  sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Allgather");
+      }
+      return __real_ptr_MPI_Allgather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
+    }
+
+    int MPI_Allgather(ESMF_MPI_CONST void *sendbuf, int  sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm) {
+      return __wrap_MPI_Allgather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
+    }
+
+  
+    static int (*__real_ptr_MPI_Allgatherv)(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, MPI_Comm comm) = NULL;
+
+    int __real_MPI_Allgatherv(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, MPI_Comm comm) {
+      if (__real_ptr_MPI_Allgatherv == NULL) {
+        __real_ptr_MPI_Allgatherv = (int (*)(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Allgatherv");
+      }
+      return __real_ptr_MPI_Allgatherv(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm);
+    }
+
+    int MPI_Allgatherv(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, MPI_Comm comm) {
+      return __wrap_MPI_Allgatherv(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm);
+    }
+
+  
     static int (*__real_ptr_MPI_Allreduce)(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) = NULL;
 
     int __real_MPI_Allreduce(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
@@ -52,6 +80,48 @@ extern "C" {
 
     int MPI_Allreduce(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
       return __wrap_MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
+    }
+
+  
+    static int (*__real_ptr_MPI_Alltoall)(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm) = NULL;
+
+    int __real_MPI_Alltoall(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm) {
+      if (__real_ptr_MPI_Alltoall == NULL) {
+        __real_ptr_MPI_Alltoall = (int (*)(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Alltoall");
+      }
+      return __real_ptr_MPI_Alltoall(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
+    }
+
+    int MPI_Alltoall(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm) {
+      return __wrap_MPI_Alltoall(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
+    }
+
+  
+    static int (*__real_ptr_MPI_Alltoallv)(ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int rdispls[], MPI_Datatype recvtype, MPI_Comm comm) = NULL;
+
+    int __real_MPI_Alltoallv(ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int rdispls[], MPI_Datatype recvtype, MPI_Comm comm) {
+      if (__real_ptr_MPI_Alltoallv == NULL) {
+        __real_ptr_MPI_Alltoallv = (int (*)(ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int rdispls[], MPI_Datatype recvtype, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Alltoallv");
+      }
+      return __real_ptr_MPI_Alltoallv(sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm);
+    }
+
+    int MPI_Alltoallv(ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int rdispls[], MPI_Datatype recvtype, MPI_Comm comm) {
+      return __wrap_MPI_Alltoallv(sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm);
+    }
+
+  
+    static int (*__real_ptr_MPI_Alltoallw)(ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], const MPI_Datatype sendtypes[], void *recvbuf, const int recvcounts[], const int rdispls[], const MPI_Datatype recvtypes[], MPI_Comm comm) = NULL;
+
+    int __real_MPI_Alltoallw(ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], const MPI_Datatype sendtypes[], void *recvbuf, const int recvcounts[], const int rdispls[], const MPI_Datatype recvtypes[], MPI_Comm comm) {
+      if (__real_ptr_MPI_Alltoallw == NULL) {
+        __real_ptr_MPI_Alltoallw = (int (*)(ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], const MPI_Datatype sendtypes[], void *recvbuf, const int recvcounts[], const int rdispls[], const MPI_Datatype recvtypes[], MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Alltoallw");
+      }
+      return __real_ptr_MPI_Alltoallw(sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm);
+    }
+
+    int MPI_Alltoallw(ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], const MPI_Datatype sendtypes[], void *recvbuf, const int recvcounts[], const int rdispls[], const MPI_Datatype recvtypes[], MPI_Comm comm) {
+      return __wrap_MPI_Alltoallw(sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm);
     }
 
   
@@ -69,6 +139,118 @@ extern "C" {
     }
 
   
+    static int (*__real_ptr_MPI_Bcast)(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm) = NULL;
+
+    int __real_MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm) {
+      if (__real_ptr_MPI_Bcast == NULL) {
+        __real_ptr_MPI_Bcast = (int (*)(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Bcast");
+      }
+      return __real_ptr_MPI_Bcast(buffer, count, datatype, root, comm);
+    }
+
+    int MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm) {
+      return __wrap_MPI_Bcast(buffer, count, datatype, root, comm);
+    }
+
+  
+    static int (*__real_ptr_MPI_Gather)(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm) = NULL;
+
+    int __real_MPI_Gather(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm) {
+      if (__real_ptr_MPI_Gather == NULL) {
+        __real_ptr_MPI_Gather = (int (*)(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Gather");
+      }
+      return __real_ptr_MPI_Gather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
+    }
+
+    int MPI_Gather(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm) {
+      return __wrap_MPI_Gather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
+    }
+
+  
+    static int (*__real_ptr_MPI_Gatherv)(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, int root, MPI_Comm comm) = NULL;
+
+    int __real_MPI_Gatherv(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, int root, MPI_Comm comm) {
+      if (__real_ptr_MPI_Gatherv == NULL) {
+        __real_ptr_MPI_Gatherv = (int (*)(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, int root, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Gatherv");
+      }
+      return __real_ptr_MPI_Gatherv(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm);
+    }
+
+    int MPI_Gatherv(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, int root, MPI_Comm comm) {
+      return __wrap_MPI_Gatherv(sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm);
+    }
+
+  
+    static int (*__real_ptr_MPI_Recv)(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status) = NULL;
+
+    int __real_MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status) {
+      if (__real_ptr_MPI_Recv == NULL) {
+        __real_ptr_MPI_Recv = (int (*)(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status)) dlsym(RTLD_NEXT, "MPI_Recv");
+      }
+      return __real_ptr_MPI_Recv(buf, count, datatype, source, tag, comm, status);
+    }
+
+    int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status) {
+      return __wrap_MPI_Recv(buf, count, datatype, source, tag, comm, status);
+    }
+
+  
+    static int (*__real_ptr_MPI_Reduce)(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm) = NULL;
+
+    int __real_MPI_Reduce(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm) {
+      if (__real_ptr_MPI_Reduce == NULL) {
+        __real_ptr_MPI_Reduce = (int (*)(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Reduce");
+      }
+      return __real_ptr_MPI_Reduce(sendbuf, recvbuf, count, datatype, op, root, comm);
+    }
+
+    int MPI_Reduce(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm) {
+      return __wrap_MPI_Reduce(sendbuf, recvbuf, count, datatype, op, root, comm);
+    }
+
+  
+    static int (*__real_ptr_MPI_Scatter)(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm) = NULL;
+
+    int __real_MPI_Scatter(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm) {
+      if (__real_ptr_MPI_Scatter == NULL) {
+        __real_ptr_MPI_Scatter = (int (*)(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Scatter");
+      }
+      return __real_ptr_MPI_Scatter(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
+    }
+
+    int MPI_Scatter(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm) {
+      return __wrap_MPI_Scatter(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
+    }
+
+  
+    static int (*__real_ptr_MPI_Send)(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm) = NULL;
+
+    int __real_MPI_Send(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm) {
+      if (__real_ptr_MPI_Send == NULL) {
+        __real_ptr_MPI_Send = (int (*)(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)) dlsym(RTLD_NEXT, "MPI_Send");
+      }
+      return __real_ptr_MPI_Send(buf, count, datatype, dest, tag, comm);
+    }
+
+    int MPI_Send(ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm) {
+      return __wrap_MPI_Send(buf, count, datatype, dest, tag, comm);
+    }
+
+  
+    static int (*__real_ptr_MPI_Sendrecv)(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, int dest, int sendtag, void *recvbuf, int recvcount, MPI_Datatype recvtype, int source, int recvtag, MPI_Comm comm, MPI_Status *status) = NULL;
+
+    int __real_MPI_Sendrecv(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, int dest, int sendtag, void *recvbuf, int recvcount, MPI_Datatype recvtype, int source, int recvtag, MPI_Comm comm, MPI_Status *status) {
+      if (__real_ptr_MPI_Sendrecv == NULL) {
+        __real_ptr_MPI_Sendrecv = (int (*)(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, int dest, int sendtag, void *recvbuf, int recvcount, MPI_Datatype recvtype, int source, int recvtag, MPI_Comm comm, MPI_Status *status)) dlsym(RTLD_NEXT, "MPI_Sendrecv");
+      }
+      return __real_ptr_MPI_Sendrecv(sendbuf, sendcount, sendtype, dest, sendtag, recvbuf, recvcount, recvtype, source, recvtag, comm, status);
+    }
+
+    int MPI_Sendrecv(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, int dest, int sendtag, void *recvbuf, int recvcount, MPI_Datatype recvtype, int source, int recvtag, MPI_Comm comm, MPI_Status *status) {
+      return __wrap_MPI_Sendrecv(sendbuf, sendcount, sendtype, dest, sendtag, recvbuf, recvcount, recvtype, source, recvtag, comm, status);
+    }
+
+  
     static int (*__real_ptr_MPI_Wait)(MPI_Request *request, MPI_Status *status) = NULL;
 
     int __real_MPI_Wait(MPI_Request *request, MPI_Status *status) {
@@ -80,6 +262,48 @@ extern "C" {
 
     int MPI_Wait(MPI_Request *request, MPI_Status *status) {
       return __wrap_MPI_Wait(request, status);
+    }
+
+  
+    static int (*__real_ptr_MPI_Waitall)(int count, MPI_Request array_of_requests[], MPI_Status *array_of_statuses) = NULL;
+
+    int __real_MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status *array_of_statuses) {
+      if (__real_ptr_MPI_Waitall == NULL) {
+        __real_ptr_MPI_Waitall = (int (*)(int count, MPI_Request array_of_requests[], MPI_Status *array_of_statuses)) dlsym(RTLD_NEXT, "MPI_Waitall");
+      }
+      return __real_ptr_MPI_Waitall(count, array_of_requests, array_of_statuses);
+    }
+
+    int MPI_Waitall(int count, MPI_Request array_of_requests[], MPI_Status *array_of_statuses) {
+      return __wrap_MPI_Waitall(count, array_of_requests, array_of_statuses);
+    }
+
+  
+    static int (*__real_ptr_MPI_Waitany)(int count, MPI_Request array_of_requests[], int *index, MPI_Status *status) = NULL;
+
+    int __real_MPI_Waitany(int count, MPI_Request array_of_requests[], int *index, MPI_Status *status) {
+      if (__real_ptr_MPI_Waitany == NULL) {
+        __real_ptr_MPI_Waitany = (int (*)(int count, MPI_Request array_of_requests[], int *index, MPI_Status *status)) dlsym(RTLD_NEXT, "MPI_Waitany");
+      }
+      return __real_ptr_MPI_Waitany(count, array_of_requests, index, status);
+    }
+
+    int MPI_Waitany(int count, MPI_Request array_of_requests[], int *index, MPI_Status *status) {
+      return __wrap_MPI_Waitany(count, array_of_requests, index, status);
+    }
+
+  
+    static int (*__real_ptr_MPI_Waitsome)(int incount, MPI_Request array_of_requests[], int *outcount, int array_of_indices[], MPI_Status array_of_statuses[]) = NULL;
+
+    int __real_MPI_Waitsome(int incount, MPI_Request array_of_requests[], int *outcount, int array_of_indices[], MPI_Status array_of_statuses[]) {
+      if (__real_ptr_MPI_Waitsome == NULL) {
+        __real_ptr_MPI_Waitsome = (int (*)(int incount, MPI_Request array_of_requests[], int *outcount, int array_of_indices[], MPI_Status array_of_statuses[])) dlsym(RTLD_NEXT, "MPI_Waitsome");
+      }
+      return __real_ptr_MPI_Waitsome(incount, array_of_requests, outcount, array_of_indices, array_of_statuses);
+    }
+
+    int MPI_Waitsome(int incount, MPI_Request array_of_requests[], int *outcount, int array_of_indices[], MPI_Status array_of_statuses[]) {
+      return __wrap_MPI_Waitsome(incount, array_of_requests, outcount, array_of_indices, array_of_statuses);
     }
 
   

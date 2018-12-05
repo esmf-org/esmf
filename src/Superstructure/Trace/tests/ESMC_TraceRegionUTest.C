@@ -561,7 +561,7 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  snprintf(failMsg, 80, "Summarized ATM count each: expected 3 but got %d", rsATM->getCountEach());
+  snprintf(failMsg, 80, "Summarized ATM count each: expected 3 but got %lu", rsATM->getCountEach());
   ESMC_Test(rsATM->getCountEach()==3, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
@@ -571,7 +571,7 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  snprintf(failMsg, 80, "Summary ATM total min: expected 6 but got %d", rsATM->getTotalMin());
+  snprintf(failMsg, 80, "Summary ATM total min: expected 6 but got %lu", rsATM->getTotalMin());
   ESMC_Test(rsATM->getTotalMin()==6, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
@@ -581,7 +581,7 @@ int main(void){
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  snprintf(failMsg, 80, "Summary ATM total max: expected 30 but got %d", rsATM->getTotalMax());
+  snprintf(failMsg, 80, "Summary ATM total max: expected 30 but got %lu", rsATM->getTotalMax());
   ESMC_Test(rsATM->getTotalMax()==30, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
@@ -591,22 +591,22 @@ int main(void){
   
   //----------------------------------------------------------------------------
   //NEX_UTest
-  snprintf(failMsg, 80, "Summary ATM total mean: expected %f but got %f", ((30+6)/2), rsATM->getTotalMean());
-  ESMC_Test(rsATM->getTotalMean()==((30+6)/2), name, failMsg, &result, __FILE__, __LINE__, 0);
+  snprintf(failMsg, 80, "Summary ATM total mean: expected %f but got %f", ((30+6)/2.0), rsATM->getTotalMean());
+  ESMC_Test(rsATM->getTotalMean()==((30+6)/2.0), name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  snprintf(failMsg, 80, "Summary ATM pet count: expected 2 but got %d", rsATM->getPetCount());
+  snprintf(failMsg, 80, "Summary ATM pet count: expected 2 but got %lu", rsATM->getPetCount());
   ESMC_Test(rsATM->getPetCount()==2, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  snprintf(failMsg, 80, "Summarized OCN count each: expected 4 but got %d", rsOCN->getCountEach());
+  snprintf(failMsg, 80, "Summarized OCN count each: expected 4 but got %lu", rsOCN->getCountEach());
   ESMC_Test(rsOCN->getCountEach()==4, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------
   //NEX_UTest
-  snprintf(failMsg, 80, "Summary OCN pet count: expected 1 but got %d", rsOCN->getPetCount());
+  snprintf(failMsg, 80, "Summary OCN pet count: expected 1 but got %lu", rsOCN->getPetCount());
   ESMC_Test(rsOCN->getPetCount()==1, name, failMsg, &result, __FILE__, __LINE__, 0);
 
   //----------------------------------------------------------------------------

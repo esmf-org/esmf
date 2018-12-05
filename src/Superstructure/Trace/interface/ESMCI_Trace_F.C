@@ -159,11 +159,18 @@ extern "C" {
   }
 
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmftrace_getmpiwaitstats()"  
+#define ESMC_METHOD "c_esmftracetest_getmpiwaitstats()"  
   /* These functions exposed only for use in unit tests. */
   void FTN_X(c_esmftracetest_getmpiwaitstats)(int *count, long long *time) {
     ESMCI::TraceTest_GetMPIWaitStats(count, time);
   }
-
+  
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmftracetest_checkmpiregion()"  
+  /* These functions exposed only for use in unit tests. */
+  void FTN_X(c_esmftracetest_checkmpiregion)(const char *name, int *exists, ESMCI_FortranStrLenArg nlen) {
+    string cname = string(name, ESMC_F90lentrim(name, nlen));
+    ESMCI::TraceTest_CheckMPIRegion(cname, exists);
+  }
   
 } // extern "C"
