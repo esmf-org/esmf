@@ -2840,15 +2840,13 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
 ! @\
 ! !INTERFACE: @\
 !      recursive subroutine ESMF_LocalArrayAdjust<rank><type><kind>(array,&@\
-!  totalCount, lb, ub, fshape, rc) @\
+!  totalCount, lb, ub, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_LocalArray), intent(inout) :: array @\
 !      integer, dimension(:), intent(in) :: totalCount @\
 !      integer, dimension(:), intent(in), optional :: lb @\
 !      integer, dimension(:), intent(in), optional :: ub @\
-!      mname (ESMF_KIND_##mtypekind), dimension(mdim), target, optional ::&@\
-! fshape(mrng) @\
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -2873,14 +2871,12 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
 ^define ESMF_METHOD "ESMF_LocalArrayAdjust" @\
  @\
   recursive subroutine ESMF_LocalArrayAdjust##mrank##D##mtypekind(array, &@\
-    totalCount, lb, ub, fshape, rc) @\
+    totalCount, lb, ub, rc) @\
  @\
     type(ESMF_LocalArray), intent(inout) :: array @\
     integer, dimension(:), intent(in) :: totalCount @\
     integer, dimension(:), intent(in) :: lb @\
     integer, dimension(:), intent(in) :: ub @\
-    mname (ESMF_KIND_##mtypekind), dimension(mdim), target, optional :: &@\
-      fshape(mrng) @\
     integer, intent(out), optional :: rc   @\
  @\
     ! Local variables @\
@@ -2893,40 +2889,20 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
     localrc = ESMF_RC_NOT_IMPL @\
     if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
  @\
-    ! Recursive branch @\
-    if (present(fshape)) then @\
-      ! second recursion -> set the member in LocalArray @\
-!print *, "Second recursion: ", lbound(fshape), ubound(fshape) @\
-!call c_esmc_vmpointerprint(fshape) @\
-      wrap%ptr##mrank##D##mtypekind => fshape @\
-      call c_ESMC_LocalArraySetFPtr(array, wrap, localrc) @\
-      if (ESMF_LogFoundError(localrc, & @\
-        ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
-      ! some compilers will have made a copy on the way to down here @\
-      ! the following call forces the base address encoded in the F90 @\
-      ! dope vector to point to the actual memory allocation *if* a mismatch @\
-      ! on the first data element location is detected, i.e. we are dealing @\
-      ! with a temporary copy of the actual array. @\
-      call c_ESMC_LocalArrayForceFPtr(array, & @\
-        ESMF_DATA_ADDRESS(fshape(mloc)), localrc) @\
-      if (ESMF_LogFoundError(localrc, & @\
-        ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
-    else @\
-      ! first recursion -> get F90ptr member and call subr. recursively @\
-      call c_ESMC_LocalArrayGetFPtr(array, wrap, localrc) @\
-      if (ESMF_LogFoundError(localrc, & @\
-        ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
-      farrayPtr => wrap%ptr##mrank##D##mtypekind @\
-!print *, "First recursion: ", lbound(farrayPtr), ubound(farrayPtr) @\
+    ! get F90ptr member @\
+    call c_ESMC_LocalArrayGetFPtr(array, wrap, localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+      ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+    farrayPtr => wrap%ptr##mrank##D##mtypekind @\
+!print *, "ESMF_LocalArrayAdjust*(): ", lbound(farrayPtr), ubound(farrayPtr) @\
 !call c_esmc_vmpointerprint(farrayPtr) @\
-      call ESMF_LocalArrayAdjust##mrank##D##mtypekind(array, totalCount, lb, ub, farrayPtr, rc=localrc) @\
-      if (ESMF_LogFoundError(localrc, & @\
-        ESMF_ERR_PASSTHRU, & @\
-        ESMF_CONTEXT, rcToReturn=rc)) return @\
-    endif @\
+    ! call another level deeper to do the actual bounds adjustment @\
+    call ESMF_LocalArrayAdjustShape##mrank##D##mtypekind(array, & @\
+      totalCount, lb, ub, farrayPtr, rc=localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+      ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
  @\
     ! return successfully @\
     if (present(rc)) rc = ESMF_SUCCESS @\
@@ -2936,6 +2912,93 @@ TypeKindRankDeclarationMacro(LocalArrayCopy)
 !---------------------------------------------------------------------------- @\
 
 TypeKindRankDeclarationMacro(LocalArrayAdjust)
+
+
+#define LocalArrayAdjustShapeDoc() \
+!---------------------------------------------------------------------------- @\
+!BOPI @\
+! !IROUTINE: ESMF_LocalArrayAdjustShape<rank><type><kind> - Adjust the bounds of the Fortran pointer member according to the proper T/K/R @\
+! @\
+! !INTERFACE: @\
+!      recursive subroutine ESMF_LocalArrayAdjustShape<rank><type><kind>(array,&@\
+!  totalCount, lb, ub, fshape, rc) @\
+! @\
+! !ARGUMENTS: @\
+!      type(ESMF_LocalArray), intent(inout) :: array @\
+!      integer, dimension(:), intent(in) :: totalCount @\
+!      integer, dimension(:), intent(in), optional :: lb @\
+!      integer, dimension(:), intent(in), optional :: ub @\
+!      mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: fshape(mrng) @\
+!      integer, intent(out), optional :: rc   @\
+! @\
+! !DESCRIPTION: @\
+! Each LocalArray object internally keeps a reference to an F90 array pointer. @\
+! This call modifies the meta-data associated with this F90 array pointer @\
+! by passing the F90 array pointer into a F90 subroutine with an explicit shape @\
+! dummy argument. On this interface the bounds meta data for the dummy argument @\
+! is not those of the actual argument but is reset to the bounds specified @\
+! on the subroutine interface. Using macros the bounds on the callee side are @\
+! set to match those of the LocalArray object meta data. Finally the internal @\
+! F90 array pointer is reset to reflect the desired bounds in the F90 dope @\
+! vector. The risk of data copy on this interface should be minimal because @\
+! the shape is not changed and the dummy argument has the target attribute. @\
+!EOPI @\
+!---------------------------------------------------------------------------- @\
+ @\
+
+#define LocalArrayAdjustShapeMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
+!---------------------------------------------------------------------------- @\
+^undef  ESMF_METHOD @\
+!define ESMF_METHOD "ESMF_LocalArrayAdjustShape##mrank##D##mtypekind" @\
+^define ESMF_METHOD "ESMF_LocalArrayAdjustShape" @\
+ @\
+  recursive subroutine ESMF_LocalArrayAdjustShape##mrank##D##mtypekind(array, &@\
+    totalCount, lb, ub, fshape, rc) @\
+ @\
+    type(ESMF_LocalArray), intent(inout) :: array @\
+    integer, dimension(:), intent(in) :: totalCount @\
+    integer, dimension(:), intent(in) :: lb @\
+    integer, dimension(:), intent(in) :: ub @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: fshape(mrng) @\
+    integer, intent(out), optional :: rc   @\
+ @\
+    ! Local variables @\
+    integer :: localrc                   ! local return code @\
+ @\
+    type (ESMF_LAWrap##mrank##D##mtypekind) :: wrap ! to pass f90 ptr to C++ @\
+    mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: farrayPtr  @\
+ @\
+    ! Initialize return code; assume routine not implemented @\
+    localrc = ESMF_RC_NOT_IMPL @\
+    if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+!print *, "ESMF_LocalArrayAdjustShape*(): ", lbound(fshape), ubound(fshape) @\
+!call c_esmc_vmpointerprint(fshape) @\
+    ! set the member in LocalArray @\
+    wrap%ptr##mrank##D##mtypekind => fshape @\
+    call c_ESMC_LocalArraySetFPtr(array, wrap, localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+      ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+    ! some compilers will have made a copy on the way to down here @\
+    ! the following call forces the base address encoded in the F90 @\
+    ! dope vector to point to the actual memory allocation *if* a mismatch @\
+    ! on the first data element location is detected, i.e. we are dealing @\
+    ! with a temporary copy of the actual array. @\
+    call c_ESMC_LocalArrayForceFPtr(array, & @\
+      ESMF_DATA_ADDRESS(fshape(mloc)), localrc) @\
+    if (ESMF_LogFoundError(localrc, & @\
+      ESMF_ERR_PASSTHRU, & @\
+      ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+    ! return successfully @\
+    if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+  end subroutine ESMF_LocalArrayAdjustShape##mrank##D##mtypekind  @\
+ @\
+!---------------------------------------------------------------------------- @\
+
+TypeKindRankDeclarationMacro(LocalArrayAdjustShape)
 
 
 !------------------------------------------------------------------------------
