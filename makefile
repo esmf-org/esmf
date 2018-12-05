@@ -627,7 +627,7 @@ install:
 	cp -f $(ESMF_LIBDIR)/lib*.* $(ESMF_INSTALL_LIBDIR_ABSPATH)
 ifeq ($(ESMF_TESTTRACE),ON)
 ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
-	cp -f $(ESMF_LIBDIR)/preload.sh $(ESMF_INSTALL_LIBDIR_ABSPATH)
+	$(MAKE) ESMF_PRELOADDIR=$(ESMF_INSTALL_LIBDIR_ABSPATH) build_preload_script
 endif
 endif
 ifneq ($(ESMF_OS),Cygwin)
@@ -646,7 +646,7 @@ endif
 	-@echo " "
 	-@echo "ESMF installation complete."
 	-@echo " "
-        
+
 # ------------------------------------------------------------------
 # INSTALLCHECK target
 installcheck:

@@ -87,6 +87,7 @@ namespace ESMCI {
 
   //These used only for testing
   void TraceTest_GetMPIWaitStats(int *count, long long *time);
+  void TraceTest_CheckMPIRegion(std::string name, int *exists);
   //////////////////////////////
     
   

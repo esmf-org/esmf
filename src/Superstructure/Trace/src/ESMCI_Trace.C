@@ -1140,6 +1140,19 @@ namespace ESMCI {
     }
   }
 
+  void TraceTest_CheckMPIRegion(string name, int *exists) {
+    if (exists == NULL) return;
+    *exists = 0;
+    if (traceLocalPet || profileLocalPet) {
+      if (currentRegionNode == NULL) return;
+      uint16_t local_id = 0;
+      bool present = userRegionMap.get(name, local_id);
+      if (!present) return;
+      RegionNode *child = currentRegionNode->getChild(local_id);
+      if (child != NULL) *exists = 1;
+    }
+  }
+  
   
   /////////////////////////////////////////////
 

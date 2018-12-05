@@ -64,9 +64,8 @@ program ESMF_TraceMPIUTest
   character(ESMF_MAXSTR)  :: line
   character(ESMF_MAXSTR)  :: filename
 
-  integer                 :: mpitest_count
-  integer(ESMF_KIND_I8)   :: mpitest_time
-
+  integer                 :: mpicheck
+  
   integer :: mpicomm
   integer :: send
   integer :: recv
@@ -98,29 +97,6 @@ program ESMF_TraceMPIUTest
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-------------------------------------------------------------------------
 
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  mpitest_count = -1
-  mpitest_time = -1
-  write(name, *) "Test MPI statistics"
-  call ESMF_TraceTest_GetMPIWaitStats(mpitest_count, mpitest_time, rc=rc)
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !-------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(failMsg, *) "Unexpected MPI call count"
-  call ESMF_Test((mpitest_count==0), name, failMsg, result, ESMF_SRCLINE)
-  !-------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  write(failMsg, *) "Unexpected MPI time"
-  call ESMF_Test((mpitest_time==0), name, failMsg, result, ESMF_SRCLINE)
-  !-------------------------------------------------------------------------
-
-  
   ! MPI_ALLREDUCE(SENDBUF, RECVBUF, COUNT, DATATYPE, OP, COMM, IERROR)
   !  <type>    SENDBUF(*), RECVBUF(*)
   !  INTEGER    COUNT, DATATYPE, OP, COMM, IERROR
@@ -152,36 +128,18 @@ program ESMF_TraceMPIUTest
 #endif
   !-------------------------------------------------------------------------
 
+  mpicheck = 0
+  call ESMF_TraceTest_CheckMPIRegion("mpi_allreduce", exists=mpicheck, rc=rc) 
+    
   !------------------------------------------------------------------------
   !NEX_UTest
-  mpitest_count = -1
-  mpitest_time = -1
-  call ESMF_TraceTest_GetMPIWaitStats(mpitest_count, mpitest_time, rc=rc)
-  write(failMsg, *) "Did not return ESMF_SUCCESS"
-  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  !-------------------------------------------------------------------------
-  
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  print *, "MPI call count = ", mpitest_count
-  write(failMsg, *) "Unexpected MPI call count"
+  write(failMsg, *) "MPI call not profiled"
 #if (!defined ESMF_MPIUNI && defined ESMF_TESTTRACE)
-  call ESMF_Test((mpitest_count==1), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((mpicheck==1), name, failMsg, result, ESMF_SRCLINE)
 #else
   call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
 #endif
   !-------------------------------------------------------------------------
-
-  !------------------------------------------------------------------------
-  !NEX_UTest
-  print *, "MPI time = ", mpitest_time
-  write(failMsg, *) "Unexpected MPI time"
-#if (!defined ESMF_MPIUNI && defined ESMF_TESTTRACE)
-  call ESMF_Test((mpitest_time > 0), name, failMsg, result, ESMF_SRCLINE)
-#else
-  call ESMF_Test(.true., name, failMsg, result, ESMF_SRCLINE)
-#endif
-  !------------------------------------------------------------------------- 
   
   !------------------------------------------------------------------------
   !NEX_UTest

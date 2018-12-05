@@ -79,6 +79,7 @@ template_wrappers_mpi = """
 extern "C" {
 
   static int insideMPIRegion = 0;
+  static int ignorerc = 0;
   
   /*
    * C MPI functions
@@ -91,9 +92,9 @@ extern "C" {
       if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
         //printf("__wrap_{{f.name}} (C)\\n");
         insideMPIRegion = 1;
-        ESMCI::TraceMPIWaitStart();
+        ESMCI::TraceEventRegionEnter("{{f.name}}", &ignorerc);
         {{f.ret}} ret = __real_{{f.name}}({{f.args}});
-        ESMCI::TraceMPIWaitEnd();
+        ESMCI::TraceEventRegionExit("{{f.name}}", &ignorerc);
         insideMPIRegion = 0;
         return ret;
       }
@@ -114,9 +115,9 @@ extern "C" {
       if (c_esmftrace_isinitialized() == 1 && insideMPIRegion == 0) {
         //printf("__wrap_{{f.name}}_ (Fortran)\\n");
         insideMPIRegion = 1;
-        ESMCI::TraceMPIWaitStart();
+        ESMCI::TraceEventRegionEnter("{{f.name}}", &ignorerc);
         FTN_X(__real_{{f.name}})({{f.args}});
-        ESMCI::TraceMPIWaitEnd();
+        ESMCI::TraceEventRegionExit("{{f.name}}", &ignorerc);
         insideMPIRegion = 0;
       }
       else {
@@ -223,11 +224,42 @@ ESMF_TRACE_WRAPPERS_MPI +={% for f in ffunc_list %} {{f.name}}_ {{f.name}}__{% i
 cfunc_list = [
 
     {
+        'ret':'int', 'name':'MPI_Allgather',
+        'params':'ESMF_MPI_CONST void *sendbuf, int  sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm',
+        'args':'sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Allgatherv',
+        'params':'ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, MPI_Comm comm',
+        'args':'sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm'
+    },
+
+    
+    {
         'ret':'int', 'name':'MPI_Allreduce',
         'params':'ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm',
         'args':'sendbuf, recvbuf, count, datatype, op, comm'
     },
 
+    {
+        'ret':'int', 'name':'MPI_Alltoall',
+        'params':'ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm',
+        'args':'sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Alltoallv',
+        'params':'ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int rdispls[], MPI_Datatype recvtype, MPI_Comm comm',
+        'args':'sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Alltoallw',
+        'params':'ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], const MPI_Datatype sendtypes[], void *recvbuf, const int recvcounts[], const int rdispls[], const MPI_Datatype recvtypes[], MPI_Comm comm',
+        'args':'sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm'
+    },
+    
     {
         'ret':'int', 'name':'MPI_Barrier',
         'params':'MPI_Comm comm',
@@ -235,13 +267,79 @@ cfunc_list = [
     },
 
     {
+        'ret':'int', 'name':'MPI_Bcast',
+        'params':'void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm',
+        'args':'buffer, count, datatype, root, comm'
+    },
+    
+    {
+        'ret':'int', 'name':'MPI_Gather',
+        'params':'ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm',
+        'args':'sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Gatherv',
+        'params':'ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, int root, MPI_Comm comm',
+        'args':'sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Recv',
+        'params':'void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status',
+        'args':'buf, count, datatype, source, tag, comm, status'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Reduce',
+        'params':'ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm',
+        'args':'sendbuf, recvbuf, count, datatype, op, root, comm'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Scatter',
+        'params':'ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm',
+        'args':'sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm'
+    },
+    
+    {
+        'ret':'int', 'name':'MPI_Send',
+        'params':'ESMF_MPI_CONST void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm',
+        'args':'buf, count, datatype, dest, tag, comm'
+    },
+    
+    {
+        'ret':'int', 'name':'MPI_Sendrecv',
+        'params':'ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, int dest, int sendtag, void *recvbuf, int recvcount, MPI_Datatype recvtype, int source, int recvtag, MPI_Comm comm, MPI_Status *status',
+        'args':'sendbuf, sendcount, sendtype, dest, sendtag, recvbuf, recvcount, recvtype, source, recvtag, comm, status'
+    },
+    
+    {
         'ret':'int', 'name':'MPI_Wait',
         'params':'MPI_Request *request, MPI_Status *status',
         'args':'request, status'
-    }
+    },
 
+    {
+        'ret':'int', 'name':'MPI_Waitall',
+        'params':'int count, MPI_Request array_of_requests[], MPI_Status *array_of_statuses',
+        'args':'count, array_of_requests, array_of_statuses'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Waitany',
+        'params':'int count, MPI_Request array_of_requests[], int *index, MPI_Status *status',
+        'args':'count, array_of_requests, index, status'
+    },
+
+    {
+        'ret':'int', 'name':'MPI_Waitsome',
+        'params':'int incount, MPI_Request array_of_requests[], int *outcount, int array_of_indices[], MPI_Status array_of_statuses[]',
+        'args':'incount, array_of_requests, outcount, array_of_indices, array_of_statuses'
+    }
     
 ]
+
 
 # Fortran MPI Functions
 ffunc_list = [

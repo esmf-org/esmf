@@ -1459,15 +1459,13 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_vmgetobject)(void **fobject, int *objectID, ESMCI::VMId **vmid,
-      const char *name_f, int *type, ESMC_Logical *obj_found, int *rc,
+      const char *name_f, ESMC_ProxyFlag *proxyflag, ESMC_Logical *obj_found, int *rc,
       ESMCI_FortranStrLenArg name_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgetobject()"
     std::string name = std::string (name_f, ESMC_F90lentrim (name_f, name_l));
     bool found;
-// std::cout << ESMC_METHOD << ": looking for vmid:" << std::endl;
-// (*vmid)->print();
-    ESMCI::VM::getObject(fobject, *objectID, *vmid, name, *type, &found, rc);
+    ESMCI::VM::getObject(fobject, *objectID, *vmid, name, *proxyflag, &found, rc);
     *obj_found = (found)?ESMF_TRUE:ESMF_FALSE;
   }
     
