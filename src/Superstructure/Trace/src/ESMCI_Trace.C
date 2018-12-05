@@ -1320,15 +1320,19 @@ namespace ESMCI {
       uint16_t local_id = 0;
       bool present = userRegionMap.get(name, local_id);
       if (!present) {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-                                      "Trace region not properly nested", ESMC_CONTEXT, rc);
+        stringstream errMsg;
+        errMsg << "Trace regions not properly nested. Attempt to exit region: ";
+        errMsg << name << " that was never entered.";
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG, errMsg.str().c_str(), ESMC_CONTEXT, rc);
         TraceClockUnlatch(traceCtx);
         return;
       }
 
       if (currentRegionNode == NULL) {
-	ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG,
-				      "Trace regions not properly nested", ESMC_CONTEXT, rc);
+        stringstream errMsg;
+        errMsg << "Trace regions not properly nested when attempting to exit region: ";
+        errMsg << name << ".";
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_WRONG, errMsg.str().c_str(), ESMC_CONTEXT, rc);
 	TraceClockUnlatch(traceCtx);
 	return;
       }
