@@ -113,7 +113,12 @@ class VMK{
   struct memhandle{
     int ssiPetCount;        // number of PETs that share same SSI with localPET
     std::vector<int> counts;// allocs requested by a specific PET on same SSI
+#ifndef ESMF_MPIUNI
     std::vector<MPI_Win> wins;  // MPI shared memory windows
+#else
+    std::vector<void*> mems;
+    std::vector<unsigned long> sizes;
+#endif
   };
 
   struct ipmutex{
@@ -196,7 +201,7 @@ class VMK{
     int nothreadsflag; // 0-threaded VM, 1-non-threaded VM
     // MPI Communicator handles
     MPI_Comm mpi_c;     // communicator across the entire VM
-#ifndef ESMF_NO_MPI3
+#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
     MPI_Comm mpi_c_ssi; // communicator holding PETs on the same SSI
 #endif
     // Shared mutex and thread_finish variables. These are pointers that will be

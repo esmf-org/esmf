@@ -346,7 +346,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   MPI_Group_free(&mpi_g);
   // ... and copy the Comm object into the class static default variable...
   default_mpi_c = mpi_c;
-#ifndef ESMF_NO_MPI3
+#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
   // set up communicator across single-system-images SSIs
   MPI_Comm_split_type(mpi_c, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, 
     &mpi_c_ssi);
@@ -541,7 +541,7 @@ void VMK::finalize(int finalizeMpi){
   MPI_Finalized(&finalized);
   if (!finalized){
     MPI_Comm_free(&mpi_c);
-#ifndef ESMF_NO_MPI3
+#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
     MPI_Comm_free(&mpi_c_ssi);
 #endif
     if (finalizeMpi)
@@ -1490,7 +1490,7 @@ void *VMK::startup(class VMKPlan *vmp,
   // current VMK makes that call, even if this process will not participate
   // in the new VMK...
   MPI_Comm new_mpi_c;
-#ifndef ESMF_NO_MPI3
+#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
   MPI_Comm new_mpi_c_ssi;
 #endif
   
@@ -1521,7 +1521,7 @@ void *VMK::startup(class VMKPlan *vmp,
           // store the communicator on this PET with info to free
           sarg[0].mpi_c = new_mpi_c;
           sarg[0].mpi_c_freeflag = 1; // responsible to free the communicator
-#ifndef ESMF_NO_MPI3
+#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
           // set up communicator across single-system-images SSIs
           MPI_Comm_split_type(vmp->mpi_c_part, MPI_COMM_TYPE_SHARED, 0, 
             MPI_INFO_NULL, &new_mpi_c_ssi);
@@ -1534,7 +1534,7 @@ void *VMK::startup(class VMKPlan *vmp,
 #endif
           recv(&new_mpi_c, sizeof(MPI_Comm), foundfirstpet);
           sarg[0].mpi_c_freeflag = 0; // not responsible to free the communicat.
-#ifndef ESMF_NO_MPI3
+#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
           recv(&new_mpi_c_ssi, sizeof(MPI_Comm), foundfirstpet);
 #endif
         }
@@ -1544,7 +1544,7 @@ void *VMK::startup(class VMKPlan *vmp,
         printf("mypet %d sends new_mpi_c to pet %d\n", mypet, i);
 #endif
         send(&new_mpi_c, sizeof(MPI_Comm), i);
-#ifndef ESMF_NO_MPI3
+#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
         send(&new_mpi_c_ssi, sizeof(MPI_Comm), i);
 #endif
       }
@@ -1743,7 +1743,7 @@ void *VMK::startup(class VMKPlan *vmp,
         sarg[i].contributors[j][k] = new_contributors[j][k];
     }
     sarg[i].mpi_c = new_mpi_c;
-#ifndef ESMF_NO_MPI3
+#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
     sarg[i].mpi_c_ssi = new_mpi_c_ssi;
 #endif
     sarg[i].pth_mutex2 = new_pth_mutex2;
@@ -1961,7 +1961,7 @@ void VMK::shutdown(class VMKPlan *vmp, void *arg){
   // now free up the MPI communicators that were associated with the VMK
   if (sarg[0].mpi_c_freeflag && (sarg[0].mpi_c != MPI_COMM_NULL)){
     MPI_Comm_free(&(sarg[0].mpi_c));
-#ifndef ESMF_NO_MPI3
+#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
     MPI_Comm_free(&(sarg[0].mpi_c_ssi));
 #endif
   }
@@ -5245,11 +5245,19 @@ void VMK::wtimedelay(double delay){
 
 int VMK::ssishmallocate(vector<unsigned long>&bytes, memhandle *memh){
 #ifndef ESMF_NO_MPI3
+#ifndef ESMF_MPIUNI
   MPI_Comm_size(mpi_c_ssi, &(memh->ssiPetCount));
   memh->counts.resize(memh->ssiPetCount);
   int count = (int)bytes.size();
   MPI_Allgather(&count, 1, MPI_INT, &(memh->counts[0]), 1, MPI_INT, mpi_c_ssi);
   int maxCount = *(max_element(memh->counts.begin(), memh->counts.end()));
+#else
+  memh->ssiPetCount = 1;
+  memh->counts.resize(memh->ssiPetCount);
+  int count = (int)bytes.size();
+  memh->counts[0] = count;
+  int maxCount = count;
+#endif
 #ifdef DEBUGLOG
   {
     std::stringstream msg;
@@ -5259,15 +5267,25 @@ int VMK::ssishmallocate(vector<unsigned long>&bytes, memhandle *memh){
   }
 #endif
   void *dummyPtr;
+#ifndef ESMF_MPIUNI
   memh->wins.resize(maxCount);
+#else
+  memh->mems.resize(maxCount);
+  memh->sizes.resize(maxCount);
+#endif
   for (int i=0; i<maxCount; i++){
     unsigned long size=0;
     if (i<count){
       size = bytes[i];
     }
+#ifndef ESMF_MPIUNI
     //TODO: make sure to request non-contiguous memory
     MPI_Win_allocate_shared(size, 1, MPI_INFO_NULL, mpi_c_ssi, &dummyPtr,
       &(memh->wins[i]));
+#else
+    memh->mems[i] = (void *)malloc(size);
+    memh->sizes[i] = size;
+#endif
   }
   return ESMF_SUCCESS;
 #else
@@ -5285,14 +5303,25 @@ int VMK::ssishmfree(memhandle *memh){
   {
     std::stringstream msg;
     msg << "ssishmfree#" << __LINE__ << " number of shared memory windows=" 
+#ifndef ESMF_MPIUNI
       << memh->wins.size();
+#else
+      << memh->mems.size();
+#endif
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
+#ifndef ESMF_MPIUNI
   for (unsigned i=0; i<memh->wins.size(); i++)
     MPI_Win_free(&(memh->wins[i]));
-  memh->counts.resize(0);
   memh->wins.resize(0);
+#else
+  for (unsigned i=0; i<memh->mems.size(); i++)
+    free(memh->mems[i]);
+  memh->mems.resize(0);
+  memh->sizes.resize(0);
+#endif
+  memh->counts.resize(0);
   memh->ssiPetCount=-1; // invalidate
   return ESMF_SUCCESS;
 #else
@@ -5319,10 +5348,15 @@ int VMK::ssishmaccess(memhandle memh, int pet, vector<void *>*mems,
   if (bytes) bytes->resize(memh.counts[pet]);
   // construct the return information
   for (int i=0; i<memh.counts[pet]; i++){
+#ifndef ESMF_MPIUNI
     MPI_Aint size;
     int disp_unit;
     void *baseptr;
     MPI_Win_shared_query(memh.wins[i], pet, &size, &disp_unit, &baseptr);
+#else
+    unsigned long size = memh.sizes[i];
+    void *baseptr = memh.mems[i];
+#endif
     if (mems) (*mems)[i]=baseptr;
     if (bytes) (*bytes)[i]=size;
 #ifdef DEBUGLOG
