@@ -1717,6 +1717,7 @@ Array *Array::create(
   if (pinflagArg) pinflag = *pinflagArg;
 
   if (pinflag == ESMF_PIN_DE_TO_PET){
+    // regular case where each DE is only accessible from the local PET
     for (int i=0; i<localDeCount; i++){
       int j=0;    // reset distributed index
       int jjj=0;  // reset undistributed index
@@ -1742,6 +1743,74 @@ Array *Array::create(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
     }
+  }else if (pinflag == ESMF_PIN_DE_TO_SSI){
+    // make DEs accessible from all the PETs that are on the same SSI
+    VM *cvm = VM::getCurrent(&localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    // determine the size of all localDE allocations
+    vector<unsigned long> bytes(localDeCount);
+    for (int i=0; i<localDeCount; i++){
+      int j=0;    // reset distributed index
+      int jjj=0;  // reset undistributed index
+      unsigned long size = 1;
+      for (int jj=0; jj<rank; jj++){
+        if (arrayToDistGridMapArray[jj]){
+          // distributed dimension
+          size *=
+            totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
+          ++j;
+        }else{
+          // non-distributed dimension
+          size *= undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1;
+          ++jjj;
+        }
+      }
+      bytes[i] = size * ESMC_TypeKind_FlagSize(typekind);
+    }
+    // go through the VM ssishm interface to do the memory allocation
+    VM::memhandle mh;
+    localrc = cvm->ssishmallocate(bytes, &mh);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    // access all the memory allocation on the localPet (i.e. for localDEs)
+    vector<void*> mems;
+    localrc = cvm->ssishmaccess(mh, cvm->getLocalPet(), &mems);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    // construct the LocalArrays for all the localDEs
+    for (int i=0; i<localDeCount; i++){
+      int j=0;    // reset distributed index
+      int jjj=0;  // reset undistributed index
+      for (int jj=0; jj<rank; jj++){
+        if (arrayToDistGridMapArray[jj]){
+          // distributed dimension
+          temp_counts[jj] =
+            totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
+          temp_larrayLBound[jj] = totalLBound[i*redDimCount+j];
+          temp_larrayUBound[jj] = totalUBound[i*redDimCount+j];
+          ++j;
+        }else{
+          // non-distributed dimension
+          temp_counts[jj] = undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1;
+          temp_larrayLBound[jj] = undistLBoundArray[jjj];
+          temp_larrayUBound[jj] = undistUBoundArray[jjj];
+          ++jjj;
+        }
+      }
+{
+  std::stringstream msg;
+  msg << "Array#" << __LINE__ << " mems[i]=" << mems[i];
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+}
+      // allocate LocalArray object with specific undistLBound and undistUBound
+      larrayList[i] = LocalArray::create(typekind, rank, &temp_counts[0],
+        &temp_larrayLBound[0], &temp_larrayUBound[0], mems[i], DATA_REF, 
+        &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    }
+    
   }else{
     // no other pinning option yet implemented
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
