@@ -34,6 +34,8 @@ ESMF_F90DEFAULT         = mpif90
 ESMF_F90LINKLIBS       += -lpmpich -lmpich
 ESMF_CXXDEFAULT         = mpiCC
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),mpich2)
 # Mpich2 ---------------------------------------------------
@@ -57,6 +59,8 @@ ESMF_F90DEFAULT         = mpif77
 ESMF_CXXDEFAULT         = mpic++
 ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
+ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),openmpi)
 # OpenMPI --------------------------------------------------
@@ -66,6 +70,8 @@ ESMF_CXXLINKLIBS       += -lmpi_mpifh
 else
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXLINKLIBS       += -lmpi_f77
+ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 endif
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.openmpif90 $(ESMF_F90DEFAULT))

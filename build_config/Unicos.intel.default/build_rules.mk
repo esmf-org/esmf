@@ -1,6 +1,6 @@
 # $Id$
 #
-# Linux.intel.default
+# Unicos.intel.default
 #
 
 ############################################################

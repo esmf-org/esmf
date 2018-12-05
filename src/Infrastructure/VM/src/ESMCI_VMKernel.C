@@ -1490,7 +1490,9 @@ void *VMK::startup(class VMKPlan *vmp,
   // current VMK makes that call, even if this process will not participate
   // in the new VMK...
   MPI_Comm new_mpi_c;
+#ifndef ESMF_NO_MPI3
   MPI_Comm new_mpi_c_ssi;
+#endif
   
   int foundfirstflag=0;
   int foundfirstpet;
@@ -1741,7 +1743,9 @@ void *VMK::startup(class VMKPlan *vmp,
         sarg[i].contributors[j][k] = new_contributors[j][k];
     }
     sarg[i].mpi_c = new_mpi_c;
+#ifndef ESMF_NO_MPI3
     sarg[i].mpi_c_ssi = new_mpi_c_ssi;
+#endif
     sarg[i].pth_mutex2 = new_pth_mutex2;
     sarg[i].pth_mutex = new_pth_mutex;
     sarg[i].pth_finish_count = new_pth_finish_count;
@@ -5265,12 +5269,12 @@ int VMK::ssishmallocate(vector<unsigned long>&bytes, memhandle *memh){
     MPI_Win_allocate_shared(size, 1, MPI_INFO_NULL, mpi_c_ssi, &dummyPtr,
       &(memh->wins[i]));
   }
-  return 0;
+  return ESMF_SUCCESS;
 #else
   std::stringstream msg;
   msg << "VMKernel in line #" << __LINE__ << " Method requires MPI3 support.";
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_ERROR);
-  return 1; // bail with error
+  return ESMC_RC_INTNRL_BAD; // bail with error
 #endif
 }
 
@@ -5290,12 +5294,12 @@ int VMK::ssishmfree(memhandle *memh){
   memh->counts.resize(0);
   memh->wins.resize(0);
   memh->ssiPetCount=-1; // invalidate
-  return 0;
+  return ESMF_SUCCESS;
 #else
   std::stringstream msg;
   msg << "VMKernel in line #" << __LINE__ << " Method requires MPI3 support.";
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_ERROR);
-  return 1; // bail with error
+  return ESMC_RC_INTNRL_BAD; // bail with error
 #endif
 }
 
@@ -5330,12 +5334,12 @@ int VMK::ssishmaccess(memhandle memh, int pet, vector<void *>*mems,
     }
 #endif
   }
-  return 0;
+  return ESMF_SUCCESS;
 #else
   std::stringstream msg;
   msg << "VMKernel in line #" << __LINE__ << " Method requires MPI3 support.";
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_ERROR);
-  return 1; // bail with error
+  return ESMC_RC_INTNRL_BAD; // bail with error
 #endif
 }
 

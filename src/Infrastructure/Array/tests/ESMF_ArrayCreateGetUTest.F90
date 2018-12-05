@@ -628,28 +628,42 @@ program ESMF_ArrayCreateGetUTest
   array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
     indexflag=ESMF_INDEX_GLOBAL, pinflag=ESMF_PIN_DE_TO_SSI, name="MyArray", &
     rc=rc)
+#ifndef ESMF_NO_MPI3
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return the correct RC"
+  call ESMF_Test((rc.eq.ESMC_RC_INTNRL_BAD), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayGet Fortran array pointer for ESMF_PIN_DE_TO_SSI Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayGet(array, farrayPtr=farrayPtr2D, rc=rc)
+#ifndef ESMF_NO_MPI3
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-  
   write (msg,*) "Local Array lbounds=", lbound(farrayPtr2D)
   call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   write (msg,*) "Local Array ubounds=", ubound(farrayPtr2D)
   call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+#else
+  write(failMsg, *) "Did not return the correct RC"
+  call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "ArrayDestroy Test for array with ESMF_PIN_DE_TO_SSI"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArrayDestroy(array, rc=rc)
+#ifndef ESMF_NO_MPI3
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return the correct RC"
+  call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
   !------------------------------------------------------------------------
   ! cleanup  

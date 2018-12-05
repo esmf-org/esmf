@@ -196,7 +196,9 @@ class VMK{
     int nothreadsflag; // 0-threaded VM, 1-non-threaded VM
     // MPI Communicator handles
     MPI_Comm mpi_c;     // communicator across the entire VM
+#ifndef ESMF_NO_MPI3
     MPI_Comm mpi_c_ssi; // communicator holding PETs on the same SSI
+#endif
     // Shared mutex and thread_finish variables. These are pointers that will be
     // pointing to shared memory variables between different thread-instances of
     // the VMK object.
