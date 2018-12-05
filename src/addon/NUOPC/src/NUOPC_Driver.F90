@@ -28,6 +28,7 @@ module NUOPC_Driver
   private
   
   public &
+    SetVM, &
     SetServices, &
     routine_Run
 
@@ -145,6 +146,16 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
   contains
+  !-----------------------------------------------------------------------------
+  
+  recursive subroutine SetVM(driver, rc)
+    type(ESMF_GridComp)  :: driver
+    integer, intent(out) :: rc
+
+    rc = ESMF_SUCCESS
+  
+  end subroutine
+
   !-----------------------------------------------------------------------------
   
   recursive subroutine SetServices(driver, rc)
@@ -2883,7 +2894,7 @@ module NUOPC_Driver
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
   recursive subroutine NUOPC_DriverAddGridComp(driver, compLabel, &
-    compSetServicesRoutine, compSetVMRoutine, petList, comp, rc)
+    compSetServicesRoutine, compSetVMRoutine, petList, info, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: compLabel
@@ -2905,8 +2916,13 @@ module NUOPC_Driver
     end interface
     optional                                   :: compSetVMRoutine
     integer,             intent(in),  optional :: petList(:)
+    type(ESMF_GridComp), intent(in),  optional :: info
     type(ESMF_GridComp), intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
+!
+!TODO: Would be nicer if there was type(ESMF_Info) that could be used to
+!TODO: pass in Attributes (i.e. hints), and could then be used to copy 
+!TODO: the Attributes onto any other ESMF class object.
 !
 ! !DESCRIPTION:
 ! Create and add a GridComp (i.e. Model, Mediator, or Driver) as a child 
@@ -3012,6 +3028,12 @@ module NUOPC_Driver
 
     call ESMF_ContainerAddUDT(is%wrap%componentMap, trim(compLabel), &
       cmEntry, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! copy the Attributes from info object to the newly created component
+    call ESMF_AttributeCopy(info, cmEntry%wrap%component, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
