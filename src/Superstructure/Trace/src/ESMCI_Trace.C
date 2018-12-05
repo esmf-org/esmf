@@ -1311,6 +1311,8 @@ namespace ESMCI {
     
   }
 
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::TraceEventRegionExit()"
   void TraceEventRegionExit(std::string name, int *rc) {
 
     if (traceLocalPet || profileLocalPet) {
