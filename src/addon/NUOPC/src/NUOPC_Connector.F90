@@ -25,7 +25,7 @@ module NUOPC_Connector
   
   private
   
-  public SetServices
+  public SetVM, SetServices
   public label_ComputeRouteHandle, label_ExecuteRouteHandle, &
     label_ReleaseRouteHandle, label_Finalize
   
@@ -77,6 +77,16 @@ module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
   contains
+  !-----------------------------------------------------------------------------
+  
+  subroutine SetVM(connector, rc)
+    type(ESMF_CplComp)   :: connector
+    integer, intent(out) :: rc
+
+    rc = ESMF_SUCCESS
+  
+  end subroutine
+
   !-----------------------------------------------------------------------------
   
   subroutine SetServices(connector, rc)

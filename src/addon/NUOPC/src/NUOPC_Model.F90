@@ -21,6 +21,7 @@ module NUOPC_Model
   use ESMF
   use NUOPC
   use NUOPC_ModelBase, only: &
+    SetVM, &
     ModelBase_routine_SS            => SetServices, &
     routine_Run                     => routine_Run, &
     routine_Nop                     => routine_Nop, &
@@ -38,6 +39,7 @@ module NUOPC_Model
   private
   
   public &
+    SetVM, &
     SetServices, &
     routine_Run
     

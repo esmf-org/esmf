@@ -21,6 +21,7 @@ module NUOPC_Mediator
   use ESMF
   use NUOPC
   use NUOPC_ModelBase, only: &
+    SetVM, &
     ModelBase_routine_SS            => SetServices, &
     routine_Run                     => routine_Run, &
     routine_Nop                     => routine_Nop, &
@@ -38,6 +39,7 @@ module NUOPC_Mediator
   private
   
   public &
+    SetVM, &
     SetServices, &
     routine_Run
     
