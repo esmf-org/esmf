@@ -110,12 +110,17 @@ class VMK{
     MPI_Request *mpireq;    // request array
   };
 
+  struct memhandle{
+    int ssiPetCount;        // number of PETs that share same SSI with localPET
+    std::vector<int> counts;// allocs requested by a specific PET on same SSI
+    std::vector<MPI_Win> wins;  // MPI shared memory windows
+  };
+
   struct ipmutex{
     // mutex variable for intraProcess sync
     esmf_pthread_mutex_t pth_mutex;
     int lastFlag;
   };
-
 
   struct status{
     int srcPet;
@@ -128,7 +133,6 @@ class VMK{
     status() : mpi_s() {}
   };
   
-  
   struct pipc_mp{
     // hack sync variables
     shmsync shms;
@@ -137,7 +141,6 @@ class VMK{
     // buffer
     char buffer[2][PIPC_BUFFER];
   };
-
 
   struct shared_mp{
     // source and destination pointers
@@ -160,13 +163,11 @@ class VMK{
     esmf_pthread_cond_t cond2;
   };
 
-
   struct comminfo{
     int comm_type;    // communication type
     shared_mp *shmp;  // shared memory message passing structure
     pipc_mp *pipcmp;  // posix ipc message passing structure
   };
-
 
   struct ipshmAlloc{
     void *allocation;   // shared memory allocation
@@ -174,7 +175,6 @@ class VMK{
     ipshmAlloc *prev;   // pointer to prev. ipshmAlloc element in list
     ipshmAlloc *next;   // pointer to next ipshmAlloc element in list
   };
-
 
   // members
   protected:
@@ -194,8 +194,9 @@ class VMK{
     // general information about this VMK
     int mpionly;    // 0: there is multi-threading, 1: MPI-only
     int nothreadsflag; // 0-threaded VM, 1-non-threaded VM
-    // MPI Communicator handle
-    MPI_Comm mpi_c;
+    // MPI Communicator handles
+    MPI_Comm mpi_c;     // communicator across the entire VM
+    MPI_Comm mpi_c_ssi; // communicator holding PETs on the same SSI
     // Shared mutex and thread_finish variables. These are pointers that will be
     // pointing to shared memory variables between different thread-instances of
     // the VMK object.
@@ -390,6 +391,12 @@ class VMK{
     void commqueuewait();
     void commcancel(commhandle **commh);
     bool cancelled(status *status);
+    
+    // SSI shared memory methods
+    int ssishmallocate(std::vector<unsigned long>&bytes, memhandle *memh);
+    int ssishmfree(memhandle *memh);
+    int ssishmaccess(memhandle memh, int pet, std::vector<void *> *mems=NULL,
+      std::vector<unsigned long> *bytes=NULL);
         
     // IntraProcessSharedMemoryAllocation Table Methods
     void *ipshmallocate(int bytes, int *firstFlag=NULL);
