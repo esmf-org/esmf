@@ -67,7 +67,7 @@ call ESMF_MeshSetMOAB(.true.)
 
 ! this is for testing development of the dual mesh feature with MBMesh
 !    will remove at the end of this development cycle
-#if 1
+#if 0
 
       !------------------------------------------------------------------------
       !EX_disable_UTest
@@ -79,6 +79,7 @@ call ESMF_MeshSetMOAB(.true.)
       rc=ESMF_SUCCESS
       
       ! do test
+      call test_regridGridToGML(rc)
       call test_regridPHMeshToGrid(rc)
 
       ! remove this later, it is here to protect hang
@@ -91,7 +92,7 @@ call ESMF_MeshSetMOAB(.true.)
 #endif
 
 ! This #if surrounds all the tests to enable turning on just one test
-#if 0
+#if 1
      !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
@@ -26331,23 +26332,18 @@ write(*,*) "LOCALRC=",localrc
      
      ! Set source function
      farrayPtr1D(i1) = 20.0+x+y
-     
-     print *, "source field id ", elemIds(i1), " = ", farrayPtr1D(i1)
   enddo
-  
-
 
    ! deallocate node data
-   ! deallocate(nodeIds)
-   ! deallocate(nodeCoords)
-   ! deallocate(nodeOwners)
-   ! 
-   ! ! deallocate elem data
-   ! deallocate(elemIds)
-   ! deallocate(elemTypes)
-   ! deallocate(elemConn)
-   ! deallocate(elemCoords)
-
+   deallocate(nodeIds)
+   deallocate(nodeCoords)
+   deallocate(nodeOwners)
+   
+   ! deallocate elem data
+   deallocate(elemIds)
+   deallocate(elemTypes)
+   deallocate(elemConn)
+   deallocate(elemCoords)
 
   ! setup dest. grid
   dstGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/2,2/), &
@@ -26460,12 +26456,6 @@ write(*,*) "LOCALRC=",localrc
       return
    endif
 
-  ! set interpolated function
-  do i1=1,numTotElems
-     print *, "source field id ", elemIds(i1), " = ", farrayPtr1D(i1)
-  enddo
-
-
   ! Do regrid
   call ESMF_FieldRegrid(srcField, dstField, routeHandle, rc=localrc)
   if (localrc /=ESMF_SUCCESS) then
@@ -26479,7 +26469,6 @@ write(*,*) "LOCALRC=",localrc
       rc=ESMF_FAILURE
       return
    endif
-
 
   ! Check error
   do lDE=0,localDECount-1
@@ -26520,10 +26509,6 @@ write(*,*) "LOCALRC=",localrc
         !! if error is too big report an error
         if (abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))) > 0.0001) then
            correct=.false.
-           print *, "ERROR: ", abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))), " at [", farrayPtrXC(i1,i2), ", ", farrayPtrYC(i1,i2), "]", " : ", farrayPtr(i1,i2), " [", 20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2), "]"
-        else
-           print *, "GOOD: ", abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))), " at [", farrayPtrXC(i1,i2), ", ", farrayPtrYC(i1,i2), "]", " : ", farrayPtr(i1,i2), " [", 20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2), "]"
-
         endif
      enddo
      enddo

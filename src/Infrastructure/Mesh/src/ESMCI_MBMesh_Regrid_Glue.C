@@ -247,7 +247,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
         Throw() << "Online regridding error" << std::endl;
     }
 
-#define BILINEAR_WEIGHTS
+// #define BILINEAR_WEIGHTS
 #ifdef BILINEAR_WEIGHTS
   cout << endl << "Bilinear Weight Matrix" << endl;
   // print out weights
@@ -498,7 +498,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
 
-#define DUMP_FACTORS_AFTER_SMM
+// #define DUMP_FACTORS_AFTER_SMM
 #ifdef DUMP_FACTORS_AFTER_SMM
     for (int i = 0; i < num_entries; ++i) {
       printf("regridglue: factorIndexList[%d, %d] factorList[%f]\n", iientries[2*i], iientries[2*i+1], factors[i]);

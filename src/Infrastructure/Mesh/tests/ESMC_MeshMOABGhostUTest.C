@@ -1153,7 +1153,7 @@ int main(void){
   
   // get the indexed pcomm object from the interface
   // pass index 0, it will the one created inside MBMesh_addelements
-  static ParallelComm *pcomm = ParallelComm::get_pcomm(mbmesh->mesh, 0);
+  ParallelComm *pcomm = ParallelComm::get_pcomm(mbmesh->mesh, 0);
   
   // this is called in MBMesh_addelements
   // merr = pcomm->resolve_shared_ents(0, elems, mbmesh->pdim, mbmesh->pdim-1);

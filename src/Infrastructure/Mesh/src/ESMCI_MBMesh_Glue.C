@@ -1998,6 +1998,11 @@ void MBMesh_destroy(void **mbmpp, int *rc) {
     // Get Moab Mesh wrapper
     MBMesh *mbmp=*((MBMesh **)mbmpp);
 
+    // get the indexed pcomm object from the interface
+    ParallelComm *pcomm = ParallelComm::get_pcomm(mbmp->mesh, 0);
+
+    delete pcomm;
+
     // Get rid of MBMesh
     delete mbmp;
 
@@ -2096,17 +2101,6 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
 
   try {
 
-#if 0
-  // Initialize the parallel environment for mesh (if not already done)
-    {
- int localrc;
- int rc;
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-   throw localrc;  // bail out with exception
-    }
-#endif
-
     // Get localPet
     int localrc;
     int localPet = VM::getCurrent(&localrc)->getLocalPet();
@@ -2121,30 +2115,26 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
 
     // MOAB error
     int merr;
-  
-    // Loop vertices
-    // NOTE: this is looping through the original order of the vertices, so
-    //       I DON'T need to sort by orig_pos
-    for(int i=0; i<mbmp->num_verts; i++) {
-      EntityHandle *vertp=mbmp->verts+i;
+
+    // Get a range containing all nodes
+    Range range_node;
+    merr=mbmp->mesh->get_entities_by_dimension(0,0,range_node);
+    MBMESH_CHECK_ERR(merr, localrc);
+
+    for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
+      const EntityHandle *node=&(*it);
 
       // Get owner
       int owner;
-      merr=moab_mesh->tag_get_data(mbmp->owner_tag, vertp, 1, &owner);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+      merr=moab_mesh->tag_get_data(mbmp->owner_tag, node, 1, &owner);
+      MBMESH_CHECK_ERR(merr, localrc);
 
       // If owned by this processor, put in list
       if (owner==localPet) {
         // Get gid
         int gid;
-        merr=moab_mesh->tag_get_data(mbmp->gid_tag, vertp, 1, &gid);
-        if (merr != MB_SUCCESS) {
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                 moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-        }
+        merr=moab_mesh->tag_get_data(mbmp->gid_tag, node, 1, &gid);
+        MBMESH_CHECK_ERR(merr, localrc);
 
         // Stick in list
         ngids.push_back(gid);
@@ -2244,6 +2234,9 @@ void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
       }
+
+      // Don't do split elements
+      if (mbmp->is_split && gid > mbmp->max_non_split_id) continue;
 
       // Get orig_pos
       int orig_pos;
