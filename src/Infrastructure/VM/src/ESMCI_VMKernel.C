@@ -5279,9 +5279,12 @@ int VMK::ssishmallocate(vector<unsigned long>&bytes, memhandle *memh){
       size = bytes[i];
     }
 #ifndef ESMF_MPIUNI
-    //TODO: make sure to request non-contiguous memory
-    MPI_Win_allocate_shared(size, 1, MPI_INFO_NULL, mpi_c_ssi, &dummyPtr,
+    MPI_Info info;
+    MPI_Info_create(&info); // allow system to allocate non-contiguous over SSI
+    MPI_Info_set(info, "alloc_shared_noncontig", "true");
+    MPI_Win_allocate_shared(size, 1, info, mpi_c_ssi, &dummyPtr,
       &(memh->wins[i]));
+    MPI_Info_free(&info);
 #else
     memh->mems[i] = (void *)malloc(size);
     memh->sizes[i] = size;
