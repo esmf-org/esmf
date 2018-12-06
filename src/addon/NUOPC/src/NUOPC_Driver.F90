@@ -3031,12 +3031,14 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-
-    ! copy the Attributes from info object to the newly created component
-    call ESMF_AttributeCopy(info, cmEntry%wrap%component, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
+    
+    if (present(info)) then
+      ! copy the Attributes from info object to the newly created component
+      call ESMF_AttributeCopy(info, cmEntry%wrap%component, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! Call the SetVM on the added component
     if (present(compSetVMRoutine)) then
