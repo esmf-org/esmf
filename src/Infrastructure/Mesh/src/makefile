@@ -24,19 +24,20 @@ SOURCEC	  = \
 
 ifneq ($(ESMF_MOAB),OFF)
 SOURCEC	  += ESMCI_MBMesh.C \
-             ESMCI_MBMesh_Util.C \
              ESMCI_MBMesh_BBox.C \
+             ESMCI_MBMesh_Bilinear.C \
+             ESMCI_MBMesh_Conserve.C \
+             ESMCI_MBMesh_Dual.C \
+             ESMCI_MBMesh_Glue.C \
              ESMCI_MBMesh_Mapping.C \
              ESMCI_MBMesh_Redist.C \
+             ESMCI_MBMesh_Regrid_Glue.C \
              ESMCI_MBMesh_Rendez_Elem.C \
              ESMCI_MBMesh_Rendez_EtoP.C \
              ESMCI_MBMesh_Search_EToE.C \
              ESMCI_MBMesh_Search_EToP.C \
              ESMCI_MBMesh_ShapeFunc.C \
-             ESMCI_MBMesh_Conserve.C \
-             ESMCI_MBMesh_Bilinear.C \
-             ESMCI_MBMesh_Glue.C \
-             ESMCI_MBMesh_Regrid_Glue.C
+             ESMCI_MBMesh_Util.C
 endif
 
 SOURCEH	  = ESMCI_MeshCXX.h

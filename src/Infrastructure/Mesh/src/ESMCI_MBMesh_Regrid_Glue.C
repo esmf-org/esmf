@@ -38,6 +38,7 @@
 #include "Mesh/include/ESMCI_MBMesh_Regrid_Glue.h"
 #include "Mesh/include/ESMCI_MBMesh_Conserve.h"
 #include "Mesh/include/ESMCI_MBMesh_Bilinear.h"
+#include "Mesh/include/ESMCI_MBMesh_Glue.h"
 
 #include <iostream>
 #include <vector>
@@ -117,7 +118,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
   // Old Regrid conserve turned off for now
   int regridConserve=ESMC_REGRID_CONSERVE_OFF;
 
-#define PROGRESSLOG_on
+#define PROGRESSLOG_off
 #define MEMLOG_off
 
 #ifdef PROGRESSLOG_on
@@ -245,7 +246,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
                         set_dst_status, dst_status))
         Throw() << "Online regridding error" << std::endl;
     }
-    
+
 // #define BILINEAR_WEIGHTS
 #ifdef BILINEAR_WEIGHTS
   cout << endl << "Bilinear Weight Matrix" << endl;
@@ -267,6 +268,13 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
     cout << endl;
   }
   cout << endl;
+  
+  // void *mbptr = (void *) mbmsrcp;
+  // int len = 12; char fname[len];
+  // sprintf(fname, "mesh_%d", Par::Rank());
+  // MBMesh_write(&mbptr, fname, rc, len);
+
+
 #endif
 
     
@@ -414,6 +422,16 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
         } // for j
       } // for wi
     }
+    
+    
+//////////////////////////////////////////////////////////////////////////////////////
+    // int *iientries2 = new int[2*iisize.first];
+    // double *factors2 = new double[iisize.first];
+    // 
+    // std::memcpy(factors2, factors, sizeof(double)*num_entries);
+    // std::memcpy(iientries2, iientries, sizeof(int)*2*num_entries);
+//////////////////////////////////////////////////////////////////////////////////////
+
 
 #if 0
     ///// If conservative, translate split element weights to non-split //////
@@ -479,6 +497,13 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
+
+// #define DUMP_FACTORS_AFTER_SMM
+#ifdef DUMP_FACTORS_AFTER_SMM
+    for (int i = 0; i < num_entries; ++i) {
+      printf("regridglue: factorIndexList[%d, %d] factorList[%f]\n", iientries[2*i], iientries[2*i+1], factors[i]);
+    }
+#endif
 
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from ArraySMMStore().", ESMC_LOGMSG_INFO);
@@ -680,6 +705,7 @@ bool all_mbmesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_i
     while ((wi != we) && (wi->first.id < id)) {
       wi++;
     }
+    // printf("PET %d pointlist point %d, node id %d start %d end %d\n", Par::Rank(), i, id, wt_id, wi->first.id);
 
     // If we're at the end of the weights then exit saying we don't have
     // all of them

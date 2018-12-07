@@ -65,7 +65,7 @@ latex2html  -white \
     -split +1 \
     -show_section_numbers \
     -local_icons \
-    -address "<A HREF="mailto:esmf_support@list.woc.noaa.gov">esmf_support@list.woc.noaa.gov</A>" \
+    -address "<A HREF="mailto:esmf_support@ucar.edu">esmf_support@ucar.edu</A>" \
     $1_$2doc.tex
 
 

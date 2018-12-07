@@ -32,7 +32,7 @@ latex2html -white \
            -split 4 \
 	   -local_icons \
            -show_section_numbers \
-           -address "<A HREF="mailto:esmf_support@list.woc.noaa.gov">esmf_support@list.woc.noaa.gov</A>" dev_guide.tex
+           -address "<A HREF="mailto:esmf_support@ucar.edu">esmf_support@ucar.edu</A>" dev_guide.tex
 
 
 rm -rf dev_guide/TMP

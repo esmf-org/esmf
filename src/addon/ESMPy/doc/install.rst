@@ -87,7 +87,7 @@ with the following command issued from the top level ESMPy directory:
 
     setenv PYTHONPATH <custom_install_location>/lib/\*/site_packages
 
-Please contact esmf_support@list.woc.noaa.gov with any questions.
+Please contact esmf_support@ucar.edu with any questions.
 
 ---------------
 Importing ESMPy
