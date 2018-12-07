@@ -84,7 +84,7 @@
 # The ESMF library source code is also available for download at:
 #                     http://sourceforge.net/projects/esmf
 #     
-# Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
+# Please contact esmf_support@ucar.edu with any questions or problems.
 #     
 # ================================================================================
 
