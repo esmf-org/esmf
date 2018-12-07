@@ -1020,7 +1020,7 @@ module NUOPC_Driver
             ! need to update the Component attributes across all PETs
             if (associated(is%wrap%modelPetLists(i)%ptr)) then
               call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
-                rootList=is%wrap%modelPetLists(i)%ptr, reconcile=.true., &
+                rootList=is%wrap%modelPetLists(i)%ptr(1:1), reconcile=.true., &
                 rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1093,7 +1093,7 @@ module NUOPC_Driver
               ! need to update the Component attributes across all PETs
               if (associated(is%wrap%connectorPetLists(i,j)%ptr)) then
                 call ESMF_AttributeUpdate(is%wrap%connectorComp(i,j), vm, &
-                  rootList=is%wrap%connectorPetLists(i,j)%ptr, &
+                  rootList=is%wrap%connectorPetLists(i,j)%ptr(1:1), &
                   reconcile=.true., rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
@@ -3032,15 +3032,15 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! optionally copy Attributes from info object to the newly created component
     if (present(info)) then
-      ! copy the Attributes from info object to the newly created component
       call ESMF_AttributeCopy(info, cmEntry%wrap%component, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
 
-    ! Call the SetVM on the added component
+    ! optionally call the SetVM on the added component
     if (present(compSetVMRoutine)) then
       call ESMF_GridCompSetVM(cmEntry%wrap%component, &
         compSetVMRoutine, userRc=localrc, rc=rc)
@@ -3507,7 +3507,7 @@ module NUOPC_Driver
         return  ! bail out
       if (associated(is%wrap%connectorPetLists(src,dst)%ptr)) then
         call ESMF_AttributeUpdate(is%wrap%connectorComp(src,dst), vm, &
-          rootList=is%wrap%connectorPetLists(src,dst)%ptr, &
+          rootList=is%wrap%connectorPetLists(src,dst)%ptr(1:1), &
           reconcile=.true., rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
