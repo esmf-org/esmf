@@ -231,7 +231,7 @@ cfunc_list = [
 
     {
         'ret':'int', 'name':'MPI_Allgatherv',
-        'params':'ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, MPI_Comm comm',
+        'params':'ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, ESMF_MPI_CONST int recvcounts[], ESMF_MPI_CONST int displs[], MPI_Datatype recvtype, MPI_Comm comm',
         'args':'sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, comm'
     },
 
@@ -250,13 +250,13 @@ cfunc_list = [
 
     {
         'ret':'int', 'name':'MPI_Alltoallv',
-        'params':'ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int rdispls[], MPI_Datatype recvtype, MPI_Comm comm',
+        'params':'ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST int sendcounts[], ESMF_MPI_CONST int sdispls[], MPI_Datatype sendtype, void *recvbuf, ESMF_MPI_CONST int recvcounts[], ESMF_MPI_CONST int rdispls[], MPI_Datatype recvtype, MPI_Comm comm',
         'args':'sendbuf, sendcounts, sdispls, sendtype, recvbuf, recvcounts, rdispls, recvtype, comm'
     },
 
     {
         'ret':'int', 'name':'MPI_Alltoallw',
-        'params':'ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], const MPI_Datatype sendtypes[], void *recvbuf, const int recvcounts[], const int rdispls[], const MPI_Datatype recvtypes[], MPI_Comm comm',
+        'params':'ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST int sendcounts[], ESMF_MPI_CONST int sdispls[], ESMF_MPI_CONST MPI_Datatype sendtypes[], void *recvbuf, ESMF_MPI_CONST int recvcounts[], ESMF_MPI_CONST int rdispls[], ESMF_MPI_CONST MPI_Datatype recvtypes[], MPI_Comm comm',
         'args':'sendbuf, sendcounts, sdispls, sendtypes, recvbuf, recvcounts, rdispls, recvtypes, comm'
     },
     
@@ -280,7 +280,7 @@ cfunc_list = [
 
     {
         'ret':'int', 'name':'MPI_Gatherv',
-        'params':'ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, int root, MPI_Comm comm',
+        'params':'ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, ESMF_MPI_CONST int recvcounts[], ESMF_MPI_CONST int displs[], MPI_Datatype recvtype, int root, MPI_Comm comm',
         'args':'sendbuf, sendcount, sendtype, recvbuf, recvcounts, displs, recvtype, root, comm'
     },
 

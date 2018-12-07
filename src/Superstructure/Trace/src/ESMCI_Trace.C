@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <algorithm>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1146,7 +1147,24 @@ namespace ESMCI {
     if (traceLocalPet || profileLocalPet) {
       if (currentRegionNode == NULL) return;
       uint16_t local_id = 0;
-      bool present = userRegionMap.get(name, local_id);
+      //bool present = userRegionMap.get(name, local_id);
+
+      std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+      vector<HashNode<string, uint16_t> *> entries = userRegionMap.getEntries();
+      vector<HashNode<string, uint16_t> *>::iterator it;
+
+      bool present = false;
+      for(it = entries.begin(); it != entries.end(); it++) {
+        string regName = (*it)->getKey();
+	std::transform(regName.begin(), regName.end(), regName.begin(), ::tolower);
+	//std::cout << "Comparing: " << name << " to " << regName << "\n";
+	if (regName == name) {
+	  present = true;
+	  local_id = (*it)->getValue();
+	  break;
+	}
+      }
+
       if (!present) return;
       RegionNode *child = currentRegionNode->getChild(local_id);
       if (child != NULL) *exists = 1;
