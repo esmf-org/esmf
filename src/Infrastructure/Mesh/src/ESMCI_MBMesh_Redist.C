@@ -810,7 +810,7 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
     // Unpack mask data
     // (Only unpack mask field (not mask_val), since that's the only one needed for rend)
      if (out_mesh->has_elem_mask) {
-      // Unpack mask
+      // Unpack elem mask
       int masked=*((int *)(buff+off));
       off +=sizeof(int);
 

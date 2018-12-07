@@ -63,7 +63,7 @@ using std::vector;
 // #define DEBUG_PCOORDS
 // #define DEBUG_SEARCH
 // #define DEBUG_SEARCH_RESULTS
-
+// #define DEBUG_REGRID_STATUS
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -230,14 +230,13 @@ static int found_func(void *c, void *y) {
     int num_verts = nodes.size();
     int src_node_mask[num_verts];
 
-  printf("%d# - elem %d has_node_mask == %s\n", Par::Rank(), srid, si->mesh->has_node_mask ? "true" : "false");
+  printf("%d# - elem %d has_node_mask == %s [", Par::Rank(), srid, si->mesh->has_node_mask ? "true" : "false");
 
     merr=si->mesh->mesh->tag_get_data(si->mesh->node_mask_val_tag, nodes, &src_node_mask);
     if (merr != MB_SUCCESS)
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
 
-    printf("%d# src_node_mask = [", Par::Rank());
     for (int i = 0; i < num_verts; ++i)
       printf("%d, ", src_node_mask[i]);
     printf("]\n");
@@ -261,7 +260,7 @@ static int found_func(void *c, void *y) {
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
 
-    merr=si->mesh->mesh->tag_get_data(si->mesh->node_mask_val_tag, nodes, &src_node_mask);
+    merr=si->mesh->mesh->tag_get_data(si->mesh->node_mask_tag, nodes, &src_node_mask);
     if (merr != MB_SUCCESS)
       if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
@@ -273,7 +272,6 @@ static int found_func(void *c, void *y) {
   printf("]\n");
 #endif
 
-    // Set src mask status
     for (int i=0; i< num_verts; i++) {
       if (src_node_mask[i] > 0.5) {
         elem_masked=true;
@@ -575,17 +573,6 @@ void MBMesh_Search_EToP(MBMesh *mbmAp,
 
     box->runon(pmin, pmax, found_func, (void*)&si);
 
-/*
-  double coords[3*3];
-  MBMesh_get_elem_coords(mbmAp, si.src_elem, 3, 9, coords);
-
-  for (int i = 0; i < 3; ++i) {
-    std::cout << "coords = [" << coords[i*3+0] << ", " << coords[i*3+1]
-              << ", " << coords[i*3+2] << "], ";
-  }
-  std::cout << std::endl;
-*/
-
     // add to dst_nodes here
     if (!si.investigated) {
 
@@ -609,6 +596,10 @@ printf("%d# again add node %d\n", Par::Rank(), pnt_id);
   
            // Put weights into weight matrix
            dst_status.InsertRowMergeSingle(row, col);
+           
+#ifdef DEBUG_REGRID_STATUS
+printf("%d# dst_id %d status %d\n", Par::Rank(), dst_id, ESMC_REGRID_STATUS_SRC_MASKED);
+#endif
         }
 
         if (unmappedaction == ESMCI_UNMAPPEDACTION_ERROR) {
@@ -632,6 +623,10 @@ printf("%d# again add node %d\n", Par::Rank(), pnt_id);
   
            // Put weights into weight matrix
            dst_status.InsertRowMergeSingle(row, col);
+           
+#ifdef DEBUG_REGRID_STATUS
+printf("%d# dst_id %d status %d\n", Par::Rank(), dst_id, ESMC_REGRID_STATUS_MAPPED);
+#endif
         }
           
         MBMesh_Search_EToP_Result sr; sr.src_elem = si.elem;
@@ -645,7 +640,7 @@ printf("%d# again add node %d\n", Par::Rank(), pnt_id);
             = const_cast<std::vector<etop_sr>&>(sri->dst_nodes);
           r.push_back(si.snr);
 #ifdef DEBUG_SEARCH
-          std::cout << Par::Rank() << "# SECOND CHOICE, gid =" << sri->dst_nodes[sri->dst_nodes.size()-1].dst_gid << std::endl;
+std::cout << Par::Rank() << "# SECOND CHOICE, gid =" << sri->dst_nodes[sri->dst_nodes.size()-1].dst_gid << std::endl;
 #endif
         }
       }
@@ -666,7 +661,6 @@ printf("%d# results: add elem %d with nodes: ", Par::Rank(), id);
 for (int i = 0; i < si->dst_nodes.size(); ++i)
   printf("%d, ", si->dst_nodes[i].dst_gid);
 printf("\n");
-
 #endif
     }
   }
@@ -691,6 +685,10 @@ printf("\n");
 
           // Put weights into weight matrix
           dst_status.InsertRowMergeSingle(row, col);
+        
+#ifdef DEBUG_REGRID_STATUS
+printf("%d# dst_id %d status %d\n", Par::Rank(), dst_id, ESMC_REGRID_STATUS_OUTSIDE);
+#endif
         }
       }
 

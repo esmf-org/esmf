@@ -242,6 +242,7 @@ void calc_bilinear_regrid_wgts(MBMesh *srcmb, PointList *dstpl, IWeights &wts,
   // If parallel then migrate weights back to decompostion of original mesh
   if (petCount > 1) {
     wts.Migrate(*dstpl);
+    if (set_dst_status) dst_status.Migrate(*dstpl);
   }
 
   // If parallel then get rid of rendezvous meshes.

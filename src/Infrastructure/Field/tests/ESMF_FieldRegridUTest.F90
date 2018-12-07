@@ -63,33 +63,7 @@
  
 #ifdef ESMF_TESTEXHAUSTIVE
 
-call ESMF_MeshSetMOAB(.true.)
-
-! this is for testing development of the dual mesh feature with MBMesh
-!    will remove at the end of this development cycle
-#if 0
-
-      !------------------------------------------------------------------------
-      !EX_disable_UTest
-      ! Test regrid with masks
-      write(failMsg, *) "Test unsuccessful"
-      write(name, *) "Regrid from Mesh containing pentagons and hexagons to Grid"
-
-      ! initialize 
-      rc=ESMF_SUCCESS
-      
-      ! do test
-      call test_regridGridToGML(rc)
-      call test_regridPHMeshToGrid(rc)
-
-      ! remove this later, it is here to protect hang
-      if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
-      ! return result
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      !------------------------------------------------------------------------
-#endif
+! call ESMF_MeshSetMOAB(.true.)
 
 ! This #if surrounds all the tests to enable turning on just one test
 #if 1
@@ -28140,7 +28114,6 @@ write(*,*) "LOCALRC=",localrc
       rc=ESMF_FAILURE
       return
    endif
-
  
   ! Check destination field
   ! Should only be 1 localDE
@@ -28150,7 +28123,7 @@ write(*,*) "LOCALRC=",localrc
         return
   endif
 
-  !  write(*,*) localPet," Status Field=",statusPtr
+  ! write(*,*) localPet," Status Field=",statusPtr
 
   ! Check status
   correct=.true.

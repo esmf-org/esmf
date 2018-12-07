@@ -51,7 +51,6 @@
 
 using namespace ESMCI;
 
-// #define DEBUG
 // #define DEBUG_MASK
 // #define DEBUG_OUTPUT
 // #define DEBUG_NODE_COORDS
@@ -287,9 +286,6 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
     }
 
     // Set mask information
-#ifdef DEBUG_MASK
-    printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMesh_Glue mask ~~~~~~~~~~~~~~~\n");
-#endif
     mbmp->has_node_mask=false;
     if (present(nodeMaskII)) { // if masks exist
       // Error checking
@@ -346,7 +342,7 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
               moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
         }
 
-        printf("node_mask = [");
+        printf("%d# has_node_mask = %s [", Par::Rank(), mbmp->has_node_mask ? "true" : "false");
         for (int i = 0; i < num_verts; ++i)
           printf("%d, ", node_mask[i]);
         printf("]\n");
@@ -354,10 +350,6 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
 #endif
 
     }
-#ifdef DEBUG_MASK
-    printf("has_node_mask = %d\n", mbmp->has_node_mask);
-    printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMesh_Glue mask ~~~~~~~~~~~~~~~\n");
-#endif
 
 #ifdef DEBUG_NODE_COORDS
   {
@@ -719,10 +711,6 @@ void MBMesh_addelements(void **mbmpp,
       }
     }
 
-#ifdef DEBUG
-printf("    PET %d - check size of elem connectivity\n", localPet);
-#endif
-
     //// Check size of connectivity list
     int expected_conn_size=0;
     if (parametric_dim==2) {
@@ -743,10 +731,6 @@ printf("    PET %d - check size of elem connectivity\n", localPet);
                                        ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
-#ifdef DEBUG
-printf("    PET %d - register elem tags\n", localPet);
-#endif
-
     // Register element tags
     int     int_def_val=-1.0;
     double  dbl_def_val[3]= {0.0, 0.0, 0.0};
@@ -764,10 +748,6 @@ printf("    PET %d - register elem tags\n", localPet);
 
       mbmp->has_elem_frac=true;
     }
-
-#ifdef DEBUG
-printf("    PET %d - elem masking\n", localPet);
-#endif
 
     // Handle element masking
     mbmp->has_elem_mask=false;
@@ -818,10 +798,6 @@ printf("    PET %d - elem masking\n", localPet);
       // Record the fact that it has masks
       mbmp->has_elem_area=true;
     }
-
-#ifdef DEBUG
-printf("    PET %d - elem coords\n", localPet);
-#endif
 
     // Handle element coords
     mbmp->has_elem_coords=false;
@@ -1023,10 +999,6 @@ printf("    PET %d - elem coords\n", localPet);
     double *elemCoords_wsplit=NULL;
     int *elemMaskIIArray_wsplit=NULL;
     InterArray<int> *elemMaskII_wsplit=NULL;
-
-#ifdef DEBUG
-printf("    PET %d - split elems\n", localPet);
-#endif
 
     if (is_split_local) {
       // New number of elements
@@ -1248,14 +1220,6 @@ printf("    PET %d - split elems\n", localPet);
       }
     }
 
-#ifdef DEBUG
-printf("    PET %d - addelems\n", localPet);
-#endif
-
-#ifdef DEBUG
-printf("    PET %d - addelems\n", localPet);
-#endif
-
     // Now loop the elements and add them to the mesh.
     int cur_conn = 0;
     for (int e = 0; e < num_elems; ++e) {
@@ -1439,6 +1403,29 @@ printf("    PET %d - addelems\n", localPet);
       printf("]\n");
     }
   }
+#endif
+
+#ifdef DEBUG_MASK
+      {
+        int localrc = 0;
+        int merr = 0;
+
+        int node_mask[num_verts];
+        if (mbmp->has_node_mask) { 
+          Range nodes;
+          merr=mbmp->mesh->get_entities_by_dimension(0, 0, nodes);
+          if (merr != MB_SUCCESS) throw (ESMC_RC_MOAB_ERROR);
+          merr=mbmp->mesh->tag_get_data(mbmp->node_mask_val_tag, nodes, &node_mask);
+          if (merr != MB_SUCCESS)
+            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+              moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }
+
+        printf("%d# has_node_mask = %s [", Par::Rank(), mbmp->has_node_mask ? "true" : "false");
+        for (int i = 0; i < num_verts; ++i)
+          printf("%d, ", node_mask[i]);
+        printf("]\n");
+      }
 #endif
 
  #if 0
