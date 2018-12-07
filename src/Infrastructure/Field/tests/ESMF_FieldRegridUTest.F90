@@ -51,10 +51,10 @@
     integer :: result = 0
  
        ! individual test result code
-     integer :: rc = 1
+    integer :: rc = 1
 
     ! individual test failure message
-     character(ESMF_MAXSTR) :: failMsg
+    character(ESMF_MAXSTR) :: failMsg
     character(512) :: name
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
@@ -63,11 +63,12 @@
  
 #ifdef ESMF_TESTEXHAUSTIVE
 
+! call ESMF_MeshSetMOAB(.true.)
 
 ! This #if surrounds all the tests to enable turning on just one test
 #if 1
      !------------------------------------------------------------------------
-        !EX_UTest
+      !EX_UTest
       ! Test regrid between -180-180 sphere and a 360 sphere
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Regrid between a 0 to 360 sphere and a -180 to 180 sphere"
@@ -630,7 +631,6 @@
       ! return result
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
@@ -647,7 +647,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       
       !------------------------------------------------------------------------
-
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test really coarse regrid
@@ -859,7 +858,6 @@
 !      call ESMF_LogFlush()
 !      call ESMF_UtilIOUnitFlush (6)
   
-
        !------------------------------------------------------------------------
       !EX_UTest
       ! Test regrid with masks
@@ -18298,6 +18296,9 @@ write(*,*) "LOCALRC=",localrc
    deallocate(elemConn)
 
 
+  call ESMF_MeshWrite(srcMesh, "srcmesh")
+  call ESMF_MeshWrite(dstMesh, "dstmesh")
+
 
   !!! Regrid forward from the A grid to the B grid
   ! Regrid store
@@ -18354,7 +18355,7 @@ write(*,*) "LOCALRC=",localrc
      !! if error is too big report an error
      if (relErr > 0.0001) then
         correct=.false.
-        !write(*,*) localPet,"::",i1,farrayPtr1D(i1),xfarrayPtr1D(i1)
+        ! write(*,*) localPet,"::",i1,farrayPtr1D(i1),xfarrayPtr1D(i1)
      endif
   enddo
 
@@ -26307,18 +26308,16 @@ write(*,*) "LOCALRC=",localrc
      farrayPtr1D(i1) = 20.0+x+y
   enddo
 
-
    ! deallocate node data
    deallocate(nodeIds)
    deallocate(nodeCoords)
    deallocate(nodeOwners)
-
+   
    ! deallocate elem data
    deallocate(elemIds)
    deallocate(elemTypes)
    deallocate(elemConn)
    deallocate(elemCoords)
-
 
   ! setup dest. grid
   dstGrid=ESMF_GridCreateNoPeriDim(minIndex=(/1,1/),maxIndex=(/dst_nx,dst_ny/),regDecomp=(/2,2/), &
@@ -26445,7 +26444,6 @@ write(*,*) "LOCALRC=",localrc
       return
    endif
 
-
   ! Check error
   do lDE=0,localDECount-1
 
@@ -26481,6 +26479,7 @@ write(*,*) "LOCALRC=",localrc
           ! Skip unmapped points 
          if (farrayPtr(i1,i2) < 1.0) cycle
 
+
         !! if error is too big report an error
         if (abs(farrayPtr(i1,i2)-(20.0+farrayPtrXC(i1,i2)+farrayPtrYC(i1,i2))) > 0.0001) then
            correct=.false.
@@ -26492,6 +26491,12 @@ write(*,*) "LOCALRC=",localrc
 
 
 #if 0
+  call ESMF_MeshWrite(srcMesh, filename="srcMesh", rc=localrc)
+  if (localrc /=ESMF_SUCCESS) then
+      rc=ESMF_FAILURE
+      return
+   endif
+
   ! Output Grid
   call ESMF_GridWriteVTK(dstGrid, staggerLoc=ESMF_STAGGERLOC_CENTER, filename="dstGrid", &
                          array1=dstArray, rc=localrc)
@@ -28109,7 +28114,6 @@ write(*,*) "LOCALRC=",localrc
       rc=ESMF_FAILURE
       return
    endif
-
  
   ! Check destination field
   ! Should only be 1 localDE
@@ -28119,7 +28123,7 @@ write(*,*) "LOCALRC=",localrc
         return
   endif
 
-  !  write(*,*) localPet," Status Field=",statusPtr
+  ! write(*,*) localPet," Status Field=",statusPtr
 
   ! Check status
   correct=.true.
