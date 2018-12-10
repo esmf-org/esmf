@@ -9,8 +9,8 @@
 
 //
 //-----------------------------------------------------------------------------
-#ifndef ESMCI_MBMeshDual_h
-#define ESMCI_MBMeshDual_h
+#ifndef ESMCI_MBMesh_Dual_h
+#define ESMCI_MBMesh_Dual_h
 
 #if defined ESMF_MOAB
 
@@ -23,8 +23,8 @@ class MBMesh;
 
  void MBMeshDual(MBMesh *src_mesh, MBMesh **_dual_mesh, int *rc);
 
-#endif
 
 } //namespace
 
+#endif
 #endif
