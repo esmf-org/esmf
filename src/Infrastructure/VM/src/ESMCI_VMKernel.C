@@ -679,7 +679,7 @@ void VMK::construct(void *ssarg){
     // that run within the same SSI but different PID
     for (int i=0; i<npets; i++){
       // looping over all pets
-      if (getSsiid(i) == getSsiid(mypet)){
+      if (getSsi(i) == getSsi(mypet)){
         // found a pet under same SSI ...
         if (pid[i] != pid[mypet]){
           // ... and with different PID (which also excludes mypet!)
@@ -2029,7 +2029,7 @@ int VMK::getNadevs(int i){
 }
 
 
-int VMK::getSsiid(int i){
+int VMK::getSsi(int i){
   return ssiid[cid[i][0]];
 }
 

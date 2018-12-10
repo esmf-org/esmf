@@ -180,12 +180,13 @@ namespace ESMCI {
     void **larrayBaseAddrList;        // [ssiLocalDeCount] localDeCount first
     int vasLocalDeCount;              // number of DEs that are in the same VAS
     int ssiLocalDeCount ;             // number of DEs that are on the same SSI
-    int *exclusiveLBound;             // [redDimCount*localDeCount]
-    int *exclusiveUBound;             // [redDimCount*localDeCount]
-    int *computationalLBound;         // [redDimCount*localDeCount]
-    int *computationalUBound;         // [redDimCount*localDeCount]
-    int *totalLBound;                 // [redDimCount*localDeCount]
-    int *totalUBound;                 // [redDimCount*localDeCount]
+    int *localDeToDeMap;              // [ssiLocalDeCount] mapping to DE
+    int *exclusiveLBound;             // [redDimCount*ssiLocalDeCount]
+    int *exclusiveUBound;             // [redDimCount*ssiLocalDeCount]
+    int *computationalLBound;         // [redDimCount*ssiLocalDeCount]
+    int *computationalUBound;         // [redDimCount*ssiLocalDeCount]
+    int *totalLBound;                 // [redDimCount*ssiLocalDeCount]
+    int *totalUBound;                 // [redDimCount*ssiLocalDeCount]
     int tensorCount;                  // number of tensor dimensions
     int tensorElementCount;           // number of tensor elements per element
     int *undistLBound;                // [tensorCount]
@@ -197,7 +198,7 @@ namespace ESMCI {
     int *distgridToPackedArrayMap;    // [dimCount] - entries are basis 1
                                       // entry of 0 indicates replicated dim
                                       // distr. Array dims as 1, 2, 3, .. only
-    int *contiguousFlag;              // [localDeCount]
+    int *contiguousFlag;              // [ssiLocalDeCount]
     int *exclusiveElementCountPDe;    // [deCount] number of elements in
                                       // exclusive region only considering
                                       // DistGrid dims that are associated with
@@ -205,7 +206,7 @@ namespace ESMCI {
                                       // Multiply with tensorElementCount to get
                                       // total number of elements in exclusive
                                       // Array region.
-    int *totalElementCountPLocalDe;   // [localDeCount] number of elements in
+    int *totalElementCountPLocalDe;   // [ssiLocalDeCount] number of elements in
                                       // total region only considering
                                       // DistGrid dims that are associated with
                                       // the Array dims.
@@ -243,6 +244,9 @@ namespace ESMCI {
     Array(VM *vm=NULL):ESMC_Base(vm){ // allow specific VM instead default
       typekind = ESMF_NOKIND;
       rank = 0;
+      vasLocalDeCount = 0;
+      ssiLocalDeCount = 0;
+      localDeToDeMap = NULL;
       indexflag = ESMC_INDEX_DELOCAL;
       larrayList = NULL;
       larrayBaseAddrList = NULL;
@@ -276,6 +280,9 @@ namespace ESMCI {
     Array(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
       typekind = ESMF_NOKIND;
       rank = 0;
+      vasLocalDeCount = 0;
+      ssiLocalDeCount = 0;
+      localDeToDeMap = NULL;
       indexflag = ESMC_INDEX_DELOCAL;
       larrayList = NULL;
       larrayBaseAddrList = NULL;
@@ -308,7 +315,7 @@ namespace ESMCI {
     }
    private:
     Array(ESMC_TypeKind_Flag typekind, int rank, LocalArray **larrayList,
-      int vasLocalDeCount, int ssiLocalDeCount,
+      int vasLocalDeCount, int ssiLocalDeCount, int *localDeToDeMap,
       DistGrid *distgrid, bool distgridCreator, int *exclusiveLBound,
       int *exclusiveUBound, int *computationalLBound, int *computationalUBound,
       int *totalLBound, int *totalUBound, int tensorCount,
@@ -357,6 +364,7 @@ namespace ESMCI {
     ESMC_IndexFlag getIndexflag()           const {return indexflag;}
     LocalArray **getLocalarrayList()        const {return larrayList;}
     void **getLarrayBaseAddrList()          const {return larrayBaseAddrList;}
+    const int *getLocalDeToDeMap()          const {return localDeToDeMap;}
     const int *getExclusiveLBound()         const {return exclusiveLBound;}
     const int *getExclusiveUBound()         const {return exclusiveUBound;}
     const int *getComputationalLBound()     const {return computationalLBound;}

@@ -291,7 +291,7 @@ class VMK{
     esmf_pthread_t getMypthid();   // return mypthid
     int getNcpet(int i);           // return ncpet
     int getNadevs(int i);          // return nadevs
-    int getSsiid(int i);           // return ssiid
+    int getSsi(int i);             // return ssiid
     MPI_Comm getMpi_c();           // return mpi_c
     int getNthreads(int i);        // return number of threads in group PET
     int getTid(int i);             // return tid for PET

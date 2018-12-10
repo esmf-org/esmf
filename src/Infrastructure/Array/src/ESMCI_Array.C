@@ -144,6 +144,7 @@ Array::Array(
   LocalArray **larrayListArg,             // (in)
   int vasLocalDeCountArg,                 // (in)
   int ssiLocalDeCountArg,                 // (in)
+  int *localDeToDeMapArg,                 // (in)
   DistGrid *distgridArg,                  // (in)
   bool distgridCreatorArg,                // (in)
   int *exclusiveLBoundArg,                // (in)
@@ -199,6 +200,18 @@ Array::Array(
       rc);
     return;
   }
+  if (localDeToDeMapArg == NULL){
+    // use DELayouts map as default
+    localDeToDeMapArg = (int *)delayout->getLocalDeToDeMap();
+    if (ssiLocalDeCount != localDeCount){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "Default localDeToDeMapArg requires ssiLocalDeCount==localDeCount", 
+        ESMC_CONTEXT, rc);
+      return;
+    }
+  }
+  localDeToDeMap = new int[ssiLocalDeCount];
+  memcpy(localDeToDeMap, localDeToDeMapArg, ssiLocalDeCount*sizeof(int));
   larrayList = new LocalArray*[ssiLocalDeCount];
   memcpy(larrayList, larrayListArg, ssiLocalDeCount*sizeof(LocalArray *));
   // determine the base addresses of the local arrays:
@@ -207,24 +220,24 @@ Array::Array(
     larrayBaseAddrList[i] = larrayList[i]->getBaseAddr();
   // copy the PET-local bound arrays
   int redDimCount = rank - tensorCountArg; // reduced dimCount w/o repl. dims
-  exclusiveLBound = new int[redDimCount*localDeCount];
+  exclusiveLBound = new int[redDimCount*ssiLocalDeCount];
   memcpy(exclusiveLBound, exclusiveLBoundArg,
-    redDimCount*localDeCount*sizeof(int));
-  exclusiveUBound = new int[redDimCount*localDeCount];
+    redDimCount*ssiLocalDeCount*sizeof(int));
+  exclusiveUBound = new int[redDimCount*ssiLocalDeCount];
   memcpy(exclusiveUBound, exclusiveUBoundArg,
-    redDimCount*localDeCount*sizeof(int));
-  computationalLBound = new int[redDimCount*localDeCount];
+    redDimCount*ssiLocalDeCount*sizeof(int));
+  computationalLBound = new int[redDimCount*ssiLocalDeCount];
   memcpy(computationalLBound, computationalLBoundArg,
-    redDimCount*localDeCount*sizeof(int));
-  computationalUBound = new int[redDimCount*localDeCount];
+    redDimCount*ssiLocalDeCount*sizeof(int));
+  computationalUBound = new int[redDimCount*ssiLocalDeCount];
   memcpy(computationalUBound, computationalUBoundArg,
-    redDimCount*localDeCount*sizeof(int));
-  totalLBound = new int[redDimCount*localDeCount];
+    redDimCount*ssiLocalDeCount*sizeof(int));
+  totalLBound = new int[redDimCount*ssiLocalDeCount];
   memcpy(totalLBound, totalLBoundArg,
-    redDimCount*localDeCount*sizeof(int));
-  totalUBound = new int[redDimCount*localDeCount];
+    redDimCount*ssiLocalDeCount*sizeof(int));
+  totalUBound = new int[redDimCount*ssiLocalDeCount];
   memcpy(totalUBound, totalUBoundArg,
-    redDimCount*localDeCount*sizeof(int));
+    redDimCount*ssiLocalDeCount*sizeof(int));
   // tensor dimensions
   tensorCount = tensorCountArg;
   tensorElementCount = tensorElementCountArg;
@@ -259,8 +272,8 @@ Array::Array(
     }
   }
   // totalElementCountPLocalDe
-  totalElementCountPLocalDe = new int[localDeCount];
-  for (int i=0; i<localDeCount; i++){
+  totalElementCountPLocalDe = new int[ssiLocalDeCount];
+  for (int i=0; i<ssiLocalDeCount; i++){
     totalElementCountPLocalDe[i] = 1;   // prime totalElementCountPLocalDe elem
     for (int j=0; j<redDimCount; j++){
       totalElementCountPLocalDe[i] *=
@@ -269,8 +282,8 @@ Array::Array(
   }
 
   // contiguous flag
-  contiguousFlag = new int[localDeCount];
-  for (int i=0; i<localDeCount; i++)
+  contiguousFlag = new int[ssiLocalDeCount];
+  for (int i=0; i<ssiLocalDeCount; i++)
     contiguousFlag[i] = -1;  // initialize as "not yet constructed"
 
   // Set up rim members and fill with canonical seqIndex values
@@ -359,6 +372,8 @@ void Array::destruct(bool followCreator, bool noGarbage){
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
+    if (localDeToDeMap != NULL)
+      delete [] localDeToDeMap;
     if (larrayList != NULL)
       delete [] larrayList;
     if (larrayBaseAddrList != NULL)
@@ -423,7 +438,6 @@ int Array::constructContiguousFlag(int redDimCount){
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
 
   int const localDeCount = delayout->getLocalDeCount();
-  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
   int dimCount = distgrid->getDimCount();
 
@@ -1169,7 +1183,7 @@ Array *Array::create(
     int vasLocalDeCountArg = localDeCount;
     int ssiLocalDeCountArg = localDeCount;
     array = new Array(typekind, rank, larrayList, vasLocalDeCountArg,
-      ssiLocalDeCountArg, distgrid, false,
+      ssiLocalDeCountArg, NULL, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
       tensorElementCount, undistLBoundArray, undistUBoundArray,
@@ -1841,7 +1855,7 @@ Array *Array::create(
     int vasLocalDeCountArg = localDeCount;
     int ssiLocalDeCountArg = localDeCount;
     array = new Array(typekind, rank, larrayList, vasLocalDeCountArg,
-      ssiLocalDeCountArg, distgrid, false,
+      ssiLocalDeCountArg, NULL, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
       tensorElementCount, undistLBoundArray, undistUBoundArray,
@@ -1954,11 +1968,10 @@ Array *Array::create(
     arrayOut->delayout = arrayIn->delayout; // copy reference
     // deep copy of members with allocations
     // copy the PET-local LocalArray pointers
-    int localDeCount = arrayIn->delayout->getLocalDeCount();
-    arrayOut->larrayList = new LocalArray*[localDeCount];
+    arrayOut->larrayList = new LocalArray*[ssiLocalDeCount];
     if (rmLeadingTensors==0){
       // use the src larrayList as a template for the new allocation
-      for (int i=0; i<localDeCount; i++){
+      for (int i=0; i<ssiLocalDeCount; i++){
         arrayOut->larrayList[i] =
           LocalArray::create(arrayIn->larrayList[i], NULL, NULL, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -1969,7 +1982,7 @@ Array *Array::create(
       }
     }else{
       // remove the leading tensor dimensions from the allocation
-      for (int i=0; i<localDeCount; i++){
+      for (int i=0; i<ssiLocalDeCount; i++){
         const int *temp_counts = arrayIn->larrayList[i]->getCounts();
         arrayOut->larrayList[i] =
           LocalArray::create(typekind, rank, &(temp_counts[rmLeadingTensors]),
@@ -1981,30 +1994,34 @@ Array *Array::create(
         }
       }
     }
+    // copy the localDeToDeMap
+    arrayOut->localDeToDeMap = new int[ssiLocalDeCount];
+    memcpy(arrayOut->localDeToDeMap, arrayIn->localDeToDeMap,
+      ssiLocalDeCount*sizeof(int));
     // determine the base addresses of the local arrays:
-    arrayOut->larrayBaseAddrList = new void*[localDeCount];
-    for (int i=0; i<localDeCount; i++)
+    arrayOut->larrayBaseAddrList = new void*[ssiLocalDeCount];
+    for (int i=0; i<ssiLocalDeCount; i++)
       arrayOut->larrayBaseAddrList[i] = arrayOut->larrayList[i]->getBaseAddr();
     // copy the PET-local bound arrays
     int redDimCount = rank - tensorCount;
-    arrayOut->exclusiveLBound = new int[redDimCount*localDeCount];
+    arrayOut->exclusiveLBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->exclusiveLBound, arrayIn->exclusiveLBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->exclusiveUBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->exclusiveUBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->exclusiveUBound, arrayIn->exclusiveUBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->computationalLBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->computationalLBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->computationalLBound, arrayIn->computationalLBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->computationalUBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->computationalUBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->computationalUBound, arrayIn->computationalUBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->totalLBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->totalLBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->totalLBound, arrayIn->totalLBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->totalUBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->totalUBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->totalUBound, arrayIn->totalUBound,
-      redDimCount*localDeCount*sizeof(int));
+      redDimCount*ssiLocalDeCount*sizeof(int));
     // tensor dimensions
     arrayOut->undistLBound = new int[tensorCount];
     memcpy(arrayOut->undistLBound, arrayIn->undistLBound + rmLeadingTensors,
@@ -2028,18 +2045,18 @@ Array *Array::create(
     memcpy(arrayOut->distgridToPackedArrayMap,
       arrayIn->distgridToPackedArrayMap, dimCount * sizeof(int));
     // contiguous flag
-    arrayOut->contiguousFlag = new int[localDeCount];
+    arrayOut->contiguousFlag = new int[ssiLocalDeCount];
     memcpy(arrayOut->contiguousFlag, arrayIn->contiguousFlag,
-      localDeCount * sizeof(int));
+      ssiLocalDeCount * sizeof(int));
     // exclusiveElementCountPDe
     int deCount = arrayIn->delayout->getDeCount();
     arrayOut->exclusiveElementCountPDe = new int[deCount];
     memcpy(arrayOut->exclusiveElementCountPDe,
       arrayIn->exclusiveElementCountPDe, deCount * sizeof(int));
     // totalElementCountPLocalDe
-    arrayOut->totalElementCountPLocalDe = new int[localDeCount];
+    arrayOut->totalElementCountPLocalDe = new int[ssiLocalDeCount];
     memcpy(arrayOut->totalElementCountPLocalDe,
-      arrayIn->totalElementCountPLocalDe, localDeCount * sizeof(int));
+      arrayIn->totalElementCountPLocalDe, ssiLocalDeCount * sizeof(int));
 
     // Set up rim members and fill with canonical seqIndex values
     arrayOut->setRimMembers();
@@ -2144,31 +2161,33 @@ Array *Array::create(
     int ssiLocalDeCount = arrayOut->ssiLocalDeCount = arrayIn->ssiLocalDeCount;
     // deep copy of members with allocations
     // copy the PET-local bound arrays
-    int localDeCount = arrayIn->delayout->getLocalDeCount();
     int redDimCount = rank - tensorCount;
-    arrayOut->exclusiveLBound = new int[redDimCount*localDeCount];
+    arrayOut->localDeToDeMap = new int[ssiLocalDeCount];
+    memcpy(arrayOut->localDeToDeMap, arrayIn->localDeToDeMap,
+      ssiLocalDeCount*sizeof(int));
+    arrayOut->exclusiveLBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->exclusiveLBound, arrayIn->exclusiveLBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->exclusiveUBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->exclusiveUBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->exclusiveUBound, arrayIn->exclusiveUBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->computationalLBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->computationalLBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->computationalLBound, arrayIn->computationalLBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->computationalUBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->computationalUBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->computationalUBound, arrayIn->computationalUBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->totalLBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->totalLBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->totalLBound, arrayIn->totalLBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->totalUBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->totalUBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->totalUBound, arrayIn->totalUBound,
-      redDimCount*localDeCount*sizeof(int));
+      redDimCount*ssiLocalDeCount*sizeof(int));
     // copy the PET-local LocalArray pointers
-    arrayOut->larrayList = new LocalArray*[localDeCount];
+    arrayOut->larrayList = new LocalArray*[ssiLocalDeCount];
     if (rmTensorFlag){
       // remove the tensor dimensions from the allocation
-      for (int i=0; i<localDeCount; i++){
+      for (int i=0; i<ssiLocalDeCount; i++){
         vector<int> counts;
         for (int k=0; k<redDimCount; k++){
           int dimSize = arrayOut->totalUBound[i*redDimCount+k]
@@ -2189,7 +2208,7 @@ Array *Array::create(
       }
     }else{
       // use the src larrayList as a template for the new allocation
-      for (int i=0; i<localDeCount; i++){
+      for (int i=0; i<ssiLocalDeCount; i++){
         arrayOut->larrayList[i] =
           LocalArray::create(arrayIn->larrayList[i], NULL, NULL, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -2203,8 +2222,8 @@ Array *Array::create(
       }
     }
     // determine the base addresses of the local arrays:
-    arrayOut->larrayBaseAddrList = new void*[localDeCount];
-    for (int i=0; i<localDeCount; i++)
+    arrayOut->larrayBaseAddrList = new void*[ssiLocalDeCount];
+    for (int i=0; i<ssiLocalDeCount; i++)
       arrayOut->larrayBaseAddrList[i] = arrayOut->larrayList[i]->getBaseAddr();
     // tensor dimensions
     arrayOut->undistLBound = new int[tensorCount];
@@ -2232,18 +2251,18 @@ Array *Array::create(
     memcpy(arrayOut->distgridToPackedArrayMap,
       arrayOut->distgridToArrayMap, dimCount * sizeof(int));
     // contiguous flag
-    arrayOut->contiguousFlag = new int[localDeCount];
+    arrayOut->contiguousFlag = new int[ssiLocalDeCount];
     memcpy(arrayOut->contiguousFlag, arrayIn->contiguousFlag,
-      localDeCount * sizeof(int));
+      ssiLocalDeCount * sizeof(int));
     // exclusiveElementCountPDe
     int deCount = arrayIn->delayout->getDeCount();
     arrayOut->exclusiveElementCountPDe = new int[deCount];
     memcpy(arrayOut->exclusiveElementCountPDe,
       arrayIn->exclusiveElementCountPDe, deCount * sizeof(int));
     // totalElementCountPLocalDe
-    arrayOut->totalElementCountPLocalDe = new int[localDeCount];
+    arrayOut->totalElementCountPLocalDe = new int[ssiLocalDeCount];
     memcpy(arrayOut->totalElementCountPLocalDe,
-      arrayIn->totalElementCountPLocalDe, localDeCount * sizeof(int));
+      arrayIn->totalElementCountPLocalDe, ssiLocalDeCount * sizeof(int));
 
     // Set up rim members and fill with canonical seqIndex values
     arrayOut->setRimMembers();
@@ -3817,7 +3836,6 @@ int Array::print()const{
   printf("deCount = %d\n", deCount);
   int localDeCount = delayout->getLocalDeCount();
   printf("localDeCount = %d\n", localDeCount);
-  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   const int redDimCount = rank - tensorCount;
   for (int i=0; i<localDeCount; i++){
     int de = localDeToDeMap[i];
@@ -4354,7 +4372,6 @@ int Array::gather(
   int dimCount = distgrid->getDimCount();
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
-  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
 
   int redDimCount = rank - tensorCount;
 
@@ -4766,7 +4783,6 @@ int Array::scatter(
   int dimCount = distgrid->getDimCount();
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
-  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
 
   int redDimCount = rank - tensorCount;
 
@@ -12499,7 +12515,7 @@ bool ArrayElement::hasValidSeqIndex(
 //EOPI
 //-----------------------------------------------------------------------------
   int rank = array->getRank();
-  int de = array->getDELayout()->getLocalDeToDeMap()[localDe];
+  int de = array->getLocalDeToDeMap()[localDe];
   int iOff = de * array->getDistGrid()->getDimCount();
   int iPacked = 0;    // reset
   for (int i=0; i<rank; i++){

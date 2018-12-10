@@ -534,7 +534,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(accDeviceCount) != ESMC_NULL_POINTER)
       *accDeviceCount = (*ptr)->getNadevs(*pet);
     if (ESMC_NOT_PRESENT_FILTER(ssiId) != ESMC_NULL_POINTER)
-      *ssiId = (*ptr)->getSsiid(*pet);
+      *ssiId = (*ptr)->getSsi(*pet);
     if (ESMC_NOT_PRESENT_FILTER(threadCount) != ESMC_NULL_POINTER)
       *threadCount = (*ptr)->getNthreads(*pet);
     if (ESMC_NOT_PRESENT_FILTER(threadId) != ESMC_NULL_POINTER)
