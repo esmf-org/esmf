@@ -169,14 +169,17 @@ namespace ESMCI {
     ESMC_TypeKind_Flag typekind;
     int rank;
     ESMC_IndexFlag indexflag;
-    //todo: the LocalArray pointers should be shared between PETs in the same
-    //todo: VAS as to allow shared memory operations. Even the LocalArray
-    //todo: pointers for Arrays instances on other VAS' may be good to keep
-    //todo: in order to allow one-sided access to their data...
-    // for now only keep PET-local LocalArray pointers here
     // PET-local information
-    LocalArray **larrayList;          // [localDeCount]
-    void **larrayBaseAddrList;        // [localDeCount]
+    // larrayList and larrayBaseAddrList hold the PET-local DEs in the first
+    // localDe many entries. Then, up to vasLocalDeCount are the DEs that
+    // are in the same VAS, and up to ssiLocalDeCount are the DEs that are
+    // in the same SSI. 
+    // Without VAS DE sharing, vasLocalDeCount==localDeCount.
+    // Without SSI DE sharing, ssiLocalDeCount==vasLocalDeCount.
+    LocalArray **larrayList;          // [ssiLocalDeCount] localDeCount first
+    void **larrayBaseAddrList;        // [ssiLocalDeCount] localDeCount first
+    int vasLocalDeCount;              // number of DEs that are in the same VAS
+    int ssiLocalDeCount ;             // number of DEs that are on the same SSI
     int *exclusiveLBound;             // [redDimCount*localDeCount]
     int *exclusiveUBound;             // [redDimCount*localDeCount]
     int *computationalLBound;         // [redDimCount*localDeCount]
@@ -305,6 +308,7 @@ namespace ESMCI {
     }
    private:
     Array(ESMC_TypeKind_Flag typekind, int rank, LocalArray **larrayList,
+      int vasLocalDeCount, int ssiLocalDeCount,
       DistGrid *distgrid, bool distgridCreator, int *exclusiveLBound,
       int *exclusiveUBound, int *computationalLBound, int *computationalUBound,
       int *totalLBound, int *totalUBound, int tensorCount,

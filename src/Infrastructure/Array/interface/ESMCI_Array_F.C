@@ -310,8 +310,10 @@ extern "C" {
         return;
       }
       // fill in undistLBound
-      if ((*ptr)->getTensorCount()) { // 0 - sized undistLBound are legit, but memcpy may not behave
-        memcpy((undistLBound)->array, (*ptr)->getUndistLBound(), sizeof(int) * (*ptr)->getTensorCount());
+      if ((*ptr)->getTensorCount()){
+        // 0 - sized undistLBound are legit, but memcpy may not behave
+        memcpy((undistLBound)->array, (*ptr)->getUndistLBound(),
+          sizeof(int) * (*ptr)->getTensorCount());
       }
     }
 
@@ -330,8 +332,10 @@ extern "C" {
         return;
       }
       // fill in undistUBound
-      if ((*ptr)->getTensorCount()) { // 0 - sized undistUBound are legit, but memcpy may not behave
-        memcpy((undistUBound)->array, (*ptr)->getUndistUBound(), sizeof(int) * (*ptr)->getTensorCount());
+      if ((*ptr)->getTensorCount()){
+        // 0 - sized undistUBound are legit, but memcpy may not behave
+        memcpy((undistUBound)->array, (*ptr)->getUndistUBound(),
+          sizeof(int) * (*ptr)->getTensorCount());
       }
     }
 

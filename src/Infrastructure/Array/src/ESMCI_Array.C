@@ -142,6 +142,8 @@ Array::Array(
   ESMC_TypeKind_Flag typekindArg,         // (in)
   int rankArg,                            // (in)
   LocalArray **larrayListArg,             // (in)
+  int vasLocalDeCountArg,                 // (in)
+  int ssiLocalDeCountArg,                 // (in)
   DistGrid *distgridArg,                  // (in)
   bool distgridCreatorArg,                // (in)
   int *exclusiveLBoundArg,                // (in)
@@ -184,11 +186,24 @@ Array::Array(
   delayout = distgrid->getDELayout();
   // copy the PET-local LocalArray pointers
   int localDeCount = delayout->getLocalDeCount();
-  larrayList = new LocalArray*[localDeCount];
-  memcpy(larrayList, larrayListArg, localDeCount*sizeof(LocalArray *));
+  vasLocalDeCount = vasLocalDeCountArg;
+  ssiLocalDeCount = ssiLocalDeCountArg;
+  if (vasLocalDeCount < localDeCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "vasLocalDeCount must not be less than localDeCount", ESMC_CONTEXT, rc);
+    return;
+  }
+  if (ssiLocalDeCount < vasLocalDeCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "ssiLocalDeCount must not be less than ssiLocalDeCount", ESMC_CONTEXT, 
+      rc);
+    return;
+  }
+  larrayList = new LocalArray*[ssiLocalDeCount];
+  memcpy(larrayList, larrayListArg, ssiLocalDeCount*sizeof(LocalArray *));
   // determine the base addresses of the local arrays:
-  larrayBaseAddrList = new void*[localDeCount];
-  for (int i=0; i<localDeCount; i++)
+  larrayBaseAddrList = new void*[ssiLocalDeCount];
+  for (int i=0; i<ssiLocalDeCount; i++)
     larrayBaseAddrList[i] = larrayList[i]->getBaseAddr();
   // copy the PET-local bound arrays
   int redDimCount = rank - tensorCountArg; // reduced dimCount w/o repl. dims
@@ -339,7 +354,7 @@ void Array::destruct(bool followCreator, bool noGarbage){
 //    int localDeCount = delayout->getLocalDeCount();
     int localDeCount = localDeCountAux; // TODO: delayout may be gone already!
 // TODO: replace the above line with the line before once ref. counting implem.
-    for (int i=0; i<localDeCount; i++){
+    for (int i=0; i<ssiLocalDeCount; i++){
       int localrc = LocalArray::destroy(larrayList[i]);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
@@ -1151,7 +1166,10 @@ Array *Array::create(
 
   // call class constructor
   try{
-    array = new Array(typekind, rank, larrayList, distgrid, false,
+    int vasLocalDeCountArg = localDeCount;
+    int ssiLocalDeCountArg = localDeCount;
+    array = new Array(typekind, rank, larrayList, vasLocalDeCountArg,
+      ssiLocalDeCountArg, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
       tensorElementCount, undistLBoundArray, undistUBoundArray,
@@ -1820,7 +1838,10 @@ Array *Array::create(
 
   // call class constructor
   try{
-    array = new Array(typekind, rank, larrayList, distgrid, false,
+    int vasLocalDeCountArg = localDeCount;
+    int ssiLocalDeCountArg = localDeCount;
+    array = new Array(typekind, rank, larrayList, vasLocalDeCountArg,
+      ssiLocalDeCountArg, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
       tensorElementCount, undistLBoundArray, undistUBoundArray,
@@ -1915,6 +1936,8 @@ Array *Array::create(
     arrayOut->indexflag = arrayIn->indexflag;
     int tensorCount =
       arrayOut->tensorCount = arrayIn->tensorCount - rmLeadingTensors;
+    arrayOut->vasLocalDeCount = arrayIn->vasLocalDeCount;
+    int ssiLocalDeCount = arrayOut->ssiLocalDeCount = arrayIn->ssiLocalDeCount;
     // determine leading tensor elements
     int leadingTensorElementCount = 0;
     if (rmLeadingTensors){
@@ -2117,6 +2140,8 @@ Array *Array::create(
     arrayOut->distgrid = arrayIn->distgrid; // copy reference
     arrayOut->distgridCreator = false;      // not a locally created object
     arrayOut->delayout = arrayIn->delayout; // copy reference
+    arrayOut->vasLocalDeCount = arrayIn->vasLocalDeCount;
+    int ssiLocalDeCount = arrayOut->ssiLocalDeCount = arrayIn->ssiLocalDeCount;
     // deep copy of members with allocations
     // copy the PET-local bound arrays
     int localDeCount = arrayIn->delayout->getLocalDeCount();
@@ -2360,8 +2385,7 @@ int Array::copy(
 
     // do the actual data copy
     int const dataSize = ESMC_TypeKind_FlagSize(typekind);
-    int const localDeCount = delayout->getLocalDeCount();
-    for (int i=0; i<localDeCount; i++){
+    for (int i=0; i<ssiLocalDeCount; i++){
       int size =
         totalElementCountPLocalDe[i]*tensorElementCount*dataSize;  // bytes
       memcpy(larrayBaseAddrList[i], arrayIn->larrayBaseAddrList[i], size);
@@ -4179,6 +4203,8 @@ int Array::deserialize(
   larrayBaseAddrList = new void*[0];        // no DE on proxy object
   totalElementCountPLocalDe = NULL;         // no De on proxy object
 
+  vasLocalDeCount = 0;
+  ssiLocalDeCount = 0;
   localDeCountAux = delayout->getLocalDeCount(); // TODO: auxilary for garb
                                                  // TODO: until ref. counting
 
