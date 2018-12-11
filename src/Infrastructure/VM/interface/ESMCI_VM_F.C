@@ -465,9 +465,10 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_vmget)(ESMCI::VM **ptr, int *localPet, int *petCount, 
-    int *peCount, int *ssiCount, int *minSsiPetCount, int *maxSsiPetCount,
-    int *mpiCommunicator, ESMC_Logical *pthreadsEnabledFlag,
-    ESMC_Logical *openMPEnabledFlag, int *rc){
+    int *peCount, int *ssiCount, int *ssiMinPetCount, int *ssiMaxPetCount,
+    int *ssiLocalPetCount, int *mpiCommunicator,
+    ESMC_Logical *pthreadsEnabledFlag, ESMC_Logical *openMPEnabledFlag, 
+    int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmget()"
     // Initialize return code; assume routine not implemented
@@ -486,10 +487,12 @@ extern "C" {
     }
     if (ESMC_NOT_PRESENT_FILTER(ssiCount) != ESMC_NULL_POINTER)
       *ssiCount = (*ptr)->getSsiCount();
-    if (ESMC_NOT_PRESENT_FILTER(minSsiPetCount) != ESMC_NULL_POINTER)
-      *minSsiPetCount = (*ptr)->getMinSsiPetCount();
-    if (ESMC_NOT_PRESENT_FILTER(maxSsiPetCount) != ESMC_NULL_POINTER)
-      *maxSsiPetCount = (*ptr)->getMaxSsiPetCount();
+    if (ESMC_NOT_PRESENT_FILTER(ssiMinPetCount) != ESMC_NULL_POINTER)
+      *ssiMinPetCount = (*ptr)->getSsiMinPetCount();
+    if (ESMC_NOT_PRESENT_FILTER(ssiMaxPetCount) != ESMC_NULL_POINTER)
+      *ssiMaxPetCount = (*ptr)->getSsiMaxPetCount();
+    if (ESMC_NOT_PRESENT_FILTER(ssiLocalPetCount) != ESMC_NULL_POINTER)
+      *ssiLocalPetCount = (*ptr)->getSsiLocalPetCount();
     if (ESMC_NOT_PRESENT_FILTER(mpiCommunicator) != ESMC_NULL_POINTER){
       mpiCommTemp = (*ptr)->getMpi_c();
 #ifdef ESMF_DONT_HAVE_MPI_COMM_C2F

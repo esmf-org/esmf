@@ -194,8 +194,10 @@ class VMK{
     int *nadevs;    // number of accelerator devices accessible from this pet
     int **cid;      // core id of the cores this pet references
     int ssiCount;   // number of single system images in this VMK
-    int minSsiPetCount;   // minimum PETs on a single system image
-    int maxSsiPetCount;   // maximum PETs on a single system image
+    int ssiMinPetCount;   // minimum PETs on a single system image
+    int ssiMaxPetCount;   // maximum PETs on a single system image
+    int ssiLocalPetCount; // number of PETs on the same SSI as localPet (incl.)
+    int *ssiLocalPetList; // PETs that are on the same SSI as localPet (incl.)
     // general information about this VMK
     int mpionly;    // 0: there is multi-threading, 1: MPI-only
     int nothreadsflag; // 0-threaded VM, 1-non-threaded VM
@@ -304,8 +306,10 @@ class VMK{
     int getLocalPet() const {return mypet;}
     int getPetCount() const {return npets;}
     int getSsiCount() const {return ssiCount;}
-    int getMinSsiPetCount() const {return minSsiPetCount;}
-    int getMaxSsiPetCount() const {return maxSsiPetCount;}
+    int getSsiMinPetCount() const {return ssiMinPetCount;}
+    int getSsiMaxPetCount() const {return ssiMaxPetCount;}
+    int getSsiLocalPetCount() const {return ssiLocalPetCount;}
+    const int *getSsiLocalPetList() const {return ssiLocalPetList;}
     esmf_pthread_t getLocalPthreadId() const {return mypthid;}
     bool isPthreadsEnabled() const{
 #ifdef ESMF_NO_PTHREADS

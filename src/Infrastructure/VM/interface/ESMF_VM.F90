@@ -4697,8 +4697,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGet()
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
-    petCount, peCount, ssiCount, minSsiPetCount, maxSsiPetCount, &
-    mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, rc)
+    petCount, peCount, ssiCount, ssiMinPetCount, ssiMaxPetCount, &
+    ssiLocalPetCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)            :: vm
@@ -4707,8 +4708,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: petCount
     integer,            intent(out), optional :: peCount
     integer,            intent(out), optional :: ssiCount
-    integer,            intent(out), optional :: minSsiPetCount
-    integer,            intent(out), optional :: maxSsiPetCount
+    integer,            intent(out), optional :: ssiMinPetCount
+    integer,            intent(out), optional :: ssiMaxPetCount
+    integer,            intent(out), optional :: ssiLocalPetCount
     integer,            intent(out), optional :: mpiCommunicator
     logical,            intent(out), optional :: pthreadsEnabledFlag
     logical,            intent(out), optional :: openMPEnabledFlag
@@ -4719,11 +4721,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.0.0] Added arguments {\tt ssiCount}, {\tt minSsiPetCount}, and
-!   {\tt maxSsiPetCount} to provide access to information about how the
-!   VM is mapped across the single system images (typically synonymous to nodes)
-!   of the compute environment. This information is useful when 
-!   constructing custom petLists.
+! \item[7.0.0] Added arguments {\tt ssiCount}, {\tt ssiMinPetCount}, 
+!   {\tt ssiMaxPetCount}, and {\tt ssiLocalPetCount} to provide access 
+!   to information about how the VM is mapped across the single system images
+!   (typically synonymous to nodes) of the compute environment. This information
+!   is useful when constructing custom petLists.
 ! \end{description}
 ! \end{itemize}
 !
@@ -4743,12 +4745,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[ssiCount]}]
 !        Upon return this holds the number of single system images referenced 
 !        by {\tt vm}.
-!   \item[{[minSsiPetCount]}]
+!   \item[{[ssiMinPetCount]}]
 !        Upon return this holds the smallest number of PETs running in the same
 !        single system images under {\tt vm}.
-!   \item[{[axSsiPetCount]}]
+!   \item[{[ssiMaxPetCount]}]
 !        Upon return this holds the largest number of PETs running in the same
 !        single system images under {\tt vm}.
+!   \item[{[ssiLocalPetCount]}]
+!        Upon return this holds the number of PETs running in the same
+!        single system as {\tt localPet}.
 !   \item[{[mpiCommunicator]}]
 !        Upon return this holds the MPI intra-communicator used by the 
 !        specified {\tt ESMF\_VM} object. This communicator may be used for
@@ -4788,8 +4793,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Call into the C++ interface.
     call c_ESMC_VMGet(vm, localPet, petCount, peCount, ssiCount, &
-      minSsiPetCount, maxSsiPetCount, mpiCommunicator, pthreadsEnabledFlagArg, &
-      openMPEnabledFlagArg, localrc)
+      ssiMinPetCount, ssiMaxPetCount, ssiLocalPetCount, mpiCommunicator, &
+      pthreadsEnabledFlagArg, openMPEnabledFlagArg, localrc)
     if (present (pthreadsEnabledFlag))  &
       pthreadsEnabledFlag = pthreadsEnabledFlagArg
     if (present (openMPEnabledFlag))  &

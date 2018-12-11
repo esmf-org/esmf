@@ -433,8 +433,11 @@ void VMK::init(MPI_Comm mpiCommunicator){
     ssiid[i]=i;                 // hardcoded assumption of single-CPU SSIs
   }
   ssiCount = ncores;
-  minSsiPetCount=1;
-  maxSsiPetCount=1;
+  ssiMinPetCount=1;
+  ssiMaxPetCount=1;
+  ssiLocalPetCount=1;
+  ssiLocalPetList = new int[1];
+  ssiLocalPetList[0] = mypet;
 #else
   int *temp_ssiPetCount = new int[ncores];
   long int *temp_ssiid = new long int[ncores];
@@ -459,15 +462,25 @@ void VMK::init(MPI_Comm mpiCommunicator){
     }
   }
   delete [] temp_ssiid;
-  minSsiPetCount=ncores;
-  maxSsiPetCount=0;
+  ssiMinPetCount=ncores;
+  ssiMaxPetCount=0;
   for (int i=0; i<ssiCount; i++){
-    if (temp_ssiPetCount[i] < minSsiPetCount)
-      minSsiPetCount = temp_ssiPetCount[i];
-    if (temp_ssiPetCount[i] > maxSsiPetCount)
-      maxSsiPetCount = temp_ssiPetCount[i];
+    if (temp_ssiPetCount[i] < ssiMinPetCount)
+      ssiMinPetCount = temp_ssiPetCount[i];
+    if (temp_ssiPetCount[i] > ssiMaxPetCount)
+      ssiMaxPetCount = temp_ssiPetCount[i];
   }
+  ssiLocalPetCount=temp_ssiPetCount[ssiid[mypet]];
   delete [] temp_ssiPetCount;
+  ssiLocalPetList = new int[ssiLocalPetCount];
+  int localSsi = ssiid[mypet];
+  int j=0;
+  for (int i=0; i<ncores; i++){
+    if (ssiid[i]==localSsi){
+      ssiLocalPetList[j] = i;
+      ++j;
+    }
+  }
 #endif
   // ESMCI::VMK pet -> core mapping
   lpid = new int[npets];
@@ -536,6 +549,7 @@ void VMK::finalize(int finalizeMpi){
   for (int i=0; i<npets; i++)
     delete [] cid[i];
   delete [] cid;
+  delete [] ssiLocalPetList;
   // conditionally finalize MPI
   int finalized;
   MPI_Finalized(&finalized);
@@ -641,15 +655,25 @@ void VMK::construct(void *ssarg){
     }else
       temp_ssiPetCount[j]++;
   }
-  minSsiPetCount=npets;
-  maxSsiPetCount=0;
+  ssiMinPetCount=npets;
+  ssiMaxPetCount=0;
   for (int i=0; i<ssiCount; i++){
-    if (temp_ssiPetCount[i] < minSsiPetCount)
-      minSsiPetCount = temp_ssiPetCount[i];
-    if (temp_ssiPetCount[i] > maxSsiPetCount)
-      maxSsiPetCount = temp_ssiPetCount[i];
+    if (temp_ssiPetCount[i] < ssiMinPetCount)
+      ssiMinPetCount = temp_ssiPetCount[i];
+    if (temp_ssiPetCount[i] > ssiMaxPetCount)
+      ssiMaxPetCount = temp_ssiPetCount[i];
   }
+  ssiLocalPetCount=temp_ssiPetCount[ssiid[mypet]];
   delete [] temp_ssiPetCount;
+  ssiLocalPetList = new int[ssiLocalPetCount];
+  int localSsi = ssiid[cid[mypet][0]];
+  int j=0;
+  for (int i=0; i<npets; i++){
+    if (ssiid[cid[i][0]]==localSsi){
+      ssiLocalPetList[j] = i;
+      ++j;
+    }
+  }
   mpi_c = sarg->mpi_c;
   pth_mutex2 = sarg->pth_mutex2;
   pth_mutex = sarg->pth_mutex;
@@ -863,6 +887,7 @@ void VMK::destruct(){
   for (int i=0; i<npets; i++)
     delete [] cid[i];
   delete [] cid;
+  delete [] ssiLocalPetList;
 }
 
 
