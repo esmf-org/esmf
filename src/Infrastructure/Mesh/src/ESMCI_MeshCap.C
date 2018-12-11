@@ -1498,7 +1498,8 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
                                       ESMC_CONTEXT, rc)) return NULL;
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+      "This functionality requires ESMF to be built with the MOAB library enabled" , 
+      ESMC_CONTEXT, rc)) return NULL;
 #endif
   }
 
@@ -1517,7 +1518,8 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
     mc->mbmesh=mbmesh;
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+      "This functionality requires ESMF to be built with the MOAB library enabled" , 
+      ESMC_CONTEXT, rc)) return NULL;
 #endif
   }
 
@@ -1555,7 +1557,8 @@ void MeshCap::destroy(MeshCap **mcpp,int *rc) {
     }
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+      "This functionality requires ESMF to be built with the MOAB library enabled" , 
+      ESMC_CONTEXT, rc)) return;
 #endif
   }
 
