@@ -5339,6 +5339,7 @@ int VMK::ssishmFree(memhandle *memh){
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   }
 #endif
+  ssishmSync(*memh);
 #ifndef ESMF_MPIUNI
   for (unsigned i=0; i<memh->wins.size(); i++)
     MPI_Win_free(&(memh->wins[i]));
