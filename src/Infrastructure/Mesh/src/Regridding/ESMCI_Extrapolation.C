@@ -377,6 +377,11 @@ void MeshAddPole(Mesh &mesh, UInt node_id,
 
       } // for s
 
+      // BOB_DEBUG
+      if (pole_side < 0) {
+        printf("elem.id=%d pole_side=%d\n",elem.get_id(),pole_side);
+      }
+
       ThrowRequire(pole_side >= 0); // need to have found a side
 
       const int *side_nodes = etopo->get_side_nodes(pole_side);

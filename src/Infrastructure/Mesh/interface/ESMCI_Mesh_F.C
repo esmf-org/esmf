@@ -493,10 +493,11 @@ extern "C" void FTN_X(c_esmc_sphdeg_to_cart)(double *lon, double *lat,
 
 
 // This method sets the pole values so a 2D Mesh from a SCRIP grid can still be used in regrid with poles
-extern "C" void FTN_X(c_esmc_meshsetpoles)(MeshCap **meshpp, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
-                                             int *rc) {
+extern "C" void FTN_X(c_esmc_meshsetpoles)(MeshCap **meshpp, int *_pole_obj_type, int *_pole_val, 
+                                           int *_min_pole_gid, int *_max_pole_gid,
+                                           int *rc) {
 
-  (*meshpp)->meshsetpoles(_pole_val, _min_pole_gid, _max_pole_gid,
+  (*meshpp)->meshsetpoles(_pole_obj_type, _pole_val, _min_pole_gid, _max_pole_gid,
                           rc);
 }
 

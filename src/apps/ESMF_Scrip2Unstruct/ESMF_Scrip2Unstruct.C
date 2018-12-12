@@ -64,11 +64,14 @@ int print_usage() {
 }
 
 // Create a ESMF unstructured grid file and define all the dimension, variables and attributes
-int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, size_t nelmts, size_t maxconnection, int nocenter, int nomask, int noarea)
+int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, size_t nelmts, size_t maxconnection, 
+                int nocenter, int nomask, int noarea, 
+                int orig_grid_rank, int *orig_grid_dims)
 {
   int ncid2;
   int vertdimid, celldimid, vpcdimid,vdimid;
   int vertexid, edgeid, ccoordid, cellid, caid, cmid;
+  int ogr_dimid, ogd_id;
   time_t tloc;
   int dims[2];
   int status, fillvalue;
@@ -97,6 +100,14 @@ int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, s
   if (status != NC_NOERR) handle_error(status,__LINE__);
   status = nc_def_dim(ncid2, "coordDim", 2L, &vdimid);
   if (status != NC_NOERR) handle_error(status,__LINE__);
+
+  // Only add if originally 2D and not-dual 
+  if ((orig_grid_rank == 2) && (dualflag == 0))  {
+    status = nc_def_dim(ncid2, "origGridRank", orig_grid_rank, &ogr_dimid);
+    if (status != NC_NOERR) handle_error(status,__LINE__);
+    status = nc_def_var(ncid2,"origGridDims", NC_INT, 1, &ogr_dimid, &ogd_id);
+    if (status != NC_NOERR) handle_error(status,__LINE__);
+  }
   
   // define the variables
   dims[0]=vertdimid;
@@ -381,7 +392,10 @@ int main(int argc, char** argv)
   int argFlag;
   int pthreadflag, openmpflag;
   int rc;
-  
+#define MAX_GRID_RANK 2
+  int grid_dims[MAX_GRID_RANK];
+  int ogr_dimid, ogd_id;  
+
   ESMC_Initialize(&status, ESMC_ArgLast);
   vm = ESMC_VMGetGlobal(&status);
   status = ESMC_VMGet(vm, &myrank, &nprocs, &npes, &mpi_comm, &pthreadflag, &openmpflag);
@@ -475,12 +489,27 @@ int main(int argc, char** argv)
   status = nc_inq_dimlen(ncid1, grdimid, &grdim);
   if (status != NC_NOERR) handle_error(status,__LINE__);
 
+
   // comment out the following check -- support the SCRIP file with grid_rank==1 and 2
   //  if (grdim > 1) {
   //  fprintf(stderr, "%s: grid_rank is greater than 1.  This program only convert grids with grid_rank=1.\n",c_infile);
   //  ESMC_Finalize();
   //  exit(1); // bail out
   //}
+
+  // Add check back in, but for larger grid rank
+  if (grdim > MAX_GRID_RANK) {
+     fprintf(stderr, "%s: grid_rank is greater than 2. This program only converts grids with grid_rank <= 2.\n",c_infile);
+     ESMC_Finalize();
+     exit(1); // bail out
+  }
+
+  // Get grid dims
+  status = nc_inq_varid(ncid1, "grid_dims", &varid);
+  if (status != NC_NOERR) handle_error(status,__LINE__);
+  status = nc_get_var_int(ncid1, varid, grid_dims);
+  if (status != NC_NOERR) handle_error(status,__LINE__);
+
 
 #if 1
   noarea = 0;
@@ -699,7 +728,7 @@ int main(int argc, char** argv)
     if (myrank == 0) {
       if (doesmf) {
 	// create the output ESMF netcdf file
-	create_esmf(c_outfile, c_infile, dualflag, alltotal, gsdim, gcdim, nocenter, nomask, noarea); 
+	create_esmf(c_outfile, c_infile, dualflag, alltotal, gsdim, gcdim, nocenter, nomask, noarea, grdim, grid_dims); 
       } else {
         // Create UGRID file
         create_ugrid(c_outfile, c_infile, dualflag, alltotal, gsdim, gcdim, nocenter);
@@ -767,6 +796,15 @@ int main(int argc, char** argv)
     if (myrank == 0) {
 	status=nc_open(c_outfile, NC_WRITE, &ncid2);
 	if (status != NC_NOERR) handle_error(status,__LINE__);
+
+        // Output original grid dims if 2D and esmf format
+        if ((doesmf) && (grdim == 2)) {
+          status = nc_inq_varid(ncid2, "origGridDims" ,&ogd_id);
+
+          status = nc_put_var_int(ncid2,ogd_id, grid_dims);
+          if (status != NC_NOERR) handle_error(status,__LINE__);
+        }
+
 	inbuf = (double*)malloc(sizeof(double)*gsdim);
 	if (!nocenter) {
 	  // get units of grid_center_lon
@@ -1006,7 +1044,7 @@ int main(int argc, char** argv)
 
     if (myrank==0) { 
       if (doesmf == 1) {
-	create_esmf(c_outfile, c_infile, dualflag, gsdim, alltotal, maxconnection, 0, nomask, 1);
+	create_esmf(c_outfile, c_infile, dualflag, gsdim, alltotal, maxconnection, 0, nomask, 1, grdim, grid_dims); 
       } else {
 	create_ugrid(c_outfile, c_infile, dualflag, gsdim, alltotal, maxconnection, 0);
       }
@@ -1129,6 +1167,6 @@ int main(int argc, char** argv)
   ESMC_Finalize();
   exit(1);
 #endif
-  }
+}
 
 

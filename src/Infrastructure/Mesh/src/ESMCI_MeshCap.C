@@ -1452,14 +1452,14 @@ void MeshCap::sphdeg_to_cart(double *lon, double *lat,
 
 
 // This method sets the pole values so a 2D Mesh from a SCRIP grid can still be used in regrid with poles
-void MeshCap::meshsetpoles(int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
+void MeshCap::meshsetpoles(int *_pole_obj_type, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
                            int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshsetpoles()"
 
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_meshsetpoles(&mesh, _pole_val, _min_pole_gid, _max_pole_gid, rc);
+    ESMCI_meshsetpoles(&mesh, _pole_obj_type, _pole_val, _min_pole_gid, _max_pole_gid, rc);
   } else {
     // Not using poles right now, so comment this out, so we can test
     // with logically rectangular meshes
