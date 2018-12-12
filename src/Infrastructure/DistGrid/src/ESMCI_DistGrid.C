@@ -1178,9 +1178,9 @@ DistGrid *DistGrid::create(
     dg->delayoutCreator = false;  // drop ownership of the referenced DELayout
   }
   
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc);
     return NULL;
   }catch(exception &x){
@@ -3074,9 +3074,9 @@ int DistGrid::destroy(
     (*distgrid)->destruct(true, noGarbage);
     // mark as invalid object
     (*distgrid)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){

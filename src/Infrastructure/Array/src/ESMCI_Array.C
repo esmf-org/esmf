@@ -327,9 +327,9 @@ Array::Array(
   // invalidate the name for this Array object in the Base class
   ESMC_BaseSetName(NULL, "Array");
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     return;
   }catch(...){
@@ -1205,9 +1205,9 @@ Array *Array::create(
       array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return NULL;
     }
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
@@ -1218,9 +1218,9 @@ Array *Array::create(
     return NULL;
   }
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     return NULL;
   }catch(...){
@@ -1988,9 +1988,9 @@ Array *Array::create(
       array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return NULL;
     }
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
@@ -2001,9 +2001,9 @@ Array *Array::create(
     return NULL;
   }
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,\
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,\
       rc);
     return NULL;
   }catch(...){
@@ -2054,9 +2054,9 @@ Array *Array::create(
     // get an allocation for the new Array object
     try{
       arrayOut = new Array();
-    }catch(int localrc){
+    }catch(int catchrc){
       // catch standard ESMF return code
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         rc);
       return NULL;
     }catch(...){
@@ -2192,9 +2192,9 @@ Array *Array::create(
                                         
     arrayOut->ioRH = NULL; // invalidate
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
@@ -2252,9 +2252,9 @@ Array *Array::create(
     // get an allocation for the new Array object
     try{
       arrayOut = new Array();
-    }catch(int localrc){
+    }catch(int catchrc){
       // catch standard ESMF return code
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         rc);
       return NULL;
     }catch(...){
@@ -2398,9 +2398,9 @@ Array *Array::create(
                                         
     arrayOut->ioRH = NULL; // invalidate
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
@@ -2460,9 +2460,9 @@ int Array::destroy(
     (*array)->destruct(true, noGarbage);
     // mark as invalid object
     (*array)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -2532,9 +2532,9 @@ int Array::copy(
       memcpy(larrayBaseAddrList[i], arrayIn->larrayBaseAddrList[i], size);
     }
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(exception &x){
@@ -3079,9 +3079,9 @@ void Array::setRimMembers(
     }
   }
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     throw rc;
   }catch(exception &x){
@@ -4121,9 +4121,9 @@ int Array::constructFileMap(
       }
     }
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(exception &x){
@@ -5592,9 +5592,9 @@ template<typename IT>
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, &rc)) return rc;
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(exception &x){
@@ -6287,9 +6287,9 @@ for (int i=0; i<factorListCount; i++)
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(exception &x){
@@ -9270,9 +9270,9 @@ template<typename SIT, typename DIT>
       Array::destroy(&dstArray, true);
   }
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(exception &x){
@@ -10495,9 +10495,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   VM::logMemInfo(std::string("ASMMStoreNbVectors11.0"));
 #endif
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -11149,9 +11149,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 //fclose(fp);
 //---DEBUG-------------------
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -11633,9 +11633,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
   VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream7.0"));
 #endif
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -12108,9 +12108,9 @@ int Array::sparseMatMul(
   fclose(fp);
 #endif
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -12210,9 +12210,9 @@ int Array::sparseMatMulRelease(
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){

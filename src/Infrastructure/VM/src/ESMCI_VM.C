@@ -1049,9 +1049,9 @@ void VM::shutdown(
               << __LINE__ << std::endl;
           // swap() trick with a temporary to free vector's memory
           std::vector<ESMC_Base *>().swap(matchTable_Objects[i]);
-        }catch(int localrc){
+        }catch(int catchrc){
           // catch standard ESMF return code
-          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, rc);
           return;
         }catch(...){
@@ -2901,9 +2901,9 @@ void VM::finalize(
         << __LINE__ << std::endl;
     // swap() trick with a temporary to free vector's memory
     std::vector<ESMC_Base *>().swap(matchTable_Objects[0]);
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc);
     return;
   }catch(...){
