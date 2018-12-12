@@ -142,6 +142,7 @@ Array::Array(
   ESMC_TypeKind_Flag typekindArg,         // (in)
   int rankArg,                            // (in)
   LocalArray **larrayListArg,             // (in)
+  VM::memhandle *mhArg,                   // (in)
   int vasLocalDeCountArg,                 // (in)
   int ssiLocalDeCountArg,                 // (in)
   int *localDeToDeMapArg,                 // (in)
@@ -182,6 +183,7 @@ Array::Array(
   // fill in the Array object
   typekind = typekindArg;
   rank = rankArg;
+  mh = mhArg;
   distgrid = distgridArg;
   distgridCreator = distgridCreatorArg;
   delayout = distgrid->getDELayout();
@@ -364,13 +366,22 @@ void Array::destruct(bool followCreator, bool noGarbage){
 //-----------------------------------------------------------------------------
   if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
     // garbage collection
-//    int localDeCount = delayout->getLocalDeCount();
-    int localDeCount = localDeCountAux; // TODO: delayout may be gone already!
-// TODO: replace the above line with the line before once ref. counting implem.
     for (int i=0; i<ssiLocalDeCount; i++){
+      // destroy this DEs LocalArray
       int localrc = LocalArray::destroy(larrayList[i]);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+    }
+    // free shared memory handle if it is present
+    if (mh != NULL){
+      int localrc;
+      VM *cvm = VM::getCurrent(&localrc);      
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+      localrc = cvm->ssishmFree(mh);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+      mh = NULL;
     }
     if (localDeToDeMap != NULL)
       delete [] localDeToDeMap;
@@ -1182,7 +1193,7 @@ Array *Array::create(
   try{
     int vasLocalDeCountArg = localDeCount;
     int ssiLocalDeCountArg = localDeCount;
-    array = new Array(typekind, rank, larrayList, vasLocalDeCountArg,
+    array = new Array(typekind, rank, larrayList, NULL, vasLocalDeCountArg,
       ssiLocalDeCountArg, NULL, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
@@ -1739,17 +1750,23 @@ Array *Array::create(
   }
 
   // allocate LocalArray list that holds all PET-local DEs
-  vector<LocalArray *> larrayListV(localDeCount);
-  LocalArray **larrayList = &larrayListV[0];
-  vector<int> temp_counts(rank);
-  vector<int> temp_larrayLBound(rank);
-  vector<int> temp_larrayUBound(rank);
   
+  // prepare for pinflag specific handling
+  vector<LocalArray *> larrayListV;
+  int ssiLocalDeCountArg = localDeCount;  // default
+  vector<int> localDeToDeMapArgV;
+  int *localDeToDeMapArg = NULL;          // default: use map from DELayout
+  VM::memhandle *mh = NULL;               // default: no memory sharing
+  
+  // branch on pinflag
   ESMC_Pin_Flag pinflag = ESMF_PIN_DE_TO_PET; // default
   if (pinflagArg) pinflag = *pinflagArg;
-
   if (pinflag == ESMF_PIN_DE_TO_PET){
     // regular case where each DE is only accessible from the local PET
+    vector<int> temp_counts(rank);
+    vector<int> temp_larrayLBound(rank);
+    vector<int> temp_larrayUBound(rank);
+    larrayListV.resize(localDeCount);
     for (int i=0; i<localDeCount; i++){
       int j=0;    // reset distributed index
       int jjj=0;  // reset undistributed index
@@ -1770,18 +1787,118 @@ Array *Array::create(
         }
       }
       // allocate LocalArray object with specific undistLBound and undistUBound
-      larrayList[i] = LocalArray::create(typekind, rank, &temp_counts[0],
+      larrayListV[i] = LocalArray::create(typekind, rank, &temp_counts[0],
         &temp_larrayLBound[0], &temp_larrayUBound[0], NULL, DATA_NONE, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
     }
   }else if (pinflag == ESMF_PIN_DE_TO_SSI){
     // make DEs accessible from all the PETs that are on the same SSI
+    vector<int> temp_counts(rank);
+    vector<int> temp_larrayLBound(rank);
+    vector<int> temp_larrayUBound(rank);
     VM *cvm = VM::getCurrent(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    // allocate temporary memhandle to share information across PETs
+    vector<unsigned long> bytes(1); // only a single segment on each PET
+    int intCount = 2 + localDeCount + 6*redDimCount*localDeCount;
+    bytes[0] = intCount*sizeof(int); // size of shared info
+    VM::memhandle mhTemp;
+    localrc = cvm->ssishmAllocate(bytes, &mhTemp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    int mhLocalPet = cvm->ssishmGetLocalPet(mhTemp);
+    int mhLocalPetCount = cvm->ssishmGetLocalPetCount(mhTemp);
+    // access all of the mhTemp allocations
+    vector<int*> info(mhLocalPetCount);
+    vector<void*> mems;
+    for (int i=0; i<mhLocalPetCount; i++){
+      localrc = cvm->ssishmGetMems(mhTemp, i, &mems);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      info[i] = (int *)mems[0];
+    }
+    // fill local information into info allocation
+    info[mhLocalPet][0] = cvm->getLocalPet(); // localPet index in the full VM
+    info[mhLocalPet][1] = localDeCount;       // number of DEs on localPet
+    int *infoP = info[mhLocalPet] + 2;
+    memcpy(infoP, localDeToDeMap, localDeCount*sizeof(int));
+    infoP += localDeCount;
+    memcpy(infoP, exclusiveLBound, redDimCount*localDeCount*sizeof(int));
+    infoP += redDimCount*localDeCount;
+    memcpy(infoP, exclusiveUBound, redDimCount*localDeCount*sizeof(int));
+    infoP += redDimCount*localDeCount;
+    memcpy(infoP, computationalLBound, redDimCount*localDeCount*sizeof(int));
+    infoP += redDimCount*localDeCount;
+    memcpy(infoP, computationalUBound, redDimCount*localDeCount*sizeof(int));
+    infoP += redDimCount*localDeCount;
+    memcpy(infoP, totalLBound, redDimCount*localDeCount*sizeof(int));
+    infoP += redDimCount*localDeCount;
+    memcpy(infoP, totalUBound, redDimCount*localDeCount*sizeof(int));
+    // synchronize PETs across memhandle
+    localrc = cvm->ssishmSync(mhTemp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    // determine ssiLocalDeCountArg and prepare mhLocalPetList
+    vector<int> mhLocalPetList(mhLocalPetCount);
+    mhLocalPetList[0] = mhLocalPet; // localPet in first position
+    int ii=1;
+    for (int i=0; i<mhLocalPetCount; i++){
+      if (i==mhLocalPet) continue;  // skip over localPet
+      mhLocalPetList[ii++] = i; // store this pet in the list
+      ssiLocalDeCountArg += info[i][1];   // add localDeCount of the other PET
+    }
+    // resize vectors to fit complete ssiLocalDeCount
+    localDeToDeMapArgV.resize(ssiLocalDeCountArg);
+    localDeToDeMapArg = &localDeToDeMapArgV[0];
+    exclusiveLBoundV.resize(redDimCount*ssiLocalDeCountArg);
+    exclusiveUBoundV.resize(redDimCount*ssiLocalDeCountArg);
+    exclusiveLBound = &exclusiveLBoundV[0];
+    exclusiveUBound = &exclusiveUBoundV[0];
+    computationalLBoundV.resize(redDimCount*ssiLocalDeCountArg);
+    computationalUBoundV.resize(redDimCount*ssiLocalDeCountArg);
+    computationalLBound = &computationalLBoundV[0];
+    computationalUBound = &computationalUBoundV[0];
+    totalLBoundV.resize(redDimCount*ssiLocalDeCountArg);
+    totalUBoundV.resize(redDimCount*ssiLocalDeCountArg);
+    totalLBound = &totalLBoundV[0];
+    totalUBound = &totalUBoundV[0];
+    // fill resized vectors with information shared across mhTemp
+    int *localDeToDeMapP = localDeToDeMapArg;
+    int *exclusiveLBoundP = exclusiveLBound;
+    int *exclusiveUBoundP = exclusiveUBound;
+    int *computationalLBoundP = computationalLBound;
+    int *computationalUBoundP = computationalUBound;
+    int *totalLBoundP = totalLBound;
+    int *totalUBoundP = totalUBound;
+    for (int i=0; i<mhLocalPetCount; i++){
+      ii = mhLocalPetList[i]; // this list has localPet first
+      int thisLocalDeCount = info[ii][1];
+      infoP = info[ii] + 2;
+      memcpy(localDeToDeMapP, infoP, thisLocalDeCount*sizeof(int));
+      localDeToDeMapP += thisLocalDeCount;
+      infoP += thisLocalDeCount;
+      memcpy(exclusiveLBoundP, infoP, redDimCount*thisLocalDeCount*sizeof(int));
+      exclusiveLBoundP += redDimCount*thisLocalDeCount;
+      infoP += redDimCount*thisLocalDeCount;
+      memcpy(exclusiveUBoundP, infoP, redDimCount*thisLocalDeCount*sizeof(int));
+      exclusiveUBoundP += redDimCount*thisLocalDeCount;
+      infoP += redDimCount*thisLocalDeCount;
+      memcpy(computationalLBoundP, infoP, redDimCount*thisLocalDeCount*sizeof(int));
+      computationalLBoundP += redDimCount*thisLocalDeCount;
+      infoP += redDimCount*thisLocalDeCount;
+      memcpy(computationalUBoundP, infoP, redDimCount*thisLocalDeCount*sizeof(int));
+      computationalUBoundP += redDimCount*thisLocalDeCount;
+      infoP += redDimCount*thisLocalDeCount;
+      memcpy(totalLBoundP, infoP, redDimCount*thisLocalDeCount*sizeof(int));
+      totalLBoundP += redDimCount*thisLocalDeCount;
+      infoP += redDimCount*thisLocalDeCount;
+      memcpy(totalUBoundP, infoP, redDimCount*thisLocalDeCount*sizeof(int));
+      totalUBoundP += redDimCount*thisLocalDeCount;
+    }
     // determine the size of all localDE allocations
-    vector<unsigned long> bytes(localDeCount);
+    bytes.resize(localDeCount);
     for (int i=0; i<localDeCount; i++){
       int j=0;    // reset distributed index
       int jjj=0;  // reset undistributed index
@@ -1800,49 +1917,54 @@ Array *Array::create(
       }
       bytes[i] = size * ESMC_TypeKind_FlagSize(typekind);
     }
-    // go through the VM ssishm interface to do the memory allocation
-    VM::memhandle mh;
-    localrc = cvm->ssishmallocate(bytes, &mh);
+    // use the VM ssishm interface to allocate memory for all localDEs
+    mh = new VM::memhandle;
+    localrc = cvm->ssishmAllocate(bytes, mh);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
-    // access all the memory allocation on the localPet (i.e. for localDEs)
-    vector<void*> mems;
-    localrc = cvm->ssishmaccess(mh, cvm->getLocalPet(), &mems);
-    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
-      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
-    // construct the LocalArrays for all the localDEs
-    for (int i=0; i<localDeCount; i++){
-      int j=0;    // reset distributed index
-      int jjj=0;  // reset undistributed index
-      for (int jj=0; jj<rank; jj++){
-        if (arrayToDistGridMapArray[jj]){
-          // distributed dimension
-          temp_counts[jj] =
-            totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
-          temp_larrayLBound[jj] = totalLBound[i*redDimCount+j];
-          temp_larrayUBound[jj] = totalUBound[i*redDimCount+j];
-          ++j;
-        }else{
-          // non-distributed dimension
-          temp_counts[jj] = undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1;
-          temp_larrayLBound[jj] = undistLBoundArray[jjj];
-          temp_larrayUBound[jj] = undistUBoundArray[jjj];
-          ++jjj;
-        }
-      }
-{
-  std::stringstream msg;
-  msg << "Array#" << __LINE__ << " mems[i]=" << mems[i];
-  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
-}
-      // allocate LocalArray object with specific undistLBound and undistUBound
-      larrayList[i] = LocalArray::create(typekind, rank, &temp_counts[0],
-        &temp_larrayLBound[0], &temp_larrayUBound[0], mems[i], DATA_REF, 
-        &localrc);
+    // loop over all memhandle local PETs and construct LocalArrays for localDEs
+    larrayListV.resize(ssiLocalDeCountArg); // room for all shared PETs localDEs
+    int k=0;
+    for (int i=0; i<mhLocalPetCount; i++){
+      ii = mhLocalPetList[i]; // this list has localPet first
+      // access the memory allocations of this PETs localDEs
+      localrc = cvm->ssishmGetMems(*mh, ii, &mems);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      // construct the LocalArrays for all the localDEs
+      int thisLocalDeCount = info[ii][1];
+      for (int lde=0; lde<thisLocalDeCount; lde++){
+        int j=0;    // reset distributed index
+        int jjj=0;  // reset undistributed index
+        for (int jj=0; jj<rank; jj++){
+          if (arrayToDistGridMapArray[jj]){
+            // distributed dimension
+            temp_counts[jj] =
+              totalUBound[k*redDimCount+j] - totalLBound[k*redDimCount+j] + 1;
+            temp_larrayLBound[jj] = totalLBound[k*redDimCount+j];
+            temp_larrayUBound[jj] = totalUBound[k*redDimCount+j];
+            ++j;
+          }else{
+            // non-distributed dimension
+            temp_counts[jj] = undistUBoundArray[jjj] - undistLBoundArray[jjj]
+              + 1;
+            temp_larrayLBound[jj] = undistLBoundArray[jjj];
+            temp_larrayUBound[jj] = undistUBoundArray[jjj];
+            ++jjj;
+          }
+        }
+        // allocate LocalArray object with specific undist bounds
+        larrayListV[k++] = LocalArray::create(typekind, rank, &temp_counts[0],
+          &temp_larrayLBound[0], &temp_larrayUBound[0], mems[lde], DATA_REF, 
+          &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      }
     }
-    
+    // done sharing across mhTemp
+    localrc = cvm->ssishmFree(&mhTemp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
   }else{
     // no other pinning option yet implemented
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
@@ -1853,9 +1975,9 @@ Array *Array::create(
   // call class constructor
   try{
     int vasLocalDeCountArg = localDeCount;
-    int ssiLocalDeCountArg = localDeCount;
-    array = new Array(typekind, rank, larrayList, vasLocalDeCountArg,
-      ssiLocalDeCountArg, NULL, distgrid, false,
+    LocalArray **larrayList = &larrayListV[0];
+    array = new Array(typekind, rank, larrayList, mh, vasLocalDeCountArg,
+      ssiLocalDeCountArg, localDeToDeMapArg, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
       tensorElementCount, undistLBoundArray, undistUBoundArray,

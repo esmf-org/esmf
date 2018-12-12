@@ -178,8 +178,9 @@ namespace ESMCI {
     // Without SSI DE sharing, ssiLocalDeCount==vasLocalDeCount.
     LocalArray **larrayList;          // [ssiLocalDeCount] localDeCount first
     void **larrayBaseAddrList;        // [ssiLocalDeCount] localDeCount first
+    VM::memhandle *mh;                // in case memory sharing between PETs
     int vasLocalDeCount;              // number of DEs that are in the same VAS
-    int ssiLocalDeCount ;             // number of DEs that are on the same SSI
+    int ssiLocalDeCount;              // number of DEs that are on the same SSI
     int *localDeToDeMap;              // [ssiLocalDeCount] mapping to DE
     int *exclusiveLBound;             // [redDimCount*ssiLocalDeCount]
     int *exclusiveUBound;             // [redDimCount*ssiLocalDeCount]
@@ -244,12 +245,13 @@ namespace ESMCI {
     Array(VM *vm=NULL):ESMC_Base(vm){ // allow specific VM instead default
       typekind = ESMF_NOKIND;
       rank = 0;
-      vasLocalDeCount = 0;
-      ssiLocalDeCount = 0;
-      localDeToDeMap = NULL;
       indexflag = ESMC_INDEX_DELOCAL;
       larrayList = NULL;
       larrayBaseAddrList = NULL;
+      mh = NULL;
+      vasLocalDeCount = 0;
+      ssiLocalDeCount = 0;
+      localDeToDeMap = NULL;
       exclusiveLBound = NULL;
       exclusiveUBound = NULL;
       computationalLBound = NULL;
@@ -280,12 +282,13 @@ namespace ESMCI {
     Array(int baseID):ESMC_Base(baseID){  // prevent baseID counter increment
       typekind = ESMF_NOKIND;
       rank = 0;
-      vasLocalDeCount = 0;
-      ssiLocalDeCount = 0;
-      localDeToDeMap = NULL;
       indexflag = ESMC_INDEX_DELOCAL;
       larrayList = NULL;
       larrayBaseAddrList = NULL;
+      mh = NULL;
+      vasLocalDeCount = 0;
+      ssiLocalDeCount = 0;
+      localDeToDeMap = NULL;
       exclusiveLBound = NULL;
       exclusiveUBound = NULL;
       computationalLBound = NULL;
@@ -315,13 +318,14 @@ namespace ESMCI {
     }
    private:
     Array(ESMC_TypeKind_Flag typekind, int rank, LocalArray **larrayList,
-      int vasLocalDeCount, int ssiLocalDeCount, int *localDeToDeMap,
-      DistGrid *distgrid, bool distgridCreator, int *exclusiveLBound,
-      int *exclusiveUBound, int *computationalLBound, int *computationalUBound,
-      int *totalLBound, int *totalUBound, int tensorCount,
-      int tensorElementCount, int *undistLBoundArray, int *undistUBoundArray,
-      int *distgridToArrayMapArray, int *arrayToDistGridMapArray,
-      int *distgridToPackedArrayMapArray, ESMC_IndexFlag indexflagArg, int *rc,
+      VM::memhandle *mh, int vasLocalDeCount, int ssiLocalDeCount,
+      int *localDeToDeMap, DistGrid *distgrid, bool distgridCreator, 
+      int *exclusiveLBound, int *exclusiveUBound, int *computationalLBound,
+      int *computationalUBound, int *totalLBound, int *totalUBound,
+      int tensorCount, int tensorElementCount, int *undistLBoundArray,
+      int *undistUBoundArray, int *distgridToArrayMapArray,
+      int *arrayToDistGridMapArray, int *distgridToPackedArrayMapArray, 
+      ESMC_IndexFlag indexflagArg, int *rc,
       VM *vm=NULL); // allow specific VM instead default
    public:
     ~Array(){destruct(false);}
