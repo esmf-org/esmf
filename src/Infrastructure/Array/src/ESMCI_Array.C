@@ -12728,12 +12728,12 @@ int ArrayElement::getArbSequenceIndexOffset(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::ArrayElement::print()"
+#define ESMC_METHOD "ESMCI::ArrayElement::log()"
 //BOPI
-// !IROUTINE:  ESMCI::ArrayElement::print
+// !IROUTINE:  ESMCI::ArrayElement::log
 //
 // !INTERFACE:
-void ArrayElement::print(
+void ArrayElement::log(
 //
 // !ARGUMENTS:
 //
@@ -12744,8 +12744,10 @@ void ArrayElement::print(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  cout << "array:   " << array << "  localDe: " << localDe << "\n";
-  MultiDimIndexLoop::print();
+  std::stringstream msg;
+  msg << ESMC_METHOD << ": array=" << array << " localDe: " << localDe;
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  MultiDimIndexLoop::log();
 }
 //-----------------------------------------------------------------------------
 

@@ -6645,20 +6645,26 @@ int DistGrid::setArbSeqIndex(
   int const *MultiDimIndexLoop::getIndexTupleStart()const{
     return &indexTupleStart[0];
   }
-  void MultiDimIndexLoop::print()const{
+  void MultiDimIndexLoop::log()const{
     unsigned i;
-    printf("MultiDimIndexLoop: indexTupleStart = (");
+    std::stringstream msg;
+    msg << "MultiDimIndexLoop: indexTupleStart = (";
     for (i=0; i<indexTupleStart.size()-1; i++)
-      printf(" %d,", indexTupleStart[i]);
-    printf(" %d)\n", indexTupleStart[i]);
-    printf("MultiDimIndexLoop: indexTupleEnd = (");
+      msg << " " << indexTupleStart[i] << ",";
+    msg << " " << indexTupleStart[i] << ")";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    msg.str("");  // clear
+    msg << "MultiDimIndexLoop: indexTupleEnd = (";
     for (i=0; i<indexTupleEnd.size()-1; i++)
-      printf(" %d,", indexTupleEnd[i]);
-    printf(" %d)\n", indexTupleEnd[i]);
-    printf("MultiDimIndexLoop: indexTuple = (");
+      msg << " " << indexTupleEnd[i] << ",";
+    msg << " " << indexTupleEnd[i] << ")";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    msg.str("");  // clear
+    msg << "MultiDimIndexLoop: indexTuple = (";
     for (i=0; i<indexTuple.size()-1; i++)
-      printf(" %d,", indexTuple[i]);
-    printf(" %d)\n", indexTuple[i]);
+      msg << " " << indexTuple[i] << ",";
+    msg << " " << indexTuple[i] << ")";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   }
   //============================================================================
 
