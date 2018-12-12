@@ -33,6 +33,8 @@
 
 #include <ESMCI_VM.h>
 
+// #define DEBUG_POINTLIST
+
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
@@ -476,6 +478,18 @@ ESMCI::PointList *MBMesh_to_PointList(MBMesh *mesh, ESMC_MeshLoc_Flag meshLoc, E
       plp->add(id, c);
     }
   }
+
+  // sort the pointlist
+  plp->sort_by_id();
+  
+#ifdef DEBUG_POINTLIST
+  {printf("%d# MB2P POINTLIST(%d) [", localPet, plp->get_curr_num_pts());
+  for (int p = 0; p < plp->get_curr_num_pts(); ++p) {
+    const int *id = plp->get_id_ptr(p);
+    printf("%d, ", plp->get_id_ptr(p));
+  }
+  printf("]\n");}
+#endif
 
   if (rc!=NULL) *rc=ESMF_SUCCESS;
   return plp;

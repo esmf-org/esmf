@@ -609,7 +609,7 @@ int main(int argc, char** argv)
 
   // cells[] are 0-based index, if not filled, the null value is -1
   //
-  //printf("PET %d: totalnodes %d, start and end lat %f %f\n", myrank, totalnodes, startlat, endlat);
+  //printf("PET %d: totalnodes %d, maxconnect %d, start and end lat %f %f\n", myrank, totalnodes, maxconnection, startlat, endlat);
   free(cornerlats);
   free(cornerlons);
 
@@ -848,6 +848,12 @@ int main(int argc, char** argv)
 	    for (i=0; i<gsdim; i++) {
 	      inbuf[i] *= rad2deg;
 	    }
+	  }
+          // convert longitude to (0, 360)
+	  for (i=0; i<gsdim; i++) {
+              if (inbuf[i] <= 0) {
+		inbuf[i] += 360.0;
+	      }
 	  }
 	  if (doesmf) {
 	    // copy inbuf to inbuf1

@@ -2360,8 +2360,11 @@ void VM::getObject(
     }
   }
 
-  if (debug)
-    std::cout << ESMC_METHOD << ": looking for object ID: " << objectID << std::endl;
+  if (debug) {
+    std::stringstream msg;
+    msg << "looking for object ID: " << objectID;
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+  }
   *fobject = NULL;          // assume not found
   *object_found = false;
 
@@ -2370,60 +2373,76 @@ void VM::getObject(
   bool vmid_found = false;
   int i;
   for (i=0; i<matchTableBound; i++) {
-    if (debug) {
-      std::cout << ESMC_METHOD << ": checking VMId " << i << ".  Comparing:" << std::endl;
-      vmID->print ();
-      std::cout << ESMC_METHOD << ": to:" << std::endl;
-      matchTable_vmID[i].print ();
-    }
     if (VMIdCompare(vmID, &matchTable_vmID[i])) {
       vmid_found = true;
       break;
     }
   }
+  if (debug) {
+    std::stringstream msg;
+    msg << "VMid " << (vmid_found ? "":"not ") << "found";
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+  }
   if (!vmid_found){
-    if (debug)
-      std::cout << ESMC_METHOD << ": vmid vector not found" << std::endl;
     *rc = ESMF_SUCCESS;
     return;
   }
 
-  // Find ID
+  // Search for and validate ID
 
   // must lock/unlock for thread-safe access to std::vector
-  VM *vm = getCurrent();
   ESMC_Base *fobject_temp;
   bool id_found = false;
+  VM *vm = getCurrent();
   vm->lock();
   for (unsigned it=0; it<matchTable_Objects[i].size(); ++it){
 
     fobject_temp = matchTable_Objects[i][it];
+    int ID = (fobject_temp)->ESMC_BaseGetID();
+    if (debug) {
+      std::stringstream msg;
+      msg << "comparing ID " << ID << " to object ID " << objectID;
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+    }
+    if (ID != objectID)
+      continue;
 
+
+    if (debug)
+      ESMC_LogDefault.Write("validating baseStatus and Status", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
     ESMC_Status baseStatus = (fobject_temp)->ESMC_BaseGetBaseStatus();
     ESMC_Status     Status = (fobject_temp)->ESMC_BaseGetStatus();
     if ((baseStatus != ESMF_STATUS_READY) || (Status != ESMF_STATUS_READY))
       continue;
 
+    ESMC_ProxyFlag fobject_proxy = (fobject_temp)->ESMC_BaseGetProxyFlag();
+    if (debug) {
+      std::stringstream msg;
+      msg << "validating proxyflag " << proxyflag << " to " <<
+          fobject_proxy;
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+    }
     switch (proxyflag) {
-      case ESMF_PROXYYES:
-        if ((fobject_temp)->ESMC_BaseGetProxyFlag() != ESMF_PROXYYES)
-          continue;
-      case ESMF_PROXYNO:
-        if ((fobject_temp)->ESMC_BaseGetProxyFlag() != ESMF_PROXYNO)
-          continue;
-      case ESMF_PROXYANY:
+      case ESMF_PROXYYES: {
+        id_found = fobject_proxy == ESMF_PROXYYES;
+        ESMC_LogDefault.Write("PROXYYES", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
         break;
+      }
+      case ESMF_PROXYNO: {
+        id_found = fobject_proxy == ESMF_PROXYNO;
+        ESMC_LogDefault.Write("PROXYNO", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+        break;
+      }
+      case ESMF_PROXYANY:
+        id_found = true;
     }
-
-    int ID = (fobject_temp)->ESMC_BaseGetID();
-
-    if (debug)
-     std::cout << ESMC_METHOD << ": comparing ID " << ID << " to object ID " << objectID << std::endl;
-    if (ID == objectID) {
-      id_found = true;
-      break;
+    if (debug) {
+      std::stringstream msg;
+      msg << "object " << name << (id_found ? " ":" not ") << "validated";
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
     }
-  }
+    if (id_found) break;
+  }  // end of ID search loop
 
   // Compare name
 
@@ -2432,13 +2451,22 @@ void VM::getObject(
   // shown that further qualification is needed.  This needs to be investigated.
 
   if (id_found) {
-    if (debug)
-      std::cout << ESMC_METHOD << ": comparing requested name: " << name << " to: " <<
-          (fobject_temp)->ESMC_BaseGetName() << std::endl;
-    if (name == (fobject_temp)->ESMC_BaseGetName()) {
+    char *fobject_name = (fobject_temp)->ESMC_BaseGetName();
+    if (debug) {
+      std::stringstream msg;
+      msg << "comparing requested name: " << name << " to: " <<
+          fobject_name;
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+    }
+    if (name == fobject_name) {
       *fobject = fobject_temp;
       // TODO: Bump Base refCount?  Gerhard says not yet.
       *object_found = true;
+    }
+    if (debug) {
+      std::stringstream msg;
+      msg << "object " << name << (*object_found ? " ":" not ") << "found";
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
     }
   }
 

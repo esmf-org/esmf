@@ -28,5 +28,5 @@ The `ESMF_RegridWeightGen application
 <http://www.earthsystemmodeling.org/esmf_releases/public/ESMF_7_1_0r/ESMF_refdoc/node3.html#SECTION03020000000000000000>`_
 is a command-line version of the functionality that is available through ESMPy.
 
-Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
+Please contact esmf_support@ucar.edu with any questions or problems.
 

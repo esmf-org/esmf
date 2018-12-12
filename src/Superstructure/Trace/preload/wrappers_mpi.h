@@ -33,15 +33,15 @@ extern "C" {
   
   int __wrap_MPI_Allgather(ESMF_MPI_CONST void *sendbuf, int  sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm);
   
-  int __wrap_MPI_Allgatherv(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, MPI_Comm comm);
+  int __wrap_MPI_Allgatherv(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, ESMF_MPI_CONST int recvcounts[], ESMF_MPI_CONST int displs[], MPI_Datatype recvtype, MPI_Comm comm);
   
   int __wrap_MPI_Allreduce(ESMF_MPI_CONST void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, MPI_Comm comm);
   
   int __wrap_MPI_Alltoall(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm);
   
-  int __wrap_MPI_Alltoallv(ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int rdispls[], MPI_Datatype recvtype, MPI_Comm comm);
+  int __wrap_MPI_Alltoallv(ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST int sendcounts[], ESMF_MPI_CONST int sdispls[], MPI_Datatype sendtype, void *recvbuf, ESMF_MPI_CONST int recvcounts[], ESMF_MPI_CONST int rdispls[], MPI_Datatype recvtype, MPI_Comm comm);
   
-  int __wrap_MPI_Alltoallw(ESMF_MPI_CONST void *sendbuf, const int sendcounts[], const int sdispls[], const MPI_Datatype sendtypes[], void *recvbuf, const int recvcounts[], const int rdispls[], const MPI_Datatype recvtypes[], MPI_Comm comm);
+  int __wrap_MPI_Alltoallw(ESMF_MPI_CONST void *sendbuf, ESMF_MPI_CONST int sendcounts[], ESMF_MPI_CONST int sdispls[], ESMF_MPI_CONST MPI_Datatype sendtypes[], void *recvbuf, ESMF_MPI_CONST int recvcounts[], ESMF_MPI_CONST int rdispls[], ESMF_MPI_CONST MPI_Datatype recvtypes[], MPI_Comm comm);
   
   int __wrap_MPI_Barrier(MPI_Comm comm);
   
@@ -49,7 +49,7 @@ extern "C" {
   
   int __wrap_MPI_Gather(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm);
   
-  int __wrap_MPI_Gatherv(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int recvcounts[], const int displs[], MPI_Datatype recvtype, int root, MPI_Comm comm);
+  int __wrap_MPI_Gatherv(ESMF_MPI_CONST void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, ESMF_MPI_CONST int recvcounts[], ESMF_MPI_CONST int displs[], MPI_Datatype recvtype, int root, MPI_Comm comm);
   
   int __wrap_MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status);
   

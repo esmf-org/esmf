@@ -24,6 +24,7 @@
 #include <string>
 #include <ostream>
 #include <iterator>
+#include <vector>
 
 #include "ESMCI_Macros.h"
 #include "ESMCI_F90Interface.h"
@@ -50,6 +51,11 @@
 
 using namespace ESMCI;
 
+// #define DEBUG_MASK
+// #define DEBUG_OUTPUT
+// #define DEBUG_NODE_COORDS
+// #define DEBUG_ELEM_COORDS
+
 
 
 void MBMesh_create(void **mbmpp,
@@ -57,7 +63,7 @@ void MBMesh_create(void **mbmpp,
                       ESMC_CoordSys_Flag *coordSys, int *rc)
 {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_meshcreate()"
+#define ESMC_METHOD "MBMesh_create()"
 
   // Init output
   *mbmpp=NULL;
@@ -113,7 +119,7 @@ void MBMesh_create(void **mbmpp,
 
     // Default value
     int int_def_val = 0;
-    double dbl_def_val = 0.0;
+    double dbl_def_val[3] = {0.0, 0.0, 0.0};
 
      // Setup global id tag
     int_def_val=0;
@@ -142,16 +148,14 @@ void MBMesh_create(void **mbmpp,
     // Setup node_orig_coord tag
     mbmp->has_node_orig_coords=false;
     if (*coordSys != ESMC_COORDSYS_CART) {
-      dbl_def_val=-1.0;
-      merr=moab_mesh->tag_get_handle("node_orig_coords", *sdim, MB_TYPE_DOUBLE, mbmp->node_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+      dbl_def_val[0]=dbl_def_val[1]=dbl_def_val[2]=-1.0;
+      merr=moab_mesh->tag_get_handle("node_orig_coords", *sdim, MB_TYPE_DOUBLE, mbmp->node_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
       if (merr != MB_SUCCESS) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                          moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
       }
       mbmp->has_node_orig_coords=true;
     }
-
- /* XMRKX */
 
     // Set Moab Mesh
     mbmp->mesh=moab_mesh;
@@ -236,7 +240,9 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
       // Convert to cartesian
       ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim,
                                    nodeCoord+orig_sdim*n, cart_coords);
-
+#ifdef DEBUG_NODE_COORDS
+      printf("%d# node %d [%f, %f] - [%f,%f,%f]\n", localPet, nodeId[n], nodeCoord[orig_sdim*n+0], nodeCoord[orig_sdim*n+1], cart_coords[0],cart_coords[1],cart_coords[2]);
+#endif
       // Add vertex
       merr=moab_mesh->create_vertex(cart_coords,verts[n]);
       if (merr != MB_SUCCESS) {
@@ -280,10 +286,6 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
     }
 
     // Set mask information
-// #define DEBUG_MASK
-#ifdef DEBUG_MASK
-    printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMesh_Glue mask ~~~~~~~~~~~~~~~\n");
-#endif
     mbmp->has_node_mask=false;
     if (present(nodeMaskII)) { // if masks exist
       // Error checking
@@ -340,7 +342,7 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
               moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
         }
 
-        printf("node_mask = [");
+        printf("%d# has_node_mask = %s [", Par::Rank(), mbmp->has_node_mask ? "true" : "false");
         for (int i = 0; i < num_verts; ++i)
           printf("%d, ", node_mask[i]);
         printf("]\n");
@@ -348,12 +350,33 @@ void MBMesh_addnodes(void **mbmpp, int *num_nodes, int *nodeId,
 #endif
 
     }
-#ifdef DEBUG_MASK
-    printf("has_node_mask = %d\n", mbmp->has_node_mask);
-    printf("~~~~~~~~~~~~~~ DEBUG - ESMCI_MBMesh_Glue mask ~~~~~~~~~~~~~~~\n");
-#endif
 
- /* XMRKX */
+#ifdef DEBUG_NODE_COORDS
+  {
+    
+    
+    Range nodes;
+    merr=mbmp->mesh->get_entities_by_dimension(0, 0, nodes);
+    MBMESH_CHECK_ERR(merr, localrc);
+    
+    for(Range::iterator it=nodes.begin(); it !=nodes.end(); it++) {
+      const EntityHandle *node=&(*it);
+    
+      int nid;
+      merr=mbmp->mesh->tag_get_data(mbmp->gid_tag, node, 1, &nid);
+      MBMESH_CHECK_ERR(merr, localrc);
+      printf("MBMesh_addnodes node %d, [",nid);
+    
+      double c[3];
+      merr = mbmp->mesh->get_coords(node, 1, c);
+      MBMESH_CHECK_ERR(merr, localrc);
+    
+      for (int i=0; i<mbmp->sdim; ++i)
+        printf("%f, ", c[i]);
+      printf("]\n");
+    }
+  }
+#endif
 
   } catch(std::exception &x) {
     // catch Mesh exception return code
@@ -409,7 +432,7 @@ EntityType get_entity_type(int pdim, int etype) {
 // TODO: Put this someplace to share with other GLUE code
 // Get the number of nodes from the element type
  // Get the element topology
-static int ElemType2NumNodes(int pdim, int sdim, int etype) {
+int ElemType2NumNodes(int pdim, int sdim, int etype) {
   if (pdim==2) {
     return etype;
   } else if (pdim==3) {
@@ -621,11 +644,11 @@ void MBMesh_addelements(void **mbmpp,
     int localrc;
 
     // Do this for now instead of initing mesh parallel stuff
-     // TODO: MAYBE EVENTUALLY PUT THIS INTO MBMesh???
-     MPI_Comm mpi_comm;
-     {
-      int localrc;
-      int rc;
+    // TODO: MAYBE EVENTUALLY PUT THIS INTO MBMesh???
+    MPI_Comm mpi_comm;
+    {
+    int localrc;
+    int rc;
       mpi_comm=VM::getCurrent(&localrc)->getMpi_c();
       if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
         throw localrc;  // bail out with exception
@@ -688,10 +711,6 @@ void MBMesh_addelements(void **mbmpp,
       }
     }
 
-#ifdef DEBUG
-printf("    PET %d - check size of elem connectivity\n", localPet);
-#endif
-
     //// Check size of connectivity list
     int expected_conn_size=0;
     if (parametric_dim==2) {
@@ -712,19 +731,16 @@ printf("    PET %d - check size of elem connectivity\n", localPet);
                                        ESMC_CONTEXT, &localrc)) throw localrc;
     }
 
-#ifdef DEBUG
-printf("    PET %d - register elem tags\n", localPet);
-#endif
-
     // Register element tags
     int     int_def_val=-1.0;
-    double  dbl_def_val= 0.0;
+    double  dbl_def_val[3]= {0.0, 0.0, 0.0};
+    double  dbl_def_val_one= 0.0;
 
     //// Register the frac field
     mbmp->has_elem_frac=false;
     if (*regridConserve == ESMC_REGRID_CONSERVE_ON) {
 
-      merr=moab_mesh->tag_get_handle("elem_frac", 1, MB_TYPE_DOUBLE, mbmp->elem_frac_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+      merr=moab_mesh->tag_get_handle("elem_frac", 1, MB_TYPE_DOUBLE, mbmp->elem_frac_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val_one);
       if (merr != MB_SUCCESS) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                          moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
@@ -732,10 +748,6 @@ printf("    PET %d - register elem tags\n", localPet);
 
       mbmp->has_elem_frac=true;
     }
-
-#ifdef DEBUG
-printf("    PET %d - elem masking\n", localPet);
-#endif
 
     // Handle element masking
     mbmp->has_elem_mask=false;
@@ -777,7 +789,7 @@ printf("    PET %d - elem masking\n", localPet);
     mbmp->has_elem_area=false;
     if (areaPresent == 1) { // if areas exist
 
-      merr=moab_mesh->tag_get_handle("elem_area", 1, MB_TYPE_DOUBLE, mbmp->elem_area_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+      merr=moab_mesh->tag_get_handle("elem_area", 1, MB_TYPE_DOUBLE, mbmp->elem_area_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val_one);
       if (merr != MB_SUCCESS) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                          moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
@@ -787,17 +799,13 @@ printf("    PET %d - elem masking\n", localPet);
       mbmp->has_elem_area=true;
     }
 
-#ifdef DEBUG
-printf("    PET %d - elem coords\n", localPet);
-#endif
-
     // Handle element coords
     mbmp->has_elem_coords=false;
     mbmp->has_elem_orig_coords=false;
     if (elemCoordsPresent == 1) { // if coords exist
 
       // Add element coords field
-      merr=moab_mesh->tag_get_handle("elem_coords", mbmp->sdim, MB_TYPE_DOUBLE, mbmp->elem_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+      merr=moab_mesh->tag_get_handle("elem_coords", mbmp->sdim, MB_TYPE_DOUBLE, mbmp->elem_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
        if (merr != MB_SUCCESS) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                          moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
@@ -805,7 +813,7 @@ printf("    PET %d - elem coords\n", localPet);
 
       // If not cartesian then add original coordinates field
       if (coordSys != ESMC_COORDSYS_CART) {
-        merr=moab_mesh->tag_get_handle("elem_orig_coords", orig_sdim, MB_TYPE_DOUBLE, mbmp->elem_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, &dbl_def_val);
+        merr=moab_mesh->tag_get_handle("elem_orig_coords", orig_sdim, MB_TYPE_DOUBLE, mbmp->elem_orig_coords_tag, MB_TAG_EXCL|MB_TAG_DENSE, dbl_def_val);
         if (merr != MB_SUCCESS) {
           if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                            moab::ErrorCodeStr[merr], ESMC_CONTEXT, rc)) return;
@@ -991,10 +999,6 @@ printf("    PET %d - elem coords\n", localPet);
     double *elemCoords_wsplit=NULL;
     int *elemMaskIIArray_wsplit=NULL;
     InterArray<int> *elemMaskII_wsplit=NULL;
-
-#ifdef DEBUG
-printf("    PET %d - split elems\n", localPet);
-#endif
 
     if (is_split_local) {
       // New number of elements
@@ -1216,14 +1220,6 @@ printf("    PET %d - split elems\n", localPet);
       }
     }
 
-#ifdef DEBUG
-printf("    PET %d - addelems\n", localPet);
-#endif
-
-#ifdef DEBUG
-printf("    PET %d - addelems\n", localPet);
-#endif
-
     // Now loop the elements and add them to the mesh.
     int cur_conn = 0;
     for (int e = 0; e < num_elems; ++e) {
@@ -1333,10 +1329,16 @@ printf("    PET %d - addelems\n", localPet);
           }
 
           // Convert to Cartesian coords
-          double cart_coords[7]; // 7 is the maximum dimension of ESMF grids
-          ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim,
-                                       elemCoords, cart_coords);
+          double cart_coords[3]; // 7 is the maximum dimension of ESMF grids
 
+          // Init to 0.0 incase less than 3D
+          cart_coords[0]=0.0; cart_coords[1]=0.0; cart_coords[2]=0.0;
+
+          ESMCI_CoordSys_ConvertToCart(coordSys, orig_sdim,
+                                       elemCoords+orig_sdim*e, cart_coords);
+#ifdef DEBUG_ELEM_COORDS
+      printf("%d# elem %d [%f, %f] - [%f,%f,%f]\n", localPet, elemId[e], elemCoords[orig_sdim*e+0], elemCoords[orig_sdim*e+1], cart_coords[0],cart_coords[1],cart_coords[2]);
+#endif
           // Save Cartesian coords
           merr=moab_mesh->tag_set_data(mbmp->elem_coords_tag, &new_elem, 1,
                                        cart_coords);
@@ -1363,18 +1365,68 @@ printf("    PET %d - addelems\n", localPet);
     // Set number of local elems
     mbmp->num_elems=num_elems;
 
-#ifdef DEBUG
-printf("    PET %d - parallel sharing\n", localPet);
-#endif
-
     //// Setup parallel sharing ///
 
-    // setup parallel comm //
+    // setup parallel comm, destroyed in MBMesh destructor
     ParallelComm *pcomm= new ParallelComm(moab_mesh, mpi_comm);
-
+  
+    Range elems;
+    merr=mbmp->mesh->get_entities_by_dimension(0, mbmp->pdim, elems);
+    MBMESH_CHECK_ERR(merr, localrc);
+    
     // Resolve object sharing like in Mesh->Commit()
-    pcomm->resolve_shared_ents(0, mbmp->pdim, mbmp->pdim-1);
+    // merr = pcomm->resolve_shared_ents(0, mbmp->pdim, mbmp->pdim-1);
+    merr = pcomm->resolve_shared_ents(0, elems, mbmp->pdim, mbmp->pdim-1);
+    MBMESH_CHECK_ERR(merr, localrc);
 
+
+#ifdef DEBUG_ELEM_COORDS
+  {
+    Range elems;
+    merr=mbmp->mesh->get_entities_by_dimension(0, mbmp->pdim, elems);
+    MBMESH_CHECK_ERR(merr, localrc);
+    
+    for(Range::iterator it=elems.begin(); it !=elems.end(); it++) {
+      const EntityHandle *elem=&(*it);
+    
+      int eid;
+      merr=mbmp->mesh->tag_get_data(mbmp->gid_tag, elem, 1, &eid);
+      MBMESH_CHECK_ERR(merr, localrc);
+      printf("getelems elem %d, [",eid);
+    
+      double c[3];
+      merr=mbmp->mesh->tag_get_data(mbmp->elem_coords_tag, elem, 1, c);
+      MBMESH_CHECK_ERR(merr, localrc);
+    
+      for (int i=0; i<mbmp->sdim; ++i)
+        printf("%f, ", c[i]);
+      printf("]\n");
+    }
+  }
+#endif
+
+#ifdef DEBUG_MASK
+      {
+        int localrc = 0;
+        int merr = 0;
+
+        int node_mask[num_verts];
+        if (mbmp->has_node_mask) { 
+          Range nodes;
+          merr=mbmp->mesh->get_entities_by_dimension(0, 0, nodes);
+          if (merr != MB_SUCCESS) throw (ESMC_RC_MOAB_ERROR);
+          merr=mbmp->mesh->tag_get_data(mbmp->node_mask_val_tag, nodes, &node_mask);
+          if (merr != MB_SUCCESS)
+            if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+              moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }
+
+        printf("%d# has_node_mask = %s [", Par::Rank(), mbmp->has_node_mask ? "true" : "false");
+        for (int i = 0; i < num_verts; ++i)
+          printf("%d, ", node_mask[i]);
+        printf("]\n");
+      }
+#endif
 
  #if 0
   // Time loops
@@ -1933,6 +1985,11 @@ void MBMesh_destroy(void **mbmpp, int *rc) {
     // Get Moab Mesh wrapper
     MBMesh *mbmp=*((MBMesh **)mbmpp);
 
+    // get the indexed pcomm object from the interface
+    ParallelComm *pcomm = ParallelComm::get_pcomm(mbmp->mesh, 0);
+
+    delete pcomm;
+
     // Get rid of MBMesh
     delete mbmp;
 
@@ -2023,21 +2080,13 @@ extern "C" void FTN_X(f_esmf_getmeshdistgrid)(int*, int*, int*, int*);
 
 void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *rc) {
 
+#undef  ESMC_METHOD
+#define ESMC_METHOD "MBMesh_createnodedistgrid()"
+
   // Declare id vectors
   std::vector<int> ngids;
 
   try {
-
-#if 0
-  // Initialize the parallel environment for mesh (if not already done)
-    {
- int localrc;
- int rc;
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-   throw localrc;  // bail out with exception
-    }
-#endif
 
     // Get localPet
     int localrc;
@@ -2054,29 +2103,25 @@ void MBMesh_createnodedistgrid(void **mbmpp, int *ngrid, int *num_lnodes, int *r
     // MOAB error
     int merr;
 
-    // Loop vertices
-    // NOTE: this is looping through the original order of the vertices, so
-    //       I DON'T need to sort by orig_pos
-    for(int i=0; i<mbmp->num_verts; i++) {
-      EntityHandle *vertp=mbmp->verts+i;
+    // Get a range containing all nodes
+    Range range_node;
+    merr=mbmp->mesh->get_entities_by_dimension(0,0,range_node);
+    MBMESH_CHECK_ERR(merr, localrc);
+
+    for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
+      const EntityHandle *node=&(*it);
 
       // Get owner
       int owner;
-      merr=moab_mesh->tag_get_data(mbmp->owner_tag, vertp, 1, &owner);
-      if (merr != MB_SUCCESS) {
-        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                    moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-      }
+      merr=moab_mesh->tag_get_data(mbmp->owner_tag, node, 1, &owner);
+      MBMESH_CHECK_ERR(merr, localrc);
 
       // If owned by this processor, put in list
       if (owner==localPet) {
         // Get gid
         int gid;
-        merr=moab_mesh->tag_get_data(mbmp->gid_tag, vertp, 1, &gid);
-        if (merr != MB_SUCCESS) {
-          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
-                 moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
-        }
+        merr=moab_mesh->tag_get_data(mbmp->gid_tag, node, 1, &gid);
+        MBMESH_CHECK_ERR(merr, localrc);
 
         // Stick in list
         ngids.push_back(gid);
@@ -2146,7 +2191,6 @@ void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
   // MOAB error
   int merr;
 
-
   // Get a range containing all elements
   Range range_elem;
   merr=moab_mesh->get_entities_by_dimension(0,mbmp->pdim,range_elem);
@@ -2177,6 +2221,9 @@ void getElemGIDS(MBMesh *mbmp, std::vector<int> &egids) {
         if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
                                          moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
       }
+
+      // Don't do split elements
+      if (mbmp->is_split && gid > mbmp->max_non_split_id) continue;
 
       // Get orig_pos
       int orig_pos;
