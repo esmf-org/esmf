@@ -111,7 +111,8 @@ class VMK{
   };
 
   struct memhandle{
-    int ssiPetCount;        // number of PETs that share same SSI with localPET
+    int localPet;           // index of the localPet in the memhandle context
+    int localPetCount;      // number of PETs that share same SSI with localPET
     std::vector<int> counts;// allocs requested by a specific PET on same SSI
 #ifndef ESMF_MPIUNI
     std::vector<MPI_Win> wins;  // MPI shared memory windows
@@ -404,10 +405,13 @@ class VMK{
     bool cancelled(status *status);
     
     // SSI shared memory methods
-    int ssishmallocate(std::vector<unsigned long>&bytes, memhandle *memh);
-    int ssishmfree(memhandle *memh);
-    int ssishmaccess(memhandle memh, int pet, std::vector<void *> *mems=NULL,
+    int ssishmAllocate(std::vector<unsigned long>&bytes, memhandle *memh);
+    int ssishmFree(memhandle *memh);
+    int ssishmGetMems(memhandle memh, int pet, std::vector<void *> *mems=NULL,
       std::vector<unsigned long> *bytes=NULL);
+    int ssishmGetLocalPet(memhandle memh){return memh.localPet;}
+    int ssishmGetLocalPetCount(memhandle memh){return memh.localPetCount;}
+    int ssishmSync(memhandle memh);
         
     // IntraProcessSharedMemoryAllocation Table Methods
     void *ipshmallocate(int bytes, int *firstFlag=NULL);

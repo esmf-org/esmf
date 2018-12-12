@@ -5268,17 +5268,18 @@ void VMK::wtimedelay(double delay){
 
 #undef DEBUGLOG
 
-int VMK::ssishmallocate(vector<unsigned long>&bytes, memhandle *memh){
+int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh){
 #ifndef ESMF_NO_MPI3
 #ifndef ESMF_MPIUNI
-  MPI_Comm_size(mpi_c_ssi, &(memh->ssiPetCount));
-  memh->counts.resize(memh->ssiPetCount);
+  MPI_Comm_rank(mpi_c_ssi, &(memh->localPet));
+  MPI_Comm_size(mpi_c_ssi, &(memh->localPetCount));
+  memh->counts.resize(memh->localPetCount);
   int count = (int)bytes.size();
   MPI_Allgather(&count, 1, MPI_INT, &(memh->counts[0]), 1, MPI_INT, mpi_c_ssi);
   int maxCount = *(max_element(memh->counts.begin(), memh->counts.end()));
 #else
-  memh->ssiPetCount = 1;
-  memh->counts.resize(memh->ssiPetCount);
+  memh->localPetCount = 1;
+  memh->counts.resize(memh->localPetCount);
   int count = (int)bytes.size();
   memh->counts[0] = count;
   int maxCount = count;
@@ -5286,7 +5287,8 @@ int VMK::ssishmallocate(vector<unsigned long>&bytes, memhandle *memh){
 #ifdef DEBUGLOG
   {
     std::stringstream msg;
-    msg << "ssishmallocate#" << __LINE__ << " ssiPetCount=" << memh->ssiPetCount
+    msg << "ssishmAllocate#" << __LINE__
+      << " localPetCount=" << memh->localPetCount
       << " bytes request maxCount=" << maxCount;
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   }
@@ -5300,9 +5302,7 @@ int VMK::ssishmallocate(vector<unsigned long>&bytes, memhandle *memh){
 #endif
   for (int i=0; i<maxCount; i++){
     unsigned long size=0;
-    if (i<count){
-      size = bytes[i];
-    }
+    if (i<count) size = bytes[i];
 #ifndef ESMF_MPIUNI
     MPI_Info info;
     MPI_Info_create(&info); // allow system to allocate non-contiguous over SSI
@@ -5324,13 +5324,13 @@ int VMK::ssishmallocate(vector<unsigned long>&bytes, memhandle *memh){
 #endif
 }
 
-int VMK::ssishmfree(memhandle *memh){
+int VMK::ssishmFree(memhandle *memh){
 #define DEBUGLOG
 #ifndef ESMF_NO_MPI3
 #ifdef DEBUGLOG
   {
     std::stringstream msg;
-    msg << "ssishmfree#" << __LINE__ << " number of shared memory windows=" 
+    msg << "ssishmFree#" << __LINE__ << " number of shared memory windows=" 
 #ifndef ESMF_MPIUNI
       << memh->wins.size();
 #else
@@ -5350,7 +5350,12 @@ int VMK::ssishmfree(memhandle *memh){
   memh->sizes.resize(0);
 #endif
   memh->counts.resize(0);
-  memh->ssiPetCount=-1; // invalidate
+  memh->localPetCount=-1; // invalidate
+  {
+    std::stringstream msg;
+    msg << "ssishmFree#" << __LINE__ << " done.";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  }
   return ESMF_SUCCESS;
 #else
   std::stringstream msg;
@@ -5360,12 +5365,12 @@ int VMK::ssishmfree(memhandle *memh){
 #endif
 }
 
-int VMK::ssishmaccess(memhandle memh, int pet, vector<void *>*mems,
+int VMK::ssishmGetMems(memhandle memh, int pet, vector<void *>*mems,
   vector<unsigned long> *bytes){
 #define DEBUGLOG
 #ifndef ESMF_NO_MPI3
   // error check the incoming information
-  if (pet < 0 || pet > memh.ssiPetCount){
+  if (pet < 0 || pet > memh.localPetCount){
     std::stringstream msg;
     msg << "VMKernel in line #" << __LINE__ << " pet argument out of range.";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_ERROR);
@@ -5390,13 +5395,31 @@ int VMK::ssishmaccess(memhandle memh, int pet, vector<void *>*mems,
 #ifdef DEBUGLOG
     {
       std::stringstream msg;
-      msg << "ssishmaccess#" << __LINE__
+      msg << "ssishmGetMems#" << __LINE__
         << " pet=" << pet << " baseptr=" << baseptr << " size=" << size;
       ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
     }
 #endif
   }
   return ESMF_SUCCESS;
+#else
+  std::stringstream msg;
+  msg << "VMKernel in line #" << __LINE__ << " Method requires MPI3 support.";
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_ERROR);
+  return ESMC_RC_INTNRL_BAD; // bail with error
+#endif
+}
+
+int VMK::ssishmSync(memhandle memh){
+#define DEBUGLOG
+#ifndef ESMF_NO_MPI3
+#ifndef ESMF_MPIUNI
+  // call barrier for the ssi-local communicator
+  MPI_Barrier(mpi_c_ssi);
+  return ESMF_SUCCESS;
+#else
+  // nothing to be done for MPIUNI
+#endif
 #else
   std::stringstream msg;
   msg << "VMKernel in line #" << __LINE__ << " Method requires MPI3 support.";
