@@ -428,6 +428,7 @@ namespace ESMCI {
          bool *overwrite, ESMC_FileStatus_Flag *status,
          int *timeslice, ESMC_IOFmt_Flag *iofmt);
     int print() const;
+    int sync();
     int validate() const;
     // fileMapList is an int64_t to be compatible with PIO and MPI.
     // Internally, PIO uses a type which is tied to the Fortran type,

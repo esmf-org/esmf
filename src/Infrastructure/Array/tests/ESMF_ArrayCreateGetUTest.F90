@@ -699,6 +699,13 @@ program ESMF_ArrayCreateGetUTest
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
+  write(name, *) "ArraySync() for ESMF_PIN_DE_TO_SSI Test"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+  call ESMF_ArraySync(array, rc=rc)
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  
+  !------------------------------------------------------------------------
+  !NEX_UTest_Multi_Proc_Only
   write(name, *) "LocalArrayGet Fortran array pointer for last ssiLocalDe for ESMF_PIN_DE_TO_SSI Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_LocalArrayGet(localArrayList(ssiLocalDeCount), &

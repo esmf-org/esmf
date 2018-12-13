@@ -843,6 +843,17 @@ extern "C" {
     fflush(stdout);
   }
 
+  void FTN_X(c_esmc_arraysync)(ESMCI::Array **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraysync()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError((*ptr)->sync(),
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
   void FTN_X(c_esmc_arrayvalidate)(ESMCI::Array **ptr, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_arrayvalidate()"

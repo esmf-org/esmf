@@ -3999,6 +3999,45 @@ int Array::print()const{
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::sync()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::sync
+//
+// !INTERFACE:
+int Array::sync(){
+//
+// !RETURN VALUE:
+//    int return code
+//
+//
+// !DESCRIPTION:
+//    Sync DEs arcoss the Array object in case of sharing.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // see if the array holds a valid memhandle, optionally call sync
+  if (mh != NULL){
+    int localrc;
+    VM *cvm = VM::getCurrent(&localrc);      
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+    localrc = cvm->ssishmSync(*mh);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+  }
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::Array::validate()"
 //BOPI
 // !IROUTINE:  ESMCI::Array::validate
