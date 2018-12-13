@@ -551,7 +551,7 @@ program ESMF_RouteHandleAdvancedUTest
   !-----------------------------------------------------------------------------
 
   ! delay for file to be available on disk
-  call ESMF_VMWtimeDelay(10.d0, rc=rc)  ! wait for 30s
+  call ESMF_VMWtimeDelay(20.d0, rc=rc)  ! wait for 20s
   if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
     line=__LINE__, &
     file=__FILE__)) &
