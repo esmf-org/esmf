@@ -187,9 +187,9 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_arrayget)(ESMCI::Array **ptr, ESMC_TypeKind_Flag *typekind,
-    int *rank, ESMCI::LocalArray **opt_localArrayList,
-    int *len_localArrayList, ESMCI::DistGrid **distgrid,
-    ESMCI::DELayout **delayout,
+    int *rank, int *ssiLocalDeCount, ESMCI::LocalArray **opt_localArrayList,
+    int *len_localArrayList, ESMCI::InterArray<int> *localDeToDeMap,
+    ESMCI::DistGrid **distgrid, ESMCI::DELayout **delayout,
     ESMC_IndexFlag *indexflag, 
     ESMCI::InterArray<int> *distgridToArrayMap,
     ESMCI::InterArray<int> *distgridToPackedArrayMap,
@@ -221,6 +221,8 @@ extern "C" {
       *typekind = (*ptr)->getTypekind();
     if (ESMC_NOT_PRESENT_FILTER(rank) != ESMC_NULL_POINTER)
       *rank = (*ptr)->getRank();
+    if (ESMC_NOT_PRESENT_FILTER(ssiLocalDeCount) != ESMC_NULL_POINTER)
+      *ssiLocalDeCount = (*ptr)->getSsiLocalDeCount();
     if (ESMC_NOT_PRESENT_FILTER(indexflag) != ESMC_NULL_POINTER)
       *indexflag = (*ptr)->getIndexflag();
     // helper variables
@@ -229,15 +231,47 @@ extern "C" {
     // fill localArrayList
     if (*len_localArrayList != 0){
       // opt_localArrayList was provided
-      if (*len_localArrayList < localDeCount){
+      int ldeCount = -1; // initialize with guard value
+      if (*len_localArrayList >= localDeCount)
+        ldeCount=localDeCount;
+      if (*len_localArrayList >= (*ptr)->getVasLocalDeCount())
+        ldeCount=(*ptr)->getVasLocalDeCount();
+      if (*len_localArrayList >= (*ptr)->getSsiLocalDeCount())
+        ldeCount=(*ptr)->getSsiLocalDeCount();
+      if (ldeCount==-1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "opt_localArrayList must provide localDeCount elements",
-          ESMC_CONTEXT, rc);
+          "opt_localArrayList must provide 'localDeCount', "
+          "'vasLocalDeCount' or 'ssiLocalDeCount' elements", ESMC_CONTEXT, rc);
         return;
       }
-      // opt_localArrayList has correct number of elements
-      for (int i=0; i<localDeCount; i++)
+      // opt_localArrayList has supported number of elements
+      for (int i=0; i<ldeCount; i++)
         opt_localArrayList[i] = ((*ptr)->getLocalarrayList())[i];
+    }
+    // fill localDeToDeMap
+    if (present(localDeToDeMap)){
+      // localDeToDeMap was provided
+      if ((localDeToDeMap)->dimCount != 1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+          "localDeToDeMap array must be of rank 1", ESMC_CONTEXT, rc);
+        return;
+      }
+      int ldeCount = -1; // initialize with guard value
+      if ((localDeToDeMap)->extent[0] >= localDeCount)
+        ldeCount=localDeCount;
+      if ((localDeToDeMap)->extent[0] >= (*ptr)->getVasLocalDeCount())
+        ldeCount=(*ptr)->getVasLocalDeCount();
+      if ((localDeToDeMap)->extent[0] >= (*ptr)->getSsiLocalDeCount())
+        ldeCount=(*ptr)->getSsiLocalDeCount();
+      if (ldeCount==-1){
+        ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
+          "1st dimension of localDeToDeMap array must of size 'localDeCount', "
+          "'vasLocalDeCount' or 'ssiLocalDeCount'", ESMC_CONTEXT, rc);
+        return;
+      }
+      // fill in distgridToArrayMap
+      memcpy((localDeToDeMap)->array, (*ptr)->getLocalDeToDeMap(),
+        sizeof(int) * ldeCount);
     }
     // fill distgridToArrayMap
     if (present(distgridToArrayMap)){
@@ -354,17 +388,24 @@ extern "C" {
           ESMC_CONTEXT, rc);
         return;
       }
-      if ((exclusiveLBound)->extent[1] < localDeCount){
+      int ldeCount = -1; // initialize with guard value
+      if ((exclusiveLBound)->extent[1] >= localDeCount)
+        ldeCount=localDeCount;
+      if ((exclusiveLBound)->extent[1] >= (*ptr)->getVasLocalDeCount())
+        ldeCount=(*ptr)->getVasLocalDeCount();
+      if ((exclusiveLBound)->extent[1] >= (*ptr)->getSsiLocalDeCount())
+        ldeCount=(*ptr)->getSsiLocalDeCount();
+      if (ldeCount==-1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "2nd dimension of exclusiveLBound must be of size 'localDeCount'",
-          ESMC_CONTEXT, rc);
+          "2nd dimension of exclusiveLBound array must of size 'localDeCount', "
+          "'vasLocalDeCount' or 'ssiLocalDeCount'", ESMC_CONTEXT, rc);
         return;
       }
       // fill in the values: The interface allows to pass in exclusiveLBound
       // arrays which are larger than redDimCount x localDeCount. Consequently
       // it is necessary to memcpy strips of contiguous data since it cannot be
       // assumed that all data ends up contiguous in the exclusiveLBound array.
-      for (int i=0; i<localDeCount; i++)
+      for (int i=0; i<ldeCount; i++)
         memcpy(&((exclusiveLBound)->array[i*(exclusiveLBound)->extent[0]]),
           &(((*ptr)->getExclusiveLBound())[i*redDimCount]),
           sizeof(int)*redDimCount);
@@ -383,17 +424,24 @@ extern "C" {
           ESMC_CONTEXT, rc);
         return;
       }
-      if ((exclusiveUBound)->extent[1] < localDeCount){
+      int ldeCount = -1; // initialize with guard value
+      if ((exclusiveUBound)->extent[1] >= localDeCount)
+        ldeCount=localDeCount;
+      if ((exclusiveUBound)->extent[1] >= (*ptr)->getVasLocalDeCount())
+        ldeCount=(*ptr)->getVasLocalDeCount();
+      if ((exclusiveUBound)->extent[1] >= (*ptr)->getSsiLocalDeCount())
+        ldeCount=(*ptr)->getSsiLocalDeCount();
+      if (ldeCount==-1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "2nd dimension of exclusiveUBound must be of size 'localDeCount'",
-          ESMC_CONTEXT, rc);
+          "2nd dimension of exclusiveUBound array must of size 'localDeCount', "
+          "'vasLocalDeCount' or 'ssiLocalDeCount'", ESMC_CONTEXT, rc);
         return;
       }
       // fill in the values: The interface allows to pass in exclusiveUBound
       // arrays which are larger than redDimCount x localDeCount. Consequently
       // it is necessary to memcpy strips of contiguous data since it cannot be
       // assumed that all data ends up contiguous in the exclusiveUBound array.
-      for (int i=0; i<localDeCount; i++)
+      for (int i=0; i<ldeCount; i++)
         memcpy(&((exclusiveUBound)->array[i*(exclusiveUBound)->extent[0]]),
           &(((*ptr)->getExclusiveUBound())[i*redDimCount]),
           sizeof(int)*redDimCount);
@@ -412,21 +460,26 @@ extern "C" {
           ESMC_CONTEXT, rc);
         return;
       }
-      if ((computationalLBound)->extent[1] < localDeCount){
+      int ldeCount = -1; // initialize with guard value
+      if ((computationalLBound)->extent[1] >= localDeCount)
+        ldeCount=localDeCount;
+      if ((computationalLBound)->extent[1] >= (*ptr)->getVasLocalDeCount())
+        ldeCount=(*ptr)->getVasLocalDeCount();
+      if ((computationalLBound)->extent[1] >= (*ptr)->getSsiLocalDeCount())
+        ldeCount=(*ptr)->getSsiLocalDeCount();
+      if (ldeCount==-1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "2nd dim of computationalLBound must be of size 'localDeCount'", 
-          ESMC_CONTEXT, rc);
+          "2nd dimension of computationalLBound array must of size 'localDeCount', "
+          "'vasLocalDeCount' or 'ssiLocalDeCount'", ESMC_CONTEXT, rc);
         return;
       }
       // fill in the values: The interface allows to pass in computationalLBound
       // arrays which are larger than redDimCount x localDeCount. Consequently
       // it is necessary to memcpy strips of contiguous data since it cannot be
-      // assumed that all data ends up contiguous in the computationalLBound
-      // array.
-      for (int i=0; i<localDeCount; i++)
-        memcpy(&((computationalLBound)->
-          array[i*(computationalLBound)->extent[0]]),
-          &(((*ptr)->getComputationalLBound())[i*redDimCount]), 
+      // assumed that all data ends up contiguous in the computationalLBound array.
+      for (int i=0; i<ldeCount; i++)
+        memcpy(&((computationalLBound)->array[i*(computationalLBound)->extent[0]]),
+          &(((*ptr)->getComputationalLBound())[i*redDimCount]),
           sizeof(int)*redDimCount);
     }
     // fill computationalUBound
@@ -443,22 +496,27 @@ extern "C" {
           ESMC_CONTEXT, rc);
         return;
       }
-      if ((computationalUBound)->extent[1] < localDeCount){
+      int ldeCount = -1; // initialize with guard value
+      if ((computationalUBound)->extent[1] >= localDeCount)
+        ldeCount=localDeCount;
+      if ((computationalUBound)->extent[1] >= (*ptr)->getVasLocalDeCount())
+        ldeCount=(*ptr)->getVasLocalDeCount();
+      if ((computationalUBound)->extent[1] >= (*ptr)->getSsiLocalDeCount())
+        ldeCount=(*ptr)->getSsiLocalDeCount();
+      if (ldeCount==-1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "2nd dim of computationalUBound must be of size 'localDeCount'",
-          ESMC_CONTEXT, rc);
+          "2nd dimension of computationalUBound array must of size 'localDeCount', "
+          "'vasLocalDeCount' or 'ssiLocalDeCount'", ESMC_CONTEXT, rc);
         return;
       }
       // fill in the values: The interface allows to pass in computationalUBound
       // arrays which are larger than redDimCount x localDeCount. Consequently
       // it is necessary to memcpy strips of contiguous data since it cannot be
-      // assumed that all data ends up contiguous in the computationalUBound
-      // array.
-      for (int i=0; i<localDeCount; i++)
-        memcpy(&((computationalUBound)->
-          array[i*(computationalUBound)->extent[0]]),
-          &(((*ptr)->getComputationalUBound())[i*redDimCount]), 
-          sizeof(int) * redDimCount);
+      // assumed that all data ends up contiguous in the computationalUBound array.
+      for (int i=0; i<ldeCount; i++)
+        memcpy(&((computationalUBound)->array[i*(computationalUBound)->extent[0]]),
+          &(((*ptr)->getComputationalUBound())[i*redDimCount]),
+          sizeof(int)*redDimCount);
     }
     // fill totalLBound
     if (present(totalLBound)){
@@ -474,17 +532,24 @@ extern "C" {
           ESMC_CONTEXT, rc);
         return;
       }
-      if ((totalLBound)->extent[1] < localDeCount){
+      int ldeCount = -1; // initialize with guard value
+      if ((totalLBound)->extent[1] >= localDeCount)
+        ldeCount=localDeCount;
+      if ((totalLBound)->extent[1] >= (*ptr)->getVasLocalDeCount())
+        ldeCount=(*ptr)->getVasLocalDeCount();
+      if ((totalLBound)->extent[1] >= (*ptr)->getSsiLocalDeCount())
+        ldeCount=(*ptr)->getSsiLocalDeCount();
+      if (ldeCount==-1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "2nd dimension of totalLBound must be of size 'localDeCount'",
-          ESMC_CONTEXT, rc);
+          "2nd dimension of totalLBound array must of size 'localDeCount', "
+          "'vasLocalDeCount' or 'ssiLocalDeCount'", ESMC_CONTEXT, rc);
         return;
       }
       // fill in the values: The interface allows to pass in totalLBound
       // arrays which are larger than redDimCount x localDeCount. Consequently
       // it is necessary to memcpy strips of contiguous data since it cannot be
       // assumed that all data ends up contiguous in the totalLBound array.
-      for (int i=0; i<localDeCount; i++)
+      for (int i=0; i<ldeCount; i++)
         memcpy(&((totalLBound)->array[i*(totalLBound)->extent[0]]),
           &(((*ptr)->getTotalLBound())[i*redDimCount]),
           sizeof(int)*redDimCount);
@@ -503,17 +568,24 @@ extern "C" {
           ESMC_CONTEXT, rc);
         return;
       }
-      if ((totalUBound)->extent[1] < localDeCount){
+      int ldeCount = -1; // initialize with guard value
+      if ((totalUBound)->extent[1] >= localDeCount)
+        ldeCount=localDeCount;
+      if ((totalUBound)->extent[1] >= (*ptr)->getVasLocalDeCount())
+        ldeCount=(*ptr)->getVasLocalDeCount();
+      if ((totalUBound)->extent[1] >= (*ptr)->getSsiLocalDeCount())
+        ldeCount=(*ptr)->getSsiLocalDeCount();
+      if (ldeCount==-1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "2nd dimension of totalUBound must be of size 'localDeCount'",
-          ESMC_CONTEXT, rc);
+          "2nd dimension of totalUBound array must of size 'localDeCount', "
+          "'vasLocalDeCount' or 'ssiLocalDeCount'", ESMC_CONTEXT, rc);
         return;
       }
       // fill in the values: The interface allows to pass in totalUBound
       // arrays which are larger than redDimCount x localDeCount. Consequently
       // it is necessary to memcpy strips of contiguous data since it cannot be
       // assumed that all data ends up contiguous in the totalUBound array.
-      for (int i=0; i<localDeCount; i++)
+      for (int i=0; i<ldeCount; i++)
         memcpy(&((totalUBound)->array[i*(totalUBound)->extent[0]]),
           &(((*ptr)->getTotalUBound())[i*redDimCount]),
           sizeof(int)*redDimCount);
@@ -532,14 +604,21 @@ extern "C" {
           ESMC_CONTEXT, rc);
         return;
       }
-      if ((computationalLWidth)->extent[1] < localDeCount){
+      int ldeCount = -1; // initialize with guard value
+      if ((computationalLWidth)->extent[1] >= localDeCount)
+        ldeCount=localDeCount;
+      if ((computationalLWidth)->extent[1] >= (*ptr)->getVasLocalDeCount())
+        ldeCount=(*ptr)->getVasLocalDeCount();
+      if ((computationalLWidth)->extent[1] >= (*ptr)->getSsiLocalDeCount())
+        ldeCount=(*ptr)->getSsiLocalDeCount();
+      if (ldeCount==-1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "2nd dimension of computationalLWidth must be of size"
-          " 'localDeCount'", ESMC_CONTEXT, rc);
+          "2nd dimension of computationalLWidth array must of size 'localDeCount', "
+          "'vasLocalDeCount' or 'ssiLocalDeCount'", ESMC_CONTEXT, rc);
         return;
       }
       // fill in values
-      for (int i=0; i<localDeCount; i++)
+      for (int i=0; i<ldeCount; i++)
         for (int j=0; j<redDimCount; j++)
           (computationalLWidth)->array[i*(computationalLWidth)->extent[0]+j] =
             ((*ptr)->getExclusiveLBound())[i*redDimCount+j] -
@@ -559,14 +638,21 @@ extern "C" {
           ESMC_CONTEXT, rc);
         return;
       }
-      if ((computationalUWidth)->extent[1] < localDeCount){
+      int ldeCount = -1; // initialize with guard value
+      if ((computationalUWidth)->extent[1] >= localDeCount)
+        ldeCount=localDeCount;
+      if ((computationalUWidth)->extent[1] >= (*ptr)->getVasLocalDeCount())
+        ldeCount=(*ptr)->getVasLocalDeCount();
+      if ((computationalUWidth)->extent[1] >= (*ptr)->getSsiLocalDeCount())
+        ldeCount=(*ptr)->getSsiLocalDeCount();
+      if (ldeCount==-1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "2nd dimension of computationalUWidth must be of size"
-          " 'localDeCount'", ESMC_CONTEXT, rc);
+          "2nd dimension of computationalUWidth array must of size 'localDeCount', "
+          "'vasLocalDeCount' or 'ssiLocalDeCount'", ESMC_CONTEXT, rc);
         return;
       }
       // fill in values
-      for (int i=0; i<localDeCount; i++)
+      for (int i=0; i<ldeCount; i++)
         for (int j=0; j<redDimCount; j++)
           (computationalUWidth)->array[i*(computationalUWidth)->extent[0]+j] =
             ((*ptr)->getComputationalUBound())[i*redDimCount+j] -
@@ -586,14 +672,21 @@ extern "C" {
           ESMC_CONTEXT, rc);
         return;
       }
-      if ((totalLWidth)->extent[1] < localDeCount){
+      int ldeCount = -1; // initialize with guard value
+      if ((totalLWidth)->extent[1] >= localDeCount)
+        ldeCount=localDeCount;
+      if ((totalLWidth)->extent[1] >= (*ptr)->getVasLocalDeCount())
+        ldeCount=(*ptr)->getVasLocalDeCount();
+      if ((totalLWidth)->extent[1] >= (*ptr)->getSsiLocalDeCount())
+        ldeCount=(*ptr)->getSsiLocalDeCount();
+      if (ldeCount==-1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "2nd dimension of totalLWidth must be of size"
-          " 'localDeCount'", ESMC_CONTEXT, rc);
+          "2nd dimension of totalLWidth array must of size 'localDeCount', "
+          "'vasLocalDeCount' or 'ssiLocalDeCount'", ESMC_CONTEXT, rc);
         return;
       }
       // fill in values
-      for (int i=0; i<localDeCount; i++)
+      for (int i=0; i<ldeCount; i++)
         for (int j=0; j<redDimCount; j++)
           (totalLWidth)->array[i*(totalLWidth)->extent[0]+j] =
             ((*ptr)->getExclusiveLBound())[i*redDimCount+j] -
@@ -613,14 +706,21 @@ extern "C" {
           ESMC_CONTEXT, rc);
         return;
       }
-      if ((totalUWidth)->extent[1] < localDeCount){
+      int ldeCount = -1; // initialize with guard value
+      if ((totalUWidth)->extent[1] >= localDeCount)
+        ldeCount=localDeCount;
+      if ((totalUWidth)->extent[1] >= (*ptr)->getVasLocalDeCount())
+        ldeCount=(*ptr)->getVasLocalDeCount();
+      if ((totalUWidth)->extent[1] >= (*ptr)->getSsiLocalDeCount())
+        ldeCount=(*ptr)->getSsiLocalDeCount();
+      if (ldeCount==-1){
         ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_SIZE,
-          "2nd dimension of totalUWidth must be of size"
-          " 'localDeCount'", ESMC_CONTEXT, rc);
+          "2nd dimension of totalUWidth array must of size 'localDeCount', "
+          "'vasLocalDeCount' or 'ssiLocalDeCount'", ESMC_CONTEXT, rc);
         return;
       }
       // fill in values
-      for (int i=0; i<localDeCount; i++)
+      for (int i=0; i<ldeCount; i++)
         for (int j=0; j<redDimCount; j++)
           (totalUWidth)->array[i*(totalUWidth)->extent[0]+j] =
             ((*ptr)->getTotalUBound())[i*redDimCount+j] -

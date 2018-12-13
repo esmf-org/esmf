@@ -365,6 +365,8 @@ namespace ESMCI {
     // get() and set()
     ESMC_TypeKind_Flag getTypekind()        const {return typekind;}
     int getRank()                           const {return rank;}
+    int getVasLocalDeCount()                const {return vasLocalDeCount;}
+    int getSsiLocalDeCount()                const {return ssiLocalDeCount;}
     ESMC_IndexFlag getIndexflag()           const {return indexflag;}
     LocalArray **getLocalarrayList()        const {return larrayList;}
     void **getLarrayBaseAddrList()          const {return larrayBaseAddrList;}
