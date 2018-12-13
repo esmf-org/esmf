@@ -5325,7 +5325,6 @@ int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh){
 }
 
 int VMK::ssishmFree(memhandle *memh){
-#define DEBUGLOG
 #ifndef ESMF_NO_MPI3
 #ifdef DEBUGLOG
   {
@@ -5352,11 +5351,13 @@ int VMK::ssishmFree(memhandle *memh){
 #endif
   memh->counts.resize(0);
   memh->localPetCount=-1; // invalidate
+#ifdef DEBUGLOG
   {
     std::stringstream msg;
     msg << "ssishmFree#" << __LINE__ << " done.";
     ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   }
+#endif
   return ESMF_SUCCESS;
 #else
   std::stringstream msg;
@@ -5368,7 +5369,6 @@ int VMK::ssishmFree(memhandle *memh){
 
 int VMK::ssishmGetMems(memhandle memh, int pet, vector<void *>*mems,
   vector<unsigned long> *bytes){
-#define DEBUGLOG
 #ifndef ESMF_NO_MPI3
   // error check the incoming information
   if (pet < 0 || pet > memh.localPetCount){
@@ -5412,7 +5412,6 @@ int VMK::ssishmGetMems(memhandle memh, int pet, vector<void *>*mems,
 }
 
 int VMK::ssishmSync(memhandle memh){
-#define DEBUGLOG
 #ifndef ESMF_NO_MPI3
 #ifndef ESMF_MPIUNI
   // call barrier for the ssi-local communicator
