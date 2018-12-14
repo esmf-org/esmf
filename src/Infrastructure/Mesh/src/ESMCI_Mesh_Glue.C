@@ -410,7 +410,7 @@ void ESMCI_meshwritewarrays(Mesh **meshpp, char *fname, ESMCI_FortranStrLenArg n
 
     char *filename = ESMC_F90toCstring(fname, nlen);
 
-    printf("mg: nna=%d\n",num_nodeArrays);
+    //   printf("mg: nna=%d\n",num_nodeArrays);
 
 
     WriteMesh(**meshpp, filename, 
@@ -5058,7 +5058,7 @@ void ESMCI_sphdeg_to_cart(double *lon, double *lat,
 
 
 // This method sets the pole values so a 2D Mesh from a SCRIP grid can still be used in regrid with poles
-void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
+void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_obj_type, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
                                              int *rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI_meshsetpoles()"
@@ -5078,31 +5078,59 @@ void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_val, int *_min_pole_gid, int *
 
     // For convenience deref numbers
     int pole_val=*_pole_val;
+    int pole_obj_type=*_pole_obj_type;
     int min_pole_gid=*_min_pole_gid;
     int max_pole_gid=*_max_pole_gid;
 
-    // printf("pole_val=%d min_pole=%d max_pole=%d\n",pole_val,min_pole_gid,max_pole_gid);
+    // Loop through node gids and change associated nodes to have the given pole value
+    if (pole_obj_type==0) {
+      for (int gid=min_pole_gid; gid<=max_pole_gid; gid++) {
+        
+        //  Find the corresponding Mesh node
+        Mesh::MeshObjIDMap::iterator mi =  meshp->map_find(MeshObj::NODE, gid);
+        
+        // If not in the local mesh, then loop to next
+        if (mi == meshp->map_end(MeshObj::NODE)) continue;
+        
+        // Get the element
+        MeshObj &obj = *mi;
+        
+        // Create new attr with the old type, new nodeset, and old context
+        const Context &old_ctxt = GetMeshObjContext(obj);
+        Attr attr(MeshObj::NODE, pole_val, old_ctxt,
+                  old_ctxt.is_set(Attr::SHARED_ID),old_ctxt.is_set(Attr::OWNED_ID),
+                  old_ctxt.is_set(Attr::ACTIVE_ID),old_ctxt.is_set(Attr::GENESIS_ID));
+        meshp->update_obj(&obj, attr);
+      }
+    } else if (pole_obj_type==1) {
+      for (int gid=min_pole_gid; gid<=max_pole_gid; gid++) {
+        
+        //  Find the corresponding Mesh node
+        Mesh::MeshObjIDMap::iterator mi =  meshp->map_find(MeshObj::ELEMENT, gid);
+        
+        // If not in the local mesh, then loop to next
+        if (mi == meshp->map_end(MeshObj::ELEMENT)) continue;
+        
+        // Get the element
+        MeshObj &obj = *mi;
 
-    // Loop through gids and change associated nodes to have the given pole value
-    for (int gid=min_pole_gid; gid<=max_pole_gid; gid++) {
+        // Get old block value
+        UInt block=GetAttr(obj).GetBlock();        
 
-      //  Find the corresponding Mesh node
-      Mesh::MeshObjIDMap::iterator mi =  meshp->map_find(MeshObj::NODE, gid);
+        // Make pole value the 100's digit (can't just set to pole value because I think that it will cause issues)
+        block=block+100*pole_val;
 
-      // If not in the local mesh, then loop to next
-      if (mi == meshp->map_end(MeshObj::NODE)) continue;
-
-      // Get the element
-      MeshObj &node = *mi;
-
-      // Create new attr with the old type, new nodeset, and old context
-      const Context &old_ctxt = GetMeshObjContext(node);
-      Attr attr(MeshObj::NODE, pole_val, old_ctxt,
-                old_ctxt.is_set(Attr::SHARED_ID),old_ctxt.is_set(Attr::OWNED_ID),
-                old_ctxt.is_set(Attr::ACTIVE_ID),old_ctxt.is_set(Attr::GENESIS_ID));
-      meshp->update_obj(&node, attr);
-
+        // Create new attr with the old type, new nodeset, and old context
+        const Context &old_ctxt = GetMeshObjContext(obj);
+        Attr attr(MeshObj::ELEMENT, block, old_ctxt,
+                  old_ctxt.is_set(Attr::SHARED_ID),old_ctxt.is_set(Attr::OWNED_ID),
+                  old_ctxt.is_set(Attr::ACTIVE_ID),old_ctxt.is_set(Attr::GENESIS_ID));
+        meshp->update_obj(&obj, attr);
+      }
+    } else {
+      Throw() << "Unknown object type.";
     }
+
   } catch(std::exception &x) {
     // catch Mesh exception return code
     if (x.what()) {

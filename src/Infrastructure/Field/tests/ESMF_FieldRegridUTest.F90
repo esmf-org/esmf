@@ -1017,7 +1017,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-
 #endif
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)

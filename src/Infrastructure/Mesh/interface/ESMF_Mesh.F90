@@ -2178,6 +2178,9 @@ end function ESMF_MeshCreateFromFile
     type(ESMF_CoordSys_Flag)            :: coordSys
     integer                             :: maxEdges
     logical                             :: hasFaceCoords
+    logical                             :: haveOrigGridDims
+    integer                             :: origGridDims(2)
+    integer                 :: poleVal, minPoleGid, maxPoleGid,poleObjType
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2235,19 +2238,32 @@ end function ESMF_MeshCreateFromFile
 
     ! define default coordinate system
     coordSys = ESMF_COORDSYS_SPH_DEG
+    
+    ! define default haveOrigGridDims
+    haveOrigGridDims=.false.
 
+    ! Get grid info
     if (fileformatlocal == ESMF_FILEFORMAT_ESMFMESH) then
        ! Get coordDim
        call ESMF_EsmfInq(filename,coordDim=coordDim, haveNodeMask=haveNodeMask, &
-                    haveElmtMask=haveElmtMask, maxNodePElement=maxEdges, rc=localrc)
+                    haveElmtMask=haveElmtMask, maxNodePElement=maxEdges, &
+                    haveOrigGridDims=haveOrigGridDims, rc=localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
+
 
        ! Don't convert if not 2D because that'll be cartesian right now
        if (coordDim .eq. 2) then
           convertToDeg = .true.
        else
           convertToDeg = .false.
+       endif
+
+       ! Get OrigGridDims
+       if (haveOrigGridDims) then
+          call ESMF_EsmfInq(filename, origGridDims=origGridDims, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+               ESMF_CONTEXT, rcToReturn=rc)) return
        endif
 
        ! Get information from file
@@ -2666,6 +2682,29 @@ end function ESMF_MeshCreateFromFile
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
+    ! Add pole info if applicable
+    if ((fileformatlocal == ESMF_FILEFORMAT_ESMFMESH) .and. &
+         haveOrigGridDims) then
+       poleVal=4
+       poleObjType=1 ! Set elements
+       minPoleGid=1
+       maxPoleGid=origGridDims(1)
+       call C_ESMC_MeshSetPoles(Mesh, poleObjType, &
+            poleVal, minPoleGid, maxPoleGid, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+
+       poleVal=5
+       poleObjType=1 ! Set elements
+       minPoleGid=origGridDims(1)*origGridDims(2)-origGridDims(1)+1
+       maxPoleGid=origGridDims(1)*origGridDims(2)
+       call C_ESMC_MeshSetPoles(Mesh, poleObjType, &
+            poleVal, minPoleGid, maxPoleGid, localrc)
+       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
+
+
     deallocate(NodeUsed, NodeId, NodeCoords1D, NodeOwners, NodeOwners1)
     deallocate(ElemId, ElemType, ElemConn, elementConn, elmtNum)
     if (haveElmtMask) deallocate(elementMask)
@@ -2674,7 +2713,7 @@ end function ESMF_MeshCreateFromFile
     if (localAddUserArea) deallocate(elementArea, ElemArea)
 
     if (localConvertToDual) then
-                ESMF_MeshCreateFromUnstruct = ESMF_MeshCreateDual(Mesh, rc=localrc)
+       ESMF_MeshCreateFromUnstruct = ESMF_MeshCreateDual(Mesh, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
     else
@@ -2733,7 +2772,7 @@ end function ESMF_MeshCreateFromUnstruct
     logical                 :: notavail
     integer                 :: gridRank
     integer,pointer         :: gridDims(:)
-    integer                 :: poleVal, minPoleGid, maxPoleGid
+    integer                 :: poleVal, minPoleGid, maxPoleGid,poleObjType
 
     ! Initialize return code; assume failure until success is certain
     localrc = ESMF_RC_NOT_IMPL
@@ -2808,18 +2847,24 @@ end function ESMF_MeshCreateFromUnstruct
          ESMF_CONTEXT, rcToReturn=rc)) return
 
     if (gridRank==2) then
+       ! Choose which object type to set based on whether this is a dual or not
+       poleObjType=1 ! Set elems
+       if (dualflag==1) poleObjType=0 ! Elems have been converted to nodes, so set nodes
+
+      ! Set pole val to 4
        poleVal=4
        minPoleGid=1
        maxPoleGid=gridDims(1)
-       call C_ESMC_MeshSetPoles(ESMF_MeshCreateFromScrip, &
+       call C_ESMC_MeshSetPoles(ESMF_MeshCreateFromScrip, poleObjType, &
             poleVal, minPoleGid, maxPoleGid, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
 
+      ! Set pole val to 5
        poleVal=5
        minPoleGid=gridDims(1)*gridDims(2)-gridDims(1)+1
        maxPoleGid=gridDims(1)*gridDims(2)
-       call C_ESMC_MeshSetPoles(ESMF_MeshCreateFromScrip, &
+       call C_ESMC_MeshSetPoles(ESMF_MeshCreateFromScrip, poleObjType, &
             poleVal, minPoleGid, maxPoleGid, localrc)
        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
