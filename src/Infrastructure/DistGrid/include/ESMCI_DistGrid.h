@@ -288,7 +288,7 @@ namespace ESMCI {
     int const *getIndexTuple()const;
     int const *getIndexTupleEnd()const;
     int const *getIndexTupleStart()const;
-    void print()const;
+    void log()const;
   };  // class MultiDimIndexLoop
   //============================================================================
 

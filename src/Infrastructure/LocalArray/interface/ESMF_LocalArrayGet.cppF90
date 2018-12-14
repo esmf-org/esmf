@@ -113,14 +113,14 @@ module ESMF_LocalArrayGetMod
       ! check typekind match @\
       if (typekind /= ESMF_TYPEKIND_##mtypekind) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-          msg="- farrayPtr typekind does not match LocalArray typekind", & @\
+          msg="farrayPtr typekind does not match LocalArray typekind", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
       ! check rank match @\
       if (rank /= mrank) then @\
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-          msg="- farrayPtr rank does not match LocalArray rank", & @\
+          msg="farrayPtr rank does not match LocalArray rank", & @\
           ESMF_CONTEXT, rcToReturn=rc) @\
         return @\
       endif @\
@@ -151,7 +151,7 @@ module ESMF_LocalArrayGetMod
         if (associated(farrayPtr)) then @\
           if (size(farrayPtr) .ne. size(lp)) then @\
             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, & @\
-              msg="- farrayPtr was associated but of incorrect size", & @\
+              msg="farrayPtr was associated but of incorrect size", & @\
               ESMF_CONTEXT, rcToReturn=rc) @\
             return @\
           endif @\
@@ -341,7 +341,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(totalCount)) then
       if (size(totalCount) < lrank) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
-          msg="- size of totalCount argument is smaller than rank", &
+          msg="size of totalCount argument is smaller than rank", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -354,7 +354,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(totalLBound)) then
       if (size(totalLBound) < lrank) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
-          msg="- size of totalLBound argument is smaller than rank", &
+          msg="size of totalLBound argument is smaller than rank", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif
@@ -367,7 +367,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(totalUBound)) then
       if (size(totalUBound) < lrank) then
         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_INCOMP, &
-          msg="- size of totalUBound argument is smaller than rank", &
+          msg="size of totalUBound argument is smaller than rank", &
           ESMF_CONTEXT, rcToReturn=rc)
         return
       endif

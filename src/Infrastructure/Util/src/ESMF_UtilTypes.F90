@@ -520,7 +520,8 @@
 
       type(ESMF_Pin_Flag), parameter:: &
         ESMF_PIN_DE_TO_PET        = ESMF_Pin_Flag(1), &
-        ESMF_PIN_DE_TO_VAS        = ESMF_Pin_Flag(2)
+        ESMF_PIN_DE_TO_VAS        = ESMF_Pin_Flag(2), &
+        ESMF_PIN_DE_TO_SSI        = ESMF_Pin_Flag(3)
 
 !------------------------------------------------------------------------------
 !
@@ -1055,7 +1056,7 @@
              ESMF_SYNC_NONBLOCKING
       public ESMF_Context_Flag, ESMF_CONTEXT_OWN_VM, ESMF_CONTEXT_PARENT_VM
       public ESMF_End_Flag, ESMF_END_NORMAL, ESMF_END_KEEPMPI, ESMF_END_ABORT
-      public ESMF_Pin_Flag, ESMF_PIN_DE_TO_PET, ESMF_PIN_DE_TO_VAS
+      public ESMF_Pin_Flag, ESMF_PIN_DE_TO_PET, ESMF_PIN_DE_TO_VAS, ESMF_PIN_DE_TO_SSI
       public ESMF_AttCopy_Flag, ESMF_ATTCOPY_HYBRID, ESMF_ATTCOPY_REFERENCE, &
                                ESMF_ATTCOPY_VALUE
       public ESMF_AttGetCountFlag, ESMF_ATTGETCOUNT_ATTRIBUTE, ESMF_ATTGETCOUNT_ATTPACK, &

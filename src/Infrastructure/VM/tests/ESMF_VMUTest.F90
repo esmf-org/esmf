@@ -1080,7 +1080,7 @@
       type(ESMF_Grid)     :: grid, grid_temp
       type(ESMF_Pointer)  :: grid_tempp
       type(ESMF_Base)     :: base
-      integer             :: id_temp, ssiCount, minSsiPetCount, maxSsiPetCount
+      integer             :: id_temp, ssiCount, ssiMinPetCount, ssiMaxPetCount
       type(ESMF_VMId)     :: vmid_temp
       type(ESMF_Logical)  :: object_found
       type(ESMF_Log)      :: log
@@ -1118,13 +1118,13 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Get Test"
       call ESMF_VMGet(vm, petCount=npets, ssiCount=ssiCount, &
-        minSsiPetCount=minSsiPetCount, maxSsiPetCount=maxSsiPetCount, rc=rc)
+        ssiMinPetCount=ssiMinPetCount, ssiMaxPetCount=ssiMaxPetCount, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       write(msg,*) "petCount=", npets, " ssiCount=", ssiCount
       call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
-      write(msg,*) "minSsiPetCount=", minSsiPetCount, &
-        " maxSsiPetCount=", maxSsiPetCount
+      write(msg,*) "ssiMinPetCount=", ssiMinPetCount, &
+        " ssiMaxPetCount=", ssiMaxPetCount
       call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
 
       !------------------------------------------------------------------------

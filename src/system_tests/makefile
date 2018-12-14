@@ -49,6 +49,7 @@ DIRS      = ESMF_CompCreate \
             ESMF_ConcurrentEnsemble \
             ESMF_ArrayRedistOpenMP \
             ESMF_ArrayRedistOpenACC \
+            ESMF_ArraySharedDeSSI \
             ESMF_DirectCoupling \
             ESMF_XGridConcurrent \
             ESMF_XGridSerial \

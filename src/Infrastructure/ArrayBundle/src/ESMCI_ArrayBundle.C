@@ -104,9 +104,9 @@ ArrayBundle::ArrayBundle(
     // invalidate the name for this ArrayBundle object in the Base class
     ESMC_BaseSetName(NULL, "ArrayBundle");
    
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     throw rc;  // bail out with exception
   }catch(...){
@@ -209,9 +209,9 @@ ArrayBundle *ArrayBundle::create(
   // call class constructor
   try{
     arraybundle = new ArrayBundle(arrayList, arrayCount, multi, relaxed);
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     return ESMC_NULL_POINTER; // bail out
   }catch(...){

@@ -32,6 +32,8 @@ ESMF_F90LINKLIBS       += -lmpi
 ESMF_CXXLINKLIBS       += -lmpi
 ESMF_MPIRUNDEFAULT      = mpirun.lsf.rms
 ESMF_MPIMPMDRUNDEFAULT  = mpimpmdrun.alpha
+ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
+ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 else
 ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
