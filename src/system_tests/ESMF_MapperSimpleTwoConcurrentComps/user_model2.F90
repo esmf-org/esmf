@@ -156,32 +156,71 @@
         type(ESMF_Clock)     :: clock
         integer, intent(out) :: rc
   
-  !   ! Local variables
+        ! local variables
         integer                             :: status = ESMF_SUCCESS
-        type(ESMF_Array)                    :: sorted_data
-        integer, dimension(9), target       :: d = (/3,7,8,5,2,1,9,5,4/)
+
+        integer, parameter :: NUM_TIMES = 1000
+        integer, parameter :: MAX_ARR_SZ = 4096
+        type(ESMF_Array)                    :: rawdata, sorted_data
+        !integer, dimension(9), target       :: d = (/3,7,8,5,2,1,9,5,4/)
+        integer, dimension(:), allocatable, target        :: d
+        integer :: d_sz
+        integer, dimension(:), pointer      :: pd        ! raw data ptr
         integer, dimension(:), pointer      :: rdptr     ! raw data ptr
         integer, dimension(:), pointer      :: sdptr     ! sorted data ptr
-        integer                             :: i
-
-        print *, "In user 2 run routine (lightweight)"
-        !call ESMF_StateGet(importState, "sorted_data2", sorted_data, rc=status)
+        integer :: petCount, localPet
+        logical :: isLastPet
+        integer :: i
+  
+        print *, "In user 1 run routine"
+        !call ESMF_StateGet(exportState, "rawdata", rawdata, rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
+        !call ESMF_ArrayGet(rawdata, localDe=0, farrayPtr=rdptr, rc=status)
+        !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+        !    ESMF_CONTEXT, rcToReturn=rc)) return
+  
+        !call ESMF_StateGet(exportState, "sorted_data1", sorted_data, rc=status)
         !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
         !    ESMF_CONTEXT, rcToReturn=rc)) return
         !call ESMF_ArrayGet(sorted_data, localDe=0, farrayPtr=sdptr, rc=status)
         !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
         !    ESMF_CONTEXT, rcToReturn=rc)) return
-        
-        ! sort local data
-        !rdptr => d
-        !call quicksortI4(rdptr, 1, 9)
 
-        ! compare local sorted data with data sorted on component 1
-        ! any mismatch indicates failure
-        ! write(*, '(A16, 9I3)') 'local rdptr', rdptr
-        !do i = lbound(sdptr, 1), ubound(sdptr, 1)
-        !    if(rdptr(i) .ne. sdptr(i)) status = ESMF_FAILURE
-        !enddo
+        call ESMF_GridCompGet(comp, petCount=petCount, localPet=localPet, rc=status)
+        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        if(localPet == petCount - 1) then
+          isLastPet = .true.
+        else
+          isLastPet = .false.
+        end if
+
+        if(petCount < MAX_ARR_SZ) then
+          if(.not. isLastPet) then
+            d_sz = MAX_ARR_SZ / petCount
+          else
+            d_sz = MAX_ARR_SZ - (petCount - 1) * (MAX_ARR_SZ / petCount)
+          end if
+        else
+          d_sz = 1
+        end if
+        allocate(d(d_sz))
+        do i=1,d_sz
+          d(i) = d_sz - i
+        end do
+
+        ! sort the input data locally
+        pd => d
+        ! dummy loop to create load imbalance btw comp1 and comp2
+        do i=1,NUM_TIMES    
+          call quicksortI4(pd, 1, d_sz)
+        end do
+
+        ! assign sorting result to output that will be delivered to component 2
+        ! through coupler component
+        !sdptr(:) = d(lbound(sdptr, 1):ubound(sdptr, 1))
+
         rc = status
 
     end subroutine user_run

@@ -169,11 +169,16 @@
         integer                             :: status = ESMF_SUCCESS
 
         integer, parameter :: NUM_TIMES = 1000
+        integer, parameter :: MAX_ARR_SZ = 65536
         type(ESMF_Array)                    :: rawdata, sorted_data
-        integer, dimension(9), target       :: d = (/3,7,8,5,2,1,9,5,4/)
+        !integer, dimension(9), target       :: d = (/3,7,8,5,2,1,9,5,4/)
+        integer, dimension(:), allocatable, target        :: d
+        integer :: d_sz
         integer, dimension(:), pointer      :: pd        ! raw data ptr
         integer, dimension(:), pointer      :: rdptr     ! raw data ptr
         integer, dimension(:), pointer      :: sdptr     ! sorted data ptr
+        integer :: petCount, localPet
+        logical :: isLastPet
         integer :: i
   
         print *, "In user 1 run routine"
@@ -191,11 +196,34 @@
         !if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
         !    ESMF_CONTEXT, rcToReturn=rc)) return
 
+        call ESMF_GridCompGet(comp, petCount=petCount, localPet=localPet, rc=status)
+        if (ESMF_LogFoundError(status, ESMF_ERR_PASSTHRU, &
+            ESMF_CONTEXT, rcToReturn=rc)) return
+        if(localPet == petCount - 1) then
+          isLastPet = .true.
+        else
+          isLastPet = .false.
+        end if
+
+        if(petCount < MAX_ARR_SZ) then
+          if(.not. isLastPet) then
+            d_sz = MAX_ARR_SZ / petCount
+          else
+            d_sz = MAX_ARR_SZ - (petCount - 1) * (MAX_ARR_SZ / petCount)
+          end if
+        else
+          d_sz = 1
+        end if
+        allocate(d(d_sz))
+        do i=1,d_sz
+          d(i) = d_sz - i
+        end do
+
         ! sort the input data locally
         pd => d
         ! dummy loop to create load imbalance btw comp1 and comp2
         do i=1,NUM_TIMES    
-          call quicksortI4(pd, 1, 9)
+          call quicksortI4(pd, 1, d_sz)
         end do
 
         ! assign sorting result to output that will be delivered to component 2
