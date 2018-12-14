@@ -174,6 +174,7 @@ ESMF_F90COMPILEOPTS += -Mallocatable=03
 # Conditionally add pthread compiler and linker flags
 #
 ifeq ($(ESMF_PTHREADS),ON)
+ESMF_F90COMPILEOPTS += -lpthread
 ESMF_CXXCOMPILEOPTS += -lpthread
 ESMF_F90LINKOPTS    += -lpthread
 ESMF_CXXLINKOPTS    += -lpthread
