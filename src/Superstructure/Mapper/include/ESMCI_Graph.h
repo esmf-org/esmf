@@ -235,7 +235,7 @@ namespace ESMCI{
     bool DGraph<T>::GraphNode::rem_iedge(const vertex_key &from)
     {
       bool edge_removed = false;
-      vertex_key_iterator iter = iedges_.begin();
+      std::vector<vertex_key>::iterator iter = iedges_.begin();
       for(;iter != iedges_.end(); ++iter){
         if(*iter == from){
           break;
@@ -252,7 +252,7 @@ namespace ESMCI{
     bool DGraph<T>::GraphNode::rem_oedge(const vertex_key &to)
     {
       bool edge_removed = false;
-      vertex_key_iterator iter = oedges_.begin();
+      std::vector<vertex_key>::iterator iter = oedges_.begin();
       for(;iter != oedges_.end(); ++iter){
         if(*iter == to){
           break;
