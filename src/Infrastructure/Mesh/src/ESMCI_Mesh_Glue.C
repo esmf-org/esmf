@@ -410,7 +410,7 @@ void ESMCI_meshwritewarrays(Mesh **meshpp, char *fname, ESMCI_FortranStrLenArg n
 
     char *filename = ESMC_F90toCstring(fname, nlen);
 
-    printf("mg: nna=%d\n",num_nodeArrays);
+    //   printf("mg: nna=%d\n",num_nodeArrays);
 
 
     WriteMesh(**meshpp, filename, 
@@ -5082,37 +5082,55 @@ void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_obj_type, int *_pole_val, int 
     int min_pole_gid=*_min_pole_gid;
     int max_pole_gid=*_max_pole_gid;
 
-    // Set object type
-    MeshObj::id_type obj_type;
+    // Loop through node gids and change associated nodes to have the given pole value
     if (pole_obj_type==0) {
-      obj_type=MeshObj::NODE;
+      for (int gid=min_pole_gid; gid<=max_pole_gid; gid++) {
+        
+        //  Find the corresponding Mesh node
+        Mesh::MeshObjIDMap::iterator mi =  meshp->map_find(MeshObj::NODE, gid);
+        
+        // If not in the local mesh, then loop to next
+        if (mi == meshp->map_end(MeshObj::NODE)) continue;
+        
+        // Get the element
+        MeshObj &obj = *mi;
+        
+        // Create new attr with the old type, new nodeset, and old context
+        const Context &old_ctxt = GetMeshObjContext(obj);
+        Attr attr(MeshObj::NODE, pole_val, old_ctxt,
+                  old_ctxt.is_set(Attr::SHARED_ID),old_ctxt.is_set(Attr::OWNED_ID),
+                  old_ctxt.is_set(Attr::ACTIVE_ID),old_ctxt.is_set(Attr::GENESIS_ID));
+        meshp->update_obj(&obj, attr);
+      }
     } else if (pole_obj_type==1) {
-      obj_type=MeshObj::ELEMENT;
+      for (int gid=min_pole_gid; gid<=max_pole_gid; gid++) {
+        
+        //  Find the corresponding Mesh node
+        Mesh::MeshObjIDMap::iterator mi =  meshp->map_find(MeshObj::ELEMENT, gid);
+        
+        // If not in the local mesh, then loop to next
+        if (mi == meshp->map_end(MeshObj::ELEMENT)) continue;
+        
+        // Get the element
+        MeshObj &obj = *mi;
+
+        // Get old block value
+        UInt block=GetAttr(obj).GetBlock();        
+
+        // Make pole value the 100's digit (can't just set to pole value because I think that it will cause issues)
+        block=block+100*pole_val;
+
+        // Create new attr with the old type, new nodeset, and old context
+        const Context &old_ctxt = GetMeshObjContext(obj);
+        Attr attr(MeshObj::ELEMENT, block, old_ctxt,
+                  old_ctxt.is_set(Attr::SHARED_ID),old_ctxt.is_set(Attr::OWNED_ID),
+                  old_ctxt.is_set(Attr::ACTIVE_ID),old_ctxt.is_set(Attr::GENESIS_ID));
+        meshp->update_obj(&obj, attr);
+      }
     } else {
       Throw() << "Unknown object type.";
     }
 
-
-    // Loop through node gids and change associated nodes to have the given pole value
-    for (int gid=min_pole_gid; gid<=max_pole_gid; gid++) {
-
-      //  Find the corresponding Mesh node
-      Mesh::MeshObjIDMap::iterator mi =  meshp->map_find(obj_type, gid);
-
-      // If not in the local mesh, then loop to next
-      if (mi == meshp->map_end(obj_type)) continue;
-
-      // Get the element
-      MeshObj &obj = *mi;
-
-      // Create new attr with the old type, new nodeset, and old context
-      const Context &old_ctxt = GetMeshObjContext(obj);
-      Attr attr(obj_type, pole_val, old_ctxt,
-                old_ctxt.is_set(Attr::SHARED_ID),old_ctxt.is_set(Attr::OWNED_ID),
-                old_ctxt.is_set(Attr::ACTIVE_ID),old_ctxt.is_set(Attr::GENESIS_ID));
-      meshp->update_obj(&obj, attr);
-
-    }
   } catch(std::exception &x) {
     // catch Mesh exception return code
     if (x.what()) {

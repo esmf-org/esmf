@@ -1001,9 +1001,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-#if 0
       !------------------------------------------------------------------------
-      !EX_OFF_UTest
+      !EX_UTest
 
       write(failMsg, *) "Test unsuccessful"
       write(name, *) "Test regridding using meshes created via Mesh create from Grid"
@@ -1018,7 +1017,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-#endif
 #endif
 #endif
     call ESMF_TestEnd(ESMF_SRCLINE)

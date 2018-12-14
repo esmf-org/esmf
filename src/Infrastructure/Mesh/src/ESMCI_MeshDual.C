@@ -282,7 +282,7 @@ namespace ESMCI {
     //  if (!GetAttr(node).is_locally_owned()) continue;
 
     // DEBUG
-    //    if (GetAttr(node).GetBlock() !=0) {
+    //if (GetAttr(node).GetBlock() !=0) {
     //  printf("node id=%d block=%d\n",node.get_id(),GetAttr(node).GetBlock());
     //}
 
@@ -382,8 +382,11 @@ namespace ESMCI {
       //  might also mean it was a split elem, that's not the original elem)
       if (nodes_used[pos]) {
 
-        // Get element pole id
-        UInt pole_id=GetAttr(elem).GetBlock();        
+        // Get element block id
+        UInt block=GetAttr(elem).GetBlock();        
+
+        // The pole id is the 100's digit
+        UInt pole_id=block/100;
 
         // Create node  
         MeshObj *node = new MeshObj(MeshObj::NODE, elem_id, data_index);
