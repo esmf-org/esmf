@@ -33,6 +33,7 @@ module user_model2
     integer, intent(out) :: rc
     type(ESMF_VM) :: vm
     logical       :: pthreadsEnabled
+    logical       :: ssiSharedMemoryEnabled
     integer       :: ssiMaxPetCount
 
     ! Initialize return code
@@ -49,15 +50,16 @@ module user_model2
     ! First test whether ESMF-threading is supported on this machine
     call ESMF_VMGetCurrent(vm, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
-    call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, &
+      ssiSharedMemoryEnabledFlag=ssiSharedMemoryEnabled, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     if (pthreadsEnabled) then
       call ESMF_VMGet(vm, ssiMaxPetCount=ssiMaxPetCount, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
-#ifdef ESMF_NO_MPI3
-      ! do not maximize PEs on fewer PETs if no support for DE sharing available
-      ssiMaxPetCount=1
-#endif
+      if (.not.ssiSharedMemoryEnabled) then
+        ! do not maximize PEs on fewer PETs if SSI shared memory not supported
+        ssiMaxPetCount=1
+      endif
       call ESMF_GridCompSetVMMaxPEs(comp, maxPeCountPerPet=ssiMaxPetCount, &
         rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out

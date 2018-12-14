@@ -341,6 +341,13 @@ class VMK{
       return true;
 #endif
     }
+    bool isSsiSharedMemoryEnabled() const{
+#ifdef ESMF_NO_MPI3
+      return false;
+#else
+      return true;
+#endif
+    }
 
     // p2p communication calls
     int send(const void *message, int size, int dest, int tag=-1);

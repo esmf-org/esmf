@@ -54,6 +54,8 @@ program ESMF_ArraySharedDeSSISTest
   type(ESMF_GridComp) :: comp1, comp2
   type(ESMF_DistGrid) :: distgrid
   type(ESMF_Array)    :: array
+  logical             :: ssiSharedMemoryEnabled
+  type(ESMF_Pin_Flag) :: pinflag
 
   ! cumulative result: count failures; no failures equals "all pass"
   integer :: result = 0
@@ -96,7 +98,8 @@ program ESMF_ArraySharedDeSSISTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
   ! Get number of PETs we are running with
-  call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
+  call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, &
+    ssiSharedMemoryEnabledFlag=ssiSharedMemoryEnabled, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
@@ -125,12 +128,13 @@ program ESMF_ArraySharedDeSSISTest
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
+  if (ssiSharedMemoryEnabled) then
+    pinflag=ESMF_PIN_DE_TO_SSI  ! requires support for SSI shared memory
+  else
+    pinflag=ESMF_PIN_DE_TO_PET
+  endif
   array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
-    indexflag=ESMF_INDEX_GLOBAL, name="MyArray", &
-#ifndef ESMF_NO_MPI3
-    pinflag=ESMF_PIN_DE_TO_SSI, &
-#endif
-    rc=localrc)
+    indexflag=ESMF_INDEX_GLOBAL, name="MyArray", pinflag=pinflag, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)

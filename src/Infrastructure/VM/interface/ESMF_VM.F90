@@ -4699,7 +4699,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   recursive subroutine ESMF_VMGetDefault(vm, keywordEnforcer, localPet, &
     petCount, peCount, ssiCount, ssiMinPetCount, ssiMaxPetCount, &
     ssiLocalPetCount, mpiCommunicator, pthreadsEnabledFlag, openMPEnabledFlag, &
-    rc)
+    ssiSharedMemoryEnabledFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)            :: vm
@@ -4714,6 +4714,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,            intent(out), optional :: mpiCommunicator
     logical,            intent(out), optional :: pthreadsEnabledFlag
     logical,            intent(out), optional :: openMPEnabledFlag
+    logical,            intent(out), optional :: ssiSharedMemoryEnabledFlag
     integer,            intent(out), optional :: rc
 !
 ! !STATUS:
@@ -4721,11 +4722,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \item\apiStatusCompatibleVersion{5.2.0r}
 ! \item\apiStatusModifiedSinceVersion{5.2.0r}
 ! \begin{description}
-! \item[7.0.0] Added arguments {\tt ssiCount}, {\tt ssiMinPetCount}, 
+! \item[8.0.0] Added arguments {\tt ssiCount}, {\tt ssiMinPetCount}, 
 !   {\tt ssiMaxPetCount}, and {\tt ssiLocalPetCount} to provide access 
 !   to information about how the VM is mapped across the single system images
-!   (typically synonymous to nodes) of the compute environment. This information
-!   is useful when constructing custom petLists.
+!   (SSI) -- typically synonymous to nodes -- of the compute environment. This
+!   information is useful when constructing custom petLists. \newline
+!   Added argument {\tt ssiSharedMemoryEnabledFlag} that allows the user to 
+!   query whether ESMF was compiled with support for shared memory 
+!   access between PETs on the same SSI.
 ! \end{description}
 ! \end{itemize}
 !
@@ -4765,14 +4769,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        \item[{\tt .TRUE.}]
 !             ESMF has been compiled with Pthreads.
 !        \item[{\tt .FALSE.}]
-!             ESMF has not been compiled with Pthreads.
+!             ESMF has {\em not} been compiled with Pthreads.
 !        \end{description}
 !   \item[{[openMPEnabledFlag]}]
 !        \begin{description}
 !        \item[{\tt .TRUE.}]
 !             ESMF has been compiled with OpenMP.
 !        \item[{\tt .FALSE.}]
-!             ESMF has not been compiled with OpenMP.
+!             ESMF has {\em not} been compiled with OpenMP.
+!        \end{description}
+!   \item[{[ssiSharedMemoryEnabledFlag]}]
+!        \begin{description}
+!        \item[{\tt .TRUE.}]
+!             ESMF has been compiled to support shared memory access
+!             between PETs that are on the same single system image (SSI).
+!        \item[{\tt .FALSE.}]
+!             ESMF has {\em not} been compiled to support shared memory access
+!             between PETs that are on the same single system image (SSI).
 !        \end{description}
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -4780,9 +4793,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !
 !EOP
 !------------------------------------------------------------------------------
-    type(ESMF_Logical)      :: pthreadsEnabledFlagArg ! helper variable
-    type(ESMF_Logical)      :: openMPEnabledFlagArg   ! helper variable
-    integer                 :: localrc                ! local return code
+    type(ESMF_Logical)      :: pthreadsEnabledFlagArg         ! helper variable
+    type(ESMF_Logical)      :: openMPEnabledFlagArg           ! helper variable
+    type(ESMF_Logical)      :: ssiSharedMemoryEnabledFlagArg  ! helper variable
+    integer                 :: localrc  ! local return code
 
     ! initialize return code; assume routine not implemented
     localrc = ESMF_RC_NOT_IMPL
@@ -4794,11 +4808,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! Call into the C++ interface.
     call c_ESMC_VMGet(vm, localPet, petCount, peCount, ssiCount, &
       ssiMinPetCount, ssiMaxPetCount, ssiLocalPetCount, mpiCommunicator, &
-      pthreadsEnabledFlagArg, openMPEnabledFlagArg, localrc)
+      pthreadsEnabledFlagArg, openMPEnabledFlagArg, &
+      ssiSharedMemoryEnabledFlagArg, localrc)
     if (present (pthreadsEnabledFlag))  &
       pthreadsEnabledFlag = pthreadsEnabledFlagArg
     if (present (openMPEnabledFlag))  &
       openMPEnabledFlag = openMPEnabledFlagArg
+    if (present (ssiSharedMemoryEnabledFlag))  &
+      ssiSharedMemoryEnabledFlag = ssiSharedMemoryEnabledFlagArg
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

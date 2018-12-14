@@ -1,4 +1,4 @@
-# $Id$
+g# $Id$
 #
 # Darwin.xlfgcc.default
 #
@@ -69,8 +69,6 @@ ESMF_CXXLINKLIBS       += -lmpi_mpifh
 else
 ESMF_F90DEFAULT         = mpif90
 ESMF_CXXLINKLIBS       += -lmpi_f77
-ESMF_F90COMPILECPPFLAGS+= -DESMF_NO_MPI3
-ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_MPI3
 endif
 ESMF_CXXCOMPILECPPFLAGS+= -DESMF_NO_SIGUSR2
 ESMF_F90LINKLIBS       += $(shell $(ESMF_DIR)/scripts/libs.openmpif90 $(ESMF_F90DEFAULT))
