@@ -173,7 +173,7 @@
 
       ! Check for correct number of PETs
      if ( npets < NUM_COMPS ) then
-        write(failMsg,'(A50I6A10)') "This system test does not run on fewer than ", NUM_COMPS, " PETs"
+        write(failMsg,'(A50,I6,A10)') "This system test does not run on fewer than ", NUM_COMPS, " PETs"
         call ESMF_LogSetError(ESMF_RC_ARG_BAD,&
             msg=failMsg,&
             ESMF_CONTEXT, rcToReturn=rc)
@@ -215,7 +215,7 @@
     print *, "Creating N model components..."
     ! Create the N model components and coupler
     do i=1,NUM_COMPS
-      write(tmpstr, '(A12I6)') "user model ", i
+      write(tmpstr, '(A12,I6)') "user model ", i
       comp_names(i) = trim(tmpstr)
       comps(i) = ESMF_GridCompCreate(name=comp_names(i), petList=petlist_comps(i)%arr, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -350,7 +350,7 @@
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
     do i=1,NUM_COMPS
-      write(tmpstr,"(A15I6)") "Gcomp Clock", i
+      write(tmpstr,"(A15,I6)") "Gcomp Clock", i
       clocks(GCOMP_SIDX+i-1) = ESMF_ClockCreate(timeSteps(GCOMP_SIDX+i-1), startTime, stopTime=stopTime, &
                                name=tmpstr, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -365,7 +365,7 @@
 !-------------------------------------------------------------------------
 
   do i=1,NUM_COMPS,2
-    write(tmpstr,"(A20I6)") "export comps", i
+    write(tmpstr,"(A20,I6)") "export comps", i
     cexps(i) = ESMF_StateCreate(name=tmpstr,  &
                              stateintent=ESMF_STATEINTENT_EXPORT, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -383,7 +383,7 @@
     !print *, "Comp 1 Initialize finished, rc =", rc
 
     if((i+1) <= NUM_COMPS) then
-      write(tmpstr,"(A20I6)") "import comps", i+1
+      write(tmpstr,"(A20,I6)") "import comps", i+1
       cimps(i+1) = ESMF_StateCreate(name=tmpstr,  &
                                stateintent=ESMF_STATEINTENT_IMPORT, rc=localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -424,7 +424,7 @@
 !-------------------------------------------------------------------------
 
     do i=1,NUM_COMPS
-      write(comp_phase_names(i),"(A15I6)") "comp phase run", i
+      write(comp_phase_names(i),"(A15,I6)") "comp phase run", i
     end do
     do while (.not. ESMF_ClockIsStopTime(clocks(CPL_IDX), rc=localrc))
 
