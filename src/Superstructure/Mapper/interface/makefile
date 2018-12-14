@@ -37,3 +37,4 @@ endif
 
 DIRS	  = 
 
+ESMF_CXXCOMPILEOPTS += -std=c++11
