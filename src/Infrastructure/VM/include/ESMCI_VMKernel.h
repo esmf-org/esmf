@@ -341,13 +341,10 @@ class VMK{
       return true;
 #endif
     }
-    bool isSsiSharedMemoryEnabled() const{
-#ifdef ESMF_NO_MPI3
-      return false;
-#else
-      return true;
-#endif
-    }
+    bool isSsiSharedMemoryEnabled() const;
+      //TODO: For now had to implement this method in the source file, because
+      //TODO: of the way the ESMF_NO_MPI3 macro is being determined.
+      //TODO: Move it into the VMKernel header once includes are fixed.
 
     // p2p communication calls
     int send(const void *message, int size, int dest, int tag=-1);

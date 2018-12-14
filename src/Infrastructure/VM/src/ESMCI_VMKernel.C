@@ -272,6 +272,18 @@ void VMK::obtain_args(){
 }
 
 
+bool VMK::isSsiSharedMemoryEnabled() const{
+  //TODO: For now had to implement this method in the source file, because
+  //TODO: of the way the ESMF_NO_MPI3 macro is being determined.
+  //TODO: Move it into the VMKernel header once includes are fixed.
+#ifdef ESMF_NO_MPI3
+  return false;
+#else
+  return true;
+#endif
+}
+
+    
 void VMK::init(MPI_Comm mpiCommunicator){
   // initialize the physical machine and a default (all MPI) virtual machine
   // initialize signal handling -> this MUST happen before MPI_Init is called!!
@@ -502,7 +514,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   int num_adevices = 0;
   num_adevices = VMAccFwGetNumDevices();
   MPI_Allgather(&num_adevices, 1, MPI_INTEGER,
-                nadevs, 1, MPI_INTEGER, mpi_c);              
+                nadevs, 1, MPI_INTEGER, mpi_c);
 #endif
 }
 
