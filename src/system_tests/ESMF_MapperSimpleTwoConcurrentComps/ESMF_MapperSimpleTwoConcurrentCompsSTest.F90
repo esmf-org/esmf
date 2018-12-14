@@ -87,7 +87,7 @@
 
     ! Local variables
     ! assert(NUM_COMPS > 0)
-    integer, parameter :: NUM_COMPS = 2
+    integer, parameter :: NUM_COMPS = 8
     integer, parameter :: NUM_COMPS_PLUS_CPL = NUM_COMPS+1
     integer :: pet_id, npets, rc, localrc, userrc
     integer :: npets_comps(NUM_COMPS)
