@@ -147,7 +147,7 @@ module user_model1
     type(ESMF_Array)      :: array
     real(ESMF_KIND_R8), pointer :: farrayPtr(:,:)   ! matching F90 array pointer
     type(ESMF_VM)         :: vm
-    integer               :: i, j, tid, localPet, peCOunt
+    integer               :: i, j, tid, localPet, peCount
     
     ! Initialize return code
     rc = ESMF_SUCCESS

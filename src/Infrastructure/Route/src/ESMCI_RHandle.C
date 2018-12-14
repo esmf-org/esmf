@@ -29,6 +29,7 @@
 #include "ESMCI_RHandle.h"
 
 // include higher level, 3rd party or system headers
+#include <cerrno>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -421,11 +422,18 @@ RouteHandle *RouteHandle::create(
     // open the file
 #ifdef ESMF_MPIUNI
     FILE *fp=fopen(file.c_str(), "rb");
+    if (!fp) {
+      string msg = file + ": " + strerror (errno);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, msg,
+          ESMC_CONTEXT,
+          &localrc);
+      throw ESMC_RC_FILE_OPEN;
+    }
 #else
     MPI_File fh;
     localrc = MPI_File_open(comm, (char*)file.c_str(), 
       MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
-    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw ESMC_RC_FILE_OPEN;
 #endif
 
     // read the header start
@@ -441,8 +449,9 @@ RouteHandle *RouteHandle::create(
 #endif
     if (strncmp(headerIn, header, strlen(header)) != 0){
       // did not find the expected header start
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "This does not look like a known ESMF_RouteHandle file.", ESMC_CONTEXT,
+      std::string msg = std::string("Unknown ESMF_RouteHandle file header: ") + headerIn;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED, msg,
+        ESMC_CONTEXT,
         &localrc);
       throw localrc;
     }
@@ -461,7 +470,7 @@ RouteHandle *RouteHandle::create(
       msg << "The petCount of the reading context is " << petCount <<
         ", and must match the petCount in the RouteHandle file: " <<
         petCountIn;
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg.str(), ESMC_CONTEXT,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED, msg.str(), ESMC_CONTEXT,
         &localrc);
       throw localrc;
     }
