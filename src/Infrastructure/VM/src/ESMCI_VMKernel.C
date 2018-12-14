@@ -5419,6 +5419,7 @@ int VMK::ssishmSync(memhandle memh){
   return ESMF_SUCCESS;
 #else
   // nothing to be done for MPIUNI
+  return ESMF_SUCCESS;
 #endif
 #else
   std::stringstream msg;
