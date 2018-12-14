@@ -335,8 +335,8 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
-    ! initialize stop time to 5/02/2003
-    call ESMF_TimeSet(stopTime, yy=2003, mm=5, dd=2, &
+    ! initialize stop time to 5/06/2003
+    call ESMF_TimeSet(stopTime, yy=2003, mm=5, dd=6, &
                       calendar=gregorianCalendar, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) &
