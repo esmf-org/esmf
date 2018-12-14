@@ -64,6 +64,7 @@ typedef struct{
   int de;           // DE id number (in case not base zero)
   int pet;          // PET associated with this DE
   int vas;          // virtual address space
+  int ssi;          // single system image
   // - DEPRECATED section
   int nconnect;     // number of connections from this DE
   int *connect_de;  // connected DEs 
@@ -82,9 +83,11 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int deCount;    // number of DEs
     de_type *deInfoList;// list that holds all of this layout's DE info
     // --- local section ---
-    int localDeCount; // number of DEs associated with instantiating PET
-    int *localDeToDeMap; // list that holds all of the de indices for this PET
-    int *deList;      // localDE index for DE or -1 if not local
+    int localDeCount;     // number of DEs associated with localPet
+    int vasLocalDeCount;  // number of DEs associated with localVas
+    int ssiLocalDeCount;  // number of DEs associated with localSsi
+    int *localDeToDeMap;  // [localDeCount] mapping localDE to DE
+    int *deList;          // localDE index for DE or -1 if not local
     
     int oldstyle;   // if this flag is set then this is an oldstyle delayout
                     // new style delayouts follow proposal sent out on 02/15/06
@@ -92,7 +95,6 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     // - NEWSTYLE section
     ESMC_Pin_Flag pinFlag; // type of resources DEs are pinned to    
     
-    int vasLocalDeCount;// number of DEs associated with local VAS
     int *vasLocalDeToDeMap;// list that holds all of the de indices for this VAS
     
     // - DEPRECATED section
@@ -143,9 +145,11 @@ class DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     int getLocalDeCount()             const {return localDeCount;}
     const int *getLocalDeToDeMap()    const {return localDeToDeMap;}
     int getVasLocalDeCount()          const {return vasLocalDeCount;}
+    int getSsiLocalDeCount()          const {return ssiLocalDeCount;}
     const int *getVasLocalDeToDeMap() const {return vasLocalDeToDeMap;}
     int getPet(int i)                 const {return deInfoList[i].pet;}
     int getVas(int i)                 const {return deInfoList[i].vas;}
+    int getSsi(int i)                 const {return deInfoList[i].ssi;}
     ESMC_Logical getOneToOneFlag()    const {return oneToOneFlag;}
     ESMC_Pin_Flag getPinFlag()        const {return pinFlag;}
     int getDEMatchDE(int DEid, DELayout &layoutMatch, int *deMatchCount, 

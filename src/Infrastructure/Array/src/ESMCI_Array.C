@@ -142,6 +142,10 @@ Array::Array(
   ESMC_TypeKind_Flag typekindArg,         // (in)
   int rankArg,                            // (in)
   LocalArray **larrayListArg,             // (in)
+  VM::memhandle *mhArg,                   // (in)
+  int vasLocalDeCountArg,                 // (in)
+  int ssiLocalDeCountArg,                 // (in)
+  int *localDeToDeMapArg,                 // (in)
   DistGrid *distgridArg,                  // (in)
   bool distgridCreatorArg,                // (in)
   int *exclusiveLBoundArg,                // (in)
@@ -179,37 +183,63 @@ Array::Array(
   // fill in the Array object
   typekind = typekindArg;
   rank = rankArg;
+  mh = mhArg;
   distgrid = distgridArg;
   distgridCreator = distgridCreatorArg;
   delayout = distgrid->getDELayout();
   // copy the PET-local LocalArray pointers
   int localDeCount = delayout->getLocalDeCount();
-  larrayList = new LocalArray*[localDeCount];
-  memcpy(larrayList, larrayListArg, localDeCount*sizeof(LocalArray *));
+  vasLocalDeCount = vasLocalDeCountArg;
+  ssiLocalDeCount = ssiLocalDeCountArg;
+  if (vasLocalDeCount < localDeCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "vasLocalDeCount must not be less than localDeCount", ESMC_CONTEXT, rc);
+    return;
+  }
+  if (ssiLocalDeCount < vasLocalDeCount){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "ssiLocalDeCount must not be less than ssiLocalDeCount", ESMC_CONTEXT, 
+      rc);
+    return;
+  }
+  if (localDeToDeMapArg == NULL){
+    // use DELayouts map as default
+    localDeToDeMapArg = (int *)delayout->getLocalDeToDeMap();
+    if (ssiLocalDeCount != localDeCount){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+        "Default localDeToDeMapArg requires ssiLocalDeCount==localDeCount", 
+        ESMC_CONTEXT, rc);
+      return;
+    }
+  }
+  localDeToDeMap = new int[ssiLocalDeCount];
+  memcpy(localDeToDeMap, localDeToDeMapArg, ssiLocalDeCount*sizeof(int));
+  larrayList = new LocalArray*[ssiLocalDeCount];
+  memcpy(larrayList, larrayListArg, ssiLocalDeCount*sizeof(LocalArray *));
   // determine the base addresses of the local arrays:
-  larrayBaseAddrList = new void*[localDeCount];
-  for (int i=0; i<localDeCount; i++)
+  larrayBaseAddrList = new void*[ssiLocalDeCount];
+  for (int i=0; i<ssiLocalDeCount; i++)
     larrayBaseAddrList[i] = larrayList[i]->getBaseAddr();
   // copy the PET-local bound arrays
   int redDimCount = rank - tensorCountArg; // reduced dimCount w/o repl. dims
-  exclusiveLBound = new int[redDimCount*localDeCount];
+  exclusiveLBound = new int[redDimCount*ssiLocalDeCount];
   memcpy(exclusiveLBound, exclusiveLBoundArg,
-    redDimCount*localDeCount*sizeof(int));
-  exclusiveUBound = new int[redDimCount*localDeCount];
+    redDimCount*ssiLocalDeCount*sizeof(int));
+  exclusiveUBound = new int[redDimCount*ssiLocalDeCount];
   memcpy(exclusiveUBound, exclusiveUBoundArg,
-    redDimCount*localDeCount*sizeof(int));
-  computationalLBound = new int[redDimCount*localDeCount];
+    redDimCount*ssiLocalDeCount*sizeof(int));
+  computationalLBound = new int[redDimCount*ssiLocalDeCount];
   memcpy(computationalLBound, computationalLBoundArg,
-    redDimCount*localDeCount*sizeof(int));
-  computationalUBound = new int[redDimCount*localDeCount];
+    redDimCount*ssiLocalDeCount*sizeof(int));
+  computationalUBound = new int[redDimCount*ssiLocalDeCount];
   memcpy(computationalUBound, computationalUBoundArg,
-    redDimCount*localDeCount*sizeof(int));
-  totalLBound = new int[redDimCount*localDeCount];
+    redDimCount*ssiLocalDeCount*sizeof(int));
+  totalLBound = new int[redDimCount*ssiLocalDeCount];
   memcpy(totalLBound, totalLBoundArg,
-    redDimCount*localDeCount*sizeof(int));
-  totalUBound = new int[redDimCount*localDeCount];
+    redDimCount*ssiLocalDeCount*sizeof(int));
+  totalUBound = new int[redDimCount*ssiLocalDeCount];
   memcpy(totalUBound, totalUBoundArg,
-    redDimCount*localDeCount*sizeof(int));
+    redDimCount*ssiLocalDeCount*sizeof(int));
   // tensor dimensions
   tensorCount = tensorCountArg;
   tensorElementCount = tensorElementCountArg;
@@ -244,8 +274,8 @@ Array::Array(
     }
   }
   // totalElementCountPLocalDe
-  totalElementCountPLocalDe = new int[localDeCount];
-  for (int i=0; i<localDeCount; i++){
+  totalElementCountPLocalDe = new int[ssiLocalDeCount];
+  for (int i=0; i<ssiLocalDeCount; i++){
     totalElementCountPLocalDe[i] = 1;   // prime totalElementCountPLocalDe elem
     for (int j=0; j<redDimCount; j++){
       totalElementCountPLocalDe[i] *=
@@ -254,8 +284,8 @@ Array::Array(
   }
 
   // contiguous flag
-  contiguousFlag = new int[localDeCount];
-  for (int i=0; i<localDeCount; i++)
+  contiguousFlag = new int[ssiLocalDeCount];
+  for (int i=0; i<ssiLocalDeCount; i++)
     contiguousFlag[i] = -1;  // initialize as "not yet constructed"
 
   // Set up rim members and fill with canonical seqIndex values
@@ -297,9 +327,9 @@ Array::Array(
   // invalidate the name for this Array object in the Base class
   ESMC_BaseSetName(NULL, "Array");
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     return;
   }catch(...){
@@ -336,14 +366,25 @@ void Array::destruct(bool followCreator, bool noGarbage){
 //-----------------------------------------------------------------------------
   if (ESMC_BaseGetStatus()==ESMF_STATUS_READY){
     // garbage collection
-//    int localDeCount = delayout->getLocalDeCount();
-    int localDeCount = localDeCountAux; // TODO: delayout may be gone already!
-// TODO: replace the above line with the line before once ref. counting implem.
-    for (int i=0; i<localDeCount; i++){
+    for (int i=0; i<ssiLocalDeCount; i++){
+      // destroy this DEs LocalArray
       int localrc = LocalArray::destroy(larrayList[i]);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
+    // free shared memory handle if it is present
+    if (mh != NULL){
+      int localrc;
+      VM *cvm = VM::getCurrent(&localrc);      
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+      localrc = cvm->ssishmFree(mh);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
+      mh = NULL;
+    }
+    if (localDeToDeMap != NULL)
+      delete [] localDeToDeMap;
     if (larrayList != NULL)
       delete [] larrayList;
     if (larrayBaseAddrList != NULL)
@@ -408,7 +449,6 @@ int Array::constructContiguousFlag(int redDimCount){
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
 
   int const localDeCount = delayout->getLocalDeCount();
-  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   const int *indexCountPDimPDe = distgrid->getIndexCountPDimPDe();
   int dimCount = distgrid->getDimCount();
 
@@ -469,10 +509,10 @@ Array *Array::create(
 //
 // !ARGUMENTS:
 //
-  LocalArray **larrayListArg,                   // (in)
-  int larrayCount,                              // (in)
-  DistGrid *distgrid,                           // (in)
-  CopyFlag copyflag,                            // (in)
+  LocalArray      **larrayListArg,              // (in)
+  int             larrayCount,                  // (in)
+  DistGrid        *distgrid,                    // (in)
+  CopyFlag        copyflag,                     // (in)
   InterArray<int> *distgridToArrayMap,          // (in)
   InterArray<int> *computationalEdgeLWidthArg,  // (in)
   InterArray<int> *computationalEdgeUWidthArg,  // (in)
@@ -480,10 +520,10 @@ Array *Array::create(
   InterArray<int> *computationalUWidthArg,      // (in)
   InterArray<int> *totalLWidthArg,              // (in)
   InterArray<int> *totalUWidthArg,              // (in)
-  ESMC_IndexFlag *indexflagArg,                 // (in)
+  ESMC_IndexFlag  *indexflagArg,                // (in)
   InterArray<int> *undistLBoundArg,             // (in)
   InterArray<int> *undistUBoundArg,             // (in)
-  int *rc                                       // (out) return code
+  int             *rc                           // (out) return code
   ){
 //
 // !DESCRIPTION:
@@ -1151,7 +1191,10 @@ Array *Array::create(
 
   // call class constructor
   try{
-    array = new Array(typekind, rank, larrayList, distgrid, false,
+    int vasLocalDeCountArg = localDeCount;
+    int ssiLocalDeCountArg = localDeCount;
+    array = new Array(typekind, rank, larrayList, NULL, vasLocalDeCountArg,
+      ssiLocalDeCountArg, NULL, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
       tensorElementCount, undistLBoundArray, undistUBoundArray,
@@ -1162,9 +1205,9 @@ Array *Array::create(
       array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return NULL;
     }
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
@@ -1175,9 +1218,9 @@ Array *Array::create(
     return NULL;
   }
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     return NULL;
   }catch(...){
@@ -1208,8 +1251,8 @@ Array *Array::create(
 //
 // !ARGUMENTS:
 //
-  ArraySpec *arrayspec,                         // (in)
-  DistGrid *distgrid,                           // (in)
+  ArraySpec       *arrayspec,                   // (in)
+  DistGrid        *distgrid,                    // (in)
   InterArray<int> *distgridToArrayMap,          // (in)
   InterArray<int> *computationalEdgeLWidthArg,  // (in)
   InterArray<int> *computationalEdgeUWidthArg,  // (in)
@@ -1217,12 +1260,13 @@ Array *Array::create(
   InterArray<int> *computationalUWidthArg,      // (in)
   InterArray<int> *totalLWidthArg,              // (in)
   InterArray<int> *totalUWidthArg,              // (in)
-  ESMC_IndexFlag *indexflagArg,                 // (in)
+  ESMC_IndexFlag  *indexflagArg,                // (in)
+  ESMC_Pin_Flag   *pinflagArg,                  // (in)
   InterArray<int> *distLBoundArg,               // (in)
   InterArray<int> *undistLBoundArg,             // (in)
   InterArray<int> *undistUBoundArg,             // (in)
-  int *rc,                                      // (out) return code
-  VM *vm                                        // (in)
+  int             *rc,                          // (out) return code
+  VM              *vm                           // (in, optional)
   ){
 //
 // !DESCRIPTION:
@@ -1706,40 +1750,234 @@ Array *Array::create(
   }
 
   // allocate LocalArray list that holds all PET-local DEs
-  vector<LocalArray *> larrayListV(localDeCount);
-  LocalArray **larrayList = &larrayListV[0];
-  vector<int> temp_counts(rank);
-  vector<int> temp_larrayLBound(rank);
-  vector<int> temp_larrayUBound(rank);
-  for (int i=0; i<localDeCount; i++){
-    int j=0;    // reset distributed index
-    int jjj=0;  // reset undistributed index
-    for (int jj=0; jj<rank; jj++){
-      if (arrayToDistGridMapArray[jj]){
-        // distributed dimension
-        temp_counts[jj] =
-          totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
-        temp_larrayLBound[jj] = totalLBound[i*redDimCount+j];
-        temp_larrayUBound[jj] = totalUBound[i*redDimCount+j];
-        ++j;
-      }else{
-        // non-distributed dimension
-        temp_counts[jj] = undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1;
-        temp_larrayLBound[jj] = undistLBoundArray[jjj];
-        temp_larrayUBound[jj] = undistUBoundArray[jjj];
-        ++jjj;
+  
+  // prepare for pinflag specific handling
+  vector<LocalArray *> larrayListV;
+  int ssiLocalDeCountArg = localDeCount;  // default
+  vector<int> localDeToDeMapArgV;
+  int *localDeToDeMapArg = NULL;          // default: use map from DELayout
+  VM::memhandle *mh = NULL;               // default: no memory sharing
+  
+  // branch on pinflag
+  ESMC_Pin_Flag pinflag = ESMF_PIN_DE_TO_PET; // default
+  if (pinflagArg) pinflag = *pinflagArg;
+  if (pinflag == ESMF_PIN_DE_TO_PET){
+    // regular case where each DE is only accessible from the local PET
+    vector<int> temp_counts(rank);
+    vector<int> temp_larrayLBound(rank);
+    vector<int> temp_larrayUBound(rank);
+    larrayListV.resize(localDeCount);
+    for (int i=0; i<localDeCount; i++){
+      int j=0;    // reset distributed index
+      int jjj=0;  // reset undistributed index
+      for (int jj=0; jj<rank; jj++){
+        if (arrayToDistGridMapArray[jj]){
+          // distributed dimension
+          temp_counts[jj] =
+            totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
+          temp_larrayLBound[jj] = totalLBound[i*redDimCount+j];
+          temp_larrayUBound[jj] = totalUBound[i*redDimCount+j];
+          ++j;
+        }else{
+          // non-distributed dimension
+          temp_counts[jj] = undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1;
+          temp_larrayLBound[jj] = undistLBoundArray[jjj];
+          temp_larrayUBound[jj] = undistUBoundArray[jjj];
+          ++jjj;
+        }
       }
+      // allocate LocalArray object with specific undistLBound and undistUBound
+      larrayListV[i] = LocalArray::create(typekind, rank, &temp_counts[0],
+        &temp_larrayLBound[0], &temp_larrayUBound[0], NULL, DATA_NONE, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
     }
-    // allocate LocalArray object with specific undistLBound and undistUBound
-    larrayList[i] = LocalArray::create(typekind, rank, &temp_counts[0],
-      &temp_larrayLBound[0], &temp_larrayUBound[0], NULL, DATA_NONE, &localrc);
+  }else if (pinflag == ESMF_PIN_DE_TO_SSI){
+    // make DEs accessible from all the PETs that are on the same SSI
+    vector<int> temp_counts(rank);
+    vector<int> temp_larrayLBound(rank);
+    vector<int> temp_larrayUBound(rank);
+    VM *cvm = VM::getCurrent(&localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    // allocate temporary memhandle to share information across PETs
+    vector<unsigned long> bytes(1); // only a single segment on each PET
+    int intCount = 2 + localDeCount + 6*redDimCount*localDeCount;
+    bytes[0] = intCount*sizeof(int); // size of shared info
+    VM::memhandle mhTemp;
+    localrc = cvm->ssishmAllocate(bytes, &mhTemp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    int mhLocalPet = cvm->ssishmGetLocalPet(mhTemp);
+    int mhLocalPetCount = cvm->ssishmGetLocalPetCount(mhTemp);
+    // access all of the mhTemp allocations
+    vector<int*> info(mhLocalPetCount);
+    vector<void*> mems;
+    for (int i=0; i<mhLocalPetCount; i++){
+      localrc = cvm->ssishmGetMems(mhTemp, i, &mems);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      info[i] = (int *)mems[0];
+    }
+    // fill local information into info allocation
+    info[mhLocalPet][0] = cvm->getLocalPet(); // localPet index in the full VM
+    info[mhLocalPet][1] = localDeCount;       // number of DEs on localPet
+    int *infoP = info[mhLocalPet] + 2;
+    memcpy(infoP, localDeToDeMap, localDeCount*sizeof(int));
+    infoP += localDeCount;
+    memcpy(infoP, exclusiveLBound, redDimCount*localDeCount*sizeof(int));
+    infoP += redDimCount*localDeCount;
+    memcpy(infoP, exclusiveUBound, redDimCount*localDeCount*sizeof(int));
+    infoP += redDimCount*localDeCount;
+    memcpy(infoP, computationalLBound, redDimCount*localDeCount*sizeof(int));
+    infoP += redDimCount*localDeCount;
+    memcpy(infoP, computationalUBound, redDimCount*localDeCount*sizeof(int));
+    infoP += redDimCount*localDeCount;
+    memcpy(infoP, totalLBound, redDimCount*localDeCount*sizeof(int));
+    infoP += redDimCount*localDeCount;
+    memcpy(infoP, totalUBound, redDimCount*localDeCount*sizeof(int));
+    // synchronize PETs across memhandle
+    localrc = cvm->ssishmSync(mhTemp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    // determine ssiLocalDeCountArg and prepare mhLocalPetList
+    vector<int> mhLocalPetList(mhLocalPetCount);
+    mhLocalPetList[0] = mhLocalPet; // localPet in first position
+    int ii=1;
+    for (int i=0; i<mhLocalPetCount; i++){
+      if (i==mhLocalPet) continue;  // skip over localPet
+      mhLocalPetList[ii++] = i; // store this pet in the list
+      ssiLocalDeCountArg += info[i][1];   // add localDeCount of the other PET
+    }
+    // resize vectors to fit complete ssiLocalDeCount
+    localDeToDeMapArgV.resize(ssiLocalDeCountArg);
+    localDeToDeMapArg = &localDeToDeMapArgV[0];
+    exclusiveLBoundV.resize(redDimCount*ssiLocalDeCountArg);
+    exclusiveUBoundV.resize(redDimCount*ssiLocalDeCountArg);
+    exclusiveLBound = &exclusiveLBoundV[0];
+    exclusiveUBound = &exclusiveUBoundV[0];
+    computationalLBoundV.resize(redDimCount*ssiLocalDeCountArg);
+    computationalUBoundV.resize(redDimCount*ssiLocalDeCountArg);
+    computationalLBound = &computationalLBoundV[0];
+    computationalUBound = &computationalUBoundV[0];
+    totalLBoundV.resize(redDimCount*ssiLocalDeCountArg);
+    totalUBoundV.resize(redDimCount*ssiLocalDeCountArg);
+    totalLBound = &totalLBoundV[0];
+    totalUBound = &totalUBoundV[0];
+    // fill resized vectors with information shared across mhTemp
+    int *localDeToDeMapP = localDeToDeMapArg;
+    int *exclusiveLBoundP = exclusiveLBound;
+    int *exclusiveUBoundP = exclusiveUBound;
+    int *computationalLBoundP = computationalLBound;
+    int *computationalUBoundP = computationalUBound;
+    int *totalLBoundP = totalLBound;
+    int *totalUBoundP = totalUBound;
+    for (int i=0; i<mhLocalPetCount; i++){
+      ii = mhLocalPetList[i]; // this list has localPet first
+      int thisLocalDeCount = info[ii][1];
+      infoP = info[ii] + 2;
+      memcpy(localDeToDeMapP, infoP, thisLocalDeCount*sizeof(int));
+      localDeToDeMapP += thisLocalDeCount;
+      infoP += thisLocalDeCount;
+      memcpy(exclusiveLBoundP, infoP, redDimCount*thisLocalDeCount*sizeof(int));
+      exclusiveLBoundP += redDimCount*thisLocalDeCount;
+      infoP += redDimCount*thisLocalDeCount;
+      memcpy(exclusiveUBoundP, infoP, redDimCount*thisLocalDeCount*sizeof(int));
+      exclusiveUBoundP += redDimCount*thisLocalDeCount;
+      infoP += redDimCount*thisLocalDeCount;
+      memcpy(computationalLBoundP, infoP, redDimCount*thisLocalDeCount*sizeof(int));
+      computationalLBoundP += redDimCount*thisLocalDeCount;
+      infoP += redDimCount*thisLocalDeCount;
+      memcpy(computationalUBoundP, infoP, redDimCount*thisLocalDeCount*sizeof(int));
+      computationalUBoundP += redDimCount*thisLocalDeCount;
+      infoP += redDimCount*thisLocalDeCount;
+      memcpy(totalLBoundP, infoP, redDimCount*thisLocalDeCount*sizeof(int));
+      totalLBoundP += redDimCount*thisLocalDeCount;
+      infoP += redDimCount*thisLocalDeCount;
+      memcpy(totalUBoundP, infoP, redDimCount*thisLocalDeCount*sizeof(int));
+      totalUBoundP += redDimCount*thisLocalDeCount;
+    }
+    // determine the size of all localDE allocations
+    bytes.resize(localDeCount);
+    for (int i=0; i<localDeCount; i++){
+      int j=0;    // reset distributed index
+      int jjj=0;  // reset undistributed index
+      unsigned long size = 1;
+      for (int jj=0; jj<rank; jj++){
+        if (arrayToDistGridMapArray[jj]){
+          // distributed dimension
+          size *=
+            totalUBound[i*redDimCount+j] - totalLBound[i*redDimCount+j] + 1;
+          ++j;
+        }else{
+          // non-distributed dimension
+          size *= undistUBoundArray[jjj] - undistLBoundArray[jjj] + 1;
+          ++jjj;
+        }
+      }
+      bytes[i] = size * ESMC_TypeKind_FlagSize(typekind);
+    }
+    // use the VM ssishm interface to allocate memory for all localDEs
+    mh = new VM::memhandle;
+    localrc = cvm->ssishmAllocate(bytes, mh);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+    // loop over all memhandle local PETs and construct LocalArrays for localDEs
+    larrayListV.resize(ssiLocalDeCountArg); // room for all shared PETs localDEs
+    int k=0;
+    for (int i=0; i<mhLocalPetCount; i++){
+      ii = mhLocalPetList[i]; // this list has localPet first
+      // access the memory allocations of this PETs localDEs
+      localrc = cvm->ssishmGetMems(*mh, ii, &mems);
+      if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+        ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      // construct the LocalArrays for all the localDEs
+      int thisLocalDeCount = info[ii][1];
+      for (int lde=0; lde<thisLocalDeCount; lde++){
+        int j=0;    // reset distributed index
+        int jjj=0;  // reset undistributed index
+        for (int jj=0; jj<rank; jj++){
+          if (arrayToDistGridMapArray[jj]){
+            // distributed dimension
+            temp_counts[jj] =
+              totalUBound[k*redDimCount+j] - totalLBound[k*redDimCount+j] + 1;
+            temp_larrayLBound[jj] = totalLBound[k*redDimCount+j];
+            temp_larrayUBound[jj] = totalUBound[k*redDimCount+j];
+            ++j;
+          }else{
+            // non-distributed dimension
+            temp_counts[jj] = undistUBoundArray[jjj] - undistLBoundArray[jjj]
+              + 1;
+            temp_larrayLBound[jj] = undistLBoundArray[jjj];
+            temp_larrayUBound[jj] = undistUBoundArray[jjj];
+            ++jjj;
+          }
+        }
+        // allocate LocalArray object with specific undist bounds
+        larrayListV[k++] = LocalArray::create(typekind, rank, &temp_counts[0],
+          &temp_larrayLBound[0], &temp_larrayUBound[0], mems[lde], DATA_REF, 
+          &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+      }
+    }
+    // done sharing across mhTemp
+    localrc = cvm->ssishmFree(&mhTemp);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+      ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
+  }else{
+    // no other pinning option yet implemented
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
+      "Requested pinflag not yet implemented.", ESMC_CONTEXT, rc);
+    return ESMC_NULL_POINTER;
   }
 
   // call class constructor
   try{
-    array = new Array(typekind, rank, larrayList, distgrid, false,
+    int vasLocalDeCountArg = localDeCount;
+    LocalArray **larrayList = &larrayListV[0];
+    array = new Array(typekind, rank, larrayList, mh, vasLocalDeCountArg,
+      ssiLocalDeCountArg, localDeToDeMapArg, distgrid, false,
       exclusiveLBound, exclusiveUBound, computationalLBound,
       computationalUBound, totalLBound, totalUBound, tensorCount,
       tensorElementCount, undistLBoundArray, undistUBoundArray,
@@ -1750,9 +1988,9 @@ Array *Array::create(
       array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
       return NULL;
     }
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     array->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
@@ -1763,9 +2001,9 @@ Array *Array::create(
     return NULL;
   }
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,\
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,\
       rc);
     return NULL;
   }catch(...){
@@ -1816,9 +2054,9 @@ Array *Array::create(
     // get an allocation for the new Array object
     try{
       arrayOut = new Array();
-    }catch(int localrc){
+    }catch(int catchrc){
       // catch standard ESMF return code
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         rc);
       return NULL;
     }catch(...){
@@ -1834,6 +2072,8 @@ Array *Array::create(
     arrayOut->indexflag = arrayIn->indexflag;
     int tensorCount =
       arrayOut->tensorCount = arrayIn->tensorCount - rmLeadingTensors;
+    arrayOut->vasLocalDeCount = arrayIn->vasLocalDeCount;
+    int ssiLocalDeCount = arrayOut->ssiLocalDeCount = arrayIn->ssiLocalDeCount;
     // determine leading tensor elements
     int leadingTensorElementCount = 0;
     if (rmLeadingTensors){
@@ -1850,11 +2090,10 @@ Array *Array::create(
     arrayOut->delayout = arrayIn->delayout; // copy reference
     // deep copy of members with allocations
     // copy the PET-local LocalArray pointers
-    int localDeCount = arrayIn->delayout->getLocalDeCount();
-    arrayOut->larrayList = new LocalArray*[localDeCount];
+    arrayOut->larrayList = new LocalArray*[ssiLocalDeCount];
     if (rmLeadingTensors==0){
       // use the src larrayList as a template for the new allocation
-      for (int i=0; i<localDeCount; i++){
+      for (int i=0; i<ssiLocalDeCount; i++){
         arrayOut->larrayList[i] =
           LocalArray::create(arrayIn->larrayList[i], NULL, NULL, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -1865,7 +2104,7 @@ Array *Array::create(
       }
     }else{
       // remove the leading tensor dimensions from the allocation
-      for (int i=0; i<localDeCount; i++){
+      for (int i=0; i<ssiLocalDeCount; i++){
         const int *temp_counts = arrayIn->larrayList[i]->getCounts();
         arrayOut->larrayList[i] =
           LocalArray::create(typekind, rank, &(temp_counts[rmLeadingTensors]),
@@ -1877,30 +2116,34 @@ Array *Array::create(
         }
       }
     }
+    // copy the localDeToDeMap
+    arrayOut->localDeToDeMap = new int[ssiLocalDeCount];
+    memcpy(arrayOut->localDeToDeMap, arrayIn->localDeToDeMap,
+      ssiLocalDeCount*sizeof(int));
     // determine the base addresses of the local arrays:
-    arrayOut->larrayBaseAddrList = new void*[localDeCount];
-    for (int i=0; i<localDeCount; i++)
+    arrayOut->larrayBaseAddrList = new void*[ssiLocalDeCount];
+    for (int i=0; i<ssiLocalDeCount; i++)
       arrayOut->larrayBaseAddrList[i] = arrayOut->larrayList[i]->getBaseAddr();
     // copy the PET-local bound arrays
     int redDimCount = rank - tensorCount;
-    arrayOut->exclusiveLBound = new int[redDimCount*localDeCount];
+    arrayOut->exclusiveLBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->exclusiveLBound, arrayIn->exclusiveLBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->exclusiveUBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->exclusiveUBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->exclusiveUBound, arrayIn->exclusiveUBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->computationalLBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->computationalLBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->computationalLBound, arrayIn->computationalLBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->computationalUBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->computationalUBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->computationalUBound, arrayIn->computationalUBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->totalLBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->totalLBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->totalLBound, arrayIn->totalLBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->totalUBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->totalUBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->totalUBound, arrayIn->totalUBound,
-      redDimCount*localDeCount*sizeof(int));
+      redDimCount*ssiLocalDeCount*sizeof(int));
     // tensor dimensions
     arrayOut->undistLBound = new int[tensorCount];
     memcpy(arrayOut->undistLBound, arrayIn->undistLBound + rmLeadingTensors,
@@ -1924,18 +2167,18 @@ Array *Array::create(
     memcpy(arrayOut->distgridToPackedArrayMap,
       arrayIn->distgridToPackedArrayMap, dimCount * sizeof(int));
     // contiguous flag
-    arrayOut->contiguousFlag = new int[localDeCount];
+    arrayOut->contiguousFlag = new int[ssiLocalDeCount];
     memcpy(arrayOut->contiguousFlag, arrayIn->contiguousFlag,
-      localDeCount * sizeof(int));
+      ssiLocalDeCount * sizeof(int));
     // exclusiveElementCountPDe
     int deCount = arrayIn->delayout->getDeCount();
     arrayOut->exclusiveElementCountPDe = new int[deCount];
     memcpy(arrayOut->exclusiveElementCountPDe,
       arrayIn->exclusiveElementCountPDe, deCount * sizeof(int));
     // totalElementCountPLocalDe
-    arrayOut->totalElementCountPLocalDe = new int[localDeCount];
+    arrayOut->totalElementCountPLocalDe = new int[ssiLocalDeCount];
     memcpy(arrayOut->totalElementCountPLocalDe,
-      arrayIn->totalElementCountPLocalDe, localDeCount * sizeof(int));
+      arrayIn->totalElementCountPLocalDe, ssiLocalDeCount * sizeof(int));
 
     // Set up rim members and fill with canonical seqIndex values
     arrayOut->setRimMembers();
@@ -1949,9 +2192,9 @@ Array *Array::create(
                                         
     arrayOut->ioRH = NULL; // invalidate
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
@@ -2009,9 +2252,9 @@ Array *Array::create(
     // get an allocation for the new Array object
     try{
       arrayOut = new Array();
-    }catch(int localrc){
+    }catch(int catchrc){
       // catch standard ESMF return code
-      ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
         rc);
       return NULL;
     }catch(...){
@@ -2036,33 +2279,37 @@ Array *Array::create(
     arrayOut->distgrid = arrayIn->distgrid; // copy reference
     arrayOut->distgridCreator = false;      // not a locally created object
     arrayOut->delayout = arrayIn->delayout; // copy reference
+    arrayOut->vasLocalDeCount = arrayIn->vasLocalDeCount;
+    int ssiLocalDeCount = arrayOut->ssiLocalDeCount = arrayIn->ssiLocalDeCount;
     // deep copy of members with allocations
     // copy the PET-local bound arrays
-    int localDeCount = arrayIn->delayout->getLocalDeCount();
     int redDimCount = rank - tensorCount;
-    arrayOut->exclusiveLBound = new int[redDimCount*localDeCount];
+    arrayOut->localDeToDeMap = new int[ssiLocalDeCount];
+    memcpy(arrayOut->localDeToDeMap, arrayIn->localDeToDeMap,
+      ssiLocalDeCount*sizeof(int));
+    arrayOut->exclusiveLBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->exclusiveLBound, arrayIn->exclusiveLBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->exclusiveUBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->exclusiveUBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->exclusiveUBound, arrayIn->exclusiveUBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->computationalLBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->computationalLBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->computationalLBound, arrayIn->computationalLBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->computationalUBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->computationalUBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->computationalUBound, arrayIn->computationalUBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->totalLBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->totalLBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->totalLBound, arrayIn->totalLBound,
-      redDimCount*localDeCount*sizeof(int));
-    arrayOut->totalUBound = new int[redDimCount*localDeCount];
+      redDimCount*ssiLocalDeCount*sizeof(int));
+    arrayOut->totalUBound = new int[redDimCount*ssiLocalDeCount];
     memcpy(arrayOut->totalUBound, arrayIn->totalUBound,
-      redDimCount*localDeCount*sizeof(int));
+      redDimCount*ssiLocalDeCount*sizeof(int));
     // copy the PET-local LocalArray pointers
-    arrayOut->larrayList = new LocalArray*[localDeCount];
+    arrayOut->larrayList = new LocalArray*[ssiLocalDeCount];
     if (rmTensorFlag){
       // remove the tensor dimensions from the allocation
-      for (int i=0; i<localDeCount; i++){
+      for (int i=0; i<ssiLocalDeCount; i++){
         vector<int> counts;
         for (int k=0; k<redDimCount; k++){
           int dimSize = arrayOut->totalUBound[i*redDimCount+k]
@@ -2083,7 +2330,7 @@ Array *Array::create(
       }
     }else{
       // use the src larrayList as a template for the new allocation
-      for (int i=0; i<localDeCount; i++){
+      for (int i=0; i<ssiLocalDeCount; i++){
         arrayOut->larrayList[i] =
           LocalArray::create(arrayIn->larrayList[i], NULL, NULL, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc,
@@ -2097,8 +2344,8 @@ Array *Array::create(
       }
     }
     // determine the base addresses of the local arrays:
-    arrayOut->larrayBaseAddrList = new void*[localDeCount];
-    for (int i=0; i<localDeCount; i++)
+    arrayOut->larrayBaseAddrList = new void*[ssiLocalDeCount];
+    for (int i=0; i<ssiLocalDeCount; i++)
       arrayOut->larrayBaseAddrList[i] = arrayOut->larrayList[i]->getBaseAddr();
     // tensor dimensions
     arrayOut->undistLBound = new int[tensorCount];
@@ -2126,18 +2373,18 @@ Array *Array::create(
     memcpy(arrayOut->distgridToPackedArrayMap,
       arrayOut->distgridToArrayMap, dimCount * sizeof(int));
     // contiguous flag
-    arrayOut->contiguousFlag = new int[localDeCount];
+    arrayOut->contiguousFlag = new int[ssiLocalDeCount];
     memcpy(arrayOut->contiguousFlag, arrayIn->contiguousFlag,
-      localDeCount * sizeof(int));
+      ssiLocalDeCount * sizeof(int));
     // exclusiveElementCountPDe
     int deCount = arrayIn->delayout->getDeCount();
     arrayOut->exclusiveElementCountPDe = new int[deCount];
     memcpy(arrayOut->exclusiveElementCountPDe,
       arrayIn->exclusiveElementCountPDe, deCount * sizeof(int));
     // totalElementCountPLocalDe
-    arrayOut->totalElementCountPLocalDe = new int[localDeCount];
+    arrayOut->totalElementCountPLocalDe = new int[ssiLocalDeCount];
     memcpy(arrayOut->totalElementCountPLocalDe,
-      arrayIn->totalElementCountPLocalDe, localDeCount * sizeof(int));
+      arrayIn->totalElementCountPLocalDe, ssiLocalDeCount * sizeof(int));
 
     // Set up rim members and fill with canonical seqIndex values
     arrayOut->setRimMembers();
@@ -2151,9 +2398,9 @@ Array *Array::create(
                                         
     arrayOut->ioRH = NULL; // invalidate
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     arrayOut->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
     return NULL;
@@ -2213,9 +2460,9 @@ int Array::destroy(
     (*array)->destruct(true, noGarbage);
     // mark as invalid object
     (*array)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -2279,16 +2526,15 @@ int Array::copy(
 
     // do the actual data copy
     int const dataSize = ESMC_TypeKind_FlagSize(typekind);
-    int const localDeCount = delayout->getLocalDeCount();
-    for (int i=0; i<localDeCount; i++){
+    for (int i=0; i<ssiLocalDeCount; i++){
       int size =
         totalElementCountPLocalDe[i]*tensorElementCount*dataSize;  // bytes
       memcpy(larrayBaseAddrList[i], arrayIn->larrayBaseAddrList[i], size);
     }
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(exception &x){
@@ -2833,9 +3079,9 @@ void Array::setRimMembers(
     }
   }
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     throw rc;
   }catch(exception &x){
@@ -3712,7 +3958,6 @@ int Array::print()const{
   printf("deCount = %d\n", deCount);
   int localDeCount = delayout->getLocalDeCount();
   printf("localDeCount = %d\n", localDeCount);
-  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
   const int redDimCount = rank - tensorCount;
   for (int i=0; i<localDeCount; i++){
     int de = localDeToDeMap[i];
@@ -3744,6 +3989,45 @@ int Array::print()const{
     }
   }
   printf("--- ESMCI::Array::print end ---\n");
+
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Array::sync()"
+//BOPI
+// !IROUTINE:  ESMCI::Array::sync
+//
+// !INTERFACE:
+int Array::sync(){
+//
+// !RETURN VALUE:
+//    int return code
+//
+//
+// !DESCRIPTION:
+//    Sync DEs arcoss the Array object in case of sharing.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  // see if the array holds a valid memhandle, optionally call sync
+  if (mh != NULL){
+    int localrc;
+    VM *cvm = VM::getCurrent(&localrc);      
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+    localrc = cvm->ssishmSync(*mh);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+  }
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -3876,9 +4160,9 @@ int Array::constructFileMap(
       }
     }
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(exception &x){
@@ -4098,6 +4382,8 @@ int Array::deserialize(
   larrayBaseAddrList = new void*[0];        // no DE on proxy object
   totalElementCountPLocalDe = NULL;         // no De on proxy object
 
+  vasLocalDeCount = 0;
+  ssiLocalDeCount = 0;
   localDeCountAux = delayout->getLocalDeCount(); // TODO: auxilary for garb
                                                  // TODO: until ref. counting
 
@@ -4247,7 +4533,6 @@ int Array::gather(
   int dimCount = distgrid->getDimCount();
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
-  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
 
   int redDimCount = rank - tensorCount;
 
@@ -4659,7 +4944,6 @@ int Array::scatter(
   int dimCount = distgrid->getDimCount();
   int deCount = delayout->getDeCount();
   int localDeCount = delayout->getLocalDeCount();
-  const int *localDeToDeMap = delayout->getLocalDeToDeMap();
 
   int redDimCount = rank - tensorCount;
 
@@ -5347,9 +5631,9 @@ template<typename IT>
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, &rc)) return rc;
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(exception &x){
@@ -6042,9 +6326,9 @@ for (int i=0; i<factorListCount; i++)
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(exception &x){
@@ -9025,9 +9309,9 @@ template<typename SIT, typename DIT>
       Array::destroy(&dstArray, true);
   }
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(exception &x){
@@ -10250,9 +10534,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreNbVectors(
   VM::logMemInfo(std::string("ASMMStoreNbVectors11.0"));
 #endif
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -10904,9 +11188,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXE(
 //fclose(fp);
 //---DEBUG-------------------
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -11388,9 +11672,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreEncodeXXEStream(
   VM::logMemInfo(std::string("ASMMStoreEncodeXXEStream7.0"));
 #endif
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -11863,9 +12147,9 @@ int Array::sparseMatMul(
   fclose(fp);
 #endif
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -11965,9 +12249,9 @@ int Array::sparseMatMulRelease(
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -12392,7 +12676,7 @@ bool ArrayElement::hasValidSeqIndex(
 //EOPI
 //-----------------------------------------------------------------------------
   int rank = array->getRank();
-  int de = array->getDELayout()->getLocalDeToDeMap()[localDe];
+  int de = array->getLocalDeToDeMap()[localDe];
   int iOff = de * array->getDistGrid()->getDimCount();
   int iPacked = 0;    // reset
   for (int i=0; i<rank; i++){
@@ -12483,12 +12767,12 @@ int ArrayElement::getArbSequenceIndexOffset(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
-#define ESMC_METHOD "ESMCI::ArrayElement::print()"
+#define ESMC_METHOD "ESMCI::ArrayElement::log()"
 //BOPI
-// !IROUTINE:  ESMCI::ArrayElement::print
+// !IROUTINE:  ESMCI::ArrayElement::log
 //
 // !INTERFACE:
-void ArrayElement::print(
+void ArrayElement::log(
 //
 // !ARGUMENTS:
 //
@@ -12499,8 +12783,10 @@ void ArrayElement::print(
 //
 //EOPI
 //-----------------------------------------------------------------------------
-  cout << "array:   " << array << "  localDe: " << localDe << "\n";
-  MultiDimIndexLoop::print();
+  std::stringstream msg;
+  msg << ESMC_METHOD << ": array=" << array << " localDe: " << localDe;
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+  MultiDimIndexLoop::log();
 }
 //-----------------------------------------------------------------------------
 

@@ -313,7 +313,7 @@ DistGrid *DistGrid::create(
       ArraySpec arrayspec;
       arrayspec.set(1, dg->indexTK);
       Array *dstArbSeqArray = Array::create(&arrayspec, distgrid, NULL, NULL,
-        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc);
+        NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       // Redist srcArbSeqArray -> dstArbSeqArray
@@ -1178,9 +1178,9 @@ DistGrid *DistGrid::create(
     dg->delayoutCreator = false;  // drop ownership of the referenced DELayout
   }
   
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc);
     return NULL;
   }catch(exception &x){
@@ -3074,9 +3074,9 @@ int DistGrid::destroy(
     (*distgrid)->destruct(true, noGarbage);
     // mark as invalid object
     (*distgrid)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -6645,20 +6645,26 @@ int DistGrid::setArbSeqIndex(
   int const *MultiDimIndexLoop::getIndexTupleStart()const{
     return &indexTupleStart[0];
   }
-  void MultiDimIndexLoop::print()const{
+  void MultiDimIndexLoop::log()const{
     unsigned i;
-    printf("MultiDimIndexLoop: indexTupleStart = (");
+    std::stringstream msg;
+    msg << "MultiDimIndexLoop: indexTupleStart = (";
     for (i=0; i<indexTupleStart.size()-1; i++)
-      printf(" %d,", indexTupleStart[i]);
-    printf(" %d)\n", indexTupleStart[i]);
-    printf("MultiDimIndexLoop: indexTupleEnd = (");
+      msg << " " << indexTupleStart[i] << ",";
+    msg << " " << indexTupleStart[i] << ")";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    msg.str("");  // clear
+    msg << "MultiDimIndexLoop: indexTupleEnd = (";
     for (i=0; i<indexTupleEnd.size()-1; i++)
-      printf(" %d,", indexTupleEnd[i]);
-    printf(" %d)\n", indexTupleEnd[i]);
-    printf("MultiDimIndexLoop: indexTuple = (");
+      msg << " " << indexTupleEnd[i] << ",";
+    msg << " " << indexTupleEnd[i] << ")";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+    msg.str("");  // clear
+    msg << "MultiDimIndexLoop: indexTuple = (";
     for (i=0; i<indexTuple.size()-1; i++)
-      printf(" %d,", indexTuple[i]);
-    printf(" %d)\n", indexTuple[i]);
+      msg << " " << indexTuple[i] << ",";
+    msg << " " << indexTuple[i] << ")";
+    ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
   }
   //============================================================================
 

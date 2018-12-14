@@ -2552,10 +2552,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateAllocate(distgrid, typekind, keywordEnforcer, indexflag, &
-    distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
-    computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    undistLBound, undistUBound, name, vm, rc)
+  function ESMF_ArrayCreateAllocate(distgrid, typekind, keywordEnforcer, &
+    indexflag, pinflag, distgridToArrayMap, computationalEdgeLWidth, &
+    computationalEdgeUWidth, computationalLWidth, computationalUWidth, &
+    totalLWidth, totalUWidth, undistLBound, undistUBound, name, vm, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocate
@@ -2565,6 +2565,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
        type(ESMF_TypeKind_Flag), intent(in)           :: typekind
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_Index_Flag), intent(in),   optional  :: indexflag
+       type(ESMF_Pin_Flag),   intent(in),   optional  :: pinflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
        integer,               intent(in),   optional  :: computationalEdgeUWidth(:)
@@ -2585,6 +2586,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \begin{description}
 ! \item[6.3.0r] Added argument {\tt vm} to support object creation on a
 !               different VM than that of the current context.
+! \item[8.0.0] Added argument {\tt pinflag} to provide access to DE sharing
+!              between PETs.
 ! \end{description}
 ! \end{itemize}
 !
@@ -2615,6 +2618,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      aligned with the global index space, if a global index space is well
 !      defined by the associated DistGrid. See section \ref{const:indexflag}
 !      for a list of valid indexflag options.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created every considers the DE as local.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
@@ -2737,7 +2745,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
     ! Call into ArraySpec overloaded interface
     ESMF_ArrayCreateAllocate = ESMF_ArrayCreate(distgrid, arrayspec, &
-      indexflag=indexflag, distgridToArrayMap=distgridToArrayMap, &
+      indexflag=indexflag, pinflag=pinflag, &
+      distgridToArrayMap=distgridToArrayMap, &
       computationalEdgeLWidth=computationalEdgeLWidth, &
       computationalEdgeUWidth=computationalEdgeUWidth, &
       computationalLWidth=computationalLWidth,  &
@@ -2762,7 +2771,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !INTERFACE:
 !  ! Private name; call using ESMF_ArrayCreate()
 !  function ESMF_ArrayCreateAllocateArb<indexkind>(distgrid, typekind, &
-!    haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
+!    haloSeqIndexList, keywordEnforcer, pinflag, distgridToArrayMap, &
 !    undistLBound, undistUBound, name, rc)
 !
 ! !RETURN VALUE:
@@ -2773,6 +2782,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !       type(ESMF_TypeKind_Flag), intent(in)           :: typekind
 !       integer(ESMF_KIND_<indexkind>), intent(in)     :: haloSeqIndexList(:)
 !       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!       type(ESMF_Pin_Flag),   intent(in),   optional  :: pinflag
 !       integer,               intent(in),   optional  :: distgridToArrayMap(:)
 !       integer,               intent(in),   optional  :: undistLBound(:)
 !       integer,               intent(in),   optional  :: undistUBound(:)
@@ -2783,6 +2793,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.0.0] Added argument {\tt pinflag} to provide access to DE sharing
+!              between PETs.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2812,6 +2827,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      The {\tt haloSeqIndexList} argument is of integer type, but can be of
 !      different kind in order to support both 32-bit ({\tt ESMF\_KIND\_I4})
 !      and 64-bit ({\tt ESMF\_KIND\_I8}) indexing.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created every considers the DE as local.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
@@ -2852,7 +2872,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
   function ESMF_ArrayCreateAllocateArb(distgrid, typekind, &
-    haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
+    haloSeqIndexList, keywordEnforcer, pinflag, distgridToArrayMap, &
     undistLBound, undistUBound, name, rc)
 !
 ! !RETURN VALUE:
@@ -2863,6 +2883,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
        type(ESMF_TypeKind_Flag), intent(in)           :: typekind
        integer(ESMF_KIND_I4), intent(in)              :: haloSeqIndexList(:)
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       type(ESMF_Pin_Flag),   intent(in),   optional  :: pinflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: undistLBound(:)
        integer,               intent(in),   optional  :: undistUBound(:)
@@ -2873,6 +2894,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.0.0] Added argument {\tt pinflag} to provide access to DE sharing
+!              between PETs.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -2899,6 +2925,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      One dimensional array containing sequence indices of local halo region.
 !      The size (and content) of {\tt haloSeqIndexList} can (and typically will)
 !      be different on each PET.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created every considers the DE as local.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
@@ -2970,7 +3001,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
     ! Call into ArraySpec overloaded interface
     ESMF_ArrayCreateAllocateArb = ESMF_ArrayCreate(distgrid, arrayspec, &
-      haloSeqIndexList, distgridToArrayMap=distgridToArrayMap, &
+      haloSeqIndexList, pinflag=pinflag, &
+      distgridToArrayMap=distgridToArrayMap, &
       undistLBound=undistLBound, undistUBound=undistUBound, &
       name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -2992,7 +3024,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
   function ESMF_ArrayCreateAllocateArbI8(distgrid, typekind, &
-    haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
+    haloSeqIndexList, keywordEnforcer, pinflag, distgridToArrayMap, &
     undistLBound, undistUBound, name, rc)
 !
 ! !RETURN VALUE:
@@ -3003,6 +3035,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
        type(ESMF_TypeKind_Flag), intent(in)           :: typekind
        integer(ESMF_KIND_I8), intent(in)              :: haloSeqIndexList(:)
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       type(ESMF_Pin_Flag),   intent(in),   optional  :: pinflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: undistLBound(:)
        integer,               intent(in),   optional  :: undistUBound(:)
@@ -3013,6 +3046,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.0.0] Added argument {\tt pinflag} to provide access to DE sharing
+!              between PETs.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3039,6 +3077,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      One dimensional array containing sequence indices of local halo region.
 !      The size (and content) of {\tt haloSeqIndexList} can (and typically will)
 !      be different on each PET.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created every considers the DE as local.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
@@ -3110,7 +3153,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
     ! Call into ArraySpec overloaded interface
     ESMF_ArrayCreateAllocateArbI8 = ESMF_ArrayCreate(distgrid, arrayspec, &
-      haloSeqIndexList, distgridToArrayMap=distgridToArrayMap, &
+      haloSeqIndexList, pinflag=pinflag, &
+      distgridToArrayMap=distgridToArrayMap, &
       undistLBound=undistLBound, undistUBound=undistUBound, &
       name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3131,10 +3175,10 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
-  function ESMF_ArrayCreateAllocateAS(distgrid, arrayspec, keywordEnforcer, indexflag, &
-    distgridToArrayMap, computationalEdgeLWidth, computationalEdgeUWidth, &
-    computationalLWidth, computationalUWidth, totalLWidth, totalUWidth, &
-    undistLBound, undistUBound, name, vm, rc)
+  function ESMF_ArrayCreateAllocateAS(distgrid, arrayspec, keywordEnforcer, &
+    indexflag, pinflag, distgridToArrayMap, computationalEdgeLWidth, &
+    computationalEdgeUWidth, computationalLWidth, computationalUWidth, &
+    totalLWidth, totalUWidth, undistLBound, undistUBound, name, vm, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Array) :: ESMF_ArrayCreateAllocateAS
@@ -3144,6 +3188,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
        type(ESMF_ArraySpec),  intent(in)              :: arrayspec
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        type(ESMF_Index_Flag), intent(in),   optional  :: indexflag
+       type(ESMF_Pin_Flag),   intent(in),   optional  :: pinflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: computationalEdgeLWidth(:)
        integer,               intent(in),   optional  :: computationalEdgeUWidth(:)
@@ -3164,6 +3209,8 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! \begin{description}
 ! \item[6.3.0r] Added argument {\tt vm} to support object creation on a
 !               different VM than that of the current context.
+! \item[8.0.0] Added argument {\tt pinflag} to provide access to DE sharing
+!              between PETs.
 ! \end{description}
 ! \end{itemize}
 !
@@ -3193,6 +3240,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      aligned with the global index space, if a global index space is well
 !      defined by the associated DistGrid. See section \ref{const:indexflag}
 !      for a list of valid indexflag options.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created every considers the DE as local.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
@@ -3336,7 +3388,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
         distgridToArrayMapArg, &
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
-        totalUWidthArg, indexflag, &
+        totalUWidthArg, indexflag, pinflag, &
         undistLBoundArg, undistUBoundArg, name, len_name, vm, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3346,7 +3398,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
         distgridToArrayMapArg, &
         computationalEdgeLWidthArg, computationalEdgeUWidthArg, &
         computationalLWidthArg, computationalUWidthArg, totalLWidthArg, &
-        totalUWidthArg, indexflag, &
+        totalUWidthArg, indexflag, pinflag, &
         undistLBoundArg, undistUBoundArg, "", len_name, vm, localrc)
       if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3401,7 +3453,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !INTERFACE:
 !  ! Private name; call using ESMF_ArrayCreate()
 !  function ESMF_ArrayCreateAllocateASArb<indexkind>(distgrid, arrayspec, &
-!    haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
+!    haloSeqIndexList, keywordEnforcer, pinflag, distgridToArrayMap, &
 !    undistLBound, undistUBound, name, rc)
 !
 ! !RETURN VALUE:
@@ -3412,6 +3464,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !       type(ESMF_ArraySpec),  intent(in)              :: arrayspec
 !       integer(ESMF_KIND_<indexkind>), intent(in)     :: haloSeqIndexList(:)
 !       type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+!       type(ESMF_Pin_Flag),   intent(in),   optional  :: pinflag
 !       integer,               intent(in),   optional  :: distgridToArrayMap(:)
 !       integer,               intent(in),   optional  :: undistLBound(:)
 !       integer,               intent(in),   optional  :: undistUBound(:)
@@ -3421,6 +3474,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.0.0] Added argument {\tt pinflag} to provide access to DE sharing
+!              between PETs.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3448,6 +3506,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      The {\tt haloSeqIndexList} argument is of integer type, but can be of
 !      different kind in order to support both 32-bit ({\tt ESMF\_KIND\_I4})
 !      and 64-bit ({\tt ESMF\_KIND\_I8}) indexing.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created every considers the DE as local.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
@@ -3488,7 +3551,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
   function ESMF_ArrayCreateAllocateASArb(distgrid, arrayspec, &
-    haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
+    haloSeqIndexList, keywordEnforcer, pinflag, distgridToArrayMap, &
     undistLBound, undistUBound, name, rc)
 !
 ! !RETURN VALUE:
@@ -3499,6 +3562,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
        type(ESMF_ArraySpec),  intent(in)              :: arrayspec
        integer(ESMF_KIND_I4), intent(in)              :: haloSeqIndexList(:)
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       type(ESMF_Pin_Flag),   intent(in),   optional  :: pinflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: undistLBound(:)
        integer,               intent(in),   optional  :: undistUBound(:)
@@ -3508,6 +3572,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.0.0] Added argument {\tt pinflag} to provide access to DE sharing
+!              between PETs.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3532,6 +3601,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      One dimensional array containing sequence indices of local halo region.
 !      The size (and content) of {\tt haloSeqIndexList} can (and typically will)
 !      be different on each PET.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created every considers the DE as local.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
@@ -3607,9 +3681,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
     ! Call into conventional interface to create the Array object
     ESMF_ArrayCreateAllocateASArb = ESMF_ArrayCreate(distgrid, arrayspec, &
-      distgridToArrayMap=distgridToArrayMap, totalUWidth=(/localHaloCount/), &
-      undistLBound=undistLBound, undistUBound=undistUBound, name=name, &
-      rc=localrc)
+      pinflag=pinflag, distgridToArrayMap=distgridToArrayMap, &
+      totalUWidth=(/localHaloCount/), undistLBound=undistLBound, &
+      undistUBound=undistUBound, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 
@@ -3635,7 +3709,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !INTERFACE:
   ! Private name; call using ESMF_ArrayCreate()
   function ESMF_ArrayCreateAllocateASArbI8(distgrid, arrayspec, &
-    haloSeqIndexList, keywordEnforcer, distgridToArrayMap, &
+    haloSeqIndexList, keywordEnforcer, pinflag, distgridToArrayMap, &
     undistLBound, undistUBound, name, rc)
 !
 ! !RETURN VALUE:
@@ -3646,6 +3720,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
        type(ESMF_ArraySpec),  intent(in)              :: arrayspec
        integer(ESMF_KIND_I8), intent(in)              :: haloSeqIndexList(:)
        type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
+       type(ESMF_Pin_Flag),   intent(in),   optional  :: pinflag
        integer,               intent(in),   optional  :: distgridToArrayMap(:)
        integer,               intent(in),   optional  :: undistLBound(:)
        integer,               intent(in),   optional  :: undistUBound(:)
@@ -3655,6 +3730,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.0.0] Added argument {\tt pinflag} to provide access to DE sharing
+!              between PETs.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -3679,6 +3759,11 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 !      One dimensional array containing sequence indices of local halo region.
 !      The size (and content) of {\tt haloSeqIndexList} can (and typically will)
 !      be different on each PET.
+! \item[{[pinflag]}]
+!      Specify which type of resource DEs are pinned to.  See section 
+!      \ref{const:pin_flag} for a list of valid pinning options.
+!      The default is to pin DEs to PETs, i.e. only the PET on which a DE
+!      was created every considers the DE as local.
 ! \item[{[distgridToArrayMap]}]
 !      List that contains as many elements as is indicated by
 !      {\tt distgrids}|s dimCount. The list elements map each dimension of
@@ -3754,9 +3839,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
 
     ! Call into conventional interface to create the Array object
     ESMF_ArrayCreateAllocateASArbI8 = ESMF_ArrayCreate(distgrid, arrayspec, &
-      distgridToArrayMap=distgridToArrayMap, totalUWidth=(/localHaloCount/), &
-      undistLBound=undistLBound, undistUBound=undistUBound, name=name, &
-      rc=localrc)
+      pinflag=pinflag, distgridToArrayMap=distgridToArrayMap, &
+      totalUWidth=(/localHaloCount/), undistLBound=undistLBound, &
+      undistUBound=undistUBound, name=name, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
 

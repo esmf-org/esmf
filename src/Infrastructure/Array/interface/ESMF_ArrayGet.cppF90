@@ -134,7 +134,7 @@ contains
     computationalUBound, totalLBound, totalUBound, computationalLWidth, &
     computationalUWidth, totalLWidth, totalUWidth, distgrid, dimCount, &
     tileCount, minIndexPTile, maxIndexPTile, deToTileMap, indexCountPDe, &
-    delayout, deCount, localDeCount, localDeToDeMap, &
+    delayout, deCount, localDeCount, ssiLocalDeCount, localDeToDeMap, &
     localDeList, &    ! DEPRECATED ARGUMENT
     name, rc)
 !
@@ -171,6 +171,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout),           intent(out), optional :: delayout
     integer,                       intent(out), optional :: deCount
     integer,                       intent(out), optional :: localDeCount
+    integer,                       intent(out), optional :: ssiLocalDeCount
     integer,                       intent(out), optional :: localDeToDeMap(:)
     integer,                       intent(out), optional :: localDeList(:)     ! DEPRECATED ARGUMENT
     character(len=*),              intent(out), optional :: name
@@ -186,6 +187,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !                 The new argument name correctly uses the {\tt Map} suffix and
 !                 better describes the returned information.
 !                 This was pointed out by user request.
+! \item[8.0.0] Added argument {\tt ssiLocalDeCount} to support DE sharing
+!              between PETs on the same single system image (SSI).
 ! \end{description}
 ! \end{itemize}
 !         
@@ -208,8 +211,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   \item[{[localarrayList]}]
 !     Upon return this holds a list of the associated {\tt ESMC\_LocalArray}
 !     objects. {\tt localarrayList} must be allocated to be of size
-!     {\tt localDeCount}, i.e. the number of DEs associated with the calling
-!     PET.
+!     {\tt localDeCount} or {\tt ssiLocalDeCount}.
 !   \item[{[indexflag]}]
 !     Upon return this flag indicates how the DE-local indices are defined.
 !     See section \ref{const:indexflag} for a list of possible return values.
@@ -246,49 +248,59 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     \begin{sloppypar}
 !     Upon return this holds the lower bounds of the exclusive regions for
 !     all PET-local DEs. {\tt exclusiveLBound} must be allocated to be
-!     of size {\tt (dimCount, localDeCount)}.
+!     of size {\tt (dimCount, localDeCount)} or 
+!     {\tt (dimCount, ssiLocalDeCount)}.
 !     \end{sloppypar}
 !   \item[{[exclusiveUBound]}]
 !     \begin{sloppypar}
 !     Upon return this holds the upper bounds of the exclusive regions for
 !     all PET-local DEs. {\tt exclusiveUBound} must be allocated to be
-!     of size {\tt (dimCount, localDeCount)}.
+!     of size {\tt (dimCount, localDeCount)} or 
+!     {\tt (dimCount, ssiLocalDeCount)}.
 !     \end{sloppypar}
 !   \item[{[computationalLBound]}]
 !     Upon return this holds the lower bounds of the computational regions for
 !     all PET-local DEs. {\tt computationalLBound} must be allocated to be
-!     of size {\tt (dimCount, localDeCount)}.
+!     of size {\tt (dimCount, localDeCount)} or 
+!     {\tt (dimCount, ssiLocalDeCount)}.
 !   \item[{[computationalUBound]}]
 !     Upon return this holds the upper bounds of the computational regions for
 !     all PET-local DEs. {\tt computationalUBound} must be allocated to be
-!     of size {\tt (dimCount, localDeCount)}.
+!     of size {\tt (dimCount, localDeCount)} or 
+!     {\tt (dimCount, ssiLocalDeCount)}.
 !   \item[{[totalLBound]}]
 !     Upon return this holds the lower bounds of the total regions for
 !     all PET-local DEs. {\tt totalLBound} must be allocated to be
-!     of size {\tt (dimCount, localDeCount)}.
+!     of size {\tt (dimCount, localDeCount)} or 
+!     {\tt (dimCount, ssiLocalDeCount)}.
 !   \item[{[totalUBound]}]
 !     Upon return this holds the upper bounds of the total regions for
 !     all PET-local DEs. {\tt totalUBound} must be allocated to be
-!     of size {\tt (dimCount, localDeCount)}.
+!     of size {\tt (dimCount, localDeCount)} or 
+!     {\tt (dimCount, ssiLocalDeCount)}.
 !   \item[{[computationalLWidth]}]
 !     Upon return this holds the lower width of the computational regions for
 !     all PET-local DEs. {\tt computationalLWidth} must be allocated to be
-!     of size {\tt (dimCount, localDeCount)}.
+!     of size {\tt (dimCount, localDeCount)} or 
+!     {\tt (dimCount, ssiLocalDeCount)}.
 !   \item[{[computationalUWidth]}]
 !     Upon return this holds the upper width of the computational regions for
 !     all PET-local DEs. {\tt computationalUWidth} must be allocated to be
-!     of size {\tt (dimCount, localDeCount)}.
+!     of size {\tt (dimCount, localDeCount)} or 
+!     {\tt (dimCount, ssiLocalDeCount)}.
 !   \item[{[totalLWidth]}]
 !     \begin{sloppypar}
 !     Upon return this holds the lower width of the total memory regions for
 !     all PET-local DEs. {\tt totalLWidth} must be allocated to be
-!     of size {\tt (dimCount, localDeCount)}.
+!     of size {\tt (dimCount, localDeCount)} or 
+!     {\tt (dimCount, ssiLocalDeCount)}.
 !     \end{sloppypar}
 !   \item[{[totalUWidth]}]
 !     \begin{sloppypar}
 !     Upon return this holds the upper width of the total memory regions for
 !     all PET-local DEs. {\tt totalUWidth} must be allocated to be
-!     of size {\tt (dimCount, localDeCount)}.
+!     of size {\tt (dimCount, localDeCount)} or 
+!     {\tt (dimCount, ssiLocalDeCount)}.
 !     \end{sloppypar}
 !   \item[{[distgrid]}]
 !     Upon return this holds the associated {\tt ESMF\_DistGrid} object.
@@ -316,11 +328,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     The total number of DEs in the Array.
 !   \item[{[localDeCount]}]
 !     The number of DEs in the Array associated with the local PET.
+!   \item[{[ssiLocalDeCount]}]
+!     The number of DEs in the Array available to the local PET. This
+!     includes DEs that are local to other PETs on the same SSI, that are
+!     accessible via shared memory.
 !   \item[{[localDeToDeMap]}]
 !     Mapping between localDe indices and the (global) DEs associated with
 !     the local PET. The localDe index variables are discussed in sections
 !     \ref{DELayout_general_mapping} and \ref{Array_native_language_localde}.
-!     The provided actual argument must be of size {\tt localDeCount}.
+!     The provided actual argument must be of size {\tt localDeCount}, or
+!     {\tt ssiLocalDeCount}, and will be filled accordingly.
 !   \item[{[localDeList]}]
 !     \apiDeprecatedArgWithReplacement{localDeToDeMap}
 !   \item [{[name]}]
@@ -334,6 +351,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer                         :: localrc        ! local return code
     type(ESMF_TypeKind_Flag)        :: opt_typekind           ! helper variable
     integer                         :: opt_rank               ! helper variable
+    integer                         :: opt_localDeCount       ! helper variable
+    integer                         :: opt_ssiLocalDeCount    ! helper variable
     type(ESMF_Pointer), allocatable :: opt_localarrayPtrList(:)   ! helper var
     integer                         :: len_localarrayPtrList, i   ! helper var
     type(ESMF_InterArray)           :: distgridToArrayMapArg  ! helper variable
@@ -351,6 +370,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_InterArray)           :: computationalUWidthArg ! helper variable
     type(ESMF_InterArray)           :: totalLWidthArg         ! helper variable
     type(ESMF_InterArray)           :: totalUWidthArg         ! helper variable
+    type(ESMF_InterArray)           :: localDeToDeMapArg      ! helper variable
     type(ESMF_DistGrid)             :: opt_distgrid           ! helper variable
     type(ESMF_DELayout)             :: opt_delayout           ! helper variable
 
@@ -423,10 +443,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     totalUWidthArg = ESMF_InterArrayCreate(farray2D=totalUWidth, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    localDeToDeMapArg = ESMF_InterArrayCreate(localDeToDeMap, rc=localrc)
+    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! Call into the C++ interface, which will sort out optional arguments
-    call c_ESMC_ArrayGet(array, opt_typekind, opt_rank, opt_localarrayPtrList, &
-      len_localarrayPtrList, opt_distgrid, opt_delayout, indexflag, &
+    call c_ESMC_ArrayGet(array, opt_typekind, opt_rank, opt_ssiLocalDeCount, &
+      opt_localarrayPtrList, len_localarrayPtrList, localDeToDeMapArg, &
+      opt_distgrid, opt_delayout, indexflag, &
       distgridToArrayMapArg, distgridToPackedArrayMapArg, &
       arrayToDistGridMapArg, &
       undistLBoundArg, undistUBoundArg, &
@@ -528,13 +552,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Obtain DELayout information
     call ESMF_DELayoutGet(opt_delayout, deCount=deCount, &
-      localDeCount=localDeCount, localDeToDeMap=localDeToDeMap, rc=localrc)
+      localDeCount=localDeCount, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
       
-    ! Deal with option arrayspec, typekind, rank arguments
+    ! Deal with optional arguments that were already queried internally
     if (present(typekind)) typekind = opt_typekind
     if (present(rank)) rank = opt_rank
+    if (present(ssiLocalDeCount)) ssiLocalDeCount = opt_ssiLocalDeCount
+    ! Deal with optional arrayspec
     if (present(arrayspec)) then
       call ESMF_ArraySpecSet(arrayspec, typekind=opt_typekind, rank=opt_rank, &
         rc=localrc)

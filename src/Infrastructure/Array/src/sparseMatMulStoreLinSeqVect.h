@@ -2599,9 +2599,9 @@ template<typename SIT, typename DIT> int sparseMatMulStoreLinSeqVect(
   VM::logMemInfo(std::string("ASMMStoreLinSeqVectXX.0"));
 #endif
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
