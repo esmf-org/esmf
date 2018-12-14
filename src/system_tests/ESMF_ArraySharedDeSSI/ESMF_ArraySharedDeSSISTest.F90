@@ -126,7 +126,10 @@ program ESMF_ArraySharedDeSSISTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   array = ESMF_ArrayCreate(typekind=ESMF_TYPEKIND_R8, distgrid=distgrid, &
-    indexflag=ESMF_INDEX_GLOBAL, pinflag=ESMF_PIN_DE_TO_SSI, name="MyArray", &
+    indexflag=ESMF_INDEX_GLOBAL, name="MyArray", &
+#ifndef ESMF_NO_MPI3
+    pinflag=ESMF_PIN_DE_TO_SSI, &
+#endif
     rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &

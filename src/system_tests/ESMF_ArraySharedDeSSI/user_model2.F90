@@ -54,6 +54,10 @@ module user_model2
     if (pthreadsEnabled) then
       call ESMF_VMGet(vm, ssiMaxPetCount=ssiMaxPetCount, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
+#ifdef ESMF_NO_MPI3
+      ! do not maximize PEs on fewer PETs if no support for DE sharing available
+      ssiMaxPetCount=1
+#endif
       call ESMF_GridCompSetVMMaxPEs(comp, maxPeCountPerPet=ssiMaxPetCount, &
         rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
@@ -140,7 +144,7 @@ module user_model2
 
 !$omp parallel do reduction (.and.:dataOkay) &
 !$omp& default (none)  &
-!$omp& shared  (pi, localArrayList)  &
+!$omp& shared  (pi, localArrayList, ssiLocalDeCount)  &
 !$omp& private (lde, i, j, tid, farrayPtr, msg, rc)
     ! Loop over all the locally accessible DEs and check for data correctness
 
@@ -156,7 +160,7 @@ module user_model2
 !$omp critical
       write(msg,*) "user2_run: OpenMP thread:", tid, &
         " Testing data for localDe =", lde-1, &
-        "lbound:", lbound(farrayPtr), " ubound:", ubound(farrayPtr)
+        " lbound:", lbound(farrayPtr), " ubound:", ubound(farrayPtr)
       call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
       ! No RC checking inside OpenMP region
       call ESMF_LogFlush(rc=rc)

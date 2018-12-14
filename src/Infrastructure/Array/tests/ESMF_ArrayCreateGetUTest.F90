@@ -702,7 +702,12 @@ program ESMF_ArrayCreateGetUTest
   write(name, *) "ArraySync() for ESMF_PIN_DE_TO_SSI Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
   call ESMF_ArraySync(array, rc=rc)
+#ifndef ESMF_NO_MPI3
   call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return the correct RC"
+  call ESMF_Test((rc.eq.ESMF_RC_OBJ_NOT_CREATED), name, failMsg, result, ESMF_SRCLINE)
+#endif
   
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
