@@ -127,19 +127,19 @@ namespace ESMCI{
       /* Find the first non zero coefficient in the result */
       cur_deg = max_deg;
       nrem_coeffs_in_deg = cur_deg + 1;
-      typename std::vector<CType>::const_iterator citer_end = dpoly_coeffs.cend();
-      for(typename std::vector<CType>::const_iterator citer = dpoly_coeffs.cbegin();
-          (citer != citer_end) && (cur_deg > 0); ++citer){
-        if(*citer != 0){
+      typename std::vector<CType>::iterator iter_end = dpoly_coeffs.end();
+      for(typename std::vector<CType>::iterator iter = dpoly_coeffs.begin();
+          (iter != iter_end) && (cur_deg > 0); ++iter){
+        if(*iter != 0){
           break;
         }
         nrem_coeffs_in_deg--;
         if(nrem_coeffs_in_deg == 0){
           /* All coeffs in this deg were 0 */
-          dpoly_coeffs.erase(dpoly_coeffs.begin(), citer+1);
+          dpoly_coeffs.erase(dpoly_coeffs.begin(), iter+1);
           /* Reset iterators */
-          citer = dpoly_coeffs.cbegin();
-          citer_end = dpoly_coeffs.cend();
+          iter = dpoly_coeffs.begin();
+          iter_end = dpoly_coeffs.end();
           cur_deg--;
           nrem_coeffs_in_deg = cur_deg + 1;
         }
