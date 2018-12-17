@@ -12,7 +12,7 @@
 \label{const:pin_flag}
 
 {\sf DESCRIPTION:\\}
-Specifies which VM resource DEs are pinned to - i.e. PETs or VASs.
+Specifies which VM resource DEs are pinned to (PETs, VASs, SSIs).
 
 The type of this flag is:
 
@@ -21,13 +21,13 @@ The type of this flag is:
 The valid values are:
 \begin{description}
   \item [ESMF\_PIN\_DE\_TO\_PET] 
-    Pin DEs against PETs. This means that even if a group of PETs in the 
-    VM are sharing a common virtual address space (VAS), DEs cannot
-    be shared between PETs, but must be serviced by the specific PET they
-    are pinned to.
+    Pin DEs to PETs. Only the owning PET has access to a DE.
   \item [ESMF\_PIN\_DE\_TO\_VAS]
-    Pin DEs against VASs. DEs may be serviced by any PET that is 
-    executing within the virtual address space (VAS) the DE is pinned to.
+    Pin DEs to virtual address spaces (VAS). DEs are accessible from all PETs
+    within the same VAS.
+  \item [ESMF\_PIN\_DE\_TO\_SSI]
+    Pin DEs to single system images (SSI) - typically shared memory nodes.
+    DEs are accessible from all PETs within the same SSI.
 \end{description}
 
 
