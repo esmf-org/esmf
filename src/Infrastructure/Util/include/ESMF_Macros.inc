@@ -62,5 +62,11 @@ MPI-3 support started in OpenMPI v3
 #endif
 #endif
 
+#ifdef MVAPICH2_NUMVERSION
+#if (MVAPICH2_NUMVERSION < 20000000)
+#define ESMF_NO_MPI3
+#endif
+#endif
+
 #endif 
 
