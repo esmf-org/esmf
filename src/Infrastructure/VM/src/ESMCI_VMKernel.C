@@ -5290,6 +5290,7 @@ int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh){
   MPI_Allgather(&count, 1, MPI_INT, &(memh->counts[0]), 1, MPI_INT, mpi_c_ssi);
   int maxCount = *(max_element(memh->counts.begin(), memh->counts.end()));
 #else
+  memh->localPet = 0;
   memh->localPetCount = 1;
   memh->counts.resize(memh->localPetCount);
   int count = (int)bytes.size();
