@@ -482,9 +482,8 @@ void VMK::init(MPI_Comm mpiCommunicator){
     if (temp_ssiPetCount[i] > ssiMaxPetCount)
       ssiMaxPetCount = temp_ssiPetCount[i];
   }
-  ssiLocalPetCount=temp_ssiPetCount[ssiid[mypet]];
-  delete [] temp_ssiPetCount;
-  ssiLocalPetList = new int[ssiLocalPetCount];
+  int localSsi = ssiid[mypet];
+  ssiLocalPetCount=temp_ssiPetCount[localSsi];
 #if 0
 {
   std::stringstream msg;
@@ -493,8 +492,9 @@ void VMK::init(MPI_Comm mpiCommunicator){
   ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
 }
 #endif
+  delete [] temp_ssiPetCount;
+  ssiLocalPetList = new int[ssiLocalPetCount];
 #if 1
-  int localSsi = ssiid[mypet];
   int j=0;
   for (int i=0; i<ncores; i++){
     if (ssiid[i]==localSsi){
@@ -685,10 +685,18 @@ void VMK::construct(void *ssarg){
     if (temp_ssiPetCount[i] > ssiMaxPetCount)
       ssiMaxPetCount = temp_ssiPetCount[i];
   }
-  ssiLocalPetCount=temp_ssiPetCount[ssiid[mypet]];
+  int localSsi = ssiid[cid[mypet][0]];
+  ssiLocalPetCount=temp_ssiPetCount[localSsi];
+#if 1
+{
+  std::stringstream msg;
+  msg << "VMK::init: " << __LINE__
+    << " ssiLocalPetCount=" << ssiLocalPetCount;
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+}
+#endif
   delete [] temp_ssiPetCount;
   ssiLocalPetList = new int[ssiLocalPetCount];
-  int localSsi = ssiid[cid[mypet][0]];
   int j=0;
   for (int i=0; i<npets; i++){
     if (ssiid[cid[i][0]]==localSsi){
