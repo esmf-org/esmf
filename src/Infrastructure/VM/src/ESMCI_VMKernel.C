@@ -687,7 +687,7 @@ void VMK::construct(void *ssarg){
   }
   int localSsi = ssiid[cid[mypet][0]];
   ssiLocalPetCount=temp_ssiPetCount[localSsi];
-#if 1
+#if 0
 {
   std::stringstream msg;
   msg << "VMK::init: " << __LINE__
