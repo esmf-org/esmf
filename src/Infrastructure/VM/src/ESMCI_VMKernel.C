@@ -466,11 +466,11 @@ void VMK::init(MPI_Comm mpiCommunicator){
       // new ssiid
       ssiid[i]=ssiCount;
       ++ssiCount;
-      temp_ssiPetCount[i] = 1;
+      temp_ssiPetCount[ssiid[i]] = 1;
     }else{
       // found previous ssiid
       ssiid[i]=ssiid[j];
-      temp_ssiPetCount[j]++;
+      temp_ssiPetCount[ssiid[j]]++;
     }
   }
   delete [] temp_ssiid;
@@ -485,6 +485,15 @@ void VMK::init(MPI_Comm mpiCommunicator){
   ssiLocalPetCount=temp_ssiPetCount[ssiid[mypet]];
   delete [] temp_ssiPetCount;
   ssiLocalPetList = new int[ssiLocalPetCount];
+#if 0
+{
+  std::stringstream msg;
+  msg << "VMK::init: " << __LINE__
+    << " ssiLocalPetCount=" << ssiLocalPetCount;
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+}
+#endif
+#if 1
   int localSsi = ssiid[mypet];
   int j=0;
   for (int i=0; i<ncores; i++){
@@ -493,6 +502,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
       ++j;
     }
   }
+#endif
 #endif
   // ESMCI::VMK pet -> core mapping
   lpid = new int[npets];
