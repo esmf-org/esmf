@@ -673,9 +673,9 @@ void VMK::construct(void *ssarg){
     if (j==i){
       // new ssiid found
       ++ssiCount;
-      temp_ssiPetCount[i] = 1;
+      temp_ssiPetCount[ssiid[cid[i][0]]] = 1;
     }else
-      temp_ssiPetCount[j]++;
+      temp_ssiPetCount[ssiid[cid[j][0]]]++;
   }
   ssiMinPetCount=npets;
   ssiMaxPetCount=0;
