@@ -11,7 +11,7 @@ OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 LIBBASE	  = libesmf
-LOCDIR	  = src/Superstructure/Trace/preload
+LOCDIR	  = src/Infrastructure/Trace/preload
 
 CLEANDIRS   =
 CLEANFILES  = $(ESMF_LDIR)/libesmftrace_* 

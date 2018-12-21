@@ -4,7 +4,7 @@ ALL:      build_examples
 run:      run_examples
 run_uni:  run_examples_uni
 
-LOCDIR	  = src/Superstructure/Trace/examples
+LOCDIR	  = src/Infrastructure/Trace/examples
 
 .NOTPARALLEL:
 EXAMPLES_BUILD    = $(ESMF_EXDIR)/ESMF_TraceEx \
@@ -44,8 +44,3 @@ run_ESMF_TraceUserEx:
 run_ESMF_TraceUserEx_uni:
 	env ESMF_RUNTIME_TRACE=ON $(MAKE) EXNAME=TraceUser NP=1 exfrun
 
-#run_ESMF_AttReadCustCplCompEx:
-#	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/custom_cplcomp.xml $(ESMF_EXDIR)
-#	cp -f $(ESMF_DIR)/src/Superstructure/Component/etc/custom_cplcomp.xsd $(ESMF_EXDIR)
-#	$(ESMF_DIR)/scripts/copy_xsd $(ESMF_EXDIR)
-#	$(MAKE) EXNAME=AttReadCustCplComp NP=4 exfrun

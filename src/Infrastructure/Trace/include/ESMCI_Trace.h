@@ -101,7 +101,7 @@ namespace ESMCI {
                                     int *ep_method, int *ep_phase);
   void TraceEventPhaseEpilogueExit(int *ep_vmid, int *ep_baseid, 
                                     int *ep_method, int *ep_phase);
-  void TraceEventComponentInfo(Comp *comp, int *ep_vmid, int *ep_baseid,
+  void TraceEventComponentInfo(int *ep_vmid, int *ep_baseid,
                                const char *ep_name,
                                std::string attributeKeys,
                                std::string attributeVals);

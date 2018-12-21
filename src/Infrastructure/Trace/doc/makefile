@@ -2,7 +2,7 @@
 
 ALL: onedoc
 
-LOCDIR	  = src/Superstructure/Trace/doc
+LOCDIR	  = src/Infrastructure/Trace/doc
 
 DVIFILES  = Trace_refdoc.dvi
 PDFFILES  = Trace_refdoc.pdf

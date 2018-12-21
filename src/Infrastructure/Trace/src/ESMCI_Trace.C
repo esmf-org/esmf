@@ -38,7 +38,6 @@
 #include "ESMCI_LogErr.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_Trace.h"
-#include "ESMCI_Comp.h"
 #include "ESMCI_VMKernel.h"
 #include "ESMCI_HashMap.h"
 #include "ESMCI_RegionNode.h"
@@ -233,6 +232,42 @@ namespace ESMCI {
     //pet not found in list      
     return false;  
 }
+
+
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::GlobalProfileOptions()"
+  static void GlobalProfileOptions(int *traceIsOn, int *profileIsOn, int *rc) {
+    *rc = ESMC_RC_NOT_IMPL;
+    if (traceIsOn != NULL) { 
+      *traceIsOn = 0;
+      char const *envVar = VM::getenv("ESMF_RUNTIME_TRACE");
+      if (envVar != NULL) {
+        std::string value(envVar);
+        int index;
+        index = value.find("on");
+        if (index == std::string::npos)
+          index = value.find("ON");
+        if (index != std::string::npos){
+          *traceIsOn=1;
+        }
+      }
+    }
+    if (profileIsOn != NULL) {
+      *profileIsOn = 0;
+      char const *envVar = VM::getenv("ESMF_RUNTIME_PROFILE");
+      if (envVar != NULL) {
+        std::string value(envVar);
+        int index;
+        index = value.find("on");
+        if (index == std::string::npos)
+          index = value.find("ON");
+        if (index != std::string::npos){
+          *profileIsOn=1;
+        }
+      }
+    } 
+    *rc = ESMF_SUCCESS;    
+  }
   
 #undef ESMC_METHOD
 #define ESMC_METHOD "ESMCI::ProfileIsEnabledForPET()"
@@ -242,7 +277,7 @@ namespace ESMCI {
 
     int tracingEnabled = 0;
     int profilingEnabled = 0;
-    localrc = Comp::getComplianceCheckerTrace(&tracingEnabled, &profilingEnabled);
+    GlobalProfileOptions(&tracingEnabled, &profilingEnabled, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, 
          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
       return false;
@@ -276,7 +311,7 @@ namespace ESMCI {
     //first check if tracing is enabled
     int tracingEnabled = 0;
     int profilingEnabled = 0;
-    localrc = Comp::getComplianceCheckerTrace(&tracingEnabled, &profilingEnabled);
+    GlobalProfileOptions(&tracingEnabled, &profilingEnabled, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, 
          ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) 
       return false;
@@ -1408,7 +1443,7 @@ namespace ESMCI {
   
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::TraceEventComponentInfo()"  
-  void TraceEventComponentInfo(Comp *comp, int *ep_vmid, int *ep_baseid,
+  void TraceEventComponentInfo(int *ep_vmid, int *ep_baseid,
                                const char *ep_name, std::string attributeKeys,
                                std::string attributeVals) {
 

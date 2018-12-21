@@ -2,15 +2,15 @@
 
 ALL: build_here 
 
-SOURCEC	  = ESMCI_Trace_F.C
-SOURCEF	  = ESMF_Trace.F90
+SOURCEC	  = 
+SOURCEF	  = ESMF_TraceAPI.F90
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 
 LIBBASE	  = libesmf
-LOCDIR	  = src/Superstructure/Trace/interface
+LOCDIR	  = src/Superstructure/TraceAPI/interface
 
 CLEANDIRS   =
 CLEANFILES  =

@@ -103,7 +103,7 @@ extern "C" {
 
 #undef ESMC_METHOD
 #define ESMC_METHOD "c_esmftrace_component_info()"
-  void FTN_X(c_esmftrace_component_info)(ESMCI::Comp *comp, int *vmid, int *baseid, const char *name,
+  void FTN_X(c_esmftrace_component_info)(int *vmid, int *baseid, const char *name,
                                          const char *attributeKeys, const char *attributeVals, int *rc,
                                          ESMCI_FortranStrLenArg nlen,  //name
                                          ESMCI_FortranStrLenArg aklen,  //attributeKeys
@@ -113,7 +113,7 @@ extern "C" {
     string aKeys = string(attributeKeys, ESMC_F90lentrim (attributeKeys, aklen));
     string aVals = string(attributeVals, ESMC_F90lentrim (attributeVals, avlen));
 
-    ESMCI::TraceEventComponentInfo(comp, vmid, baseid, cname.c_str(), aKeys, aVals);
+    ESMCI::TraceEventComponentInfo(vmid, baseid, cname.c_str(), aKeys, aVals);
     if (rc != NULL) *rc = ESMF_SUCCESS;
 
   }

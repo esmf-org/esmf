@@ -1980,10 +1980,10 @@ endif
 
 build_tracelibs:
 ifeq ($(ESMF_TESTTRACE),ON)
-	cd $(ESMF_DIR)/src/Superstructure/Trace/preload ;\
+	cd $(ESMF_DIR)/src/Infrastructure/Trace/preload ;\
 	$(MAKE) tracelib_static
 ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
-	cd $(ESMF_DIR)/src/Superstructure/Trace/preload ;\
+	cd $(ESMF_DIR)/src/Infrastructure/Trace/preload ;\
 	$(MAKE) tracelib_preload
 endif
 endif
