@@ -2,7 +2,7 @@
 
 ALL: tracelib_preload tracelib_static
 
-SOURCEC	  = preload.C preload_io.C preload_mpi.C wrappers.C wrappers_io.C wrappers_mpi.C
+SOURCEC	  = preload.C preload_io.C preload_mpi.C preload_mem.C wrappers.C wrappers_io.C wrappers_mpi.C wrappers_mem.C
 SOURCEF	  = 
 SOURCEH	  = 
 STOREH    = 
@@ -31,7 +31,7 @@ ifeq  ($(ESMF_OS),MinGW)
   ESMF_TRACE_ESMFLIB = -lesmf
 endif
 
-tracelib_preload: preload.o preload_io.o preload_mpi.o wrappers.o wrappers_io.o wrappers_mpi.o
+tracelib_preload: preload.o preload_io.o preload_mpi.o preload_mem.o wrappers.o wrappers_io.o wrappers_mpi.o wrappers_mem.o
 	$(ESMF_SL_LIBLINKER) $(ESMF_SL_LIBOPTS) -o $(ESMF_LDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX) $^ $(ESMF_CXXLINKOPTS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKRPATHS) $(ESMF_CXXLINKLIBS) $(ESMF_TRACE_ESMFLIB)
 	$(MAKE) ESMF_PRELOADDIR=$(ESMF_LIBDIR) build_preload_script
 
