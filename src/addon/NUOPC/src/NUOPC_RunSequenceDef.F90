@@ -492,16 +492,16 @@ module NUOPC_RunSequenceDef
       if (.not.associated(runElement%next)) then
         if (runElement%i == -runSeqIndex) then
           ! first run element happens to be an "ENDDO" marker
-          do while (.not. ESMF_ClockIsStopTime(clock, rc=localrc))
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+          do while (clockIsStopTime)
             ! advance to next time step
             call ESMF_ClockAdvance(clock, rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            ! check whether to stop at next time step
+            clockIsStopTime = ESMF_ClockIsStopTime(clock, rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
           enddo
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         else
           ! invalid element
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="invalid runElement",&
