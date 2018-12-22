@@ -318,6 +318,8 @@ contains
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
         character(ESMF_MAXSTR)  :: compName
         character(1024)         :: jsonString
+        logical                 :: clockIsCreated
+        logical                 :: stateIsCreated
         !type(ESMF_Clock)        :: clockInternal
         !logical                 :: clockIsPresent
     
@@ -459,7 +461,10 @@ contains
                call ESMF_TraceMemInfo(rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
-               if (ESMF_ClockIsCreated(clock)) then
+               clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return
+               if (clockIsCreated) then
                   call ESMF_TraceClock(clock, rc=rc)
                   if (ESMF_LogFoundError(rc, &
                        line=__LINE__, file=FILENAME)) return                              
@@ -495,7 +500,10 @@ contains
               call ESMF_TracePhaseExit(comp, rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return                              
-              if (ESMF_ClockIsCreated(clock)) then
+              clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                   line=__LINE__, file=FILENAME)) return
+              if (clockIsCreated) then
                  call ESMF_TraceClock(clock, rc=rc)
                  if (ESMF_LogFoundError(rc, &
                       line=__LINE__, file=FILENAME)) return                              
@@ -567,7 +575,13 @@ contains
 
             ! drivers are allowed to have invalid import/export states, if they are not
             ! participating in the exchange of fields
-            if (ESMF_StateIsCreated(importState)) then
+            stateIsCreated = ESMF_StateIsCreated(importState, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+
+            if (stateIsCreated) then
                 ! compliance check importState
                 call NUOPC_CheckState(prefix, referenceName="importState", state=importState, &
                     rc=rc)
@@ -577,7 +591,13 @@ contains
                     return  ! bail out
             endif
     
-            if (ESMF_StateIsCreated(exportState)) then
+            stateIsCreated = ESMF_StateIsCreated(exportState, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+                line=__LINE__, &
+                file=FILENAME)) &
+                return  ! bail out
+
+            if (stateIsCreated) then
                 ! compliance check exportState
                 call NUOPC_CheckState(prefix, referenceName="exportState", state=exportState, &
                     rc=rc)
@@ -663,6 +683,7 @@ contains
         integer                 :: phase
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
         character(ESMF_MAXSTR)  :: compName
+        logical                 :: clockIsCreated
         !type(ESMF_Clock)        :: clockInternal
         !logical                 :: clockIsPresent
     
@@ -783,7 +804,10 @@ contains
                call ESMF_TraceMemInfo(rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
-               if (ESMF_ClockIsCreated(clock)) then
+               clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return
+               if (clockIsCreated) then
                   call ESMF_TraceClock(clock, rc=rc)
                   if (ESMF_LogFoundError(rc, &
                        line=__LINE__, file=FILENAME)) return                              
@@ -818,7 +842,10 @@ contains
               call ESMF_TracePhaseExit(comp, rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return                              
-              if (ESMF_ClockIsCreated(clock)) then
+              clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                   line=__LINE__, file=FILENAME)) return
+              if (clockIsCreated) then
                  call ESMF_TraceClock(clock, rc=rc)
                  if (ESMF_LogFoundError(rc, &
                       line=__LINE__, file=FILENAME)) return                              
@@ -938,6 +965,7 @@ contains
         character(ESMF_MAXSTR)  :: compName
         type(ESMF_Clock)        :: clockInternal
         logical                 :: clockIsPresent
+        logical                 :: clockIsCreated
     
         ! Initialize user return code
         rc = ESMF_SUCCESS
@@ -1048,7 +1076,10 @@ contains
                call ESMF_TraceMemInfo(rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
-               if (ESMF_ClockIsCreated(clock)) then
+               clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return
+               if (clockIsCreated) then
                   call ESMF_TraceClock(clock, rc=rc)
                   if (ESMF_LogFoundError(rc, &
                        line=__LINE__, file=FILENAME)) return                              
@@ -1083,7 +1114,10 @@ contains
               call ESMF_TracePhaseExit(comp, rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return                              
-              if (ESMF_ClockIsCreated(clock)) then
+              clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                   line=__LINE__, file=FILENAME)) return
+              if (clockIsCreated) then
                  call ESMF_TraceClock(clock, rc=rc)
                  if (ESMF_LogFoundError(rc, &
                       line=__LINE__, file=FILENAME)) return                              
@@ -1186,6 +1220,7 @@ contains
         logical,            intent(in),  optional :: forward
         integer,            intent(out), optional :: rc
 
+        integer                 :: localrc
         character(ESMF_MAXSTR)  :: compName
         character(len=3)        :: arrow
         character(len=3)        :: forwardArrow
@@ -1198,10 +1233,11 @@ contains
             if (.not.forward) arrow = "|<-"
         endif
 
-        call ESMF_GridCompGet(comp, name=compName, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call ESMF_GridCompGet(comp, name=compName, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         prefix = "COMPLIANCECHECKER:"//repeat(forwardArrow, ccfDepth-1)//&
@@ -1300,6 +1336,7 @@ contains
         integer,      intent(out), optional   :: rc
 
         ! local variables
+        integer :: localrc
         integer :: item, itemCount
         character(ESMF_MAXSTR), allocatable    :: itemNameList(:)
         type(ESMF_StateItem_Flag), allocatable :: stateitemtypeList(:)
@@ -1307,27 +1344,39 @@ contains
         type(ESMF_Field), allocatable          :: fields(:)
         type(ESMF_FieldBundle)                 :: fieldbundle
         integer                                :: fieldCount, fitem
+        logical                                :: stateIsCreated
+
+        if (present(rc)) rc = ESMF_SUCCESS
 
         totalFields = 0
 
-        if (.not.ESMF_StateIsCreated(state)) then
+        stateIsCreated = ESMF_StateIsCreated(state, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+
+        if (.not.stateIsCreated) then
            return
         endif
         
-        call ESMF_StateGet(state, itemCount=itemCount, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call ESMF_StateGet(state, itemCount=itemCount, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         if (itemCount > 0) then
             allocate(itemNameList(itemCount))
             allocate(stateitemtypeList(itemCount))
             call ESMF_StateGet(state, itemNameList=itemNameList, &
-                itemtypeList=stateitemtypeList, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                itemtypeList=stateitemtypeList, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             do item=1, itemCount
@@ -1335,41 +1384,47 @@ contains
                 if (stateitemtypeList(item) == ESMF_STATEITEM_FIELD) then
                     totalFields = totalFields + 1
                     call ESMF_StateGet(state, itemName=itemNameList(item), &
-                        field=field, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                        field=field, rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
-                    call checkFieldMetaAfterRealize(prefix, field=field, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                    call checkFieldMetaAfterRealize(prefix, field=field, rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
                 else if (stateitemtypeList(item) == ESMF_STATEITEM_FIELDBUNDLE) then
                     call ESMF_StateGet(state, itemName=itemNameList(item), &
-                        fieldbundle=fieldbundle, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                        fieldbundle=fieldbundle, rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
-                    call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                    call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
                     allocate(fields(fieldCount))
-                    call ESMF_FieldBundleGet(fieldbundle, fieldList=fields, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                    call ESMF_FieldBundleGet(fieldbundle, fieldList=fields, rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
                     do fitem=1, fieldCount
                         totalFields = totalFields + 1
                         field = fields(fitem)
-                        call checkFieldMetaAfterRealize(prefix, field=field, rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                        call checkFieldMetaAfterRealize(prefix, field=field, rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                     enddo
                     deallocate(fields)
@@ -1389,6 +1444,7 @@ contains
         type(ESMF_Field)                      :: field
         integer,      intent(out), optional   :: rc
 
+        integer                               :: localrc
         character(ESMF_MAXSTR)                :: attributeName
         character(ESMF_MAXSTR)                :: convention
         character(ESMF_MAXSTR)                :: purpose
@@ -1401,46 +1457,51 @@ contains
 
         call NUOPC_ComplianceLogWrite(trim(prefix)//" Field level attribute check: "// &
           "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
-           ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+           ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
            line=__LINE__, &
-           file=FILENAME)) &
+           file=FILENAME, &
+           rcToReturn=rc)) &
            return  ! bail out
 
         attributeName = "StandardName"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "Units"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "LongName"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "ShortName"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         !      How is this used by NUOPC?
@@ -1457,118 +1518,131 @@ contains
         attributeName = "Connected"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "TimeStamp"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "ProducerConnection"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "ConsumerConnection"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "Updated"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "TransferOfferGeomObject"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "TransferActionGeomObject"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "MaxIndex"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            warnIfMissing=.false., rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            warnIfMissing=.false., rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "MinIndex"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
              attributeName=attributeName, convention=convention, purpose=purpose, &
-             warnIfMissing=.false., rc=rc)
-        if (ESMF_LogFoundError(rc, &
+             warnIfMissing=.false., rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
              line=__LINE__, &
-             file=FILENAME)) &
+             file=FILENAME, &
+             rcToReturn=rc)) &
              return  ! bail out
 
         attributeName = "ArbDimCount"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            warnIfMissing=.false., rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            warnIfMissing=.false., rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "GridToFieldMap"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            warnIfMissing=.false., rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            warnIfMissing=.false., rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
         
         attributeName = "UngriddedLBound"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            warnIfMissing=.false., rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            warnIfMissing=.false., rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "UngriddedUBound"
         call NUOPC_CheckFieldAttribute(prefix, field=field, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            warnIfMissing=.false., rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            warnIfMissing=.false., rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
     end subroutine

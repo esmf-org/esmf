@@ -1132,22 +1132,23 @@ module NUOPC_ModelBase
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
+    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
 
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(gcomp, name=name, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_CompGet(gcomp, name=name, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! driverClock
     if (present(driverClock)) then
       ! query Component for the internal State
       nullify(is%wrap)
-      call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       driverClock = is%wrap%driverClock
@@ -1155,9 +1156,9 @@ module NUOPC_ModelBase
     
     ! remaining arguments
     call ESMF_GridCompGet(gcomp, clock=clock, importState=importState, &
-      exportState=exportState, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      exportState=exportState, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------

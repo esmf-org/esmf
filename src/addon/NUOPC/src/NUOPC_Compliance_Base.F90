@@ -95,6 +95,7 @@ contains
         integer, intent(out), optional :: rc
 
         ! locals
+        integer :: localrc
         integer :: configrc
         integer :: jsonIsOn
         integer :: textIsOn
@@ -103,18 +104,20 @@ contains
         character(10) :: cfgIncludeState
         character(10) :: cfgIncludeVmStats
 
-        rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
-        call c_esmc_getComplianceCheckDepth(maxDepth, rc)
-        if (ESMF_LogFoundError(rc, &
+        call c_esmc_getComplianceCheckDepth(maxDepth, localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
-        call c_esmc_getComplianceCheckText(textIsOn, rc)
-        if (ESMF_LogFoundError(rc, &
+        call c_esmc_getComplianceCheckText(textIsOn, localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
         if (textIsOn == 1) then
           outputText = .true.
@@ -122,10 +125,11 @@ contains
           outputText = .false.
         endif
 
-        call c_esmc_getComplianceCheckTrace(traceIsOn, profileIsOn, rc)
-        if (ESMF_LogFoundError(rc, &
+        call c_esmc_getComplianceCheckTrace(traceIsOn, profileIsOn, localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
         if (traceIsOn == 1 .or. profileIsOn == 1) then
           outputTrace = .true.
@@ -133,10 +137,11 @@ contains
           outputTrace = .false.
         endif
           
-        call c_esmc_getComplianceCheckJSON(jsonIsOn, rc)
-        if (ESMF_LogFoundError(rc, &
+        call c_esmc_getComplianceCheckJSON(jsonIsOn, localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
         if (jsonIsOn == 1) then
           outputJSON = .true.
@@ -145,35 +150,39 @@ contains
         endif
 
         if (outputJSON) then
-            config = ESMF_ConfigCreate(rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            config = ESMF_ConfigCreate(rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
             call ESMF_ConfigLoadFile(config, "nuopc.trace", rc=configrc)
             if (configrc == ESMF_SUCCESS) then
                 call ESMF_ConfigGetAttribute(config, cfgIncludeState, &
-                    label="include.state:", default="true", rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    label="include.state:", default="true", rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
                 includeState = (trim(cfgIncludeState)=="true")
 
                 call ESMF_ConfigGetAttribute(config, cfgIncludeVmStats, &
-                    label="include.vmstats:", default="true", rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    label="include.vmstats:", default="true", rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
                 includeVmStats = (trim(cfgIncludeVmStats)=="true")
             end if
 
             ! write header line once
-            call JSON_LogHeader(rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call JSON_LogHeader(rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
         endif
 
@@ -193,19 +202,22 @@ contains
         integer, optional,                intent(out) :: rc
 
         ! locals
+        integer                :: localrc
         type(ESMF_LogMsg_Flag) :: localMsgType
 
-        rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
+
         if (outputText) then
             if (present(msgType)) then
                 localMsgType = msgType
             else
                 localMsgType = ESMF_LOGMSG_INFO
             endif
-            call ESMF_LogWrite(trim(msg), localMsgType, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call ESMF_LogWrite(trim(msg), localMsgType, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
          endif
     end subroutine
@@ -223,6 +235,7 @@ contains
         character(1024*50)                    :: jsonstring
         logical                               :: isPresent
         character(64)                         :: idStr
+        integer                               :: localrc
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -232,28 +245,31 @@ contains
 
         call NUOPC_ComplianceLogWrite(trim(prefix)//" GridComp level attribute check: "// &
             "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
-            ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "Verbosity"
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "InitializePhaseMap"
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         ! Applies only to NUOPC Drivers
@@ -269,114 +285,128 @@ contains
         attributeName = "RunPhaseMap"
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "FinalizePhaseMap"
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "NestingGeneration"
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "Nestling"
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "InitializeDataComplete"
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "InitializeDataProgress"
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         if (outputJSON) then
 
-            call ESMF_GridCompGet(comp, name=compName, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call ESMF_GridCompGet(comp, name=compName, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
 
-            call JSON_GetID(comp, idStr, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call JSON_GetID(comp, idStr, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
 
             call ESMF_AttributeAdd(comp, convention=convention, purpose=purpose, &
                                    attrList=(/"CompName", &
                                               "ESMFID  "/), &
-                                   attpack=attpack, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                                   attpack=attpack, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
 
             call ESMF_AttributeSet(comp, name="CompName", value=compName, &
-                                   attpack=attpack, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                                   attpack=attpack, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
 
             call ESMF_AttributeSet(comp, name="ESMFID", value=trim(adjustl(idStr)), &
-                                   attpack=attpack, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                                   attpack=attpack, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
 
             ! output JSON
             call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
-              convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+              convention=convention, purpose=purpose, isPresent=isPresent, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
 
             if (isPresent) then
                 call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
-                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                   line=__LINE__, &
-                  file=FILENAME)) &
+                  file=FILENAME, &
+                  rcToReturn=rc)) &
                   return  ! bail out
 
-                call JSON_LogWrite(jsonstring, rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                call JSON_LogWrite(jsonstring, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                   line=__LINE__, &
-                  file=FILENAME)) &
+                  file=FILENAME, &
+                  rcToReturn=rc)) &
                   return  ! bail out
             endif
         endif
@@ -398,6 +428,7 @@ contains
         character(1024*50)                    :: jsonstring
         logical                               :: isPresent
         character(64)                         :: idStr
+        integer                               :: localrc
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -407,10 +438,11 @@ contains
 
         call NUOPC_ComplianceLogWrite(trim(prefix)//" CplComp level attribute check: "// &
             "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
-            ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
 !            attributeName = "ComponentLongName"
@@ -425,37 +457,41 @@ contains
         attributeName = "Verbosity"
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "InitializePhaseMap"
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "RunPhaseMap"
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         attributeName = "FinalizePhaseMap"
         call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
             attributeName=attributeName, convention=convention, purpose=purpose, &
-            rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         ! moved to phase-specific check
@@ -479,61 +515,69 @@ contains
 
         if (outputJSON) then
 
-            call ESMF_CplCompGet(comp, name=compName, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call ESMF_CplCompGet(comp, name=compName, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
 
-            call JSON_GetID(comp, idStr, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call JSON_GetID(comp, idStr, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
 
             call ESMF_AttributeAdd(comp, convention=convention, purpose=purpose, &
                                    attrList=(/"CompName", &
                                               "ESMFID  "/), &
-                                   attpack=attpack, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                                   attpack=attpack, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
 
             call ESMF_AttributeSet(comp, name="CompName", value=compName, &
-                                   attpack=attpack, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                                   attpack=attpack, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
 
             call ESMF_AttributeSet(comp, name="ESMFID", value=trim(adjustl(idStr)), &
-                                   attpack=attpack, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                                   attpack=attpack, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
 
             ! output JSON
             call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
-              convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+              convention=convention, purpose=purpose, isPresent=isPresent, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
 
             if (isPresent) then
                 call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
-                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                   line=__LINE__, &
-                  file=FILENAME)) &
+                  file=FILENAME, &
+                  rcToReturn=rc)) &
                   return  ! bail out
 
-                call JSON_LogWrite(jsonstring, rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                call JSON_LogWrite(jsonstring, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                   line=__LINE__, &
-                  file=FILENAME)) &
+                  file=FILENAME, &
+                  rcToReturn=rc)) &
                   return  ! bail out
             endif
         endif
@@ -550,14 +594,16 @@ contains
         character(ESMF_MAXSTR)                :: attributeName
         character(ESMF_MAXSTR)                :: convention
         character(ESMF_MAXSTR)                :: purpose
+        integer                               :: localrc
 
         if (present(rc)) rc = ESMF_SUCCESS
 
         ! get Component type and branch on it
-        call ESMF_GridCompGet(comp, comptype=comptype, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call ESMF_GridCompGet(comp, comptype=comptype, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         if (comptype == ESMF_COMPTYPE_GRID) then
@@ -568,64 +614,71 @@ contains
 
             call NUOPC_ComplianceLogWrite(trim(prefix)//" GridComp level attribute check: "// &
                 "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             attributeName = "ShortName"
             call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             attributeName = "LongName"
             call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             attributeName = "Description"
             call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             attributeName = "ModelType"
             call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             attributeName = "ReleaseDate"
             call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             attributeName = "PreviousVersion"
             call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
 #if 0
@@ -633,92 +686,102 @@ contains
       attributeName = "ShortTitle"
       call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
         attributeName=attributeName, convention=convention, purpose=purpose, &
-        rc=rc)
-      if (ESMF_LogFoundError(rc, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
         line=__LINE__, &
-        file=FILENAME)) &
+        file=FILENAME, &
+        rcToReturn=rc)) &
         return  ! bail out
 
       attributeName = "LongTitle"
       call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
         attributeName=attributeName, convention=convention, purpose=purpose, &
-        rc=rc)
-      if (ESMF_LogFoundError(rc, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
         line=__LINE__, &
-        file=FILENAME)) &
+        file=FILENAME, &
+        rcToReturn=rc)) &
         return  ! bail out
 
       attributeName = "Date"
       call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
         attributeName=attributeName, convention=convention, purpose=purpose, &
-        rc=rc)
-      if (ESMF_LogFoundError(rc, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
         line=__LINE__, &
-        file=FILENAME)) &
+        file=FILENAME, &
+        rcToReturn=rc)) &
         return  ! bail out
 
       attributeName = "PresentationForm"
       call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
         attributeName=attributeName, convention=convention, purpose=purpose, &
-        rc=rc)
-      if (ESMF_LogFoundError(rc, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
         line=__LINE__, &
-        file=FILENAME)) &
+        file=FILENAME, &
+        rcToReturn=rc)) &
         return  ! bail out
 
       attributeName = "DOI"
       call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
         attributeName=attributeName, convention=convention, purpose=purpose, &
-        rc=rc)
-      if (ESMF_LogFoundError(rc, &
+        rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
         line=__LINE__, &
-        file=FILENAME)) &
+        file=FILENAME, &
+        rcToReturn=rc)) &
         return  ! bail out
 #endif
 
             attributeName = "ResponsiblePartyRole"
             call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             attributeName = "Name"
             call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             attributeName = "EmailAddress"
             call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             attributeName = "PhysicalAddress"
             call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             attributeName = "URL"
             call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
         elseif (comptype == ESMF_COMPTYPE_CPL) then
@@ -729,19 +792,21 @@ contains
 
             call NUOPC_ComplianceLogWrite(trim(prefix)//" CplComp level attribute check: "// &
                 "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             attributeName = "ComponentLongName"
             call NUOPC_CheckComponentAttribute(prefix, comp=comp, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
         else
@@ -779,6 +844,7 @@ contains
         character(1024*100)                   :: jsonstring
         logical                               :: isPresent
         character(64)                         :: idStr
+        integer                               :: localrc
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -787,10 +853,11 @@ contains
         if (.not. ESMF_StateIsCreated(state)) then
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
                 " is invalid!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
             stateValid = .false.
         endif
@@ -798,16 +865,18 @@ contains
         if (stateValid) then
             ! Provide name and type of State
             call ESMF_StateGet(state, name=name, stateintent=stateintent, &
-                itemCount=itemCount, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                itemCount=itemCount, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
             call NUOPC_ComplianceLogWrite(trim(prefix)//" "//trim(referenceName)//" name: "// &
-                trim(name), rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                trim(name), rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
             if (stateintent==ESMF_STATEINTENT_IMPORT) then
                 tempString = "ESMF_STATEINTENT_IMPORT"
@@ -819,10 +888,11 @@ contains
                 tempString = "ESMF_STATEINTENT_INVALID"
             endif
             call NUOPC_ComplianceLogWrite(trim(prefix)//" "//trim(referenceName)//" stateintent: "// &
-                trim(tempString), rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                trim(tempString), rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             ! set NUOPC convention and purpose specifiers
@@ -831,10 +901,11 @@ contains
 
             if (outputJSON .and. includeState) then
 
-              call JSON_GetID(state, idStr, rc=rc)
-              if (ESMF_LogFoundError(rc, &
+              call JSON_GetID(state, idStr, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
                  line=__LINE__, &
-                 file=FILENAME)) &
+                 file=FILENAME, &
+                 rcToReturn=rc)) &
                  return  ! bail out
 
               ! add a few attributes so they appear in the JSON
@@ -843,52 +914,59 @@ contains
                                    attrList=(/"ESMFID", &
                                               "name  ", &
                                               "intent"/), &
-                                   attpack=attpack, rc=rc)
-              if (ESMF_LogFoundError(rc, &
+                                   attpack=attpack, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
               call ESMF_AttributeSet(state, name="name", value=name, &
-                                   attpack=attpack, rc=rc)
-              if (ESMF_LogFoundError(rc, &
+                                   attpack=attpack, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
               call ESMF_AttributeSet(state, name="intent", value=tempString, &
-                                   attpack=attpack, rc=rc)
-              if (ESMF_LogFoundError(rc, &
+                                   attpack=attpack, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
               call ESMF_AttributeSet(state, name="ESMFID", value=trim(idStr), &
-                                   attpack=attpack, rc=rc)
-              if (ESMF_LogFoundError(rc, &
+                                   attpack=attpack, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
               call ESMF_AttributeGetAttPack(state, attpack=attpack, &
-                  convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
-              if (ESMF_LogFoundError(rc, &
+                  convention=convention, purpose=purpose, isPresent=isPresent, rc=localrc)
+              if (ESMF_LogFoundError(localrc, &
                   line=__LINE__, &
-                  file=FILENAME)) &
+                  file=FILENAME, &
+                  rcToReturn=rc)) &
                   return  ! bail out
 
               if (isPresent) then
                   call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
-                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=rc)
-                  if (ESMF_LogFoundError(rc, &
+                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=localrc)
+                  if (ESMF_LogFoundError(localrc, &
                       line=__LINE__, &
-                      file=FILENAME)) &
+                      file=FILENAME, &
+                      rcToReturn=rc)) &
                       return  ! bail out
 
-                  call JSON_LogWrite(jsonstring, rc=rc)
-                  if (ESMF_LogFoundError(rc, &
+                  call JSON_LogWrite(jsonstring, rc=localrc)
+                  if (ESMF_LogFoundError(localrc, &
                      line=__LINE__, &
-                     file=FILENAME)) &
+                     file=FILENAME, &
+                     rcToReturn=rc)) &
                      return  ! bail out
               endif
             endif ! doJSON
@@ -896,46 +974,51 @@ contains
 
             call NUOPC_ComplianceLogWrite(trim(prefix)//" State level attribute check: "// &
                 "convention: '"//trim(convention)//"', purpose: '"//trim(purpose)//"'.", &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             attributeName = "Namespace"
             call NUOPC_CheckStateAttribute(prefix, state=state, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             attributeName = "FieldTransferPolicy"
             call NUOPC_CheckStateAttribute(prefix, state=state, &
                 attributeName=attributeName, convention=convention, purpose=purpose, &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             write (tempString, *) itemCount
             call NUOPC_ComplianceLogWrite(trim(prefix)//" "//trim(referenceName)//" itemCount: "// &
-                trim(tempString), rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                trim(tempString), rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             if (itemCount > 0) then
                 allocate(itemNameList(itemCount))
                 allocate(stateitemtypeList(itemCount))
                 call ESMF_StateGet(state, itemNameList=itemNameList, &
-                    itemtypeList=stateitemtypeList, rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    itemtypeList=stateitemtypeList, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
 
                 do item=1, itemCount
@@ -945,18 +1028,20 @@ contains
                         write (tempString, *) item, " [FIELDBUNDLE] name: "
                     else if (stateitemtypeList(item) == ESMF_STATEITEM_ARRAY) then
                         call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
-                            " contains an ESMF_Array object!", ESMF_LOGMSG_WARNING, rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                            " contains an ESMF_Array object!", ESMF_LOGMSG_WARNING, rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                         write (tempString, *) item, " [ARRAY] name: "
                     else if (stateitemtypeList(item) == ESMF_STATEITEM_ARRAYBUNDLE) then
                         call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The "//trim(referenceName)// &
-                            " contains an ESMF_ArrayBundle object!", ESMF_LOGMSG_WARNING, rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                            " contains an ESMF_ArrayBundle object!", ESMF_LOGMSG_WARNING, rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                         write (tempString, *) item, " [ARRAYBUNDLE] name: "
                     else if (stateitemtypeList(item) == ESMF_STATEITEM_ROUTEHANDLE) then
@@ -971,10 +1056,11 @@ contains
 
                     call NUOPC_ComplianceLogWrite(trim(prefix)//" "//trim(referenceName)//" item #"// &
                         trim(tempString)//trim(itemNameList(item)), &
-                        rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                        rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
 
                     ! check metadata compliance
@@ -982,68 +1068,78 @@ contains
 
                         ! compliance check Field metadata
                         call ESMF_StateGet(state, itemName=itemNameList(item), &
-                          field=field, rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                          field=field, rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                           line=__LINE__, &
-                          file=FILENAME)) &
+                          file=FILENAME, &
+                          rcToReturn=rc)) &
                           return  ! bail out
-                        call NUOPC_CheckField(prefix, "", field=field, stateid=idStr, rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                        call NUOPC_CheckField(prefix, "", field=field, stateid=idStr, rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                           line=__LINE__, &
-                          file=FILENAME)) &
+                          file=FILENAME, &
+                          rcToReturn=rc)) &
                           return  ! bail out
                     else if (stateitemtypeList(item) == ESMF_STATEITEM_FIELDBUNDLE) then
                         call ESMF_StateGet(state, itemName=itemNameList(item), &
-                          fieldbundle=fieldbundle, rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                          fieldbundle=fieldbundle, rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                           line=__LINE__, &
-                          file=FILENAME)) &
+                          file=FILENAME, &
+                          rcToReturn=rc)) &
                           return  ! bail out
-                        call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                        call ESMF_FieldBundleGet(fieldbundle, fieldCount=fieldCount, rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                           line=__LINE__, &
-                          file=FILENAME)) &
+                          file=FILENAME, &
+                          rcToReturn=rc)) &
                           return  ! bail out
                         allocate(fields(fieldCount))
-                        call ESMF_FieldBundleGet(fieldbundle, fieldList=fields, rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                        call ESMF_FieldBundleGet(fieldbundle, fieldList=fields, rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                           line=__LINE__, &
-                          file=FILENAME)) &
+                          file=FILENAME, &
+                          rcToReturn=rc)) &
                           return  ! bail out
                         do fitem=1, fieldCount
                           field = fields(fitem)
-                          call ESMF_FieldGet(field, name=name, rc=rc)
-                          if (ESMF_LogFoundError(rc, &
+                          call ESMF_FieldGet(field, name=name, rc=localrc)
+                          if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                           call NUOPC_ComplianceLogWrite(trim(prefix)//" in FieldBundle, Field name: "//&
-                            trim(name), rc=rc)
-                          if (ESMF_LogFoundError(rc, &
+                            trim(name), rc=localrc)
+                          if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                           call NUOPC_CheckField(prefix, "", field=field, stateid=idStr, &
-                            rc=rc)
-                          if (ESMF_LogFoundError(rc, &
+                            rc=localrc)
+                          if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                         enddo
                         deallocate(fields)
                     else if (stateitemtypeList(item) == ESMF_STATEITEM_STATE) then
                         ! recursive call
                         call ESMF_StateGet(state, itemName=itemNameList(item), &
-                            nestedState=nestedState, rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                            nestedState=nestedState, rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                         nestedPrefix = trim(prefix)//trim(itemNameList(item))//":"
-                        call NUOPC_CheckState(nestedPrefix, referenceName, nestedState, rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                        call NUOPC_CheckState(nestedPrefix, referenceName, nestedState, rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                     endif
 
@@ -1073,6 +1169,9 @@ contains
         character(ESMF_MAXSTR)                :: iStr, vStr
         integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
         logical                               :: warn
+        integer                               :: localrc
+
+        if (present(rc)) rc = ESMF_SUCCESS
 
         if (present(warnIfMissing)) then
             warn = warnIfMissing
@@ -1081,28 +1180,31 @@ contains
         endif
 
         call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
-            convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            convention=convention, purpose=purpose, isPresent=isPresent, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
         if (.not.isPresent) then
             ! attpack not present
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Component level attpack: <"// &
                 "convention: '"//trim(convention)//"', "// &
                 "purpose: '"//trim(purpose)//"'> is NOT present!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
         endif
         call ESMF_AttributeGet(comp, name=attributeName, attpack=attpack, &
             typekind=typekind, itemCount=itemCount, isPresent=isPresent, &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
         if (.not.warn .and. (.not.isPresent .or. itemCount==0)) then
             return
@@ -1110,19 +1212,21 @@ contains
             ! attribute not present
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Component level attribute: <"// &
                 trim(attributeName)//"> is NOT present!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
         else if (itemCount == 0) then
             ! attribute present but not set
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Component level attribute: <"// &
                 trim(attributeName)//"> present but NOT set!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
         else
             ! attribute present and set
@@ -1131,16 +1235,22 @@ contains
                 call ESMF_AttributeGet(comp, name=attributeName, &
                     valueList=valueStringList, &
                     convention=convention, purpose=purpose, &
-                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
+                    attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                    line=__LINE__, &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
+                    return  ! bail out
                 if (itemCount == 1) then
                     ! single valued
                     call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// trim(valueStringList(1)), &
-                        rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                        rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
                 else
                     ! multi valued -> requires loop
@@ -1149,10 +1259,11 @@ contains
                         call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// trim(valueStringList(i)), &
-                            rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                            rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                     enddo
                 endif
@@ -1162,17 +1273,23 @@ contains
                 call ESMF_AttributeGet(comp, name=attributeName, &
                     valueList=valueI4List, &
                     convention=convention, purpose=purpose, &
-                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
+                    attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                    line=__LINE__, &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
+                    return  ! bail out
                 if (itemCount == 1) then
                     ! single valued
                     write(vStr,*) valueI4List(1)
                     call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// vStr, &
-                        rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                        rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
                 else
                     ! multi valued -> requires loop
@@ -1182,10 +1299,11 @@ contains
                         call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// vStr, &
-                            rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                            rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                     enddo
                 endif
@@ -1194,10 +1312,11 @@ contains
                 call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                     trim(attributeName)//"> "// &
                     "present and set: <unsupported data type>", &
-                    rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
             endif
         endif
@@ -1221,48 +1340,56 @@ contains
         character(10*ESMF_MAXSTR), pointer    :: valueStringList(:)
         character(ESMF_MAXSTR)                :: iStr, vStr
         integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
+        integer                               :: localrc
+
+        if (present(rc)) rc = ESMF_SUCCESS
 
         call ESMF_AttributeGetAttPack(comp, attpack=attpack, &
-            convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            convention=convention, purpose=purpose, isPresent=isPresent, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
         if (.not.isPresent) then
             ! attpack not present
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Component level attpack: <"// &
                 "convention: '"//trim(convention)//"', "// &
                 "purpose: '"//trim(purpose)//"'> is NOT present!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
         endif
         call ESMF_AttributeGet(comp, name=attributeName, attpack=attpack, &
             typekind=typekind, itemCount=itemCount, isPresent=isPresent, &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
         if (.not.isPresent) then
             ! attribute not present
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Component level attribute: <"// &
                 trim(attributeName)//"> is NOT present!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
         else if (itemCount == 0) then
             ! attribute present but not set
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Component level attribute: <"// &
                 trim(attributeName)//"> present but NOT set!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
         else
             ! attribute present and set
@@ -1271,16 +1398,22 @@ contains
                 call ESMF_AttributeGet(comp, name=attributeName, &
                     valueList=valueStringList, &
                     convention=convention, purpose=purpose, &
-                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
+                    attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                    line=__LINE__, &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
+                    return  ! bail out
                 if (itemCount == 1) then
                     ! single valued
                     call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// trim(valueStringList(1)), &
-                        rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                        rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
                 else
                     ! multi valued -> requires loop
@@ -1289,10 +1422,11 @@ contains
                         call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// trim(valueStringList(i)), &
-                            rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                            rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                     enddo
                 endif
@@ -1302,17 +1436,23 @@ contains
                 call ESMF_AttributeGet(comp, name=attributeName, &
                     valueList=valueI4List, &
                     convention=convention, purpose=purpose, &
-                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
+                    attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                    line=__LINE__, &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
+                    return  ! bail out
                 if (itemCount == 1) then
                     ! single valued
                     write(vStr,*) valueI4List(1)
                     call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// vStr, &
-                        rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                        rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
                 else
                     ! multi valued -> requires loop
@@ -1322,10 +1462,11 @@ contains
                         call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// vStr, &
-                            rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                            rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                     enddo
                 endif
@@ -1334,10 +1475,11 @@ contains
                 call NUOPC_ComplianceLogWrite(trim(prefix)//" Component level attribute: <"// &
                     trim(attributeName)//"> "// &
                     "present and set: <unsupported data type>", &
-                    rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
             endif
         endif
@@ -1360,49 +1502,57 @@ contains
         character(10*ESMF_MAXSTR), pointer    :: valueStringList(:)
         character(ESMF_MAXSTR)                :: iStr, vStr
         integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
+        integer                               :: localrc
+
+        if (present(rc)) rc = ESMF_SUCCESS
 
         call ESMF_AttributeGetAttPack(state, attpack=attpack, &
-            convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            convention=convention, purpose=purpose, isPresent=isPresent, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
         if (.not.isPresent) then
             ! attpack not present
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> State level attpack: <"// &
                 "convention: '"//trim(convention)//"', "// &
                 "purpose: '"//trim(purpose)//"'> is NOT present!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
             return
          endif
         call ESMF_AttributeGet(state, name=attributeName, attpack=attpack, &
             typekind=typekind, itemCount=itemCount, isPresent=isPresent, &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
         if (.not.isPresent) then
             ! attribute not present
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> State level attribute: <"// &
                 trim(attributeName)//"> is NOT present!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
         else if (itemCount == 0) then
             ! attribute present but not set
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> State level attribute: <"// &
                 trim(attributeName)//"> present but NOT set!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
         else
             ! attribute present and set
@@ -1411,16 +1561,22 @@ contains
                 call ESMF_AttributeGet(state, name=attributeName, &
                     valueList=valueStringList, &
                     convention=convention, purpose=purpose, &
-                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
+                    attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                    line=__LINE__, &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
+                    return  ! bail out
                 if (itemCount == 1) then
                     ! single valued
                     call NUOPC_ComplianceLogWrite(trim(prefix)//" State level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// trim(valueStringList(1)), &
-                        rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                        rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
                 else
                     ! multi valued -> requires loop
@@ -1429,10 +1585,11 @@ contains
                         call NUOPC_ComplianceLogWrite(trim(prefix)//" State level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// trim(valueStringList(i)), &
-                            rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                            rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                     enddo
                 endif
@@ -1442,17 +1599,23 @@ contains
                 call ESMF_AttributeGet(state, name=attributeName, &
                     valueList=valueI4List, &
                     convention=convention, purpose=purpose, &
-                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
+                    attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                    line=__LINE__, &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
+                    return  ! bail out
                 if (itemCount == 1) then
                     ! single valued
                     write(vStr,*) valueI4List(1)
                     call NUOPC_ComplianceLogWrite(trim(prefix)//" State level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// vStr, &
-                        rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                        rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
                 else
                     ! multi valued -> requires loop
@@ -1462,10 +1625,11 @@ contains
                         call NUOPC_ComplianceLogWrite(trim(prefix)//" State level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// vStr, &
-                            rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                            rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                     enddo
                 endif
@@ -1474,10 +1638,11 @@ contains
                 call NUOPC_ComplianceLogWrite(trim(prefix)//" State level attribute: <"// &
                     trim(attributeName)//"> "// &
                     "present and set: <unsupported data type>", &
-                    rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
             endif
         endif
@@ -1506,6 +1671,7 @@ contains
         type(ESMF_AttPack)                    :: attpack
         type(ESMF_FieldStatus_Flag)           :: fieldStatus
         integer                               :: localDeCount
+        integer                               :: localrc
 
         if (present(rc)) rc = ESMF_SUCCESS
 
@@ -1514,26 +1680,29 @@ contains
 
         if (outputJSON .and. includeState) then
 
-            call ESMF_FieldGet(field, status=fieldStatus, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call ESMF_FieldGet(field, status=fieldStatus, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             if (fieldStatus==ESMF_FIELDSTATUS_COMPLETE) then
                 call ESMF_FieldGet(field, rank=rank, typekind=typekind, &
-                    localDeCount=localDeCount, rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    localDeCount=localDeCount, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
 
                 ! only support this case while testing
                 if (typekind==ESMF_TYPEKIND_R8 .and. rank==2 .and. localDeCount==1) then
-                    call ESMF_FieldGet(field, localDe=0, farrayPtr=farrayPtr2D, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                    call ESMF_FieldGet(field, localDe=0, farrayPtr=farrayPtr2D, rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
 
                     fieldMinVal = minval(farrayPtr2D)
@@ -1542,24 +1711,27 @@ contains
                     call ESMF_AttributeAdd(field, convention=convention, purpose=purpose, &
                                attrList=(/"petMinVal",   &
                                           "petMaxVal"/), &
-                               attpack=attpack, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                               attpack=attpack, rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
 
                     call ESMF_AttributeSet(field, name="petMinVal", value=fieldMinVal, &
-                               attpack=attpack, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                               attpack=attpack, rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
 
                     call ESMF_AttributeSet(field, name="petMaxVal", value=fieldMaxVal, &
-                                       attpack=attpack, rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                                       attpack=attpack, rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
 
                    endif
@@ -1569,51 +1741,58 @@ contains
             call ESMF_AttributeAdd(field, convention=convention, purpose=purpose, &
                                attrList=(/"ESMFID     ",   &
                                           "stateESMFID"/), &
-                               attpack=attpack, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                               attpack=attpack, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
-            call JSON_GetID(field, idStr, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call JSON_GetID(field, idStr, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                  line=__LINE__, &
-                 file=FILENAME)) &
+                 file=FILENAME, &
+                 rcToReturn=rc)) &
                  return  ! bail out
 
             call ESMF_AttributeSet(field, name="ESMFID", value=trim(idStr), &
-                               attpack=attpack, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                               attpack=attpack, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             call ESMF_AttributeSet(field, name="stateESMFID", value=trim(stateid), &
-                               attpack=attpack, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                               attpack=attpack, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             call ESMF_AttributeGetAttPack(field, attpack=attpack, &
-              convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+              convention=convention, purpose=purpose, isPresent=isPresent, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                   line=__LINE__, &
-                  file=FILENAME)) &
+                  file=FILENAME, &
+                  rcToReturn=rc)) &
                   return  ! bail out
 
             if (isPresent) then
                 call ESMF_AttPackStreamJSON(attpack, flattenPackList=.true., &
-                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    includeUnset=.false., includeLinks=.false., output=jsonstring, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                   line=__LINE__, &
-                  file=FILENAME)) &
+                  file=FILENAME, &
+                  rcToReturn=rc)) &
                   return  ! bail out
 
-                call JSON_LogWrite(jsonstring, rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                call JSON_LogWrite(jsonstring, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                  line=__LINE__, &
-                 file=FILENAME)) &
+                 file=FILENAME, &
+                 rcToReturn=rc)) &
                  return  ! bail out
             endif
         endif ! outputJSON
@@ -1628,8 +1807,8 @@ contains
     !    &"petMinVal":"'//trim(adjustl(fieldMinValStr))//'",&
     !    &"petMaxVal":"'//trim(adjustl(fieldMaxValStr))//'"}}'
 
-    !call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=rc)
-    !if (ESMF_LogFoundError(rc, &
+    !call ESMF_LogWrite(jsonstring, ESMF_LOGMSG_JSON, rc=localrc)
+    !if (ESMF_LogFoundError(localrc, &
     !    line=__LINE__, &
     !    file=FILENAME)) &
     !    return  ! bail out
@@ -1655,6 +1834,9 @@ contains
         character(ESMF_MAXSTR)                :: iStr, vStr
         integer(ESMF_KIND_I4), pointer        :: valueI4List(:)
         logical                               :: warn
+        integer                               :: localrc
+
+        if (present(rc)) rc = ESMF_SUCCESS
 
         if (present(warnIfMissing)) then
             warn = warnIfMissing
@@ -1663,28 +1845,31 @@ contains
         endif
 
         call ESMF_AttributeGetAttPack(field, attpack=attpack, &
-            convention=convention, purpose=purpose, isPresent=isPresent, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            convention=convention, purpose=purpose, isPresent=isPresent, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
         if (.not.isPresent) then
             ! attpack not present
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Field level attpack: <"// &
                 "convention: '"//trim(convention)//"', "// &
                 "purpose: '"//trim(purpose)//"'> is NOT present!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
         endif
         call ESMF_AttributeGet(field, name=attributeName, attpack=attpack, &
             typekind=typekind, itemCount=itemCount, isPresent=isPresent, &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
         if (.not.warn .and. (.not.isPresent .or. itemCount==0)) then
             return
@@ -1692,19 +1877,21 @@ contains
             ! attribute not present
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Field level attribute: <"// &
                 trim(attributeName)//"> is NOT present!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
         else if (itemCount == 0) then
             ! attribute present but not set
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> Field level attribute: <"// &
                 trim(attributeName)//"> present but NOT set!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
         else
             ! attribute present and set
@@ -1713,16 +1900,22 @@ contains
                 call ESMF_AttributeGet(field, name=attributeName, &
                     valueList=valueStringList, &
                     convention=convention, purpose=purpose, &
-                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
+                    attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                    line=__LINE__, &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
+                    return  ! bail out
                 if (itemCount == 1) then
                     ! single valued
                     call NUOPC_ComplianceLogWrite(trim(prefix)//" Field level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// trim(valueStringList(1)), &
-                        rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                        rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
                 else
                     ! multi valued -> requires loop
@@ -1731,10 +1924,11 @@ contains
                         call NUOPC_ComplianceLogWrite(trim(prefix)//" Field level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// trim(valueStringList(i)), &
-                            rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                            rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                     enddo
                 endif
@@ -1744,17 +1938,23 @@ contains
                 call ESMF_AttributeGet(field, name=attributeName, &
                     valueList=valueI4List, &
                     convention=convention, purpose=purpose, &
-                    attnestflag=ESMF_ATTNEST_ON, rc=rc)
+                    attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
+                    line=__LINE__, &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
+                    return  ! bail out
                 if (itemCount == 1) then
                     ! single valued
                     write(vStr,*) valueI4List(1)
                     call NUOPC_ComplianceLogWrite(trim(prefix)//" Field level attribute: <"// &
                         trim(attributeName)//"> "// &
                         "present and set: "// vStr, &
-                        rc=rc)
-                    if (ESMF_LogFoundError(rc, &
+                        rc=localrc)
+                    if (ESMF_LogFoundError(localrc, &
                         line=__LINE__, &
-                        file=FILENAME)) &
+                        file=FILENAME, &
+                        rcToReturn=rc)) &
                         return  ! bail out
                 else
                     ! multi valued -> requires loop
@@ -1764,10 +1964,11 @@ contains
                         call NUOPC_ComplianceLogWrite(trim(prefix)//" Field level attribute: <"// &
                             trim(attributeName)//">["//trim(adjustl(iStr))//"] "// &
                             "present and set: "// vStr, &
-                            rc=rc)
-                        if (ESMF_LogFoundError(rc, &
+                            rc=localrc)
+                        if (ESMF_LogFoundError(localrc, &
                             line=__LINE__, &
-                            file=FILENAME)) &
+                            file=FILENAME, &
+                            rcToReturn=rc)) &
                             return  ! bail out
                     enddo
                 endif
@@ -1776,10 +1977,11 @@ contains
                 call NUOPC_ComplianceLogWrite(trim(prefix)//" Field level attribute: <"// &
                     trim(attributeName)//"> "// &
                     "present and set: <unsupported data type>", &
-                    rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
             endif
         endif
@@ -1796,33 +1998,44 @@ contains
 
         type(ESMF_Pointer)                      :: clockThis
         logical                                 :: clockValid
+        logical                                 :: clockCreated
+        integer                                 :: localrc
 
         if (present(rc)) rc = ESMF_SUCCESS
 
         clockValid = .true.
         ! Ensure that the Clock is a valid object
         ! Clock has deep C++ implementation, thus must also check this pointer here
-        call ESMF_ClockGetThis(clock, clockThis, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call ESMF_ClockGetThis(clock, clockThis, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
-        if (.not.ESMF_ClockIsCreated(clock) .or. &
+        clockCreated = ESMF_ClockIsCreated(clock, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        if (clockCreated .or. &
             (clockThis == ESMF_NULL_POINTER)) then
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The incoming Clock is invalid!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
             clockValid = .false.
         endif
 
         if (clockValid) then
-            clockCopy = ESMF_ClockCreate(clock, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            clockCopy = ESMF_ClockCreate(clock, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
         endif
 
@@ -1839,6 +2052,7 @@ contains
         type(ESMF_Pointer)                      :: clockThis
         logical                                 :: clockValid
         logical                                 :: clockModified
+        logical                                 :: clockCreated
 
         character (ESMF_MAXSTR) :: name, nameCopy
         type(ESMF_TimeInterval) :: timeStep, timeStepCopy
@@ -1850,27 +2064,42 @@ contains
         type(ESMF_Time)         :: currTime, currTimeCopy
         integer(ESMF_KIND_I8)   :: advanceCount, advanceCountCopy
         type(ESMF_Direction_Flag)    :: direction, directionCopy
+        integer                      :: localrc
 
         if (present(rc)) rc = ESMF_SUCCESS
 
         clockValid = .true.
         ! Ensure that the Clock is a valid object
         ! Clock has deep C++ implementation, thus must also check this pointer here
-        call ESMF_ClockGetThis(clock, clockThis, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call ESMF_ClockGetThis(clock, clockThis, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
-        if (.not.ESMF_ClockIsCreated(clock) .or. &
+        clockCreated = ESMF_ClockIsCreated(clock, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        if (clockCreated .or. &
             (clockThis == ESMF_NULL_POINTER)) clockValid = .false.
         ! Further ensure that the clockCopy is a valid object
         ! Clock has deep C++ implementation, thus must also check this pointer here
-        call ESMF_ClockGetThis(clockCopy, clockThis, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call ESMF_ClockGetThis(clockCopy, clockThis, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
-        if (.not.ESMF_ClockIsCreated(clockCopy) .or. &
+        clockCreated = ESMF_ClockIsCreated(clockCopy, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        if (clockCreated .or. &
             (clockThis == ESMF_NULL_POINTER)) clockValid = .false.
 
         if (clockValid) then
@@ -1879,19 +2108,21 @@ contains
             call ESMF_ClockGet(clock, name=name, timeStep=timeStep, &
                 startTime=startTime, stopTime=stopTime, runDuration=runDuration, &
                 runTimeStepCount=runTimeStepCount, refTime=refTime, currTime=currTime, &
-                advanceCount=advanceCount, direction=direction, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                advanceCount=advanceCount, direction=direction, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             call ESMF_ClockGet(clockCopy, name=nameCopy, timeStep=timeStepCopy, &
                 startTime=startTimeCopy, stopTime=stopTimeCopy, runDuration=runDurationCopy, &
                 runTimeStepCount=runTimeStepCountCopy, refTime=refTimeCopy, currTime=currTimeCopy, &
-                advanceCount=advanceCountCopy, direction=directionCopy, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                advanceCount=advanceCountCopy, direction=directionCopy, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             if (name /= nameCopy) clockModified = .true.
@@ -1908,24 +2139,27 @@ contains
 
             if (clockModified) then
                 call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The incoming Clock was modified!", &
-                    ESMF_LOGMSG_WARNING, rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    ESMF_LOGMSG_WARNING, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
             else
                 call NUOPC_ComplianceLogWrite(trim(prefix)//" The incoming Clock was not modified.", &
-                    ESMF_LOGMSG_INFO, rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    ESMF_LOGMSG_INFO, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
             endif
 
-            call ESMF_ClockDestroy(clockCopy, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call ESMF_ClockDestroy(clockCopy, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
         endif
@@ -1946,6 +2180,7 @@ contains
         type(ESMF_Clock)                        :: clockInternal
         logical                                 :: clockMatch
         logical                                 :: clockIsPresent
+        logical                                 :: clockIsCreated
 
         character (ESMF_MAXSTR) :: name, nameInt
         type(ESMF_TimeInterval) :: timeStep, timeStepInt
@@ -1957,45 +2192,56 @@ contains
         type(ESMF_Time)         :: currTime, currTimeInt
         integer(ESMF_KIND_I8)   :: advanceCount, advanceCountInt
         type(ESMF_Direction_Flag)    :: direction, directionInt
+        integer                      :: localrc
 
         if (present(rc)) rc = ESMF_SUCCESS
 
-        call ESMF_GridCompGet(comp, clockIsPresent=clockIsPresent, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call ESMF_GridCompGet(comp, clockIsPresent=clockIsPresent, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         if (.not.clockIsPresent) then
 
             call NUOPC_ComplianceLogWrite(trim(prefix)// &
                 " ==> The internal Clock is not present!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
             return
 
         else
 
-            call ESMF_GridCompGet(comp, clock=clockInternal, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call ESMF_GridCompGet(comp, clock=clockInternal, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
 
             clockInternalValid = .true.
             ! Ensure that the internalClock is a valid object
-            if (.not.ESMF_ClockIsCreated(clockInternal)) &
+            clockIsCreated = ESMF_ClockIsCreated(clockInternal, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                line=__LINE__, &
+                file=FILENAME, &
+                rcToReturn=rc)) &
+                return  ! bail out
+            if (clockIsCreated) &
                 clockInternalValid = .false.
 
             if (.not.clockInternalValid) then
                 call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The internal Clock is invalid!", &
-                    ESMF_LOGMSG_WARNING, rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    ESMF_LOGMSG_WARNING, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
                 return
             endif
@@ -2007,15 +2253,22 @@ contains
 
         clockValid = .true.
         ! Ensure that the Clock is a valid object
+        clockIsCreated = ESMF_ClockIsCreated(clock, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
         if (.not.ESMF_ClockIsCreated(clock)) &
             clockValid = .false.
 
         if (.not.clockValid) then
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> No Clock to compare internal Clock!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
             return
         endif
@@ -2023,29 +2276,32 @@ contains
         call ESMF_ClockGet(clock, name=name, timeStep=timeStep, &
             startTime=startTime, stopTime=stopTime, runDuration=runDuration, &
             runTimeStepCount=runTimeStepCount, refTime=refTime, currTime=currTime, &
-            advanceCount=advanceCount, direction=direction, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            advanceCount=advanceCount, direction=direction, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         call ESMF_ClockGet(clockInternal, name=nameInt, timeStep=timeStepInt, &
             startTime=startTimeInt, stopTime=stopTimeInt, runDuration=runDurationInt, &
             runTimeStepCount=runTimeStepCountInt, refTime=refTimeInt, currTime=currTimeInt, &
-            advanceCount=advanceCountInt, direction=directionInt, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            advanceCount=advanceCountInt, direction=directionInt, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         clockMatch = .true. ! initialize
 
         if (startTimeInt /= startTime) then
             call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> startTime of internal Clock does not match Clock!", &
-                ESMF_LOGMSG_WARNING, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                ESMF_LOGMSG_WARNING, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
             clockMatch = .false.
         endif
@@ -2053,10 +2309,11 @@ contains
         if (mustMatchCurr) then
             if (currTimeInt /= currTime) then
                 call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> currTime of internal Clock does not match Clock!", &
-                    ESMF_LOGMSG_WARNING, rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    ESMF_LOGMSG_WARNING, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
                 clockMatch = .false.
             endif
@@ -2064,27 +2321,30 @@ contains
 
         if (clockMatch) then
             call NUOPC_ComplianceLogWrite(trim(prefix)//" The internal Clock matches incoming Clock.", &
-                rc=rc)
-            if (ESMF_LogFoundError(rc, &
+                rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
                 line=__LINE__, &
-                file=FILENAME)) &
+                file=FILENAME, &
+                rcToReturn=rc)) &
                 return  ! bail out
         endif
 
         if (mustReachStop) then
             if (currTimeInt /= stopTimeInt) then
                 call NUOPC_ComplianceLogWrite(trim(prefix)//" ==> The internal Clock has not run to its stopTime!", &
-                    ESMF_LOGMSG_WARNING, rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    ESMF_LOGMSG_WARNING, rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
             else
                 call NUOPC_ComplianceLogWrite(trim(prefix)//" The internal Clock has run to its stopTime.", &
-                    rc=rc)
-                if (ESMF_LogFoundError(rc, &
+                    rc=localrc)
+                if (ESMF_LogFoundError(localrc, &
                     line=__LINE__, &
-                    file=FILENAME)) &
+                    file=FILENAME, &
+                    rcToReturn=rc)) &
                     return  ! bail out
             endif
         endif
@@ -2096,6 +2356,7 @@ contains
         type(ESMF_GridComp)                   :: comp
         integer,      intent(out), optional   :: rc
 
+        integer                 :: localrc
         integer                 :: fobjCount, objCount
         integer                 :: virtMemPet, physMemPet
         character(ESMF_MAXSTR)  :: output, virtMemPetStr, physMemPetStr, compName
@@ -2104,71 +2365,79 @@ contains
         if (present(rc)) rc = ESMF_SUCCESS
 
         ! memory statistics for this PET
-        call ESMF_VMGetMemInfo(virtMemPet, physMemPet, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call ESMF_VMGetMemInfo(virtMemPet, physMemPet, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         write (virtMemPetStr, *) virtMemPet
         call NUOPC_ComplianceLogWrite(trim(prefix)//"ESMF Stats: "//&
             "the virtual memory used by this PET (in KB): "// &
-            trim(adjustl(virtMemPetStr)), rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            trim(adjustl(virtMemPetStr)), rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         write (physMemPetStr, *) physMemPet
         call NUOPC_ComplianceLogWrite(trim(prefix)//"ESMF Stats: "//&
             "the physical memory used by this PET (in KB): "// &
-            trim(adjustl(physMemPetStr)), rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            trim(adjustl(physMemPetStr)), rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         ! objects tracked by the ESMF garbage collection
-        call ESMF_VMGetCurrentGarbageInfo(fobjCount, objCount, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call ESMF_VMGetCurrentGarbageInfo(fobjCount, objCount, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         write (output, *) fobjCount
         call NUOPC_ComplianceLogWrite(trim(prefix)//"ESMF Stats: "//&
             "ESMF Fortran objects referenced by the ESMF garbage collection: "// &
-            trim(adjustl(output)), rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            trim(adjustl(output)), rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         write (output, *) objCount
         call NUOPC_ComplianceLogWrite(trim(prefix)//"ESMF Stats: "//&
             "ESMF objects (F & C++) referenced by the ESMF garbage collection: "// &
-            trim(adjustl(output)), rc=rc)
-        if (ESMF_LogFoundError(rc, &
+            trim(adjustl(output)), rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         if (outputJSON .and. includeVmStats) then
 
-            call ESMF_GridCompGet(comp, name=compName, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call ESMF_GridCompGet(comp, name=compName, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
 
             write(jsonString,*) '{"stats":{&
               &"virtMemPet":"'//trim(adjustl(virtMemPetStr))//'",&
               &"physMemPet":"'//trim(adjustl(physMemPetStr))//'"}}'
 
-            call JSON_LogWrite(trim(jsonString), rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call JSON_LogWrite(trim(jsonString), rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
         endif
 
@@ -2210,18 +2479,19 @@ contains
 
         !-----------------------------------------------------------------------------
         ! local variables
+        integer                   :: localrc
         integer                   :: i
         integer                   :: itemCount, stat, ind, max, tempPhaseIndex
         character(ESMF_MAXSTR)    :: name
         character(len=40)         :: attributeName
         character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
 
-        rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         ! query the Component for info
-        call ESMF_GridCompGet(comp, name=name, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call ESMF_GridCompGet(comp, name=name, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
         ! determine which phaseMap to deal with
         attributeName = "UnknownPhaseMap" ! initialize to something obvious
@@ -2241,9 +2511,9 @@ contains
         call ESMF_AttributeGet(comp, name=trim(attributeName), &
             itemCount=itemCount, &
             convention="NUOPC", purpose="Instance", &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
         ! search the phaseMap
         if (itemCount > 0) then
@@ -2251,12 +2521,12 @@ contains
             if (ESMF_LogFoundAllocError(statusToCheck=stat, &
                 msg="Allocation of temporary data structure.", &
                 line=__LINE__, &
-                file=trim(name)//":"//FILENAME)) return  ! bail out
+                file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
             call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
                 convention="NUOPC", purpose="Instance", &
-                attnestflag=ESMF_ATTNEST_ON, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
             do i=1, itemCount
                 !print *, "PHASES(i) = " // phases(i)
@@ -2305,18 +2575,19 @@ contains
 
         !-----------------------------------------------------------------------------
         ! local variables
+        integer                   :: localrc
         integer                   :: i
         integer                   :: itemCount, stat, ind, max, tempPhaseIndex
         character(ESMF_MAXSTR)    :: name
         character(len=40)         :: attributeName
         character(len=NUOPC_PhaseMapStringLength), pointer  :: phases(:)
 
-        rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         ! query the Component for info
-        call ESMF_CplCompGet(comp, name=name, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        call ESMF_CplCompGet(comp, name=name, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
         ! determine which phaseMap to deal with
         attributeName = "UnknownPhaseMap" ! initialize to something obvious
@@ -2334,9 +2605,9 @@ contains
         call ESMF_AttributeGet(comp, name=trim(attributeName), &
             itemCount=itemCount, &
             convention="NUOPC", purpose="Instance", &
-            attnestflag=ESMF_ATTNEST_ON, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
         ! search the phaseMap
         if (itemCount > 0) then
@@ -2344,12 +2615,13 @@ contains
             if (ESMF_LogFoundAllocError(statusToCheck=stat, &
                 msg="Allocation of temporary data structure.", &
                 line=__LINE__, &
-                file=trim(name)//":"//FILENAME)) return  ! bail out
+                file=trim(name)//":"//FILENAME, &
+                rcToReturn=rc)) return  ! bail out
             call ESMF_AttributeGet(comp, name=trim(attributeName), valueList=phases, &
                 convention="NUOPC", purpose="Instance", &
-                attnestflag=ESMF_ATTNEST_ON, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+                attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
             do i=1, itemCount
                 !print *, "PHASES(i) = " // phases(i)
@@ -2376,17 +2648,19 @@ contains
 
         ! locals
         character(len=128) :: jsonString
+        integer            :: localrc
 
-        rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         if (outputJSON) then
             write(jsonString,*) '{"ctrl":{&
                 &"event":"region_enter",&
                 &"name":"'//trim(name)//'"}}'
-            call JSON_LogWrite(jsonString, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call JSON_LogWrite(jsonString, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
         endif
 
@@ -2398,17 +2672,19 @@ contains
 
         ! locals
         character(len=128) :: jsonString
+        integer            :: localrc
 
-        rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         if (outputJSON) then
             write(jsonString,*) '{"ctrl":{&
                 &"event":"region_exit",&
                 &"name":"'//trim(name)//'"}}'
-            call JSON_LogWrite(jsonString, rc=rc)
-            if (ESMF_LogFoundError(rc, &
+            call JSON_LogWrite(jsonString, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
               line=__LINE__, &
-              file=FILENAME)) &
+              file=FILENAME, &
+              rcToReturn=rc)) &
               return  ! bail out
         endif
 
@@ -2419,12 +2695,16 @@ contains
         character(len=*), intent(in) ::   msg
         integer, optional, intent(out) :: rc
 
-        rc = ESMF_SUCCESS
+        ! locals
+        integer            :: localrc
 
-        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_JSON, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        call ESMF_LogWrite(trim(msg), ESMF_LOGMSG_JSON, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
           line=__LINE__, &
-          file=FILENAME)) &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
 
     end subroutine
@@ -2436,10 +2716,12 @@ contains
         integer, intent(out), optional :: rc
 
         ! locals
+        integer :: localrc
         character(len=ESMF_MAXSTR) :: compName
         integer :: phase
         type(ESMF_Clock) :: clock
         logical :: clockIsPresent
+        logical :: clockIsCreated
         type(ESMF_Method_Flag) :: method
         character(len=16) :: phaseString
         character(len=16) :: methodString
@@ -2447,17 +2729,17 @@ contains
         character(len=64) :: idStr
         character(len=512) :: jsonString
 
-        rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         call ESMF_GridCompGet(comp, clockIsPresent=clockIsPresent, &
-            currentMethod=method, currentPhase=phase, name=compName, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-             line=__LINE__, file=FILENAME)) return  ! bail out
+            currentMethod=method, currentPhase=phase, name=compName, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
         if (clockIsPresent) then
-            call ESMF_GridCompGet(comp, clock=clock, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-              line=__LINE__, file=FILENAME)) return  ! bail out
+            call ESMF_GridCompGet(comp, clock=clock, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         endif
 
         if (method == ESMF_METHOD_INITIALIZEIC) then
@@ -2473,18 +2755,23 @@ contains
         write(phaseString, "(I0)") phase
 
         timeStamp = '""'
-        if (clockIsPresent .and. ESMF_ClockIsCreated(clock)) then
+        clockIsCreated = ESMF_ClockIsCreated(clock, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+        if (clockIsPresent .and. clockIsCreated) then
             call ESMF_ClockPrint(clock, options="currTime", &
-                unit=timeStamp, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, file=FILENAME)) return  ! bail out
+                unit=timeStamp, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
             timeStamp = '"'//trim(timeStamp)//'"'
         endif
 
-        call JSON_GetID(comp, idStr, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call JSON_GetID(comp, idStr, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
           line=__LINE__, &
-          file=FILENAME)) &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
 
         write(jsonString,*) '{"ctrl":{&
@@ -2495,10 +2782,11 @@ contains
             &"phase":"'//trim(phaseString)//'",&
             &"currTime":'//trim(timeStamp)//'}}'
 
-        call JSON_LogWrite(trim(jsonString), rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call JSON_LogWrite(trim(jsonString), rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
           line=__LINE__, &
-          file=FILENAME)) &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
 
     end subroutine
@@ -2511,10 +2799,12 @@ contains
         integer, intent(out), optional :: rc
 
         ! locals
+        integer :: localrc
         character(len=ESMF_MAXSTR) :: compName
         integer :: phase
         type(ESMF_Clock) :: clock
         logical :: clockIsPresent
+        logical :: clockIsCreated
         type(ESMF_Method_Flag) :: method
         character(len=16) :: phaseString
         character(len=16) :: methodString
@@ -2522,17 +2812,17 @@ contains
         character(len=64) :: idStr
         character(len=512) :: jsonString
 
-        rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         call ESMF_CplCompGet(comp, clockIsPresent=clockIsPresent, &
-            currentMethod=method, currentPhase=phase, name=compName, rc=rc)
-        if (ESMF_LogFoundError(rc, &
-             line=__LINE__, file=FILENAME)) return  ! bail out
+            currentMethod=method, currentPhase=phase, name=compName, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
         if (clockIsPresent) then
-            call ESMF_CplCompGet(comp, clock=clock, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-              line=__LINE__, file=FILENAME)) return  ! bail out
+            call ESMF_CplCompGet(comp, clock=clock, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         endif
 
         if (method == ESMF_METHOD_INITIALIZEIC) then
@@ -2548,18 +2838,23 @@ contains
         write(phaseString, "(I0)") phase
 
         timeStamp = '""'
-        if (clockIsPresent .and. ESMF_ClockIsCreated(clock)) then
+        clockIsCreated = ESMF_ClockIsCreated(clock, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
+             line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
+        if (clockIsPresent .and. clockIsCreated) then
             call ESMF_ClockPrint(clock, options="currTime", &
-                unit=timeStamp, rc=rc)
-            if (ESMF_LogFoundError(rc, &
-                line=__LINE__, file=FILENAME)) return  ! bail out
+                unit=timeStamp, rc=localrc)
+            if (ESMF_LogFoundError(localrc, &
+                line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
             timeStamp = '"'//trim(timeStamp)//'"'
         endif
 
-        call JSON_GetID(comp, idStr, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call JSON_GetID(comp, idStr, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
           line=__LINE__, &
-          file=FILENAME)) &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
 
         write(jsonString,*) '{"ctrl":{&
@@ -2570,10 +2865,11 @@ contains
             &"phase":"'//trim(phaseString)//'",&
             &"currTime":'//trim(timeStamp)//'}}'
 
-        call JSON_LogWrite(trim(jsonString), rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call JSON_LogWrite(trim(jsonString), rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
           line=__LINE__, &
-          file=FILENAME)) &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
 
     end subroutine
@@ -2582,17 +2878,19 @@ contains
         integer, intent(out), optional :: rc
 
         ! locals
+        integer           :: localrc
         character(len=64) :: jsonString
 
-        rc = ESMF_SUCCESS
+        if (present(rc)) rc = ESMF_SUCCESS
 
         write(jsonString,*) '{"esmf_json":{&
             &"version":"0.1"}}'
 
-        call JSON_LogWrite(trim(jsonString), rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call JSON_LogWrite(trim(jsonString), rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
           line=__LINE__, &
-          file=FILENAME)) &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
 
     end subroutine

@@ -135,6 +135,7 @@ module NUOPC_Model
     integer                   :: localrc
     character(ESMF_MAXSTR)    :: name
     logical                   :: clockIsPresent
+    logical                   :: clockIsCreated
     logical                   :: existflag
     logical                   :: allConnected
     integer                   :: i
@@ -198,7 +199,10 @@ module NUOPC_Model
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-    if (.not.clockIsPresent .and. ESMF_ClockIsCreated(clock)) then
+    clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (.not.clockIsPresent .and. clockIsCreated) then
       ! set the internal Clock as a copy of the incoming Clock by a default
       call NUOPC_CompSetClock(gcomp, clock, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -443,19 +447,20 @@ module NUOPC_Model
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
+    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
 
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(model, name=name, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_CompGet(model, name=name, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! query ModeBase
     call NUOPC_ModelBaseGet(model, driverClock=driverClock, clock=modelClock, &
-      importState=importState, exportState=exportState, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      importState=importState, exportState=exportState, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     

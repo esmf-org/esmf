@@ -328,6 +328,7 @@ contains
         type(ESMF_Clock)        :: clockCopy
         integer                 :: phase
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
+        logical                 :: clockIsCreated
     
         ! Initialize user return code
         rc = ESMF_SUCCESS
@@ -442,7 +443,10 @@ contains
                call ESMF_TraceMemInfo(rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
-               if (ESMF_ClockIsCreated(clock)) then
+               clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return
+               if (clockIsCreated) then
                   call ESMF_TraceClock(clock, rc=rc)
                   if (ESMF_LogFoundError(rc, &
                        line=__LINE__, file=FILENAME)) return                              
@@ -478,7 +482,10 @@ contains
               call ESMF_TracePhaseExit(comp, rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return                              
-              if (ESMF_ClockIsCreated(clock)) then
+              clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                   line=__LINE__, file=FILENAME)) return
+              if (clockIsCreated) then
                  call ESMF_TraceClock(clock, rc=rc)
                  if (ESMF_LogFoundError(rc, &
                       line=__LINE__, file=FILENAME)) return                              
@@ -602,6 +609,7 @@ contains
         type(ESMF_Clock)        :: clockCopy
         integer                 :: phase
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
+        logical                 :: clockIsCreated
 
         ! Initialize user return code
         rc = ESMF_SUCCESS
@@ -709,7 +717,10 @@ contains
                 call ESMF_TraceMemInfo(rc=rc)
                 if (ESMF_LogFoundError(rc, &
                      line=__LINE__, file=FILENAME)) return                              
-                if (ESMF_ClockIsCreated(clock)) then
+                clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+                if (ESMF_LogFoundError(rc, &
+                     line=__LINE__, file=FILENAME)) return
+                if (clockIsCreated) then
                    call ESMF_TraceClock(clock, rc=rc)
                    if (ESMF_LogFoundError(rc, &
                         line=__LINE__, file=FILENAME)) return                              
@@ -744,7 +755,10 @@ contains
               call ESMF_TracePhaseExit(comp, rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return                              
-              if (ESMF_ClockIsCreated(clock)) then
+              clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                   line=__LINE__, file=FILENAME)) return
+              if (clockIsCreated) then
                  call ESMF_TraceClock(clock, rc=rc)
                  if (ESMF_LogFoundError(rc, &
                       line=__LINE__, file=FILENAME)) return                              
@@ -861,6 +875,7 @@ contains
         type(ESMF_Clock)        :: clockCopy
         integer                 :: phase
         character(NUOPC_PhaseMapStringLength) :: phaseLabel
+        logical                 :: clockIsCreated
 
         ! Initialize user return code
         rc = ESMF_SUCCESS
@@ -960,7 +975,10 @@ contains
                call ESMF_TraceMemInfo(rc=rc)
                if (ESMF_LogFoundError(rc, &
                     line=__LINE__, file=FILENAME)) return                              
-               if (ESMF_ClockIsCreated(clock)) then
+               clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+               if (ESMF_LogFoundError(rc, &
+                    line=__LINE__, file=FILENAME)) return
+               if (clockIsCreated) then
                   call ESMF_TraceClock(clock, rc=rc)
                   if (ESMF_LogFoundError(rc, &
                        line=__LINE__, file=FILENAME)) return                              
@@ -995,7 +1013,10 @@ contains
               call ESMF_TracePhaseExit(comp, rc=rc)
               if (ESMF_LogFoundError(rc, &
                    line=__LINE__, file=FILENAME)) return                              
-              if (ESMF_ClockIsCreated(clock)) then
+              clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                   line=__LINE__, file=FILENAME)) return
+              if (clockIsCreated) then
                  call ESMF_TraceClock(clock, rc=rc)
                  if (ESMF_LogFoundError(rc, &
                       line=__LINE__, file=FILENAME)) return                              
@@ -1098,6 +1119,7 @@ contains
         logical,            intent(in),  optional :: forward
         integer,            intent(out), optional :: rc
 
+        integer                 :: localrc
         character(ESMF_MAXSTR)  :: compName
         character(len=3)        :: arrow
         character(len=3)        :: forwardArrow
@@ -1110,10 +1132,11 @@ contains
             if (.not.forward) arrow = "|<-"
         endif
 
-        call ESMF_CplCompGet(comp, name=compName, rc=rc)
-        if (ESMF_LogFoundError(rc, &
+        call ESMF_CplCompGet(comp, name=compName, rc=localrc)
+        if (ESMF_LogFoundError(localrc, &
             line=__LINE__, &
-            file=FILENAME)) &
+            file=FILENAME, &
+            rcToReturn=rc)) &
             return  ! bail out
 
         prefix = "COMPLIANCECHECKER:"//repeat(forwardArrow, ccfDepth-1)//&
