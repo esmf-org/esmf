@@ -8458,9 +8458,12 @@ template<typename SIT, typename DIT>
 //
 //EOPI
 //-----------------------------------------------------------------------------
+
   // initialize return code; assume routine not implemented
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
+
+  ESMCI_METHOD_ENTER(localrc)
 
   // every Pet must provide srcArray and dstArray
   if (srcArray == NULL){
@@ -8533,6 +8536,8 @@ template<typename SIT, typename DIT>
   localrc = (*routehandle)->fingerprint(srcArray, dstArray);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
+
+  ESMCI_METHOD_EXIT(localrc)
 
   // return successfully
   rc = ESMF_SUCCESS;
