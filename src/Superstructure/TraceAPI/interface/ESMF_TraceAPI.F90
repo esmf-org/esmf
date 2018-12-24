@@ -589,7 +589,7 @@ contains
     !print *, "attributeKeys = ", trim(attributeKeys)
     !print *, "attributeVals = ", trim(attributeVals)
         
-    call c_esmftrace_component_info(comp, vmid, baseid, trim(name), &
+    call c_esmftrace_component_info(vmid, baseid, trim(name), &
          trim(attributeKeys), trim(attributeVals), rc)
     if (ESMF_LogFoundError(rc, ESMF_ERR_PASSTHRU, &
          ESMF_CONTEXT, rcToReturn=rc)) return
