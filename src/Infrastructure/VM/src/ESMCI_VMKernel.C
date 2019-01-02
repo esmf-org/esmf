@@ -466,11 +466,11 @@ void VMK::init(MPI_Comm mpiCommunicator){
       // new ssiid
       ssiid[i]=ssiCount;
       ++ssiCount;
-      temp_ssiPetCount[i] = 1;
+      temp_ssiPetCount[ssiid[i]] = 1;
     }else{
       // found previous ssiid
       ssiid[i]=ssiid[j];
-      temp_ssiPetCount[j]++;
+      temp_ssiPetCount[ssiid[j]]++;
     }
   }
   delete [] temp_ssiid;
@@ -482,10 +482,19 @@ void VMK::init(MPI_Comm mpiCommunicator){
     if (temp_ssiPetCount[i] > ssiMaxPetCount)
       ssiMaxPetCount = temp_ssiPetCount[i];
   }
-  ssiLocalPetCount=temp_ssiPetCount[ssiid[mypet]];
+  int localSsi = ssiid[mypet];
+  ssiLocalPetCount=temp_ssiPetCount[localSsi];
+#if 0
+{
+  std::stringstream msg;
+  msg << "VMK::init: " << __LINE__
+    << " ssiLocalPetCount=" << ssiLocalPetCount;
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+}
+#endif
   delete [] temp_ssiPetCount;
   ssiLocalPetList = new int[ssiLocalPetCount];
-  int localSsi = ssiid[mypet];
+#if 1
   int j=0;
   for (int i=0; i<ncores; i++){
     if (ssiid[i]==localSsi){
@@ -493,6 +502,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
       ++j;
     }
   }
+#endif
 #endif
   // ESMCI::VMK pet -> core mapping
   lpid = new int[npets];
@@ -663,9 +673,9 @@ void VMK::construct(void *ssarg){
     if (j==i){
       // new ssiid found
       ++ssiCount;
-      temp_ssiPetCount[i] = 1;
+      temp_ssiPetCount[ssiid[cid[i][0]]] = 1;
     }else
-      temp_ssiPetCount[j]++;
+      temp_ssiPetCount[ssiid[cid[j][0]]]++;
   }
   ssiMinPetCount=npets;
   ssiMaxPetCount=0;
@@ -675,10 +685,18 @@ void VMK::construct(void *ssarg){
     if (temp_ssiPetCount[i] > ssiMaxPetCount)
       ssiMaxPetCount = temp_ssiPetCount[i];
   }
-  ssiLocalPetCount=temp_ssiPetCount[ssiid[mypet]];
+  int localSsi = ssiid[cid[mypet][0]];
+  ssiLocalPetCount=temp_ssiPetCount[localSsi];
+#if 0
+{
+  std::stringstream msg;
+  msg << "VMK::init: " << __LINE__
+    << " ssiLocalPetCount=" << ssiLocalPetCount;
+  ESMC_LogDefault.Write(msg.str(), ESMC_LOGMSG_INFO);
+}
+#endif
   delete [] temp_ssiPetCount;
   ssiLocalPetList = new int[ssiLocalPetCount];
-  int localSsi = ssiid[cid[mypet][0]];
   int j=0;
   for (int i=0; i<npets; i++){
     if (ssiid[cid[i][0]]==localSsi){
