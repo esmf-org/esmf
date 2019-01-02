@@ -152,7 +152,7 @@ DistGrid *DistGrid::create(
     return ESMC_NULL_POINTER;
   }
 
-#if 1
+#if 0
   {
     std::stringstream debugmsg;
     debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -182,7 +182,7 @@ DistGrid *DistGrid::create(
     }
   }
   
-#if 1
+#if 0
   {
     std::stringstream debugmsg;
     debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -227,7 +227,7 @@ DistGrid *DistGrid::create(
     }
     int allArbSeqFlag;
     currentVM->allreduce(&localArbSeqFlag, &allArbSeqFlag, 1, vmI4, vmSUM);
-#if 1
+#if 0
     {
       std::stringstream debugmsg;
       debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -252,7 +252,7 @@ DistGrid *DistGrid::create(
       vector<void *> keepArbPtr(dg->delayout->getLocalDeCount());
       for (int i=0; i<dg->delayout->getLocalDeCount(); i++){
         keepArbPtr[i] = (void *)dg->getArbSeqIndexList(i, 1, &localrc);
-#if 1
+#if 0
         {
           std::stringstream debugmsg;
           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
