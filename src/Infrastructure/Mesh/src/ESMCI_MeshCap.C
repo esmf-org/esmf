@@ -31,6 +31,8 @@
 #include "ESMCI_Mesh.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
+#include "ESMCI_TraceRegion.h"
+
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
 #include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
 #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
@@ -1479,6 +1481,8 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
 
   int localrc;
 
+  ESMCI_METHOD_ENTER(localrc)
+
  // Get mesh type
   bool is_esmf_mesh=(*src_meshpp)->is_esmf_mesh;
 
@@ -1522,6 +1526,8 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
       ESMC_CONTEXT, rc)) return NULL;
 #endif
   }
+
+  ESMCI_METHOD_EXIT(localrc)
 
   // Output new MeshCap
   return mc;

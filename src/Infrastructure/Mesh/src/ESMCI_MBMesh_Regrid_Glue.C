@@ -28,6 +28,8 @@
 #include "ESMCI_GridToMesh.h"
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
+#include "ESMCI_TraceRegion.h"
+
 #include "Mesh/include/Legacy/ESMCI_Exception.h"
 #include "Mesh/include/Regridding/ESMCI_Interp.h"
 #include "Mesh/include/Regridding/ESMCI_Extrapolation.h"
@@ -231,6 +233,12 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
     }
     WMat dst_status;
 
+#define TRACE_PROFILE
+#ifdef TRACE_PROFILE
+    int localrc;
+    ESMCI_REGION_ENTER("MOAB Mesh Weight Generation", localrc)
+#endif
+
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
       if(!calc_regrid_wgts(mbmsrcp, mbmdstp, dstpl, wts, &regridConserve, regridMethod,
@@ -246,6 +254,10 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
                         set_dst_status, dst_status))
         Throw() << "Online regridding error" << std::endl;
     }
+
+#ifdef TRACE_PROFILE
+    ESMCI_REGION_EXIT("MOAB Mesh Weight Generation", localrc)
+#endif
 
 // #define BILINEAR_WEIGHTS
 #ifdef BILINEAR_WEIGHTS
@@ -486,6 +498,10 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
     VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
 
+#ifdef TRACE_PROFILE
+    ESMCI_REGION_ENTER("MOAB Mesh ArraySMMStore", localrc)
+#endif
+
     // Build the ArraySMM
     if (*has_rh != 0) {
       int localrc;
@@ -497,6 +513,10 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
+
+#ifdef TRACE_PROFILE
+    ESMCI_REGION_EXIT("MOAB Mesh ArraySMMStore", localrc)
+#endif
 
 // #define DUMP_FACTORS_AFTER_SMM
 #ifdef DUMP_FACTORS_AFTER_SMM

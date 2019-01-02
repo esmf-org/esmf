@@ -691,7 +691,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !        real(ESMF_KIND_R8) :: beg_time, end_time
 !        call ESMF_VMWtime(beg_time)
 
-        ESMF_METHOD_ENTER(localrc)
+        ! ESMF_METHOD_ENTER(localrc)
 
         ! Initialize return code; assume failure until success is certain
         localrc = ESMF_SUCCESS
@@ -1008,13 +1008,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
 
-            ESMF_REGION_ENTER("gridToMesh", localrc)
+            ! ESMF_REGION_ENTER("gridToMesh", localrc)
             ! Convert Grid to Mesh
             srcMesh = ESMF_GridToMesh(srcGrid, srcStaggerLocG2M, srcIsSphere, srcIsLatLonDeg, &
                         maskValues=srcMaskValues, regridConserve=regridConserveG2M, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-            ESMF_REGION_EXIT("gridToMesh", localrc)
+            ! ESMF_REGION_EXIT("gridToMesh", localrc)
           endif
 
         else if (srcgeomtype .eq. ESMF_GEOMTYPE_MESH) then
@@ -1521,7 +1521,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
         if(present(rc)) rc = ESMF_SUCCESS
 
-        ESMF_METHOD_EXIT(localrc)
+        ! ESMF_METHOD_EXIT(localrc)
 
 !        call ESMF_VMWtime(end_time)
 !        print*,'regrid store time= ',end_time-beg_time

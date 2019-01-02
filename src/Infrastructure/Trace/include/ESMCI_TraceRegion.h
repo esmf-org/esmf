@@ -11,20 +11,16 @@
 #ifndef ESMCI_TRACEREGION_H
 #define ESMCI_TRACEREGION_H
 
-#define ESMF_PROFILE_INTERNAL_off
+#define ESMF_PROFILE_INTERNAL
 #ifdef ESMF_PROFILE_INTERNAL
 #define ESMCI_METHOD_ENTER(localrc) ESMCI::TraceEventRegionEnter(ESMC_METHOD, &(localrc)); \
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, \
-                                    &rc)) return rc;
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
 #define ESMCI_METHOD_EXIT(localrc)  ESMCI::TraceEventRegionExit(ESMC_METHOD, &(localrc)); \
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, \
-                                    &rc)) return rc;
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
 #define ESMCI_REGION_ENTER(name, localrc)      ESMCI::TraceEventRegionEnter(name, &(localrc)); \
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, \
-                                    &rc)) return rc;
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
 #define ESMCI_REGION_EXIT(name, localrc)       ESMCI::TraceEventRegionExit(name, &(localrc)); \
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, \
-                                    &rc)) return rc;
+  ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
 #else
 #define ESMCI_METHOD_ENTER(rc)
 #define ESMCI_METHOD_EXIT(rc)

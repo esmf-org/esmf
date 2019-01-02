@@ -5786,7 +5786,7 @@ int Array::redistStore(
   ESMC_TypeKind_Flag srcIndexTK = srcArray->getDistGrid()->getIndexTK();
   ESMC_TypeKind_Flag dstIndexTK = dstArray->getDistGrid()->getIndexTK();
 
-  ESMCI_REGION_ENTER("ESMCI::Array::tRedistStore", localrc)
+  //ESMCI_REGION_ENTER("ESMCI::Array::tRedistStore", localrc)
   if (srcIndexTK==ESMC_TYPEKIND_I4 && dstIndexTK==ESMC_TYPEKIND_I4){
     // call into the actual store method
     localrc = tRedistStore<ESMC_I4,ESMC_I4>(
@@ -5806,7 +5806,7 @@ int Array::redistStore(
       "Type option not supported", ESMC_CONTEXT, &rc);
     return rc;
   }
-  ESMCI_REGION_EXIT("ESMCI::Array::tRedistStore", localrc)
+  //ESMCI_REGION_EXIT("ESMCI::Array::tRedistStore", localrc)
 
   // return successfully
   rc = ESMF_SUCCESS;
@@ -8463,7 +8463,7 @@ template<typename SIT, typename DIT>
   int localrc = ESMC_RC_NOT_IMPL;         // local return code
   int rc = ESMC_RC_NOT_IMPL;              // final return code
 
-  ESMCI_METHOD_ENTER(localrc)
+  //ESMCI_METHOD_ENTER(localrc)
 
   // every Pet must provide srcArray and dstArray
   if (srcArray == NULL){
@@ -8537,7 +8537,7 @@ template<typename SIT, typename DIT>
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc;
 
-  ESMCI_METHOD_EXIT(localrc)
+  //ESMCI_METHOD_EXIT(localrc)
 
   // return successfully
   rc = ESMF_SUCCESS;
