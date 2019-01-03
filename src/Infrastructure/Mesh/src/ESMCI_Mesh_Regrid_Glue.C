@@ -206,6 +206,7 @@ void ESMCI_regrid_create(
 #ifdef TRACE_PROFILE
     int localrc;
     ESMCI_REGION_ENTER("Native Mesh Weight Generation", localrc)
+    VM::logMemInfo(std::string("before Native Mesh Weight Generation"));
 #endif
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
@@ -237,6 +238,7 @@ void ESMCI_regrid_create(
     }
 
 #ifdef TRACE_PROFILE
+    VM::logMemInfo(std::string("after Native Mesh Weight Generation"));
     ESMCI_REGION_EXIT("Native Mesh Weight Generation", localrc)
 #endif
 
@@ -346,7 +348,7 @@ void ESMCI_regrid_create(
           // Construct factor list entry
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
-          
+
 #define ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL_off
 
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
@@ -446,6 +448,7 @@ void ESMCI_regrid_create(
 
 #ifdef TRACE_PROFILE
     ESMCI_REGION_ENTER("Native Mesh ArraySMMStore", localrc)
+    VM::logMemInfo(std::string("before Native Mesh ArraySMMStore"));
 #endif
 
     // Build the ArraySMM
@@ -461,6 +464,7 @@ void ESMCI_regrid_create(
     }
 
 #ifdef TRACE_PROFILE
+    VM::logMemInfo(std::string("after Native Mesh ArraySMMStore"));
     ESMCI_REGION_EXIT("Native Mesh ArraySMMStore", localrc)
 #endif
 

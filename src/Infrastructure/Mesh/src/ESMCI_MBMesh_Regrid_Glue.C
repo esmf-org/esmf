@@ -131,7 +131,6 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
   VM::logMemInfo(std::string("RegridCreate1.0"));
 #endif
 
-
   try {
 
     // transalate ignoreDegenerate to C++ bool
@@ -237,6 +236,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
 #ifdef TRACE_PROFILE
     int localrc;
     ESMCI_REGION_ENTER("MOAB Mesh Weight Generation", localrc)
+    VM::logMemInfo(std::string("before MOAB Mesh Weight Generation"));
 #endif
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
@@ -256,6 +256,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
     }
 
 #ifdef TRACE_PROFILE
+    VM::logMemInfo(std::string("after MOAB Mesh Weight Generation"));
     ESMCI_REGION_EXIT("MOAB Mesh Weight Generation", localrc)
 #endif
 
@@ -280,7 +281,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
     cout << endl;
   }
   cout << endl;
-  
+
   // void *mbptr = (void *) mbmsrcp;
   // int len = 12; char fname[len];
   // sprintf(fname, "mesh_%d", Par::Rank());
@@ -289,7 +290,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
 
 #endif
 
-    
+
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Done with weight generation... check unmapped dest,", ESMC_LOGMSG_INFO);
 #endif
@@ -434,12 +435,12 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
         } // for j
       } // for wi
     }
-    
-    
+
+
 //////////////////////////////////////////////////////////////////////////////////////
     // int *iientries2 = new int[2*iisize.first];
     // double *factors2 = new double[iisize.first];
-    // 
+    //
     // std::memcpy(factors2, factors, sizeof(double)*num_entries);
     // std::memcpy(iientries2, iientries, sizeof(int)*2*num_entries);
 //////////////////////////////////////////////////////////////////////////////////////
@@ -500,6 +501,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
 
 #ifdef TRACE_PROFILE
     ESMCI_REGION_ENTER("MOAB Mesh ArraySMMStore", localrc)
+    VM::logMemInfo(std::string("before MOAB Mesh ArraySMMStore"));
 #endif
 
     // Build the ArraySMM
@@ -515,6 +517,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
     }
 
 #ifdef TRACE_PROFILE
+    VM::logMemInfo(std::string("after MOAB Mesh ArraySMMStore"));
     ESMCI_REGION_EXIT("MOAB Mesh ArraySMMStore", localrc)
 #endif
 
@@ -651,7 +654,7 @@ static void get_mbmesh_node_ids_not_in_wmat(PointList *pointlist, WMat &wts, std
 static void get_mbmesh_elem_ids_not_in_wmat(MBMesh *mbmesh, WMat &wts, std::vector<int> *missing_ids) {
 
   int merr = 0;
-  
+
   // Get Parallel Information
   int localrc;
   int localpet = VM::getCurrent(&localrc)->getLocalPet();
@@ -679,7 +682,7 @@ static void get_mbmesh_elem_ids_not_in_wmat(MBMesh *mbmesh, WMat &wts, std::vect
     merr=mbmesh->mesh->tag_get_data(mbmesh->elem_mask_tag, &(*it), 1, &masked);
     if (merr != MB_SUCCESS) Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
     if (masked) continue;
-    
+
     // id : gid_tag
     int elem_id;
     merr=mbmesh->mesh->tag_get_data(mbmesh->gid_tag,  &(*it), 1, &elem_id);
@@ -697,7 +700,7 @@ static void get_mbmesh_elem_ids_not_in_wmat(MBMesh *mbmesh, WMat &wts, std::vect
     if (wi->first.id != elem_id) {
       missing_ids->push_back(elem_id);
     }
-    
+
   }
 }
 
@@ -757,7 +760,7 @@ bool all_mbmesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_i
 bool all_mbmesh_elem_ids_in_wmat(MBMesh *mbmesh, WMat &wts, int *missing_id) {
 
   int merr = 0;
-  
+
   // Get Parallel Information
   int localrc;
   int localpet = VM::getCurrent(&localrc)->getLocalPet();
@@ -785,7 +788,7 @@ bool all_mbmesh_elem_ids_in_wmat(MBMesh *mbmesh, WMat &wts, int *missing_id) {
     merr=mbmesh->mesh->tag_get_data(mbmesh->elem_mask_tag, &(*it), 1, &masked);
     if (merr != MB_SUCCESS) Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
     if (masked) continue;
-    
+
     // id : gid_tag
     int elem_id;
     merr=mbmesh->mesh->tag_get_data(mbmesh->gid_tag, &(*it), 1, &elem_id);
@@ -1153,7 +1156,7 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, PointList *dstpl, IWeight
   if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE) {
     calc_cnsrv_regrid_wgts(srcmbmp, dstmbmp, wts);
   } else if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR){
-    calc_bilinear_regrid_wgts(srcmbmp, dstpl, wts, map_type, 
+    calc_bilinear_regrid_wgts(srcmbmp, dstpl, wts, map_type,
                               set_dst_status, dst_status);
   } else {
     Throw() << "This regrid method not currently supported with MOAB";
