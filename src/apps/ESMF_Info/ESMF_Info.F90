@@ -10,7 +10,7 @@
 !
 !==============================================================================
 
-program ESMF_Info
+program ESMF_InfoF
 
   ! modules
   use ESMF

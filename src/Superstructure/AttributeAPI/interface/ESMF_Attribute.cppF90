@@ -64,6 +64,7 @@ module ESMF_AttributeMod
   use ESMF_CplCompMod
   use ESMF_GridCompMod
   use ESMF_SciCompMod
+  use ESMF_InfoMod
   use ESMF_DistGridMod
   use ESMF_FieldMod
   use ESMF_FieldBundleMod
@@ -167,6 +168,14 @@ module ESMF_AttributeMod
         module procedure ESMF_SciCompAttAddPackStdSL
         !module procedure ESMF_SciCompAttAddPackStdNSL
         module procedure ESMF_SciCompAttAddPackCstSL
+        module procedure ESMF_InfoAttAddPackStd
+        module procedure ESMF_InfoAttAddPackStdN
+        module procedure ESMF_InfoAttAddPackCst
+        module procedure ESMF_InfoAttAddPackCstN
+        module procedure ESMF_InfoAttAddPackCstN1
+        module procedure ESMF_InfoAttAddPackStdSL
+        !module procedure ESMF_InfoAttAddPackStdNSL
+        module procedure ESMF_InfoAttAddPackCstSL
         module procedure ESMF_DistGridAttAddPackCst
         module procedure ESMF_DistGridAttAddPackCstN
         module procedure ESMF_DistGridAttAddPackCstN1
@@ -219,6 +228,12 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttCopy
         module procedure ESMF_GridCompAttCopy
         module procedure ESMF_SciCompAttCopy
+        module procedure ESMF_InfoAttCopy
+        module procedure ESMF_InfoAttCopyESMF_CplComp
+        module procedure ESMF_InfoAttCopyESMF_GridComp
+        module procedure ESMF_InfoAttCopyESMF_SciComp
+        module procedure ESMF_InfoAttCopyESMF_State
+        module procedure ESMF_InfoAttCopyESMF_Field
         module procedure ESMF_StateAttCopy
         module procedure ESMF_FieldAttCopy
         module procedure ESMF_FieldBundleAttCopy
@@ -250,6 +265,8 @@ module ESMF_AttributeMod
         module procedure ESMF_GridCompAttRemoveAP
         module procedure ESMF_SciCompAttRemove
         module procedure ESMF_SciCompAttRemoveAP
+        module procedure ESMF_InfoAttRemove
+        module procedure ESMF_InfoAttRemoveAP
         module procedure ESMF_DistGridAttRemove
         module procedure ESMF_DistGridAttRemoveAP
         module procedure ESMF_FieldAttRemove
@@ -380,6 +397,27 @@ module ESMF_AttributeMod
         module procedure ESMF_SciCompAttGetCountAttPack
         module procedure ESMF_SciCompAttGetAPinstNames
         module procedure ESMF_SciCompAttGetAPinstNamesAP
+
+        TypeKindInterfaceMacro(ESMF_InfoAttGet)
+        TypeKindInterfaceMacro(ESMF_InfoAttGet1D)
+        module procedure ESMF_InfoAttGetLgcl
+        module procedure ESMF_InfoAttGetLgclList
+        module procedure ESMF_InfoAttGetChar
+        module procedure ESMF_InfoAttGetCharList
+        TypeKindInterfaceMacro(ESMF_InfoAttGetAP)
+        TypeKindInterfaceMacro(ESMF_InfoAttGet1DAP)
+        module procedure ESMF_InfoAttGetLgclAP
+        module procedure ESMF_InfoAttGetLgclListAP
+        module procedure ESMF_InfoAttGetCharAP
+        module procedure ESMF_InfoAttGetCharListAP
+        module procedure ESMF_InfoAttGetInfoByNam
+        module procedure ESMF_InfoAttGetInfoByNamAP
+        module procedure ESMF_InfoAttGetInfoByNum
+        module procedure ESMF_InfoAttGetInfoByNumAP
+        module procedure ESMF_InfoAttGetCount
+        module procedure ESMF_InfoAttGetCountAttPack
+        module procedure ESMF_InfoAttGetAPinstNames
+        module procedure ESMF_InfoAttGetAPinstNamesAP
 
         TypeKindInterfaceMacro(ESMF_DistGridAttGet)
         TypeKindInterfaceMacro(ESMF_DistGridAttGet1D)
@@ -518,6 +556,7 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttGetAttPack
         module procedure ESMF_GridCompAttGetAttPack
         module procedure ESMF_SciCompAttGetAttPack
+        module procedure ESMF_InfoAttGetAttPack
         module procedure ESMF_DistGridAttGetAttPack
         module procedure ESMF_FieldAttGetAttPack
         module procedure ESMF_FieldBundleAttGetAttPack
@@ -529,6 +568,7 @@ module ESMF_AttributeMod
         module procedure ESMF_CplCompAttGetAttPackSL
         module procedure ESMF_GridCompAttGetAttPackSL
         module procedure ESMF_SciCompAttGetAttPackSL
+        module procedure ESMF_InfoAttGetAttPackSL
         module procedure ESMF_DistGridAttGetAttPackSL
         module procedure ESMF_FieldAttGetAttPackSL
         module procedure ESMF_FieldBundleAttGetAttPackSL
@@ -736,6 +776,19 @@ module ESMF_AttributeMod
         module procedure ESMF_SciCompAttSetLgclListAP
         module procedure ESMF_SciCompAttSetCharAP
         module procedure ESMF_SciCompAttSetCharListAP
+
+        TypeKindInterfaceMacro(ESMF_InfoAttSet)
+        TypeKindInterfaceMacro(ESMF_InfoAttSet1D)
+        module procedure ESMF_InfoAttSetLgcl
+        module procedure ESMF_InfoAttSetLgclList
+        module procedure ESMF_InfoAttSetChar
+        module procedure ESMF_InfoAttSetCharList
+        TypeKindInterfaceMacro(ESMF_InfoAttSetAP)
+        TypeKindInterfaceMacro(ESMF_InfoAttSet1DAP)
+        module procedure ESMF_InfoAttSetLgclAP
+        module procedure ESMF_InfoAttSetLgclListAP
+        module procedure ESMF_InfoAttSetCharAP
+        module procedure ESMF_InfoAttSetCharListAP
 
         TypeKindInterfaceMacro(ESMF_DistGridAttSet)
         TypeKindInterfaceMacro(ESMF_DistGridAttSet1D)
@@ -5049,6 +5102,75 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (present(rc)) rc = ESMF_SUCCESS @\
  @\
       end subroutine mclass1##AttCopy @\
+
+!------------------------------------------------------------------------------
+
+#define AttCopyMacro2(mclass1, mclass2, mthis1, mthis2, mthisfield1, mthisfield2) \
+^undef  ESMF_METHOD @\
+^define ESMF_METHOD "ESMF_AttributeCopy" @\
+ @\
+!BOPI @\
+! !IROUTINE: ESMF_AttributeCopy - Copy an Attribute hierarchy between objects @\
+! @\
+! !INTERFACE: @\
+      ! Private name; call using ESMF_AttributeCopy() @\
+      subroutine mclass1##AttCopy##mclass2(mthis1, mthis2, attcopy, rc) @\
+! @\
+! !ARGUMENTS: @\
+      type(mclass1), intent(in) :: mthis1   @\
+      type(mclass2), intent(inout) :: mthis2 @\
+      type(ESMF_AttCopy_Flag), intent(in), optional :: attcopy @\
+      integer, intent(out), optional :: rc    @\
+ @\
+! @\
+! !DESCRIPTION: @\
+!     Copy all Attributes in one hierarchy to another. @\
+! @\
+!     The arguments are: @\
+!     \begin{description} @\
+!     \item [mthis1] @\
+!      An {\tt mclass1} object. @\
+!     \item [mthis2] @\
+!      An {\tt mclass2} object. @\
+!     \item [attcopyflag] @\
+!      A flag to determine if the copy is to be by reference, value, or hybrid @\
+!     \item [{[rc]}] @\
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!     \end{description} @\
+! @\
+! @\
+!EOPI @\
+ @\
+      integer :: localrc @\
+ @\
+       character(ESMF_MAXSTR) :: value @\
+       integer, dimension(1) :: lens @\
+       type(ESMF_AttCopy_Flag) :: localattcopy @\
+ @\
+      ! Initialize @\
+      localrc = ESMF_RC_NOT_IMPL @\
+      if (present(rc)) rc = ESMF_RC_NOT_IMPL @\
+ @\
+      ! check variables @\
+      ESMF_INIT_CHECK_DEEP(mclass1##GetInit,mthis1,rc) @\
+ @\
+      ! check variables @\
+      ESMF_INIT_CHECK_DEEP(mclass2##GetInit,mthis2,rc) @\
+ @\
+      ! set copy flag default @\
+      localattcopy = ESMF_ATTCOPY_VALUE @\
+      if (present(attcopy)) then @\
+        localattcopy = attcopy @\
+      endif @\
+ @\
+      call c_ESMC_AttributeCopy(mthisfield1, mthisfield2, & @\
+                                localattcopy, localrc) @\
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, & @\
+         ESMF_CONTEXT, rcToReturn=rc)) return @\
+ @\
+      if (present(rc)) rc = ESMF_SUCCESS @\
+ @\
+      end subroutine mclass1##AttCopy##mclass2 @\
 
 !------------------------------------------------------------------------------
 
@@ -12633,6 +12755,49 @@ AttSetCharacterMacro(ESMF_SciComp, comp, comp%compp%base)
 
 AttUpdateMacro(ESMF_SciComp, comp, comp%compp%base)
 AttWriteMacro(ESMF_SciComp, comp, comp%compp%base, comp, field)
+
+!-------------------------------------------------------------------------
+!  Info
+!-------------------------------------------------------------------------
+
+AttGetAttPackMacro(ESMF_Info, info, info%base)
+AttGetAttPackMacroSL(ESMF_Info, info, info%base)
+
+AttAddPackStandardMacro(ESMF_Info, info, info%base)
+AttAddPackStandardNMacro(ESMF_Info, info, info%base)
+AttAddPackCustomMacro(ESMF_Info, info, info%base)
+AttAddPackCustomNMacro(ESMF_Info, info, info%base)
+AttAddPackCustomN1Macro(ESMF_Info, info, info%base)
+AttAddPackStandardMacroSL(ESMF_Info, info, info%base)
+!AttAddPackStandardNMacroSL(ESMF_Info, info, info%base)
+AttAddPackCustomMacroSL(ESMF_Info, info, info%base)
+
+AttCopyMacro(ESMF_Info, ESMF_Info, info1, info2, info1%base, info2%base)
+AttCopyMacro2(ESMF_Info, ESMF_CplComp, info, comp, info%base, comp%compp%base)
+AttCopyMacro2(ESMF_Info, ESMF_GridComp, info, comp, info%base, comp%compp%base)
+AttCopyMacro2(ESMF_Info, ESMF_SciComp, info, comp, info%base, comp%compp%base)
+AttCopyMacro2(ESMF_Info, ESMF_State, info, state, info%base, state%statep%base)
+AttCopyMacro2(ESMF_Info, ESMF_Field, info, field, info%base, field%ftypep%base)
+
+AttRemoveMacro(ESMF_Info, info, info%base)
+
+TypeKind3DeclarationMacro(AttGet, ESMF_Info, info, info%base)
+TypeKind3NoDocDeclarationMacro(AttGet1D, ESMF_Info, info, info%base)
+AttGetLogicalMacro(ESMF_Info, info, info%base)
+AttGetCharacterMacro(ESMF_Info, info, info%base)
+
+GetCountMacro(ESMF_Info, info, info%base)
+GetNameNumberMacro(ESMF_Info, info, info%base)
+
+AttGetAPinstNamesMacro(ESMF_Info, info, info%base)
+
+AttReadMacro(ESMF_Info, info, info%base)
+
+TypeKind3DeclarationMacro(AttSet, ESMF_Info, info, info%base)
+AttSetLogicalMacro(ESMF_Info, info, info%base)
+AttSetCharacterMacro(ESMF_Info, info, info%base)
+
+AttUpdateMacro(ESMF_Info, info, info%base)
 
 !-------------------------------------------------------------------------
 !  STATE
