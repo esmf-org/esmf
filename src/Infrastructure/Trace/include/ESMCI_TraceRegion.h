@@ -11,7 +11,6 @@
 #ifndef ESMCI_TRACEREGION_H
 #define ESMCI_TRACEREGION_H
 
-#define ESMF_PROFILE_INTERNAL
 #ifdef ESMF_PROFILE_INTERNAL
 #define ESMCI_METHOD_ENTER(localrc) ESMCI::TraceEventRegionEnter(ESMC_METHOD, &(localrc)); \
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
@@ -22,8 +21,8 @@
 #define ESMCI_REGION_EXIT(name, localrc)       ESMCI::TraceEventRegionExit(name, &(localrc)); \
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
 #else
-#define ESMCI_METHOD_ENTER(rc)
-#define ESMCI_METHOD_EXIT(rc)
+#define ESMCI_METHOD_ENTER(localrc)
+#define ESMCI_METHOD_EXIT(localrc)
 #define ESMCI_REGION_ENTER(name, localrc)
 #define ESMCI_REGION_EXIT(name, localrc) 
 #endif

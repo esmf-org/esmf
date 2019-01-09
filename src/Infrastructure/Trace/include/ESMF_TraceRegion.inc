@@ -14,7 +14,6 @@ Licensed under the University of Illinois-NCSA License.
 #ifndef ESMF_TIMING_INC
 #define ESMF_TIMING_INC
 
-#define ESMF_PROFILE_INTERNAL
 #ifdef ESMF_PROFILE_INTERNAL
 #define ESMF_METHOD_ENTER(localrc) call ESMF_TraceRegionEnter(ESMF_METHOD, rc=localrc)
 #define ESMF_METHOD_EXIT(localrc) call ESMF_TraceRegionExit(ESMF_METHOD, rc=localrc)

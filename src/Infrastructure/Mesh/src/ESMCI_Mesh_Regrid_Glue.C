@@ -202,8 +202,7 @@ void ESMCI_regrid_create(
     }
     WMat dst_status;
 
-#define TRACE_PROFILE
-#ifdef TRACE_PROFILE
+#ifdef ESMF_PROFILE_INTERNAL
     int localrc;
     ESMCI_REGION_ENTER("Native Mesh Weight Generation", localrc)
     VM::logMemInfo(std::string("before Native Mesh Weight Generation"));
@@ -237,7 +236,7 @@ void ESMCI_regrid_create(
       }
     }
 
-#ifdef TRACE_PROFILE
+#ifdef ESMF_PROFILE_INTERNAL
     VM::logMemInfo(std::string("after Native Mesh Weight Generation"));
     ESMCI_REGION_EXIT("Native Mesh Weight Generation", localrc)
 #endif
@@ -446,7 +445,7 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
 
-#ifdef TRACE_PROFILE
+#ifdef ESMF_PROFILE_INTERNAL
     ESMCI_REGION_ENTER("Native Mesh ArraySMMStore", localrc)
     VM::logMemInfo(std::string("before Native Mesh ArraySMMStore"));
 #endif
@@ -463,7 +462,7 @@ void ESMCI_regrid_create(
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
 
-#ifdef TRACE_PROFILE
+#ifdef ESMF_PROFILE_INTERNAL
     VM::logMemInfo(std::string("after Native Mesh ArraySMMStore"));
     ESMCI_REGION_EXIT("Native Mesh ArraySMMStore", localrc)
 #endif

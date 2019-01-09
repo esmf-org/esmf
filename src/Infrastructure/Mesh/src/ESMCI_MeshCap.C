@@ -1489,8 +1489,7 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
   MBMesh *mbmesh;
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-#define TRACE_PROFILE
-#ifdef TRACE_PROFILE
+#ifdef ESMF_PROFILE_INTERNAL
     ESMCI_REGION_ENTER("Native Dual Mesh Generation", localrc);
     VM::logMemInfo(std::string("before Native Dual Mesh Generation"));
 #endif
@@ -1499,8 +1498,7 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
 
-#define TRACE_PROFILE
-#ifdef TRACE_PROFILE
+#ifdef ESMF_PROFILE_INTERNAL
     VM::logMemInfo(std::string("after Native Dual Mesh Generation"));
     ESMCI_REGION_EXIT("Native Dual Mesh Generation", localrc)
 #endif
@@ -1508,8 +1506,7 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
 #if defined ESMF_MOAB
     MBMesh *meshin = (MBMesh *)((*src_meshpp)->mbmesh);
 
-#define TRACE_PROFILE
-#ifdef TRACE_PROFILE
+#ifdef ESMF_PROFILE_INTERNAL
     ESMCI_REGION_ENTER("MOAB Dual Mesh Generation", localrc);
     VM::logMemInfo(std::string("before MOAB Dual Mesh Generation"));
 #endif
@@ -1518,8 +1515,7 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
 
-#define TRACE_PROFILE
-#ifdef TRACE_PROFILE
+#ifdef ESMF_PROFILE_INTERNAL
     VM::logMemInfo(std::string("after MOAB Dual Mesh Generation"));
     ESMCI_REGION_EXIT("MOAB Dual Mesh Generation", localrc)
 #endif
