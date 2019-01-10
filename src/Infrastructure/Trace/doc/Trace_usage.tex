@@ -36,23 +36,37 @@ where XXX is the PET number.  Below is an example timing
 profile.  Some regions are left out for brevity.
 
 \begin{verbatim}
-Region                                             Count  Total (s)   Self (s)    Mean (s)    Min (s)     Max (s)
-  [esm] RunPhase1                                  1      1.3629      0.6119      1.3629      1.3629      1.3629 
-    [OCN-TO-ATM] RunPhase1                         864    0.2441      0.2441      0.0003      0.0002      0.0252 
-    [ATM-TO-OCN] RunPhase1                         864    0.1775      0.1775      0.0002      0.0001      0.0129 
-    [OCN] RunPhase1                                864    0.1744      0.1744      0.0002      0.0002      0.0004 
-    [ATM] RunPhase1                                864    0.1550      0.1550      0.0002      0.0001      0.0004 
-  [esm] Init 1                                     1      0.9236      0.0139      0.9236      0.9236      0.9236 
-    [OCN-TO-ATM] IPDv05p6b                         1      0.5447      0.5447      0.5447      0.5447      0.5447 
-    [ATM-TO-OCN] IPDv05p6b                         1      0.3594      0.3594      0.3594      0.3594      0.3594 
-    [ATM] IPDv00p2                                 1      0.0014      0.0014      0.0014      0.0014      0.0014 
-    [OCN] IPDv00p2                                 1      0.0007      0.0007      0.0007      0.0007      0.0007 
-    [ATM] IPDv00p1                                 1      0.0003      0.0003      0.0003      0.0003      0.0003 
-  [esm] FinalizePhase1                             1      0.0010      0.0009      0.0010      0.0010      0.0010 
-    [ATM-TO-OCN] FinalizePhase1                    1      0.0001      0.0001      0.0001      0.0001      0.0001 
-    [OCN-TO-ATM] FinalizePhase1                    1      0.0000      0.0000      0.0000      0.0000      0.0000 
-    [ATM] FinalizePhase1                           1      0.0000      0.0000      0.0000      0.0000      0.0000 
-    [OCN] FinalizePhase1                           1      0.0000      0.0000      0.0000      0.0000      0.0000 
+Region                           Count  Total (s)   Self (s)    Mean (s)    Min (s)     Max (s)
+  [esm] Init 1                   1      4.0878      0.0341      4.0878      4.0878      4.0878
+    [OCN-TO-ATM] IPDv05p6b       1      2.6007      2.6007      2.6007      2.6007      2.6007
+    [ATM-TO-OCN] IPDv05p6b       1      1.4333      1.4333      1.4333      1.4333      1.4333
+    [ATM] IPDv00p2               1      0.0055      0.0055      0.0055      0.0055      0.0055
+    [OCN] IPDv00p2               1      0.0023      0.0023      0.0023      0.0023      0.0023
+    [ATM] IPDv00p1               1      0.0011      0.0011      0.0011      0.0011      0.0011
+    [OCN] IPDv00p1               1      0.0009      0.0009      0.0009      0.0009      0.0009
+    [ATM-TO-OCN] IPDv05p3        1      0.0008      0.0008      0.0008      0.0008      0.0008
+    [ATM-TO-OCN] IPDv05p1        1      0.0008      0.0008      0.0008      0.0008      0.0008
+    [ATM-TO-OCN] IPDv05p2b       1      0.0007      0.0007      0.0007      0.0007      0.0007
+    [ATM-TO-OCN] IPDv05p4        1      0.0007      0.0007      0.0007      0.0007      0.0007
+    [ATM-TO-OCN] IPDv05p2a       1      0.0007      0.0007      0.0007      0.0007      0.0007
+    [ATM-TO-OCN] IPDv05p5        1      0.0007      0.0007      0.0007      0.0007      0.0007
+    [OCN-TO-ATM] IPDv05p3        1      0.0006      0.0006      0.0006      0.0006      0.0006
+    [OCN-TO-ATM] IPDv05p4        1      0.0006      0.0006      0.0006      0.0006      0.0006
+    [OCN-TO-ATM] IPDv05p2b       1      0.0006      0.0006      0.0006      0.0006      0.0006
+    [OCN-TO-ATM] IPDv05p2a       1      0.0006      0.0006      0.0006      0.0006      0.0006
+    [OCN-TO-ATM] IPDv05p5        1      0.0006      0.0006      0.0006      0.0006      0.0006
+    [OCN-TO-ATM] IPDv05p1        1      0.0005      0.0005      0.0005      0.0005      0.0005
+  [esm] RunPhase1                1      2.7423      0.9432      2.7423      2.7423      2.7423
+    [OCN-TO-ATM] RunPhase1       864    0.6094      0.6094      0.0007      0.0006      0.0179
+    [ATM] RunPhase1              864    0.5296      0.2274      0.0006      0.0005      0.0011
+      ATM:ModelAdvance           864    0.3022      0.3022      0.0003      0.0003      0.0005
+    [ATM-TO-OCN] RunPhase1       864    0.3345      0.3345      0.0004      0.0002      0.0299
+    [OCN] RunPhase1              864    0.3256      0.3256      0.0004      0.0003      0.0010
+  [esm] FinalizePhase1           1      0.0029      0.0020      0.0029      0.0029      0.0029
+    [OCN-TO-ATM] FinalizePhase1  1      0.0006      0.0006      0.0006      0.0006      0.0006
+    [ATM-TO-OCN] FinalizePhase1  1      0.0002      0.0002      0.0002      0.0002      0.0002
+    [OCN] FinalizePhase1         1      0.0001      0.0001      0.0001      0.0001      0.0001
+    [ATM] FinalizePhase1         1      0.0000      0.0000      0.0000      0.0000      0.0000
 \end{verbatim}
 
 A timed region is either an ESMF component phase (e.g., initialize,
@@ -88,7 +102,7 @@ describes the meaning of the statistics in each column:
 
 By default, separate timing profiles are generated for each PET
 in the application.  The per-PET profiles can be aggregated together
-and output to a single file, {\em ESMF\_Profile.txt}, by setting the
+and output to a single file, {\em ESMF\_Profile.summary}, by setting the
 {\tt ESMF\_RUNTIME\_PROFILE\_OUTPUT} environment variable as follows:
 
 \begin{verbatim}
@@ -98,15 +112,60 @@ $ setenv ESMF_RUNTIME_PROFILE_OUTPUT SUMMARY  # specify summary output
 
 Note the {\tt ESMF\_RUNTIME\_PROFILE} environment variable must
 also be set to {\tt ON} since this controls all profiling capabilities.
-The {\em ESMF\_Profile.txt} file will contain a similar tree of
-timed regions, but aggregated across all PETs.  For example, the
-{\tt Total} column will contain the sum of all {\tt Total}s across
-all PETs that were profiled.  In other words, this is the sum of the
-total wall clock times across all PETs for each region. The {\tt Min}
-will contain the global minimum execution time of the region
-across all PETs and the {\tt Mean} will be the mean of all PET means.
+The {\em ESMF\_Profile.summary} file will contain a tree of
+timed regions, but aggregated across all PETs. For example:
 
-To output both the per-PET and summary timing profiles,
+\begin{verbatim}
+Region                           PETs   Count    Mean (s)    Min (s)     Min PET Max (s)     Max PET
+  [esm] Init 1                   4      1        4.0880      4.0878      2       4.0883      1      
+    [OCN-TO-ATM] IPDv05p6b       4      1        2.6007      2.6007      2       2.6007      3      
+    [ATM-TO-OCN] IPDv05p6b       4      1        1.4335      1.4333      0       1.4337      3      
+    [ATM-TO-OCN] IPDv05p4        4      1        0.0037      0.0007      0       0.0060      1      
+    [ATM] IPDv00p2               4      1        0.0034      0.0020      1       0.0055      0      
+    [ATM-TO-OCN] IPDv05p1        4      1        0.0020      0.0007      2       0.0033      3      
+    [OCN] IPDv00p2               4      1        0.0019      0.0015      3       0.0024      2      
+    [ATM-TO-OCN] IPDv05p3        4      1        0.0010      0.0008      0       0.0013      1      
+    [ATM-TO-OCN] IPDv05p2a       4      1        0.0009      0.0007      0       0.0012      3      
+    [ATM] IPDv00p1               4      1        0.0009      0.0007      3       0.0011      0      
+    [ATM-TO-OCN] IPDv05p2b       4      1        0.0008      0.0007      0       0.0010      3      
+    [ATM-TO-OCN] IPDv05p5        4      1        0.0008      0.0007      0       0.0010      3      
+    [ATM-TO-OCN] IPDv05p6a       4      1        0.0008      0.0005      2       0.0012      3      
+    [OCN-TO-ATM] IPDv05p3        4      1        0.0008      0.0006      2       0.0010      3      
+    [OCN-TO-ATM] IPDv05p4        4      1        0.0008      0.0006      0       0.0009      3      
+    [OCN-TO-ATM] IPDv05p2b       4      1        0.0007      0.0006      2       0.0009      3      
+    [OCN] IPDv00p1               4      1        0.0007      0.0005      1       0.0009      2      
+    [OCN-TO-ATM] IPDv05p2a       4      1        0.0007      0.0006      2       0.0009      1      
+    [OCN-TO-ATM] IPDv05p5        4      1        0.0007      0.0006      0       0.0009      3      
+    [OCN-TO-ATM] IPDv05p1        4      1        0.0006      0.0005      0       0.0008      1      
+    [OCN-TO-ATM] IPDv05p6a       4      1        0.0006      0.0004      2       0.0007      1      
+  [esm] RunPhase1                4      1        2.7444      2.7423      0       2.7454      1      
+    [OCN-TO-ATM] RunPhase1       4      864      0.6123      0.6004      2       0.6244      1      
+    [ATM] RunPhase1              4      864      0.5386      0.5296      0       0.5530      1      
+      ATM:ModelAdvance           4      864      0.3038      0.3022      0       0.3065      1      
+    [OCN] RunPhase1              4      864      0.3471      0.3256      0       0.3824      1      
+    [ATM-TO-OCN] RunPhase1       4      864      0.2843      0.1956      1       0.3345      0      
+  [esm] FinalizePhase1           4      1        0.0029      0.0029      1       0.0030      2      
+    [OCN-TO-ATM] FinalizePhase1  4      1        0.0007      0.0006      0       0.0008      3      
+    [ATM-TO-OCN] FinalizePhase1  4      1        0.0002      0.0001      3       0.0002      1      
+    [OCN] FinalizePhase1         4      1        0.0001      0.0001      3       0.0001      0      
+    [ATM] FinalizePhase1         4      1        0.0001      0.0000      0       0.0001      2  
+\end{verbatim}
+
+The meaning of the statistics in each column in as follows:
+\begin{itemize}
+\item [{\tt PETs}] the number of reporting PETs that executed the region
+\item [{\tt Count}] the number of times each reporting PET executed the region
+      or ``MULTIPLE'' if not all PETs executed the region the same number of times
+\item [{\tt Mean}] the mean across all reporting PETs of the total time spent in the region
+\item [{\tt Min}] the minimum across all reporting PETs of the total time spent in the region
+\item [{\tt Min PET}] the PET that reported the minimum time
+\item [{\tt Max}] the maximum across all reporting PETs of the total time spent in the region
+\item [{\tt Max PET}] the PET that reported the maximum time
+\end{itemize}
+
+Note that setting the {\tt ESMF\_RUNTIME\_PROFILE\_PETLIST} environment variable
+(described below) may reduce the number of reporting PETs. Only reporting PETs are
+included in the summary profile. To output both the per-PET and summary timing profiles,
 set the {\tt ESMF\_RUNTIME\_PROFILE\_OUTPUT} environment variable as follows:
 
 \begin{verbatim}

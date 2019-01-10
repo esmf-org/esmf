@@ -31,6 +31,8 @@
 #include "ESMCI_Mesh.h"
 #include "ESMCI_VM.h"
 #include "ESMCI_CoordSys.h"
+#include "ESMCI_TraceRegion.h"
+
 #include "Mesh/include/ESMCI_Mesh_Glue.h"
 #include "Mesh/include/ESMCI_Mesh_GToM_Glue.h"
 #include "Mesh/include/ESMCI_Mesh_Regrid_Glue.h"
@@ -710,8 +712,8 @@ void MeshCap::meshwrite(char *fname, int *rc,
 }
 
 void MeshCap::meshwritewarrays(char *fname, ESMCI_FortranStrLenArg nlen,
-                               int num_nodeArrays, ESMCI::Array **nodeArrays, 
-                               int num_elemArrays, ESMCI::Array **elemArrays, 
+                               int num_nodeArrays, ESMCI::Array **nodeArrays,
+                               int num_elemArrays, ESMCI::Array **elemArrays,
                                int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshwritewarrays()"
@@ -721,10 +723,10 @@ void MeshCap::meshwritewarrays(char *fname, ESMCI_FortranStrLenArg nlen,
 
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_meshwritewarrays(&mesh, 
+    ESMCI_meshwritewarrays(&mesh,
                            fname, nlen,
-                           num_nodeArrays, nodeArrays, 
-                           num_elemArrays, elemArrays, 
+                           num_nodeArrays, nodeArrays,
+                           num_elemArrays, elemArrays,
                            rc);
   } else {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
@@ -990,10 +992,10 @@ void MeshCap::meshfindpnt(int *unmappedaction, int *dimPnts, int *numPnts,
 
 }
 
-void MeshCap::geteleminfointoarray(DistGrid *elemDistgrid, 
+void MeshCap::geteleminfointoarray(DistGrid *elemDistgrid,
                                    int numElemArrays,
-                                   int *infoTypeElemArrays, 
-                                   Array **elemArrays, 
+                                   int *infoTypeElemArrays,
+                                   Array **elemArrays,
                                    int *rc)
 {
 #undef ESMC_METHOD
@@ -1001,11 +1003,11 @@ void MeshCap::geteleminfointoarray(DistGrid *elemDistgrid,
 
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-    ESMCI_geteleminfointoarray(mesh, 
-                               elemDistgrid, 
+    ESMCI_geteleminfointoarray(mesh,
+                               elemDistgrid,
                                numElemArrays,
-                               infoTypeElemArrays, 
-                               elemArrays, 
+                               infoTypeElemArrays,
+                               elemArrays,
                                rc);
   } else {
     ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
@@ -1487,18 +1489,40 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
   MBMesh *mbmesh;
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
+#ifdef ESMF_PROFILE_INTERNAL
+    ESMCI_REGION_ENTER("Native Dual Mesh Generation", localrc);
+    VM::logMemInfo(std::string("before Native Dual Mesh Generation"));
+#endif
+
     ESMCI_meshcreatedual(&((*src_meshpp)->mesh), &mesh, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
+
+#ifdef ESMF_PROFILE_INTERNAL
+    VM::logMemInfo(std::string("after Native Dual Mesh Generation"));
+    ESMCI_REGION_EXIT("Native Dual Mesh Generation", localrc)
+#endif
   } else {
 #if defined ESMF_MOAB
     MBMesh *meshin = (MBMesh *)((*src_meshpp)->mbmesh);
+
+#ifdef ESMF_PROFILE_INTERNAL
+    ESMCI_REGION_ENTER("MOAB Dual Mesh Generation", localrc);
+    VM::logMemInfo(std::string("before MOAB Dual Mesh Generation"));
+#endif
+
     MBMeshDual(meshin, &mbmesh, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
+
+#ifdef ESMF_PROFILE_INTERNAL
+    VM::logMemInfo(std::string("after MOAB Dual Mesh Generation"));
+    ESMCI_REGION_EXIT("MOAB Dual Mesh Generation", localrc)
+#endif
+
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the MOAB library enabled" , 
+      "This functionality requires ESMF to be built with the MOAB library enabled" ,
       ESMC_CONTEXT, rc)) return NULL;
 #endif
   }
@@ -1518,7 +1542,7 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
     mc->mbmesh=mbmesh;
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the MOAB library enabled" , 
+      "This functionality requires ESMF to be built with the MOAB library enabled" ,
       ESMC_CONTEXT, rc)) return NULL;
 #endif
   }
@@ -1557,7 +1581,7 @@ void MeshCap::destroy(MeshCap **mcpp,int *rc) {
     }
 #else
    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
-      "This functionality requires ESMF to be built with the MOAB library enabled" , 
+      "This functionality requires ESMF to be built with the MOAB library enabled" ,
       ESMC_CONTEXT, rc)) return;
 #endif
   }
@@ -1632,7 +1656,7 @@ MeshCap *MeshCap::meshcreate_easy_elems(int *pdim,
 
 // returns NULL if unsuccessful
 MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp,
-                                       bool _is_esmf_mesh, 
+                                       bool _is_esmf_mesh,
                                        int *rc) {
 #undef ESMC_METHOD
 #define ESMC_METHOD "MeshCap::meshcreate_from_grid()"
@@ -1686,6 +1710,3 @@ MeshCap *MeshCap::meshcreate_from_grid(Grid **gridpp,
   // Output new MeshCap
   return mc;
 }
-
-
-

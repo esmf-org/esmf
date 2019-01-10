@@ -3037,13 +3037,9 @@ module NUOPC_Driver
     end interface
     optional                                   :: compSetVMRoutine
     integer,             intent(in),  optional :: petList(:)
-    type(ESMF_GridComp), intent(in),  optional :: info
+    type(ESMF_Info),     intent(in),  optional :: info
     type(ESMF_GridComp), intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
-!
-!TODO: Would be nicer if there was type(ESMF_Info) that could be used to
-!TODO: pass in Attributes (i.e. hints), and could then be used to copy 
-!TODO: the Attributes onto any other ESMF class object.
 !
 ! !DESCRIPTION:
 ! Create and add a GridComp (i.e. Model, Mediator, or Driver) as a child 
@@ -3361,7 +3357,8 @@ module NUOPC_Driver
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
   recursive subroutine NUOPC_DriverAddCplComp(driver, srcCompLabel, &
-    dstCompLabel, compSetServicesRoutine, petList, comp, rc)
+    dstCompLabel, compSetServicesRoutine, compSetVMRoutine, petList, info, &
+    comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: srcCompLabel
@@ -3374,7 +3371,17 @@ module NUOPC_Driver
         integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
+    interface
+      recursive subroutine compSetVMRoutine(cplcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    optional                                   :: compSetVMRoutine
     integer, target,     intent(in),  optional :: petList(:)
+    type(ESMF_Info),     intent(in),  optional :: info
     type(ESMF_CplComp),  intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
 !
@@ -3594,6 +3601,26 @@ module NUOPC_Driver
       ! also add the new connector component to the legacy data structures:
       is%wrap%connectorComp(src,dst) = cmEntry%wrap%connector ! set the alias
       is%wrap%connectorPetLists(src,dst)%ptr => cmEntry%wrap%petList
+    endif
+
+    ! optionally copy Attributes from info object to the newly created component
+    if (present(info)) then
+      call ESMF_AttributeCopy(info, cmEntry%wrap%connector, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
+    ! optionally call the SetVM on the added component
+    if (present(compSetVMRoutine)) then
+      call ESMF_CplCompSetVM(cmEntry%wrap%connector, &
+        compSetVMRoutine, userRc=userrc, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
 
     ! add standard NUOPC CplComp Attribute Package to the connectorComp

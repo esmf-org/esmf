@@ -2425,12 +2425,14 @@ void VM::getObject(
     switch (proxyflag) {
       case ESMF_PROXYYES: {
         id_found = fobject_proxy == ESMF_PROXYYES;
-        ESMC_LogDefault.Write("PROXYYES", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+        if (debug)
+          ESMC_LogDefault.Write("PROXYYES", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
         break;
       }
       case ESMF_PROXYNO: {
         id_found = fobject_proxy == ESMF_PROXYNO;
-        ESMC_LogDefault.Write("PROXYNO", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+        if (debug)
+          ESMC_LogDefault.Write("PROXYNO", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
         break;
       }
       case ESMF_PROXYANY:

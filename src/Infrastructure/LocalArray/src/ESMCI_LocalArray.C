@@ -397,7 +397,7 @@ LocalArray *LocalArray::create(
   }
   
   // construct LocalArray internals, allocate memory for data
-  localrc = a->construct(allocateF, docopy, tk, rank, FROM_CPLUSPLUS, true,
+  localrc = a->construct(allocateF, docopy, tk, rank, FROM_CPLUSPLUS, allocateF,
     NULL, NULL, NULL, counts, base_addr, NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return ESMC_NULL_POINTER;
@@ -468,7 +468,7 @@ LocalArray *LocalArray::create(
   }
   
   // construct LocalArray internals, allocate memory for data
-  localrc = a->construct(allocateF, docopy, tk, rank, FROM_CPLUSPLUS, true,
+  localrc = a->construct(allocateF, docopy, tk, rank, FROM_CPLUSPLUS, allocateF,
     NULL, lbounds, ubounds, counts, base_addr, NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return ESMC_NULL_POINTER;

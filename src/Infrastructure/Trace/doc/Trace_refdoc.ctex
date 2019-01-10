@@ -57,7 +57,7 @@
 #ifdef STANDALONE
 \input{Trace_desc}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Trace/doc/Trace_desc}
+\input{../Infrastructure/Trace/doc/Trace_desc}
 #endif
 
 \subsection{Use and Examples}
@@ -66,23 +66,23 @@
 \input{ESMF_TraceEx_fapi}
 \input{ESMF_TraceUserEx_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Trace/doc/Trace_usage}
-\input{../Superstructure/Trace/doc/ESMF_TraceEx_fapi}
-\input{../Superstructure/Trace/doc/ESMF_TraceUserEx_fapi}
+\input{../Infrastructure/Trace/doc/Trace_usage}
+\input{../Infrastructure/Trace/doc/ESMF_TraceEx_fapi}
+\input{../Infrastructure/Trace/doc/ESMF_TraceUserEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
 #ifdef STANDALONE
 \input{Trace_rest}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Trace/doc/Trace_rest}
+\input{../Infrastructure/Trace/doc/Trace_rest}
 #endif
 
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_Trace_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Trace/doc/ESMF_Trace_fapi}
+\input{../Infrastructure/Trace/doc/ESMF_Trace_fapi}
 #endif
 
 #ifdef STANDALONE

@@ -24,6 +24,8 @@
 #include "ESMCI_GridToMesh.h"
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
+#include "ESMCI_TraceRegion.h"
+
 #include "Mesh/include/ESMCI_Mesh.h"
 #include "Mesh/include/Legacy/ESMCI_MeshRead.h"
 #include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
@@ -200,6 +202,11 @@ void ESMCI_regrid_create(
     }
     WMat dst_status;
 
+#ifdef ESMF_PROFILE_INTERNAL
+    int localrc;
+    ESMCI_REGION_ENTER("Native Mesh Weight Generation", localrc)
+    VM::logMemInfo(std::string("before Native Mesh Weight Generation"));
+#endif
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
@@ -228,6 +235,12 @@ void ESMCI_regrid_create(
         Throw() << "Online regridding error" << std::endl;
       }
     }
+
+#ifdef ESMF_PROFILE_INTERNAL
+    VM::logMemInfo(std::string("after Native Mesh Weight Generation"));
+    ESMCI_REGION_EXIT("Native Mesh Weight Generation", localrc)
+#endif
+
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Done with weight generation... check unmapped dest,", ESMC_LOGMSG_INFO);
 #endif
@@ -334,7 +347,7 @@ void ESMCI_regrid_create(
           // Construct factor list entry
           iientries[twoi+1] = w.id;  iientries[twoi] = wc.id;
           factors[i] = wc.value;
-          
+
 #define ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL_off
 
 #ifdef ESMF_REGRID_DEBUG_OUTPUT_WTS_ALL
@@ -432,6 +445,11 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
 
+#ifdef ESMF_PROFILE_INTERNAL
+    ESMCI_REGION_ENTER("Native Mesh ArraySMMStore", localrc)
+    VM::logMemInfo(std::string("before Native Mesh ArraySMMStore"));
+#endif
+
     // Build the ArraySMM
     if (*has_rh != 0) {
       int localrc;
@@ -443,6 +461,11 @@ void ESMCI_regrid_create(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
+
+#ifdef ESMF_PROFILE_INTERNAL
+    VM::logMemInfo(std::string("after Native Mesh ArraySMMStore"));
+    ESMCI_REGION_EXIT("Native Mesh ArraySMMStore", localrc)
+#endif
 
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Returned from ArraySMMStore().", ESMC_LOGMSG_INFO);

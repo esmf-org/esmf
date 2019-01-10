@@ -123,7 +123,7 @@ program ESMF_ArraySharedDeSSISTest
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
   
   ! Create DistGrid and Array that support sharing of DEs on the same SSI
-  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10000,15000/), &
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/10000,12000/), &
     regDecomp=(/petCount,1/), rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
     ESMF_CONTEXT, rcToReturn=rc)) &

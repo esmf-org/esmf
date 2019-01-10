@@ -5,7 +5,7 @@ ALL: build_here
 
 # This needs to be the path of this directory relative to the
 # top level esmf directory.
-LOCDIR    = src/Superstructure/Trace/
+LOCDIR    = src/Infrastructure/Trace/
 
 # Leave this line alone.
 include $(ESMF_DIR)/makefile

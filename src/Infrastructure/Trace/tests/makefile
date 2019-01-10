@@ -4,7 +4,7 @@ ALL:  build_unit_tests
 run:  run_unit_tests
 run_uni:  run_unit_tests_uni
 
-LOCDIR	  = src/Superstructure/Trace/tests
+LOCDIR	  = src/Infrastructure/Trace/tests
 
 .NOTPARALLEL:
 
