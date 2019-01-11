@@ -1077,13 +1077,14 @@
       integer   :: id_value
       character :: key_value
 
-      type(ESMF_Grid) :: grid, grid_temp
-      type(ESMF_Pointer) :: grid_tempp
-      type(ESMF_Base) :: base
-      integer :: id_temp
-      type(ESMF_VMId) :: vmid_temp
-      type(ESMF_Logical) :: object_found
-      type(ESMF_Log)  :: log
+      type(ESMF_Grid)     :: grid, grid_temp
+      type(ESMF_Pointer)  :: grid_tempp
+      type(ESMF_Base)     :: base
+      integer             :: id_temp, ssiCount, ssiMinPetCount, ssiMaxPetCount
+      type(ESMF_VMId)     :: vmid_temp
+      type(ESMF_Logical)  :: object_found
+      type(ESMF_Log)      :: log
+      character(len=80)   :: msg
 
       logical :: tf
 
@@ -1116,8 +1117,15 @@
       !NEX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Get Test"
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      call ESMF_VMGet(vm, petCount=npets, ssiCount=ssiCount, &
+        ssiMinPetCount=ssiMinPetCount, ssiMaxPetCount=ssiMaxPetCount, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      write(msg,*) "petCount=", npets, " ssiCount=", ssiCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+      write(msg,*) "ssiMinPetCount=", ssiMinPetCount, &
+        " ssiMaxPetCount=", ssiMaxPetCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -1394,7 +1402,7 @@
       write(name, *) "Obtain pointer to object via id/vmid lookup"
       write(failMsg, *) 'Can not access object'
       call c_esmc_vmgetobject (grid_temp,  &
-          id_temp, vmid_temp,  ESMF_GEOMTYPE_GRID%type,  &
+          id_temp, vmid_temp, "Grid", ESMF_PROXYNO,  &
           object_found, rc)
       grid_temp%isInit = ESMF_INIT_CREATED
       call ESMF_Test((rc == ESMF_SUCCESS), &

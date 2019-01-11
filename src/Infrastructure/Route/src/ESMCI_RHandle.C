@@ -29,6 +29,7 @@
 #include "ESMCI_RHandle.h"
 
 // include higher level, 3rd party or system headers
+#include <cerrno>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -92,9 +93,9 @@ RouteHandle *RouteHandle::create(
       throw localrc;
     }
     
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     if (routehandle)
       routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -359,9 +360,9 @@ RouteHandle *RouteHandle::create(
   VM::logMemInfo(std::string(ESMC_METHOD": right after creating xxeNew"));
 #endif
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     if (routehandle)
       routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -421,11 +422,18 @@ RouteHandle *RouteHandle::create(
     // open the file
 #ifdef ESMF_MPIUNI
     FILE *fp=fopen(file.c_str(), "rb");
+    if (!fp) {
+      string msg = file + ": " + strerror (errno);
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_OPEN, msg,
+          ESMC_CONTEXT,
+          &localrc);
+      throw ESMC_RC_FILE_OPEN;
+    }
 #else
     MPI_File fh;
     localrc = MPI_File_open(comm, (char*)file.c_str(), 
       MPI_MODE_RDONLY, MPI_INFO_NULL, &fh);
-    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw ESMC_RC_FILE_OPEN;
 #endif
 
     // read the header start
@@ -441,8 +449,9 @@ RouteHandle *RouteHandle::create(
 #endif
     if (strncmp(headerIn, header, strlen(header)) != 0){
       // did not find the expected header start
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-        "This does not look like a known ESMF_RouteHandle file.", ESMC_CONTEXT,
+      std::string msg = std::string("Unknown ESMF_RouteHandle file header: ") + headerIn;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED, msg,
+        ESMC_CONTEXT,
         &localrc);
       throw localrc;
     }
@@ -461,7 +470,7 @@ RouteHandle *RouteHandle::create(
       msg << "The petCount of the reading context is " << petCount <<
         ", and must match the petCount in the RouteHandle file: " <<
         petCountIn;
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD, msg.str(), ESMC_CONTEXT,
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_UNEXPECTED, msg.str(), ESMC_CONTEXT,
         &localrc);
       throw localrc;
     }
@@ -492,8 +501,20 @@ RouteHandle *RouteHandle::create(
 #else
     // each PET reads its local displacement
     unsigned long disp;
+#define BUG_MPI_SEEK_CUR
+#ifdef BUG_MPI_SEEK_CUR
+    // some MPI implementations have a bug wrt MPI_SEEK_CUR in MPI_File_seek()
+    // work around this by using MPI_SEEK_SET instead.
+    MPI_Offset currOffset;
+    localrc = MPI_File_get_position(fh, &currOffset);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+    localrc = MPI_File_seek(fh, currOffset+localPet*sizeof(disp), MPI_SEEK_SET);
+    if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#else
+    // without the bug wrt MPI_SEEK_CUR, the code is more straight forward
     localrc = MPI_File_seek(fh, localPet*sizeof(disp), MPI_SEEK_CUR);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
+#endif
     localrc = MPI_File_read(fh, &disp, 1, MPI_UNSIGNED_LONG, MPI_STATUS_IGNORE);
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
     unsigned long size;
@@ -547,9 +568,9 @@ RouteHandle *RouteHandle::create(
     // store the new XXE object in RH
     routehandle->setStorage(xxeNew);
 
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       rc);
     if (routehandle)
       routehandle->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);  // mark invalid
@@ -836,22 +857,22 @@ int RouteHandle::print(
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
     Array *sendMsgArray = Array::create(&as, dg,
-      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
       &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
     Array *sendDataArray = Array::create(&as, dg,
-      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
       &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
     Array *recvMsgArray = Array::create(&as, dg,
-      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
       &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
     Array *recvDataArray = Array::create(&as, dg,
-      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
       &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
@@ -952,9 +973,9 @@ int RouteHandle::print(
 #endif  // PRINTCOMMMATRIX
 #endif  // PIO, etc.
     
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -1116,9 +1137,9 @@ int RouteHandle::write(
     if (VM::MPIError(localrc, ESMC_CONTEXT)) throw localrc;
 #endif
     
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -1180,9 +1201,9 @@ int RouteHandle::optimize(
   
     
         
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){

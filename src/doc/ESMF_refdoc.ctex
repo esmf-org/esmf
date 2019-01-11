@@ -229,7 +229,7 @@
 
 #include "../Infrastructure/VM/doc/VM_refdoc.ctex"
 
-#include "../Superstructure/Trace/doc/Trace_refdoc.ctex"
+#include "../Infrastructure/Trace/doc/Trace_refdoc.ctex"
 
 #include "../Infrastructure/Util/doc/IOUtil_refdoc.ctex"
 

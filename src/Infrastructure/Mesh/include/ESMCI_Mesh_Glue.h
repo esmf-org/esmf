@@ -217,7 +217,7 @@ void ESMCI_sphdeg_to_cart(double *lon, double *lat,
                           double *x, double *y, double *z, int *rc);
 
 // This method sets the pole values so a 2D Mesh from a SCRIP grid can still be used in regrid with poles
-void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
+void ESMCI_meshsetpoles(Mesh **meshpp, int *_pole_obj_type, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
                         int *rc);
 
 void ESMCI_meshcreatedual(Mesh **src_meshpp, Mesh **output_meshpp, int *rc);

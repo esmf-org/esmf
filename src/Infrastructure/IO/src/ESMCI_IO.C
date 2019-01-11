@@ -1283,7 +1283,7 @@ void IO::redist_arraycreate1de(Array *src_array_p, Array **dest_array_p, int pet
 
   ESMCI::Array *temp_arr_p = ESMCI::Array::create(&arrayspec, distgrid,
     &distgridToArrayMapArg,
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     &undistLBoundArg, &undistUBoundArg,
     &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))

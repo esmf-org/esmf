@@ -422,6 +422,24 @@
 
 !------------------------------------------------------------------------------
 !
+!     ! Typed proxy flag
+
+!     ! WARNING: must match corresponding values in ../include/ESMC_Util.h
+
+      type ESMF_ProxyFlag
+#ifndef ESMF_NO_SEQUENCE
+      sequence
+#endif
+      private
+          integer :: flag
+      end type
+
+      type(ESMF_ProxyFlag), parameter :: ESMF_PROXYYES = ESMF_ProxyFlag (1),  &
+                                         ESMF_PROXYNO  = ESMF_ProxyFlag (2),  &
+                                         ESMF_PROXYANY = ESMF_ProxyFlag (3)
+
+!------------------------------------------------------------------------------
+!
 !     ! Typed reduction operations
 
 !     ! WARNING: must match corresponding values in ../include/ESMC_Util.h
@@ -502,7 +520,8 @@
 
       type(ESMF_Pin_Flag), parameter:: &
         ESMF_PIN_DE_TO_PET        = ESMF_Pin_Flag(1), &
-        ESMF_PIN_DE_TO_VAS        = ESMF_Pin_Flag(2)
+        ESMF_PIN_DE_TO_VAS        = ESMF_Pin_Flag(2), &
+        ESMF_PIN_DE_TO_SSI        = ESMF_Pin_Flag(3)
 
 !------------------------------------------------------------------------------
 !
@@ -1012,6 +1031,9 @@
       public ESMF_InquireFlag
       public ESMF_INQUIREONLY, ESMF_NOINQUIRE
 
+      public ESMF_ProxyFlag
+      public ESMF_PROXYYES, ESMF_PROXYNO, ESMF_PROXYANY
+
       public ESMF_Direction_Flag, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE
 
       public ESMF_IOFmt_Flag, ESMF_IOFMT_BIN, ESMF_IOFMT_NETCDF, &
@@ -1034,7 +1056,7 @@
              ESMF_SYNC_NONBLOCKING
       public ESMF_Context_Flag, ESMF_CONTEXT_OWN_VM, ESMF_CONTEXT_PARENT_VM
       public ESMF_End_Flag, ESMF_END_NORMAL, ESMF_END_KEEPMPI, ESMF_END_ABORT
-      public ESMF_Pin_Flag, ESMF_PIN_DE_TO_PET, ESMF_PIN_DE_TO_VAS
+      public ESMF_Pin_Flag, ESMF_PIN_DE_TO_PET, ESMF_PIN_DE_TO_VAS, ESMF_PIN_DE_TO_SSI
       public ESMF_AttCopy_Flag, ESMF_ATTCOPY_HYBRID, ESMF_ATTCOPY_REFERENCE, &
                                ESMF_ATTCOPY_VALUE
       public ESMF_AttGetCountFlag, ESMF_ATTGETCOUNT_ATTRIBUTE, ESMF_ATTGETCOUNT_ATTPACK, &

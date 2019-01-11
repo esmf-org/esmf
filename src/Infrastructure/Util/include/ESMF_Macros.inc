@@ -53,5 +53,20 @@ block/end block statements.
 #define ESMF_ENDBLOCK(ESMF_BLOCK_LABEL) if (.true.) exit ESMF_BLOCK_LABEL; end do ESMF_BLOCK_LABEL
 #endif
 
+#ifdef OMPI_MAJOR_VERSION
+#if (OMPI_MAJOR_VERSION < 3)
+#if 0
+MPI-3 support started in OpenMPI v3
+#endif
+#define ESMF_NO_MPI3
+#endif
+#endif
+
+#ifdef MVAPICH2_NUMVERSION
+#if (MVAPICH2_NUMVERSION < 20000000)
+#define ESMF_NO_MPI3
+#endif
+#endif
+
 #endif 
 

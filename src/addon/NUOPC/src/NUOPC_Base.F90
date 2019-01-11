@@ -2393,7 +2393,10 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    integer :: indentCount
+    integer             :: indentCount
+    character(len=120)  :: msg
+    type(ESMF_VM)       :: vm
+    integer             :: localPet, ssiLocalPetCount, peCount, accDeviceCount
     if (btest(verbosity,0)) then
       call ESMF_LogWrite(trim(name)//": "//rName//" intro.", ESMF_LOGMSG_INFO, &
         rc=rc)
@@ -2414,6 +2417,34 @@ module NUOPC_Base
     if (btest(verbosity,2)) then
       call ESMF_VMLogCurrentGarbageInfo(trim(name)//": "//rName//" intro: ", &
         rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    if (btest(verbosity,3)) then
+      call ESMF_VMGetCurrent(vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_VMGet(vm, localPet=localPet, &
+        ssiLocalPetCount=ssiLocalPetCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_VMGet(vm, pet=localPet, peCount=peCount, &
+        accDeviceCount=accDeviceCount, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      write (msg,"(A,I3)") trim(name)//": "//rName// &
+        " intro: local peCount=", peCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      write (msg,"(A,I3)") trim(name)//": "//rName// &
+        " intro: local accDeviceCount=", accDeviceCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      write (msg,"(A,I3)") trim(name)//": "//rName// &
+        " intro: ssiLocalPetCount=", ssiLocalPetCount
+      call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif

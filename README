@@ -39,7 +39,7 @@ Several addon packages are included with this ESMF release under ./src/addon:
 See each addon package for a specific README file.
 
 
-Please contact <esmf_support@list.woc.noaa.gov> with any questions or problems.
+Please contact <esmf_support@ucar.edu> with any questions or problems.
 
 ================================================================================
 ================================================================================
@@ -435,7 +435,7 @@ Adding a New Platform
 4. Edit the ESMC_Conf.h file and look over the macro definitions.
 
 5. Once it is working, post it back on the esmfcontrib sourceforge site and
-   email esmf_support@list.woc.noaa.gov so we can include it in our next
+   email esmf_support@ucar.edu so we can include it in our next
    release.
 
 
@@ -501,7 +501,7 @@ realistic situations are available at:
 Contributions from ESMF users are available at:
         http://sourceforge.net/projects/esmfcontrib
 
-Please contact esmf_support@list.woc.noaa.gov with any questions or problems.
+Please contact esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
 $Id$

@@ -1729,10 +1729,20 @@ endif
 
 endif
 
+build_preload_script:
+	-@echo "#!/bin/sh" > $(ESMF_PRELOADDIR)/preload.sh
+	-@echo "# Script to preload ESMF dynamic trace library" >> $(ESMF_PRELOADDIR)/preload.sh
+	-@echo 'env LD_PRELOAD="$$LD_PRELOAD $(ESMF_PRELOADDIR)/libesmftrace_preload.$(ESMF_SL_SUFFIX)" $$*' >> $(ESMF_PRELOADDIR)/preload.sh
+	chmod 755 $(ESMF_PRELOADDIR)/preload.sh
+
 ESMF_TRACE_STATICLINKLIBS := -lesmftrace_static
 
 ESMF_TRACE_WRAPPERS_IO  := write writev pwrite read open
-ESMF_TRACE_WRAPPERS_MPI := MPI_Allreduce MPI_Barrier MPI_Wait
+ESMF_TRACE_WRAPPERS_MPI := MPI_Allgather MPI_Allgatherv MPI_Allreduce MPI_Alltoall
+ESMF_TRACE_WRAPPERS_MPI += MPI_Alltoallv MPI_Alltoallw MPI_Barrier MPI_Bcast
+ESMF_TRACE_WRAPPERS_MPI += MPI_Gather MPI_Gatherv MPI_Recv MPI_Reduce
+ESMF_TRACE_WRAPPERS_MPI += MPI_Scatter MPI_Send MPI_Sendrecv MPI_Wait
+ESMF_TRACE_WRAPPERS_MPI += MPI_Waitall MPI_Waitany MPI_Waitsome
 ESMF_TRACE_WRAPPERS_MPI += mpi_allgather_ mpi_allgather__ mpi_allgatherv_ mpi_allgatherv__
 ESMF_TRACE_WRAPPERS_MPI += mpi_allreduce_ mpi_allreduce__ mpi_alltoall_ mpi_alltoall__
 ESMF_TRACE_WRAPPERS_MPI += mpi_alltoallv_ mpi_alltoallv__ mpi_alltoallw_ mpi_alltoallw__
@@ -1987,10 +1997,10 @@ endif
 
 build_tracelibs:
 ifeq ($(ESMF_TESTTRACE),ON)
-	cd $(ESMF_DIR)/src/Superstructure/Trace/preload ;\
+	cd $(ESMF_DIR)/src/Infrastructure/Trace/preload ;\
 	$(MAKE) tracelib_static
 ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
-	cd $(ESMF_DIR)/src/Superstructure/Trace/preload ;\
+	cd $(ESMF_DIR)/src/Infrastructure/Trace/preload ;\
 	$(MAKE) tracelib_preload
 endif
 endif

@@ -67,7 +67,8 @@ enum ESMC_ContextFlag { ESMF_CHILD_IN_NEW_VM=1,
 
 // pin flag
 enum ESMC_Pin_Flag { ESMF_PIN_DE_TO_PET=1,
-                     ESMF_PIN_DE_TO_VAS};
+                     ESMF_PIN_DE_TO_VAS,
+                     ESMF_PIN_DE_TO_SSI};
 
 // direction type
 enum ESMC_Direction { ESMF_DIRECTION_FORWARD=1,
@@ -78,8 +79,9 @@ enum ESMC_InquireFlag { ESMF_INQUIREONLY=ESMF_TRUE,
                         ESMF_NOINQUIRE=ESMF_FALSE};
 
 // proxy flag type
-enum ESMC_ProxyFlag { ESMF_PROXYYES=1,
-                      ESMF_PROXYNO};
+enum ESMC_ProxyFlag { ESMF_PROXYYES=1,  // Object is a proxy
+                      ESMF_PROXYNO,     // Object is not a proxy
+                      ESMF_PROXYANY};   // For queries
 
 // halostartregionflag type
 enum ESMC_HaloStartRegionFlag { ESMF_REGION_EXCLUSIVE=0,
@@ -172,6 +174,8 @@ size_t ESMC_F90lentrim (const char *src, ESMCI_FortranStrLenArg slen);
 char *ESMC_F90toCstring(const char *src, ESMCI_FortranStrLenArg slen);
 int  ESMC_F90toCstring(const char *src, ESMCI_FortranStrLenArg slen, char *dst, ESMCI_FortranStrLenArg dlen);
 int  ESMC_CtoF90string(const char *src, char *dst, ESMCI_FortranStrLenArg dlen);
+void ESMC_cxxtoF90string(const std::string &src, char *dst, int *rc, 
+                             /* hidden */ ESMCI_FortranStrLenArg dlen);
 extern "C" {
 void  FTN_X(esmf_f90tocstring)(const char *src, char *dst, int *rc, 
                              /* hidden */ ESMCI_FortranStrLenArg slen, ESMCI_FortranStrLenArg dlen);

@@ -26,6 +26,7 @@ module NUOPC_ModelBase
   private
   
   public &
+    SetVM, &
     SetServices, &
     routine_Run, &
     routine_Nop
@@ -69,6 +70,64 @@ module NUOPC_ModelBase
 
   !-----------------------------------------------------------------------------
   contains
+  !-----------------------------------------------------------------------------
+  
+  subroutine SetVM(gcomp, rc)
+    type(ESMF_GridComp)  :: gcomp
+    integer, intent(out) :: rc
+
+    ! local variables
+    type(ESMF_VM)             :: gvm
+    character(ESMF_MAXSTR)    :: name
+    logical                   :: pthreadsEnabled
+    logical                   :: isPresent
+    integer                   :: value
+    
+    rc = ESMF_SUCCESS
+
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    
+#if 1
+    call ESMF_LogWrite("Generic ModelBase SetVM() is executing for: "// &
+      trim(name), ESMF_LOGMSG_INFO, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+    
+    ! detect early return condition of the SetVM*() methods cannot be used
+    call ESMF_VMGetGlobal(gvm, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_VMGet(gvm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (.not.pthreadsEnabled) then
+      return  ! early successful return
+    endif
+    
+    ! looking for hints in the component's Attributes
+    call ESMF_AttributeGet(gcomp, name="maxPeCountPerPet", value=value, &
+      defaultvalue=1, isPresent=isPresent, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (isPresent) then
+#if 1
+      call ESMF_LogWrite("Generic ModelBase SetVM() is calling "// &
+        "ESMF_GridCompSetVMMaxPEsexecuting() for : "// &
+        trim(name), ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
+      call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=value, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+    
+  end subroutine
+
   !-----------------------------------------------------------------------------
   
   subroutine SetServices(gcomp, rc)

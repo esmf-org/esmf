@@ -208,8 +208,8 @@
     static void sphdeg_to_cart(double *lon, double *lat,
                         double *x, double *y, double *z, int *rc);
 
-    void meshsetpoles(int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
-                      int *rc);
+    void meshsetpoles(int *_pole_obj_type, int *_pole_val, int *_min_pole_gid, int *_max_pole_gid,
+                           int *rc);
 
     static MeshCap *meshcreatedual(MeshCap **src_meshpp, int *rc);
 

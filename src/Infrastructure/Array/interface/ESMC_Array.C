@@ -55,7 +55,8 @@ ESMC_Array ESMC_ArrayCreate(ESMC_ArraySpec arrayspec, ESMC_DistGrid distgrid,
   array.ptr = (void *)
     ESMCI::Array::create((ESMCI::ArraySpec *)&arrayspec,
     (ESMCI::DistGrid *)(distgrid.ptr),
-    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &localrc);
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    &localrc);
 
   // Set name in newly created Array
   localrc = ((ESMCI::Array*)(array.ptr))->ESMCI::Array::setName(name);

@@ -110,12 +110,23 @@ class VMK{
     MPI_Request *mpireq;    // request array
   };
 
+  struct memhandle{
+    int localPet;           // index of the localPet in the memhandle context
+    int localPetCount;      // number of PETs that share same SSI with localPET
+    std::vector<int> counts;// allocs requested by a specific PET on same SSI
+#ifndef ESMF_MPIUNI
+    std::vector<MPI_Win> wins;  // MPI shared memory windows
+#else
+    std::vector<void*> mems;
+    std::vector<unsigned long> sizes;
+#endif
+  };
+
   struct ipmutex{
     // mutex variable for intraProcess sync
     esmf_pthread_mutex_t pth_mutex;
     int lastFlag;
   };
-
 
   struct status{
     int srcPet;
@@ -128,7 +139,6 @@ class VMK{
     status() : mpi_s() {}
   };
   
-  
   struct pipc_mp{
     // hack sync variables
     shmsync shms;
@@ -137,7 +147,6 @@ class VMK{
     // buffer
     char buffer[2][PIPC_BUFFER];
   };
-
 
   struct shared_mp{
     // source and destination pointers
@@ -160,13 +169,11 @@ class VMK{
     esmf_pthread_cond_t cond2;
   };
 
-
   struct comminfo{
     int comm_type;    // communication type
     shared_mp *shmp;  // shared memory message passing structure
     pipc_mp *pipcmp;  // posix ipc message passing structure
   };
-
 
   struct ipshmAlloc{
     void *allocation;   // shared memory allocation
@@ -174,7 +181,6 @@ class VMK{
     ipshmAlloc *prev;   // pointer to prev. ipshmAlloc element in list
     ipshmAlloc *next;   // pointer to next ipshmAlloc element in list
   };
-
 
   // members
   protected:
@@ -186,13 +192,21 @@ class VMK{
     int *pid;       // pid (equal to rank in MPI_COMM_WORLD)
     int *tid;       // thread index
     int *ncpet;     // number of cores this pet references
-    int *nadevs;     // number of accelerator devices accessible from this pet
+    int *nadevs;    // number of accelerator devices accessible from this pet
     int **cid;      // core id of the cores this pet references
+    int ssiCount;   // number of single system images in this VMK
+    int ssiMinPetCount;   // minimum PETs on a single system image
+    int ssiMaxPetCount;   // maximum PETs on a single system image
+    int ssiLocalPetCount; // number of PETs on the same SSI as localPet (incl.)
+    int *ssiLocalPetList; // PETs that are on the same SSI as localPet (incl.)
     // general information about this VMK
     int mpionly;    // 0: there is multi-threading, 1: MPI-only
     int nothreadsflag; // 0-threaded VM, 1-non-threaded VM
-    // MPI Communicator handle
-    MPI_Comm mpi_c;
+    // MPI Communicator handles
+    MPI_Comm mpi_c;     // communicator across the entire VM
+#if !(defined ESMF_NO_MPI3 || defined ESMF_MPIUNI)
+    MPI_Comm mpi_c_ssi; // communicator holding PETs on the same SSI
+#endif
     // Shared mutex and thread_finish variables. These are pointers that will be
     // pointing to shared memory variables between different thread-instances of
     // the VMK object.
@@ -280,7 +294,7 @@ class VMK{
     esmf_pthread_t getMypthid();   // return mypthid
     int getNcpet(int i);           // return ncpet
     int getNadevs(int i);          // return nadevs
-    int getSsiid(int i);           // return ssiid
+    int getSsi(int i);             // return ssiid
     MPI_Comm getMpi_c();           // return mpi_c
     int getNthreads(int i);        // return number of threads in group PET
     int getTid(int i);             // return tid for PET
@@ -292,6 +306,11 @@ class VMK{
     // get() calls
     int getLocalPet() const {return mypet;}
     int getPetCount() const {return npets;}
+    int getSsiCount() const {return ssiCount;}
+    int getSsiMinPetCount() const {return ssiMinPetCount;}
+    int getSsiMaxPetCount() const {return ssiMaxPetCount;}
+    int getSsiLocalPetCount() const {return ssiLocalPetCount;}
+    const int *getSsiLocalPetList() const {return ssiLocalPetList;}
     esmf_pthread_t getLocalPthreadId() const {return mypthid;}
     bool isPthreadsEnabled() const{
 #ifdef ESMF_NO_PTHREADS
@@ -322,6 +341,10 @@ class VMK{
       return true;
 #endif
     }
+    bool isSsiSharedMemoryEnabled() const;
+      //TODO: For now had to implement this method in the source file, because
+      //TODO: of the way the ESMF_NO_MPI3 macro is being determined.
+      //TODO: Move it into the VMKernel header once includes are fixed.
 
     // p2p communication calls
     int send(const void *message, int size, int dest, int tag=-1);
@@ -384,6 +407,15 @@ class VMK{
     void commqueuewait();
     void commcancel(commhandle **commh);
     bool cancelled(status *status);
+    
+    // SSI shared memory methods
+    int ssishmAllocate(std::vector<unsigned long>&bytes, memhandle *memh);
+    int ssishmFree(memhandle *memh);
+    int ssishmGetMems(memhandle memh, int pet, std::vector<void *> *mems=NULL,
+      std::vector<unsigned long> *bytes=NULL);
+    int ssishmGetLocalPet(memhandle memh){return memh.localPet;}
+    int ssishmGetLocalPetCount(memhandle memh){return memh.localPetCount;}
+    int ssishmSync(memhandle memh);
         
     // IntraProcessSharedMemoryAllocation Table Methods
     void *ipshmallocate(int bytes, int *firstFlag=NULL);

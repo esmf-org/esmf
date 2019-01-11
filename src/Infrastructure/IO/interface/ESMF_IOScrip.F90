@@ -3970,7 +3970,8 @@ end subroutine ESMF_OutputScripVarFile
 ! !INTERFACE:
 subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
                         maxNodePElement, coordDim,  &
-                        haveNodeMask, haveElmtMask, haveArea, rc)
+                        haveNodeMask, haveElmtMask, haveArea, &
+                        haveOrigGridDims, origGridDims, rc)
 
 ! !ARGUMENTS:
 
@@ -3982,6 +3983,8 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
     logical, intent(out), optional :: haveNodeMask
     logical, intent(out), optional :: haveElmtMask
     logical, intent(out), optional :: haveArea
+    logical, intent(out), optional :: haveOrigGridDims
+    integer, intent(out), optional :: origGridDims(2)
     integer, intent(out), optional :: rc
 
     integer:: localrc, ncStatus
@@ -4088,6 +4091,33 @@ subroutine ESMF_EsmfInq(filename, nodeCount, elementCount, &
       else
            haveArea = .false.
       end if
+    end if
+
+    ! check if haveOrigGridDims
+    if (present(haveOrigGridDims)) then
+      ncStatus = nf90_inq_varid (ncid, "origGridDims", VarId)
+      if (ncStatus == nf90_noerror) then
+           haveOrigGridDims = .true.
+      else
+           haveOrigGridDims = .false.
+      end if
+    end if
+
+! XMRKX !
+    ! Get origGridDims
+    if (present(origGridDims)) then
+      ncStatus = nf90_inq_varid (ncid, "origGridDims", VarId)
+      errmsg = "Variable origGridDims in "//trim(filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,errmsg,&
+        rc)) return
+
+      ncStatus=nf90_get_var(ncid, VarId, origGridDims)
+      if (CDFCheckError (ncStatus, &
+           ESMF_METHOD, &
+           ESMF_SRCLINE,errmsg,&
+           rc)) return
     end if
 
     if (present(rc)) rc=ESMF_SUCCESS

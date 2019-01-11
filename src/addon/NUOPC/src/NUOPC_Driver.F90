@@ -28,6 +28,7 @@ module NUOPC_Driver
   private
   
   public &
+    SetVM, &
     SetServices, &
     routine_Run
 
@@ -145,6 +146,16 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
   contains
+  !-----------------------------------------------------------------------------
+  
+  recursive subroutine SetVM(driver, rc)
+    type(ESMF_GridComp)  :: driver
+    integer, intent(out) :: rc
+
+    rc = ESMF_SUCCESS
+  
+  end subroutine
+
   !-----------------------------------------------------------------------------
   
   recursive subroutine SetServices(driver, rc)
@@ -1009,7 +1020,7 @@ module NUOPC_Driver
             ! need to update the Component attributes across all PETs
             if (associated(is%wrap%modelPetLists(i)%ptr)) then
               call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
-                rootList=is%wrap%modelPetLists(i)%ptr, reconcile=.true., &
+                rootList=is%wrap%modelPetLists(i)%ptr(1:1), reconcile=.true., &
                 rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -1082,7 +1093,7 @@ module NUOPC_Driver
               ! need to update the Component attributes across all PETs
               if (associated(is%wrap%connectorPetLists(i,j)%ptr)) then
                 call ESMF_AttributeUpdate(is%wrap%connectorComp(i,j), vm, &
-                  rootList=is%wrap%connectorPetLists(i,j)%ptr, &
+                  rootList=is%wrap%connectorPetLists(i,j)%ptr(1:1), &
                   reconcile=.true., rc=rc)
                 if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                   line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
@@ -2883,7 +2894,7 @@ module NUOPC_Driver
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
   recursive subroutine NUOPC_DriverAddGridComp(driver, compLabel, &
-    compSetServicesRoutine, petList, comp, rc)
+    compSetServicesRoutine, compSetVMRoutine, petList, info, comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: compLabel
@@ -2895,7 +2906,17 @@ module NUOPC_Driver
         integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
+    interface
+      recursive subroutine compSetVMRoutine(gridcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_GridComp)        :: gridcomp ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    optional                                   :: compSetVMRoutine
     integer,             intent(in),  optional :: petList(:)
+    type(ESMF_Info),     intent(in),  optional :: info
     type(ESMF_GridComp), intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
 !
@@ -2904,12 +2925,16 @@ module NUOPC_Driver
 ! component to a Driver. The component is created on the provided {\tt petList},
 ! or by default across all of the Driver PETs.
 !
-! The specified {\tt SetServices()} routine is called back immediately after the
-! new child component has been created internally. Very little around the
+! The specified {\tt compSetServicesRoutine()} is called back immediately after
+! the new child component has been created internally. Very little around the
 ! component is set up at that time (e.g. component attributes are not 
 ! available). The routine should therefore be very light weight, with the sole
 ! purpose of setting the entry points of the component -- typically by deriving 
 ! from a generic component followed by the appropriate specilizations.
+!
+! If provided, the {\tt compSetVMRoutine()} is called back before the 
+! {\tt compSetServicesRoutine()}. This allows the child component to set
+! aspects of its own VM, such as threading or the PE distribution among PETs.
 !
 ! The {\tt compLabel} must uniquely identify the child component within the
 ! context of the Driver component.
@@ -3002,7 +3027,27 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
+    
+    ! optionally copy Attributes from info object to the newly created component
+    if (present(info)) then
+      call ESMF_AttributeCopy(info, cmEntry%wrap%component, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
+    ! optionally call the SetVM on the added component
+    if (present(compSetVMRoutine)) then
+      call ESMF_GridCompSetVM(cmEntry%wrap%component, &
+        compSetVMRoutine, userRc=localrc, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+      
     ! add standard NUOPC GridComp Attribute Package to the modelComp
     call NUOPC_CompAttributeInit(cmEntry%wrap%component, kind="Model", rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3189,7 +3234,8 @@ module NUOPC_Driver
 ! !INTERFACE:
   ! Private name; call using NUOPC_DriverAddComp()
   recursive subroutine NUOPC_DriverAddCplComp(driver, srcCompLabel, &
-    dstCompLabel, compSetServicesRoutine, petList, comp, rc)
+    dstCompLabel, compSetServicesRoutine, compSetVMRoutine, petList, info, &
+    comp, rc)
 ! !ARGUMENTS:
     type(ESMF_GridComp)                        :: driver
     character(len=*),    intent(in)            :: srcCompLabel
@@ -3202,7 +3248,17 @@ module NUOPC_Driver
         integer, intent(out)       :: rc       ! must not be optional
       end subroutine
     end interface
+    interface
+      recursive subroutine compSetVMRoutine(cplcomp, rc)
+        use ESMF
+        implicit none
+        type(ESMF_CplComp)         :: cplcomp  ! must not be optional
+        integer, intent(out)       :: rc       ! must not be optional
+      end subroutine
+    end interface
+    optional                                   :: compSetVMRoutine
     integer, target,     intent(in),  optional :: petList(:)
+    type(ESMF_Info),     intent(in),  optional :: info
     type(ESMF_CplComp),  intent(out), optional :: comp
     integer,             intent(out), optional :: rc 
 !
@@ -3423,6 +3479,26 @@ module NUOPC_Driver
       is%wrap%connectorPetLists(src,dst)%ptr => cmEntry%wrap%petList
     endif
 
+    ! optionally copy Attributes from info object to the newly created component
+    if (present(info)) then
+      call ESMF_AttributeCopy(info, cmEntry%wrap%connector, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
+    ! optionally call the SetVM on the added component
+    if (present(compSetVMRoutine)) then
+      call ESMF_CplCompSetVM(cmEntry%wrap%connector, &
+        compSetVMRoutine, userRc=localrc, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+      
     ! add standard NUOPC CplComp Attribute Package to the connectorComp
     call NUOPC_CompAttributeInit(cmEntry%wrap%connector, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -3458,7 +3534,7 @@ module NUOPC_Driver
         return  ! bail out
       if (associated(is%wrap%connectorPetLists(src,dst)%ptr)) then
         call ESMF_AttributeUpdate(is%wrap%connectorComp(src,dst), vm, &
-          rootList=is%wrap%connectorPetLists(src,dst)%ptr, &
+          rootList=is%wrap%connectorPetLists(src,dst)%ptr(1:1), &
           reconcile=.true., rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&

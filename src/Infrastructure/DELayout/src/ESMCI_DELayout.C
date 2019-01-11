@@ -444,9 +444,9 @@ int DELayout::destroy(
     (*delayout)->destruct();
     // mark as invalid object
     (*delayout)->ESMC_BaseSetStatus(ESMF_STATUS_INVALID);
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc);
     return rc;
   }catch(...){
@@ -520,6 +520,7 @@ int DELayout::construct(
   int petCount = vmArg->getPetCount();
   int localPet = vmArg->getLocalPet();
   int localVas = vmArg->getVas(localPet);
+  int localSsi = vmArg->getSsi(localPet);
 
   // by default use a sequential 1-to-1 petMap
   bool petMapDeleteFlag = false; // reset
@@ -541,6 +542,7 @@ int DELayout::construct(
     deInfoList[i].de = i;                // by default start at 0
     deInfoList[i].pet = petMap[i];
     deInfoList[i].vas = vmArg->getVas(petMap[i]);
+    deInfoList[i].ssi = vmArg->getSsi(petMap[i]);
   }
 
   // clean up petMap if necessary
@@ -596,6 +598,11 @@ int DELayout::construct(
       vasLocalDeToDeMap[j]=i;
       ++j;
     }
+  
+  // determine SSI part
+  ssiLocalDeCount = 0;               // reset ssi-local de count
+  for (int i=0; i<deCount; i++)
+    if (deInfoList[i].ssi == localSsi) ++ssiLocalDeCount;
 
   // setup work queue
   localServiceOfferCount = new int[vasLocalDeCount];

@@ -228,6 +228,50 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 }
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_cxxtoF90string"
+//BOPI
+// !IROUTINE:  ESMC_cxxtoF90string - Conversion routine from C++ string to F90 character
+//
+// !INTERFACE:
+  void  ESMC_cxxtoF90string(
+//
+// !RETURN VALUE:
+//  converts a C++ string into an F90, space padded string.
+//
+// !ARGUMENTS:
+    const std::string &src,        // in - C++ string source buffer
+    char *dst,                     // out - pointer to a buffer to hold F90 string
+    int *rc,                       // out - return code
+    ESMCI_FortranStrLenArg dlen) { // *hidden* in - max len of F90 dst buffer
+//EOPI
+
+    // Initialize return code; assume routine not implemented
+    if (rc) *rc = ESMC_RC_NOT_IMPL;
+
+    size_t cxxlen = src.size();
+
+    // fortran doesn't need trailing null, so len can be up to == maxlen
+    if (cxxlen > (size_t)dlen) {
+       std::stringstream msgbuf;
+       msgbuf << "dest buffer size of " << dlen
+           << " bytes too small, must be >= " << cxxlen << " bytes";
+       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE, msgbuf.str(), ESMC_CONTEXT,
+           rc);
+       return;
+    }
+
+    // move bytes, then pad rest of string to spaces
+    memcpy(dst, src.c_str(), cxxlen);
+    memset (&dst[cxxlen], ' ', dlen-cxxlen);
+
+    // return ok.  caller has passed us in dst buffer so it is up to them
+    // to manage that space.
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+}
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_F90lentrim"
@@ -367,7 +411,7 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 //  returns ESMF_SUCCESS or ESMF_FAILURE.
 //
 // !ARGUMENTS:
-    const char *src,               // in - C++ null term string source buffer
+    const char *src,               // in - C null term string source buffer
     char *dst,                     // inout - pointer to a buffer holding F90 string
 
     ESMCI_FortranStrLenArg dlen) {  // in - length of dst buffer, space padded
@@ -407,14 +451,14 @@ ESMC_ObjectID ESMC_ID_NONE           = {99, "ESMF_None"};
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_f90tostring"
 //BOPI
-// !IROUTINE:  ESMF_F90toCstring - Fortran-callable conversion routine from F90 character to C++ string
+// !IROUTINE:  ESMF_F90toCstring - Fortran-callable conversion routine from F90 character to C string
 //
 // !INTERFACE:
 extern "C" {
     void  FTN_X(esmf_f90tocstring)(
 //
 // !RETURN VALUE:
-//  converts an F90, space padded string into a C++ null terminated string
+//  converts an F90, space padded string into a C null terminated string
 //  sets *rc to ESMF_SUCCESS or ESMF_FAILURE, returns nothing.
 //  the arguments below labeled *hidden* are added by the fortran compiler
 //  and should not appear in the fortran argument list
@@ -465,14 +509,14 @@ extern "C" {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "esmf_ctof90string"
 //BOPI
-// !IROUTINE:  ESMF_CtoF90string - Fortran-callable conversion routine from C++ string to F90 character
+// !IROUTINE:  ESMF_CtoF90string - Fortran-callable conversion routine from C string to F90 character
 //
 // !INTERFACE:
 extern "C" {
     void  FTN_X(esmf_ctof90string)(
 //
 // !RETURN VALUE:
-//  converts a C++ null terminated string info an F90, space padded string
+//  converts a C null terminated string into an F90, space padded string
 //  sets *rc to ESMF_SUCCESS or ESMF_FAILURE, returns nothing.
 //  the arguments below labeled *hidden* are added by the fortran compiler
 //  and should not appear in the fortran argument list
@@ -517,7 +561,6 @@ extern "C" {
     return;
  }
 }
-
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

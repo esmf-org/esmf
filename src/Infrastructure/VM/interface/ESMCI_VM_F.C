@@ -465,8 +465,10 @@ extern "C" {
   }
   
   void FTN_X(c_esmc_vmget)(ESMCI::VM **ptr, int *localPet, int *petCount, 
-    int *peCount, int *mpiCommunicator, ESMC_Logical *pthreadsEnabledFlag,
-    ESMC_Logical *openMPEnabledFlag, int *rc){
+    int *peCount, int *ssiCount, int *ssiMinPetCount, int *ssiMaxPetCount,
+    int *ssiLocalPetCount, int *mpiCommunicator,
+    ESMC_Logical *pthreadsEnabledFlag, ESMC_Logical *openMPEnabledFlag,
+    ESMC_Logical *ssiSharedMemoryEnabledFlag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmget()"
     // Initialize return code; assume routine not implemented
@@ -483,6 +485,14 @@ extern "C" {
       for (int i=0; i<npets; i++)
         *peCount += (*ptr)->getNcpet(i);
     }
+    if (ESMC_NOT_PRESENT_FILTER(ssiCount) != ESMC_NULL_POINTER)
+      *ssiCount = (*ptr)->getSsiCount();
+    if (ESMC_NOT_PRESENT_FILTER(ssiMinPetCount) != ESMC_NULL_POINTER)
+      *ssiMinPetCount = (*ptr)->getSsiMinPetCount();
+    if (ESMC_NOT_PRESENT_FILTER(ssiMaxPetCount) != ESMC_NULL_POINTER)
+      *ssiMaxPetCount = (*ptr)->getSsiMaxPetCount();
+    if (ESMC_NOT_PRESENT_FILTER(ssiLocalPetCount) != ESMC_NULL_POINTER)
+      *ssiLocalPetCount = (*ptr)->getSsiLocalPetCount();
     if (ESMC_NOT_PRESENT_FILTER(mpiCommunicator) != ESMC_NULL_POINTER){
       mpiCommTemp = (*ptr)->getMpi_c();
 #ifdef ESMF_DONT_HAVE_MPI_COMM_C2F
@@ -502,6 +512,13 @@ extern "C" {
         *openMPEnabledFlag = ESMF_TRUE;
       else
         *openMPEnabledFlag = ESMF_FALSE;
+    }
+    if (ESMC_NOT_PRESENT_FILTER(ssiSharedMemoryEnabledFlag)
+      != ESMC_NULL_POINTER){
+      if ((*ptr)->isSsiSharedMemoryEnabled())
+        *ssiSharedMemoryEnabledFlag = ESMF_TRUE;
+      else
+        *ssiSharedMemoryEnabledFlag = ESMF_FALSE;
     }
     // return successfully
     if (rc!=NULL) *rc = ESMF_SUCCESS;
@@ -527,7 +544,7 @@ extern "C" {
     if (ESMC_NOT_PRESENT_FILTER(accDeviceCount) != ESMC_NULL_POINTER)
       *accDeviceCount = (*ptr)->getNadevs(*pet);
     if (ESMC_NOT_PRESENT_FILTER(ssiId) != ESMC_NULL_POINTER)
-      *ssiId = (*ptr)->getSsiid(*pet);
+      *ssiId = (*ptr)->getSsi(*pet);
     if (ESMC_NOT_PRESENT_FILTER(threadCount) != ESMC_NULL_POINTER)
       *threadCount = (*ptr)->getNthreads(*pet);
     if (ESMC_NOT_PRESENT_FILTER(threadId) != ESMC_NULL_POINTER)
@@ -1452,13 +1469,13 @@ extern "C" {
   }
 
   void FTN_X(c_esmc_vmgetobject)(void **fobject, int *objectID, ESMCI::VMId **vmid,
-      int *type, ESMC_Logical *obj_found, int *rc){
+      const char *name_f, ESMC_ProxyFlag *proxyflag, ESMC_Logical *obj_found, int *rc,
+      ESMCI_FortranStrLenArg name_l){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmgetobject()"
+    std::string name = std::string (name_f, ESMC_F90lentrim (name_f, name_l));
     bool found;
-// std::cout << ESMC_METHOD << ": looking for vmid:" << std::endl;
-// (*vmid)->print();
-    ESMCI::VM::getObject(fobject, *objectID, *vmid, *type, &found, rc);
+    ESMCI::VM::getObject(fobject, *objectID, *vmid, name, *proxyflag, &found, rc);
     *obj_found = (found)?ESMF_TRUE:ESMF_FALSE;
   }
     

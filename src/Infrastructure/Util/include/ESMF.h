@@ -40,4 +40,5 @@ uniform error messages and exit codes.
 #include "ESMF_LogMacros.inc"
 #include "ESMF_ErrReturnCodes.inc"
 #include "ESMF_InitMacros.inc"
+#include "ESMF_TraceRegion.inc"
 #endif

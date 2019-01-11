@@ -303,19 +303,31 @@ extern "C" {
       const int *offset,        // in - current offset in the stream
       int *ID,                  // out - Object ID
       ESMCI::VMId **vmId,       // out - vmId
+      char *objname,            // out - base name
       int *rc,                  // out - return code
-      ESMCI_FortranStrLenArg buf_l) { // hidden/in - buffer length
+      ESMCI_FortranStrLenArg buf_l, // hidden/in - buffer length
+      ESMCI_FortranStrLenArg objname_l) { // hidden/in - objname length
 //
 // !DESCRIPTION:
-//     Deserialize the ID and vmId of a serialized Base.
+//     Deserialize the ID, vmId, and base name of a serialized Base.
 //
 //EOPI
 
   // Initialize return code; assume routine not implemented
   if (rc) *rc = ESMC_RC_NOT_IMPL;
 
-  *rc = ESMC_Base::ESMC_Deserialize(buf, offset, ID, *vmId);
+  std::string objname_local;
+  int localrc = ESMC_Base::ESMC_Deserialize(buf, offset, ID, *vmId, objname_local);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+    if (rc) *rc = localrc;
+    return;
+  }
 
+  ESMC_cxxtoF90string (objname_local, objname, rc, objname_l);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) {
+    if (rc) *rc = localrc;
+    return;
+  }
   return;
 
 }  // end c_ESMC_BaseDeserialize_idvmid

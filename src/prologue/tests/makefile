@@ -60,7 +60,7 @@ RUN_ESMF_StringUTestUNI:
 #
 #  Fortran 90 array pointer size test.  This must pass before any of the
 #  ESMF LocalArray code can be assumed safe. If this test does not pass
-#  please report it to esmf_support@list.woc.noaa.gov.
+#  please report it to esmf_support@ucar.edu.
 #
 
 RUN_ESMF_F90ArrayPtrUTest:

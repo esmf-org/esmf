@@ -1049,9 +1049,9 @@ void VM::shutdown(
               << __LINE__ << std::endl;
           // swap() trick with a temporary to free vector's memory
           std::vector<ESMC_Base *>().swap(matchTable_Objects[i]);
-        }catch(int localrc){
+        }catch(int catchrc){
           // catch standard ESMF return code
-          ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+          ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU,
             ESMC_CONTEXT, rc);
           return;
         }catch(...){
@@ -2324,16 +2324,20 @@ void VM::getObject(
 //
 // !ARGUMENTS:
 //
-  void **fobject, // out - alias to object
-  int objectID,   // in - identifying ID
-  VMId *vmID,     // in - identifying vmID
-  int type,       // in - identifying object type
+  void **fobject,     // out - alias to object
+  int objectID,       // in - identifying ID
+  VMId *vmID,         // in - identifying vmID
+  const string &name, // in - identifying object name
+  ESMC_ProxyFlag proxyflag,  // in - proxy/non-proxy flag
   bool *object_found, // out - true if found, false if not
   int *rc) {
 //
 // !DESCRIPTION:
 //    Find and return a object in matchTable_FObjects list for a
 //    given ID/vmId.
+//
+//    If proxyflag is ESMF_PROXYYES, only match proxies.  Likewise, if
+//    ESMF_PROXYNO, only match non-proxies.  ESMF_PROXYANY matches any.
 //
 //EOPI
 //-----------------------------------------------------------------------------
@@ -2343,58 +2347,131 @@ void VM::getObject(
   // initialize return code; assume routine not implemented
   *rc = ESMC_RC_NOT_IMPL;   // final return code
 
-  if (debug)
-    std::cout << ESMC_METHOD << ": looking for object ID: " << objectID << std::endl;
+  switch (proxyflag) {
+    case ESMF_PROXYYES:
+    case ESMF_PROXYNO:
+    case ESMF_PROXYANY:
+      break;
+    default: {
+      *rc = ESMC_RC_ARG_BAD;
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
+          "- Bad proxyflag value", ESMC_CONTEXT, rc);
+      return;
+    }
+  }
+
+  if (debug) {
+    std::stringstream msg;
+    msg << "looking for object ID: " << objectID;
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+  }
   *fobject = NULL;          // assume not found
   *object_found = false;
 
+  // find VMId
 
   bool vmid_found = false;
   int i;
   for (i=0; i<matchTableBound; i++) {
-    if (debug) {
-      std::cout << ESMC_METHOD << ": checking VMId " << i << ".  Comparing:" << std::endl;
-      vmID->print ();
-      std::cout << ESMC_METHOD << ": to:" << std::endl;
-      matchTable_vmID[i].print ();
-    }
     if (VMIdCompare(vmID, &matchTable_vmID[i])) {
       vmid_found = true;
       break;
     }
   }
+  if (debug) {
+    std::stringstream msg;
+    msg << "VMid " << (vmid_found ? "":"not ") << "found";
+    ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+  }
   if (!vmid_found){
-    if (debug)
-      std::cout << ESMC_METHOD << ": vmid vector not found" << std::endl;
     *rc = ESMF_SUCCESS;
     return;
   }
 
-  // match found
+  // Search for and validate ID
 
   // must lock/unlock for thread-safe access to std::vector
+  ESMC_Base *fobject_temp;
+  bool id_found = false;
   VM *vm = getCurrent();
   vm->lock();
   for (unsigned it=0; it<matchTable_Objects[i].size(); ++it){
 
-    ESMC_Base *fobject_temp = matchTable_Objects[i][it];
+    fobject_temp = matchTable_Objects[i][it];
+    int ID = (fobject_temp)->ESMC_BaseGetID();
+    if (debug) {
+      std::stringstream msg;
+      msg << "comparing ID " << ID << " to object ID " << objectID;
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+    }
+    if (ID != objectID)
+      continue;
 
+
+    if (debug)
+      ESMC_LogDefault.Write("validating baseStatus and Status", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
     ESMC_Status baseStatus = (fobject_temp)->ESMC_BaseGetBaseStatus();
     ESMC_Status     Status = (fobject_temp)->ESMC_BaseGetStatus();
     if ((baseStatus != ESMF_STATUS_READY) || (Status != ESMF_STATUS_READY))
       continue;
 
-    int ID = (fobject_temp)->ESMC_BaseGetID();
+    ESMC_ProxyFlag fobject_proxy = (fobject_temp)->ESMC_BaseGetProxyFlag();
+    if (debug) {
+      std::stringstream msg;
+      msg << "validating proxyflag " << proxyflag << " to " <<
+          fobject_proxy;
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+    }
+    switch (proxyflag) {
+      case ESMF_PROXYYES: {
+        id_found = fobject_proxy == ESMF_PROXYYES;
+        if (debug)
+          ESMC_LogDefault.Write("PROXYYES", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+        break;
+      }
+      case ESMF_PROXYNO: {
+        id_found = fobject_proxy == ESMF_PROXYNO;
+        if (debug)
+          ESMC_LogDefault.Write("PROXYNO", ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+        break;
+      }
+      case ESMF_PROXYANY:
+        id_found = true;
+    }
+    if (debug) {
+      std::stringstream msg;
+      msg << "object " << name << (id_found ? " ":" not ") << "validated";
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+    }
+    if (id_found) break;
+  }  // end of ID search loop
 
-    if (debug)
-     std::cout << ESMC_METHOD << ": comparing ID " << ID << " to object ID " << objectID << std::endl;
-    if (ID == objectID) {
+  // Compare name
+
+  // TODO: In theory, VMId/ID should be sufficient to distinguish an object and the objects
+  // name shouldn't be needed.  However some tests (e.g., in ESMF_TransferGridSTest) have
+  // shown that further qualification is needed.  This needs to be investigated.
+
+  if (id_found) {
+    char *fobject_name = (fobject_temp)->ESMC_BaseGetName();
+    if (debug) {
+      std::stringstream msg;
+      msg << "comparing requested name: " << name << " to: " <<
+          fobject_name;
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
+    }
+    if (name == fobject_name) {
       *fobject = fobject_temp;
       // TODO: Bump Base refCount?  Gerhard says not yet.
       *object_found = true;
-      break;
+    }
+    if (debug) {
+      std::stringstream msg;
+      msg << "object " << name << (*object_found ? " ":" not ") << "found";
+      ESMC_LogDefault.Write(msg, ESMC_LOGMSG_INFO, ESMC_CONTEXT);
     }
   }
+
   vm->unlock();
   if (rc) *rc = ESMF_SUCCESS;
 }
@@ -2854,9 +2931,9 @@ void VM::finalize(
         << __LINE__ << std::endl;
     // swap() trick with a temporary to free vector's memory
     std::vector<ESMC_Base *>().swap(matchTable_Objects[0]);
-  }catch(int localrc){
+  }catch(int catchrc){
     // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
+    ESMC_LogDefault.MsgFoundError(catchrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc);
     return;
   }catch(...){

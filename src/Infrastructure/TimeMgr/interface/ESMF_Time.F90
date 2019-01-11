@@ -1034,7 +1034,8 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
       integer :: localrc                        ! local return code
-      integer                 :: yy, mm, dd, h, m, s, ms
+      integer :: yy, mm, dd, h, m, s, ms
+      logical :: underscore
 
       ! Assume failure until success
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -1043,6 +1044,11 @@
       ! check input
       ESMF_INIT_CHECK_SHALLOW(ESMF_TimeGetInit,time,rc)
 
+      underscore = .false.
+      if (present(options)) then
+        if (trim(options)=="underscore") underscore = .true.
+      endif
+
       if (present(unit).or.present(preString)) then
         ! simple, single line print format
         call ESMF_TimeGet(time, yy=yy, mm=mm, dd=dd, h=h, m=m, s=s, ms=ms, &
@@ -1050,7 +1056,7 @@
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
         if (present(unit)) then
-          if (trim(options)=="underscore") then
+          if (underscore) then
             if (present(preString)) then
               write (unit, "(A, '_', I4.4, '_', I2.2, '_', I2.2, '_', I2.2, "//&
                 "'_', I2.2, '_', I2.2, '_', I3.3)") preString, &

@@ -62,6 +62,9 @@ extern "C" {
   void FTN_X(f_esmf_localarraycopyf90ptr)(const ESMCI::LocalArray** laIn, 
     ESMCI::LocalArray** laOut, int *rc);
   
+  void FTN_X(f_esmf_localarrayctof90)(ESMCI::LocalArray**, void *, int *, 
+    ESMC_TypeKind_Flag*, int *, int *, int *, int *);
+ 
 #ifndef ESMF_NO_INTEGER_1_BYTE
   void FTN_X(f_esmf_fortrantkrptrcopy1di1)(void *dst, void *src);
   void FTN_X(f_esmf_fortrantkrptrcopy2di1)(void *dst, void *src);
@@ -141,7 +144,7 @@ int LocalArray::construct(
 // !ARGUMENTS:
   bool aflag,                 // allocate space for data?
   CopyFlag docopy,            // make a data copy from ibase_addr?
-  ESMC_TypeKind_Flag tk,           // I1, I2, I4, I8, R4, R8
+  ESMC_TypeKind_Flag tk,      // I1, I2, I4, I8, R4, R8
   int irank,                  // 1, 2, ..., ESMF_MAXDIM
   LocalArrayOrigin oflag,     // create called from Fortran or C++?
   bool dflag,                 // responsible for deallocation?
@@ -201,7 +204,14 @@ int LocalArray::construct(
       lbound, ubound, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
-  } 
+  }else if (docopy == DATA_REF){
+    // call into Fortran to cast ibase_addr to Fortran pointer
+    LocalArray *aptr = this;
+    FTN_X(f_esmf_localarrayctof90)(&aptr, ibase_addr, &rank, &typekind, counts, 
+      lbound, ubound, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+  }
 
   // Setup info for calculating index tuple location quickly
   // Needs to be done after lbounds and counts are set
@@ -291,7 +301,7 @@ LocalArray *LocalArray::create(
 //    pointer to newly allocated LocalArray object
 //
 // !ARGUMENTS:
-  ESMC_TypeKind_Flag tk,           // I1, I2, I4, I8, R4, R8
+  ESMC_TypeKind_Flag tk,      // I1, I2, I4, I8, R4, R8
   int rank,                   // 1, 2, ..., ESMF_MAXDIM
   LocalArrayOrigin oflag,     // caller is fortran or C++?
   int *rc){                   // return code
@@ -343,10 +353,10 @@ LocalArray *LocalArray::create(
 //    pointer to newly allocated ESMCI::LocalArray object
 //
 // !ARGUMENTS:
-  ESMC_TypeKind_Flag tk,           // I1, I2, I4, I8, R4, R8
+  ESMC_TypeKind_Flag tk,      // I1, I2, I4, I8, R4, R8
   int rank,                   // 1, 2, ..., ESMF_MAXDIM
   const int *counts,          // number of items in each dim
-  void *base_addr,            // if non-null, this is already allocated memory
+  void *base_addr,            // if non-null, this is allocated memory
   CopyFlag docopy,            // make a data copy from base_addr?
   int *rc){                   // return code
 //
@@ -375,15 +385,19 @@ LocalArray *LocalArray::create(
     return ESMC_NULL_POINTER;
   }
 
-  // ensure docopy option is supported
+  // check whether allocation is needed on the Fortran side
+  bool allocateF = true;
   if (docopy == DATA_REF){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-      "DATA_REF is not supported through this interface!", ESMC_CONTEXT, rc);
-    return ESMC_NULL_POINTER;
+    if (base_addr == NULL){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+        "Must provide valid pointer for DATA_REF", ESMC_CONTEXT, rc);
+      return ESMC_NULL_POINTER;
+    }
+    allocateF = false; // no allocation on Fortran side needed
   }
-
+  
   // construct LocalArray internals, allocate memory for data
-  localrc = a->construct(true, docopy, tk, rank, FROM_CPLUSPLUS, true,
+  localrc = a->construct(allocateF, docopy, tk, rank, FROM_CPLUSPLUS, allocateF,
     NULL, NULL, NULL, counts, base_addr, NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return ESMC_NULL_POINTER;
@@ -408,12 +422,12 @@ LocalArray *LocalArray::create(
 //    pointer to newly allocated ESMCI::LocalArray object
 //
 // !ARGUMENTS:
-  ESMC_TypeKind_Flag tk,           // I1, I2, I4, I8, R4, R8
+  ESMC_TypeKind_Flag tk,      // I1, I2, I4, I8, R4, R8
   int rank,                   // 1, 2, ..., ESMF_MAXDIM
   const int *counts,          // number of items in each dim
   const int *lbounds,         // lower index number per dim
   const int *ubounds,         // upper index number per dim
-  void *base_addr,            // if non-null, this is already allocated memory
+  void *base_addr,            // if non-null, this is allocated memory
   CopyFlag docopy,            // make a data copy from base_addr?
   int *rc){                   // return code
 //
@@ -442,15 +456,19 @@ LocalArray *LocalArray::create(
     return ESMC_NULL_POINTER;
   }
 
-  // ensure docopy option is supported
+  // check whether allocation is needed on the Fortran side
+  bool allocateF = true;
   if (docopy == DATA_REF){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-      "DATA_REF is not supported through this interface!", ESMC_CONTEXT, rc);
-    return ESMC_NULL_POINTER;
+    if (base_addr == NULL){
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+        "Must provide valid pointer for DATA_REF", ESMC_CONTEXT, rc);
+      return ESMC_NULL_POINTER;
+    }
+    allocateF = false; // no allocation on Fortran side needed
   }
-
+  
   // construct LocalArray internals, allocate memory for data
-  localrc = a->construct(true, docopy, tk, rank, FROM_CPLUSPLUS, true,
+  localrc = a->construct(allocateF, docopy, tk, rank, FROM_CPLUSPLUS, allocateF,
     NULL, lbounds, ubounds, counts, base_addr, NULL);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return ESMC_NULL_POINTER;
