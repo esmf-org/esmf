@@ -3560,7 +3560,7 @@ call ESMF_LogSet(trace=.true.)
       if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
-          "cplList("//trim(adjustl(iString))//"): "//trim(cplName)
+          "cplList("//trim(adjustl(iString))//"): "//trim(cplList(i))
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &

@@ -1347,9 +1347,10 @@ module NUOPC_Comp
       rcToReturn=rc)) return  ! bail out
     
     ! Add more Attributes -> NUOPC/Connector AttPack
-    allocate(attrList(2))
+    allocate(attrList(3))
     attrList(1) = "CplList"
     attrList(2) = "CplSetList"
+    attrList(3) = "ConnectionOptions"
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose="Connector", &
       attrList=attrList, nestConvention="NUOPC", nestPurpose="Component", rc=localrc)
@@ -1383,6 +1384,11 @@ module NUOPC_Comp
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call NUOPC_CompAttributeSet(comp, &
+      name="ConnectionOptions", value="", &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME)) return  ! bail out
       
   end subroutine
   !-----------------------------------------------------------------------------

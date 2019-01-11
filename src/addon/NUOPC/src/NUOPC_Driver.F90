@@ -4528,7 +4528,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! i.e. by {\tt srcCompLabel} and {\tt dstCompLabel}. The syntax requires that
 ! the token {\tt ->} be specified between source and destination. Optionally
 ! {\tt connectionOptions} can be supplied using the format discussed 
-! under section \ref{connection_options}. An example of executing the connector
+! under section \ref{connection_options}. The connection options are set
+! as attribute {\tt ConnectionOptions} on the respective connector component.
+!
+! An example of executing the connector
 ! instance that transfers fields from the ATM component to the OCN component,
 ! using redistribution for remapping:
 ! 
@@ -4724,8 +4727,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         endif
       else
         if (level==0) needDriverTopLoop = .true.  ! element outside top loop
-        if (optAutoAddConnectors .and. &
-          ((tokenCount == 3) .or. (tokenCount == 4))) then
+        if ((tokenCount == 3) .or. (tokenCount == 4)) then
           ! a connector if the second element is "->"
           if (trim(tokenList(2)) /= "->") then
             call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -4736,7 +4738,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           endif
           ! determine whether this connector component already exists
           call NUOPC_DriverGetCplComp(driver, srcCompLabel=trim(tokenList(1)), &
-            dstCompLabel=trim(tokenList(3)), comp=conn, relaxedflag=.true., rc=localrc)
+            dstCompLabel=trim(tokenList(3)), comp=conn, relaxedflag=.true., &
+            rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
@@ -4745,10 +4748,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
           if (.not.compIsCreated) then
-            ! this is a new connector component that needs to be added to driver
-            call NUOPC_DriverAddComp(driver, &
-              srcCompLabel=trim(tokenList(1)), dstCompLabel=trim(tokenList(3)), &
-              compSetServicesRoutine=cplSS, comp=conn, rc=localrc)
+            if (.not.optAutoAddConnectors) then
+              call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+                msg="Connector must exist if not setting autoAddConnectors.", &
+                line=__LINE__, &
+                file=trim(name)//":"//FILENAME, rcToReturn=rc)
+              return  ! bail out
+            endif
+            ! this is a new connector component that needs be added to driver
+            call NUOPC_DriverAddComp(driver, srcCompLabel=trim(tokenList(1)), &
+              dstCompLabel=trim(tokenList(3)), compSetServicesRoutine=cplSS, &
+              comp=conn, rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
@@ -4756,20 +4766,20 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ! of parent's verbosity setting
             vInherit = ibits(verbosity,0,8)
             write(vString,"(I10)") vInherit
-            call NUOPC_CompAttributeSet(conn, name="Verbosity", &
-              value=vString, rc=localrc)
+            call NUOPC_CompAttributeSet(conn, name="Verbosity", value=vString, &
+              rc=localrc)
             if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail
-            ! optionally additional options
-            if (tokenCount == 4) then
-              ! there are additional connection options specified
-              ! -> set as Attribute for now on the connector object
-              call ESMF_AttributeSet(conn, name="ConnectionOptions", &
-                value=trim(tokenList(4)), rc=localrc)
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                return  ! bail out
-            endif
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+          endif
+          ! optionally additional options
+          if (tokenCount == 4) then
+            ! there are additional connection options specified
+            ! -> set as Attribute on the connector object
+            call NUOPC_CompAttributeSet(conn, name="ConnectionOptions", &
+              value=trim(tokenList(4)), rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
           endif
         endif
       endif
@@ -5432,6 +5442,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_CplComp)        :: connector
     integer                   :: i
     type(type_InternalState)  :: is
+    type(ESMF_CplComp), pointer   :: connectorList(:)
+    character(len=160)            :: value
+    logical                       :: isSet
 
     rc = ESMF_SUCCESS
 
@@ -5462,7 +5475,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       if (areServicesSet) then
-        call addCplListOption(connector, rc=rc)
+        call addCplListOption(connector, ":REMAPMETHOD=redist", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
@@ -5476,13 +5489,33 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       if (areServicesSet) then
-        call addCplListOption(connector, rc=rc)
+        call addCplListOption(connector, ":REMAPMETHOD=redist", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
     enddo
     
+    ! each connector to add connection options to its CplList as per Attribute
+    nullify(connectorList)
+    call NUOPC_DriverGetComp(driver, connectorList, rc=rc)    
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    do i=1, size(connectorList)
+      call NUOPC_CompAttributeGet(connectorList(i), name="ConnectionOptions", &
+        value=value, isSet=isSet, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      if (isSet) then
+        call addCplListOption(connectorList(i), value, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+          return  ! bail out
+      endif
+    enddo
+    deallocate(connectorList)
+
     ! SPECIALIZE by calling into optional attached method allowing modification
     ! of the "CplList" metadata on child Connectors.
     call ESMF_MethodExecute(driver, label=label_ModifyCplLists, &
@@ -5501,8 +5534,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
   contains
   
-    recursive subroutine addCplListOption(connector, rc)
+    recursive subroutine addCplListOption(connector, appendString, rc)
       type(ESMF_CplComp)              :: connector
+      character(len=*)                :: appendString
       integer, intent(out)            :: rc
       ! local variables
       integer                         :: j, cplListSize
@@ -5522,7 +5556,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! go through all of the entries in the cplList and add options
         do j=1, cplListSize
           ! switch remapping to redist
-          cplList(j) = trim(cplList(j))//":REMAPMETHOD=redist"
+          cplList(j) = trim(cplList(j))//trim(appendString)
         enddo
         ! store the modified cplList in CplList attribute of connector
         call NUOPC_CompAttributeSet(connector, &
