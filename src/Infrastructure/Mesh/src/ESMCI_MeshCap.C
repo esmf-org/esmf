@@ -1044,10 +1044,12 @@ void MeshCap::getlocalcoords(double *nodeCoord, int *_orig_sdim, int *rc)
   if (is_esmf_mesh) {
     ESMCI_getlocalcoords(&mesh, nodeCoord, _orig_sdim, rc);
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_getlocalcoords(&mbmesh, nodeCoord, _orig_sdim, rc);
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
 
