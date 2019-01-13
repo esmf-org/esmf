@@ -232,7 +232,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
     }
     WMat dst_status;
 
-#ifdef ESMF_PROFILE_INTERNAL
+#ifdef ESMF_PROFILE_MESH_WEIGHTGEN_MBMESH
     int localrc;
     ESMCI_REGION_ENTER("MOAB Mesh Weight Generation", localrc)
     VM::logMemInfo(std::string("before MOAB Mesh Weight Generation"));
@@ -254,7 +254,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
         Throw() << "Online regridding error" << std::endl;
     }
 
-#ifdef ESMF_PROFILE_INTERNAL
+#ifdef ESMF_PROFILE_MESH_WEIGHTGEN_MBMESH
     VM::logMemInfo(std::string("after MOAB Mesh Weight Generation"));
     ESMCI_REGION_EXIT("MOAB Mesh Weight Generation", localrc)
 #endif
@@ -498,7 +498,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
     VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
 
-#ifdef ESMF_PROFILE_INTERNAL
+#ifdef ESMF_PROFILE_MESH_SMMSTORE_MBMESH
     ESMCI_REGION_ENTER("MOAB Mesh ArraySMMStore", localrc)
     VM::logMemInfo(std::string("before MOAB Mesh ArraySMMStore"));
 #endif
@@ -515,7 +515,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
 
-#ifdef ESMF_PROFILE_INTERNAL
+#ifdef ESMF_PROFILE_MESH_SMMSTORE_MBMESH
     VM::logMemInfo(std::string("after MOAB Mesh ArraySMMStore"));
     ESMCI_REGION_EXIT("MOAB Mesh ArraySMMStore", localrc)
 #endif
