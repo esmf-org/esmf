@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Copyright 2002-2019, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -662,7 +662,7 @@ static void get_mbmesh_elem_ids_not_in_wmat(MBMesh *mbmesh, WMat &wts, std::vect
 
   // get verts entities, by type
   Range elems;
-  merr = mbmesh->mesh->get_entities_by_dimension(0, 3, elems);
+  merr = mbmesh->mesh->get_entities_by_dimension(0, mbmesh->pdim, elems);
   if (merr != MB_SUCCESS) Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
 
   // Get weight iterators
@@ -768,7 +768,7 @@ bool all_mbmesh_elem_ids_in_wmat(MBMesh *mbmesh, WMat &wts, int *missing_id) {
 
   // get verts entities, by type
   Range elems;
-  merr = mbmesh->mesh->get_entities_by_dimension(0, 3, elems);
+  merr = mbmesh->mesh->get_entities_by_dimension(0, mbmesh->pdim, elems);
   if (merr != MB_SUCCESS) Throw() <<"MOAB ERROR: "<<moab::ErrorCodeStr[merr];
 
   // Get weight iterators
