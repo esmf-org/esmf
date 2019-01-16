@@ -224,6 +224,8 @@
               int *extrapMethod,
               int *extrapNumSrcPnts,
               ESMC_R8 *extrapDistExponent,
+              int *extrapNumLevels,
+              int *extrapNumInputLevels,
               int *unmappedaction, int *_ignoreDegenerate,
               int *srcTermProcessing, int *pipelineDepth,
               ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,

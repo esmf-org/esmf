@@ -157,6 +157,8 @@ end function my_xor
                  extrapMethod, &
                  extrapNumSrcPnts, &
                  extrapDistExponent, &
+                 extrapNumLevels, &
+                 extrapNumInputLevels, &
                  unmappedaction, &
                  ignoreDegenerate, &
                  srcTermProcessing, &
@@ -184,6 +186,8 @@ end function my_xor
       type(ESMF_ExtrapMethod_Flag),   intent(in) :: extrapMethod
       integer, intent(in)                    :: extrapNumSrcPnts
       real(ESMF_KIND_R8)                     :: extrapDistExponent
+      integer, intent(in)                    :: extrapNumLevels
+      integer, intent(in)                    :: extrapNumInputLevels
       type(ESMF_UnmappedAction_Flag), intent(in), optional :: unmappedaction
       logical, intent(in)                              :: ignoreDegenerate
       integer,                       intent(inout), optional :: srcTermProcessing
@@ -347,6 +351,8 @@ end function my_xor
                    extrapMethod, &
                    extrapNumSrcPnts, &
                    extrapDistExponent, &
+                   extrapNumLevels, &
+                   extrapNumInputLevels, &
                    localunmappedaction%unmappedaction, &
                    localIgnoreDegenerate, &
                    srcTermProcessing, pipelineDepth, &

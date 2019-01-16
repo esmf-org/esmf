@@ -364,6 +364,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                     extrapMethod, &
                     extrapNumSrcPnts, &
                     extrapDistExponent, &
+                    extrapNumLevels, &
+                    extrapNumInputLevels, &
                     unmappedaction, ignoreDegenerate, &
                     srcTermProcessing, & 
                     pipeLineDepth, &
@@ -389,6 +391,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       type(ESMF_ExtrapMethod_Flag),   intent(in),    optional :: extrapMethod
       integer,                        intent(in),    optional :: extrapNumSrcPnts
       real(ESMF_KIND_R4),             intent(in),    optional :: extrapDistExponent
+      integer,                        intent(in),    optional :: extrapNumLevels
+      integer,                        intent(in),    optional :: extrapNumInputLevels
       type(ESMF_UnmappedAction_Flag), intent(in),    optional :: unmappedaction
       logical,                        intent(in),    optional :: ignoreDegenerate
       integer,                        intent(inout), optional :: srcTermProcessing
@@ -529,6 +533,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !           The exponent to raise the distance to when calculating weights for 
 !           the {\tt ESMF\_EXTRAPMETHOD\_NEAREST\_IDAVG} extrapolation method. A higher value reduces the influence 
 !           of more distant points. If not specified, defaults to 2.0.
+!     \item [{[extrapNumLevels]}] 
+!           The number of levels to output for the extrapolation methods that fill levels
+!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}). When a method is used that requires this, then an error will be returned, if it 
+!           is not specified.
+!     \item [{[extrapNumInputLevels]}] 
+!           The number of levels to use as input for the extrapolation methods that use levels
+!           (e.g. {\tt ESMF\_EXTRAPMETHOD\_CREEP}). If not specified, defaults to 1.
 !     \item [{[unmappedaction]}]
 !           Specifies what should happen if there are destination points that
 !           can't be mapped to a source cell. Please see Section~\ref{const:unmappedaction} for a 
@@ -660,7 +671,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_Array)     :: dstArray
         type(ESMF_Array)     :: fracArray
         type(ESMF_Mesh)      :: srcMesh, srcMeshDual
-        type(ESMF_Mesh)      :: dstMesh, tempMesh
+        type(ESMF_Mesh)      :: dstMesh, dstMeshDual
+        type(ESMF_Mesh)      :: tempMesh
         type(ESMF_MeshLoc)   :: srcMeshloc,dstMeshloc,fracMeshloc
         type(ESMF_StaggerLoc) :: srcStaggerLoc,dstStaggerLoc
         type(ESMF_StaggerLoc) :: srcStaggerLocG2M,dstStaggerLocG2M
@@ -678,7 +690,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         type(ESMF_LineType_Flag):: localLineType
         type(ESMF_NormType_Flag):: localNormType
         type(ESMF_ExtrapMethod_Flag):: localExtrapMethod
-        logical :: srcDual, src_pl_used, dst_pl_used
+        logical :: srcDual, dstDual
+        logical :: src_pl_used, dst_pl_used
         type(ESMF_PointList) :: dstPointList, srcPointList
         type(ESMF_LocStream) :: dstLocStream, srcLocStream
         logical :: hasStatusArray
@@ -687,6 +700,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         integer :: tileCount
         integer :: localExtrapNumSrcPnts
         real(ESMF_KIND_R8) :: localExtrapDistExponent
+        integer :: localExtrapNumLevels
+        integer :: localExtrapNumInputLevels
+
 
 !        real(ESMF_KIND_R8) :: beg_time, end_time
 !        call ESMF_VMWtime(beg_time)
@@ -763,7 +779,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 
         ! Init variables
-         srcDual=.false.
+        srcDual=.false.
+        dstDual=.false.
         src_pl_used=.false.
         dst_pl_used=.false.
 
@@ -792,6 +809,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
            localExtrapDistExponent=REAL(extrapDistExponent,ESMF_KIND_R8)
         else     
            localExtrapDistExponent=2.0_ESMF_KIND_R8
+        endif
+
+        ! Handle optional extrapNumInputLevels
+        if (present(extrapNumLevels)) then
+           localExtrapNumLevels=extrapNumLevels
+        else     
+           if (localExtrapMethod==ESMF_EXTRAPMETHOD_CREEP) then 
+              call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                   msg=" If extrapMethod is ESMF_EXTRAPMETHOD_CREEP, then extrapNumLevels must be specified.", & 
+                   ESMF_CONTEXT, rcToReturn=rc) 
+              return
+           endif
+        endif
+
+        ! Handle optional extrapNumInputLevels
+        if (present(extrapNumInputLevels)) then
+           localExtrapNumInputLevels=extrapNumInputLevels
+        else     
+           localExtrapNumInputLevels=1
         endif
 
         ! TODO: If lineType is present then do error checking here
@@ -1205,7 +1241,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             dst_pl_used=.true.
           endif
 
-
+          ! If we're doing creep fill, then also need Mesh
+          if (localExtrapMethod .eq. ESMF_EXTRAPMETHOD_CREEP) then
+               dstMesh = ESMF_GridToMesh(dstGrid, dstStaggerLocG2M, dstIsSphere, dstIsLatLonDeg, &
+                    maskValues=dstMaskValues, regridConserve=regridConserveG2M, rc=localrc)
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+          endif
 
         else if (dstgeomtype .eq. ESMF_GEOMTYPE_MESH) then
 
@@ -1248,6 +1290,37 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                ESMF_CONTEXT, rcToReturn=rc)) return
              dst_pl_used=.true.
 
+
+             ! Generate Mesh for creep fill extrapolation 
+             if (localExtrapMethod .eq. ESMF_EXTRAPMETHOD_CREEP) then
+                if (dstMeshloc .ne. ESMF_MESHLOC_NODE) then
+                   if (dstMeshloc .eq. ESMF_MESHLOC_ELEMENT) then
+                      ! Create a dual of the Mesh
+                      dstMeshDual=ESMF_MeshCreateDual(tempMesh, rc=localrc)
+                      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                           ESMF_CONTEXT, rcToReturn=rc)) return
+                   
+                      ! Use the dual as the srcMesh
+                      tempMesh=dstMeshDual
+                   
+                      ! Record that we created the dual
+                      dstDual=.true.
+                   else
+                      call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                           msg="- D can currently only do non-conservative  on a mesh built on nodes or elements", & 
+                           ESMF_CONTEXT, rcToReturn=rc) 
+                      return  
+                   endif
+                endif
+
+                ! Turn on masking
+                if (present(dstMaskValues)) then
+                   call ESMF_MeshTurnOnNodeMask(tempMesh, maskValues=dstMaskValues, rc=localrc);
+                   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                        ESMF_CONTEXT, rcToReturn=rc)) return
+                endif
+                dstMesh=tempMesh               
+             endif
           endif
           
         else if (dstgeomtype .eq. ESMF_GEOMTYPE_LOCSTREAM) then
@@ -1272,6 +1345,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ESMF_CONTEXT, rcToReturn=rc)) return
           dst_pl_used=.true.
 
+          ! Can't do creep fill on locstream
+          if (localExtrapMethod .eq. ESMF_EXTRAPMETHOD_CREEP) then
+             call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_BAD, & 
+                  msg=" - Creep fill extrapolation is not allowed when destination is a location stream", & 
+                  ESMF_CONTEXT, rcToReturn=rc) 
+             return  
+          endif
         else
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
             msg="destination GEOMTYPE not supported, must be GRID,MESH or LOCSTREAM", &
@@ -1298,6 +1378,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, &
                                   localExtrapDistExponent, &
+                                  localExtrapNumLevels, &
+                                  localExtrapNumInputLevels, &
                                   unmappedaction, &
                                   localIgnoreDegenerate, &
                                   srcTermProcessing, &
@@ -1333,6 +1415,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                                   localExtrapMethod, &
                                   localExtrapNumSrcPnts, &
                                   localExtrapDistExponent, &
+                                  localExtrapNumLevels, &
+                                  localExtrapNumInputLevels, &
                                   unmappedaction, &
                                   localIgnoreDegenerate, &
                                   srcTermProcessing, &
@@ -1498,24 +1582,41 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
              if (ESMF_LogFoundError(localrc, &
                ESMF_ERR_PASSTHRU, &
                ESMF_CONTEXT, rcToReturn=rc)) return
+           else 
+              ! If we're doing creep fill, then also made mesh
+              if (localExtrapMethod .eq. ESMF_EXTRAPMETHOD_CREEP) then
+                 call ESMF_MeshDestroy(dstMesh,rc=localrc)
+                 if (ESMF_LogFoundError(localrc, &
+                      ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              endif
            endif           
         else if (dstgeomtype .eq. ESMF_GEOMTYPE_MESH) then
            if (.not. dst_pl_used) then
 
-           ! Otherwise reset masking
-           if (present(dstMaskValues)) then
-              if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
-                   (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
-                 call ESMF_MeshTurnOffCellMask(dstMesh, rc=localrc);
-                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rcToReturn=rc)) return
-              else
-                 call ESMF_MeshTurnOffNodeMask(dstMesh, rc=localrc);
-                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
+              ! Otherwise reset masking
+              if (present(dstMaskValues)) then
+                 if ((lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE) .or. &
+                      (lregridmethod .eq. ESMF_REGRIDMETHOD_CONSERVE_2ND)) then
+                    call ESMF_MeshTurnOffCellMask(dstMesh, rc=localrc);
+                    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+                 else
+                    call ESMF_MeshTurnOffNodeMask(dstMesh, rc=localrc);
+                    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                         ESMF_CONTEXT, rcToReturn=rc)) return
+                 endif
               endif
-           endif
-
+           else
+              ! If we're doing creep fill and made a dual, then also destroy
+              if ((localExtrapMethod .eq. ESMF_EXTRAPMETHOD_CREEP) .and. &
+                   dstDual) then
+                 
+                 call ESMF_MeshDestroy(dstMesh,rc=localrc)
+                 if (ESMF_LogFoundError(localrc, &
+                      ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              endif
            endif
         endif
 

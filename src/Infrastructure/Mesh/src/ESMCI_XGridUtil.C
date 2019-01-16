@@ -1586,6 +1586,8 @@ int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &
   bool tmp_set_dst_status=false;
   int tmpExtrapMethod=0;
   int tmpExtrapNumSrcPnts=1;
+  int tmpExtrapNumLevels=1;
+  int tmpExtrapNumInputLevels=1;
   ESMC_R8 tmpExtrapDistExponent=2.0;
   IWeights tmp_dst_status;
 //WriteVTKMesh(srcmesh, "srcmesh");
@@ -1595,6 +1597,8 @@ int online_regrid_xgrid(Mesh &srcmesh, Mesh &dstmesh, Mesh * midmesh, IWeights &
               &tmpExtrapMethod,
               &tmpExtrapNumSrcPnts,
               &tmpExtrapDistExponent,
+              &tmpExtrapNumLevels,
+              &tmpExtrapNumInputLevels,
               unmappedaction,
               tmp_set_dst_status, tmp_dst_status))
     Throw() << "Regridding error" << std::endl;
