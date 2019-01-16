@@ -21,7 +21,7 @@
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
 #include <Mesh/include/Regridding/ESMCI_MeshRegrid.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
-#include "Mesh/include/Legacy/ESMCI_MeshOBjConn.h"
+#include "Mesh/include/Legacy/ESMCI_MeshObjConn.h"
 
 #include <iostream>
 #include <fstream>
