@@ -33,7 +33,7 @@
 #include <type_traits>
 #include <memory>
 
-#include "Sacado_DynamicArrayTraits.hpp"
+#include "Mesh/include/sacado/Sacado_DynamicArrayTraits.hpp"
 #include "Mesh/include/sacado/mpl/Sacado_mpl_integral_nonzero_constant.hpp"
 
 namespace Sacado {

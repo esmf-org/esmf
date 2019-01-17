@@ -30,7 +30,7 @@
 #ifndef SACADO_MPL_VECTOR_HPP
 #define SACADO_MPL_VECTOR_HPP
 
-#include "Sacado_ConfigDefs.h"
+#include "Mesh/include/sacado/Sacado_ConfigDefs.h"
 #ifdef HAVE_SACADO_CXX11
 
 #include "Mesh/include/sacado/mpl/Sacado_mpl_none.hpp"

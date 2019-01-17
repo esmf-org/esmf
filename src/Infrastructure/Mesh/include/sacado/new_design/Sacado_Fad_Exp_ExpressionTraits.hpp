@@ -30,9 +30,9 @@
 #ifndef SACADO_FAD_EXP_EXPRESSIONTRAITS_HPP
 #define SACADO_FAD_EXP_EXPRESSIONTRAITS_HPP
 
-#include "Sacado_Traits.hpp"
+#include "Mesh/include/sacado/Sacado_Traits.hpp"
 
-#include "Sacado_Fad_Exp_Expression.hpp"
+#include "Mesh/include/sacado/new_design/Sacado_Fad_Exp_Expression.hpp"
 
 namespace Sacado {
 

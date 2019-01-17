@@ -31,7 +31,7 @@
 #ifndef SACADO_FAD_EXP_GENERALFADTRAITS_HPP
 #define SACADO_FAD_EXP_GENERALFADTRAITS_HPP
 
-#include "Sacado_Traits.hpp"
+#include "Mesh/include/sacado/Sacado_Traits.hpp"
 
 // Forward declarations
 namespace Sacado {

@@ -30,7 +30,7 @@
 #ifndef SACADO_MPL_INTEGRAL_NONZERO_CONSTANT_HPP
 #define SACADO_MPL_INTEGRAL_NONZERO_CONSTANT_HPP
 
-#include "Sacado_ConfigDefs.h"
+#include "Mesh/include/sacado/Sacado_ConfigDefs.h"
 
 namespace Sacado {
 

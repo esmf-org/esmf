@@ -48,8 +48,8 @@
 // Traits for all of the Sacado classes -- Include these first so they are all
 // defined before any nesting of AD classes
 #ifdef SACADO_ENABLE_NEW_DESIGN
-#include "Sacado_Fad_Exp_ExpressionTraits.hpp"
-#include "Sacado_Fad_Exp_GeneralFadTraits.hpp"
+#include "Mesh/include/sacado/new_design/Sacado_Fad_Exp_ExpressionTraits.hpp"
+#include "Mesh/include/sacado/new_design/Sacado_Fad_Exp_GeneralFadTraits.hpp"
 #endif
 #include "Sacado_Fad_ExpressionTraits.hpp"
 #include "Sacado_Fad_DFadTraits.hpp"
@@ -78,9 +78,9 @@
 
 // Standard forward AD classes
 #ifdef SACADO_ENABLE_NEW_DESIGN
-#include "Sacado_Fad_Exp_DFad.hpp"
-#include "Sacado_Fad_Exp_SFad.hpp"
-#include "Sacado_Fad_Exp_SLFad.hpp"
+#include "Mesh/include/sacado/new_design/Sacado_Fad_Exp_DFad.hpp"
+#include "Mesh/include/sacado/new_design/Sacado_Fad_Exp_SFad.hpp"
+#include "Mesh/include/sacado/new_design/Sacado_Fad_Exp_SLFad.hpp"
 #endif
 #include "Sacado_Fad_DFad.hpp"
 #include "Sacado_Fad_SFad.hpp"
