@@ -20,16 +20,16 @@
 /* #undef HAVE_SACADO_TESTS */
 
 /* Define if want to build with teuchos enabled */
-#define HAVE_SACADO_TEUCHOS
+/* #define HAVE_SACADO_TEUCHOS */
 
 /* Define if want to build with kokkos-core enabled */
-#define HAVE_SACADO_KOKKOSCORE
+/* #define HAVE_SACADO_KOKKOSCORE */
 
 /* Define if want to build with kokkos-containers enabled */
-#define HAVE_SACADO_KOKKOSCONTAINERS
+/* #define HAVE_SACADO_KOKKOSCONTAINERS */
 
 /* Define if want to build with TeuchosKokkosComm subpackage enabled */
-#define HAVE_SACADO_TEUCHOSKOKKOSCOMM
+/* #define HAVE_SACADO_TEUCHOSKOKKOSCOMM */
 #ifdef HAVE_SACADO_TEUCHOSKOKKOSCOMM
 // For backwards compatibility
 #  define HAVE_SACADO_KOKKOSMPICOMM
