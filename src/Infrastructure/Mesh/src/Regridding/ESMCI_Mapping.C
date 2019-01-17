@@ -16,7 +16,7 @@
 #include <limits>
 #include <Mesh/include/ESMCI_MathUtil.h>
 
-#include <Mesh/include/sacado/Sacado.hpp>
+#include <Mesh/include/sacado/Sacado_No_Kokkos.hpp>
 
 #include <Mesh/include/Legacy/ESMCI_Exception.h>
 

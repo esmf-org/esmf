@@ -12,7 +12,7 @@
 #include <Mesh/include/Regridding/ESMCI_ShapeFunc.h>
 #include <Mesh/include/Legacy/ESMCI_Exception.h>
 
-#include <Mesh/include/sacado/Sacado.hpp>
+#include <Mesh/include/sacado/Sacado_No_Kokkos.hpp>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string

@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include <Mesh/include/sacado/Sacado.hpp>
+#include <Mesh/include/sacado/Sacado_No_Kokkos.hpp>
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string

@@ -12,7 +12,7 @@
 #ifndef ESMCI_MeshTypes_h
 #define ESMCI_MeshTypes_h
 
-#include <Mesh/include/sacado/Sacado.hpp>
+#include <Mesh/include/sacado/Sacado_No_Kokkos.hpp>
 
 namespace ESMCI {
 
