@@ -71,7 +71,7 @@ Questions? Contact David M. Gay (dmgay@sandia.gov) or Eric T. Phipps
 #endif
 
 #ifndef TRILINOS_NO_CONFIG_H
-#include "Sacado_config.h"
+#include <Sacado_config.h>
 #endif
 
 /* Kokkos macros */
