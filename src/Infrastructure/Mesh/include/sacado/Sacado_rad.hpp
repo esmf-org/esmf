@@ -35,7 +35,7 @@
 #define SACADO_RAD_H
 
 #include <stddef.h>
-#include <Sacado_cmath.hpp>
+#include "Sacado_cmath.hpp"
 
 #include "Sacado_ConfigDefs.h"
 

@@ -39,7 +39,7 @@
 #include "Sacado_tradvec_Traits.hpp"
 
 #include <stddef.h>
-#include <Sacado_cmath.hpp>
+#include "Sacado_cmath.hpp"
 
 #if defined(RAD_DEBUG_BLOCKKEEP) && !defined(HAVE_SACADO_UNINIT)
 #undef RAD_DEBUG_BLOCKKEEP
