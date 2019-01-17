@@ -38,7 +38,7 @@
 #include "Teuchos_Assert.hpp"
 #include "Teuchos_RCP.hpp"
 #include "Teuchos_Array.hpp"
-#include "Sacado_mpl_apply.hpp"
+#include <mpl/Sacado_mpl_apply.hpp>
 
 #include <iterator>
 

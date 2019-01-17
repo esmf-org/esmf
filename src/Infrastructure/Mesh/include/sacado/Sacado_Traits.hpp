@@ -51,10 +51,10 @@
 
 #include "Sacado_ConfigDefs.h"
 #include "Sacado_dummy_arg.hpp"
-#include "Sacado_mpl_enable_if.hpp"
-#include "Sacado_mpl_disable_if.hpp"
-#include "Sacado_mpl_is_convertible.hpp"
-#include "Sacado_mpl_is_same.hpp"
+#include <mpl/Sacado_mpl_enable_if.hpp>
+#include <mpl/Sacado_mpl_disable_if.hpp>
+#include <mpl/Sacado_mpl_is_convertible.hpp>
+#include <mpl/Sacado_mpl_is_same.hpp>
 #include <string>
 
 #ifdef HAVE_SACADO_COMPLEX

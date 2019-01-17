@@ -36,7 +36,7 @@
 #endif // HAVE_SACADO_TEUCHOSKOKKOSCOMM
 
 /* Define if want to enable Kokkos view specializations for Sacado */
-#define HAVE_SACADO_VIEW_SPEC
+/* #define HAVE_SACADO_VIEW_SPEC */
 
 /* define if the compiler is confused by std::sin, etc., within namespace
    Sacado::Rad */

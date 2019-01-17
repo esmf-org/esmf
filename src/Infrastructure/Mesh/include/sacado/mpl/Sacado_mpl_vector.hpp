@@ -33,17 +33,17 @@
 #include "Sacado_ConfigDefs.h"
 #ifdef HAVE_SACADO_CXX11
 
-#include "Sacado_mpl_none.hpp"
-#include "Sacado_mpl_size.hpp"
-#include "Sacado_mpl_begin.hpp"
-#include "Sacado_mpl_end.hpp"
-#include "Sacado_mpl_next.hpp"
-#include "Sacado_mpl_push_back.hpp"
-#include "Sacado_mpl_at.hpp"
-#include "Sacado_mpl_deref.hpp"
+#include <mpl/Sacado_mpl_none.hpp>
+#include <mpl/Sacado_mpl_size.hpp>
+#include <mpl/Sacado_mpl_begin.hpp>
+#include <mpl/Sacado_mpl_end.hpp>
+#include <mpl/Sacado_mpl_next.hpp>
+#include <mpl/Sacado_mpl_push_back.hpp>
+#include <mpl/Sacado_mpl_at.hpp>
+#include <mpl/Sacado_mpl_deref.hpp>
 
 // Specializations needed for various mpl operations
-#include "Sacado_mpl_vector_size_spec.hpp"
+#include <mpl/Sacado_mpl_vector_size_spec.hpp>
 
 namespace Sacado {
 
@@ -107,8 +107,8 @@ namespace Sacado {
 
 }
 
-#include "Sacado_mpl_vector_at_spec.hpp"
-#include "Sacado_mpl_vector_push_back_spec.hpp"
+#include <mpl/Sacado_mpl_vector_at_spec.hpp>
+#include <mpl/Sacado_mpl_vector_push_back_spec.hpp>
 
 namespace Sacado {
   namespace mpl {

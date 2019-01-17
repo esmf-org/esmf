@@ -50,7 +50,7 @@ namespace Sacado {
 
 #include "Sacado_Traits.hpp"
 #include "Sacado_DynamicArrayTraits.hpp"
-#include "Sacado_mpl_integral_nonzero_constant.hpp"
+#include <mpl/Sacado_mpl_integral_nonzero_constant.hpp>
 
 namespace Sacado {
 

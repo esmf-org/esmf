@@ -30,7 +30,7 @@
 #ifndef SACADO_MPL_TYPE_WRAP_HPP
 #define SACADO_MPL_TYPE_WRAP_HPP
 
-#include "Sacado_mpl_has_type.hpp"
+#include <mpl/Sacado_mpl_has_type.hpp>
 
 namespace Sacado {
 

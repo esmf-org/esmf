@@ -32,9 +32,9 @@
 #ifndef SACADO_MPL_APPLY_HPP
 #define SACADO_MPL_APPLY_HPP
 
-#include "Sacado_mpl_apply_wrap.hpp"
-#include "Sacado_mpl_lambda.hpp"
-#include "Sacado_mpl_none.hpp"
+#include <mpl/Sacado_mpl_apply_wrap.hpp>
+#include <mpl/Sacado_mpl_lambda.hpp>
+#include <mpl/Sacado_mpl_none.hpp>
 
 namespace Sacado {
 

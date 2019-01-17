@@ -32,7 +32,7 @@
 #ifndef SACADO_MPL_QUOTE_HPP
 #define SACADO_MPL_QUOTE_HPP
 
-#include "Sacado_mpl_type_wrap.hpp"
+#include <mpl/Sacado_mpl_type_wrap.hpp>
 
 namespace Sacado {
 

@@ -30,11 +30,11 @@
 #ifndef SACADO_MPL_LAMBDA_HPP
 #define SACADO_MPL_LAMBDA_HPP
 
-#include "Sacado_mpl_bind.hpp"
-#include "Sacado_mpl_quote.hpp"
-#include "Sacado_mpl_type_wrap.hpp"
-#include "Sacado_mpl_if.hpp"
-#include "Sacado_mpl_is_placeholder.hpp"
+#include <mpl/Sacado_mpl_bind.hpp>
+#include <mpl/Sacado_mpl_quote.hpp>
+#include <mpl/Sacado_mpl_type_wrap.hpp>
+#include <mpl/Sacado_mpl_if.hpp>
+#include <mpl/Sacado_mpl_is_placeholder.hpp>
 
 namespace Sacado {
 
