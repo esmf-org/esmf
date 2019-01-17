@@ -38,7 +38,7 @@
 #include "Teuchos_SerializationTraits.hpp"
 #include "Teuchos_SerializationTraitsHelpers.hpp"
 #include "Teuchos_Assert.hpp"
-#include <mpl/Sacado_mpl_apply.hpp>
+#include "Sacado_mpl_apply.hpp"
 
 #include <iterator>
 

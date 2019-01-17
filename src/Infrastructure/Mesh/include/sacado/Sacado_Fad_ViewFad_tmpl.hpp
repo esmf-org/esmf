@@ -27,9 +27,9 @@
 // ***********************************************************************
 // @HEADER
 
-#include <mpl/Sacado_mpl_apply.hpp>
-#include <mpl/Sacado_mpl_if.hpp>
-#include <mpl/Sacado_mpl_type_wrap.hpp>
+#include "Sacado_mpl_apply.hpp"
+#include "Sacado_mpl_if.hpp"
+#include "Sacado_mpl_type_wrap.hpp"
 
 #if defined(HAVE_SACADO_KOKKOSCORE)
 #include "Kokkos_Atomic.hpp"

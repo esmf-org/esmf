@@ -30,11 +30,11 @@
 #ifndef SACADO_SFINAE_MACROS_H
 #define SACADO_SFINAE_MACROS_H
 
-#include <mpl/Sacado_mpl_enable_if.hpp>
-#include <mpl/Sacado_mpl_disable_if.hpp>
-#include <mpl/Sacado_mpl_is_same.hpp>
-#include <mpl/Sacado_mpl_is_convertible.hpp>
-#include <mpl/Sacado_mpl_type_wrap.hpp>
+#include "Sacado_mpl_enable_if.hpp"
+#include "Sacado_mpl_disable_if.hpp"
+#include "Sacado_mpl_is_same.hpp"
+#include "Sacado_mpl_is_convertible.hpp"
+#include "Sacado_mpl_type_wrap.hpp"
 
 /* Define some macros useful for disabling template function overloads */
 #define SACADO_ENABLE_IF_SAME(TYPE1, TYPE2, RETURN_TYPE)              \

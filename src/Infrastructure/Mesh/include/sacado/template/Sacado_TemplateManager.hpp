@@ -37,10 +37,10 @@
 
 #include "Teuchos_RCP.hpp"
 
-#include <mpl/Sacado_mpl_size.hpp>
-#include <mpl/Sacado_mpl_find.hpp>
-#include <mpl/Sacado_mpl_for_each.hpp>
-#include <mpl/Sacado_mpl_apply.hpp>
+#include "Sacado_mpl_size.hpp"
+#include "Sacado_mpl_find.hpp"
+#include "Sacado_mpl_for_each.hpp"
+#include "Sacado_mpl_apply.hpp"
 
 #include "Sacado_TemplateIterator.hpp"
 
