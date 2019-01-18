@@ -61,10 +61,10 @@
     !------------------------------------------------------------------------
     !------------------------------------------------------------------------
     ! not a test - informational messages only.
-    call ESMF_PointerDifference(c_sizeof (c_ptrvar), vi(1), vi(2), diff)
+    call ESMF_PointerDifference(C_SIZEOF (c_ptrvar), vi(1), vi(2), diff)
     print *, "F90: Default Integer size = ", diff
 
-    call ESMF_PointerDifference(c_sizeof (c_ptrvar), vr(1), vr(2), diff)
+    call ESMF_PointerDifference(C_SIZEOF (c_ptrvar), vr(1), vr(2), diff)
     print *, "F90: Default Real size = ", diff
 
 
@@ -72,29 +72,29 @@
     !------------------------------------------------------------------------
     ! Collect sizes on the Fortran side.
 
-    call ESMF_PointerDifference(c_sizeof (c_ptrvar), vip(1), vip(2), ptrsizeF)
+    call ESMF_PointerDifference(C_SIZEOF (c_ptrvar), vip(1), vip(2), ptrsizeF)
     print *, "F90: Pointer size = ", ptrsizeF
 
 #ifndef ESMF_NO_INTEGER_1_BYTE
-    call ESMF_PointerDifference(c_sizeof (c_ptrvar), vi1(1), vi1(2), i1sizeF)
+    call ESMF_PointerDifference(C_SIZEOF (c_ptrvar), vi1(1), vi1(2), i1sizeF)
     print *, "F90: Explicit Integer I1 size = ", i1sizeF
 #endif
 
 #ifndef ESMF_NO_INTEGER_2_BYTE
-    call ESMF_PointerDifference(c_sizeof (c_ptrvar), vi2(1), vi2(2), i2sizeF)
+    call ESMF_PointerDifference(C_SIZEOF (c_ptrvar), vi2(1), vi2(2), i2sizeF)
     print *, "F90: Explicit Integer I2 size = ", i2sizeF
 #endif
 
-    call ESMF_PointerDifference(c_sizeof (c_ptrvar), vi4(1), vi4(2), i4sizeF)
+    call ESMF_PointerDifference(C_SIZEOF (c_ptrvar), vi4(1), vi4(2), i4sizeF)
     print *, "F90: Explicit Integer I4 size = ", i4sizeF
 
-    call ESMF_PointerDifference(c_sizeof (c_ptrvar), vi8(1), vi8(2), i8sizeF)
+    call ESMF_PointerDifference(C_SIZEOF (c_ptrvar), vi8(1), vi8(2), i8sizeF)
     print *, "F90: Explicit Integer I8 size = ", i8sizeF
 
-    call ESMF_PointerDifference(c_sizeof (c_ptrvar), vr4(1), vr4(2), r4sizeF)
+    call ESMF_PointerDifference(C_SIZEOF (c_ptrvar), vr4(1), vr4(2), r4sizeF)
     print *, "F90: Explicit Real R4 size = ", r4sizeF
 
-    call ESMF_PointerDifference(c_sizeof (c_ptrvar), vr8(1), vr8(2), r8sizeF)
+    call ESMF_PointerDifference(C_SIZEOF (c_ptrvar), vr8(1), vr8(2), r8sizeF)
     print *, "F90: Explicit Real R8 size = ", r8sizeF
 
     !------------------------------------------------------------------------

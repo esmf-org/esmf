@@ -95,7 +95,7 @@ contains
     udt_ptr1 => udt
     udt_ptr2 => udt
     
-    call ESMF_PointerDifference(c_sizeof (c_ptrvar), udt_ptr1, udt_ptr2, size)
+    call ESMF_PointerDifference(C_SIZEOF (c_ptrvar), udt_ptr1, udt_ptr2, size)
     ! because of compiler introduced padding size may actually overestimate the
     ! size of the (UDT, pointer) structure, but all we need is an estimate of
     ! the upper limit
@@ -174,7 +174,7 @@ contains
      ! some compilers will notice that var is unused, and issue warnings @\
      if (var==var) continue ! dummy check to quiet down compiler warnings @\
 @\
-     call ESMF_PointerDifference(c_sizeof (c_ptrvar), varTK(1), varTK(2), size) @\
+     call ESMF_PointerDifference(C_SIZEOF (c_ptrvar), varTK(1), varTK(2), size) @\
      ESMF_FortranWordsize##mtypekind = size @\
 @\
      if (rcpresent) rc = ESMF_SUCCESS @\
