@@ -43,6 +43,7 @@
 !------------------------------------------------------------------------------
 
 ! !USES:
+  use iso_c_binding
       ! inherit from ESMF base class
 !     use ESMF_UtilTypesMod
  !!  use ESMF_InitMacrosMod Commented out to prevent circular dependency
@@ -163,10 +164,14 @@
       sequence
 #endif
       !private
+#if 1
+          integer(C_SIZE_T) :: ptr
+#else
 #if (ESMC_POINTER_SIZE == 4)
           integer(selected_int_kind( 9)) :: ptr
 #else
           integer(selected_int_kind(18)) :: ptr
+#endif
 #endif
       end type
 
