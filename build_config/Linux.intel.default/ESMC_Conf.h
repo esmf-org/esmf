@@ -30,23 +30,4 @@ typedef long ESMCI_FortranStrLenArg;
 
 #define ESMC_PRESENT(arg) ( (arg) != 0 )
 
-#ifdef S32
-#define ESMC_POINTER_SIZE 4
-#endif
-#ifdef Sia64_64
-#define ESMC_POINTER_SIZE 8
-#endif
-#ifdef Sx86_64_32
-#define ESMC_POINTER_SIZE 4
-#endif
-#ifdef Sx86_64_small
-#define ESMC_POINTER_SIZE 8
-#endif
-#ifdef Sx86_64_medium
-#define ESMC_POINTER_SIZE 8
-#endif
-#ifdef Sx86_64_mic
-#define ESMC_POINTER_SIZE 8
-#endif
-
 #endif

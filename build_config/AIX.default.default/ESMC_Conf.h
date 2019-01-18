@@ -29,13 +29,6 @@ typedef int ESMCI_FortranStrLenArg;
 
 #define ESMC_PRESENT(arg) ( (arg) != 0 )
 
-#ifdef S32
-#define ESMC_POINTER_SIZE 4
-#endif
-#ifdef S64
-#define ESMC_POINTER_SIZE 8
-#endif
-
 #if 0
 Special defines necessary on this platform:
 #endif

@@ -38,7 +38,6 @@ typedef long ESMCI_FortranStrLenArg;
 #ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 12
 #endif
-#define ESMC_POINTER_SIZE 4
 #endif
 #if Sia64_64
 #define ESMF_IS_64BIT_MACHINE 1
@@ -48,7 +47,6 @@ typedef long ESMCI_FortranStrLenArg;
 #ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 24
 #endif
-#define ESMC_POINTER_SIZE 8
 #endif
 #if Sx86_64_32
 #define ESMF_IS_32BIT_MACHINE 1
@@ -58,7 +56,6 @@ typedef long ESMCI_FortranStrLenArg;
 #ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 12
 #endif
-#define ESMC_POINTER_SIZE 4
 #endif
 #if Sx86_64_small
 #define ESMF_IS_64BIT_MACHINE 1
@@ -68,7 +65,6 @@ typedef long ESMCI_FortranStrLenArg;
 #ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 24
 #endif
-#define ESMC_POINTER_SIZE 8
 #endif
 #if Sx86_64_medium
 #define ESMF_IS_64BIT_MACHINE 1
@@ -78,7 +74,6 @@ typedef long ESMCI_FortranStrLenArg;
 #ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 48
 #endif
-#define ESMC_POINTER_SIZE 8
 #endif
 #if S64
 #define ESMF_IS_64BIT_MACHINE 1
@@ -88,7 +83,6 @@ typedef long ESMCI_FortranStrLenArg;
 #ifndef ESMF_F90_PTR_PLUS_RANK
 #define ESMF_F90_PTR_PLUS_RANK 24
 #endif
-#define ESMC_POINTER_SIZE 8
 #endif
 
 #endif

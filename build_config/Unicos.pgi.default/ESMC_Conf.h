@@ -51,13 +51,6 @@ extern char pghpf_0c_;
                                   (char*)(arg) == &pghpf_0c_ ) )
 #endif
 
-#ifdef S32
-#define ESMC_POINTER_SIZE 4
-#endif
-#ifdef S64
-#define ESMC_POINTER_SIZE 8
-#endif
-
 #if 0
 PGI before 17.9 could not handle the dynamic masking interfaces for different
 typekinds
