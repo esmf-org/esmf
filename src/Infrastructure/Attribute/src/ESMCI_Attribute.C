@@ -1532,6 +1532,8 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // get the attr on the attpack
   attr = attpack->AttPackGetAttribute(name, anflag);
   if (!attr) *present = ESMF_FALSE;
+  // edge case: attr in AttPack but does not yet have a value
+  else if (attr->tk == ESMF_NOKIND) *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
 
   // return
