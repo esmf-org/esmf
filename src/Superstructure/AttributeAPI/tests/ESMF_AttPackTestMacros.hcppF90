@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research,
+! Copyright 2002-2019, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -972,8 +972,37 @@
       call ESMF_Test((rc==ESMF_RC_ATTR_NOTSET), & @\
                       name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
-       @\
+ @\
       attrname = "Custom1" @\
+      !mtag @\
+      ! Get a char Attribute in an Attribute package on mobj Test @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Getting a nonexistent char Attribute in an Attribute package with defaultValue on ", mobj, " Test" @\
+^if 0 @\
+      call ESMF_AttributeGet(mname, name=attrname, & @\
+        value=outChar, defaultValue="TryThisAsDefault", & @\
+        convention=conv, purpose=purp, rc=rc) @\
+^else @\
+      rc=ESMF_SUCCESS @\
+^endif @\
+      call ESMF_Test((rc==ESMF_SUCCESS), & @\
+        name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+      attrvalue = "" @\
+       @\
+      !mtag @\
+      ! Set an empty string Attribute in an Attribute package on mobj Test @\
+      write(failMsg, *) "Did not return ESMF_SUCCESS" @\
+      write(name, *) "Setting an Attribute in an Attribute package to empty string on ", mobj, " Test" @\
+^if 0 @\
+      call ESMF_AttributeSet(mname, name=attrname, value=attrvalue, & @\
+        convention=conv, purpose=purp, rc=rc) @\
+^else @\
+      rc=ESMF_SUCCESS @\
+^endif @\
+      call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
+      !---------------------------------------------------------------------- @\
+       @\
       attrvalue = "m/s" @\
        @\
       !mtag @\
