@@ -977,34 +977,25 @@
       !mtag @\
       ! Get a char Attribute in an Attribute package on mobj Test @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
-      write(name, *) "Getting a nonexistent char Attribute in an Attribute package with defaultValue on ", mobj, " Test" @\
-^if 0 @\
+      write(name, *) "Getting an unset char Attribute in an Attribute package with defaultValue on ", mobj, " Test" @\
       call ESMF_AttributeGet(mname, name=attrname, & @\
         value=outChar, defaultValue="TryThisAsDefault", & @\
         convention=conv, purpose=purp, rc=rc) @\
-^else @\
-      rc=ESMF_SUCCESS @\
-^endif @\
       call ESMF_Test((rc==ESMF_SUCCESS), & @\
         name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
-      attrvalue = "" @\
-       @\
+@\
       !mtag @\
       ! Set an empty string Attribute in an Attribute package on mobj Test @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
       write(name, *) "Setting an Attribute in an Attribute package to empty string on ", mobj, " Test" @\
-^if 0 @\
-      call ESMF_AttributeSet(mname, name=attrname, value=attrvalue, & @\
+      call ESMF_AttributeSet(mname, name=attrname, value="", & @\
         convention=conv, purpose=purp, rc=rc) @\
-^else @\
-      rc=ESMF_SUCCESS @\
-^endif @\
       call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
-       @\
+@\
       attrvalue = "m/s" @\
-       @\
+@\
       !mtag @\
       ! Set an Attribute in an Attribute package on mobj Test @\
       call ESMF_AttributeSet(mname, name=attrname, value=attrvalue, & @\

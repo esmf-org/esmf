@@ -1850,7 +1850,7 @@ extern "C" {
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
   for (int i=0; i<(*count); i++) {
-    if (!(valueList[j])) {
+    if (j > vlen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", ESMC_CONTEXT, &status);
       if (rc) *rc = status;
