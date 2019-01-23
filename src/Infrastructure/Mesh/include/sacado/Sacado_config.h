@@ -11,7 +11,7 @@
 /* #undef HAVE_ADIC */
 
 /* define if we want to use MPI */
-#define HAVE_MPI
+/* #define HAVE_MPI */
 
 /* Define if want to build sacado-examples */
 /* #undef HAVE_SACADO_EXAMPLES */
