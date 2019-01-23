@@ -1112,7 +1112,8 @@
       !mtag @\
       do i = 1, count @\
         call ESMF_AttributeGet(mname, attributeIndex=i, name=name, & @\
-                               convention=conv, purpose=purp, rc=rc) @\
+                               convention=conv, purpose=purp, & @\
+                               isPresent=isPresent, rc=rc) @\
         if (rc /= ESMF_SUCCESS) continue @\
       enddo @\
       write(failMsg, *) "Did not return ESMF_SUCCESS" @\
