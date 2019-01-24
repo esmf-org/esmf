@@ -610,6 +610,11 @@ Possible value: {\em flag}
 
 This variable can be used to override the default C++ optimization flag.
 
+\item[ESMF\_CXXSTD]
+Possible value: {\em integer} or {\em default}
+
+Used to set the default C++ compiler standard. If unset or {\em default}, then C++ build options use the platform's compiler default. To build with C++11 for example, set {\em ESMF\_CXXSTD=11} resulting in {\em --std=c++11} being appended to C++ build flags.
+
 \item[ESMF\_DEFER\_LIB\_BUILD]
 Possible value: {\em ON} (default), {\em OFF}
 
