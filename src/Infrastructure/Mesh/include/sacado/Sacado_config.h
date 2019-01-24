@@ -49,7 +49,9 @@
 #define HAS_C99_TR1_CMATH
 
 /* Define to enable C++11 support*/
+#if ESMF_CXXSTD >= 11
 #define HAVE_SACADO_CXX11
+#endif
 
 /* Define to enable hierarchical parallelism support */
 #if !defined(SACADO_VIEW_CUDA_HIERARCHICAL) && !defined(SACADO_VIEW_CUDA_HIERARCHICAL_DFAD)
