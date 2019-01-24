@@ -244,9 +244,3 @@ ESMF_CXXLINKLIBS += $(shell $(ESMF_DIR)/scripts/libs.ifort "$(ESMF_F90COMPILER) 
 # Shared library options
 ESMF_SL_LIBOPTS  += -dynamiclib
 ESMF_SL_LIBLIBS  += $(ESMF_F90LINKPATHS) $(ESMF_F90LINKLIBS) $(ESMF_CXXLINKPATHS) $(ESMF_CXXLINKLIBS)
-
-############################################################
-# Add compile options required by external libraries
-ifneq ($(ESMF_YAMLCPP),)
-ESMF_CXXCOMPILEOPTS  += -std=c++11
-endif
