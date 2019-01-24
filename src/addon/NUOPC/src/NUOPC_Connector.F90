@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research, 
+! Copyright 2002-2019, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -2394,10 +2394,18 @@ call ESMF_LogSet(trace=.true.)
               name="MinIndex", valueList=minIndex, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
             call ESMF_AttributeSet(acceptorField, &
               name="MaxIndex", valueList=maxIndex, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
             ! bring over arbDimCount as attribute
             call ESMF_AttributeSet(acceptorField, &
               name="ArbDimCount", value=arbDimCount, &
@@ -3552,7 +3560,7 @@ call ESMF_LogSet(trace=.true.)
       if (btest(verbosity,11).or.btest(verbosity,12)) then
         write (iString,'(I4)') i
         write (msgString, '(A)') trim(name)//": handle "// &
-          "cplList("//trim(adjustl(iString))//"): "//trim(cplName)
+          "cplList("//trim(adjustl(iString))//"): "//trim(cplList(i))
         call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -3913,6 +3921,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     type(ESMF_VM)             :: vm
     integer                   :: localrc
     logical                   :: existflag
+    logical                   :: routeHandleIsCreated
     integer                   :: rootPet, rootVas, vas, petCount
     character(ESMF_MAXSTR)    :: compName, pLabel
     character(len=160)        :: msgString
@@ -4057,7 +4066,10 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         enddo
       else
-        if (ESMF_RouteHandleIsCreated(is%wrap%rh)) then !--- TEST
+        routeHandleIsCreated = ESMF_RouteHandleIsCreated(is%wrap%rh, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (routeHandleIsCreated) then
           call ESMF_FieldBundleSMM(is%wrap%srcFields, is%wrap%dstFields, &
             routehandle=is%wrap%rh, termorderflag=is%wrap%termOrders, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -4217,6 +4229,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     type(type_InternalState)  :: is
     integer                   :: localrc
     logical                   :: existflag
+    logical                   :: routeHandleIsCreated
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity, diagnostic
     integer                   :: i
@@ -4292,7 +4305,10 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         enddo
       else
-        if (ESMF_RouteHandleIsCreated(is%wrap%rh)) then !--- TEST
+        routeHandleIsCreated = ESMF_RouteHandleIsCreated(is%wrap%rh, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (routeHandleIsCreated) then
           call ESMF_FieldBundleRegridRelease(is%wrap%rh, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4587,7 +4603,8 @@ print *, "found match:"// &
       allocate(uniqueList(0), stat=stat)
       if (ESMF_LogFoundAllocError(stat, msg="allocating uniqueList", &
         line=__LINE__, &
-        file=FILENAME)) &
+        file=FILENAME, &
+        rcToReturn=rc)) &
         return  ! bail out
       return
     endif
@@ -4604,7 +4621,8 @@ print *, "found match:"// &
     allocate(l_uniqueList(size(list)), stat=stat) ! temporary list
     if (ESMF_LogFoundAllocError(stat, msg="allocating l_uniqueList", &
       line=__LINE__, &
-      file=FILENAME)) &
+      file=FILENAME, &
+      rcToReturn=rc)) &
       return  ! bail out
 
     l_count = 0
@@ -4623,7 +4641,8 @@ print *, "found match:"// &
     allocate(uniqueList(l_count), stat=stat)
     if (ESMF_LogFoundAllocError(stat, msg="allocating uniqueList", &
       line=__LINE__, &
-      file=FILENAME)) &
+      file=FILENAME, &
+      rcToReturn=rc)) &
       return  ! bail out
 
     if (l_count > 0) then 
@@ -4633,7 +4652,8 @@ print *, "found match:"// &
     deallocate(l_uniqueList)
     if (ESMF_LogFoundDeallocError(stat, msg="deallocating l_uniqueList", &
       line=__LINE__, &
-      file=FILENAME)) &
+      file=FILENAME, &
+      rcToReturn=rc)) &
       return  ! bail out
 
   end subroutine
@@ -4725,6 +4745,7 @@ print *, "found match:"// &
     integer,                   intent(out), optional :: rc
     
     ! local variables
+    integer                         :: localrc
     integer                         :: i, j, k, count, stat, localDeCount
     integer                         :: iRegrid, iRedist
     type(ESMF_Field), pointer       :: srcFields(:), dstFields(:)
@@ -4795,18 +4816,18 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
 
     ! consistency check counts
     count = size(cplList)
-    call ESMF_FieldBundleGet(srcFB, fieldCount=i, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_FieldBundleGet(srcFB, fieldCount=i, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     if (i /= count) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="Counts must match!", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
-    call ESMF_FieldBundleGet(dstFB, fieldCount=i, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_FieldBundleGet(dstFB, fieldCount=i, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     if (i /= count) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="Counts must match!", &
@@ -4844,56 +4865,56 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     call ESMF_FieldBundleGet(srcFB, fieldList=srcFields, &
-      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     call ESMF_FieldBundleGet(dstFB, fieldList=dstFields, &
-      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! destroy the incoming FieldBundles and create replacement FieldBundles
-    call ESMF_FieldBundleDestroy(srcFB, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    srcFB = ESMF_FieldBundleCreate(rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_FieldBundleDestroy(dstFB, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    dstFB = ESMF_FieldBundleCreate(rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+    call ESMF_FieldBundleDestroy(srcFB, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    srcFB = ESMF_FieldBundleCreate(rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    call ESMF_FieldBundleDestroy(dstFB, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    dstFB = ESMF_FieldBundleCreate(rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+
     ! prepare temporary FieldBundles for Redist operation
-    srcFBRedist = ESMF_FieldBundleCreate(rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    dstFBRedist = ESMF_FieldBundleCreate(rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+    srcFBRedist = ESMF_FieldBundleCreate(rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    dstFBRedist = ESMF_FieldBundleCreate(rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+
     ! prepare Routehandle
-    rh = ESMF_RouteHandleCreate(rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_RouteHandlePrepXXE(rh, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+    rh = ESMF_RouteHandleCreate(rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    call ESMF_RouteHandlePrepXXE(rh, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+
     ! prepare auxiliary variables
     rraShift = 0              ! reset
     vectorLengthShift = 0     ! reset
     iRegrid = 0               ! reset
     iRedist = 0               ! reset
-    
+
     ! prepare rhList linked list
     nullify(rhList)
-    
+
     ! loop over all field pairs
     do i=1, count
-      
+
       ! prepare pointer variables
       nullify(chopStringList)   ! reset
       nullify(chopSubString)    ! reset
@@ -4904,24 +4925,24 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       nullify(dstMaskValues)    ! reset
 
       ! use a temporary string and convert the cplList(i) to lower characters
-      tempString = ESMF_UtilStringLowerCase(cplList(i), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+      tempString = ESMF_UtilStringLowerCase(cplList(i), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+
       ! chop the cplList entry
       call chopString(tempString, chopChar=":", chopStringList=chopStringList, &
-        rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+
       ! determine "termOrder" which will be used by Run() method
       termOrder = ESMF_TERMORDER_FREE ! default
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"termorder=")==1) then
           call chopString(chopStringList(j), chopChar="=", &
-            chopStringList=chopSubString, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            chopStringList=chopSubString, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
           if (size(chopSubString)>=2) then
             if (trim(chopSubString(2))=="srcseq") then
               termOrder = ESMF_TERMORDER_SRCSEQ
@@ -4947,12 +4968,14 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"srcmaskvalues=")==1) then
           call chopString(chopStringList(j), chopChar="=", &
-            chopStringList=chopSubString, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            chopStringList=chopSubString, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
           if (size(chopSubString)>=2) then
             call chopString(chopSubString(2), chopChar=",", &
-              chopStringList=chopSubSubString, rc=rc)
+              chopStringList=chopSubSubString, rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
             if (size(chopSubSubString)>0) then
               deallocate(srcMaskValues)
               allocate(srcMaskValues(size(chopSubSubString)))
@@ -4972,12 +4995,14 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"dstmaskvalues=")==1) then
           call chopString(chopStringList(j), chopChar="=", &
-            chopStringList=chopSubString, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            chopStringList=chopSubString, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
           if (size(chopSubString)>=2) then
             call chopString(chopSubString(2), chopChar=",", &
-              chopStringList=chopSubSubString, rc=rc)
+              chopStringList=chopSubSubString, rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
             if (size(chopSubSubString)>0) then
               deallocate(dstMaskValues)
               allocate(dstMaskValues(size(chopSubSubString)))
@@ -4998,9 +5023,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"remapmethod=")==1) then
           call chopString(chopStringList(j), chopChar="=", &
-            chopStringList=chopSubString, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            chopStringList=chopSubString, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
           if (size(chopSubString)>=2) then
             if (trim(chopSubString(2))=="redist") then
               redistflag = .true.
@@ -5030,29 +5055,29 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       ! decide whether this is a Redist field pair, or to proceed with Regrid
       if (redistflag) then
         call ESMF_FieldBundleAdd(srcFBRedist, (/srcFields(i)/), &
-          multiflag=.true., rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          multiflag=.true., rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
         call ESMF_FieldBundleAdd(dstFBRedist, (/dstFields(i)/), &
-          multiflag=.true., rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          multiflag=.true., rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
         iRedist = iRedist+1
         termOrdersRedist(iRedist) = termOrder ! record in list to merge below
         cycle ! advance to the next field pair, handle Redist further down
       endif
-      
+
       ! only Regid field pairs will proceed here...
       iRegrid = iRegrid+1
       termOrders(iRegrid) = termOrder ! record in the list used by Run
-      
+
       ! add Regrid field pair to the beginning of replacement srcFB and dstFB
-      call ESMF_FieldBundleAdd(srcFB, (/srcFields(i)/), multiflag=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_FieldBundleAdd(dstFB, (/dstFields(i)/), multiflag=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_FieldBundleAdd(srcFB, (/srcFields(i)/), multiflag=.true., rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_FieldBundleAdd(dstFB, (/dstFields(i)/), multiflag=.true., rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
       ! determine "polemethod" and "regridPoleNPnts"
       polemethod = ESMF_POLEMETHOD_NONE ! default
@@ -5060,9 +5085,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"polemethod=")==1) then
           call chopString(chopStringList(j), chopChar="=", &
-            chopStringList=chopSubString, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            chopStringList=chopSubString, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
           if (size(chopSubString)>=2) then
             if (trim(chopSubString(2))=="none") then
               polemethod = ESMF_POLEMETHOD_NONE
@@ -5093,9 +5118,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"unmappedaction=")==1) then
           call chopString(chopStringList(j), chopChar="=", &
-            chopStringList=chopSubString, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            chopStringList=chopSubString, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
           if (size(chopSubString)>=2) then
             if (trim(chopSubString(2))=="error") then
               unmappedaction = ESMF_UNMAPPEDACTION_ERROR
@@ -5119,9 +5144,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"srctermprocessing=")==1) then
           call chopString(chopStringList(j), chopChar="=", &
-            chopStringList=chopSubString, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            chopStringList=chopSubString, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
           if (size(chopSubString)>=2) then
             read(chopSubString(2), "(i10)") srcTermProcessing
           endif
@@ -5135,9 +5160,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"pipelinedepth=")==1) then
           call chopString(chopStringList(j), chopChar="=", &
-            chopStringList=chopSubString, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            chopStringList=chopSubString, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
           if (size(chopSubString)>=2) then
             read(chopSubString(2), "(i10)") pipelineDepth
           endif
@@ -5151,9 +5176,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       do j=2, size(chopStringList)
         if (index(chopStringList(j),"dumpweights=")==1) then
           call chopString(chopStringList(j), chopChar="=", &
-            chopStringList=chopSubString, rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            chopStringList=chopSubString, rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
           if (size(chopSubString)>=2) then
             if (trim(chopSubString(2))=="on") then
               dumpWeightsFlag = .true.
@@ -5182,12 +5207,12 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
 
       ! for now optimized reuse of RouteHandle is only implemented for Grids
       
-      call ESMF_FieldGet(srcFields(i), geomtype=srcGeomtype, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_FieldGet(dstFields(i), geomtype=dstGeomtype, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_FieldGet(srcFields(i), geomtype=srcGeomtype, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_FieldGet(dstFields(i), geomtype=dstGeomtype, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
       gridPair = (srcGeomtype==ESMF_GEOMTYPE_GRID)
       gridPair = gridPair .and. (dstGeomtype==ESMF_GEOMTYPE_GRID)
@@ -5197,46 +5222,46 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore enter: ")
       if (gridPair) then
         ! access the src and dst grid objects
         call ESMF_FieldGet(srcFields(i), arrayspec=srcArraySpec, grid=srcGrid, &
-          staggerLoc=srcStaggerLoc, dimCount=fieldDimCount, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call ESMF_GridGet(srcGrid, dimCount=gridDimCount, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          staggerLoc=srcStaggerLoc, dimCount=fieldDimCount, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+        call ESMF_GridGet(srcGrid, dimCount=gridDimCount, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
         allocate(srcGridToFieldMap(gridDimCount))
         allocate(srcUngriddedLBound(fieldDimCount-gridDimCount), &
           srcUngriddedUBound(fieldDimCount-gridDimCount))
         call ESMF_FieldGet(srcFields(i), gridToFieldMap=srcGridToFieldMap, &
           ungriddedLBound=srcUngriddedLBound, &
-          ungriddedUBound=srcUngriddedUBound,rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          ungriddedUBound=srcUngriddedUBound,rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
         
         call ESMF_FieldGet(dstFields(i), arrayspec=dstArraySpec, grid=dstGrid, &
-          staggerLoc=dstStaggerLoc, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call ESMF_GridGet(dstGrid, dimCount=gridDimCount, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          staggerLoc=dstStaggerLoc, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+        call ESMF_GridGet(dstGrid, dimCount=gridDimCount, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
         allocate(dstGridToFieldMap(gridDimCount))
         allocate(dstUngriddedLBound(fieldDimCount-gridDimCount), &
           dstUngriddedUBound(fieldDimCount-gridDimCount))
         call ESMF_FieldGet(dstFields(i), gridToFieldMap=dstGridToFieldMap, &
           ungriddedLBound=dstUngriddedLBound, &
-          ungriddedUBound=dstUngriddedUBound,rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          ungriddedUBound=dstUngriddedUBound,rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
         ! search for a match
         rhListE=>rhList
         do while (associated(rhListE))
           ! test src grid match
           rhListMatch = &
-            ESMF_GridMatch(rhListE%srcGrid, srcGrid, globalflag=.true., rc=rc) &
+            ESMF_GridMatch(rhListE%srcGrid, srcGrid, globalflag=.true., rc=localrc) &
             >= ESMF_GRIDMATCH_EXACT
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 #if 0
 write (msgString,*) trim(name)//": srcGrid Match for i=", i, " is: ", &
   rhListMatch
@@ -5245,10 +5270,10 @@ call ESMF_LogWrite(trim(msgString), ESMF_LOGMSG_INFO)
           if (.not.rhListMatch) goto 123
           ! test dst grid match
           rhListMatch = &
-            ESMF_GridMatch(rhListE%dstGrid, dstGrid, globalflag=.true., rc=rc) &
+            ESMF_GridMatch(rhListE%dstGrid, dstGrid, globalflag=.true., rc=localrc) &
             >= ESMF_GRIDMATCH_EXACT
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 #if 0
 write (msgString,*) trim(name)//": dstGrid Match for i=", i, " is: ", &
   rhListMatch
@@ -5379,9 +5404,9 @@ call ESMF_LogWrite(trim(name)//&
           ! regrid store call
           !TODO: leverage ESMF_FieldBundleRegridStore(), like for the Redist
           !TODO: case, once ESMF_FieldBundleRegridStore() supports passing
-          !TODO: field pair specific arguments e.g. for polemethod, 
-          !TODO: srcTermProcessing, etc. Until then must do each field 
-          !TODO: individually here. Notice that most of the RH reuse 
+          !TODO: field pair specific arguments e.g. for polemethod,
+          !TODO: srcTermProcessing, etc. Until then must do each field
+          !TODO: individually here. Notice that most of the RH reuse
           !TODO: optimization is already available on the ESMF side, too.
           call ESMF_FieldRegridStore(srcField=srcFields(i), &
             dstField=dstFields(i), &
@@ -5392,9 +5417,9 @@ call ESMF_LogWrite(trim(name)//&
             srcTermProcessing=srcTermProcessing, pipelineDepth=pipelineDepth, &
             routehandle=rhh, &
             factorIndexList=factorIndexList, factorList=factorList, &
-            rc=rc)
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
         endif
         if (gridPair) then
           ! store info in the new rhList element
@@ -5441,18 +5466,18 @@ call ESMF_LogWrite(trim(name)//&
       ! append rhh to rh and clear rhh
       call ESMF_RouteHandleAppend(rh, appendRoutehandle=rhh, &
         rraShift=rraShift, vectorLengthShift=vectorLengthShift, &
-        transferflag=.not.rhListMatch, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        transferflag=.not.rhListMatch, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
       
       ! adjust rraShift and vectorLengthShift
-      call ESMF_FieldGet(srcFields(i), localDeCount=localDeCount, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_FieldGet(srcFields(i), localDeCount=localDeCount, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
       rraShift = rraShift + localDeCount
-      call ESMF_FieldGet(dstFields(i), localDeCount=localDeCount, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_FieldGet(dstFields(i), localDeCount=localDeCount, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
       rraShift = rraShift + localDeCount
       vectorLengthShift = vectorLengthShift + 1
       
@@ -5461,9 +5486,9 @@ call ESMF_LogWrite(trim(name)//&
         call NUOPC_Write(factorList=factorList, &
           factorIndexList=factorIndexList, &
           fileName="weightmatrix_"//trim(name)//"_"//trim(chopStringList(1))//".nc",&
-          rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
       endif
       
       ! local garbage collection
@@ -5475,14 +5500,14 @@ call ESMF_LogWrite(trim(name)//&
       if (associated(chopStringList)) deallocate(chopStringList)
 
     enddo ! loop over all field pairs
-    
+
     ! take down rhList and destroy rh objects
     do while (associated(rhList))
       rhListE=>rhList
       rhList=>rhList%prev
-      call ESMF_RouteHandleDestroy(rhListE%rh, noGarbage=.true., rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_RouteHandleDestroy(rhListE%rh, noGarbage=.true., rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
       if (associated(rhListE%factorIndexList)) deallocate(rhListE%factorIndexList)
       if (associated(rhListE%factorList)) deallocate(rhListE%factorList)
       deallocate(rhListE%srcGridToFieldMap, rhListE%dstGridToFieldMap)
@@ -5496,25 +5521,25 @@ call ESMF_LogWrite(trim(name)//&
     deallocate(srcFields, dstFields)
 
     ! now deal with the Redist field pairs
-    call ESMF_FieldBundleGet(srcFBRedist, fieldCount=count, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_FieldBundleGet(srcFBRedist, fieldCount=count, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     if (count /= iRedist) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="Counts must match!", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
-    call ESMF_FieldBundleGet(dstFBRedist, fieldCount=i, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_FieldBundleGet(dstFBRedist, fieldCount=i, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     if (i /= count) then
       call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
         msg="Counts must match!", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
       return  ! bail out
     endif
-    
+
     if (count > 0) then
 #if 0
 write(msgString,*) "Redist FBs have elements: ", count
@@ -5522,16 +5547,16 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 #endif
       ! call into ESMF for an optimized Redist pre-compute between FieldBundles
       call ESMF_FieldBundleRedistStore(srcFBRedist, dstFBRedist, &
-        routehandle=rhh, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+        routehandle=rhh, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+
       ! append rhh to rh and clear rhh
       call ESMF_RouteHandleAppend(rh, appendRoutehandle=rhh, &
-        rraShift=rraShift, vectorLengthShift=vectorLengthShift, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+        rraShift=rraShift, vectorLengthShift=vectorLengthShift, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+
       ! obtain fields from srcFBRedist and dstFBRedist
       allocate(srcFields(count), dstFields(count), stat=stat)
       if (ESMF_LogFoundAllocError(statusToCheck=stat, &
@@ -5539,22 +5564,22 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       call ESMF_FieldBundleGet(srcFBRedist, fieldList=srcFields, &
-        itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
       call ESMF_FieldBundleGet(dstFBRedist, fieldList=dstFields, &
-      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      itemorderflag=ESMF_ITEMORDER_ADDORDER, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
       ! add fields to srcFB and dstFB
-      call ESMF_FieldBundleAdd(srcFB, srcFields, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call ESMF_FieldBundleAdd(dstFB, dstFields, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+      call ESMF_FieldBundleAdd(srcFB, srcFields, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      call ESMF_FieldBundleAdd(dstFB, dstFields, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+
       ! append termOrdersRedist at the end of termOrders list
       do i=1, count
         termOrders(iRegrid+i) = termOrdersRedist(i)
@@ -5566,12 +5591,12 @@ call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
 
     ! garbage collection
     deallocate(termOrdersRedist)
-    call ESMF_FieldBundleDestroy(srcFBRedist, noGarbage=.true., rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_FieldBundleDestroy(dstFBRedist, noGarbage=.true., rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_FieldBundleDestroy(srcFBRedist, noGarbage=.true., rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+    call ESMF_FieldBundleDestroy(dstFBRedist, noGarbage=.true., rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
 
     ! return successfully
     if (present(rc)) rc = ESMF_SUCCESS
@@ -5650,13 +5675,14 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     type(type_InternalState)        :: is
     integer                         :: sIndex
     integer                         :: stat
+    integer                         :: localrc
 
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(connector, name=name, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_CompGet(connector, name=name, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! early exit if nothing to be done -> this allows calling the method even
     ! if the internal state does not (yet) exist - done for testing
@@ -5668,8 +5694,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
@@ -5706,7 +5732,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
         allocate(cplSetList(is%wrap%cplSetCount), stat=stat)
         if (ESMF_LogFoundAllocError(stat, msg="allocating cplSetList", &
           line=__LINE__, &
-          file=FILENAME)) &
+          file=FILENAME, &
+          rcToReturn=rc)) &
           return  ! bail out
         cplSetList=is%wrap%cplSetList
       endif
@@ -5776,13 +5803,14 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
     integer                         :: sIndex
+    integer                         :: localrc
 
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(connector, name=name, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_CompGet(connector, name=name, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! early exit if nothing to be done -> this allows calling the method even
     ! if the internal state does not (yet) exist - done for testing
@@ -5793,8 +5821,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 
     ! query Component for the internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     

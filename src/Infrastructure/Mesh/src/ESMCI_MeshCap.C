@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Copyright 2002-2019, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -488,6 +488,8 @@ void MeshCap::regrid_create(
     int *extrapMethod,
     int *extrapNumSrcPnts,
     ESMC_R8 *extrapDistExponent,
+    int *extrapNumLevels,
+    int *extrapNumInputLevels,                                             
     int *unmappedaction, int *_ignoreDegenerate,
     int *srcTermProcessing, int *pipelineDepth,
     ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
@@ -580,6 +582,8 @@ void MeshCap::regrid_create(
                         extrapMethod,
                         extrapNumSrcPnts,
                         extrapDistExponent,
+                        extrapNumLevels,
+                        extrapNumInputLevels,
                         unmappedaction, _ignoreDegenerate,
                         srcTermProcessing, pipelineDepth,
                         rh, has_rh, has_iw,
@@ -1044,10 +1048,12 @@ void MeshCap::getlocalcoords(double *nodeCoord, int *_orig_sdim, int *rc)
   if (is_esmf_mesh) {
     ESMCI_getlocalcoords(&mesh, nodeCoord, _orig_sdim, rc);
   } else {
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_NOT_IMPL,
-       "- this functionality is not currently supported using MOAB",
-                                  ESMC_CONTEXT, rc);
-    return;
+#if defined ESMF_MOAB
+    MBMesh_getlocalcoords(&mbmesh, nodeCoord, _orig_sdim, rc);
+#else
+   if(ESMC_LogDefault.MsgFoundError(ESMC_RC_LIB_NOT_PRESENT,
+      "This functionality requires ESMF to be built with the MOAB library enabled" , ESMC_CONTEXT, rc)) return;
+#endif
   }
 }
 
@@ -1489,7 +1495,7 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
   MBMesh *mbmesh;
   // Call into func. depending on mesh type
   if (is_esmf_mesh) {
-#ifdef ESMF_PROFILE_INTERNAL
+#ifdef ESMF_PROFILE_MESH_DUAL_NATIVE
     ESMCI_REGION_ENTER("Native Dual Mesh Generation", localrc);
     VM::logMemInfo(std::string("before Native Dual Mesh Generation"));
 #endif
@@ -1498,7 +1504,7 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
 
-#ifdef ESMF_PROFILE_INTERNAL
+#ifdef ESMF_PROFILE_MESH_DUAL_NATIVE
     VM::logMemInfo(std::string("after Native Dual Mesh Generation"));
     ESMCI_REGION_EXIT("Native Dual Mesh Generation", localrc)
 #endif
@@ -1506,7 +1512,7 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
 #if defined ESMF_MOAB
     MBMesh *meshin = (MBMesh *)((*src_meshpp)->mbmesh);
 
-#ifdef ESMF_PROFILE_INTERNAL
+#ifdef ESMF_PROFILE_MESH_DUAL_MBMESH
     ESMCI_REGION_ENTER("MOAB Dual Mesh Generation", localrc);
     VM::logMemInfo(std::string("before MOAB Dual Mesh Generation"));
 #endif
@@ -1515,7 +1521,7 @@ MeshCap *MeshCap::meshcreatedual(MeshCap **src_meshpp, int *rc) {
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
                                       ESMC_CONTEXT, rc)) return NULL;
 
-#ifdef ESMF_PROFILE_INTERNAL
+#ifdef ESMF_PROFILE_MESH_DUAL_MBMESH
     VM::logMemInfo(std::string("after MOAB Dual Mesh Generation"));
     ESMCI_REGION_EXIT("MOAB Dual Mesh Generation", localrc)
 #endif

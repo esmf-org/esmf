@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Copyright 2002-2019, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -77,6 +77,9 @@ void MBMesh_createelemdistgrid(void **meshpp, int *egrid, int *num_lelems, int *
 
 void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc);
 
+
+void MBMesh_getlocalcoords(void **meshpp, double *ncoords,
+                               int *_orig_sdim, int *rc);
 
 void MBMesh_getlocalelemcoords(void **meshpp, double *ecoords,
                                int *_orig_sdim, int *rc);

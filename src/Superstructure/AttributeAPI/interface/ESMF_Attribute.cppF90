@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research,
+! Copyright 2002-2019, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -9117,9 +9117,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else @\
         if (present(typekind)) typekind = ESMF_NOKIND @\
         if (present(itemCount)) itemCount = 0 @\
-        if (.not.present(isPresent).and..not.present(itemCount).and..not.present(typekind)) then @\
+        if (.not.present(isPresent)) then @\
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ATTR_NOTSET, & @\
-             msg="Attribute not found and neither default values nor isPresent flag was given", & @\
+             msg="Attribute not found and isPresent flag not supplied", & @\
              ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
@@ -9266,9 +9266,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       else @\
         if (present(typekind)) typekind = ESMF_NOKIND @\
         if (present(itemCount)) itemCount = 0 @\
-        if (.not.present(isPresent).and..not.present(itemCount).and..not.present(typekind)) then @\
+        if (.not.present(isPresent)) then @\
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ATTR_NOTSET, & @\
-             msg="Attribute not found and neither default values nor isPresent flag was given", & @\
+             msg="Attribute not found and isPresent flag not supplied", & @\
              ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
@@ -9382,9 +9382,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(typekind)) typekind = ESMF_NOKIND @\
         if (present(itemCount)) itemCount = 0 @\
         name = "" @\
-        if (.not.present(isPresent).and..not.present(itemCount).and..not.present(typekind)) then @\
+        if (.not.present(isPresent)) then @\
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ATTR_NOTSET, & @\
-             msg="Attribute not found and neither default values nor isPresent flag was given", & @\
+             msg="Attribute not found and isPresent flag not supplied", & @\
              ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\
@@ -9538,9 +9538,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (present(typekind)) typekind = ESMF_NOKIND @\
         if (present(itemCount)) itemCount = 0 @\
         name = "" @\
-        if (.not.present(isPresent).and..not.present(itemCount).and..not.present(typekind)) then @\
+        if (.not.present(isPresent)) then @\
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ATTR_NOTSET, & @\
-             msg="Attribute not found and neither default values nor isPresent flag was given", & @\
+             msg="Attribute not found and isPresent flag not supplied", & @\
              ESMF_CONTEXT, rcToReturn=rc) @\
           return @\
         endif @\

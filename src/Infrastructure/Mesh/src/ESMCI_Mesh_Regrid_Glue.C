@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Copyright 2002-2019, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -98,6 +98,8 @@ void ESMCI_regrid_create(
                      int *extrapMethod,
                      int *extrapNumSrcPnts,
                      ESMC_R8 *extrapDistExponent,
+                     int *extrapNumLevels,
+                     int *extrapNumInputLevels, 
                      int *unmappedaction, int *_ignoreDegenerate,
                      int *srcTermProcessing, int *pipelineDepth,
                      ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
@@ -202,7 +204,7 @@ void ESMCI_regrid_create(
     }
     WMat dst_status;
 
-#ifdef ESMF_PROFILE_INTERNAL
+#ifdef ESMF_PROFILE_MESH_WEIGHTGEN_NATIVE
     int localrc;
     ESMCI_REGION_ENTER("Native Mesh Weight Generation", localrc)
     VM::logMemInfo(std::string("before Native Mesh Weight Generation"));
@@ -217,6 +219,8 @@ void ESMCI_regrid_create(
                         extrapMethod,
                         extrapNumSrcPnts,
                         extrapDistExponent,
+                        extrapNumLevels,
+                        extrapNumInputLevels, 
                         &temp_unmappedaction,
                         set_dst_status, dst_status)) {
         Throw() << "Online regridding error" << std::endl;
@@ -230,13 +234,15 @@ void ESMCI_regrid_create(
                         extrapMethod,
                         extrapNumSrcPnts,
                         extrapDistExponent,
+                        extrapNumLevels,
+                        extrapNumInputLevels, 
                         &temp_unmappedaction,
                         set_dst_status, dst_status)) {
         Throw() << "Online regridding error" << std::endl;
       }
     }
 
-#ifdef ESMF_PROFILE_INTERNAL
+#ifdef ESMF_PROFILE_MESH_WEIGHTGEN_NATIVE
     VM::logMemInfo(std::string("after Native Mesh Weight Generation"));
     ESMCI_REGION_EXIT("Native Mesh Weight Generation", localrc)
 #endif
@@ -445,7 +451,7 @@ void ESMCI_regrid_create(
     VM::logMemInfo(std::string("RegridCreate5.2"));
 #endif
 
-#ifdef ESMF_PROFILE_INTERNAL
+#ifdef ESMF_PROFILE_MESH_SMMSTORE_NATIVE
     ESMCI_REGION_ENTER("Native Mesh ArraySMMStore", localrc)
     VM::logMemInfo(std::string("before Native Mesh ArraySMMStore"));
 #endif
@@ -462,7 +468,7 @@ void ESMCI_regrid_create(
         ESMC_CONTEXT, NULL)) throw localrc;  // bail out with exception
     }
 
-#ifdef ESMF_PROFILE_INTERNAL
+#ifdef ESMF_PROFILE_MESH_SMMSTORE_NATIVE
     VM::logMemInfo(std::string("after Native Mesh ArraySMMStore"));
     ESMCI_REGION_EXIT("Native Mesh ArraySMMStore", localrc)
 #endif

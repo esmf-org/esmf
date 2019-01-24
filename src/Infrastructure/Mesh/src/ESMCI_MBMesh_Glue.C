@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Copyright 2002-2019, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -2667,6 +2667,167 @@ void MBMesh_getarea(void **mbmpp, int *num_elem, double *elem_areas, int *rc) {
 
 }
 
+// DO THIS BETTER, HAVE A FIELD THAT CONTAINS THE POSITION IN THE FINAL ARRAY AND -1 FOR ANYTHING NOT LOCAL OR SPLIT
+void getNodes(void **mbmpp, std::vector<EntityHandle> &nodes) {
+
+  // Get localPet
+  int localrc;
+  int localPet = VM::getCurrent(&localrc)->getLocalPet();
+  if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
+    throw localrc;  // bail out with exception
+
+  // Get Moab Mesh wrapper
+  MBMesh *mbmp=*((MBMesh **)mbmpp);
+
+  //Get MOAB Mesh
+  Interface *moab_mesh=mbmp->mesh;
+
+  // MOAB error
+  int merr;
+
+
+  // Get a range containing all nodes
+  Range range_node;
+  merr=moab_mesh->get_entities_by_dimension(0,0,range_node);
+  if (merr != MB_SUCCESS) {
+    if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+  }
+
+  // Loop through nodes putting into list
+  std::vector<std::pair<int,EntityHandle> > pos_and_nodes;
+  for(Range::iterator it=range_node.begin(); it !=range_node.end(); it++) {
+    const EntityHandle *nodep=(&*it);
+    EntityHandle node=*it;
+
+    // Get owner
+    int owner;
+    merr=moab_mesh->tag_get_data(mbmp->owner_tag, nodep, 1, &owner);
+    if (merr != MB_SUCCESS) {
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                       moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+    }
+
+    // If owned by this processor, put in list
+    if (owner==localPet) {
+      // Get gid
+      int gid;
+      merr=moab_mesh->tag_get_data(mbmp->gid_tag, nodep, 1, &gid);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }
+
+      // Get orig_pos
+      int orig_pos;
+      merr=moab_mesh->tag_get_data(mbmp->orig_pos_tag, nodep, 1, &orig_pos);
+      if (merr != MB_SUCCESS) {
+        if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                         moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+      }
+
+      // Stick in list
+      pos_and_nodes.push_back(std::make_pair(orig_pos,node));
+    }
+  }
+
+  // Put in order by original pos
+  std::sort(pos_and_nodes.begin(), pos_and_nodes.end());
+
+  // Fill array of node entities
+  nodes.clear();
+  for (int i = 0; i<pos_and_nodes.size(); ++i) {
+    nodes.push_back(pos_and_nodes[i].second);
+
+    // printf("pos=%d ngids=%d\n",pos_and_gids[i].first,pos_and_gids[i].second);
+
+  }
+}
+
+void MBMesh_getlocalcoords(void **mbmpp, double *ncoords, int *_orig_sdim, int *rc)
+{
+  try {
+    // Get Moab Mesh wrapper
+    MBMesh *mbmp=*((MBMesh **)mbmpp);
+
+    //Get MOAB Mesh
+    Interface *moab_mesh=mbmp->mesh;
+
+    // MOAB error
+    int merr;
+    int localrc;
+
+    // Get dimensions
+    int sdim=mbmp->sdim;
+    int pdim=mbmp->pdim;
+
+
+    // Get original spatial dim
+    int orig_sdim=*_orig_sdim;
+
+    // Declare id vector
+    std::vector<EntityHandle> nodes;
+
+    // Get local nodes in correct order
+    getNodes(mbmpp, nodes);
+
+    // Loop through nodes and put coords into array
+    if (mbmp->has_node_orig_coords) {
+      for (int i=0; i<nodes.size(); i++) {
+        // Get node
+        EntityHandle node=nodes[i];
+
+        // Get coords
+        merr=moab_mesh->tag_get_data(mbmp->node_orig_coords_tag,
+                                     &node, 1, ncoords+orig_sdim*i);
+        if (merr != MB_SUCCESS) {
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                           moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }
+      }
+    } else {
+      for (int i=0; i<nodes.size(); i++) {
+        // Get node
+        EntityHandle node=nodes[i];
+
+        // Get coords
+        merr=moab_mesh->get_coords(&node, 1, ncoords+orig_sdim*i);
+        if (merr != MB_SUCCESS) {
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+                                           moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+        }
+      }
+    }
+
+
+
+  } catch(std::exception &x) {
+    // catch Mesh exception return code
+    if (x.what()) {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          x.what(), ESMC_CONTEXT, rc);
+    } else {
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+                                          "UNKNOWN", ESMC_CONTEXT, rc);
+    }
+
+    return;
+  }catch(int localrc){
+    // catch standard ESMF return code
+    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
+    return;
+  } catch(...){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
+      "- Caught unknown exception", ESMC_CONTEXT, rc);
+    return;
+  }
+
+  // Set return code
+  if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+}
+
+
 
 
  /* XMRKX */
@@ -3464,96 +3625,6 @@ void ESMCI_meshfindpnt(Mesh **meshpp, int *unmappedaction, int *dimPnts, int *nu
   // Set return code
   if(rc != NULL) *rc = ESMF_SUCCESS;
 }
-
-void ESMCI_getlocalcoords(Mesh **meshpp, double *nodeCoord, int *_orig_sdim, int *rc)
-{
-   try {
-    Mesh *meshp = *meshpp;
-    ThrowRequire(meshp);
-    Mesh &mesh = *meshp;
-
-
-  // Initialize the parallel environment for mesh (if not already done)
-    {
- int localrc;
- int rc;
-  ESMCI::Par::Init("MESHLOG", false /* use log */,VM::getCurrent(&localrc)->getMpi_c());
- if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
-   throw localrc;  // bail out with exception
-    }
-
-    // Get some info
-    int num_nodes = mesh.num_nodes();
-
-    // Choose which coords field and dimension to use
-    // try orig_coordinates first, if it doesn't exist
-    // then go with coordinates
-    MEField<> *coords=mesh.GetField("orig_coordinates");
-    int sdim=*_orig_sdim;
-    if (!coords) {
-      coords = mesh.GetCoordField();
-      sdim=mesh.spatial_dim();
-    }
-
-
-    // Make a map between data index and associated node pointer
-    std::vector<std::pair<int,MeshObj *> > index_to_node;
-    index_to_node.reserve(num_nodes);
-
-    // iterate through local nodes collecting indices and node pointers
-    Mesh::iterator ni = mesh.node_begin(), ne = mesh.node_end();
-    for (; ni != ne; ++ni) {
-      MeshObj &node = *ni;
-
-      if (!GetAttr(node).is_locally_owned()) continue;
-
-      int idx = node.get_data_index();
-      index_to_node.push_back(std::make_pair(idx,&node));
-    }
-
-    // Sort by data index
-    std::sort(index_to_node.begin(), index_to_node.end());
-
-    // Load coords in order of index
-    int nodeCoordPos=0;
-    for (UInt i = 0; i < index_to_node.size(); ++i) {
-      MeshObj &node = *(index_to_node[i].second);
-
-      // Copy coords into output array
-      double *c = coords->data(node);
-      for (int j=0; j<sdim; j++) {
-        nodeCoord[nodeCoordPos]=c[j];
-        nodeCoordPos++;
-      }
-    }
-
-
-  } catch(std::exception &x) {
-    // catch Mesh exception return code
-    if (x.what()) {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          x.what(), ESMC_CONTEXT, rc);
-    } else {
-      ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-                                          "UNKNOWN", ESMC_CONTEXT, rc);
-    }
-
-    return;
-  }catch(int localrc){
-    // catch standard ESMF return code
-    ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
-    return;
-  } catch(...){
-    ESMC_LogDefault.MsgFoundError(ESMC_RC_INTNRL_BAD,
-      "- Caught unknown exception", ESMC_CONTEXT, rc);
-    return;
-  }
-
-  // Set return code
-  if (rc!=NULL) *rc = ESMF_SUCCESS;
-
-}
-
 
 ////////////////
 

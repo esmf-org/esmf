@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research, 
+! Copyright 2002-2019, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -69,31 +69,32 @@ module NUOPC_FieldDictionaryDef
     ! local variables
     type(NUOPC_FieldDictionaryEntry)  :: fdEntry
     integer                           :: stat
+    integer                           :: localrc
     
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! allocate fdEntry
     allocate(fdEntry%wrap, stat=stat)
     if (ESMF_LogFoundAllocError(stat, msg="allocating fdEntry", &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! set values inside of fdEntry
     fdEntry%wrap%standardName     = standardName
     fdEntry%wrap%canonicalUnits   = canonicalUnits
     allocate(fdEntry%wrap%connectedOptions(2), stat=stat)
     if (ESMF_LogFoundAllocError(stat, msg="allocating fdEntry member", &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     fdEntry%wrap%connectedOptions(1)     = "false" ! default
     fdEntry%wrap%connectedOptions(2)     = "true"
     allocate(fdEntry%wrap%synonyms(0), stat=stat)
     if (ESMF_LogFoundAllocError(stat, msg="allocating synonyms member", &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! add fdEntry to the FieldDictionary
     call ESMF_ContainerAddUDT(fieldDictionary, &
-      trim(fdEntry%wrap%standardName), fdEntry, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      trim(fdEntry%wrap%standardName), fdEntry, localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
   end subroutine
   !-----------------------------------------------------------------------------
@@ -112,15 +113,17 @@ module NUOPC_FieldDictionaryDef
 !
 !EOPI
   !-----------------------------------------------------------------------------
+    integer :: localrc
+
     if (present(rc)) rc = ESMF_SUCCESS
 
-    fieldDictionary = ESMF_ContainerCreate(rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+    fieldDictionary = ESMF_ContainerCreate(rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-    call ESMF_ContainerGarbageOn(fieldDictionary, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+    call ESMF_ContainerGarbageOn(fieldDictionary, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
   end subroutine
   !-----------------------------------------------------------------------------
@@ -246,6 +249,7 @@ module NUOPC_FieldDictionaryDef
 !EOPI
   !-----------------------------------------------------------------------------
     type(NUOPC_FieldDictionaryEntry)                :: fdEntry
+    integer                                         :: localrc
     integer                                         :: stat, i, k, count, len
     character(len=NUOPC_FreeFormatLen)              :: tempString
     character(len=10)                               :: lenString
@@ -254,18 +258,21 @@ module NUOPC_FieldDictionaryDef
     
     if (present(rc)) rc = ESMF_SUCCESS
 
-    call ESMF_ContainerGet(fieldDictionary, itemCount=count, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    call ESMF_ContainerGet(fieldDictionary, itemCount=count, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
     ! create free format object with estimated capacity
-    freeFormat = NUOPC_FreeFormatCreate(capacity=4*count, rc=rc)
+    freeFormat = NUOPC_FreeFormatCreate(capacity=4*count, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     do i=1, count
       call ESMF_ContainerGetUDTByIndex(fieldDictionary, i, fdEntry, &
-        ESMF_ITEMORDER_ABC, rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        ESMF_ITEMORDER_ABC, localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
       ! determine approoriate character length for output
@@ -278,28 +285,28 @@ module NUOPC_FieldDictionaryDef
       ! standardName
       write(tempString, "('standardName:   ',a"//trim(lenString)//")") &
         trim(fdEntry%wrap%standardName)
-      call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
       ! canonicalUnits
       write(tempString, "('canonicalUnits: ',a"//trim(lenString)//")") &
         trim(fdEntry%wrap%canonicalUnits)
-      call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
       ! synonyms
       do k=1, size(fdEntry%wrap%synonyms)
         write(tempString, "('synonym:        ',a"//trim(lenString)//")") &
           trim(fdEntry%wrap%synonyms(k))
-        call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(tempString)/), rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) &
           return  ! bail out
       enddo
-      call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(sepString)/), rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      call NUOPC_FreeFormatAdd(freeFormat, (/adjustl(sepString)/), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) &
         return  ! bail out
     enddo
@@ -528,14 +535,15 @@ module NUOPC_FieldDictionaryDef
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
+    integer                           :: localrc
     type(NUOPC_FieldDictionaryEntry)  :: fdEntry
     
     if (present(rc)) rc = ESMF_SUCCESS
     
     call ESMF_ContainerGetUDT(fieldDictionary, trim(standardName), &
-      fdEntry, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      fdEntry, localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
     if (present(canonicalUnits)) &
       canonicalUnits = trim(fdEntry%wrap%canonicalUnits)
@@ -560,6 +568,7 @@ module NUOPC_FieldDictionaryDef
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
+    integer                       :: localrc
     type(ESMF_Logical)            :: isPres
     
     if (present(rc)) rc = ESMF_SUCCESS
@@ -567,9 +576,9 @@ module NUOPC_FieldDictionaryDef
     NUOPC_FieldDictionaryHasEntryI = .false.
 
     call c_ESMC_ContainerGetIsPresent(fieldDictionary, trim(standardName), &
-      isPres, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      isPres, localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
     NUOPC_FieldDictionaryHasEntryI = isPres
     
@@ -791,15 +800,16 @@ module NUOPC_FieldDictionaryDef
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
+    integer                           :: localrc
     integer                           :: i
     type(NUOPC_FieldDictionaryEntry)  :: fdEntry
     
     if (present(rc)) rc = ESMF_SUCCESS
 
     NUOPC_FieldDictionaryMatchSynoI = &
-      NUOPC_FieldDictionaryHasEntryI(fieldDictionary, standardName1, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      NUOPC_FieldDictionaryHasEntryI(fieldDictionary, standardName1, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     if (.not.NUOPC_FieldDictionaryMatchSynoI) return  ! early exit
 
     NUOPC_FieldDictionaryMatchSynoI = .true. ! re-initialize
@@ -807,9 +817,9 @@ module NUOPC_FieldDictionaryDef
     
     NUOPC_FieldDictionaryMatchSynoI = .false. ! re-initialize
     call ESMF_ContainerGetUDT(fieldDictionary, trim(standardName1), &
-      fdEntry, rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      fdEntry, localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
     do i=1, size(fdEntry%wrap%synonyms)
       if (trim(standardName2) == trim(fdEntry%wrap%synonyms(i))) then
@@ -839,6 +849,7 @@ module NUOPC_FieldDictionaryDef
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
+    integer                           :: localrc
     integer                           :: i, k, j, stat
     type(NUOPC_FieldDictionaryEntry)  :: fdEntry
     character(ESMF_MAXSTR), pointer   :: synonyms(:)
@@ -848,23 +859,23 @@ module NUOPC_FieldDictionaryDef
     ! first loop to ensure all of the provided standard names are valid entries
     do i=1, size(standardNames)
       call ESMF_ContainerGetUDT(fieldDictionary, trim(standardNames(i)), &
-        fdEntry, rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
+        fdEntry, localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     enddo
     
     ! second loop to set the synonyms
     do i=1, size(standardNames)
     
       call ESMF_ContainerGetUDT(fieldDictionary, trim(standardNames(i)), &
-        fdEntry, rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
+        fdEntry, localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
       j = size(fdEntry%wrap%synonyms)
       allocate(synonyms(j+size(standardNames)-1), stat=stat)
       if (ESMF_LogFoundAllocError(stat, msg="allocating synonyms array", &
-        line=__LINE__, file=FILENAME)) return  ! bail out
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
       do k=1, j
         synonyms(k) = fdEntry%wrap%synonyms(k)  ! fill in the existing entries
@@ -896,6 +907,7 @@ module NUOPC_FieldDictionaryDef
 !   Create NUOPC Field dictionary.
 !EOPI
   !-----------------------------------------------------------------------------
+    integer                 :: localrc
     type(NUOPC_FreeFormat)  :: freeFormatFD
     
     if (present(rc)) rc = ESMF_SUCCESS
@@ -952,15 +964,17 @@ module NUOPC_FieldDictionaryDef
       "----------------------------------------------------------------"/), &
 !EOLTCFD
 !EOLTFD
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=FILENAME)) &
+      file=FILENAME, &
+      rcToReturn=rc)) &
       return  ! bail out
-    call NUOPC_FieldDictionaryIngestI(fieldDictionary, freeFormatFD, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    call NUOPC_FieldDictionaryIngestI(fieldDictionary, freeFormatFD, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
-      file=FILENAME)) &
+      file=FILENAME, &
+      rcToReturn=rc)) &
       return  ! bail out
 
   end subroutine

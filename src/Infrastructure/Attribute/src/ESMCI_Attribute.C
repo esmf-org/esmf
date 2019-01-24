@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Copyright 2002-2019, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1532,6 +1532,8 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // get the attr on the attpack
   attr = attpack->AttPackGetAttribute(name, anflag);
   if (!attr) *present = ESMF_FALSE;
+  // edge case: attr in AttPack but does not yet have a value
+  else if (attr->tk == ESMF_NOKIND) *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
 
   // return
@@ -1576,6 +1578,8 @@ const char Attribute::GRIDS_PURP[]   = "grids";
   // get the attr on the attpack
   attr = attpack->AttPackGetAttribute(num, anflag);
   if (!attr) *present = ESMF_FALSE;
+  // edge case: attr in AttPack but does not yet have a value
+  else if (attr->tk == ESMF_NOKIND) *present = ESMF_FALSE;
   else *present = ESMF_TRUE;
   
   // return

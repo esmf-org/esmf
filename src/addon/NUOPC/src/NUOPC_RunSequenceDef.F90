@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research, 
+! Copyright 2002-2019, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -175,6 +175,7 @@ module NUOPC_RunSequenceDef
 !
 !EOPI
   !-----------------------------------------------------------------------------
+    integer                                :: localrc
     integer                                :: jLocal, pLocal
     
     if (present(rc)) rc = ESMF_SUCCESS
@@ -199,8 +200,8 @@ module NUOPC_RunSequenceDef
     endif
     
     ! call into the more generic method
-    call NUOPC_RunElementAdd(runSeq, i=i, j=jLocal, phase=pLocal, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    call NUOPC_RunElementAdd(runSeq, i=i, j=jLocal, phase=pLocal, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
   end subroutine
@@ -230,6 +231,8 @@ module NUOPC_RunSequenceDef
 !
 !EOPI
   !-----------------------------------------------------------------------------
+    integer :: localrc
+
     if (present(rc)) rc = ESMF_SUCCESS
     
     ! error checking
@@ -240,8 +243,8 @@ module NUOPC_RunSequenceDef
     endif
     
     ! call into the more generic method
-    call NUOPC_RunElementAdd(runSeq, i=-slot, j=0, phase=0, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+    call NUOPC_RunElementAdd(runSeq, i=-slot, j=0, phase=0, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
   end subroutine
@@ -262,6 +265,7 @@ module NUOPC_RunSequenceDef
 !   output goes to stdout.
 !EOPI
   !-----------------------------------------------------------------------------
+    integer                   :: localrc
     character(ESMF_MAXSTR)    :: msgString
     logical                   :: logflagL
     
@@ -273,8 +277,8 @@ module NUOPC_RunSequenceDef
     write (msgString,"(A, I6, I6, I6)") "runElementPrint: ", &
       runElement%i, runElement%j, runElement%phase
     if (logflagL) then
-      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     else
       print *, trim(msgString)
@@ -368,6 +372,7 @@ module NUOPC_RunSequenceDef
 !   {\tt runSeq} vector.
 !EOPI
   !-----------------------------------------------------------------------------
+    integer :: localrc
     integer :: i
     
     if (present(rc)) rc = ESMF_SUCCESS
@@ -376,7 +381,9 @@ module NUOPC_RunSequenceDef
     
       ! deallocate the individual run sequences
       do i=1, size(runSeq)
-        call NUOPC_RunSequenceSingleDeall(runSeq(i))
+        call NUOPC_RunSequenceSingleDeall(runSeq(i), rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       enddo
     
       deallocate(runSeq)  ! finally deallocate the actual runSeq array
@@ -441,6 +448,7 @@ module NUOPC_RunSequenceDef
 !   {\tt .true.}.
 !EOPI
   !-----------------------------------------------------------------------------
+    integer           :: localrc
     type(ESMF_Clock)  :: clock
     logical           :: clockIsStopTime
     
@@ -473,9 +481,9 @@ module NUOPC_RunSequenceDef
       runSeq(runSeqIndex)%levelChildren=0
       ! check the clock
       clock = runSeq(runSeqIndex)%clock
-      clockIsStopTime = ESMF_ClockIsStopTime(clock, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
+      clockIsStopTime = ESMF_ClockIsStopTime(clock, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       NUOPC_RunSequenceIterate = .not.clockIsStopTime ! return value
       if (clockIsStopTime) return ! no reason to continue here
       ! finally set runElement
@@ -484,16 +492,16 @@ module NUOPC_RunSequenceDef
       if (.not.associated(runElement%next)) then
         if (runElement%i == -runSeqIndex) then
           ! first run element happens to be an "ENDDO" marker
-          do while (.not. ESMF_ClockIsStopTime(clock, rc=rc))
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=FILENAME)) return  ! bail out
+          do while (clockIsStopTime)
             ! advance to next time step
-            call ESMF_ClockAdvance(clock, rc=rc)
-            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            call ESMF_ClockAdvance(clock, rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+            ! check whether to stop at next time step
+            clockIsStopTime = ESMF_ClockIsStopTime(clock, rc=localrc)
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
           enddo
-          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-            line=__LINE__, file=FILENAME)) return  ! bail out
         else
           ! invalid element
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="invalid runElement",&
@@ -508,9 +516,9 @@ module NUOPC_RunSequenceDef
     endif
     
     ! runElement may be a control element (either LINK or ENDDO)
-    NUOPC_RunSequenceIterate = NUOPC_RunSequenceCtrl(runSeq, runElement, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+    NUOPC_RunSequenceIterate = NUOPC_RunSequenceCtrl(runSeq, runElement, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     
   end function
   !-----------------------------------------------------------------------------
@@ -531,6 +539,7 @@ module NUOPC_RunSequenceDef
 !   output goes to stdout.
 !EOPI
   !-----------------------------------------------------------------------------
+    integer                         :: localrc
     character(ESMF_MAXSTR)          :: msgString
     logical                         :: logflagL
     type(NUOPC_RunElement), pointer :: searchElement
@@ -543,16 +552,16 @@ module NUOPC_RunSequenceDef
     if (.not.associated(runSeq%first)) then
       write (msgString,"(A)") "runSeq::"
       if (logflagL) then
-        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
         write (*,"(A)") trim(msgString)
       endif
       write (msgString,"(A)") "::"
       if (logflagL) then
-        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
         write (*,"(A)") trim(msgString)
@@ -560,26 +569,26 @@ module NUOPC_RunSequenceDef
     else
       write (msgString,"(A)") "runSeq::"
       if (logflagL) then
-        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
         write (*,"(A)") trim(msgString)
       endif
       searchElement => runSeq%first
       do while (associated(searchElement%next))
-        call NUOPC_RunElementPrint(searchElement, logflag, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        call NUOPC_RunElementPrint(searchElement, logflag, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         searchElement => searchElement%next
       enddo
-      call NUOPC_RunElementPrint(searchElement, logflag, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      call NUOPC_RunElementPrint(searchElement, logflag, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       write (msgString,"(A)") "::"
       if (logflagL) then
-        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
         write (*,"(A)") trim(msgString)
@@ -605,6 +614,7 @@ module NUOPC_RunSequenceDef
 !   the output goes to stdout.
 !EOPI
   !-----------------------------------------------------------------------------
+    integer                         :: localrc
     character(ESMF_MAXSTR)          :: msgString
     logical                         :: logflagL
     integer                         :: i
@@ -618,13 +628,15 @@ module NUOPC_RunSequenceDef
       write (msgString,"(A, I6, A, I6)") &
         "NUOPC_RunSequenceArrayPrint: element", i, " out of ", size(runSeq)
       if (logflagL) then
-        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
         write (*,"(A)") trim(msgString)
       endif
-      call NUOPC_RunSequenceSinglePrint(runSeq(i), logflag)
+      call NUOPC_RunSequenceSinglePrint(runSeq(i), logflag, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     enddo
     
   end subroutine
@@ -663,6 +675,7 @@ module NUOPC_RunSequenceDef
 ! !DESCRIPTION:
 !EOP
   !-----------------------------------------------------------------------------
+    integer           :: localrc
     type(ESMF_Clock)  :: clock
     logical           :: clockIsStopTime
     integer           :: i
@@ -715,12 +728,12 @@ module NUOPC_RunSequenceDef
       print *, "found ENDDO element"
 #endif
       ! advance the clock and check for stop time
-      call ESMF_ClockAdvance(clock, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      call ESMF_ClockAdvance(clock, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      clockIsStopTime = ESMF_ClockIsStopTime(clock, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME)) return  ! bail out
+      clockIsStopTime = ESMF_ClockIsStopTime(clock, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       NUOPC_RunSequenceCtrlResult = .not.clockIsStopTime ! return value
       if (clockIsStopTime) then
         if (.not.associated(runSeq(i)%stack)) then
@@ -759,20 +772,20 @@ module NUOPC_RunSequenceDef
         ! first level member checksets Clock, forcing to upper level currTime
         call NUOPC_CheckSetClock(setClock=clock, &
           checkClock=runElement%runSeq%clock, setStartTimeToCurrent=.true., &
-          forceCurrTime=.true., rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME)) return  ! bail out
+          forceCurrTime=.true., rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       else
         ! follow-on members checkset Clocks, forcing to previous member currTime
         call ESMF_ClockGet(runElement%runSeq%prevMemberClock, &
-          currTime=currTime, rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME)) return  ! bail out
+          currTime=currTime, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
         call NUOPC_CheckSetClock(setClock=clock, &
           checkClock=runElement%runSeq%clock, setStartTimeToCurrent=.true., &
-          currTime=currTime, forceCurrTime=.true., rc=rc)
-        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, file=FILENAME)) return  ! bail out
+          currTime=currTime, forceCurrTime=.true., rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       endif
       ! set the prevMemberClock in case more level members follow-on
       runElement%runSeq%prevMemberClock = runSeq(i)%clock
@@ -787,9 +800,9 @@ module NUOPC_RunSequenceDef
     
     ! recursive call...
     NUOPC_RunSequenceCtrlResult = NUOPC_RunSequenceCtrl(runSeq, runElement, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME)) return  ! bail out
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
   
   end function
   !-----------------------------------------------------------------------------

@@ -2,7 +2,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2014, University Corporation for Atmospheric Research,
+! Copyright 2002-2019, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 ! Laboratory, University of Michigan, National Centers for Environmental
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1848,12 +1848,13 @@
       !mtag_nex @\
       ! Get Attribute info by name from mobj Test @\
       call ESMF_AttributeGet(mname, name="NOTHERE", & @\
-        typekind=attrTK, itemCount=items, rc=rc) @\
+        typekind=attrTK, itemCount=items, isPresent=isPresent, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
       write(name, *) "Getting Attribute info by name with typekind and itemCount from mobj Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS) & @\
                      .and. (attrTK==ESMF_NOKIND) & @\
-                     .and. (items==0), & @\
+                     .and. (items==0) & @\
+                     .and. (isPresent.eqv..false.), & @\
                      name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\
@@ -1861,11 +1862,12 @@
       !mtag_nex @\
       ! Get Attribute info by name from mobj Test @\
       call ESMF_AttributeGet(mname, name="NOTHERE", & @\
-        typekind=attrTK, rc=rc) @\
+        typekind=attrTK, isPresent=isPresent, rc=rc) @\
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value" @\
       write(name, *) "Getting Attribute info by name with typekind from mobj Test" @\
       call ESMF_Test((rc==ESMF_SUCCESS) & @\
-                     .and. (attrTK==ESMF_NOKIND), & @\
+                     .and. (attrTK==ESMF_NOKIND) & @\
+                     .and. (isPresent.eqv..false.), & @\
                      name, failMsg, result, ESMF_SRCLINE) @\
       !---------------------------------------------------------------------- @\
  @\

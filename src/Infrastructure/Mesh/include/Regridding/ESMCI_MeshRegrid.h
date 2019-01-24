@@ -1,6 +1,6 @@
 // $Id$
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Copyright 2002-2019, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -57,6 +57,7 @@ enum {ESMC_REGRID_SCHEME_FULL3D = 0,
 #define ESMC_EXTRAPMETHOD_NONE 0
 #define ESMC_EXTRAPMETHOD_NEAREST_STOD 1
 #define ESMC_EXTRAPMETHOD_NEAREST_IDAVG 2
+#define ESMC_EXTRAPMETHOD_CREEP 3
 
 
 enum {ESMC_REGRID_METHOD_BILINEAR = 0, ESMC_REGRID_METHOD_PATCH,
@@ -74,6 +75,8 @@ enum {ESMC_REGRID_POLETYPE_NONE = 0, ESMC_REGRID_POLETYPE_ALL = 1, ESMC_REGRID_P
             int *extrapMethod,
             int *extrapNumSrcPnts,
             ESMC_R8 *extrapDistExponent,
+            int *extrapNumLevels,
+            int *extrapNumInputLevels, 
             int *unmappedaction,
             bool set_dst_status, WMat &dst_status);
 
@@ -96,6 +99,8 @@ int offline_regrid(Mesh &, Mesh &, Mesh &, int *, int *, int *, int *, char *, c
                     int *extrapMethod,
                     int *extrapNumSrcPnts,
                     ESMC_R8 *extrapDistExponent,
+                    int *extrapNumLevels,
+                    int *extrapNumInputLevels, 
                     int *unmappedaction,
                     bool set_dst_status, WMat &dst_status);
 

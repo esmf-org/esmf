@@ -1,7 +1,7 @@
 ! $Id$
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2018, University Corporation for Atmospheric Research, 
+! Copyright 2002-2019, University Corporation for Atmospheric Research, 
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
 ! Laboratory, University of Michigan, National Centers for Environmental 
 ! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
@@ -387,20 +387,21 @@ module NUOPC_Mediator
 !EOP
   !-----------------------------------------------------------------------------
     ! local variables
+    integer                         :: localrc
     character(ESMF_MAXSTR)          :: name
 
     if (present(rc)) rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(mediator, name=name, rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call NUOPC_CompGet(mediator, name=name, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
     
     ! query ModeBase
     call NUOPC_ModelBaseGet(mediator, driverClock=driverClock, &
       clock=mediatorClock, importState=importState, exportState=exportState, &
-      rc=rc)
-    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     

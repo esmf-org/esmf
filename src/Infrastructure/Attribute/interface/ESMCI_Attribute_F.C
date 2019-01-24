@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Copyright 2002-2019, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -1850,7 +1850,7 @@ extern "C" {
   // loop through valueList allocating space and copying values to cvalue
   j = 0;
   for (int i=0; i<(*count); i++) {
-    if (!(valueList[j])) {
+    if (j > vlen) {
       ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_BAD,
                          "bad attribute value", ESMC_CONTEXT, &status);
       if (rc) *rc = status;

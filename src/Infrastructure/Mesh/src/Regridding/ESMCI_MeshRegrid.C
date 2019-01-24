@@ -1,7 +1,7 @@
 // $Id$
 //
 // Earth System Modeling Framework
-// Copyright 2002-2018, University Corporation for Atmospheric Research,
+// Copyright 2002-2019, University Corporation for Atmospheric Research,
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics
 // Laboratory, University of Michigan, National Centers for Environmental
 // Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
@@ -13,6 +13,7 @@
 #include <Mesh/include/Regridding/ESMCI_MeshRegrid.h>
 #include <Mesh/include/Legacy/ESMCI_MeshRead.h>
 #include <Mesh/include/Regridding/ESMCI_Interp.h>
+#include <Mesh/include/Regridding/ESMCI_CreepFill.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -123,6 +124,8 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
                     int *extrapMethod,
                     int *extrapNumSrcPnts,
                     ESMC_R8 *extrapDistExponent,
+                    int *extrapNumLevels,
+                    int *extrapNumInputLevels, 
                     int *unmappedaction,
                     bool set_dst_status, WMat &dst_status) {
 
@@ -153,6 +156,8 @@ int form_neg_wts_field(IWeights &wts, Mesh &srcmesh, MEField<> *src_neg_wts,
                   extrapMethod,
                   extrapNumSrcPnts,
                   extrapDistExponent,
+                  extrapNumLevels,
+                  extrapNumInputLevels, 
                   unmappedaction,
                   set_dst_status, dst_status)) {
         Throw() << "Regridding error" << std::endl;
@@ -266,11 +271,15 @@ int offline_regrid(Mesh &srcmesh, Mesh &dstmesh, Mesh &dstmeshcpy,
       int map_type=0;
       int tmpExtrapMethod=0;
       ESMC_R8 tmpDistExponent=2.0;
+      int tmpExtrapNumLevels=0;
+      int tmpExtrapNumInputLevels=0;
       if (!regrid(&srcmesh, NULL, &dstmesh, NULL, NULL, wts, regridMethod, &regridScheme,
                   regridPoleType, regridPoleNPnts, &map_type,
                   &tmpExtrapMethod,
                   &tmpExtrapNumSrcPnts,
                   &tmpDistExponent,
+                  &tmpExtrapNumLevels,
+                  &tmpExtrapNumInputLevels, 
                   &unmappedaction,
                   tmp_set_dst_status, tmp_dst_status))
 
@@ -483,6 +492,23 @@ static void _create_pointlist_of_mesh_elems_not_in_wmat(Mesh *mesh, WMat &wts, P
 }
 #endif
 
+
+// Get list of dst ids in wts (i.e. mapped points)
+ static void _get_dst_gids_in_wmat(WMat &wts, std::vector<int> &dst_gids) {
+
+   // Get weight iterators
+   WMat::WeightMap::iterator wi =wts.begin_row(),we = wts.end_row();
+   for (; wi != we; ++wi) {
+    
+     // get dst id
+     int dst_gid=wi->first.id;
+
+     // Stick it into the list
+     dst_gids.push_back(dst_gid);
+   }
+ }
+
+
 // Get the list of ids in the mesh, but not in the wts
 // (i.e. if mesh is the dest. mesh, the unmapped points)
 static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &wts, PointList **_missing_points) {
@@ -558,6 +584,151 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
    }
  }
 
+
+ // Migrate regrid weights so the correct ones are available for merging in the 
+ // creep weights
+ static void _migrate_wts_for_creep_merge(WMat &creep_wts, WMat &regrid_wts) {
+
+   // Get current ids on this pet for src of migration
+   std::vector<UInt> src_mig_gids;
+   regrid_wts.GetRowGIDS(src_mig_gids);
+
+   // Get current ids again to start dst of migrate
+   std::vector<UInt> dst_mig_gids;
+   regrid_wts.GetRowGIDS(dst_mig_gids);
+
+   // Now add any needed for creep
+   std::set<UInt> creep_gids; // use a set for efficieny
+   WMat::WeightMap::iterator wi = creep_wts.weights.begin(), we = creep_wts.weights.end();
+   for (; wi != we; ++wi) {
+     std::vector<WMat::Entry> &col = wi->second;
+     for (UInt i = 0; i < col.size(); i++) {
+       creep_gids.insert(col[i].id);
+     }
+  }
+
+   // merge into dst mig gids
+   std::copy(creep_gids.begin(), creep_gids.end(), std::back_inserter(dst_mig_gids));
+
+   // Now migrate
+   Migrator mig(dst_mig_gids.size(), dst_mig_gids.size() > 0 ? &dst_mig_gids[0] : NULL, 0,
+                src_mig_gids.size(), src_mig_gids.size() > 0 ? &src_mig_gids[0] : NULL);
+   mig.Migrate(regrid_wts);
+ }
+
+ // Prune out any extra weights in the regrid weights
+ static void _prune_wts_after_creep_merge(Mesh &mesh, WMat &regrid_wts) {
+
+   // Loop through weights, pruning out ones that aren't in mesh
+   WMat::WeightMap::iterator wi = regrid_wts.weights.begin(), we = regrid_wts.weights.end();
+   while(wi != we) {
+
+     // Get row and column info
+     const WMat::Entry &row = wi->first;
+
+     // Get gid
+     UInt gid=row.id;
+
+     // Save temporary iterator in case we need to erase
+     WMat::WeightMap::iterator tmp_wi = wi;
+
+     // Advance to next position before wi is invalidated by erase
+     ++wi;
+
+     // If gid isn't in mesh, then erase it
+     Mesh::MeshObjIDMap::iterator mi =  mesh.map_find(MeshObj::NODE, gid);
+     if (mi == mesh.map_end(MeshObj::NODE)) {
+       regrid_wts.weights.erase(tmp_wi);
+     }
+   }
+ }
+
+ static void _dst_merge_creep_wts_into_regrid_wts(Mesh &mesh, WMat &creep_wts, 
+                                                  WMat &regrid_wts) {
+
+   // If parallel, migrate regrid_wts to make sure the correct entries are on this
+   // processor to allow the merge
+   if (Par::Size() > 1) {
+     _migrate_wts_for_creep_merge(creep_wts, regrid_wts);
+   }
+
+   // New column vector to be filled with merged weights
+   std::vector<IWeights::Entry> new_cols;
+
+   // Loop through creep weights
+   WMat::WeightMap::iterator cwi = creep_wts.begin_row(), cwe = creep_wts.end_row();
+   for (; cwi != cwe; ++cwi) {
+     const WMat::Entry &cw_row = cwi->first;
+     std::vector<WMat::Entry> &cw_cols = cwi->second;
+
+     // Clear new_cols before we start filling it 
+     new_cols.clear();
+
+     // Loop through incoming col vector processing ids
+     for (int i=0; i<cw_cols.size(); i++) {
+       const WMat::Entry &cwc = cw_cols[i];
+
+       // Get id
+       int id=cwc.id;
+
+       // Get weight
+       double wgt=cwc.value;
+
+       // Lower bound row
+       WMat::Entry lower(id);
+       WMat::WeightMap::const_iterator ri = regrid_wts.weights.lower_bound(lower);
+
+       // Upper Bound row
+       WMat::Entry upper(id+1);
+       WMat::WeightMap::const_iterator re = regrid_wts.weights.lower_bound(upper);
+
+       // If there are no rows which match complain
+       if (ri == regrid_wts.weights.end()) {
+         Throw() << "destination id not found in weight matrix.";
+       }
+
+       // Loop over rows which match
+       // see if any have the same dst id
+       bool found_id=false;
+       for (; ri != re; ++ri) {
+         const WMat::Entry &tmp_row = ri->first;
+         
+         // Complain if they have the same dst id
+         if (tmp_row.id == id) {
+           found_id=true;
+           break;
+         }
+       }
+
+       // If there are no rows which match complain
+       if (!found_id) {
+         Throw() << "destination id not found in weight matrix.";
+       }
+       
+       // Get columns of weights corresponding to tmp_row
+       const std::vector<WMat::Entry> &tmp_cols = ri->second;
+       for (int j=0; j<tmp_cols.size(); j++) {
+         const WMat::Entry &tc = tmp_cols[j];
+
+         // Set col entry info 
+         WMat::Entry new_col_entry(tc.id, 0, wgt*tc.value, 0);
+
+         // Push into new cols
+         new_cols.push_back(new_col_entry);
+       }
+     }
+
+     // Add to weight matrix
+     regrid_wts.InsertRow(cw_row, new_cols);
+   }
+
+   // If parallel, now prune the weights again to make sure just 
+   // the correct weights for the mesh are present
+   if (Par::Size() > 1) {
+     _prune_wts_after_creep_merge(mesh,regrid_wts);
+   }
+ }
+
  // Do extrapolation. The wts structure which comes out will have the new weights for the extrapolation merged in
  // TODO: move to another file
  void extrap(Mesh *srcmesh, PointList *srcpointlist, Mesh *dstmesh, PointList *dstpointlist,
@@ -567,10 +738,34 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
              int extrapMethod,
              int extrapNumSrcPnts,
              ESMC_R8 extrapDistExponent,
+             int extrapNumLevels,
+             int extrapNumInputLevels, 
              bool set_dst_status, WMat &dst_status) {
 
 
-   //  printf("BOB: in extrap() extrapMethod=%d\n",extrapMethod);
+   //   printf("BOB: in extrap() extrapMethod=%d\n",extrapMethod);
+
+   if (extrapMethod == ESMC_EXTRAPMETHOD_CREEP) {
+
+     // Set info for calling into interp
+     IWeights extrap_wts;
+     WMat extrap_dst_status;
+     std::vector<int> valid_gids;
+
+     // Get list of valid gids
+     _get_dst_gids_in_wmat(wts, valid_gids);
+
+     // Get creep fill weights
+     CreepFill(*dstmesh, valid_gids, extrapNumLevels, extrapNumInputLevels,
+               extrap_wts, set_dst_status, extrap_dst_status);
+
+     // Merge weights into regrid weights
+     // NOTE: this is for creeping in the destination, if we 
+     // do it in the source, then we will have to do something different here
+     _dst_merge_creep_wts_into_regrid_wts(*dstmesh, extrap_wts, wts);
+
+     return;
+   }
 
    // Construct pointlist for srcmesh
    // We need a pointlist to be able to use nearest neighbor
@@ -653,6 +848,8 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
             int *extrapMethod,
             int *extrapNumSrcPnts,
             ESMC_R8 *extrapDistExponent,
+            int *extrapNumLevels,
+            int *extrapNumInputLevels, 
             int *unmappedaction,
             bool set_dst_status, WMat &dst_status) {
 
@@ -799,8 +996,13 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
     // destroyed before we do other things like the extrapolation below
     {
 
+      // Only pass the dstMesh into rendezvous grid creation, if the dstpointlist doesn't exist.
+      // (sometimes we have both for extrapolation)
+      Mesh *tmp_dstmesh=NULL;
+      if (dstpointlist == NULL) tmp_dstmesh=dstmesh;
+
       // Build the rendezvous grids
-      Interp interp(srcmesh, srcpointlist, dstmesh, dstpointlist,
+      Interp interp(srcmesh, srcpointlist, tmp_dstmesh, dstpointlist,
                     midmesh, false, *regridMethod,
                     set_dst_status, dst_status,
                     mtype, *unmappedaction);
@@ -830,6 +1032,7 @@ static void _create_pointlist_of_points_not_in_wmat(PointList *pointlist, WMat &
        extrap(srcmesh, srcpointlist, dstmesh, dstpointlist,
               wts, mtype, pole_constraint_id,
               *extrapMethod, *extrapNumSrcPnts, *extrapDistExponent,
+              *extrapNumLevels, *extrapNumInputLevels,
               set_dst_status, dst_status);
      }
 
