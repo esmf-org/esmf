@@ -381,6 +381,7 @@ class TestRegrid(TestBase):
                 if dstfield.grid.mask[StaggerLoc.CENTER][i, j] == 0:
                     assert(dstfield[i, j] == 0)
 
+    @attr('parallel')
     def test_field_regrid_zeroregion_select_ndbounds(self):
         # Test zero region select during a sparse matrix multiplication having undistributed dimensions.
 
