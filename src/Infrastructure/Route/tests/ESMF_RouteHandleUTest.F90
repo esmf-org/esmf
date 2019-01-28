@@ -195,6 +195,8 @@ program ESMF_RouteHandleUTest
   call ESMF_Test((rc == ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  call ESMF_LogFlush(rc=rc)
+
   !------------------------------------------------------------------------
 10 continue
   call ESMF_TestEnd(ESMF_SRCLINE) ! calls ESMF_Finalize() internally
