@@ -50,7 +50,7 @@
 
 /* Define to enable C++11 support*/
 #if ESMF_CXXSTD >= 11
-#define HAVE_SACADO_CXX11
+#  define HAVE_SACADO_CXX11
 #endif
 
 /* Define to enable hierarchical parallelism support */

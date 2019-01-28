@@ -1618,7 +1618,7 @@ endif
 endif
 
 ifneq ($(ESMF_CXXSTD),default)
-ESMF_CXXCOMPILEOPTS  += -std=c++$(ESMF_CXXSTD)
+ESMF_CXXCOMPILEOPTS  += -std=c++$(ESMF_CXXSTD) -DESMF_CXXSTD=$(ESMF_CXXSTD)
 endif
 
 #-------------------------------------------------------------------------------
