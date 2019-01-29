@@ -3367,6 +3367,20 @@ module NUOPC_Base
     character(ESMF_MAXSTR)  :: tempString
     
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! Obtain the advertised Field
+    call ESMF_FieldGet(field, name=name, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call ESMF_StateGet(state, itemName=name, field=advertisedField, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      
+    ! Test for aliasing
+    if (field==advertisedField) then
+      ! aliased field means nothing to do here -> early successful exit
+      return
+    endif
 
     ! Set up a customized list of Attributes to be copied
     attrList(1) = "Connected"
@@ -3382,15 +3396,6 @@ module NUOPC_Base
     attrList(11) = "SharePolicyGeomObject"
     attrList(12) = "ShareStatusGeomObject"
     
-    ! Obtain the advertised Field
-    
-    call ESMF_FieldGet(field, name=name, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      
-    call ESMF_StateGet(state, itemName=name, field=advertisedField, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
     ! Obtain basic attributes from the advertised Field
       

@@ -681,6 +681,7 @@ module NUOPC_RunSequenceDef
     integer           :: i
     type(ESMF_Time)   :: currTime
     
+    if (present(rc)) rc = ESMF_SUCCESS
     NUOPC_RunSequenceCtrlResult = .false. ! initialize to safe return value
 
     ! sanity checks
