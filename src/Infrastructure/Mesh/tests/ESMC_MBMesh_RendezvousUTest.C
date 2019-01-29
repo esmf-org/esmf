@@ -47,8 +47,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-using namespace std;
-
 #if defined ESMF_MOAB
 
 int mesh_print(MBMesh *mesh) {
@@ -147,7 +145,7 @@ int main(int argc, char *argv[]) {
   if (rc != ESMF_SUCCESS) return 0;
 
   // common vector for pointlist verification
-  vector<double*> cv;
+  std::vector<double*> cv;
 
 #if defined ESMF_MOAB
 

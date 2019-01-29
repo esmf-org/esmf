@@ -34,7 +34,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-using namespace std;
 using ESMCI::MeshCXX;
 
 MeshCXX* create_nmesh_quad(int &rc) {
