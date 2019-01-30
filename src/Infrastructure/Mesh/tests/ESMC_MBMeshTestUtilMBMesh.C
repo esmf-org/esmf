@@ -45,22 +45,20 @@
 
 static double UNINITVAL = -42;
 
-using namespace std;
-
 
 // test base class ideas
 // - almost equal function
 // - vector comparison with IWeights
 // - 
 
-bool weights_correct(IWeights &wts, vector<double> weights) {
+bool weights_correct(IWeights &wts, std::vector<double> weights) {
   bool correct = true;
   if (weights[0] != UNINITVAL) {
     int ind = 0;
     WMat::WeightMap::iterator mb = wts.begin_row(), me = wts.end_row();
     for(; mb != me; ++mb) {
-      vector<WMat::Entry> row = mb->second;
-      vector<WMat::Entry>::iterator vb = row.begin(), ve = row.end();
+      std::vector<WMat::Entry> row = mb->second;
+      std::vector<WMat::Entry>::iterator vb = row.begin(), ve = row.end();
       for(; vb != ve; ++vb) {
         WMat::Entry rv = *vb;
         if (rv.value /= weights[ind]) correct = false;
@@ -74,7 +72,7 @@ bool weights_correct(IWeights &wts, vector<double> weights) {
 }
 
 #if defined ESMF_MOAB
-bool weight_gen(MBMesh *mesh, PointList *pl, vector<double> weights, bool cart=true) {
+bool weight_gen(MBMesh *mesh, PointList *pl, std::vector<double> weights, bool cart=true) {
   bool correct = false;
 
   // early exit for ESMF_MOAB=OFF
@@ -97,25 +95,25 @@ bool weight_gen(MBMesh *mesh, PointList *pl, vector<double> weights, bool cart=t
   // output weight matrix for debugging purposes
 #define BILINEAR_WEIGHTS
 #ifdef BILINEAR_WEIGHTS
-  cout << endl << "Bilinear Weight Matrix" << endl;
+  std::cout << std::endl << "Bilinear Weight Matrix" << std::endl;
   // print out weights
   WMat::WeightMap::iterator mb = wts.begin_row(), me = wts.end_row();
   for(; mb != me; ++mb) {
     WMat::Entry col = mb->first;
-    vector<WMat::Entry> row = mb->second;
+    std::vector<WMat::Entry> row = mb->second;
 
-    cout << "[" << col.id << "," << col.idx << "," << col.value << ","
+    std::cout << "[" << col.id << "," << col.idx << "," << col.value << ","
          << col.src_id << "] - ";
 
-    vector<WMat::Entry>::iterator vb = row.begin(), ve = row.end();
+    std::vector<WMat::Entry>::iterator vb = row.begin(), ve = row.end();
     for(; vb != ve; ++vb) {
       WMat::Entry rv = *vb;
-      cout << "[" << rv.id << "," << rv.idx << "," << rv.value << ","
+      std::cout << "[" << rv.id << "," << rv.idx << "," << rv.value << ","
            << rv.src_id << "] ";
     }
-    cout << endl;
+    std::cout << std::endl;
   }
-  cout << endl;
+  std::cout << std::endl;
 #endif
 
   return correct;
