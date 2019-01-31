@@ -64,7 +64,7 @@ character(*), parameter :: version = '$Id$'
 
   grid = ESMF_GridEmptyCreate(rc=rc)
 
-  AttPackTestMacro(grid, "a Grid", EX_UTest, "unnamed  0")
+  AttPackTestMacro(grid, "a Grid", EX_UTest, "unnamed000")
   AttPackStandardTestMacro(grid, "a Grid", "CIM 1.5.1", "grids    ", EX_UTest)
   AttPackStandardTestMacro(grid, "a Grid", "ESMF   ", "General", EX_UTest)
 
