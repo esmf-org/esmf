@@ -1104,7 +1104,7 @@ static const char *const version = "$Id$";
 
   refCount = 1;
   strcpy(className, "global");
-  sprintf(baseName, "%s%3d", "unnamed", ID);
+  sprintf(baseName, "%s%03d", "unnamed", ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
   
 #if 0
@@ -1169,7 +1169,7 @@ static const char *const version = "$Id$";
 
   refCount = 1;
   strcpy(className, "global");
-  sprintf(baseName, "%s%3d", "unnamed", ID);
+  sprintf(baseName, "%s%03d", "unnamed", ID);
   ESMC_CtoF90string(baseName, baseNameF90, ESMF_MAXSTR);
   
 #if 0

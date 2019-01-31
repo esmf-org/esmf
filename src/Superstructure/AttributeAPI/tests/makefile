@@ -257,13 +257,13 @@ RUN_ESMF_AttPackGridCompUTestUNI:
 # --- AttPackGrid
 
 RUN_ESMF_AttPackGridUTest:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed\ \ 0grid.xml $(ESMF_TESTDIR)/baseline_unnamed\ \ 0.xml
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed\ \ 0grid.stdout $(ESMF_TESTDIR)/baseline_unnamed\ \ 0.stdout
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed000grid.xml $(ESMF_TESTDIR)/baseline_unnamed000.xml
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed000grid.stdout $(ESMF_TESTDIR)/baseline_unnamed000.stdout
 	$(MAKE) TNAME=AttPackGrid NP=4 ftest
 
 RUN_ESMF_AttPackGridUTestUNI:
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed\ \ 0grid.xml $(ESMF_TESTDIR)/baseline_unnamed\ \ 0.xml
-	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed\ \ 0grid.stdout $(ESMF_TESTDIR)/baseline_unnamed\ \ 0.stdout
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed000grid.xml $(ESMF_TESTDIR)/baseline_unnamed000.xml
+	cp -f $(ESMF_DIR)/src/Superstructure/AttributeAPI/tests/data/baseline_unnamed000grid.stdout $(ESMF_TESTDIR)/baseline_unnamed000.stdout
 	$(MAKE) TNAME=AttPackGrid NP=1 ftest
 
 # --- AttPackLocStream
