@@ -218,6 +218,10 @@ The valid values are:
       to multiple destination points, but no destination point will receive input from more than
       one source point. This extrapolation method not supported with conservative regrid methods
       (e.g. {\tt ESMF\_REGRIDMETHOD\_CONSERVE}).
+\item [ESMF\_EXTRAPMETHOD\_CREEP]
+      Creep fill.
+      Here unmapped destination points are filled by moving data from mapped locations to neighboring unmapped locations. The data filled into a new location is the average of its already filled neighbors' values. This processes is repeated for a user specified number of levels (e.g. in ESMF\_FieldRegridStore() this is specified via the {\tt extrapNumLevels} argument).
+
 \end{description}
 
 \subsection{ESMF\_FIELDSTATUS}
