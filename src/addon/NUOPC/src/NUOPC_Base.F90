@@ -1004,12 +1004,15 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_GetAttribute - Get the typekind of a NUOPC Field Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_GetAttribute()
-  subroutine NUOPC_GetAttributeFieldTK(field, name, typekind, isPresent, rc)
+  subroutine NUOPC_GetAttributeFieldTK(field, name, isPresent, isSet, &
+    itemCount, typekind, rc)
 ! !ARGUMENTS:
     type(ESMF_Field),         intent(in)            :: field
     character(*),             intent(in)            :: name
-    type(ESMF_TypeKind_Flag), intent(out)           :: typekind
     logical,                  intent(out), optional :: isPresent
+    logical,                  intent(out), optional :: isSet
+    integer,                  intent(out), optional :: itemCount
+    type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
     integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Query the {\tt typekind} of the attribute {\tt name} inside of {\tt field}
@@ -1024,11 +1027,16 @@ module NUOPC_Base
 !     The {\tt ESMF\_Field} object to be queried.
 !   \item[name]
 !     The name of the queried attribute.
-!   \item[typekind]
-!     The typekind of the queried attribute.
 !   \item[{[isPresent]}]
 !     Set to {\tt .true.} if the queried attribute is present, {\tt .false.}
 !     otherwise.
+!   \item[{[isSet]}]
+!     Set to {\tt .true.} if the queried attribute is set, {\tt .false.}
+!     otherwise.
+!   \item[{[itemCount]}]
+!     Number of items in the attribute. Return 0 if not present or not set.
+!   \item[{[typekind]}]
+!     The typekind of the queried attribute.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1037,23 +1045,48 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     integer                 :: localrc
-
+    logical                 :: isPresentOpt
+    type(ESMF_TYPEKIND_FLAG):: tk
+    
     if (present(rc)) rc = ESMF_SUCCESS
 
-    if (present(isPresent)) then
-      isPresent = .true.
-      call ESMF_AttributeGet(field, name=name, &
-        convention="NUOPC", purpose="Instance", &
-        attnestflag=ESMF_ATTNEST_ON, isPresent=isPresent, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    call ESMF_AttributeGet(field, name=name, &
+      isPresent=isPresentOpt, typekind=tk, &
+      convention="NUOPC", purpose="Instance", &
+      attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+    if (present(itemCount)) itemCount=0
+    if (present(typekind)) typekind=tk
+    if (present(isPresent)) isPresent = isPresentOpt
+    if (present(isSet)) then
+      isSet = .false.
+      if (tk/=ESMF_NOKIND) isSet = .true.
+    endif
+    if (.not.isPresentOpt) then
+      ! must bail out
+      if (present(isPresent).or.present(isSet) &
+        .or.present(itemCount)) return  ! bail out successfully
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
         line=__LINE__, &
         file=FILENAME, &
-        rcToReturn=rc)) &
-        return  ! bail out
-      if (.not.isPresent) return
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    if (tk==ESMF_NOKIND) then
+      ! must bail out
+      if (present(isSet).or.present(itemCount)) return  ! bail out successfully
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
     endif
 
-    call ESMF_AttributeGet(field, name=name, typekind=typekind, &
+    call ESMF_AttributeGet(field, name=name, itemCount=itemCount, &
       convention="NUOPC", purpose="Instance", &
       attnestflag=ESMF_ATTNEST_ON, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1070,14 +1103,17 @@ module NUOPC_Base
 ! !IROUTINE: NUOPC_GetAttribute - Get the value of a NUOPC State Attribute
 ! !INTERFACE:
   ! Private name; call using NUOPC_GetAttribute()
-  subroutine NUOPC_GetAttributeState(state, name, value, isPresent, isSet, rc)
+  subroutine NUOPC_GetAttributeState(state, name, value, isPresent, isSet, &
+    itemCount, typekind, rc)
 ! !ARGUMENTS:
-    type(ESMF_State), intent(in)            :: state
-    character(*),     intent(in)            :: name
-    character(*),     intent(out)           :: value
-    logical,          intent(out), optional :: isPresent
-    logical,          intent(out), optional :: isSet
-    integer,          intent(out), optional :: rc
+    type(ESMF_State),         intent(in)            :: state
+    character(*),             intent(in)            :: name
+    character(*),             intent(out), optional :: value
+    logical,                  intent(out), optional :: isPresent
+    logical,                  intent(out), optional :: isSet
+    integer,                  intent(out), optional :: itemCount
+    type(ESMF_TypeKind_Flag), intent(out), optional :: typekind
+    integer,                  intent(out), optional :: rc
 ! !DESCRIPTION:
 !   Access the attribute {\tt name} inside of {\tt state} using the
 !   convention {\tt NUOPC} and purpose {\tt Instance}. Returns with error if
@@ -1089,7 +1125,7 @@ module NUOPC_Base
 !     The {\tt ESMF\_State} object to be queried.
 !   \item[name]
 !     The name of the queried attribute.
-!   \item[value]
+!   \item[{[value]}]
 !     The value of the queried attribute.
 !   \item[{[isPresent]}]
 !     Set to {\tt .true.} if the queried attribute is present, {\tt .false.}
@@ -1097,6 +1133,10 @@ module NUOPC_Base
 !   \item[{[isSet]}]
 !     Set to {\tt .true.} if the queried attribute is set, {\tt .false.}
 !     otherwise.
+!   \item[{[itemCount]}]
+!     Number of items in the attribute. Return 0 if not present or not set.
+!   \item[{[typekind]}]
+!     The typekind of the queried attribute.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1105,46 +1145,56 @@ module NUOPC_Base
   !-----------------------------------------------------------------------------
     ! local variables
     integer                 :: localrc
-    character(ESMF_MAXSTR)  :: defaultvalue
+    logical                 :: isPresentOpt
+    type(ESMF_TYPEKIND_FLAG):: tk
     
     if (present(rc)) rc = ESMF_SUCCESS
 
-    defaultvalue = "CheckThisDefaultValue"
-
-    call ESMF_AttributeGet(state, name=name, value=value, &
-      defaultvalue=defaultvalue, convention="NUOPC", purpose="Instance", &
+    call ESMF_AttributeGet(state, name=name, &
+      isPresent=isPresentOpt, typekind=tk, &
+      convention="NUOPC", purpose="Instance", &
       attnestflag=ESMF_ATTNEST_ON, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-    if (present(isPresent)) isPresent = .true.
-    if (present(isSet)) isSet = .true.
-    if (trim(value) == trim(defaultvalue)) then
-      ! attribute not present
-      if (present(isPresent)) then
-        isPresent = .false.
-      else
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)
-        return  ! bail out
-      endif
-    else if (len_trim(value) == 0) then
-      ! attribute present but not set
-      if (present(isSet)) then
-        isSet = .false.
-      else
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)
-        return  ! bail out
-      endif
+    if (present(itemCount)) itemCount=0
+    if (present(typekind)) typekind=tk
+    if (present(isPresent)) isPresent = isPresentOpt
+    if (present(isSet)) then
+      isSet = .false.
+      if (tk/=ESMF_NOKIND) isSet = .true.
     endif
-    
+    if (.not.isPresentOpt) then
+      ! must bail out
+      if (present(isPresent).or.present(isSet) &
+        .or.present(itemCount)) return  ! bail out successfully
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not present",&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+    if (tk==ESMF_NOKIND) then
+      ! must bail out
+      if (present(isSet).or.present(itemCount)) return  ! bail out successfully
+      call ESMF_LogSetError(ESMF_RC_ARG_BAD, msg="Attribute not set",&
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)
+      return  ! bail out
+    endif
+
+    call ESMF_AttributeGet(state, name=name, value=value, &
+      convention="NUOPC", purpose="Instance", &
+      attnestflag=ESMF_ATTNEST_ON, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, &
+      file=FILENAME, &
+      rcToReturn=rc)) &
+      return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -3317,6 +3367,20 @@ module NUOPC_Base
     character(ESMF_MAXSTR)  :: tempString
     
     if (present(rc)) rc = ESMF_SUCCESS
+    
+    ! Obtain the advertised Field
+    call ESMF_FieldGet(field, name=name, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+    call ESMF_StateGet(state, itemName=name, field=advertisedField, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      
+    ! Test for aliasing
+    if (field==advertisedField) then
+      ! aliased field means nothing to do here -> early successful exit
+      return
+    endif
 
     ! Set up a customized list of Attributes to be copied
     attrList(1) = "Connected"
@@ -3332,15 +3396,6 @@ module NUOPC_Base
     attrList(11) = "SharePolicyGeomObject"
     attrList(12) = "ShareStatusGeomObject"
     
-    ! Obtain the advertised Field
-    
-    call ESMF_FieldGet(field, name=name, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      
-    call ESMF_StateGet(state, itemName=name, field=advertisedField, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
       
     ! Obtain basic attributes from the advertised Field
       

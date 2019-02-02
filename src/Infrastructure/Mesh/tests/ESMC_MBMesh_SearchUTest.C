@@ -47,8 +47,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-using namespace std;
-
 #if defined ESMF_MOAB
 
 bool compare(const double *c1, double *c2) {
@@ -129,7 +127,7 @@ bool pcoords(MBMesh *mesh) {
 }
 
 
-bool search_gen(MBMesh *mesh, PointList *pl, vector<double*> &cv, bool cart=true) {
+bool search_gen(MBMesh *mesh, PointList *pl, std::vector<double*> &cv, bool cart=true) {
   int rc = ESMF_RC_NOT_IMPL;
   char name[80];
   char failMsg[80];
@@ -234,7 +232,7 @@ int main(int argc, char *argv[]) {
   if (rc != ESMF_SUCCESS) return 0;
 
   // common vector for pointlist verification
-  vector<double*> cv;
+  std::vector<double*> cv;
 
 #if defined ESMF_MOAB
   // build a mesh

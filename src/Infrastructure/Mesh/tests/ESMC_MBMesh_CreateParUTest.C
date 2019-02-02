@@ -47,9 +47,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-using namespace std;
-
-
 int main(int argc, char *argv[]) {
 
   char name[80];

@@ -463,14 +463,14 @@ void VMK::init(MPI_Comm mpiCommunicator){
     for (j=0; j<i; j++)
       if (temp_ssiid[j] == temp_ssiid[i]) break;
     if (j==i){
-      // new ssiid
+      // found new ssiid
       ssiid[i]=ssiCount;
       ++ssiCount;
       temp_ssiPetCount[ssiid[i]] = 1;
     }else{
       // found previous ssiid
       ssiid[i]=ssiid[j];
-      temp_ssiPetCount[ssiid[j]]++;
+      temp_ssiPetCount[ssiid[i]]++;
     }
   }
   delete [] temp_ssiid;
@@ -657,6 +657,7 @@ void VMK::construct(void *ssarg){
   cid = new int*[npets];
   ssiCount=0;
   int *temp_ssiPetCount = new int[npets];
+  int *temp_ssiid = new int[npets];
   for (int i=0; i<npets; i++){
     lpid[i]=sarg->lpid[i];
     pid[i]=sarg->pid[i];
@@ -671,12 +672,18 @@ void VMK::construct(void *ssarg){
     for (j=0; j<i; j++)
       if (ssiid[cid[j][0]] == ssiid[cid[i][0]]) break;
     if (j==i){
-      // new ssiid found
+      // found new ssiid
+      temp_ssiid[i]=ssiCount;
       ++ssiCount;
-      temp_ssiPetCount[ssiid[cid[i][0]]] = 1;
-    }else
-      temp_ssiPetCount[ssiid[cid[j][0]]]++;
+      temp_ssiPetCount[temp_ssiid[i]] = 1;
+    }else{
+      // found previous ssiid
+      temp_ssiid[i]=temp_ssiid[j];
+      temp_ssiPetCount[temp_ssiid[i]]++;
+    }
   }
+  int localSsi = temp_ssiid[mypet];
+  delete [] temp_ssiid;
   ssiMinPetCount=npets;
   ssiMaxPetCount=0;
   for (int i=0; i<ssiCount; i++){
@@ -685,7 +692,6 @@ void VMK::construct(void *ssarg){
     if (temp_ssiPetCount[i] > ssiMaxPetCount)
       ssiMaxPetCount = temp_ssiPetCount[i];
   }
-  int localSsi = ssiid[cid[mypet][0]];
   ssiLocalPetCount=temp_ssiPetCount[localSsi];
 #if 0
 {
@@ -699,7 +705,7 @@ void VMK::construct(void *ssarg){
   ssiLocalPetList = new int[ssiLocalPetCount];
   int j=0;
   for (int i=0; i<npets; i++){
-    if (ssiid[cid[i][0]]==localSsi){
+    if (ssiid[cid[i][0]]==ssiid[cid[mypet][0]]){
       ssiLocalPetList[j] = i;
       ++j;
     }

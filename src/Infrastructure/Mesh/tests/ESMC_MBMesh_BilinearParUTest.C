@@ -49,8 +49,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-using namespace std;
-
 int main(int argc, char *argv[]) {
 
   char name[80];
@@ -70,7 +68,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   bool cart = false;
 
-  vector<double> weights;
+  std::vector<double> weights;
   weights.resize(4);
 #endif
 

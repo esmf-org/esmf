@@ -47,8 +47,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-using namespace std;
-
 #if defined ESMF_MOAB
 
 bool is_inside (const MBMesh *mesh, const double *coords) {

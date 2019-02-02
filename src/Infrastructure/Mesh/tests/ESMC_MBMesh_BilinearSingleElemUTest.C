@@ -53,8 +53,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-using namespace std;
-
 #if defined ESMF_MOAB
 MBMesh* create_mesh_pent_single(int &rc, bool cart) {
   //
@@ -540,7 +538,7 @@ int main(int argc, char *argv[]) {
   //----------------------------------------------------------------------------
   bool cart;
 
-  vector<double> weights;
+  std::vector<double> weights;
   weights.resize(4);
 #endif
 

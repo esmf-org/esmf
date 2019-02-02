@@ -37,11 +37,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-using namespace std;
-
-
-
-PointList* create_pointlist(vector<double*> *cv, int &rc) {
+PointList* create_pointlist(std::vector<double*> *cv, int &rc) {
   //
   //
   //  2.0   7 ------- 8 -------- 9
@@ -155,7 +151,7 @@ PointList* create_pointlist(vector<double*> *cv, int &rc) {
   return pl;
 }
 
-PointList* create_pointlist_for_quad(vector<double*> *cv, int &rc) {
+PointList* create_pointlist_for_quad(std::vector<double*> *cv, int &rc) {
   //
   //
   //  1.5   3 ------- 4
@@ -468,7 +464,7 @@ PointList* create_pointlist_sph_for_quad_parallel(int &rc) {
   return pl;
 }
 
-PointList* create_pointlist_for_quad_sph(vector<double*> *cv, int &rc) {
+PointList* create_pointlist_for_quad_sph(std::vector<double*> *cv, int &rc) {
   //
   //
   // 3pi/20 3 ------- 4
@@ -533,7 +529,7 @@ PointList* create_pointlist_for_quad_sph(vector<double*> *cv, int &rc) {
   return pl;
 }
 
-PointList* create_pointlist_for_tri(vector<double*> *cv, int &rc) {
+PointList* create_pointlist_for_tri(std::vector<double*> *cv, int &rc) {
   //
   //
   //  1.5   5 ------- 6 ------- 7 ------- 8
@@ -574,7 +570,7 @@ PointList* create_pointlist_for_tri(vector<double*> *cv, int &rc) {
   int np = 8;
   int dim = 2;
 
-  vector<double> x;
+  std::vector<double> x;
   x.reserve(np);
   x.push_back(0.25);
   x.push_back(0.75);
@@ -585,7 +581,7 @@ PointList* create_pointlist_for_tri(vector<double*> *cv, int &rc) {
   x.push_back(1.25);
   x.push_back(1.75);
 
-  vector<double> y;
+  std::vector<double> y;
   y.reserve(np);
   y.push_back(0.5);
   y.push_back(0.5);
@@ -610,7 +606,7 @@ PointList* create_pointlist_for_tri(vector<double*> *cv, int &rc) {
   return pl;
 }
 
-PointList* create_pointlist_for_tri_sph(vector<double*> *cv, int &rc) {
+PointList* create_pointlist_for_tri_sph(std::vector<double*> *cv, int &rc) {
   //
   //
   // 3pi/20 5 ------- 6 ------- 7 ------- 8
@@ -653,7 +649,7 @@ PointList* create_pointlist_for_tri_sph(vector<double*> *cv, int &rc) {
   int np = 8;
   int dim = 3;
 
-  vector<double> x;
+  std::vector<double> x;
   x.reserve(np);
   x.push_back(pi/40);
   x.push_back(3*pi/40);
@@ -664,7 +660,7 @@ PointList* create_pointlist_for_tri_sph(vector<double*> *cv, int &rc) {
   x.push_back(5*pi/40);
   x.push_back(1.75);
 
-  vector<double> y;
+  std::vector<double> y;
   y.reserve(np);
   y.push_back(pi/20);
   y.push_back(pi/20);
@@ -675,7 +671,7 @@ PointList* create_pointlist_for_tri_sph(vector<double*> *cv, int &rc) {
   y.push_back(3*pi/20);
   y.push_back(3*pi/20);
 
-  vector<double> z;
+  std::vector<double> z;
   z.reserve(np);
   z.push_back(1);
   z.push_back(1);
@@ -701,7 +697,7 @@ PointList* create_pointlist_for_tri_sph(vector<double*> *cv, int &rc) {
   return pl;
 }
 
-PointList* create_pointlist_for_tet(vector<double*> *cv, int &rc) {
+PointList* create_pointlist_for_tet(std::vector<double*> *cv, int &rc) {
   //
   //
   //  1.5   3 ------- 4

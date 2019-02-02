@@ -1,11 +1,10 @@
 # $Id$ 
 
 ALL: tree_build_system_tests
-
 run: tree_run_system_tests
+run_uni:  tree_run_system_tests_uni
 
 LOCDIR	  = src/system_tests/ESMF_ArraySharedDeSSI
-
 
 SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_ArraySharedDeSSISTest
 

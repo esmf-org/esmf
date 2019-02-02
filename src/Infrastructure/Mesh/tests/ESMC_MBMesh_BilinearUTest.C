@@ -49,8 +49,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-using namespace std;
-
 int main(int argc, char *argv[]) {
 
   char name[80];
@@ -62,10 +60,10 @@ int main(int argc, char *argv[]) {
 
 #if defined ESMF_MOAB
   // common vector for pointlist verification
-  vector<double*> cv;
+  std::vector<double*> cv;
   bool cart = false;
 
-  vector<double> weights;
+  std::vector<double> weights;
   weights.resize(4);
 #endif
 

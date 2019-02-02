@@ -13,7 +13,6 @@
 #include <cstring>
 #include <cstdio>
 #include <vector>
-using namespace std;
 
 #if defined ESMF_MOAB
 
