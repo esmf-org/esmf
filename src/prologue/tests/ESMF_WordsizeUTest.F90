@@ -110,7 +110,7 @@
     !------------------------------------------------------------------------
     ! Compare F90 and C++ sizes; they must match.
     !NEX_UTest
-    write(failMsg,*) "Size mismatch for I1 variable"
+    write(failMsg,*) "Size mismatch for I1 variable: ", i1sizeC, " /=", i1sizeF
 #ifndef ESMF_NO_INTEGER_1_BYTE
     write(name, *) "Verifying F90 I1 matches C I1"
     call ESMF_Test((i1sizeC .eq. i1sizeF), name, failMsg, result, ESMF_SRCLINE) 
@@ -121,7 +121,7 @@
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(failMsg,*) "Size mismatch for I2 variable"
+    write(failMsg,*) "Size mismatch for I2 variable: ", i2sizeC, " /=", i2sizeF
 #ifndef ESMF_NO_INTEGER_1_BYTE
     write(name, *) "Verifying F90 I2 matches C I2"
     call ESMF_Test((i2sizeC .eq. i2sizeF), name, failMsg, result, ESMF_SRCLINE) 
@@ -132,25 +132,25 @@
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(failMsg,*) "Size mismatch for I4 variable"
+    write(failMsg,*) "Size mismatch for I4 variable: ", i4sizeC, " /=", i4sizeF
     write(name, *) "Verifying F90 I4 matches C I4"
     call ESMF_Test((i4sizeC .eq. i4sizeF), name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(failMsg,*) "Size mismatch for I8 variable"
+    write(failMsg,*) "Size mismatch for I8 variable: ", i8sizeC, " /=", i8sizeF
     write(name, *) "Verifying F90 I8 matches C I8"
     call ESMF_Test((i8sizeC .eq. i8sizeF), name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(failMsg,*) "Size mismatch for R4 variable"
+    write(failMsg,*) "Size mismatch for R4 variable: ", r4sizeC, " /=", r4sizeF
     write(name, *) "Verifying F90 R4 matches C R4"
     call ESMF_Test((r4sizeC .eq. r4sizeF), name, failMsg, result, ESMF_SRCLINE) 
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(failMsg,*) "Size mismatch for R8 variable"
+    write(failMsg,*) "Size mismatch for R8 variable: ", r8sizeC, " /=", r8sizeF
     write(name, *) "Verifying F90 R8 matches C R8"
     call ESMF_Test((r8sizeC .eq. r8sizeF), name, failMsg, result, ESMF_SRCLINE) 
 
