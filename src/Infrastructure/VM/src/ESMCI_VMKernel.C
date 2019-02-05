@@ -5304,7 +5304,8 @@ void VMK::wtimedelay(double delay){
 
 #undef DEBUGLOG
 
-int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh){
+int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh, 
+  bool contigFlag){
 #ifndef ESMF_NO_MPI3
 #ifndef ESMF_MPIUNI
   MPI_Comm_rank(mpi_c_ssi, &(memh->localPet));
@@ -5342,8 +5343,11 @@ int VMK::ssishmAllocate(vector<unsigned long>&bytes, memhandle *memh){
     if (i<count) size = bytes[i];
 #ifndef ESMF_MPIUNI
     MPI_Info info;
-    MPI_Info_create(&info); // allow system to allocate non-contiguous over SSI
-    MPI_Info_set(info, "alloc_shared_noncontig", "true");
+    MPI_Info_create(&info);
+    if (!contigFlag){
+      // allow system to allocate non-contiguous over SSI
+      MPI_Info_set(info, "alloc_shared_noncontig", "true");
+    }
     MPI_Win_allocate_shared(size, 1, info, mpi_c_ssi, &dummyPtr,
       &(memh->wins[i]));
     MPI_Info_free(&info);
