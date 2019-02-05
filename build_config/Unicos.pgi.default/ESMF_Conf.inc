@@ -61,7 +61,7 @@ to have them by letting us write conditional code.
 
 #if 0
 Older PGI compilers had a bug which prevents forward pointer references from
-working if also using the sequence keyword. Don't sequence some select derived
+working if also using the sequence keyword. Do not sequence some select derived
 types to avoid issues.
 #endif
 
