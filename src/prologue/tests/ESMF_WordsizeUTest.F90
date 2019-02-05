@@ -110,23 +110,25 @@
     !------------------------------------------------------------------------
     ! Compare F90 and C++ sizes; they must match.
     !NEX_UTest
-    write(failMsg,*) "Size mismatch for I1 variable: ", i1sizeC, " /=", i1sizeF
 #ifndef ESMF_NO_INTEGER_1_BYTE
+    write(failMsg,*) "Size mismatch for I1 variable: ", i1sizeC, " /=", i1sizeF
     write(name, *) "Verifying F90 I1 matches C I1"
     call ESMF_Test((i1sizeC .eq. i1sizeF), name, failMsg, result, ESMF_SRCLINE) 
 #else
+    write(failMsg,*) "Size mismatch for I1 variable"
     write(name, *) "Verifying F90 I1 matches C I1 - disabled"
     call ESMF_Test((0 .eq. 0), name, failMsg, result, ESMF_SRCLINE) 
 #endif
 
     !------------------------------------------------------------------------
     !NEX_UTest
-    write(failMsg,*) "Size mismatch for I2 variable: ", i2sizeC, " /=", i2sizeF
 #ifndef ESMF_NO_INTEGER_1_BYTE
+    write(failMsg,*) "Size mismatch for I2 variable: ", i2sizeC, " /=", i2sizeF
     write(name, *) "Verifying F90 I2 matches C I2"
     call ESMF_Test((i2sizeC .eq. i2sizeF), name, failMsg, result, ESMF_SRCLINE) 
 #else
-    write(name, *) "Verifying F90 I2 matches C I2"
+    write(failMsg,*) "Size mismatch for I2 variable"
+    write(name, *) "Verifying F90 I2 matches C I2 - disabled"
     call ESMF_Test((0 .eq. 0), name, failMsg, result, ESMF_SRCLINE) 
 #endif
 
