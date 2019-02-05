@@ -23,3 +23,9 @@ types to avoid issues.
 #endif
 
 #define ESMF_SEQUENCE_BUG 1
+
+#if 0
+Has F2003 C Interop, but not F2008 C_SIZEOF
+#endif
+#define C_SIZEOF SIZEOF
+
