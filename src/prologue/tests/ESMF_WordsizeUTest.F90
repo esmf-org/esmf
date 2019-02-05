@@ -102,7 +102,7 @@
     !NEX_UTest
     ! get numbers from C for next set of tests
     call c_ints(i1sizeC, i2sizeC, i4sizeC, i8sizeC, r4sizeC, r8sizeC, ptrsizeC, rc)
-    write(failMsg,*) "Failed getting int/float sizes"
+    write(failMsg,*) "Failed getting int/float/ptr sizes"
     write(name, *) "Getting C int/float word sizes"
     call ESMF_Test((rc .eq. ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE) 
 
@@ -122,7 +122,7 @@
 
     !------------------------------------------------------------------------
     !NEX_UTest
-#ifndef ESMF_NO_INTEGER_1_BYTE
+#ifndef ESMF_NO_INTEGER_2_BYTE
     write(failMsg,*) "Size mismatch for I2 variable: ", i2sizeC, " /=", i2sizeF
     write(name, *) "Verifying F90 I2 matches C I2"
     call ESMF_Test((i2sizeC .eq. i2sizeF), name, failMsg, result, ESMF_SRCLINE) 
