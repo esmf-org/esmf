@@ -4406,7 +4406,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
     character(len=*), intent(in)   :: filename
     integer(ESMF_KIND_I4), pointer :: elementConn (:)
     integer(ESMF_KIND_I4), pointer :: elmtNums (:)
-    integer(selected_int_kind(1)), allocatable :: elmtNums_i1(:)
+!    integer(selected_int_kind(1)), allocatable :: elmtNums_i1(:)
     integer,           intent(out) :: startElmt
     integer(ESMF_KIND_I4), pointer, optional :: elementMask (:)
     real(ESMF_KIND_R8), pointer, optional :: elementArea (:)
@@ -4510,6 +4510,7 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
       ESMF_SRCLINE, errmsg, &
       rc)) return
 
+#if 0
     ncStatus = nf90_inquire_variable (ncid, VarNo, xtype=VarType)
     errmsg = "Variable numElementConn type inquiry in "//trim(filename)
     if (CDFCheckError (ncStatus, &
@@ -4548,6 +4549,14 @@ subroutine ESMF_EsmfGetElement (filename, elementConn, &
           msg='unsupport numElementConn variable type', &
           ESMF_CONTEXT, rcToReturn=rc)) return
     end select
+#endif
+
+      ncStatus = nf90_get_var (ncid, VarNo, elmtNums, start=(/startElmt/), count=(/localcount/))
+      errmsg = "Reading numElementConn from int variable in " // trim (filename)
+      if (CDFCheckError (ncStatus, &
+          ESMF_METHOD,  &
+          ESMF_SRCLINE, errmsg, &
+          rc)) return
 
     ! calculate the RaggedArray size
     totalConn = 0
