@@ -11,7 +11,7 @@
 //==============================================================================
 #define ESMC_FILENAME "ESMCI_ArrayBundle.C"
 //==============================================================================
-#define AB_REDISTSTORE_LOG_off
+#define AB_REDISTSTORE_LOG_on
 //==============================================================================
 //
 // ArrayBundle class implementation (body) file
@@ -1491,7 +1491,7 @@ int ArrayBundle::sparseMatMul(
 
       // get a handle on the XXE stored in routehandle
       XXE *xxe = (XXE *)(*routehandle)->getStorage();
-      
+      XXE::SubRecursiveSearch look;  // prepare for search
       if (srcArraybundle != NULL || dstArraybundle != NULL){
         int k=0;  // init
         for (int i=0; i<count; i++){
@@ -1512,7 +1512,7 @@ int ArrayBundle::sparseMatMul(
             }
           }
           // see if xxe sub element indicates okay for super-vectorization
-          bool superVectorOkay = xxe->getNextSubSuperVectorOkay(&k);
+          bool superVectorOkay = xxe->getNextSubSuperVectorOkay(look);
           int vectorL = 0;  // initialize
           // src-side super vectorization
           int srcLocalDeCount = 0;
