@@ -61,7 +61,7 @@ to have them by letting us write conditional code.
 
 #if 0
 Older PGI compilers had a bug which prevents forward pointer references from
-working if also using the sequence keyword. Don't sequence some select derived
+working if also using the sequence keyword. Do not sequence some select derived
 types to avoid issues.
 #endif
 
@@ -79,6 +79,15 @@ PGI fixed this in 10.1.
 #endif
 #if (ESMF_PGIVERSION_MAJOR < 10) || ((ESMF_PGIVERSION_MAJOR == 10) && (ESMF_PGIVERSION_MINOR == 0))
 #define ESMF_PGI_C_BOOL_BUG
+#endif
+#endif
+
+#if 0
+PGI before v15.7, use non-std sizeof instead of F2008 C_SIZEOF
+#endif
+#if defined (ESMF_PGIVERSION_MAJOR)
+#if (ESMF_PGIVERSION_MAJOR < 15) || ((ESMF_PGIVERSION_MAJOR == 15) && (ESMF_PGIVERSION_MINOR < 7))
+#define C_SIZEOF SIZEOF
 #endif
 #endif
 

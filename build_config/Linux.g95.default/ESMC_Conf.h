@@ -35,9 +35,4 @@ typedef int ESMCI_FortranStrLenArg;
 
 #define ESMC_PRESENT(arg) ( (arg) != 0 )
 
-#if 0
-Has F2003 C Interop, but not F2008 C_SIZEOF
-#endif
-#define C_SIZEOF SIZEOF
-
 #endif
