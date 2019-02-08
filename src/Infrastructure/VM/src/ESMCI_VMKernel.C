@@ -324,6 +324,9 @@ void VMK::init(MPI_Comm mpiCommunicator){
 #else
     MPI_Init_thread(NULL, NULL, VM_MPI_THREAD_LEVEL, &mpi_thread_level);
 #endif
+  }else{
+    // query the MPI thread support level as set by external MPI initialization
+    MPI_Query_thread(&mpi_thread_level);
   }
   // so now MPI is for sure initialized...
   wtime0 = MPI_Wtime();
