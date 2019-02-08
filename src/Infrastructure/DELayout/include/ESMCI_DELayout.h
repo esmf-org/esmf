@@ -291,10 +291,14 @@ class XXE{
       int *dstSuperVecSize_j; // dst dist
     };
     struct SubRecursiveSearch{
-      XXE *xxe=NULL;
-      int iNext=0;
+      XXE *xxe;
+      int iNext;
       std::stack<int> iStack;
       std::stack<XXE*> xxeStack;
+      SubRecursiveSearch(){
+        xxe=NULL;
+        iNext=0;
+      }
     };
     
     // special predefined filter bits
