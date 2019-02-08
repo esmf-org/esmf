@@ -105,6 +105,13 @@ module NUOPC_ModelBase
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     if (.not.pthreadsEnabled) then
+#if 1
+      call ESMF_LogWrite("Generic ModelBase SetVM() is exiting "// &
+        "due to lack of Pthreads support for: "// &
+        trim(name), ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
       return  ! early successful return
     endif
     
@@ -116,7 +123,7 @@ module NUOPC_ModelBase
     if (isPresent) then
 #if 1
       call ESMF_LogWrite("Generic ModelBase SetVM() is calling "// &
-        "ESMF_GridCompSetVMMaxPEsexecuting() for : "// &
+        "ESMF_GridCompSetVMMaxPEs() for: "// &
         trim(name), ESMF_LOGMSG_INFO, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -124,6 +131,14 @@ module NUOPC_ModelBase
       call ESMF_GridCompSetVMMaxPEs(gcomp, maxPeCountPerPet=value, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    else
+#if 1
+      call ESMF_LogWrite("Generic ModelBase SetVM() did not find "// &
+        "Attribute 'maxPeCountPerPet' for: "// &
+        trim(name), ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+#endif
     endif
     
   end subroutine
