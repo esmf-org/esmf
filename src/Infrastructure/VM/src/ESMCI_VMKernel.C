@@ -311,6 +311,7 @@ void VMK::init(MPI_Comm mpiCommunicator){
   // because signal blocking might not reach all of the threads again...
   int initialized;
   MPI_Initialized(&initialized);
+#ifndef ESMF_MPIUNI
   if (!initialized){
 #ifdef ESMF_MPICH
     // MPICH1.2 is not standard compliant and needs valid args
@@ -328,6 +329,10 @@ void VMK::init(MPI_Comm mpiCommunicator){
     // query the MPI thread support level as set by external MPI initialization
     MPI_Query_thread(&mpi_thread_level);
   }
+#else
+  // MPIUNI simply set the thread level
+  mpi_thread_level = MPI_THREAD_SERIALIZED;
+#endif
   // so now MPI is for sure initialized...
   wtime0 = MPI_Wtime();
   // TODO: now it should be safe to call obtain_args() for all MPI impl.
