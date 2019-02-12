@@ -184,6 +184,7 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
+
     ! Initialize phases
 
     ! Phase 0 requires use of ESMF method.
@@ -193,8 +194,8 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
-    ! Claim initialize phase 1 to be able to call into Driver simply via
-    ! a single ESMF_GridCompInitialize() from application level.
+    ! Explicitly claim initialize phase 1 to be able to call into Driver
+    ! simply via a single ESMF_GridCompInitialize() from the application level.
     call ESMF_GridCompSetEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
       userRoutine=InitializeP1, phase=1, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -300,7 +301,9 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    ! NOOP, because only single IPD version entry points set.
+    ! NOOP, because only single IPD version entry points are being used by
+    ! this implementation on both the upward and downward sides. 
+    ! -> No explicit filtering of phaseLabels needed here.
 
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
@@ -395,6 +398,7 @@ module NUOPC_Driver
     logical                   :: clockIsCreated
     logical                   :: stateIsCreated
     logical                   :: areServicesSet
+    logical                   :: needConnector
     integer                   :: rootPet, rootVas
     type(ESMF_VM)             :: vm
     character(ESMF_MAXSTR)    :: name
@@ -406,6 +410,7 @@ module NUOPC_Driver
     type(ESMF_CplComp)        :: connector
     character(len=80)         :: srcCompLabel
     character(len=80)         :: dstCompLabel
+    character(len=80)         :: hierarchyProtocol
     type(ESMF_PtrInt1D), pointer :: petLists(:)
     integer, pointer          :: petList(:)
 
@@ -659,6 +664,10 @@ module NUOPC_Driver
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
         ! potentially the connector must be created here to/from driver-self
+        call NUOPC_CompAttributeGet(gcomp, name="HierarchyProtocol", &
+          value=hierarchyProtocol, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         areServicesSet = NUOPC_CompAreServicesSet(connector, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -666,10 +675,52 @@ module NUOPC_Driver
           ! the connector was not added by the user level code SetModelServices
           ! and this involves the driver itself -> maybe automatic connector add
           if (.not.(i==0.and.j==0)) then
-            ! not a driver-to-driver-self connection
-            if (.not.(trim(srcCompLabel)=="_uninitialized").and. &
-              .not.(trim(dstCompLabel)=="_uninitialized")) then
-              ! the driver is a child of a parent driver
+            ! not a driver-to-driver-self connection, which has no known purpose
+            if (i==0) then
+              needConnector = ESMF_StateIsCreated(is%wrap%modelIS(i), rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              if (needConnector .and. (trim(srcCompLabel)=="_uninitialized")) &
+                then  ! query the ESMF component name if no NUOPC label present
+                call ESMF_GridCompGet(gcomp, name=srcCompLabel, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return
+                call NUOPC_CompAttributeSet(gcomp, name="CompLabel", &
+                  value=trim(srcCompLabel), rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              else
+                ! NUOPC CompLabel present -> therefore running hierarchically
+                if (trim(hierarchyProtocol) /= &
+                  "PushUpAllExportsUnsatisfiedImports") then
+                  ! not the only currently supported HierarchyProtocal
+                  needConnector = .false.
+                endif
+              endif
+            else
+              needConnector = ESMF_StateIsCreated(is%wrap%modelES(j), rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              if (needConnector .and. (trim(dstCompLabel)=="_uninitialized")) &
+                then  ! query the ESMF component name if no NUOPC label present
+                call ESMF_GridCompGet(gcomp, name=dstCompLabel, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return
+                call NUOPC_CompAttributeSet(gcomp, name="CompLabel", &
+                  value=trim(dstCompLabel), rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, file=trim(name)//":"//FILENAME)) return
+              else
+                ! NUOPC CompLabel present -> therefore running hierarchically
+                if (trim(hierarchyProtocol) /= &
+                  "PushUpAllExportsUnsatisfiedImports") then
+                  ! not the only currently supported HierarchyProtocal
+                  needConnector = .false.
+                endif
+              endif
+            endif
+            if (needConnector) then
+              ! the driver import or export States exist
               ! -> automatic connector add
               call NUOPC_DriverAddComp(gcomp, &
                 srcCompLabel=srcCompLabel, dstCompLabel=dstCompLabel, &
@@ -3486,7 +3537,6 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     cmEntry%wrap%label = trim(srcCompLabel)//"-TO-"//trim(dstCompLabel)
-    
     
     if (associated(connectorPetList)) then
       ! connectorPetList was either explicitly provided or constructed
