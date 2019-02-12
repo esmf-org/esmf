@@ -461,7 +461,7 @@ module NUOPC_Driver
     type(ESMF_Clock)          :: internalClock
     integer                   :: i, j, k, l, cIndex
     character(ESMF_MAXSTR)    :: iString, jString, lString
-    character(ESMF_MAXSTR)    :: compName, stateName, msgString
+    character(ESMF_MAXSTR)    :: compName, stateName
     character(ESMF_MAXSTR)    :: petListBuffer(100)
     integer                   :: lineCount
     integer, pointer          :: i_petList(:), j_petList(:), c_petList(:)
@@ -474,6 +474,8 @@ module NUOPC_Driver
     integer                   :: rootPet, rootVas
     type(ESMF_VM)             :: vm
     character(ESMF_MAXSTR)    :: name
+    character(ESMF_MAXSTR)    :: msgString, pLabel
+    integer                   :: phase
     integer                   :: verbosity, vInherit
     character(len=10)         :: vString
     character(len=160)        :: namespace  ! long engough for component label
@@ -497,6 +499,43 @@ module NUOPC_Driver
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle verbosity
+    if (btest(verbosity,8)) then
+      call ESMF_GridCompGet(gcomp, currentPhase=phase, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
+        phaseIndex=phase, phaseLabel=pLabel, rc=rc)
+      if (len_trim(pLabel)==0) pLabel="<none>"
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      if (clockIsPresent) then
+        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        call ESMF_ClockPrint(internalClock, options="currTime", &
+          preString=">>>"//trim(name)//&
+          ": entered Initialize (phase="//trim(adjustl(pLabel))// &
+          ") with current time: ", unit=msgString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      else
+        write(msgString,"(A)") ">>>"//trim(name)//&
+          ": entered Initialize (phase="//trim(adjustl(pLabel))// &
+          ") without valid internal Clock."
+      endif
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! allocate memory for the internal state and set it in the Component
     allocate(is%wrap, stat=stat)
@@ -1134,6 +1173,34 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
 
+    ! handle verbosity
+    if (btest(verbosity,8)) then
+      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      if (clockIsPresent) then
+        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        call ESMF_ClockPrint(internalClock, options="currTime", &
+          preString="<<<"//trim(name)//&
+          ": leaving Initialize (phase="//trim(adjustl(pLabel))// &
+          ") with current time: ", unit=msgString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      else
+        write(msgString,"(A)") "<<<"//trim(name)//&
+          ": leaving Initialize (phase="//trim(adjustl(pLabel))// &
+          ") without valid internal Clock."
+      endif
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1397,6 +1464,10 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     type(ESMF_VM)             :: vm
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
+    type(ESMF_Clock)          :: internalClock
+    logical                   :: clockIsPresent
+    character(ESMF_MAXSTR)    :: msgString, pLabel
+    integer                   :: phase
 
     rc = ESMF_SUCCESS
 
@@ -1409,6 +1480,43 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle verbosity
+    if (btest(verbosity,8)) then
+      call ESMF_GridCompGet(gcomp, currentPhase=phase, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
+        phaseIndex=phase, phaseLabel=pLabel, rc=rc)
+      if (len_trim(pLabel)==0) pLabel="<none>"
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      if (clockIsPresent) then
+        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        call ESMF_ClockPrint(internalClock, options="currTime", &
+          preString=">>>"//trim(name)//&
+          ": entered Initialize (phase="//trim(adjustl(pLabel))// &
+          ") with current time: ", unit=msgString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      else
+        write(msgString,"(A)") ">>>"//trim(name)//&
+          ": entered Initialize (phase="//trim(adjustl(pLabel))// &
+          ") without valid internal Clock."
+      endif
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! query Component for the internal State
     nullify(is%wrap)
@@ -1578,6 +1686,34 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     ! connectorComps
     ! nothing to do
 
+    ! handle verbosity
+    if (btest(verbosity,8)) then
+      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      if (clockIsPresent) then
+        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        call ESMF_ClockPrint(internalClock, options="currTime", &
+          preString="<<<"//trim(name)//&
+          ": leaving Initialize (phase="//trim(adjustl(pLabel))// &
+          ") with current time: ", unit=msgString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      else
+        write(msgString,"(A)") "<<<"//trim(name)//&
+          ": leaving Initialize (phase="//trim(adjustl(pLabel))// &
+          ") without valid internal Clock."
+      endif
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
+
     ! extro
     call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1598,14 +1734,15 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     character(*), parameter   :: rName="InitializeIPDv02p5"
     integer                   :: localrc
     type(ESMF_Clock)          :: internalClock
-    logical                   :: existflag
+    logical                   :: clockIsPresent
     character(ESMF_MAXSTR)    :: oldDataComplete, newDataComplete
     integer                   :: oldUpdatedCount, newUpdatedCount
     logical                   :: allUpdated
     logical                   :: stateIsCreated
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
-    character(len=160)        :: msgString
+    character(ESMF_MAXSTR)    :: msgString, pLabel
+    integer                   :: phase
 
     rc = ESMF_SUCCESS
 
@@ -1618,6 +1755,43 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! handle verbosity
+    if (btest(verbosity,8)) then
+      call ESMF_GridCompGet(gcomp, currentPhase=phase, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_INITIALIZE, &
+        phaseIndex=phase, phaseLabel=pLabel, rc=rc)
+      if (len_trim(pLabel)==0) pLabel="<none>"
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      if (clockIsPresent) then
+        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        call ESMF_ClockPrint(internalClock, options="currTime", &
+          preString=">>>"//trim(name)//&
+          ": entered Initialize (phase="//trim(adjustl(pLabel))// &
+          ") with current time: ", unit=msgString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      else
+        write(msgString,"(A)") ">>>"//trim(name)//&
+          ": entered Initialize (phase="//trim(adjustl(pLabel))// &
+          ") without valid internal Clock."
+      endif
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+    endif
 
     ! see if this driver was called with a valid exportState
     stateIsCreated = ESMF_StateIsCreated(exportState, rc=rc)
@@ -1736,6 +1910,34 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
           line=__LINE__, file=trim(name)//":"//FILENAME)) &
           return  ! bail out
       endif
+    endif
+
+    ! handle verbosity
+    if (btest(verbosity,8)) then
+      call ESMF_GridCompGet(gcomp, clockIsPresent=clockIsPresent, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      if (clockIsPresent) then
+        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
+        call ESMF_ClockPrint(internalClock, options="currTime", &
+          preString="<<<"//trim(name)//&
+          ": leaving Initialize (phase="//trim(adjustl(pLabel))// &
+          ") with current time: ", unit=msgString, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      else
+        write(msgString,"(A)") "<<<"//trim(name)//&
+          ": leaving Initialize (phase="//trim(adjustl(pLabel))// &
+          ") without valid internal Clock."
+      endif
+      call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
 
     ! extro
