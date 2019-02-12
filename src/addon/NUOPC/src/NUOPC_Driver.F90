@@ -242,12 +242,12 @@ module NUOPC_Driver
       
     ! - downward implement IPDv05:
     call NUOPC_CompSetInternalEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv05p1"/), userRoutine=IInitAdvertize, rc=rc)
+      phaseLabelList=(/"IPDv05p1"/), userRoutine=IInitAdvertise, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     call NUOPC_CompSetInternalEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
-      phaseLabelList=(/"IPDv05p2"/), userRoutine=IInitAdvertizeFinish, rc=rc)
+      phaseLabelList=(/"IPDv05p2"/), userRoutine=IInitAdvertiseFinish, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -1041,7 +1041,7 @@ module NUOPC_Driver
       return  ! bail out
       
     ! Before returning the driver must clean up its own importState, which 
-    ! may have Fields advertized that do not have a ConsumerConnection set.
+    ! may have Fields advertised that do not have a ConsumerConnection set.
     ! These are Fields that during the negotiation between driver children
     ! were mirrored into the driver importState, but then subsequently were
     ! resolved among the children themselves (sibling-to-sibling). Therefore
@@ -5359,7 +5359,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
   !-----------------------------------------------------------------------------
 
-  recursive subroutine IInitAdvertize(driver, importState, exportState, clock, &
+  recursive subroutine IInitAdvertise(driver, importState, exportState, clock, &
     rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
@@ -5367,7 +5367,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter   :: rName="IInitAdvertize"
+    character(*), parameter   :: rName="IInitAdvertise"
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     logical                   :: stateIsCreated
@@ -5417,7 +5417,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
   
   !-----------------------------------------------------------------------------
 
-  recursive subroutine IInitAdvertizeFinish(driver, importState, exportState, &
+  recursive subroutine IInitAdvertiseFinish(driver, importState, exportState, &
     clock, rc)
     type(ESMF_GridComp)  :: driver
     type(ESMF_State)     :: importState, exportState
@@ -5425,7 +5425,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, intent(out) :: rc
     
     ! local variables
-    character(*), parameter   :: rName="IInitAdvertizeFinish"
+    character(*), parameter   :: rName="IInitAdvertiseFinish"
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     logical                   :: stateIsCreated
