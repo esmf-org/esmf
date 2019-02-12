@@ -219,6 +219,26 @@ module NUOPC_Driver
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
+    ! - upward implement External IPD:
+    call NUOPC_CompSetEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"ExternalAdvertise"/), &
+      userRoutine=InitializeExternalAdvertise, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call NUOPC_CompSetEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"ExternalRealize"/), &
+      userRoutine=InitializeIPDv02p3, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call NUOPC_CompSetEntryPoint(driver, ESMF_METHOD_INITIALIZE, &
+      phaseLabelList=(/"ExternalDataInitialize"/), &
+      userRoutine=InitializeIPDv02p5, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
     ! Run phases
     call NUOPC_CompSetEntryPoint(driver, ESMF_METHOD_RUN, &
       phaseLabelList=(/"RunPhase1"/), userRoutine=routine_Run, rc=rc)
@@ -338,6 +358,12 @@ module NUOPC_Driver
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    ! turn off hierarchy support b/c this entry point goes outside NUOPC
+    call NUOPC_CompAttributeSet(gcomp, &
+      name="HierarchyProtocol", value="off", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! call the actual initialize routines
     call InitializeIPDv02p1(gcomp, importState, exportState, clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -375,6 +401,51 @@ module NUOPC_Driver
   
   !-----------------------------------------------------------------------------
 
+  recursive subroutine InitializeExternalAdvertise(gcomp, importState, &
+    exportState, clock, rc)
+    type(ESMF_GridComp)   :: gcomp
+    type(ESMF_State)      :: importState, exportState
+    type(ESMF_Clock)      :: clock
+    integer, intent(out)  :: rc
+    
+    ! local variables
+    character(*), parameter   :: rName="InitializeExternalAdvertise"
+    character(ESMF_MAXSTR)    :: name
+    integer                   :: verbosity
+    type(type_InternalState)  :: is
+
+    rc = ESMF_SUCCESS
+
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, verbosity=verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! intro
+    call NUOPC_LogIntro(name, rName, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! turn off hierarchy support b/c this entry point goes outside NUOPC
+    call NUOPC_CompAttributeSet(gcomp, &
+      name="HierarchyProtocol", value="off", rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+    ! call the actual initialize routine
+    call InitializeIPDv02p1(gcomp, importState, exportState, clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      
+    ! extro
+    call NUOPC_LogExtro(name, rName, verbosity, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
+  end subroutine
+  
+  !-----------------------------------------------------------------------------
+
   recursive subroutine InitializeIPDv02p1(gcomp, importState, exportState, &
     clock, rc)
     type(ESMF_GridComp)  :: gcomp
@@ -399,6 +470,7 @@ module NUOPC_Driver
     logical                   :: stateIsCreated
     logical                   :: areServicesSet
     logical                   :: needConnector
+    logical                   :: parentIsNUOPC
     integer                   :: rootPet, rootVas
     type(ESMF_VM)             :: vm
     character(ESMF_MAXSTR)    :: name
@@ -527,7 +599,26 @@ module NUOPC_Driver
     call NUOPC_DriverGetComp(gcomp, compList, petLists, rc=rc)    
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      
+    
+    ! determine whether this driver is plugged into a parent NUOPC driver or not
+    parentIsNUOPC = .true. ! initialize
+    call NUOPC_CompAttributeGet(gcomp, name="CompLabel", &
+      value=srcCompLabel, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (trim(srcCompLabel)=="_uninitialized") then
+      ! this driver is not plugged into a NUOPC parent
+      parentIsNUOPC = .false.
+      ! the ESMF component name to be used as NUOPC CompLabel
+      call ESMF_GridCompGet(gcomp, name=srcCompLabel, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return
+      call NUOPC_CompAttributeSet(gcomp, name="CompLabel", &
+        value=trim(srcCompLabel), rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return
+    endif
+    
     do i=0, is%wrap%modelCount
       write (iString, *) i
       
@@ -680,41 +771,22 @@ module NUOPC_Driver
               needConnector = ESMF_StateIsCreated(is%wrap%modelIS(i), rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return
-              if (needConnector .and. (trim(srcCompLabel)=="_uninitialized")) &
-                then  ! query the ESMF component name if no NUOPC label present
-                call ESMF_GridCompGet(gcomp, name=srcCompLabel, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return
-                call NUOPC_CompAttributeSet(gcomp, name="CompLabel", &
-                  value=trim(srcCompLabel), rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return
-              else
-                ! NUOPC CompLabel present -> therefore running hierarchically
+              if (parentIsNUOPC ) then
+                ! make sure a valid HieraryProtocol is requested
                 if (trim(hierarchyProtocol) /= &
                   "PushUpAllExportsUnsatisfiedImports") then
-                  ! not the only currently supported HierarchyProtocal
                   needConnector = .false.
                 endif
               endif
             else
+              ! j==0
               needConnector = ESMF_StateIsCreated(is%wrap%modelES(j), rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return
-              if (needConnector .and. (trim(dstCompLabel)=="_uninitialized")) &
-                then  ! query the ESMF component name if no NUOPC label present
-                call ESMF_GridCompGet(gcomp, name=dstCompLabel, rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return
-                call NUOPC_CompAttributeSet(gcomp, name="CompLabel", &
-                  value=trim(dstCompLabel), rc=rc)
-                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return
-              else
-                ! NUOPC CompLabel present -> therefore running hierarchically
+              if (parentIsNUOPC ) then
+                ! make sure a valid HieraryProtocol is requested
                 if (trim(hierarchyProtocol) /= &
                   "PushUpAllExportsUnsatisfiedImports") then
-                  ! not the only currently supported HierarchyProtocal
                   needConnector = .false.
                 endif
               endif
@@ -735,6 +807,9 @@ module NUOPC_Driver
               ! automatically created connectors inherit lower 8-bit
               ! of parent's verbosity setting
               vInherit = ibits(verbosity,0,8)
+#if 0
+vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
+#endif
               write(vString,"(I10)") vInherit
               call NUOPC_CompAttributeSet(connector, name="Verbosity", &
                 value=vString, rc=rc)
@@ -5371,6 +5446,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     logical                   :: stateIsCreated
+    character(len=80)         :: hierarchyProtocol
 
     rc = ESMF_SUCCESS
     
@@ -5384,16 +5460,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
+    call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
+      value=hierarchyProtocol, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     stateIsCreated = ESMF_StateIsCreated(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     if (stateIsCreated) then
-      ! request that connectors transfer all fields into the importState
-      call NUOPC_SetAttribute(importState, name="FieldTransferPolicy", &
-        value="transferAll", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (trim(hierarchyProtocol)=="PushUpAllExportsUnsatisfiedImports") then
+        ! request that connectors transfer all fields into the importState
+        call NUOPC_SetAttribute(importState, name="FieldTransferPolicy", &
+          value="transferAll", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
     endif
     
     stateIsCreated = ESMF_StateIsCreated(exportState, rc=rc)
@@ -5401,11 +5484,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     if (stateIsCreated) then
-      ! request that connectors transfer all fields into the exportState
-      call NUOPC_SetAttribute(exportState, name="FieldTransferPolicy", &
-        value="transferAll", rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (trim(hierarchyProtocol)=="PushUpAllExportsUnsatisfiedImports") then
+        ! request that connectors transfer all fields into the exportState
+        call NUOPC_SetAttribute(exportState, name="FieldTransferPolicy", &
+          value="transferAll", rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      endif
     endif
 
     ! extro
