@@ -277,7 +277,7 @@ void FTN_X(c_convertscrip)(
   int *dualcells, *dualcellcounts;
   int *cells, temp[16];
   int numedges, *next;
-  unsigned char *edges, *totalneighbors;
+  int *edges, *totalneighbors;
   int i,i1, i2, j, k, totalnodes, count, fillvalue;
   int goodnodes;
   int noarea, nocenter, nomask;
@@ -407,7 +407,7 @@ void FTN_X(c_convertscrip)(
 
 
   nodelatlon = (double*)malloc(sizeof(double)*totalnodes*2);
-  totalneighbors = (unsigned char*)calloc(totalnodes, sizeof(unsigned char));
+  totalneighbors = (int*)calloc(totalnodes, sizeof(int));
   for (i=0; i<totalnodes; i++) {
     nodelatlon[i*2]=nodelons[i];
     nodelatlon[i*2+1]=nodelats[i];
@@ -423,7 +423,7 @@ void FTN_X(c_convertscrip)(
     totalneighbors[cells[i]] += 1;
   }
   // check for degenerated cells, remove duplicate nodes and fill cell_edges;
-  edges = (unsigned char*)malloc(gsdim);
+  edges = (int*)malloc(gsdim);
   for (i=0; i<gsdim; i++) {
     i1=i*gcdim;
     temp[0]=cells[i1];
@@ -508,7 +508,7 @@ void FTN_X(c_convertscrip)(
     fillvalue = -1;
     status = nc_put_att_int(ncid2, cellid, "_FillValue", NC_INT, 1, &fillvalue);
     if (handle_error(status,__LINE__)) return; // bail out;
-    status = nc_def_var(ncid2,"numElementConn", NC_BYTE, 1, dims, &edgeid);
+    status = nc_def_var(ncid2,"numElementConn", NC_INT, 1, dims, &edgeid);
     if (handle_error(status,__LINE__)) return; // bail out;
     strbuf = "Number of nodes per element";
     status = nc_put_att_text(ncid2, edgeid, "long_name", strlen(strbuf)+1, strbuf);
@@ -568,7 +568,7 @@ void FTN_X(c_convertscrip)(
     nc_put_var_int(ncid2, cellid, cells);
     if (handle_error(status,__LINE__)) return; // bail out;
 
-    nc_put_var_uchar(ncid2, edgeid, edges);
+    nc_put_var_int(ncid2, edgeid, edges);
     if (handle_error(status,__LINE__)) return; // bail out;
 
 
@@ -806,7 +806,7 @@ void FTN_X(c_convertscrip)(
   fillvalue = -1;
   status = nc_put_att_int(ncid2, cellid, "_FillValue", NC_INT, 1, &fillvalue);
   if (handle_error(status,__LINE__)) return; // bail out;
-  status = nc_def_var(ncid2,"numElementConn", NC_BYTE, 1, dims, &edgeid);
+  status = nc_def_var(ncid2,"numElementConn", NC_INT, 1, dims, &edgeid);
   if (handle_error(status,__LINE__)) return; // bail out;
   strbuf = "Number of nodes per element";
   status = nc_put_att_text(ncid2, edgeid, "long_name", strlen(strbuf), strbuf);
@@ -852,7 +852,7 @@ void FTN_X(c_convertscrip)(
   if (handle_error(status,__LINE__)) return; // bail out;
   nc_put_var_int(ncid2, cellid, dualcells);
   if (handle_error(status,__LINE__)) return; // bail out;
-  nc_put_var_uchar(ncid2, edgeid, totalneighbors);
+  nc_put_var_int(ncid2, edgeid, totalneighbors);
   if (handle_error(status,__LINE__)) return; // bail out;
 
   free(totalneighbors);
