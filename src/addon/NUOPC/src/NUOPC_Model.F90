@@ -362,6 +362,7 @@ module NUOPC_Model
     integer                   :: phase
     type(ESMF_Clock)          :: internalClock
     logical                   :: clockIsPresent
+    logical                   :: clockIsCreated
     integer                   :: verbosity, diagnostic
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
@@ -447,6 +448,24 @@ module NUOPC_Model
         return  ! bail out
     endif
     
+    ! if the incoming clock is valid, then use to set currTime on internalClock
+    clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    if (clockIsCreated) then
+      ! reset the currTime of the internalClock
+      call ESMF_ClockGet(clock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) &
+        return  ! bail out
+      call ESMF_ClockSet(internalClock, currTime=currTime, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    endif
+
     ! fill all export Fields with valid initial data for current time
     ! note that only connected Fields reside in exportState at this time
     ! SPECIALIZE by calling into attached method to fill initial data
