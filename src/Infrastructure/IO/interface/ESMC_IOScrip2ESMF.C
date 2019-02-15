@@ -423,7 +423,7 @@ void FTN_X(c_convertscrip)(
     totalneighbors[cells[i]] += 1;
   }
   // check for degenerated cells, remove duplicate nodes and fill cell_edges;
-  edges = (int*)malloc(gsdim);
+  edges = (int*)malloc(gsdim*sizeof(int));
   for (i=0; i<gsdim; i++) {
     i1=i*gcdim;
     temp[0]=cells[i1];
@@ -737,17 +737,17 @@ void FTN_X(c_convertscrip)(
       if (i1 != i) {
         for (k=0; k<maxconnection; k++) {
           dualcells[i1*maxconnection+k]=dualcells[i*maxconnection+k];
-          totalneighbors[i1]=totalneighbors[i];
-          nodelatlon[i1*2]=nodelatlon[i*2];
-          nodelatlon[i1*2+1]=nodelatlon[i*2+1];
-        }
+	}
+	totalneighbors[i1]=totalneighbors[i];
+	nodelatlon[i1*2]=nodelatlon[i*2];
+	nodelatlon[i1*2+1]=nodelatlon[i*2+1];
       }
       i1++;
     }
   }
 
   goodnodes = i1;
-  // printf("Total nodes: %d, total non-degenerated nodes: %d\n", totalnodes, goodnodes);
+  //printf("Total nodes: %d, total non-degenerated nodes: %d\n", totalnodes, goodnodes);
 
   // order the cell center coordinates in counter-clockwise order
   // lonbuf and latbuf contains the center vertex coordinates
