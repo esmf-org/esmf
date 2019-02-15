@@ -64,6 +64,7 @@ using std::vector;
 // #define DEBUG_SEARCH
 // #define DEBUG_SEARCH_RESULTS
 // #define DEBUG_REGRID_STATUS
+// #define ESMF_REGRID_DEBUG_MAP_NODE 112
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -200,8 +201,10 @@ static int found_func(void *c, void *y) {
   int srid; MBMesh_get_gid(si->mesh, sr->src_elem, &srid);
   int siid; MBMesh_get_gid(si->mesh, si->elem, &siid);
 
-#ifdef DEBUG_SEARCH
-  if (si->snr.dst_gid == 6) printf("%d# Search against %d [%d]\n", Par::Rank(), srid, siid);
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+  if (si->snr.dst_gid==ESMF_REGRID_DEBUG_MAP_NODE) {
+    printf("Checking dst pnt id=%d vs. elem id=%d\n",si->snr.dst_gid,srid);
+  }
 #endif
 
   // from search.c
@@ -356,6 +359,68 @@ static int found_func(void *c, void *y) {
   double pcoords[3];
   bool is_inside = map->is_in_cell(coords, si->coords, pcoords, &dist);
 
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+  if (si->snr.dst_gid == ESMF_REGRID_DEBUG_MAP_NODE) {
+    printf("%d# Mapping dst_id=%d dst_coords=%f %f %f in=%s pcoords=%f %f %f dist=%e s_elem=%d [",
+      Par::Rank(), si->snr.dst_gid,si->coords[0],si->coords[1],si->coords[2],is_inside ? "true" : "false",pcoords[0],pcoords[1],pcoords[2],dist,srid);
+
+    Range nodes;
+    merr=si->mesh->mesh->get_connectivity(&(sr->src_elem), 1, nodes);
+    if (merr != MB_SUCCESS)
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+
+    int num_verts = nodes.size();
+    int gids[num_verts];
+
+    if (num_nodes != num_verts)
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+
+    merr=si->mesh->mesh->tag_get_data(si->mesh->gid_tag, nodes, &gids);
+    if (merr != MB_SUCCESS)
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+
+    for (int i=0; i<num_verts; i++)
+      printf("%d ",gids[i]);
+    printf("]\n");
+    
+    printf("%d# Pcoords - Elem %d: ", Par::Rank(), srid);
+    for (int i = 0; i < num_nodes; ++i) {
+      printf("[");
+      for (int j = 0; j < nd; ++j) {
+        printf("%f, ", coords[i*nd+j]);
+      }
+      printf("], ");
+    }
+    printf("\nNode %d: [", si->snr.dst_gid);
+    for (int i=0; i < nd; ++i)
+      printf("%f, ", si->coords[i]);
+    printf("]\n");
+
+
+    printf("\n\n-- print out info --\n\n");
+
+    for (int i = 0; i < nd; ++i) {
+      printf("[");
+      for (int j = 0; j < num_nodes; ++j) {
+        printf("%f", coords[j*nd+i]);
+        if (j<num_nodes-1) printf(", ");
+      }
+      printf("]\n");
+    }
+    printf("\n");
+
+    for (int i=0; i < nd; ++i)
+      printf("[%f]\n", si->coords[i]);
+    printf("\n");
+
+    fflush(stdout);
+  }
+#endif
+
+
 #ifdef DEBUG_PCOORDS
   printf("%d# is inside = %s\n", Par::Rank(), is_inside ? "true" : "false");
 #endif
@@ -390,9 +455,6 @@ static int found_func(void *c, void *y) {
     si->dist = dist;
   }
   
-#ifdef DEBUG_SEARCH
-  printf("%d# investigated %d .. keep searching\n", Par::Rank(), siid);
-#endif
   // Mark that something is in struct
   si->investigated=true;
 

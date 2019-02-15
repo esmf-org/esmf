@@ -102,6 +102,9 @@ void MBMesh::CreateGhost() {
   // MBMESH_CHECK_ERR(merr, localrc);
 
 #ifdef DEBUG_MOAB_GHOST_EXCHANGE
+  int nprocs = pcomm->size();
+  int rank = pcomm->rank();
+
   Range shared_ents;
   // Get entities shared with all other processors
   merr = pcomm->get_shared_entities(-1, shared_ents);
@@ -207,6 +210,7 @@ void MBMesh::CreateGhost() {
           rbuf[4*i + 1] << " edges, " << rbuf[4*i + 2] << " faces, " << rbuf[4*i + 3] << " elements" << endl;
     }
   }
+  
 #endif
 
 }

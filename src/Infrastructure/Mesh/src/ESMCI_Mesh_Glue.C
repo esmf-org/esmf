@@ -53,6 +53,7 @@
 
 using namespace ESMCI;
 
+// #define DEBUG_OWNED
 
 void ESMCI_meshcreate(Mesh **meshpp,
                       int *pdim, int *sdim,
@@ -1505,6 +1506,19 @@ void ESMCI_meshaddelements(Mesh **meshpp,
   }
 #endif
 
+#ifdef DEBUG_OWNED
+{
+  // Loop through nodes changing owners to owners in new VM
+  printf("%d# Native node owners = [", Par::Rank());
+  MeshDB::iterator ni = mesh.node_begin_all(), ne = mesh.node_end_all();
+  for (; ni != ne; ++ni) {
+    MeshObj &node=*ni;
+
+    printf("%d, ", node.get_owner());
+  }
+  printf("]\n");
+}
+#endif
 
   } catch(std::exception &x) {
     // catch Mesh exception return code

@@ -55,6 +55,7 @@ using namespace ESMCI;
 // #define DEBUG_OUTPUT
 // #define DEBUG_NODE_COORDS
 // #define DEBUG_ELEM_COORDS
+// #define DEBUG_OWNED
 
 
 
@@ -1428,7 +1429,29 @@ void MBMesh_addelements(void **mbmpp,
       }
 #endif
 
- #if 0
+#ifdef DEBUG_OWNED
+      {
+        int localrc = 0;
+        int merr = 0;
+
+        int node_owners[num_verts];
+        Range nodes;
+        merr=mbmp->mesh->get_entities_by_dimension(0, 0, nodes);
+        if (merr != MB_SUCCESS) throw (ESMC_RC_MOAB_ERROR);
+        merr=mbmp->mesh->tag_get_data(mbmp->owner_tag, nodes, &node_owners);
+        if (merr != MB_SUCCESS)
+          if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+            moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+
+        printf("%d# MBMesh node_owners = [", Par::Rank());
+        for (int i = 0; i < num_verts; ++i)
+          printf("%d, ", node_owners[i]);
+        printf("]\n");
+      }
+#endif
+
+
+#if 0
   // Time loops
   {
    /* XMRKX */
@@ -1456,7 +1479,6 @@ void MBMesh_addelements(void **mbmpp,
   // Perhaps commit will be a separate call, but for now commit the mesh here.
   mesh.build_sym_comm_rel(MeshObj::NODE);
   mesh.Commit();
-
 
   // Set Mask values
   if (has_elem_mask) {

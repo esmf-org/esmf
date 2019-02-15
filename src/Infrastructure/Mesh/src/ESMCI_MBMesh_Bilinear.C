@@ -82,15 +82,6 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
   // Get MOAB mesh
   Interface *mesh = srcmb->mesh;
 
-#ifdef DEBUG_POINTLIST
-  {printf("%d# POINTLIST(%d) [", Par::Rank(), dstpl->get_curr_num_pts());
-  for (int p = 0; p < dstpl->get_curr_num_pts(); ++p) {
-    const int *id = dstpl->get_id_ptr(p);
-    printf("%d, ", *id);
-  }
-  printf("]\n");}
-#endif
-
   // Find maximum number of dst nodes in search results
   unsigned int max_num_dst_nodes = 0;
   MBMesh_Search_EToP_Result_List::iterator sb = sres.begin(), se = sres.end();
@@ -211,11 +202,21 @@ void calc_bilinear_regrid_wgts(MBMesh *srcmb, PointList *dstpl, IWeights &wts,
   if (ESMC_LogDefault.MsgFoundError(localrc,ESMCI_ERR_PASSTHRU,ESMC_CONTEXT,NULL))
     throw localrc;  // bail out with exception
 
-
   // Set meshes to use for regrid weight calculations
   MBMesh *srcmesh_regrid=srcmb;
   PointList *dstpl_regrid=dstpl;
 
+#ifdef DEBUG_POINTLIST
+  {printf("%d# calc_bilinear_regrid_wgts (%d) [", Par::Rank(), dstpl->get_curr_num_pts());
+  for (int p = 0; p < dstpl->get_curr_num_pts(); ++p) {
+    const int *id = dstpl->get_id_ptr(p);
+    double coords[3];
+    dstpl->get_coord(p, &coords[0]);
+     printf("%d [%f,%f,%f], ", dstpl->get_id_ptr(p), coords[0], coords[1], coords[2]);
+  }
+  printf("]\n");}
+#endif
+ 
   // If parallel then generate rendezvous meshes...and use them instead
   MBMesh *srcmesh_rend=NULL;
   PointList *dstpl_rend=NULL;

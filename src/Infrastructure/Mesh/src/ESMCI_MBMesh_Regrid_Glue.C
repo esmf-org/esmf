@@ -211,6 +211,7 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
       }
     }
 #endif
+
 #ifdef PROGRESSLOG_on
     ESMC_LogDefault.Write("c_esmc_regrid_create(): Entering weight generation.", ESMC_LOGMSG_INFO);
 #endif
@@ -288,6 +289,8 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
 
 
 #endif
+
+
 
 
 #ifdef PROGRESSLOG_on
