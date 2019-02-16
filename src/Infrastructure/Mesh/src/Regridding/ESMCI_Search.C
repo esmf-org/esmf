@@ -37,6 +37,7 @@
 #include <Mesh/include/Legacy/ESMCI_BBox.h>
 
 
+// #define ESMF_REGRID_DEBUG_MAP_NODE 112
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
