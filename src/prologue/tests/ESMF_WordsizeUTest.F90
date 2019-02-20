@@ -48,6 +48,11 @@
     real(ESMF_KIND_R4)    :: vr4(2)
     real(ESMF_KIND_R8)    :: vr8(2)
 
+#if defined (ESMF_NO_C_SIZEOF)
+#define C_SIZEOF(x) size(transfer(x,sizeof_data))
+    character :: sizeof_data(32)
+#endif
+
 
 !------------------------------------------------------------------------
 ! test of default variable wordsizes, selected_int_kind options, pointer
