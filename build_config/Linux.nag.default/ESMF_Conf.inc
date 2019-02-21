@@ -29,7 +29,7 @@ be one of the following:
 #if 0
 NAG before v6.2, use sizeof work-around code instead of F2008 C_SIZEOF
 #endif
-#ifndef defined (__NAG_COMPILER_RELEASE)
+#ifndef __NAG_COMPILER_RELEASE
 #define ESMF_NO_C_SIZEOF
 #else
 #if (__NAG_COMPILER_RELEASE < 62)
