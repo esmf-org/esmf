@@ -4,6 +4,7 @@
 #include "ESMCI_Macros.h"
 #include <iostream>
 #include <vector>
+#include <set>
 #include <map>
 #include <cassert>
 #include <cmath>
@@ -393,6 +394,50 @@ namespace ESMCI{
         csinfo.center_and_scale(vals);
         return csinfo;
       }
+
+      template<typename VType>
+      class PairUniqByFirst{
+        public:
+        bool operator()( const std::pair<VType, VType> &a,
+                        const std::pair<VType, VType> &b){
+          return (a.first < b.first);
+        }
+      };
+
+      template<typename VType>
+      class TupleUniqByFirstAndSecond{
+        public:
+        bool operator()( const std::tuple<VType, VType, VType> &a,
+                        const std::tuple<VType, VType, VType> &b){
+          return (  (std::get<0>(a) < std::get<0>(b)) ||
+                    (std::get<1>(a) < std::get<1>(b)) );
+        }
+      };
+
+      template<typename VType>
+      void find_unique( const std::vector<VType> &xvals,
+                        const std::vector<VType> &yvals,
+                        std::vector<VType> &uniq_xvals,
+                        std::vector<VType> &uniq_yvals)
+      {
+        std::set<std::pair<VType, VType>, PairUniqByFirst<VType> > xyvals_uniq;
+        assert(xvals.size() == yvals.size());
+        for(typename std::vector<VType>::const_iterator
+              citer1 = xvals.cbegin(),
+              citer2 = yvals.cbegin();
+              (citer1 != xvals.cend()) && (citer2 != yvals.cend());
+              ++citer1, ++citer2){
+          xyvals_uniq.insert(std::pair<VType, VType>(*citer1, *citer2));
+        }
+        uniq_xvals.reserve(xvals.size());
+        uniq_yvals.reserve(yvals.size());
+        for(typename std::set<std::pair<VType, VType> >::const_iterator
+            citer = xyvals_uniq.cbegin();
+            citer != xyvals_uniq.cend(); ++citer){
+          uniq_xvals.push_back((*citer).first);
+          uniq_yvals.push_back((*citer).second);
+        }
+      }
     } // namespace PolyFitUtil
 
     /* Fit a polynomial of degree, max_deg, on a 2D user data set with xvalues
@@ -402,13 +447,21 @@ namespace ESMCI{
     template<typename CType, typename VType>
     int PolyFit(PolyFitAlg alg, int max_deg, const std::vector<VType>& xvals, const std::vector<VType>& yvals, UVIDPoly<CType> &poly)
     {
+      const int MIN_VALS_REQD_FOR_POLYFIT = 3;
       std::vector<CType> coeffs;
       assert(alg == POLY_FIT_LS_LAPACK);
 
-      std::vector<VType> xvals_centered_and_scaled = xvals;
+      std::vector<VType> yvals_uniq;
+      std::vector<VType> xvals_centered_and_scaled;
+      PolyFitUtil::find_unique(xvals, yvals, xvals_centered_and_scaled, yvals_uniq);
+      if(yvals_uniq.size() < MIN_VALS_REQD_FOR_POLYFIT){
+        std::cout << "WARNING: Not enough unique vals (" << yvals_uniq.size() << ") available for a polyfit\n";
+        return ESMF_FAILURE;
+      }
+
       PolyCSInfo<VType> csinfo = PolyFitUtil::CenterAndScale(xvals_centered_and_scaled);
 
-      int ret = PolyFitUtil::LAPACK_Minimize_LSE(max_deg, xvals_centered_and_scaled, yvals, coeffs);
+      int ret = PolyFitUtil::LAPACK_Minimize_LSE(max_deg, xvals_centered_and_scaled, yvals_uniq, coeffs);
       assert(ret == ESMF_SUCCESS);
 
       poly.set_coeffs(coeffs); 
