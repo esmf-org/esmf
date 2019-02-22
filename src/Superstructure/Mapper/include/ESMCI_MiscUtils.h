@@ -7,6 +7,14 @@ namespace ESMCI{
   namespace MapperUtil{
     namespace Math{
 
+      /* A util function to calculate the value of a 
+       * number, base, to the power of an integral exponent, exp
+       *
+       * This function can be considered to replace pow* and has
+       * been instrumented to be faster that the functions available
+       * in the C library on some systems.
+       * Currently we do not use this function in the Mapper
+       */
       template<typename T>
       inline T ipow(T base, unsigned int exp,
               std::vector<T> &cache, std::vector<bool> &cache_is_valid)

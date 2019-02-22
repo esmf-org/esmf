@@ -18,11 +18,27 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* Class to store information about component phases
+     *
+     * The user can get an instance of this class and use it
+     * to store information about component phases. There is
+     * only one instance of this class, and the information
+     * stored can be retrieved even after the associated
+     * component info object is destroyed.
+     *
+     * The user can retrieve the stored number of PETs and
+     * timing info associated with any component. The user
+     * can also get a scaling function associated with the
+     * component (phase), if available.
+     */
     template<typename T>
     class CompInfoStore{
       public:
+          /* Get the component info store object */
           static CompInfoStore *get_instance(void );
+          /* Add information about component into the store */
           void add_comp_info(const CompInfo<T> &comp_info);
+          /* Retrieve information stored in the store */
           std::vector<std::pair<T, T> > get_past_time_intervals(
             const CompInfo<T> &comp_info) const;
           std::vector<std::pair<int, int> > get_past_pet_ranges(
@@ -30,10 +46,14 @@ namespace ESMCI{
           std::vector<int> get_past_npets(const CompInfo<T> &comp_info) const;
           std::vector<T> get_past_wtimes(const CompInfo<T> &comp_info) const;
           std::vector<T> get_past_stimes(const CompInfo<T> &comp_info) const;
+          /* Get a scaling function, if available, for this component phase */
           bool get_scaling_function(const CompInfo<T> &comp_info, UVIDPoly<T> &f) const;
+          /* Reset (delete all) information in the store */
           static void reset(void );
+          /* Finalize/delete the store */
           static void finalize(void );
       private:
+          /* Internal class to backup information about component phases */
           class CompBackupInfo{
             public:
               CompBackupInfo(const std::string &comp_name,
@@ -63,12 +83,15 @@ namespace ESMCI{
           std::map<std::string, CompBackupInfo> backup_info_;
           int next_comp_id_;
           static CompInfoStore<T> *store_instance_;
+          /* Make sure that users cannot create instances of this store */
           CompInfoStore();
     };
 
+    /* Component info store instance */
     template<typename T>
     CompInfoStore<T> *CompInfoStore<T>::store_instance_ = NULL;
 
+    /* Get the component info store instance */
     template<typename T>
     CompInfoStore<T> *CompInfoStore<T>::get_instance(void )
     {
@@ -78,6 +101,7 @@ namespace ESMCI{
       return store_instance_;
     }
 
+    /* Add component info */
     template<typename T>
     void CompInfoStore<T>::add_comp_info(const CompInfo<T> &comp_info)
     {
@@ -98,6 +122,7 @@ namespace ESMCI{
       }
     }
 
+    /* Get the stored time intervals for a component phase */
     template<typename T>
     std::vector<std::pair<T, T> > CompInfoStore<T>::get_past_time_intervals(
             const CompInfo<T> &comp_info) const
@@ -115,6 +140,7 @@ namespace ESMCI{
       }
     }
 
+    /* Get store pet ranges for a component phase */
     template<typename T>
     std::vector<std::pair<int, int> > CompInfoStore<T>::get_past_pet_ranges(
             const CompInfo<T> &comp_info) const
@@ -132,6 +158,7 @@ namespace ESMCI{
       }
     }
 
+    /* Get store number of PETs for a component phase */
     template<typename T>
     std::vector<int> CompInfoStore<T>::get_past_npets(
       const CompInfo<T> &comp_info) const
@@ -149,6 +176,7 @@ namespace ESMCI{
       }
     }
 
+    /* Get stored wallclock times for a component phase */
     template<typename T>
     std::vector<T> CompInfoStore<T>::get_past_wtimes(
       const CompInfo<T> &comp_info) const
@@ -166,6 +194,7 @@ namespace ESMCI{
       }
     }
 
+    /* Get stored start times for a component phase */
     template<typename T>
     std::vector<T> CompInfoStore<T>::get_past_stimes(
       const CompInfo<T> &comp_info) const
@@ -183,6 +212,9 @@ namespace ESMCI{
       }
     }
 
+    /* Get the scaling function (based on store number of PETs and
+     * wallclock times) for a component phase
+     */
     template<typename T>
     bool CompInfoStore<T>::get_scaling_function(
       const CompInfo<T> &comp_info, UVIDPoly<T> &f) const
@@ -204,12 +236,16 @@ namespace ESMCI{
     {
     }
 
+    /* Reset a component info store. This function deletes all stored info.*/
     template<typename T>
     void CompInfoStore<T>::reset(void )
     {
       finalize();
     }
 
+    /* Finalize a component info store. This function deletes the store
+     * instance
+     */
     template<typename T>
     void CompInfoStore<T>::finalize(void )
     {
@@ -219,7 +255,7 @@ namespace ESMCI{
       }
     }
 
-    // CompBackupInfo class functions
+    /* CompBackupInfo class functions */
     template<typename T>
     CompInfoStore<T>::CompBackupInfo::CompBackupInfo(const std::string &comp_name,
                               const std::string &comp_phase_name,
@@ -247,6 +283,7 @@ namespace ESMCI{
       past_wtimes_.push_back(wtime);
       past_stimes_.push_back(stime);
 
+      /* The scaling function is a 2nd degree polynomial */
       const int MAX_DEG = 2;
       const int MIN_VALS_REQD_FOR_POLYFIT = 3;
       const int MIN_VALS_REQD_FOR_LFIT = 2;
@@ -261,6 +298,7 @@ namespace ESMCI{
         }
       }
       else if(past_npets_.size() >= MIN_VALS_REQD_FOR_LFIT){
+        /* Linear fit is disabled for now */
         /*
         int ret = LinearFit(past_npets_, past_wtimes_, sfunc_);
         if(ret != ESMF_SUCCESS){

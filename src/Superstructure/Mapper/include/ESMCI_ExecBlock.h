@@ -20,14 +20,44 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* The class used to represent an execution block.
+     *
+     * An execution block consists of multiple component phases
+     * that execute on the same range of PETs
+     *
+     * Users can add/remove component phases, retrieve scaling
+     * function for the execution block and compare the
+     * execution block with other execution blocks or component
+     * infos (The comparision is based on temporal order. For
+     * entities that run during the same time interval, the tie
+     * is broken using the starting PETs)
+     */
     template<typename T>
     class ExecBlock{
       public:
         ExecBlock();
         ExecBlock(const std::vector<CompInfo<T> > &comp_phases);
+        /* Add/rem component phases in the execution block */
         void add_comp_phase(const CompInfo<T> &comp_info);
         void rem_comp_phase(const CompInfo<T> &comp_info);
         void rem_comp_phase(const std::string &comp_phase_name);
+        /* PET range comparison info
+         * PET_INR_LE : The provided component phase/execution block
+         *              runs within the PET range of this execution
+         *              block
+         * PET_INR_GT : This execution block runs within the range
+         *              of the provided component phase/execution
+         *              block
+         * SPET_INR   : The starting pet of the provided component
+         *              phase/execution block is inside the PET
+         *              range of this execution block
+         * EPET_INR   : The ending pet of the provided component
+         *              phase/execution block is inside the PET
+         *              range of this execution block
+         * PET_NIR    : The provided component phase/execution block
+         *              is not within the PET range of this
+         *              execution block
+         */
         enum PetCmpInfo{
           PET_INR_LE,
           PET_INR_GT,
@@ -37,13 +67,21 @@ namespace ESMCI{
         };
         PetCmpInfo cmp_pet_range(const CompInfo<T> &comp_info) const;
         PetCmpInfo cmp_pet_range(const ExecBlock<T> &exec_block) const;
+        /* Get PET and time info for this execution block */
         std::pair<int, int> get_pet_range(void ) const;
         int get_npets(void ) const;
         std::pair<T, T> get_time_interval(void ) const;
         T get_wtime(void ) const;
+        /* Get scaling function for this execution block */
         bool get_scaling_function(UVIDPoly<T> &f);
+        /* Get scaling function for this execution block. Additional
+         * constraints on the execution block is also provided by
+         * the user via constraint functions
+         * The scaling function will include these additional constraints
+         */
         bool get_scaling_function(UVIDPoly<T> &f, std::vector<MVIDLPoly<T> >&constraint_funcs);
         bool get_scaling_function(UVIDPoly<T> &f, MVIDLPoly<T> &constraint_func);
+        /* Print out the execution block to the provided stream */
         template<typename U>
         friend std::ostream &operator<<(std::ostream &ostr, const ExecBlock<U> &exec_block);
       private:
@@ -52,7 +90,9 @@ namespace ESMCI{
         std::pair<int, int> pet_range_;
         std::pair<T, T> time_intvl_;
         bool sfunc_is_valid_;
+        /* scaling function for this execution block */
         UVIDPoly<T> sfunc_;
+        /* Constraint functions for this execution block */
         std::vector<MVIDLPoly<T> > sfunc_cfuncs_;
         MVIDLPoly<T> sfunc_cfunc_;
         int exec_id_;

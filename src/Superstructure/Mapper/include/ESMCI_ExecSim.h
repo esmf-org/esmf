@@ -16,6 +16,7 @@ namespace ESMCI{
         END_PET = 1,
         COMP_INFO_IDX = 2
       };
+      /* Pet range info comparator */
       class PetRangeInfoCmp{
         public:
           bool operator()(const std::tuple<int, int, std::size_t> &a,

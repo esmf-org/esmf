@@ -13,6 +13,10 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* The class to store information about a component phase
+     * : component name, component phase name, pet range
+     * and time
+     */
     template<typename T>
     class CompInfo{
       public:
@@ -43,19 +47,22 @@ namespace ESMCI{
         T stime_;
     };
 
-    // comparators for the comp info class
+    /* Comparators for the comp info class */
+    /* Compare comp infos by starting PET */
     template<typename T>
     class CompInfoCmpBySPet{
       public:
         bool operator()(const CompInfo<T> &a, const CompInfo<T> &b) const;
     };
 
+    /* Compare comp infos by ending PET */
     template<typename T>
     class CompInfoCmpByEPet{
       public:
         bool operator()(const CompInfo<T> &a, const CompInfo<T> &b) const;
     };
 
+    /* Compare comp infos by start time */
     template<typename T>
     class CompInfoCmpBySTime{
       public:
@@ -66,6 +73,7 @@ namespace ESMCI{
         double tol_;
     };
 
+    /* Compare comp infos by end time */
     template<typename T>
     class CompInfoCmpByETime{
       public:
@@ -76,6 +84,7 @@ namespace ESMCI{
         double tol_;
     };
 
+    /* Compare comp infos by start time and then start PET */
     template<typename T>
     class CompInfoCmpBySTimePet{
       public:
@@ -86,6 +95,7 @@ namespace ESMCI{
         double tol_;
     };
 
+    /* Compare pointers to comp infos by start time and then start PET */
     template<typename T>
     class CompInfoPtrCmpBySTimePet{
       public:
@@ -96,6 +106,7 @@ namespace ESMCI{
         double tol_;
     };
 
+    /* Compare iterators to comp infos by start time and then start PET */
     template<typename T, typename CompInfoIterator>
     class CompInfoIterCmpBySTimePet{
       public:
@@ -107,6 +118,7 @@ namespace ESMCI{
         double tol_;
     };
 
+    /* Comp info class and comparator definitions */
     template<typename T>
     inline CompInfo<T>::CompInfo(
               const std::string &comp_name,

@@ -18,6 +18,7 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* NUOPC Runsequence parser tokens */
     typedef enum {
       ESMF_TIMELOOP_BEGIN_TOKEN = 1,
       ESMF_TIMELOOP_END_TOKEN,
@@ -35,6 +36,7 @@ namespace ESMCI{
       std::vector<std::string> tokens; 
     };
 
+    /* Tokenize a NUOPC run sequence */
     int TokenizeRunSeq(const std::vector<std::string> &rseq_lines, std::vector<RunSeqTokenizedLine> &tokenized_rseq_lines)
     {
       // Ignore comments
@@ -402,6 +404,7 @@ namespace ESMCI{
       return ESMF_SUCCESS;
     }
 
+    /* Create dependency graph from run sequence */
     int CreateDGraphFromRSeq(const std::string &rseq_fname, RunSeqDGraph &g)
     {
       int ret = ESMF_SUCCESS;

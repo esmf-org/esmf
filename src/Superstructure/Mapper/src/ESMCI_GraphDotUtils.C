@@ -3,6 +3,9 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* Dependency graph printer that writes the graph out in the DOT
+     * graph format, https://www.graphviz.org/doc/info/lang.html
+     */
     DGraphPrinter::DGraphPrinter(const std::string &ofile_name):ofile_(ofile_name)
     {
       print_header();

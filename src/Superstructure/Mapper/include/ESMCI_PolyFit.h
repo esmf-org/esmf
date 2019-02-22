@@ -387,6 +387,9 @@ namespace ESMCI{
         return ESMF_SUCCESS;
       }
 
+      /* Center and scale the given values, vals, and return the 
+       * center and scale information using a PolyCSInfo type obj
+       */
       template<typename VType>
       PolyCSInfo<VType> CenterAndScale(std::vector<VType> &vals)
       {
@@ -414,6 +417,9 @@ namespace ESMCI{
         }
       };
 
+      /* Find unique pairs of xvals and yvals such that no two
+       * pairs have the same xval
+       */
       template<typename VType>
       void find_unique( const std::vector<VType> &xvals,
                         const std::vector<VType> &yvals,

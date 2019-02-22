@@ -15,12 +15,26 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* Time Extent Matrix class used to map the execution of the
+     * different component phases on a 2D matrix where the cols
+     * represent PET ranges and columns represent the execution
+     * time intervals
+     *
+     * This structure is used to find potential parallel execution
+     * blocks (component phases running on the same PETs)
+     *
+     * This is a sort of GANTT chart-like representation of the
+     * execution of the component phases (x axis/cols representing
+     * PETs and y axis/rows representing time)
+     */    
     template<typename T>
     class TimeExtentMatrixInfo{
       public:
         TimeExtentMatrixInfo(const std::vector<CompInfo<T> > &comp_infos);
+        /* Get number of rows/cols of the matrix */
         int get_nrows(void ) const;
         int get_ncols(void ) const;
+        /* Get mapping between matrix indices and PET id/time */
         int to_pet_id(int tem_col_idx) const;
         int to_tem_col_idx(int pet_id) const;
         T to_time(int tem_row_idx) const;
@@ -109,6 +123,11 @@ namespace ESMCI{
       return time2row_map_.at(time);
     }
 
+    /* The class representing the time extent matrix information
+     * associated with a component phase.
+     * This class includes information on "where" the component
+     * phase resides in the time extent matrix
+     */
     template<typename T>
     class TimeExtentCompInfo{
       public:

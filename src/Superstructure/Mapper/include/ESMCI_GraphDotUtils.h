@@ -9,6 +9,7 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* The DGraph printer base class */
     class DGraphPrinter{
       public:
         DGraphPrinter(const std::string &ofile_name);

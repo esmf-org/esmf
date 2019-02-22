@@ -9,10 +9,21 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* The Dependency Graph class
+     * 
+     * This class is used to represent all graphs in the mapper. Specifically
+     * this class is used to represent dependencies between component phases
+     * gleaned from a NUOPC run sequence
+     * 
+     * The graph is a directed graph with vertices/nodes and edges. Each
+     * vertex/node in the graph is associated with a "vertex key" that is
+     * used by the user for all operations involving vertices.
+     */
     template<typename T>
     class DGraph{
       public:
         typedef int vertex_key;
+        /* A map used to color nodes in the graph */
         class ColorMap{
           public:
             ColorMap(const DGraph<T> &g);
@@ -23,6 +34,7 @@ namespace ESMCI{
           private:
             std::vector<bool> cmap_;
         };
+        /* An iterator for the nodes in the graph */
         class GraphNodeIterator{
           public:
             friend class DGraph;
@@ -47,41 +59,80 @@ namespace ESMCI{
         typedef GraphNodeIterator vertex_iterator;
         friend class GraphNodeIterator;
         DGraph();
+        /* Add a node to the dgraph */
         vertex_key add_node(const T& val);
+        /* Remove a node from the graph */
         void rem_node(const vertex_key &v);
+        /* Melt an existing node in the graph
+         *
+         * The node is removed and the incoming and outgoing edges
+         * are "passed through" to the neighboring nodes
+         */
         void melt_node(const vertex_key &v);
+        /* Fuse two nodes into a single node in the graph */
         void fuse_nodes(const vertex_key &v1, const vertex_key &v2);
+        /* Add an edge between two nodes in the graph */
         void add_edge(const vertex_key &from, const vertex_key &to);
+        /* Remove an edge between two nodes in the graph */
         void rem_edge(const vertex_key &from, const vertex_key &to);
+        /* Get neighbors of a particular vertex */
         std::vector<vertex_key> get_neighbors(const vertex_key &v) const;
+        /* Get parents (since edges are directed) of a vertex */
         std::vector<vertex_key> get_parents(const vertex_key &v) const;
+        /* Get the value stored in a node */
         T &get_val(const vertex_key &v);
+        /* Get the number of nodes in the graph */
         std::size_t size(void ) const;
+        /* Create a color map that can be used with the current graph.
+         * Color maps are used as associative maps for operations like
+         * traversals etc.
+         */
         ColorMap create_color_map(void ) const;
+        /* Vertex iterator functions to traverse a graph */
         vertex_iterator begin(void ) const;
         vertex_iterator end(void ) const;
+        /* Print the graph to a file. Currently the DOT format is supported */
         void print_to_file(const std::string &fname) const;
+        /* Get the inverse of a graph.
+         * In the inverse graph all the edges of the graph are reversed
+         * in direction
+         */
         DGraph<T> inverse(void ) const;
+        /* Add a root to the graph */
         vertex_key add_root(const T& val);
       private:
+        /* Internal class to represent a node of the graph */
         class GraphNode{
           public:
             typedef std::vector<vertex_key>::const_iterator vertex_key_iterator;
             GraphNode(const T &val);
             T &get_val(void );
+            /* Add / remove edges to/from the node */
             void add_iedge(const vertex_key &from);
             void add_oedge(const vertex_key &to);
             bool rem_iedge(const vertex_key &from);
             bool rem_oedge(const vertex_key &to);
+            /* Functions to iterate through vertices with incoming edges
+             * from this node
+             */
             vertex_key_iterator ibegin(void ) const;
             vertex_key_iterator iend(void ) const;
+            /* Functions to iterate through vertices with outgoing edges
+             * from this node
+             */
             vertex_key_iterator obegin(void ) const;
             vertex_key_iterator oend(void ) const;
+            /* Get neighboring nodes of this node */
             std::vector<vertex_key> get_neighbors(void ) const;
+            /* Get parents of this node */
             std::vector<vertex_key> get_parents(void ) const;
+            /* Returns true if this node has any neighbors, false otherwise */
             bool has_neighbors(void ) const;
+            /* Returns true if this node is valid, false otherwise */
             bool is_valid(void ) const;
+            /* Mark a node as invalid, allows dirty nodes in a graph */
             void mark_invalid(void );
+            /* Convert node value to a string. Useful to serializing a graph */
             std::string to_string(void ) const;
           private:
             T val_;

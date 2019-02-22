@@ -10,6 +10,7 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* The base class for all dependency graph visitors */
     template<typename T>
     class DGraphVisitor{
       public:
@@ -46,6 +47,7 @@ namespace ESMCI{
       cmap_.reset();
     }
 
+    /* A visitor for printing a dgraph */
     template<typename T>
     class PrintDGraphVisitor : public DGraphVisitor<T>{
       public:
@@ -65,7 +67,10 @@ namespace ESMCI{
       std::cout << val << ",";
     }
 
-
+    /* A visitor for validating nodes in a graph.
+     * This visitor can be used to make sure that we don't have duplicate
+     * visits (in a traversal)
+     */
     template<typename T>
     class NodeValidatorVisitor : public DGraphVisitor<T>{
       public:
@@ -106,6 +111,9 @@ namespace ESMCI{
       return nnodes_visited_;
     }
 
+    /* A visitor class that includes information on the parent of a
+     * node
+     */
     template<typename T>
     class DGraphPVisitor : public DGraphVisitor<T>{
       public:
@@ -135,7 +143,11 @@ namespace ESMCI{
       DGraphVisitor<T>::on_node(v, val);
     }
 
-    // Graph algorithms
+    /* Graph algorithms : All traversal algorithms call the appropriate
+     * trigger functions (on_node etc) on the visitor provided by the
+     * user
+     */
+    /* Breadth first search algorithm using regular Dgraph visitors */
     template<typename T>
     void DGraph_BFS(DGraph<T> &g, DGraphVisitor<T> &vis, const typename DGraph<T>::vertex_key &v)
     {
@@ -159,6 +171,7 @@ namespace ESMCI{
       }
     }
 
+    /* Depth first search algorithm for dgraphs */
     template<typename T>
     void DGraph_DFS(DGraph<T> &g, DGraphVisitor<T> &vis, const typename DGraph<T>::vertex_key &v)
     {
@@ -174,6 +187,9 @@ namespace ESMCI{
       }
     }
 
+    /* Breadth first search algorithm using Dgraph visitors with information
+     * on parents to each node
+     */
     template<typename T>
     void DGraph_BFS(DGraph<T> &g, DGraphPVisitor<T> &vis, const typename DGraph<T>::vertex_key &v)
     {
@@ -210,6 +226,9 @@ namespace ESMCI{
       }
     }
 
+    /* A modified breadth first search algorithm where on_node() trigger
+     * is not called for nodes that don't have parents
+     */
     template<typename T>
     void DGraph_MBFS(DGraph<T> &g, DGraphPVisitor<T> &vis, const typename DGraph<T>::vertex_key &v)
     {

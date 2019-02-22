@@ -35,20 +35,34 @@ namespace ESMCI{
     template<typename T>
     class LoadBalancer{
       public:
+        /* The algorithms supported by the load balancer
+         * The only algorithm supported for now is to balance load by
+         * minimizing idle time between the execution blocks (component
+         * phases running on the same range of PETs)
+         */
         typedef enum{
           LBAL_ALG_MIN_IDLE_TIME = 1
         } LoadBalancerAlg;
         LoadBalancer();
         LoadBalancer(const std::vector<CompInfo<T> > &comp_infos);
         LoadBalancerAlg set_opt_method(const LoadBalancerAlg &opt_alg);
+        /* Set the information for the load balancer.
+         * Users provide a list of component infos corresponding to
+         * component phases in a component layout.
+         */
         void set_lb_info(const std::vector<CompInfo<T> > &comp_infos,
               bool is_user_info = false);
+        /* Optimize the component phase layouts using the algorithm
+         * set by the user
+         */
         bool optimize(std::vector<int> &opt_npets,
                     std::vector<std::pair<int, int> > &opt_pet_ranges,
                     T &opt_wtime);
+        /* Get the best/optimal PET layout available */
         bool get_optimal(std::vector<int> &opt_npets,
                     std::vector<std::pair<int, int> > &opt_pet_ranges,
                     T &opt_wtime);
+        /* Get the next optimal layout candidate */
         bool get_next_optimal_candidate(std::vector<int> &opt_npets,
                     std::vector<std::pair<int, int> > &opt_pet_ranges,
                     T &opt_wtime);
@@ -87,8 +101,11 @@ namespace ESMCI{
         std::vector<LoadBalancerBackupInfo> ex_backup_infos_;
         /* Backup infos related to possible candidates for user */
         std::vector<LoadBalancerBackupInfo> candidate_backup_infos_;
+        /* Update backup info associated with a user execution */
         void update_ex_backup_info(const std::vector<CompInfo<T> > &comp_infos);
+        /* Update backup info associated with candidate PET layouts */
         void update_candidate_backup_info(const LoadBalancerBackupInfo &cand_backup_info);
+        /* Get constraint functions associated with a PET layout */
         bool get_constraint_funcs(
           std::vector<std::vector<ExecBlock<T> > > &pexec_blocks,
           std::vector<TwoDVIDPoly<T> > &twodvidp_cfuncs,
@@ -96,9 +113,11 @@ namespace ESMCI{
           std::vector<MVIDLPoly<T> > &reshape_mvidlp_cfuncs,
           std::vector<std::string> &cfuncs_vnames,
           std::vector<int> &cfuncs_vivals);
+        /* Get the PET layout */
         void get_pet_layout(const std::vector<int> &opt_npets,
           std::vector<std::pair<int, int> > &opt_pet_range,
           T &opt_wtime);
+        /* Get the predicted wallclock time for a PET layout */
         T get_wtime(std::vector<std::pair<int, int> > &new_pet_ranges) const;
           
     }; //class LoadBalancer

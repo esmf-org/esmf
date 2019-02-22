@@ -11,6 +11,7 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* Get a linear fit for values in 2D space defined by xvals and yvals */
     template<typename CType, typename VType>
     int LinearFit(const std::vector<VType> &xvals, const std::vector<VType> &yvals,
                   UVIDPoly<CType> &poly)

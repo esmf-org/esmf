@@ -34,17 +34,31 @@ namespace ESMCI{
         SESolver(const std::vector<std::string> &vnames, const std::vector<T> &init_vals, const std::vector<TwoVIDPoly<T> > &funcs);
         SESolver(const std::vector<std::string> &vnames, const std::vector<T> &init_vals, const std::vector<TwoDVIDPoly<T> > &two_dvid_funcs, const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs);
         SESolver(const std::vector<std::string> &vnames, const std::vector<T> &init_vals, const std::vector<TwoVIDPoly<T> > &two_vid_funcs, const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs);
+        /* Set the initial values for the solver */
         void set_init_vals(const std::vector<T> &init_vals);
+        /* Set the constraint functions for the solver */
         void set_funcs(const std::vector<TwoVIDPoly<T> > &funcs);
         void set_funcs(const std::vector<TwoDVIDPoly<T> > &dfuncs);
         void set_funcs(const std::vector<MVIDLPoly<T> > &mvid_lpoly_funcs);
+        /* Set reshape functions for the solver. These functions are used
+         * to reshape the solution in the solver when the solutions 
+         * diverge from user constraints (e.g. Ensure that Sum(Xi) = C )
+         */
         void set_reshape_funcs(const std::vector<MVIDLPoly<T> >
           &reshape_mvid_lpoly_funcs);
+        /* Scale and center the functions for the given vals */
         void scale_and_center_funcs(const std::vector<T> &vals);
+        /* Set the maximum number of iterations for the solver */
         void set_niters(int niters);
+        /* Minimize the values based on the user specified constraints */
         std::vector<T> minimize(const UConstraintValGenerator &uc_vgen);
 
       private:
+        /* The solver is,
+         * Under constrained : No enough equations to solve the variables
+         * Normal constrained : Same number of equations as the variables
+         * Over constrained : More equations than variables
+         */
         enum Sol_Constraint_type{
           SOL_UNDER_CONSTRAINED,
           SOL_NORMAL_CONSTRAINED,
@@ -225,6 +239,10 @@ namespace ESMCI{
           }
       };
 
+      /* Map function variables to global variables
+       * Pre-computing these maps in the solver reduces the execution time
+       * of the solver
+       */
       template<typename T>
       void map_fv2gv(
         const std::vector<std::vector<GenPoly<T, int> *> > &j,

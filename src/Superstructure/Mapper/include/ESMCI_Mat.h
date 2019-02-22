@@ -26,29 +26,44 @@ namespace ESMCI{
         Matrix(std::initializer_list<int> dims, std::initializer_list<T> data);
         Matrix(const std::vector<int> &dims, const T &val);
         
+        /* Get the matrix dimensions */
         std::vector<int> get_dims(void ) const;
+        /* Get a reference to the data strored in the matrix */
         const T *get_data_by_ref(void ) const;
         T *get_data_by_ref(void );
+        /* Get the data stored in the matrix */
         std::vector<T> get_data(void ) const;
 
+        /* Get the transpose of the matrix */
         Matrix<T> transpose(void ) const;
+        /* Get the inverse of the matrix */
         Matrix<T> inv(void ) const;
+        /* Get the pseudo inverse of the matrix */
         Matrix<T> pinv(void ) const;
 
+        /* Returns true if the matrix, m, is equal to this matrix,
+         * false otherwise. This function uses a tolerance, tol, to
+         * compare the values stored in the matrix (unlike == that
+         * does not provide a tolerance)
+         */
         bool equals(const Matrix<T> &m, double tol) const;
 
+        /* Compare if two matrices are equal */
         template<typename U>
         friend bool operator==(const Matrix<U> &lhs, const Matrix<U> &rhs);
+        /* Compare if all values in the matrix is equal to val */
         template<typename U>
         friend bool operator==(const Matrix<U> &m, const U &val);
         template<typename U>
         friend bool operator==(const U &val, const Matrix<U> &m);
+        /* Operator to add/subtract/multiply two matrices */
         template<typename U>
         friend Matrix<U> operator+(const Matrix<U> &lhs, const Matrix<U> &rhs);
         template<typename U>
         friend Matrix<U> operator-(const Matrix<U> &lhs, const Matrix<U> &rhs);
         template<typename U>
         friend Matrix<U> operator*(const Matrix<U> &lhs, const Matrix<U> &rhs);
+        /* Operator to scale a matrix by a scalar */
         template<typename U, typename V>
         friend Matrix<U> operator*(const Matrix<U> &lhs, const V &rhs);
         template<typename U, typename V>

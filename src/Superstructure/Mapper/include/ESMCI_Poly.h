@@ -15,6 +15,7 @@ namespace ESMCI{
   namespace MapperUtil{
 
     namespace PolyCSInfoUtil{
+      /* Find and return the mean of the values in vals */
       template<typename VType>
       VType GetMean(const std::vector<VType> &vals)
       {
@@ -68,11 +69,13 @@ namespace ESMCI{
         PolyCSInfo(const T &mean, const T &stddev);
         T get_mean(void ) const;
         T get_stddev(void ) const;
+        /* Functions to center and scale values */
         T center_and_scale(const T& val) const;
         void center_and_scale(T &val) const;
         std::vector<T> center_and_scale(const std::vector<T> &vals) const;
         void center_and_scale(std::vector<T> &vals) const;
         bool operator==(const PolyCSInfo<T> &other) const;
+        /* Function to create a center and scale info for a polynomial */
         static PolyCSInfo<T> create_poly_csinfo(const std::vector<T> &vals);
       private:
         T mean_;

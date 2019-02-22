@@ -13,11 +13,20 @@
 namespace ESMCI{
   namespace MapperUtil{
 
+    /* The Run sequence dependency graph
+     *
+     * This class stores the dependency graph gleaned from a NUOPC
+     * run sequence
+     */
     class RunSeqDGraph{
       public:
+        /* Internal class to represent a run sequence dgraph node */
         class RunSeqDGraphNode{
           public:
             typedef DGraph<RunSeqDGraphNode>::vertex_key vertex_key;
+            /* Create a dgraph node to store component name, phase name
+             * and line/iteration number from the NUOPC run sequence
+             */
             RunSeqDGraphNode(const std::string &comp_name, const std::string &phase_name, int line_num, int iter_num);
             std::string get_comp_name(void ) const;
             std::string get_phase_name(void ) const;
@@ -46,6 +55,7 @@ namespace ESMCI{
         std::vector<CompInfo<double> > get_opt_layout(
           const std::vector<CompInfo<double> > &comp_infos);
       private:
+        /* A visitor class to detect components phases in a run sequence graph */
         class RunSeqDGraphCompDetector : public DGraphVisitor<RunSeqDGraphNode>{
           public:
             RunSeqDGraphCompDetector(DGraph<RunSeqDGraphNode> &g, DGraph<RunSeqDGraphNode>::ColorMap &cmap, const std::string &comp_name);
@@ -55,6 +65,7 @@ namespace ESMCI{
             const std::string &comp_name_;
             bool is_present_;
         };
+        /* A visitor to merge component phases in a rseq dgraph */
         class RunSeqDGraphCompPhaseMerger : public DGraphPVisitor<RunSeqDGraphNode>{
           public:
             RunSeqDGraphCompPhaseMerger(DGraph<RunSeqDGraphNode> &g, DGraph<RunSeqDGraphNode>::ColorMap &cmap);
@@ -64,6 +75,7 @@ namespace ESMCI{
           private:
             DGraph<RunSeqDGraphNode> &g_;
         };
+        /* A visitor to generate a PET layout from a rseq dgraph */
         class RunSeqDGraphLayoutGenerator : public DGraphPVisitor<RunSeqDGraphNode>{
           public:
             RunSeqDGraphLayoutGenerator(
