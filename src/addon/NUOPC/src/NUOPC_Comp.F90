@@ -1220,15 +1220,17 @@ module NUOPC_Comp
     endif
 
     ! Add more Attributes -> NUOPC/Driver, NUOPC/Model, NUOPC/Mediator AttPacks
-    allocate(attrList(5))
+    allocate(attrList(6))
     attrList(1) = "InternalInitializePhaseMap"  ! list of strings to map str to phase #
     attrList(2) = "NestingGeneration" ! values: integer starting 0 for parent
     attrList(3) = "Nestling"  ! values: integer starting 0 for first nestling
     attrList(4) = "InitializeDataComplete"  ! values: strings "false"/"true"
     attrList(5) = "InitializeDataProgress"  ! values: strings "false"/"true"
+    attrList(6) = "HierarchyProtocol"       ! strings
     ! add Attribute packages
     call ESMF_AttributeAdd(comp, convention="NUOPC", purpose=trim(kind), &
-      attrList=attrList, nestConvention="NUOPC", nestPurpose="Component", rc=localrc)
+      attrList=attrList, nestConvention="NUOPC", nestPurpose="Component", &
+      rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
     deallocate(attrList, stat=stat)
@@ -1289,7 +1291,12 @@ module NUOPC_Comp
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      
+    call NUOPC_CompAttributeSet(comp, &
+      name="HierarchyProtocol", value="PushUpAllExportsUnsatisfiedImports", &
+      rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+
   end subroutine
   !-----------------------------------------------------------------------------
   
