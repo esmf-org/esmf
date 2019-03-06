@@ -4735,7 +4735,7 @@ end function ESMF_MeshEmptyCreate
     integer  :: localrc
     logical  :: isCreated
     integer, parameter :: maxElemArrays=2
-    integer            :: numElemArrays=0
+    integer            :: numElemArrays
     type(ESMF_Pointer) :: elemArrays(maxElemArrays)
     integer :: infoTypeElemArrays(maxElemArrays)
     integer,parameter :: infoTypeElem_Mask=1
@@ -4896,6 +4896,9 @@ end function ESMF_MeshEmptyCreate
 
     ! Get number owned elements
     if (present(numOwnedElements)) numOwnedElements =mesh%numOwnedElements
+
+    ! Init number of elem arrays for which user is asking
+    numElemArrays=0
 
     ! Get elem mask information
     if (present(elemMaskArray)) then
