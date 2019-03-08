@@ -583,57 +583,39 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !-----------------------------------------------------------------
 
     ncstat = nf90_open(weightFile, NF90_NOWRITE, nc_file_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_open error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_open: '//weightFile,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     !-----------------------------------------------------------------
     ! Title
     !-----------------------------------------------------------------
     ncstat = nf90_inquire_attribute(nc_file_id, nf90_global, 'title', len=titleLen)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inquire_attribute error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inquire_attribute',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     if(len(title) < titleLen) then
       print *, "Not enough space to put title."
       return
     end if
+
     ncstat = nf90_get_att(nc_file_id, nf90_global, "title", title)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_att error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_att',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     !-----------------------------------------------------------------
     ! Regridmethod
     !-----------------------------------------------------------------
     ncstat = nf90_inquire_attribute(nc_file_id, nf90_global, 'map_method', &
              len=methodLen)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inquire_attribute error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inquire_attribute',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     if(len(methodStr) < methodLen) then
       print *, "Not enough space to put regridmethod string."
       return
     end if
+
     ncstat = nf90_get_att(nc_file_id, nf90_global, "map_method", methodStr)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_att error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_att',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     regridmethod = ESMF_REGRIDMETHOD_BILINEAR
     if (trim(methodStr) .eq. "Conservative remapping")  then
@@ -645,23 +627,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !-----------------------------------------------------------------
     ncstat = nf90_inquire_attribute(nc_file_id, nf90_global, 'normalization', &
              len=normLen)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inquire_attribute error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inquire_attribute',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     if(len(normStr) < normLen) then
       print *, "Not enough space to put normalization string."
       return
     end if
+
     ncstat = nf90_get_att(nc_file_id, nf90_global, "normalization", normStr)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_att error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_att error',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! translate normalization into normtype
     normType=ESMF_NORMTYPE_DSTAREA
@@ -674,53 +649,32 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !-----------------------------------------------------------------
 
     ncstat = nf90_inq_dimid(nc_file_id, 'n_a', nc_srcdim_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_dimid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inq_dimid',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     ncstat = nf90_inquire_dimension(nc_file_id, nc_srcdim_id, len=src_dim)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inquire_variable error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inquire_variable',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     !-----------------------------------------------------------------
     ! destination grid dimensions
     !-----------------------------------------------------------------
 
     ncstat = nf90_inq_dimid(nc_file_id, 'n_b', nc_dstdim_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_dimid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inq_dimid',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     ncstat = nf90_inquire_dimension(nc_file_id, nc_dstdim_id, len=dst_dim)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inquire_variable error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
-
-
-
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inquire_variable',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     !------------------------------------------------------------------------
     !     close input file
     !------------------------------------------------------------------------
 
     ncstat = nf90_close(nc_file_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_close error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_close',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
@@ -776,53 +730,35 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     !-----------------------------------------------------------------
 
     ncstat = nf90_open(weightFile, NF90_NOWRITE, nc_file_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_open error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__, rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_open: '//weightFile,  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     !-----------------------------------------------------------------
     ! get the grid coordinates
     !-----------------------------------------------------------------
     cart = .false.
     ncstat = nf90_inq_varid(nc_file_id, 'yc_a', nc_srcgridlat_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inq_varid',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     ncstat = nf90_get_var(ncid=nc_file_id, varid=nc_srcgridlat_id, &
       values=src_lat)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_var error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_var',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! get the units of the grid coordinates
     ncstat = nf90_inquire_attribute(nc_file_id, nc_srcgridlat_id, 'units', &
       len=unitsLen)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inquire_attribute error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inquire_attribute',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     if(len(units) < unitsLen) then
       print *, "Not enough space to get units."
       return
     endif
+
     ncstat = nf90_get_att(nc_file_id, nc_srcgridlat_id, "units", buffer)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_att error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_att',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     units = buffer(1:unitsLen)
     ! convert to radians if coordinates are in degrees
@@ -839,41 +775,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ncstat = nf90_inq_varid(nc_file_id, 'xc_a', nc_srcgridlon_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inq_varid',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     ncstat = nf90_get_var(ncid=nc_file_id, varid=nc_srcgridlon_id, &
       values=src_lon)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_var error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_var',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! get the units of the grid coordinates
     ncstat = nf90_inquire_attribute(nc_file_id, nc_srcgridlon_id, 'units', &
       len=unitsLen)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inquire_attribute error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inquire_attribute',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     if(len(units) < unitsLen) then
       print *, "Not enough space to get units."
       return
     endif
+
     ncstat = nf90_get_att(nc_file_id, nc_srcgridlon_id, "units", buffer)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_att error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_att',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     units = buffer(1:unitsLen)
     ! convert to radians if coordinates are in degrees
@@ -910,41 +832,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! get the destination grid coordinates
     !-----------------------------------------------------------------
     ncstat = nf90_inq_varid(nc_file_id, 'yc_b', nc_dstgridlat_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inq_varid',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     ncstat = nf90_get_var(ncid=nc_file_id, varid=nc_dstgridlat_id, &
       values=dst_lat)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_var error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_var',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! get the units of the grid coordinates
     ncstat = nf90_inquire_attribute(nc_file_id, nc_dstgridlat_id, 'units', &
       len=unitsLen)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inquire_attribute error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inquire_attribute',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     if(len(units) < unitsLen) then
       print *, "Not enough space to get units."
       return
     endif
+
     ncstat = nf90_get_att(nc_file_id, nc_dstgridlat_id, "units", buffer)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_att error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_att',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     units = buffer(1:unitsLen)
     ! convert to radians if coordinates are in degrees
@@ -961,41 +869,27 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ncstat = nf90_inq_varid(nc_file_id, 'xc_b', nc_dstgridlon_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inq_varid',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     ncstat = nf90_get_var(ncid=nc_file_id, varid=nc_dstgridlon_id, &
       values=dst_lon)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_var error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_var',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ! get the units of the grid coordinates
     ncstat = nf90_inquire_attribute(nc_file_id, nc_dstgridlon_id, 'units', &
       len=unitsLen)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inquire_attribute error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inquire_attribute',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     if(len(units) < unitsLen) then
       print *, "Not enough space to get units."
       return
     endif
+
     ncstat = nf90_get_att(nc_file_id, nc_dstgridlon_id, "units", buffer)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_att error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_att',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     units = buffer(1:unitsLen)
     if ((trim(units) == "degrees" .or. trim(units) == "radians") .and. &
@@ -1031,118 +925,72 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! get the grid areas
     !-----------------------------------------------------------------
     ncstat = nf90_inq_varid(nc_file_id, 'area_a', nc_srcarea_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inq_varid',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     ncstat = nf90_get_var(ncid=nc_file_id, varid=nc_srcarea_id, &
       values=src_area)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_var error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_var',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ncstat = nf90_inq_varid(nc_file_id, 'area_b', nc_dstarea_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inq_varid error',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     ncstat = nf90_get_var(ncid=nc_file_id, varid=nc_dstarea_id, &
       values=dst_area)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_var error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_var',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     !-----------------------------------------------------------------
     ! get the grid masks
     !-----------------------------------------------------------------
     ncstat = nf90_inq_varid(nc_file_id, 'mask_a', nc_srcmask_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inq_varid',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     ncstat = nf90_get_var(ncid=nc_file_id, varid=nc_srcmask_id, &
       values=src_mask)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_var error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_var',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ncstat = nf90_inq_varid(nc_file_id, 'mask_b', nc_dstmask_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inq_varid',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     ncstat = nf90_get_var(ncid=nc_file_id, varid=nc_dstmask_id, &
       values=dst_mask)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_var error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_var',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     !-----------------------------------------------------------------
     ! get the grid fracs
     !-----------------------------------------------------------------
     ncstat = nf90_inq_varid(nc_file_id, 'frac_a', nc_srcfrac_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inq_varid',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     ncstat = nf90_get_var(ncid=nc_file_id, varid=nc_srcfrac_id, &
       values=src_frac)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_var error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_var',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     ncstat = nf90_inq_varid(nc_file_id, 'frac_b', nc_dstfrac_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_inq_varid error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_inq_varid',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
     ncstat = nf90_get_var(ncid=nc_file_id, varid=nc_dstfrac_id, &
       values=dst_frac)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_get_var error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_get_var',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     !------------------------------------------------------------------------
     !     close input file
     !------------------------------------------------------------------------
 
     ncstat = nf90_close(nc_file_id)
-    if(ncstat /= 0) then
-      write (msg, '(a,i4)') "- nf90_close error:", ncstat
-      call ESMF_LogSetError(ESMF_RC_SYS, msg=msg, &
-        line=__LINE__, file=__FILE__ , rcToReturn=rc)
-      return
-    endif
+    if (ESMF_LogFoundNetCDFError (ncstat, msg='nf90_close',  &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
     if(present(rc)) rc = ESMF_SUCCESS
 
