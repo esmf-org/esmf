@@ -3510,7 +3510,6 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
        end if
     end if
 
-    call ESMF_VMBarrier(vm)
     deallocate(allCounts, stat=memstat)
     if (ESMF_LogFoundDeallocError(memstat,  &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3524,8 +3523,9 @@ subroutine ESMF_OutputScripWeightFile (wgtFile, factorList, factorIndexList, &
        deallocate(weightbuf, stat=memstat)
        if (ESMF_LogFoundDeallocError(memstat,  &
            ESMF_CONTEXT, rcToReturn=rc)) return
-
     end if
+    call ESMF_VMBarrier(vm)
+
     deallocate(indexbuf, stat=memstat)
     if (ESMF_LogFoundDeallocError(memstat,  &
          ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3843,7 +3843,6 @@ subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
        end if
      end if
 
-     call ESMF_VMBarrier(vm)
      deallocate(allCounts, stat=memstat)
       if (ESMF_LogFoundDeallocError(memstat,  &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -3857,8 +3856,9 @@ subroutine ESMF_OutputSimpleWeightFile (wgtFile, factorList, factorIndexList, &
        deallocate(weightbuf, stat=memstat)
        if (ESMF_LogFoundDeallocError(memstat,  &
            ESMF_CONTEXT, rcToReturn=rc)) return
-
      end if
+     call ESMF_VMBarrier(vm)
+
      deallocate(indexbuf, stat=memstat)
      if (ESMF_LogFoundAllocError(memstat,  &
          ESMF_CONTEXT, rcToReturn=rc)) return
