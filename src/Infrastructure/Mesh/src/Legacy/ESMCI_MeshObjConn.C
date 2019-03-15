@@ -567,6 +567,9 @@ template void edge_info<>(MeshObj** node_begin,
                bool
                );
 
+#if !defined (ESMF_PGI_TEMPLATE_INSTANTIATION_BUG)
+// Some older PGI compilers can not distinguish between this instantiation and
+// the preceding instantiation...
 template void edge_info<>(std::vector<MeshObj*>::iterator node_begin,
                std::vector<MeshObj*>::iterator node_end,
                std::vector<MeshObj*>::iterator elem_begin,
@@ -575,6 +578,7 @@ template void edge_info<>(std::vector<MeshObj*>::iterator node_begin,
                int *polarity, // out
                bool
                );
+#endif
 
 template <typename obj_iter>
 void face_info(obj_iter node_begin, obj_iter node_end,
@@ -705,11 +709,15 @@ template void common_objs<>(MeshObj** in_obj_begin, MeshObj** in_obj_end,
                  UInt out_obj_type, 
                  std::vector<MeshObj*> &out_obj);
 
+#if !defined (ESMF_PGI_TEMPLATE_INSTANTIATION_BUG)
+// Some older PGI compilers can not distinguish between this instantiation and
+// the preceding instantiation...
 template void common_objs<>(std::vector<MeshObj*>::iterator, 
                  std::vector<MeshObj*>::iterator, 
                  UInt rel_type, 
                  UInt out_obj_type, 
                  std::vector<MeshObj*> &out_obj);
+#endif
 
 // ----------------------------------------------------------------------------
 
