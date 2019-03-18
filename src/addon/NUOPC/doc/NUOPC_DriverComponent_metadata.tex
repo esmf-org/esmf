@@ -14,7 +14,7 @@ The Driver component metadata is implemented as an ESMF Attribute Package:
 Attribute name had to be broken into multiple lines. When that happens, a hyphen shows up to indicate the line break. The hyphen
 is {\em not} part of the Attribute name!
 
-\begin{longtable}{|p{.22\textwidth}|p{.6\textwidth}|p{.2\textwidth}|}
+\begin{longtable}{|p{.22\textwidth}|p{.5\textwidth}|p{.3\textwidth}|}
      \hline\hline
      {\bf Attribute name} & {\bf Definition} & {\bf Controlled vocabulary}\\
      \hline\hline
@@ -46,5 +46,6 @@ is {\em not} part of the Attribute name!
      {\tt Nestling} & Integer value enumerating siblings within the same generation.& 0, 1, 2, ...\\ \hline
      {\tt Initialize\-DataComplete} & String value indicating whether all initialize data dependencies have been satisfied.& false, true\\ \hline
      {\tt Initialize\-DataProgress} & String value indicating whether progress is being made resolving initialize data dependencies.& false, true\\ \hline
+     {\tt HierarchyProtocol} & String value specifying the hierarchy protocol.& "PushUpAllExportsUnsatisfiedImports", {\em All other values currently disable the hierarchy protocol.}\\ \hline
      \hline
 \end{longtable}

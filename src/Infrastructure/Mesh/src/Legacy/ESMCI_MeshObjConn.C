@@ -566,12 +566,10 @@ template void edge_info<>(MeshObj** node_begin,
                int *polarity, // out
                bool
                );
-#ifdef __INTEL_COMPILER
-// The following instantiation is necessary for Intel-12.0.x on Cray systems.
-// Intel-12.0.x on regulare Linux systems do not seem to need this. Also
-// Intel-12.1.x on Cray seems to have fixed the problem again, however, this 
-// work around does not seem to bother any of the Intel compilers, even if they
-// work without it.
+
+#if !defined (ESMF_PGI_TEMPLATE_INSTANTIATION_BUG)
+// Some older PGI compilers can not distinguish between this instantiation and
+// the preceding instantiation...
 template void edge_info<>(std::vector<MeshObj*>::iterator node_begin,
                std::vector<MeshObj*>::iterator node_end,
                std::vector<MeshObj*>::iterator elem_begin,
@@ -711,11 +709,9 @@ template void common_objs<>(MeshObj** in_obj_begin, MeshObj** in_obj_end,
                  UInt out_obj_type, 
                  std::vector<MeshObj*> &out_obj);
 
-#ifdef __INTEL_COMPILER
-// Intel's icpc version < 11.0 have a problem with implicit template
-// instantiation if compiled and linked into a shared library.
-// Use explicit instantiation to help these compilers.
-
+#if !defined (ESMF_PGI_TEMPLATE_INSTANTIATION_BUG)
+// Some older PGI compilers can not distinguish between this instantiation and
+// the preceding instantiation...
 template void common_objs<>(std::vector<MeshObj*>::iterator, 
                  std::vector<MeshObj*>::iterator, 
                  UInt rel_type, 

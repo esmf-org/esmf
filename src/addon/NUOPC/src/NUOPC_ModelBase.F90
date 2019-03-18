@@ -467,6 +467,10 @@ module NUOPC_ModelBase
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
         return  ! bail out
       if (clockIsPresent) then
+        call ESMF_GridCompGet(gcomp, clock=internalClock, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) &
+          return  ! bail out
         call ESMF_ClockPrint(internalClock, options="currTime", &
           preString=">>>"//trim(name)//&
           ": entered Initialize (phase="//trim(adjustl(pLabel))// &

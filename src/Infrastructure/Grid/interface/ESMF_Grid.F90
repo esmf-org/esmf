@@ -2804,7 +2804,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
        integer :: staggerEdgeUWidth(ESMF_MAXDIM)
        integer :: staggerAlign(ESMF_MAXDIM)
        integer :: staggerLBound(ESMF_MAXDIM)
-       type(ESMF_Index_Flag) :: indexflag
+       type(ESMF_Index_Flag) :: indexflag, arrayIndexflag
        integer :: i, j, nStaggers
        type(ESMF_ArrayBundle) :: srcAB, dstAB
        type(ESMF_RouteHandle) :: routehandle
@@ -3061,11 +3061,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ! dim Arrays along one dimension
             srcRepl(k) = .true.
             call ESMF_ArrayGet(srcA(k), distgrid=dg, typekind=tk, &
-              arrayToDistGridMap=atodMap, rc=localrc)
+              arrayToDistGridMap=atodMap, indexflag=arrayIndexflag, &
+              rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             srcA2D(k) = ESMF_ArrayCreate(distgrid=dg, typekind=tk, &
-              indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+              indexflag=arrayIndexflag, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             if (localDECount/=0) then
@@ -3122,11 +3123,12 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             dstA2D(k) = dstA(k)
           else
             dstRepl(k) = .true.
-            call ESMF_ArrayGet(dstA(k), distgrid=dg, typekind=tk, rc=localrc)
+            call ESMF_ArrayGet(dstA(k), distgrid=dg, typekind=tk, &
+                 indexflag=arrayIndexflag, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
             dstA2D(k) = ESMF_ArrayCreate(distgrid=dg, typekind=tk, &
-              indexflag=ESMF_INDEX_GLOBAL, rc=localrc)
+              indexflag=arrayIndexflag, rc=localrc)
             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
           endif
