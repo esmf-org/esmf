@@ -1995,7 +1995,13 @@ int VMK::getLpid(int i){
 int VMK::getMaxTag(){
   int *value;
   int flag;
+#if MPI_VERSION >= 2
+  // TODO: MPI_TAG_UB is also deprecated in MPI 2.0.
+  MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB, &value, &flag);
+#else
+  // MPI_Attr_get is deprecated in MPI 2.0
   MPI_Attr_get(MPI_COMM_WORLD, MPI_TAG_UB, &value, &flag);
+#endif
   if (flag)
     return *value;
   else
