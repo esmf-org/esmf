@@ -322,7 +322,24 @@ int Zoltan_RB_find_bisector(
     /* Describe struct bisector to MPI. Add MPI_UB at the end just to be safe. */
     int lengths[4] = {2,5,4*MAX_BISECT_WGTS,1};
     MPI_Aint ind[4], offset;
-    MPI_Datatype types[4] = {MPI_DOUBLE, MPI_INT, MPI_DOUBLE, MPI_UB};
+    MPI_Datatype types[4] = {MPI_DOUBLE, MPI_INT, MPI_DOUBLE, 0};
+#if MPI_VERSION >= 2
+    /* Since we do not use arrays of our defined type med_type, we don't need */
+    /* MPI_UB or call to MPI_Type_create_resized to mark end of med_type.     */
+#else /* MPI 1.x */
+    /* MPI_UB is deprecated in MPI 2.0 */
+    types[3] = MPI_UB;
+#endif /* MPI_VERSION >= 2 */
+
+#if MPI_VERSION >= 2
+    MPI_Get_address(med, &offset);
+    ind[0] = 0;
+    MPI_Get_address(&(med->countlo), &(ind[1])); 
+    ind[1] -= offset;
+    MPI_Get_address(&(med->totallo[0]), &(ind[2])); 
+    ind[2] -= offset;
+#else
+    /* MPI_Address is deprecated in MPI 2.0 */
     MPI_Address(med, &offset);
     ind[0] = 0;
     MPI_Address(&(med->countlo), &(ind[1])); 
@@ -330,8 +347,16 @@ int Zoltan_RB_find_bisector(
     MPI_Address(&(med->totallo[0]), &(ind[2])); 
     ind[2] -= offset;
     ind[3] = sizeof(struct bisector);
+#endif
 
+#if MPI_VERSION >= 2
+    MPI_Type_create_struct(3, lengths, ind, types, &med_type);
+    /* Since we do not use arrays of med_type, we don't need     */
+    /* to call MPI_Type_create_resized to mark end of med_type.  */
+#else
+    /* MPI_Type_struct is deprecated in MPI 2.0 */
     MPI_Type_struct(4, lengths, ind, types, &med_type);
+#endif
     MPI_Type_commit(&med_type);
 
     MPI_Op_create(&Zoltan_bisector_merge, 1, &med_op);
