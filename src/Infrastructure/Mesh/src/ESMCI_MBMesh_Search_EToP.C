@@ -61,10 +61,10 @@ using std::vector;
 
 // #define DEBUG_MASK
 // #define DEBUG_PCOORDS
-//#define DEBUG_SEARCH
+// #define DEBUG_SEARCH
 // #define DEBUG_SEARCH_RESULTS
 // #define DEBUG_REGRID_STATUS
-//#define ESMF_REGRID_DEBUG_MAP_NODE 4323801
+// #define ESMF_REGRID_DEBUG_MAP_NODE 4323801
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -451,9 +451,30 @@ static int found_func(void *c, void *y) {
   
     // Mark that something is in struct
     si->investigated=true;
-
   } else if (!si->is_in && (dist < si->dist)) {
+    // if quad or hex transform pcoords to [0,1]
+    if (num_nodes > 3)
+      translate(pcoords);
+
+    // set the search data pcoords structure
+    si->snr.pcoord[0] = pcoords[0];
+    si->snr.pcoord[1] = pcoords[1];
+    si->snr.pcoord[2] = pcoords[2];
+
+    si->elem = sr->src_elem;
+    si->elem_masked=elem_masked;
+
+#ifdef DEBUG_PCOORDS
+    printf("%d# Node %d pcoords = [", Par::Rank(), si->snr.dst_gid);
+    for (int i = 0; i < nd; ++i)
+      printf("%f, ", si->snr.pcoord[i]);
+    printf("]\n");
+#endif
+
     si->dist = dist;
+
+    // Mark that something is in struct
+    si->investigated=true;
   }
   
   // Keep searching
