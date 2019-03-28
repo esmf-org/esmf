@@ -55,18 +55,11 @@ program ESMF_ArrayIOUTest
   type(ESMF_Array)                        :: array_2DE, array_2DE_r
   type(ESMF_Array)                        :: array_20DE, array_20DE_r
   type(ESMF_Array)                        :: array_undist, array_undist_r
-  type(ESMF_DistGrid)                     :: distgrid_tmp
-  type(ESMF_Array)                        :: array_tmp
   type(ESMF_Array)                        :: array_gxt
   integer                                 :: rank, tileCount, dimCount, jj
-  integer, allocatable                    :: arrayToDistGridMap(:), regDecomp(:)
-  integer, allocatable                    :: minIndexPTile(:,:), maxIndexPTile(:,:)
-  integer, allocatable                    :: minIndexNew(:), maxIndexNew(:)
-  integer, allocatable                    :: undistLBound(:), undistUBound(:)
   real(ESMF_KIND_R8),    pointer          :: arrayPtrR8D4(:,:,:,:)
   real(ESMF_KIND_R8),    pointer          :: arrayPtrR8D4_r(:,:,:,:)
   real(ESMF_KIND_R8),    pointer          :: arrayPtrR8D1(:)
-  type(ESMF_RouteHandle)                  :: rh
   integer                                 :: rc, de
   integer, allocatable :: totalLWidth(:), totalUWidth(:), &
                        computationalLWidth(:),computationalUWidth(:)
@@ -1516,14 +1509,6 @@ program ESMF_ArrayIOUTest
 
 10 continue
 
-  if (allocated (minIndexPTile)) deallocate (minIndexPTile)
-  if (allocated (maxIndexPTile)) deallocate (maxIndexPTile)
-  if (allocated (arrayToDistGridMap)) deallocate (arrayToDistGridMap)
-  if (allocated (undistLBound)) deallocate (undistLBound)
-  if (allocated (undistUBound)) deallocate (undistUBound)
-  if (allocated (minIndexNew)) deallocate (minIndexNew)
-  if (allocated (maxIndexNew)) deallocate (maxIndexNew)
-  if (allocated (regDecomp)) deallocate (regDecomp)
   if (allocated (attrNameVals)) deallocate (attrNameVals)
 
   !-----------------------------------------------------------------------------
