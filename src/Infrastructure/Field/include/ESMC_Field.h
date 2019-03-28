@@ -755,8 +755,11 @@ int ESMC_FieldRegridStore(
     float *extrapDistExponent,                     // in
     enum ESMC_UnmappedAction_Flag *unmappedaction, // in
     enum ESMC_Logical *ignoreDegenerate,           // in
-    ESMC_Field *srcFracField,                      // out
-    ESMC_Field *dstFracField);                     // out
+    double **factorList,                           // inout
+    int **factorIndexList,                         // inout
+    int *numFactors,                               // inout
+    ESMC_Field *srcFracField,                      // inout
+    ESMC_Field *dstFracField);                     // inout
 
 // !RETURN VALUE:
 //   Return code; equals ESMF_SUCCESS if there are no errors.
@@ -822,6 +825,25 @@ int ESMC_FieldRegridStore(
 //    Specifies what should happen if there are destination points that can't 
 //    be mapped to a source cell. Options are {\tt ESMF\_UNMAPPEDACTION\_ERROR} or
 //    {\tt ESMF\_UNMAPPEDACTION\_IGNORE}. If not specified, defaults to {\tt ESMF\_UNMAPPEDACTION\_ERROR}.
+//  \item [{[factorList]}] 
+//    The list of coefficients for a sparse matrix which interpolates from {\tt srcField} to 
+//    {\tt dstField}. The array coming out of this variable is in the appropriate format to be used
+//    in other ESMF sparse matrix multiply calls, for example {\tt ESMC\_FieldSMMStore()}. 
+//    The {\tt factorList} array is allocated by the method and the user is responsible for 
+//    deallocating it. 
+//  \item [{[factorIndexList]}] 
+//    The indices for a sparse matrix which interpolates from {\tt srcField} to 
+//    {\tt dstField}. This argument is a 2D array containing pairs of source and destination
+//    sequence indices corresponding to the coefficients in the {\tt factorList} argument. 
+//    The first dimension of {\tt factorIndexList} is of size 2. {\tt factorIndexList(1,:)} specifies 
+//    the sequence index of the source element in the {\tt srcField}. {\tt factorIndexList(2,:)} specifies 
+//    the sequence index of the destination element in the {\tt dstField}. The second dimension of 
+//    {\tt factorIndexList} steps through the list of pairs, i.e. {\tt size(factorIndexList,2)==size(factorList)}.
+//    The array coming out of this variable is in the appropriate format to be used
+//    in other ESMF sparse matrix multiply calls, for example {\tt ESMC\_FieldSMMStore()}. 
+//    The {\tt factorIndexList} array is allocated by the method and the user is responsible for deallocating it. 
+//  \item [{[numFactors]}] 
+//    The number of factors returned in {\tt factorList}.
 //  \item [{[srcFracField]}] 
 //    The fraction of each source cell participating in the regridding. Only 
 //    valid when regridmethod is {\tt ESMC\_REGRIDMETHOD\_CONSERVE}.
@@ -1004,6 +1026,32 @@ int ESMC_FieldRegridStoreFile(
 //EOP
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE: ESMC_FieldRegridReleaseFactors - Free resources allocated for weights
+//
+// !INTERFACE:
+  int ESMC_FieldRegridReleaseFactors(double **factorList, int **factorIndexList, int* numFactors);
+
+// !RETURN VALUE:
+//  Return code; equals ESMF_SUCCESS if there are no errors.
+//
+// !DESCRIPTION:
+//
+//  Free resources allocated for regridding weights.
+//
+//  The arguments are:
+//  \begin{description}
+//  \item[factorList]
+//    Pointer to the factorList to be deallocated
+//  \item[factorIndexList]
+//    Pointer to the factorIndexList to be deallocated
+//  \item[numFactors]
+//    Size of factorList
+//  \end{description}
+//
+//EOPI
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 //BOP

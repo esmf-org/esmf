@@ -148,6 +148,9 @@ void FTN_X(f_esmf_regridstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   float *extrapDistExponent,
   ESMC_UnmappedAction_Flag *unmappedaction,
   ESMC_Logical *ignoreDegenerate,
+  double **factorList,
+  int **factorIndexList,
+  int *numFactors,
   ESMCI::Field *srcfracfieldp,
   ESMCI::Field *dstfracfieldp,
   int *rc);
@@ -176,6 +179,8 @@ void FTN_X(f_esmf_regrid)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   int *rc);
 
 void FTN_X(f_esmf_regridrelease)(ESMCI::RouteHandle **routehandlep, int *rc);
+
+void FTN_X(f_esmf_regridreleasefactors)(double **factorList, int **factorIndexList, int* numFactors, int *rc);
 
 void FTN_X(f_esmf_smmstore)(ESMCI::Field *fieldpsrc, ESMCI::Field *fieldpdst,
   const char *filename, ESMCI::RouteHandle **routehandlep,
@@ -1370,6 +1375,9 @@ namespace ESMCI {
     float *extrapDistExponent,
     ESMC_UnmappedAction_Flag *unmappedAction,
     ESMC_Logical *ignoreDegenerate,
+    double **factorList,
+    int **factorIndexList,
+    int *numFactors,
     Field *srcFracField, 
     Field *dstFracField) {
 //
@@ -1427,7 +1435,9 @@ namespace ESMCI {
       dff_created = true;
     }
 
-    FTN_X(f_esmf_regridstore)(fieldpsrc, fieldpdst, 
+    // =====================================================================
+
+    FTN_X(f_esmf_regridstore)(fieldpsrc, fieldpdst,
                               srcMaskArray, &srcMaskLen,
                               dstMaskArray, &dstMaskLen,
                               routehandlep,
@@ -1436,20 +1446,21 @@ namespace ESMCI {
                               regridPoleNPnts,
                               lineType,
                               normType,
-                              extrapMethod,
-                              extrapNumSrcPnts,
-                              extrapDistExponent,
+                              extrapMethod, extrapNumSrcPnts, extrapDistExponent,
                               unmappedAction,
                               ignoreDegenerate,
-                              srcFracField,
-                              dstFracField,
+                              factorList, factorIndexList,
+                              numFactors,
+                              srcFracField, dstFracField,
                               &localrc);
+
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) {
       if (sff_created) delete sff;
       if (dff_created) delete dff;
       return rc;
     }
+
     if (sff_created) delete sff;
     if (dff_created) delete dff;
 
@@ -1642,6 +1653,41 @@ namespace ESMCI {
   
     // TODO: why are fields.ptr and routehandle by reference??  from create.. 
     FTN_X(f_esmf_regridrelease)(&routehandlep, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;
+
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::Field::regridreleasefactors()"
+//BOP
+// !IROUTINE:  ESMCI::Field::regridreleasefactors - release resources associated with weights
+//
+// !INTERFACE:
+  int Field::regridreleasefactors(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+    double **factorList,
+    int **factorIndexList,
+    int* numFactors) {
+//
+// !DESCRIPTION:
+//
+//
+//EOP
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMC_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+
+    FTN_X(f_esmf_regridreleasefactors)(factorList, factorIndexList, numFactors,
+      &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &rc)) return rc;
 
