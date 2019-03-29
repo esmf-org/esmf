@@ -1792,7 +1792,8 @@ Array *Array::create(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
     }
-  }else if (pinflag == ESMF_PIN_DE_TO_SSI){
+  }else if (pinflag == ESMF_PIN_DE_TO_SSI || 
+    pinflag == ESMF_PIN_DE_TO_SSI_CONTIG){
     // make DEs accessible from all the PETs that are on the same SSI
     vector<int> temp_counts(rank);
     vector<int> temp_larrayLBound(rank);
@@ -1919,7 +1920,12 @@ Array *Array::create(
     }
     // use the VM ssishm interface to allocate memory for all localDEs
     mh = new VM::memhandle;
-    localrc = cvm->ssishmAllocate(bytes, mh);
+    bool contigFlag = false;  //default
+    if (pinflag == ESMF_PIN_DE_TO_SSI_CONTIG){
+      // contiguous memory allocation over each SSI requested
+      contigFlag = true;
+    }
+    localrc = cvm->ssishmAllocate(bytes, mh, contigFlag);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
       ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
     // loop over all memhandle local PETs and construct LocalArrays for localDEs

@@ -127,7 +127,7 @@ int create_esmf(char* filename, char* infilename, int dualflag, size_t nnodes, s
   fillvalue = -1;
   status = nc_put_att_int(ncid2, cellid, "_FillValue", NC_INT, 1, &fillvalue);
   if (status != NC_NOERR) handle_error(status,__LINE__);
-  status = nc_def_var(ncid2,"numElementConn", NC_BYTE, 1, dims, &edgeid);
+  status = nc_def_var(ncid2,"numElementConn", NC_INT, 1, dims, &edgeid);
   if (status != NC_NOERR) handle_error(status,__LINE__);
   strbuf = "Number of nodes per element";
   status = nc_put_att_text(ncid2, edgeid, "long_name", strlen(strbuf)+1, strbuf);
@@ -361,11 +361,12 @@ int main(int argc, char** argv)
   double *nodelats, *nodelons;
   double *inbuf, *inbuf1;
   int *inbuf2;
-  int *dualcells, *dualcellcounts;
+  int *dualcells;
+  int *dualcellcounts;
   int *cells, temp[16];
   int numedges, *next;
-  char *totalneighbors;
-  unsigned char *edges;
+  int *totalneighbors;
+  int *edges;
   int i,i1, j, k, totalnodes, goodnodes, count;
   int *globalnodes;
   int noarea, nocenter, nomask;
@@ -609,7 +610,7 @@ int main(int argc, char** argv)
 
   // cells[] are 0-based index, if not filled, the null value is -1
   //
-  //printf("PET %d: totalnodes %d, maxconnect %d, start and end lat %f %f\n", myrank, totalnodes, maxconnection, startlat, endlat);
+  // printf("PET %d: totalnodes %d, maxconnect %d, start and end lat %f %f\n", myrank, totalnodes, maxconnection, startlat, endlat);
   free(cornerlats);
   free(cornerlons);
 
@@ -617,7 +618,7 @@ int main(int argc, char** argv)
   // also count the maximum cells that vertex belongs to, this
   // this value will decide the maximal edges of the dual mesh
   nodelatlon = (double*)malloc(sizeof(double)*totalnodes*2);
-  totalneighbors=(char*)calloc(totalnodes, sizeof(char));
+  totalneighbors=(int*)calloc(totalnodes, sizeof(int));
   for (i=0; i<totalnodes; i++) {
     nodelatlon[i*2]=nodelons[i];
     nodelatlon[i*2+1]=nodelats[i];
@@ -667,7 +668,7 @@ int main(int argc, char** argv)
 
 #if 1
   // check for degenerated cells, remove duplicate nodes and fill cell_edges;
-  edges = (unsigned char*)malloc(mypart);
+  edges = (int*)malloc(mypart*sizeof(int));
   int mycount = 0;
   for (i=0; i<gsdim; i++) {
     i1=i*gcdim;
@@ -781,7 +782,7 @@ int main(int argc, char** argv)
 	  status = nc_inq_varid(ncid2, "numElementConn" ,&edgeid);
 	  start1[0]=mystartelement;
 	  count1[0]=mypart;
-	  status = nc_put_vara_uchar(ncid2, edgeid, start1, count1, edges);
+	  status = nc_put_vara_int(ncid2, edgeid, start1, count1, edges);
 	  if (status != NC_NOERR) handle_error(status,__LINE__);
 	}
 	status=nc_close(ncid2);
@@ -1015,7 +1016,7 @@ int main(int argc, char** argv)
     }
 
     goodnodes = i1;
-    //printf("Total nodes: %d, total non-degenerated nodes: %d\n", totalnodes, goodnodes);
+    // printf("Total nodes: %d, total non-degenerated nodes: %d\n", totalnodes, goodnodes);
     // broadcast goodnodes to get total number of good nodes and revise mystart and alltotal
     globalnodes = (int*)malloc(sizeof(int)*nprocs);
     MPI_Allgather(&goodnodes, 1, MPI_INT, globalnodes, 1, MPI_INT, mpi_comm);
@@ -1058,9 +1059,6 @@ int main(int argc, char** argv)
  
     MPI_Barrier(mpi_comm);
 
-    status = nc_open(c_outfile, NC_WRITE, &ncid2);
-    if (status != NC_NOERR) handle_error(status,__LINE__);
-
     // now write out node and elements in sequence
     for (i=0; i<nprocs; i++) {
       if (myrank == i) {
@@ -1097,7 +1095,7 @@ int main(int argc, char** argv)
 	  start2[1]=0;
 	  count2[0]=totalnodes;
 	  count2[1]=2;
-	  //printf("%d: write centerCoords from %d of total %d count\n", myrank, mystart, totalnodes);
+	  // printf("%d: write centerCoords from %d of total %d count\n", myrank, mystart, totalnodes);
 	  status = nc_inq_varid(ncid2, "centerCoords" ,&vertexid);
 	  if (status != NC_NOERR) handle_error(status,__LINE__);
 	  status = nc_put_vara_double(ncid2, vertexid, start2, count2, nodelatlon); 
@@ -1138,7 +1136,7 @@ int main(int argc, char** argv)
 	start2[1]=0;
 	count2[0]=totalnodes;
 	count2[1]=maxconnection;
-	//printf("%d: write elementConn from %d of total %d count\n", myrank, mystart, totalnodes);
+	// printf("%d: write elementConn from %d of total %d count\n", myrank, mystart, totalnodes);
 	status = nc_inq_varid(ncid2, "elementConn" ,&cellid);
 	status = nc_put_vara_int(ncid2, cellid, start2, count2, dualcells);
 	if (status != NC_NOERR) handle_error(status,__LINE__);
@@ -1146,7 +1144,7 @@ int main(int argc, char** argv)
 	  status = nc_inq_varid(ncid2, "numElementConn" ,&edgeid);
 	  start1[0]=mystart;
 	  count1[0]=totalnodes;
-	  status = nc_put_vara_uchar(ncid2, edgeid, start1, count1, (unsigned char*)totalneighbors);
+	  status = nc_put_vara_int(ncid2, edgeid, start1, count1, totalneighbors);
 	  if (status != NC_NOERR) handle_error(status,__LINE__);
 	}
 	status=nc_close(ncid2);

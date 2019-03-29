@@ -540,6 +540,7 @@ module NUOPC_Connector
     character(ESMF_MAXSTR), pointer       :: exportNamespaceList(:)
     character(ESMF_MAXSTR), pointer       :: importCplSetList(:)
     character(ESMF_MAXSTR), pointer       :: exportCplSetList(:)
+    character(len=240)                    :: msgString
     logical                               :: match
     integer                   :: verbosity, profiling, diagnostic
     type(ESMF_Time)           :: currTime
@@ -603,10 +604,6 @@ module NUOPC_Connector
       call ESMF_VMLogMemInfo("aftP1a Reconcile")
     endif
 
-#if 0
-call ESMF_VMLogCurrentGarbageInfo(trim(name)//": InitializeIPDv05p2a after reconcile: ")
-#endif
-
     nullify(importStandardNameList)
     nullify(importFieldList)
     nullify(importNamespaceList)
@@ -622,24 +619,12 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": InitializeIPDv05p2a after recon
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-#if 0
-call printStringList("importStandardNameList", importStandardNameList)
-call printStringList("importNamespaceList", importNamespaceList)
-call printStringList("importCplSetList", importCplSetList)
-#endif
-      
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
       fieldList=exportFieldList, namespaceList=exportNamespaceList, &
       cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-#if 0
-call printStringList("exportStandardNameList", exportStandardNameList)
-call printStringList("exportNamespaceList", exportNamespaceList)
-call printStringList("exportCplSetList", exportCplSetList)
-#endif
-      
     ! associated pointers means that there are name lists
     if (associated(importStandardNameList) .and. &
       associated(exportStandardNameList)) then
@@ -658,10 +643,6 @@ call printStringList("exportCplSetList", exportCplSetList)
               getBondLevel(importNamespaceList(i), exportNamespaceList(j), &
                 importCplSetList(i), exportCplSetList(j))
             if (bondLevel == -1) cycle  ! break out and look for next match
-
-#if 0
-print *, "current bondLevel=", bondLevel
-#endif
 
             ! Getting to this place in the double loop means that the 
             ! standard name match has a connection that supports the match.
@@ -682,14 +663,8 @@ print *, "current bondLevel=", bondLevel
                 line=__LINE__, file=trim(name)//":"//FILENAME)) &
                 return  ! bail out
             else
-#if 0
-print *, "connectionString: ", connectionString
-#endif
               ! see if a new bondLevel highmark was found
               read (connectionString, "(i10)") bondLevelMax
-#if 0
-print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
-#endif
               if (bondLevel > bondLevelMax) then
                 write (connectionString, "(i10)") bondLevel
                 call NUOPC_SetAttribute(field, name="ProducerConnection", &
@@ -698,6 +673,56 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
                   line=__LINE__, file=trim(name)//":"//FILENAME)) &
                   return  ! bail out
               endif
+            endif
+            
+            if (btest(verbosity,9)) then
+              write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
+                "importStandardNameList(i=", i, importStandardNameList(i)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
+                "importNamespaceList(i=", i, importNamespaceList(i)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
+                "importCplSetList(i=", i, importCplSetList(i)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
+                "exportStandardNameList(j=", j, exportStandardNameList(j)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
+                "exportNamespaceList(j=", j, exportNamespaceList(j)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
+                "exportCplSetList(j=", j, exportCplSetList(j)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": bondLevel=", I2)') trim(name), bondLevel
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
+              write (msgString,'(A, ": ProductionConnection:", A)') trim(name),&
+                trim(connectionString)
+              call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
             endif
             
           endif
@@ -861,24 +886,12 @@ print *, "bondLevelMax:", bondLevelMax, "bondLevel:", bondLevel
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
-#if 0
-call printStringList("importStandardNameList", importStandardNameList)
-call printStringList("importNamespaceList", importNamespaceList)
-call printStringList("importCplSetList", importCplSetList)
-#endif
-      
     call NUOPC_GetStateMemberLists(exportState, exportStandardNameList, &
       fieldList=exportFieldList, namespaceList=exportNamespaceList, &
       cplSetList=exportCplSetList, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-#if 0
-call printStringList("exportStandardNameList", exportStandardNameList)
-call printStringList("exportNamespaceList", exportNamespaceList)
-call printStringList("exportCplSetList", exportCplSetList)
-#endif
-      
     ! associated pointers means that there are name lists
     if (associated(importStandardNameList) .and. &
       associated(exportStandardNameList)) then
@@ -904,10 +917,6 @@ call printStringList("exportCplSetList", exportCplSetList)
               getBondLevel(importNamespaceList(i), exportNamespaceList(j), &
                 importCplSetList(i), exportCplSetList(j))
               
-#if 0
-print *, "current bondLevel=", bondLevel
-#endif
-
             if (btest(verbosity,9)) then
               write (msgString,'(A, ": ", A30, I3, "): ", A60)') trim(name), &
                 "importStandardNameList(i=", i, importStandardNameList(i)

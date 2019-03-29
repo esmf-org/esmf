@@ -68,7 +68,8 @@ enum ESMC_ContextFlag { ESMF_CHILD_IN_NEW_VM=1,
 // pin flag
 enum ESMC_Pin_Flag { ESMF_PIN_DE_TO_PET=1,
                      ESMF_PIN_DE_TO_VAS,
-                     ESMF_PIN_DE_TO_SSI};
+                     ESMF_PIN_DE_TO_SSI,
+                     ESMF_PIN_DE_TO_SSI_CONTIG};
 
 // direction type
 enum ESMC_Direction { ESMF_DIRECTION_FORWARD=1,

@@ -9,8 +9,8 @@
       xsi:schemaLocation="http://www.earthsystemmodeling.org file:/esmf_model_component.xsd">
     <variable_set>
     </variable_set>
-<GridSpec name="unnamed  0">
-  <Mosaic name="unnamed  0">
+<GridSpec name="unnamed000">
+  <Mosaic name="unnamed000">
   </Mosaic>
 </GridSpec>
   </model_component>

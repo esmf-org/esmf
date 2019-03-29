@@ -59,20 +59,15 @@ extern char pghpf_0c_;
                                   (char*)(arg) == &pghpf_0c_ ) )
 #endif
 
-#ifdef S32
-#define ESMC_POINTER_SIZE 4
+#if 0
+Some older PGI compilers can not handle certain cases of explicit template instantiations
+with the same name, but different argument types.  These instantiations are needed by other
+compilers - especially at higher levels of optimization.
 #endif
-#ifdef S64
-#define ESMC_POINTER_SIZE 8
+#if defined (ESMF_PGIVERSION_MAJOR)
+#if (ESMF_PGIVERSION_MAJOR < 17)
+#define ESMF_PGI_TEMPLATE_INSTANTIATION_BUG
 #endif
-#ifdef Sx86_64_32
-#define ESMC_POINTER_SIZE 4
-#endif
-#ifdef Sx86_64_small
-#define ESMC_POINTER_SIZE 8
-#endif
-#ifdef Sx86_64_medium
-#define ESMC_POINTER_SIZE 8
 #endif
 
 #if 0

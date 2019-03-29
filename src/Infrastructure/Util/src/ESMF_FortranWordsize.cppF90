@@ -28,6 +28,8 @@ module ESMF_FortranWordsizeMod
 ^include "ESMF.h"
 !------------------------------------------------------------------------------
 ! !USES:
+  use iso_c_binding
+
   use ESMF_UtilTypesMod      
   use ESMF_LogErrMod
 
@@ -73,13 +75,14 @@ contains
 ! !IROUTINE: ESMF_FortranUDTPointerSize - Get upper limit on size of Fortran UDT Pointer in bytes
 
 ! !INTERFACE:
-  subroutine ESMF_FortranUDTPointerSize(size)
+  subroutine ESMF_FortranUDTPointerSize(psize)
     implicit none
 !
 ! !ARGUMENTS:
-    integer, intent(out)  :: size
+    integer, intent(out)  :: psize
 !EOPI
 !------------------------------------------------------------------------------
+
     type simple_udt
       sequence
       real :: a, b, c
@@ -88,19 +91,25 @@ contains
     type(simple_udt), pointer :: udt_ptr1, udt_ptr2
     type(simple_udt), target :: udt
     common /udtcom/ udt_ptr1, udt_ptr2
-    
+    integer(C_SIZE_T) :: c_ptrvar
+
+^if defined (ESMF_NO_C_SIZEOF)
+^define C_SIZEOF(x) size(transfer(x,sizeof_data))
+    character :: sizeof_data(32)
+^endif
+
     udt_ptr1 => udt
     udt_ptr2 => udt
     
-    call ESMF_PointerDifference(ESMC_POINTER_SIZE, udt_ptr1, udt_ptr2, size)
+    call ESMF_PointerDifference(C_SIZEOF (c_ptrvar), udt_ptr1, udt_ptr2, psize)
     ! because of compiler introduced padding size may actually overestimate the
     ! size of the (UDT, pointer) structure, but all we need is an estimate of
     ! the upper limit
 
-    if (size<4) then
+    if (psize<4) then
       ! A size smaller than 4 bytes is suspicious and may indicate that the
       ! size was not determined correctly by the above code!
-      size = 64 ! bytes - large enough to work on all current platforms
+      psize = 64 ! bytes - large enough to work on all current platforms
     endif
     
   end subroutine ESMF_FortranUDTPointerSize
@@ -155,9 +164,15 @@ contains
      integer, intent(out), optional :: rc @\
 @\
      ! local data @\
-     integer :: size @\
+     integer :: wsize @\
      mtypename(ESMF_KIND_##mtypekind) :: varTK(2) ! varTK is same TK as var @\
      logical :: rcpresent                    ! Return code present @\
+     integer(C_SIZE_T) :: c_ptrvar @\
+ @\
+^if defined (ESMF_NO_C_SIZEOF) @\
+^define C_SIZEOF(x) size(transfer(x,sizeof_data)) @\
+    character :: sizeof_data(32) @\
+^endif @\
 @\
      ! Initialize return code; assume routine not implemented @\
      rcpresent = .FALSE. @\
@@ -170,8 +185,8 @@ contains
      ! some compilers will notice that var is unused, and issue warnings @\
      if (var==var) continue ! dummy check to quiet down compiler warnings @\
 @\
-     call ESMF_PointerDifference(ESMC_POINTER_SIZE, varTK(1), varTK(2), size) @\
-     ESMF_FortranWordsize##mtypekind = size @\
+     call ESMF_PointerDifference(C_SIZEOF (c_ptrvar), varTK(1), varTK(2), wsize) @\
+     ESMF_FortranWordsize##mtypekind = wsize @\
 @\
      if (rcpresent) rc = ESMF_SUCCESS @\
 @\

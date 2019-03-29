@@ -2073,12 +2073,17 @@ int PIO_IODescHandler::constructPioDecomp(
     return ESMF_RC_NOT_IMPL;
   }
 
-  pioDofCount = 0;
   // We need the total number of elements
+  pioDofCount = 0;
+  int const *localDeToDeMap = arr_p->getDistGrid()->getDELayout()->getLocalDeToDeMap();
   // NB: This loop is redundant for now, I wish I could lift the restriction.
   for (localDe = 0; localDe < localDeCount; ++localDe) {
-    pioDofCount += arr_p->getTotalElementCountPLocalDe()[localDe];
+    // consider the fact that replicated dimensions may lead to local elements in the
+    // Array, that are not accounted for by actual exclusive elements in the DistGrid
+    if (arr_p->getDistGrid()->getElementCountPDe()[localDeToDeMap[localDe]]>0)
+      pioDofCount += arr_p->getTotalElementCountPLocalDe()[localDe];
   }
+
   PRINTMSG("(" << my_rank << "): pioDofCount = " << pioDofCount);
   try {
     // Allocate space for the DOF list
@@ -2105,14 +2110,17 @@ int PIO_IODescHandler::constructPioDecomp(
   // TODO: This is where we would need to make some magic to include
   // TODO: multiple DEs.
   localDe = 0;
-  localrc = arr_p->constructFileMap(pioDofList, pioDofCount, localDe);
-  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+  if (pioDofCount>0){
+    // construct the mapping of the local elements
+    localrc = arr_p->constructFileMap(pioDofList, pioDofCount, localDe);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &localrc)) {
-    free(handle->io_descriptor);
-    handle->io_descriptor = NULL;
-    delete[] pioDofList;
-    pioDofList = (int64_t *)NULL;
-    return localrc;
+      free(handle->io_descriptor);
+      handle->io_descriptor = NULL;
+      delete[] pioDofList;
+      pioDofList = (int64_t *)NULL;
+      return localrc;
+    }
   }
 
 #if 0
@@ -2123,7 +2131,7 @@ int PIO_IODescHandler::constructPioDecomp(
     }
     std::cout << "]" << std::endl;
 #endif // 0
-    // Get TKR info
+  // Get TKR info
   switch(arr_p->getTypekind()) {
   case ESMC_TYPEKIND_I4:
     handle->basepiotype = PIO_int;
@@ -2142,8 +2150,7 @@ int PIO_IODescHandler::constructPioDecomp(
   case ESMF_C16:
   case ESMC_TYPEKIND_LOGICAL:
   default:
-    localrc = ESMF_RC_ARG_BAD;
-    if (ESMC_LogDefault.MsgFoundError(localrc, "Unsupported typekind", ESMC_CONTEXT,
+    if (ESMC_LogDefault.MsgFoundError(ESMF_RC_ARG_BAD, "Unsupported typekind", ESMC_CONTEXT,
         &localrc)) {
       free(handle->io_descriptor);
       handle->io_descriptor = NULL;
@@ -2153,73 +2160,72 @@ int PIO_IODescHandler::constructPioDecomp(
     }
   }
 
-  if (ESMF_SUCCESS == localrc) {
-    int tile = 0;
-    distGrid = arr_p->getDistGrid();
-    const int *minIndexPDimPTile = distGrid->getMinIndexPDimPTile();
-    const int *maxIndexPDimPTile = distGrid->getMaxIndexPDimPTile();
-    const int *totalLBound = arr_p->getTotalLBound();
-    const int *totalUBound = arr_p->getTotalUBound();
+  int tile = 0;
+  distGrid = arr_p->getDistGrid();
+  const int *minIndexPDimPTile = distGrid->getMinIndexPDimPTile();
+  const int *maxIndexPDimPTile = distGrid->getMaxIndexPDimPTile();
+  const int *totalLBound = arr_p->getTotalLBound();
+  const int *totalUBound = arr_p->getTotalUBound();
 // NB: Is this part of the restrictions on Array I/O?
 //    nDims = arr_p->getRank();
-    handle->nDims = distGrid->getDimCount();
-    // Make sure dims is not used
-    if (handle->dims != (int *)NULL) {
-      delete handle->dims;
-      handle->dims = (int *)NULL;
-    }
-    handle->dims = new int[handle->nDims];
-    // Step through the distGrid dimensions, getting the size of the
-    // dimension.
-    for (int i = 0; i < handle->nDims; i++) {
-      handle->dims[i] = (maxIndexPDimPTile[(tile * handle->nDims) + i] -
-                         minIndexPDimPTile[(tile * handle->nDims) + i] + 1);
-    }
+  handle->nDims = distGrid->getDimCount();
+  // Make sure dims is not used
+  if (handle->dims != (int *)NULL) {
+    delete handle->dims;
+    handle->dims = (int *)NULL;
+  }
+  handle->dims = new int[handle->nDims];
+  // Step through the distGrid dimensions, getting the size of the
+  // dimension.
+  for (int i = 0; i < handle->nDims; i++) {
+    handle->dims[i] = (maxIndexPDimPTile[(tile * handle->nDims) + i] -
+                       minIndexPDimPTile[(tile * handle->nDims) + i] + 1);
+  }
 
-    handle->arrayRank = arr_p->getRank();
-    if (handle->arrayShape != (int *)NULL) {
-      delete handle->arrayShape;
-      handle->arrayShape = (int *)NULL;
-    }
-    handle->arrayShape = new int[handle->arrayRank];
-    for (int i = 0; i < handle->arrayRank; ++i) {
-      handle->arrayShape[i] = (totalUBound[(tile * handle->arrayRank) + i] -
-                               totalLBound[(tile * handle->arrayRank) + i] +
-                               1);
-    }
+  handle->arrayRank = arr_p->getRank();
+  if (handle->arrayShape != (int *)NULL) {
+    delete handle->arrayShape;
+    handle->arrayShape = (int *)NULL;
+  }
+  handle->arrayShape = new int[handle->arrayRank];
+  for (int i = 0; i < handle->arrayRank; ++i) {
+    handle->arrayShape[i] = (totalUBound[(tile * handle->arrayRank) + i] -
+                             totalLBound[(tile * handle->arrayRank) + i] +
+                             1);
+  }
 
 #ifdef ESMFIO_DEBUG
-    {
-      char dimstr[64];
-      for (int i = 0; i < handle->arrayRank; i++) {
-        sprintf((dimstr + (5 * i)), " %03d%c", handle->arrayShape[i],
-                (((handle->arrayRank - 1) == i) ? ' ' : ','));
-      }
-      PRINTMSG(", IODesc shape = [" << dimstr << "], calling pio_initdecomp");
+  {
+    char dimstr[64];
+    for (int i = 0; i < handle->arrayRank; i++) {
+      sprintf((dimstr + (5 * i)), " %03d%c", handle->arrayShape[i],
+              (((handle->arrayRank - 1) == i) ? ' ' : ','));
     }
-    pio_cpp_setdebuglevel(3);
+    PRINTMSG(", IODesc shape = [" << dimstr << "], calling pio_initdecomp");
+  }
+  pio_cpp_setdebuglevel(3);
 #endif // ESMFIO_DEBUG
 
-    // Create the decomposition
-    pio_cpp_initdecomp_dof(&iosys, handle->basepiotype, handle->dims,
-                           handle->nDims, pioDofList, pioDofCount,
-                           handle->io_descriptor);
-    PRINTMSG("after call to pio_cpp_initdecomp_dof");
+  // Create the decomposition
+  pio_cpp_initdecomp_dof(&iosys, handle->basepiotype, handle->dims,
+                         handle->nDims, pioDofList, pioDofCount,
+                         handle->io_descriptor);
+  PRINTMSG("after call to pio_cpp_initdecomp_dof");
 #ifdef ESMFIO_DEBUG
   pio_cpp_setdebuglevel(0);
 #endif // ESMFIO_DEBUG
 
-    // Add the handle into the master list
-    PIO_IODescHandler::activePioIoDescriptors.push_back(handle);
-    // Finally, set the output handle
-    *newDecomp_p = handle->io_descriptor;
-  }
+  // Add the handle into the master list
+  PIO_IODescHandler::activePioIoDescriptors.push_back(handle);
+  // Finally, set the output handle
+  *newDecomp_p = handle->io_descriptor;
   
   // Free the DofList!
   delete[] pioDofList;
   pioDofList = (int64_t *)NULL;
 
-  return localrc;
+  // return successfully
+  return ESMF_SUCCESS;
 } // PIO_IODescHandler::constructPioDecomp()
 //-----------------------------------------------------------------------------
 

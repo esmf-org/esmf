@@ -25,3 +25,15 @@ be one of the following:
 #if 0
 #define ESMF_IOFlushMacro(unit,status) call flush (unit, status)
 #endif
+
+#if 0
+NAG before v6.2, use sizeof work-around code instead of F2008 C_SIZEOF
+#endif
+#ifndef __NAG_COMPILER_RELEASE
+#define ESMF_NO_C_SIZEOF
+#else
+#if (__NAG_COMPILER_RELEASE < 62)
+#define ESMF_NO_C_SIZEOF
+#endif
+#endif
+

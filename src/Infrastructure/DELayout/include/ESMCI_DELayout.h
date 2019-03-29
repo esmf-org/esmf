@@ -33,6 +33,7 @@
 
 #include <vector>
 #include <map>
+#include <stack>
 
 #include "ESMCI_Base.h"       // Base is superclass to DELayout
 #include "ESMCI_VM.h"
@@ -289,6 +290,16 @@ class XXE{
       int *dstSuperVecSize_i; // dst dist
       int *dstSuperVecSize_j; // dst dist
     };
+    struct SubRecursiveSearch{
+      XXE *xxe;
+      int iNext;
+      std::stack<int> iStack;
+      std::stack<XXE*> xxeStack;
+      SubRecursiveSearch(){
+        xxe=NULL;
+        iNext=0;
+      }
+    };
     
     // special predefined filter bits
     static int const filterBitRegionTotalZero   = 0x1;  // total dst zero'ing
@@ -393,21 +404,41 @@ class XXE{
       int commhandleCountArg=-1, int xxeSubCountArg=-1, 
       int bufferInfoListArg=-1);
     void streamify(std::stringstream &streami);
-    bool getNextSubSuperVectorOkay(int *k){
-      // search for the next xxeSub element in the opstream, starting at 
-      // index k. when found return the element's superVectorOkay setting,
-      // and also update k to point to the next stream element for continued
-      // search
-      XxeSubInfo *xxeSubInfo;
-      for (int i=*k; i<count; i++){
-        if (opstream[i].opId==xxeSub){
-          *k = i+1;   // index where to start next time
-          xxeSubInfo = (XxeSubInfo *)&(opstream[i]);
-          if (xxeSubInfo->xxe)
+    bool getNextSubSuperVectorOkay(SubRecursiveSearch &look){
+      // Search for the next "actual" xxeSub element in the opstream, that is
+      // not just a container for another list of xxeSub. If it is not an actual,
+      // i.e. just a container for more xxeSub elements, traverse recursively. 
+      // Once the next actual xxeSub is found, return the element's 
+      // superVectorOkay setting. Subsequent calls keep stepping forward.
+      if (look.xxe==NULL) look.xxe=this;  // first time in ever
+      int lookCount = look.xxe->count;
+      for (int i=look.iNext; i<lookCount; i++){
+        if (look.xxe->opstream[i].opId==xxeSub){
+          XxeSubInfo *xxeSubInfo = (XxeSubInfo *)&(look.xxe->opstream[i]);
+          if (xxeSubInfo->xxe){
+            // valid XXE element
+            look.iNext = i+1;   // index where to start next time
+            if (xxeSubInfo->xxe->opstream[0].opId==xxeSub){
+              // trigger recursion down
+              look.xxeStack.push(look.xxe);
+              look.iStack.push(look.iNext);
+              look.xxe = xxeSubInfo->xxe;
+              look.iNext = 0;
+              return getNextSubSuperVectorOkay(look);
+            }
             return xxeSubInfo->xxe->superVectorOkay;
-          else
-            return false; // default
+          }else{
+            // invalid XXE element
+            return false;
+          }
         }
+      }
+      if (!look.xxeStack.empty()){
+        // trigger recursion up
+        look.xxe = look.xxeStack.top();
+        look.iNext = look.iStack.top();
+        look.xxeStack.pop();
+        look.iStack.pop();
       }
       // if no subXXE found then return false
       return false;

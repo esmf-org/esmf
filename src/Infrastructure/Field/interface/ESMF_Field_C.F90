@@ -961,6 +961,36 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
   end subroutine f_esmf_regridrelease
 
 #undef  ESMF_METHOD
+#define ESMF_METHOD "f_esmf_regridreleasefactors"
+  subroutine f_esmf_regridreleasefactors(factorList, factorIndexList, numfac, rc)
+    use ESMF_UtilTypesMod
+    use iso_c_binding
+
+    implicit none
+
+    type(C_PTR), intent(out) :: factorList
+    type(C_PTR), intent(out) :: factorIndexList
+    integer(C_INT), intent(in)  :: numfac
+    integer, intent(inout) :: rc
+
+    real(ESMF_KIND_R8), dimension(:), pointer :: factorListFPtr
+    integer(ESMF_KIND_I4), dimension(:,:), pointer :: factorIndexListFPtr
+
+    rc = ESMF_RC_NOT_IMPL
+
+    call C_F_POINTER(factorList, factorListFPtr, [numfac])
+    deallocate(factorListFPtr)
+
+    call C_F_POINTER(factorIndexList, factorIndexListFPtr, [2, numfac])
+    deallocate(factorIndexListFPtr)
+
+    rc = ESMF_SUCCESS
+
+  end subroutine f_esmf_regridreleasefactors
+
+! ==================================================================================
+
+#undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_regridstore"
   subroutine f_esmf_regridstore(srcField, dstField, &
                                 srcMaskValues, len1, &
@@ -976,6 +1006,9 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
                                 extrapDistExponent, &
                                 unmappedaction, &
                                 ignoreDegenerate, &
+                                factorList, &
+                                factorIndexList, &
+                                numFactors, &
                                 srcFracField, &
                                 dstFracField, &
                                 rc)
@@ -986,59 +1019,117 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     use ESMF_RHandleMod
     use ESMF_FieldRegridMod
     use ESMF_FieldMod
+    use iso_c_binding
 
     implicit none
 
-      type(ESMF_Field)                        :: srcField
-      type(ESMF_Field)                        :: dstField
-      integer                                 :: len1, len2
-      integer,optional                        :: srcMaskValues(len1), &
+    type(ESMF_Field)                        :: srcField
+    type(ESMF_Field)                        :: dstField
+    integer                                 :: len1, len2
+    integer,optional                        :: srcMaskValues(len1), &
                                                  dstMaskValues(len2)
-      type(ESMF_RouteHandle),optional         :: routehandle
-      type(ESMF_RegridMethod_Flag),optional   :: regridmethod
-      type(ESMF_PoleMethod_Flag),optional     :: polemethod
-      integer,optional                        :: regridPoleNPnts
+    type(ESMF_RouteHandle),optional         :: routehandle
+    type(ESMF_RegridMethod_Flag),optional   :: regridmethod
+    type(ESMF_PoleMethod_Flag),optional     :: polemethod
+    integer,optional                        :: regridPoleNPnts
 
-      type(ESMF_LineType_Flag),optional       :: linetype
-      type(ESMF_NormType_Flag),optional       :: normtype
-      type(ESMF_ExtrapMethod_Flag), optional  :: extrapMethod
-      integer, optional                       :: extrapNumSrcPnts
-      real(ESMF_KIND_R4), optional            :: extrapDistExponent
-      type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
-      logical,optional                        :: ignoreDegenerate
-      type(ESMF_Field),optional               :: srcFracField
-      type(ESMF_Field),optional               :: dstFracField
-      integer,optional                        :: rc 
+    type(ESMF_LineType_Flag),optional       :: linetype
+    type(ESMF_NormType_Flag),optional       :: normtype
+    type(ESMF_ExtrapMethod_Flag), optional  :: extrapMethod
+    integer, optional                       :: extrapNumSrcPnts
+    real(ESMF_KIND_R4), optional            :: extrapDistExponent
+    type(ESMF_UnmappedAction_Flag),optional :: unmappedaction
+    logical,optional                        :: ignoreDegenerate
+
+    type(C_PTR), optional                   :: factorList
+    type(C_PTR), optional                   :: factorIndexList
+    integer,optional                        :: numFactors
+
+    type(ESMF_Field),optional               :: srcFracField
+    type(ESMF_Field),optional               :: dstFracField
+    integer,optional                        :: rc
+
+    !--------------------------------------------------------------------------
 
     integer :: localrc
     type(ESMF_RouteHandle) :: l_routehandle
+
+    real(ESMF_KIND_R8), pointer    :: factorListFPtr(:)
+    integer(ESMF_KIND_I4), pointer :: factorIndexListFPtr(:,:)
+
+    !--------------------------------------------------------------------------
+
+    ! This is called by the C++ Field::regridstore method which is called by
+    ! ESMC_FieldRegridStore which is called by Python Regrid.
 
     ! initialize return code; assume routine not implemented
     rc = ESMF_RC_NOT_IMPL
     localrc = ESMF_RC_NOT_IMPL
 
-    call ESMF_FieldRegridStore(srcField, dstField, &
-                              srcMaskValues=srcMaskValues, &
-                              dstMaskValues=dstMaskValues, &
-                              routehandle=l_routehandle, &
-                              regridmethod=regridmethod, &
-                              polemethod=polemethod, &
-                              regridPoleNPnts=regridPoleNPnts, &
-                              lineType=linetype, &
-                              normType=normtype, &
-                              extrapMethod=extrapMethod, &
-                              extrapNumSrcPnts=extrapNumSrcPnts, &
-                              extrapDistExponent=extrapDistExponent, &
-                              unmappedaction=unmappedaction, &
-                              ignoreDegenerate=ignoreDegenerate, &
-                              srcFracField=srcFracField, &
-                              dstFracField=dstFracField, &
-                              rc=localrc)
+    ! Only return factors if numFactors is a specific integer. This circumvents
+    ! odd behavior by C_ASSOCIATED when calling from Python. This may also
+    ! happen when calling from C. This is just safer.
+    if (numFactors == -999) then
+
+      call ESMF_FieldRegridStore(srcField, dstField, &
+                                srcMaskValues=srcMaskValues, &
+                                dstMaskValues=dstMaskValues, &
+                                routehandle=l_routehandle, &
+                                regridmethod=regridmethod, &
+                                polemethod=polemethod, &
+                                regridPoleNPnts=regridPoleNPnts, &
+                                lineType=linetype, &
+                                normType=normtype, &
+                                extrapMethod=extrapMethod, &
+                                extrapNumSrcPnts=extrapNumSrcPnts, &
+                                extrapDistExponent=extrapDistExponent, &
+                                unmappedaction=unmappedaction, &
+                                ignoreDegenerate=ignoreDegenerate, &
+                                factorList=factorListFPtr, &
+                                factorIndexList=factorIndexListFPtr, &
+                                srcFracField=srcFracField, &
+                                dstFracField=dstFracField, &
+                                rc=localrc)
+
+        numFactors = size(factorListFPtr, 1)
+
+        ! Associate the Fortran pointers with C pointers. Only do this if
+        ! factors were created during the regrid store call.
+        if (numFactors > 0) then
+          factorList = C_LOC(factorListFPtr(1))
+          factorIndexList = C_LOC(factorIndexListFPtr(1, 1))
+        end if
+
+    else
+
+        call ESMF_FieldRegridStore(srcField, dstField, &
+                                srcMaskValues=srcMaskValues, &
+                                dstMaskValues=dstMaskValues, &
+                                routehandle=l_routehandle, &
+                                regridmethod=regridmethod, &
+                                polemethod=polemethod, &
+                                regridPoleNPnts=regridPoleNPnts, &
+                                lineType=linetype, &
+                                normType=normtype, &
+                                extrapMethod=extrapMethod, &
+                                extrapNumSrcPnts=extrapNumSrcPnts, &
+                                extrapDistExponent=extrapDistExponent, &
+                                unmappedaction=unmappedaction, &
+                                ignoreDegenerate=ignoreDegenerate, &
+                                srcFracField=srcFracField, &
+                                dstFracField=dstFracField, &
+                                rc=localrc)
+
+        ! We are not returning factors so send something nonsensical back so it is
+        ! not improperly used.
+        numFactors = -1
+
+      endif
 
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
  
-    ! because ESMF_RouteHandle.this is private, it cannot be accessed directly
+    ! because ESMF_RouteHandle is private, it cannot be accessed directly
     ! we use the public interface to do the ptr copy;
     ! the RouteHandle object returned to the C interface must consist only of
     ! the 'this' pointer. It must not contain the isInit member.
@@ -1049,6 +1140,8 @@ subroutine f_esmf_fieldcollectgarbage(field, rc)
     rc = ESMF_SUCCESS
   
   end subroutine f_esmf_regridstore
+
+! ==================================================================================
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "f_esmf_regridstorefile"

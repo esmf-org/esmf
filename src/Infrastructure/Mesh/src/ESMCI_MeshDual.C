@@ -18,6 +18,7 @@
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <Mesh/include/Legacy/ESMCI_MeshUtils.h>
 #include <Mesh/include/ESMCI_MathUtil.h>
+#include <Mesh/include/ESMCI_Mesh_Glue.h>
 #include "Mesh/include/Legacy/ESMCI_DDir.h" 
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
 #include <Mesh/include/Legacy/ESMCI_CommReg.h>
@@ -42,6 +43,9 @@
 static const char *const version = "$Id: ESMCI_MeshDual.C,v 1.23 2012/01/06 20:17:51 svasquez Exp $";
 //-----------------------------------------------------------------------------
 
+// #define DEBUG_UNIQUE_ELEMS
+// #define DEBUG_WRITE_MESH
+// #define DEBUG_TRI
 
  
 namespace ESMCI {
@@ -142,9 +146,73 @@ namespace ESMCI {
       num_snd++;
     }
 
+#ifdef DEBUG_TRI
+{
+  int nn = 0;
+  int on = 0;
+  MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
+  for (; ni != ne; ++ni) {
+    ++nn;
+    MeshObj &node=*ni;
+    if (node.get_owner() != Par::Rank()) on++;
+  }
+
+  int nee = 0;
+  int oe = 0;
+  MeshDB::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
+  for (; ei != ee; ++ei) {
+    ++nee;
+    MeshObj &elem=*ei;
+    if (elem.get_owner() != Par::Rank()) oe++;
+  }
+  
+  printf("%d# BEFORE GHOST nodes %d owned %d elems %d owned %d\n", Par::Rank(), nn, on, nee, oe);
+}
+#endif
+
+
+#ifdef DEBUG_WRITE_MESH
+  {int *rc;
+  int len = 18; char fname[len];
+  sprintf(fname, "NativeBeforeGhost");
+  ESMCI_meshwrite(&src_mesh, fname, rc, len);}
+#endif
+
     // TODO: add elem mask fields and mask_val fields   
     src_mesh->CreateGhost();
     src_mesh->GhostComm().SendFields(num_snd, snd, rcv);
+
+#ifdef DEBUG_WRITE_MESH
+  {int *rc;
+  int len = 18; char fname[len];
+  sprintf(fname, "NativeAfterGhost");
+  ESMCI_meshwrite(&src_mesh, fname, rc, len);}
+#endif
+
+#ifdef DEBUG_TRI
+{
+  int nn = 0;
+  int on = 0;
+  MeshDB::iterator ni = src_mesh->node_begin(), ne = src_mesh->node_end();
+  for (; ni != ne; ++ni) {
+    ++nn;
+    MeshObj &node=*ni;
+    if (node.get_owner() != Par::Rank()) on++;
+  }
+
+  int nee = 0;
+  int oe = 0;
+  MeshDB::iterator ei = src_mesh->elem_begin(), ee = src_mesh->elem_end();
+  for (; ei != ee; ++ei) {
+    ++nee;
+    MeshObj &elem=*ei;
+    if (elem.get_owner() != Par::Rank()) oe++;
+  }
+  
+  printf("%d# AFTER GHOST nodes %d owned %d elems %d owned %d\n", Par::Rank(), nn, on, nee, oe);
+}
+#endif
+
 
     // If src_mesh is split, add newly created ghost elements to split_to_orig map
     if (src_mesh->is_split) add_ghost_elems_to_split_orig_id_map(src_mesh);
@@ -210,7 +278,6 @@ namespace ESMCI {
   for (int i=0; i<num_nodes; i++) {
     nodes_used[i]=0;
   }
-
 
   // Iterate through src nodes counting sizes
   // Note that the elems around the node are the maximum possible, it
@@ -292,7 +359,15 @@ namespace ESMCI {
     get_unique_elems_around_node(&node, src_mesh, tmp_mdss,
                           &num_elems_around_node_ids,
                           elems_around_node_ids);
-    
+
+#ifdef DEBUG_UNIQUE_ELEMS
+    {
+    printf("%d# mesh node id %d, unique elems %d [", Par::Rank(), node.get_id(), num_elems_around_node_ids);
+    for (int i=0; i<num_elems_around_node_ids; i++) {  
+      printf("%d, ", elems_around_node_ids[i]);
+    }
+    printf("]\n");}
+#endif
     // If less than 3 (a triangle) then don't make an element
     if (num_elems_around_node_ids < 3) continue;
     
@@ -945,6 +1020,16 @@ void triangulate(int sdim, int num_p, double *p, double *td, int *ti, int *tri_i
       *_num_ids=0;
       return;
     }
+
+#ifdef DEBUG_TRI
+    int count = 0;
+    while (el != node->Relations.end() && el->obj->get_type() == MeshObj::ELEMENT){
+      el++;
+      count++;
+    }
+    // if (node->get_id() == 1436160) printf("%d# node %d O[%d]\n", Par::Rank(), node->get_id(), node->get_owner());
+    if (count == 3) printf("%d# 3 adjacencies, node %d owner %d\n", Par::Rank(), node->get_id(), node->get_owner());
+#endif
 
     // Get coords from elem with max id to make things consistent
     // on different processors

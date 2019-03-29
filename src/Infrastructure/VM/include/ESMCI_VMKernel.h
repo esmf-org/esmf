@@ -409,7 +409,8 @@ class VMK{
     bool cancelled(status *status);
     
     // SSI shared memory methods
-    int ssishmAllocate(std::vector<unsigned long>&bytes, memhandle *memh);
+    int ssishmAllocate(std::vector<unsigned long>&bytes, memhandle *memh,
+      bool contigFlag=false);
     int ssishmFree(memhandle *memh);
     int ssishmGetMems(memhandle memh, int pet, std::vector<void *> *mems=NULL,
       std::vector<unsigned long> *bytes=NULL);

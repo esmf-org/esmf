@@ -37,6 +37,7 @@
 #include <Mesh/include/Legacy/ESMCI_BBox.h>
 
 
+//#define ESMF_REGRID_DEBUG_MAP_NODE 4323801
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -245,7 +246,7 @@ static int found_func(void *c, void *y) {
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
   if (si.snr.dst_gid==ESMF_REGRID_DEBUG_MAP_NODE) {
-    printf("Checking dst pnt id=%d vs. elem id=%d\n",si.snr.dst_gid,elem.get_id());
+    printf("%d# Checking dst pnt id=%d vs. elem id=%d\n",Par::Rank(), si.snr.dst_gid,elem.get_id());
   }
 #endif
 
@@ -311,7 +312,7 @@ static int found_func(void *c, void *y) {
 
 #ifdef ESMF_REGRID_DEBUG_MAP_NODE
   if (si.snr.dst_gid == ESMF_REGRID_DEBUG_MAP_NODE) {
-    printf("Mapping dst_id=%d dst_coords=%f %f %f in=%d pcoords=%f %f %f dist=%e s_elem=%d [",si.snr.dst_gid,si.coords[0],si.coords[1],si.coords[2],in,pcoord[0],pcoord[1],pcoord[2],dist,elem.get_id());
+    printf("%d# Mapping dst_id=%d dst_coords=%f %f %f in=%d pcoords=%f %f %f dist=%e s_elem=%d [",Par::Rank(), si.snr.dst_gid,si.coords[0],si.coords[1],si.coords[2],in,pcoord[0],pcoord[1],pcoord[2],dist,elem.get_id());
 
     double coords[3*40];
     int num_nds;

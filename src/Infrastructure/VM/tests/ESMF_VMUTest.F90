@@ -174,6 +174,13 @@
 
 !-----------------------------------------------------------------------------
       subroutine test_Reduce_sum
+
+      ! Tolerance for floating point equality tests
+      real(ESMF_KIND_R4), parameter :: fuzz4 = 1.0e-7
+      real(ESMF_KIND_R8), parameter :: fuzz8 = 1.0d-15
+
+      logical :: passflg
+
 ! This subroutine tests all the overloaded versions of the ESMF global sum.
 
       ! Test with integer arguments
@@ -187,7 +194,7 @@
         array5 = (/604,608/)
       end if
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM Reduce ESMF_REDUCE_SUM Test"
+      write(name, *) "VM Reduce ESMF_REDUCE_SUM Test: integer"
       call ESMF_VMReduce(vm, sendData=array1, recvData=array4, &
         count=nsize, reduceflag=ESMF_REDUCE_SUM, rootPet=rootPet, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -202,25 +209,24 @@
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify Reduce ESMF_REDUCE_SUM Results Test"
+      write(name, *) "Verify Reduce ESMF_REDUCE_SUM Test: integer"
       if (localPet == rootPet) then
-        call ESMF_Test((array4(1)==(array5(1)).and.(array4(2)==(array5(2)))), &
-            name, failMsg, result, ESMF_SRCLINE)
+        passflg = array4(1)==array5(1) .and. array4(2)==array5(2)
       else
-        call ESMF_Test(((array4(1)==50).and.(array4(2)==50)), &
-            name, failMsg, result, ESMF_SRCLINE)
+        passflg = .true.  ! Values are undefined after MPI_Reduce
       end if
+      call ESMF_Test(passflg, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !Test with ESMF_KIND_R8 arguments
       !=================================
       !EX_UTest
-      farray4 = (/50,50/)
+      farray4 = (/50.0,50.0/)
       ! Set expected results
       if (npets == 1) then
-        farray5 = (/1,2/)
+        farray5 = (/1.0,2.0/)
       else
-        farray5 = (/604,608/)
+        farray5 = (/604.0,608.0/)
       end if
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_REDUCE_SUM Test: ESMF_KIND_R8"
@@ -242,24 +248,23 @@
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify Reduce ESMF_REDUCE_SUM Results Test: ESMF_KIND_R8"
       if (localPet == rootPet) then
-        call ESMF_Test((farray4(1)==(farray5(1)).and.(farray4(2)==(farray5(2)))), &
-                        name, failMsg, result, ESMF_SRCLINE)
+        passflg = abs (farray4(1)-farray5(1)) < fuzz8 .and. abs (farray4(2)-farray5(2)) < fuzz8
       else
-        call ESMF_Test(((farray4(1)==50).and.(farray4(2)==50)), &
-                        name, failMsg, result, ESMF_SRCLINE)
+        passflg = .true.  ! Values are undefined after MPI_Reduce
       end if
+      call ESMF_Test(passflg, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
       !Test with ESMF_KIND_R4 arguments
       !=================================
       !EX_UTest
-      f4array4 = (/50,50/)
+      f4array4 = (/50.0,50.0/)
       ! Set expected results
       if (npets == 1) then
-        f4array5 = (/1,2/)
+        f4array5 = (/1.0,2.0/)
       else
-        f4array5 = (/604,608/)
+        f4array5 = (/604.0,608.0/)
       end if
 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -283,12 +288,11 @@
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify Reduce ESMF_REDUCE_SUM Results Test: ESMF_KIND_R4"
       if (localPet == rootPet) then
-        call ESMF_Test((farray4(1)==(farray5(1)).and.(farray4(2)==(farray5(2)))), &
-                        name, failMsg, result, ESMF_SRCLINE)
+        passflg = abs (f4array4(1)-f4array5(1)) < fuzz4 .and. abs (f4array4(2)-f4array5(2)) < fuzz4
       else
-        call ESMF_Test(((farray4(1)==50).and.(farray4(2)==50)), &
-                        name, failMsg, result, ESMF_SRCLINE)
+        passflg = .true.  ! Values are undefined after MPI_Reduce
       end if
+      call ESMF_Test(passflg, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
@@ -300,6 +304,13 @@
 !------------------------------------------------------------------------------
 
       subroutine test_Reduce_min
+
+      ! Tolerance for floating point equality tests
+      real(ESMF_KIND_R4), parameter :: fuzz4 = 0.0
+      real(ESMF_KIND_R8), parameter :: fuzz8 = 0.0d0
+
+      logical :: passflg
+
 ! This subroutine tests all the overloaded versions of the ESMF global sum.
 
       ! Test with integer arguments
@@ -309,7 +320,7 @@
       ! Set expected results
       array5 = (/1,2/)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM Reduce ESMF_REDUCE_MINTest"
+      write(name, *) "VM Reduce ESMF_REDUCE_MINTest: integer"
       call ESMF_VMReduce(vm, sendData=array1, recvData=array4, &
         count=nsize, reduceflag=ESMF_REDUCE_MIN, rootPet=rootPet, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -324,22 +335,21 @@
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify Reduce ESMF_REDUCE_MINResults Test"
+      write(name, *) "Verify Reduce ESMF_REDUCE_MINResults Test: integer"
       if (localPet == rootPet) then
-        call ESMF_Test((array4(1)==(array5(1)).and.(array4(2)==(array5(2)))), &
-            name, failMsg, result, ESMF_SRCLINE)
+        passflg = array4(1)==array5(1) .and. array4(2)==array5(2)
       else
-        call ESMF_Test(((array4(1)==50).and.(array4(2)==50)), &
-            name, failMsg, result, ESMF_SRCLINE)
+        passflg = .true.  ! Values are undefined after MPI_Reduce
       end if
+      call ESMF_Test(passflg, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !Test with ESMF_KIND_R8 arguments
       !=================================
       !EX_UTest
-      farray4 = (/50,50/)
+      farray4 = (/50.0,50.0/)
       ! Set expected results
-      farray5 = (/1,2/)
+      farray5 = (/1.0,2.0/)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_REDUCE_MINTest: ESMF_KIND_R8"
       call ESMF_VMReduce(vm, sendData=farray1, recvData=farray4, &
@@ -360,12 +370,11 @@
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify Reduce ESMF_REDUCE_MINResults Test: ESMF_KIND_R8"
       if (localPet == rootPet) then
-        call ESMF_Test((farray4(1)==(farray5(1)).and.(farray4(2)==(farray5(2)))), &
-                        name, failMsg, result, ESMF_SRCLINE)
+        passflg = abs (farray4(1)-farray5(1)) <= fuzz8 .and. abs (farray4(2)-farray5(2)) <= fuzz8
       else
-        call ESMF_Test(((farray4(1)==50).and.(farray4(2)==50)), &
-                        name, failMsg, result, ESMF_SRCLINE)
+        passflg = .true.  ! Values are undefined after MPI_Reduce
       end if
+      call ESMF_Test(passflg, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
@@ -397,12 +406,11 @@
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify Reduce ESMF_REDUCE_MINResults Test: ESMF_KIND_R4"
       if (localPet == rootPet) then
-        call ESMF_Test((farray4(1)==(farray5(1)).and.(farray4(2)==(farray5(2)))), &
-                        name, failMsg, result, ESMF_SRCLINE)
+        passflg = abs (f4array4(1)-f4array5(1)) <= fuzz4 .and. abs (f4array4(2)-f4array5(2)) <= fuzz4
       else
-        call ESMF_Test(((farray4(1)==50).and.(farray4(2)==50)), &
-                        name, failMsg, result, ESMF_SRCLINE)
+        passflg = .true.  ! Values are undefined after MPI_Reduce
       end if
+      call ESMF_Test(passflg, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
@@ -413,6 +421,13 @@
 !------------------------------------------------------------------------------
 
       subroutine test_Reduce_max
+
+      ! Tolerance for floating point equality tests
+      real(ESMF_KIND_R4), parameter :: fuzz4 = 0.0
+      real(ESMF_KIND_R8), parameter :: fuzz8 = 0.0d0
+
+      logical :: passflg
+
 ! This subroutine tests all the overloaded versions of the ESMF global sum.
 
       ! Test with integer arguments
@@ -426,7 +441,7 @@
         array5 = (/301,302/)
       end if
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM Reduce ESMF_REDUCE_MAXTest"
+      write(name, *) "VM Reduce ESMF_REDUCE_MAXTest: integer"
       call ESMF_VMReduce(vm, sendData=array1, recvData=array4, &
         count=nsize, reduceflag=ESMF_REDUCE_MAX, rootPet=rootPet, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -441,25 +456,24 @@
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify Reduce ESMF_REDUCE_MAXResults Test"
+      write(name, *) "Verify Reduce ESMF_REDUCE_MAXResults Test: integer"
       if (localPet == rootPet) then
-        call ESMF_Test((array4(1)==(array5(1)).and.(array4(2)==(array5(2)))), &
-            name, failMsg, result, ESMF_SRCLINE)
+        passflg = array4(1)==array5(1) .and. array4(2)==array5(2)
       else
-        call ESMF_Test(((array4(1)==50).and.(array4(2)==50)), &
-            name, failMsg, result, ESMF_SRCLINE)
+        passflg = .true.  ! Values are undefined after MPI_Reduce
       end if
+      call ESMF_Test(passflg, name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !Test with ESMF_KIND_R8 arguments
       !=================================
       !EX_UTest
-      farray4 = (/50,50/)
+      farray4 = (/50.0,50.0/)
       ! Set expected results
       if (npets == 1) then
-        farray5 = (/1,2/)
+        farray5 = (/1.0,2.0/)
       else
-        farray5 = (/301,302/)
+        farray5 = (/301.0,302.0/)
       end if
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "VM Reduce ESMF_REDUCE_MAXTest: ESMF_KIND_R8"
@@ -481,24 +495,23 @@
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify Reduce ESMF_REDUCE_MAXResults Test: ESMF_KIND_R8"
       if (localPet == rootPet) then
-        call ESMF_Test((farray4(1)==(farray5(1)).and.(farray4(2)==(farray5(2)))), &
-                        name, failMsg, result, ESMF_SRCLINE)
+        passflg = abs (farray4(1)-farray5(1)) <= fuzz8 .and. abs (farray4(2)-farray5(2)) <= fuzz8
       else
-        call ESMF_Test(((farray4(1)==50).and.(farray4(2)==50)), &
-                        name, failMsg, result, ESMF_SRCLINE)
+        passflg = .true.  ! Values on non-root PETs are undefined after MPI_Reduce
       end if
+      call ESMF_Test(passflg, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
       !Test with ESMF_KIND_R4 arguments
       !=================================
       !EX_UTest
-      f4array4 = (/50,50/)
+      f4array4 = (/50.0,50.0/)
       ! Set expected results
       if (npets == 1) then
-        f4array5 = (/1,2/)
+        f4array5 = (/1.0,2.0/)
       else
-        f4array5 = (/301,302/)
+        f4array5 = (/301.0,302.0/)
       end if
 
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -522,12 +535,11 @@
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify Reduce ESMF_REDUCE_MAXResults Test: ESMF_KIND_R4"
       if (localPet == rootPet) then
-        call ESMF_Test((farray4(1)==(farray5(1)).and.(farray4(2)==(farray5(2)))), &
-                        name, failMsg, result, ESMF_SRCLINE)
+        passflg = abs (f4array4(1)-f4array5(1)) <= fuzz4 .and. abs (f4array4(2)-f4array5(2)) <= fuzz4
       else
-        call ESMF_Test(((farray4(1)==50).and.(farray4(2)==50)), &
-                        name, failMsg, result, ESMF_SRCLINE)
+        passflg = .true.  ! Values are undefined after MPI_Reduce
       end if
+      call ESMF_Test(passflg, name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
@@ -580,7 +592,7 @@
       !EX_UTest
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify Reduce ESMF_REDUCE_SUM Results Test: ESMF_KIND_R8"
-      call ESMF_Test((float_results.eq.my_float_results), name, failMsg, &
+      call ESMF_Test(.not. abs (float_results - my_float_results) > 0.0, name, failMsg, &
                       result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -603,7 +615,7 @@
       !EX_UTest
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify Reduce ESMF_REDUCE_SUM Results Test: ESMF_KIND_R4"
-      call ESMF_Test((float4_results.eq.my_float4_results), name, failMsg, &
+      call ESMF_Test(.not. abs (float4_results - my_float4_results) > 0.0, name, failMsg, &
                       result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -719,7 +731,7 @@
       my_float_results = MAXVAL(farray2)
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Full Reduce ESMF_REDUCE_MAXResults Test:ESMF_KIND_R8"
-      call ESMF_Test((float_results.eq.my_float_results), name, failMsg, &
+      call ESMF_Test(.not. abs (float_results - my_float_results) > 0.0, name, failMsg, &
                       result, ESMF_SRCLINE)
       print *, localPet,' float_results: ', float_results, &
                         ' my_float_results:', my_float_results
@@ -740,7 +752,7 @@
       my_float4_results = MAXVAL(f4array2)
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Full Reduce ESMF_REDUCE_MAXResults Test:ESMF_KIND_R4"
-      call ESMF_Test((float4_results.eq.my_float4_results), name, failMsg, &
+      call ESMF_Test(.not. abs (float4_results - my_float4_results) > 0.0, name, failMsg, &
                       result, ESMF_SRCLINE)
       print *, localPet,' float4_results: ', float4_results, &
                         ' my_float4_results:', my_float4_results
@@ -806,7 +818,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      fsum=0.
+      fsum=0.0
       do i=1,nsize
         farray3_soln(i) = sum( farray2(i,:) )
         print *, localPet,'farray3(',i,')=',farray3(i), &
@@ -815,7 +827,7 @@
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_SUM Results Test"
-      call ESMF_Test((fsum.eq.0), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(.not. abs (fsum) > 0.0, name, failMsg, result, ESMF_SRCLINE)
 
       !Test with ESMF_KIND_R4  arguments
       !=================================
@@ -829,7 +841,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      fsum4=0.
+      fsum4=0.0
       do i=1,nsize
         f4array3_soln(i) = sum( f4array2(i,:) )
         print *, localPet,'f4array3(',i,')=',f4array3(i), &
@@ -838,7 +850,7 @@
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_SUM Results Test"
-      call ESMF_Test((fsum4.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(.not. abs (fsum4) > 0.0, name, failMsg, result, ESMF_SRCLINE)
 
       end subroutine test_AllReduce_sum
 
@@ -865,7 +877,7 @@
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MINResults Test"
-      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((isum.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       ! Scalar version
@@ -898,7 +910,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      fsum=0
+      fsum=0.0
       do i=1,nsize
         farray3_soln(i) = minval( farray2(i,:) )
         print *, localPet,'farray3(',i,')=',farray3(i), &
@@ -907,7 +919,7 @@
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MINResults Test:ESMF_KIND_R8"
-      call ESMF_Test((fsum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(.not. abs (fsum) > 0.0, name, failMsg, result, ESMF_SRCLINE)
 
 
       !Test with ESMF_KIND_R4 arguments
@@ -922,7 +934,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      fsum4=0
+      fsum4=0.0
       do i=1,nsize
         f4array3_soln(i) = minval( f4array2(i,:) )
         print *, localPet,'f4array3(',i,')=',f4array3(i), &
@@ -931,7 +943,7 @@
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MINResults Test:ESMF_KIND_R4"
-      call ESMF_Test((fsum4.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(.not. abs (fsum4) > 0.0, name, failMsg, result, ESMF_SRCLINE)
 
       end subroutine test_AllReduce_min
 
@@ -959,7 +971,7 @@
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MAXResults Test"
-      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((isum.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       ! Scalar version
@@ -992,7 +1004,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      isum=0
+      fsum=0.0
       do i=1,nsize
         farray3_soln(i) = maxval( farray2(i,:) )
         print *, localPet,'farray3(',i,')=',farray3(i), &
@@ -1001,7 +1013,7 @@
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MAXResults Test: ESMF_KIND_R8"
-      call ESMF_Test((isum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(.not. abs (fsum) > 0.0, name, failMsg, result, ESMF_SRCLINE)
 
 
       !Tests using ESMF_KIND_R4 arguments
@@ -1016,7 +1028,7 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      isum=0
+      fsum4=0.0
       do i=1,nsize
         f4array3_soln(i) = maxval( f4array2(i,:) )
         print *, localPet,'f4array3(',i,')=',f4array3(i), &
@@ -1025,7 +1037,7 @@
       end do
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Reduce ESMF_REDUCE_MAXResults Test: ESMF_KIND_R4"
-      call ESMF_Test((fsum4.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test(.not. abs (fsum4) > 0.0, name, failMsg, result, ESMF_SRCLINE)
 
       end subroutine test_AllReduce_max
 
@@ -1120,6 +1132,11 @@
       call ESMF_VMGet(vm, petCount=npets, ssiCount=ssiCount, &
         ssiMinPetCount=ssiMinPetCount, ssiMaxPetCount=ssiMaxPetCount, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      if (npets .ne. 1 .and. npets .ne. 4) then
+        print *, 'PET count must be 1 or 4, npets =', npets
+        call ESMF_Finalize (endflag=ESMF_END_ABORT)
+      end if
 
       write(msg,*) "petCount=", npets, " ssiCount=", ssiCount
       call ESMF_LogWrite(msg, ESMF_LOGMSG_INFO, rc=rc)

@@ -64,6 +64,7 @@ using std::vector;
 // #define DEBUG_SEARCH
 // #define DEBUG_SEARCH_RESULTS
 // #define DEBUG_REGRID_STATUS
+// #define ESMF_REGRID_DEBUG_MAP_NODE 4323801
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -177,10 +178,6 @@ static void populate_box_elems(OTree *box,
       if (sdim >2) max[2] = bounding_box.getMax()[2] + btol;
       else  max[2] = btol;
 
-  int srid; MBMesh_get_gid(mbmp, sr->src_elem, &srid);
-#ifdef DEBUG_SEARCH
-  printf("%d# elem %d pmin/max [%f, %f], [%f, %f] \n",  Par::Rank(), srid, min[0], min[1], max[0], max[1]);
-#endif
       // Add element to search tree
       box->add(min, max, (void*)sr);
     }
@@ -200,8 +197,10 @@ static int found_func(void *c, void *y) {
   int srid; MBMesh_get_gid(si->mesh, sr->src_elem, &srid);
   int siid; MBMesh_get_gid(si->mesh, si->elem, &siid);
 
-#ifdef DEBUG_SEARCH
-  if (si->snr.dst_gid == 6) printf("%d# Search against %d [%d]\n", Par::Rank(), srid, siid);
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+  if (si->snr.dst_gid==ESMF_REGRID_DEBUG_MAP_NODE) {
+    printf("%d# Checking dst pnt id=%d vs. elem id=%d\n",Par::Rank(), si->snr.dst_gid,srid);
+  }
 #endif
 
   // from search.c
@@ -356,6 +355,69 @@ static int found_func(void *c, void *y) {
   double pcoords[3];
   bool is_inside = map->is_in_cell(coords, si->coords, pcoords, &dist);
 
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+  if (si->snr.dst_gid == ESMF_REGRID_DEBUG_MAP_NODE) {
+    printf("%d# Mapping dst_id=%d dst_coords=%f %f %f in=%s pcoords=%f %f %f dist=%e s_elem=%d [",
+      Par::Rank(), si->snr.dst_gid,si->coords[0],si->coords[1],si->coords[2],is_inside ? "true" : "false",pcoords[0],pcoords[1],pcoords[2],dist,srid);
+
+    Range nodes;
+    merr=si->mesh->mesh->get_connectivity(&(sr->src_elem), 1, nodes);
+    if (merr != MB_SUCCESS)
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+
+    int num_verts = nodes.size();
+    int gids[num_verts];
+
+    if (num_nodes != num_verts)
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_VALUE,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+
+    merr=si->mesh->mesh->tag_get_data(si->mesh->gid_tag, nodes, &gids);
+    if (merr != MB_SUCCESS)
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+
+    for (int i=0; i<num_verts; i++)
+      printf("%d ",gids[i]);
+    printf("]\n");
+    
+    printf("%d# Pcoords - Elem %d: ", Par::Rank(), srid);
+    for (int i = 0; i < num_nodes; ++i) {
+      printf("[");
+      for (int j = 0; j < nd; ++j) {
+        printf("%f, ", coords[i*nd+j]);
+      }
+      printf("], ");
+    }
+    printf("\nNode %d: [", si->snr.dst_gid);
+    for (int i=0; i < nd; ++i)
+      printf("%f, ", si->coords[i]);
+    printf("]\n");
+
+#if 0
+    printf("\n\n-- print out info --\n\n");
+
+    for (int i = 0; i < nd; ++i) {
+      printf("[");
+      for (int j = 0; j < num_nodes; ++j) {
+        printf("%f", coords[j*nd+i]);
+        if (j<num_nodes-1) printf(", ");
+      }
+      printf("]\n");
+    }
+    printf("\n");
+
+    for (int i=0; i < nd; ++i)
+      printf("[%f]\n", si->coords[i]);
+    printf("\n");
+#endif
+
+    fflush(stdout);
+  }
+#endif
+
+
 #ifdef DEBUG_PCOORDS
   printf("%d# is inside = %s\n", Par::Rank(), is_inside ? "true" : "false");
 #endif
@@ -363,6 +425,7 @@ static int found_func(void *c, void *y) {
   // if we're too far away don't even consider this as a fall back candidate
   if (!is_inside && (dist > 1.0E-8)) return 0;
 
+  if (is_inside) {
     // if quad or hex transform pcoords to [0,1]
     if (num_nodes > 3)
       translate(pcoords);
@@ -382,20 +445,38 @@ static int found_func(void *c, void *y) {
     printf("]\n");
 #endif
 
-  if (is_inside) {
     // sr->dst_nodes.push_back(si->snr);
     si->dist = 0.0;
     si->is_in=true;
+  
+    // Mark that something is in struct
+    si->investigated=true;
   } else if (!si->is_in && (dist < si->dist)) {
+    // if quad or hex transform pcoords to [0,1]
+    if (num_nodes > 3)
+      translate(pcoords);
+
+    // set the search data pcoords structure
+    si->snr.pcoord[0] = pcoords[0];
+    si->snr.pcoord[1] = pcoords[1];
+    si->snr.pcoord[2] = pcoords[2];
+
+    si->elem = sr->src_elem;
+    si->elem_masked=elem_masked;
+
+#ifdef DEBUG_PCOORDS
+    printf("%d# Node %d pcoords = [", Par::Rank(), si->snr.dst_gid);
+    for (int i = 0; i < nd; ++i)
+      printf("%f, ", si->snr.pcoord[i]);
+    printf("]\n");
+#endif
+
     si->dist = dist;
+
+    // Mark that something is in struct
+    si->investigated=true;
   }
   
-#ifdef DEBUG_SEARCH
-  printf("%d# investigated %d .. keep searching\n", Par::Rank(), siid);
-#endif
-  // Mark that something is in struct
-  si->investigated=true;
-
   // Keep searching
   return 0;
 }
@@ -450,7 +531,7 @@ void MBMesh_Search_EToP(MBMesh *mbmAp,
 
   Trace __trace("MBMesh_Search_EToP()");
 
-#ifdef DEBUG_SEARCH
+#ifdef DEBUG_SEARCH_off
   std::cout << Par::Rank() << "# MBMesh_Search_EToP, stol =" << stol << std::endl;
   
   // int rc;
@@ -568,7 +649,9 @@ void MBMesh_Search_EToP(MBMesh *mbmAp,
     // The point coordinates.
     si.coords[0] = pnt_crd[0]; si.coords[1] = pnt_crd[1]; si.coords[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
 #ifdef DEBUG_SEARCH
+if (si.snr.dst_gid==ESMF_REGRID_DEBUG_MAP_NODE) {
     printf("%d# Point %d  pmin/max [%f, %f], [%f, %f] \n", Par::Rank(), pnt_id, pmin[0], pmin[1], pmax[0], pmax[1]);
+}
 #endif
 
     box->runon(pmin, pmax, found_func, (void*)&si);
@@ -579,7 +662,9 @@ void MBMesh_Search_EToP(MBMesh *mbmAp,
       // this is the new method
       again.push_back(loc);
 #ifdef DEBUG_SEARCH
+if (si.snr.dst_gid==ESMF_REGRID_DEBUG_MAP_NODE) {
 printf("%d# again add node %d\n", Par::Rank(), pnt_id);
+}
 #endif
     } else {
       if (si.elem_masked) {
@@ -635,12 +720,22 @@ printf("%d# dst_id %d status %d\n", Par::Rank(), dst_id, ESMC_REGRID_STATUS_MAPP
         if (sri == tmp_sr.end() || *sri != sr) {
           sr.dst_nodes.push_back(si.snr);
           tmp_sr.insert(sri, sr);
+#ifdef DEBUG_SEARCH
+if (si.snr.dst_gid==ESMF_REGRID_DEBUG_MAP_NODE) {
+  // using sr.src_elem here because insert hoses the iterator
+  int gid; MBMesh_get_gid(mbmAp, sr.src_elem, &gid);
+  std::cout << Par::Rank() << "# NEW search result, add node " << si.snr.dst_gid << " to src_elem " << gid << std::endl;
+}
+#endif
         } else {
           std::vector<etop_sr> &r
             = const_cast<std::vector<etop_sr>&>(sri->dst_nodes);
           r.push_back(si.snr);
 #ifdef DEBUG_SEARCH
-std::cout << Par::Rank() << "# SECOND CHOICE, gid =" << sri->dst_nodes[sri->dst_nodes.size()-1].dst_gid << std::endl;
+if (si.snr.dst_gid==ESMF_REGRID_DEBUG_MAP_NODE) {
+  int gid; MBMesh_get_gid(mbmAp, sri->src_elem, &gid);
+  std::cout << Par::Rank() << "# OLD search result, add node " << si.snr.dst_gid << " to src_elem " << gid << std::endl;
+}
 #endif
         }
       }

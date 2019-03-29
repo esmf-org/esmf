@@ -18,8 +18,14 @@ The g95 compiler does not support Fortran 2003 allocatable character string leng
 
 #if 0
 The g95 compiler has a bug which prevents forward pointer references from
-working if also using the sequence keyword. Don't sequence some select derived
+working if also using the sequence keyword. Do not sequence some select derived
 types to avoid issues.
 #endif
 
 #define ESMF_SEQUENCE_BUG 1
+
+#if 0
+Has F2003 C Interop, but not F2008 C_SIZEOF
+#endif
+#define C_SIZEOF SIZEOF
+

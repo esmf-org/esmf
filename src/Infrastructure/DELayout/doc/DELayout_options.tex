@@ -27,7 +27,11 @@ The valid values are:
     within the same VAS.
   \item [ESMF\_PIN\_DE\_TO\_SSI]
     Pin DEs to single system images (SSI) - typically shared memory nodes.
-    DEs are accessible from all PETs within the same SSI.
+    DEs are accessible from all PETs within the same SSI. The memory allocation
+    between different DEs is allowed to be non-contiguous.
+  \item [ESMF\_PIN\_DE\_TO\_SSI\_CONTIG]
+    Same as {\tt ESMF\_PIN\_DE\_TO\_SSI}, but the shared memory allocation
+    across DEs located on the same SSI must be contigous throughout.
 \end{description}
 
 

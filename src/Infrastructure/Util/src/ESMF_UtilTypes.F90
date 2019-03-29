@@ -43,6 +43,7 @@
 !------------------------------------------------------------------------------
 
 ! !USES:
+  use iso_c_binding
       ! inherit from ESMF base class
 !     use ESMF_UtilTypesMod
  !!  use ESMF_InitMacrosMod Commented out to prevent circular dependency
@@ -163,10 +164,14 @@
       sequence
 #endif
       !private
+#if 1
+          integer(C_SIZE_T) :: ptr
+#else
 #if (ESMC_POINTER_SIZE == 4)
           integer(selected_int_kind( 9)) :: ptr
 #else
           integer(selected_int_kind(18)) :: ptr
+#endif
 #endif
       end type
 
@@ -521,7 +526,8 @@
       type(ESMF_Pin_Flag), parameter:: &
         ESMF_PIN_DE_TO_PET        = ESMF_Pin_Flag(1), &
         ESMF_PIN_DE_TO_VAS        = ESMF_Pin_Flag(2), &
-        ESMF_PIN_DE_TO_SSI        = ESMF_Pin_Flag(3)
+        ESMF_PIN_DE_TO_SSI        = ESMF_Pin_Flag(3), &
+        ESMF_PIN_DE_TO_SSI_CONTIG = ESMF_Pin_Flag(4)
 
 !------------------------------------------------------------------------------
 !
@@ -1037,66 +1043,123 @@
 
       public ESMF_Direction_Flag, ESMF_DIRECTION_FORWARD, ESMF_DIRECTION_REVERSE
 
-      public ESMF_IOFmt_Flag, ESMF_IOFMT_BIN, ESMF_IOFMT_NETCDF, &
-             ESMF_IOFMT_NETCDF_64BIT_OFFSET, ESMF_IOFMT_NETCDF4,  &
-             ESMF_IOFMT_NETCDF4P, ESMF_IOFMT_NETCDF4C, &
-             ESMF_IOFMT_CONFIG, ESMF_IOFMT_YAML
+      public ESMF_IOFmt_Flag, &
+             ESMF_IOFMT_BIN, &
+             ESMF_IOFMT_NETCDF, &
+             ESMF_IOFMT_NETCDF_64BIT_OFFSET, &
+             ESMF_IOFMT_NETCDF4, &
+             ESMF_IOFMT_NETCDF4P, &
+             ESMF_IOFMT_NETCDF4C, &
+             ESMF_IOFMT_CONFIG, &
+             ESMF_IOFMT_YAML
 
-      public ESMF_Index_Flag
-      public ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL, ESMF_INDEX_USER
+      public ESMF_Index_Flag, &
+             ESMF_INDEX_DELOCAL, &
+             ESMF_INDEX_GLOBAL, &
+             ESMF_INDEX_USER
+             
       public ESMF_StartRegion_Flag, &
-             ESMF_STARTREGION_EXCLUSIVE, ESMF_STARTREGION_COMPUTATIONAL
+             ESMF_STARTREGION_EXCLUSIVE, &
+             ESMF_STARTREGION_COMPUTATIONAL
+             
       public ESMF_Region_Flag, &
-             ESMF_REGION_TOTAL, ESMF_REGION_SELECT, ESMF_REGION_EMPTY
+             ESMF_REGION_TOTAL, &
+             ESMF_REGION_SELECT, &
+             ESMF_REGION_EMPTY
+             
       public ESMF_RouteSync_Flag, &
-             ESMF_ROUTESYNC_BLOCKING, ESMF_ROUTESYNC_NBSTART, &
-             ESMF_ROUTESYNC_NBTESTFINISH, ESMF_ROUTESYNC_NBWAITFINISH, ESMF_ROUTESYNC_CANCEL
-
-      public ESMF_Reduce_Flag, ESMF_REDUCE_SUM, ESMF_REDUCE_MIN, ESMF_REDUCE_MAX
-      public ESMF_Sync_Flag, ESMF_SYNC_BLOCKING, ESMF_SYNC_VASBLOCKING, &
+             ESMF_ROUTESYNC_BLOCKING, &
+             ESMF_ROUTESYNC_NBSTART, &
+             ESMF_ROUTESYNC_NBTESTFINISH, &
+             ESMF_ROUTESYNC_NBWAITFINISH, &
+             ESMF_ROUTESYNC_CANCEL
+             
+      public ESMF_Reduce_Flag, &
+             ESMF_REDUCE_SUM, &
+             ESMF_REDUCE_MIN, &
+             ESMF_REDUCE_MAX
+             
+      public ESMF_Sync_Flag, &
+             ESMF_SYNC_BLOCKING, &
+             ESMF_SYNC_VASBLOCKING, &
              ESMF_SYNC_NONBLOCKING
-      public ESMF_Context_Flag, ESMF_CONTEXT_OWN_VM, ESMF_CONTEXT_PARENT_VM
-      public ESMF_End_Flag, ESMF_END_NORMAL, ESMF_END_KEEPMPI, ESMF_END_ABORT
-      public ESMF_Pin_Flag, ESMF_PIN_DE_TO_PET, ESMF_PIN_DE_TO_VAS, ESMF_PIN_DE_TO_SSI
-      public ESMF_AttCopy_Flag, ESMF_ATTCOPY_HYBRID, ESMF_ATTCOPY_REFERENCE, &
-                               ESMF_ATTCOPY_VALUE
-      public ESMF_AttGetCountFlag, ESMF_ATTGETCOUNT_ATTRIBUTE, ESMF_ATTGETCOUNT_ATTPACK, &
-                                   ESMF_ATTGETCOUNT_ATTLINK, ESMF_ATTGETCOUNT_TOTAL
-      public ESMF_AttReconcileFlag, ESMF_ATTRECONCILE_OFF, ESMF_ATTRECONCILE_ON
-      public ESMF_AttNest_Flag, ESMF_ATTNEST_OFF, ESMF_ATTNEST_ON
-      public ESMF_AttWriteFlag, ESMF_ATTWRITE_TAB, ESMF_ATTWRITE_XML
-      public ESMF_ATT_GRIDDED_DIM_LABELS, ESMF_ATT_UNGRIDDED_DIM_LABELS
+             
+      public ESMF_Context_Flag, &
+             ESMF_CONTEXT_OWN_VM, &
+             ESMF_CONTEXT_PARENT_VM
+             
+      public ESMF_End_Flag, &
+             ESMF_END_NORMAL, &
+             ESMF_END_KEEPMPI, &
+             ESMF_END_ABORT
+             
+      public ESMF_Pin_Flag, &
+             ESMF_PIN_DE_TO_PET, &
+             ESMF_PIN_DE_TO_VAS, &
+             ESMF_PIN_DE_TO_SSI, &
+             ESMF_PIN_DE_TO_SSI_CONTIG
+             
+      public ESMF_AttCopy_Flag, &
+             ESMF_ATTCOPY_HYBRID, &
+             ESMF_ATTCOPY_REFERENCE, &
+             ESMF_ATTCOPY_VALUE
+             
+      public ESMF_AttGetCountFlag, &
+             ESMF_ATTGETCOUNT_ATTRIBUTE, &
+             ESMF_ATTGETCOUNT_ATTPACK, &
+             ESMF_ATTGETCOUNT_ATTLINK, &
+             ESMF_ATTGETCOUNT_TOTAL
+             
+      public ESMF_AttReconcileFlag, &
+             ESMF_ATTRECONCILE_OFF, &
+             ESMF_ATTRECONCILE_ON
+             
+      public ESMF_AttNest_Flag, &
+             ESMF_ATTNEST_OFF, &
+             ESMF_ATTNEST_ON
+             
+      public ESMF_AttWriteFlag, &
+             ESMF_ATTWRITE_TAB, &
+             ESMF_ATTWRITE_XML
+             
+      public ESMF_ATT_GRIDDED_DIM_LABELS, &
+             ESMF_ATT_UNGRIDDED_DIM_LABELS
 
-       public ESMF_RegridMethod_Flag,   ESMF_REGRIDMETHOD_BILINEAR, &
-                                   ESMF_REGRIDMETHOD_PATCH, &
-                                   ESMF_REGRIDMETHOD_CONSERVE, &
-                                   ESMF_REGRIDMETHOD_NEAREST_STOD, &
-                                   ESMF_REGRIDMETHOD_NEAREST_DTOS, &
-                                   ESMF_REGRIDMETHOD_CONSERVE_2ND
+      public ESMF_RegridMethod_Flag, &
+             ESMF_REGRIDMETHOD_BILINEAR, &
+             ESMF_REGRIDMETHOD_PATCH, &
+             ESMF_REGRIDMETHOD_CONSERVE, &
+             ESMF_REGRIDMETHOD_NEAREST_STOD, &
+             ESMF_REGRIDMETHOD_NEAREST_DTOS, &
+             ESMF_REGRIDMETHOD_CONSERVE_2ND
 
-       public ESMF_ExtrapMethod_Flag, ESMF_EXTRAPMETHOD_NONE, & 
-                                      ESMF_EXTRAPMETHOD_NEAREST_STOD, &
-                                      ESMF_EXTRAPMETHOD_NEAREST_IDAVG, &
-                                      ESMF_EXTRAPMETHOD_CREEP
+      public ESMF_ExtrapMethod_Flag, &
+             ESMF_EXTRAPMETHOD_NONE, & 
+             ESMF_EXTRAPMETHOD_NEAREST_STOD, &
+             ESMF_EXTRAPMETHOD_NEAREST_IDAVG, &
+             ESMF_EXTRAPMETHOD_CREEP
 
-       public ESMF_LineType_Flag,   ESMF_LINETYPE_CART, &
-                                   ESMF_LINETYPE_GREAT_CIRCLE
+      public ESMF_LineType_Flag, &
+             ESMF_LINETYPE_CART, &
+             ESMF_LINETYPE_GREAT_CIRCLE
 
-       public ESMF_PoleMethod_Flag,  ESMF_POLEMETHOD_NONE, &
-                                ESMF_POLEMETHOD_ALLAVG, &
-                                ESMF_POLEMETHOD_NPNTAVG, &
-                                ESMF_POLEMETHOD_TEETH
+      public ESMF_PoleMethod_Flag, &
+             ESMF_POLEMETHOD_NONE, &
+             ESMF_POLEMETHOD_ALLAVG, &
+             ESMF_POLEMETHOD_NPNTAVG, &
+             ESMF_POLEMETHOD_TEETH
 
-       public ESMF_RegridConserve, ESMF_REGRID_CONSERVE_OFF, &
-                                   ESMF_REGRID_CONSERVE_ON
+      public ESMF_RegridConserve, &
+             ESMF_REGRID_CONSERVE_OFF, &
+             ESMF_REGRID_CONSERVE_ON
 
-       public ESMF_REGRID_SCHEME_FULL3D, &
-              ESMF_REGRID_SCHEME_NATIVE, &
-              ESMF_REGRID_SCHEME_REGION3D, &
-              ESMF_REGRID_SCHEME_FULLTOREG3D, &
-              ESMF_REGRID_SCHEME_REGTOFULL3D, &
-              ESMF_REGRID_SCHEME_DCON3D, &
-              ESMF_REGRID_SCHEME_DCON3DWPOLE
+      public ESMF_REGRID_SCHEME_FULL3D, &
+             ESMF_REGRID_SCHEME_NATIVE, &
+             ESMF_REGRID_SCHEME_REGION3D, &
+             ESMF_REGRID_SCHEME_FULLTOREG3D, &
+             ESMF_REGRID_SCHEME_REGTOFULL3D, &
+             ESMF_REGRID_SCHEME_DCON3D, &
+             ESMF_REGRID_SCHEME_DCON3DWPOLE
 
       public ESMF_FAILURE, ESMF_SUCCESS
 

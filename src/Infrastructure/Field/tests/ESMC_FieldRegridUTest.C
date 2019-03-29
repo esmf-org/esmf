@@ -361,7 +361,7 @@ int main(void){
                              NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL,
                              NULL, NULL, NULL,
-                             NULL, NULL);
+                             NULL, NULL, NULL, NULL, NULL);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //--------------------------------------------------------------------------- -
@@ -571,7 +571,7 @@ int main(void){
                              NULL, NULL, NULL, NULL,
                              NULL, NULL, NULL,
                              NULL, NULL, NULL,
-                             NULL, NULL);
+                             NULL, NULL, NULL, NULL, NULL);
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------
 
