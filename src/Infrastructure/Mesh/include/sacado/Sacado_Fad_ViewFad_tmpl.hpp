@@ -260,7 +260,10 @@ namespace Sacado {
       typedef ViewFad<T,sl,ss,U> view_fad_type;
 
       // Bring in constructors
-      using view_fad_type::view_fad_type;
+      // NOTE (bekozi): Commented out per W. Spector testing on Darwin. Build
+      // complains that ”view_fad_type” has already been declared in the current
+      // scope.
+      // using view_fad_type::view_fad_type;
 
       // Add overload of dereference operator
       KOKKOS_INLINE_FUNCTION
