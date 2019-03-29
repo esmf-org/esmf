@@ -58,7 +58,7 @@ class AbstractESMFNoseCommand(AbstractESMFCommand):
             ret = ret + cmd_nose_attrs
 
         if cls._nose_parallel:
-            # Needed for ESMF contants import
+            # Needed for ESMF constants import
             sys.path.append('src')
 
             from ESMF.api import constants
@@ -205,6 +205,7 @@ class TestRegridFromFileParallelCommand(TestRegridFromFileCommand):
     def run(self):
         TestRegridFromFileCommand.run(self)
 
+
 class TestAllCommand(AbstractESMFCommand):
     description = "run serial, parallel, and example tests"
 
@@ -215,6 +216,7 @@ class TestAllCommand(AbstractESMFCommand):
         for t in to_run:
             cmd = t.nosetests_command()
             subprocess.check_call(cmd)
+
 
 # Get package structure
 def _get_dot_(path, root='src'):
@@ -264,7 +266,6 @@ setup(name="ESMPy",
                 'test_examples': TestExamplesCommand,
                 'test_examples_dryrun': TestExamplesDryrunCommand,
                 'test_examples_parallel': TestExamplesParallelCommand,
-                'test_regrid': TestRegridCommand,
                 'test_regrid': TestRegridCommand,
                 'test_regrid_from_file': TestRegridFromFileCommand,
                 'test_regrid_from_file_dryrun': TestRegridFromFileDryrunCommand,

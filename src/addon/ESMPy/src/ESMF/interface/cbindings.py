@@ -12,10 +12,19 @@ import ESMF.api.constants as constants
 from ESMF.util.decorators import deprecated, netcdf
 from ESMF.interface.loadESMF import _ESMF
 
+
 def copy_struct(src):
     dst = type(src)()
     ct.pointer(dst)[0] = src
     return dst
+
+
+def handle_esmf_error(rc, esmf_name):
+    from ESMF.api import constants
+    if rc != constants._ESMP_SUCCESS:
+        msg = esmf_name + ' failed with rc = ' + str(rc) + '. ' + constants._errmsg
+        raise ValueError(msg)
+
 
 class ESMP_Field(ct.Structure):
     _fields_ = [("ptr", ct.c_void_p)]
@@ -143,6 +152,17 @@ class OptionalFloat(object):
             else:
                 ptr = ct.POINTER(ct.c_float)
                 paramptr = ptr(ct.c_float(param))
+                return paramptr
+
+# this class allows optional arguments to be passed in place of pointers
+class OptionalPtr(object):
+        @classmethod
+        def from_param(cls, param):
+            if param is None:
+                return None
+            else:
+                ptr = ct.POINTER(ct.c_void_p)
+                paramptr = ptr(ct.c_void_p(param))
                 return paramptr
 
 class Py3Char(object):
@@ -1893,88 +1913,73 @@ def ESMP_FieldRegridRelease(routehandle):
         raise ValueError('ESMC_FieldRegridRelease() failed with rc = '+str(rc)+
                         '.    '+constants._errmsg)
 
-_ESMF.ESMC_FieldRegridStore.restype = ct.c_int
-_ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p, ct.c_void_p,
-                                        OptionalStructPointer,
-                                        OptionalStructPointer,
-                                        ct.POINTER(ct.c_void_p),
-                                        OptionalNamedConstant,
-                                        OptionalNamedConstant,
-                                        ct.POINTER(ct.c_void_p),
-                                        OptionalNamedConstant,
-                                        OptionalNamedConstant,
-                                        OptionalNamedConstant,
-                                        OptionalInt,
-                                        OptionalFloat,
-                                        OptionalNamedConstant,
-                                        OptionalBool,
-                                        OptionalField,
-                                        OptionalField]
+_ESMF.ESMC_FieldRegridReleaseFactors.restype = ct.c_int
+_ESMF.ESMC_FieldRegridReleaseFactors.argtypes = [ct.POINTER(ct.POINTER(ct.c_double)),
+                                                 ct.POINTER(ct.POINTER(ct.c_int)),
+                                                 ct.POINTER(ct.c_int)]
 
-def ESMP_FieldRegridStore(srcField, dstField,
-                          srcMaskValues=None, dstMaskValues=None,
-                          regridmethod=None,
-                          polemethod=None, regridPoleNPnts=None,
-                          lineType=None, normType=None,
-                          extrapMethod=None, 
-                          extrapNumSrcPnts=None, extrapDistExponent=None,
-                          unmappedaction=None,
-                          ignoreDegenerate=None, 
-                          srcFracField=None, dstFracField=None):
+def ESMP_FieldRegridReleaseFactors(factorList, factorIndexList, numFactors):
     """
-    Preconditions: Two ESMP_Fields have been created and initialized
-                   sufficiently for a regridding operation to take
-                   place.  'srcMaskValues' and 'dstMaskValues' are
-                   Numpy arrays which hold the values of a field which
-                   represent a masked cell.\n
-    Postconditions: A handle to the regridding operation 
-                    has been returned into 'routehandle' and Fields containing
-                    the fractions of the source and destination cells
-                    participating in the regridding operation are
-                    optionally returned into 'srcFracField' and
-                    'dstFracField'.\n
+    Preconditions: factorList and factorIndexList have been created.\n
+    Postconditions: All heap data associated with the factorList and factorIndexList will be released.\n
     Arguments:\n
-        :RETURN: ESMP_RouteHandle           :: routehandle\n
-        ESMP_Field                          :: srcField\n
-        ESMP_Field                          :: dstField\n
-        Numpy.array(dtype=int32) (optional) :: srcMaskValues\n
-        Numpy.array(dtype=int32) (optional) :: dstMaskValues\n
-        regridMethod (optional)             :: regridmethod\n
-            Argument values:\n
-                (default) RegridMethod.BILINEAR\n
-                RegridMethod.PATCH\n
-                RegridMethod.CONSERVE\n
-        poleMethod (optional)               :: polemethod\n
-            Argument values:\n
-                (default for regridmethod == RegridMethod.CONSERVE) PoleMethod.NONE\n
-                (default for regridmethod != RegridMethod.CONSERVE) PoleMethod.ALLAVG\n
-                PoleMethod.NPNTAVG\n
-                PoleMethod.TEETH\n
-        integer (optional)                  :: regridPoleNPnts\n
-        lineType (optional)                 :: normType\n
-            Argument values:\n
-                NOTE: default is dependent on the value of regridMethod
-                LineType.CART \n
-                LineType.GREAT_CIRCLE \n
-        normType (optional)                 :: normType\n
-            Argument values:\n
-                (default) NormType.DSTAREA \n
-                NormType.DSTFRAC \n
-        extrapMethod (optional)             :: extrapMethod \n
-            Argument values:\n
-                (default) ExtrapMethod.NONE \n
-                ExtrapMethod.NEAREST_STOD \n
-                ExtrapMethod.NEAREST_IDAVG \n
-        integer (optional)                  :: extrapNumSrcPnts\n
-        float (optional)                    :: extrapDistExponent\n
-        unmappedAction (optional)           :: unmappedaction\n
-            Argument values:\n
-                (default) UnmappedAction.ERROR\n
-                UnmappedAction.IGNORE\n
-        boolean (optional)                  :: ignoreDegenerate\n
-        ESMP_Field (optional)               :: srcFracField\n
-        ESMP_Field (optional)               :: dstFracField\n
+        float buffer :: factorList\n
+        int buffer :: factorIndexList\n
     """
+    rc = _ESMF.ESMC_FieldRegridReleaseFactors(ct.byref(factorList), ct.byref(factorIndexList), ct.byref(numFactors))
+    if rc != constants._ESMP_SUCCESS:
+        raise ValueError('ESMC_FieldRegridReleaseFactors() failed with rc = '+str(rc)+
+                        '.    '+constants._errmsg)
+
+
+_ESMF.ESMC_FieldRegridStore.restype = ct.c_int
+_ESMF.ESMC_FieldRegridStore.argtypes = [ct.c_void_p,              # srcField
+                                        ct.c_void_p,              # dstField
+                                        OptionalStructPointer,    # srcMaskValues
+                                        OptionalStructPointer,    # dstMaskValues
+                                        ct.POINTER(ct.c_void_p),  # routehandle
+                                        OptionalNamedConstant,    # regridmethod
+                                        OptionalNamedConstant,    # polemethod
+                                        ct.POINTER(ct.c_void_p),  # regridPoleNPnts
+                                        OptionalNamedConstant,    # lineType
+                                        OptionalNamedConstant,    # normType
+                                        OptionalNamedConstant,    # extrapMethod
+                                        OptionalInt,              # extrapNumSrcPnts
+                                        OptionalFloat,            # extrapDistExponent
+                                        OptionalNamedConstant,    # unmappedaction
+                                        OptionalBool,             # ignoreDegenerate
+                                        ct.POINTER(ct.POINTER(ct.c_double)),  # factorList
+                                        ct.POINTER(ct.POINTER(ct.c_int)),  # factorIndexList
+                                        ct.POINTER(ct.c_int),     # numfac
+                                        OptionalField,            # srcFracField
+                                        OptionalField             # dstFracField
+                                        ]
+
+
+def ESMP_FieldRegridStore(srcField,
+                          dstField,
+                          srcMaskValues=None,
+                          dstMaskValues=None,
+                          regridmethod=None,
+                          polemethod=None,
+                          regridPoleNPnts=None,
+                          lineType=None,
+                          normType=None,
+                          extrapMethod=None, 
+                          extrapNumSrcPnts=None,
+                          extrapDistExponent=None,
+                          unmappedaction=None,
+                          ignoreDegenerate=None,
+                          factorList=None,
+                          factorIndexList=None,
+                          numFactors=None,
+                          srcFracField=None,
+                          dstFracField=None):
+    """
+    Call into the ESMF C layer in this function. See calling function for
+    documentation.
+    """
+
     routehandle = ct.c_void_p(1)
     if regridPoleNPnts:
         regridPoleNPnts_ct = ct.byref(ct.c_void_p(regridPoleNPnts))
@@ -1995,6 +2000,21 @@ def ESMP_FieldRegridStore(srcField, dstField,
             raise TypeError('dstMaskValues must have dtype=int32')
         dstMaskValues_i = ESMP_InterfaceInt(dstMaskValues)
 
+    # The factor count integer pointer is always expected by the Fortran
+    # layer. It will return zero if we are not returning factors.
+    numfac = ct.c_int(0)
+
+    if factorList is None:
+        arg_factorList = None
+        arg_factorIndexList = None
+    else:
+        # HACK: Gets around weird C_ASSOCIATED behavior with Python-->Fortran.
+        # HACK:   This value is checked in regrid store to determine if we are
+        # HACK:   returning factors.
+        numfac.value = -999
+        arg_factorList = ct.byref(factorList)
+        arg_factorIndexList = ct.byref(factorIndexList)
+
     rc = _ESMF.ESMC_FieldRegridStore(srcField.struct.ptr,
                                      dstField.struct.ptr,
                                      srcMaskValues_i,
@@ -2006,16 +2026,25 @@ def ESMP_FieldRegridStore(srcField, dstField,
                                      lineType,
                                      normType,
                                      extrapMethod, 
-                                     extrapNumSrcPnts, extrapDistExponent,
+                                     extrapNumSrcPnts,
+                                     extrapDistExponent,
                                      unmappedaction,
                                      ignoreDegenerate,
+                                     arg_factorList,
+                                     arg_factorIndexList,
+                                     ct.byref(numfac),
                                      srcFracField,
                                      dstFracField)
-    if rc != constants._ESMP_SUCCESS:
-        raise ValueError('ESMC_FieldRegridStore() failed with rc = '+str(rc)+
-                        '.    '+constants._errmsg)
+
+    handle_esmf_error(rc, 'ESMC_FieldRegridStore')
+
+    # Assign the outgoing pointer for the factor count if we are returning
+    # factors.
+    if factorList is not None:
+        numFactors.value = numfac.value
 
     return routehandle
+
 
 _ESMF.ESMC_FieldRegridStoreFile.restype = ct.c_int
 _ESMF.ESMC_FieldRegridStoreFile.argtypes = [ct.c_void_p, ct.c_void_p,
