@@ -990,7 +990,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
 !
 ! !DESCRIPTION:
-!   Append the exchanged stored in {\tt appendRoutehandle} to the 
+!   Append the exchange pattern stored in {\tt appendRoutehandle} to the 
 !   {\tt routehandle}. Optionally transfer ownership of the exchange pattern
 !   stored in the incoming {\tt appendRoutehandle} to the {\tt routehandle}.
 !
@@ -1004,9 +1004,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !     If set to {\tt .true.}, the ownership of the appended exchange will be
 !     transferred to {\tt routehandle}. This means that the exchange will be 
 !     released when {\tt routehandle} is released. Even when ownership of the
-!     exchanged is transferred, {\tt appendRoutehandle} still can be used
+!     exchange pattern is transferred, {\tt appendRoutehandle} still can be used
 !     as a container to reference the exchange, e.g. to append the same
-!     exchange multiple times. The default is {\tt .false.}.
+!     exchange pattern multiple times. The default is {\tt .false.}.
 !   \item[{[rc]}] 
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
