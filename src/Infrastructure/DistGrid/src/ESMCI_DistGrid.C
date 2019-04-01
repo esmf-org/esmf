@@ -1343,11 +1343,16 @@ DistGrid *DistGrid::create(
     // regDecomp was not provided -> create a temporary default regDecomp
     regDecompDeleteFlag = true;  // set
     dummy = new int[dimCount];
+    regDecomp = new InterArray<int>(dummy, 1, &dimCount);
     // set default decomposition
+#if 1
     dummy[0] = deCount;
     for (int i=1; i<dimCount; i++)
       dummy[i] = 1;
-    regDecomp = new InterArray<int>(dummy, 1, &dimCount);
+#else
+    // enable this branch to switch regDecomp default to "most cubic"
+    regDecompSetCubic(regDecomp,deCount);
+#endif
   }
   if (regDecomp->dimCount != 1){
     ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
@@ -2561,12 +2566,19 @@ DistGrid *DistGrid::create(
     deCountPTile = new int[tileCount];    
     for (int i=0; i<tileCount; i++){
       if (i<extraDEs)
-        dummy[dimCount*i] = deCountPerTile + 1; // spread the extra DEs
+        deCountPTile[i] = deCountPerTile + 1; // spread the extra DEs
       else
-        dummy[dimCount*i] = deCountPerTile;     // just regular DEs
+        deCountPTile[i] = deCountPerTile;     // just regular DEs
+#if 1
+      dummy[dimCount*i] = deCountPTile[i];
       for (int j=1; j<dimCount; j++)
         dummy[dimCount*i+j] = 1;                // no decomp in higher dims
-      deCountPTile[i] = dummy[dimCount*i];      // keep for easier access
+#else
+      // enable this branch to switch regDecomp default to "most cubic"
+      regDecomp = new InterArray<int>(dummy+dimCount*i, 1, &dimCount);
+      regDecompSetCubic(regDecomp,deCountPTile[i]);
+      delete regDecomp;
+#endif
     }
     // finish up creating the default regDecomp InterArray
     dummyLen[0] = dimCount;
@@ -6072,6 +6084,86 @@ int DistGrid::connection(
 }
 //-----------------------------------------------------------------------------
 
+
+//----------------------------------------------------------------------------
+//
+// RegDecomp functions
+//
+//-----------------------------------------------------------------------------
+
+int regDecompProd(int *n, int d){
+  int m=1;
+  for (int i=0; i<d; i++) m*=n[i];
+  return m;
+}
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::DistGrid::regDecompSetCubic()"
+//BOPI
+// !IROUTINE:  ESMCI::DistGrid::regDecompSetCubic
+//
+// !INTERFACE:
+int DistGrid::regDecompSetCubic(
+//
+// !RETURN VALUE:
+//    int return code
+//
+// !ARGUMENTS:
+//
+  InterArray<int> *regDecomp,         // out -
+  int v                               // in  -
+  ){
+//
+// !DESCRIPTION:
+//    Set a regDecomp to be most cubic
+//
+//EOPI
+//-----------------------------------------------------------------------------
+  // initialize return code; assume routine not implemented
+  int rc = ESMC_RC_NOT_IMPL;              // final return code
+  
+  // check connetion argument
+  if (!present(regDecomp)){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_PTR_NULL,
+      "Not a valid pointer to regDecomp array", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  if (regDecomp->dimCount != 1){
+    ESMC_LogDefault.MsgFoundError(ESMC_RC_ARG_RANK,
+      "regDecomp array must be of rank 1", ESMC_CONTEXT, &rc);
+    return rc;
+  }
+  
+  int d = regDecomp->extent[0];
+  int *n = regDecomp->array;
+  
+  int s = pow(v,1/(double)d);
+  for (int i=0; i<d; i++) n[i]=s; // init
+  int a=0;
+  while (regDecompProd(n,d) != v){
+    if (a==d) a=0;
+    n[a++]++;
+    if (regDecompProd(n,d) > v) a=d-1;
+    while(regDecompProd(n,d) > v){
+      if (a==-1) a=d-1;
+      if (n[a]>1) n[a--]--;
+      else a--;
+      if (regDecompProd(n,d) < v) a=0;
+    }
+  }
+  // return successfully
+  rc = ESMF_SUCCESS;
+  return rc;
+}
+//-----------------------------------------------------------------------------
+
+
+//----------------------------------------------------------------------------
+//
+// Misc functions
+//
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD

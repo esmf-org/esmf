@@ -111,6 +111,14 @@
 \input{../Infrastructure/DistGrid/doc/ESMF_DistGridConnection_fapi}
 #endif
 
+\subsection{Class API: DistGridRegDecomp Methods}
+\label{ref:distgridregdecomp}
+#ifdef STANDALONE
+\input{ESMF_DistGridRegDecomp_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/DistGrid/doc/ESMF_DistGridRegDecomp_fapi}
+#endif
+
 %#ifdef STANDALONE
 %\section{Bibliography}
 %\bibliography{comp} 

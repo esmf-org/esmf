@@ -55,7 +55,8 @@ program ESMF_ArrayCreateGetUTest
   type(ESMF_VM):: vm
   integer:: i,j
   integer:: petCount, localPet, deCount, de, localDeCount, lde, ssiLocalDeCount
-  type(ESMF_ArraySpec):: arrayspec, arrayspec2
+  integer, allocatable  :: regDecomp(:)
+  type(ESMF_ArraySpec)  :: arrayspec, arrayspec2
   type(ESMF_LocalArray), allocatable :: localArrayList(:)
   type(ESMF_Array):: array, arrayAlias, arrayCpy, arrayUnInit
   type(ESMF_DistGrid):: distgrid, distgrid2
@@ -124,10 +125,14 @@ program ESMF_ArrayCreateGetUTest
 
   !------------------------------------------------------------------------
   ! DistGrid preparation
-  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/15,23/), &
-    regDecomp=(/2,2/), rc=rc)
+  allocate(regDecomp(2))
+  call ESMF_DistGridRegDecompSetCubic(regDecomp, rc=rc) ! expect 2 x 2
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
-
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/15,23/), &
+    regDecomp=regDecomp, rc=rc)
+  if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
+  deallocate(regDecomp)
+  
   !------------------------------------------------------------------------
   !NEX_UTest_Multi_Proc_Only
   write(name, *) "Create test Array for IsCreated"
@@ -841,7 +846,8 @@ program ESMF_ArrayCreateGetUTest
   
   !------------------------------------------------------------------------
   ! preparations
-  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), rc=rc)
+  distgrid = ESMF_DistGridCreate(minIndex=(/1,1/), maxIndex=(/40,10/), &
+    regDecomp=(/petCount,1/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   !------------------------------------------------------------------------
@@ -881,7 +887,7 @@ program ESMF_ArrayCreateGetUTest
   !------------------------------------------------------------------------
   ! preparations
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1/), maxIndex=(/40,10,10/), &
-    rc=rc)
+    regDecomp=(/petCount,1,1/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   !------------------------------------------------------------------------
@@ -914,7 +920,7 @@ program ESMF_ArrayCreateGetUTest
   !------------------------------------------------------------------------
   ! preparations
   distgrid = ESMF_DistGridCreate(minIndex=(/1,1,1,1/), &
-    maxIndex=(/40,10,10,10/), rc=rc)
+    maxIndex=(/40,10,10,10/), regDecomp=(/petCount,1,1,1/), rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
   
   !------------------------------------------------------------------------
