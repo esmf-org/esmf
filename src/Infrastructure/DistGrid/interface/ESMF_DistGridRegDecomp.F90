@@ -75,18 +75,18 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!   Construct a regular decomposition argument for DistGrid that is most cubic in 
-!   {\tt dimCount} dimensions, and multiplies out to {\tt deCount} DEs. The 
+!   Construct a regular decomposition argument for DistGrid that is most cubic
+!   in {\tt dimCount} dimensions, and multiplies out to {\tt deCount} DEs. The
 !   factorization is stable monotonic decreasing, ensuring that earlier entries
 !   in {\tt regDecomp} are larger or equal to the later entires.
 !
 !   The arguments are:
 !   \begin{description}
-!   \item[regDecomp] 
-!     Thhe regular decomposition description being constructed.
+!   \item[regDecomp]
+!     The regular decomposition description being constructed.
 !   \item[{[deCount]}]
 !     The number of DEs. Defaults to {\tt petCount}.
-!   \item[{[rc]}] 
+!   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
