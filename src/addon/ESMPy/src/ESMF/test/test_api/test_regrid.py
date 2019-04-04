@@ -526,8 +526,9 @@ class TestRegrid(TestBase):
         self.assertGreater(np.sum(dstfield.data == 33.33), 10)
         self.assertGreater(np.sum(dstfield.data == -999), 10)
 
-        if os.path.exists(filename):
-            os.remove(filename)
+        if (ESMF.local_pet() == 0):
+            if os.path.exists(filename):
+                os.remove(filename)
 
     @attr('parallel')
     def test_field_regrid_area(self):
