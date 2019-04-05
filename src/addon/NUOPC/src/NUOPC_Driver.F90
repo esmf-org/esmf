@@ -461,7 +461,7 @@ module NUOPC_Driver
     
     ! local variables
     character(*), parameter   :: rName="InitializeIPDv02p1"
-    integer                   :: localrc, stat
+    integer                   :: userrc, stat
     type(type_InternalState)  :: is
     logical                   :: clockIsPresent
     type(ESMF_Clock)          :: internalClock
@@ -597,10 +597,10 @@ module NUOPC_Driver
         
     ! SPECIALIZE by calling into attached method to SetServices for modelComps
     call ESMF_MethodExecute(gcomp, label=label_SetModelServices, &
-      userRc=localrc, rc=rc)
+      userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
       
@@ -985,22 +985,22 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
     ! SPECIALIZE by calling into optional attached method that sets RunSequence
     call ESMF_MethodExecute(gcomp, label=label_SetRunSequence, &
-      existflag=existflag, userRc=localrc, rc=rc)
+      existflag=existflag, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
     ! SPECIALIZE by calling into optional attached method allowing modification
     ! of the "InitializePhaseMap" metadata.
     call ESMF_MethodExecute(gcomp, label=label_ModifyInitializePhaseMap, &
-      existflag=existflag, userRc=localrc, rc=rc)
+      existflag=existflag, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     
@@ -1245,14 +1245,14 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
               return  ! bail out
             call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
               importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i),&
-              clock=is%wrap%initClock(i), phase=phase, userRc=localrc, rc=rc)
+              clock=is%wrap%initClock(i), phase=phase, userRc=userrc, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg="NUOPC Incompatible: "//&
               "Failed calling phase "// &
               trim(adjustl(pLabel))//" Initialize for modelComp "// &
               trim(adjustl(iString))//": "//trim(compName), &
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase '"// &
+            if (ESMF_LogFoundError(rcToCheck=userrc, msg="Phase '"// &
               trim(adjustl(pLabel))//"' Initialize for modelComp "// &
               trim(adjustl(iString))//": "//trim(compName)// &
               " did not return ESMF_SUCCESS", &
@@ -1323,14 +1323,14 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
                 return  ! bail out
               call ESMF_CplCompInitialize(is%wrap%connectorComp(i,j), &
                 importState=imState, exportState=exState, &
-                clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+                clock=internalClock, phase=phase, userRc=userrc, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase "// &
                 trim(adjustl(pLabel))//" Initialize for connectorComp "// &
                 trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
                 trim(compName), &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase '"// &
+              if (ESMF_LogFoundError(rcToCheck=userrc, msg="Phase '"// &
                 trim(adjustl(pLabel))//"' Initialize for connectorComp "// &
                 trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
                 trim(compName)//" did not return ESMF_SUCCESS", &
@@ -1738,7 +1738,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     
     ! local variables
     character(*), parameter   :: rName="InitializeIPDv02p5"
-    integer                   :: localrc
+    integer                   :: userrc
     type(ESMF_Clock)          :: internalClock
     logical                   :: clockIsPresent
     logical                   :: clockIsCreated
@@ -2123,7 +2123,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     logical, intent(out), optional :: execFlag ! .true. if at least one executed
     integer, intent(out)    :: rc
     ! local variables
-    integer                 :: phase, i, k, localrc
+    integer                 :: phase, i, k, userrc
     character(ESMF_MAXSTR)  :: iString, pLabel
     type(type_InternalState):: is
     character(ESMF_MAXSTR)  :: name, compName
@@ -2182,13 +2182,13 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
           return  ! bail out
         call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
           importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-          clock=is%wrap%initClock(i), phase=phase, userRc=localrc, rc=rc)
+          clock=is%wrap%initClock(i), phase=phase, userRc=userrc, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase '"// &
           trim(adjustl(pLabel))//"' Initialize for modelComp "// &
           trim(adjustl(iString))//": "//trim(compName), &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase '"// &
+        if (ESMF_LogFoundError(rcToCheck=userrc, msg="Phase '"// &
           trim(adjustl(pLabel))//"' Initialize for modelComp "// &
           trim(adjustl(iString))//": "//trim(compName)// &
           " did not return ESMF_SUCCESS", &
@@ -2208,7 +2208,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     logical, intent(out), optional :: execFlag ! .true. if at least one executed
     integer, intent(out)    :: rc
     ! local variables
-    integer                 :: phase, i, ii, j, k, localrc
+    integer                 :: phase, i, ii, j, k, userrc
     character(ESMF_MAXSTR)  :: iString, jString, pLabel
     type(ESMF_State)        :: imState, exState
     type(type_InternalState):: is
@@ -2283,14 +2283,14 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
             return  ! bail out
           call ESMF_CplCompInitialize(is%wrap%connectorComp(i,j), &
             importState=imState, exportState=exState, &
-            clock=internalClock, phase=phase, userRc=localrc, rc=rc)
+            clock=internalClock, phase=phase, userRc=userrc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase '"// &
             trim(adjustl(pLabel))//"' Initialize for connectorComp "// &
             trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
             trim(compName), &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase '"// &
+          if (ESMF_LogFoundError(rcToCheck=userrc, msg="Phase '"// &
             trim(adjustl(pLabel))//"' Initialize for connectorComp "// &
             trim(adjustl(iString))//" -> "//trim(adjustl(jString))//": "// &
             trim(compName)//" did not return ESMF_SUCCESS", &
@@ -2312,7 +2312,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     
     ! local variables
     character(*), parameter         :: rName="loopDataDependentInitialize"
-    integer                         :: phase, i, j, k, cphase, localrc
+    integer                         :: phase, i, j, k, cphase, userrc
     character(ESMF_MAXSTR)          :: iString, jString, pString, valueString
     character(ESMF_MAXSTR)          :: cpString
     type(ESMF_State)                :: imState, exState
@@ -2415,7 +2415,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
           ! preconditioned input variables considering petList of component
           helperIn = 1  ! initialize
-          gridCompIsPetLocal = ESMF_GridCompIsPetLocal(is%wrap%modelComp(i), rc=rc)
+          gridCompIsPetLocal = ESMF_GridCompIsPetLocal(is%wrap%modelComp(i), &
+            rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) &
             return  ! bail out
@@ -2465,14 +2466,14 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
               endif
               call ESMF_CplCompRun(is%wrap%connectorComp(j,i), &
                 importState=imState, exportState=exState, &
-                clock=internalClock, phase=cphase, userRc=localrc, rc=rc)
+                clock=internalClock, phase=cphase, userRc=userrc, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, &
                 msg="Failed calling phase "//trim(adjustl(cpString))// &
                 " Run for connectorComp "//trim(adjustl(jString))// &
                 " -> "//trim(adjustl(iString)), &
                 line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
-              if (ESMF_LogFoundError(rcToCheck=localrc,  msg="Phase '"// &
+              if (ESMF_LogFoundError(rcToCheck=userrc,  msg="Phase '"// &
                 trim(adjustl(cpString))//"' Run for connectorComp "// &
                 trim(adjustl(jString))//" -> "//trim(adjustl(iString))// &
                 " did not return ESMF_SUCCESS", &
@@ -2484,13 +2485,13 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
           ! attempt to make the actual call to initialize for model i
           call ESMF_GridCompInitialize(is%wrap%modelComp(i), &
             importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-            clock=is%wrap%initClock(i), phase=phase, userRc=localrc, rc=rc)
+            clock=is%wrap%initClock(i), phase=phase, userRc=userrc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg="Failed calling phase "// &
             trim(adjustl(pString))//" Initialize for modelComp "// &
             trim(adjustl(iString))//": "//trim(compName), &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase '"// &
+          if (ESMF_LogFoundError(rcToCheck=userrc, msg="Phase '"// &
             trim(adjustl(pString))//"' Initialize for modelComp "// &
             trim(adjustl(iString))//": "//trim(compName)// &
             " did not return ESMF_SUCCESS", &
@@ -2581,7 +2582,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 
     ! local variables
     character(*), parameter         :: rName="Run"
-    integer                         :: localrc
+    integer                         :: userrc
     type(type_InternalState)        :: is
     type(ESMF_Clock)                :: internalClock, activeClock
     logical                         :: existflag
@@ -2681,19 +2682,19 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     ! SPECIALIZE required: label_SetRunClock
     ! -> first check for the label with phase index
     call ESMF_MethodExecute(gcomp, label=label_SetRunClock, index=phase, &
-      existflag=existflag, userRc=localrc, rc=rc)
+      existflag=existflag, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
     if (.not.existflag) then
       ! -> next check for the label without phase index
       call ESMF_MethodExecute(gcomp, label=label_SetRunClock, &
-        userRc=localrc, rc=rc)
+        userRc=userrc, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
     endif
@@ -2835,7 +2836,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 #endif    
           call ESMF_GridCompRun(is%wrap%modelComp(i), &
             importState=is%wrap%modelIS(i), exportState=is%wrap%modelES(i), &
-            clock=activeClock, phase=phase, userRc=localrc, rc=rc)
+            clock=activeClock, phase=phase, userRc=userrc, rc=rc)
 #ifdef NUOPC_DRIVER_TRACE
           call ESMF_TraceRegionExit("NUOPC_Driver:GridComp:Callthrough")
 #endif
@@ -2844,7 +2845,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
             " Run for modelComp "//trim(adjustl(iString)), &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          if (ESMF_LogFoundError(rcToCheck=localrc, msg="Phase '"// &
+          if (ESMF_LogFoundError(rcToCheck=userrc, msg="Phase '"// &
             trim(adjustl(pLabel))//"' Run for modelComp "// &
             trim(adjustl(iString))//" did not return ESMF_SUCCESS", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
@@ -3011,7 +3012,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
 #endif          
           call ESMF_CplCompRun(is%wrap%connectorComp(i,j), &
             importState=imState, exportState=exState, &
-            clock=activeClock, phase=phase, userRc=localrc, rc=rc)
+            clock=activeClock, phase=phase, userRc=userrc, rc=rc)
 #ifdef NUOPC_DRIVER_TRACE
           call ESMF_TraceRegionExit("NUOPC_Driver:CplComp:Callthrough")
 #endif
@@ -3022,7 +3023,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
             " -> "//trim(adjustl(jString)), &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
-          if (ESMF_LogFoundError(rcToCheck=localrc,  msg="Phase '"// &
+          if (ESMF_LogFoundError(rcToCheck=userrc,  msg="Phase '"// &
             trim(adjustl(pLabel))//"' Run for connectorComp "// &
             trim(adjustl(iString))//" -> "//trim(adjustl(jString))// &
             " did not return ESMF_SUCCESS", &
@@ -3164,8 +3165,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
             return  ! bail out
           if (ESMF_LogFoundError(rcToCheck=urc, msg="Phase 1 "// &
             "Finalize for connectorComp "// &
-            trim(adjustl(iString))//" -> "//trim(adjustl(jString))//" did not "// &
-            "return ESMF_SUCCESS", &
+            trim(adjustl(iString))//" -> "//trim(adjustl(jString))// &
+            " did not return ESMF_SUCCESS", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
         endif
@@ -3428,8 +3429,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
             return  ! bail out
           if (ESMF_LogFoundError(rcToCheck=urc, msg="Phase 1 "// &
             "Finalize for connectorComp "// &
-            trim(adjustl(iString))//" -> "//trim(adjustl(jString))//" did not "// &
-            "return ESMF_SUCCESS", &
+            trim(adjustl(iString))//" -> "//trim(adjustl(jString)) &
+            " did not return ESMF_SUCCESS", &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
         endif
@@ -3570,7 +3571,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -3615,11 +3617,11 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
           ! have the resources to print the entire petList
           write (petListBuffer, "(10I7)") cmEntry%wrap%petList
           lineCount = size(cmEntry%wrap%petList)/10
-          if ((size(cmEntry%wrap%petList)/10)*10 /= size(cmEntry%wrap%petList)) &
+          if ((size(cmEntry%wrap%petList)/10)*10 /= size(cmEntry%wrap%petList))&
             lineCount = lineCount + 1
           do k=1, lineCount
             call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
           enddo
@@ -3661,7 +3663,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     endif
       
     ! add standard NUOPC GridComp Attribute Package to the modelComp
-    call NUOPC_CompAttributeInit(cmEntry%wrap%component, kind="Model", rc=localrc)
+    call NUOPC_CompAttributeInit(cmEntry%wrap%component, kind="Model", &
+      rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -3741,7 +3744,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -3786,11 +3790,11 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
           ! have the resources to print the entire petList
           write (petListBuffer, "(10I7)") cmEntry%wrap%petList
           lineCount = size(cmEntry%wrap%petList)/10
-          if ((size(cmEntry%wrap%petList)/10)*10 /= size(cmEntry%wrap%petList)) &
+          if ((size(cmEntry%wrap%petList)/10)*10 /= size(cmEntry%wrap%petList))&
             lineCount = lineCount + 1
           do k=1, lineCount
             call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
           enddo
@@ -3812,7 +3816,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       return  ! bail out
 
     ! add standard NUOPC GridComp Attribute Package to the modelComp
-    call NUOPC_CompAttributeInit(cmEntry%wrap%component, kind="Model", rc=localrc)
+    call NUOPC_CompAttributeInit(cmEntry%wrap%component, kind="Model", &
+      rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -3918,7 +3923,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, verbosity=verbosity, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -3935,11 +3941,13 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       connectorPetList => petList ! point to the provided petList
     else
       ! figure out the default union petList.... if necessary
-      call NUOPC_DriverGetComp(driver, srcCompLabel, petList=srcPetList, rc=localrc)
+      call NUOPC_DriverGetComp(driver, srcCompLabel, petList=srcPetList, &
+        rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_DriverGetComp(driver, dstCompLabel, petList=dstPetList, rc=localrc)
+      call NUOPC_DriverGetComp(driver, dstCompLabel, petList=dstPetList, &
+        rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
@@ -3996,7 +4004,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
             lineCount = lineCount + 1
           do k=1, lineCount
             call ESMF_LogWrite(petListBuffer(k), ESMF_LOGMSG_INFO, rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
           enddo
@@ -4005,7 +4013,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       cmEntry%wrap%connector = ESMF_CplCompCreate(&
         name=trim(cmEntry%wrap%label), petList=connectorPetList, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     else
       ! create the connector without petList
       if (btest(verbosity,13)) then
@@ -4020,7 +4029,8 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       cmEntry%wrap%connector = ESMF_CplCompCreate(&
         name=trim(cmEntry%wrap%label), rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
     
     ! store the petList 
@@ -4218,7 +4228,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -4267,7 +4278,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
       phaseLabel=phaseLabel, phaseIndex=phase, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! check the result of the seach
     if (phase < 0) then
@@ -4279,7 +4291,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         if (present(phaseLabel)) then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
+            msg="run phase: '"//trim(phaseLabel)//"' could not be identified.",&
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         else
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -4358,7 +4370,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -4434,7 +4447,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
       phaseLabel=phaseLabel, phaseIndex=phase, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! check the result of the seach
     if (phase < 0) then
@@ -4446,7 +4460,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ! bail out with error
         if (present(phaseLabel)) then
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-            msg="run phase: '"//trim(phaseLabel)//"' could not be identified.", &
+            msg="run phase: '"//trim(phaseLabel)//"' could not be identified.",&
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)
         else
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
@@ -4495,7 +4509,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -4514,7 +4529,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     endif
 
     ! Actually add the RunElement for the identified component
-    call NUOPC_RunElementAddLink(is%wrap%runSeq(slot), slot=linkSlot, rc=localrc)
+    call NUOPC_RunElementAddLink(is%wrap%runSeq(slot), slot=linkSlot, &
+      rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -4548,7 +4564,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -4592,7 +4609,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -4750,7 +4768,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -4831,7 +4850,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -4922,7 +4942,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -5060,7 +5081,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! The {\tt runDuration} specification is optional. If omitted, the duration of
 ! the associated run clock is set to the {\tt timeStep} of the time loop one
 ! level up in the loop nesting hierarchy. This ensures that for a single
-! nested time loop, the loop returns to the parent loop level at the appropriate 
+! nested time loop, the loop returns to the parent loop level at the appropriate
 ! time.
 !
 ! A simple example of a single time loop with one hour timestep:
@@ -5248,7 +5269,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             call NUOPC_DriverAddComp(driver, srcCompLabel=trim(tokenList(1)), &
               dstCompLabel=trim(tokenList(3)), compSetServicesRoutine=cplSS, &
               comp=conn, rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
             ! automatically created connectors inherit lower 8-bit
@@ -5257,7 +5278,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             write(vString,"(I10)") vInherit
             call NUOPC_CompAttributeSet(conn, name="Verbosity", value=vString, &
               rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
           endif
           ! optionally additional options
@@ -5266,7 +5287,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             ! -> set as Attribute on the connector object
             call NUOPC_CompAttributeSet(conn, name="ConnectionOptions", &
               value=trim(tokenList(4)), rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU,&
               line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
               return  ! bail out
           endif
@@ -5392,8 +5413,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               print *, "found runDuration indicator: ", seconds
 #endif
               call ESMF_TimeIntervalSet(runDuration, s_r8=seconds, rc=localrc)
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
+              if (ESMF_LogFoundError(rcToCheck=localrc, &
+                msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, &
                 file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
               tempString = tempString(1:colonIndex-1) ! truncate at ":"
@@ -5411,8 +5432,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ! Insert the link to a new slot
               call NUOPC_DriverAddRunElement(driver, slot=slotStack(level), &
                 linkSlot=slot, rc=localrc)
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+              if (ESMF_LogFoundError(rcToCheck=localrc, &
+                msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, &
+                file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
             endif
             haveTimeStep = .false. ! reset
             if (index(tempString,"*") == 2) then
@@ -5421,15 +5444,15 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               ! initialization
               if (slotStack(level)==0) then
                 call ESMF_ClockGet(internalClock, timeStep=timeStep, rc=localrc)
-                if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, &
+                if (ESMF_LogFoundError(rcToCheck=localrc, &
+                  msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, &
                   file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                   return  ! bail out
               else
                 call ESMF_ClockGet(is%wrap%runSeq(slotStack(level))%clock, &
                   timeStep=timeStep, rc=localrc)
-                if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, &
+                if (ESMF_LogFoundError(rcToCheck=localrc, &
+                  msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, &
                   file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                   return  ! bail out
               endif
@@ -5441,24 +5464,25 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
               print *, "found timeStep indicator: ", seconds
 #endif
               call ESMF_TimeIntervalSet(timeStep, s_r8=seconds, rc=localrc)
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, &
+              if (ESMF_LogFoundError(rcToCheck=localrc, &
+                msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, &
                 file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
                 return  ! bail out
               haveTimeStep = .true. ! set
             endif
             ! see if timeStep and runDuration are compatible
             if (haveTimeStep .and. haveRunDuration) then
-              if (ceiling(runDuration/timeStep) /= floor(runDuration/timeStep)) then
+              if (ceiling(runDuration/timeStep) /= floor(runDuration/timeStep))&
+                then
                 call ESMF_TimeIntervalGet(timeStep, s=aSec, rc=localrc)
-                if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, &
+                if (ESMF_LogFoundError(rcToCheck=localrc, &
+                  msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, &
                   file=FILENAME, &
                   rcToReturn=rc)) &
                   return  ! bail out
                 call ESMF_TimeIntervalGet(runDuration, s=bSec, rc=localrc)
-                if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, &
+                if (ESMF_LogFoundError(rcToCheck=localrc, &
+                  msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, &
                   file=FILENAME, &
                   rcToReturn=rc)) &
                   return  ! bail out
@@ -5481,26 +5505,34 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
             else
               ! create a new Clock for this slot, starting as driver clock copy
               runClock = ESMF_ClockCreate(internalClock, rc=localrc)
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+              if (ESMF_LogFoundError(rcToCheck=localrc, &
+                msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, &
+                file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
             endif
             if (haveTimeStep) then
               ! set timeStep
               call ESMF_ClockSet(runClock, timeStep=timeStep, rc=localrc)
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+              if (ESMF_LogFoundError(rcToCheck=localrc, &
+                msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, &
+                file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
             endif
             if (haveRunDuration) then
               ! set runDuration
               call ESMF_ClockSet(runClock, runDuration=runDuration, rc=localrc)
-              if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+              if (ESMF_LogFoundError(rcToCheck=localrc, &
+                msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, &
+                file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                return  ! bail out
             endif
             ! set runClock 
             call NUOPC_DriverSetRunSequence(driver, slot=slot, clock=runClock, &
               rc=localrc)
-            if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-              line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+            if (ESMF_LogFoundError(rcToCheck=localrc, &
+              msg=ESMF_LOGERR_PASSTHRU, line=__LINE__, &
+              file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
           else
             if (zeroSkip) then
               if (level==zeroSkipLevel) zeroSkip = .false.
@@ -5526,7 +5558,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (zeroSkip) cycle ! go to next line ---^
         ! a model with a specific phase label
         call NUOPC_DriverAddRunElement(driver, slot=slot, &
-          compLabel=trim(tokenList(1)), phaseLabel=trim(tokenList(2)), rc=localrc)
+          compLabel=trim(tokenList(1)), phaseLabel=trim(tokenList(2)), &
+          rc=localrc)
         if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, &
           file=trim(name)//":"//FILENAME, &
@@ -5598,7 +5631,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -5653,7 +5687,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -5765,7 +5800,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! query the component for info
     call NUOPC_CompGet(driver, name=name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -5935,7 +5971,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(*), parameter   :: rName="IInitModifyCplLists"
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
-    integer                   :: localrc
+    integer                   :: userrc
     logical                   :: existflag
     logical                   :: areServicesSet
     type(ESMF_CplComp)        :: connector
@@ -6018,11 +6054,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     ! SPECIALIZE by calling into optional attached method allowing modification
     ! of the "CplList" metadata on child Connectors.
     call ESMF_MethodExecute(driver, label=label_ModifyCplLists, &
-      existflag=existflag, userRc=localrc, rc=rc)
+      existflag=existflag, userRc=userrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+    if (ESMF_LogFoundError(rcToCheck=userrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
       
@@ -6377,63 +6413,63 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
           ! UngriddedLBound, UngriddedUBound attributes
           call ESMF_AttributeGet(fieldList(i), name="UngriddedLBound", &
-               convention="NUOPC", purpose="Instance", &
-               itemCount=ulbCount, isPresent=isPresent, &
-               attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            convention="NUOPC", purpose="Instance", &
+            itemCount=ulbCount, isPresent=isPresent, &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           if (isPresent .and. ulbCount > 0) then           
-             call ESMF_AttributeGet(fieldList(i), name="UngriddedUBound", &
-               convention="NUOPC", purpose="Instance", &
-               itemCount=uubCount, isPresent=isPresent, &
-               attnestflag=ESMF_ATTNEST_ON, rc=rc)
-             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-             if (.not. isPresent .or. ulbCount /= uubCount) then
-                call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
-                     msg="Field "//trim(itemNameList(i))//&
-                     " has inconsistent UngriddedLBound/UngriddedUBound attributes", &
-                     line=__LINE__, file=trim(name)//":"//FILENAME, &
-                     rcToReturn=rc)
-                return
-             endif
-             allocate(ungriddedLBound(ulbCount), &
-                  ungriddedUBound(uubCount), stat=stat)
-             if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-                  msg="Allocation of internal ungriddedLBound/ungriddedUBound failed.", &
-                  line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-                  return  ! bail out
-             call ESMF_AttributeGet(fieldList(i), &
-                  name="UngriddedLBound", valueList=ungriddedLBound, &
-                  convention="NUOPC", purpose="Instance", &
-                  attnestflag=ESMF_ATTNEST_ON, rc=rc)
-             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-             call ESMF_AttributeGet(fieldList(i), &
-                  name="UngriddedUBound", valueList=ungriddedUBound, &
-                  convention="NUOPC", purpose="Instance", &
-                  attnestflag=ESMF_ATTNEST_ON, rc=rc)
-             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out                          
-             ! create field with ungridded dims
-             !print *, "Creating field with ungridded dims ", ungriddedLBound(:), ungriddedUBound(:)
-             call ESMF_FieldEmptyComplete(fieldList(i), &
-                  gridToFieldMap=gridToFieldMap, typekind=ESMF_TYPEKIND_R8, &
-                  ungriddedLBound=ungriddedLBound, &
-                  ungriddedUBound=ungriddedUBound, &
-                  rc=rc)
-             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-             deallocate(ungriddedLBound, ungriddedUBound)
-          else   
-             ! create field with no ungridded dims
-             call ESMF_FieldEmptyComplete(fieldList(i), &
-                  gridToFieldMap=gridToFieldMap, typekind=ESMF_TYPEKIND_R8, rc=rc)
-             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                  line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          endif      
+            call ESMF_AttributeGet(fieldList(i), name="UngriddedUBound", &
+              convention="NUOPC", purpose="Instance", &
+              itemCount=uubCount, isPresent=isPresent, &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (.not. isPresent .or. ulbCount /= uubCount) then
+              call ESMF_LogSetError(ESMF_RC_NOT_VALID, &
+                msg="Field "//trim(itemNameList(i))//&
+                " has inconsistent UngriddedLBound/UngriddedUBound attributes",&
+                line=__LINE__, file=trim(name)//":"//FILENAME, &
+                rcToReturn=rc)
+               return
+            endif
+            allocate(ungriddedLBound(ulbCount), &
+              ungriddedUBound(uubCount), stat=stat)
+            if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+              msg="Allocation of internal ungriddedLBound/ungriddedUBound "//&
+              "failed.", line=__LINE__, &
+              file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+              return  ! bail out
+            call ESMF_AttributeGet(fieldList(i), &
+              name="UngriddedLBound", valueList=ungriddedLBound, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            call ESMF_AttributeGet(fieldList(i), &
+              name="UngriddedUBound", valueList=ungriddedUBound, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            ! create field with ungridded dims
+            call ESMF_FieldEmptyComplete(fieldList(i), &
+              gridToFieldMap=gridToFieldMap, typekind=ESMF_TYPEKIND_R8, &
+              ungriddedLBound=ungriddedLBound, &
+              ungriddedUBound=ungriddedUBound, &
+              rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            deallocate(ungriddedLBound, ungriddedUBound)
+          else
+            ! create field with no ungridded dims
+            call ESMF_FieldEmptyComplete(fieldList(i), &
+              gridToFieldMap=gridToFieldMap, typekind=ESMF_TYPEKIND_R8, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+          endif
           deallocate(gridToFieldMap)
-       enddo
+        enddo
       endif
       if (associated(fieldList)) deallocate(fieldList)
       if (associated(itemNameList)) deallocate(itemNameList)
