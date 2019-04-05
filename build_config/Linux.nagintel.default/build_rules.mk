@@ -104,6 +104,7 @@ ESMF_CXXOPTFLAG_G       += -traceback
 ############################################################
 # Set NAG unix modules when certain non-Standard system calls
 # (e.g., ABORT) are made.
+#
 ESMF_F90COMPILEOPTS += -DESMF_NAG_UNIX_MODULE
 
 ############################################################
