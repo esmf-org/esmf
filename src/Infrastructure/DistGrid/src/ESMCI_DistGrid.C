@@ -289,7 +289,7 @@ DistGrid *DistGrid::create(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       void **baseAddrList;
-#if 0
+#if 1
       baseAddrList = srcArbSeqArray->getLarrayBaseAddrList();
       for (int i=0; i<dg->delayout->getLocalDeCount(); i++){
         {
@@ -336,7 +336,7 @@ DistGrid *DistGrid::create(
       // set the arbitrary sequence indices on the outgoing DG
       baseAddrList = dstArbSeqArray->getLarrayBaseAddrList();
       for (int i=0; i<distgrid->delayout->getLocalDeCount(); i++){
-#if 0
+#if 1
         {
           std::stringstream debugmsg;
           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -648,9 +648,13 @@ DistGrid *DistGrid::create(
     // create DistGrid according to collected information
     if (dg->regDecomp!=NULL){
       // this is a regDecomp
-#if 0
-      ESMC_LogDefault.Write("DGfromDG: incoming DG identified as regDecomp", 
-        ESMC_LOGMSG_INFO);
+#if 1
+      {
+        std::stringstream debugmsg;
+        debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+          " incoming DG identified as regDecomp";
+        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+      }
 #endif
       // prepare regDecomp
       InterArray<int> *regDecomp = new InterArray<int>(dg->regDecomp,
@@ -661,9 +665,13 @@ DistGrid *DistGrid::create(
       
       if (dg->tileCount==1){
         // single tile
-#if 0
-      ESMC_LogDefault.Write("DGfromDG: single-tile regDecomp branch", 
-        ESMC_LOGMSG_INFO);
+#if 1
+        {
+          std::stringstream debugmsg;
+          debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+            " single-tile regDecomp branch";
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+        }
 #endif
         int decompflagCount = 0;  // default
         if (decompflag)
@@ -675,9 +683,13 @@ DistGrid *DistGrid::create(
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
         // multi tile
-#if 0
-      ESMC_LogDefault.Write("DGfromDG: multi-tile regDecomp branch", 
-        ESMC_LOGMSG_INFO);
+#if 1
+        {
+          std::stringstream debugmsg;
+          debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+            " multi-tile regDecomp branch";
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+        }
 #endif
         int decompflagCount1 = 0;  // default
         int decompflagCount2 = 0;  // default
@@ -691,16 +703,24 @@ DistGrid *DistGrid::create(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }
-#if 0
-      ESMC_LogDefault.Write("DGfromDG: done with DistGrid::create()", 
-        ESMC_LOGMSG_INFO);
+#if 1
+      {
+        std::stringstream debugmsg;
+        debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+          " done with DistGrid::create()";
+        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+      }
 #endif
       delete regDecomp;
     }else{
       // this is a deBlockList
-#if 0
-      ESMC_LogDefault.Write("DGfromDG: incoming DG identified as deBlock", 
-        ESMC_LOGMSG_INFO);
+#if 1
+      {
+        std::stringstream debugmsg;
+        debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+          " incoming DG identified as deBlock";
+        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+      }
 #endif
       // prepare deBlockList
       int deCount = dg->delayout->getDeCount();
@@ -748,9 +768,13 @@ DistGrid *DistGrid::create(
       }
       if (dg->tileCount==1){
         // single tile
-#if 0
-      ESMC_LogDefault.Write("DGfromDG: single-tile deBlock branch", 
-        ESMC_LOGMSG_INFO);
+#if 1
+        {
+          std::stringstream debugmsg;
+          debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+            " single-tile deBlock branch";
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+        }
 #endif
         // create DistGrid
         distgrid = DistGrid::create(minIndex, maxIndex, deBlockList,
@@ -759,9 +783,13 @@ DistGrid *DistGrid::create(
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
         // multi tile
-#if 0
-      ESMC_LogDefault.Write("DGfromDG: multi-tile deBlock branch", 
-        ESMC_LOGMSG_INFO);
+#if 1
+        {
+          std::stringstream debugmsg;
+          debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+            " multi-tile deBlock branch";
+          ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+        }
 #endif
         InterArray<int> *deToTileMap =
           new InterArray<int>(dg->tileListPDe, 1, &deCount);
@@ -793,7 +821,7 @@ DistGrid *DistGrid::create(
    // deal with arbitrary sequence index lists
    // keep in mind that the new "distgrid" object only exists across
    // PETs with actualFlag true.
-#if 0
+#if 1
    // block for debugging only
    char msgString[160];
    sprintf(msgString, "DGfromDG: incoming DG localDeCount=%d",
@@ -826,7 +854,7 @@ DistGrid *DistGrid::create(
    
    if (dg->delayout->getLocalDeCount() > 0){
      for (int i=0; i<dg->delayout->getLocalDeCount(); i++){
-        void const *arbSeq=dg->getArbSeqIndexList(i, 1, &localrc)
+        void const *arbSeq=dg->getArbSeqIndexList(i, 1, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) throw localrc;
         sprintf(msgString, "DGfromDG: incoming DG localDe=%d=>%d, elementCount=%d, "
@@ -850,6 +878,15 @@ DistGrid *DistGrid::create(
    if (providerVM != acceptorVM)
      currentVMcollectiveOK = true;
    
+#if 1
+     {
+        std::stringstream debugmsg;
+        debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+          " currentVMcollectiveOK = " << currentVMcollectiveOK;
+        ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+     }
+#endif
+     
    if (currentVMcollectiveOK){
      // only in this case do we need to check if there are arbitrary sequence
      // indices on the provider DistGrid (on its PETs), and if so then 
@@ -866,7 +903,7 @@ DistGrid *DistGrid::create(
      }
      int allArbSeqFlag;
      currentVM->allreduce(&localArbSeqFlag, &allArbSeqFlag, 1, vmI4, vmSUM);
-#if 0
+#if 1
      {
         std::stringstream debugmsg;
         debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -904,11 +941,13 @@ DistGrid *DistGrid::create(
          acceptorLocalDeToDeMap, acceptorLocalDeCountPPet,
          acceptorLocalOffsets, vmI4);
        delete [] acceptorLocalOffsets;
-#if 0
+#if 1
        for (int i=0; i<deCount; i++){
-         sprintf(msgString, "DGfromDG: DE mapping for acceptor item %d is %d: ",
-           i, acceptorLocalDeToDeMap[i]);
-         ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+         std::stringstream debugmsg;
+         debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+           " DE mapping for acceptor item" << i << " is " <<
+            acceptorLocalDeToDeMap[i];
+         ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
        }
 #endif
        // determine how many local DEs in the provider DistGrid there are
@@ -929,11 +968,13 @@ DistGrid *DistGrid::create(
          providerLocalDeToDeMap, providerLocalDeCountPPet,
          providerLocalOffsets, vmI4);
        delete [] providerLocalOffsets;
-#if 0
+#if 1
        for (int i=0; i<deCount; i++){
-         sprintf(msgString, "DGfromDG: DE mapping for provider item %d is %d: ",
-           i, providerLocalDeToDeMap[i]);
-         ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+         std::stringstream debugmsg;
+         debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+           " DE mapping for provider item" << i << " is " <<
+            providerLocalDeToDeMap[i];
+         ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
        }
 #endif
        // loop through DEs (same on both provider and acceptor DistGrids), and
@@ -957,11 +998,14 @@ DistGrid *DistGrid::create(
            if (foundFlag) break;
          }
          // now provider Pet and offset are known
-#if 0
-         sprintf(msgString, "DGfromDG: DE %d - provider PET=%d, "
-           "localDe=%d, offset=%d", de, providerPet, providerLDe, 
-           providerOffset);
-         ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+#if 1
+         {
+           std::stringstream debugmsg;
+           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+             " DE " << de << " - provider PET=" << providerPet <<
+             " localDe=" << providerLDe << " offset=" << providerOffset;
+           ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+         }
 #endif
          // find this DE amount the localDEs of the acceptor PETs
          int acceptorPet;
@@ -981,11 +1025,14 @@ DistGrid *DistGrid::create(
            if (foundFlag) break;
          }
          // now acceptor Pet and offset are known
-#if 0
-         sprintf(msgString, "DGfromDG: DE %d - acceptor PET=%d, "
-           "localDe=%d, offset=%d", de, acceptorPet, acceptorLDe, 
-           acceptorOffset);
-         ESMC_LogDefault.Write(msgString, ESMC_LOGMSG_INFO);
+#if 1
+         {
+           std::stringstream debugmsg;
+           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+             " DE " << de << " - acceptor PET=" << acceptorPet <<
+             " localDe=" << acceptorLDe << " offset=" << acceptorOffset;
+           ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+         }
 #endif
          // finally send the arb sequence indices from provider to acceptor
          int *arbSeqIndex;
@@ -1029,7 +1076,7 @@ DistGrid *DistGrid::create(
    } // endif currentVMcollectiveOK
     
   }else{
-#if 0
+#if 1
     char msgString[160];
     sprintf(msgString, "DGfromDG: incoming DG identified for deep copy, "
       "actualFlag=%d", actualFlag);
