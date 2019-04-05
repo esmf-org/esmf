@@ -2130,6 +2130,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     type(ESMF_Clock)        :: internalClock
     logical                 :: internalflag
     logical                 :: areServicesSet
+    type(ESMF_VM)           :: vm
     ! initialize out arguments
     rc = ESMF_SUCCESS
     if (present(execFlag)) execFlag = .false.
@@ -2194,7 +2195,34 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
           " did not return ESMF_SUCCESS", &
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
-        if (present(execFlag)) execFlag = .true. ! at least this model executed for phaseString
+        if (present(execFlag)) execFlag = .true. ! at least this model executed
+        ! ensure that Attributes are consistent across all PETs
+        !
+        !TODO: The Update() is only needed if there are child PETs that are 
+        !TODO: going to pause for PE-reuse via user level threading. Figure out
+        !TODO: how to detect this here, and make Update() call conditional.
+        !
+        !TODO: Should be calling with all master PETs (those processes that go
+        !TODO: on to execute child code), for better Update() performance. For
+        !TODO: now just call with first PET as root, because that always will
+        !TODO: work (because first PET always is passed to child component).
+        !
+        call ESMF_VMGetCurrent(vm=vm, rc=rc)
+        if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        if (associated(is%wrap%modelPetLists(i)%ptr)) then
+          call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
+            rootList=is%wrap%modelPetLists(i)%ptr(1:1), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        else
+          call ESMF_AttributeUpdate(is%wrap%modelComp(i), vm, &
+            rootList=(/0/), rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+            return  ! bail out
+        endif
       endif
     enddo
   end subroutine
