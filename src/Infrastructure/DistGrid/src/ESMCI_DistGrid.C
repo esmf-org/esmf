@@ -152,7 +152,7 @@ DistGrid *DistGrid::create(
     return ESMC_NULL_POINTER;
   }
 
-#if 1
+#if 0
   {
     std::stringstream debugmsg;
     debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -182,7 +182,7 @@ DistGrid *DistGrid::create(
     }
   }
   
-#if 1
+#if 0
   {
     std::stringstream debugmsg;
     debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -192,7 +192,7 @@ DistGrid *DistGrid::create(
 #endif
 
   if (balanceflag){
-#if 1
+#if 0
     {
       std::stringstream debugmsg;
       debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -235,7 +235,7 @@ DistGrid *DistGrid::create(
     }
     int allArbSeqFlag;
     currentVM->allreduce(&localArbSeqFlag, &allArbSeqFlag, 1, vmI4, vmSUM);
-#if 1
+#if 0
     {
       std::stringstream debugmsg;
       debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -260,7 +260,7 @@ DistGrid *DistGrid::create(
       vector<void *> keepArbPtr(dg->delayout->getLocalDeCount());
       for (int i=0; i<dg->delayout->getLocalDeCount(); i++){
         keepArbPtr[i] = (void *)dg->getArbSeqIndexList(i, 1, &localrc);
-#if 1
+#if 0
         {
           std::stringstream debugmsg;
           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -297,7 +297,7 @@ DistGrid *DistGrid::create(
       if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
         ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       void **baseAddrList;
-#if 1
+#if 0
       baseAddrList = srcArbSeqArray->getLarrayBaseAddrList();
       for (int i=0; i<dg->delayout->getLocalDeCount(); i++){
         {
@@ -344,7 +344,7 @@ DistGrid *DistGrid::create(
       // set the arbitrary sequence indices on the outgoing DG
       baseAddrList = dstArbSeqArray->getLarrayBaseAddrList();
       for (int i=0; i<distgrid->delayout->getLocalDeCount(); i++){
-#if 1
+#if 0
         {
           std::stringstream debugmsg;
           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -400,7 +400,7 @@ DistGrid *DistGrid::create(
     }
   }else if (delayoutPresent || present(firstExtra) || present(lastExtra) || 
     indexflag || present(connectionList) || vm || !actualFlag){
-#if 1
+#if 0
     {
       std::stringstream debugmsg;
       debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -668,7 +668,7 @@ DistGrid *DistGrid::create(
     // create DistGrid according to collected information
     if (dg->regDecomp!=NULL){
       // this is a regDecomp
-#if 1
+#if 0
       {
         std::stringstream debugmsg;
         debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -685,7 +685,7 @@ DistGrid *DistGrid::create(
       
       if (dg->tileCount==1){
         // single tile
-#if 1
+#if 0
         {
           std::stringstream debugmsg;
           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -703,7 +703,7 @@ DistGrid *DistGrid::create(
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
         // multi tile
-#if 1
+#if 0
         {
           std::stringstream debugmsg;
           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -723,7 +723,7 @@ DistGrid *DistGrid::create(
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU,
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }
-#if 1
+#if 0
       {
         std::stringstream debugmsg;
         debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -734,7 +734,7 @@ DistGrid *DistGrid::create(
       delete regDecomp;
     }else{
       // this is a deBlockList
-#if 1
+#if 0
       {
         std::stringstream debugmsg;
         debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -788,7 +788,7 @@ DistGrid *DistGrid::create(
       }
       if (dg->tileCount==1){
         // single tile
-#if 1
+#if 0
         {
           std::stringstream debugmsg;
           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -803,7 +803,7 @@ DistGrid *DistGrid::create(
           ESMC_CONTEXT, rc)) return ESMC_NULL_POINTER;
       }else{
         // multi tile
-#if 1
+#if 0
         {
           std::stringstream debugmsg;
           debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -841,7 +841,7 @@ DistGrid *DistGrid::create(
    // deal with arbitrary sequence index lists
    // keep in mind that the new "distgrid" object only exists across
    // PETs with actualFlag true.
-#if 1
+#if 0
    // block for debugging only
    char msgString[160];
    sprintf(msgString, "DGfromDG: incoming DG localDeCount=%d",
@@ -889,7 +889,7 @@ DistGrid *DistGrid::create(
    // currentVM or not. 
    bool currentVMcollectiveOK = (vm!=NULL) | !actualFlag;
 
-#if 1
+#if 0
      {
         std::stringstream debugmsg;
         debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -915,7 +915,7 @@ DistGrid *DistGrid::create(
      }
      int allArbSeqFlag;
      currentVM->allreduce(&localArbSeqFlag, &allArbSeqFlag, 1, vmI4, vmSUM);
-#if 1
+#if 0
      {
         std::stringstream debugmsg;
         debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -953,7 +953,7 @@ DistGrid *DistGrid::create(
          acceptorLocalDeToDeMap, acceptorLocalDeCountPPet,
          acceptorLocalOffsets, vmI4);
        delete [] acceptorLocalOffsets;
-#if 1
+#if 0
        for (int i=0; i<deCount; i++){
          std::stringstream debugmsg;
          debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -980,7 +980,7 @@ DistGrid *DistGrid::create(
          providerLocalDeToDeMap, providerLocalDeCountPPet,
          providerLocalOffsets, vmI4);
        delete [] providerLocalOffsets;
-#if 1
+#if 0
        for (int i=0; i<deCount; i++){
          std::stringstream debugmsg;
          debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -1010,7 +1010,7 @@ DistGrid *DistGrid::create(
            if (foundFlag) break;
          }
          // now provider Pet and offset are known
-#if 1
+#if 0
          {
            std::stringstream debugmsg;
            debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -1037,7 +1037,7 @@ DistGrid *DistGrid::create(
            if (foundFlag) break;
          }
          // now acceptor Pet and offset are known
-#if 1
+#if 0
          {
            std::stringstream debugmsg;
            debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
@@ -1088,7 +1088,7 @@ DistGrid *DistGrid::create(
    } // endif currentVMcollectiveOK
     
   }else{
-#if 1
+#if 0
     char msgString[160];
     sprintf(msgString, "DGfromDG: incoming DG identified for deep copy, "
       "actualFlag=%d", actualFlag);
