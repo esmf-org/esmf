@@ -192,6 +192,14 @@ DistGrid *DistGrid::create(
 #endif
 
   if (balanceflag){
+#if 1
+    {
+      std::stringstream debugmsg;
+      debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+        " inside 'balanceflag' branch.";
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
     // for now assume very simple conditions, or else error out
     // that is why this is it's own high level branch to balance
     if (delayoutPresent || present(firstExtra) || present(lastExtra) || 
@@ -392,6 +400,18 @@ DistGrid *DistGrid::create(
     }
   }else if (delayoutPresent || present(firstExtra) || present(lastExtra) || 
     indexflag || present(connectionList) || vm || !actualFlag){
+#if 1
+    {
+      std::stringstream debugmsg;
+      debugmsg << "DistGrid::create(fromDG):" << __LINE__ <<
+        " inside 'not balanceflag and also not simple deep copy' branch:"
+        << delayoutPresent << ", " << present(firstExtra) << ", "
+        << present(lastExtra) << ", " << indexflag  << ", "
+        << present(connectionList) << ", " << vm  << ", "
+        << !actualFlag;
+      ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+    }
+#endif
    if (actualFlag){
     // creating a new DistGrid from the existing one considering additional info
     // prepare for internal InterArray usage
@@ -867,17 +887,8 @@ DistGrid *DistGrid::create(
 
    // Need to figure out whether it is safe to communicate across the entire
    // currentVM or not. 
-   // It is safe to do so if acceptor VM and provider VM do NOT match!
-   // That is because in this case this must be a call that is coming in
-   // on all PETs.
-   VM *currentVM = VM::getCurrent();
-   bool currentVMcollectiveOK = false;
-   VM *providerVM = dg->delayout->getVM();
-   VM *acceptorVM = NULL; // default on all PETs
-   if (actualFlag) acceptorVM = distgrid->delayout->getVM();
-   if (providerVM != acceptorVM)
-     currentVMcollectiveOK = true;
-   
+   bool currentVMcollectiveOK = (vm!=NULL) | !actualFlag;
+
 #if 1
      {
         std::stringstream debugmsg;
@@ -886,8 +897,9 @@ DistGrid *DistGrid::create(
         ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
      }
 #endif
-     
+
    if (currentVMcollectiveOK){
+     VM *currentVM = VM::getCurrent();
      // only in this case do we need to check if there are arbitrary sequence
      // indices on the provider DistGrid (on its PETs), and if so then 
      // send them over to the acceptor DistGrid DEs. 
