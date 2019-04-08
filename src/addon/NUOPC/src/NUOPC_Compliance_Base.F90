@@ -125,17 +125,17 @@ contains
           outputText = .false.
         endif
 
-        call c_esmc_getComplianceCheckTrace(traceIsOn, profileIsOn, localrc)
-        if (ESMF_LogFoundError(localrc, &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        if (traceIsOn == 1 .or. profileIsOn == 1) then
-          outputTrace = .true.
-        else
-          outputTrace = .false.
-        endif
+!        call c_esmc_getComplianceCheckTrace(traceIsOn, profileIsOn, localrc)
+!        if (ESMF_LogFoundError(localrc, &
+!            line=__LINE__, &
+!            file=FILENAME, &
+!            rcToReturn=rc)) &
+!            return  ! bail out
+!        if (traceIsOn == 1 .or. profileIsOn == 1) then
+!          outputTrace = .true.
+!        else
+!          outputTrace = .false.
+!        endif
           
         call c_esmc_getComplianceCheckJSON(jsonIsOn, localrc)
         if (ESMF_LogFoundError(localrc, &

@@ -388,12 +388,8 @@ contains
         ! Start Compliance Checking: InitializePrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-            if (outputJSON) then
-                call JSON_LogCtrlFlow("start_prologue", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-            endif
-
+          if (outputText) then
+            
             write(output,*) ">START InitializePrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
             call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
@@ -457,14 +453,7 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            if (outputJSON) then
-                call JSON_LogCtrlFlow("stop_prologue", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-                call JSON_LogCtrlFlow("start_phase", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-            endif
+          end if
 
             if (outputTrace) then
                call ESMF_TracePhasePrologueEnter(comp, rc=rc)
@@ -527,14 +516,7 @@ contains
                    line=__LINE__, file=FILENAME)) return                              
            endif
 
-            if (outputJSON) then
-                call JSON_LogCtrlFlow("stop_phase", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-                call JSON_LogCtrlFlow("start_epilogue", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-            endif
+           if (outputText) then
 
             call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -622,11 +604,7 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            if (outputJSON) then
-                call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-            endif
+          end if
 
         endif
         ! Stop Compliance Checking: InitializeEpilogue
@@ -690,12 +668,8 @@ contains
         ! Start Compliance Checking: RunPrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
 
-            if (outputJSON) then
-                call JSON_LogCtrlFlow("start_prologue", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-            endif
-
+          if (outputText) then
+            
             write(output,*) ">START RunPrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
             call NUOPC_ComplianceLogWrite(trim(prefix)//trim(output), &
@@ -752,14 +726,7 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            if (outputJSON) then
-                call JSON_LogCtrlFlow("stop_prologue", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-                call JSON_LogCtrlFlow("start_phase", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-            endif
+          end if
 
             if (outputTrace) then
                call ESMF_TracePhasePrologueEnter(comp, rc=rc)
@@ -819,15 +786,8 @@ contains
                    line=__LINE__, file=FILENAME)) return                              
            endif
            
-           if (outputJSON) then
-                call JSON_LogCtrlFlow("stop_phase", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-                call JSON_LogCtrlFlow("start_epilogue", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-            endif
-
+           if (outputText) then
+             
             call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
             if (ESMF_LogFoundError(rc, &
                 line=__LINE__, &
@@ -890,11 +850,7 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            if (outputJSON) then
-                call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-            endif
+          end if
 
         endif
         ! Stop Compliance Checking: RunEpilogue
@@ -956,12 +912,8 @@ contains
         !---------------------------------------------------------------------------
         ! Start Compliance Checking: FinalizePrologue
         if (ccfDepth <= maxDepth .or. maxDepth < 0) then
-
-            if (outputJSON) then
-                call JSON_LogCtrlFlow("start_prologue", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-            endif
+          
+          if (outputText) then
 
             write(output,*) ">START FinalizePrologue for phase:", &
               trim(adjustl(pString)), ": ", trim(phaseLabel)
@@ -1011,35 +963,28 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            if (outputJSON) then
-                call JSON_LogCtrlFlow("stop_prologue", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-                call JSON_LogCtrlFlow("start_phase", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-            endif
+          end if
             
-            if (outputTrace) then
-               call ESMF_TracePhasePrologueEnter(comp, rc=rc)
-               if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return               
-               call ESMF_TraceMemInfo(rc=rc)
-               if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return                              
-               clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
-               if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return
-               if (clockIsCreated) then
-                  call ESMF_TraceClock(clock, rc=rc)
-                  if (ESMF_LogFoundError(rc, &
-                       line=__LINE__, file=FILENAME)) return                              
-               endif
-               call ESMF_TracePhaseEnter(comp, rc=rc)
-               if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return                              
+          if (outputTrace) then
+            call ESMF_TracePhasePrologueEnter(comp, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, file=FILENAME)) return               
+            call ESMF_TraceMemInfo(rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, file=FILENAME)) return                              
+            clockIsCreated = ESMF_ClockIsCreated(clock, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, file=FILENAME)) return
+            if (clockIsCreated) then
+              call ESMF_TraceClock(clock, rc=rc)
+              if (ESMF_LogFoundError(rc, &
+                line=__LINE__, file=FILENAME)) return                              
             endif
-                    
+            call ESMF_TracePhaseEnter(comp, rc=rc)
+            if (ESMF_LogFoundError(rc, &
+              line=__LINE__, file=FILENAME)) return                              
+          endif
+          
         endif
         ! Stop Compliance Checking: FinalizePrologue
         !---------------------------------------------------------------------------
@@ -1078,14 +1023,7 @@ contains
                    line=__LINE__, file=FILENAME)) return                              
            endif
            
-           if (outputJSON) then
-                call JSON_LogCtrlFlow("stop_phase", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-                call JSON_LogCtrlFlow("start_epilogue", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-            endif
+           if (outputText) then
 
             call prefixString(comp, prefix=prefix, forward=.false., rc=rc)
             if (ESMF_LogFoundError(rc, &
@@ -1141,11 +1079,7 @@ contains
                 file=FILENAME)) &
                 return  ! bail out
 
-            if (outputJSON) then
-                call JSON_LogCtrlFlow("stop_epilogue", comp, rc)
-                if (ESMF_LogFoundError(rc, &
-                    line=__LINE__, file=FILENAME)) return  ! bail out
-            endif
+          end if
 
         endif
         ! Stop Compliance Checking: FinalizeEpilogue
