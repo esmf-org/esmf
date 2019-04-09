@@ -41,7 +41,7 @@ enum {
   ESMCI_ConfigArgCountID,                      // int
   ESMCI_ConfigArgUniqueID,                     // int
   ESMCI_ConfigArgTableEndID,                   // int*
-  ESMCI_ConfigArgOptionsID,                    // char*
+  ESMCI_ConfigArgOptionsID                     // char*
 };
 
 // Argument expansion macros for the ESMC_Config API.
