@@ -321,6 +321,7 @@
       integer :: ioerr1, ioerr2
       integer :: localrc
       character(1024) :: string1, string2
+      character(ESMF_MAXSTR) :: errmsg
       integer :: unit1, unit2
 
       ESMF_TestFileCompare = .false.
@@ -328,6 +329,8 @@
 
       call ESMF_UtilIOUnitGet (unit=unit1, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
+        call ESMF_LogWrite (msg='Can not obtain IO unit number',  &
+            logmsgFlag=ESMF_LOGMSG_ERROR)
         write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
             ': Can not obtain IO unit number'
         return
@@ -337,13 +340,16 @@
         form='formatted', status='old', action='read',  &
         iostat=ioerr1)
       if (ioerr1 /= 0) then
-        write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-            ': Can not open file: ', trim (file1)
+        errmsg = 'Can not open file: ' // file1
+        call ESMF_LogWrite (msg=errmsg, logmsgFlag=ESMF_LOGMSG_ERROR)
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD, ': ' // trim (errmsg)
         return
       end if        
 
       call ESMF_UtilIOUnitGet (unit=unit2, rc=localrc)
       if (localrc /= ESMF_SUCCESS) then
+        call ESMF_LogWrite (msg='Can not obtain IO unit number',  &
+            logmsgFlag=ESMF_LOGMSG_ERROR)
         write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
             ': Can not obtain IO unit number'
         close (unit1)
@@ -354,8 +360,9 @@
         form='formatted', status='old', action='read',  &
         iostat=ioerr2)
       if (ioerr2 /= 0) then
-        write (ESMF_UtilIOStderr,*) ESMF_METHOD,  &
-            ': Can not open file: ', trim (file2)
+        errmsg = 'Can not open file: ' // file2
+        call ESMF_LogWrite (msg=errmsg, logmsgFlag=ESMF_LOGMSG_ERROR)
+        write (ESMF_UtilIOStderr,*) ESMF_METHOD, ': ' // trim (errmsg)
         close (unit1)
         return
       end if        
@@ -414,7 +421,9 @@ exclusion_loop:  &
           end if
 
         case (1:)
-          print *, ESMF_METHOD, ': unknown iostat =', ioerr1
+          write (errmsg, '(a,i4)') 'unknown iostat = ', ioerr1
+          call ESMF_LogWrite (msg=errmsg, logmsgFlag=ESMF_LOGMSG_ERROR)
+          print *, ESMF_METHOD, ': ', trim (errmsg)
           exit
         end select
 
