@@ -53,7 +53,7 @@ extern char pghpf_0c_;
 
 #if 0
 Some older PGI compilers can not handle certain cases of explicit template instantiations
-with the same name, but different argument types.  These instantiations are required by other
+with the same name, but different argument types.  These instantiations are needed by other
 compilers - especially at higher levels of optimization.
 #endif
 #if defined (ESMF_PGIVERSION_MAJOR)
