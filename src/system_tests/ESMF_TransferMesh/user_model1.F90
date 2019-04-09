@@ -37,7 +37,7 @@ module user_model1
     rc = ESMF_SUCCESS
 
 #ifdef ESMF_TESTWITHTHREADS
-    ! The following call will turn on ESMF-threading (single threaded)
+    ! The following call will turn on ESMF-threading support
     ! for this component. If you are using this file as a template for
     ! your own code development you probably don't want to include the
     ! following call unless you are interested in exploring ESMF's
@@ -49,7 +49,7 @@ module user_model1
     call ESMF_VMGet(vm, pthreadsEnabledFlag=pthreadsEnabled, rc=rc)
     if (rc/=ESMF_SUCCESS) return ! bail out
     if (pthreadsEnabled) then
-      call ESMF_GridCompSetVMMinThreads(comp, rc=rc)
+      call ESMF_GridCompSetVMMaxPEs(comp, maxPeCountPerPet=2, rc=rc)
       if (rc/=ESMF_SUCCESS) return ! bail out
     endif
 #endif
