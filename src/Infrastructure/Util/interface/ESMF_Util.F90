@@ -370,7 +370,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     count = argc
 
     if (present (rc)) then
-      rc = ESMF_SUCCESS
+      ! TODO: On a few platforms, count will be erroneously returned as -1
+      ! when libesmf is a shared lib.  See ticket #3614703.
+      rc = merge (ESMF_SUCCESS, ESMF_FAILURE, count >= 0)
     end if
 
   end subroutine ESMF_UtilGetArgC

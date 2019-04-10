@@ -286,7 +286,13 @@
     ! Get command line argument count
     write (name, *) "Testing ESMF_UtilGetArgC, command line argument count"
     write (failMsg, *) "Obtaining the command line argument count"
-    call ESMF_UtilGetArgC (nargs)
+    call ESMF_UtilGetArgC (nargs, rc=rc)
+    call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
+
+  !------------------------------------------------------------------------
+    ! Test command line argument count value
+    write (name, *) "Testing ESMF_UtilGetArgC, command line argument count value"
+    write (failMsg, *) "Bad command line argument count"
     call ESMF_Test(nargs >= 0, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
