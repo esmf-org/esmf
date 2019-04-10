@@ -2,6 +2,7 @@ from ESMF import Manager
 from ESMF.api.constants import Reduce
 import numpy as np
 
+
 def reduce_val(inval, op=Reduce.SUM):
     mg = Manager()
     send_buf = np.array([inval], dtype=np.float64)
@@ -9,6 +10,7 @@ def reduce_val(inval, op=Reduce.SUM):
     mg._reduce_(send_buf, recv_buf, 1, reduceflag=op)
     outval = recv_buf[0]
     return outval
+
 
 def broadcast_val(inval):
     mg = Manager()

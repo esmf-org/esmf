@@ -258,10 +258,11 @@ int main(void){
 #ifdef masking
   rc = ESMC_FieldRegridStore(srcfield, dstfield, &i_maskValues, NULL, &routehandle,
                              NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &unmappedaction,
-           NULL, NULL, NULL);
+                             NULL, NULL, NULL, NULL, NULL, NULL);
 #else
   rc = ESMC_FieldRegridStore(srcfield, dstfield, NULL, NULL, &routehandle,
-                          NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                             NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                             NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
   //----------------------------------------------------------------------------
 

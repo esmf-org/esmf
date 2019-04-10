@@ -3,7 +3,7 @@
 ALL: build_here
 
 SOURCEC	  = ESMCI_DistGrid_F.C ESMC_DistGrid.C
-SOURCEF	  = ESMF_DistGridConnection.F90 ESMF_DistGrid.F90
+SOURCEF	  = ESMF_DistGridRegDecomp.F90 ESMF_DistGridConnection.F90 ESMF_DistGrid.F90
 SOURCEH	  = 
 
 # List all .h files which should be copied to common include dir

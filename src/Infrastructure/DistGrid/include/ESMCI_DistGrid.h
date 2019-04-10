@@ -249,6 +249,8 @@ namespace ESMCI {
     static int connection(InterArray<int> *connection, int tileIndexA, 
       int tileIndexB, InterArray<int> *positionVector,
       InterArray<int> *orientationVector);
+    // regDecomp
+    static int regDecompSetCubic(InterArray<int> *regDecomp, int deCount);
   };  // class DistGrid
 
   

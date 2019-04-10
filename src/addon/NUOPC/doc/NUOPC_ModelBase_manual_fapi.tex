@@ -90,7 +90,7 @@ clock does not match the current time of the internal clock.
   \begin{itemize}
   \item Timestamp the Fields in the export State according to the current time of the internal Clock.
   \item {\sc Specialization Required}: {\tt label\_Advance} to execute model or mediation code.
-  \item Advance the current time of the internal Clock according to the time step of the internal Clock.
+  \item {\sc Specialization Optional}: {\tt label\_AdvanceClock} to advance the current time of the internal Clock. By default (without specialization) advance the current time of the internal Clock according to the time step of the internal Clock.
   \end{itemize}
   \item {\sc Specialization Optional}: {\tt label\_TimestampExport} to timestamp Fields in the export State.
   \end{itemize}    

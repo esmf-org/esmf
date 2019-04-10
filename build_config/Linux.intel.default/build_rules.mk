@@ -228,7 +228,7 @@ endif
 
 ############################################################
 # OpenMP compiler and linker flags
-
+#
 ifeq ($(shell [ $(ESMF_F90MAJORVERSION) -ge 16 ] && echo true), true)
 ESMF_OPENMP_F90COMPILEOPTS += -qopenmp
 ESMF_OPENMP_F90LINKOPTS    += -qopenmp
@@ -246,6 +246,7 @@ endif
 
 ############################################################
 # MKL specific options for external LAPACK
+#
 ifeq ($(ESMF_LAPACK),mkl)
 ifndef ESMF_LAPACK_LIBS
 ESMF_LAPACK_LIBS = -mkl
