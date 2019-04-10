@@ -1029,8 +1029,6 @@ program ESMF_RegridWeightGenApp
 
   ! error checking
   if (checkFlag) then
-    call ESMF_VMBarrier(vm, rc=rc) ! make sure all PETs are done with weight gen
-    if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
     call ESMF_RegridWeightGenCheck(wgtfile, rc=rc)
     if (rc /= ESMF_SUCCESS) call ErrorMsgAndAbort(PetNo)
   endif

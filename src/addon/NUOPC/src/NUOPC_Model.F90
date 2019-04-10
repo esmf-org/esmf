@@ -30,8 +30,8 @@ module NUOPC_Model
     label_CheckImport               => label_CheckImport, &
     label_DataInitialize            => label_DataInitialize, &
     label_SetRunClock               => label_SetRunClock, &
+    label_TimestampExport           => label_TimestampExport, &
     label_Finalize                  => label_Finalize, &
-    ModelBase_label_TimestampExport => label_TimestampExport, &
     NUOPC_ModelBaseGet
 
   implicit none
@@ -50,6 +50,7 @@ module NUOPC_Model
     label_DataInitialize, &
     label_SetClock, &
     label_SetRunClock, &
+    label_TimestampExport, &
     label_Finalize
   
   character(*), parameter :: &
@@ -114,7 +115,7 @@ module NUOPC_Model
       return  ! bail out
 
     ! Specialize Run -> timestamp export Fields
-    call ESMF_MethodAdd(gcomp, label=ModelBase_label_TimestampExport, &
+    call ESMF_MethodAdd(gcomp, label=label_TimestampExport, &
       userRoutine=TimestampExport, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &

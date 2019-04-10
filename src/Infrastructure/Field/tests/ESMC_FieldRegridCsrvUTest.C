@@ -351,14 +351,14 @@ int main(void){
                              &routehandle,
                              &regridmethod, NULL, NULL, NULL,
                              &normtype, NULL, NULL, NULL, &unmappedaction, NULL,
-                             &srcFracField, &dstFracField);
+                             NULL, NULL, NULL, &srcFracField, &dstFracField);
 #else
   rc = ESMC_FieldRegridStore(srcfield, dstfield, 
                              NULL, NULL,
                              &routehandle,
                              &regridmethod, NULL, NULL, NULL,
-                             &normtype, NULL, NULL, NULL, NULL, NULL,
-                             &srcFracField, &dstFracField);
+                             &normtype, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                             NULL, &srcFracField, &dstFracField);
 #endif
   ESMC_Test((rc==ESMF_SUCCESS), name, failMsg, &result, __FILE__, __LINE__, 0);
   //----------------------------------------------------------------------------

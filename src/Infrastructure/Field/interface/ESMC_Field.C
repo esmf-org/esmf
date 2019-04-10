@@ -31,6 +31,7 @@
 #include "ESMCI_Grid.h"
 
 #include <string>
+#include <iostream>
 
 using namespace ESMCI;
 
@@ -379,10 +380,10 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     rc = ESMF_SUCCESS;
     return rc;
   }
-//--------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 
-//--------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldRegridStore()"
   int ESMC_FieldRegridStore(ESMC_Field srcField, ESMC_Field dstField,
@@ -399,6 +400,9 @@ int ESMC_FieldGetBounds(ESMC_Field field,
                             float *extrapDistExponent,
                             enum ESMC_UnmappedAction_Flag *unmappedaction,
                             ESMC_Logical *ignoreDegenerate,
+                            double **factorList,
+                            int **factorIndexList,
+                            int *numFactors,
                             ESMC_Field *srcFracField,
                             ESMC_Field *dstFracField){
 
@@ -408,7 +412,7 @@ int ESMC_FieldGetBounds(ESMC_Field field,
 
     ESMCI::Field *srcfracp = NULL;
     ESMCI::Field *dstfracp = NULL;
-    // typecase into ESMCI type
+    // typecasetinto ESMCI type
     ESMCI::Field *fieldpsrc = reinterpret_cast<ESMCI::Field *>(srcField.ptr);
     ESMCI::Field *fieldpdst = reinterpret_cast<ESMCI::Field *>(dstField.ptr);
     if (srcFracField != NULL)
@@ -418,28 +422,61 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     ESMCI::RouteHandle *rhPtr;
     rhPtr=NULL;
 
+    // HACK (bekozi): This workaround avoids some undefined behavior with
+    //                C_ASSOCIATED in the Fortran regrid store layer. In the
+    //                Fortran layer, if numFactors = -999 then we are returning
+    //                factor lists.
+    int local_numFactors;
+    if (!numFactors) {
+      local_numFactors = -1;
+    } else {
+      local_numFactors = *numFactors;
+    }
 
-    // Invoke the C++ interface
-    localrc = ESMCI::Field::regridstore(fieldpsrc, fieldpdst, 
-      srcMaskValues, dstMaskValues, &rhPtr, regridmethod, 
-      polemethod, regridPoleNPnts, lineType, normType, extrapMethod,
-      extrapNumSrcPnts, extrapDistExponent, unmappedaction, ignoreDegenerate,
-      srcfracp, dstfracp);
+    // C++ regrid store
+    localrc = ESMCI::Field::regridstore(fieldpsrc,
+                                        fieldpdst,
+                                        srcMaskValues,
+                                        dstMaskValues,
+                                        &rhPtr,
+                                        regridmethod,
+                                        polemethod,
+                                        regridPoleNPnts,
+                                        lineType,
+                                        normType,
+                                        extrapMethod,
+                                        extrapNumSrcPnts,
+                                        extrapDistExponent,
+                                        unmappedaction,
+                                        ignoreDegenerate,
+                                        factorList,
+                                        factorIndexList,
+                                        &local_numFactors,
+                                        srcfracp,
+                                        dstfracp);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
-      &rc)) return rc;  // bail out
+      &rc)) return rc;
 
-    // return rhPtr in routehandle argument
+    // HACK (bekozi): If the external factor count pointer was not passed in as
+    //                NULL assign out local factor count to the pointer.
+    //                Otherwise, the factor count value will not be returned
+    //                appropriately.
+    if (numFactors) {
+      *numFactors = local_numFactors;
+    }
+
+    // Assign the route handle pointer. bekozi is not sure if the pointer needs
+    // to be nullified before it is assigned.
     routehandle->ptr = NULL;
     routehandle->ptr = (void *)rhPtr;
 
-    // return successfully
     rc = ESMF_SUCCESS;
     return rc;
   }
-//--------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 
-//--------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_FieldRegridStoreFile()"
   int ESMC_FieldRegridStoreFile(ESMC_Field srcField, ESMC_Field dstField,
@@ -549,6 +586,26 @@ int ESMC_FieldGetBounds(ESMC_Field field,
     // mark invalid
     routehandle->ptr = NULL;
 
+    // return successfully
+    rc = ESMF_SUCCESS;
+    return rc;
+  }
+//--------------------------------------------------------------------------
+  
+//--------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FieldRegridReleaseFactors()"
+  int ESMC_FieldRegridReleaseFactors(double **factorList, int **factorIndexList, int* numFactors){
+
+    // Initialize return code. Assume routine not implemented
+    int rc = ESMF_RC_NOT_IMPL;
+    int localrc = ESMC_RC_NOT_IMPL;
+    
+    // Invoke the C++ interface
+    localrc = ESMCI::Field::regridreleasefactors(factorList, factorIndexList, numFactors);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      &rc)) return rc;  // bail out
+    
     // return successfully
     rc = ESMF_SUCCESS;
     return rc;

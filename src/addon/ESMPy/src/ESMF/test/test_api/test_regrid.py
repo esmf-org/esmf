@@ -81,8 +81,106 @@ class TestRegrid(TestBase):
 
         # regridding
         rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR,
-                    line_type=LineType.CART)
+                    line_type=LineType.CART, factors=False)
         _ = rh(srcfield, dstfield)
+
+    @attr('serial')
+    def test_field_regrid_factor_retrieval(self):
+        # Test retrieving factors from a route handle.
+
+        for offset in [0, 1000]:
+
+            max_index = np.array([2, 2])
+            srcgrid = Grid(max_index, coord_sys=CoordSys.CART)
+
+            max_index = np.array([20, 20])
+            dstgrid = Grid(max_index, coord_sys=CoordSys.CART)
+
+            srcgrid.add_coords()
+            dstgrid.add_coords()
+
+            [x, y] = [0, 1]
+
+            # Source grid creation ============================================
+
+            xcoords = srcgrid.get_coords(x)
+            ycoords = srcgrid.get_coords(y)
+
+            for i in range(xcoords.shape[x]):
+                xcoords[i, :] = float(i) / 6.
+
+            for j in range(ycoords.shape[y]):
+                ycoords[:, j] = float(j) / 6.
+
+            # Destination grid creation =======================================
+
+            xcoords = dstgrid.get_coords(x)
+            ycoords = dstgrid.get_coords(y)
+
+            for i in range(xcoords.shape[x]):
+                xcoords[i, :] = float(i) / 6. + offset
+
+            for j in range(ycoords.shape[y]):
+                ycoords[:, j] = float(j) / 6. + offset
+
+            # Initialize field data ===========================================
+
+            srcfield = Field(srcgrid)
+            srcfield.data[:, :] = 10.
+
+            dstfield = Field(dstgrid)
+            dstfield.data[:, :] = -999.
+
+            # Test factor creation with and without deep copying ==============
+
+            keywords = dict(deep_copy=[False, True], as_dict=[False, True])
+            for k in self.iter_product_keywords(keywords):
+
+                rh = Regrid(srcfield, dstfield,
+                            regrid_method=RegridMethod.BILINEAR,
+                            line_type=LineType.CART, factors=True,
+                            create_rh=False,
+                            unmapped_action=UnmappedAction.IGNORE)
+                _ = rh(srcfield, dstfield)
+
+                fl, fil, fdict = [None] * 3  # Reset at each loop
+
+                if k.as_dict:
+                    fdict = rh.get_weights_dict(deep_copy=k.deep_copy)
+                    fl = fdict['weights']
+                    fil = np.zeros((fl.shape[0], 2), dtype=np.int32)
+                    fil[:, 0] = fdict['col_src']
+                    fil[:, 1] = fdict['row_dst']
+                else:
+                    fl, fil = rh.get_factors(deep_copy=k.deep_copy)
+
+                if k.deep_copy:
+                    self.assertNotEqual(id(fl), id(rh._factor_list))
+                else:
+                    self.assertEqual(id(fl), id(rh._factor_list))
+
+                # Offset is added to the destination coordinates to test for
+                # disjoint grids and factor list retrieval. When grids are
+                # disjoint and the unmapped action is to ignore, there should
+                # be zero rows in the returned arrays.
+                if offset == 0:
+                    self.assertEqual(fl.shape, (16,))
+                    desired = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+                               0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+                    self.assertNumpyAllClose(fl, np.array(desired,
+                                                          dtype=np.float64))
+
+                    self.assertEqual(fil.shape, (16, 2))
+                    desired = [[1, 1], [2, 1], [3, 1], [4, 1], [1, 2], [2, 2],
+                               [3, 2], [4, 2], [1, 21], [2, 21], [3, 21],
+                               [4, 21], [1, 22], [2, 22], [3, 22], [4, 22]]
+                    desired = np.array(desired, dtype=np.int32)
+                    self.assertNumpyAll(fil, desired)
+                else:
+                    self.assertEqual(fl.shape, (0,))
+                    self.assertEqual(fil.shape, (0, 2))
+
+                rh.destroy()
 
     @attr('parallel')
     def test_field_regrid_file1(self):
@@ -291,7 +389,6 @@ class TestRegrid(TestBase):
         self.assertNumpyAllClose(xctfield.data, dstfield.data)
         mgr.barrier()
 
-
     def test_field_regrid_gridmesh(self):
         # create mesh
         parallel = False
@@ -383,23 +480,28 @@ class TestRegrid(TestBase):
 
     @attr('parallel')
     def test_field_regrid_zeroregion_select_ndbounds(self):
-        # Test zero region select during a sparse matrix multiplication having undistributed dimensions.
+        # Test zero region select during a sparse matrix multiplication
+        # having undistributed dimensions.
 
         # Create source field and mask some elements
-        srcgrid = grid_create_from_bounds([0, 4], [0, 4], 24, 24, corners=False, domask=True)
+        srcgrid = grid_create_from_bounds([0, 4], [0, 4], 24, 24, corners=False,
+                                          domask=True)
         srcfield = Field(srcgrid, ndbounds=[3])
         srcfield.data[:] = 33.33
         srcmask = srcgrid.get_item(GridItem.MASK)
         srcmask[3:30, 10:40] = 0
 
         # Create the destination field without a mask
-        dstgrid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=False, domask=False)
+        dstgrid = grid_create_from_bounds([0, 4], [0, 4], 8, 8, corners=False,
+                                          domask=False)
         dstfield = Field(dstgrid, ndbounds=[3])
         dstfield.data[:] = -999
 
         # Regrid in-memory
-        rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR, src_mask_values=np.array([0]),
-                    dst_mask_values=np.array([0]), unmapped_action=UnmappedAction.IGNORE)
+        rh = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR,
+                    src_mask_values=np.array([0]),
+                    dst_mask_values=np.array([0]),
+                    unmapped_action=UnmappedAction.IGNORE)
         _ = rh(srcfield, dstfield, zero_region=Region.SELECT)
 
         # Assert fill values are retained
@@ -409,8 +511,10 @@ class TestRegrid(TestBase):
         # Write the regridding operation weights to file
         dstfield.data[:] = -999
         filename = '_esmf_test_weights_.nc'
-        _ = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR, src_mask_values=np.array([0]),
-                   unmapped_action=UnmappedAction.IGNORE, filename=filename)
+        _ = Regrid(srcfield, dstfield, regrid_method=RegridMethod.BILINEAR,
+                   src_mask_values=np.array([0]),
+                   unmapped_action=UnmappedAction.IGNORE,
+                   filename=filename)
         self.assertTrue(np.all(dstfield.data == -999))
 
         # Compute the regrid from file route handle
@@ -422,10 +526,9 @@ class TestRegrid(TestBase):
         self.assertGreater(np.sum(dstfield.data == 33.33), 10)
         self.assertGreater(np.sum(dstfield.data == -999), 10)
 
-        try:
-            os.remove(filename)
-        except FileNotFoundError:
-            pass
+        if (ESMF.local_pet() == 0):
+            if os.path.exists(filename):
+                os.remove(filename)
 
     @attr('parallel')
     def test_field_regrid_area(self):

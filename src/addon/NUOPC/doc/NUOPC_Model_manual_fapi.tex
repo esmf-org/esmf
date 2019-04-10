@@ -150,9 +150,13 @@ The {\tt NUOPC\_Realize} methods (\ref{NUOPC_RealizeComplete}, \ref{NUOPC_Realiz
   \begin{itemize}
   \item Timestamp the Fields in the export State according to the current time of the internal Clock.
   \item {\sc Specialization Required}: {\tt label\_Advance} to execute model code.
-  \item Advance the current time of the internal Clock according to the time step of the internal Clock.
+  \item {\sc Specialization Optional}: {\tt label\_AdvanceClock} to advance the current time of the internal Clock. By default (without specialization) advance the current time of the internal Clock according to the time step of the internal Clock.
   \end{itemize}
-  \item Timestamp all Fields in the export State according to the current time of the internal Clock, which now is identical to the stop time of the internal Clock.
+  \item {\sc Specialization Optional/Provided}: {\tt label\_TimestampExport} to timestamp Fields in the export State.
+  \begin{itemize}
+  \item {\tt IF} (Phase specific specialization present): Execute the phase specific specialization.
+  \item {\tt ELSE}: Execute the phase independent specialization. {\sc Provided}: Timestamp all Fields in the export State according to the current time of the internal Clock, which now is identical to the stop time of the internal Clock.
+  \end{itemize}
   \end{itemize}    
 \end{itemize}
 

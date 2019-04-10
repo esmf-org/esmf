@@ -44,6 +44,7 @@ module ESMF_DistGridMod
   use ESMF_IOUtilMod              ! ESMF I/O utility layer
 
   use ESMF_DistGridConnectionMod  ! ESMF DistGrid connections
+  use ESMF_DistGridRegDecompMod   ! ESMF DistGrid regDecomp
   
   implicit none
 
@@ -146,6 +147,8 @@ module ESMF_DistGridMod
   public ESMF_DistGridConnectionGet ! implemented in ESMF_DistGridConnectionMod
   public ESMF_DistGridConnectionSet ! implemented in ESMF_DistGridConnectionMod
   public ESMF_DistGridConnectionPrint ! impl. in ESMF_DistGridConnectionMod
+
+  public ESMF_DistGridRegDecompSetCubic ! implemented in ESMF_DistGridRegDecompMod
 
 ! - ESMF-internal methods:
   public ESMF_DistGridGetInit

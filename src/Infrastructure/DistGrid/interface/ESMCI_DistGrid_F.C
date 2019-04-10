@@ -748,6 +748,19 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
 
+  void FTN_X(c_esmc_distgridrdsetcubic)(
+    ESMCI::InterArray<int> *regDecomp, int *deCount, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_distgridrdsetcubic()"
+    // Initialize return code; assume routine not implemented
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.MsgFoundError(
+      ESMCI::DistGrid::regDecompSetCubic(regDecomp, *deCount), 
+      ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
   void FTN_X(c_esmc_distgridset)(
     ESMCI::DistGrid **ptr, ESMCI::InterArray<int> *collocationPDim, int *rc){
 #undef  ESMC_METHOD

@@ -110,6 +110,9 @@ namespace ESMCI{
                            float *extrapDistExponent,
                            ESMC_UnmappedAction_Flag *unmappedAction,
                            ESMC_Logical *ignoreDegenerate,
+                           double **factorList,
+                           int **factorIndexList,
+                           int *numFactors,
                            Field *srcFracField, Field *dstFracField);
     static int regridstorefile(Field *fieldsrc, Field *fielddst,
                            const char *filename,
@@ -128,6 +131,7 @@ namespace ESMCI{
     static int regrid(Field *fieldsrc, Field *fielddst,
                       RouteHandle *routehandle, ESMC_Region_Flag *zeroRegion);
     static int regridrelease(RouteHandle *routehandle);
+    static int regridreleasefactors(double **factorList, int **factorIndexList, int* numFactors);
     static int smmstore(Field *fieldsrc, Field *fielddst,
                         const char *filename, RouteHandle **routehandle,
                         ESMC_Logical *ignoreUnmatchedIndices,

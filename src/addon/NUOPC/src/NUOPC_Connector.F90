@@ -2323,9 +2323,6 @@ module NUOPC_Connector
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
-#if 0
-call ESMF_LogSet(trace=.true.)
-#endif
             acceptorDG = ESMF_DistGridCreate(providerDG, vm=vm, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out

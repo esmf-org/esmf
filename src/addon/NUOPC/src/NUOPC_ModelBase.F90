@@ -38,7 +38,10 @@ module NUOPC_ModelBase
     label_DataInitialize, &
     label_SetRunClock, &
     label_TimestampExport, &
-    label_Finalize
+    label_Finalize, &
+    type_InternalStateStruct, &
+    type_InternalState, &
+    label_InternalState
   
   character(*), parameter :: &
     label_InternalState = "ModelBase_InternalState"
@@ -59,6 +62,7 @@ module NUOPC_ModelBase
 
   type type_InternalStateStruct
     type(ESMF_Clock)      :: driverClock
+    type(ESMF_Time)       :: preAdvanceCurrTime
   end type
 
   type type_InternalState
@@ -804,6 +808,13 @@ module NUOPC_ModelBase
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
 
+    ! store the current time of the internalClock before advancing it
+    call ESMF_ClockGet(internalClock, currTime=is%wrap%preAdvanceCurrTime, &
+      rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+
     ! handle verbosity
     if (btest(verbosity,9)) then
       call NUOPC_CompSearchRevPhaseMap(gcomp, ESMF_METHOD_RUN, &
@@ -869,13 +880,6 @@ module NUOPC_ModelBase
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
           return  ! bail out
       endif
-
-      ! by default update the timestamp on Fields in exportState to the 
-      ! currTime. This timestamp can then be overridded in Advance() or 
-      ! in TimestampExport() after the timestepping loop.
-      call NUOPC_SetTimestamp(exportState, internalClock, rc=rc)
-      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
 #ifdef NUOPC_MODELBASE_TRACE
       call ESMF_TraceRegionEnter("NUOPC_ModelBase:Advance")
