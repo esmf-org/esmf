@@ -32,6 +32,7 @@ module NUOPC_Mediator
     label_SetRunClock               => label_SetRunClock, &
     label_TimestampExport           => label_TimestampExport, &
     label_Finalize                  => label_Finalize, &
+    type_InternalStateStruct, type_InternalState, label_InternalState, &
     NUOPC_ModelBaseGet
 
   implicit none
@@ -111,6 +112,13 @@ module NUOPC_Mediator
     call NUOPC_CompSetEntryPoint(gcomp, ESMF_METHOD_INITIALIZE, &
       phaseLabelList=(/"IPDv00p4", "IPDv01p5"/), &
       userRoutine=InitializeP4, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+
+    ! Specialize Run -> timestamp export Fields
+    call ESMF_MethodAdd(gcomp, label=label_TimestampExport, &
+      userRoutine=TimestampExport, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) &
       return  ! bail out
@@ -499,6 +507,46 @@ module NUOPC_Mediator
 
   end subroutine
   
+  !-----------------------------------------------------------------------------
+  
+  subroutine TimestampExport(gcomp, rc)
+    type(ESMF_GridComp)   :: gcomp
+    integer, intent(out)  :: rc
+    
+    ! local variables
+    character(ESMF_MAXSTR)    :: name
+    type(ESMF_State)          :: exportState
+    type(type_InternalState)  :: is
+
+    rc = ESMF_SUCCESS
+
+    ! query the component for info
+    call NUOPC_CompGet(gcomp, name=name, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+
+    ! get to the clock and exportState
+    call ESMF_GridCompGet(gcomp, exportState=exportState, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+
+    ! query Component for the internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(gcomp, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+
+    ! update timestamp on export Fields
+    call NUOPC_SetTimestamp(exportState, is%wrap%preAdvanceCurrTime, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) &
+      return  ! bail out
+    
+  end subroutine
+    
   !-----------------------------------------------------------------------------
   
   !-----------------------------------------------------------------------------
