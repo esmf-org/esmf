@@ -290,6 +290,7 @@
     call ESMF_Test(rc == ESMF_SUCCESS, name, failMsg, result, ESMF_SRCLINE)
 
   !------------------------------------------------------------------------
+    !EX_UTest
     ! Test command line argument count value
     write (name, *) "Testing ESMF_UtilGetArgC, command line argument count value"
     write (failMsg, *) "Bad command line argument count"
