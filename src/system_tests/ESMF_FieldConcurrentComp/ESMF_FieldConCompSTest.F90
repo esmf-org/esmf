@@ -102,6 +102,8 @@
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
+    call ESMF_LogSet (flush=.true.)
+
     ! Get number of PETs we are running with
     call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

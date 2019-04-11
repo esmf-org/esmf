@@ -113,6 +113,8 @@ program ESMF_CompFortranAndC
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(endflag=ESMF_END_ABORT)
 
+  call ESMF_LogSet (flush=.true.)
+
   ! Get the global VM
   call ESMF_VMGetGlobal(vm, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
