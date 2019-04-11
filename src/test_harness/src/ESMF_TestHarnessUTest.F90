@@ -155,6 +155,8 @@
       print '("XML File = ", A)', trim(xmlFname(1))
     end if
   10 continue
+  else
+    localrc = ESMF_FAILURE  ! dummy initialization before broadcast
   end if  ! PET 0 command line processing
 
   ! Check for command line error
@@ -280,7 +282,7 @@
 !   gather aggregate error count?
 !
 90 continue
-  name = "Harness Test  for class " // adjustL(har%testClass)
+  name = "Harness Test  for class " // trim (adjustL(har%testClass))
   call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
     ESMF_SRCLINE)
 
