@@ -131,7 +131,7 @@ subroutine comp2_final(gcomp, istate, ostate, clock, rc)
 end subroutine comp2_final
     
 
-! Initialize routine which creates "field1"and "field2" on PETs 0 and 1 - sharing a Grid
+! Initialize routine which creates "field1"and "field2" - sharing a Grid
 subroutine comp1_sg_init(gcomp, istate, ostate, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: istate, ostate
@@ -171,7 +171,7 @@ print *, 'comp1_sg_init: adding fields to istate'
 
 end subroutine comp1_sg_init
 
-! Initialize routine on PETs 2 and 3 for shared Grid test
+! Initialize routine for shared Grid test
 subroutine comp2_sg_init(gcomp, istate, ostate, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: istate, ostate
@@ -184,7 +184,7 @@ subroutine comp2_sg_init(gcomp, istate, ostate, clock, rc)
 
 end subroutine comp2_sg_init
 
-! Finalize routine which destroys "field1" on PETs 0 and 1
+! Finalize routine which destroys "field1" and "field2"
 subroutine comp1_sg_final(gcomp, istate, ostate, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: istate, ostate
@@ -209,22 +209,16 @@ subroutine comp1_sg_final(gcomp, istate, ostate, clock, rc)
 
 end subroutine comp1_sg_final
 
-! Finalize routine which destroys "field2" on PETs 2 and 3
+! Finalize routine
 subroutine comp2_sg_final(gcomp, istate, ostate, clock, rc)
     type(ESMF_GridComp)  :: gcomp
     type(ESMF_State)     :: istate, ostate
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
 
-    type(ESMF_Field) :: field2
-
     print *, "i am comp2_sg_final"
 
-    call ESMF_StateGet(istate, "Comp2 Field", field2,  rc=rc)
-    if (rc .ne. ESMF_SUCCESS) return
-
-    call ESMF_FieldDestroy(field2, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) return
+    rc = ESMF_SUCCESS
 
 end subroutine comp2_sg_final
 
