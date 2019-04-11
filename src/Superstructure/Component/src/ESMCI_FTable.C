@@ -39,6 +39,7 @@
 #include "ESMCI_Comp.h"
 #include "ESMCI_CompTunnel.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_TraceRegion.h"
 
 using std::string;
 
@@ -732,11 +733,26 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
     // ...the user return code will not be available until wait() is called
 
   }else{
+
+    TraceEventCompPhaseEnter(f90comp, &(cargo->currentMethod), &(cargo->currentPhase), &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &esmfrc)){
+      cargo->esmfrc[mytid] = esmfrc;  // put esmf return code into cargo
+      return NULL;
+    }
+    
     // a regular component or a dual component that needs to connect still,
     // use the local ftable for user code or system code callback
     localrc = ftable->callVFuncPtr(name, (ESMCI::VM*)vm, &userrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &esmfrc)){
+      cargo->esmfrc[mytid] = esmfrc;  // put esmf return code into cargo
+      return NULL;
+    }
+
+    TraceEventCompPhaseExit(f90comp, &(cargo->currentMethod), &(cargo->currentPhase), &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &esmfrc)){
       cargo->esmfrc[mytid] = esmfrc;  // put esmf return code into cargo
       return NULL;
     }
@@ -850,6 +866,7 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
       vmplan->parentVMflag = 1;
     }
   }
+
   delete[] name;  // delete memory that "newtrim" allocated above
 
   // store the current timeout in the cargo structure
@@ -866,7 +883,7 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   localrc = vm_parent->enter(vmplan, *vm_info, *vm_cargo);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return; // bail out
-
+  
   // ... if the child VM uses threads (multi-threading or single-threading)
   // then this parent PET continues running concurrently to the child PET in the
   // same VAS! In that case the return codes in cargo are not valid here!
@@ -1777,32 +1794,6 @@ int FTable::callVFuncPtr(
           complianceCheckFlag |= value.find("ON")!=string::npos;  // turn on
         }
 
-        //if tracing enabled, turn on compliance checker
-        if (!complianceCheckFlag) {
-          envVar = VM::getenv("ESMF_RUNTIME_TRACE");    
-          if (envVar != NULL) {
-            string value(envVar);
-            complianceCheckFlag |= value.find("on")!=string::npos;  // turn on
-            complianceCheckFlag |= value.find("ON")!=string::npos;  // turn on
-          }
-          envVar = VM::getenv("ESMF_RUNTIME_PROFILE");    
-          if (envVar != NULL) {
-            string value(envVar);
-            complianceCheckFlag |= value.find("on")!=string::npos;  // turn on
-            complianceCheckFlag |= value.find("ON")!=string::npos;  // turn on
-          }  
-          if (complianceCheckFlag) {
-            //if component-level tracing is off, do not
-            //hook in compliance checker
-            envVar = VM::getenv("ESMF_RUNTIME_TRACE_COMPONENT");
-            if (envVar != NULL) {
-              string value(envVar);
-              complianceCheckFlag &= value.find("off")==string::npos;  // turn off
-              complianceCheckFlag &= value.find("OFF")==string::npos;  // turn off
-            }
-          }
-        }
-              
         if (complianceCheckFlag){
           int registerIcUserRc;
 
