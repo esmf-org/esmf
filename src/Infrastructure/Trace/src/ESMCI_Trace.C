@@ -1334,15 +1334,29 @@ namespace ESMCI {
         localrc = comp->getBase(&base);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
 
+        VM *vm;
+        localrc = comp->getVm(&vm);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+        
+        VMId *vmid = vm->getVMId(&localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+        
+        int localvmid = TraceMapVmId(vmid, &localrc);
+        if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
+        
+        int baseid = base->ESMC_BaseGetID();
+        char *compName = base->ESMC_BaseGetName();
+
+        vector<string> IPM;
+        vector<string> IIPM;
+        vector<string> RPM;
+        vector<string> FPM;
+              
         Attribute *attrRoot = base->ESMC_BaseGetRoot();
         if (attrRoot != NULL) {
 
           Attribute *attrPack = attrRoot->AttPackGet("NUOPC", "Instance", "comp", "", ESMC_ATTNEST_ON);
           if (attrPack != NULL) {
-            vector<string> IPM;
-            vector<string> IIPM;
-            vector<string> RPM;
-            vector<string> FPM;
 
             Attribute *attr;
             attr = attrPack->AttPackGetAttribute("InitializePhaseMap", ESMC_ATTNEST_ON);
@@ -1365,26 +1379,9 @@ namespace ESMCI {
               localrc = attr->get(&FPM);
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
             }
-
-            VM *vm;
-            localrc = comp->getVm(&vm);
-            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-
-            VMId *vmid = vm->getVMId(&localrc);
-            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-
-            int localvmid = TraceMapVmId(vmid, &localrc);
-            if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-
-            int baseid = base->ESMC_BaseGetID();
-            char *compName = base->ESMC_BaseGetName();
-
-            TraceEventComponentInfo(&localvmid, &baseid, compName, IPM, IIPM, RPM, FPM);
-
           }
-
-        }
-
+        }        
+        TraceEventComponentInfo(&localvmid, &baseid, compName, IPM, IIPM, RPM, FPM);
       }
 
       int methodid = MethodToEnum(*method);
