@@ -817,6 +817,13 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   if (recursionCount && *recursionCount==0 && *vm_cargo)
     newCargoFlag = false; // this is not a recursion but a re-entrance
 
+#if 1
+std::cout << "inside c_esmc_ftablecallentrypointvm(): recursionCount=" 
+  <<  recursionCount << " *recursionCount="
+  << (recursionCount ? *recursionCount : -1)
+  << " vm_cargo=" << vm_cargo << " newCargoFlag=" << newCargoFlag <<"\n";
+#endif
+
   if (newCargoFlag){
     ESMCI::cargotype *cargo = new ESMCI::cargotype;
     strcpy(cargo->name, name);    // copy trimmed type string
@@ -863,9 +870,17 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   if (recursionCount) (*recursionCount)++;
 
   // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
+#if 1
+std::cout << ">>> calling into vm_parent->enter() with parentVMflag:" 
+  <<  vmplan->parentVMflag <<"\n";
+#endif
   localrc = vm_parent->enter(vmplan, *vm_info, *vm_cargo);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return; // bail out
+
+#if 1
+std::cout << "<<< parent thread returned from vm_parent->enter()" << "\n";
+#endif
 
   // ... if the child VM uses threads (multi-threading or single-threading)
   // then this parent PET continues running concurrently to the child PET in the
@@ -1679,6 +1694,10 @@ int FTable::callVFuncPtr(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc; // bail out
 
+#if 1
+std::cout << "callVFuncPtr found i=" << i << "\n";
+#endif
+
   Comp *comp;       // pointer to PET-local component
   funcinfo *func;   // pointer to PET-local function entry
 
@@ -1690,6 +1709,10 @@ int FTable::callVFuncPtr(
     int mypet = vm_pointer->getMypet();
     int mynthreads = vm_pointer->getNthreads(mypet);
     int mytid = vm_pointer->getTid(mypet);
+#if 1
+std::cout << "vm_pointer present, mypet=" << mypet << " mynthreads=" <<
+  mynthreads << " mytid=" << mytid <<"\n";
+#endif
     if (componentcount==0){
       // first time Component is entering its VM -> replicate Comp
       if (i == -1){
@@ -1757,7 +1780,9 @@ int FTable::callVFuncPtr(
   // call-back into user code
   switch (func->ftype){
     case FT_VOIDP1INTP: {
-      //printf("calling out of case FT_VOIDP1INTP\n");
+#if 1
+std::cout << "calling out of case FT_VOIDP1INTP" << "\n";
+#endif
       VoidP1IntPFunc vf = (VoidP1IntPFunc)func->funcptr;
       (*vf)((void *)comp, userrc);
       // conditionally set entry point for ServiceLoop
@@ -1855,7 +1880,7 @@ int FTable::callVFuncPtr(
             value[0]+="_";
 #endif
 
-#if 0
+#if 1
 std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
 #endif
 
@@ -1962,7 +1987,9 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
       break;
     }
     case FT_VOIDP4INTP: {
-      //printf("calling out of case FT_VOIDP4INTP\n");
+#if 1
+std::cout << "calling out of case FT_VOIDP4INTP" << "\n";
+#endif
       VoidP4IntPFunc vf = (VoidP4IntPFunc)func->funcptr;
       (*vf)((void *)comp, func->funcarg[1], func->funcarg[2],
         func->funcarg[3], userrc);
