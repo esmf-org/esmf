@@ -890,9 +890,6 @@ std::cout << "<<< parent thread returned from vm_parent->enter()" << "\n";
   // The return code of the callback code will be valid in all cases (threading
   // or no threading) _after_ VMK::exit() returns.
 
-  // decrement recursionCount again
-  if (recursionCount) (*recursionCount)--;
-
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
 }
@@ -907,6 +904,7 @@ void FTN_X(c_esmc_compwait)(
   void **vm_info,             // p2 to member which holds info
   void **vm_cargo,            // p2 to member which holds cargo
   int *timeout,               // time out in seconds
+  int *recursionCount,        // keeping track of recursion level of component
   int *userrc,                // return code of the user component method
   int *rc){                   // esmf internal return error code
 
@@ -983,6 +981,9 @@ void FTN_X(c_esmc_compwait)(
   *vm_cargo = cargo->previousCargo; // bring back previous cargo structure
   vmplan->parentVMflag = cargo->previousParentFlag;   // previous value
   delete cargo;
+
+  // decrement recursionCount again
+  if (recursionCount) (*recursionCount)--;
 
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
@@ -1245,7 +1246,7 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
     rc)) return;
 
   // wait for the register routine to return
-  FTN_X(c_esmc_compwait)(&vm_parent, &vmplan_p, &vm_info, &vm_cargo, NULL,
+  FTN_X(c_esmc_compwait)(&vm_parent, &vmplan_p, &vm_info, &vm_cargo, NULL, NULL,
     userRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;

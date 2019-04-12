@@ -1220,7 +1220,8 @@ contains
         timeoutArg = max(timeoutArg - int(usedTime), 1)
 !print *, "ESMF_CompExecute(), calling c_ESMC_CompWait(): usedTime=",usedTime,"timeoutArg=",timeoutArg
         call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-          compp%vm_cargo, timeoutArg, localUserRc, localrc)
+          compp%vm_cargo, timeoutArg, compp%vm_recursionCount, localUserRc, &
+          localrc)
         ! localUserRc - return code of registered user callback method
         ! localrc     - return code of ESMF internal callback stack
         if (ESMF_LogFoundError(localrc, &
@@ -2443,7 +2444,8 @@ contains
         timeoutArg = max(timeoutArg - int(usedTime), 1)
 !print *, "ESMF_CompWait(), calling c_ESMC_CompWait(): usedTime=",usedTime,"timeoutArg=",timeoutArg
         call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-          compp%vm_cargo, timeoutArg, localUserRc, localrc)
+          compp%vm_cargo, timeoutArg, compp%vm_recursionCount, localUserRc, &
+          localrc)
         ! localUserRc - return code of registered user callback method
         ! localrc     - return code of ESMF internal callback stack
         if (ESMF_LogFoundError(localrc, &
