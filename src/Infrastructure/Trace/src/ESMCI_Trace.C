@@ -800,8 +800,66 @@ namespace ESMCI {
   }
 
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMCI::findImbalancedConnectors()"
+  static void findImbalancedConnectors(RegionSummary *rs, vector<string> &connList, int *rc) {
+
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+
+    rs->sortChildren();
+    for (unsigned i = 0; i < rs->getChildren().size(); i++) {
+      //TODO: find a cleaner way of determining the type of component
+      RegionSummary *child = rs->getChildren().at(i);
+      if (child->getName().find("-TO-") != string::npos &&
+	  child->getName().find("Run") != string::npos) {
+	//only report if normalized time shows > 5% imbalance
+	if (child->getParent()->getTotalMax() > 0) {
+	  double ndiff = (1.0*child->getTotalMax() / child->getParent()->getTotalMax()) -
+	    (1.0*child->getTotalMin() / child->getParent()->getTotalMax());
+	  if (ndiff > .05) {
+	    connList.push_back(child->getName());
+	  }
+	}
+      }
+    }
+
+    for (unsigned i = 0; i < rs->getChildren().size(); i++) {
+      findImbalancedConnectors(rs->getChildren().at(i), connList, rc);
+    }
+
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+  }
+
+#undef ESMC_METHOD
+#define ESMC_METHOD "ESMCI::printSummaryProfileMessage()"
+  static void printSummaryProfileMessage(RegionSummary *rs, ofstream &ofs, int *rc) {
+
+    if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
+    int localrc;
+    vector<string> connList;
+
+    findImbalancedConnectors(rs, connList, &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc,
+	  ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
+      return;
+
+    if (connList.size() > 0) {
+      string msg = "********";
+      msg += "\nIMPORTANT: Large deviations between Connector times on different PETs\n";
+      msg += "are typically indicators of load imbalance in the system. The following\n";
+      msg += "Connectors in this profile may indicate a load imbalance:\n";
+      for (unsigned i = 0; i < connList.size(); i++) {
+	msg += "\t - " + connList.at(i) + "\n";
+      }
+      ofs << msg << "********\n\n";
+    }
+
+    if (rc!=NULL) *rc = ESMF_SUCCESS;
+
+  }
+
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::printSummaryProfile()"
-  static void printSummaryProfile(RegionSummary *rs, bool printToLog, string prefix, ofstream &ofs, size_t namePadding, int *rc) {
+  static void printSummaryProfile(RegionSummary *rs, string prefix, ofstream &ofs, size_t namePadding, int *rc) {
 
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
@@ -826,23 +884,18 @@ namespace ESMCI {
 	       rs->getTotalMean()*NANOS_TO_SECS,
 	       rs->getTotalMin()*NANOS_TO_SECS, rs->getTotalMinPet(),
 	       rs->getTotalMax()*NANOS_TO_SECS, rs->getTotalMaxPet());
-      if (printToLog) {
-        ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
-      }
-      else {
-        ofs << strbuf << "\n";
-      }
+      ofs << strbuf << "\n";
     }
     rs->sortChildren();
     for (unsigned i = 0; i < rs->getChildren().size(); i++) {
-      printSummaryProfile(rs->getChildren().at(i), printToLog, prefix + "  ", ofs, namePadding, rc);
+      printSummaryProfile(rs->getChildren().at(i), prefix + "  ", ofs, namePadding, rc);
     }
     if (rc!=NULL) *rc=ESMF_SUCCESS;
   }
 
 #undef  ESMC_METHOD
 #define ESMC_METHOD "ESMCI::printSummaryProfile()"
-  static void printSummaryProfile(RegionSummary *rs, bool printToLog, string filename, int *rc) {
+  static void printSummaryProfile(RegionSummary *rs, string filename, int *rc) {
 
     if (rc!=NULL) *rc = ESMC_RC_NOT_IMPL;
 
@@ -859,28 +912,26 @@ namespace ESMCI {
     snprintf(strbuf, STATLINE, fmt.str().c_str(),
              "Region", "PETs", "Count", "Mean (s)", "Min (s)", "Min PET", "Max (s)", "Max PET");
 
-    if (printToLog) {
-      ESMC_LogDefault.Write("**************** Region Timings *******************", ESMC_LOGMSG_INFO);
-      ESMC_LogDefault.Write(strbuf, ESMC_LOGMSG_INFO);
+    ofs.open(filename.c_str(), ofstream::trunc);
+    if (ofs.is_open() && !ofs.fail()) {
+      printSummaryProfileMessage(rs, ofs, &localrc);
+      if (ESMC_LogDefault.MsgFoundError(localrc, "Error writing profile footer",
+	   ESMC_CONTEXT, rc))
+	return;
+      ofs << strbuf << "\n";
     }
     else {
-      ofs.open(filename.c_str(), ofstream::trunc);
-      if (ofs.is_open() && !ofs.fail()) {
-        ofs << strbuf << "\n";
-      }
-      else {
-        ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error opening profile output file",
-           ESMC_CONTEXT, rc);
-        return;
-      }
+      ESMC_LogDefault.MsgFoundError(ESMC_RC_FILE_CREATE, "Error opening profile output file",
+				    ESMC_CONTEXT, rc);
+      return;
     }
-    printSummaryProfile(rs, printToLog, "", ofs, namePadding, &localrc);
+
+    printSummaryProfile(rs, "", ofs, namePadding, &localrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, "Error writing profile output file",
          ESMC_CONTEXT, rc))
       return;
-    if (!printToLog) {
-      ofs.close();
-    }
+    ofs.close();
+
     if (rc!=NULL) *rc = ESMF_SUCCESS;
   }
 
@@ -990,7 +1041,7 @@ namespace ESMCI {
 
       //now we have received and merged
       //profiles from all other PETs
-      printSummaryProfile(sumNode, false, "ESMF_Profile.summary", &localrc);
+      printSummaryProfile(sumNode, "ESMF_Profile.summary", &localrc);
       if (ESMC_LogDefault.MsgFoundError(localrc,
            ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc))
         return;
@@ -1337,13 +1388,13 @@ namespace ESMCI {
         VM *vm;
         localrc = comp->getVm(&vm);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-        
+
         VMId *vmid = vm->getVMId(&localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-        
+
         int localvmid = TraceMapVmId(vmid, &localrc);
         if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
-        
+
         int baseid = base->ESMC_BaseGetID();
         char *compName = base->ESMC_BaseGetName();
 
@@ -1351,7 +1402,7 @@ namespace ESMCI {
         vector<string> IIPM;
         vector<string> RPM;
         vector<string> FPM;
-              
+
         Attribute *attrRoot = base->ESMC_BaseGetRoot();
         if (attrRoot != NULL) {
 
@@ -1380,7 +1431,7 @@ namespace ESMCI {
               if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc)) return;
             }
           }
-        }        
+        }
         TraceEventComponentInfo(&localvmid, &baseid, compName, IPM, IIPM, RPM, FPM);
       }
 
