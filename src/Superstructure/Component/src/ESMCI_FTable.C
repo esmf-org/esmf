@@ -817,7 +817,7 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   if (recursionCount && *recursionCount==0 && *vm_cargo)
     newCargoFlag = false; // this is not a recursion but a re-entrance
 
-#if 1
+#if 0
 std::cout << "inside c_esmc_ftablecallentrypointvm(): recursionCount=" 
   <<  recursionCount << " *recursionCount="
   << (recursionCount ? *recursionCount : -1)
@@ -870,7 +870,7 @@ std::cout << "inside c_esmc_ftablecallentrypointvm(): recursionCount="
   if (recursionCount) (*recursionCount)++;
 
   // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
-#if 1
+#if 0
 std::cout << ">>> calling into vm_parent->enter() with parentVMflag:" 
   <<  vmplan->parentVMflag <<"\n";
 #endif
@@ -878,7 +878,7 @@ std::cout << ">>> calling into vm_parent->enter() with parentVMflag:"
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return; // bail out
 
-#if 1
+#if 0
 std::cout << "<<< parent thread returned from vm_parent->enter()" << "\n";
 #endif
 
@@ -1695,7 +1695,7 @@ int FTable::callVFuncPtr(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc; // bail out
 
-#if 1
+#if 0
 std::cout << "callVFuncPtr found i=" << i << "\n";
 #endif
 
@@ -1710,7 +1710,7 @@ std::cout << "callVFuncPtr found i=" << i << "\n";
     int mypet = vm_pointer->getMypet();
     int mynthreads = vm_pointer->getNthreads(mypet);
     int mytid = vm_pointer->getTid(mypet);
-#if 1
+#if 0
 std::cout << "vm_pointer present, mypet=" << mypet << " mynthreads=" <<
   mynthreads << " mytid=" << mytid <<"\n";
 #endif
@@ -1781,7 +1781,7 @@ std::cout << "vm_pointer present, mypet=" << mypet << " mynthreads=" <<
   // call-back into user code
   switch (func->ftype){
     case FT_VOIDP1INTP: {
-#if 1
+#if 0
 std::cout << "calling out of case FT_VOIDP1INTP" << "\n";
 #endif
       VoidP1IntPFunc vf = (VoidP1IntPFunc)func->funcptr;
@@ -1881,7 +1881,7 @@ std::cout << "calling out of case FT_VOIDP1INTP" << "\n";
             value[0]+="_";
 #endif
 
-#if 1
+#if 0
 std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
 #endif
 
@@ -1988,7 +1988,7 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
       break;
     }
     case FT_VOIDP4INTP: {
-#if 1
+#if 0
 std::cout << "calling out of case FT_VOIDP4INTP" << "\n";
 #endif
       VoidP4IntPFunc vf = (VoidP4IntPFunc)func->funcptr;
