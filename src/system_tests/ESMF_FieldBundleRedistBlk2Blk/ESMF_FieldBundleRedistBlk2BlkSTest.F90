@@ -95,6 +95,8 @@ program Blk2BlkBunRedist
         ESMF_CONTEXT, rcToReturn=rc)) &
         call ESMF_Finalize(rc=localrc, endflag=ESMF_END_ABORT)
 
+    call ESMF_LogSet (flush=.true.)
+
     ! Get the PET count and our PET number
     call ESMF_VMGet(vm, localPet=localPet, petCount=npets, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

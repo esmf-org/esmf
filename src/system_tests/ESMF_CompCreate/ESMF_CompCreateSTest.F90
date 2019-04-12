@@ -57,6 +57,8 @@
                         logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
+    call ESMF_LogSet (flush=.true.)
+
     ! Get the default global VM
     call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
