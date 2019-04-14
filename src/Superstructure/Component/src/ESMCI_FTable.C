@@ -818,10 +818,14 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
     newCargoFlag = false; // this is not a recursion but a re-entrance
 
 #if 0
-std::cout << "inside c_esmc_ftablecallentrypointvm(): recursionCount=" 
-  <<  recursionCount << " *recursionCount="
-  << (recursionCount ? *recursionCount : -1)
-  << " vm_cargo=" << vm_cargo << " newCargoFlag=" << newCargoFlag <<"\n";
+  {
+    std::stringstream debugmsg;
+    debugmsg << "inside c_esmc_ftablecallentrypointvm(): recursionCount=" 
+      <<  recursionCount << " *recursionCount="
+      << (recursionCount ? *recursionCount : -1)
+      << " vm_cargo=" << vm_cargo << " newCargoFlag=" << newCargoFlag;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
 #endif
 
   if (newCargoFlag){
@@ -889,6 +893,24 @@ std::cout << "<<< parent thread returned from vm_parent->enter()" << "\n";
   // child VM, not failure or success of the callback.
   // The return code of the callback code will be valid in all cases (threading
   // or no threading) _after_ VMK::exit() returns.
+
+  // get a pointer to the CompTunnel object
+  ESMCI::CompTunnel *compTunnel;
+  localrc = f90comp->getTunnel(&compTunnel);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;
+
+  // determine whether this is a dual component that is ready to execute
+  bool dualConnected = false;  // initialize
+  if (compTunnel) dualConnected = compTunnel->isConnected();
+
+  if (dualConnected){
+    // decrement recursionCount here for the dual side of a comp tunnel
+    // in general the decrement must happen during the wait, in case there
+    // are separate parent vs child threads running, but for comp tunnel must
+    // apply the decrement here
+    if (recursionCount) (*recursionCount)--;
+  }
 
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
@@ -982,9 +1004,11 @@ void FTN_X(c_esmc_compwait)(
   vmplan->parentVMflag = cargo->previousParentFlag;   // previous value
   delete cargo;
 
-  // decrement recursionCount again
-  if (recursionCount) (*recursionCount)--;
-
+  if (!dualConnected){
+    // decrement recursionCount here if not dual side of a comp tunnel
+    if (recursionCount) (*recursionCount)--;
+  }
+  
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
 }
