@@ -80,6 +80,8 @@
     call ESMF_Initialize(vm=vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
+    call ESMF_LogSet (flush=.true.)
+
     ! Get number of PETs we are running with
     call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10

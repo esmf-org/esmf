@@ -52,6 +52,17 @@ extern char pghpf_0c_;
 #endif
 
 #if 0
+Some older PGI compilers can not handle certain cases of explicit template instantiations
+with the same name, but different argument types.  These instantiations are needed by other
+compilers - especially at higher levels of optimization.
+#endif
+#if defined (ESMF_PGIVERSION_MAJOR)
+#if (ESMF_PGIVERSION_MAJOR < 17)
+#define ESMF_PGI_TEMPLATE_INSTANTIATION_BUG
+#endif
+#endif
+
+#if 0
 PGI before 17.9 could not handle the dynamic masking interfaces for different
 typekinds
 #endif

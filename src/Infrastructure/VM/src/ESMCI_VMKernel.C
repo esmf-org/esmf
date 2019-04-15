@@ -1901,24 +1901,22 @@ void VMK::enter(class VMKPlan *vmp, void *arg, void *argvmkt){
   // Enter into VMK by its registered function, i.e. release vmkt
   // First need to cast arg into its correct type
   SpawnArg *sarg = (SpawnArg *)arg;
+  bool simpleBlockingCallback = false;
   // simple case is that where the child runs in the parent VM, then all this
-  // degenerates into a simple blocking callback 
-  if (vmp->parentVMflag){
-    if (argvmkt==NULL)
-      sarg[0].fctp((void *)sarg[0].myvm, sarg[0].cargo);
-    else
-      sarg[0].fctp((void *)sarg[0].myvm, argvmkt);
-    return;
-  }
+  // degenerates into a simple blocking callback
+  simpleBlockingCallback |= vmp->parentVMflag;
   // the non-thread based VMs simply do a blocking callback for all the 
   // spawning PETs.
-  if (vmp->nothreadflag && vmp->spawnflag[mypet]==1){
+  simpleBlockingCallback |= (vmp->nothreadflag && vmp->spawnflag[mypet]==1);
+  // finally execute the simple blocking callback
+  if (simpleBlockingCallback){
     if (argvmkt==NULL)
       sarg[0].fctp((void *)sarg[0].myvm, sarg[0].cargo);
     else
       sarg[0].fctp((void *)sarg[0].myvm, argvmkt);
     return;
   }
+  // continue with the more complicated case, where threads must be released...
   // pets that do not spawn but contribute need to release their blocker and
   // sigcatcher _before_ the actual spawner threads get released 
   // (this is so that no signals get missed!)
@@ -2131,7 +2129,12 @@ int VMK::getLpid(int i){
 int VMK::getMaxTag(){
   int *value;
   int flag;
+#if MPI_VERSION >= 2
+  MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB, &value, &flag);
+#else
+  // MPI_Attr_get is deprecated in MPI 2.0
   MPI_Attr_get(MPI_COMM_WORLD, MPI_TAG_UB, &value, &flag);
+#endif
   if (flag)
     return *value;
   else

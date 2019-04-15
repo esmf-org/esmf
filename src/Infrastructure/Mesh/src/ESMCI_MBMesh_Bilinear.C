@@ -41,6 +41,7 @@ using std::iterator;
 
 // #define DEBUG_POINTLIST
 // #define DEBUG_WEIGHTS
+//#define ESMF_REGRID_DEBUG_MAP_NODE 4323801
 
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
@@ -78,6 +79,10 @@ void pcoord_3d(vector<double> &p, vector<double> &a) {
 void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
   MBMesh_Search_EToP_Result_List &sres, IWeights &iw) {
   Trace __trace("calc_bilinear_mat(MBMesh &srcmb, PointList &dstpl, MBMesh_Search_EToP_Result_List &sres, IWeights &iw)");
+#undef ESMC_METHOD
+#define ESMC_METHOD "MBMesh::calc_bilinear_mat"
+
+  int merr, localrc;
 
   // Get MOAB mesh
   Interface *mesh = srcmb->mesh;
@@ -97,6 +102,38 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
     vector<etop_sr>::iterator db = sr.dst_nodes.begin(),
                                    de = sr.dst_nodes.end();
     for (; db != de; db++) {
+
+#ifdef ESMF_REGRID_DEBUG_MAP_NODE
+{
+  if (db->dst_gid == ESMF_REGRID_DEBUG_MAP_NODE) {
+    
+    int gid; MBMesh_get_gid(srcmb, sr.src_elem, &gid);
+    
+    printf("%d# calc_bilinear_mat dst_id=%d pcoords=%f %f %f s_elem=%d [",
+      Par::Rank(), db->dst_gid, db->pcoord[0], db->pcoord[1], db->pcoord[2], gid);
+
+    Range nodes;
+    merr=srcmb->mesh->get_connectivity(&(sr.src_elem), 1, nodes);
+    if (merr != MB_SUCCESS)
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+
+    int num_verts = nodes.size();
+    int gids[num_verts];
+
+    merr=srcmb->mesh->tag_get_data(srcmb->gid_tag, nodes, &gids);
+    if (merr != MB_SUCCESS)
+      if(ESMC_LogDefault.MsgFoundError(ESMC_RC_MOAB_ERROR,
+        moab::ErrorCodeStr[merr], ESMC_CONTEXT,&localrc)) throw localrc;
+
+    for (int i=0; i<num_verts; i++)
+      printf("%d ",gids[i]);
+    printf("]\n");
+
+    fflush(stdout);
+  }
+}
+#endif
 
 #ifdef MOAB_UNORDERED_CONNECTIVITY
       // Get the nodes on this element (only corners)
@@ -194,6 +231,7 @@ void calc_bilinear_mat(MBMesh *srcmb, PointList *dstpl,
 
 void calc_bilinear_regrid_wgts(MBMesh *srcmb, PointList *dstpl, IWeights &wts, 
                                int *map_type, bool set_dst_status, WMat &dst_status) {
+#undef ESMC_METHOD
 #define ESMC_METHOD "calc_bilinear_regrid_wgts()"
 
   // Get Parallel Information

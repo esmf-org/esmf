@@ -125,17 +125,17 @@ contains
           outputText = .false.
         endif
 
-        call c_esmc_getComplianceCheckTrace(traceIsOn, profileIsOn, localrc)
-        if (ESMF_LogFoundError(localrc, &
-            line=__LINE__, &
-            file=FILENAME, &
-            rcToReturn=rc)) &
-            return  ! bail out
-        if (traceIsOn == 1 .or. profileIsOn == 1) then
-          outputTrace = .true.
-        else
-          outputTrace = .false.
-        endif
+!        call c_esmc_getComplianceCheckTrace(traceIsOn, profileIsOn, localrc)
+!        if (ESMF_LogFoundError(localrc, &
+!            line=__LINE__, &
+!            file=FILENAME, &
+!            rcToReturn=rc)) &
+!            return  ! bail out
+!        if (traceIsOn == 1 .or. profileIsOn == 1) then
+!          outputTrace = .true.
+!        else
+!          outputTrace = .false.
+!        endif
           
         call c_esmc_getComplianceCheckJSON(jsonIsOn, localrc)
         if (ESMF_LogFoundError(localrc, &
@@ -149,49 +149,6 @@ contains
           outputJSON = .false.
         endif
 
-        if (outputJSON) then
-            config = ESMF_ConfigCreate(rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                line=__LINE__, &
-                file=FILENAME, &
-                rcToReturn=rc)) &
-                return  ! bail out
-            call ESMF_ConfigLoadFile(config, "nuopc.trace", rc=configrc)
-            if (configrc == ESMF_SUCCESS) then
-                call ESMF_ConfigGetAttribute(config, cfgIncludeState, &
-                    label="include.state:", default="true", rc=localrc)
-                if (ESMF_LogFoundError(localrc, &
-                    line=__LINE__, &
-                    file=FILENAME, &
-                    rcToReturn=rc)) &
-                    return  ! bail out
-                includeState = (trim(cfgIncludeState)=="true")
-
-                call ESMF_ConfigGetAttribute(config, cfgIncludeVmStats, &
-                    label="include.vmstats:", default="true", rc=localrc)
-                if (ESMF_LogFoundError(localrc, &
-                    line=__LINE__, &
-                    file=FILENAME, &
-                    rcToReturn=rc)) &
-                    return  ! bail out
-                includeVmStats = (trim(cfgIncludeVmStats)=="true")
-            end if
-
-            ! write header line once
-            call JSON_LogHeader(rc=localrc)
-            if (ESMF_LogFoundError(localrc, &
-                    line=__LINE__, &
-                    file=FILENAME, &
-                    rcToReturn=rc)) &
-                    return  ! bail out
-        endif
-
-        !call c_esmftrc_filesys_init(4096, "./traceout", 0, rc)
-        !if (ESMF_LogFoundError(rc, &
-        !     line=__LINE__, &
-        !     file=FILENAME)) &
-        !     return  ! bail out     
-        
         complianceInit = .true.
 
     end subroutine

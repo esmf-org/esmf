@@ -33,6 +33,17 @@ ESMF_CXXLINKLIBS       += -lmpi -lmpi++
 ESMF_MPIRUNDEFAULT      = mpiexec_mpt $(ESMF_MPILAUNCHOPTIONS)
 ESMF_MPIMPMDRUNDEFAULT  = mpiexec_mpt $(ESMF_MPILAUNCHOPTIONS)
 else
+ifeq ($(ESMF_COMM),mpt)
+# MPT with compiler wrappers -------------------------------
+ESMF_F90DEFAULT         = mpif90
+ESMF_CXXDEFAULT         = mpicxx
+ESMF_MPIRUNDEFAULT      = mpirun $(ESMF_MPILAUNCHOPTIONS)
+ESMF_MPIMPMDRUNDEFAULT  = mpiexec $(ESMF_MPILAUNCHOPTIONS)
+# Under ticket #3614573 found that MPT has issues. One of the following macros
+# must be set!
+ESMF_CXXCOMPILEOPTS    += -DMUST_USE_BLOCKING_SEND
+#ESMF_CXXCOMPILEOPTS    += -DMUST_NOTUSE_MALLOC_TRIM
+else
 ifeq ($(ESMF_COMM),mpich)
 # Mpich ----------------------------------------------------
 ESMF_F90COMPILECPPFLAGS+= -DESMF_MPICH
@@ -105,6 +116,7 @@ ifeq ($(ESMF_COMM),user)
 # User specified flags -------------------------------------
 else
 $(error Invalid ESMF_COMM setting: $(ESMF_COMM))
+endif
 endif
 endif
 endif
