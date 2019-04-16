@@ -481,8 +481,17 @@ module ESMF_BaseMod
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
+      ! access the VM from the C++ side
       call c_ESMC_GetVM(base , vm, localrc)
       if (present(rc)) rc = localrc
+      
+      ! Set init code
+      call ESMF_VMSetInitCreated(vm, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_GetVM
 

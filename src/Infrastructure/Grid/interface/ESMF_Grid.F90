@@ -17078,6 +17078,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Initialize this grid object as invalid
     grid%this = ESMF_NULL_POINTER
+    
+    ! Check init status of arguments
+    if (present(vm)) then
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_VMGetInit, vm, rc)
+    endif
 
     ! Call C++ Subroutine to do the create
     call c_ESMC_gridcreateempty(grid%this, vm, localrc)

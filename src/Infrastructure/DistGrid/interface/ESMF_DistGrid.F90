@@ -767,6 +767,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
+    if (present(vm)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    endif
     
     ! Deal with (optional) array arguments
     firstExtraAux = ESMF_InterArrayCreate(firstExtra, rc=localrc)
@@ -931,6 +934,9 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
     ! Check init status of arguments
     ESMF_INIT_CHECK_DEEP(ESMF_DistGridGetInit, distgrid, rc)
+    if (present(vm)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+    endif
     
     ! Deal with (optional) array arguments
     firstExtraAux = ESMF_InterArrayCreate(farray2D=firstExtraPTile, rc=localrc)
