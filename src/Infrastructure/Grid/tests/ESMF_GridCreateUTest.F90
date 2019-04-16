@@ -84,8 +84,16 @@ program ESMF_GridCreateUTest
   integer :: tile
   integer(ESMF_KIND_I4) :: regDecompPTile(2,6), deLabelList(6)
   type(ESMF_Decomp_Flag) :: decompFlagPTile(2,6)
-
-
+  real(ESMF_KIND_R8), pointer :: lonPtrR8(:,:), latPtrR8(:,:)
+  real(ESMF_KIND_R4), pointer :: lonPtrR4(:,:), latPtrR4(:,:)
+  real(ESMF_KIND_R8), allocatable :: lonDiff(:,:), latDiff(:,:)
+  real(ESMF_KIND_R8), allocatable :: mean(:)
+  real(ESMF_KIND_R8) :: lonmin, latmin, lonmax, latmax, lonmean, latmean
+  real(ESMF_KIND_R8) :: threshhold
+  type(ESMF_DELayout) :: delayout
+  integer :: total, s,  decount, localDe
+  type(ESMF_Staggerloc) :: staggerLocList(2)
+ 
   !-----------------------------------------------------------------------------
   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
   if (rc /= ESMF_SUCCESS) call ESMF_Finalize(endflag=ESMF_END_ABORT)
@@ -2794,7 +2802,90 @@ program ESMF_GridCreateUTest
   call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and. correct), name, failMsg, result, ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
+  !------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "GridCreateMosaic with different CoordTypeKind "
+  write(failMsg, *) "Returns incorrect results"
 
+  rc = ESMF_SUCCESS
+
+  staggerLocList(1) = ESMF_STAGGERLOC_CENTER
+  staggerLocList(2) = ESMF_STAGGERLOC_CORNER
+  threshhold = 1.0E-5
+  ! Create cubed sphere grid with coordTypeKind == ESMF_TYPEKIND_R4
+  grid = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
+                staggerLocList= staggerLocList, &
+		coordTypeKind = ESMF_TYPEKIND_R4, &
+                tileFilePath='./data/', rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_GridGet(grid, distgrid = distgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_DistGridGet(distgrid, delayout = delayout, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+ 
+  call ESMF_DELayoutGet(delayout, localDeCount = decount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  ! Create cubed sphere grid with coordTypeKind == ESMF_TYPEKIND_R8
+  grid2 = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
+                staggerLocList= staggerLocList, &
+		coordTypeKind = ESMF_TYPEKIND_R8, &
+                tileFilePath='./data/', rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  do s = 1, 2
+    do localDe = 0, decount-1  
+      call ESMF_GridGetCoord(grid2, coordDim=1, localDe=localDe, &
+         staggerloc=staggerLocList(s), farrayPtr=lonPtrR8, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      call ESMF_GridGetCoord(grid2, coordDim=2, localDe=localDe, &
+         staggerloc=staggerLocList(s), farrayPtr=latPtrR8, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+       staggerloc=staggerLocList(s), farrayPtr=lonPtrR4, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+         staggerloc=staggerLocList(s), farrayPtr=latPtrR4, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      allocate(lonDiff(size(lonPtrR8,1), size(lonPtrR8,2)))
+      allocate(latDiff(size(lonPtrR8,1), size(lonPtrR8,2)))
+      total = size(lonPtrR8,1)*size(lonPtrR8,2)
+      lonDiff = abs(lonPtrR8-lonPtrR4)
+      latDiff = abs(latPtrR8-latPtrR4)
+
+      ! Find the max/min/mean errors
+      ! lonmin = minval(lonDiff)	  
+      ! latmin = minval(latDiff)
+      ! lonmax = maxval(lonDiff)	  
+      ! latmax = maxval(latDiff)
+      allocate(mean(size(lonDiff,2)))
+      do  j=1, size(lonDiff,2)
+      	 mean(j) = sum(lonDiff(:,j))
+      enddo
+      lonmean = sum(mean, 1)/total
+      do j=1, size(latDiff,2)
+      	 mean(j) = sum(latDiff(:,j))
+      enddo
+      latmean = sum(mean, 1)/total
+      
+      deallocate(lonDiff, latDiff, mean)
+
+      ! print *, localPet, localDe, 'min/max/mean:', lonmin, latmin, lonmax, latmax, lonmean, latmean
+      if (lonmean > threshhold .and. latmean > threshhold) rc = ESMF_FAILURE
+    enddo
+  enddo
+
+  ! destroy grid
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  call ESMF_GridDestroy(grid2,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+  
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 
