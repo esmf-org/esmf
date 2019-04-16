@@ -97,6 +97,8 @@ module NUOPC_Connector
     
     ! local variables
     character(ESMF_MAXSTR)    :: name
+    integer                   :: stat
+    type(type_InternalState)  :: is
 
     rc = ESMF_SUCCESS
 
@@ -117,6 +119,17 @@ module NUOPC_Connector
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif    
+
+    ! allocate memory for the internal state and set it in the Component
+    allocate(is%wrap, stat=stat)
+    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
+      msg="Allocation of internal state memory failed.", &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    call ESMF_UserCompSetInternalState(connector, label_InternalState, is, rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+
     ! Initialize phases
     
     ! Phase 0 requires use of ESMF method.
@@ -1299,16 +1312,12 @@ module NUOPC_Connector
     nullify(exportNamespaceList)
     nullify(exportCplSetList)
     
-    ! allocate memory for the internal state and set it in the Component
-    allocate(is%wrap, stat=stat)
-    if (ESMF_LogFoundAllocError(statusToCheck=stat, &
-      msg="Allocation of internal state memory failed.", &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-      return  ! bail out
-    call ESMF_UserCompSetInternalState(cplcomp, label_InternalState, is, rc)
+    ! query Component for its internal State
+    nullify(is%wrap)
+    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    
+
     ! clean starting condition for pointer member inside internal state
     nullify(is%wrap%termOrders)
 
@@ -5831,6 +5840,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     ! local variables
     character(ESMF_MAXSTR)          :: name
     type(type_InternalState)        :: is
+    logical                         :: isPetLocal
     integer                         :: sIndex
     integer                         :: localrc
 
@@ -5839,7 +5849,15 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     ! query the component for info
     call NUOPC_CompGet(connector, name=name, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) return  ! bail out
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    
+    ! on PETs that are not part of the connector, this is a noop
+    isPetLocal = ESMF_CplCompIsPetLocal(connector, rc=localrc)
+    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+      return  ! bail out
+    if (.not.isPetLocal) return ! early successful return
     
     ! early exit if nothing to be done -> this allows calling the method even
     ! if the internal state does not (yet) exist - done for testing
@@ -5848,7 +5866,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
         .not.present(rh) .and. &
         .not.present(state) .and. &
         .not.present(srcVM) .and. &
-        .not.present(dstVM)) return
+        .not.present(dstVM)) return ! early successful return
 
     ! query Component for the internal State
     nullify(is%wrap)

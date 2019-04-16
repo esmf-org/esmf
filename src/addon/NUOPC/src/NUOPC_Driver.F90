@@ -4132,21 +4132,6 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
       ! also add the new connector component to the legacy data structures:
       is%wrap%connectorComp(src,dst) = cmEntry%wrap%connector ! set the alias
       is%wrap%connectorPetLists(src,dst)%ptr => cmEntry%wrap%petList
-      ! must set the srcVM and dstVM inside Connector in case those are needed,
-      ! e.g. when Connector advertises on behalf of src/dst during mirroring
-      call ESMF_GridCompGet(srcComp, vm=srcVM, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-      call ESMF_GridCompGet(dstComp, vm=dstVM, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
-      call NUOPC_ConnectorSet(cmEntry%wrap%connector, srcVM=srcVM, dstVM=dstVM,&
-        rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
-        return  ! bail out
     endif
 
     ! optionally copy Attributes from info object to the newly created component
@@ -4216,6 +4201,21 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
           return  ! bail out
       endif
+      ! must set the srcVM and dstVM inside Connector in case those are needed,
+      ! e.g. when Connector advertises on behalf of src/dst during mirroring
+      call ESMF_GridCompGet(srcComp, vm=srcVM, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_GridCompGet(dstComp, vm=dstVM, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call NUOPC_ConnectorSet(cmEntry%wrap%connector, srcVM=srcVM, dstVM=dstVM,&
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
 
     ! Optionally return the added connector
