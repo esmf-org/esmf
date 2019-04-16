@@ -66,6 +66,8 @@ module NUOPC_Connector
     integer                             :: cplSetCount
     character(ESMF_MAXSTR), pointer     :: cplSetList(:)
     type(type_CplSet), allocatable      :: cplSet(:)
+    type(ESMF_VM)                       :: srcVM
+    type(ESMF_VM)                       :: dstVM
   end type
 
   type type_InternalState
@@ -2334,15 +2336,8 @@ module NUOPC_Connector
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             endif
             grid = ESMF_GridEmptyCreate(vm=vm, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            if (btest(verbosity,11)) then
-              call ESMF_LogWrite(trim(name)//&
-                ": done transferring underlying DistGrid", &
-                ESMF_LOGMSG_INFO, rc=rc)
-              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
-                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            endif
             call ESMF_GridSet(grid, name=geomobjname, distgrid=acceptorDG, &
               vm=vm, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2351,6 +2346,13 @@ module NUOPC_Connector
               staggerloc=staggerloc, vm=vm, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            if (btest(verbosity,11)) then
+              call ESMF_LogWrite(trim(name)//&
+                ": done transferring underlying DistGrid", &
+                ESMF_LOGMSG_INFO, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+            endif
           endif
           ! query additional provider information
           call ESMF_FieldGet(providerField, grid=grid, &
@@ -5624,7 +5626,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !
 ! !INTERFACE:
   subroutine NUOPC_ConnectorGet(connector, srcFields, dstFields, rh, state, &
-    CplSet, cplSetList, rc)
+    CplSet, cplSetList, srcVM, dstVM, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp)                            :: connector
     type(ESMF_FieldBundle), intent(out), optional :: srcFields
@@ -5633,6 +5635,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     type(ESMF_State),       intent(out), optional :: state
     character(*),           intent(in),  optional :: CplSet
     character(ESMF_MAXSTR), pointer,     optional :: cplSetList(:)
+    type(ESMF_VM),          intent(out), optional :: srcVM
+    type(ESMF_VM),          intent(out), optional :: dstVM
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -5670,6 +5674,10 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !     Connector more convenient. The generic Connector code handles creation
 !     and destruction of {\tt state}, but does {\em not} access it directly 
 !     for information.
+!   \item[{[srcVM]}]
+!     The VM of the source side component.
+!   \item[{[dstVM]}]
+!     The VM of the destination side component.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5696,7 +5704,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
         .not.present(srcFields) .and. &
         .not.present(dstFields) .and. &
         .not.present(rh) .and. &
-        .not.present(state)) return
+        .not.present(state) .and. &
+        .not.present(srcVM) .and. &
+        .not.present(dstVM)) return
     
     ! query Component for the internal State
     nullify(is%wrap)
@@ -5745,6 +5755,13 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
       endif
     endif
     
+    if (present(srcVM)) then
+      srcVM = is%wrap%srcVM
+    endif
+    if (present(dstVM)) then
+      dstVM = is%wrap%dstVM
+    endif
+    
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -5754,7 +5771,7 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !
 ! !INTERFACE:
   subroutine NUOPC_ConnectorSet(connector, srcFields, dstFields, rh, state, &
-    CplSet, rc)
+    CplSet, srcVM, dstVM, rc)
 ! !ARGUMENTS:
     type(ESMF_CplComp)                            :: connector
     type(ESMF_FieldBundle), intent(in),  optional :: srcFields
@@ -5762,6 +5779,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     type(ESMF_RouteHandle), intent(in),  optional :: rh
     type(ESMF_State),       intent(in),  optional :: state
     character(*),           intent(in),  optional :: CplSet
+    type(ESMF_VM),          intent(out), optional :: srcVM
+    type(ESMF_VM),          intent(out), optional :: dstVM
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -5799,6 +5818,10 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
 !     responsible for its destruction. Ownership of the new {\tt state} is 
 !     transferred to the Connector and must not be explicitly destroyed by the
 !     user code.
+!   \item[{[srcVM]}]
+!     The VM of the source side component.
+!   \item[{[dstVM]}]
+!     The VM of the destination side component.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -5823,7 +5846,9 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     if (.not.present(srcFields) .and. &
         .not.present(dstFields) .and. &
         .not.present(rh) .and. &
-        .not.present(state)) return
+        .not.present(state) .and. &
+        .not.present(srcVM) .and. &
+        .not.present(dstVM)) return
 
     ! query Component for the internal State
     nullify(is%wrap)
@@ -5852,6 +5877,13 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
       if (present(rh))        is%wrap%rh = rh
     endif
     if (present(state))     is%wrap%state = state
+    
+    if (present(srcVM)) then
+      is%wrap%srcVM = srcVM
+    endif
+    if (present(dstVM)) then
+      is%wrap%dstVM = dstVM
+    endif
     
   end subroutine
   !-----------------------------------------------------------------------------
