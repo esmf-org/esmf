@@ -67,6 +67,29 @@
 
 
 !------------------------------------------------------------------------------
+   subroutine f_esmf_configcreatefromsection(config, configin, olabel, clabel, rc)
+     use ESMF_UtilTypesMod    ! ESMF base class
+     use ESMF_BaseMod    ! ESMF base class
+     use ESMF_ConfigMod
+
+     implicit none
+
+     type(ESMF_Config)              :: config
+     type(ESMF_Config)              :: configin
+     character(len=*),  intent(in)  :: olabel
+     character(len=*),  intent(in)  :: clabel
+     integer,           intent(out) :: rc
+
+     ! Initialize return code; assume routine not implemented
+     rc = ESMF_RC_NOT_IMPL
+
+     config = ESMF_ConfigCreate(configin, olabel, clabel, rc=rc)
+
+   end subroutine f_esmf_configcreatefromsection
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
    subroutine f_esmf_configloadfile(config, filename, unique, rc)
      use ESMF_UtilTypesMod    ! ESMF base class
      use ESMF_BaseMod    ! ESMF base class
@@ -120,6 +143,31 @@
      isPresent = lisPresent
 
    end subroutine f_esmf_configfindlabel
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+   subroutine f_esmf_configfindnextlabel(config, label, isPresent, rc)
+     use ESMF_UtilTypesMod    ! ESMF base class
+     use ESMF_BaseMod    ! ESMF base class
+     use ESMF_ConfigMod
+
+     implicit none
+
+     type(ESMF_Config)               :: config
+     character(len=*),   intent(in)  :: label
+     type(ESMF_Logical), intent(out) :: isPresent
+     integer,            intent(out) :: rc
+
+     logical :: lisPresent
+
+     ! Initialize return code; assume routine not implemented
+     rc = ESMF_RC_NOT_IMPL
+
+     call ESMF_ConfigFindNextLabel(config, label, isPresent=lisPresent, rc=rc)
+     isPresent = lisPresent
+
+   end subroutine f_esmf_configfindnextlabel
 !------------------------------------------------------------------------------
 
 
@@ -255,6 +303,24 @@
    end subroutine f_esmf_configgetdimnolabel
 !------------------------------------------------------------------------------
 
+!------------------------------------------------------------------------------
+   subroutine f_esmf_configprint(config, rc)
+     use ESMF_UtilTypesMod    ! ESMF base class
+     use ESMF_BaseMod    ! ESMF base class
+     use ESMF_ConfigMod
+
+     implicit none
+
+     type(ESMF_Config), intent(inout)         :: config
+     integer, intent(out)                     :: rc
+
+     ! Initialize return code; assume routine not implemented
+     rc = ESMF_RC_NOT_IMPL
+
+     call ESMF_ConfigPrint(config, rc=rc)
+
+   end subroutine f_esmf_configprint
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
    subroutine f_esmf_configvalidate(config, options, rc)
