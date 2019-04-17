@@ -556,6 +556,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         if (ESMF_LogFoundError(localrc, &
           ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
+        ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
     endif
 
     if (present(rc)) rc = ESMF_SUCCESS

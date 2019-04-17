@@ -2708,6 +2708,7 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Must make sure the local PET is associated with an actual member
     actualFlag = .true.
     if (present(vm)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
       call ESMF_VMGetThis(vm, vmThis)
       if (vmThis == ESMF_NULL_POINTER) then
         actualFlag = .false.  ! local PET is not for an actual member of Array
@@ -3335,6 +3336,9 @@ TypeKindRankDeclarationMacro(ArrayCreateAsmdSpArbI8)
     ! Check init status of arguments
     ESMF_INIT_CHECK_SHALLOW(ESMF_ArraySpecGetInit, arrayspec, rc)
     ESMF_INIT_CHECK_DEEP_SHORT(ESMF_DistGridGetInit, distgrid, rc)
+    if (present(vm)) then
+      ESMF_INIT_CHECK_DEEP_SHORT(ESMF_VMGetInit, vm, rc)
+    endif
 
     ! Check that indexflag does not specify mode that is not supported here
     if (present(indexflag)) then

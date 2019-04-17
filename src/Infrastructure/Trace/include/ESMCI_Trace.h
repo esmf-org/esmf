@@ -103,8 +103,8 @@ namespace ESMCI {
                                     int *ep_method, int *ep_phase);
   void TraceEventComponentInfo(int *ep_vmid, int *ep_baseid,
                                const char *ep_name,
-                               std::string attributeKeys,
-                               std::string attributeVals);
+                               std::vector<std::string> IPM, std::vector<std::string> IIPM,
+                               std::vector<std::string> RPM, std::vector<std::string> FPM);
   void TraceEventMemInfo();
   void TraceEventClock(int *ep_year, int *ep_month, int *ep_day,
                        int *ep_hour, int *ep_minute, int *ep_second);

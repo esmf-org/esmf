@@ -40,9 +40,17 @@ DIRS        =
 # --- Grid Creation
 
 RUN_ESMF_GridCreateUTest:
+	mkdir -p $(ESMF_TESTDIR)/data
+	cp -f data/*.nc $(ESMF_TESTDIR)/data
+	cp -f ../../Field/tests/data/*.nc $(ESMF_TESTDIR)/data
+	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=GridCreate NP=4 ftest
 
 RUN_ESMF_GridCreateUTestUNI:
+	mkdir -p $(ESMF_TESTDIR)/data
+	cp -f data/*.nc $(ESMF_TESTDIR)/data
+	cp -f ../../Field/tests/data/*.nc $(ESMF_TESTDIR)/data
+	chmod u+rw $(ESMF_TESTDIR)/data/*
 	$(MAKE) TNAME=GridCreate NP=1 ftest
 
 

@@ -11,6 +11,8 @@
 #ifndef ESMCI_TRACEREGION_H
 #define ESMCI_TRACEREGION_H
 
+#include "ESMCI_Comp.h"
+
 #ifdef ESMF_PROFILE_INTERNAL
 #define ESMCI_METHOD_ENTER(localrc) ESMCI::TraceEventRegionEnter(ESMC_METHOD, &(localrc)); \
   ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT, rc);
@@ -30,6 +32,8 @@
 namespace ESMCI { 
   void TraceEventRegionEnter(std::string name, int *rc);
   void TraceEventRegionExit(std::string name, int *rc);
+  void TraceEventCompPhaseEnter(ESMCI::Comp *comp, enum ESMCI::method *method, int *phase, int *rc);
+  void TraceEventCompPhaseExit(ESMCI::Comp *comp, enum ESMCI::method *method, int *phase, int *rc);
 }
 
 #endif

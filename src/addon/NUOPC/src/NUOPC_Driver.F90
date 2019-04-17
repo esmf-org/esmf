@@ -21,7 +21,7 @@ module NUOPC_Driver
   use ESMF
   use NUOPC
   use NUOPC_RunSequenceDef
-  use NUOPC_Connector, only: cplSS => SetServices
+  use NUOPC_Connector, only: cplSS => SetServices, NUOPC_ConnectorSet
   
   implicit none
   
@@ -3947,7 +3947,7 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
     integer                         :: k, l, cIndex, lineCount
     character(ESMF_MAXSTR)          :: petListBuffer(100)
     character(ESMF_MAXSTR)          :: msgString, lString
-    type(ESMF_VM)                   :: vm
+    type(ESMF_VM)                   :: vm, srcVM, dstVM
     integer                         :: verbosity
 
     if (present(rc)) rc = ESMF_SUCCESS
@@ -4201,6 +4201,21 @@ vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
           line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc))&
           return  ! bail out
       endif
+      ! must set the srcVM and dstVM inside Connector in case those are needed,
+      ! e.g. when Connector advertises on behalf of src/dst during mirroring
+      call ESMF_GridCompGet(srcComp, vm=srcVM, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call ESMF_GridCompGet(dstComp, vm=dstVM, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      call NUOPC_ConnectorSet(cmEntry%wrap%connector, srcVM=srcVM, dstVM=dstVM,&
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
     endif
 
     ! Optionally return the added connector

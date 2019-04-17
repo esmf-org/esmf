@@ -76,14 +76,14 @@ namespace ESMCI {
   RegionNode(RegionNode *parent, RegionNode *toClone):
     _parent(parent), _global_id(next_global_id()),
       _local_id(toClone->getLocalId()),
+      _name(toClone->getName()),
       _isUserRegion(toClone->isUserRegion()),
       _count(toClone->getCount()), _total(toClone->getTotal()),
       _min(toClone->getMin()), _max(toClone->getMax()),
       _mean(toClone->getMean()), _variance(toClone->_variance),
       _last_entered(0), _time_mpi_start(0),
       _time_mpi(toClone->getTotalMPI()),
-      _count_mpi(toClone->getCountMPI()),
-      _name(toClone->getName())  {
+      _count_mpi(toClone->getCountMPI())  {
 
       //deep clone children
       for (unsigned i = 0; i < toClone->_children.size(); i++) {

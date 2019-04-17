@@ -75,6 +75,8 @@
                         logkindflag=ESMF_LOGKIND_MULTI, rc=rc)
      if (rc .ne. ESMF_SUCCESS) goto 20
 
+     call ESMF_LogSet (flush=.true.)
+
      ! Get the PET count and our PET number
      call ESMF_VMGet(vm, localPet=localPet, petCount=npets, rc=rc)
      if (rc .ne. ESMF_SUCCESS) goto 20

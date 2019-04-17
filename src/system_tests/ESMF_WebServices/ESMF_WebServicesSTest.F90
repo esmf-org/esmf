@@ -194,6 +194,8 @@ program ESMF_WebServicesSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
+  call ESMF_LogSet (flush=.true.)
+
   ! Create the model component
   cname1 = "user model 1"
   comp1 = ESMF_GridCompCreate(name=cname1, rc=localrc)
