@@ -1834,6 +1834,21 @@ subroutine MultPar_SingleLine_Vf
       end if
 
       !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Config Validate
+      write(failMsg, *) "Did not return ESMF_RC_ATTR_UNUSED"
+      write(name, *) "Config From Section Validate Test"
+      call ESMF_ConfigValidate(cf2, options="unusedAttributes", rc=rc)
+      call ESMF_Test((rc.eq.ESMF_RC_ATTR_UNUSED), name, failMsg, result, ESMF_SRCLINE)
+
+      counter_total = counter_total + 1
+      if (rc == ESMF_RC_ATTR_UNUSED) then
+         counter_success = counter_success + 1
+      else
+         print *,'ESMF_ConfigValidate failed, rc =', rc
+      endif
+
+      !------------------------------------------------------------------------
       !NEX_UTest
       ! Test Config From Section Destroy
       write(failMsg, *) "Did not return ESMF_SUCCESS"
