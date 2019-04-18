@@ -2678,7 +2678,7 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "GridCreateCubedSphere"
+  write(name, *) "Testing GridCreateCubedSphere"
   write(failMsg, *) "Incorrect result"
 
   ! create grid with nondefault parameter
@@ -2804,7 +2804,7 @@ program ESMF_GridCreateUTest
 
   !------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "GridCreateMosaic with different CoordTypeKind "
+  write(name, *) "Testing GridCreateMosaic with different CoordTypeKind "
   write(failMsg, *) "Returns incorrect results"
 
   rc = ESMF_SUCCESS
@@ -2817,6 +2817,11 @@ program ESMF_GridCreateUTest
                 staggerLocList= staggerLocList, &
 		coordTypeKind = ESMF_TYPEKIND_R4, &
                 tileFilePath='./data/', rc=localrc)
+
+#ifndef ESMF_NETCDF
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((localrc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#else
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_GridGet(grid, distgrid = distgrid, rc=localrc)
@@ -2864,15 +2869,15 @@ program ESMF_GridCreateUTest
       do  j=1, size(lonDiff,2)
       	 mean(j) = sum(lonDiff(:,j))
       enddo
-      lonmean = sum(mean, 1)/total
+      lonmean = sum(mean)/total
       do j=1, size(latDiff,2)
       	 mean(j) = sum(latDiff(:,j))
       enddo
-      latmean = sum(mean, 1)/total
+      latmean = sum(mean)/total
       
       deallocate(lonDiff, latDiff, mean)
 
-      ! print *, localPet, localDe, 'min/max/mean:', lonmin, latmin, lonmax, latmax, lonmean, latmean
+      !print *, localPet, localDe, 'min/max/mean:', lonmin, latmin, lonmax, latmax, lonmean, latmean
       if (lonmean > threshhold .and. latmean > threshhold) rc = ESMF_FAILURE
     enddo
   enddo
@@ -2883,9 +2888,9 @@ program ESMF_GridCreateUTest
   call ESMF_GridDestroy(grid2,rc=localrc)
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
-  call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
 
-  
   call ESMF_TestEnd(ESMF_SRCLINE)
   !-----------------------------------------------------------------------------
 

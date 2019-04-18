@@ -645,6 +645,16 @@ contains
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! own VM
+    call ESMF_VMSetThis(compp%vm, ESMF_NULL_POINTER, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_VMSetInitCreated(compp%vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! for config files, store a directory path and subsequent opens can
     ! be relative to this or absolute.

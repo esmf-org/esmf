@@ -1286,7 +1286,7 @@ end subroutine ESMF_FieldEmptyCompTK
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Construct a default name if one is not given
-    call ESMF_BaseCreate(ftype%base, "Field", name, 0, localrc)
+    call ESMF_BaseCreate(ftype%base, "Field", name, 0, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
@@ -4182,7 +4182,7 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGBPtr)
 ! !IROUTINE: ESMF_FieldEmptyCreate - Create an empty Field
 
 ! !INTERFACE:
-  function ESMF_FieldEmptyCreate(keywordEnforcer, name, rc)
+  function ESMF_FieldEmptyCreate(keywordEnforcer, name, vm, rc)
 !
 ! !RETURN VALUE:
     type(ESMF_Field) :: ESMF_FieldEmptyCreate
@@ -4190,11 +4190,17 @@ TypeKindRankDeclarationMacro(FieldEmptyCompGBPtr)
 ! !ARGUMENTS:
 type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character (len = *), intent(in),  optional :: name
+    type(ESMF_VM),       intent(in),  optional :: vm
     integer,             intent(out), optional :: rc
 !
 ! !STATUS:
 ! \begin{itemize}
 ! \item\apiStatusCompatibleVersion{5.2.0r}
+! \item\apiStatusModifiedSinceVersion{5.2.0r}
+! \begin{description}
+! \item[8.0.0] Added argument {\tt vm} to support object creation on a
+!              different VM than that of the current context.
+! \end{description}
 ! \end{itemize}
 !
 ! !DESCRIPTION:
@@ -4213,6 +4219,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \begin{description}
 ! \item [{[name]}]
 !       Field name.
+! \item[{[vm]}]
+!       If present, the Field object is created on the specified
+!       {\tt ESMF\_VM} object. The default is to create on the VM of the
+!       current component context.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -4220,6 +4230,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !EOP
 !------------------------------------------------------------------------------
     type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
+    type(ESMF_Pointer)                    :: vmThis
+    logical                               :: actualFlag
     integer :: localrc
 
     ! Initialize
@@ -4227,33 +4239,47 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
     nullify(ftype)
     nullify(ESMF_FieldEmptyCreate%ftypep)
+    
+    ! Must make sure the local PET is associated with an actual member
+    actualFlag = .true.
+    if (present(vm)) then
+      ESMF_INIT_CHECK_DEEP(ESMF_VMGetInit, vm, rc)
+      call ESMF_VMGetThis(vm, vmThis)
+      if (vmThis == ESMF_NULL_POINTER) then
+        actualFlag = .false.  ! local PET is not for an actual member
+      endif
+    endif
+    
+    if (actualFlag) then
+      ! allocate and initialize
+      allocate(ftype, stat=localrc)
+      if (ESMF_LogFoundAllocError(localrc, msg="Allocating Field information", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldInitialize(ftype, rc=localrc)
+      if (ESMF_LogFoundAllocError(localrc, msg="Default initialize Field", &
+        ESMF_CONTEXT, rcToReturn=rc)) return
 
-    allocate(ftype, stat=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg="Allocating Field information", &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-    call ESMF_FieldInitialize(ftype, rc=localrc)
-    if (ESMF_LogFoundAllocError(localrc, msg="Default initialize Field", &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-    ! Call field construction method
-    call ESMF_FieldConstructEmpty(ftype, name, localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      ! Call field construction method
+      call ESMF_FieldConstructEmpty(ftype, name, vm, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     ! Set return values.
     ESMF_FieldEmptyCreate%ftypep => ftype
-
-    ! Add reference to this object into ESMF garbage collection table
-    ! Only call this in those Create() methods that call Construct()
-    call c_ESMC_VMAddFObject(ESMF_FieldEmptyCreate, ESMF_ID_FIELD%objectID)
-
     ESMF_INIT_SET_CREATED(ESMF_FieldEmptyCreate)
+      
+    if (actualFlag) then
+      ! Add reference to this object into ESMF garbage collection table
+      ! Only call this in those Create() methods that call Construct()
+      call c_ESMC_VMAddFObject(ESMF_FieldEmptyCreate, ESMF_ID_FIELD%objectID)
 
-    call ESMF_FieldValidate(ESMF_FieldEmptyCreate, rc=localrc)
-    if (ESMF_LogFoundError(localrc, &
-      ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
+      call ESMF_FieldValidate(ESMF_FieldEmptyCreate, rc=localrc)
+      if (ESMF_LogFoundError(localrc, &
+        ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+    endif
 
     if (present(rc)) rc = ESMF_SUCCESS
 
@@ -4695,12 +4721,13 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! !IROUTINE: ESMF_FieldConstructEmpty - Construct a Field with no GeomBase or Array
 !
 ! !INTERFACE:
-  subroutine ESMF_FieldConstructEmpty(ftypep, name, rc)
+  subroutine ESMF_FieldConstructEmpty(ftypep, name, vm, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_FieldType), pointer :: ftypep
-    character (len = *), intent(in), optional :: name
-    integer, intent(out), optional :: rc
+    type(ESMF_FieldType), pointer               :: ftypep
+    character (len = *),  intent(in),  optional :: name
+    type(ESMF_VM),        intent(in),  optional :: vm
+    integer,              intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Constructs an empty {\tt ESMF\_Field}.
@@ -4711,6 +4738,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !       Pointer to an {\tt ESMF\_Field} object.
 ! \item [{[name]}]
 !       Field name.
+! \item[{[vm]}]
+!       If present, the Field object is constructed on the specified
+!       {\tt ESMF\_VM} object. The default is to construct on the VM of the
+!       current component context.
 ! \item [{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -4724,7 +4755,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (present(rc)) rc = ESMF_RC_NOT_IMPL
 
     ! Construct a default name if one is not given
-    call ESMF_BaseCreate(ftypep%base, "Field", name, 0, localrc)
+    call ESMF_BaseCreate(ftypep%base, "Field", name, 0, vm=vm, rc=localrc)
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
