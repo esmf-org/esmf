@@ -228,8 +228,8 @@ module NUOPC_Connector
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeP0(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine InitializeP0(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -244,7 +244,7 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
       diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -286,7 +286,7 @@ module NUOPC_Connector
     endif
     
     ! filter all other entries but those of type IPDv05
-    call NUOPC_CompFilterPhaseMap(cplcomp, ESMF_METHOD_INITIALIZE, &
+    call NUOPC_CompFilterPhaseMap(connector, ESMF_METHOD_INITIALIZE, &
       acceptStringList=(/"IPDv05p"/), rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -320,8 +320,8 @@ module NUOPC_Connector
   
    !-----------------------------------------------------------------------------
 
-  subroutine InitializeIPDv05p1(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine InitializeIPDv05p1(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -338,7 +338,7 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
       profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -416,18 +416,18 @@ module NUOPC_Connector
     endif
     
     if (trim(exportXferPolicy)=="transferAll") then
-      call NUOPC_ConnectorGet(cplcomp, dstVM=vm, rc=rc)
+      call NUOPC_ConnectorGet(connector, dstVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call doTransfer(importState, exportState, acceptorVM=vm, rc=rc)
+      call doMirror(importState, exportState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     if (trim(importXferPolicy)=="transferAll") then
-      call NUOPC_ConnectorGet(cplcomp, srcVM=vm, rc=rc)
+      call NUOPC_ConnectorGet(connector, srcVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      call doTransfer(exportState, importState, acceptorVM=vm, rc=rc)
+      call doMirror(exportState, importState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -459,7 +459,7 @@ module NUOPC_Connector
 
    contains
 
-    subroutine doTransfer(providerState, acceptorState, acceptorVM, rc)
+    subroutine doMirror(providerState, acceptorState, acceptorVM, rc)
       type(ESMF_State)           :: providerState
       type(ESMF_State)           :: acceptorState
       type(ESMF_VM), intent(in)  :: acceptorVM       
@@ -569,8 +569,8 @@ module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
   
-  subroutine InitializeIPDv05p2a(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine InitializeIPDv05p2a(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -599,7 +599,7 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
       profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -819,8 +819,8 @@ module NUOPC_Connector
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeIPDv05p2b(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine InitializeIPDv05p2b(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -853,7 +853,7 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
       profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -909,7 +909,7 @@ module NUOPC_Connector
     endif
 
     ! set Attributes
-    call NUOPC_CompAttributeSet(cplcomp, &
+    call NUOPC_CompAttributeSet(connector, &
       name="ComponentLongName", value="NUOPC Generic Connector Component", &
       rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1092,11 +1092,11 @@ module NUOPC_Connector
       
       if (associated(cplList)) then
         if (count>0) then
-          call NUOPC_CompAttributeSet(cplcomp, &
+          call NUOPC_CompAttributeSet(connector, &
             name="CplList", valueList=cplList(1:count), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          call NUOPC_CompAttributeSet(cplcomp, &
+          call NUOPC_CompAttributeSet(connector, &
             name="CplSetList", valueList=cplSetList(1:count), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1145,8 +1145,8 @@ module NUOPC_Connector
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeIPDv03p1(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine InitializeIPDv03p1(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -1162,7 +1162,7 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
       diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1212,16 +1212,16 @@ module NUOPC_Connector
     internalClock = ESMF_ClockCreate(clock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call ESMF_CplCompSet(cplcomp, clock=internalClock, rc=rc)
+    call ESMF_CplCompSet(connector, clock=internalClock, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 #endif
 
     ! Simply the combination of IPDv05p2a + IPDv05p2b
-    call InitializeIPDv05p2a(cplcomp, importState, exportState, clock, rc)
+    call InitializeIPDv05p2a(connector, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call InitializeIPDv05p2b(cplcomp, importState, exportState, clock, rc)
+    call InitializeIPDv05p2b(connector, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -1254,8 +1254,8 @@ module NUOPC_Connector
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeIPDv05p3(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine InitializeIPDv05p3(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -1294,7 +1294,7 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
       profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1349,7 +1349,7 @@ module NUOPC_Connector
     
     ! query Component for its internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1372,12 +1372,12 @@ module NUOPC_Connector
     endif
     
     ! get the cplList Attribute
-    call NUOPC_CompAttributeGet(cplcomp, name="CplList", &
+    call NUOPC_CompAttributeGet(connector, name="CplList", &
       itemCount=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! get the cplSetList Attribute
-    call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+    call NUOPC_CompAttributeGet(connector, name="CplSetList", &
       itemCount=cplSetListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1395,7 +1395,7 @@ module NUOPC_Connector
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, name="CplList", valueList=cplList, &
+      call NUOPC_CompAttributeGet(connector, name="CplList", valueList=cplList, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1404,7 +1404,7 @@ module NUOPC_Connector
         msg="Allocation of internal cplSetList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+      call NUOPC_CompAttributeGet(connector, name="CplSetList", &
         valueList=cplSetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2018,8 +2018,8 @@ module NUOPC_Connector
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeIPDv05p4(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine InitializeIPDv05p4(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -2078,7 +2078,7 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
       profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2133,7 +2133,7 @@ module NUOPC_Connector
     
     ! query Component for its internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2153,12 +2153,12 @@ module NUOPC_Connector
     endif
     
     ! get the cplList Attribute
-    call NUOPC_CompAttributeGet(cplcomp, name="CplList", &
+    call NUOPC_CompAttributeGet(connector, name="CplList", &
       itemCount=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! get the cplSetList Attribute
-    call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+    call NUOPC_CompAttributeGet(connector, name="CplSetList", &
       itemCount=cplSetListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2176,7 +2176,7 @@ module NUOPC_Connector
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, name="CplList", valueList=cplList, &
+      call NUOPC_CompAttributeGet(connector, name="CplList", valueList=cplList, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2185,7 +2185,7 @@ module NUOPC_Connector
         msg="Allocation of internal cplSetList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+      call NUOPC_CompAttributeGet(connector, name="CplSetList", &
         valueList=cplSetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2809,8 +2809,8 @@ module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeIPDv05p5(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine InitializeIPDv05p5(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -2860,7 +2860,7 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
       profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2915,7 +2915,7 @@ module NUOPC_Connector
 
     ! query Component for its internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -2935,12 +2935,12 @@ module NUOPC_Connector
     endif
     
     ! get the cplList Attribute
-    call NUOPC_CompAttributeGet(cplcomp, name="CplList", &
+    call NUOPC_CompAttributeGet(connector, name="CplList", &
       itemCount=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! get the cplSetList Attribute
-    call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+    call NUOPC_CompAttributeGet(connector, name="CplSetList", &
       itemCount=cplSetListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2958,7 +2958,7 @@ module NUOPC_Connector
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, name="CplList", valueList=cplList, &
+      call NUOPC_CompAttributeGet(connector, name="CplList", valueList=cplList, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2967,7 +2967,7 @@ module NUOPC_Connector
         msg="Allocation of internal cplSetList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+      call NUOPC_CompAttributeGet(connector, name="CplSetList", &
         valueList=cplSetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3303,8 +3303,8 @@ module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeIPDv05p6a(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine InitializeIPDv05p6a(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -3319,7 +3319,7 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
       profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3404,8 +3404,8 @@ module NUOPC_Connector
 
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeIPDv05p6b(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine InitializeIPDv05p6b(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -3455,7 +3455,7 @@ module NUOPC_Connector
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
       diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3510,17 +3510,17 @@ module NUOPC_Connector
     
     ! query Component for its internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! get the cplList Attribute
-    call NUOPC_CompAttributeGet(cplcomp, name="CplList", &
+    call NUOPC_CompAttributeGet(connector, name="CplList", &
       itemCount=cplListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     ! get the cplSetList Attribute
-    call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+    call NUOPC_CompAttributeGet(connector, name="CplSetList", &
       itemCount=cplSetListSize, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3538,7 +3538,7 @@ module NUOPC_Connector
         msg="Allocation of internal cplList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, name="CplList", valueList=cplList, &
+      call NUOPC_CompAttributeGet(connector, name="CplList", valueList=cplList, &
         rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3547,7 +3547,7 @@ module NUOPC_Connector
         msg="Allocation of internal cplSetList() failed.", &
         line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
-      call NUOPC_CompAttributeGet(cplcomp, name="CplSetList", &
+      call NUOPC_CompAttributeGet(connector, name="CplSetList", &
         valueList=cplSetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3761,7 +3761,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     enddo
 
     ! SPECIALIZE by calling into attached method to precompute routehandle
-    call ESMF_MethodExecute(cplcomp, label=label_ComputeRouteHandle, &
+    call ESMF_MethodExecute(connector, label=label_ComputeRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3882,8 +3882,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeIPDv00p2a(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine InitializeIPDv00p2a(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -3897,7 +3897,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -3907,10 +3907,10 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! Simply the combination of IPDv05p3 + IPDv05p6a
-    call InitializeIPDv05p3(cplcomp, importState, exportState, clock, rc)
+    call InitializeIPDv05p3(connector, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-    call InitializeIPDv05p6a(cplcomp, importState, exportState, clock, rc)
+    call InitializeIPDv05p6a(connector, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -3923,8 +3923,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
   
   !-----------------------------------------------------------------------------
 
-  subroutine InitializeIPDv00p2b(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine InitializeIPDv00p2b(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -3938,7 +3938,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, rc=rc)
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -3948,7 +3948,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! Simply same as IPDv05p6b
-    call InitializeIPDv05p6b(cplcomp, importState, exportState, clock, rc)
+    call InitializeIPDv05p6b(connector, importState, exportState, clock, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -3961,8 +3961,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
   
   !-----------------------------------------------------------------------------
 
-  subroutine Run(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine Run(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -3993,7 +3993,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     time0=timeBase
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
       profiling=profiling, diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4004,13 +4004,13 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! get the compName and currentPhase
-    call ESMF_CplCompGet(cplcomp, name=compName, currentPhase=phase, rc=rc)
+    call ESMF_CplCompGet(connector, name=compName, currentPhase=phase, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! handle verbosity
     if (btest(verbosity,13)) then
-      call NUOPC_CompSearchRevPhaseMap(cplcomp, ESMF_METHOD_RUN, &
+      call NUOPC_CompSearchRevPhaseMap(connector, ESMF_METHOD_RUN, &
         phaseIndex=phase, phaseLabel=pLabel, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4064,7 +4064,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
     ! query Component for its internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -4088,7 +4088,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     endif
 
     ! SPECIALIZE by calling into attached method to execute routehandle
-    call ESMF_MethodExecute(cplcomp, label=label_ExecuteRouteHandle, &
+    call ESMF_MethodExecute(connector, label=label_ExecuteRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4170,7 +4170,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
       call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO)
     endif
 
-    call ESMF_CplCompGet(cplcomp, vm=vm, petCount=petCount, rc=rc)
+    call ESMF_CplCompGet(connector, vm=vm, petCount=petCount, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
@@ -4269,8 +4269,8 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
   
   !-----------------------------------------------------------------------------
 
-  subroutine Finalize(cplcomp, importState, exportState, clock, rc)
-    type(ESMF_CplComp)   :: cplcomp
+  subroutine Finalize(connector, importState, exportState, clock, rc)
+    type(ESMF_CplComp)   :: connector
     type(ESMF_State)     :: importState, exportState
     type(ESMF_Clock)     :: clock
     integer, intent(out) :: rc
@@ -4291,7 +4291,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     rc = ESMF_SUCCESS
 
     ! query the component for info
-    call NUOPC_CompGet(cplcomp, name=name, verbosity=verbosity, &
+    call NUOPC_CompGet(connector, name=name, verbosity=verbosity, &
       diagnostic=diagnostic, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4303,7 +4303,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
 
     ! query Component for its internal State
     nullify(is%wrap)
-    call ESMF_UserCompGetInternalState(cplcomp, label_InternalState, is, rc)
+    call ESMF_UserCompGetInternalState(connector, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       
@@ -4339,7 +4339,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     endif
     
     ! SPECIALIZE by calling into attached method to release routehandle
-    call ESMF_MethodExecute(cplcomp, label=label_ReleaseRouteHandle, &
+    call ESMF_MethodExecute(connector, label=label_ReleaseRouteHandle, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4384,7 +4384,7 @@ call ESMF_LogWrite("eShareStatus: "//trim(eShareStatus), ESMF_LOGMSG_INFO, rc=rc
     endif
 
     ! SPECIALIZE by calling into optional attached method
-    call ESMF_MethodExecute(cplcomp, label=label_Finalize, &
+    call ESMF_MethodExecute(connector, label=label_Finalize, &
       existflag=existflag, userRc=localrc, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
