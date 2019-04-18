@@ -17,9 +17,10 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-
 #include "ESMCI_Base.h"
+
 #include "ESMCI_VM.h"
+#include "ESMCI_F90Interface.h"
 #include "ESMCI_LogErr.h"
 
 #include <string>
@@ -52,6 +53,7 @@ extern "C" {
       const char *superclass,   // in - F90, non-null terminated string
       const char *name,         // in (opt) - F90, non-null terminated string
       int *nattrs,              // in - number of initial attributes to alloc
+      ESMCI::VM **vm,           // in - optional VM object
       int *rc,                  // out - return code
       ESMCI_FortranStrLenArg sclen,  // hidden/in - strlen count for superclass
       ESMCI_FortranStrLenArg nlen) { // hidden/in - strlen count for name
@@ -79,7 +81,13 @@ extern "C" {
     return;
   }
 
-  (*base) = new ESMC_Base(scname.c_str(), cname.c_str(), *nattrs);
+  ESMCI::VM *opt_vm;
+  if (ESMC_NOT_PRESENT_FILTER(vm) == ESMC_NULL_POINTER)
+    opt_vm = NULL;
+  else
+    opt_vm = *vm;
+
+  (*base) = new ESMC_Base(scname.c_str(), cname.c_str(), *nattrs, opt_vm);
   if (*base != NULL)
       *rc = ESMF_SUCCESS;
   else

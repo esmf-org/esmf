@@ -140,7 +140,8 @@ class ESMC_Base
     // constructors/destructor
     ESMC_Base(ESMCI::VM *vm=NULL);  // default constructor
     ESMC_Base(int id);  // explicit id, don't modify Base id counting
-    ESMC_Base(const char *superclass, const char *name, int nattrs);
+    ESMC_Base(const char *superclass, const char *name, int nattrs,
+      ESMCI::VM *vm=NULL);
     virtual ~ESMC_Base(void);
 
 };   // end class ESMC_Base

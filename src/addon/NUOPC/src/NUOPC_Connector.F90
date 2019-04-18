@@ -129,6 +129,19 @@ module NUOPC_Connector
     call ESMF_UserCompSetInternalState(connector, label_InternalState, is, rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    ! initialize internal state members that require sepcial treatment
+    call ESMF_VMSetThis(is%wrap%srcVM, ESMF_NULL_POINTER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_VMSetInitCreated(is%wrap%srcVM, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_VMSetThis(is%wrap%dstVM, ESMF_NULL_POINTER, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+    call ESMF_VMSetInitCreated(is%wrap%dstVM, rc=rc)
+    if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+      line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     ! Initialize phases
     
@@ -317,6 +330,7 @@ module NUOPC_Connector
     character(*), parameter   :: rName="InitializeIPDv05p1"
     character(ESMF_MAXSTR)    :: name
     character(ESMF_MAXSTR)    :: importXferPolicy, exportXferPolicy
+    type(ESMF_VM)             :: vm
     integer                   :: verbosity, profiling, diagnostic
     type(ESMF_Time)           :: currTime
     character(len=40)         :: currTimeString
@@ -402,12 +416,18 @@ module NUOPC_Connector
     endif
     
     if (trim(exportXferPolicy)=="transferAll") then
-      call doTransfer(importState, exportState, rc)
+      call NUOPC_ConnectorGet(cplcomp, dstVM=vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call doTransfer(importState, exportState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
     if (trim(importXferPolicy)=="transferAll") then
-      call doTransfer(exportState, importState, rc=rc)
+      call NUOPC_ConnectorGet(cplcomp, srcVM=vm, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      call doTransfer(exportState, importState, acceptorVM=vm, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     endif
@@ -439,95 +459,110 @@ module NUOPC_Connector
 
    contains
 
-    subroutine doTransfer(srcState, dstState, rc)
+    subroutine doTransfer(providerState, acceptorState, acceptorVM, rc)
+      type(ESMF_State)           :: providerState
+      type(ESMF_State)           :: acceptorState
+      type(ESMF_VM), intent(in)  :: acceptorVM       
+      integer,       intent(out) :: rc
 
-      type(ESMF_State)     :: srcState
-      type(ESMF_State)     :: dstState
-      integer, intent(out) :: rc
-
-      character(ESMF_MAXSTR) :: srcTransferGeom, dstTransferGeom
+      character(ESMF_MAXSTR) :: providerTransferGeom, acceptorTransferGeom
+      character(ESMF_MAXSTR) :: acceptorStateName
       integer                :: i, j
-      character(ESMF_MAXSTR), pointer       :: srcStandardNameList(:)
-      character(ESMF_MAXSTR), pointer       :: dstStandardNameList(:)
-      character(ESMF_MAXSTR), pointer       :: srcNamespaceList(:)
-      character(ESMF_MAXSTR), pointer       :: dstNamespaceList(:)
-      type(ESMF_Field),       pointer       :: srcFieldList(:)
-      type(ESMF_Field),       pointer       :: dstFieldList(:)
-      character(ESMF_MAXSTR), pointer       :: srcCplSetList(:)
-      character(ESMF_MAXSTR), pointer       :: dstCplSetList(:)
+      character(ESMF_MAXSTR), pointer       :: providerStandardNameList(:)
+      character(ESMF_MAXSTR), pointer       :: acceptorStandardNameList(:)
+      character(ESMF_MAXSTR), pointer       :: providerNamespaceList(:)
+      character(ESMF_MAXSTR), pointer       :: acceptorNamespaceList(:)
+      type(ESMF_Field),       pointer       :: providerFieldList(:)
+      type(ESMF_Field),       pointer       :: acceptorFieldList(:)
+      character(ESMF_MAXSTR), pointer       :: providerCplSetList(:)
+      character(ESMF_MAXSTR), pointer       :: acceptorCplSetList(:)
       
       rc = ESMF_SUCCESS
 
-      nullify(srcStandardNameList)
-      nullify(srcNamespaceList)
-      nullify(srcFieldList)
-      nullify(srcCplSetList)
-      nullify(dstStandardNameList)
-      nullify(dstNamespaceList)
-      nullify(dstFieldList)
-      nullify(dstCplSetList)
+      nullify(providerStandardNameList)
+      nullify(providerNamespaceList)
+      nullify(providerFieldList)
+      nullify(providerCplSetList)
+      nullify(acceptorStandardNameList)
+      nullify(acceptorNamespaceList)
+      nullify(acceptorFieldList)
+      nullify(acceptorCplSetList)
+      
+      call ESMF_StateGet(acceptorState, name=acceptorStateName, rc=rc)
+      if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-      call NUOPC_GetStateMemberLists(srcState, srcStandardNameList, &
-        fieldList=srcFieldList, namespaceList=srcNamespaceList, &
-        cplSetList=srcCplSetList, rc=rc)
+      call NUOPC_GetStateMemberLists(providerState, providerStandardNameList, &
+        fieldList=providerFieldList, namespaceList=providerNamespaceList, &
+        cplSetList=providerCplSetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
-      call NUOPC_GetStateMemberLists(dstState, dstStandardNameList, &
-        fieldList=dstFieldList, namespaceList=dstNamespaceList, &
-        cplSetList=dstCplSetList, rc=rc)
+      call NUOPC_GetStateMemberLists(acceptorState, acceptorStandardNameList, &
+        fieldList=acceptorFieldList, namespaceList=acceptorNamespaceList, &
+        cplSetList=acceptorCplSetList, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       ! WARNING: does not currently deal with nested states or field bundles
       
-      if (associated(srcStandardNameList)) then
-        do i=1, size(srcStandardNameList)
+      if (associated(providerStandardNameList)) then
+        do i=1, size(providerStandardNameList)
 
           ! do not transfer if it already exists in the destination state
-          if (associated(dstStandardNameList)) then
-            do j=1, size(dstStandardNameList)
-              if (trim(srcStandardNameList(i))==trim(dstStandardNameList(j))) &
-                exit
+          if (associated(acceptorStandardNameList)) then
+            do j=1, size(acceptorStandardNameList)
+              if (trim(providerStandardNameList(i))&
+                ==trim(acceptorStandardNameList(j))) exit
             enddo
-            if (j<size(dstStandardNameList)+1) cycle
+            if (j<size(acceptorStandardNameList)+1) cycle
           endif
 
           ! reverse TransferOfferGeomObject attribute, e.g., if a component
           ! providing a field wants to provide a grid, then the accepting
           ! component should not try to provide its own grid
-          call NUOPC_GetAttribute(srcFieldList(i), &
-            name="TransferOfferGeomObject", value=srcTransferGeom, rc=rc)
+          call NUOPC_GetAttribute(providerFieldList(i), &
+            name="TransferOfferGeomObject", value=providerTransferGeom, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
           ! default
-          dstTransferGeom = "cannot provide"
-          if (trim(srcTransferGeom)=="will provide") then
-            dstTransferGeom = "cannot provide"
-          else if (trim(srcTransferGeom)=="can provide") then
-            dstTransferGeom = "cannot provide"
-          else if (trim(srcTransferGeom)=="cannot provide") then
-            dstTransferGeom = "will provide"
+          acceptorTransferGeom = "cannot provide"
+          if (trim(providerTransferGeom)=="will provide") then
+            acceptorTransferGeom = "cannot provide"
+          else if (trim(providerTransferGeom)=="can provide") then
+            acceptorTransferGeom = "cannot provide"
+          else if (trim(providerTransferGeom)=="cannot provide") then
+            acceptorTransferGeom = "will provide"
           end if
 
-          ! transfer to toState
-          call NUOPC_Advertise(dstState, &
-            StandardName=trim(srcStandardNameList(i)), &
-            TransferOfferGeomObject=dstTransferGeom, rc=rc)
+          ! transfer to acceptorState
+          if (btest(verbosity,8)) then
+            call ESMF_LogWrite(trim(name)//": mirroring: "// &
+              trim(providerStandardNameList(i))//" into acceptorState: "//&
+              trim(acceptorStateName), ESMF_LOGMSG_INFO, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, file=trim(name)//":"//FILENAME)) &
+              return  ! bail out
+          endif
+          call NUOPC_Advertise(acceptorState, &
+            StandardName=trim(providerStandardNameList(i)), &
+            TransferOfferGeomObject=acceptorTransferGeom, vm=acceptorVM, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
         end do
       endif
 
-      if (associated(srcStandardNameList)) deallocate(srcStandardNameList)
-      if (associated(srcNamespaceList)) deallocate(srcNamespaceList)
-      if (associated(srcFieldList)) deallocate(srcFieldList)
-      if (associated(srcCplSetList)) deallocate(srcCplSetList)
-      if (associated(dstStandardNameList)) deallocate(dstStandardNameList)
-      if (associated(dstNamespaceList)) deallocate(dstNamespaceList)
-      if (associated(dstFieldList)) deallocate(dstFieldList)
-      if (associated(dstCplSetList)) deallocate(dstCplSetList)
+      if (associated(providerStandardNameList)) &
+        deallocate(providerStandardNameList)
+      if (associated(providerNamespaceList)) deallocate(providerNamespaceList)
+      if (associated(providerFieldList)) deallocate(providerFieldList)
+      if (associated(providerCplSetList)) deallocate(providerCplSetList)
+      if (associated(acceptorStandardNameList)) &
+        deallocate(acceptorStandardNameList)
+      if (associated(acceptorNamespaceList)) deallocate(acceptorNamespaceList)
+      if (associated(acceptorFieldList)) deallocate(acceptorFieldList)
+      if (associated(acceptorCplSetList)) deallocate(acceptorCplSetList)
     end subroutine
 
   end subroutine
@@ -5788,8 +5823,8 @@ call ESMF_VMLogCurrentGarbageInfo(trim(name)//": FieldBundleCplStore leaving: ")
     type(ESMF_RouteHandle), intent(in),  optional :: rh
     type(ESMF_State),       intent(in),  optional :: state
     character(*),           intent(in),  optional :: CplSet
-    type(ESMF_VM),          intent(out), optional :: srcVM
-    type(ESMF_VM),          intent(out), optional :: dstVM
+    type(ESMF_VM),          intent(in),  optional :: srcVM
+    type(ESMF_VM),          intent(in),  optional :: dstVM
     integer,                intent(out), optional :: rc
 !
 ! !DESCRIPTION:
