@@ -714,6 +714,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 
       integer :: localrc
       integer :: ptr, section_open, section_close
+      logical, parameter :: unique = .false.
 
       ! Initialize return code; assume routine not implemented
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
@@ -724,7 +725,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         msg="Opening section label not found",  &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-      section_open = config % cptr % next_line - 1
+      section_open = config % cptr % value_begin
 
       ! Look closing section label after opening label
       call ESMF_ConfigFindNextLabel(config, closelabel, rc=localrc)
@@ -732,7 +733,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         msg="Closing section label not found",  &
         ESMF_CONTEXT, rcToReturn=rc)) return
 
-      section_close = config % cptr % next_line - 2
+      section_close = config % cptr % value_begin - len(closelabel) - 1
 
       if (section_close < section_open) then
         call ESMF_LogSetError(ESMF_RC_NOT_FOUND, &
@@ -748,15 +749,28 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         ESMF_CONTEXT, rcToReturn=rc)) return
 
       ptr = section_close - section_open + 1
-      ESMF_ConfigCreateFromSection % cptr % buffer(1:ptr) = &
-        config % cptr % buffer(section_open:section_close)
+      if (config % cptr % buffer(section_open:section_open) == EOL) then
+        ESMF_ConfigCreateFromSection % cptr % buffer(1:ptr) = &
+          config % cptr % buffer(section_open:section_close)
+      else
+        ptr = ptr + 1
+        ESMF_ConfigCreateFromSection % cptr % buffer(1:1) = EOL
+        ESMF_ConfigCreateFromSection % cptr % buffer(2:ptr) = &
+          config % cptr % buffer(section_open:section_close)
+      end if
+
       ptr = ptr + 1
       ESMF_ConfigCreateFromSection % cptr % nbuf = ptr
-      ESMF_ConfigCreateFromSection % cptr % buffer(ptr:ptr) = &
-        config % cptr % buffer(config % cptr % nbuf:config % cptr % nbuf)
+      ESMF_ConfigCreateFromSection % cptr % buffer(ptr:ptr) = EOB
+
       ESMF_ConfigCreateFromSection % cptr % this_line = ' '
       ESMF_ConfigCreateFromSection % cptr % next_line = 1
       ESMF_ConfigCreateFromSection % cptr % value_begin = 1
+
+      call ESMF_ConfigParseAttributes(ESMF_ConfigCreateFromSection, &
+                                      unique=unique, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+                             ESMF_CONTEXT, rcToReturn=rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
