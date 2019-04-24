@@ -5615,6 +5615,55 @@ subroutine pack_and_send_float(vm, bufsize, recvPets, rootPet, buffer, &
   endif
 end subroutine pack_and_send_float
 
+subroutine pack_and_send_floatR4(vm, bufsize, recvPets, rootPet, buffer, &
+                               outbuffer, dims)
+
+  type(ESMF_VM) :: vm
+  integer :: bufsize(:)
+  integer :: recvPets
+  integer :: rootPet
+  real(ESMF_KIND_R4) :: buffer(:)
+  real(ESMF_KIND_R4) :: outbuffer(:,:)
+  integer :: dims(:)
+
+  integer :: xdim, start
+  integer :: lbnd(2), ubnd(2)
+  integer :: i,j,k,ii
+  real(ESMF_KIND_R4), pointer :: sendbuf(:)
+  integer :: localrc
+
+  ! fill my own pointer first
+  lbnd = lbound(outbuffer)
+  ubnd = ubound(outbuffer)
+  xdim = ubnd(1)-lbnd(1)+1
+  bufsize(2)=ubnd(2)-lbnd(2)+1
+  do i=1,bufsize(2)
+    outbuffer(:, lbnd(2)+i-1) = buffer((i-1)*bufsize(1)+1 : (i-1)*bufsize(1)+xdim)
+  enddo
+  if (recvPets > 1) then
+     allocate(sendbuf(dims(1)*bufsize(2)))
+     start=xdim
+     do k = 1, recvPets-1
+       if (k>1) then
+        if (dims(k) /= dims(k-1)) then
+          deallocate(sendbuf)
+          allocate(sendbuf(dims(k)*bufsize(2)))
+        endif
+       endif
+       ii = 1
+       do j = 1, bufsize(2)
+         do i = start+1, start+dims(k)
+            sendbuf(ii) = buffer((j-1)*bufsize(1)+i)
+            ii=ii+1
+         enddo
+       enddo
+       call ESMF_VMSend(vm, sendbuf, dims(k)*bufsize(2), rootPet+k, rc=localrc)
+       start = start+dims(k)
+     enddo
+     deallocate(sendbuf)
+  endif
+end subroutine pack_and_send_floatR4
+
 ! Fill in the local fortran pointer and send the rest of the data to the other
 ! PETs in the same row of the decomposition
 ! input buffer is 1D for SCRIP files
@@ -5718,6 +5767,56 @@ subroutine pack_and_send_float2D(vm, bufsize, recvPets, rootPet, buffer, &
   endif
 end subroutine pack_and_send_float2D
 
+! Fill in the local fortran pointer and send the rest of the data to the other
+! PETs in the same row of the decomposition
+! input buffer is 2D for GridSpec files
+subroutine pack_and_send_float2DR4(vm, bufsize, recvPets, rootPet, buffer, &
+                               outbuffer, dims)
+
+  type(ESMF_VM) :: vm
+  integer :: bufsize(:)
+  integer :: recvPets
+  integer :: rootPet
+  real(ESMF_KIND_R4) :: buffer(:,:)
+  real(ESMF_KIND_R4) :: outbuffer(:,:)
+  integer :: dims(:)
+
+  integer :: xdim, start
+  integer :: lbnd(2), ubnd(2)
+  integer :: i,j,k,ii
+  real(ESMF_KIND_R4), pointer :: sendbuf(:)
+  integer :: localrc
+
+  ! fill my own pointer first
+  lbnd = lbound(outbuffer)
+  ubnd = ubound(outbuffer)
+  xdim = ubnd(1)-lbnd(1)+1
+  bufsize(2)=ubnd(2)-lbnd(2)+1
+  outbuffer = buffer(1:xdim,1:bufsize(2))
+  if (recvPets > 1) then
+    allocate(sendbuf(dims(1)*bufsize(2)))
+    start=xdim
+    do k = 1, recvPets-1
+      if (k>1) then
+       if (dims(k) /= dims(k-1)) then
+         deallocate(sendbuf)
+         allocate(sendbuf(dims(k)*bufsize(2)))
+       endif
+      endif
+      ii = 1
+      do j = 1, bufsize(2)
+         do i = start+1, start+dims(k)
+            sendbuf(ii) = buffer(i,j)
+            ii=ii+1
+         enddo
+      enddo
+      call ESMF_VMSend(vm, sendbuf, dims(k)*bufsize(2), rootPet+k, rc=localrc)
+      start = start+dims(k)
+    enddo
+    deallocate(sendbuf)
+  endif
+end subroutine pack_and_send_float2DR4
+
 ! Fill in the local integer pointer and send the rest of the data to the other
 ! PETs in the same row of the decomposition
 ! input buffer is 2D for GridSpec files
@@ -5777,7 +5876,7 @@ end subroutine pack_and_send_int2D
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
      function ESMF_GridCreateFrmNCFileDG(filename, fileformat, distgrid, keywordEnforcer, &
-       isSphere, polekindflag, addCornerStagger, addUserArea, indexflag, &
+       isSphere, polekindflag, addCornerStagger, coordTypeKind, addUserArea, indexflag, &
        addMask, varname, coordNames, rc)
 
 ! !RETURN VALUE:
@@ -5792,6 +5891,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     logical,                intent(in),  optional  :: isSphere
     type(ESMF_PoleKind_Flag),  intent(in),  optional :: polekindflag(2)
     logical,                intent(in),  optional  :: addCornerStagger
+    type(ESMF_TypeKind_Flag),intent(in), optional  :: coordTypeKind
     logical,                intent(in),  optional  :: addUserArea
     type(ESMF_Index_Flag),  intent(in),  optional  :: indexflag
     logical,                intent(in),  optional  :: addMask
@@ -5833,6 +5933,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Uses the information in the grid file to add the Corner stagger to
 !      the Grid. The coordinates for the corner stagger is required for conservative
 !      regridding. If not specified, defaults to false.
+! \item[{[coordTypeKind]}]
+!          The type/kind of the grid coordinate data. Only ESMF\_TYPEKIND\_R4
+!          and ESMF\_TYPEKIND\_R8 are allowed.  Currently, ESMF\_TYPEKIND_R4 is only
+!          supported for the GRIDSPEC fileformat. 
+!          If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[addUserArea]}]
 !      If .true., read in the cell area from the Grid file, otherwise, ESMF will calculate it. The feature
 !      is only supported when the grid file is in the SCRIP format.  If not set, the default value is
@@ -5872,6 +5977,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     integer, pointer:: griddims(:)
     type(ESMF_Index_Flag) :: localIndexFlag
     type(ESMF_FileFormat_Flag)  :: localFileformat
+    type(ESMF_TypeKind_Flag)    :: localCoordTypeKind
 
     if (present(rc)) rc=ESMF_FAILURE
 
@@ -5912,6 +6018,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
         localAddCorner = .false.
     endif
+
+   ! Set Default coordTypeKind
+   if (present(coordTypeKind)) then
+      if (coordTypeKind .ne. ESMF_TYPEKIND_R4 .and. &
+          coordTypeKind .ne. ESMF_TYPEKIND_R8) then
+         call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+            msg="- only ESMF_TYPEKIND_R4 and ESMF_TYPEKIND_R8 are allowed", &
+            ESMF_CONTEXT, rcToReturn=rc)
+         return
+      endif      
+      localCoordTypeKind=coordTypeKind
+   else
+      localCoordTypeKind=ESMF_TYPEKIND_R8
+   endif
+
+   ! Only allow ESMF_TYPEKIND_R4 for GRIDSPEC filetye for now
+   if (localCoordTypeKind .eq. ESMF_TYPEKIND_R4 .and. &
+       localFileformat .ne. ESMF_FILEFORMAT_GRIDSPEC) then
+       call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+          msg="- Currently coordTypeKind == ESMF_TYPEKIND_R4 is only supported for the GRIDSPEC format", &
+          ESMF_CONTEXT, rcToReturn=rc)
+       return
+   endif
+
     allocate(griddims(2))
     if (PetNo == 0) then
        if (localFileformat == ESMF_FILEFORMAT_SCRIP) then
@@ -6002,12 +6132,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 localIndexFlag, decompflag=localDEcompflag, &
                 isSphere=localIsSphere, polekindflag=polekindflag, &
                 addCornerStagger=localAddCorner, &
+                coordTypeKind = localCoordTypeKind, &
                 addMask=addMask, varname=varname, coordNames=coordNames, rc=localrc)
         else
           grid = ESMF_GridCreateFrmGridspec(trim(filename), (/xpart,ypart/), &
                 localIndexFlag, decompflag=localDEcompflag, &
                 isSphere=localIsSphere, polekindflag=polekindflag, &
                 addCornerStagger=localAddCorner, &
+                coordTypeKind = localCoordTypeKind, &
                 coordNames = coordNames, rc=localrc)
         endif
     else
@@ -6044,8 +6176,8 @@ end function ESMF_GridCreateFrmNCFileDG
 ! !INTERFACE:
   ! Private name; call using ESMF_GridCreate()
      function ESMF_GridCreateFrmNCFile(filename, fileformat, keywordEnforcer, regDecomp, &
-       decompflag, delayout, isSphere, polekindflag, addCornerStagger, addUserArea, indexflag, &
-       addMask, varname, coordNames, rc)
+       decompflag, delayout, isSphere, polekindflag, addCornerStagger, coordTypeKind, &
+       addUserArea, indexflag, addMask, varname, coordNames, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateFrmNCFile
@@ -6060,7 +6192,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_DELayout),    intent(in),  optional     :: delayout
     logical,                intent(in),  optional     :: isSphere
     type(ESMF_PoleKind_Flag),  intent(in),  optional  :: polekindflag(2)
-    logical,                intent(in),  optional     :: addCornerStagger
+    logical,                intent(in),  optional     :: addCornerStagger 
+    type(ESMF_TypeKind_Flag),intent(in), optional     :: coordTypeKind
     logical,                intent(in),  optional     :: addUserArea
     type(ESMF_Index_Flag),  intent(in),  optional     :: indexflag
     logical,                intent(in),  optional     :: addMask
@@ -6118,6 +6251,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      Uses the information in the grid file to add the Corner stagger to
 !      the Grid. The coordinates for the corner stagger is required for conservative
 !      regridding. If not specified, defaults to false.
+! \item[{[coordTypeKind]}]
+!          The type/kind of the grid coordinate data. Only ESMF\_TYPEKIND\_R4
+!          and ESMF\_TYPEKIND\_R8 are allowed.  Currently, ESMF\_TYPEKIND_R4 is only
+!          supported for the GRIDSPEC fileformat. 
+!          If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[addUserArea]}]
 !      If .true., read in the cell area from the Grid file, otherwise, ESMF will calculate it.  The feature
 !      is only supported when the grid file is in the SCRIP format.  If not set, the default value is
@@ -6155,6 +6293,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_VM) :: vm
     integer :: PetCnt
     type(ESMF_FileFormat_Flag)  :: localFileformat
+    type(ESMF_TypeKind_Flag)    :: localCoordTypeKind
 
     if (present(rc)) rc=ESMF_FAILURE
 
@@ -6223,6 +6362,30 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     else
         localIndexFlag = ESMF_INDEX_DELOCAL
     endif
+
+    ! Set Default coordTypeKind
+    if (present(coordTypeKind)) then
+       if (coordTypeKind .ne. ESMF_TYPEKIND_R4 .and. &
+           coordTypeKind .ne. ESMF_TYPEKIND_R8) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="- only ESMF_TYPEKIND_R4 and ESMF_TYPEKIND_R8 are allowed", &
+             ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif      
+       localCoordTypeKind=coordTypeKind
+    else
+       localCoordTypeKind=ESMF_TYPEKIND_R8
+    endif
+
+    ! Only allow ESMF_TYPEKIND_R4 for GRIDSPEC filetye for now
+    if (localCoordTypeKind .eq. ESMF_TYPEKIND_R4 .and. &
+        localFileformat .ne. ESMF_FILEFORMAT_GRIDSPEC) then
+        call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+           msg="- Currently coordTypeKind == ESMF_TYPEKIND_R4 is only supported for the GRIDSPEC format", &
+           ESMF_CONTEXT, rcToReturn=rc)
+        return
+    endif
+
     if (localfileformat == ESMF_FILEFORMAT_SCRIP) then
         grid = ESMF_GridCreateFrmScrip(trim(filename), regDecompLocal, &
                 localIndexFlag, decompflag=localDEcompflag, &
@@ -6252,6 +6415,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 localIndexFlag, decompflag=localDEcompflag, &
                 isSphere=localIsSphere, polekindflag=polekindflag, &
                 addCornerStagger=localAddCorner, &
+                coordTypeKind = localCoordTypeKind, &
                 addMask=addMask, varname=varname, coordNames=coordNames, &
                 rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -6261,6 +6425,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
                 localIndexFlag, decompflag=localDEcompflag, &
                 isSphere=localIsSphere, polekindflag=polekindflag, &
                 addCornerStagger=localAddCorner, &
+                coordTypeKind = localCoordTypeKind, &
                 coordNames = coordNames, rc=localrc)
           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
             ESMF_CONTEXT, rcToReturn=rc)) return
@@ -6821,7 +6986,7 @@ end function ESMF_GridCreateFrmScrip
                                         regDecomp, indexflag, keywordEnforcer, decompflag, &
                                         addMask, varname, coordNames, &
                                         isSphere, polekindflag, &
-                                        addCornerStagger, rc)
+                                        addCornerStagger, coordTypeKind, rc)
 
 ! !RETURN VALUE:
     type(ESMF_Grid) :: ESMF_GridCreateFrmGridspec
@@ -6838,6 +7003,7 @@ end function ESMF_GridCreateFrmScrip
     type(ESMF_PoleKind_Flag),  intent(in),  optional :: polekindflag(2)
     logical,               intent(in),  optional   :: isSphere
     logical,               intent(in),  optional   :: addCornerStagger
+    type(ESMF_TypeKind_Flag),intent(in), optional  :: coordTypeKind
     integer,               intent(out), optional   :: rc
 
 ! !DESCRIPTION:
@@ -6889,6 +7055,10 @@ end function ESMF_GridCreateFrmScrip
 !      Uses the information in the GridSpec file to add the Corner stagger to
 !      the Grid. If not specified, defaults to true (since GridSpec defaults to
 !      vertex-centered grids).
+! \item[{[coordTypeKind]}]
+!          The type/kind of the grid coordinate data. Only ESMF\_TYPEKIND\_R4
+!          and ESMF\_TYPEKIND\_R8 are allowed.  
+!          If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 ! \end{description}
@@ -6904,6 +7074,11 @@ end function ESMF_GridCreateFrmScrip
     real(ESMF_KIND_R8),  allocatable :: cornerlon2D(:,:), cornerlat2D(:,:)
     real(ESMF_KIND_R8),  allocatable :: cornerlon3D(:,:,:), cornerlat3D(:,:,:)
     real(ESMF_KIND_R8),  allocatable :: corner1D(:), corner2D(:,:)
+    real(ESMF_KIND_R4),  allocatable :: loncoord1DR4(:), latcoord1DR4(:)
+    real(ESMF_KIND_R4),  allocatable :: loncoord2DR4(:,:), latcoord2DR4(:,:)
+    real(ESMF_KIND_R4),  allocatable :: cornerlon2DR4(:,:), cornerlat2DR4(:,:)
+    real(ESMF_KIND_R4),  allocatable :: cornerlon3DR4(:,:,:), cornerlat3DR4(:,:,:)
+    real(ESMF_KIND_R4),  allocatable :: corner1DR4(:), corner2DR4(:,:)
     integer :: msgbuf(8)
     type(ESMF_CommHandle) :: commHandle
     integer :: localMinIndex(2), gridEdgeLWidth(2), gridEdgeUWidth(2)
@@ -6918,6 +7093,8 @@ end function ESMF_GridCreateFrmScrip
     integer :: total(2), lbnd(2), ubnd(2), recv(1)
     real(ESMF_KIND_R8), allocatable :: varBuffer(:,:), recvbuf(:)
     real(ESMF_KIND_R8), pointer :: fptrlat(:,:), fptrlon(:,:)
+    real(ESMF_KIND_R4), allocatable :: recvbufR4(:)
+    real(ESMF_KIND_R4), pointer :: fptrlatR4(:,:), fptrlonR4(:,:)
     integer, pointer :: fptrmask(:,:), maskbuf(:)
     integer, allocatable :: mask2D(:,:)
     real(ESMF_KIND_R8) :: missing_value
@@ -6938,6 +7115,7 @@ end function ESMF_GridCreateFrmScrip
     type(ESMF_StaggerLoc), allocatable         :: staggerLocList(:)
     type(ESMF_DELayout)                        :: delayout
     integer, allocatable                       :: demap(:)
+    type(ESMF_TypeKind_Flag)                   :: localCoordTypeKind
     
    
     ! Initialize return code; assume failure until success is certain
@@ -6985,6 +7163,19 @@ end function ESMF_GridCreateFrmScrip
         endif
     endif
      
+    if (present(coordTypeKind)) then
+       if (coordTypeKind .ne. ESMF_TYPEKIND_R4 .and. &
+           coordTypeKind .ne. ESMF_TYPEKIND_R8) then
+          call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, &
+             msg="- only ESMF_TYPEKIND_R4 and ESMF_TYPEKIND_R8 are allowed", &
+             ESMF_CONTEXT, rcToReturn=rc)
+          return
+       endif      
+       localCoordTypeKind=coordTypeKind
+    else
+       localCoordTypeKind=ESMF_TYPEKIND_R8
+    endif
+
     call ESMF_GridspecQueryTileFile(grid_filename, isSupergrid, rc=localrc)
     if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7130,32 +7321,6 @@ end function ESMF_GridCreateFrmScrip
 
       ! only parallelize the code if ndims == 2, so separate the code based on ndums
       if (ndims == 1) then
-        if (PetNo == 0) then
-          ! Get coordinate info from the GridSpec file, if in radians, convert to degrees
-          if (localAddCornerStagger) then
-             allocate(loncoord1D(gridims(1)), latcoord1D(gridims(2)))
-             allocate(cornerlon2D(2,gridims(1)), cornerlat2D(2, gridims(2)))
-             call ESMF_GridspecGetVar1D(grid_filename, coordids, loncoord1D, latcoord1D,&
-                                    cornerlon=cornerlon2D, cornerlat=cornerlat2D, rc=localrc)
-             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-          else
-             allocate(loncoord1D(gridims(1)), latcoord1D(gridims(2)))
-             call ESMF_GridspecGetVar1D(grid_filename, coordids, loncoord1D, latcoord1D,&
-                                    rc=localrc)
-             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-          endif
-          ! convert to kilometer if the units is "meters"
-          if (units(1:1) .eq. 'm') then
-             loncoord1D(:) = loncoord1D(:) * 1.d-3
-             latcoord1D(:) = latcoord1D(:) * 1.d-3
-             if (localAddCornerStagger) then
-                cornerlon2D(:,:) = cornerlon2D(:,:) * 1.d-3
-                cornerlat2D(:,:) = cornerlat2D(:,:) * 1.d-3
-             endif
-          endif
-        endif
         if (localIsSphere) then
            grid = ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=gridims, &
                 regDecomp=regDecomp, &
@@ -7163,6 +7328,7 @@ end function ESMF_GridCreateFrmScrip
                 polekindflag=polekindflag, &
                 coordDep1=(/1/), coordDep2=(/2/), &
                 coordSys=ESMF_COORDSYS_SPH_DEG, &
+                coordTypeKind = localCoordTypeKind, &
                 indexflag=indexflag, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7172,88 +7338,223 @@ end function ESMF_GridCreateFrmScrip
                 gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
                 coordDep1=(/1/), coordDep2=(/2/), &
                 coordSys=coordsys, &
+                coordTypeKind = localCoordTypeKind, &
                 indexflag=indexflag, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
         endif
+        
+        if (localCoordTypeKind == ESMF_TYPEKIND_R8) then
+          if (PetNo == 0) then
+            ! Get coordinate info from the GridSpec file, if in radians, convert to degrees
+            if (localAddCornerStagger) then
+               allocate(loncoord1D(gridims(1)), latcoord1D(gridims(2)))
+               allocate(cornerlon2D(2,gridims(1)), cornerlat2D(2, gridims(2)))
+               call ESMF_GridspecGetVar1D(grid_filename, coordids, loncoord1D, latcoord1D,&
+                                    cornerlon=cornerlon2D, cornerlat=cornerlat2D, rc=localrc)
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            else
+               allocate(loncoord1D(gridims(1)), latcoord1D(gridims(2)))
+               call ESMF_GridspecGetVar1D(grid_filename, coordids, loncoord1D, latcoord1D,&
+                                    rc=localrc)
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+            ! convert to kilometer if the units is "meters"
+            if (units(1:1) .eq. 'm') then
+               loncoord1D(:) = loncoord1D(:) * 1.d-3
+               latcoord1D(:) = latcoord1D(:) * 1.d-3
+               if (localAddCornerStagger) then
+                  cornerlon2D(:,:) = cornerlon2D(:,:) * 1.d-3
+                  cornerlat2D(:,:) = cornerlat2D(:,:) * 1.d-3
+               endif
+            endif
+          endif
+  
+          ! Set coordinate tables -  Put Corners into coordinates
+          localStaggerLoc = ESMF_STAGGERLOC_CENTER
 
-        ! Set coordinate tables -  Put Corners into coordinates
-        localStaggerLoc = ESMF_STAGGERLOC_CENTER
+          call ESMF_GridAddCoord(grid, staggerloc=localStaggerLoc, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
 
-        call ESMF_GridAddCoord(grid, staggerloc=localStaggerLoc, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-            ESMF_CONTEXT, rcToReturn=rc)) return
-
-        ! Set longitude coordinate
-        call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=1, &
+          ! Set longitude coordinate
+          call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=1, &
                      array=array, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayScatter(array, loncoord1D, rootPet=0, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          call ESMF_ArrayScatter(array, loncoord1D, rootPet=0, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
 
-        ! Set longitude coordinate
-        call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=2, &
+          ! Set longitude coordinate
+          call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=2, &
                      array=array, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
-        call ESMF_ArrayScatter(array, latcoord1D, rootPet=0, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          call ESMF_ArrayScatter(array, latcoord1D, rootPet=0, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (PetNo == 0) then
-           deallocate(loncoord1D, latcoord1D)
-        endif
+          if (PetNo == 0) then
+            deallocate(loncoord1D, latcoord1D)
+          endif
 
-        ! Add coordinates at the corner stagger location
-        if (localAddCornerStagger) then
-            call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+          ! Add coordinates at the corner stagger location
+          if (localAddCornerStagger) then
+             call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
 
-            ! Longitude
-            call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
+             ! Longitude
+             call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
                   array = array, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
 
-            call ESMF_GridGet(grid,tile=1,staggerloc=ESMF_STAGGERLOC_CORNER, maxIndex=maxIndex2D,&
+             call ESMF_GridGet(grid,tile=1,staggerloc=ESMF_STAGGERLOC_CORNER, maxIndex=maxIndex2D,&
                        rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                        ESMF_CONTEXT, rcToReturn=rc)) return
-            if (PetNo == 0) then
-               allocate(corner1D(maxIndex2D(1)))
-               corner1D(1:gridims(1)) = cornerlon2D(1,:)
-               if (maxIndex2D(1) > gridims(1)) then
+             if (PetNo == 0) then
+                allocate(corner1D(maxIndex2D(1)))
+                corner1D(1:gridims(1)) = cornerlon2D(1,:)
+                if (maxIndex2D(1) > gridims(1)) then
                    corner1D(maxIndex2D(1)) = cornerlon2D(2,gridims(1))
-               endif
-            endif
+                endif
+             endif
 
-            call ESMF_ArrayScatter(array, corner1D, rootPet=0, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-
-            if (PetNo == 0) deallocate(corner1D)
-
-            ! Latitude
-            call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
-                 array = array, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             call ESMF_ArrayScatter(array, corner1D, rootPet=0, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rcToReturn=rc)) return
 
-            if (PetNo == 0) then
-               allocate(corner1D(maxIndex2D(2)))
-               corner1D(1:gridims(2)) = cornerlat2D(1,:)
-               if (maxIndex2D(2) > gridims(2)) then
-                  corner1D(maxIndex2D(2)) = cornerlat2D(2,gridims(2))
-               endif
-            endif
+             if (PetNo == 0) deallocate(corner1D)
 
-            call ESMF_ArrayScatter(array, corner1D, rootPet=0, rc=localrc)
-            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+             ! Latitude
+             call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
+                 array = array, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+             if (PetNo == 0) then
+                allocate(corner1D(maxIndex2D(2)))
+                corner1D(1:gridims(2)) = cornerlat2D(1,:)
+                if (maxIndex2D(2) > gridims(2)) then
+                   corner1D(maxIndex2D(2)) = cornerlat2D(2,gridims(2))
+                endif
+             endif
+
+             call ESMF_ArrayScatter(array, corner1D, rootPet=0, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                    ESMF_CONTEXT, rcToReturn=rc)) return
-        endif
+          endif
+        else ! localCoordTypeKind == ESMF_TYPEKIND_R4
+          if (PetNo == 0) then
+            ! Get coordinate info from the GridSpec file, if in radians, convert to degrees
+            if (localAddCornerStagger) then
+              allocate(loncoord1DR4(gridims(1)), latcoord1DR4(gridims(2)))
+              allocate(cornerlon2DR4(2,gridims(1)), cornerlat2DR4(2, gridims(2)))
+              call ESMF_GridspecGetVar1DR4(grid_filename, coordids, loncoord1DR4, latcoord1DR4,&
+                                    cornerlon=cornerlon2DR4, cornerlat=cornerlat2DR4, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+            else
+              allocate(loncoord1DR4(gridims(1)), latcoord1DR4(gridims(2)))
+              call ESMF_GridspecGetVar1DR4(grid_filename, coordids, loncoord1DR4, latcoord1DR4,&
+                                    rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+            endif
+            ! convert to kilometer if the units is "meters"
+            if (units(1:1) .eq. 'm') then
+              loncoord1DR4(:) = loncoord1DR4(:) * 1.d-3
+              latcoord1DR4(:) = latcoord1DR4(:) * 1.d-3
+              if (localAddCornerStagger) then
+                 cornerlon2DR4(:,:) = cornerlon2DR4(:,:) * 1.d-3
+                 cornerlat2DR4(:,:) = cornerlat2DR4(:,:) * 1.d-3
+              endif
+            endif
+          endif
+  
+          ! Set coordinate tables -  Put Corners into coordinates
+          localStaggerLoc = ESMF_STAGGERLOC_CENTER
+
+          call ESMF_GridAddCoord(grid, staggerloc=localStaggerLoc, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+              ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Set longitude coordinate
+          call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=1, &
+                     array=array, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_ArrayScatter(array, loncoord1DR4, rootPet=0, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+
+          ! Set longitude coordinate
+          call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=2, &
+                     array=array, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+          call ESMF_ArrayScatter(array, latcoord1DR4, rootPet=0, rc=localrc)
+          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+
+          if (PetNo == 0) then
+             deallocate(loncoord1DR4, latcoord1DR4)
+          endif
+
+          ! Add coordinates at the corner stagger location
+          if (localAddCornerStagger) then
+             call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+             ! Longitude
+             call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
+                  array = array, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+             call ESMF_GridGet(grid,tile=1,staggerloc=ESMF_STAGGERLOC_CORNER, maxIndex=maxIndex2D,&
+                       rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                       ESMF_CONTEXT, rcToReturn=rc)) return
+             if (PetNo == 0) then
+                allocate(corner1DR4(maxIndex2D(1)))
+                corner1DR4(1:gridims(1)) = cornerlon2DR4(1,:)
+                if (maxIndex2D(1) > gridims(1)) then
+                    corner1DR4(maxIndex2D(1)) = cornerlon2DR4(2,gridims(1))
+                endif
+             endif
+
+             call ESMF_ArrayScatter(array, corner1DR4, rootPet=0, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+             if (PetNo == 0) deallocate(corner1DR4)
+
+             ! Latitude
+             call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
+                  array = array, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+             if (PetNo == 0) then
+                allocate(corner1DR4(maxIndex2D(2)))
+                corner1DR4(1:gridims(2)) = cornerlat2DR4(1,:)
+                if (maxIndex2D(2) > gridims(2)) then
+                   corner1DR4(maxIndex2D(2)) = cornerlat2DR4(2,gridims(2))
+                endif
+             endif
+
+             call ESMF_ArrayScatter(array, corner1DR4, rootPet=0, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+          endif !localAddCornerStagger
+        endif  ! localCoordTypeKind == ESMF_TYPEKIND_R8
       elseif (ndims==2) then
         if (localIsSphere) then
            grid = ESMF_GridCreate1PeriDim(minIndex=(/1,1/), maxIndex=gridims, &
@@ -7261,6 +7562,7 @@ end function ESMF_GridCreateFrmScrip
                   gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
                   polekindflag=polekindflag, &
                   coordSys=ESMF_COORDSYS_SPH_DEG, &
+                  coordTypeKind=localCoordTypeKind, &
                   indexflag=indexflag, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7269,207 +7571,99 @@ end function ESMF_GridCreateFrmScrip
                   regDecomp=regDecomp, &
                   gridEdgeLWidth=gridEdgeLWidth, gridEdgeUWidth=gridEdgeUWidth, &
                   coordSys=coordsys, &
+                  coordTypeKind=localCoordTypeKind, &
                   indexflag=indexflag, rc=localrc)
            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
         endif
 
-        call ESMF_GridGet(grid, localDECount=decnt, rc=localrc)
-        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-           ESMF_CONTEXT, rcToReturn=rc)) return
-        if (decnt > 0) then
-         if ( mod(PetNo, regDecomp(1)) == 0) then
-           call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-           allocate(minind(2,PetCnt))
-           call ESMF_DistGridGet(distgrid, minIndexPDe=minind, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-           call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
-              exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
-
-           total(1)=gridims(1)
-           allocate(loncoord2D(total(1),total(2)), latcoord2D(total(1),total(2)))
-           if (localAddCornerStagger) then
-                allocate(cornerlon3D(4,total(1),total(2)), cornerlat3D(4, total(1), total(2)))
-                call ESMF_GridspecGetVar2D(grid_filename, coordids, &
-                                    loncoord=loncoord2D, latcoord=latcoord2D, &
-                                    cornerlon=cornerlon3D, cornerlat=cornerlat3D, &
-                                    start=minind(:,PetNo+1), count=total, &
-                                    rc=localrc)
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rcToReturn=rc)) return
-           else
-                call ESMF_GridspecGetVar2D(grid_filename, coordids,  &
-                                    loncoord=loncoord2D, latcoord=latcoord2D, &
-                                    start=minind(:,PetNo+1), count=total, &
-                                    rc=localrc)
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                      ESMF_CONTEXT, rcToReturn=rc)) return
-           endif
-           ! convert to kilometer if the units is "meters"
-           if (units(1:1) .eq. 'm') then
-             loncoord2D(:,:) = loncoord2D(:,:) * 1.d-3
-             latcoord2D(:,:) = latcoord2D(:,:) * 1.d-3
-             if (localAddCornerStagger) then
-                cornerlon3D(:,:,:) = cornerlon3D(:,:,:) * 1.d-3
-                cornerlat3D(:,:,:) = cornerlat3D(:,:,:) * 1.d-3
-             endif
-           endif
-         endif
-        endif
-        
-        ! Set coordinate tables -  Put Corners into coordinates
+        ! Add center stagger coordinates
         localStaggerLoc = ESMF_STAGGERLOC_CENTER
 
         call ESMF_GridAddCoord(grid, staggerloc=localStaggerLoc, rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-              ESMF_CONTEXT, rcToReturn=rc)) return
+            ESMF_CONTEXT, rcToReturn=rc)) return
 
-        if (decnt > 0) then
-         ! Set longitude coordinate
-         call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=1, &
-                     farrayptr=fptrlon, rc=localrc)
-         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                     ESMF_CONTEXT, rcToReturn=rc)) return
-
-         ! Set latitude coordinate
-         call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=2, &
-                     farrayptr=fptrlat, rc=localrc)
-         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                     ESMF_CONTEXT, rcToReturn=rc)) return
-
-         if (mod(PetNo, regDecomp(1)) == 0) then
-           allocate(dims(regdecomp(1)-1))
-           do i=1, regDecomp(1)-1
-              call ESMF_VMRecv(vm, recv, 1, PetNo+i)
+        call ESMF_GridGet(grid, localDECount=decnt, rc=localrc)
+        if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+           ESMF_CONTEXT, rcToReturn=rc)) return
+       
+        if (localCoordTypeKind == ESMF_TYPEKIND_R8) then
+          if (decnt > 0) then
+            if ( mod(PetNo, regDecomp(1)) == 0) then
+              call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-              dims(i)=recv(1)
-           enddo
-           call pack_and_send_float2D(vm, total, regDecomp(1), PetNo, lonCoord2D, fptrlon, dims)
-           call pack_and_send_float2D(vm, total, regDecomp(1), PetNo, latCoord2D, fptrlat, dims)
-
-           deallocate(loncoord2D, latcoord2D, dims)
-         else
-           localroot = (PetNo/regDecomp(1))*regDecomp(1)
-           call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
-               exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-           allocate(recvbuf(total(1)*total(2)))
-           ! First, send the xdim of the local array to the localroot
-           call ESMF_VMSend(vm, total, 1, localroot, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-
-           ! Longitude coordinates
-           call ESMF_VMRecv(vm, recvbuf, total(1)*total(2), localroot, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-               ESMF_CONTEXT, rcToReturn=rc)) return
-           k=1
-           do i=lbnd(2),ubnd(2)
-              do j=lbnd(1),ubnd(1)
-                 fptrlon(j,i) = recvbuf(k)
-                 k=k+1
-              enddo
-           enddo
-           ! Latitude coordinates
-           call ESMF_VMRecv(vm, recvbuf, total(1)*total(2), localroot, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-           k=1
-           do i=lbnd(2),ubnd(2)
-              do j=lbnd(1),ubnd(1)
-                fptrlat(j,i) = recvbuf(k)
-                k=k+1
-              enddo
-           enddo
-           deallocate(recvbuf)
-         endif
-        endif
-        ! Add coordinates at the corner stagger location
-        if (localAddCornerStagger) then
-           call ESMF_GridGet(grid,tile=1,staggerloc=ESMF_STAGGERLOC_CORNER, &
-                    maxIndex=maxIndex2D, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
-
-           call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+              allocate(minind(2,PetCnt))
+              call ESMF_DistGridGet(distgrid, minIndexPDe=minind, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+              call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
+                 exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                  ESMF_CONTEXT, rcToReturn=rc)) return
 
-           ! Longitude
-           call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
-                 farrayptr = fptrlon, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+              total(1)=gridims(1)
+              allocate(loncoord2D(total(1),total(2)), latcoord2D(total(1),total(2)))
+              if (localAddCornerStagger) then
+                 allocate(cornerlon3D(4,total(1),total(2)), cornerlat3D(4, total(1), total(2)))
+                 call ESMF_GridspecGetVar2D(grid_filename, coordids, &
+                                    loncoord=loncoord2D, latcoord=latcoord2D, &
+                                    cornerlon=cornerlon3D, cornerlat=cornerlat3D, &
+                                    start=minind(:,PetNo+1), count=total, &
+                                    rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              else
+                 call ESMF_GridspecGetVar2D(grid_filename, coordids,  &
+                                    loncoord=loncoord2D, latcoord=latcoord2D, &
+                                    start=minind(:,PetNo+1), count=total, &
+                                    rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              endif !localAddCornerStagger
+              ! convert to kilometer if the units is "meters"
+              if (units(1:1) .eq. 'm') then
+                 loncoord2D(:,:) = loncoord2D(:,:) * 1.d-3
+                 latcoord2D(:,:) = latcoord2D(:,:) * 1.d-3
+                 if (localAddCornerStagger) then
+                   cornerlon3D(:,:,:) = cornerlon3D(:,:,:) * 1.d-3
+                   cornerlat3D(:,:,:) = cornerlat3D(:,:,:) * 1.d-3
+                 endif
+              endif
+            endif ! mod(PetNo, regDecomp(1))==0
 
-           ! Latitude
-           call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
-                  farrayptr = fptrlat, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                  ESMF_CONTEXT, rcToReturn=rc)) return
+            ! Set longitude coordinate
+            call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=1, &
+                   farrayptr=fptrlon, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
 
-           if (decnt > 0) then
-           if (mod(PetNo, regDecomp(1)) == 0) then
-              ! Get the x dimension of every local array
-              allocate(dims1(regDecomp(1)-1))
-              do i=1, regDecomp(1)-1
+            ! Set latitude coordinate
+            call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=2, &
+                   farrayptr=fptrlat, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+
+            if (mod(PetNo, regDecomp(1)) == 0) then
+               allocate(dims(regdecomp(1)-1))
+               do i=1, regDecomp(1)-1
                  call ESMF_VMRecv(vm, recv, 1, PetNo+i)
                  if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                      ESMF_CONTEXT, rcToReturn=rc)) return
-                 dims1(i)=recv(1)
+                 dims(i)=recv(1)
               enddo
+              call pack_and_send_float2D(vm, total, regDecomp(1), PetNo, lonCoord2D, fptrlon, dims)
+              call pack_and_send_float2D(vm, total, regDecomp(1), PetNo, latCoord2D, fptrlat, dims)
 
-              call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, 0, exclusiveLBound=lbnd, &
-                  exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
+              deallocate(loncoord2D, latcoord2D, dims)
+            else
+              localroot = (PetNo/regDecomp(1))*regDecomp(1)
+              call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
+                 exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
-              ! prepare the corner coordinates for the entire slab to send to the
-              ! member PETs, the horizontal size is the maxIndex for the corner stagger
-              total(1)=maxIndex2D(1)
-              allocate(corner2D(total(1),total(2)))
-              ! the input cornerlon3D may be smaller than the size of corner2D, so need to
-              ! fill the data at the right border or the bottom border (if it is the last
-              ! row of the grid
-              datadims(1)=size(cornerlon3D,2)
-              datadims(2)=size(cornerlon3D,3)
-              corner2D(1:datadims(1),1:datadims(2)) = cornerlon3D(1,:,:)
-              if (total(1) > datadims(1)) then
-                    corner2D(total(1), 1:datadims(2)) = cornerlon3D(2,datadims(1),:)
-              end if
-              if (total(2) > datadims(2)) then
-                   corner2D(1:datadims(1), total(2)) = cornerlon3D(4,:,datadims(2))
-              end if
-              if (total(1) > datadims(1) .and. total(2) > datadims(2)) then
-                   corner2D(total(1),total(2))=cornerlon3D(3, datadims(1), datadims(2))
-              endif
-
-              call pack_and_send_float2D(vm, total, regDecomp(1), PetNo, corner2D, fptrlon, dims1)
-
-              corner2D(1:datadims(1),1:datadims(2)) = cornerlat3D(1,:,:)
-              if (total(1) > datadims(1)) then
-                    corner2D(total(1), 1:datadims(2)) = cornerlat3D(2,datadims(1),:)
-              end if
-              if (total(2) > datadims(2)) then
-                   corner2D(1:datadims(1), total(2)) = cornerlat3D(4,:,datadims(2))
-              end if
-              if (total(1) > datadims(1) .and. total(2) > datadims(2)) then
-                   corner2D(total(1),total(2))=cornerlat3D(3, datadims(1), datadims(2))
-              endif
-              call pack_and_send_float2D(vm, total, regDecomp(1), PetNo, corner2D, fptrlat, dims1)
-              deallocate(dims1, minind)
-           else
-              call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, 0, exclusiveLBound=lbnd, &
-                  exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
-              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                   ESMF_CONTEXT, rcToReturn=rc)) return
+                 ESMF_CONTEXT, rcToReturn=rc)) return
               allocate(recvbuf(total(1)*total(2)))
-
               ! First, send the xdim of the local array to the localroot
               call ESMF_VMSend(vm, total, 1, localroot, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -7478,31 +7672,358 @@ end function ESMF_GridCreateFrmScrip
               ! Longitude coordinates
               call ESMF_VMRecv(vm, recvbuf, total(1)*total(2), localroot, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
-                k=1
-                do i=lbnd(2),ubnd(2)
-                  do j=lbnd(1),ubnd(1)
-                    fptrlon(j,i) = recvbuf(k)
-                    k=k+1
-                  enddo
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+              k=1
+              do i=lbnd(2),ubnd(2)
+                do j=lbnd(1),ubnd(1)
+                  fptrlon(j,i) = recvbuf(k)
+                  k=k+1
                 enddo
-                ! Latitude coordinates
-                call ESMF_VMRecv(vm, recvbuf, total(1)*total(2), localroot, rc=localrc)
-                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                    ESMF_CONTEXT, rcToReturn=rc)) return
-                k=1
-                do i=lbnd(2),ubnd(2)
-                  do j=lbnd(1),ubnd(1)
-                    fptrlat(j,i) = recvbuf(k)
-                    k=k+1
-                  enddo
+              enddo
+              ! Latitude coordinates
+              call ESMF_VMRecv(vm, recvbuf, total(1)*total(2), localroot, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+              k=1
+              do i=lbnd(2),ubnd(2)
+                do j=lbnd(1),ubnd(1)
+                  fptrlat(j,i) = recvbuf(k)
+                  k=k+1
                 enddo
-                deallocate(recvbuf)
-            endif  ! end if (mod(PetNo, RegDecomp(1))==0)
-            endif
-         endif  ! end if (AddCornerStagger)
-      endif  ! end if ndims = 2
+              enddo
+              deallocate(recvbuf)
+            endif ! mod(PetNo, regDecomp(1))==0
+          endif !decnt > 0
 
+          ! Add coordinates at the corner stagger location
+          if (localAddCornerStagger) then
+             call ESMF_GridGet(grid,tile=1,staggerloc=ESMF_STAGGERLOC_CORNER, &
+                    maxIndex=maxIndex2D, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+             call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+             ! Longitude
+             call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
+                 farrayptr = fptrlon, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+             ! Latitude
+             call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
+                  farrayptr = fptrlat, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+             if (decnt > 0) then
+               if (mod(PetNo, regDecomp(1)) == 0) then
+                 ! Get the x dimension of every local array
+                 allocate(dims1(regDecomp(1)-1))
+                 do i=1, regDecomp(1)-1
+                   call ESMF_VMRecv(vm, recv, 1, PetNo+i)
+                   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+                   dims1(i)=recv(1)
+                 enddo
+
+                 call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, 0, exclusiveLBound=lbnd, &
+                    exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+                 ! prepare the corner coordinates for the entire slab to send to the
+                 ! member PETs, the horizontal size is the maxIndex for the corner stagger
+                 total(1)=maxIndex2D(1)
+                 allocate(corner2D(total(1),total(2)))
+                 ! the input cornerlon3D may be smaller than the size of corner2D, so need to
+                 ! fill the data at the right border or the bottom border (if it is the last
+                 ! row of the grid
+                 datadims(1)=size(cornerlon3D,2)
+                 datadims(2)=size(cornerlon3D,3)
+                 corner2D(1:datadims(1),1:datadims(2)) = cornerlon3D(1,:,:)
+                 if (total(1) > datadims(1)) then
+                    corner2D(total(1), 1:datadims(2)) = cornerlon3D(2,datadims(1),:)
+                 end if
+                 if (total(2) > datadims(2)) then
+                    corner2D(1:datadims(1), total(2)) = cornerlon3D(4,:,datadims(2))
+                 end if
+                 if (total(1) > datadims(1) .and. total(2) > datadims(2)) then
+                    corner2D(total(1),total(2))=cornerlon3D(3, datadims(1), datadims(2))
+                 endif
+
+                 call pack_and_send_float2D(vm, total, regDecomp(1), PetNo, corner2D, fptrlon, dims1)
+
+                 corner2D(1:datadims(1),1:datadims(2)) = cornerlat3D(1,:,:)
+                 if (total(1) > datadims(1)) then
+                    corner2D(total(1), 1:datadims(2)) = cornerlat3D(2,datadims(1),:)
+                 end if
+                 if (total(2) > datadims(2)) then
+                   corner2D(1:datadims(1), total(2)) = cornerlat3D(4,:,datadims(2))
+                 end if
+                 if (total(1) > datadims(1) .and. total(2) > datadims(2)) then
+                   corner2D(total(1),total(2))=cornerlat3D(3, datadims(1), datadims(2))
+                 endif
+                 call pack_and_send_float2D(vm, total, regDecomp(1), PetNo, corner2D, fptrlat, dims1)
+                 deallocate(dims1, minind)
+               else ! mod(PetNo, regDecomp(1)) == 0
+                 call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, 0, exclusiveLBound=lbnd, &
+                    exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+                 allocate(recvbuf(total(1)*total(2)))
+
+                 ! First, send the xdim of the local array to the localroot
+                 call ESMF_VMSend(vm, total, 1, localroot, rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+
+                 ! Longitude coordinates
+                 call ESMF_VMRecv(vm, recvbuf, total(1)*total(2), localroot, rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+                 k=1
+                 do i=lbnd(2),ubnd(2)
+                   do j=lbnd(1),ubnd(1)
+                     fptrlon(j,i) = recvbuf(k)
+                     k=k+1
+                   enddo
+                 enddo
+                 ! Latitude coordinates
+                 call ESMF_VMRecv(vm, recvbuf, total(1)*total(2), localroot, rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+                 k=1
+                 do i=lbnd(2),ubnd(2)
+                   do j=lbnd(1),ubnd(1)
+                     fptrlat(j,i) = recvbuf(k)
+                     k=k+1
+                   enddo
+                 enddo
+                 deallocate(recvbuf)
+               endif  ! end if (mod(PetNo, RegDecomp(1))==0)
+             endif  ! decnt > 0
+           endif  ! end if (AddCornerStagger)
+         else  ! localCoordTypeKind == ESMF_TYPEKIND_R4
+          if (decnt > 0) then
+            if ( mod(PetNo, regDecomp(1)) == 0) then
+              call ESMF_GridGet(grid, distgrid=distgrid, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+              allocate(minind(2,PetCnt))
+              call ESMF_DistGridGet(distgrid, minIndexPDe=minind, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+              call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
+                 exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
+              if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+              total(1)=gridims(1)
+              allocate(loncoord2DR4(total(1),total(2)), latcoord2DR4(total(1),total(2)))
+              if (localAddCornerStagger) then
+                allocate(cornerlon3DR4(4,total(1),total(2)), cornerlat3DR4(4, total(1), total(2)))
+                call ESMF_GridspecGetVar2DR4(grid_filename, coordids, &
+                                    loncoord=loncoord2DR4, latcoord=latcoord2DR4, &
+                                    cornerlon=cornerlon3DR4, cornerlat=cornerlat3DR4, &
+                                    start=minind(:,PetNo+1), count=total, &
+                                    rc=localrc)
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              else
+                call ESMF_GridspecGetVar2DR4(grid_filename, coordids,  &
+                                    loncoord=loncoord2DR4, latcoord=latcoord2DR4, &
+                                    start=minind(:,PetNo+1), count=total, &
+                                    rc=localrc)
+                if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                      ESMF_CONTEXT, rcToReturn=rc)) return
+              endif
+              ! convert to kilometer if the units is "meters"
+              if (units(1:1) .eq. 'm') then
+                loncoord2DR4(:,:) = loncoord2DR4(:,:) * 1.d-3
+                latcoord2DR4(:,:) = latcoord2DR4(:,:) * 1.d-3
+                if (localAddCornerStagger) then
+                  cornerlon3DR4(:,:,:) = cornerlon3DR4(:,:,:) * 1.d-3
+                  cornerlat3DR4(:,:,:) = cornerlat3DR4(:,:,:) * 1.d-3
+                endif
+              endif
+            endif ! mod(PetNo, regDecomp(1))==0
+        
+            ! Set longitude coordinate
+            call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=1, &
+                     farrayptr=fptrlonR4, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+
+            ! Set latitude coordinate
+            call ESMF_GridGetCoord(grid, staggerloc=localStaggerLoc, coordDim=2, &
+                     farrayptr=fptrlatR4, rc=localrc)
+            if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+
+           if (mod(PetNo, regDecomp(1)) == 0) then
+             allocate(dims(regdecomp(1)-1))
+             do i=1, regDecomp(1)-1
+               call ESMF_VMRecv(vm, recv, 1, PetNo+i)
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+               dims(i)=recv(1)
+             enddo
+             call pack_and_send_float2DR4(vm, total, regDecomp(1), PetNo, lonCoord2DR4, fptrlonR4, dims)
+             call pack_and_send_float2DR4(vm, total, regDecomp(1), PetNo, latCoord2DR4, fptrlatR4, dims)
+
+             deallocate(loncoord2DR4, latcoord2DR4, dims)
+           else
+             localroot = (PetNo/regDecomp(1))*regDecomp(1)
+             call ESMF_GridGet(grid, ESMF_STAGGERLOC_CENTER, 0, exclusiveLBound=lbnd, &
+                exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             allocate(recvbufR4(total(1)*total(2)))
+             ! First, send the xdim of the local array to the localroot
+             call ESMF_VMSend(vm, total, 1, localroot, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+
+             ! Longitude coordinates
+             call ESMF_VMRecv(vm, recvbufR4, total(1)*total(2), localroot, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                 ESMF_CONTEXT, rcToReturn=rc)) return
+             k=1
+             do i=lbnd(2),ubnd(2)
+               do j=lbnd(1),ubnd(1)
+                   fptrlonR4(j,i) = recvbufR4(k)
+                   k=k+1
+               enddo
+             enddo
+             ! Latitude coordinates
+             call ESMF_VMRecv(vm, recvbufR4, total(1)*total(2), localroot, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+             k=1
+             do i=lbnd(2),ubnd(2)
+               do j=lbnd(1),ubnd(1)
+                 fptrlatR4(j,i) = recvbufR4(k)
+                 k=k+1
+               enddo
+             enddo
+             deallocate(recvbufR4)
+            endif  ! end if (mod(PetNo, RegDecomp(1))==0)
+          endif  ! decnt > 0
+
+          ! Add coordinates at the corner stagger location
+          if (localAddCornerStagger) then
+             call ESMF_GridGet(grid,tile=1,staggerloc=ESMF_STAGGERLOC_CORNER, &
+                    maxIndex=maxIndex2D, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+             call ESMF_GridAddCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+             ! Longitude
+             call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=1, &
+                 farrayptr = fptrlonR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                ESMF_CONTEXT, rcToReturn=rc)) return
+
+             ! Latitude
+             call ESMF_GridGetCoord(grid, staggerloc=ESMF_STAGGERLOC_CORNER, coordDim=2, &
+                  farrayptr = fptrlatR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+             if (decnt > 0) then
+               if (mod(PetNo, regDecomp(1)) == 0) then
+                 ! Get the x dimension of every local array
+                 allocate(dims1(regDecomp(1)-1))
+                 do i=1, regDecomp(1)-1
+                   call ESMF_VMRecv(vm, recv, 1, PetNo+i)
+                   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+                   dims1(i)=recv(1)
+                 enddo
+
+               call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, 0, exclusiveLBound=lbnd, &
+                   exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+               ! prepare the corner coordinates for the entire slab to send to the
+               ! member PETs, the horizontal size is the maxIndex for the corner stagger
+               total(1)=maxIndex2D(1)
+               allocate(corner2DR4(total(1),total(2)))
+               ! the input cornerlon3D may be smaller than the size of corner2D, so need to
+               ! fill the data at the right border or the bottom border (if it is the last
+               ! row of the grid
+               datadims(1)=size(cornerlon3DR4,2)
+               datadims(2)=size(cornerlon3DR4,3)
+               corner2DR4(1:datadims(1),1:datadims(2)) = cornerlon3DR4(1,:,:)
+               if (total(1) > datadims(1)) then
+                    corner2DR4(total(1), 1:datadims(2)) = cornerlon3DR4(2,datadims(1),:)
+               end if
+               if (total(2) > datadims(2)) then
+                   corner2DR4(1:datadims(1), total(2)) = cornerlon3DR4(4,:,datadims(2))
+               end if
+               if (total(1) > datadims(1) .and. total(2) > datadims(2)) then
+                   corner2DR4(total(1),total(2))=cornerlon3DR4(3, datadims(1), datadims(2))
+               endif
+
+               call pack_and_send_float2DR4(vm, total, regDecomp(1), PetNo, corner2DR4, fptrlonR4, dims1)
+
+               corner2DR4(1:datadims(1),1:datadims(2)) = cornerlat3DR4(1,:,:)
+               if (total(1) > datadims(1)) then
+                    corner2DR4(total(1), 1:datadims(2)) = cornerlat3DR4(2,datadims(1),:)
+               end if
+               if (total(2) > datadims(2)) then
+                   corner2DR4(1:datadims(1), total(2)) = cornerlat3DR4(4,:,datadims(2))
+               end if
+               if (total(1) > datadims(1) .and. total(2) > datadims(2)) then
+                   corner2DR4(total(1),total(2))=cornerlat3DR4(3, datadims(1), datadims(2))
+               endif
+               call pack_and_send_float2DR4(vm, total, regDecomp(1), PetNo, corner2DR4, fptrlatR4, dims1)
+               deallocate(dims1, minind)
+             else ! mod(PetNo, regDecomp(1))==0
+               call ESMF_GridGet(grid, ESMF_STAGGERLOC_CORNER, 0, exclusiveLBound=lbnd, &
+                  exclusiveUBound=ubnd, exclusiveCount=total, rc=localrc)
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                   ESMF_CONTEXT, rcToReturn=rc)) return
+               allocate(recvbufR4(total(1)*total(2)))
+
+               ! First, send the xdim of the local array to the localroot
+               call ESMF_VMSend(vm, total, 1, localroot, rc=localrc)
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+               ! Longitude coordinates
+               call ESMF_VMRecv(vm, recvbufR4, total(1)*total(2), localroot, rc=localrc)
+               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                    ESMF_CONTEXT, rcToReturn=rc)) return
+                 k=1
+                 do i=lbnd(2),ubnd(2)
+                   do j=lbnd(1),ubnd(1)
+                     fptrlonR4(j,i) = recvbufR4(k)
+                     k=k+1
+                   enddo
+                 enddo
+                 ! Latitude coordinates
+                 call ESMF_VMRecv(vm, recvbufR4, total(1)*total(2), localroot, rc=localrc)
+                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                     ESMF_CONTEXT, rcToReturn=rc)) return
+                 k=1
+                 do i=lbnd(2),ubnd(2)
+                   do j=lbnd(1),ubnd(1)
+                     fptrlatR4(j,i) = recvbufR4(k)
+                     k=k+1
+                   enddo
+                 enddo
+                 deallocate(recvbufR4)
+               endif  ! end if (mod(PetNo, RegDecomp(1))==0)
+             endif    ! end if (decnt>0)
+           endif      ! end if (localAddCornerStagger) then
+        endif         ! end if (localCoordTypeKind == ESMF_TYPEKIND_R8)
+      endif           ! end if ndims == 2
 
       ! Only add mask if localAddMask = .TRUE.
       ! This code is common whether it is ndims=1 or ndims=2

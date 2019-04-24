@@ -316,10 +316,10 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Grid creation from file ESMF_FILEFORMAT_GRIDSPEC with default regDecomp Test"
+  write(name, *) "Grid creation from a regular structured grid in GRIDSPEC format with default ESMF_TYPEKIND_R8"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
-  grid=ESMF_GridCreate('data/horizontal_grid.tile6.nc', ESMF_FILEFORMAT_GRIDSPEC, rc=rc)
+  grid=ESMF_GridCreate('data/GRIDSPEC_1x1.nc', rc=rc)
 #ifdef ESMF_NETCDF
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
@@ -329,7 +329,46 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Grid creation from file ESMF_FILEFORMAT_GRIDSPEC with custom regDecomp Test"
+  write(name, *) "Grid creation from a regular structured grid in GRIDSPEC format with coordTypeKind=ESMF_TYPEKIND_R4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  grid=ESMF_GridCreate('data/GRIDSPEC_1x1.nc', coordTypeKind=ESMF_TYPEKIND_R4, rc=rc)
+#ifdef ESMF_NETCDF
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Grid creation from file ESMF_FILEFORMAT_GRIDSPEC with default ESMF_TYPEKIND_R8"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  grid=ESMF_GridCreate('data/RCM3_CF_CART2D.nc', rc=rc)
+#ifdef ESMF_NETCDF
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Grid creation from file ESMF_FILEFORMAT_GRIDSPEC with coordTypeKind=ESMF_TYPEKIND_R4"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  grid=ESMF_GridCreate('data/RCM3_CF_CART2D.nc', coordTypeKind=ESMF_TYPEKIND_R4, rc=rc)
+#ifdef ESMF_NETCDF
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
+#endif
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Supergrid creation from file ESMF_FILEFORMAT_GRIDSPEC with custom regDecomp Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   grid=ESMF_GridCreate('data/horizontal_grid.tile6.nc', &
@@ -348,7 +387,7 @@ program ESMF_GridCreateUTest
 
   !-----------------------------------------------------------------------------
   !NEX_UTest
-  write(name, *) "Grid creation from file ESMF_FILEFORMAT_GRIDSPEC with custom regDecomp < petCount Test"
+  write(name, *) "Supergrid creation from file ESMF_FILEFORMAT_GRIDSPEC with custom regDecomp < petCount Test"
   write(failMsg, *) "Did not return ESMF_SUCCESS"
 
   grid=ESMF_GridCreate('data/horizontal_grid.tile6.nc', &
