@@ -1995,6 +1995,7 @@ module NUOPC_Comp
     ! local variables
     integer                         :: localrc
     character(ESMF_MAXSTR)          :: lName, valueString
+    integer                         :: max, high, low
     
     ! query the component for its name
     call ESMF_GridCompGet(comp, name=lName, rc=localrc)
@@ -2012,6 +2013,26 @@ module NUOPC_Comp
     if (present(verbosity)) then
       ! initialize the output value
       verbosity = 0
+      ! query the component for its kind
+      call NUOPC_CompAttributeGet(comp, name="Kind", value=valueString, &
+        rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
+        return  ! bail out
+      ! set component kind specific verbosity levels
+      if (trim(valueString)=="Driver") then
+        max   = 131071  ! all 16 lower bits set
+        high  =  32513  ! bits 0, 8, 9, 10, 11, 12, 13, 14
+        low   =   9985  ! bits 0, 8, 9, 10, 13 
+      else if (trim(valueString)=="Model") then
+        max   = 131071  ! all 16 lower bits set
+        high  =  32513  ! bits 0, 8, 9, 10, 11, 12, 13, 14
+        low   =   9985  ! bits 0, 8, 9, 10, 13 
+      else if (trim(valueString)=="Mediator") then
+        max   = 131071  ! all 16 lower bits set
+        high  =  32513  ! bits 0, 8, 9, 10, 11, 12, 13, 14
+        low   =   9985  ! bits 0, 8, 9, 10, 13 
+      endif
       ! query the component for Verbosity
       call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
         rc=localrc)
@@ -2019,8 +2040,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       verbosity = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"high", "max "/), &
-        specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+        specialStringList=(/"max ", "high", "low ", "off "/), &
+        specialValueList=(/max, high, low, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
@@ -2091,7 +2112,8 @@ module NUOPC_Comp
     ! local variables
     integer                         :: localrc
     character(ESMF_MAXSTR)          :: lName, valueString
-    
+    integer                         :: max, high, low
+
     ! query the component for its name
     call ESMF_CplCompGet(comp, name=lName, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2108,6 +2130,10 @@ module NUOPC_Comp
     if (present(verbosity)) then
       ! initialize the output value
       verbosity = 0
+      ! set specific verbosity levels
+      max   = 131071  ! all 16 lower bits set
+      high  =  65281  ! bits 0, 8, 9, 10, 11, 12, 13, 14, 15
+      low   =   8193  ! bits 0, 13
       ! query the component for Verbosity
       call NUOPC_CompAttributeGet(comp, name="Verbosity", value=valueString, &
         rc=localrc)
@@ -2115,8 +2141,8 @@ module NUOPC_Comp
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
         return  ! bail out
       verbosity = ESMF_UtilString2Int(valueString, &
-        specialStringList=(/"high", "max "/), &
-        specialValueList=(/131071, 131071/), &  ! all 16 lower bits set
+        specialStringList=(/"max ", "high", "low ", "off "/), &
+        specialValueList=(/max, high, low, 0/), &
         rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(lName)//":"//FILENAME, rcToReturn=rc)) &
