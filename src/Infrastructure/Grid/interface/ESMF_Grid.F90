@@ -7110,6 +7110,7 @@ end function ESMF_GridCreateFrmScrip
     logical                                    :: isGlobal
     logical                                    :: isSupergrid
     real(kind=ESMF_KIND_R8),  pointer          :: lonPtr(:,:), latPtr(:,:)
+    real(kind=ESMF_KIND_R4),  pointer          :: lonPtrR4(:,:), latPtrR4(:,:)
     integer                                    :: localDe, deCount, s
     integer                                    :: sizex, sizey
     type(ESMF_StaggerLoc), allocatable         :: staggerLocList(:)
@@ -7194,6 +7195,7 @@ end function ESMF_GridCreateFrmScrip
           minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
           indexflag=indexflag, &
           coordSys=ESMF_COORDSYS_SPH_DEG, &
+          coordTypeKind = localCoordTypeKind, &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7202,6 +7204,7 @@ end function ESMF_GridCreateFrmScrip
           minIndex=(/1,1/), maxIndex=(/sizex,sizey/), &
           indexflag=indexflag, &
           coordSys=ESMF_COORDSYS_SPH_DEG, &
+          coordTypeKind = localCoordTypeKind, &
           rc=localrc)
         if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
           ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7235,27 +7238,51 @@ end function ESMF_GridCreateFrmScrip
          call ESMF_GridAddCoord(grid, staggerloc=staggerLocList(s), rc=localrc)
          if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
               ESMF_CONTEXT, rcToReturn=rc)) return
-         do localDe = 0,decnt-1
-           call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
-                staggerloc=staggerLocList(s), farrayPtr=lonPtr, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
+         if (localCoordTypeKind == ESMF_TYPEKIND_R8) then
+           do localDe = 0,decnt-1
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                  staggerloc=staggerLocList(s), farrayPtr=lonPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
 
-           start(1)=minIndexPDe(1,demap(localDe)+1)
-           start(2)=minIndexPDe(2,demap(localDe)+1)
-           count=ubound(lonPtr)-lbound(lonPtr)+1
-           call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
-                staggerloc=staggerLocList(s), farrayPtr=latPtr, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-           ! Generate glocal edge coordinates and local center coordinates
-           ! need to adjust the count???
-           call ESMF_GridSpecReadStagger(trim(grid_filename),sizex, sizey, lonPtr, latPtr, &
-                staggerLoc=staggerLocList(s), &
-                start=start, count=count, rc=localrc)
-           if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-                ESMF_CONTEXT, rcToReturn=rc)) return
-         enddo
+             start(1)=minIndexPDe(1,demap(localDe)+1)
+             start(2)=minIndexPDe(2,demap(localDe)+1)
+             count=ubound(lonPtr)-lbound(lonPtr)+1
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                  staggerloc=staggerLocList(s), farrayPtr=latPtr, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+             ! Generate glocal edge coordinates and local center coordinates
+             ! need to adjust the count???
+             call ESMF_GridSpecReadStagger(trim(grid_filename),sizex, sizey, lonPtr, latPtr, &
+                  staggerLoc=staggerLocList(s), &
+                  start=start, count=count, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+           enddo
+	 else ! localCoordTypeKind == ESMF_TYPEKIND_R4
+           do localDe = 0,decnt-1
+             call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+                  staggerloc=staggerLocList(s), farrayPtr=lonPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+
+             start(1)=minIndexPDe(1,demap(localDe)+1)
+             start(2)=minIndexPDe(2,demap(localDe)+1)
+             count=ubound(lonPtrR4)-lbound(lonPtrR4)+1
+             call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+                  staggerloc=staggerLocList(s), farrayPtr=latPtrR4, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+             ! Generate glocal edge coordinates and local center coordinates
+             ! need to adjust the count???
+             call ESMF_GridSpecReadStagger(trim(grid_filename),sizex, sizey, lonPtrR4, latPtrR4, &
+                  staggerLoc=staggerLocList(s), &
+                  start=start, count=count, rc=localrc)
+             if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+                  ESMF_CONTEXT, rcToReturn=rc)) return
+           enddo
+         endif ! localCoordTypeKind == ESMF_TYPEKIND_RR
       enddo
       deallocate(minIndexPDe, maxIndexPDe, demap, staggerLocList)
     else  ! a regular CF Grid file containing center stagger 
@@ -7455,13 +7482,13 @@ end function ESMF_GridCreateFrmScrip
             if (localAddCornerStagger) then
               allocate(loncoord1DR4(gridims(1)), latcoord1DR4(gridims(2)))
               allocate(cornerlon2DR4(2,gridims(1)), cornerlat2DR4(2, gridims(2)))
-              call ESMF_GridspecGetVar1DR4(grid_filename, coordids, loncoord1DR4, latcoord1DR4,&
+              call ESMF_GridspecGetVar1D(grid_filename, coordids, loncoord1DR4, latcoord1DR4,&
                                     cornerlon=cornerlon2DR4, cornerlat=cornerlat2DR4, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
             else
               allocate(loncoord1DR4(gridims(1)), latcoord1DR4(gridims(2)))
-              call ESMF_GridspecGetVar1DR4(grid_filename, coordids, loncoord1DR4, latcoord1DR4,&
+              call ESMF_GridspecGetVar1D(grid_filename, coordids, loncoord1DR4, latcoord1DR4,&
                                     rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7824,7 +7851,7 @@ end function ESMF_GridCreateFrmScrip
               allocate(loncoord2DR4(total(1),total(2)), latcoord2DR4(total(1),total(2)))
               if (localAddCornerStagger) then
                 allocate(cornerlon3DR4(4,total(1),total(2)), cornerlat3DR4(4, total(1), total(2)))
-                call ESMF_GridspecGetVar2DR4(grid_filename, coordids, &
+                call ESMF_GridspecGetVar2D(grid_filename, coordids, &
                                     loncoord=loncoord2DR4, latcoord=latcoord2DR4, &
                                     cornerlon=cornerlon3DR4, cornerlat=cornerlat3DR4, &
                                     start=minind(:,PetNo+1), count=total, &
@@ -7832,7 +7859,7 @@ end function ESMF_GridCreateFrmScrip
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
               else
-                call ESMF_GridspecGetVar2DR4(grid_filename, coordids,  &
+                call ESMF_GridspecGetVar2D(grid_filename, coordids,  &
                                     loncoord=loncoord2DR4, latcoord=latcoord2DR4, &
                                     start=minind(:,PetNo+1), count=total, &
                                     rc=localrc)
@@ -8100,7 +8127,7 @@ end function ESMF_GridCreateFrmScrip
            deallocate(maskbuf)
         endif
       endif
-    endif
+    endif ! if (isSuperGrid)
 
     ESMF_GridCreateFrmGridspec = grid
 
