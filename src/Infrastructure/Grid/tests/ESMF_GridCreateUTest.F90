@@ -270,6 +270,10 @@ program ESMF_GridCreateUTest
 
   grid=ESMF_GridCreate('data/T42_grid.nc',ESMF_FILEFORMAT_SCRIP,rc=rc)
 #ifdef ESMF_NETCDF
+
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -288,6 +292,9 @@ program ESMF_GridCreateUTest
     call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   else
 #ifdef ESMF_NETCDF
+    call ESMF_GridDestroy(grid,rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
     write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -307,6 +314,8 @@ program ESMF_GridCreateUTest
     call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   else
 #ifdef ESMF_NETCDF
+    call ESMF_GridDestroy(grid,rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
     write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -321,6 +330,9 @@ program ESMF_GridCreateUTest
 
   grid=ESMF_GridCreate('data/GRIDSPEC_1x1.nc', rc=rc)
 #ifdef ESMF_NETCDF
+
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -334,6 +346,8 @@ program ESMF_GridCreateUTest
 
   grid=ESMF_GridCreate('data/GRIDSPEC_1x1.nc', coordTypeKind=ESMF_TYPEKIND_R4, rc=rc)
 #ifdef ESMF_NETCDF
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -347,6 +361,8 @@ program ESMF_GridCreateUTest
 
   grid=ESMF_GridCreate('data/RCM3_CF_CART2D.nc', rc=rc)
 #ifdef ESMF_NETCDF
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -360,6 +376,8 @@ program ESMF_GridCreateUTest
 
   grid=ESMF_GridCreate('data/RCM3_CF_CART2D.nc', coordTypeKind=ESMF_TYPEKIND_R4, rc=rc)
 #ifdef ESMF_NETCDF
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
   write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -378,6 +396,8 @@ program ESMF_GridCreateUTest
     call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   else
 #ifdef ESMF_NETCDF
+    call ESMF_GridDestroy(grid,rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
     write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -397,6 +417,8 @@ program ESMF_GridCreateUTest
     call ESMF_Test((rc/=ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   else
 #ifdef ESMF_NETCDF
+    call ESMF_GridDestroy(grid,rc=localrc)
+    if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
     call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 #else
     write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
@@ -2917,7 +2939,7 @@ program ESMF_GridCreateUTest
       deallocate(lonDiff, latDiff, mean)
 
       !print *, localPet, localDe, 'min/max/mean:', lonmin, latmin, lonmax, latmax, lonmean, latmean
-      if (lonmean > threshhold .and. latmean > threshhold) rc = ESMF_FAILURE
+      if (lonmean > threshhold .or. latmean > threshhold) rc = ESMF_FAILURE
     enddo
   enddo
 
@@ -2928,6 +2950,78 @@ program ESMF_GridCreateUTest
   if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
 
   call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#endif
+
+  !-----------------------------------------------------------------------------
+  !NEX_UTest
+  write(name, *) "Test ESMF_GridCreate with different coordTypeKind with GRIDSPEC supergrid tile file"
+  write(failMsg, *) "Did not return ESMF_SUCCESS"
+
+  grid=ESMF_GridCreate('data/horizontal_grid.tile6.nc', &
+    ESMF_FILEFORMAT_GRIDSPEC, coordTypeKind=ESMF_TYPEKIND_R4, rc=rc)
+
+#ifdef ESMF_NETCDF
+
+  call ESMF_GridGet(grid, distgrid = distgrid, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_DistGridGet(distgrid, delayout = delayout, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+ 
+  call ESMF_DELayoutGet(delayout, localDeCount = decount, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  grid2=ESMF_GridCreate('data/horizontal_grid.tile6.nc', &
+    ESMF_FILEFORMAT_GRIDSPEC, coordTypeKind=ESMF_TYPEKIND_R8, rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  
+  threshhold = 1.0E-5
+
+  do localDe = 0, decount-1  
+      call ESMF_GridGetCoord(grid2, coordDim=1, localDe=localDe, &
+         staggerloc=ESMF_STAGGERLOC_CENTER, farrayPtr=lonPtrR8, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      call ESMF_GridGetCoord(grid2, coordDim=2, localDe=localDe, &
+         staggerloc=ESMF_STAGGERLOC_CENTER, farrayPtr=latPtrR8, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      call ESMF_GridGetCoord(grid, coordDim=1, localDe=localDe, &
+       staggerloc=ESMF_STAGGERLOC_CENTER, farrayPtr=lonPtrR4, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+      call ESMF_GridGetCoord(grid, coordDim=2, localDe=localDe, &
+         staggerloc=ESMF_STAGGERLOC_CENTER, farrayPtr=latPtrR4, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+      allocate(lonDiff(size(lonPtrR8,1), size(lonPtrR8,2)))
+      allocate(latDiff(size(lonPtrR8,1), size(lonPtrR8,2)))
+      total = size(lonPtrR8,1)*size(lonPtrR8,2)
+      lonDiff = abs(lonPtrR8-lonPtrR4)
+      latDiff = abs(latPtrR8-latPtrR4)
+
+      ! Find the mean errors
+      allocate(mean(size(lonDiff,2)))
+      do  j=1, size(lonDiff,2)
+      	 mean(j) = sum(lonDiff(:,j))
+      enddo
+      lonmean = sum(mean)/total
+      do j=1, size(latDiff,2)
+      	 mean(j) = sum(latDiff(:,j))
+      enddo
+      latmean = sum(mean)/total
+      
+      deallocate(lonDiff, latDiff, mean)
+
+      if (lonmean > threshhold .or. latmean > threshhold) rc = ESMF_FAILURE
+  enddo
+
+  call ESMF_GridDestroy(grid,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+  call ESMF_GridDestroy(grid2,rc=localrc)
+  if (localrc .ne. ESMF_SUCCESS) rc=ESMF_FAILURE
+
+  call ESMF_Test((rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+#else
+  write(failMsg, *) "Did not return ESMF_RC_LIB_NOT_PRESENT"
+  call ESMF_Test((rc==ESMF_RC_LIB_NOT_PRESENT), name, failMsg, result, ESMF_SRCLINE) 
 #endif
 
   call ESMF_TestEnd(ESMF_SRCLINE)
