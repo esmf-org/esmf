@@ -149,11 +149,7 @@ ESMF_F90COMPILEFIXCPP    = -fixed -fpp
 ############################################################
 # Set rpath syntax
 #
-ifeq ($(ESMF_COMM),openmpi)
-ESMF_F90RPATHPREFIX         = -Wl,-rpath,
-else
 ESMF_F90RPATHPREFIX         = -Wl,-Wl,,-rpath,,
-endif
 ESMF_CXXRPATHPREFIX         = -Wl,-rpath,
 
 ############################################################
@@ -180,11 +176,7 @@ ESMF_CXXLINKLIBS += -lrt -ldl $(shell $(ESMF_DIR)/scripts/libs.nag $(ESMF_F90COM
 # Linker option that ensures that the specified libraries are 
 # used to also resolve symbols needed by other libraries.
 #
-ifeq ($(ESMF_COMM),openmpi)
-ESMF_F90LINKOPTS          += -Wl,--no-as-needed
-else
 ESMF_F90LINKOPTS          += -Wl,-Wl,,--no-as-needed
-endif
 ESMF_CXXLINKOPTS          += -Wl,--no-as-needed
 
 ############################################################
