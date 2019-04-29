@@ -5935,7 +5935,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      regridding. If not specified, defaults to false.
 ! \item[{[coordTypeKind]}]
 !          The type/kind of the grid coordinate data. Only ESMF\_TYPEKIND\_R4
-!          and ESMF\_TYPEKIND\_R8 are allowed.  Currently, ESMF\_TYPEKIND_R4 is only
+!          and ESMF\_TYPEKIND\_R8 are allowed.  Currently, ESMF\_TYPEKIND\_R4 is only
 !          supported for the GRIDSPEC fileformat. 
 !          If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[addUserArea]}]
@@ -6253,7 +6253,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      regridding. If not specified, defaults to false.
 ! \item[{[coordTypeKind]}]
 !          The type/kind of the grid coordinate data. Only ESMF\_TYPEKIND\_R4
-!          and ESMF\_TYPEKIND\_R8 are allowed.  Currently, ESMF\_TYPEKIND_R4 is only
+!          and ESMF\_TYPEKIND\_R8 are allowed.  Currently, ESMF\_TYPEKIND\_R4 is only
 !          supported for the GRIDSPEC fileformat. 
 !          If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[addUserArea]}]
