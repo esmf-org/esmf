@@ -521,7 +521,7 @@ module NUOPC_Connector
           ! providing a field wants to provide a grid, then the accepting
           ! component should not try to provide its own grid
           call NUOPC_GetAttribute(providerFieldList(i), &
-            name="TransferOffer", value=providerTransferOffer, rc=rc)
+            name="TransferOfferGeomObject", value=providerTransferOffer, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -546,7 +546,7 @@ module NUOPC_Connector
           endif
           call NUOPC_Advertise(acceptorState, &
             StandardName=trim(providerStandardNameList(i)), &
-            TransferOffer=acceptorTransferOffer, vm=acceptorVM, rc=rc)
+            TransferOfferGeomObject=acceptorTransferOffer, vm=acceptorVM, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
@@ -1550,11 +1550,11 @@ module NUOPC_Connector
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         
         ! coordinate the transfer and sharing between components
-        call NUOPC_GetAttribute(iField, name="TransferOffer", &
+        call NUOPC_GetAttribute(iField, name="TransferOfferGeomObject", &
           value=iTransferOffer, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call NUOPC_GetAttribute(eField, name="TransferOffer", &
+        call NUOPC_GetAttribute(eField, name="TransferOfferGeomObject", &
           value=eTransferOffer, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -1563,11 +1563,11 @@ module NUOPC_Connector
           if (trim(eTransferOffer)=="will provide") then
             ! -> both sides must provide
             call NUOPC_SetAttribute(iField, &
-              name="TransferAction", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_SetAttribute(eField, &
-              name="TransferAction", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,12)) then
@@ -1582,11 +1582,11 @@ module NUOPC_Connector
             ! -> import side must provide, export side must accept
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
-              name="TransferAction", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_SetAttribute(eField, &
-              name="TransferAction", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,12)) then
@@ -1601,11 +1601,11 @@ module NUOPC_Connector
             ! -> import side must provide, export side must accept
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
-              name="TransferAction", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_SetAttribute(eField, &
-              name="TransferAction", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,12)) then
@@ -1622,11 +1622,11 @@ module NUOPC_Connector
             ! -> import side must accept, export side must provide
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
-              name="TransferAction", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_SetAttribute(eField, &
-              name="TransferAction", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,12)) then
@@ -1641,11 +1641,11 @@ module NUOPC_Connector
             ! -> import side must provide, export side must accept
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
-              name="TransferAction", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_SetAttribute(eField, &
-              name="TransferAction", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,12)) then
@@ -1660,11 +1660,11 @@ module NUOPC_Connector
             ! -> import side must provide, export side must accept
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
-              name="TransferAction", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_SetAttribute(eField, &
-              name="TransferAction", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,12)) then
@@ -1681,11 +1681,11 @@ module NUOPC_Connector
             ! -> import side must accept, export side must provide
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
-              name="TransferAction", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_SetAttribute(eField, &
-              name="TransferAction", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,12)) then
@@ -1700,11 +1700,11 @@ module NUOPC_Connector
             ! -> import side must accept, export side must provide
             acceptFlag=.true.
             call NUOPC_SetAttribute(iField, &
-              name="TransferAction", value="accept", rc=rc)
+              name="TransferActionGeomObject", value="accept", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             call NUOPC_SetAttribute(eField, &
-              name="TransferAction", value="provide", rc=rc)
+              name="TransferActionGeomObject", value="provide", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
             if (btest(verbosity,12)) then
@@ -2123,11 +2123,11 @@ module NUOPC_Connector
         eField=exportFieldList(eMatch)
         
         ! check if TransferAction of one side is "accept"
-        call NUOPC_GetAttribute(iField, name="TransferAction", &
+        call NUOPC_GetAttribute(iField, name="TransferActionGeomObject", &
           value=iTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call NUOPC_GetAttribute(eField, name="TransferAction", &
+        call NUOPC_GetAttribute(eField, name="TransferActionGeomObject", &
           value=eTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2382,9 +2382,9 @@ module NUOPC_Connector
             call NUOPC_Realize(acceptorState, acceptorField, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            ! reset the TransferAction for this completed field
+            ! reset the TransferActionGeomObject for this completed field
             call NUOPC_SetAttribute(acceptorField, &
-              name="TransferAction", value="complete", rc=rc)
+              name="TransferActionGeomObject", value="complete", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
@@ -2546,9 +2546,9 @@ module NUOPC_Connector
             call NUOPC_Realize(acceptorState, acceptorField, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-            ! reset the TransferAction for this completed field
+            ! reset the TransferActionGeomObject for this completed field
             call NUOPC_SetAttribute(acceptorField, &
-              name="TransferAction", value="complete", rc=rc)
+              name="TransferActionGeomObject", value="complete", rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
@@ -2918,11 +2918,11 @@ module NUOPC_Connector
         eField=exportFieldList(eMatch)
 
         ! check if TransferAction of one side is "accept"
-        call NUOPC_GetAttribute(iField, name="TransferAction", &
+        call NUOPC_GetAttribute(iField, name="TransferActionGeomObject", &
           value=iTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-        call NUOPC_GetAttribute(eField, name="TransferAction", &
+        call NUOPC_GetAttribute(eField, name="TransferActionGeomObject", &
           value=eTransferAction, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -3097,11 +3097,11 @@ module NUOPC_Connector
         ! attributes on the acceptorField, just in case this Field interacts on
         ! multiple levels of a component hierarchy.
         call NUOPC_SetAttribute(acceptorField, &
-          name="TransferOffer", value="will provide", rc=rc)
+          name="TransferOfferGeomObject", value="will provide", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         call NUOPC_SetAttribute(acceptorField, &
-          name="TransferAction", value="provide", rc=rc)
+          name="TransferActionGeomObject", value="provide", rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
