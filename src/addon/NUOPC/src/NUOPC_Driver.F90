@@ -496,7 +496,7 @@ module NUOPC_Driver
     logical                   :: needConnector
     integer                   :: rootPet, rootVas
     type(ESMF_VM)             :: vm
-    character(ESMF_MAXSTR)    :: name
+    character(ESMF_MAXSTR)    :: name, valueString
     character(ESMF_MAXSTR)    :: msgString, pLabel
     integer                   :: phase
     integer                   :: verbosity, vInherit
@@ -864,13 +864,30 @@ module NUOPC_Driver
                 comp=connector, petList=petList, relaxedflag=.true., rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
                 line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
-              ! automatically created connectors inherit lower 8-bit
-              ! of parent's verbosity setting
-              vInherit = ibits(verbosity,0,8)
-#if 0
-vInherit = ibset(vInherit,10) ! turn on CplList construction verbosity
-#endif
-              write(vString,"(I10)") vInherit
+              ! automatically created connectors inherit Verbosity from parent
+              call NUOPC_CompAttributeGet(gcomp, name="Verbosity", &
+                value=valueString, rc=rc)
+              if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail
+              if (trim(valueString)=="max" .or. trim(valueString)=="high" .or. &
+                trim(valueString)=="low" .or. trim(valueString)=="off") then
+                ! directly inherit presets
+                vString = trim(valueString)
+              else
+                ! not a present: lower 8-bit of parent's verbosity setting
+                vInherit = ibits(verbosity,0,8)
+                write(vString,"(I10)") vInherit
+              endif
+              if (btest(verbosity,13)) then
+                write (msgString,"(A)") trim(name)//&
+                  " - Setting verbosity on created component to: "// &
+                  trim(vString)
+                call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
+                if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+                  line=__LINE__, &
+                  file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
+                  return  ! bail out
+              endif
               call NUOPC_CompAttributeSet(connector, name="Verbosity", &
                 value=vString, rc=rc)
               if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
