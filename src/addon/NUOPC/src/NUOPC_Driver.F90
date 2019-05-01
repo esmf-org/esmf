@@ -5919,7 +5919,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     logical                   :: stateIsCreated
-    logical                   :: needMirror
+    logical                   :: isSet, needMirror
     character(len=80)         :: hierarchyProtocol
 
     rc = ESMF_SUCCESS
@@ -5935,11 +5935,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
-      isSet=needMirror, rc=rc)
+      isSet=isSet, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    needMirror = .not.needMirror  ! by default request mirroring
+    needMirror = .not.isSet  ! by default request mirroring
     
     if (.not.needMirror) then
       ! see if HieraryProtocol attribute explicitly requests mirroring
@@ -6200,7 +6200,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     logical                   :: stateIsCreated
-    logical                   :: needMirror
+    logical                   :: isSet, needMirror
     character(len=80)         :: hierarchyProtocol
 
     rc = ESMF_SUCCESS
@@ -6216,11 +6216,11 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
     call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
-      isSet=needMirror, rc=rc)
+      isSet=isSet, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    needMirror = .not.needMirror  ! by default request mirroring
+    needMirror = .not.isSet  ! by default request mirroring
     
     if (.not.needMirror) then
       ! see if HieraryProtocol attribute explicitly requests mirroring
