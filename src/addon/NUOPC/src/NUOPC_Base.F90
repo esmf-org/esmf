@@ -2827,24 +2827,20 @@ module NUOPC_Base
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
 #if 0
-          call NUOPC_GetAttribute(field, name="TransferActionField", &
+          call NUOPC_GetAttribute(field, name="TransferAction", &
             value=value, rc=localrc)
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
-            " ***: TransferActionField", ESMF_LOGMSG_INFO, rc=localrc)
+            " ***: TransferAction", ESMF_LOGMSG_INFO, rc=localrc)
           call NUOPC_GetAttribute(field, name="ShareStatusField", &
             value=value, rc=localrc)
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
             " ***: ShareStatusField", ESMF_LOGMSG_INFO, rc=localrc)
-          call NUOPC_GetAttribute(field, name="TransferActionGeomObject", &
-            value=value, rc=localrc)
-          call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
-            " ***: TransferActionGeomObject", ESMF_LOGMSG_INFO, rc=localrc)
           call NUOPC_GetAttribute(field, name="ShareStatusGeomObject", &
             value=value, rc=localrc)
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
             " ***: ShareStatusGeomObject:", ESMF_LOGMSG_INFO, rc=localrc)
 #endif
-          call NUOPC_GetAttribute(field, name="TransferActionField", &
+          call NUOPC_GetAttribute(field, name="TransferAction", &
             value=value, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
