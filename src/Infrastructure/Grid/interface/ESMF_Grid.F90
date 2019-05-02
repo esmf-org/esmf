@@ -5935,7 +5935,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      regridding. If not specified, defaults to false.
 ! \item[{[coordTypeKind]}]
 !          The type/kind of the grid coordinate data. Only ESMF\_TYPEKIND\_R4
-!          and ESMF\_TYPEKIND\_R8 are allowed.  Currently, ESMF\_TYPEKIND_R4 is only
+!          and ESMF\_TYPEKIND\_R8 are allowed.  Currently, ESMF\_TYPEKIND\_R4 is only
 !          supported for the GRIDSPEC fileformat. 
 !          If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[addUserArea]}]
@@ -6253,7 +6253,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !      regridding. If not specified, defaults to false.
 ! \item[{[coordTypeKind]}]
 !          The type/kind of the grid coordinate data. Only ESMF\_TYPEKIND\_R4
-!          and ESMF\_TYPEKIND\_R8 are allowed.  Currently, ESMF\_TYPEKIND_R4 is only
+!          and ESMF\_TYPEKIND\_R8 are allowed.  Currently, ESMF\_TYPEKIND\_R4 is only
 !          supported for the GRIDSPEC fileformat. 
 !          If not specified then defaults to ESMF\_TYPEKIND\_R8.
 ! \item[{[addUserArea]}]
@@ -7482,13 +7482,13 @@ end function ESMF_GridCreateFrmScrip
             if (localAddCornerStagger) then
               allocate(loncoord1DR4(gridims(1)), latcoord1DR4(gridims(2)))
               allocate(cornerlon2DR4(2,gridims(1)), cornerlat2DR4(2, gridims(2)))
-              call ESMF_GridspecGetVar1D(grid_filename, coordids, loncoord1DR4, latcoord1DR4,&
+              call ESMF_GridspecGetVar1DR4(grid_filename, coordids, loncoord1DR4, latcoord1DR4,&
                                     cornerlon=cornerlon2DR4, cornerlat=cornerlat2DR4, rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                   ESMF_CONTEXT, rcToReturn=rc)) return
             else
               allocate(loncoord1DR4(gridims(1)), latcoord1DR4(gridims(2)))
-              call ESMF_GridspecGetVar1D(grid_filename, coordids, loncoord1DR4, latcoord1DR4,&
+              call ESMF_GridspecGetVar1DR4(grid_filename, coordids, loncoord1DR4, latcoord1DR4,&
                                     rc=localrc)
               if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                 ESMF_CONTEXT, rcToReturn=rc)) return
@@ -7851,7 +7851,7 @@ end function ESMF_GridCreateFrmScrip
               allocate(loncoord2DR4(total(1),total(2)), latcoord2DR4(total(1),total(2)))
               if (localAddCornerStagger) then
                 allocate(cornerlon3DR4(4,total(1),total(2)), cornerlat3DR4(4, total(1), total(2)))
-                call ESMF_GridspecGetVar2D(grid_filename, coordids, &
+                call ESMF_GridspecGetVar2DR4(grid_filename, coordids, &
                                     loncoord=loncoord2DR4, latcoord=latcoord2DR4, &
                                     cornerlon=cornerlon3DR4, cornerlat=cornerlat3DR4, &
                                     start=minind(:,PetNo+1), count=total, &
@@ -7859,7 +7859,7 @@ end function ESMF_GridCreateFrmScrip
                 if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
                       ESMF_CONTEXT, rcToReturn=rc)) return
               else
-                call ESMF_GridspecGetVar2D(grid_filename, coordids,  &
+                call ESMF_GridspecGetVar2DR4(grid_filename, coordids,  &
                                     loncoord=loncoord2DR4, latcoord=latcoord2DR4, &
                                     start=minind(:,PetNo+1), count=total, &
                                     rc=localrc)

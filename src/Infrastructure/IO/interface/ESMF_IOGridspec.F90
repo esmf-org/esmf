@@ -58,42 +58,9 @@
   public ESMF_GridspecInq
   public ESMF_GridspecGetVarByName
   public ESMF_GridspecGetVar1D  
+  public ESMF_GridspecGetVar1DR4  
   public ESMF_GridspecGetVar2D
-
-! -------------------------- ESMF-public method -------------------------------
-!BOPI
-! !IROUTINE: ESMF_GridspecGetVar1D -- Generic interface
-
-! !INTERFACE:
-interface ESMF_GridspecGetVar1D
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      module procedure ESMF_GridspecGetVar1DR8
-      module procedure ESMF_GridspecGetVar1DR4
-
-! !DESCRIPTION:
-! This interface provides a single entry point for the various
-!  types of {\tt ESMF\_GridspecGetVar1D} functions.
-!EOPI
-end interface
-
-!BOPI
-! !IROUTINE: ESMF_GridspecGetVar2D -- Generic interface
-
-! !INTERFACE:
-interface ESMF_GridspecGetVar2D
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      module procedure ESMF_GridspecGetVar2DR8
-      module procedure ESMF_GridspecGetVar2DR4
-
-! !DESCRIPTION:
-! This interface provides a single entry point for the various
-!  types of {\tt ESMF\_GridspecGetVar2D} functions.
-!EOPI
-end interface
+  public ESMF_GridspecGetVar2DR4
 
 !==============================================================================
 
@@ -384,13 +351,13 @@ end interface
 end subroutine ESMF_GridspecInq
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridspecGetVar1DR8"
+#define ESMF_METHOD "ESMF_GridspecGetVar1D"
 !BOPI
-! !ROUTINE: ESMF_GridspecGetVar1DR8
+! !ROUTINE: ESMF_GridspecGetVar1D
 !
 
 ! !INTERFACE:
-  subroutine ESMF_GridspecGetVar1DR8(grid_filename, varids, loncoord, latcoord, &
+  subroutine ESMF_GridspecGetVar1D(grid_filename, varids, loncoord, latcoord, &
                         cornerlon, cornerlat, rc)
 !
 ! !ARGUMENTS:
@@ -513,7 +480,7 @@ end subroutine ESMF_GridspecInq
     return
 #endif
 
-end subroutine ESMF_GridspecGetVar1DR8
+end subroutine ESMF_GridspecGetVar1D
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridspecGetVar1DR4"
@@ -648,12 +615,12 @@ end subroutine ESMF_GridspecGetVar1DR8
 end subroutine ESMF_GridspecGetVar1DR4
 
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridspecGetVar2DR8"
+#define ESMF_METHOD "ESMF_GridspecGetVar2D"
 !BOPI
-! !ROUTINE: ESMF_GridspecGetVar2DR8
+! !ROUTINE: ESMF_GridspecGetVar2D
 !
 ! !INTERFACE:
-  subroutine ESMF_GridspecGetVar2DR8(grid_filename, varids, loncoord, latcoord, &
+  subroutine ESMF_GridspecGetVar2D(grid_filename, varids, loncoord, latcoord, &
                                   cornerlon, cornerlat, start, count, rc)
 !
 ! !ARGUMENTS:
@@ -830,7 +797,7 @@ end subroutine ESMF_GridspecGetVar1DR4
     return
 #endif
 
-end subroutine ESMF_GridspecGetVar2DR8
+end subroutine ESMF_GridspecGetVar2D
 
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridspecGetVar2DR4"
