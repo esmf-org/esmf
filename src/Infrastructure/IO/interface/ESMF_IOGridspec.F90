@@ -57,8 +57,10 @@
 ! - ESMF-public methods:
   public ESMF_GridspecInq
   public ESMF_GridspecGetVarByName
-  public ESMF_GridspecGetVar1D
+  public ESMF_GridspecGetVar1D  
+  public ESMF_GridspecGetVar1DR4  
   public ESMF_GridspecGetVar2D
+  public ESMF_GridspecGetVar2DR4
 
 !==============================================================================
 
@@ -481,6 +483,138 @@ end subroutine ESMF_GridspecInq
 end subroutine ESMF_GridspecGetVar1D
 
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridspecGetVar1DR4"
+!BOPI
+! !ROUTINE: ESMF_GridspecGetVar1DR4
+!
+
+! !INTERFACE:
+  subroutine ESMF_GridspecGetVar1DR4(grid_filename, varids, loncoord, latcoord, &
+                        cornerlon, cornerlat, rc)
+!
+! !ARGUMENTS:
+    character(len=*), intent(in)  :: grid_filename
+    integer, intent(in)            :: varids(:)
+    real(ESMF_KIND_R4), intent(out) :: loncoord(:)
+    real(ESMF_KIND_R4), intent(out) :: latcoord(:)
+    real(ESMF_KIND_R4), intent(out), optional  :: cornerlon(:,:)
+    real(ESMF_KIND_R4), intent(out), optional  :: cornerlat(:,:)
+    integer, intent(out), optional:: rc
+
+    integer:: ncStatus
+    integer:: gridid, boundId, VarId, totaldims
+    integer:: len, i
+    character(len=256) :: errmsg, boundvar
+    character (len=80)  :: attstr
+
+#ifdef ESMF_NETCDF
+
+    ! Open the grid files
+    ncStatus = nf90_open (path=trim(grid_filename), mode=nf90_nowrite, ncid=gridid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD, &
+      ESMF_SRCLINE,&
+      trim(grid_filename), &
+      rc)) return
+
+    ncStatus = nf90_get_var(gridid, varids(1), loncoord)
+    errmsg = "longitude variable in "//trim(grid_filename)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD, &
+      ESMF_SRCLINE,&
+      errmsg, &
+      rc)) return
+    ncStatus = nf90_get_var(gridid, varids(2), latcoord)
+    errmsg = "latitude variable in "//trim(grid_filename)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD, &
+      ESMF_SRCLINE,&
+      errmsg, &
+      rc)) return
+    
+    if (present(cornerlon)) then
+      ! find the bound variable for lon
+      ncStatus = nf90_inquire_attribute(gridid, varids(1), "bounds", len=len)
+      errmsg = "attribute bounds in "//trim(grid_filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+      ncStatus = nf90_get_att(gridid, varids(1), "bounds", boundvar)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+
+      ncStatus = nf90_inq_varid(gridid, boundvar(1:len), boundId)
+      errmsg = "longitude bound variable in "//trim(grid_filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+      ncStatus = nf90_get_var(gridid, boundId, cornerlon)
+      errmsg = "longitude bound variable in "//trim(grid_filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+    endif
+
+    if (present(cornerlat)) then
+      ! find the bound variable for lat
+      ncStatus = nf90_inquire_attribute(gridid, varids(2), "bounds", len=len)
+      errmsg = "attribute bounds in "//trim(grid_filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+      ncStatus = nf90_get_att(gridid, varids(2), "bounds", boundvar)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+
+      ncStatus = nf90_inq_varid(gridid, boundvar(1:len), boundId)
+      errmsg = "latitude bound variable in "//trim(grid_filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+      ncStatus = nf90_get_var(gridid, boundId, cornerlat)
+      errmsg = "longitude bound variable in "//trim(grid_filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+    endif
+
+    ncStatus = nf90_close(gridid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD, &
+      ESMF_SRCLINE,&
+      trim(grid_filename),&
+      rc)) return
+
+    if(present(rc)) rc = ESMF_SUCCESS
+    return
+#else
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+    return
+#endif
+
+end subroutine ESMF_GridspecGetVar1DR4
+
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridspecGetVar2D"
 !BOPI
 ! !ROUTINE: ESMF_GridspecGetVar2D
@@ -664,6 +798,191 @@ end subroutine ESMF_GridspecGetVar1D
 #endif
 
 end subroutine ESMF_GridspecGetVar2D
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridspecGetVar2DR4"
+!BOPI
+! !ROUTINE: ESMF_GridspecGetVar2DR4
+!
+! !INTERFACE:
+  subroutine ESMF_GridspecGetVar2DR4(grid_filename, varids, loncoord, latcoord, &
+                                  cornerlon, cornerlat, start, count, rc)
+!
+! !ARGUMENTS:
+    character(len=*), intent(in)    :: grid_filename
+    integer, intent(in)             :: varids(:)
+    real(ESMF_KIND_R4), intent(out), optional  :: loncoord(:,:)
+    real(ESMF_KIND_R4), intent(out), optional  :: latcoord(:,:)
+    real(ESMF_KIND_R4), intent(out), optional  :: cornerlon(:,:,:)
+    real(ESMF_KIND_R4), intent(out), optional  :: cornerlat(:,:,:)
+    integer, intent(in), optional   :: start(:), count(:)
+    integer, intent(out), optional  :: rc
+
+    integer:: ncStatus
+    integer:: gridid, boundId
+    integer:: len, i
+    integer:: start2(2), count2(2), start3(3), count3(3)
+    integer:: dimids(2), grid_dims(2)
+    character(len=256) :: errmsg
+    character(len=80)  :: boundvar, attstr
+
+#ifdef ESMF_NETCDF
+    ! Open the grid and mosaic files
+    ncStatus = nf90_open (path=trim(grid_filename), mode=nf90_nowrite, ncid=gridid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD, &
+      ESMF_SRCLINE,&
+      trim(grid_filename), &
+      rc)) return
+
+    ! inquire the variable dimensions
+    ncStatus = nf90_inquire_variable(gridid, varids(1), dimids = dimids)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD, &
+      ESMF_SRCLINE,&
+      trim(grid_filename), &
+      rc)) return
+
+    ! find the dimension values
+    ncStatus = nf90_inquire_dimension (gridid, dimids(1), len=grid_dims(1))
+    errmsg ="grid 1st dimension in "//trim(grid_filename)
+    if (CDFCheckError (ncStatus, &
+            ESMF_METHOD, &
+            ESMF_SRCLINE,&
+            errmsg,&
+            rc)) return
+    ncStatus = nf90_inquire_dimension (gridid, dimids(2), len=grid_dims(2))
+    errmsg ="grid 2nd dimension in "//trim(grid_filename)
+    if (CDFCheckError (ncStatus, &
+            ESMF_METHOD, &
+            ESMF_SRCLINE,&
+            errmsg,&
+            rc)) return
+
+    if (present(start)) then
+        start2(:) = start(1:2)
+        start3(2)=start(1)
+        start3(3)=start(2)
+        start3(1)=1
+    else
+        start2(:)=1
+        start3(:)=1
+    endif
+    if (present(count)) then
+        count2(:) = count(1:2)
+        count3(2)=count(1)
+        count3(3)=count(2)
+        count3(1)=4
+    else
+        count2(:) = grid_dims(1:2)
+        count3(2)=grid_dims(1)
+        count3(3)=grid_dims(2)
+        count3(1)=4
+    endif
+
+    if (present(loncoord)) then
+       ncStatus = nf90_get_var(gridid, varids(1), loncoord, &
+                start=start2, count=count2)
+       errmsg = "longitude variable in "//trim(grid_filename)
+       if (CDFCheckError (ncStatus, &
+         ESMF_METHOD, &
+         ESMF_SRCLINE,&
+         errmsg, &
+         rc)) return
+    endif
+    if (present(latcoord)) then
+       ncStatus = nf90_get_var(gridid, varids(2), latcoord, &
+                start=start2, count=count2)
+       errmsg = "latitude variable in "//trim(grid_filename)
+       if (CDFCheckError (ncStatus, &
+         ESMF_METHOD, &
+         ESMF_SRCLINE,&
+         errmsg, &
+         rc)) return
+    endif
+    if (present(cornerlon)) then
+      ! find the bound variable for lon
+      ncStatus = nf90_inquire_attribute(gridid, varids(1), "bounds", len=len)
+      errmsg = "attribute bounds in "//trim(grid_filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+      ncStatus = nf90_get_att(gridid, varids(1), "bounds", boundvar)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+
+      ncStatus = nf90_inq_varid(gridid, boundvar(1:len), boundId)
+      errmsg = "longitude bound variable in "//trim(grid_filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+      ncStatus = nf90_get_var(gridid, boundId, cornerlon, &
+                 start=start3, count=count3)
+      errmsg = "longitude bound variable in "//trim(grid_filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+    endif
+
+    if (present(cornerlat)) then
+      ! find the bound variable for lat
+      ncStatus = nf90_inquire_attribute(gridid, varids(2), "bounds", len=len)
+      errmsg = "attribute bounds in "//trim(grid_filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+      ncStatus = nf90_get_att(gridid, varids(2), "bounds", boundvar)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+
+      ncStatus = nf90_inq_varid(gridid, boundvar(1:len), boundId)
+      errmsg = "latitude bound variable in "//trim(grid_filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+      ncStatus = nf90_get_var(gridid, boundId, cornerlat, &
+                 start=start3, count=count3)
+      errmsg = "longitude bound variable in "//trim(grid_filename)
+      if (CDFCheckError (ncStatus, &
+        ESMF_METHOD, &
+        ESMF_SRCLINE,&
+        errmsg, &
+        rc)) return
+    endif
+
+    ncStatus = nf90_close(gridid)
+    if (CDFCheckError (ncStatus, &
+      ESMF_METHOD, &
+      ESMF_SRCLINE,&
+      trim(grid_filename),&
+      rc)) return
+
+    if(present(rc)) rc = ESMF_SUCCESS
+    return
+#else
+    call ESMF_LogSetError(ESMF_RC_LIB_NOT_PRESENT, &
+                 msg="- ESMF_NETCDF not defined when lib was compiled", &
+                 ESMF_CONTEXT, rcToReturn=rc)
+    return
+#endif
+
+end subroutine ESMF_GridspecGetVar2DR4
 
 !------------------------------------------------------------------------------
 !

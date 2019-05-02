@@ -1588,7 +1588,6 @@ endif
 
      ! Create cubed sphere grid without reading in the coordinates
      grid2D = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
-                staggerLocList=(/ESMF_STAGGERLOC_CENTER, ESMF_STAGGERLOC_CORNER/), &
                 tileFilePath='./data/', regDecompPTile=decomptile, rc=rc)
 
 !EOC
@@ -1612,10 +1611,11 @@ endif
 !BOC
 
      ! Create cubed sphere grid and read in the edge staggers' coordinates
-     ! from the tile files
+     ! from the tile files, set the coordTypeKind to ESMF_TYPEKIND_R4
 
      grid2D = ESMF_GridCreateMosaic(filename='data/C48_mosaic.nc', &
                 staggerLocList=(/ESMF_STAGGERLOC_EDGE1, ESMF_STAGGERLOC_EDGE2/), &
+		coordTypeKind = ESMF_TYPEKIND_R4, &
                 tileFilePath='./data/', regDecompPTile=decomptile, rc=rc)
 
 !EOC

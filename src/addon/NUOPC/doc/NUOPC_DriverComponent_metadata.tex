@@ -32,7 +32,10 @@ is {\em not} part of the Attribute name!
                        {\bf bit 13}: Log Component creation.\newline
                        {\bf bit 14}: Log State creation.
                      & 0, 1, 2, ... \newline
-                       "max" = set all lower 16 bits\\ \hline
+                       "off" = 0 (default), \newline
+                       "low": some verbosity, \newline
+                       "high": more verbosity, \newline
+                       "max": all lower 16 bits\\ \hline
      {\tt Profiling} & String value, converted into an integer, and interpreted as a bit field. The lower 16 bits are reserved to control profiling of the generic component implementation. Higher bits are available for user level profiling control. \newline
                        {\bf bit 0}: Run sequence timings.
                      & 0, 1, 2, ... \newline
@@ -46,6 +49,6 @@ is {\em not} part of the Attribute name!
      {\tt Nestling} & Integer value enumerating siblings within the same generation.& 0, 1, 2, ...\\ \hline
      {\tt Initialize\-DataComplete} & String value indicating whether all initialize data dependencies have been satisfied.& false, true\\ \hline
      {\tt Initialize\-DataProgress} & String value indicating whether progress is being made resolving initialize data dependencies.& false, true\\ \hline
-     {\tt HierarchyProtocol} & String value specifying the hierarchy protocol.& "PushUpAllExportsUnsatisfiedImports", {\em All other values currently disable the hierarchy protocol.}\\ \hline
+     {\tt HierarchyProtocol} & String value specifying the hierarchy protocol.& "PushUpAllExportsAndUnsatisfiedImports" for field mirroring and connecting, "ConnectProvidedFields" to only connect provided fields (no mirroring), {\em All other values currently disable the hierarchy protocol.}\\ \hline
      \hline
 \end{longtable}

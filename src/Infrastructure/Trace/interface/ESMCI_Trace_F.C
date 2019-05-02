@@ -101,22 +101,22 @@ extern "C" {
     if (rc != NULL) *rc = ESMF_SUCCESS;
   }
 
-#undef ESMC_METHOD
-#define ESMC_METHOD "c_esmftrace_component_info()"
-  void FTN_X(c_esmftrace_component_info)(int *vmid, int *baseid, const char *name,
-                                         const char *attributeKeys, const char *attributeVals, int *rc,
-                                         ESMCI_FortranStrLenArg nlen,  //name
-                                         ESMCI_FortranStrLenArg aklen,  //attributeKeys
-                                         ESMCI_FortranStrLenArg avlen)  //attributeValues
-  {
-    string cname = string(name, ESMC_F90lentrim (name, nlen));
-    string aKeys = string(attributeKeys, ESMC_F90lentrim (attributeKeys, aklen));
-    string aVals = string(attributeVals, ESMC_F90lentrim (attributeVals, avlen));
+// #undef ESMC_METHOD
+// #define ESMC_METHOD "c_esmftrace_component_info()"
+//   void FTN_X(c_esmftrace_component_info)(int *vmid, int *baseid, const char *name,
+//                                          const char *attributeKeys, const char *attributeVals, int *rc,
+//                                          ESMCI_FortranStrLenArg nlen,  //name
+//                                          ESMCI_FortranStrLenArg aklen,  //attributeKeys
+//                                          ESMCI_FortranStrLenArg avlen)  //attributeValues
+//   {
+//     string cname = string(name, ESMC_F90lentrim (name, nlen));
+//     string aKeys = string(attributeKeys, ESMC_F90lentrim (attributeKeys, aklen));
+//     string aVals = string(attributeVals, ESMC_F90lentrim (attributeVals, avlen));
 
-    ESMCI::TraceEventComponentInfo(vmid, baseid, cname.c_str(), aKeys, aVals);
-    if (rc != NULL) *rc = ESMF_SUCCESS;
+//     ESMCI::TraceEventComponentInfo(vmid, baseid, cname.c_str(), aKeys, aVals);
+//     if (rc != NULL) *rc = ESMF_SUCCESS;
 
-  }
+//   }
 
 #undef ESMC_METHOD
 #define ESMC_METHOD "c_esmftrace_region_enter()"

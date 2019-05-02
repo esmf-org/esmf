@@ -156,14 +156,15 @@ module ESMF_BaseMod
 ! !IROUTINE:  ESMF_BaseCreate - Create and initialize a Base object
 !
 ! !INTERFACE:
-  subroutine ESMF_BaseCreate(base, superclass, name, nattr, rc)
+  subroutine ESMF_BaseCreate(base, superclass, name, nattr, vm, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Base) :: base                 
-      character(len=*), intent(in) :: superclass
-      character(len=*), intent(in), optional :: name
-      integer, intent(in), optional :: nattr 
-      integer, intent(out), optional :: rc     
+    type(ESMF_Base)                         :: base
+    character(len=*), intent(in)            :: superclass
+    character(len=*), intent(in),  optional :: name
+    integer,          intent(in),  optional :: nattr
+    type(ESMF_VM),    intent(in),  optional :: vm
+    integer,          intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -184,6 +185,9 @@ module ESMF_BaseMod
 !           If given, the initial number of attributes to allocate space for.
 !           Additional attributes can be added at any time, but it will be
 !           more efficient if space is allocated at create time.
+!     \item[{[vm]}]
+!           If present, base is created on the specified {\tt ESMF\_VM} object.
+!           The default is to create on the VM of the current component context.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -200,13 +204,14 @@ module ESMF_BaseMod
     if (present(nattr)) allocNAttrs = nattr
 
     if (present(name)) then
-        call c_ESMC_BaseCreate(base , superclass, name, allocNattrs, localrc)
+      call c_ESMC_BaseCreate(base , superclass, name, allocNattrs, vm, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     else
-        !!call c_ESMC_BaseCreate(base , superclass, ESMF_NULL_POINTER, &
-        call c_ESMC_BaseCreate(base , superclass, "", allocNattrs, localrc)
+      call c_ESMC_BaseCreate(base , superclass, "", allocNattrs, vm, localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
     endif
-    if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
     
     ! Set init code
     ESMF_INIT_SET_CREATED(base)
@@ -352,7 +357,7 @@ module ESMF_BaseMod
       ! TODO: remove this once everyone is initializing their Base objects.
       ! cheat for old code for now.
       if (base%isInit .ne. ESMF_INIT_CREATED) then 
-          call ESMF_BaseCreate(base, namespace, name, 0, localrc)
+          call ESMF_BaseCreate(base, namespace, name, 0, rc=localrc)
           if (rcpresent) rc = localrc
           return
       endif
@@ -481,8 +486,17 @@ module ESMF_BaseMod
       if (present(rc)) rc = ESMF_RC_NOT_IMPL
       localrc = ESMF_RC_NOT_IMPL
 
+      ! access the VM from the C++ side
       call c_ESMC_GetVM(base , vm, localrc)
       if (present(rc)) rc = localrc
+      
+      ! Set init code
+      call ESMF_VMSetInitCreated(vm, rc=localrc)
+      if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &
+        ESMF_CONTEXT, rcToReturn=rc)) return
+
+      ! return successfully
+      if (present(rc)) rc = ESMF_SUCCESS
 
   end subroutine ESMF_GetVM
 

@@ -43,7 +43,7 @@
 
   ! individual test result code
   integer :: rc
-  integer :: localrc
+  integer :: localrc, localrc1(1)
 
   ! local args needed to create/construct objects
   type(ESMF_VM)          :: vm
@@ -94,47 +94,47 @@
     xmlFlag(1) = 0
 
     ! get arg cnt
-    call ESMF_UtilGetArgC (argc)
-
+    call ESMF_UtilGetArgC (argc, rc=localrc)
+    if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArgC failure", rc)) go to 10
     print '("command line arg count = ", I4)', argc
 
     do argindex = 1, argc
       call ESMF_UtilGetArg (argindex=argindex, argvalue=name, rc=localrc)
-      if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 90
+      if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 10
         print '("command line arg [", I2, "] = ", I4, ":", A)', argindex, LEN_TRIM(name), TRIM(name)
     end do
 
     ! get path info
     call ESMF_UtilGetArgIndex (argvalue="-path", argindex=argindex, rc=localrc)
-    if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArgIndex failure", rc)) go to 90
+    if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArgIndex failure", rc)) go to 10
     print '("argindex (-path) = ", I4)', argindex
     if ((argindex >= 0) .AND. (argindex < argc - 1)) then
       call ESMF_UtilGetArg (argindex=argindex+1, argvalue=srcPath(1), rc=localrc)
-      if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 90
+      if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 10
     end if
 
     ! get test case info
     call ESMF_UtilGetArgIndex (argvalue="-case", argindex=argindex, rc=localrc)
-    if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArgIndex failure", rc)) go to 90
+    if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArgIndex failure", rc)) go to 10
     print '("argindex (-case) = ", I4)', argindex
     if ((argindex >= 0) .AND. (argindex < argc)) then
       call ESMF_UtilGetArg (argindex=argindex+1, argvalue=configFname(1), rc=localrc)
-      if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 90
+      if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 10
     end if
 
     ! get xml file info
     call ESMF_UtilGetArgIndex (argvalue="-xml", argindex=argindex, rc=localrc)
-    if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArgIndex failure", rc)) go to 90
+    if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArgIndex failure", rc)) go to 10
     print '("argindex (-xml) = ", I4)', argindex
     if ((argindex >= 0) .AND. (argindex < argc)) then
       call ESMF_UtilGetArg (argindex=argindex+1, argvalue=xmlFname(1), rc=localrc)
-      if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 90
+      if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArg failure", rc)) go to 10
       xmlFlag(1) = 1
     end if
 
     ! get no run info
     call ESMF_UtilGetArgIndex (argvalue="-norun", argindex=argindex, rc=localrc)
-    if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArgIndex failure", rc)) go to 90
+    if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "ESMF_UtilGetArgIndex failure", rc)) go to 10
     if ((argindex >= 0) .AND. (argindex <= argc)) then
       runFlag(1) = 0
     end if
@@ -154,7 +154,17 @@
     if (xmlFlag(1) .ne. 0) then
       print '("XML File = ", A)', trim(xmlFname(1))
     end if
+  10 continue
+  else
+    localrc = ESMF_FAILURE  ! dummy initialization before broadcast
   end if  ! PET 0 command line processing
+
+  ! Check for command line error
+  localrc1 = localrc
+  call ESMF_VMBroadcast (vm, bcstData=localrc1, count=1, rootPet=0, rc=localrc)
+  if (CheckError (checkpoint, __LINE__, __FILE__, localrc, "Broadcast Failure - Command line argument errors", rc)) go to 90
+  rc = localrc1(1)
+  if (localrc1(1) /= ESMF_SUCCESS) go to 90
 
   ! broadcast command line args to all PETS
 ! how many characters
@@ -272,7 +282,7 @@
 !   gather aggregate error count?
 !
 90 continue
-  name = "Harness Test  for class " // adjustL(har%testClass)
+  name = "Harness Test  for class " // trim (adjustL(har%testClass))
   call ESMF_TestGlobal((rc.eq.ESMF_SUCCESS), name, failMsg, result, &
     ESMF_SRCLINE)
 

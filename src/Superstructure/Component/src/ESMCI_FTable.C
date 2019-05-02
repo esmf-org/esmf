@@ -39,6 +39,7 @@
 #include "ESMCI_Comp.h"
 #include "ESMCI_CompTunnel.h"
 #include "ESMCI_LogErr.h"
+#include "ESMCI_TraceRegion.h"
 
 using std::string;
 
@@ -732,11 +733,26 @@ void *ESMCI_FTableCallEntryPointVMHop(void *vm, void *cargoCast){
     // ...the user return code will not be available until wait() is called
 
   }else{
+
+    TraceEventCompPhaseEnter(f90comp, &(cargo->currentMethod), &(cargo->currentPhase), &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &esmfrc)){
+      cargo->esmfrc[mytid] = esmfrc;  // put esmf return code into cargo
+      return NULL;
+    }
+    
     // a regular component or a dual component that needs to connect still,
     // use the local ftable for user code or system code callback
     localrc = ftable->callVFuncPtr(name, (ESMCI::VM*)vm, &userrc);
     if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
       &esmfrc)){
+      cargo->esmfrc[mytid] = esmfrc;  // put esmf return code into cargo
+      return NULL;
+    }
+
+    TraceEventCompPhaseExit(f90comp, &(cargo->currentMethod), &(cargo->currentPhase), &localrc);
+    if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+                                      &esmfrc)){
       cargo->esmfrc[mytid] = esmfrc;  // put esmf return code into cargo
       return NULL;
     }
@@ -817,6 +833,17 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   if (recursionCount && *recursionCount==0 && *vm_cargo)
     newCargoFlag = false; // this is not a recursion but a re-entrance
 
+#if 0
+  {
+    std::stringstream debugmsg;
+    debugmsg << "inside c_esmc_ftablecallentrypointvm(): recursionCount=" 
+      <<  recursionCount << " *recursionCount="
+      << (recursionCount ? *recursionCount : -1)
+      << " vm_cargo=" << vm_cargo << " newCargoFlag=" << newCargoFlag;
+    ESMC_LogDefault.Write(debugmsg.str(), ESMC_LOGMSG_INFO);
+  }
+#endif
+
   if (newCargoFlag){
     ESMCI::cargotype *cargo = new ESMCI::cargotype;
     strcpy(cargo->name, name);    // copy trimmed type string
@@ -850,6 +877,7 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
       vmplan->parentVMflag = 1;
     }
   }
+
   delete[] name;  // delete memory that "newtrim" allocated above
 
   // store the current timeout in the cargo structure
@@ -863,9 +891,17 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   if (recursionCount) (*recursionCount)++;
 
   // enter the child VM -> resurface in ESMCI_FTableCallEntryPointVMHop()
+#if 0
+std::cout << ">>> calling into vm_parent->enter() with parentVMflag:" 
+  <<  vmplan->parentVMflag <<"\n";
+#endif
   localrc = vm_parent->enter(vmplan, *vm_info, *vm_cargo);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return; // bail out
+
+#if 0
+std::cout << "<<< parent thread returned from vm_parent->enter()" << "\n";
+#endif
 
   // ... if the child VM uses threads (multi-threading or single-threading)
   // then this parent PET continues running concurrently to the child PET in the
@@ -875,8 +911,23 @@ void FTN_X(c_esmc_ftablecallentrypointvm)(
   // The return code of the callback code will be valid in all cases (threading
   // or no threading) _after_ VMK::exit() returns.
 
-  // decrement recursionCount again
-  if (recursionCount) (*recursionCount)--;
+  // get a pointer to the CompTunnel object
+  ESMCI::CompTunnel *compTunnel;
+  localrc = f90comp->getTunnel(&compTunnel);
+  if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
+    rc)) return;
+
+  // determine whether this is a dual component that is ready to execute
+  bool dualConnected = false;  // initialize
+  if (compTunnel) dualConnected = compTunnel->isConnected();
+
+  if (dualConnected){
+    // decrement recursionCount here for the dual side of a comp tunnel
+    // in general the decrement must happen during the wait, in case there
+    // are separate parent vs child threads running, but for comp tunnel must
+    // apply the decrement here
+    if (recursionCount) (*recursionCount)--;
+  }
 
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
@@ -892,6 +943,7 @@ void FTN_X(c_esmc_compwait)(
   void **vm_info,             // p2 to member which holds info
   void **vm_cargo,            // p2 to member which holds cargo
   int *timeout,               // time out in seconds
+  int *recursionCount,        // keeping track of recursion level of component
   int *userrc,                // return code of the user component method
   int *rc){                   // esmf internal return error code
 
@@ -969,6 +1021,11 @@ void FTN_X(c_esmc_compwait)(
   vmplan->parentVMflag = cargo->previousParentFlag;   // previous value
   delete cargo;
 
+  if (!dualConnected){
+    // decrement recursionCount here if not dual side of a comp tunnel
+    if (recursionCount) (*recursionCount)--;
+  }
+  
   // return successfully
   if (rc) *rc = ESMF_SUCCESS;
 }
@@ -1230,7 +1287,7 @@ void FTable::setServices(void *ptr, void (*func)(), int *userRc, int *rc) {
     rc)) return;
 
   // wait for the register routine to return
-  FTN_X(c_esmc_compwait)(&vm_parent, &vmplan_p, &vm_info, &vm_cargo, NULL,
+  FTN_X(c_esmc_compwait)(&vm_parent, &vmplan_p, &vm_info, &vm_cargo, NULL, NULL,
     userRc, &localrc);
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     rc)) return;
@@ -1679,6 +1736,10 @@ int FTable::callVFuncPtr(
   if (ESMC_LogDefault.MsgFoundError(localrc, ESMCI_ERR_PASSTHRU, ESMC_CONTEXT,
     &rc)) return rc; // bail out
 
+#if 0
+std::cout << "callVFuncPtr found i=" << i << "\n";
+#endif
+
   Comp *comp;       // pointer to PET-local component
   funcinfo *func;   // pointer to PET-local function entry
 
@@ -1690,6 +1751,10 @@ int FTable::callVFuncPtr(
     int mypet = vm_pointer->getMypet();
     int mynthreads = vm_pointer->getNthreads(mypet);
     int mytid = vm_pointer->getTid(mypet);
+#if 0
+std::cout << "vm_pointer present, mypet=" << mypet << " mynthreads=" <<
+  mynthreads << " mytid=" << mytid <<"\n";
+#endif
     if (componentcount==0){
       // first time Component is entering its VM -> replicate Comp
       if (i == -1){
@@ -1757,7 +1822,9 @@ int FTable::callVFuncPtr(
   // call-back into user code
   switch (func->ftype){
     case FT_VOIDP1INTP: {
-      //printf("calling out of case FT_VOIDP1INTP\n");
+#if 0
+std::cout << "calling out of case FT_VOIDP1INTP" << "\n";
+#endif
       VoidP1IntPFunc vf = (VoidP1IntPFunc)func->funcptr;
       (*vf)((void *)comp, userrc);
       // conditionally set entry point for ServiceLoop
@@ -1777,32 +1844,6 @@ int FTable::callVFuncPtr(
           complianceCheckFlag |= value.find("ON")!=string::npos;  // turn on
         }
 
-        //if tracing enabled, turn on compliance checker
-        if (!complianceCheckFlag) {
-          envVar = VM::getenv("ESMF_RUNTIME_TRACE");    
-          if (envVar != NULL) {
-            string value(envVar);
-            complianceCheckFlag |= value.find("on")!=string::npos;  // turn on
-            complianceCheckFlag |= value.find("ON")!=string::npos;  // turn on
-          }
-          envVar = VM::getenv("ESMF_RUNTIME_PROFILE");    
-          if (envVar != NULL) {
-            string value(envVar);
-            complianceCheckFlag |= value.find("on")!=string::npos;  // turn on
-            complianceCheckFlag |= value.find("ON")!=string::npos;  // turn on
-          }  
-          if (complianceCheckFlag) {
-            //if component-level tracing is off, do not
-            //hook in compliance checker
-            envVar = VM::getenv("ESMF_RUNTIME_TRACE_COMPONENT");
-            if (envVar != NULL) {
-              string value(envVar);
-              complianceCheckFlag &= value.find("off")==string::npos;  // turn off
-              complianceCheckFlag &= value.find("OFF")==string::npos;  // turn off
-            }
-          }
-        }
-              
         if (complianceCheckFlag){
           int registerIcUserRc;
 
@@ -1962,7 +2003,9 @@ std::cout << "ESMF_RUNTIME_COMPLIANCEICREGISTER attribute:" << value[0] <<"\n";
       break;
     }
     case FT_VOIDP4INTP: {
-      //printf("calling out of case FT_VOIDP4INTP\n");
+#if 0
+std::cout << "calling out of case FT_VOIDP4INTP" << "\n";
+#endif
       VoidP4IntPFunc vf = (VoidP4IntPFunc)func->funcptr;
       (*vf)((void *)comp, func->funcarg[1], func->funcarg[2],
         func->funcarg[3], userrc);

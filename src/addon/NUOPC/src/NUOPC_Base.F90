@@ -322,8 +322,8 @@ module NUOPC_Base
 ! !INTERFACE:
   ! Private name; call using NUOPC_Advertise() 
   subroutine NUOPC_AdvertiseField(state, StandardName, Units, &
-    LongName, ShortName, name, TransferOfferField, SharePolicyField, &
-    TransferOfferGeomObject, SharePolicyGeomObject, rc)
+    LongName, ShortName, name, TransferOfferGeomObject, SharePolicyField, &
+    SharePolicyGeomObject, vm, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(*),     intent(in)            :: StandardName
@@ -331,10 +331,10 @@ module NUOPC_Base
     character(*),     intent(in),  optional :: LongName
     character(*),     intent(in),  optional :: ShortName
     character(*),     intent(in),  optional :: name
-    character(*),     intent(in),  optional :: TransferOfferField
-    character(*),     intent(in),  optional :: SharePolicyField
     character(*),     intent(in),  optional :: TransferOfferGeomObject
+    character(*),     intent(in),  optional :: SharePolicyField
     character(*),     intent(in),  optional :: SharePolicyGeomObject
+    type(ESMF_VM),    intent(in),  optional :: vm
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   \label{NUOPC_AdvertiseField}
@@ -380,8 +380,8 @@ module NUOPC_Base
 !     state object. The string provided for {\tt name} must not contain the
 !     slash ("/") character.
 !     If omitted, the default is to use the value of the ShortName.
-!   \item[{[TransferOfferField]}]
-!     The "TransferOfferField" attribute of the advertised field. NUOPC 
+!   \item[{[TransferOfferGeomObject]}]
+!     The "TransferOfferGeomObject" attribute of the advertised field. NUOPC 
 !     controls the vocabulary of this attribute. Valid options are 
 !     "will provide", "can provide", "cannot provide".
 !     If omitted, the default is "will provide".
@@ -390,16 +390,15 @@ module NUOPC_Base
 !     controls the vocabulary of this attribute. Valid options are 
 !     "share", and "not share".
 !     If omitted, the default is "not share".
-!   \item[{[TransferOfferGeomObject]}]
-!     The "TransferOfferGeomObject" attribute of the advertised field. NUOPC 
-!     controls the vocabulary of this attribute. Valid options are 
-!     "will provide", "can provide", "cannot provide".
-!     If omitted, the default is equal to {\tt TransferOfferField}.
 !   \item[{[SharePolicyGeomObject]}]
 !     The "SharePolicyGeomObject" attribute of the advertised field. NUOPC 
 !     controls the vocabulary of this attribute. Valid options are 
 !     "share", and "not share".
 !     If omitted, the default is equal to {\tt SharePolicyField}.
+!   \item[{[vm]}]
+!     If present, the Field object used during advertising is created on the
+!     specified {\tt ESMF\_VM} object. The default is to create the Field object
+!     on the VM of the current component context.
 !   \item[{[rc]}]
 !     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -410,179 +409,148 @@ module NUOPC_Base
     integer                 :: localrc
     type(ESMF_Field)        :: field
     character(ESMF_MAXSTR)  :: tempString
+    type(ESMF_Pointer)      :: vmThis
+    logical                 :: actualFlag
     
     if (present(rc)) rc = ESMF_SUCCESS
     
-    field = ESMF_FieldEmptyCreate(name=name, rc=localrc)
+    field = ESMF_FieldEmptyCreate(name=name, vm=vm, rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, &
       file=FILENAME, &
       rcToReturn=rc)) &
       return  ! bail out
-    call NUOPC_InitAttributes(field, StandardName=StandardName, &
-      Units=Units, LongName=LongName, ShortName=ShortName, rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)) &
-      return  ! bail out
-    if (.not.present(name)) then
-      ! name was not provided -> default to using ShortName
-      call NUOPC_GetAttribute(field, name="ShortName", value=tempString, &
-        rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      call ESMF_FieldSet(field, name=trim(tempString), rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    endif
-    if (present(TransferOfferField)) then
-      if (trim(TransferOfferField)=="will provide") then
-        call NUOPC_SetAttribute(field, name="TransferOfferField", &
-          value="will provide", rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-      elseif (trim(TransferOfferField)=="can provide") then
-        call NUOPC_SetAttribute(field, name="TransferOfferField", &
-          value="can provide", rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-      elseif (trim(TransferOfferField)=="cannot provide") then
-        call NUOPC_SetAttribute(field, name="TransferOfferField", &
-          value="cannot provide", rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-      else
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="must provide a valid string for TransferOfferField", &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)
-        return  ! bail out
+      
+    ! determine whether the localPet actually created a Field object here
+    actualFlag = .true.
+    if (present(vm)) then
+      call ESMF_VMGetThis(vm, vmThis)
+      if (vmThis == ESMF_NULL_POINTER) then
+        actualFlag = .false.  ! local PET is not for an actual member
       endif
     endif
-    if (present(SharePolicyField)) then
-      if (trim(SharePolicyField)=="share") then
-        call NUOPC_SetAttribute(field, name="SharePolicyField", &
-          value="share", rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-      elseif (trim(SharePolicyField)=="not share") then
-        call NUOPC_SetAttribute(field, name="SharePolicyField", &
-          value="not share", rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-      else
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="must provide a valid string for SharePolicyField", &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)
-        return  ! bail out
-      endif
-    endif
-    if (present(TransferOfferGeomObject)) then
-      if (trim(TransferOfferGeomObject)=="will provide") then
-        call NUOPC_SetAttribute(field, name="TransferOfferGeomObject", &
-          value="will provide", rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-      elseif (trim(TransferOfferGeomObject)=="can provide") then
-        call NUOPC_SetAttribute(field, name="TransferOfferGeomObject", &
-          value="can provide", rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-      elseif (trim(TransferOfferGeomObject)=="cannot provide") then
-        call NUOPC_SetAttribute(field, name="TransferOfferGeomObject", &
-          value="cannot provide", rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-      else
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="must provide a valid string for TransferOfferGeomObject", &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)
-        return  ! bail out
-      endif
-    else
-      ! set default for TransferOfferGeomObject
-      call NUOPC_GetAttribute(field, name="TransferOfferField", &
-        value=tempString, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      call NUOPC_SetAttribute(field, name="TransferOfferGeomObject", &
-        value=tempString, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    endif
-    if (present(SharePolicyGeomObject)) then
-      if (trim(SharePolicyGeomObject)=="share") then
-        call NUOPC_SetAttribute(field, name="SharePolicyGeomObject", &
-          value="share", rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-      elseif (trim(SharePolicyGeomObject)=="not share") then
-        call NUOPC_SetAttribute(field, name="SharePolicyGeomObject", &
-          value="not share", rc=localrc)
-        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)) &
-          return  ! bail out
-      else
-        call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-          msg="must provide a valid string for SharePolicyGeomObject", &
-          line=__LINE__, &
-          file=FILENAME, &
-          rcToReturn=rc)
-        return  ! bail out
-      endif
-    else
-      ! set default for SharePolicyGeomObject
-      call NUOPC_GetAttribute(field, name="SharePolicyField", &
-        value=tempString, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-      call NUOPC_SetAttribute(field, name="SharePolicyGeomObject", &
-        value=tempString, rc=localrc)
-      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-        line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-    endif
-    call ESMF_StateAdd(state, fieldList=(/field/), rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, &
-      file=FILENAME, &
-      rcToReturn=rc)) &
-      return  ! bail out
     
+    if (actualFlag) then
+      call NUOPC_InitAttributes(field, StandardName=StandardName, &
+        Units=Units, LongName=LongName, ShortName=ShortName, rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+      if (.not.present(name)) then
+        ! name was not provided -> default to using ShortName
+        call NUOPC_GetAttribute(field, name="ShortName", value=tempString, &
+          rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        call ESMF_FieldSet(field, name=trim(tempString), rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+      if (present(TransferOfferGeomObject)) then
+        if (trim(TransferOfferGeomObject)=="will provide") then
+          call NUOPC_SetAttribute(field, name="TransferOfferGeomObject", &
+            value="will provide", rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        elseif (trim(TransferOfferGeomObject)=="can provide") then
+          call NUOPC_SetAttribute(field, name="TransferOfferGeomObject", &
+            value="can provide", rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        elseif (trim(TransferOfferGeomObject)=="cannot provide") then
+          call NUOPC_SetAttribute(field, name="TransferOfferGeomObject", &
+            value="cannot provide", rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="must provide a valid string for TransferOfferGeomObject", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)
+          return  ! bail out
+        endif
+      endif
+      if (present(SharePolicyField)) then
+        if (trim(SharePolicyField)=="share") then
+          call NUOPC_SetAttribute(field, name="SharePolicyField", &
+            value="share", rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        elseif (trim(SharePolicyField)=="not share") then
+          call NUOPC_SetAttribute(field, name="SharePolicyField", &
+            value="not share", rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="must provide a valid string for SharePolicyField", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)
+          return  ! bail out
+        endif
+      endif
+      if (present(SharePolicyGeomObject)) then
+        if (trim(SharePolicyGeomObject)=="share") then
+          call NUOPC_SetAttribute(field, name="SharePolicyGeomObject", &
+            value="share", rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        elseif (trim(SharePolicyGeomObject)=="not share") then
+          call NUOPC_SetAttribute(field, name="SharePolicyGeomObject", &
+            value="not share", rc=localrc)
+          if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)) &
+            return  ! bail out
+        else
+          call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
+            msg="must provide a valid string for SharePolicyGeomObject", &
+            line=__LINE__, &
+            file=FILENAME, &
+            rcToReturn=rc)
+          return  ! bail out
+        endif
+      else
+        ! set default for SharePolicyGeomObject
+        call NUOPC_GetAttribute(field, name="SharePolicyField", &
+          value=tempString, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+        call NUOPC_SetAttribute(field, name="SharePolicyGeomObject", &
+          value=tempString, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+          line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
+      endif
+      call ESMF_StateAdd(state, fieldList=(/field/), rc=localrc)
+      if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
+        line=__LINE__, &
+        file=FILENAME, &
+        rcToReturn=rc)) &
+        return  ! bail out
+    endif
   end subroutine
   !-----------------------------------------------------------------------------
 
@@ -592,24 +560,22 @@ module NUOPC_Base
 ! !INTERFACE:
   ! Private name; call using NUOPC_Advertise() 
   subroutine NUOPC_AdvertiseFields(state, StandardNames, &
-    TransferOfferField, SharePolicyField, &
-    TransferOfferGeomObject, SharePolicyGeomObject, rc)
+    TransferOfferGeomObject, SharePolicyField, SharePolicyGeomObject, rc)
 ! !ARGUMENTS:
     type(ESMF_State), intent(inout)         :: state
     character(*),     intent(in)            :: StandardNames(:)
-    character(*),     intent(in),  optional :: TransferOfferField
-    character(*),     intent(in),  optional :: SharePolicyField
     character(*),     intent(in),  optional :: TransferOfferGeomObject
+    character(*),     intent(in),  optional :: SharePolicyField
     character(*),     intent(in),  optional :: SharePolicyGeomObject
     integer,          intent(out), optional :: rc
 ! !DESCRIPTION:
 !   \label{NUOPC_AdvertiseFields}
 !   Advertise a list of fields in a state. This creates a list of empty fields
-!   and adds it to the {\tt state}. The "StandardName", and 
-!   "TransferOfferGeomObject" attributes of all the fields are set according to
-!   the provided input. The "Units", "LongName", and "ShortName" attributes for
-!   each field are set according to the defaults documented under method 
-!   \ref{NUOPC_AdvertiseField}
+!   and adds it to the {\tt state}. The "StandardName", "TransferOfferGeomObject",
+!   "SharePolicyField", and "SharePolicyGeomObject" attributes of all the 
+!   fields are set according to the provided input. The "Units", "LongName",
+!   and "ShortName" attributes for each field are set according to the defaults
+!   documented under method \ref{NUOPC_AdvertiseField}
 !
 !   The call checks the provided information against the NUOPC Field Dictionary
 !   to ensure correctness.
@@ -621,8 +587,8 @@ module NUOPC_Base
 !   \item[StandardNames]
 !     A list of "StandardName" attributes of the advertised fields. Must be 
 !     StandardNames found in the  NUOPC Field Dictionary.
-!   \item[{[TransferOfferField]}]
-!     The "TransferOfferField" attribute of the advertised fields. This 
+!   \item[{[TransferOfferGeomObject]}]
+!     The "TransferOfferGeomObject" attribute of the advertised fields. This 
 !     setting applies to all the fields advertised in this call. NUOPC 
 !     controls the vocabulary of this attribute. Valid options are 
 !     "will provide", "can provide", "cannot provide".
@@ -633,12 +599,6 @@ module NUOPC_Base
 !     controls the vocabulary of this attribute. Valid options are 
 !     "share", and "not share".
 !     If omitted, the default is "not share".
-!   \item[{[TransferOfferGeomObject]}]
-!     The "TransferOfferGeomObject" attribute of the advertised fields. This 
-!     setting applies to all the fields advertised in this call. NUOPC 
-!     controls the vocabulary of this attribute. Valid options are 
-!     "will provide", "can provide", "cannot provide".
-!     If omitted, the default is equal to {\tt TransferOfferField}.
 !   \item[{[SharePolicyGeomObject]}]
 !     The "SharePolicyGeomObject" attribute of the advertised fields. This 
 !     setting applies to all the fields advertised in this call. NUOPC 
@@ -659,11 +619,8 @@ module NUOPC_Base
 
     do i=1, size(StandardNames)
       call NUOPC_AdvertiseField(state, StandardName=StandardNames(i), &
-        TransferOfferField=TransferOfferField, &
-        SharePolicyField=SharePolicyField, &
-        TransferOfferGeomObject=TransferOfferGeomObject, &
-        SharePolicyGeomObject=SharePolicyGeomObject, &
-        rc=localrc)
+        TransferOfferGeomObject=TransferOfferGeomObject, SharePolicyField=SharePolicyField, &
+        SharePolicyGeomObject=SharePolicyGeomObject, rc=localrc)
       if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, &
         file=FILENAME, &
@@ -1675,7 +1632,7 @@ module NUOPC_Base
 !EOPI
   !-----------------------------------------------------------------------------
     ! local variables
-    character(ESMF_MAXSTR)            :: attrList(19)
+    character(ESMF_MAXSTR)            :: attrList(17)
     character(ESMF_MAXSTR)            :: tempString
     logical                           :: accepted
     integer                           :: i
@@ -1690,22 +1647,19 @@ module NUOPC_Base
     attrList(3) = "ProducerConnection"! values: "open", "targeted", "connected"
     attrList(4) = "ConsumerConnection"! values: "open", "targeted", "connected"
     attrList(5) = "Updated" ! values: "true" or "false"
-    attrList(6) = "TransferOfferGeomObject" ! values: "cannot provide",
-                                            !   "can provide", "will provide"
-    attrList(7) = "TransferActionGeomObject"! values: "provide", "accept"
-    attrList(8) = "SharePolicyGeomObject"   ! values: "share", "not share"
-    attrList(9) = "ShareStatusGeomObject"   ! values: "shared", "not shared"
-    attrList(10)= "TransferOfferField"      ! values: "cannot provide",
-                                            !   "can provide", "will provide"
-    attrList(11)= "TransferActionField"     ! values: "provide", "accept"
-    attrList(12)= "SharePolicyField"        ! values: "share", "not share"
-    attrList(13)= "ShareStatusField"        ! values: "shared", "not shared"
-    attrList(14)= "UngriddedLBound"
-    attrList(15)= "UngriddedUBound"
-    attrList(16)= "GridToFieldMap"
-    attrList(17)= "ArbDimCount"
-    attrList(18)= "MinIndex"
-    attrList(19)= "MaxIndex"
+    attrList(6) = "TransferOfferGeomObject"   ! values: "cannot provide",
+                                    !   "can provide", "will provide"
+    attrList(7) = "TransferActionGeomObject"  ! values: "provide", "accept"
+    attrList(8) = "SharePolicyField"       ! values: "share", "not share"
+    attrList(9) = "ShareStatusField"       ! values: "shared", "not shared"
+    attrList(10)= "SharePolicyGeomObject"  ! values: "share", "not share"
+    attrList(11)= "ShareStatusGeomObject"  ! values: "shared", "not shared"
+    attrList(12)= "UngriddedLBound"
+    attrList(13)= "UngriddedUBound"
+    attrList(14)= "GridToFieldMap"
+    attrList(15)= "ArbDimCount"
+    attrList(16)= "MinIndex"
+    attrList(17)= "MaxIndex"
     
     ! add Attribute packages
     call ESMF_AttributeAdd(field, convention="ESG", purpose="General", rc=localrc)
@@ -1864,17 +1818,17 @@ module NUOPC_Base
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-    ! set TransferOfferField
+    ! set TransferOfferGeomObject
     call ESMF_AttributeSet(field, &
-      name="TransferOfferField", value="will provide", &
+      name="TransferOfferGeomObject", value="will provide", &
       convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
 
-    ! set TransferActionField
+    ! set TransferActionGeomObject
     call ESMF_AttributeSet(field, &
-      name="TransferActionField", value="provide", &
+      name="TransferActionGeomObject", value="provide", &
       convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1891,22 +1845,6 @@ module NUOPC_Base
     ! set ShareStatusField
     call ESMF_AttributeSet(field, &
       name="ShareStatusField", value="not shared", &
-      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
-      rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
-    ! set TransferOfferGeomObject
-    call ESMF_AttributeSet(field, &
-      name="TransferOfferGeomObject", value="_undefined", &
-      convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
-      rc=localrc)
-    if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
-      line=__LINE__, file=FILENAME, rcToReturn=rc)) return  ! bail out
-
-    ! set TransferActionGeomObject
-    call ESMF_AttributeSet(field, &
-      name="TransferActionGeomObject", value="_undefined", &
       convention="NUOPC", purpose="Instance", attnestflag=ESMF_ATTNEST_ON, &
       rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2889,24 +2827,20 @@ module NUOPC_Base
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
             return  ! bail out
 #if 0
-          call NUOPC_GetAttribute(field, name="TransferActionField", &
-            value=value, rc=localrc)
-          call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
-            " ***: TransferActionField", ESMF_LOGMSG_INFO, rc=localrc)
-          call NUOPC_GetAttribute(field, name="ShareStatusField", &
-            value=value, rc=localrc)
-          call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
-            " ***: ShareStatusField", ESMF_LOGMSG_INFO, rc=localrc)
           call NUOPC_GetAttribute(field, name="TransferActionGeomObject", &
             value=value, rc=localrc)
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
             " ***: TransferActionGeomObject", ESMF_LOGMSG_INFO, rc=localrc)
+          call NUOPC_GetAttribute(field, name="ShareStatusField", &
+            value=value, rc=localrc)
+          call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
+            " ***: ShareStatusField", ESMF_LOGMSG_INFO, rc=localrc)
           call NUOPC_GetAttribute(field, name="ShareStatusGeomObject", &
             value=value, rc=localrc)
           call ESMF_LogWrite(trim(fieldNameList(i))//":*** "//trim(value)// &
             " ***: ShareStatusGeomObject:", ESMF_LOGMSG_INFO, rc=localrc)
 #endif
-          call NUOPC_GetAttribute(field, name="TransferActionField", &
+          call NUOPC_GetAttribute(field, name="TransferActionGeomObject", &
             value=value, rc=localrc)
           if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=FILENAME, rcToReturn=rc)) &
@@ -3362,7 +3296,7 @@ module NUOPC_Base
     character(ESMF_MAXSTR)  :: ShortName
     integer                 :: localrc
     integer                 :: i
-    integer, parameter      :: attrCount=12
+    integer, parameter      :: attrCount=10
     character(ESMF_MAXSTR)  :: attrList(attrCount)
     character(ESMF_MAXSTR)  :: tempString
     
@@ -3387,15 +3321,12 @@ module NUOPC_Base
     attrList(2) = "ProducerConnection"
     attrList(3) = "ConsumerConnection"
     attrList(4) = "Updated"
-    attrList(5) = "TransferOfferField"
-    attrList(6) = "TransferActionField"
+    attrList(5) = "TransferOfferGeomObject"
+    attrList(6) = "TransferActionGeomObject"
     attrList(7) = "SharePolicyField"
     attrList(8) = "ShareStatusField"
-    attrList(9) = "TransferOfferGeomObject"
-    attrList(10) = "TransferActionGeomObject"
-    attrList(11) = "SharePolicyGeomObject"
-    attrList(12) = "ShareStatusGeomObject"
-    
+    attrList(9) = "SharePolicyGeomObject"
+    attrList(10)= "ShareStatusGeomObject"
       
     ! Obtain basic attributes from the advertised Field
       

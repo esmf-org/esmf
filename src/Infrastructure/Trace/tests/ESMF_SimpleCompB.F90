@@ -48,8 +48,8 @@ contains
 
       rc = ESMF_SUCCESS
 
-      call ESMF_TraceRegionEnter("NEVER_EXIT", rc=rc)
-      if (rc /= ESMF_SUCCESS) return
+      !call ESMF_TraceRegionEnter("NEVER_EXIT", rc=rc)
+      !if (rc /= ESMF_SUCCESS) return
            
     end subroutine Init
 

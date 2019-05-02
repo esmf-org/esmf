@@ -150,6 +150,8 @@ program ESMF_DirectCouplingSTest
     ESMF_CONTEXT, rcToReturn=rc)) &
     call ESMF_Finalize(rc=rc, endflag=ESMF_END_ABORT)
 
+  call ESMF_LogSet (flush=.true.)
+
   ! Get number of PETs and local PET this driver is running on
   call ESMF_VMGet(vm, petCount=petCount, localPet=localPet, rc=localrc)
   if (ESMF_LogFoundError(localrc, ESMF_ERR_PASSTHRU, &

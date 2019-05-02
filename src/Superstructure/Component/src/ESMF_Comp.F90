@@ -645,6 +645,16 @@ contains
     if (ESMF_LogFoundError(localrc, &
       ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+    
+    ! own VM
+    call ESMF_VMSetThis(compp%vm, ESMF_NULL_POINTER, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+    call ESMF_VMSetInitCreated(compp%vm, rc=localrc)
+    if (ESMF_LogFoundError(localrc, &
+      ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
  
     ! for config files, store a directory path and subsequent opens can
     ! be relative to this or absolute.
@@ -1220,7 +1230,8 @@ contains
         timeoutArg = max(timeoutArg - int(usedTime), 1)
 !print *, "ESMF_CompExecute(), calling c_ESMC_CompWait(): usedTime=",usedTime,"timeoutArg=",timeoutArg
         call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-          compp%vm_cargo, timeoutArg, localUserRc, localrc)
+          compp%vm_cargo, timeoutArg, compp%vm_recursionCount, localUserRc, &
+          localrc)
         ! localUserRc - return code of registered user callback method
         ! localrc     - return code of ESMF internal callback stack
         if (ESMF_LogFoundError(localrc, &
@@ -2443,7 +2454,8 @@ contains
         timeoutArg = max(timeoutArg - int(usedTime), 1)
 !print *, "ESMF_CompWait(), calling c_ESMC_CompWait(): usedTime=",usedTime,"timeoutArg=",timeoutArg
         call c_ESMC_CompWait(compp%vm_parent, compp%vmplan, compp%vm_info, &
-          compp%vm_cargo, timeoutArg, localUserRc, localrc)
+          compp%vm_cargo, timeoutArg, compp%vm_recursionCount, localUserRc, &
+          localrc)
         ! localUserRc - return code of registered user callback method
         ! localrc     - return code of ESMF internal callback stack
         if (ESMF_LogFoundError(localrc, &

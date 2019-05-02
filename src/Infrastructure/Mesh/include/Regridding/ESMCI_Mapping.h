@@ -157,7 +157,7 @@ public:
     for (UInt p = 0; p < npts; p++) {
       typename richest_type<mdata_type,pcoord_type>::value rnorm_i = 0;
       for (UInt i = 0; i < sdim; i++) rnorm_i += result[p*sdim+i]*result[p*sdim+i];
-      rnorm_i = 1.0/std::sqrt(rnorm_i);
+      if (rnorm_i != 0.0) rnorm_i = 1.0/std::sqrt(rnorm_i);
       for (UInt i = 0; i < sdim; i++) result[p*sdim+i] *= rnorm_i;
     }
  }
