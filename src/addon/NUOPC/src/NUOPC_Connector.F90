@@ -2176,13 +2176,13 @@ module NUOPC_Connector
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
           write (msgString, '(A)') trim(name)//": "//&
-            "- import ShareStatusGeomObject="//trim(iShareStatusG)
+            "- export ShareStatusField="//trim(eShareStatusF)
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
             return  ! bail out
           write (msgString, '(A)') trim(name)//": "//&
-            "- export ShareStatusField="//trim(eShareStatusF)
+            "- import ShareStatusGeomObject="//trim(iShareStatusG)
           call ESMF_LogWrite(msgString, ESMF_LOGMSG_INFO, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &

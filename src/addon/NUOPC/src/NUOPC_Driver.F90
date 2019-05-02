@@ -531,9 +531,9 @@ module NUOPC_Driver
         return  ! bail out
       call NUOPC_CompSearchRevPhaseMap(driver, ESMF_METHOD_INITIALIZE, &
         phaseIndex=phase, phaseLabel=pLabel, rc=rc)
-      if (len_trim(pLabel)==0) pLabel="<none>"
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (len_trim(pLabel)==0) pLabel="<none>"
       call ESMF_GridCompGet(driver, clockIsPresent=clockIsPresent, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -827,9 +827,11 @@ module NUOPC_Driver
             value=hierarchyProtocol, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          if (trim(hierarchyProtocol) == &
-            "PushUpAllExportsAndUnsatisfiedImports") needConnector = .true.
-          if (trim(hierarchyProtocol) == "ConnectProvidedFields") needConnector = .true.
+          if (trim(hierarchyProtocol)=="PushUpAllExportsAndUnsatisfiedImports" &
+            .or. trim(hierarchyProtocol)=="ConnectProvidedFields" &
+            .or. trim(hierarchyProtocol)=="Explorer") then
+            needConnector = .true.
+          endif
         endif
         areServicesSet = NUOPC_CompAreServicesSet(connector, rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -1524,9 +1526,9 @@ module NUOPC_Driver
         return  ! bail out
       call NUOPC_CompSearchRevPhaseMap(driver, ESMF_METHOD_INITIALIZE, &
         phaseIndex=phase, phaseLabel=pLabel, rc=rc)
-      if (len_trim(pLabel)==0) pLabel="<none>"
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (len_trim(pLabel)==0) pLabel="<none>"
       call ESMF_GridCompGet(driver, clockIsPresent=clockIsPresent, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -1788,9 +1790,9 @@ module NUOPC_Driver
         return  ! bail out
       call NUOPC_CompSearchRevPhaseMap(driver, ESMF_METHOD_INITIALIZE, &
         phaseIndex=phase, phaseLabel=pLabel, rc=rc)
-      if (len_trim(pLabel)==0) pLabel="<none>"
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+      if (len_trim(pLabel)==0) pLabel="<none>"
       call ESMF_GridCompGet(driver, clockIsPresent=clockIsPresent, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) &
@@ -2650,6 +2652,7 @@ module NUOPC_Driver
     integer                         :: loopLevel, loopLevelPrev
     integer                         :: levelMember, levelMemberPrev
     integer                         :: loopIteration, loopIterationPrev
+    logical                         :: internalFlag
 
     rc = ESMF_SUCCESS
 
@@ -2687,7 +2690,7 @@ module NUOPC_Driver
     ! conditionally output info to Log file
     if (btest(verbosity,9)) then
       call NUOPC_CompSearchRevPhaseMap(driver, ESMF_METHOD_RUN, &
-        phaseIndex=phase, phaseLabel=pLabel, rc=rc)
+        phaseIndex=runPhase, phaseLabel=pLabel, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       call ESMF_ClockPrint(internalClock, options="currTime", &
@@ -2848,11 +2851,13 @@ module NUOPC_Driver
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
         if (areServicesSet) then
           write (iString, *) i
+          internalFlag = .false.
+          if (i==0) internalFlag = .true. ! driver self
           call NUOPC_CompSearchRevPhaseMap(is%wrap%modelComp(i), &
-            ESMF_METHOD_RUN, phaseIndex=phase, phaseLabel=pLabel, rc=rc)
+            ESMF_METHOD_RUN, phaseIndex=phase, phaseLabel=pLabel, &
+            internalFlag=internalFlag, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-          
           isPetLocal = ESMF_GridCompIsPetLocal(is%wrap%modelComp(i), rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -4292,6 +4297,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     type(ESMF_GridComp)             :: comp
     integer                         :: phase
     logical                         :: relaxed
+    logical                         :: internalFlag
     
     if (present(rc)) rc = ESMF_SUCCESS
     
@@ -4347,9 +4353,14 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       endif
     endif
     
+    ! consider driver self
+    internalFlag = .false.
+    if (iComp==0) internalFlag = .true.
+    
     ! Figure out the phase index
     call NUOPC_CompSearchPhaseMap(comp, methodflag=ESMF_METHOD_RUN, &
-      phaseLabel=phaseLabel, phaseIndex=phase, rc=localrc)
+      phaseLabel=phaseLabel, phaseIndex=phase, internalFlag=internalFlag, &
+      rc=localrc)
     if (ESMF_LogFoundError(rcToCheck=localrc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
@@ -5947,7 +5958,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
         value=hierarchyProtocol, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
-      if (trim(hierarchyProtocol)=="PushUpAllExportsAndUnsatisfiedImports") &
+      if (trim(hierarchyProtocol)=="PushUpAllExportsAndUnsatisfiedImports" &
+        .or. trim(hierarchyProtocol)=="Explorer") &
         needMirror = .true.
     endif
 
@@ -6200,7 +6212,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     character(ESMF_MAXSTR)    :: name
     integer                   :: verbosity
     logical                   :: stateIsCreated
-    logical                   :: isSet, needMirror
+    logical                   :: isSet, checkImportProducer
     character(len=80)         :: hierarchyProtocol
 
     rc = ESMF_SUCCESS
@@ -6220,23 +6232,23 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
     
-    needMirror = .not.isSet  ! by default request mirroring
+    checkImportProducer = .not.isSet  ! by default request checking
     
-    if (.not.needMirror) then
+    if (.not.checkImportProducer) then
       ! see if HieraryProtocol attribute explicitly requests mirroring
       call NUOPC_CompAttributeGet(driver, name="HierarchyProtocol", &
         value=hierarchyProtocol, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
         line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
       if (trim(hierarchyProtocol)=="PushUpAllExportsAndUnsatisfiedImports") &
-        needMirror = .true.
+        checkImportProducer = .true.
     endif
 
     stateIsCreated = ESMF_StateIsCreated(importState, rc=rc)
     if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
       line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
 
-    if (needMirror.and.stateIsCreated) then
+    if (checkImportProducer.and.stateIsCreated) then
       ! - check that all connected fields in importState have producer
       call checkProducerConnection(importState, rc=rc)
       if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
