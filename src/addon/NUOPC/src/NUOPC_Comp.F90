@@ -2501,13 +2501,7 @@ module NUOPC_Comp
       line=__LINE__, file=trim(name)//":"//FILENAME, rcToReturn=rc)) &
       return  ! bail out
 
-    if (.not.isSet) then
-      call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
-        msg="Could not find the Attribute: "//trim(attributeName),&
-        line=__LINE__, &
-        file=FILENAME, &
-        rcToReturn=rc)
-    endif
+    if (.not.isSet) return ! nothing to be done -> early return
 
     call ESMF_AttributeGet(comp, name=trim(attributeName), &
       itemCount=itemCount, convention="NUOPC", purpose="Instance", &
