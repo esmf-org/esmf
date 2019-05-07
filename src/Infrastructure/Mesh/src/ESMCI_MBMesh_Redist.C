@@ -1104,15 +1104,13 @@ void create_mbmesh_copy_metadata(MBMesh *src_mesh,
 #ifdef DEBUG
     printf("PET %d - create_pointlist_redist_move_points: pl_rend_size (%d) = pl->size (%d)\n", localPet, pl_rend_size, pl->get_curr_num_pts());
 #endif
-    // Create source rendezvous point list (create outside of if, so will work even if 0-sized)
+
+    // Create source rendezvous point list, start with points that are not being sent to other processors
     PointList *pl_rend;
     pl_rend = new ESMCI::PointList(pl_rend_size,sdim);
 
     if (pl_rend_size >= 0) {
 
-      // dstplist_rend = new ESMCI::PointList(pl_rend_size,sdim);
-
-      // TODO: verify that Zoltan is not checking that point are sent to their native processors, if so we can remove this loop and the mymoving vector
       int orig_dstpointlist_size = pl->get_curr_num_pts();
       for (int i=0; i<orig_dstpointlist_size; i++) {
         if (mymoving[i] == 0) {
