@@ -1910,7 +1910,7 @@ module NUOPC_Connector
     character(len=40)               :: currTimeString
     character(len=40)               :: transferDirection
     type(ESMF_TypeKind_Flag)        :: tkf
-    integer                         :: tk
+    integer                         :: tk, gl
     
     rc = ESMF_SUCCESS
 
@@ -2203,9 +2203,12 @@ module NUOPC_Connector
           
         ! transfer the underlying DistGrid from provider to acceptor
         ! or share the providerField or providerGeomObject with the acceptor
-        call ESMF_FieldGet(providerField, geomtype=geomtype, rc=rc)
+        call ESMF_FieldGet(providerField, geomtype=geomtype, typekind=tkf, &
+          rc=rc)
         if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
           line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
+        
+        ! ESMF_GEOMTYPE_GRID
         if (geomtype==ESMF_GEOMTYPE_GRID) then
           call ESMF_FieldGet(providerField, grid=grid, staggerloc=staggerloc, &
             rc=rc)
@@ -2257,8 +2260,8 @@ module NUOPC_Connector
             endif
           endif
           ! query additional provider information
-          call ESMF_FieldGet(providerField, grid=grid, typekind=tkf, &
-            dimCount=fieldDimCount, rc=rc)
+          call ESMF_FieldGet(providerField, grid=grid, dimCount=fieldDimCount, &
+            rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_GridGet(grid, dimCount=gridDimCount, &
@@ -2300,9 +2303,18 @@ module NUOPC_Connector
           endif
           if (.not.sharedFlag) then
             ! transfer additional provider info in form of attributes
-            tk = tkf
+            tk = tkf  ! convert TypeKind_Flag to integer
             call ESMF_AttributeSet(acceptorField, &
               name="TypeKind", value=tk, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+            gl = staggerloc  ! convert StaggerLoc to integer
+            call ESMF_AttributeSet(acceptorField, &
+              name="GeomLoc", value=gl, &
               convention="NUOPC", purpose="Instance", &
               attnestflag=ESMF_ATTNEST_ON, rc=rc)
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2345,8 +2357,6 @@ module NUOPC_Connector
               return  ! bail out
             if (fieldDimCount - gridDimCount > 0) then
               ! bring over ungridded dim bounds as attributes
-!            print *, "fieldDimCount = ", fieldDimCount
-!            print *, "gridDimCount = ", gridDimCount
               call ESMF_AttributeSet(acceptorField, &
                 name="UngriddedLBound", valueList=ungriddedLBound, &
                 convention="NUOPC", purpose="Instance", &
@@ -2419,7 +2429,8 @@ module NUOPC_Connector
               msg="Deallocating ungriddedUBound", &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
-          
+        
+        ! ESMF_GEOMTYPE_MESH
         elseif (geomtype==ESMF_GEOMTYPE_MESH) then
           call ESMF_FieldGet(providerField, mesh=mesh, meshloc=meshloc, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2464,8 +2475,8 @@ module NUOPC_Connector
             endif
           endif
           ! query additional provider information
-          call ESMF_FieldGet(providerField, mesh=mesh, &
-            dimCount=fieldDimCount, rc=rc)
+          call ESMF_FieldGet(providerField, mesh=mesh, dimCount=fieldDimCount,&
+            rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           call ESMF_DistGridGet(providerDG, dimCount=gridDimCount, rc=rc)
@@ -2499,6 +2510,24 @@ module NUOPC_Connector
           endif
           if (.not.sharedFlag) then
             ! transfer additional provider info in form of attributes
+            tk = tkf  ! convert TypeKind_Flag to integer
+            call ESMF_AttributeSet(acceptorField, &
+              name="TypeKind", value=tk, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
+            gl = meshloc  ! convert StaggerLoc to integer
+            call ESMF_AttributeSet(acceptorField, &
+              name="GeomLoc", value=gl, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
             ! bring over gridToFieldMap as attributes
             call ESMF_AttributeSet(acceptorField, &
               name="GridToFieldMap", valueList=gridToFieldMap, &
@@ -2580,6 +2609,7 @@ module NUOPC_Connector
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
 
+        ! ESMF_GEOMTYPE_LOCSTREAM
         elseif (geomtype==ESMF_GEOMTYPE_LOCSTREAM) then
           call ESMF_FieldGet(providerField, locstream=locstream, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
@@ -2616,6 +2646,18 @@ module NUOPC_Connector
             if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
               line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
           endif
+          ! transfer additional provider info in form of attributes
+          tk = tkf  ! convert TypeKind_Flag to integer
+          call ESMF_AttributeSet(acceptorField, &
+            name="TypeKind", value=tk, &
+            convention="NUOPC", purpose="Instance", &
+            attnestflag=ESMF_ATTNEST_ON, rc=rc)
+          if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+            line=__LINE__, &
+            file=FILENAME)) &
+            return  ! bail out
+
+        ! unsupported ESMF_GEOMTYPE
         else
           call ESMF_LogSetError(ESMF_RC_ARG_BAD, &
             msg="Provided GeomType must be Grid, Mesh, or LocStream.", &

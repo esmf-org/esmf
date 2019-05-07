@@ -185,6 +185,7 @@ module ESMF_MeshMod
 ! !PUBLIC MEMBER FUNCTIONS:
 
 ! - ESMF-public methods:
+  public assignment(=)
   public operator(==)
   public operator(/=)
 
@@ -249,6 +250,14 @@ module ESMF_MeshMod
      module procedure ESMF_MeshCreateFromGrid
    end interface
 
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface assignment (=)
+         module procedure ESMF_MeshLocToInt
+         module procedure ESMF_IntToMeshLoc
+      end interface
+!
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
@@ -452,6 +461,18 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+subroutine ESMF_MeshLocToInt(lhsInt, rhsMeshLoc)
+  integer,                   intent(out) :: lhsInt
+  type(ESMF_MeshLoc),        intent(in)  :: rhsMeshLoc
+  lhsInt = rhsMeshLoc%meshloc
+end subroutine
+
+subroutine ESMF_IntToMeshLoc(lhsMeshLoc, rhsInt)
+  type(ESMF_MeshLoc),        intent(out) :: lhsMeshLoc
+  integer,                   intent(in)  :: rhsInt
+  lhsMeshLoc = ESMF_MeshLoc(rhsInt)
+end subroutine
 
 !-------------------------------------------------------------------------------
 #undef  ESMF_METHOD
