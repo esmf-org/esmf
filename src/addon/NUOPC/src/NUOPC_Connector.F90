@@ -1909,6 +1909,8 @@ module NUOPC_Connector
     type(ESMF_Time)                 :: currTime
     character(len=40)               :: currTimeString
     character(len=40)               :: transferDirection
+    type(ESMF_TypeKind_Flag)        :: tkf
+    integer                         :: tk
     
     rc = ESMF_SUCCESS
 
@@ -2255,7 +2257,7 @@ module NUOPC_Connector
             endif
           endif
           ! query additional provider information
-          call ESMF_FieldGet(providerField, grid=grid, &
+          call ESMF_FieldGet(providerField, grid=grid, typekind=tkf, &
             dimCount=fieldDimCount, rc=rc)
           if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
             line=__LINE__, file=trim(name)//":"//FILENAME)) return  ! bail out
@@ -2298,6 +2300,15 @@ module NUOPC_Connector
           endif
           if (.not.sharedFlag) then
             ! transfer additional provider info in form of attributes
+            tk = tkf
+            call ESMF_AttributeSet(acceptorField, &
+              name="TypeKind", value=tk, &
+              convention="NUOPC", purpose="Instance", &
+              attnestflag=ESMF_ATTNEST_ON, rc=rc)
+            if (ESMF_LogFoundError(rcToCheck=rc, msg=ESMF_LOGERR_PASSTHRU, &
+              line=__LINE__, &
+              file=FILENAME)) &
+              return  ! bail out
             call ESMF_AttributeSet(acceptorField, &
               name="MinIndex", valueList=minIndex, &
               convention="NUOPC", purpose="Instance", &
