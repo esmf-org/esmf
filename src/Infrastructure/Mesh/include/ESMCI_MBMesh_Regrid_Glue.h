@@ -30,15 +30,19 @@
 #include "ESMCI_GridToMesh.h"
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
+
 #include "Mesh/include/ESMCI_Mesh.h"
-#include "Mesh/include/Legacy/ESMCI_MeshRead.h"
+#include "Mesh/include/ESMCI_MathUtil.h"
+#include "Mesh/include/ESMCI_Regrid_Nearest.h"
+
 #include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
-#include "Mesh/include/Legacy/ESMCI_Exception.h"
 #include "Mesh/include/Regridding/ESMCI_Integrate.h"
 #include "Mesh/include/Regridding/ESMCI_Interp.h"
 #include "Mesh/include/Regridding/ESMCI_Extrapolation.h"
-#include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/Regridding/ESMCI_Regrid_Helper.h"
+
+#include "Mesh/include/Legacy/ESMCI_Exception.h"
+#include "Mesh/include/Legacy/ESMCI_MeshRead.h"
 
 
 //-----------------------------------------------------------------------------
@@ -51,8 +55,10 @@
 using namespace ESMCI;
 
  
-void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
-                          void **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
+void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, 
+                          ESMCI::PointList **plsrcpp,
+                          void **meshdstpp, ESMCI::Array **arraydstpp, 
+                          ESMCI::PointList **pldstpp,
                           int *regridMethod,
                           int *map_type,
                           int *norm_type,

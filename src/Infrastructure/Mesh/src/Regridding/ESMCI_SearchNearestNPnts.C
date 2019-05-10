@@ -37,7 +37,7 @@
 #include <vector>
 
 #include <Mesh/include/Legacy/ESMCI_BBox.h>
-#include <Mesh/include/Legacy/ESMCI_SpaceDir.h>
+#include <Mesh/include/Regridding/ESMCI_SpaceDir.h>
 
 using std::vector;
 

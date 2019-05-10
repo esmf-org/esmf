@@ -413,6 +413,26 @@ std::ostream &operator<<(std::ostream &os, const MBMesh_BBox &cn) {
   return os;
 }
 
+void build_pl_mb_bbox(double *cmin, double *cmax, PointList *pl) {
+  // sdim
+  int sdim = pl->get_coord_dim();
+
+  // Init cmin, cmax
+  std::fill(cmin, cmin+sdim, std::numeric_limits<double>::max());
+  std::fill(cmax, cmax+sdim, -std::numeric_limits<double>::max());
+
+  int pl_size = pl->get_curr_num_pts();
+  const double *c;
+  for (int i=0; i<pl_size; i++) {
+    c=pl->get_coord_ptr(i);
+
+    for (UInt d = 0; d < sdim; d++) {
+      if (c[d] < cmin[d]) cmin[d] = c[d];
+      if (c[d] > cmax[d]) cmax[d] = c[d];
+    }
+  }
+}
+
 }
 
 #endif // ESMF_MOAB

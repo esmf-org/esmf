@@ -93,7 +93,7 @@ bool weight_gen(MBMesh *mesh, PointList *pl, std::vector<double> weights, bool c
   if (weights_correct(wts, weights)) correct = true;
 
   // output weight matrix for debugging purposes
-#define BILINEAR_WEIGHTS
+// #define BILINEAR_WEIGHTS
 #ifdef BILINEAR_WEIGHTS
   std::cout << std::endl << "Bilinear Weight Matrix" << std::endl;
   // print out weights

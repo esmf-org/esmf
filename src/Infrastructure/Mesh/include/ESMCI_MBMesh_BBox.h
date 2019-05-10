@@ -82,6 +82,7 @@ bool MBMesh_BBoxSubset(const MBMesh_BBox &b1, const MBMesh_BBox &b2);
 
 std::ostream &operator<<(std::ostream &os, const MBMesh_BBox &cn);
 
+void build_pl_mb_bbox(double *cmin, double *cmax, PointList *pl);
 
 } // namespace
 

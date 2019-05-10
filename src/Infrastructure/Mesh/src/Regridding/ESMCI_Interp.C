@@ -2756,7 +2756,7 @@ interp_method(imethod)
       Throw() << "unable to proceed with interpolation method dst_to_src";
 
     } else if (has_nearest_src_to_dst) {
-      ParSearchNearestSrcToDst(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres, set_dst_status, dst_status);
+      ParSearchNearestSrcToDst_lgc(grend.GetSrcPlistRend(), grend.GetDstPlistRend(), unmappedaction, sres, set_dst_status, dst_status);
 
       // Redistribute regrid status
       if (set_dst_status) {
@@ -2801,7 +2801,7 @@ interp_method(imethod)
     if (has_nearest_dst_to_src) {
       Throw() << "unable to proceed with interpolation method dst_to_src";
     } else if (has_nearest_src_to_dst) {
-      SearchNearestSrcToDst(*srcpointlist, *dstpointlist, unmappedaction, sres, set_dst_status, dst_status);
+      SearchNearestSrcToDst_lgc(*srcpointlist, *dstpointlist, unmappedaction, sres, set_dst_status, dst_status);
     } else if (has_nearest_idavg) {
       SearchNearestSrcToDstNPnts(*srcpointlist, *dstpointlist, num_src_pnts, unmappedaction, sres, set_dst_status, dst_status);
     } else {

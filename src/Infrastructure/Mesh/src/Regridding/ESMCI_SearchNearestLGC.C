@@ -10,16 +10,12 @@
 //
 //==============================================================================
 #include <Mesh/include/Regridding/ESMCI_Search.h>
-#include <Mesh/include/Legacy/ESMCI_MeshTypes.h>
-#include <Mesh/include/Legacy/ESMCI_MeshObjTopo.h>
-#include <Mesh/include/Regridding/ESMCI_Mapping.h>
-#include <Mesh/include/Legacy/ESMCI_MeshObj.h>
-#include <Mesh/include/ESMCI_Mesh.h>
-#include <Mesh/include/Legacy/ESMCI_MeshUtils.h>
+#include <Mesh/include/Regridding/ESMCI_SpaceDir.h>
 #include <Mesh/include/ESMCI_OTree.h>
-#include <Mesh/include/Legacy/ESMCI_Mask.h>
+#include <Mesh/include/ESMCI_RegridConstants.h>
+
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
-#include <Mesh/include/Regridding/ESMCI_MeshRegrid.h>
+// #include <Mesh/include/Legacy/ESMCI_BBox.h>
 
 #include "PointList/include/ESMCI_PointList.h"
 
@@ -35,9 +31,6 @@
 #include <limits>
 #include <vector>
 
-#include <Mesh/include/Legacy/ESMCI_BBox.h>
-#include <Mesh/include/Legacy/ESMCI_SpaceDir.h>
-
 using std::vector;
 
 
@@ -50,15 +43,13 @@ static const char *const version = "$Id$";
 namespace ESMCI {
 
 
- bool sn_debug=false;
+bool sn_debug=false;
 
 struct SearchData {
   int sdim;
   double dst_pnt[3];
 
-  const MeshObj *closest_src_node;
   double closest_dist2;  // closest distance squared
-  MEField<> *src_coord;
   double closest_coord[3];
 
   int closest_src_id;
@@ -136,8 +127,8 @@ struct SearchData {
 
 
 // The main routine
-  void SearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status) {
-  Trace __trace("Search(PointList &src_pl, PointList &dst_pl, int unmappedaction, SearchResult &result)");
+  void SearchNearestSrcToDst_lgc(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status) {
+  Trace __trace("SearchNearestSrcToDst_lgc(PointList &src_pl, PointList &dst_pl, int unmappedaction, SearchResult &result)");
 
 
   // Get spatial dim and make sure both have the same
@@ -191,9 +182,9 @@ struct SearchData {
   // Setup search structure
   SearchData sd;
   sd.sdim=sdim;
-  sd.closest_src_node=NULL;
+  // sd.closest_src_node=NULL;
   sd.closest_dist2=std::numeric_limits<double>::max();
-  sd.src_coord=NULL;
+  // sd.src_coord=NULL;
   sd.closest_src_id=SN_BAD_ID;
   sd.srcpointlist=&src_pl;
 
@@ -301,8 +292,8 @@ struct CommData {
 
 
 
-  void ParSearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status) {
-    Trace __trace("Search(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result)");
+  void ParSearchNearestSrcToDst_lgc(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status) {
+    Trace __trace("ParSearchNearestSrcToDst_lgc(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result)");
   //int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, double *pnts, int *procs, int *gids) {
   //  Trace __trace("FindPnts()");
 
@@ -383,9 +374,9 @@ struct CommData {
   // Setup search structure
   SearchData sd;
   sd.sdim=sdim;
-  sd.closest_src_node=NULL;
+  // sd.closest_src_node=NULL;
   sd.closest_dist2=std::numeric_limits<double>::max();
-  sd.src_coord=NULL;
+  // sd.src_coord=NULL;
   sd.closest_src_id=SN_BAD_ID;
   sd.srcpointlist=&src_pl;
 
@@ -664,9 +655,9 @@ struct CommData {
       sd.dst_pnt[0] = pnt[0];
       sd.dst_pnt[1] = pnt[1];
       sd.dst_pnt[2] = (sdim == 3 ? pnt[2] : 0.0);
-      sd.closest_src_node=NULL;
+      // sd.closest_src_node=NULL;
       sd.closest_dist2=dist*dist;
-      sd.src_coord=NULL;
+      // sd.src_coord=NULL;
 
       sd.closest_src_id=SN_BAD_ID;
       sd.srcpointlist=&src_pl;

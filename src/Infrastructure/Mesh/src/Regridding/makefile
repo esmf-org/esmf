@@ -18,10 +18,11 @@ SOURCEC	  = \
 					 ESMCI_PatchRecovery.C \
 					 ESMCI_Regrid_Helper.C \
 					 ESMCI_Search.C \
-					 ESMCI_SearchNearest.C \
+					 ESMCI_SearchNearestLGC.C \
 					 ESMCI_SearchNearestNPnts.C \
 					 ESMCI_SearchNearestDToS.C \
 					 ESMCI_ShapeFunc.C \
+					 ESMCI_SpaceDir.C \
 					 ESMCI_WMat.C \
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))

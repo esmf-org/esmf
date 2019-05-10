@@ -57,7 +57,8 @@
 using namespace std;
 using namespace ESMCI;
 
-int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, PointList *dstpl, IWeights &wts,
+int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, 
+                     PointList *srcpl, PointList *dstpl, IWeights &wts,
                      int *regridConserve, int *regridMethod,
                      int *regridPoleType, int *regridPoleNPnts,
                      int *regridScheme,
@@ -79,20 +80,22 @@ extern "C" void FTN_X(c_esmc_arraysmmstoreind4)(ESMCI::Array **srcArray,
     int *srcTermProcessing, int *pipelineDepth, int *rc);
 
 
-void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::PointList **plsrcpp,
-                     void **meshdstpp, ESMCI::Array **arraydstpp, ESMCI::PointList **pldstpp,
-                     int *regridMethod,
-                     int *map_type,
-                     int *norm_type,
-                     int *regridPoleType, int *regridPoleNPnts,
-                     int *regridScheme,
-                     int *unmappedaction, int *_ignoreDegenerate,
-                     int *srcTermProcessing, int *pipelineDepth,
-                     ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
-                     int *nentries, ESMCI::TempWeights **tweights,
-                     int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
-                     int *_has_statusArray, ESMCI::Array **_statusArray,
-                     int*rc) {
+void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, 
+                          ESMCI::PointList **plsrcpp,
+                          void **meshdstpp, ESMCI::Array **arraydstpp, 
+                          ESMCI::PointList **pldstpp,
+                          int *regridMethod,
+                          int *map_type,
+                          int *norm_type,
+                          int *regridPoleType, int *regridPoleNPnts,
+                          int *regridScheme,
+                          int *unmappedaction, int *_ignoreDegenerate,
+                          int *srcTermProcessing, int *pipelineDepth,
+                          ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
+                          int *nentries, ESMCI::TempWeights **tweights,
+                          int *has_udl, int *_num_udl, ESMCI::TempUDL **_tudl,
+                          int *_has_statusArray, ESMCI::Array **_statusArray,
+                          int*rc) {
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_regrid_create()"
   Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
@@ -241,17 +244,19 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp, ESMCI::Po
 
     // to do NEARESTDTOS just do NEARESTSTOD and invert results
     if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
-      if(!calc_regrid_wgts(mbmsrcp, mbmdstp, dstpl, wts, &regridConserve, regridMethod,
-                        regridPoleType, regridPoleNPnts,
-                        regridScheme, map_type, &temp_unmappedaction,
-                        set_dst_status, dst_status))
+      if(!calc_regrid_wgts(mbmsrcp, mbmdstp, srcpl, dstpl, wts, 
+                           &regridConserve, regridMethod,
+                           regridPoleType, regridPoleNPnts,
+                           regridScheme, map_type, &temp_unmappedaction,
+                           set_dst_status, dst_status))
         Throw() << "Online regridding error" << std::endl;
     } else {
       int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
-      if(!calc_regrid_wgts(mbmdstp, mbmsrcp, dstpl, wts, &regridConserve, &tempRegridMethod,
-                        regridPoleType, regridPoleNPnts,
-                        regridScheme, map_type, &temp_unmappedaction,
-                        set_dst_status, dst_status))
+      if(!calc_regrid_wgts(mbmdstp, mbmsrcp, srcpl, dstpl, wts, 
+                           &regridConserve, &tempRegridMethod,
+                           regridPoleType, regridPoleNPnts,
+                           regridScheme, map_type, &temp_unmappedaction,
+                           set_dst_status, dst_status))
         Throw() << "Online regridding error" << std::endl;
     }
 
@@ -1147,7 +1152,9 @@ void mbcopy_cnsv_rs_from_WMat_to_Array(WMat *wmat, ESMCI::Array *array) {
 }
 
 
-int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, PointList *dstpl, IWeights &wts,
+int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
+                     PointList *srcpl, PointList *dstpl,
+                     IWeights &wts,
                      int *regridConserve, int *regridMethod,
                      int *regridPoleType, int *regridPoleNPnts,
                      int *regridScheme,
@@ -1157,12 +1164,20 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp, PointList *dstpl, IWeight
   // Branch to different subroutines based on method
   if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE) {
     calc_cnsrv_regrid_wgts(srcmbmp, dstmbmp, wts);
-  } else if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR){
+  } else if (*regridMethod == ESMC_REGRID_METHOD_BILINEAR) {
     calc_bilinear_regrid_wgts(srcmbmp, dstpl, wts, map_type,
                               set_dst_status, dst_status);
+  } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST) {
+    calc_nearest_regrid_wgts(srcpl, dstpl, wts,
+                             set_dst_status, dst_status);
+  } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
+    calc_nearest_regrid_wgts(dstpl, srcpl, wts,
+                             set_dst_status, dst_status);
   } else {
     Throw() << "This regrid method not currently supported with MOAB";
   }
+
+  // call into extrapolation
 
   return 1;
 

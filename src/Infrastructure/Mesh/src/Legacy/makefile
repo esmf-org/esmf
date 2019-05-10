@@ -58,7 +58,6 @@ SOURCEC	  = \
            ESMCI_SparseMsg.C \
            ESMCI_WriteWeights.C \
            ESMCI_WriteWeightsPar.C \
-           ESMCI_SpaceDir.C \
            ESMCI_FindPnts.C \
            ESMCI_SM.C \
 

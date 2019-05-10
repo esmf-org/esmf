@@ -7,19 +7,22 @@ ALL: build_here
 ESMF_CXXCOMPILECPPFLAGS += -DMPICH_IGNORE_CXX_SEEK
 
 SOURCEC	  = \
-					 ESMCI_ClumpPnts.C \
-					 ESMCI_MathUtil.C \
-           ESMCI_Mesh_Glue.C \
-           ESMCI_Mesh_GToM_Glue.C \
-					 ESMCI_Mesh_Regrid_Glue.C \
-           ESMCI_Mesh_XGrid_Glue.C \
-					 ESMCI_Mesh.C \
-           ESMCI_MeshCap.C \
-           ESMCI_MeshCXX.C \
-					 ESMCI_MeshDual.C \
-					 ESMCI_MeshRedist.C \
-					 ESMCI_OTree.C \
-					 ESMCI_XGridUtil.C
+            ESMCI_ClumpPnts.C \
+            ESMCI_MathUtil.C \
+            ESMCI_Mesh_Glue.C \
+            ESMCI_Mesh_GToM_Glue.C \
+            ESMCI_Mesh_Regrid_Glue.C \
+            ESMCI_Mesh_XGrid_Glue.C \
+            ESMCI_Mesh.C \
+            ESMCI_MeshCap.C \
+            ESMCI_MeshCXX.C \
+            ESMCI_MeshDual.C \
+            ESMCI_MeshRedist.C \
+            ESMCI_OTree.C \
+            ESMCI_Regrid_Nearest.C \
+            ESMCI_Rendez_Nearest.C \
+            ESMCI_SearchNearest.C \
+            ESMCI_XGridUtil.C
 
 
 ifneq ($(ESMF_MOAB),OFF)

@@ -25,6 +25,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_SearchUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_UtilUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_UtilParUTest \
+               $(ESMF_TESTDIR)/ESMC_NearestUTest \
                $(ESMF_TESTDIR)/ESMF_MeshOpUTest \
                $(ESMF_TESTDIR)/ESMF_MeshUTest
 
@@ -47,6 +48,7 @@ TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MBMesh_SearchUTest \
                 RUN_ESMC_MBMesh_UtilUTest \
                 RUN_ESMC_MBMesh_UtilParUTest \
+                RUN_ESMC_NearestUTest \
                 RUN_ESMF_MeshOpUTest \
                 RUN_ESMF_MeshUTest
 
@@ -219,4 +221,8 @@ RUN_ESMC_MBMesh_SearchUTest:
 
 RUN_ESMC_MBMesh_SearchUTestUNI:
 	$(MAKE) TNAME=MBMesh_Search NP=1 ctest
+
+
+RUN_ESMC_NearestUTest:
+	$(MAKE) TNAME=Nearest NP=4 ctest
 

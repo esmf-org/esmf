@@ -25,7 +25,7 @@
 #include <Mesh/include/ESMCI_OTree.h>
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
 #include <Mesh/include/Legacy/ESMCI_SparseMsg.h>
-#include <Mesh/include/Legacy/ESMCI_SpaceDir.h>
+#include <Mesh/include/Regridding/ESMCI_SpaceDir.h>
 #include <Mesh/include/Regridding/ESMCI_Search.h>
 #include <Mesh/include/ESMCI_XGridUtil.h>
 #include <ESMCI_VM.h>
