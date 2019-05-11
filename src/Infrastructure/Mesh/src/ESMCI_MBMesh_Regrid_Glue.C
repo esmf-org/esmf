@@ -32,15 +32,17 @@
 
 #include "Mesh/include/Legacy/ESMCI_Exception.h"
 // #include "Mesh/include/Regridding/ESMCI_Interp.h"
-// #include "Mesh/include/Regridding/ESMCI_Extrapolation.h"
+// #include "Mesh/include/Regridding/ESMCI_ExtrapolationPoleLGC.h"
 
 #include "Mesh/include/ESMCI_MathUtil.h"
 
 #include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_MBMesh_Regrid_Glue.h"
-#include "Mesh/include/ESMCI_MBMesh_Conserve.h"
-#include "Mesh/include/ESMCI_MBMesh_Bilinear.h"
+#include "Mesh/include/ESMCI_RegridConstants.h"
 #include "Mesh/include/ESMCI_MBMesh_Glue.h"
+#include "Mesh/include/ESMCI_MBMesh_Bilinear.h"
+#include "Mesh/include/ESMCI_MBMesh_Conserve.h"
+#include "Mesh/include/ESMCI_MBMesh_Extrapolation.h"
 
 #include <iostream>
 #include <vector>
@@ -108,8 +110,8 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
                           int *_has_statusArray, ESMCI::Array **_statusArray,
                           int*rc) {
 #undef  ESMC_METHOD
-#define ESMC_METHOD "c_esmc_regrid_create()"
-  Trace __trace(" FTN_X(regrid_test)(ESMCI::Grid **gridsrcpp, ESMCI::Grid **griddstcpp, int*rc");
+#define ESMC_METHOD "MBMesh_regrid_create()"
+  Trace __trace("MBMesh_regrid_create()");
 
   // Get Moab Mesh wrapper
   MBMesh *mbmsrcp=*((MBMesh **)meshsrcpp);
@@ -253,6 +255,8 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
     VM::logMemInfo(std::string("before MOAB Mesh Weight Generation"));
 #endif
 
+    // need to pass the pole_constraint_id for extrapolation
+    //   |--> after pole handling implemented, which is after gridtombmesh
     if(!calc_regrid_wgts(mbmsrcp, mbmdstp, srcpl, dstpl, wts, 
                          &regridConserve, regridMethod,
                          regridPoleType, regridPoleNPnts,
@@ -1172,6 +1176,11 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
                      int *extrapNumInputLevels, 
                      int *unmappedaction,
                      bool set_dst_status, WMat &dst_status) {
+#undef  ESMC_METHOD
+#define ESMC_METHOD "calc_regrid_wgts()"
+  Trace __trace("calc_regrid_wgts()");
+
+  int localrc;
 
   // Branch to different subroutines based on method
   if (*regridMethod == ESMC_REGRID_METHOD_CONSERVE) {
@@ -1198,7 +1207,16 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
     Throw() << "This regrid method is not currently supported.";
   }
 
-  // call into extrapolation
+  // Do extrapolation if the user has requested it
+  if (*extrapMethod != ESMC_EXTRAPMETHOD_NONE) {
+    MBMesh_Extrapolate(srcmbmp, srcpl, dstmbmp, dstpl,
+                       wts, 
+                       // map_type, // RLO: not sure if this is needed
+                       NULL, // pole_constraint_id only used with src_mesh
+                       extrapMethod, extrapNumSrcPnts, extrapDistExponent,
+                       extrapNumLevels, extrapNumInputLevels,
+                       set_dst_status, dst_status, &localrc);
+  }
 
   return 1;
 

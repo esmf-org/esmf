@@ -9,7 +9,7 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/Regridding/ESMCI_Extrapolation.h>
+#include <Mesh/include/Regridding/ESMCI_ExtrapolationPoleLGC.h>
 
 #include <Mesh/include/Regridding/ESMCI_Interp.h>
 #include <Mesh/include/ESMCI_Mesh.h>

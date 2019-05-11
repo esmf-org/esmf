@@ -14,7 +14,7 @@
 
 #include <Mesh/include/ESMCI_Mesh.h>
 #include <PointList/include/ESMCI_PointList.h>
-#include <Mesh/include/Regridding/ESMCI_Extrapolation.h>
+#include <Mesh/include/Regridding/ESMCI_ExtrapolationPoleLGC.h>
 #include <Mesh/include/Regridding/ESMCI_Integrate.h>
 #include <Mesh/include/Regridding/ESMCI_Interp.h>
 #include <Mesh/include/Legacy/ESMCI_WriteWeightsPar.h>

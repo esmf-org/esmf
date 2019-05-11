@@ -31,18 +31,23 @@
 #include "ESMC_Util.h"
 #include "ESMCI_Array.h"
 
-#include "Mesh/include/ESMCI_Mesh.h"
-#include "Mesh/include/ESMCI_MathUtil.h"
+#include "Mesh/include/ESMCI_MBMesh.h"
 #include "Mesh/include/ESMCI_Regrid_Nearest.h"
 
-#include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
-#include "Mesh/include/Regridding/ESMCI_Integrate.h"
-#include "Mesh/include/Regridding/ESMCI_Interp.h"
-#include "Mesh/include/Regridding/ESMCI_Extrapolation.h"
+// for temp weights, this file should be merged into something else
 #include "Mesh/include/Regridding/ESMCI_Regrid_Helper.h"
 
+// #include "Mesh/include/ESMCI_Mesh.h"
+// #include "Mesh/include/ESMCI_MathUtil.h"
+
+// #include "Mesh/include/Regridding/ESMCI_MeshRegrid.h"
+// #include "Mesh/include/Regridding/ESMCI_Integrate.h"
+// #include "Mesh/include/Regridding/ESMCI_Interp.h"
+// #include "Mesh/include/Regridding/ESMCI_ExtrapolationPoleLGC.h"
+// #include "Mesh/include/Regridding/ESMCI_Regrid_Helper.h"
+
 #include "Mesh/include/Legacy/ESMCI_Exception.h"
-#include "Mesh/include/Legacy/ESMCI_MeshRead.h"
+// #include "Mesh/include/Legacy/ESMCI_MeshRead.h"
 
 
 //-----------------------------------------------------------------------------

@@ -20,6 +20,7 @@ TESTS_BUILD   = $(ESMF_TESTDIR)/ESMCI_IntegrateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_BilinearEdgeCases3DUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_CreateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_CreateParUTest \
+               $(ESMF_TESTDIR)/ESMC_MBMesh_ExtrapolateUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_RendezvousParUTest \
                $(ESMF_TESTDIR)/ESMC_MBMesh_SearchUTest \
@@ -45,6 +46,7 @@ TESTS_RUN     = RUN_ESMCI_IntegrateUTest \
                 RUN_ESMC_MBMesh_CreateUTest \
                 RUN_ESMC_MBMesh_CreateParUTest \
                 RUN_ESMC_MBMesh_DualUTest \
+                RUN_ESMC_MBMesh_ExtrapolateUTest \
                 RUN_ESMC_MBMesh_SearchUTest \
                 RUN_ESMC_MBMesh_UtilUTest \
                 RUN_ESMC_MBMesh_UtilParUTest \
@@ -194,6 +196,11 @@ RUN_ESMC_MBMesh_DualUTest:
 
 RUN_ESMC_MBMesh_DualParUTest:
 	$(MAKE) TNAME=MBMesh_DualPar NP=4 ctest
+
+
+RUN_ESMC_MBMesh_ExtrapolateUTest:
+	$(MAKE) TNAME=MBMesh_Extrapolate NP=4 ctest
+
 
 
 RUN_ESMC_MBMesh_RendezvousUTest:

@@ -33,7 +33,7 @@
 #include "Mesh/include/Legacy/ESMCI_Exception.h"
 #include "Mesh/include/Regridding/ESMCI_Integrate.h"
 #include "Mesh/include/Regridding/ESMCI_Interp.h"
-#include "Mesh/include/Regridding/ESMCI_Extrapolation.h"
+#include "Mesh/include/Regridding/ESMCI_ExtrapolationPoleLGC.h"
 #include "Mesh/include/ESMCI_MathUtil.h"
 #include "Mesh/include/Regridding/ESMCI_Regrid_Helper.h"
 #include "ESMCI_PointList.h"
