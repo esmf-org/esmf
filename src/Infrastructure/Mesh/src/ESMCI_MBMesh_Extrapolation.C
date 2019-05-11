@@ -118,7 +118,7 @@ void MBMesh_Extrapolate(MBMesh *srcmesh, PointList *srcpointlist,
 
   int localrc;
 
-  printf("MBMesh_Extrapolate: extrapMethod=%d\n", *extrapMethod);
+  // printf("MBMesh_Extrapolate: extrapMethod=%d\n", *extrapMethod);
 
   // if (extrapMethod == ESMC_EXTRAPMETHOD_CREEP) {
   // 
