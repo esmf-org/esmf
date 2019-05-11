@@ -26,10 +26,18 @@
 namespace ESMCI {
 
 
+struct Search_nearest_node_result {
+  int dst_gid;
+  double pcoord[3];
+};
+
 struct Search_nearest_result {
+  std::vector<Search_nearest_node_result> nodes;
+
   UInt dst_gid;
   UInt src_gid;
 };
+
 
 typedef std::vector<Search_nearest_result*> SearchNearestResultList;
 
@@ -37,9 +45,9 @@ void SearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int
 
 void ParSearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchNearestResultList &result, bool set_dst_status, WMat &dst_status);
 
-// void SearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts, int unmappedaction, SearchNearestResultList &result, bool set_dst_status, WMat &dst_status);
-// 
-// void ParSearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts,  int unmappedaction, SearchNearestResultList &result, bool set_dst_status, WMat &dst_status);
+void SearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts, int unmappedaction, SearchNearestResultList &result, bool set_dst_status, WMat &dst_status);
+
+void ParSearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts,  int unmappedaction, SearchNearestResultList &result, bool set_dst_status, WMat &dst_status);
 // 
 // void SearchNearestDstToSrc(const Mesh &src, const Mesh &dst, int unmappedaction, SearchNearestResultList &result);
 // 

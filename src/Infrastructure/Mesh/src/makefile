@@ -21,7 +21,8 @@ SOURCEC	  = \
             ESMCI_OTree.C \
             ESMCI_Regrid_Nearest.C \
             ESMCI_Rendez_Nearest.C \
-            ESMCI_SearchNearest.C \
+            ESMCI_Search_Nearest.C \
+            ESMCI_Search_NearestNPnts.C \
             ESMCI_XGridUtil.C
 
 

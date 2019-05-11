@@ -57,7 +57,10 @@ bool weights_correct_nearest(WMat &wts, std::vector<double> weights) {
   return correct;
 }
 
-bool weight_gen_nearest(PointList *pl1, PointList *pl, std::vector<double> weights) {
+bool weight_gen_nearest(PointList *pl1, PointList *pl, 
+                        std::vector<double> weights,
+                        int method = 3, int num_pts = 0,
+                        double dist_exponent = 2) {
   bool correct = false;
 
   // early exit for ESMF_MOAB=OFF
@@ -68,7 +71,7 @@ bool weight_gen_nearest(PointList *pl1, PointList *pl, std::vector<double> weigh
   WMat wt, dst_status;
   WMat &wts = wt;
   WMat &ds = dst_status;
-  calc_nearest_regrid_wgts(pl1, pl, wts, true, ds);
+  calc_nearest_regrid_wgts(pl1, pl, wts, true, ds, &method, &num_pts, &dist_exponent);
 
   // verify results
   if (weights_correct_nearest(wts, weights)) correct = true;

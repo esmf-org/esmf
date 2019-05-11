@@ -15,9 +15,6 @@
 
 #include "Mesh/include/Regridding/ESMCI_WMat.h"
 
-// for IWeights?
-// #include <Mesh/include/Regridding/ESMCI_Interp.h>
-
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
@@ -30,6 +27,8 @@ using namespace ESMCI;
 
 void calc_nearest_regrid_wgts(PointList *srcpl, PointList *dstpl, 
                               WMat &wts, bool set_dst_status, 
-                              WMat &dst_status);
+                              WMat &dst_status, int *regridMethod,
+                              int *extrapNumSrcPnts, 
+                              ESMC_R8 *extrapDistExponent);
 
 #endif

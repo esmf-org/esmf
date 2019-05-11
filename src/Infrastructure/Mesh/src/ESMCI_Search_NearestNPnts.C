@@ -9,13 +9,13 @@
 // Licensed under the University of Illinois-NCSA License.
 //
 //==============================================================================
-#include <Mesh/include/Regridding/ESMCI_Search.h>
+#include <Mesh/include/ESMCI_Search_Nearest.h>
 #include <Mesh/include/Regridding/ESMCI_SpaceDir.h>
 #include <Mesh/include/ESMCI_OTree.h>
-#include <Mesh/include/ESMCI_RegridConstants.h>
-
+// #include <Mesh/include/Legacy/ESMCI_Mask.h>
 #include <Mesh/include/Legacy/ESMCI_ParEnv.h>
-// #include <Mesh/include/Legacy/ESMCI_BBox.h>
+#include <Mesh/include/ESMCI_MathUtil.h>
+#include <Mesh/include/ESMCI_RegridConstants.h>
 
 #include "PointList/include/ESMCI_PointList.h"
 
@@ -31,7 +31,9 @@
 #include <limits>
 #include <vector>
 
+
 using std::vector;
+
 
 
 //-----------------------------------------------------------------------------
@@ -42,21 +44,241 @@ static const char *const version = "$Id$";
 
 namespace ESMCI {
 
+#define SN_BAD_ID -1
 
-bool sn_debug=false;
+struct SearchDataPnt {
+  double dist2;  // closest distance squared
+  int src_id;
+  double coord[3];
+
+  SearchDataPnt() : dist2(std::numeric_limits<double>::max()), src_id(SN_BAD_ID) {
+    coord[0]=0.0;
+    coord[1]=0.0;
+    coord[2]=0.0;
+  }
+
+  // Operators don't consider coord
+  bool operator<(const SearchDataPnt &rhs) const {
+    if (dist2 != rhs.dist2) return dist2 < rhs.dist2;
+    return src_id < rhs.src_id;
+  }
+
+  bool operator==(const SearchDataPnt &rhs) {
+    return (dist2 == rhs.dist2 && src_id == rhs.src_id);
+  }
+
+};
 
 struct SearchData {
   int sdim;
   double dst_pnt[3];
+  double max_dist2;
 
-  double closest_dist2;  // closest distance squared
-  double closest_coord[3];
+  int max_num_pnts;
+  int num_valid_pnts;
+  SearchDataPnt *pnts;
 
-  int closest_src_id;
-  const PointList *srcpointlist;
+  SearchData() : sdim(0),
+                 max_dist2(std::numeric_limits<double>::max()),
+                 max_num_pnts(0), num_valid_pnts(0), pnts(NULL) {
+    dst_pnt[0]=0.0;
+    dst_pnt[1]=0.0;
+    dst_pnt[2]=0.0;
+  }
+
+  SearchData(int _sdim, double *_dst_pnt, int _max_num_pnts) :
+    sdim(_sdim),  max_dist2(std::numeric_limits<double>::max()),
+    max_num_pnts(_max_num_pnts), num_valid_pnts(0), pnts(NULL) {
+
+    // Set dst point coords in search structure
+    dst_pnt[0] = _dst_pnt[0];
+    dst_pnt[1] = _dst_pnt[1];
+    dst_pnt[2] = (sdim == 3 ? _dst_pnt[2] : 0.0);
+
+    // Set up point list
+    pnts=NULL;
+    if (max_num_pnts > 0) pnts=new SearchDataPnt[max_num_pnts];
+  }
+
+  // Copy
+  SearchData &operator=(const SearchData &rhs) {
+      if (this == &rhs) return *this;
+      sdim = rhs.sdim;
+      dst_pnt[0]=rhs.dst_pnt[0];
+      dst_pnt[1]=rhs.dst_pnt[1];
+      dst_pnt[2]=rhs.dst_pnt[2];
+      max_dist2=rhs.max_dist2;
+      max_num_pnts=rhs.max_num_pnts;
+      num_valid_pnts=rhs.num_valid_pnts;
+
+      // Get rid of points list, if it exists
+      if (pnts != NULL) delete [] pnts;
+
+      // Set up new point list
+      pnts=NULL;
+      if (max_num_pnts > 0) pnts=new SearchDataPnt[max_num_pnts];
+
+      // Copy points list
+      for(int i=0; i<num_valid_pnts; i++) {
+        pnts[i]=rhs.pnts[i];
+      }
+
+      return *this;
+    }
+
+  // Explicity set max_dist2, this will be adjusted automatically if the box is full when
+  // things are added.
+  void set_max_dist2(double new_max_dist2) {
+    max_dist2=new_max_dist2;
+  }
+
+  void swap_dst_pnt(const double *new_dst_pnt) {
+
+    // Set dst point coords in search structure
+    dst_pnt[0] = new_dst_pnt[0];
+    dst_pnt[1] = new_dst_pnt[1];
+    dst_pnt[2] = (sdim == 3 ? new_dst_pnt[2] : 0.0);
+
+    // If a closest points exist from the last loop then use as initial guess
+    for (int i=0; i<num_valid_pnts; i++) {
+      SearchDataPnt *pnt=pnts+i;
+
+      // Calculate distance squared
+      double dist2=
+        (dst_pnt[0]-pnt->coord[0])*(dst_pnt[0]-pnt->coord[0])+
+        (dst_pnt[1]-pnt->coord[1])*(dst_pnt[1]-pnt->coord[1])+
+        (dst_pnt[2]-pnt->coord[2])*(dst_pnt[2]-pnt->coord[2]);
+
+      // set distance squared
+      pnt->dist2=dist2;
+    }
+
+    // Sort points in order
+    std::sort(pnts,pnts+num_valid_pnts);
+
+    // If necessary adjust max distance
+    if (num_valid_pnts == max_num_pnts) {
+      // Get max distance squared of points
+      // (which is distance of furthest point)
+      max_dist2=pnts[max_num_pnts-1].dist2;
+    }
+  }
+
+  // See if the pointlist is full, if so then the search box
+  // will start changing as things are added, etc.
+  bool is_full() {
+    return (num_valid_pnts == max_num_pnts);
+  }
+
+  // Attempt to add a new point
+  // Try adding a new point to the search structure. If added returns true, else returns false
+  // If added it updates all the other info (e.g. max_dist2, etc) to correspond
+  bool add_pnt(int id, double *pnt) {
+
+    // Convert to 3D point
+    double new_pnt[3];
+    new_pnt[0] = pnt[0];
+    new_pnt[1] = pnt[1];
+    new_pnt[2] = (sdim == 3 ? pnt[2] : 0.0);
+
+    // Calculate squared distance
+    double dist2=
+      (dst_pnt[0]-new_pnt[0])*(dst_pnt[0]-new_pnt[0])+
+      (dst_pnt[1]-new_pnt[1])*(dst_pnt[1]-new_pnt[1])+
+      (dst_pnt[2]-new_pnt[2])*(dst_pnt[2]-new_pnt[2]);
+
+    // Leave if this is bigger than the max distance that we already have
+    if (dist2 > max_dist2) return false;
+
+    // Leave if we already have it
+    for (int i=0; i<num_valid_pnts; i++) {
+      if (pnts[i].src_id == id) return false;
+    }
+
+    // variable to watch for adding
+    bool was_added=false;
+
+    // make tmp point
+    SearchDataPnt tmp_sdp;
+    tmp_sdp.dist2=dist2;
+    tmp_sdp.src_id=id;
+    MU_ASSIGN_VEC3D(tmp_sdp.coord, new_pnt);
+
+    // Insert it into the list
+    for (int i=0; i<num_valid_pnts; i++) {
+
+      if (tmp_sdp < pnts[i]) {
+        SearchDataPnt swap_sdp;
+        swap_sdp=pnts[i];
+        pnts[i]=tmp_sdp;
+        tmp_sdp=swap_sdp;
+        was_added=true;
+      }
+    }
+
+    // Insert tmp_sdp at end if there's room
+    if (num_valid_pnts < max_num_pnts) {
+      pnts[num_valid_pnts]=tmp_sdp;
+      num_valid_pnts++;
+      was_added=true;
+    }
+
+    // If we're full get max distance squared of points
+    if (num_valid_pnts == max_num_pnts) {
+      max_dist2=pnts[max_num_pnts-1].dist2;
+    }
+
+#if 0
+    // DEBUG
+      printf(" nnf2: dst_id=%d :: ",573);
+      for (int i=0; i<num_valid_pnts; i++) {
+        printf(" %d ",pnts[i].src_id);
+      }
+      printf("\n");
+#endif
+
+    // return was_added status
+    return was_added;
+  }
+
+  // Get the min-max box that should be searched to add new points
+  // If the structure isn't full this will be infinite, otherwise
+  // it's the maximum distance out
+  void get_search_min_max(double *min, double *max) {
+
+    // If max_dist2 isn't infinite then compute search box
+    if (max_dist2 < std::numeric_limits<double>::max()) {
+
+      // get distance
+      double dist=sqrt(max_dist2);
+
+      // Compute new search box
+      min[0]=dst_pnt[0]-dist;
+      min[1]=dst_pnt[1]-dist;
+      min[2]=dst_pnt[2]-dist;
+
+      max[0]=dst_pnt[0]+dist;
+      max[1]=dst_pnt[1]+dist;
+      max[2]=dst_pnt[2]+dist;
+    } else {
+      // Set to infinite
+      min[0]=-std::numeric_limits<double>::max();
+      min[1]=-std::numeric_limits<double>::max();
+      min[2]=-std::numeric_limits<double>::max();
+
+      max[0]=std::numeric_limits<double>::max();
+      max[1]=std::numeric_limits<double>::max();
+      max[2]=std::numeric_limits<double>::max();
+    }
+  }
+
+
+  ~SearchData() {
+    // Get rid of points list
+    if (pnts != NULL) delete [] pnts;
+  }
 };
 
-#define SN_BAD_ID -1
 
   static int nearest_func(void *n, void *y, double *min, double *max) {
 
@@ -64,60 +286,16 @@ struct SearchData {
 
     SearchData *sd = static_cast<SearchData*>(y);
 
-    // Get source node coords
-    const double *c=this_pt->coords;
+    // Try adding point, if not added then leave, because nothing to update
+    if (!sd->add_pnt(this_pt->id, this_pt->coords)) return 0;
 
-    // Convert to 3D point
-    double src_pnt[3];
-    src_pnt[0] = c[0];
-    src_pnt[1] = c[1];
-    src_pnt[2] = (sd->sdim == 3 ? c[2] : 0.0);
+    // If there is still room, leave because we can't restrict things yet
+    if (sd->num_valid_pnts < sd->max_num_pnts) return 0;
 
-
-    // Calculate squared distance
-    double dist2=(sd->dst_pnt[0]-src_pnt[0])*(sd->dst_pnt[0]-src_pnt[0])+
-      (sd->dst_pnt[1]-src_pnt[1])*(sd->dst_pnt[1]-src_pnt[1])+
-      (sd->dst_pnt[2]-src_pnt[2])*(sd->dst_pnt[2]-src_pnt[2]);
-
-    // If this node is closer then make it the closest node
-    if (dist2 < sd->closest_dist2) {
-      sd->closest_src_id=this_pt->id;
-      sd->closest_dist2=dist2;
-
-      // compute a new min-max box
-      double dist=sqrt(dist2);
-
-      min[0]=sd->dst_pnt[0]-dist;
-      min[1]=sd->dst_pnt[1]-dist;
-      min[2]=sd->dst_pnt[2]-dist;
-
-      max[0]=sd->dst_pnt[0]+dist;
-      max[1]=sd->dst_pnt[1]+dist;
-      max[2]=sd->dst_pnt[2]+dist;
-
-      sd->closest_coord[0]=src_pnt[0];
-      sd->closest_coord[1]=src_pnt[1];
-      sd->closest_coord[2]=src_pnt[2];
-
-    } else if (dist2 == sd->closest_dist2) {
-
-      // If there wasn't a closer point or if the new point has a smaller id, 
-      // then use the new point instead
-      if ((sd->closest_src_id == SN_BAD_ID) ||
-          (this_pt->id < sd->closest_src_id))  {
-        
-        // Change to new id
-        sd->closest_src_id=this_pt->id;
-        
-        // Change to new point
-        sd->closest_coord[0]=src_pnt[0];
-        sd->closest_coord[1]=src_pnt[1];
-        sd->closest_coord[2]=src_pnt[2];
-
-        // Don't need to change the closest_dist2  because at exactly the same dist   
-        
-        // Don't need to adjust the min-max box because at exactly the same dist
-      }
+    // We are full, so search box may have changed with point added above,
+    // so get the new search box
+    if (sd->is_full()) {
+      sd->get_search_min_max(min,max);
     }
 
     // Don't know if this is the closest, so search further
@@ -127,9 +305,8 @@ struct SearchData {
 
 
 // The main routine
-  void SearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status) {
-  Trace __trace("SearchNearestSrcToDst(PointList &src_pl, PointList &dst_pl, int unmappedaction, SearchResult &result)");
-
+  void SearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts, int unmappedaction, SearchNearestResultList &result, bool set_dst_status, WMat &dst_status) {
+  Trace __trace("Search(PointList &src_pl, PointList &dst_pl, int unmappedaction, SearchNearestResultList &result)");
 
   // Get spatial dim and make sure both have the same
   UInt sdim=src_pl.get_coord_dim();
@@ -172,68 +349,53 @@ struct SearchData {
 
   // Set initial search box to the largest possible
   double pmin[3],pmax[3];
-  pmin[0]=min;
-  pmin[1]=min;
-  pmin[2]=min;
-  pmax[0]=max;
-  pmax[1]=max;
-  pmax[2]=max;
+  MU_SET_TO_SCALAR_VEC3D(pmin,min);
+  MU_SET_TO_SCALAR_VEC3D(pmax,max);
 
-  // Setup search structure
-  SearchData sd;
-  sd.sdim=sdim;
-  // sd.closest_src_node=NULL;
-  sd.closest_dist2=std::numeric_limits<double>::max();
-  // sd.src_coord=NULL;
-  sd.closest_src_id=SN_BAD_ID;
-  sd.srcpointlist=&src_pl;
+  // Setup empty search structure
+  double tmp_pnt[3]={0.0,0.0,0.0};
+  SearchData sd(sdim, tmp_pnt, num_pnts);
 
   // Loop the destination points, find hosts.
   int dst_size=dst_pl.get_curr_num_pts();
   for (UInt p = 0; p < dst_size; ++p) {
 
+    // Get point from the point list
     const double *pnt_crd=dst_pl.get_coord_ptr(p);
     int pnt_id=dst_pl.get_id(p);
 
-    // Set dst point coords in search structure
-    sd.dst_pnt[0] = pnt_crd[0];
-    sd.dst_pnt[1] = pnt_crd[1];
-    sd.dst_pnt[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
+    // Swap to a new point in the search structure
+    sd.swap_dst_pnt(pnt_crd);
 
-    // Note we're not resetting the closest src info because starting with last
-    // nearest point as first quess
-
-    // If a closest point exists from the last loop then use as initial guess
-    if (sd.closest_src_id != SN_BAD_ID) {
-    // Calculate distance squared
-      double dist2=(sd.dst_pnt[0]-sd.closest_coord[0])*(sd.dst_pnt[0]-sd.closest_coord[0])+
-                   (sd.dst_pnt[1]-sd.closest_coord[1])*(sd.dst_pnt[1]-sd.closest_coord[1])+
-                   (sd.dst_pnt[2]-sd.closest_coord[2])*(sd.dst_pnt[2]-sd.closest_coord[2]);
-
-      // set closest dist squared
-      sd.closest_dist2=dist2;
-
-      // Calc new search box
-      double dist=sqrt(dist2);
-
-      pmin[0]=sd.dst_pnt[0]-dist;
-      pmin[1]=sd.dst_pnt[1]-dist;
-      pmin[2]=sd.dst_pnt[2]-dist;
-
-      pmax[0]=sd.dst_pnt[0]+dist;
-      pmax[1]=sd.dst_pnt[1]+dist;
-      pmax[2]=sd.dst_pnt[2]+dist;
-    }
-
+    // Get the new search box
+    sd.get_search_min_max(pmin,pmax);
 
     // Find closest source node to this destination node
     tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
 
     // If we've found a nearest source point, then add to the search results list...
-    if (sd.closest_src_id != SN_BAD_ID) {
-      Search_result *sr=new Search_result();
-      sr->dst_gid=pnt_id;
-      sr->src_gid=sd.closest_src_id;
+    if (sd.num_valid_pnts > 0) {
+
+      // New search result
+      Search_nearest_result *sr=new Search_nearest_result();
+
+      // Fill search results
+      sr->dst_gid=p;  // save the location in the dst point list, so we can pull info out
+      sr->nodes.reserve(sd.num_valid_pnts);
+      for (int i=0; i<sd.num_valid_pnts; i++) {
+        SearchDataPnt *pnt=sd.pnts+i;
+
+        // Fill in tmp_snr
+        Search_nearest_node_result tmp_snr;
+        tmp_snr.dst_gid=pnt->src_id; // Yeah this is ugly, but it seems a shame to add a new member
+                                       // TODO: rename these members to be more generic
+        MU_ASSIGN_VEC3D(tmp_snr.pcoord,pnt->coord);
+
+        // Add it to search results
+        sr->nodes.push_back(tmp_snr);
+      }
+
+      // Add to results list
       result.push_back(sr);
 
       // If necessary, set dst status
@@ -274,28 +436,27 @@ struct SearchData {
 
   } // for dst nodes
 
-
   // Get rid of tree
   if (tree) delete tree;
   }
 
+struct CommDataOut {
+  int loc;
+  double pnt[3];
+  double dist;
+};
 
 
-
-struct CommData {
-  double closest_dist;
-  int closest_src_gid;
+struct CommDataBack {
+  int loc;
+  double pnt[3];
+  int id;
   int proc;
 };
 
 
-
-
-
-  void ParSearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status) {
-    Trace __trace("ParSearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result)");
-  //int FindPnts(const Mesh &mesh, int unmappedaction, int dim_pnts, int num_pnts, double *pnts, int *procs, int *gids) {
-  //  Trace __trace("FindPnts()");
+  void ParSearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts,  int unmappedaction, SearchNearestResultList &result, bool set_dst_status, WMat &dst_status) {
+    Trace __trace("Search(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchNearestResultList &result)");
 
   // Get spatial dim and make sure both have the same
   int sdim=src_pl.get_coord_dim();
@@ -320,13 +481,11 @@ struct CommData {
     max = std::numeric_limits<double>::max();
   }
 
-
   // Add unmasked nodes to search tree
   // and calculate proc min-max
   double pnt[3];
   double proc_min[3];
   double proc_max[3];
-
   proc_min[0]=max; proc_min[1]=max; proc_min[2]=max;
   proc_max[0]=min; proc_max[1]=min; proc_max[2]=min;
 
@@ -359,106 +518,56 @@ struct CommData {
   // Create SpaceDir
   SpaceDir *spacedir=new SpaceDir(proc_min, proc_max, tree, false);
 
-
   //// Find the closest point locally ////
+
+  // Allocate space to hold search structs for each point
+  vector<SearchData> sd_list(dst_size);
 
   // Set initial search box to the largest possible
   double pmin[3], pmax[3];
-  pmin[0] = min;  pmin[1] = min;  pmin[2] = min;
-  pmax[0] = max;  pmax[1] = max;  pmax[2] = max;
+  MU_SET_TO_SCALAR_VEC3D(pmin,min);
+  MU_SET_TO_SCALAR_VEC3D(pmax,max);
 
-  // Allocate space to hold closest gids, dist
-  vector<int> closest_src_gid(dst_size,-1);
-  vector<double> closest_dist(dst_size,std::numeric_limits<double>::max());
-
-  // Setup search structure
-  SearchData sd;
-  sd.sdim=sdim;
-  // sd.closest_src_node=NULL;
-  sd.closest_dist2=std::numeric_limits<double>::max();
-  // sd.src_coord=NULL;
-  sd.closest_src_id=SN_BAD_ID;
-  sd.srcpointlist=&src_pl;
+  // Setup empty search structure
+  double tmp_pnt[3]={0.0,0.0,0.0};
+  SearchData sd(sdim, tmp_pnt, num_pnts);
 
   // Loop the destination points, find hosts.
   for (UInt p = 0; p < dst_size; ++p) {
 
+    // Get point from the point list
     const double *pnt_crd=dst_pl.get_coord_ptr(p);
+    int pnt_id=dst_pl.get_id(p);
 
-    // Set dst point coords in search structure
-    sd.dst_pnt[0] = pnt_crd[0];
-    sd.dst_pnt[1] = pnt_crd[1];
-    sd.dst_pnt[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
+    // Swap to a new point in the search structure
+    sd.swap_dst_pnt(pnt_crd);
 
-    // If a closest point exists from the last loop then use as initial guess
-    if (sd.closest_src_id != SN_BAD_ID) {
-    // Calculate distance
-      double dist2=(sd.dst_pnt[0]-sd.closest_coord[0])*(sd.dst_pnt[0]-sd.closest_coord[0])+
-                   (sd.dst_pnt[1]-sd.closest_coord[1])*(sd.dst_pnt[1]-sd.closest_coord[1])+
-                   (sd.dst_pnt[2]-sd.closest_coord[2])*(sd.dst_pnt[2]-sd.closest_coord[2]);
-
-      // set closest dist squared
-      sd.closest_dist2=dist2;
-
-      // Calc new search box
-      double dist=sqrt(dist2);
-
-      pmin[0]=sd.dst_pnt[0]-dist;
-      pmin[1]=sd.dst_pnt[1]-dist;
-      pmin[2]=sd.dst_pnt[2]-dist;
-
-      pmax[0]=sd.dst_pnt[0]+dist;
-      pmax[1]=sd.dst_pnt[1]+dist;
-      pmax[2]=sd.dst_pnt[2]+dist;
-    }
+    // Get the new search box
+    sd.get_search_min_max(pmin,pmax);
 
     // Find closest source node to this destination node
     tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
 
-    // If we've found a nearest source point, then add to the search results list...
-    if (sd.closest_src_id != SN_BAD_ID) {
-      closest_src_gid[p]=sd.closest_src_id;
-      closest_dist[p]=sqrt(sd.closest_dist2);
-    }
+    // Copy search results into global list
+    sd_list[p] = sd;
   }
 
   // Get list of procs where a point can be located
   vector< vector<int> > proc_lists;  // List of procs
   proc_lists.resize(dst_size);
-
   for (int i=0; i<dst_size; i++) {
 
-    const double *pnt_crd=dst_pl.get_coord_ptr(i);
-
-    // Get search box based on what we've found so far
+    // Declare search box
     double pnt_min[3], pnt_max[3];
 
-    // If we've found a point, then search box is based on distance to it
-    if (closest_src_gid[i] != -1) {
-      double dist=closest_dist[i];
+    // Get search box based on what we've found so far
+    sd_list[i].get_search_min_max(pnt_min, pnt_max);
 
-      pnt_min[0] = pnt_crd[0]-dist;
-      pnt_min[1] = pnt_crd[1]-dist;
-      pnt_min[2] = (sdim == 3) ? pnt_crd[2]-dist : 0.0;
-
-      pnt_max[0] = pnt_crd[0]+dist;
-      pnt_max[1] = pnt_crd[1]+dist;
-      pnt_max[2] = (sdim == 3) ? pnt_crd[2]+dist : 0.0;
-    } else {  // ...nothing so far, so just make maxium
-      pnt_min[0] = min;  pnt_min[1] = min;  pnt_min[2] = min;
-      pnt_max[0] = max;  pnt_max[1] = max;  pnt_max[2] = max;
-    }
-
-    //// Init vector
+    // Init vector
     proc_lists[i].clear();
 
-    //// Search on point, plus or minus search_tolerence
+    // Search on point, plus or minus search_tolerence
     spacedir->get_procs(pnt_min, pnt_max, &(proc_lists[i])); // Definitely need () around proc_lists
-
-    //  if (node.get_id()==110581) {
-    //printf("%d# BOB FOUND %d other procs for node=%d\n",Par::Rank(),proc_lists[i].size(),node.get_id());
-    // }
-
 
 #if 0
     printf(" %d# Pnt=[%f %f %f] sending to = ",Par::Rank(),pnt_crd[0],pnt_crd[1],pnt_crd[2]);
@@ -468,7 +577,6 @@ struct CommData {
     printf(" \n");
 #endif
   }
-
 
   // Get the number of processors used below
   int num_procs=Par::Size();
@@ -508,9 +616,8 @@ struct CommData {
     //  } // Get rid of tmp_snd_inds
 
 
-    // send size: point+dist
-    int snd_size=(sdim+1)*sizeof(double);
-
+    // send size
+    int snd_size=sizeof(CommDataOut);
 
     // Calculate send sizes
     vector<int> snd_sizes;
@@ -546,8 +653,6 @@ struct CommData {
   // Reset buffers
   comm.resetBuffers();
 
-  ///// THINK ABOUT MAKING A STRUCT AND SENDING PNT ID AND getting rid of snd_inds? and tmp_snd_inds
-  ///// ALSO MAYBE BREAK INTO A FEW SUBROUTINES
 
   // Pack points into buffers
   for (int i=0; i< num_snd_procs; i++) {
@@ -556,26 +661,34 @@ struct CommData {
       // Get index of node
       int ind=snd_inds[i][j];
 
+      // Get point and max distance
       const double *pnt_crd=dst_pl.get_coord_ptr(ind);
 
-      // pack buf
-      double buf[4]; // 4 is biggest this should be (i.e. 3D+dist)
-      buf[0]=pnt_crd[0];
-      buf[1]=pnt_crd[1];
-      if (sdim < 3) buf[2]=closest_dist[ind];
-      else {
-        buf[2]=pnt_crd[2];
-        buf[3]=closest_dist[ind];
+      // Get max distance if there is one, otherwise infinity
+      double max_dist;
+      if (sd_list[ind].is_full()) {
+        max_dist=sqrt(sd_list[ind].max_dist2);
+      } else {
+        max_dist=std::numeric_limits<double>::max();
       }
 
+      // pack comm data out
+      CommDataOut cdo;
+      cdo.loc=ind;
+      cdo.pnt[0]=pnt_crd[0];
+      cdo.pnt[1]=pnt_crd[1];
+      cdo.pnt[2] = (sdim == 3 ? pnt_crd[2] : 0.0);
+      cdo.dist=max_dist;
+
       // Push buf onto send struct
-      b->push((const UChar *)buf, (UInt)snd_size);
+      b->push((const UChar *)&cdo, (UInt)snd_size);
     }
   }
 
 
   // Communicate point information
   comm.communicate();
+
 
   // Calculate the number of recv. pets
   int num_rcv_pets=0;
@@ -585,14 +698,15 @@ struct CommData {
 
   // Hold rcv results
   int *rcv_pets=NULL;
-  int *rcv_results_size=NULL;
-  CommData **rcv_results_array=NULL;
+  //  int *rcv_results_size=NULL;
+  vector<CommDataBack> *rcv_results_array=NULL;
 
   if (num_rcv_pets>0) {
     rcv_pets=new int[num_rcv_pets];
-    rcv_results_size=new int[num_rcv_pets];
-    rcv_results_array=new CommData*[num_rcv_pets];
+    //rcv_results_size=new int[num_rcv_pets];
+    rcv_results_array=new vector<CommDataBack>[num_rcv_pets];
   }
+
 
   int ip=0;
   for (std::vector<UInt>::iterator p = comm.inProc_begin(); p != comm.inProc_end(); ++p) {
@@ -605,38 +719,34 @@ struct CommData {
     // Figure out how many messages we have
     int num_msgs=b->msg_size()/snd_size;
 
-    // Setup for results
-    rcv_results_size[ip]=num_msgs;
-    rcv_results_array[ip]=NULL;
-
     // Skip to next buffer if empty
     if (num_msgs==0) continue;
 
     // Allocate space for results
-    rcv_results_array[ip]=new CommData[num_msgs];
-
+    //    rcv_results_array[ip]=new CommDataBack[num_msgs];
+    rcv_results_array[ip].clear();
 
     // Unpack everything from this processor
     int jp=0;
     while (!b->empty()) {
-      double buf[4]; // 4 is biggest this should be (i.e. 3D+dist)
 
- /* XMRKX */
-      b->pop((UChar *)buf, (UInt)snd_size);
+      // Comm Data Out
+      CommDataOut cdo;
 
+      // Pop one piece of info off of the buffer
+      b->pop((UChar *)&cdo, (UInt)snd_size);
 
-      // Unpack buf
+      // Unpack info
+      int loc;
       double pnt[3]={0.0,0.0,0.0};
       double dist=0.0;
 
-      pnt[0]=buf[0];
-      pnt[1]=buf[1];
-      if (sdim < 3) dist=buf[2];
-      else {
-        pnt[2]=buf[2];
-        dist=buf[3];
-      }
+      loc=cdo.loc;
+      MU_ASSIGN_VEC3D(pnt, cdo.pnt);
+      dist=cdo.dist;
 
+
+      // TODO: INSTEAD OF THIS, TRY USING sd.get_search_min_max() below for consistencies sake
       //// Point min max we expand the point by the distance to the closest point
       double pmin[3], pmax[3];
 
@@ -650,37 +760,25 @@ struct CommData {
 
 
       // Setup search structure
-      SearchData sd;
-      sd.sdim=sdim;
-      sd.dst_pnt[0] = pnt[0];
-      sd.dst_pnt[1] = pnt[1];
-      sd.dst_pnt[2] = (sdim == 3 ? pnt[2] : 0.0);
-      // sd.closest_src_node=NULL;
-      sd.closest_dist2=dist*dist;
-      // sd.src_coord=NULL;
+      SearchData sd(sdim, pnt, num_pnts);
+      sd.set_max_dist2(dist*dist);
 
-      sd.closest_src_id=SN_BAD_ID;
-      sd.srcpointlist=&src_pl;
-
-      // Find closest source node to this destination node
+      // Find closest source nodes to this destination node
       tree->runon_mm_chng(pmin, pmax, nearest_func, (void *)&sd);
 
-      // Fill in structure to be sent
-      CommData cd;
-      if (sd.closest_src_id != SN_BAD_ID) {
-        cd.closest_dist=sqrt(sd.closest_dist2);
-        cd.closest_src_gid=sd.closest_src_id;
+      // Fill in CommDataBack structure
+      for (int i=0; i<sd.num_valid_pnts; i++) {
+        SearchDataPnt *pnt=sd.pnts+i;
 
-        //      printf("#%d c_s_g=%d \n", Par::Rank(),cd.closest_src_gid);
+        CommDataBack cd;
+        cd.loc=loc;
+        MU_ASSIGN_VEC3D(cd.pnt,pnt->coord);
+        cd.id=pnt->src_id;
+        cd.proc=Par::Rank(); // Do we need this??
 
-      } else {
-        cd.closest_dist=std::numeric_limits<double>::max();;
-        cd.closest_src_gid=SN_BAD_ID;
+        // Add results to list to send back
+        rcv_results_array[ip].push_back(cd);
       }
-      cd.proc=Par::Rank();
-
-      // Save results
-      rcv_results_array[ip][jp]=cd;
 
       jp++;
     }
@@ -692,13 +790,12 @@ struct CommData {
   vector<int> rcv_sizes;
   rcv_sizes.resize(num_rcv_pets,0); // resize and init to 0
   for (int i=0; i< num_rcv_pets; i++) {
-    rcv_sizes[i]=sizeof(CommData)*rcv_results_size[i];
+    rcv_sizes[i]=sizeof(CommDataBack)*rcv_results_array[i].size();
   }
 
 
   // Create communication structure spatial to home
   SparseMsg comm_to_home;
-
 
   // Setup pattern and sizes
   if (num_rcv_pets>0) {
@@ -716,8 +813,8 @@ struct CommData {
   // Pack points into buffers
   for (int i=0; i< num_rcv_pets; i++) {
     SparseMsg:: buffer *b=comm_to_home.getSendBuffer(rcv_pets[i]);
-    for (int j=0; j<rcv_results_size[i]; j++) {
-      b->push((const UChar *)&(rcv_results_array[i][j]), (UInt)sizeof(CommData));
+    for (int j=0; j<rcv_results_array[i].size(); j++) {
+      b->push((const UChar *)&(rcv_results_array[i][j]), (UInt)sizeof(CommDataBack));
     }
   }
 
@@ -726,69 +823,64 @@ struct CommData {
 
   // Get rid of rcv results
   if (num_rcv_pets>0) {
-    for (int i=0; i<num_rcv_pets; i++) {
-      if (rcv_results_array[i]!=NULL) delete [] rcv_results_array[i];
-    }
+    //    for (int i=0; i<num_rcv_pets; i++) {
+    //  if (rcv_results_array[i]!=NULL) delete [] rcv_results_array[i];
+    //}
     if (rcv_results_array!=NULL) delete [] rcv_results_array;
     if (rcv_pets!=NULL) delete [] rcv_pets;
-    if (rcv_results_size!=NULL) delete [] rcv_results_size;
+    //    if (rcv_results_size!=NULL) delete [] rcv_results_size;
   }
 
-  // Unpack CommData and generate results
+  // Unpack CommDataBack and generate results
   for (std::vector<UInt>::iterator p = comm_to_home.inProc_begin(); p != comm_to_home.inProc_end(); ++p) {
     UInt proc = *p;
     SparseMsg::buffer *b = comm_to_home.getRecvBuffer(proc);
 
     // Unpack everything from this processor
-    int j=0;
     while (!b->empty()) {
-      CommData cd;
+      CommDataBack cd;
 
       // Get sent data
-      b->pop((UChar *)&cd, (UInt)sizeof(CommData));
+      b->pop((UChar *)&cd, (UInt)sizeof(CommDataBack));
 
-      // Get loc of point
-      //// Can't use snd_inds because first index isn't necesarily in same order
-      //// between send and receive
-      int pnt_ind=tmp_snd_inds[proc][j];
+      // Get location in search data list
+      int loc=cd.loc;
 
-      // Compare and set
-      if (cd.closest_src_gid > -1) {
-        //      printf("#%d LAST c_s_g=%d \n", Par::Rank(),cd.closest_src_gid);
-
-        if (cd.closest_dist < closest_dist[pnt_ind]) {
-          closest_dist[pnt_ind]=cd.closest_dist;
-          closest_src_gid[pnt_ind]=cd.closest_src_gid;
-        } else if (cd.closest_dist == closest_dist[pnt_ind]) {
-          // If exactly the same distance chose the point with the smallest id
-          // (To make things consistent when running on different numbers of procs)
-          if (cd.closest_src_gid < closest_src_gid[pnt_ind]) {
-            closest_dist[pnt_ind]=cd.closest_dist;
-            closest_src_gid[pnt_ind]=cd.closest_src_gid;
-          }
-        }
-      }
-
-      // next result
-      j++;
+      // Try adding this point to the corresponding search structure
+      sd_list[loc].add_pnt(cd.id, cd.pnt);
     }
   }
 
-  // Do output based on CommData
+  // Do output based on CommDataBack
   result.clear();
-  for (int i=0; i<dst_size; i++) {
-    // Get dst id of point
-    int dst_id=dst_pl.get_id(i);
+  for (int p=0; p<dst_size; p++) {
 
-    // Do stuff depending on if nearest point was found
-    if (closest_src_gid[i] > -1) {
+    // Get dst id of point
+    int dst_id=dst_pl.get_id(p);
+
+    // If we've found a nearest source point, then add to the search results list...
+    if (sd_list[p].num_valid_pnts > 0) {
 
       // We've found a nearest source point, so add to results list
-      Search_result *sr=new Search_result();
+      Search_nearest_result *sr=new Search_nearest_result();
 
-      sr->dst_gid=dst_id;
-      sr->src_gid=closest_src_gid[i];
+      // Fill search results
+      sr->dst_gid=p;  // save the location in the dst point list, so we can pull info out
+      sr->nodes.reserve(sd_list[p].num_valid_pnts);
+      for (int i=0; i<sd_list[p].num_valid_pnts; i++) {
+        SearchDataPnt *pnt=sd_list[p].pnts+i;
 
+        // Fill in tmp_snr
+        Search_nearest_node_result tmp_snr;
+        tmp_snr.dst_gid=pnt->src_id; // Yeah this is ugly, but it seems a shame to add a new member
+        // TODO: rename these members to be more generic
+        MU_ASSIGN_VEC3D(tmp_snr.pcoord,pnt->coord);
+
+        // Add it to search results
+        sr->nodes.push_back(tmp_snr);
+      }
+
+      // Add to results list
       result.push_back(sr);
 
       // If necessary, set dst status
@@ -839,8 +931,9 @@ struct CommData {
   }
 #endif
 
-}
+  }
 
 #undef SN_BAD_ID
+
 
 } // namespace

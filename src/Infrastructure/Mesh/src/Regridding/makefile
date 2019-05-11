@@ -19,7 +19,7 @@ SOURCEC	  = \
 					 ESMCI_Regrid_Helper.C \
 					 ESMCI_Search.C \
 					 ESMCI_SearchNearestLGC.C \
-					 ESMCI_SearchNearestNPnts.C \
+					 ESMCI_SearchNearestNPntsLGC.C \
 					 ESMCI_SearchNearestDToS.C \
 					 ESMCI_ShapeFunc.C \
 					 ESMCI_SpaceDir.C \

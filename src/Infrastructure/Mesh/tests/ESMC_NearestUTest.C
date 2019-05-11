@@ -115,6 +115,57 @@ int main(int argc, char *argv[]) {
   delete pl_quad_sph;
   delete pl_par_sph;
 
+  // --------------------------------------------------------------------------
+  // nearest neighbor N point average Cartesian
+  // --------------------------------------------------------------------------
+  // build a pointlist
+  // PointList *pl_par;
+  pl_par = create_pointlist_par(rc);
+  
+  // build a pointlist
+  // PointList *pl_quad;
+  pl_quad = create_pointlist_for_quad_parallel(rc);
+  
+  // expected result
+  std::fill(weights.begin(), weights.end(), UNINITVAL2);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Nearest neighbor weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test((weight_gen_nearest(pl_par, pl_quad, weights, 6, 4)), 
+             name, failMsg, &result, __FILE__, __LINE__, 0);
+  
+  // clean up
+  delete pl_quad;
+  delete pl_par;
+
+  // --------------------------------------------------------------------------
+  // Nearest neighbor N point average spherical
+  // --------------------------------------------------------------------------
+
+  // build a mesh
+  // PointList *pl_par_sph;
+  pl_par_sph = create_pointlist_par_sph(rc);
+  
+  // build a pointlist
+  // PointList *pl_quad_sph;
+  pl_quad_sph = create_pointlist_sph_for_quad_parallel(rc);
+  
+  // expected result
+  std::fill(weights.begin(), weights.end(), UNINITVAL2);
+
+  //----------------------------------------------------------------------------
+  //NEX_UTest
+  strcpy(name, "Spherical nearest neighbor weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test((weight_gen_nearest(pl_par_sph, pl_quad_sph, weights, 6, 4)), 
+             name, failMsg, &result, __FILE__, __LINE__, 0);
+  
+  // clean up
+  delete pl_quad_sph;
+  delete pl_par_sph;
+
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);
 

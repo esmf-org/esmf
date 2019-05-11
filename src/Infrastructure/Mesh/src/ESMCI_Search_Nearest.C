@@ -10,7 +10,7 @@
 //
 //==============================================================================
 
-#include <Mesh/include/ESMCI_SearchNearest.h>
+#include <Mesh/include/ESMCI_Search_Nearest.h>
 #include <Mesh/include/Regridding/ESMCI_SpaceDir.h>
 #include <Mesh/include/ESMCI_OTree.h>
 #include <Mesh/include/ESMCI_RegridConstants.h>

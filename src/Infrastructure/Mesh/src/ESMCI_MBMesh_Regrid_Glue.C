@@ -31,8 +31,8 @@
 #include "ESMCI_TraceRegion.h"
 
 #include "Mesh/include/Legacy/ESMCI_Exception.h"
-#include "Mesh/include/Regridding/ESMCI_Interp.h"
-#include "Mesh/include/Regridding/ESMCI_Extrapolation.h"
+// #include "Mesh/include/Regridding/ESMCI_Interp.h"
+// #include "Mesh/include/Regridding/ESMCI_Extrapolation.h"
 
 #include "Mesh/include/ESMCI_MathUtil.h"
 
@@ -62,7 +62,13 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
                      int *regridConserve, int *regridMethod,
                      int *regridPoleType, int *regridPoleNPnts,
                      int *regridScheme,
-                     int *map_type, int *unmappedaction,
+                     int *map_type, 
+                     int *extrapMethod,
+                     int *extrapNumSrcPnts,
+                     ESMC_R8 *extrapDistExponent,
+                     int *extrapNumLevels,
+                     int *extrapNumInputLevels, 
+                     int *unmappedaction,
                      bool set_dst_status, WMat &dst_status);
 // prototypes from below
 static bool all_mbmesh_node_ids_in_wmat(PointList *pointlist, WMat &wts, int *missing_id);
@@ -89,6 +95,11 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
                           int *norm_type,
                           int *regridPoleType, int *regridPoleNPnts,
                           int *regridScheme,
+                          int *extrapMethod,
+                          int *extrapNumSrcPnts,
+                          ESMC_R8 *extrapDistExponent,
+                          int *extrapNumLevels,
+                          int *extrapNumInputLevels, 
                           int *unmappedaction, int *_ignoreDegenerate,
                           int *srcTermProcessing, int *pipelineDepth,
                           ESMCI::RouteHandle **rh, int *has_rh, int *has_iw,
@@ -242,32 +253,27 @@ void MBMesh_regrid_create(void **meshsrcpp, ESMCI::Array **arraysrcpp,
     VM::logMemInfo(std::string("before MOAB Mesh Weight Generation"));
 #endif
 
-    // to do NEARESTDTOS just do NEARESTSTOD and invert results
-    if (*regridMethod != ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
-      if(!calc_regrid_wgts(mbmsrcp, mbmdstp, srcpl, dstpl, wts, 
-                           &regridConserve, regridMethod,
-                           regridPoleType, regridPoleNPnts,
-                           regridScheme, map_type, &temp_unmappedaction,
-                           set_dst_status, dst_status))
-        Throw() << "Online regridding error" << std::endl;
-    } else {
-      int tempRegridMethod=ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST;
-      if(!calc_regrid_wgts(mbmdstp, mbmsrcp, srcpl, dstpl, wts, 
-                           &regridConserve, &tempRegridMethod,
-                           regridPoleType, regridPoleNPnts,
-                           regridScheme, map_type, &temp_unmappedaction,
-                           set_dst_status, dst_status))
-        Throw() << "Online regridding error" << std::endl;
-    }
+    if(!calc_regrid_wgts(mbmsrcp, mbmdstp, srcpl, dstpl, wts, 
+                         &regridConserve, regridMethod,
+                         regridPoleType, regridPoleNPnts,
+                         regridScheme, map_type, 
+                         extrapMethod,
+                         extrapNumSrcPnts,
+                         extrapDistExponent,
+                         extrapNumLevels,
+                         extrapNumInputLevels, 
+                         &temp_unmappedaction,
+                         set_dst_status, dst_status))
+    Throw() << "Online regridding error" << std::endl;
 
 #ifdef ESMF_PROFILE_MESH_WEIGHTGEN_MBMESH
     VM::logMemInfo(std::string("after MOAB Mesh Weight Generation"));
     ESMCI_REGION_EXIT("MOAB Mesh Weight Generation", localrc)
 #endif
 
-// #define BILINEAR_WEIGHTS
-#ifdef BILINEAR_WEIGHTS
-  cout << endl << "Bilinear Weight Matrix" << endl;
+// #define OUTPUT_WEIGHTS
+#ifdef OUTPUT_WEIGHTS
+  cout << endl << "Weight Matrix" << endl;
   // print out weights
   WMat::WeightMap::iterator mb = wts.begin_row(), me = wts.end_row();
   for(; mb != me; ++mb) {
@@ -1158,7 +1164,13 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
                      int *regridConserve, int *regridMethod,
                      int *regridPoleType, int *regridPoleNPnts,
                      int *regridScheme,
-                     int *map_type, int *unmappedaction,
+                     int *map_type, 
+                     int *extrapMethod,
+                     int *extrapNumSrcPnts,
+                     ESMC_R8 *extrapDistExponent,
+                     int *extrapNumLevels,
+                     int *extrapNumInputLevels, 
+                     int *unmappedaction,
                      bool set_dst_status, WMat &dst_status) {
 
   // Branch to different subroutines based on method
@@ -1169,12 +1181,21 @@ int calc_regrid_wgts(MBMesh *srcmbmp, MBMesh *dstmbmp,
                               set_dst_status, dst_status);
   } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_SRC_TO_DST) {
     calc_nearest_regrid_wgts(srcpl, dstpl, wts,
-                             set_dst_status, dst_status);
+                             set_dst_status, dst_status, 
+                             regridMethod, extrapNumSrcPnts,
+                             extrapDistExponent);
+  } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_IDAVG) {
+    calc_nearest_regrid_wgts(srcpl, dstpl, wts, 
+                             set_dst_status, dst_status, 
+                             regridMethod, extrapNumSrcPnts, 
+                             extrapDistExponent);
   } else if (*regridMethod == ESMC_REGRID_METHOD_NEAREST_DST_TO_SRC) {
     calc_nearest_regrid_wgts(dstpl, srcpl, wts,
-                             set_dst_status, dst_status);
+                             set_dst_status, dst_status,
+                             regridMethod, extrapNumSrcPnts,
+                             extrapDistExponent);
   } else {
-    Throw() << "This regrid method not currently supported with MOAB";
+    Throw() << "This regrid method is not currently supported.";
   }
 
   // call into extrapolation

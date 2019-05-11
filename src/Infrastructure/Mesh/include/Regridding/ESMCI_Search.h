@@ -66,9 +66,9 @@ void OctSearchElems(const Mesh &meshA, int unmappedactionA, const Mesh &meshB, i
                       double stol, SearchResult &result);
 
 
-void SearchNearestSrcToDst_lgc(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status);
+void SearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status);
 
-void ParSearchNearestSrcToDst_lgc(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status);
+void ParSearchNearestSrcToDst(const PointList &src_pl, const PointList &dst_pl, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status);
 
 void SearchNearestSrcToDstNPnts(const PointList &src_pl, const PointList &dst_pl, int num_pnts, int unmappedaction, SearchResult &result, bool set_dst_status, WMat &dst_status);
 
