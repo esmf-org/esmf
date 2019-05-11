@@ -39,8 +39,8 @@ SOURCEC	  += ESMCI_MBMesh.C \
              ESMCI_MBMesh_Regrid_Glue.C \
              ESMCI_MBMesh_Rendez_Elem.C \
              ESMCI_MBMesh_Rendez_EtoP.C \
-             ESMCI_MBMesh_Search_EToE.C \
-             ESMCI_MBMesh_Search_EToP.C \
+             ESMCI_MBMesh_Search_EtoE.C \
+             ESMCI_MBMesh_Search_EtoP.C \
              ESMCI_MBMesh_ShapeFunc.C \
              ESMCI_MBMesh_Util.C
 endif

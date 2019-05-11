@@ -45,7 +45,7 @@
 #include <Mesh/include/ESMCI_XGridUtil.h>
 
 #include <Mesh/include/ESMCI_MBMesh_BBox.h>
-#include <Mesh/include/ESMCI_MBMesh_Search_EToP.h>
+#include <Mesh/include/ESMCI_MBMesh_Search_EtoP.h>
 #include <Mesh/include/ESMCI_MBMesh_Util.h>
 #include <Mesh/include/ESMCI_MBMesh_Mapping.h>
 #include <Mesh/include/ESMCI_MBMesh_Glue.h>
