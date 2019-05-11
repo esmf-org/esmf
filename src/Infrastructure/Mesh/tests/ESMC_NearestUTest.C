@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
   std::fill(weights.begin(), weights.end(), UNINITVAL2);
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_Multi_Proc_Only_UTest
   strcpy(name, "Nearest neighbor weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
   ESMC_Test((weight_gen_nearest(pl_par, pl_quad, weights)), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
   std::fill(weights.begin(), weights.end(), UNINITVAL2);
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_Multi_Proc_Only_UTest
   strcpy(name, "Spherical nearest neighbor weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
   ESMC_Test((weight_gen_nearest(pl_par_sph, pl_quad_sph, weights)), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
   std::fill(weights.begin(), weights.end(), UNINITVAL2);
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_Multi_Proc_Only_UTest
   strcpy(name, "Nearest neighbor weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
   ESMC_Test((weight_gen_nearest(pl_par, pl_quad, weights, 6, 4)), 
@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
   std::fill(weights.begin(), weights.end(), UNINITVAL2);
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_Multi_Proc_Only_UTest
   strcpy(name, "Spherical nearest neighbor weight generation");
   strcpy(failMsg, "Weights were not generated correctly");
   ESMC_Test((weight_gen_nearest(pl_par_sph, pl_quad_sph, weights, 6, 4)), 

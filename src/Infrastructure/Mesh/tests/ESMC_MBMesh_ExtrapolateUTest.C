@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
   std::fill(weights.begin(), weights.end(), UNINITVAL3);
   
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_Multi_Proc_Only_UTest
   strcpy(name, "Extrapolation");
   strcpy(failMsg, "Weights were not generated correctly");
   ESMC_Test((extrapolate(pl_par, pl_quad, weights)), name, failMsg, &result, __FILE__, __LINE__, 0);
@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
   std::fill(weights.begin(), weights.end(), UNINITVAL3);
 
   //----------------------------------------------------------------------------
-  //NEX_UTest
+  //NEX_Multi_Proc_Only_UTest
   strcpy(name, "Spherical extrapolation");
   strcpy(failMsg, "Weights were not generated correctly");
   ESMC_Test((extrapolate(pl_par_sph, pl_quad_sph, weights)), name, failMsg, &result, __FILE__, __LINE__, 0);
