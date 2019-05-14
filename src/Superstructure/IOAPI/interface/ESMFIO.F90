@@ -363,7 +363,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       end do
       do item = 1, size(fieldList)
-        call ESMFIO_FieldAccess(IOComp, fieldList(item), 'write', iofmt=liofmt, rc=localrc)
+        call ESMFIO_FieldAccess(IOComp, fieldList(item), 'write', &
+          iofmt=liofmt, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       end do
       do localDe = 0, localDeCount - 1
         call IONCClose(IOComp, localDe=localDe, rc=localrc)
@@ -424,7 +427,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
           ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       end do
       do item = 1, size(fieldList)
-        call ESMFIO_FieldAccess(IOComp, fieldList(item), 'read', iofmt=liofmt, rc=localrc)
+        call ESMFIO_FieldAccess(IOComp, fieldList(item), 'read', iofmt=liofmt, &
+          rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       end do
       do localDe = 0, localDeCount - 1
         call IONCClose(IOComp, localDe=localDe, rc=localrc)
@@ -491,10 +497,17 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
       if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
         ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
       if (grid /= iogrid) then
+#if 0
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
           msg="I/O fields and I/O component must be defined on the same grid", &
           ESMF_CONTEXT, rcToReturn=rc)
         return  ! bail out
+#else
+        call ESMF_LogWrite("I/O field and I/O component may not be on same grid", &
+          ESMF_LOGMSG_WARNING, rc=localrc)
+        if (ESMF_LogFoundError(rcToCheck=localrc, ESMF_ERR_PASSTHRU, &
+          ESMF_CONTEXT, rcToReturn=rc)) return  ! bail out
+#endif
       end if
       if (rank /= 2) then
         call ESMF_LogSetError(ESMF_RC_NOT_IMPL, &
