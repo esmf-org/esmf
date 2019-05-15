@@ -60,7 +60,7 @@ bool weights_correct_extrapolate(WMat &wts, std::vector<double> weights) {
   return correct;
 }
 
-
+#if defined ESMF_MOAB
 bool extrapolate(PointList *pl1, PointList *pl, 
                  std::vector<double> weights,
                  int method = 1, int num_src_pnts = 0, double dist_exponent = 2,
@@ -111,7 +111,7 @@ bool extrapolate(PointList *pl1, PointList *pl,
 #endif
   return correct;
 }
-
+#endif
 
 int main(int argc, char *argv[]) {
 
@@ -141,6 +141,8 @@ int main(int argc, char *argv[]) {
                 (int *)NULL, (int *)NULL);
   if (rc != ESMF_SUCCESS) return 0;
 
+#if defined ESMF_MOAB
+
   // --------------------------------------------------------------------------
   // nearest neighbor Cartesian
   // --------------------------------------------------------------------------
@@ -157,13 +159,24 @@ int main(int argc, char *argv[]) {
   
   //----------------------------------------------------------------------------
   //NEX_Multi_Proc_Only_UTest
+
   strcpy(name, "Extrapolation");
   strcpy(failMsg, "Weights were not generated correctly");
   ESMC_Test((extrapolate(pl_par, pl_quad, weights)), name, failMsg, &result, __FILE__, __LINE__, 0);
   
+
   // clean up
   delete pl_quad;
   delete pl_par;
+
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "Extrapolation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+
+  #if defined ESMF_MOAB
 
   // --------------------------------------------------------------------------
   // Nearest neighbor spherical
@@ -189,6 +202,13 @@ int main(int argc, char *argv[]) {
   // clean up
   delete pl_quad_sph;
   delete pl_par_sph;
+
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "Extrapolation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

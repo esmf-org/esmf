@@ -66,6 +66,8 @@ int main(int argc, char *argv[]) {
                 (int *)NULL, (int *)NULL);
   if (rc != ESMF_SUCCESS) return 0;
 
+#if defined ESMF_MOAB
+
   // --------------------------------------------------------------------------
   // nearest neighbor Cartesian
   // --------------------------------------------------------------------------
@@ -90,9 +92,18 @@ int main(int argc, char *argv[]) {
   delete pl_quad;
   delete pl_par;
 
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "Nearest neighbor weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+
   // --------------------------------------------------------------------------
   // Nearest neighbor spherical
   // --------------------------------------------------------------------------
+
+#if defined ESMF_MOAB
 
   // build a mesh
   PointList *pl_par_sph;
@@ -114,6 +125,15 @@ int main(int argc, char *argv[]) {
   // clean up
   delete pl_quad_sph;
   delete pl_par_sph;
+
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "Spherical nearest neighbor weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+
+#if defined ESMF_MOAB
 
   // --------------------------------------------------------------------------
   // nearest neighbor N point average Cartesian
@@ -140,9 +160,19 @@ int main(int argc, char *argv[]) {
   delete pl_quad;
   delete pl_par;
 
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "Nearest neighbor weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
+
+
   // --------------------------------------------------------------------------
   // Nearest neighbor N point average spherical
   // --------------------------------------------------------------------------
+
+#if defined ESMF_MOAB
 
   // build a mesh
   // PointList *pl_par_sph;
@@ -165,6 +195,13 @@ int main(int argc, char *argv[]) {
   // clean up
   delete pl_quad_sph;
   delete pl_par_sph;
+
+#else
+  rc = ESMF_SUCCESS;
+  strcpy(name, "Spherical nearest neighbor weight generation");
+  strcpy(failMsg, "Weights were not generated correctly");
+  ESMC_Test(rc==ESMF_SUCCESS, name, failMsg, &result, __FILE__, __LINE__, 0);
+#endif
 
   //----------------------------------------------------------------------------
   ESMC_TestEnd(__FILE__, __LINE__, 0);

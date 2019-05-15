@@ -57,6 +57,7 @@ bool weights_correct_nearest(WMat &wts, std::vector<double> weights) {
   return correct;
 }
 
+#if defined ESMF_MOAB
 bool weight_gen_nearest(PointList *pl1, PointList *pl, 
                         std::vector<double> weights,
                         int method = 3, int num_pts = 0,
@@ -101,6 +102,7 @@ bool weight_gen_nearest(PointList *pl1, PointList *pl,
 #endif
   return correct;
 }
+#endif
 
 PointList* create_pointlist(std::vector<double*> *cv, int &rc) {
   //
