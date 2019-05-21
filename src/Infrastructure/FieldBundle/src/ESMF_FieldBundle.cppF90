@@ -199,7 +199,7 @@ module ESMF_FieldBundleMod
 ! !PRIVATE MEMBER FUNCTIONS:
 !
     module procedure ESMF_FieldBundleCreateDefault
-    !TypeKindRankInterfaceMacro(FieldBundleCreateGridDataPtr)
+    TypeKindRankInterfaceMacro(FieldBundleCreateGridDataPtr)
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -880,10 +880,10 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ^undef  ESMF_METHOD
 ^define ESMF_METHOD "ESMF_FieldBundleCreateDefault()"
 !BOP
-! !IROUTINE: ESMF_FieldBundleCreateDefault - Create a FieldBundle from a list of Fields
+! !IROUTINE: ESMF_FieldBundleCreate - Create a non packed FieldBundle from a list of Fields
 !
 ! !INTERFACE:
-  ! Private name; call using ESMF_FieldGet()
+  ! Private name; call using ESMF_FieldBundleCreate()
   function ESMF_FieldBundleCreateDefault(keywordEnforcer, fieldList, &
       multiflag, relaxedflag, name, rc)
 !         
@@ -1013,8 +1013,7 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 #define FieldBundleCreateGridDataPtrDoc() \
 !---------------------------------------------------------------------------- @\
 !BOP @\
-! !IROUTINE: ESMF_FieldBundleCreateGridDataPtr - Create packed FieldBundle from @\
-!                                 Fortran array pointer and ESMF Grid @\
+! !IROUTINE: ESMF_FieldBundleCreate - Create packed FieldBundle from Fortran array pointer and Grid @\
 ! @\
 ! !INTERFACE: @\
 ! ! Private name; call using ESMF_FieldBundleCreate() @\
@@ -1057,10 +1056,16 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   The {\tt ESMF\_Grid} object on which the Fields in the packed FieldBundle are built. @\
 ! \item [fieldCountDim] @\
 !   The dimension in the {\tt farrayPtr} that has the size of fieldCount. @\
-! \item [indexflag] @\
+! \item [{[indexflag]}] @\
 !       Indicate how DE-local indices are defined. See section @\
 !       \ref{const:indexflag} for a list of valid indexflag options. @\
 !       All Fields in packed FieldBundle use identical indexflag setting. @\
+! \item [{[staggerloc]}] @\
+!       Stagger location of data in grid cells.  For valid @\
+!       predefined values see section \ref{const:staggerloc}. @\
+!       To create a custom stagger location see section @\
+!       \ref{sec:usage:staggerloc:adv}. The default @\
+!       value is {\tt ESMF\_STAGGERLOC\_CENTER}. @\
 ! \item [{[gridToFieldMap]}] @\
 !       List with number of elements equal to the @\
 !       {\tt grid}|s dimCount.  The list elements map each dimension @\
