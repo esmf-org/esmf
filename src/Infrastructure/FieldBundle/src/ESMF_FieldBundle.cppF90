@@ -1043,10 +1043,6 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 !   integer,          intent(in),  optional :: name @\
 !   integer,          intent(out), optional :: rc @\
 ! @\
-! !STATUS: @\
-! \begin{itemize} @\
-! \end{itemize} @\
-! @\
 ! !DESCRIPTION: @\
 ! Create a packed FieldBundle from user supplied list of field names, pre-allocated @\
 ! Fortran array pointer, and {\tt ESMF\_Grid} object. @\
