@@ -1,10 +1,10 @@
 % $Id$
 %
 % Earth System Modeling Framework
-% Copyright 2002-2019, University Corporation for Atmospheric Research, 
-% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-% Laboratory, University of Michigan, National Centers for Environmental 
-% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% Copyright 2002-2019, University Corporation for Atmospheric Research,
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+% Laboratory, University of Michigan, National Centers for Environmental
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 % NASA Goddard Space Flight Center.
 % Licensed under the University of Illinois-NCSA License.
 
@@ -117,38 +117,38 @@ timed regions, but aggregated across all PETs. For example:
 
 \begin{verbatim}
 Region                           PETs   Count    Mean (s)    Min (s)     Min PET Max (s)     Max PET
-  [esm] Init 1                   4      1        4.0880      4.0878      2       4.0883      1      
-    [OCN-TO-ATM] IPDv05p6b       4      1        2.6007      2.6007      2       2.6007      3      
-    [ATM-TO-OCN] IPDv05p6b       4      1        1.4335      1.4333      0       1.4337      3      
-    [ATM-TO-OCN] IPDv05p4        4      1        0.0037      0.0007      0       0.0060      1      
-    [ATM] IPDv00p2               4      1        0.0034      0.0020      1       0.0055      0      
-    [ATM-TO-OCN] IPDv05p1        4      1        0.0020      0.0007      2       0.0033      3      
-    [OCN] IPDv00p2               4      1        0.0019      0.0015      3       0.0024      2      
-    [ATM-TO-OCN] IPDv05p3        4      1        0.0010      0.0008      0       0.0013      1      
-    [ATM-TO-OCN] IPDv05p2a       4      1        0.0009      0.0007      0       0.0012      3      
-    [ATM] IPDv00p1               4      1        0.0009      0.0007      3       0.0011      0      
-    [ATM-TO-OCN] IPDv05p2b       4      1        0.0008      0.0007      0       0.0010      3      
-    [ATM-TO-OCN] IPDv05p5        4      1        0.0008      0.0007      0       0.0010      3      
-    [ATM-TO-OCN] IPDv05p6a       4      1        0.0008      0.0005      2       0.0012      3      
-    [OCN-TO-ATM] IPDv05p3        4      1        0.0008      0.0006      2       0.0010      3      
-    [OCN-TO-ATM] IPDv05p4        4      1        0.0008      0.0006      0       0.0009      3      
-    [OCN-TO-ATM] IPDv05p2b       4      1        0.0007      0.0006      2       0.0009      3      
-    [OCN] IPDv00p1               4      1        0.0007      0.0005      1       0.0009      2      
-    [OCN-TO-ATM] IPDv05p2a       4      1        0.0007      0.0006      2       0.0009      1      
-    [OCN-TO-ATM] IPDv05p5        4      1        0.0007      0.0006      0       0.0009      3      
-    [OCN-TO-ATM] IPDv05p1        4      1        0.0006      0.0005      0       0.0008      1      
-    [OCN-TO-ATM] IPDv05p6a       4      1        0.0006      0.0004      2       0.0007      1      
-  [esm] RunPhase1                4      1        2.7444      2.7423      0       2.7454      1      
-    [OCN-TO-ATM] RunPhase1       4      864      0.6123      0.6004      2       0.6244      1      
-    [ATM] RunPhase1              4      864      0.5386      0.5296      0       0.5530      1      
-      ATM:ModelAdvance           4      864      0.3038      0.3022      0       0.3065      1      
-    [OCN] RunPhase1              4      864      0.3471      0.3256      0       0.3824      1      
-    [ATM-TO-OCN] RunPhase1       4      864      0.2843      0.1956      1       0.3345      0      
-  [esm] FinalizePhase1           4      1        0.0029      0.0029      1       0.0030      2      
-    [OCN-TO-ATM] FinalizePhase1  4      1        0.0007      0.0006      0       0.0008      3      
-    [ATM-TO-OCN] FinalizePhase1  4      1        0.0002      0.0001      3       0.0002      1      
-    [OCN] FinalizePhase1         4      1        0.0001      0.0001      3       0.0001      0      
-    [ATM] FinalizePhase1         4      1        0.0001      0.0000      0       0.0001      2  
+  [esm] Init 1                   4      1        4.0880      4.0878      2       4.0883      1
+    [OCN-TO-ATM] IPDv05p6b       4      1        2.6007      2.6007      2       2.6007      3
+    [ATM-TO-OCN] IPDv05p6b       4      1        1.4335      1.4333      0       1.4337      3
+    [ATM-TO-OCN] IPDv05p4        4      1        0.0037      0.0007      0       0.0060      1
+    [ATM] IPDv00p2               4      1        0.0034      0.0020      1       0.0055      0
+    [ATM-TO-OCN] IPDv05p1        4      1        0.0020      0.0007      2       0.0033      3
+    [OCN] IPDv00p2               4      1        0.0019      0.0015      3       0.0024      2
+    [ATM-TO-OCN] IPDv05p3        4      1        0.0010      0.0008      0       0.0013      1
+    [ATM-TO-OCN] IPDv05p2a       4      1        0.0009      0.0007      0       0.0012      3
+    [ATM] IPDv00p1               4      1        0.0009      0.0007      3       0.0011      0
+    [ATM-TO-OCN] IPDv05p2b       4      1        0.0008      0.0007      0       0.0010      3
+    [ATM-TO-OCN] IPDv05p5        4      1        0.0008      0.0007      0       0.0010      3
+    [ATM-TO-OCN] IPDv05p6a       4      1        0.0008      0.0005      2       0.0012      3
+    [OCN-TO-ATM] IPDv05p3        4      1        0.0008      0.0006      2       0.0010      3
+    [OCN-TO-ATM] IPDv05p4        4      1        0.0008      0.0006      0       0.0009      3
+    [OCN-TO-ATM] IPDv05p2b       4      1        0.0007      0.0006      2       0.0009      3
+    [OCN] IPDv00p1               4      1        0.0007      0.0005      1       0.0009      2
+    [OCN-TO-ATM] IPDv05p2a       4      1        0.0007      0.0006      2       0.0009      1
+    [OCN-TO-ATM] IPDv05p5        4      1        0.0007      0.0006      0       0.0009      3
+    [OCN-TO-ATM] IPDv05p1        4      1        0.0006      0.0005      0       0.0008      1
+    [OCN-TO-ATM] IPDv05p6a       4      1        0.0006      0.0004      2       0.0007      1
+  [esm] RunPhase1                4      1        2.7444      2.7423      0       2.7454      1
+    [OCN-TO-ATM] RunPhase1       4      864      0.6123      0.6004      2       0.6244      1
+    [ATM] RunPhase1              4      864      0.5386      0.5296      0       0.5530      1
+      ATM:ModelAdvance           4      864      0.3038      0.3022      0       0.3065      1
+    [OCN] RunPhase1              4      864      0.3471      0.3256      0       0.3824      1
+    [ATM-TO-OCN] RunPhase1       4      864      0.2843      0.1956      1       0.3345      0
+  [esm] FinalizePhase1           4      1        0.0029      0.0029      1       0.0030      2
+    [OCN-TO-ATM] FinalizePhase1  4      1        0.0007      0.0006      0       0.0008      3
+    [ATM-TO-OCN] FinalizePhase1  4      1        0.0002      0.0001      3       0.0002      1
+    [OCN] FinalizePhase1         4      1        0.0001      0.0001      3       0.0001      0
+    [ATM] FinalizePhase1         4      1        0.0001      0.0000      0       0.0001      2
 \end{verbatim}
 
 The meaning of the statistics in each column in as follows:
@@ -196,6 +196,82 @@ PET 0 is always profiled if {\tt ESMF\_RUNTIME\_PROFILE=ON}, regardless of the
 {\tt ESMF\_RUNTIME\_TRACE\_PETLIST} setting.
 
 
+\subsubsection{Include MPI Communication in the Profile}
+\label{sec:MPIProfiling}
+
+MPI functions can be included in the timing profile to indicate how much time
+is spent inside communication calls.  This can also help to determine load imbalance
+in the system, since large times spent inside MPI may indicate that communication
+between PETs is not tightly synchronized.  This option includes {\em all} MPI calls in
+the application, whether or not they original from the ESMF library.  Here is a partial
+example summary profile that contains MPI times:
+
+\begin{verbatim}
+Region                           PETs   Count    Mean (s)    Min (s)     Min PET Max (s)     Max PET
+  [esm] RunPhase1                8      1        4.9307      4.6867      0       4.9656      1
+    [OCN] RunPhase1              8      1824     0.8344      0.8164      0       0.8652      1
+    [MED] RunPhase1              8      1824     0.8203      0.7900      5       0.8584      1
+    [ATM] RunPhase1              8      1824     0.6387      0.6212      5       0.6610      1
+    [ATM-TO-MED] RunPhase1       8      1824     0.5975      0.5317      0       0.6583      5
+      MPI_Bcast                  8      1824     0.0443      0.0025      4       0.1231      5
+      MPI_Wait                   8      MULTIPLE 0.0421      0.0032      0       0.0998      2
+    [MED-TO-OCN] RunPhase1       8      1824     0.4879      0.4497      0       0.5362      4
+      MPI_Wait                   8      MULTIPLE 0.0234      0.0030      0       0.0821      4
+      MPI_Bcast                  8      1824     0.0111      0.0024      4       0.0273      5
+    [OCN-TO-MED] RunPhase1       8      1824     0.4541      0.4075      0       0.4918      4
+      MPI_Wait                   8      MULTIPLE 0.0339      0.0017      0       0.0824      4
+      MPI_Bcast                  8      1824     0.0194      0.0026      4       0.0452      6
+    [MED-TO-ATM] RunPhase1       8      1824     0.4487      0.4005      0       0.4911      5
+      MPI_Bcast                  8      1824     0.0338      0.0026      4       0.0942      5
+      MPI_Wait                   8      MULTIPLE 0.0241      0.0022      1       0.0817      2
+  [esm] Init 1                   8      1        0.6287      0.6287      1       0.6287      4
+    [ATM-TO-MED] IPDv05p6b       8      1        0.1501      0.1500      1       0.1501      2
+      MPI_Barrier                8      242      0.0082      0.0006      3       0.0157      7
+      MPI_Wait                   8      MULTIPLE 0.0034      0.0010      0       0.0053      7
+      MPI_Allreduce              8      62       0.0030      0.0003      3       0.0063      7
+      MPI_Alltoall               8      6        0.0015      0.0000      1       0.0022      5
+      MPI_Allgather              8      21       0.0010      0.0002      1       0.0017      7
+      MPI_Waitall                8      MULTIPLE 0.0006      0.0001      3       0.0015      7
+      MPI_Send                   8      MULTIPLE 0.0004      0.0001      7       0.0008      6
+      MPI_Allgatherv             8      6        0.0001      0.0001      4       0.0001      0
+      MPI_Scatter                8      5        0.0000      0.0000      0       0.0000      7
+      MPI_Reduce                 8      5        0.0000      0.0000      1       0.0000      0
+      MPI_Recv                   8      MULTIPLE 0.0000      0.0000      0       0.0000      3
+      MPI_Bcast                  8      1        0.0000      0.0000      0       0.0000      7
+\end{verbatim}
+
+The procedure for including MPI
+functions in the timing profile depends on whether the application is
+dynamically or statically linked. Most applications are dynamically linked,
+however on some systems (such as Cray), static linking may be used.
+Note that for either option, ESMF must be built with {\tt ESMF\_TRACE\_BUILD\_LIB=ON},
+which is the default.
+
+
+In {\em dynamically linked applications}, the {\tt LD\_PRELOAD} environment variable
+must be used when executing the MPI application.  This instructs the dynamic
+linker to interpose certain MPI symbols so they can be captured by the ESMF
+profiler.  To simplify this process, a script is provided at
+{\tt \$(ESMF\_INSTALL\_LIBDIR)/preload.sh} that sets the {\tt LD\_PRELOAD} variable.
+For example, if you typically execute your application as as follows:
+
+\begin{verbatim}
+$ mpirun -np 8 ./myApp
+\end{verbatim}
+
+then you should add the {\em preload.sh} script in front of the
+executable when starting the application as follows:
+
+\begin{verbatim}
+# replace $(ESMF_INSTALL_LIBDIR) with absolute path to the ESMF installation lib directory
+$ mpirun -np 8 $(ESMF_INSTALL_LIBDIR)/preload.sh ./myApp
+\end{verbatim}
+
+An advantage of this approach is that your application does {\em not} need to
+be recompiled. The MPI timing information will be included in the per-PET profiles and/or the summary
+profile, depending on the setting of {\tt ESMF\_RUNTIME\_PROFILE\_OUTPUT}.
+
+
 \subsubsection{Output a Detailed Trace for Analysis}
 
 
@@ -212,7 +288,7 @@ $ export ESMF_RUNTIME_TRACE=ON
 \end{verbatim}
 
 When enabled, the default behavior is to trace all PETs of the
-ESMF application. Although the ESMF tracer is designed to write 
+ESMF application. Although the ESMF tracer is designed to write
 events in a compact form, tracing can produce an extremely
 large number of events depending on the total number of PETs and
 the length of the run. To reduce output, it is possible to restrict
@@ -293,5 +369,5 @@ These options are controlled by setting the environment variable
       in that it is guaranteed to be monotonically increasing. In addition, at
       application startup, all PET clocks are synchronized to a common time
       by determining a PET-local offset to be applied to timestamps. Therefore this option
-      can be used to compare trace streams across physical nodes.     
+      can be used to compare trace streams across physical nodes.
 \end{itemize}

@@ -192,6 +192,10 @@ ifndef ESMF_SHARED_LIB_BUILD
 export ESMF_SHARED_LIB_BUILD = default
 endif
 
+ifndef ESMF_TRACE_LIB_BUILD
+export ESMF_TRACE_LIB_BUILD = default
+endif
+
 ifndef ESMF_FORTRANSYMBOLS
 export ESMF_FORTRANSYMBOLS = default
 endif
@@ -406,6 +410,10 @@ endif
 
 ifneq ($(ESMF_SHARED_LIB_BUILD),OFF)
 export ESMF_SHARED_LIB_BUILD = ON
+endif
+
+ifneq ($(ESMF_TRACE_LIB_BUILD),OFF)
+export ESMF_TRACE_LIB_BUILD = ON
 endif
 
 ifneq ($(ESMF_TESTCOMPTUNNEL),OFF)
@@ -2000,7 +2008,7 @@ ifneq ($(strip $(ESMF_SL_LIBS_TO_MAKE)),)
 endif
 
 build_tracelibs:
-ifeq ($(ESMF_TESTTRACE),ON)
+ifeq ($(ESMF_TRACE_LIB_BUILD),ON)
 	cd $(ESMF_DIR)/src/Infrastructure/Trace/preload ;\
 	$(MAKE) tracelib_static
 ifeq ($(ESMF_TRACE_BUILD_SHARED),ON)
