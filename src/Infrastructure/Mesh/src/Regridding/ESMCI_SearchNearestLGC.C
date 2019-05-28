@@ -161,14 +161,11 @@ struct SearchData {
 
 
   // Get big/small numbers
-  double min,max;
-  if (std::numeric_limits<double>::has_infinity) {
-    min= -std::numeric_limits<double>::infinity();
-    max= std::numeric_limits<double>::infinity();
-  } else {
-    min = -std::numeric_limits<double>::max();
-    max = std::numeric_limits<double>::max();
-  }
+  //// Use sqrt, so if it's squared it doesn't overflow
+  double huge=sqrt(std::numeric_limits<double>::max());
+  double min=-huge;
+  double max=huge;
+
 
   // Set initial search box to the largest possible
   double pmin[3],pmax[3];
@@ -183,7 +180,7 @@ struct SearchData {
   SearchData sd;
   sd.sdim=sdim;
   // sd.closest_src_node=NULL;
-  sd.closest_dist2=std::numeric_limits<double>::max();
+  sd.closest_dist2=huge;
   // sd.src_coord=NULL;
   sd.closest_src_id=SN_BAD_ID;
   sd.srcpointlist=&src_pl;
@@ -311,15 +308,10 @@ struct CommData {
   OTree *tree=new OTree(num_nodes_to_search);
 
   // Get universal min-max
-   double min,max;
-  if (std::numeric_limits<double>::has_infinity) {
-    min= -std::numeric_limits<double>::infinity();
-    max= std::numeric_limits<double>::infinity();
-  } else {
-    min = -std::numeric_limits<double>::max();
-    max = std::numeric_limits<double>::max();
-  }
-
+  //// Use sqrt, so if it's squared it doesn't overflow
+  double huge=sqrt(std::numeric_limits<double>::max());
+  double min=-huge;
+  double max=huge;
 
   // Add unmasked nodes to search tree
   // and calculate proc min-max
@@ -369,13 +361,13 @@ struct CommData {
 
   // Allocate space to hold closest gids, dist
   vector<int> closest_src_gid(dst_size,-1);
-  vector<double> closest_dist(dst_size,std::numeric_limits<double>::max());
+  vector<double> closest_dist(dst_size,huge);
 
   // Setup search structure
   SearchData sd;
   sd.sdim=sdim;
   // sd.closest_src_node=NULL;
-  sd.closest_dist2=std::numeric_limits<double>::max();
+  sd.closest_dist2=huge;
   // sd.src_coord=NULL;
   sd.closest_src_id=SN_BAD_ID;
   sd.srcpointlist=&src_pl;
@@ -674,7 +666,7 @@ struct CommData {
         //      printf("#%d c_s_g=%d \n", Par::Rank(),cd.closest_src_gid);
 
       } else {
-        cd.closest_dist=std::numeric_limits<double>::max();;
+        cd.closest_dist=huge;
         cd.closest_src_gid=SN_BAD_ID;
       }
       cd.proc=Par::Rank();
