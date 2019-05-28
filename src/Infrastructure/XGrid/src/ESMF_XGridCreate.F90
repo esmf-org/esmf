@@ -451,7 +451,7 @@ function ESMF_XGridCreate(keywordEnforcer, &
             ESMF_CONTEXT, rcToReturn=rc)) return
       enddo
       if(present(sideBGridPriority)) then
-        if(size(sideBGridPriority, 1) /= ngrid_a) then
+        if(size(sideBGridPriority, 1) /= ngrid_b) then
           call ESMF_LogSetError(rcToCheck=ESMF_RC_ARG_WRONG, & 
              msg="- Size of sideBGridPriority does not match size of sideBGrid", &
              ESMF_CONTEXT, rcToReturn=rc) 
@@ -495,6 +495,17 @@ function ESMF_XGridCreate(keywordEnforcer, &
          ESMF_CONTEXT, rcToReturn=rc) 
       return
     endif
+
+    ! Output Mask Values for debugging
+#if 0
+    if (present(sideAMaskValues)) then
+       write(*,*) "sideAMaskValues=",sideAMaskValues
+    endif
+
+    if (present(sideBMaskValues)) then
+       write(*,*) "sideBMaskValues=",sideBMaskValues
+    endif
+#endif
 
     ! At this point the inputs are consistently sized.
     ! Take care of ordering
@@ -1158,6 +1169,10 @@ function ESMF_XGridCreate(keywordEnforcer, &
     ! and clean up temporary memory used
     if(xgtype%storeOverlay) then
       xgtype%mesh = mesh
+
+     !! Debug output of xgrid mesh
+     ! call ESMF_MeshWrite(mesh, "xgrid_mesh")
+
     else
       call ESMF_MeshDestroy(mesh, rc=localrc)
       if (ESMF_LogFoundError(localrc, &

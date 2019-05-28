@@ -45,6 +45,7 @@
 #include "ESMC_Clock.h"
 #include "ESMC_Mesh.h"
 #include "ESMC_Grid.h"
+#include "ESMC_XGrid.h"
 #include "ESMC_Field.h"
 #include "ESMC_LocStream.h"
 
