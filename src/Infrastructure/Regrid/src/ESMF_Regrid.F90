@@ -380,6 +380,7 @@ end function my_xor
          allocate(indices(2,nentries))
          allocate(weights(nentries))
 
+         ! Copy weights if any exist
          if (nentries > 0)  then
             call c_ESMC_Copy_TempWeights(tweights, indices(1,1), weights(1))
          endif
@@ -388,7 +389,11 @@ end function my_xor
        ! If unmappedDstList is present then we must allocate the F90 pointers and copy 
        if (present(unmappedDstList)) then
          allocate(unmappedDstList(num_udl))
-         call c_ESMC_Copy_TempUDL(num_udl, tudl, unmappedDstList(1))
+         
+         ! Copy unmapped dst locations if any exist
+         if (num_udl > 0)  then
+            call c_ESMC_Copy_TempUDL(num_udl, tudl, unmappedDstList(1))
+         endif
        endif
 
        ! Mark route handle created
