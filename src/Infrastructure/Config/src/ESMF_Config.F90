@@ -869,7 +869,8 @@ type(ESMF_KeywordEnforcer), optional:: keywordEnforcer ! must use keywords below
 ! \end{description}
 ! \end{itemize}
 !
-! !DESCRIPTION: Finds the {\tt label} (key) string in the {\tt config} object. 
+! !DESCRIPTION: Finds the {\tt label} (key) string in the {\tt config} object
+!   starting from the beginning of its content.
 !
 !   Since the search is done by looking for a string, possibly multi-worded,
 !   in the whole {\tt Config} object, it is important to use special 
